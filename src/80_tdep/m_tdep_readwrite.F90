@@ -97,7 +97,7 @@ module m_tdep_readwrite
  public :: tdep_read_input
  public :: tdep_distrib_data
  public :: tdep_init_MPIdata
- public :: tdep_init_MPIshell
+!FB public :: tdep_init_MPIshell
  public :: tdep_clean_MPI
 
 contains
@@ -154,11 +154,11 @@ contains
   type(abihist), intent(out) :: Hist
 
   integer :: values(8)  
-  integer :: ncid, ncerr,ierr
+  integer :: ncid, ncerr
   integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
   integer :: ntypat_id
-  integer :: ii,jj,tmp,istep,iatom,this_istep
-  double precision :: version_value,tmp1,tmp2,tmp3,dtion
+  integer :: ii,jj,tmp
+  double precision :: version_value,dtion
   character (len=30):: string,NormalMode,DebugMode,use_ideal_positions
   character (len=30):: born_charge,dielec_constant,tolmotifinboxmatch,TheEnd,bzpath
   character (len=30):: order,slice,enunit,readifc,together,nproc,bzlength,ngqpt1,ngqpt2,dosdeltae
@@ -167,7 +167,7 @@ contains
   character (len=5) :: zone
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
-  character(len=500) :: filename,inputfilename,message
+  character(len=500) :: filename,inputfilename
   logical :: has_nimage
   real(dp), allocatable :: znucl(:)
 
@@ -621,15 +621,14 @@ contains
  end subroutine tdep_distrib_data
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! subroutine tdep_init_MPIshell(Invar,MPIdata,Shelllllll)
- subroutine tdep_init_MPIshell(Invar,MPIdata)
-
-  implicit none 
-
-  type(Input_Variables_type), intent(in) :: Invar
-  type(MPI_enreg_type), intent(in) :: MPIdata
-
- end subroutine tdep_init_MPIshell
+!FB subroutine tdep_init_MPIshell(Invar,MPIdata)
+!FB
+!FB  implicit none 
+!FB
+!FB  type(Input_Variables_type), intent(in) :: Invar
+!FB  type(MPI_enreg_type), intent(in) :: MPIdata
+!FB
+!FB end subroutine tdep_init_MPIshell
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_MPIdata(Invar,MPIdata)

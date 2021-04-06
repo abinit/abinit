@@ -65,11 +65,10 @@ program atdep
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-  use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ifc, &
-&                                tdep_write_ddb  
+  use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb  
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
-&                                tdep_calc_alpha_gamma, tdep_write_gruneisen, tdep_calc_lifetime1
+&                                tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phi2,        only : tdep_calc_phi2fcoeff, tdep_calc_phi1fcoeff, tdep_calc_phi2, tdep_write_phi2, tdep_calc_ftot2, &
 &                                Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, tdep_write_phi1
   use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
@@ -85,8 +84,8 @@ program atdep
 
   implicit none
 
-  integer :: natom,jatom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
-  integer :: stdout,nshell_max
+  integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
+  integer :: stdout,nshell_max,ii
   double precision :: U0
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
@@ -97,7 +96,6 @@ program atdep
   double precision, allocatable :: Forces_MD(:),MP_coeff(:,:)
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
   double precision, allocatable :: Phi1Ui(:),Phi2UiUj(:),Phi3UiUjUk(:),Phi4UiUjUkUl(:)
-  double complex  , allocatable :: Gruneisen(:)
   type(args_t) :: args
   type(phonon_dos_type) :: PHdos
   type(Input_Variables_type) :: Invar
@@ -116,9 +114,9 @@ program atdep
   type(abihist) :: Hist
 
 !TEST
-  integer, allocatable :: data_tmp(:,:),data_loc(:,:),data_gather(:,:),shft_step(:)
-  integer, allocatable :: nstep_acc(:),tab_step(:)
-  integer :: ii,istep,ierr,iproc,dim1,dim2,remain,idim1
+!FB  integer, allocatable :: data_tmp(:,:),data_loc(:,:),data_gather(:,:),shft_step(:)
+!FB  integer, allocatable :: nstep_acc(:),tab_step(:)
+!FB  integer :: istep,ierr,iproc,dim1,dim2,remain,idim1
 !TEST
 
 !******************************************************************
@@ -440,18 +438,18 @@ program atdep
    if (Invar%order.ge.3) then 
      ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
      Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
-     call tdep_calc_phi3ref(Invar,ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
+     call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
      ABI_FREE(proj3rd)
      ABI_FREE(Phi3_coeff)
-     call tdep_calc_ftot3(Forces_TDEP,Invar,MPIdata,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
+     call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
    end if
    if (Invar%order.ge.4) then 
      ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
      Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
-     call tdep_calc_phi4ref(Invar,ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
+     call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
      ABI_FREE(proj4th)
      ABI_FREE(Phi4_coeff)
-     call tdep_calc_ftot4(Forces_TDEP,Invar,MPIdata,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
+     call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
    end if  
 
 !==========================================================================================
@@ -479,17 +477,17 @@ program atdep
      else if (ii.eq.2) then 
        ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
        Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
-       call tdep_calc_phi3ref(Invar,ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
+       call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
        ABI_FREE(proj3rd)
        ABI_FREE(Phi3_coeff)
-       call tdep_calc_ftot3(Forces_TDEP,Invar,MPIdata,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
+       call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
      else if (ii.eq.3) then 
        ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
        Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
-       call tdep_calc_phi4ref(Invar,ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
+       call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
        ABI_FREE(proj4th)
        ABI_FREE(Phi4_coeff)
-       call tdep_calc_ftot4(Forces_TDEP,Invar,MPIdata,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
+       call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
      end if  
      Fresid(:)=Forces_MD(:)-Forces_TDEP(:)
    end do  
@@ -498,6 +496,7 @@ program atdep
  ABI_FREE(CoeffMoore%fcoeff)
  ABI_FREE(Fresid)
  ABI_FREE(MP_coeff)
+ ABI_FREE(ucart)
 
 !==========================================================================================
 !=================== Write the IFC and check the constraints ==============================
@@ -512,9 +511,8 @@ program atdep
  end if  
 
  call tdep_check_constraints(distance,Invar,Phi2,Phi1,Shell3at%nshell,Shell4at%nshell,&
-&                            Phi3_ref,Phi4_ref,Shell3at,Shell4at,Sym,ucart)
+&                            Phi3_ref,Phi4_ref,Shell3at,Shell4at,Sym)
  ABI_FREE(Phi1)
- ABI_FREE(ucart)
    
 !==========================================================================================
 !===================== Compute the phonon spectrum, the DOS, ==============================
@@ -571,9 +569,9 @@ program atdep
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 
  if (MPIdata%iam_master) then
-   call tdep_write_gruneisen(Crystal,distance,Eigen2nd_path,Ifc,Invar,Lattice,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+   call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Lattice,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
  end if  
- call tdep_calc_alpha_gamma(distance,DDB,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
+ call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
 !FB Begin Lifetime
 !FB call tdep_calc_lifetime1(Crystal,distance,Eigen2nd_MP,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)

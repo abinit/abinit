@@ -172,7 +172,7 @@ contains
 !   Copy Phi2 to Ifc%atmfrc
     call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,0,Phi2,Rlatt_cart,Shell2at,Sym)
 !   Write IFC in ifc_check.dat (for check)
-    if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,Invar%natom_unitcell,1)
+    if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,Invar%natom_unitcell,1)
 
 !   Write the Phi2.dat file
     if (Invar%debug.and.MPIdata%iam_master) then
@@ -314,7 +314,7 @@ contains
   integer :: choice,mband,mpert,msize,unddb,iq_ibz,iatom
   integer :: jatom,ii,jj,nblok,counter
   type(ddb_hdr_type) :: ddb_hdr
-  character(len=fnlen) :: dscrpt,filename,filename_bis
+  character(len=fnlen) :: filename,filename_bis
   character(len=500) :: message
 
 ! Test !!!!!!!!!!!!!
@@ -485,7 +485,7 @@ contains
 !FB  call ifc_init_fromFile(dielt,trim(filename_bis),Ifc_tmp,natom_uc,ngqpt,nqshft,qshft,Crystal_tmp,zeff,comm)
     call ifc_init_fromFile(dielt,trim(filename),Ifc_tmp,natom_uc,ngqpt,nqshft,qshft,Crystal_tmp,zeff,qdrp_cart,comm)
     unitfile=2
-    call tdep_write_ifc(Crystal_tmp,Ifc_tmp,Invar,MPIdata,Invar%natom_unitcell,unitfile)
+    call tdep_write_ifc(Crystal_tmp,Ifc_tmp,Invar,Invar%natom_unitcell,unitfile)
   end if  
   ABI_FREE(qdrp_cart)
   ABI_FREE(qshft)
@@ -582,7 +582,7 @@ subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
 end subroutine tdep_read_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,natom_unitcell,unitfile)
+subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
 
   implicit none
 
@@ -590,7 +590,6 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,natom_unitcell,unitfile)
   type(Input_Variables_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
-  type(MPI_enreg_type), intent(in) :: MPIdata
 
   integer :: ifcana,ifcout,ncid,prt_ifc
   integer :: atifc(natom_unitcell)

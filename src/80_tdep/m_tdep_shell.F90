@@ -339,9 +339,8 @@ contains
 
   integer :: ii,ishell,iatom,jatom,katom,eatom,fatom,gatom,iatref,jatref,katref
   integer :: natom,natom_unitcell,watom,xatom,yatom,ninteractions,ncoeff,ncoeff_prev,nshell_tmp
-  integer :: find_equivalent,jj,ninter,iat_ref,jat_ref,kat_ref,ok,tmpinter,isym,itrans
+  integer :: find_equivalent,ninter,iat_ref,jat_ref,kat_ref,tmpinter
   double precision :: norma,normb,normc
-  double precision :: vectj(3),vectk(3),vect1(3),vect2(3)
   integer :: Isym3at(2)
   integer, allocatable :: atref(:,:),interactions(:,:)
 
@@ -703,13 +702,12 @@ contains
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(out) :: proj(norder,norder,nshell_max)
 
-  integer :: ii,ishell,iatcell,iatom,jatom,katom,latom,eatom,fatom,gatom,hatom,iatref,jatref,katref,latref
+  integer :: ii,ishell,iatom,jatom,katom,latom,eatom,fatom,gatom,hatom,iatref,jatref,katref,latref
   integer :: natom,natom_unitcell,watom,xatom,yatom,zatom,ninteractions,ncoeff,ncoeff_prev,nshell_tmp
-  integer :: already_found,find_equivalent,jj,ninter,iat_ref,jat_ref,kat_ref,lat_ref,ok,tmpinter,isym,itrans
+  integer :: already_found,find_equivalent,ninter,iat_ref,jat_ref,kat_ref,lat_ref,tmpinter
   double precision :: norma1,norma2,norma3
   double precision :: normb1,normb2,normb3
   double precision :: normc1,normc2,normc3
-  double precision :: vectj(3),vectk(3),vect1(3),vect2(3)
   integer :: Isym4at(2)
   integer, allocatable :: atref(:,:),interactions(:,:)
 

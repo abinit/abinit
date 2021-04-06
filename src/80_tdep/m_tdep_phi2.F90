@@ -13,7 +13,6 @@ module m_tdep_phi2
   use m_xmpi
   use m_io_tools
   use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
-  use m_tdep_latt,        only : Lattice_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_qpt,         only : Qpoints_type
@@ -58,7 +57,7 @@ contains
   double precision, intent(out) :: Phi2UiUj(Invar%my_nstep)
   double precision, intent(inout) :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
   
-  integer :: jj,istep,jatom,katom
+  integer :: jj,istep,jatom
   double precision, allocatable :: ucart_blas(:)
   double precision, allocatable :: ftot2(:)
 
@@ -303,7 +302,7 @@ subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
   double precision,intent(out) :: Phi2(3*Invar%natom,3*Invar%natom)
 
   integer :: ishell,isym,eatom,fatom,ncoeff,ncoeff_prev
-  integer :: nshell,ii,jj,kk,ll,kappa,iatshell,itrans
+  integer :: nshell,ii,jj,kk,kappa,iatshell,itrans
   double precision,allocatable :: Phi2_33(:,:),Phi2_ref(:,:,:)
 
   nshell=Shell2at%nshell
@@ -452,12 +451,11 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 end subroutine tdep_write_phi2 
 
 !=====================================================================================================
-subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,Lattice,omega,Phi2,qpt_cart,Rlatt_cart)
+subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,omega,Phi2,qpt_cart,Rlatt_cart)
 
   implicit none
 
   type(Input_Variables_type),intent(in) :: Invar
-  type(Lattice_Variables_type),intent(in) :: Lattice
   integer,intent(in) :: iqpt
   double precision,intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
@@ -468,7 +466,7 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,Lattice,omega,Phi2,qpt_cart,Rlatt
 
   integer :: LWORK,ii,jj,kk,iatom,jatom,iatcell,jatcell,itypat,jtypat,iat_mod,INFO,itemp,imode,nmode
   double precision :: phase
-  double complex :: ctemp,norm
+  double complex :: norm
   double precision, allocatable :: RWORK(:)
   double complex, allocatable :: WORKC(:)
 ! double complex, allocatable :: mass_mat(:,:)
@@ -555,13 +553,12 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,Lattice,omega,Phi2,qpt_cart,Rlatt
 end subroutine tdep_calc_dij
 
 !=====================================================================================================
-!FB subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,Lattice,qpt_cart)
-subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,Lattice,qpt)
+!FB subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt_cart)
+subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
 
   implicit none
 
   type(Input_Variables_type),intent(in) :: Invar
-  type(Lattice_Variables_type),intent(in) :: Lattice
   integer,intent(in) :: iqpt
 !FB  double precision,intent(in) :: qpt_cart(3)
   double precision,intent(in) :: qpt(3)
@@ -590,7 +587,6 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,Lattice,qpt)
   end do !iatcell
 
 ! Print the dynamical matrix (Dij)
-!FB  write(52,'(a,1x,3(f10.6,1x))') 'For qpt=',qpt_cart(:)*Lattice%acell_unitcell(:)
   write(52,'(a,1x,3(f10.6,1x))') 'For qpt=',qpt(:)
   write(52,'(a,i4,a)') '  Dij(',iqpt,'real)='
   do iatcell=1,Invar%natom_unitcell
@@ -696,7 +692,6 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
   character(len=*) :: Prefix
-! type(Lattice_Variables_type),intent(in) :: Lattice
 
   integer :: ii,jj,iatcell,jatcell,iqpt,imode,nmode
   double precision :: distance

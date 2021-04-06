@@ -65,7 +65,6 @@ contains
   type(Input_Variables_type),intent(inout) :: Invar
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
-  character(len=500) :: message
 
 ! Compute all the symetries coming from the bravais lattice
 ! The routine used is symlatt (from Abinit code)

@@ -58,19 +58,21 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   type(Eigen_Variables_type),intent(inout) :: Eigen2nd_path
   type(Eigen_Variables_type),intent(inout) :: Eigen2nd_MP
 
-  integer :: prtdos,iqpt,iq_ibz,iatom,jatom,iomega,ii,jj
+  integer :: prtdos,iqpt,iq_ibz,iomega,iatom
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
   character (len=25):: phdos_fname
   double precision :: dossmear,integ,domega
   double precision :: dos_qshift(3)
   double precision, allocatable :: Phi2_new(:,:),displ(:,:)
-  double precision, allocatable :: omega (:)
-  double complex  , allocatable :: dij   (:,:)
-  double complex  , allocatable :: eigenV(:,:)
   character(len=500) :: message
   real(dp) :: wminmax(2)
   type(ifc_type) :: Ifc_tmp
+
+!FB  integer :: iatom,jatom,ii,jj
+!FB  double precision, allocatable :: omega (:)
+!FB  double complex  , allocatable :: dij   (:,:)
+!FB  double complex  , allocatable :: eigenV(:,:)
 
   write(Invar%stdout,'(a)')' '
   write(Invar%stdout,'(a)') ' #############################################################################'
@@ -85,7 +87,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 
 ! Write Ifc%atmfrc in the ifc_out.dat file
 ! =====================================
-  if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,MPIdata,natom_unitcell,0)
+  if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,0)
 
 ! Read the previous IFC from ifc_out.dat input file and copy to Phi2
 ! ===============================================================
@@ -100,7 +102,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !   Copy Phi2_new to Ifc_tmp%atmfrc
     call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_new,Rlatt4abi,Shell2at,Sym)
 !   Write IFC in ifc_check.dat (for check)
-    call tdep_write_ifc(Crystal,Ifc_tmp,Invar,MPIdata,natom_unitcell,1)
+    call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
 
 !   Write the Phi2-new.dat file
     if (Invar%debug) then
@@ -175,7 +177,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB  ABI_MALLOC(omega,(3*Invar%natom_unitcell))
 !FB  do iqpt=1,Qpt%nqpt
 !FB    omega=zero ; eigenV=zero ; dij=zero
-!FB    call tdep_calc_dij(dij,eigenV,iqpt,Invar,Lattice,omega,Phi2,Qpt%qpt_cart(:,iqpt),Rlatt_cart)
+!FB    call tdep_calc_dij(dij,eigenV,iqpt,Invar,omega,Phi2,Qpt%qpt_cart(:,iqpt),Rlatt_cart)
 !FB    Eigen2nd_path%eigenval(:,iqpt)= omega(:)
 !FB    do iatom=1,Invar%natom_unitcell
 !FB      do ii=1,3
@@ -204,7 +206,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
 !FB    if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
 !FB    do iqpt=1,Qpt%nqpt
-!FB      call tdep_write_dij(Eigen2nd_path,iqpt,Invar,Lattice,Qpt%qpt_red(:,iqpt))
+!FB      call tdep_write_dij(Eigen2nd_path,iqpt,Invar,Qpt%qpt_red(:,iqpt))
 !FB    end do
 !FB    close(51)
 !FB    close(52)
@@ -234,7 +236,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
     if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
     do iqpt=1,Qpt%nqpt
-      call tdep_write_dij(Eigen2nd_path,iqpt,Invar,Lattice,Qpt%qpt_red(:,iqpt))
+      call tdep_write_dij(Eigen2nd_path,iqpt,Invar,Qpt%qpt_red(:,iqpt))
     end do
     close(51)
     close(52)
@@ -258,7 +260,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB  ABI_MALLOC(omega,(3*Invar%natom_unitcell))
 !FB  do iq_ibz=1,Qbz%nqibz
 !FB    omega=zero ; eigenV=zero ; dij=zero
-!FB    call tdep_calc_dij(dij,eigenV,iq_ibz,Invar,Lattice,omega,Phi2,Qbz%qibz_cart(:,iq_ibz),Rlatt_cart)
+!FB    call tdep_calc_dij(dij,eigenV,iq_ibz,Invar,omega,Phi2,Qbz%qibz_cart(:,iq_ibz),Rlatt_cart)
 !FB    Eigen2nd_MP%eigenval(:,iq_ibz)= omega(:)
 !FB    do iatom=1,Invar%natom_unitcell
 !FB      do ii=1,3
@@ -285,7 +287,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
 !FB    if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
 !FB    do iq_ibz=1,Qbz%nqibz
-!FB      call tdep_write_dij(Eigen2nd_MP,iq_ibz,Invar,Lattice,Qbz%qibz(:,iq_ibz))
+!FB      call tdep_write_dij(Eigen2nd_MP,iq_ibz,Invar,Qbz%qibz(:,iq_ibz))
 !FB    end do
 !FB    close(51)
 !FB    close(52)
@@ -311,7 +313,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
 !FB    if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
 !FB    do iq_ibz=1,Qbz%nqibz
-!FB      call tdep_write_dij(Eigen2nd_MP,iq_ibz,Invar,Lattice,Qbz%qibz(:,iq_ibz))
+!FB      call tdep_write_dij(Eigen2nd_MP,iq_ibz,Invar,Qbz%qibz(:,iq_ibz))
 !FB    end do
 !FB    close(51)
 !FB    close(52)

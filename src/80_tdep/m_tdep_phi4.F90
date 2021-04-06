@@ -31,12 +31,11 @@ module m_tdep_phi4
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot4(Forces_TDEP,Invar,MPIdata,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
+ subroutine tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
 
   implicit none 
 
   type(Input_Variables_type),intent(in) :: Invar
-  type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_Variables_type),intent(in) :: Shell4at
   type(Symetries_Variables_type),intent(in) :: Sym
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
@@ -62,7 +61,7 @@ contains
         latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
         isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,Invar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
 !       Calculation of the force components (third order)
         do istep=1,Invar%my_nstep
           do ii=1,3
@@ -236,11 +235,10 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
 end subroutine tdep_calc_phi4fcoeff
 
 !=====================================================================================================
-subroutine tdep_calc_phi4ref(Invar,ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
+subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell4at
   integer,intent(in) :: ntotcoeff
   double precision, intent(in) :: proj(81,81,Shell4at%nshell)
@@ -290,7 +288,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,Shell4at%nshell)
 
-  integer :: ishell,jshell,isym,jatom,katom,latom
+  integer :: ishell,isym,jatom,katom,latom
   integer :: iatref,jatref,katref,latref,iatshell,itrans
   integer :: ii,jj,kk
   double precision, allocatable :: Phi4_3333(:,:,:,:)
@@ -317,7 +315,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         latom =Shell4at%neighbours(iatref,ishell)%atoml_in_shell(iatshell)
         isym  =Shell4at%neighbours(iatref,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatref,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,Invar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
         write(Invar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
@@ -343,12 +341,11 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
 end subroutine tdep_write_phi4
 
 !=====================================================================================================
-subroutine tdep_build_phi4_3333(isym,Invar,Phi4_ref,Phi4_3333,Sym,itrans) 
+subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans) 
 
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
-  type(Input_Variables_type),intent(in) :: Invar
   double precision, intent(in) :: Phi4_ref(3,3,3,3)
   double precision, intent(out) :: Phi4_3333(3,3,3,3)
   integer,intent(in) :: isym,itrans

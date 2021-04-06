@@ -38,18 +38,17 @@ module m_tdep_phi3
   public :: tdep_calc_gruneisen
   public :: tdep_write_gruneisen
   public :: tdep_calc_alpha_gamma
-  public :: tdep_calc_lifetime1
+!FB  public :: tdep_calc_lifetime1
 !  public :: tdep_calc_lifetime2
 
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot3(Forces_TDEP,Invar,MPIdata,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
+ subroutine tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
 
   implicit none 
 
   type(Input_Variables_type),intent(in) :: Invar
-  type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_Variables_type),intent(in) :: Shell3at
   type(Symetries_Variables_type),intent(in) :: Sym
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
@@ -74,7 +73,7 @@ contains
         katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
         isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi3_333(isym,Invar,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
 !       Calculation of the force components (third order)
         do istep=1,Invar%my_nstep
           do ii=1,3
@@ -216,11 +215,10 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
 end subroutine tdep_calc_phi3fcoeff
 
 !=====================================================================================================
-subroutine tdep_calc_phi3ref(Invar,ntotcoeff,proj,Phi3_coeff,Phi3_ref,Shell3at)
+subroutine tdep_calc_phi3ref(ntotcoeff,proj,Phi3_coeff,Phi3_ref,Shell3at)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell3at
   integer,intent(in) :: ntotcoeff
   double precision, intent(in) :: proj(27,27,Shell3at%nshell)
@@ -266,7 +264,7 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi3_ref(3,3,3,Shell3at%nshell)
 
-  integer :: ishell,jshell,isym,jatom,katom
+  integer :: ishell,isym,jatom,katom
   integer :: iatref,jatref,katref,iatshell,itrans
   integer :: ii,jj
   double precision, allocatable :: Phi3_333(:,:,:)
@@ -291,7 +289,7 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
         katom=Shell3at%neighbours(iatref,ishell)%atomk_in_shell(iatshell)
         isym =Shell3at%neighbours(iatref,ishell)%sym_in_shell(iatshell)
         itrans=Shell3at%neighbours(iatref,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi3_333(isym,Invar,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
         write(Invar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
@@ -319,14 +317,13 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
 end subroutine tdep_write_phi3
 
 !=====================================================================================================
-subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Phi3_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
+subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell3at
-  type(Lattice_Variables_type),intent(in) :: Lattice
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   integer,intent(in) :: iqpt
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
@@ -340,7 +337,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Ph
   double precision :: phase
   double precision :: F_strain(3,3)
   double precision, allocatable :: Phi3_333(:,:,:)
-  double complex, allocatable :: mass_mat(:,:),eigen_prod(:,:,:,:,:),eigenvec_loc(:,:),omega(:)
+  double complex, allocatable :: eigen_prod(:,:,:,:,:),eigenvec_loc(:,:),omega(:)
 
 ! Define quantities
   natom_unitcell=Invar%natom_unitcell
@@ -421,7 +418,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Ph
         do jj=1,3
           phase=phase+2*pi*Rlatt_cart(jj,iatcell,jatom)*qpt_cart(jj)
         end do
-        call tdep_build_phi3_333(isym,Invar,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
         do ii=1,3
           do jj=1,3
             do kk=1,3
@@ -460,12 +457,11 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Ph
 end subroutine tdep_calc_gruneisen
 
 !=====================================================================================================
-subroutine tdep_build_phi3_333(isym,Invar,Phi3_ref,Phi3_333,Sym,itrans) 
+subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans) 
 
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
-  type(Input_Variables_type),intent(in) :: Invar
   double precision, intent(in) :: Phi3_ref(3,3,3)
   double precision, intent(out) :: Phi3_333(3,3,3)
   integer,intent(in) :: isym,itrans
@@ -514,11 +510,10 @@ subroutine tdep_build_phi3_333(isym,Invar,Phi3_ref,Phi3_333,Sym,itrans)
 end subroutine tdep_build_phi3_333
 
 !=====================================================================================================
-subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
+subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
   implicit none
 
-  type(ddb_type),intent(in) :: DDB
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Input_Variables_type),intent(in) :: Invar
   type(Lattice_Variables_type),intent(inout) :: Lattice
@@ -530,9 +525,9 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
   double precision,intent(in) :: Phi3_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
 
-  integer :: iq_ibz,ii,iatcell,jatcell,jj,nmode,ntemp,itemp,kk,imode,ll
+  integer :: iq_ibz,ii,jj,nmode,ntemp,itemp,kk,imode,ll
   integer :: alpha,beta
-  double precision :: k_B,wovert,xx,C_v,Gama,alpha_v,P_th,E_th,P_th1,P_th2,Vp,Vs,tmp1
+  double precision :: k_B,wovert,xx,C_v,P_th,E_th,Vp,Vs,P_th2
   double precision, allocatable :: heatcapa(:),grun_thermo(:,:,:),u_vib(:)
   double precision, allocatable :: heatcapa_HA(:,:),grun_thermo_HA(:,:,:,:),p_thermo1(:,:,:)
   double precision, allocatable :: p_thermo_HA(:,:,:,:),u_vib_HA(:,:)
@@ -566,7 +561,7 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
 !   Compute the gruneisen for this q-point
 !   ======================================
     if ((sum(abs(Qbz%qibz_cart(:,iq_ibz)))).lt.tol8) cycle  ! G point
-    call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iq_ibz,Invar,Lattice,&
+    call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iq_ibz,Invar,&
 &                            Phi3_ref,Qbz%qibz_cart(:,iq_ibz),Rlatt_cart,Shell3at,Sym)
     Grun_mean(:)=czero
     do ii=1,3*Invar%natom_unitcell
@@ -820,23 +815,21 @@ subroutine tdep_calc_alpha_gamma(distance,DDB,Eigen2nd,Invar,Lattice,MPIdata,Phi
 end subroutine tdep_calc_alpha_gamma
 
 !=====================================================================================================
-subroutine tdep_write_gruneisen(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Lattice,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
 
   implicit none
 
-  type(crystal_t),intent(in) :: Crystal
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Input_Variables_type),intent(in) :: Invar
   type(Shell_Variables_type),intent(in) :: Shell3at
   type(Lattice_Variables_type),intent(in) :: Lattice
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
-  type(ifc_type),intent(in) :: Ifc
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision,intent(in) :: Phi3_ref(3,3,3,Shell3at%nshell)
   double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
 
-  integer :: iqpt,imode,nmode,ii,jj,kk,iatcell,jatcell
+  integer :: iqpt,nmode,ii,jj,kk
   double precision :: qpt_cart(3)
   double complex, allocatable :: Gruneisen(:,:,:)
   double complex, allocatable :: Grun_mean(:)
@@ -859,7 +852,7 @@ subroutine tdep_write_gruneisen(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3
     qpt_cart(:)=Qpt%qpt_cart(:,iqpt)
     if ((sum(abs(Qpt%qpt_red(:,iqpt)))).lt.tol8) cycle  ! G point
     if (abs(sum(Qpt%qpt_red(:,iqpt)**2)-1.d0).lt.tol8) cycle ! Gp point
-    call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Lattice,Phi3_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
+    call tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
     do ii=1,3*Invar%natom_unitcell
       do jj=1,3
         do kk=1,3
@@ -904,79 +897,78 @@ subroutine tdep_write_gruneisen(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3
 end subroutine tdep_write_gruneisen
 
 !=====================================================================================================
-subroutine tdep_calc_lifetime1(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
-
-  implicit none
-
-  type(crystal_t),intent(in) :: Crystal
-  type(Symetries_Variables_type),intent(in) :: Sym
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Shell_Variables_type),intent(in) :: Shell3at
-  type(Lattice_Variables_type),intent(in) :: Lattice
-  type(Eigen_Variables_type),intent(in) :: Eigen2nd
-  type(Qbz_type),intent(in) :: Qbz
-  type(ifc_type),intent(in) :: Ifc
-  double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
-  double precision,intent(in) :: Phi3_ref(3,3,3,Shell3at%nshell)
-  double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
-
-  integer :: iq_bz,jq_bz,kq_bz,imode,nmode,ii,jj,kk,iatcell,jatcell,tot_count
-  integer :: okp_count,okm_count
-  double precision :: iqbz(3),jqbz(3),kqbz(3),ipjpk(3),imjpk(3)
-!  double complex, allocatable :: Gruneisen(:,:,:)
-!  double complex, allocatable :: Grun_mean(:)
-  character(len=500) :: message
-  integer :: ierr
-
-  ierr = 0
-
-  nmode=3*Invar%natom_unitcell
-  tot_count=zero
-  okp_count=zero
-  okm_count=zero
-  do ii=1,3
-    write(Invar%stdout,'(a,3(e15.6,1x),1x)') 'Gmet=',Lattice%gmet(ii,:)
-    write(Invar%stdout,'(a,3(e15.6,1x),1x)') 'Gprim=',Lattice%gprim(ii,:)
-  end do
-  do iq_bz=1,Qbz%nqbz
-    iqbz(:)=Qbz%qbz(:,iq_bz)
-!    iqbz(:)=0.2
-    write(Invar%stdout,'(a,3(e15.6,1x),1x)') 'Qbz1=',iqbz(:)
-    do jq_bz=1,Qbz%nqbz
-      jqbz(:)=Qbz%qbz(:,jq_bz)
-!      jqbz(:)=0.3
-      do kq_bz=1,Qbz%nqbz
-        tot_count=tot_count+1
-        kqbz(:)=Qbz%qbz(:,kq_bz)
-!        kqbz(:)=0.5
-        ipjpk(:)=iqbz(:)+jqbz(:)+kqbz(:)
-        imjpk(:)=iqbz(:)-jqbz(:)+kqbz(:)
-        if (sum(abs(ipjpk(:)-int(ipjpk(:)))).lt.tol4) then
-          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi+qj+qk=G',iq_bz,jq_bz,kq_bz  
-          okp_count=okp_count+1
-        else if (sum(abs(imjpk(:)-int(imjpk(:)))).lt.tol4) then
-          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi-qj+qk=G',iq_bz,jq_bz,kq_bz  
-          okm_count=okm_count+1
-        else 
-          cycle
-        end if  
-!       do imode=1,nmode
-!         do jmode=1,nmode
-!           do kmode=1,nmode
-!            end do  
-!          end do  
-!        end do  
-      end do  
-    end do  
-  end do  
-  write(Invar%stdout,'(a,i10)') 'Total number of (q1,q2,q3) =',tot_count
-  write(Invar%stdout,'(a,i10)') 'Partial number of (q1+q2+q3) =',okp_count
-  write(Invar%stdout,'(a,i10)') 'Partial number of (q1-q2+q3) =',okm_count
-
-end subroutine tdep_calc_lifetime1
-
-!=====================================================================================================
 end module m_tdep_phi3
+
+!FB!=====================================================================================================
+!FBsubroutine tdep_calc_lifetime1(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
+!FB
+!FB  implicit none
+!FB
+!FB  type(crystal_t),intent(in) :: Crystal
+!FB  type(Symetries_Variables_type),intent(in) :: Sym
+!FB  type(Input_Variables_type),intent(in) :: Invar
+!FB  type(Shell_Variables_type),intent(in) :: Shell3at
+!FB  type(Lattice_Variables_type),intent(in) :: Lattice
+!FB  type(Eigen_Variables_type),intent(in) :: Eigen2nd
+!FB  type(Qbz_type),intent(in) :: Qbz
+!FB  type(ifc_type),intent(in) :: Ifc
+!FB  double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
+!FB  double precision,intent(in) :: Phi3_ref(3,3,3,Shell3at%nshell)
+!FB  double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
+!FB
+!FB  integer :: iq_bz,jq_bz,kq_bz,nmode,ii,tot_count
+!FB  integer :: okp_count,okm_count
+!FB  double precision :: iqbz(3),jqbz(3),kqbz(3),ipjpk(3),imjpk(3)
+!FB!  double complex, allocatable :: Gruneisen(:,:,:)
+!FB!  double complex, allocatable :: Grun_mean(:)
+!FB  integer :: ierr
+!FB
+!FB  ierr = 0
+!FB
+!FB  nmode=3*Invar%natom_unitcell
+!FB  tot_count=zero
+!FB  okp_count=zero
+!FB  okm_count=zero
+!FB  do ii=1,3
+!FB    write(Invar%stdout,'(a,3(e15.6,1x),1x)') 'Gmet=',Lattice%gmet(ii,:)
+!FB    write(Invar%stdout,'(a,3(e15.6,1x),1x)') 'Gprim=',Lattice%gprim(ii,:)
+!FB  end do
+!FB  do iq_bz=1,Qbz%nqbz
+!FB    iqbz(:)=Qbz%qbz(:,iq_bz)
+!FB!    iqbz(:)=0.2
+!FB    write(Invar%stdout,'(a,3(e15.6,1x),1x)') 'Qbz1=',iqbz(:)
+!FB    do jq_bz=1,Qbz%nqbz
+!FB      jqbz(:)=Qbz%qbz(:,jq_bz)
+!FB!      jqbz(:)=0.3
+!FB      do kq_bz=1,Qbz%nqbz
+!FB        tot_count=tot_count+1
+!FB        kqbz(:)=Qbz%qbz(:,kq_bz)
+!FB!        kqbz(:)=0.5
+!FB        ipjpk(:)=iqbz(:)+jqbz(:)+kqbz(:)
+!FB        imjpk(:)=iqbz(:)-jqbz(:)+kqbz(:)
+!FB        if (sum(abs(ipjpk(:)-int(ipjpk(:)))).lt.tol4) then
+!FB          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi+qj+qk=G',iq_bz,jq_bz,kq_bz  
+!FB          okp_count=okp_count+1
+!FB        else if (sum(abs(imjpk(:)-int(imjpk(:)))).lt.tol4) then
+!FB          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi-qj+qk=G',iq_bz,jq_bz,kq_bz  
+!FB          okm_count=okm_count+1
+!FB        else 
+!FB          cycle
+!FB        end if  
+!FB!       do imode=1,nmode
+!FB!         do jmode=1,nmode
+!FB!           do kmode=1,nmode
+!FB!            end do  
+!FB!          end do  
+!FB!        end do  
+!FB      end do  
+!FB    end do  
+!FB  end do  
+!FB  write(Invar%stdout,'(a,i10)') 'Total number of (q1,q2,q3) =',tot_count
+!FB  write(Invar%stdout,'(a,i10)') 'Partial number of (q1+q2+q3) =',okp_count
+!FB  write(Invar%stdout,'(a,i10)') 'Partial number of (q1-q2+q3) =',okm_count
+!FB
+!FBend subroutine tdep_calc_lifetime1
 
 !=====================================================================================================
 !FBsubroutine tdep_calc_lifetime2(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)

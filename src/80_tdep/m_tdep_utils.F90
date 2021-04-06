@@ -79,9 +79,9 @@ contains
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer, intent(in) :: order
   
-  integer :: ii,LWORK,INFO,ntotcoeff,ntotconst
+  integer :: INFO,ntotcoeff,ntotconst
   integer :: natnstep,nconcoef,ierr,ncoeff_prev,nconst_prev,iconst,icoeff
-  integer, allocatable :: IWORK(:),IPIV(:)
+  integer, allocatable :: IPIV(:)
   double precision, allocatable :: WORK(:)
   double precision, allocatable :: ffcoeff_tmp(:,:),fforces_tmp(:),b_const(:)
   double precision, allocatable :: A_tot(:,:),A_inv(:,:),b_tot(:),x_tot(:)
@@ -674,7 +674,7 @@ contains
   double precision, intent(in)  :: Phi3UiUjUk(Invar%my_nstep)
   double precision, intent(in)  :: Phi4UiUjUkUl(Invar%my_nstep)
   
-  integer :: ii,jj,kk,istep,iatom,jatom,katom,my_istep
+  integer :: ii,istep,iatom
   double precision :: Delta_F2,Delta_U,Delta_U2
   double precision :: sigma,U_1,U_2,U_3,U_4,UMD
   double precision, allocatable :: tmp(:),Phi_tot(:)

@@ -92,19 +92,18 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
   double precision, intent(in) :: proj4th(81,81,nshell4at)
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
 
-  integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,katom,latom,iatshell,YES,ishell2at,counter
-  integer :: icoeff,iconst,nconst,nconst_loc,iconst_loc,iconst_new,isym,itrans,ntotcoeff,iat_mod
+  integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,katom,latom,iatshell,counter
+  integer :: icoeff,iconst,nconst_loc,iconst_loc,iconst_new,isym,itrans,ntotcoeff,iat_mod
   integer :: mu,nu,xi,zeta,alpha,beta,gama,delta,lambda,natom_unitcell,natom,ii
-  double precision :: terme,temp,terme1,terme2,terme3,terme4,terme5
+  double precision :: terme,temp,terme1,terme2,terme3,terme4
   double precision, allocatable :: SS_ref(:,:,:,:,:)
   double precision, allocatable :: vect(:,:)
   double precision, allocatable :: const_rot1st(:,:,:)
   double precision, allocatable :: const_rot2nd(:,:,:,:,:)
   double precision, allocatable :: const_dynmat(:,:,:,:,:)
   double precision, allocatable :: const_huang(:,:,:,:,:)
-  double precision, allocatable :: const_asr4th(:,:,:,:,:,:)
-  double precision, allocatable :: const_rot4th(:,:,:,:,:,:,:)
-  double precision, allocatable :: cf_ovlp(:,:)
+!FB  double precision, allocatable :: const_asr4th(:,:,:,:,:,:)
+!FB  double precision, allocatable :: const_rot4th(:,:,:,:,:,:,:)
   type(Constraints_Variables_type) :: Const3,Const4
   logical :: order2,order3,order4
 
@@ -837,7 +836,7 @@ end subroutine tdep_calc_constraints
 
 !====================================================================================================
  subroutine tdep_check_constraints(distance,Invar,Phi2,Phi1,nshell3at,nshell4at,&
-&                 Phi3_ref,Phi4_ref,Shell3at,Shell4at,Sym,ucart)
+&                 Phi3_ref,Phi4_ref,Shell3at,Shell4at,Sym)
 
   type(Input_Variables_type),intent(in) :: Invar
   integer, intent(in)  :: nshell3at,nshell4at
@@ -849,11 +848,10 @@ end subroutine tdep_calc_constraints
   type(Symetries_Variables_type),intent(in) :: Sym
   double precision, intent(in) :: Phi3_ref(3,3,3,nshell3at)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,nshell4at)
-  double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
   
   integer :: ii,jj,kk,ll,iatom,jatom,katom,latom,isym,itrans
   integer :: alpha,beta,gama,lambda
-  integer :: ishell,iatshell,istep
+  integer :: ishell,iatshell
   double precision :: norm1
   double precision :: Kroenecker(3,3),Phi3_333(3,3,3),Phi4_3333(3,3,3,3)
   double precision, allocatable :: asr3(:,:,:,:,:),rot3(:,:,:,:,:)
@@ -984,7 +982,7 @@ end subroutine tdep_calc_constraints
           katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
           isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_phi3_333(isym,Invar,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+          call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
 !         Compute the first ASR : sum_k Psi_ijk=0 
 !              --> Psi_iji+sum_{k.ne.i} Psi_ijk=0
 !              --> if i.eq.j Psi_iii+sum_{k.ne.i} Psi_iik
@@ -1085,7 +1083,7 @@ end subroutine tdep_calc_constraints
           latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
           isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_phi4_3333(isym,Invar,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+          call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
 !         Compute the first ASR : sum_l Psi_ijkl=0 
           asr4(jatom,katom,:,:,:,:)=asr4(jatom,katom,:,:,:,:)+Phi4_3333(:,:,:,:)
 !FB!         Compute the rotational invariance (third order)
