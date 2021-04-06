@@ -3640,13 +3640,10 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff_in ecut ', npw_kf,npwarr(ik
  end if
 
  if(present(pawrhoij) .and. usepaw_in==1) then
-print *, "before copy dims: ======================================================================================="
-call pawrhoij_io(pawrhoij,std_out,nsppol,nspinor_in,wfk_disk%hdr%nspden,wfk_disk%hdr%typat,wfk_disk%hdr%typat,&
-    &                   0,'D')
-print *, ""
    call pawrhoij_copy(wfk_disk%hdr%pawrhoij,pawrhoij)
-print *, "======================================================================================="
+
 #ifdef DEV_MJV
+print *, "======================================================================================="
 print *, ' m_wfk rhoij dims ', shape(wfk_disk%hdr%pawrhoij), ' and ', shape(pawrhoij) 
 print *, 'size wfk_disk%hdr%pawrhoij ', size(wfk_disk%hdr%pawrhoij)
 print *, 'wfk_disk%hdr%pawrhoij%p ', size(wfk_disk%hdr%pawrhoij(1)%rhoijp), size(wfk_disk%hdr%pawrhoij(2)%rhoijp)
@@ -3663,6 +3660,7 @@ call pawrhoij_io(pawrhoij,std_out,nsppol,nspinor_in,wfk_disk%hdr%nspden,wfk_disk
     &                   0,'D')
 print *, "end m_wfk "
 #endif
+
  end if
 
  ABI_FREE(icg)

@@ -440,11 +440,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
-#ifdef DEV_MJV
-print *, 'after hdr init'
-call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
-    &                   0,'D')
-#endif
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
@@ -458,14 +453,6 @@ call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dt
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
  ! End CP modified
 
-#ifdef DEV_MJV
-print *, 'after hdr update'
-call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
-    &                   0,'D')
-print *, 'non hdr pawrhoij = '
-call pawrhoij_io(pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
-    &                   0,'D')
-#endif
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
 
@@ -498,18 +485,7 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
  end if
-#ifdef DEV_MJV
-print *, ' after read my kptbands, hdr%pawrhoij : ireadwf0 ', ireadwf0, ''
-print *, 'hdr%pawrhoij(1)%cplex_rhoij ', hdr%pawrhoij(1)%cplex_rhoij, ' hdr%pawrhoij(1)%qphase ', hdr%pawrhoij(1)%qphase
-call pawrhoij_print_rhoij(hdr%pawrhoij(1)%rhoijp,1,&
-  1,1,dtset%natom,&
-  unit=std_out,opt_prtvol=dtset%pawprtvol)
-print *, ' (no hdr)   pawrhoij  '
-print *, 'pawrhoij(1)%cplex_rhoij ', pawrhoij(1)%cplex_rhoij, ' pawrhoij(1)%qphase ', pawrhoij(1)%qphase
-call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,1,&
-  1,1,dtset%natom,&
-  unit=std_out,opt_prtvol=dtset%pawprtvol)
-#endif
+
  call timab(135,2,tsec)
  call timab(136,1,tsec)
 
@@ -845,10 +821,12 @@ call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,1,&
 #ifdef DEV_MJV
 print *, ' rhog after nhat ', rhog(:,1:10)
 print *, ' rhor after nhat ', rhor(1:10,:)
+if(psps%usepaw==1)then
 print *, ' pawrhoij ', allocated (pawrhoij)
 call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
   pawrhoij(1)%qphase,1,natom,&
   unit=std_out,opt_prtvol=dtset%pawprtvol)
+endif
 #endif
 
 !The GS irrzon and phnons were only needed to symmetrize the GS density
