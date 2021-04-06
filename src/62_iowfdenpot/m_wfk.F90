@@ -3643,10 +3643,19 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff_in ecut ', npw_kf,npwarr(ik
    call pawrhoij_copy(wfk_disk%hdr%pawrhoij,pawrhoij)
 #ifdef DEV_MJV
 print *, ' rhoij dims ', shape(wfk_disk%hdr%pawrhoij), ' and ', shape(pawrhoij) 
-print *, 'wfk_disk%hdr%pawrhoij ', size(wfk_disk%hdr%pawrhoij)
+print *, 'size wfk_disk%hdr%pawrhoij ', size(wfk_disk%hdr%pawrhoij)
 print *, 'wfk_disk%hdr%pawrhoij%p ', size(wfk_disk%hdr%pawrhoij(1)%rhoijp), size(wfk_disk%hdr%pawrhoij(2)%rhoijp)
 print *, ' wfk_disk%hdr%pawrhoij(1)%rhoijp ', wfk_disk%hdr%pawrhoij(1)%rhoijp
+print *, ""
+call pawrhoij_io(wfk_disk%hdr%pawrhoij,std_out,nsppol,nspinor_in,wfk_disk%hdr%nspden,wfk_disk%hdr%typat,wfk_disk%hdr%typat,&
+    &                   0,'D')
+print *, ""
+print *, 'size pawrhoij ', size(pawrhoij),  ' allocated ijp? ', allocated(pawrhoij(1)%rhoijp)
+print *, 'size pawrhoij(1)%rhoijp ', size(pawrhoij(1)%rhoijp)
 print *, ' pawrhoij(1)%rhoijp ', pawrhoij(1)%rhoijp
+print *, ""
+call pawrhoij_io(pawrhoij,std_out,nsppol,nspinor_in,wfk_disk%hdr%nspden,wfk_disk%hdr%typat,wfk_disk%hdr%typat,&
+    &                   0,'D')
 #endif
  end if
 
