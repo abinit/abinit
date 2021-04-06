@@ -71,7 +71,6 @@ module m_respfn_driver
                            pawrhoij_print_rhoij
 
  use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
-
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc
@@ -802,7 +801,11 @@ call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,1,&
  nhatgrdim=0;nhatdim=0
  ABI_MALLOC(nhatgr,(0,0,0))
  if (psps%usepaw==1.and. ((usexcnhat==0).or.(dtset%getden==0).or.dtset%xclevel==2)) then
+#ifdef DEV_MJV
+ print *, ' adding nhat '
+#endif
    nhatdim=1
+
    ABI_MALLOC(nhat,(nfftf,dtset%nspden))
    call timab(558,1,tsec)
    nhatgrdim=0;if (dtset%xclevel==2.and.dtset%pawnhatxc>0) nhatgrdim=usexcnhat
@@ -934,7 +937,6 @@ call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
 #ifdef DEV_MJV
 print *, ' vtrial ', vtrial(1:10,1)
 #endif
-
 
  if(dtset%prtvol==-level)then
    call wrtout(std_out,' respfn: ground-state density and potential set up.','COLL')
