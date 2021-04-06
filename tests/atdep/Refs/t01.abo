@@ -58,7 +58,7 @@
  readifc                 2
  enunit                  1 (Phonon frequencies in cm-1)
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
- Number of processors    1    1
+-Number of processors    1    1
  
  WARNING: ALL the quantities are now computed :
                                       from nstep_min=    1

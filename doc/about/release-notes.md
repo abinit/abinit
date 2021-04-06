@@ -834,7 +834,7 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
 **D.13** aTDEP utility:
-added [[guide:aTDEP|aTDEP user guide]],
+added [[pdf:aTDEP_Guide| aTDEP guide]],
 [[topic:aTDEP|aTDEP topic]], and corresponding input variable documentation.
 References: [[pdf:aTDEP_Paper|aTDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
@@ -1568,7 +1568,7 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
 **D.13** aTDEP utility:
-added [[guide:aTDEP|A-TDEP user guide]],
+added [[pdf:aTDEP_Guide| aTDEP guide]],
 [[topic:aTDEP|aTDEP topic]], and corresponding input variable documentation.
 References: [[pdf:aTDEP_Paper|aTDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].

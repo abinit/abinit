@@ -717,7 +717,7 @@ contains
   call xmpi_comm_free(commcart_2d)
 
 ! Write some data
-  write(message,'(1x,a20,2(1x,i4))') 'Number of processors :',MPIdata%nproc_shell,MPIdata%nproc_step
+  write(message,'(a21,2(1x,i4))') '-Number of processors',MPIdata%nproc_shell,MPIdata%nproc_step
   call wrtout(Invar%stdout,message,'COLL')
 !FB  write(message,'(a,2i5)') 'me_shell and me_step : ',MPIdata%me_shell,MPIdata%me_step
 !FB  call wrtout(Invar%stdout,message,'COLL')
@@ -742,7 +742,7 @@ contains
   end if  
   write(Invar%stdout,'(a,1x,i4)') '          So, the real number of time steps is nstep=',Invar%nstep_tot
   if (MPIdata%nproc_step.gt.1) then
-    write(Invar%stdout,'(a,1000(1x,i5))') 'Distribution of number of steps wrt the number of processors=',MPIdata%nstep_all(:)
+    write(Invar%stdout,'(a,1000(1x,i5))') '-Distribution of number of steps wrt the number of processors=',MPIdata%nstep_all(:)
   end if
 
   ABI_MALLOC(nstep_acc,(MPIdata%nproc_step+1)); nstep_acc(:)=zero

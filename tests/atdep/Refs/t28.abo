@@ -72,7 +72,7 @@
  use_ideal_positions     1
  order                   4    5.0000000000    5.0000000000
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
- Number of processors    1    1
+-Number of processors    1    1
  
  WARNING: ALL the quantities are now computed :
                                       from nstep_min=    1

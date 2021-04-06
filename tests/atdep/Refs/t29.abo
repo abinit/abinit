@@ -61,7 +61,7 @@
  order                   4    5.0000000000    5.0000000000
  use_ideal_positions     0
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
- Number of processors    1    1
+-Number of processors    1    1
  
  WARNING: ALL the quantities are now computed :
                                       from nstep_min=    1

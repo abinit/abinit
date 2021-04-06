@@ -18,7 +18,7 @@ You will learn:
 2. the meaning and effects of the main input variables, and 
 3. how to exploit the data provided in the output files.
 
-You are supposed to have performed the [1$^{st}$ aTDEP tutorial](atdep1) and strongly encouraged to read the following documents:
+You are supposed to have performed the [1$^{st}$ aTDEP tutorial](/tutorial/atdep1) and strongly encouraged to read the following documents:
 
 * User guide: [[pdf:aTDEP_Guide| aTDEP guide]]  
 * Theory: [[pdf:aTDEP_Paper|aTDEP paper]] corresponding to the article [[cite:Bottin2020]]
