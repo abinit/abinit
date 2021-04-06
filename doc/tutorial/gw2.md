@@ -30,24 +30,24 @@ Also, it is suggested to acknowledge the efforts of developers of the GW part of
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, see the
-[tutorial index](.) as well as the [first GW tutorial](gw1).
+[tutorial index](/tutorial/) as well as the [first GW tutorial](/tutorial/gw1).
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
-relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+relying on matplotlib. See the README file of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about one hour to be completed (also including the
 reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## The preliminary Kohn-Sham band structure calculation
 
 *Before beginning, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_gw2?*
 
-In [basic tutorial 4](base4), we have computed different properties of
+In [basic tutorial 4](/tutorial/base4), we have computed different properties of
 Aluminum within DFT(LDA). Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved

@@ -24,7 +24,7 @@ This tutorial should take about 15 minutes.
 We will first start by a simple example: viewing Silicon density information.
 Before using the cut3d program, we first have to generate the density and
 the wavefunctions files by running the Abinit program. For this simple case,
-we will use the last input file used in [tutorial 3](base3)
+we will use the last input file used in [tutorial 3](/tutorial/base3)
 (*tbase3_5.in*). That input file contains two datasets, one to obtain a
 self-consistent density and the other to obtain a selected number of k-point wavefunctions.
 If you do not have the output of this case, you will need to

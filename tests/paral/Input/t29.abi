@@ -2,7 +2,7 @@
  use_slk 1
  bandpp 2
  istwfk 2
- npband 2 npkpt 1 npfft 2
+ npband 2 np_spkpt 1 npfft 2
 
  # To test the different FFT libraries
  #fftalg 312

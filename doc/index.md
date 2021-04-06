@@ -23,8 +23,7 @@ If you have never used another electronic structure code or a Quantum
 Chemistry package, you should complete such reading by going (at your own
 pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2004]].
 
-After having gone through the present New User's Guide, you should follow the
-[[tutorial:index|ABINIT tutorial]].
+After having gone through the present New User's Guide, you should follow the [ABINIT tutorial](/tutorial/).
 
 ## Introduction
   

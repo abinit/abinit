@@ -381,7 +381,7 @@ type, public :: dataset_type
  integer :: npfft
  integer :: nphf
  integer :: npimage
- integer :: npkpt
+ integer :: np_spkpt
  integer :: nppert
  integer :: npspinor
  integer :: npsp
@@ -934,7 +934,7 @@ type, public :: dataset_type
 
  contains
 
- procedure :: chkneu => dtset_chkneu
+ procedure :: initocc_chkneu => dtset_initocc_chkneu
    ! Check neutrality of system based on band occupancies and valence charges of pseudo-atoms.
 
  procedure :: copy => dtset_copy
@@ -963,9 +963,9 @@ type, public :: dataset_type
 CONTAINS  !==============================================================================
 !!***
 
-!!****f* m_dtset/dtset_chkneu
+!!****f* m_dtset/dtset_initocc_chkneu
 !! NAME
-!! dtset_chkneu
+!! dtset_initocc_chkneu
 !!
 !! FUNCTION
 !! Check neutrality of system based on band occupancies and valence charges of pseudo-atoms.
@@ -1014,7 +1014,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine dtset_chkneu(dtset, nelectjell, occopt)
+subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
 
 !Arguments ------------------------------------
 !scalars
@@ -1043,7 +1043,7 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
    dtset%nelect=one
  end if
 
-! write(std_out,*)ch10,' chkneu : enter, dtset%nelect=',dtset%nelect
+! write(std_out,*)ch10,' initocc_chkneu : enter, dtset%nelect=',dtset%nelect
 ! write(std_out,*)' occopt,dtset%nsppol,dtset%nspden=',occopt,dtset%nsppol,dtset%nspden
 
 !(2) Optionally initialize occ with semiconductor occupancies
@@ -1185,7 +1185,7 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
      if(dtset%nsppol==1)then
        if (dtset%prtvol > 0) then
          write(msg, '(a,i0,a,a)' ) &
-          ' chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
+          ' initocc_chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
          call wrtout(std_out,msg)
          do ii=0,(dtset%nband(1)-1)/12
            write(msg,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
@@ -1194,7 +1194,7 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
        end if
      else
        write(msg, '(a,i0,2a)' ) &
-        ' dtset_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
+        ' initocc_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
        call wrtout(std_out,msg)
        if (dtset%prtvol > 0) then
          do ii=0,(dtset%nband(1)-1)/12
@@ -1253,7 +1253,7 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
 !      There is a discrepancy
        write(msg, &
        '(a,a,i4,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
-       ' chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
+       ' initocc_chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
        '         and input value of cellcharge=',dtset%cellcharge(iimage),',',ch10,&
        '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
        '   zval is nominal charge of all nuclei, computed from zion (read in psp),',ch10,&
@@ -1288,7 +1288,7 @@ subroutine dtset_chkneu(dtset, nelectjell, occopt)
 
  end if ! condition dtset%iscf>0 or -1 or -3 .
 
-end subroutine dtset_chkneu
+end subroutine dtset_initocc_chkneu
 !!***
 
 !----------------------------------------------------------------------
@@ -1687,7 +1687,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%npfft              = dtin%npfft
  dtout%nphf               = dtin%nphf
  dtout%npimage            = dtin%npimage
- dtout%npkpt              = dtin%npkpt
+ dtout%np_spkpt           = dtin%np_spkpt
  dtout%nppert             = dtin%nppert
  dtout%npspinor           = dtin%npspinor
  dtout%npsp               = dtin%npsp
@@ -3256,7 +3256,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
- list_vars=trim(list_vars)//' npfft nphf nph1l npimage npkpt nppert npsp npspinor'
+ list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'

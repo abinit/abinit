@@ -1007,8 +1007,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%npimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npimage','INT',0,firstchar="-")
 
- intarr(1,:)=dtsets(:)%npkpt
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npkpt','INT',0,firstchar='-')
+ intarr(1,:)=dtsets(:)%np_spkpt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_spkpt','INT',0,firstchar='-')
 
  intarr(1,:)=dtsets(:)%nppert
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nppert','INT',0,firstchar="-")

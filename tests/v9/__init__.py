@@ -85,4 +85,10 @@ inp_files = [
 # GS Coulomb cut-off
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
 "t91.abi", # occopt 9 tests on Si
+"t95.abi", # test treatment of inaccurate POSCAR file
+"t96.abi", # test treatment of inaccurate POSCAR file
+"t97.abi", # test treatment of inaccurate POSCAR file
+"t98.abi", # test treatment of inaccurate POSCAR file
+"t99.abi", # test treatment of inaccurate POSCAR file
+"t100.abi",  # optic (same as t14 but prtlincompmatrixelements = 1)
 ]

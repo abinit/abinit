@@ -2384,7 +2384,7 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
  real(dp),parameter :: zp=1.0_dp              ! Hard-coded charge of the impinging particle
  real(dp) :: omega_p
  real(dp) :: im_epsm1_int(1)
- real(dp) :: qbz(3),qpgcart(3),qpgred(3)
+ real(dp) :: qbz(3),qpgcart(3),qpg_red(3)
  real(dp) :: pvel(3,npvel),pvel_norm(npvel)
  real(dp) :: ypp_i(Ep%nomega)
  real(dp) :: vcoul(Ep%npwe)
@@ -2453,11 +2453,11 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
      ! Loop over velocities
      do ipvel=1,npvel
 
-       qpgred(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
+       qpg_red(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
        ! Transform q + G from reduced to cartesian with the symmetry operation
-       qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpgred(1) &
-&                 + two_pi * Cryst%gprimd(:,2) * qpgred(2) &
-&                 + two_pi * Cryst%gprimd(:,3) * qpgred(3)
+       qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpg_red(1) &
+&                 + two_pi * Cryst%gprimd(:,2) * qpg_red(2) &
+&                 + two_pi * Cryst%gprimd(:,3) * qpg_red(3)
 
        ! omega_p = ( q + G ) . v
        omega_p =  DOT_PRODUCT( qpgcart(:) , pvel(:,ipvel) )

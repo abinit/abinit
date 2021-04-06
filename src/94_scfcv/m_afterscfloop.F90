@@ -59,7 +59,6 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -191,8 +190,6 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
-!!  with_vectornd = 1 if nuclear dipole vector potential allocated
-!!  vectornd(with_vectornd*nfftf,3)
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
@@ -221,10 +218,10 @@ contains
 !!   fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!     at input, previous value of forces,
 !!     at output, new value.
-!!     Note : unlike fred, this array has been corrected by enforcing
+!!     Note : unlike gred, this array has been corrected by enforcing
 !!     the translational symmetry, namely that the sum of force
 !!     on all atoms is zero.
-!!   fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!   gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!   gresid(3,natom)=forces due to the residual of the potential
 !!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!   grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -242,7 +239,6 @@ contains
 !!       In case dtset%berryopt = 4/6/7/14/16/17, the overlap matrices computed
 !!       in this routine are stored in dtefield%smat in order
 !!       to be used in the electric field calculation.
-!! dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
@@ -292,23 +288,23 @@ contains
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
-& gresid,grewtn,grhf,grhor,grvdw,&
+& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
+& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,with_vectornd
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -317,7 +313,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
- type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
@@ -342,7 +337,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: tollist(12),vpsp(nfftf)
- real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -357,7 +352,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
  real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
- real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),fred(3,dtset%natom)
+ real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),kxc(nfftf,nkxc),strten(6)
  real(dp),intent(inout) :: synlgr(3,dtset%natom)
@@ -543,16 +538,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
- end if
-
-!----------------------------------------------------------------------
-! Orbital magnetization calculations
-!----------------------------------------------------------------------
-
- if(dtset%orbmag.NE.0) then
-    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
-         & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
-         & vectornd,vtrial,with_vectornd,xred,ylm,ylmgr)
  end if
 
  call timab(252,2,tsec)
@@ -938,7 +923,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
-&   forold,fred,grchempottn,grcondft,gresid,grewtn,&
+&   forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grvdw,grxc,gsqcut,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
@@ -1000,7 +985,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (dtset%positron/=0) then
    electronpositron%scf_converged=.false.
    if (dtset%positron<0.and.electronpositron_calctype(electronpositron)==1) then
-     call exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,fred,mcg,mcprj,&
+     call exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energies,gred,mcg,mcprj,&
 &     mpi_enreg,my_natom,nfftf,ngfftf,nhat,npwarr,occ,paw_an,pawrhoij,rhog,rhor,strten,usecprj,vhartr)
    end if
  end if
@@ -1039,12 +1024,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if(dtset%ionmov==23 .and. mpi_enreg%nproc_band>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
    ABI_MALLOC(mpibuf,(3,bufsz))
-   mpibuf(:,1:dtset%natom)=fred(:,1:dtset%natom)
+   mpibuf(:,1:dtset%natom)=gred(:,1:dtset%natom)
    mpibuf(:,dtset%natom+1:2*dtset%natom)=fcart(:,1:dtset%natom)
    if (moved_atm_inside==1) mpibuf(:,2*dtset%natom+1:3*dtset%natom)=xred(:,1:dtset%natom)
    mpibuf(1:3,bufsz-1:bufsz)=reshape(strten(1:6),(/3,2/))
    call xmpi_sum(mpibuf,mpi_enreg%comm_band,ierr)
-   fred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_band
+   gred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_band
    fcart(:,1:dtset%natom)=mpibuf(:,dtset%natom+1:2*dtset%natom)/mpi_enreg%nproc_band
    if (moved_atm_inside==1) xred(:,1:dtset%natom)=mpibuf(:,2*dtset%natom+1:3*dtset%natom)/mpi_enreg%nproc_band
    strten(1:6)=reshape(mpibuf(1:3,bufsz-1:bufsz),(/6/))/mpi_enreg%nproc_band
@@ -1057,12 +1042,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (mpi_enreg%nproc_fft>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
    ABI_MALLOC(mpibuf,(3,bufsz))
-   mpibuf(:,1:dtset%natom)=fred(:,1:dtset%natom)
+   mpibuf(:,1:dtset%natom)=gred(:,1:dtset%natom)
    mpibuf(:,dtset%natom+1:2*dtset%natom)=fcart(:,1:dtset%natom)
    if (moved_atm_inside==1) mpibuf(:,2*dtset%natom+1:3*dtset%natom)=xred(:,1:dtset%natom)
    mpibuf(1:3,bufsz-1:bufsz)=reshape(strten(1:6),(/3,2/))
    call xmpi_sum(mpibuf,mpi_enreg%comm_fft,ierr)
-   fred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_fft
+   gred(:,1:dtset%natom)=mpibuf(:,1:dtset%natom)/mpi_enreg%nproc_fft
    fcart(:,1:dtset%natom)=mpibuf(:,dtset%natom+1:2*dtset%natom)/mpi_enreg%nproc_fft
    if (moved_atm_inside==1) xred(:,1:dtset%natom)=mpibuf(:,2*dtset%natom+1:3*dtset%natom)/mpi_enreg%nproc_fft
    strten(1:6)=reshape(mpibuf(1:3,bufsz-1:bufsz),(/6/))/mpi_enreg%nproc_fft
@@ -1077,7 +1062,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%residm     =residm
  results_gs%res2       =res2
  results_gs%fcart(:,:) =fcart(:,:)
- results_gs%fred(:,:)  =fred(:,:)
+ results_gs%gred(:,:)  =gred(:,:)
  results_gs%grchempottn(:,:)=grchempottn(:,:)
  results_gs%gresid(:,:)=gresid(:,:)
  results_gs%grewtn(:,:)=grewtn(:,:)
