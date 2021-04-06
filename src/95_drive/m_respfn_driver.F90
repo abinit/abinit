@@ -68,7 +68,7 @@ module m_respfn_driver
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
                            pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim, &
-                           pawrhoij_print_rhoij
+                           pawrhoij_print_rhoij, pawrhoij_io
 
  use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
@@ -440,6 +440,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
+#ifdef DEV_MJV
+print *, 'after hdr init'
+call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
+    &                   0,'D')
+#endif
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
@@ -453,6 +458,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
  ! End CP modified
 
+#ifdef DEV_MJV
+print *, 'after hdr update'
+call pawrhoij_io(hdr%pawrhoij,std_out,dtset%nsppol,dtset%nspinor,dtset%nspden,dtset%typat,dtset%typat,&
+    &                   0,'D')
+#endif
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
 
