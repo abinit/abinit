@@ -527,7 +527,7 @@ program atdep
 !FB call tdep_init_eigen2nd(Eigen2nd_MP,Invar%natom_unitcell,Qbz%nqibz)
  call tdep_init_eigen2nd(Eigen2nd_path,Invar%natom_unitcell,Qpt%nqpt)
  call tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Lattice,MPIdata,natom,&
-&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Rlatt_cart,Shell2at,Sym)
+&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
  write(Invar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
