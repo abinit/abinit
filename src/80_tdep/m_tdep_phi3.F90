@@ -636,13 +636,13 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
   if (MPIdata%iam_master) then
     open(unit=20,file=trim(Invar%output_prefix)//'thermo3.dat')
     open(unit=21,file=trim(Invar%output_prefix)//'alpha_gamma.dat')
-    write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th_(GPa)'
+    write(20,'(a)')'#   T(K)    C_v(k_B/fu)        Gamma     alpha_v*10^6(K^-1)   E_th(eV)                       P_th(GPa)'
     write(20,'(a,72x,a)')'#',' ----------------------------------------------'
     write(20,'(a,72x,a)')'#','  {sum G_i.U_iV}  {int G.C_v/V dT}    {G.U/V}'
     write(21,'(a)')'#   T(K)      Gamma_11         Gamma_22        Gamma_33      alpha_11        alpha_22        alpha_33',&
 &                  '        alpha_12        alpha_13        alpha_23'
-    write(20,'(a)')'# ---------------------------------------------------------------------------------------------------',&
-&                  '------------------------------------------------'
+    write(20,'(2a)')'# --------------------------------------------------------------------------------------------------',&
+                    '--------------------'
   end if  
   do itemp=1,ntemp
     C_v    =sum(heatcapa_HA   (:,itemp))

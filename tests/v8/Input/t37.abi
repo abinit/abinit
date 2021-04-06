@@ -27,7 +27,7 @@
 #%%   t37.abo, tolnlines = 1, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%%   t37thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = J. Bieder
 #%% keywords = atdep

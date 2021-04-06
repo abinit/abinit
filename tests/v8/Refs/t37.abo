@@ -53,7 +53,7 @@
  ======================= Optional input variables ============================
  ngqpt2                  2    2    2
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
- Number of processors    1    1
+-Number of processors    1    1
  
  WARNING: ALL the quantities are now computed :
                                       from nstep_min=    1

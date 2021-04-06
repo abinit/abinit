@@ -2290,7 +2290,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        trace3=sriaf(1,1,ii)+sriaf(2,2,ii)+sriaf(3,3,ii)
        if (iout > 0) then
          write(iout,'(3(f9.5,17x))')trace1+tol10,trace2+tol10,trace3+tol10
-         write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10 !
+         write(iout,'(3(f9.5,17x))')1.0,(trace2+tol10)/(trace1+tol10),(trace3+tol10)/(trace1+tol10) !
        end if
 
        if(flag==1)then

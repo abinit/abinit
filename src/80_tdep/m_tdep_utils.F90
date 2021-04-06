@@ -768,7 +768,11 @@ contains
   Delta_U  =tmp(2) /real(Invar%nstep_tot*Invar%natom)
   Delta_U2 =tmp(9) /real(Invar%nstep_tot*Invar%natom)
   Delta_F2 =tmp(4) /real(Invar%nstep_tot*Invar%natom*3)
-  sigma    =dsqrt(tmp(4)/tmp(5))
+  if (tmp(5).eq.0.d0) then
+    sigma    =0.d0
+  else  
+    sigma    =dsqrt(tmp(4)/tmp(5))
+  end if  
   if (Invar%order.eq.4) then
     write(Invar%stdout,'(10(f12.5,5x))') UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,U_3*Ha_eV,U_4*Ha_eV,&
 &     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
