@@ -496,6 +496,7 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
      mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
 #ifdef DEV_MJV
+print *, 'gvnlx1 490 ', gvnlx1(:,1:10)
 print *, 'gh1c 490 ', gh1c(:,1:10)
 print *, 'gs1c 490 ', gs1c(:,1:10)
 #endif
