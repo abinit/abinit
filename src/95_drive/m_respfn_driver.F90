@@ -494,8 +494,6 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
  ABI_FREE(distrb_flags)
 
  if (psps%usepaw==1 .and. ireadwf0==1) then
-   call pawrhoij_copy(pawrhoij,hdr%pawrhoij)
-
 !  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
