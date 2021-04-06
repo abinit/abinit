@@ -2679,6 +2679,9 @@ print *, ' minb_per_proc = ', minb_per_proc
          do nb_per_proc = minb_per_proc, nband_k
            if (mod(nband_k,nb_per_proc)==0) exit
          end do
+#ifdef DEV_MJV
+print *, ' nb_per_proc = ', nb_per_proc
+#endif
 
          mband_mem_out = max(mband_mem_out,nb_per_proc)
          do iiband=1,nband_k
