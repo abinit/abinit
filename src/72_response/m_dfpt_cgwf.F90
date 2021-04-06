@@ -498,9 +498,11 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
 #ifdef DEV_MJV
 print *, 'gvnlx1 490 ', gvnlx1(:,1:10)
 print *, 'gh1c 490 ', gh1c(:,1:10)
-print *, 'gs1c 490 ', gs1c(:,1:10)
 #endif
    if (gen_eigenpb) then
+#ifdef DEV_MJV
+print *, 'gs1c 490 ', gs1c(:,1:10)
+#endif
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
 !$OMP PARALLEL
 !$OMP DO
