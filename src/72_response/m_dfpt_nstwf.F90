@@ -2034,10 +2034,14 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 ! filter for bands on this cpu for cg cg1 etc.
  distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
+#ifdef DEV_MJV
 print *, 'distrb_cycle ', distrb_cycle
+#endif
  call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,nband_k,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+#ifdef DEV_MJV
 print *, 'band_procs ', band_procs
+#endif
 
 !Additional allocations
  if (.not.ddk) then
@@ -2164,6 +2168,9 @@ print *, 'band_procs ', band_procs
 
    end if 
    call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
+#ifdef DEV_MJV
+print *, " iband ", iband, " cwave0 ", cwave0(:,1:10)
+#endif
    call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
 
 !  In case non ddk perturbation
@@ -2246,8 +2253,6 @@ print *, 'band_procs ', band_procs
              d2nl_k(1,idir1,ipert1)=d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*two*dotr
              d2nl_k(2,idir1,ipert1)=d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*two*doti
 
-!TODO : need an mpi_reduce here somewhere to collect terms?
-!   or if there is no sub-loop over jband there is no need to distribute and everyone works on their own iband???
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
 !            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal
@@ -2325,13 +2330,11 @@ print *, 'band_procs ', band_procs
          jband_me = 0
          do jband = 1,nband_k              !compute dot1 and dot2
            if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_kpt) then
-print *, " skipped for kpt index"
+#ifdef DEV_MJV
+print *, " skipped for kpt index i j ", iband, jband, ' ikpt ', ikpt
+#endif
              cycle
            end if
-           if (distrb_cycle(jband)) then 
-print *, " skipped for jband index"
-             cycle
-           end if 
            jband_me = jband_me + 1
 
            if (abs(occ_k(jband)) > tol8) then
@@ -2351,8 +2354,6 @@ print *, " skipped for jband index"
 &               (dot1r*dot2i + dot1i*dot2r)
            end if  ! occ_k
          end do !jband
-         ! complete over jband index
-         call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
 
          d2bbb_k(:,idir1,iband,:)=d2bbb_k(:,idir1,iband,:)*wtk_k*occ_k(iband)*half
          d2nl_k(1,idir1,ipert1)= &
@@ -2364,7 +2365,18 @@ print *, " skipped for jband index"
      end do  ! idir1
    end if   ! Compute localization tensor, ipert=natom+1
 
- end do !  End loop over bands
+ end do !  End loop over iband
+
+ if(dtset%prtbbb==1)then
+#ifdef DEV_MJV
+print *, "d2bbb_k before mpisum ", d2bbb_k
+#endif
+   ! complete over jband index
+   call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
+#ifdef DEV_MJV
+print *, "d2bbb_k after mpisum ", d2bbb_k
+#endif
+ end if
 
 !Final deallocations
  ABI_FREE(cwave0)
