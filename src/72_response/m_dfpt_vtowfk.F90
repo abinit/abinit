@@ -675,14 +675,17 @@ print *, 'vtowfk : eig1_k ', eig1_k
 !For rf2 perturbation
  if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
 
-!Find largest resid over bands at this k point
-#ifdef DEV_MJV
-print *, 'vtowfk residk 643', resid_k
-#endif
- call xmpi_sum(resid_k,mpi_enreg%comm_band,ierr)
+!#ifdef DEV_MJV
+!print *, 'vtowfk residk 643', resid_k
+!write (200+mpi_enreg%me_kpt, *) 'vtowfk residk 643', resid_k
+!#endif
+! call xmpi_sum(resid_k,mpi_enreg%comm_band,ierr)
 #ifdef DEV_MJV
 print *, 'vtowfk residk 647', resid_k
+write (200+mpi_enreg%me_kpt, *) 'vtowfk residk 647', resid_k
 #endif
+
+!Find largest resid over bands at this k point
  residk=maxval(resid_k(:))
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    do ii=0,(nband_k-1)/8

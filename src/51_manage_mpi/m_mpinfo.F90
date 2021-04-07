@@ -2209,6 +2209,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  integer :: ii,ikpt,iproc_min,iproc_max,irank,isppol
  integer :: me,nband_k,nproc,nb_per_proc,nrank,nstates,spacecomm
  integer :: maxproc_bandpool, mband
+ integer :: mpierr, tmpcomm, colorcomm
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
@@ -2229,6 +2230,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 print *, 'enter initmpi_band'
 print *, ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
 print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
+write( 100+me, *)  'enter initmpi_band'
+write( 100+me, *)  ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
+write( 100+me, *)    mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
 call flush()
 #endif
 
@@ -2240,6 +2244,7 @@ call flush()
    me=mpi_enreg%me_kpt
 #ifdef DEV_MJV
 print *, 'me, nproc, maxproc_bandpool, mkmem = ', me, nproc, maxproc_bandpool, mkmem
+write( 100+me, *)'me, nproc, maxproc_bandpool, mkmem = ', me, nproc, maxproc_bandpool, mkmem
 call flush()
 #endif
 
@@ -2250,6 +2255,7 @@ call flush()
    
 #ifdef DEV_MJV
 print *, 'nb_per_proc ', mband / maxproc_bandpool, ' vs old version ', nstates/nproc
+write( 100+me, *)'nb_per_proc ', mband / maxproc_bandpool, ' vs old version ', nstates/nproc
 call flush()
 #endif
    do nb_per_proc = mband / maxproc_bandpool, mband
@@ -2258,13 +2264,16 @@ call flush()
 #ifdef DEV_MJV
 print *, 'nb_per_proc primed ',nb_per_proc, ' is a divisor of mband = ', mband
 print *, 'only using ', mband/nb_per_proc*nkpt, ' procs out of ', nproc
+write( 100+me, *) 'nb_per_proc primed ',nb_per_proc, ' is a divisor of mband = ', mband
+write( 100+me, *) 'only using ', mband/nb_per_proc*nkpt, ' procs out of ', nproc
 call flush()
 #endif
 
 
    nrank=0
+   colorcomm=xmpi_undefined
 
-   if (nb_per_proc<mband .and. mkmem > 0) then
+   if (nb_per_proc<mband) then ! .and. mkmem > 0) then
      do isppol=1,nsppol
        do ikpt=1,nkpt
          ii=ikpt+(isppol-1)*nkpt
@@ -2274,9 +2283,11 @@ call flush()
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
 #ifdef DEV_MJV
 print *, 'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
+write( 100+me, *)'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
 call flush()
 #endif
            if ((me>=iproc_min).and.(me<=iproc_max)) then
+             colorcomm = 1
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
@@ -2291,11 +2302,17 @@ call flush()
        end do
      end do
 #ifdef DEV_MJV
+print *, ' me nrank =', me, nrank
+write( 100+me, *)' me nrank =', me, nrank
+if (nrank>0) then
 print *, ' probable rank = ', mod(me, nrank)
+write( 100+me, *)' probable rank = ', mod(me, nrank)
 call flush()
+endif
 #endif
 
      if (.not.allocated(ranks)) then
+       nrank = 0
        ABI_MALLOC(ranks,(0))
      end if
 
@@ -2303,17 +2320,20 @@ call flush()
 
 #ifdef DEV_MJV
 print *, 'call subcomm ',  spacecomm, nrank, ' ranks ', ranks
+write( 100+me, *)'call subcomm ',  spacecomm, nrank, ' ranks ', ranks
 call flush()
 #endif
 
 ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
+     !call xmpi_comm_split(spacecomm,colorcomm,me,tmpcomm,mpierr)
+     !mpi_enreg%comm_band=xmpi_subcomm(tmpcomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
 
 #ifdef DEV_MJV
 print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks, '    me_band ', mpi_enreg%me_band
-print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band
+print *, ' mpi_enreg%comm_band ', mpi_enreg%comm_band, ' me = ', mpi_enreg%me_band
 #endif
 
      ABI_FREE(ranks)
@@ -2789,6 +2809,7 @@ print *, iisppol, iiband, iikpt, mpi_enreg%proc_distrb(iikpt,iiband,iisppol)
 end do
 end do
 end do
+call flush()
 #endif
 
 end subroutine distrb2

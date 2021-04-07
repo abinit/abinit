@@ -464,6 +464,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end if
 
  nlines_done = 0
+ resid = zero
 
 !LOOP OVER SPINS
  do isppol=1,nsppol
@@ -690,6 +691,10 @@ print *, 'eig0_kq  ',   eig0_kq
 !    Save eigenvalues (hartree), residuals (hartree**2)
      eigen1 (1+bd2tot_index : 2*nband_k**2+bd2tot_index) = eig1_k(:)
      resid  (1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
+#ifdef DEV_MJV
+print *, ' resid total ', resid
+write (300+mpi_enreg%me_kpt, *) ' resid total ', resid
+#endif
 
 !    Accumulate sum over k points for nonlocal and kinetic energies,
 !    also accumulate gradients of Enonlocal:
@@ -883,6 +888,9 @@ print *, 'vtorho rho1wfr 814 ', rho1wfr(1:5,:)
      end do
    end do
    ABI_FREE(buffer1)
+#ifdef DEV_MJV
+print *, 'resid unpacked ',  resid
+#endif
 
 !  Accumulate PAW occupancies
    if (psps%usepaw==1.and.iscf_mod>0) then

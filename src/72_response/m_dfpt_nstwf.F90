@@ -1465,7 +1465,7 @@ print *, ' nstpaw drhoaug1 check ', any(isnan(drhoaug1))
              call pawcprj_free(dcwaveprj)
              ABI_FREE(dcwaveprj)
              ABI_FREE(dcwavef)
-           end if
+           end if ! has_drho
 
            if((usecprj==1).and..not.(associated(cwaveprj0_idir1,cwaveprj0)))then
              call pawcprj_free(cwaveprj0_idir1)
@@ -2034,9 +2034,10 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 ! filter for bands on this cpu for cg cg1 etc.
  distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
+print *, 'distrb_cycle ', distrb_cycle
  call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,nband_k,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
-
+print *, 'band_procs ', band_procs
 
 !Additional allocations
  if (.not.ddk) then
@@ -2137,16 +2138,17 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    ABI_MALLOC(cwavef_db,(2,npw1_k*dtset%nspinor))
    ABI_MALLOC(cg_k,(2,npw_k*dtset%nspinor*mband_mem_rbz))
    if ((ipert == dtset%natom + 1).or.(ipert <= dtset%natom).or. &
-&   (ipert == dtset%natom + 2).or.(ipert == dtset%natom + 5)) then
+&      (ipert == dtset%natom + 2).or.(ipert == dtset%natom + 5)) then
      cg_k(:,:) = cg(:,1+icg:icg+mband_mem_rbz*npw_k*dtset%nspinor)
    end if
    d2bbb_k(:,:,:,:) = zero
  end if
 
-!Loop over bands
+!Loop over ALL bands
  iband_me = 0
  do iband=1,nband_k
 
+! if band is mine, retrieve it and then broadcast it
    if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
      iband_me = iband_me + 1
 
@@ -2322,8 +2324,14 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          dot_ndiagr=zero ; dot_ndiagi=zero
          jband_me = 0
          do jband = 1,nband_k              !compute dot1 and dot2
-           !if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_kpt) cycle
-           if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_band) cycle
+           if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_kpt) then
+print *, " skipped for kpt index"
+             cycle
+           end if
+           if (distrb_cycle(jband)) then 
+print *, " skipped for jband index"
+             cycle
+           end if 
            jband_me = jband_me + 1
 
            if (abs(occ_k(jband)) > tol8) then
@@ -2338,9 +2346,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              dot_ndiagi = dot_ndiagi + dot1r*dot2i + dot1i*dot2r
 ! this should fill all of the iband but only the local cpu jband indices
              d2bbb_k(1,idir1,iband,jband) = d2bbb_k(1,idir1,iband,jband) - &
-&             (dot1r*dot2r - dot1i*dot2i)
+&               (dot1r*dot2r - dot1i*dot2i)
              d2bbb_k(2,idir1,iband,jband) = d2bbb_k(2,idir1,iband,jband) - &
-&             (dot1r*dot2i + dot1i*dot2r)
+&               (dot1r*dot2i + dot1i*dot2r)
            end if  ! occ_k
          end do !jband
          ! complete over jband index
