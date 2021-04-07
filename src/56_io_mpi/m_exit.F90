@@ -330,7 +330,6 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
      ! Master tests and broadcast the result to others
      iexit=0
 
-     tsec = zero
      ! Is it worth to test the cpu time ?
      tsec = zero
      if (abs(cpus)>1.0d-5 .or. openexit==1) then

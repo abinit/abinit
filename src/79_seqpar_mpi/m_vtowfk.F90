@@ -196,7 +196,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_fock,newlobpcg,enable_cgwf_paw_,update_cprj,do_subdiago,do_ortho, rotate_subvnlx
+ logical :: has_fock,newlobpcg,enable_cgwf_paw_,update_cprj,do_subdiago,do_ortho, rotate_subvnlx,use_rmm_diis
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -296,7 +296,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
  else
-   ABI_ALLOCATE(gsc,(0,0))
+   ABI_MALLOC(gsc,(0,0))
  end if
 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
@@ -338,10 +338,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,msg,'PERS')
  end if
 
- if (enable_cgwf_paw) then
+ if (enable_cgwf_paw_) then
    if(ikpt==1) then
-     write(message,'(a,i3)') ' In vtowfk : use of cprj in memory with cprj_update_lvl=',dtset%cprj_update_lvl
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,i3)') ' In vtowfk : use of cprj in memory with cprj_update_lvl=',dtset%cprj_update_lvl
+     call wrtout(std_out,msg,'COLL')
    end if
    cprj_cwavef_bands => cprj(:,1+ibg:nband_k*my_nspinor+ibg)
  end if
@@ -527,7 +527,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
      call timab(585,1,tsec) !"vtowfk(subdiago)"
-     if (enable_cgwf_paw) then
+     if (enable_cgwf_paw_) then
        call subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 &       mcg,nband_k,npw_k,my_nspinor,dtset%paral_kgb,subham)
        call timab(585,2,tsec)
@@ -581,9 +581,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if (do_ortho) then
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
-     if (enable_cgwf_paw.and.ortalgo==0) then
-       ABI_DEALLOCATE(subovl)
-       ABI_ALLOCATE(subovl,(nband_k*(nband_k+1)))
+     if (enable_cgwf_paw_.and.ortalgo==0) then
+       ABI_FREE(subovl)
+       ABI_MALLOC(subovl,(nband_k*(nband_k+1)))
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
        call pw_orthon_paw(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,cprj=cprj_cwavef_bands)
      else
@@ -597,7 +597,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ! Fix phases of all bands
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
      !call wrtout(std_out, "Calling cgtk_fixphase")
-      if ( .not. newlobpcg .and. .not. enable_cgwf_paw ) then
+      if ( .not. newlobpcg .and. .not. enable_cgwf_paw_ ) then
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else if (newlobpcg) then
        ! GSC is local to vtowfk and is completely useless since everything
@@ -689,11 +689,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      iorder_cprj=0
      nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
      bandpp_cprj=mpi_enreg%bandpp
-     ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp_cprj))
+     ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp_cprj))
      ncpgr=0;if (cpopt==1) ncpgr=cprj(1,1)%ncpgr
      call pawcprj_alloc(cwaveprj,ncpgr,gs_hamk%dimcprj)
    else
-     ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
+     ABI_MALLOC(cwaveprj,(0,0))
    end if
  end if
 

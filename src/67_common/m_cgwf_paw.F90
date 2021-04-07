@@ -161,7 +161,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 !Some checks
 !Only wfoptalg==10 for now
  if (wfoptalg/=10) then
-   MSG_ERROR("cgwf_paw is implemented for wfoptalg==10 only")
+   ABI_ERROR("cgwf_paw is implemented for wfoptalg==10 only")
  end if
 
 !======================================================================
@@ -183,21 +183,21 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  npw=gs_hamk%npw_k
  nspinor=gs_hamk%nspinor
 
- ABI_ALLOCATE(pcon,(npw))
- ABI_ALLOCATE(conjgr,(2,npw*nspinor))
- ABI_ALLOCATE(scwavef_dum,(0,0))
- ABI_ALLOCATE(direc,(2,npw*nspinor))
- ABI_ALLOCATE(scprod,(2,nband))
- ABI_ALLOCATE(scprod_csc,(2*nband))
- ABI_ALLOCATE(direc_tmp,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
+ ABI_MALLOC(pcon,(npw))
+ ABI_MALLOC(conjgr,(2,npw*nspinor))
+ ABI_MALLOC(scwavef_dum,(0,0))
+ ABI_MALLOC(direc,(2,npw*nspinor))
+ ABI_MALLOC(scprod,(2,nband))
+ ABI_MALLOC(scprod_csc,(2*nband))
+ ABI_MALLOC(direc_tmp,(2,npw*nspinor))
+ ABI_MALLOC(gvnlxc,(2,npw*nspinor))
 
- ABI_DATATYPE_ALLOCATE(cprj_direc ,(natom,nspinor))
- ABI_DATATYPE_ALLOCATE(cprj_conjgr ,(natom,nspinor))
+ ABI_MALLOC(cprj_direc ,(natom,nspinor))
+ ABI_MALLOC(cprj_conjgr ,(natom,nspinor))
 
  n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
- ABI_ALLOCATE(cwavef_r,(2,n4,n5,n6,nspinor))
- ABI_ALLOCATE(direc_r, (2,n4,n5,n6,nspinor))
+ ABI_MALLOC(cwavef_r,(2,n4,n5,n6,nspinor))
+ ABI_MALLOC(direc_r, (2,n4,n5,n6,nspinor))
 
  ncpgr  = 0 ! no need of gradients here...
  call pawcprj_alloc(cprj_direc,ncpgr,gs_hamk%dimcprj)
@@ -275,7 +275,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
            write(message, '(a,i8,a,1p,e14.6,a1,3x,a,1p,e14.6,a1)')&
 &           'New trial energy at line ',iline,' = ',lam0,ch10,&
 &           'is higher than former =',lamold,ch10
-           MSG_WARNING(message)
+           ABI_WARNING(message)
          end if
          lamold=lam0
        end if
@@ -729,19 +729,19 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  nullify(cprj_cwavef_left)
  call pawcprj_free(cprj_direc)
  call pawcprj_free(cprj_conjgr)
- ABI_DATATYPE_DEALLOCATE(cprj_direc)
- ABI_DATATYPE_DEALLOCATE(cprj_conjgr)
- ABI_DEALLOCATE(conjgr)
- ABI_DEALLOCATE(scwavef_dum)
- ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(direc)
- ABI_DEALLOCATE(pcon)
- ABI_DEALLOCATE(scprod)
- ABI_DEALLOCATE(scprod_csc)
+ ABI_FREE(cprj_direc)
+ ABI_FREE(cprj_conjgr)
+ ABI_FREE(conjgr)
+ ABI_FREE(scwavef_dum)
+ ABI_FREE(gvnlxc)
+ ABI_FREE(direc)
+ ABI_FREE(pcon)
+ ABI_FREE(scprod)
+ ABI_FREE(scprod_csc)
 
- ABI_DEALLOCATE(direc_tmp)
- ABI_DEALLOCATE(cwavef_r)
- ABI_DEALLOCATE(direc_r)
+ ABI_FREE(direc_tmp)
+ ABI_FREE(cwavef_r)
+ ABI_FREE(direc_r)
 
 ! Do not delete this line, needed to run with open MP
  write(unit=message,fmt=*) resid(1)
@@ -997,7 +997,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
  end if
  write(std_out,'(a,i3)') 'ncpgr : ',ncpgr
 
- ABI_DATATYPE_ALLOCATE(cprj_tmp,(gs_hamk%natom,gs_hamk%nspinor))
+ ABI_MALLOC(cprj_tmp,(gs_hamk%natom,gs_hamk%nspinor))
  call pawcprj_alloc(cprj_tmp,ncpgr,gs_hamk%dimcprj)
 
  wfsize=gs_hamk%npw_k*gs_hamk%nspinor
@@ -1019,7 +1019,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
          write(std_out,'(a,2i5,2es11.3e3)') 'iband,iatom:',iband,iatom,re,ratio
          write(std_out,'(a)') ''
          flush(std_out)
-         MSG_ERROR('dif too large')
+         ABI_ERROR('dif too large')
        end if
        if (ncpgr>0) then
          re = sum(abs(cprj_tmp(iatom,ispinor)%dcp-cprj_cwavef_bands(iatom,gs_hamk%nspinor*(iband-1)+ispinor)%dcp))
@@ -1028,7 +1028,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
            write(std_out,'(a,2i5,es11.3e3)') 'iband,iatom:',iband,iatom,re
            write(std_out,'(a)') ''
            flush(std_out)
-           MSG_ERROR('dif too large (dcp)')
+           ABI_ERROR('dif too large (dcp)')
          end if
        end if
      end do
@@ -1039,7 +1039,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
  flush(std_out)
 
  call pawcprj_free(cprj_tmp)
- ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+ ABI_FREE(cprj_tmp)
 
 end subroutine cprj_check
 
@@ -1097,7 +1097,7 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
  end if
  write(std_out,'(a,i3)') 'ncpgr : ',ncpgr
 
- ABI_DATATYPE_ALLOCATE(cprj_tmp,(gs_hamk%natom,1))
+ ABI_MALLOC(cprj_tmp,(gs_hamk%natom,1))
  call pawcprj_alloc(cprj_tmp,ncpgr,gs_hamk%dimcprj)
 
  wfsize=gs_hamk%npw_k*gs_hamk%nspinor
@@ -1114,7 +1114,7 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
      write(std_out,'(a,i5,es11.3e3)') 'iatom:',iatom,re
      write(std_out,'(a)') ''
      flush(std_out)
-     MSG_ERROR('dif too large')
+     ABI_ERROR('dif too large')
    end if
    if (ncpgr>0) then
      re = sum(abs(cprj_tmp(iatom,1)%dcp-cprj_cwavef(iatom,1)%dcp))
@@ -1123,7 +1123,7 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
        write(std_out,'(a,i5,es11.3e3)') 'iatom:',iatom,re
        write(std_out,'(a)') ''
        flush(std_out)
-       MSG_ERROR('dif too large (dcp)')
+       ABI_ERROR('dif too large (dcp)')
      end if
    end if
  end do
@@ -1132,7 +1132,7 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
  flush(std_out)
 
  call pawcprj_free(cprj_tmp)
- ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+ ABI_FREE(cprj_tmp)
 
 end subroutine cprj_check_oneband
 !!***
@@ -1224,8 +1224,8 @@ subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
  n4=gs_hamk%ngfft(4);n5=gs_hamk%ngfft(5);n6=gs_hamk%ngfft(6)
  npw=gs_hamk%npw_k
 
- ABI_ALLOCATE(denpot_dum, (0,0,0))
- ABI_ALLOCATE(fofgout_dum, (0,0))
+ ABI_MALLOC(denpot_dum, (0,0,0))
+ ABI_MALLOC(fofgout_dum, (0,0))
 
  if (gs_hamk%nspinor==1) then
    cwavef_fft1 => cwavef
@@ -1242,8 +1242,8 @@ subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
 &    n4,n5,n6,0,tim_fourwf,weight_fft,weight_fft)
  end if
 
- ABI_DEALLOCATE(denpot_dum)
- ABI_DEALLOCATE(fofgout_dum)
+ ABI_FREE(denpot_dum)
+ ABI_FREE(fofgout_dum)
 
 end subroutine get_cwavefr
 !!***

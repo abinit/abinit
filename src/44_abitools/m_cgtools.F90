@@ -45,6 +45,7 @@ module m_cgtools
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit
  use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
+ use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
 
  implicit none
 
@@ -115,6 +116,8 @@ module m_cgtools
  public :: subdiago_low_memory      ! Diagonalizes the Hamiltonian in the eigenfunction subspace
                                     ! G components are updated block by block to save memory.
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
+                                    ! orthogonalize by modified Gram-Schmidt.
+ public :: pw_orthon_paw            ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
  public :: cg_hprotate_and_get_diag
  public :: cg_hrotate_and_get_diag
@@ -4648,7 +4651,7 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 ! *********************************************************************
 
  if (paral_kgb<0) then
-   MSG_BUG('paral_kgb should be positive ')
+   ABI_BUG('paral_kgb should be positive ')
  end if
 
  ! 1 if Scalapack version is used.
@@ -4660,14 +4663,14 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 
 !Diagonalize the Hamitonian matrix
  if(istwf_k==2) then
-   ABI_ALLOCATE(evec_tmp,(nband_k,nband_k))
-   ABI_ALLOCATE(subham_tmp,(nband_k*(nband_k+1)/2))
+   ABI_MALLOC(evec_tmp,(nband_k,nband_k))
+   ABI_MALLOC(subham_tmp,(nband_k*(nband_k+1)/2))
    subham_tmp=subham(1:nband_k*(nband_k+1):2)
    evec_tmp=zero
    call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
-   ABI_DEALLOCATE(evec_tmp)
-   ABI_DEALLOCATE(subham_tmp)
+   ABI_FREE(evec_tmp)
+   ABI_FREE(subham_tmp)
  else
    call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
  end if
@@ -4685,7 +4688,7 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
          write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
 &         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
 &         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
      end do
    end do
@@ -4743,9 +4746,9 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 
    end do
 
-   ABI_DEALLOCATE(blockvectora)
-   ABI_DEALLOCATE(blockvectorb)
-   ABI_DEALLOCATE(blockvectorc)
+   ABI_FREE(blockvectora)
+   ABI_FREE(blockvectorb)
+   ABI_FREE(blockvectorc)
 
  else ! evec is complex
 
@@ -4783,9 +4786,9 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
      end do
    end do
 
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
    if (nblock/=1) then
-     ABI_DEALLOCATE(cg_block)
+     ABI_FREE(cg_block)
    end if
 
  end if
@@ -5404,7 +5407,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
    do_cprj=.true.
    ncprj = size(cprj,2)
    if (ncprj/=nspinor*nvec) then
-     MSG_ERROR('bad size for cprj')
+     ABI_ERROR('bad size for cprj')
    end if
  end if
 
@@ -5455,7 +5458,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
        if (abs(re-1)>tol10.or.abs(im)>tol10) then
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-         MSG_WARNING('In pw_orthon : the result should be equal to one!')
+         ABI_WARNING('In pw_orthon : the result should be equal to one!')
        end if
      end if
    end do

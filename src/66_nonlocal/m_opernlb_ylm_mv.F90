@@ -170,14 +170,14 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  nthreads=OMP_GET_NUM_THREADS()
 #endif
  if (nthreads>1) then
-   MSG_ERROR('Only nthreads=1 is available for now.')
+   ABI_ERROR('Only nthreads=1 is available for now.')
  end if
 
  if (abs(choice)>1) then
-   MSG_ERROR('Only abs(choice)<=1 is available for now.')
+   ABI_ERROR('Only abs(choice)<=1 is available for now.')
  end if
  if (nloalg(1)/=2.and.nloalg(1)/=3) then
-   MSG_ERROR('nloalg(1) should be 2 or 3.')
+   ABI_ERROR('nloalg(1) should be 2 or 3.')
  end if
 
 !Inits
@@ -186,14 +186,14 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  ffnl_loc => ffnl(:,1,:)
 
  if (paw_opt/=3) then
-   ABI_ALLOCATE(gxfac_,(nlmn,2))
+   ABI_MALLOC(gxfac_,(nlmn,2))
  end if
  if (paw_opt>=3) then
-   ABI_ALLOCATE(gxfacs_,(nlmn,2))
+   ABI_MALLOC(gxfacs_,(nlmn,2))
  end if
 
- ABI_ALLOCATE(scalr,(npw))
- ABI_ALLOCATE(scali,(npw))
+ ABI_MALLOC(scalr,(npw))
+ ABI_MALLOC(scali,(npw))
 
 ! (-i)^l
  cil(1) = ( 1.0_DP, 0.0_DP) * wt
@@ -230,7 +230,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
            gxfac_(ilmn,2) = aimag(ctmp)
          end do
        else
-         MSG_BUG('Error : should not be possible to be here')
+         ABI_BUG('Error : should not be possible to be here')
        end if
      end if
 !     call timab(1151,2,tsec)
@@ -253,7 +253,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
            gxfacs_(ilmn,2) = aimag(ctmp)
          end do
        else
-         MSG_BUG('Error : should not be possible to be here')
+         ABI_BUG('Error : should not be possible to be here')
        end if
      end if
 !     call timab(1152,2,tsec)
@@ -328,14 +328,14 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
    end do
  end do !  End loop on spinors
 
- ABI_DEALLOCATE(scalr)
- ABI_DEALLOCATE(scali)
+ ABI_FREE(scalr)
+ ABI_FREE(scali)
 
  if (paw_opt/=3) then
-   ABI_DEALLOCATE(gxfac_)
+   ABI_FREE(gxfac_)
  end if
  if (paw_opt>=3) then
-   ABI_DEALLOCATE(gxfacs_)
+   ABI_FREE(gxfacs_)
  end if
 
 ! call timab(1150,2,tsec)

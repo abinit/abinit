@@ -145,17 +145,17 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
 
 !Some checks
  if (abs(choice)>1) then
-   MSG_ERROR('Only abs(choice)<=1 is available for now.')
+   ABI_ERROR('Only abs(choice)<=1 is available for now.')
  end if
  if (nloalg(1)/=2.and.nloalg(1)/=3) then
-   MSG_ERROR('nloalg(1) should be 2 or 3.')
+   ABI_ERROR('nloalg(1) should be 2 or 3.')
  end if
  nthreads=1
 #if defined HAVE_OPENMP
  nthreads=OMP_GET_NUM_THREADS()
 #endif
  if (nthreads>1) then
-   MSG_ERROR('Only nthreads=1 is available for now.')
+   ABI_ERROR('Only nthreads=1 is available for now.')
  end if
 
 !Useful variables
@@ -163,10 +163,10 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  ipw0=1;if (istwf_k==2.and.mpi_enreg%me_g0==1) ipw0=2
 
 !Allocate work space
- ABI_ALLOCATE(scalr,(npw))
- ABI_ALLOCATE(scali,(npw))
- ABI_ALLOCATE(scalr_lmn,(nlmn))
- ABI_ALLOCATE(scali_lmn,(nlmn))
+ ABI_MALLOC(scalr,(npw))
+ ABI_MALLOC(scali,(npw))
+ ABI_MALLOC(scalr_lmn,(nlmn))
+ ABI_MALLOC(scali_lmn,(nlmn))
 
  ffnl_loc => ffnl(:,1,:)
 
@@ -247,10 +247,10 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  end do !  End loop on spinorial components
 
 !Deallocate temporary space
- ABI_DEALLOCATE(scalr)
- ABI_DEALLOCATE(scali)
- ABI_DEALLOCATE(scalr_lmn)
- ABI_DEALLOCATE(scali_lmn)
+ ABI_FREE(scalr)
+ ABI_FREE(scali)
+ ABI_FREE(scalr_lmn)
+ ABI_FREE(scali_lmn)
 
 !Has to reduce arrays in case of FFT parallelization
  if (mpi_enreg%nproc_fft>1) then

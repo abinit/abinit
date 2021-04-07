@@ -192,25 +192,25 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
  end if
  k1_eq_k2=(all(abs(kpt_k1(:)-kpt_k2(:))<tol8))
  if (.not.k1_eq_k2) then
-   MSG_ERROR('getchc is not implemented yet for k1/=k2')
+   ABI_ERROR('getchc is not implemented yet for k1/=k2')
  end if
 
 !Check sizes
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw_k1*my_nspinor) then
    msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (gs_ham%usepaw==1.and.cpopt>=0) then
    if (size(cwaveprj)<gs_ham%natom*my_nspinor) then
      msg='wrong size for cwaveprj!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (gs_ham%usepaw==1) then
    if (size(cwaveprj_left)<gs_ham%natom*my_nspinor*ndat) then
      msg='wrong size for cwaveprj_left!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -226,13 +226,13 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 !paral_kgb constraint
  if (mpi_enreg%paral_kgb==1.and.(.not.k1_eq_k2)) then
    msg='paral_kgb=1 not allowed for k/=k_^prime!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Do we add Fock exchange term ?
  has_fock=(associated(gs_ham%fockcommon))
  if (has_fock) then
-   MSG_BUG('Fock not implemented yet')
+   ABI_BUG('Fock not implemented yet')
  end if
 ! if (has_fock) fock => gs_ham%fockcommon
 
@@ -259,10 +259,10 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    call timab(1371,1,tsec)
 !  Need a Vlocal
    if (.not.associated(gs_ham%vlocal)) then
-     MSG_BUG("We need vlocal in gs_ham!")
+     ABI_BUG("We need vlocal in gs_ham!")
    end if
    if (ndat>1) then
-     MSG_ERROR("ndat should be 1 for the local part")
+     ABI_ERROR("ndat should be 1 for the local part")
    end if
 
    n1=gs_ham%ngfft(1)
@@ -343,8 +343,8 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
 
      signs=1 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=15
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
-     ABI_ALLOCATE(gvnlxc,(0,0))
-     ABI_ALLOCATE(gsc,(0,0))
+     ABI_MALLOC(gvnlxc,(0,0))
+     ABI_MALLOC(gsc,(0,0))
 !     if (has_fock) then
 !       if (gs_ham%usepaw==1) then
 !         cpopt_here=max(cpopt,0)
@@ -379,8 +379,8 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
        chc(2*idat  ) = chc(2*idat  ) + enlout_im(idat)
      end do
 
-     ABI_DEALLOCATE(gvnlxc)
-     ABI_DEALLOCATE(gsc)
+     ABI_FREE(gvnlxc)
+     ABI_FREE(gsc)
 
    end if ! if(type_calc...
 
@@ -391,7 +391,7 @@ subroutine getchc(chc,cpopt,cwavef,cwavef_left,cwaveprj,cwaveprj_left,cwavef_r,c
    if (type_calc==0.or.type_calc==2.or.type_calc==3) then
 
      if (ndat>1) then
-       MSG_ERROR("ndat should be 1 for the kinetic part")
+       ABI_ERROR("ndat should be 1 for the kinetic part")
      end if
 
      call timab(1372,1,tsec)
@@ -530,16 +530,16 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  nspinor = gs_ham%nspinor
 
  if (size(cwavef,2)/=npw*nspinor) then
-   MSG_BUG('Wrong size for cwavef')
+   ABI_BUG('Wrong size for cwavef')
  end if
  if (size(cwavef_left,2)/=npw*nspinor*ndat) then
-   MSG_BUG('Wrong size for cwavef_left')
+   ABI_BUG('Wrong size for cwavef_left')
  end if
  if (size(cprj,2)/=nspinor) then
-   MSG_BUG('Wrong size for cprj')
+   ABI_BUG('Wrong size for cprj')
  end if
  if (size(cprj_left,2)/=nspinor*ndat) then
-   MSG_BUG('Wrong size for cprj_left')
+   ABI_BUG('Wrong size for cprj_left')
  end if
 
  call timab(1361,1,tsec)
@@ -563,10 +563,10 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
  if (gs_ham%usepaw==1) then
    select_k_=1;if (present(select_k)) select_k_=select_k
    choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=16 ; paw_opt=3
-   ABI_ALLOCATE(gsc,(0,0))
-   ABI_ALLOCATE(gvnlxc,(0,0))
-   ABI_ALLOCATE(enlout   ,(ndat))
-   ABI_ALLOCATE(enlout_im,(ndat))
+   ABI_MALLOC(gsc,(0,0))
+   ABI_MALLOC(gvnlxc,(0,0))
+   ABI_MALLOC(enlout   ,(ndat))
+   ABI_MALLOC(enlout_im,(ndat))
    enlout=zero
    enlout_im=zero
    signs=1
@@ -577,10 +577,10 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
      csc(2*idat-1) = csc(2*idat-1) + enlout(idat)
      csc(2*idat  ) = csc(2*idat  ) + enlout_im(idat)
    end do
-   ABI_DEALLOCATE(gsc)
-   ABI_DEALLOCATE(gvnlxc)
-   ABI_DEALLOCATE(enlout   )
-   ABI_DEALLOCATE(enlout_im)
+   ABI_FREE(gsc)
+   ABI_FREE(gvnlxc)
+   ABI_FREE(enlout   )
+   ABI_FREE(enlout_im)
  end if
 
  call timab(1360+tim_getcsc,2,tsec)

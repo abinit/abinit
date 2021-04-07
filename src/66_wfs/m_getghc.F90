@@ -48,7 +48,6 @@ module m_getghc
  public :: getghc      ! Compute <G|H|C> for input vector |C> expressed in reciprocal space
  public :: getgsc      ! Compute <G|S|C> for all input vectors |Cnk> at a given k-point
  public :: getghc_mGGA
- public :: getghc_nucdip
  public :: multithreaded_getghc
  public :: getghc_nucdip ! compute <G|H_nucdip|C> for input vector |C> expressed in recip space
 !!***

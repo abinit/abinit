@@ -40,7 +40,7 @@ module m_cgprj
                         pawcprj_set_zero, pawcprj_mpi_sum, pawcprj_copy, pawcprj_lincom
  use m_opernla_ylm, only : opernla_ylm
  use m_opernla_ylm_mv, only : opernla_ylm_mv
- use m_time,             only : timab
+ use m_time,           only : timab
 
  implicit none
 
@@ -1014,7 +1014,7 @@ contains
 ! call timab(1211,1,tsec)
 
  ncpgr=cprj_in(1,1)%ncpgr
- ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,nspinor*nband))
+ ABI_MALLOC(cprj_tmp,(natom,nspinor*nband))
  call pawcprj_alloc(cprj_tmp,ncpgr,dimcprj)
 
  do iband=1,nband
@@ -1025,7 +1025,7 @@ contains
 
  call pawcprj_copy(cprj_tmp,cprj_in)
  call pawcprj_free(cprj_tmp)
- ABI_DATATYPE_DEALLOCATE(cprj_tmp)
+ ABI_FREE(cprj_tmp)
 
 ! call timab(1211,2,tsec)
 

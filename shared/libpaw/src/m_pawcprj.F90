@@ -755,7 +755,7 @@ end subroutine pawcprj_zaxpby
  if (n2dimx/=n2dimy*n2dima) msg = TRIM(msg)//"Error in pawcprj_projbd: n2 wrong sizes !"//ch10
  if (ncpgrx/=ncpgry) msg = TRIM(msg)//"Error in pawcprj_projbd: ncpgr wrong sizes !"//ch10
  if (LEN_TRIM(msg) > 0) then
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  do ia=1,n2dima

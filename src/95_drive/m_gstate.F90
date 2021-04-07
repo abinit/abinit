@@ -267,15 +267,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !52  for density rho(r)       (fformr)
 !102 for potential V(r) file. (fformv)  NOT USED
 !scalars
+ logical :: compute_cprj
  integer,parameter :: formeig=0, level=101, response=0 ,cplex1=1, master=0, itime0=0
  integer :: ndtpawuj=0  ! Cannot use parameter because scfargs points to this! Have to get rid of pointers to scalars!
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
- integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
+ integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
  integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,ncpgr,nfftf,nfftot,npwmin
+ integer :: nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option

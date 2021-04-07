@@ -350,7 +350,7 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
    do_cprj=.true.
    ncprj = size(cprj,2)
    if (ncprj/=nband_k*nspinor) then
-     MSG_ERROR('bad size for cprj')
+     ABI_ERROR('bad size for cprj')
    end if
  end if
 

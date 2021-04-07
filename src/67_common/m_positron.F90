@@ -193,7 +193,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          grcondft,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
+&          rmet,rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
 &          xccc3d,xcctau3d,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
@@ -220,7 +220,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
- real(dp),intent(in) :: strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: rmet(3,3),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)

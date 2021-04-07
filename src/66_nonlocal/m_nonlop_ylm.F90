@@ -491,7 +491,7 @@ contains
    write(message, '(a,a,a,i4,a,i4,a)' ) &
 &   'With nloc_mem<=0, mincat must be less than matblk.',ch10,&
 &   'Their value is ',mincat,' and ',matblk,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  ndat_left_=1
  if (present(ndat_left)) then
@@ -941,7 +941,7 @@ contains
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
              call timab(1106,2,tsec)
            else
-             ABI_MALLOC(gx_left,(cplex,nlmn,nincat,nspinor))
+             ABI_MALLOC(gx_left,(cplex,nlmn,nincat,nspinor*ndat_left_))
 !            Retrieve <p_lmn|c> coeffs
              do ispinor=1,nspinor*ndat_left_
                do ia=1,nincat
