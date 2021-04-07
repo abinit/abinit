@@ -37,6 +37,7 @@ module m_cgtk
  use m_crystal,   only : crystal_t
  use m_fftcore,   only : sphere
  use m_kg,        only : ph1d3d, getph
+ use m_pawcprj,   only : pawcprj_type, pawcprj_zaxpby
 
  implicit none
 
@@ -320,7 +321,7 @@ end subroutine cgtk_change_gsphere
 !!
 !! SOURCE
 
-subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband_k, npw_k, useoverlap)
+subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband_k, npw_k, useoverlap,cprj,nspinor)
 
 !Arguments ------------------------------------
 !scalars
@@ -328,10 +329,13 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
+ type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
+ integer,intent(in),optional :: nspinor
 
 !Local variables-------------------------------
 !scalars
- integer :: iband,ierr,ii,indx
+ logical :: do_cprj
+ integer :: iband,ierr,ii,indx,ncprj
  real(dp) :: cim,cre,gscim,gscre,quotient,root1,root2,saa,sab,sbb,theta
  real(dp) :: thppi,xx,yy
  character(len=500) :: msg
@@ -340,6 +344,15 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
 
 ! *************************************************************************
+
+ do_cprj=.false.
+ if (present(cprj)) then
+   do_cprj=.true.
+   ncprj = size(cprj,2)
+   if (ncprj/=nband_k*nspinor) then
+     MSG_ERROR('bad size for cprj')
+   end if
+ end if
 
 !The general case, where a complex phase indeterminacy is present
  if(istwfk==1)then
@@ -488,6 +501,8 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
        cg(1,ii)=xx*cre-yy*cim
        cg(2,ii)=xx*cim+yy*cre
      end do
+     if (do_cprj) call pawcprj_zaxpby((/zero,zero/),(/xx,yy/),cprj(:,nspinor*(iband-1)+1:nspinor*iband),&
+&                                                             cprj(:,nspinor*(iband-1)+1:nspinor*iband))
 
 !    Alter phase of array S|cg>
      if (useoverlap==1) then
@@ -548,6 +563,7 @@ subroutine cgtk_fixphase(cg, gsc, icg, igsc, istwfk, mcg, mgsc, mpi_enreg, nband
          cg(1,ii)=-cg(1,ii)
          cg(2,ii)=-cg(2,ii)
        end do
+       if (do_cprj) call pawcprj_zaxpby((/zero,zero/),(/-one,zero/),cprj(:,iband:iband),cprj(:,iband:iband))
        if(useoverlap==1)then
          indx=igsc+(iband-1)*npw_k
          do ii=1+indx,npw_k+indx
