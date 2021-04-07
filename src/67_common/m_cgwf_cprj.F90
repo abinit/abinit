@@ -1279,12 +1279,14 @@ logical function cprj_in_memory(dtset)
    if (dtset%wfoptalg/=10) cprj_in_memory = .false.
    ! ...with only parralelization over k point...
    if (dtset%paral_kgb/=0) cprj_in_memory = .false.
-   ! ...without Electric field...
+   ! ...without electric field...
    if (dtset%berryopt/=0) cprj_in_memory = .false.
    ! ...without Fock exchange...
    if (dtset%usefock/=0) cprj_in_memory = .false.
-   ! ...without nuclear dipolar moements.
+   ! ...without nuclear dipolar moements...
    if (sum(abs(dtset%nucdipmom))>tol16) cprj_in_memory = .false.
+   ! ...with cprj_update_lvl>=-1 (so cprj_update_lvl<-1 is a simply way to disable cprj_in_memory)
+   if (dtset%cprj_update_lvl<-1) cprj_in_memory = .false.
 
 end function cprj_in_memory
 !!***
