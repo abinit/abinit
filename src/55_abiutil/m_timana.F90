@@ -750,7 +750,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(862)='fourwf%suskmm !0 part 2         '
  names(871)='fourwf%suskmm !3 part 1         '
  names(872)='fourwf%suskmm !3 part 2         '
- names(880)='fourwf%cgwf_paw                 '
+ names(880)='fourwf%cgwf_cprj                '
 
  names(901)='newvtr(before selection)        '
  names(902)='newvtr(bef. prcref_PMA)         '
@@ -896,22 +896,22 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1290)='getcprj(all)                    '
  names(1291)='getcprj%opernla                 '; basic(1201)=1
  names(1292)='getcprj%opernla_mv              '; basic(1202)=1
- names(1293)='getcprj(cgwf_paw)               '
+ names(1293)='getcprj(cgwf_cprj)              '
  names(1294)='getcprj(ctocprj)                '
  names(1295)='getcprj(vtowfk)                 '
  names(1299)='getcprj(other)                  '
 
- names(1300)='cgwf_paw                        '
- names(1301)='cgwf_paw%other                  '
+ names(1300)='cgwf_cprj                       '
+ names(1301)='cgwf_cprj%other                 '
  names(1302)='pawcprj(zxpby)                  '
  names(1303)='pawcprj(projbd)                 '; basic(1303)=1
  names(1304)='subham(dotprod_g)               '; basic(1304)=1
- names(1305)='cgwf_paw%npw_work               '; basic(1305)=1
+ names(1305)='cgwf_cprj%npw_work              '; basic(1305)=1
 
  names(1360)='getcsc(all)                     '
  names(1361)='getcsc%dotprod_g                '; basic(1361)=1
  names(1362)='getcsc%other                    '
- names(1363)='getcsc(cgwf_paw)                '
+ names(1363)='getcsc(cgwf_cprj)               '
  names(1364)='getcsc(subovl)                  '
 
  names(1370)='getchc                          '
@@ -1337,7 +1337,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !      Estimate the complement of getcprj
      tslots(:5)=(/1299,1290,-1293,-1294,-1295/)
    case(48)
-!      Estimate the complement of cgwf_paw
+!      Estimate the complement of cgwf_cprj
      tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1203,-1363,-1370,-201,-211,-880/)
    case(49)
 !      Sum calls of getcsc
@@ -1725,7 +1725,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/ (ii,ii=1662,1669,1) /)                          ; msg='low-level xgTransposer type '
        case(79)
          list(:12)=(/1300,1203,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
-         msg='cgwf_paw'
+         msg='cgwf_cprj'
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
          msg='nonlop_ylm'

@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_cgwf_paw
+!!****m* ABINIT/m_cgwf_cprj
 !! NAME
-!!  m_cgwf_paw
+!!  m_cgwf_cprj
 !!
 !! FUNCTION
 !!  Conjugate-gradient eigensolver.
@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-module m_cgwf_paw
+module m_cgwf_cprj
 
  use defs_basis
  use m_errors
@@ -50,22 +50,22 @@ module m_cgwf_paw
  private
 !!***
 
- public :: cgwf_paw
+ public :: cgwf_cprj
  public :: mksubovl
  public :: cprj_update
  public :: cprj_update_oneband
  public :: cprj_check
  public :: get_cprj_id
- public :: enable_cgwf_paw
+ public :: cprj_in_memory
 
 !!***
 
 contains
 !!***
 
-!!****f* m_cgwf/cgwf_paw
+!!****f* m_cgwf/cgwf_cprj
 !! NAME
-!! cgwf_paw
+!! cgwf_cprj
 !!
 !! FUNCTION
 !! Update all wavefunction |C>, non self-consistently.
@@ -111,7 +111,7 @@ contains
 !!
 !! SOURCE
 
-subroutine cgwf_paw(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
+subroutine cgwf_cprj(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
 &                gs_hamk,icg,mcg,mpi_enreg,nband,nline,ortalg,prtvol,quit,resid,subham,&
 &                tolrde,tolwfr,wfoptalg)
 !Arguments ------------------------------------
@@ -161,7 +161,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 !Some checks
 !Only wfoptalg==10 for now
  if (wfoptalg/=10) then
-   ABI_ERROR("cgwf_paw is implemented for wfoptalg==10 only")
+   ABI_ERROR("cgwf_cprj is implemented for wfoptalg==10 only")
  end if
 
 !======================================================================
@@ -750,7 +750,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  DBG_EXIT("COLL")
 
-end subroutine cgwf_paw
+end subroutine cgwf_cprj
 !!***
 
 !!****f* m_cgwf/mksubovl
@@ -1248,19 +1248,19 @@ subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
 end subroutine get_cwavefr
 !!***
 
-!!****f* ABINIT/enable_cgwf_paw
+!!****f* ABINIT/cprj_in_memory
 !!
 !! NAME
-!! enable_cgwf_paw
+!! cprj_in_memory
 !!
 !! FUNCTION
-!! Return a logical value determining if the "cgwf_paw" implementation can be used or not
+!! Return a logical value determining if the "cprj_in_memory" implementation can be used or not
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
-!!  enable_cgwf_paw : true if "cgwf_paw" can be used
+!!  cprj_in_memory : true if "cprj_in_memory" implementation can be used
 !!
 !! PARENTS
 !!
@@ -1268,22 +1268,26 @@ end subroutine get_cwavefr
 !!
 !! SOURCE
 
-logical function enable_cgwf_paw(dtset)
+logical function cprj_in_memory(dtset)
 
    type(dataset_type), intent(in) :: dtset
 
-   enable_cgwf_paw = .false.
-   ! cgwf_paw is supposed to work for the following cases :
-   if (dtset%usepaw==1.and.dtset%wfoptalg==10.and.dtset%paral_kgb==0) then
-     enable_cgwf_paw = .true.
-   end if
-   ! but the following cases are not implemented yet:
-   if (dtset%berryopt/=0.or.dtset%usefock/=0.or.sum(abs(dtset%nucdipmom))>tol16) then
-     enable_cgwf_paw = .false.
-   end if
+   cprj_in_memory = .true.
+   ! Must be PAW...
+   if (dtset%usepaw/=1) cprj_in_memory = .false.
+   ! ... and Conjugate Gradient...
+   if (dtset%wfoptalg/=10) cprj_in_memory = .false.
+   ! ...with only parralelization over k point...
+   if (dtset%paral_kgb/=0) cprj_in_memory = .false.
+   ! ...without Electric field...
+   if (dtset%berryopt/=0) cprj_in_memory = .false.
+   ! ...without Fock exchange...
+   if (dtset%usefock/=0) cprj_in_memory = .false.
+   ! ...without nuclear dipolar moements.
+   if (sum(abs(dtset%nucdipmom))>tol16) cprj_in_memory = .false.
 
-end function enable_cgwf_paw
+end function cprj_in_memory
 !!***
 
-end module m_cgwf_paw
+end module m_cgwf_cprj
 !!***

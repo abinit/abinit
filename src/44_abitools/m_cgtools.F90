@@ -117,8 +117,8 @@ module m_cgtools
                                     ! G components are updated block by block to save memory.
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
- public :: pw_orthon_paw            ! Normalize nvec complex vectors each of length nelem and then
-                                    ! orthogonalize by modified Gram-Schmidt.
+ public :: pw_orthon_cprj           ! Normalize nvec complex vectors each of length nelem and then
+                                    ! orthogonalize by modified Gram-Schmidt. Also update cprj coeffs.
  public :: cg_hprotate_and_get_diag
  public :: cg_hrotate_and_get_diag
  public :: cg_get_eigens            ! Compute <i|H|i> / <i|S|i> for ndat states.
@@ -5377,7 +5377,7 @@ end subroutine pw_orthon
 !!
 !! SOURCE
 
-subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
+subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 
  use m_abi_linalg
 
@@ -5458,7 +5458,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
        if (abs(re-1)>tol10.or.abs(im)>tol10) then
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
          write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
-         ABI_WARNING('In pw_orthon : the result should be equal to one!')
+         ABI_WARNING('In pw_orthon_cprj : the result should be equal to one!')
        end if
      end if
    end do
@@ -5539,7 +5539,7 @@ subroutine pw_orthon_paw(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
 !end loop over vectors (or bands) with index ivec :
  end do
 
-end subroutine pw_orthon_paw
+end subroutine pw_orthon_cprj
 !!***
 
 !!****f* m_cgtools/cg_hprotate_and_get_diag

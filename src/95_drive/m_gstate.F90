@@ -103,7 +103,7 @@ module m_gstate
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
  use m_cgprj,            only : ctocprj
- use m_cgwf_paw,         only : enable_cgwf_paw
+ use m_cgwf_cprj,        only : cprj_in_memory
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -1011,7 +1011,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  usecprj=0; mcprj=0;mband_cprj=0
  compute_cprj=.false.
  ! PAW keeping cprj in memory : some cases are excluded for now...
- if (enable_cgwf_paw(dtset)) then
+ if (cprj_in_memory(dtset)) then
    compute_cprj=.true.
    usecprj=1
  else
