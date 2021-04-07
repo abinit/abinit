@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (TO, hexu)
+!! Copyright (C) 2001-2021 ABINIT group (TO, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ module  m_spin_potential
   type, public, extends(abstract_potential_t) :: spin_potential_t
      integer :: nspin=0
      logical :: has_external_hfield, has_dipdip
-
+     real(dp) :: eref !energy of reference spin state
 
      ! Array or scalar?
      real(dp), allocatable :: external_hfield(:,:)
@@ -110,13 +110,13 @@ contains
     self%is_null=.False.
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
-    ABI_ALLOCATE( self%ms, (self%nspin))
+    ABI_MALLOC( self%ms, (self%nspin))
     if(iam_master) then
        call self%coeff_coo%initialize([self%nspin*3, self%nspin*3])
     endif
-    ABI_ALLOCATE(self%external_hfield, (3,self%nspin))
+    ABI_MALLOC(self%external_hfield, (3,self%nspin))
     self%external_hfield=0.0_dp
-    ABI_ALLOCATE( self%Htmp, (3, self%nspin))
+    ABI_MALLOC( self%Htmp, (3, self%nspin))
     self%Htmp(:,:)=0.0_dp
 
     self%has_external_hfield=.False.
@@ -169,7 +169,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_params(self, params)
     class(spin_potential_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), intent(inout) :: params
     real(dp) :: tmp(3, self%nspin)
     integer :: i
     integer :: master, my_rank, comm, nproc
@@ -299,6 +299,9 @@ contains
     if (present(bfield) ) then
        call self%get_Heff(spin, bfield, etmp)
 
+       ! subtract enery of reference spin configuration
+       etmp = etmp - self%eref
+
        ! only update energy when bfield is asked for.
        if ( present(energy)) then
           energy=energy+etmp
@@ -354,6 +357,7 @@ contains
 
     ! linear terms
     if (self%has_external_hfield) then
+        self%Htmp(:,:)= 0.0_dp
        call self%calc_external_Heff(self%Htmp)
         do i= self%mps%istart, self%mps%iend
            Heff(:,i)=Heff(:,i)+self%Htmp(:,i)
@@ -436,19 +440,18 @@ contains
   end subroutine spin_potential_t_get_delta_E
 
 
-
   subroutine finalize(self)
     class(spin_potential_t), intent(inout):: self
     if (allocated(self%ms)) then
-       ABI_DEALLOCATE(self%ms)
+       ABI_FREE(self%ms)
     end if
 
     if (allocated(self%Htmp)) then
-       ABI_DEALLOCATE(self%Htmp)
+       ABI_FREE(self%Htmp)
     endif
 
     if (allocated(self%external_hfield)) then
-       ABI_DEALLOCATE(self%external_hfield)
+       ABI_FREE(self%external_hfield)
     endif
 
     call self%bilinear_csr_mat%finalize()

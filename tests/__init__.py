@@ -214,7 +214,8 @@ class Suite(object):
             for k in subsuite_names: self.subsuites[k] = []
 
             for name in subsuite_names:
-                pattern = re.compile("-?t" + name + "_\d+\.in")
+                #pattern = re.compile("-?t" + name + "_\d+\.in")
+                pattern = re.compile("-?t" + name + "_\d+\.abi")
                 for inp in module.inp_files:
                     if pattern.match(inp):
                         #print(inp, "--> subsuite: ", name)
@@ -914,6 +915,7 @@ KNOWN_KEYWORDS = {
     "EFG": "Electric field gradient",
     "IMAGES": "Parallelization over images",
     "PARTIAL_DOS": "Partial DOS",
+    "RTA": "Relaxation-time approximation",
     "DOS": "electronic DOS calculations",
     "STS": "STS calculations",
     "CTQMC": "CTQMC method for DMFT",

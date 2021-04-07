@@ -1,7 +1,9 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-README_gpu.md
-README_MacOSX.md
-README_xlf.md
+INSTALL_gpu.md
+INSTALL_EasyBuild.md
+INSTALL_CentOS.md
+INSTALL_MacOS.md
+INSTALL_Ubuntu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
@@ -113,7 +115,7 @@ topics/a-TDEP.md
 topics/TDepES.md
 topics/Temperature.md
 topics/TransPath.md
-topics/TuningSpeed.md
+topics/TuningSpeedMem.md
 topics/Unfolding.md
 topics/UnitCell.md
 topics/vdw.md

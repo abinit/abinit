@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon
+## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
 
 #
 # Performance Application Programming Interface (PAPI)
@@ -151,6 +151,7 @@ AC_DEFUN([SD_PAPI_INIT], [
   AC_SUBST(sd_papi_ok)
   AC_SUBST(sd_papi_cppflags)
   AC_SUBST(sd_papi_cflags)
+  AC_SUBST(sd_papi_sd_papi_fcflags)
   AC_SUBST(sd_papi_ldflags)
   AC_SUBST(sd_papi_libs)
   AC_SUBST(with_papi)

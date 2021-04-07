@@ -9,7 +9,7 @@
 !!  They have been reshaped and translated into modern fortran here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2020 ABINIT group (FB)
+!! Copyright (C) 2012-2021 ABINIT group (FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,7 +83,7 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
 !!
@@ -101,10 +101,10 @@ integer :: nwork
  lbfgs_plan%iter   = 0
  lbfgs_plan%ndim = ndim
  lbfgs_plan%history_record = history_record
- ABI_ALLOCATE(lbfgs_plan%diag,(ndim))
+ ABI_MALLOC(lbfgs_plan%diag,(ndim))
 
  nwork = ndim * ( 2 * history_record + 1 ) + 2 * history_record
- ABI_ALLOCATE(lbfgs_plan%work,(nwork))
+ ABI_MALLOC(lbfgs_plan%work,(nwork))
 
  lbfgs_plan%gtol = 0.9
  lbfgs_plan%line_stpmin = 1.0e-20
@@ -131,7 +131,7 @@ end subroutine lbfgs_init
 !! OUTPUT
 !!
 !! PARENTS
-!!      pred_lbfgs
+!!      m_pred_bfgs
 !!
 !! CHILDREN
 !!
@@ -140,10 +140,10 @@ end subroutine lbfgs_init
 subroutine lbfgs_destroy()
 
  if(allocated (lbfgs_plan%work)) then
-   ABI_DEALLOCATE(lbfgs_plan%work)
+   ABI_FREE(lbfgs_plan%work)
  end if
  if(allocated (lbfgs_plan%diag)) then
-   ABI_DEALLOCATE(lbfgs_plan%diag)
+   ABI_FREE(lbfgs_plan%diag)
  end if
 
 end subroutine lbfgs_destroy
@@ -190,7 +190,8 @@ integer                :: lbfgs_execute
        lbfgs_plan%line_bracket, lbfgs_plan%line_stage1, lbfgs_plan%line_infoc)
 
 
- lbfgs_execute = lbfgs_plan%lbfgs_status
+!lbfgs_execute = lbfgs_plan%lbfgs_status
+ lbfgs_execute = lbfgs_plan%line_info
 
 end function lbfgs_execute
 !!***

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/libxc_functionals
 !! NAME
 !!  libxc_functionals
@@ -10,7 +9,7 @@
 !!  Also contains basic container datatype for LibXC interfacing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+!! Copyright (C) 2008-2021 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
 !! GNU Gener_al Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,15 +68,17 @@ module libxc_functionals
  public :: libxc_functionals_end                ! End usage of libXC functional
  public :: libxc_functionals_fullname           ! Return full name of the XC functional
  public :: libxc_functionals_getrefs            ! Get references of a XC functional
- public :: libxc_functionals_getid              ! Return identifer of a XC functional from its name
- public :: libxc_functionals_family_from_id     ! Retrieve family of a XC functional from its id
+ public :: libxc_functionals_getid              ! Return identifer of a XC functional, from its name
+ public :: libxc_functionals_family_from_id     ! Retrieve family of a XC functional, from its id
  public :: libxc_functionals_ixc                ! The value of ixc used to initialize the XC functionals
  public :: libxc_functionals_getvxc             ! Return XC potential and energy, from input density
  public :: libxc_functionals_isgga              ! Return TRUE if the XC functional is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the XC functional is meta-GGA
  public :: libxc_functionals_needs_laplacian    ! Return TRUE if functional uses LAPLACIAN
- public :: libxc_functionals_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
+ public :: libxc_functionals_is_hybrid          ! Return TRUE if the XC functional is hybrid
+ public :: libxc_functionals_is_hybrid_from_id  ! Return TRUE if a XC functional is hybrid, from its id
  public :: libxc_functionals_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
+ public :: libxc_functionals_has_k3xc           ! Return TRUE if K3xc (4th der) is available for the XC functional
  public :: libxc_functionals_nspin              ! The number of spin components for the XC functionals
  public :: libxc_functionals_get_hybridparams   ! Retrieve parameter(s) for hybrid functionals
  public :: libxc_functionals_set_hybridparams   ! Change parameter(s) for a hybrid functionals
@@ -110,6 +111,19 @@ module libxc_functionals
  integer,public,save :: XC_CORRELATION          =  1
  integer,public,save :: XC_EXCHANGE_CORRELATION =  2
  integer,public,save :: XC_KINETIC              =  3
+ integer,public,save :: XC_HYB_NONE             =  0
+ integer,public,save :: XC_HYB_FOCK             =  1
+ integer,public,save :: XC_HYB_PT2              =  2
+ integer,public,save :: XC_HYB_ERF_SR           =  4
+ integer,public,save :: XC_HYB_YUKAWA_SR        =  8
+ integer,public,save :: XC_HYB_GAUSSIAN_SR      = 16
+ integer,public,save :: XC_HYB_SEMILOCAL        =  0
+ integer,public,save :: XC_HYB_HYBRID           =  1
+ integer,public,save :: XC_HYB_CAM              =  2
+ integer,public,save :: XC_HYB_CAMY             =  3
+ integer,public,save :: XC_HYB_CAMG             =  4
+ integer,public,save :: XC_HYB_DOUBLE_HYBRID    =  5
+ integer,public,save :: XC_HYB_MIXTURE          = 32768
  integer,public,save :: XC_SINGLE_PRECISION     =  0
  logical,private,save :: libxc_constants_initialized=.false.
 
@@ -125,6 +139,7 @@ module libxc_functionals
    logical  :: has_fxc         ! TRUE is fxc is available for the functional
    logical  :: has_kxc         ! TRUE is kxc is available for the functional
    logical  :: needs_laplacian ! TRUE is functional needs laplacian of density
+   logical  :: is_hybrid       ! TRUE is functional is a hybrid functional
    real(dp) :: hyb_mixing      ! Hybrid functional: mixing factor of Fock contribution (default=0)
    real(dp) :: hyb_mixing_sr   ! Hybrid functional: mixing factor of SR Fock contribution (default=0)
    real(dp) :: hyb_range       ! Range (for separation) for a hybrid functional (default=0)
@@ -189,36 +204,36 @@ module libxc_functionals
  end interface
 !
  interface
-   subroutine xc_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) bind(C)
+   subroutine xc_get_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) bind(C)
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,zk,vrho,v2rho2,v3rho3
      type(C_PTR) :: xc_func
-   end subroutine xc_lda
+   end subroutine xc_get_lda
  end interface
 !
  interface
-   subroutine xc_gga(xc_func,np,rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
+   subroutine xc_get_gga(xc_func,np,rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                    v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3) bind(C)
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                         v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3
      type(C_PTR) :: xc_func
-   end subroutine xc_gga
+   end subroutine xc_get_gga
  end interface
 !
  interface
-   subroutine xc_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
-&                     v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
-&                     v2sigmalapl,v2sigmatau,v2lapltau) bind(C)
+   subroutine xc_get_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
+&                    v2rho2,v2rhosigma,v2rholapl,v2rhotau,v2sigma2,v2sigmalapl, &
+&                    v2sigmatau,v2lapl2,v2lapltau,v2tau2) bind(C)
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
 &                         v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
 &                         v2sigmalapl,v2sigmatau,v2lapltau
      type(C_PTR) :: xc_func
-   end subroutine xc_mgga
+   end subroutine xc_get_mgga
  end interface
 !
  interface
@@ -236,6 +251,13 @@ module libxc_functionals
      real(C_DOUBLE) :: dens_threshold
      type(C_PTR) :: xc_func
    end subroutine xc_func_set_density_threshold
+ end interface
+!
+ interface
+   integer(C_INT) function xc_func_is_hybrid_from_id(func_id) bind(C)
+     use iso_c_binding, only : C_INT
+     integer(C_INT),value :: func_id
+   end function xc_func_is_hybrid_from_id
  end interface
 !
  interface
@@ -272,6 +294,20 @@ module libxc_functionals
      integer(C_INT) :: xc_cst_exchange,xc_cst_correlation, &
 &                      xc_cst_exchange_correlation,xc_cst_kinetic
    end subroutine xc_get_kind_constants
+ end interface
+!
+ interface
+   subroutine xc_get_hybrid_constants(xc_cst_hyb_none, &
+              xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
+              xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
+              xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
+              xc_cst_hyb_mixture) bind(C)
+     use iso_c_binding, only : C_INT
+     integer(C_INT) :: xc_cst_hyb_none, xc_cst_hyb_fock,xc_cst_hyb_pt2, xc_cst_hyb_erf_sr, &
+                       xc_cst_hyb_yukawa_sr,xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, &
+                       xc_cst_hyb_hybrid,xc_cst_hyb_cam,xc_cst_hyb_camy,xc_cst_hyb_camg, &
+                       xc_cst_hyb_double_hybrid,xc_cst_hyb_mixture
+   end subroutine xc_get_hybrid_constants
  end interface
 !
  interface
@@ -340,7 +376,7 @@ contains
 
 !Local variables-------------------------------
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
+ integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13
 #endif
 
 ! *************************************************************************
@@ -369,6 +405,20 @@ contains
   XC_CORRELATION          = int(i2)
   XC_EXCHANGE_CORRELATION = int(i3)
   XC_KINETIC              = int(i4)
+  call xc_get_hybrid_constants(i1,i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13)
+  XC_HYB_NONE             = int(i1)
+  XC_HYB_FOCK             = int(i2)
+  XC_HYB_PT2              = int(i3)
+  XC_HYB_ERF_SR           = int(i4)
+  XC_HYB_YUKAWA_SR        = int(i5)
+  XC_HYB_GAUSSIAN_SR      = int(i6)
+  XC_HYB_SEMILOCAL        = int(i7)
+  XC_HYB_HYBRID           = int(i8)
+  XC_HYB_CAM              = int(i9)
+  XC_HYB_CAMY             = int(i10)
+  XC_HYB_CAMG             = int(i11)
+  XC_HYB_DOUBLE_HYBRID    = int(i12)
+  XC_HYB_MIXTURE          = int(i13)
  libxc_constants_initialized=.true.
 #endif
 
@@ -423,7 +473,7 @@ contains
 
  if (present(stop_if_error)) then
    if (stop_if_error.and.trim(msg)/="") then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -453,8 +503,8 @@ contains
 !!                     Handle for XC functionals
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
-!!      xchybrid_ncpp_cc
+!!      m_driver,m_drivexc,m_invars2,m_kxc,m_rhotoxc,m_vhxc_me,m_xc_vdw
+!!      m_xchybrid
 !!
 !! CHILDREN
 !!
@@ -516,6 +566,7 @@ contains
    xc_func%has_fxc=.false.
    xc_func%has_kxc=.false.
    xc_func%needs_laplacian=.false.
+   xc_func%is_hybrid=.false.
    xc_func%hyb_mixing=zero
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
@@ -525,17 +576,17 @@ contains
 
 !  Get XC functional family
    xc_func%family=libxc_functionals_family_from_id(xc_func%id)
-   if (xc_func%family/=XC_FAMILY_LDA.and. &
-&      xc_func%family/=XC_FAMILY_GGA.and. &
-&      xc_func%family/=XC_FAMILY_HYB_GGA.and. &
-&      xc_func%family/=XC_FAMILY_MGGA) then
+   if (xc_func%family/=XC_FAMILY_LDA .and. &
+&      xc_func%family/=XC_FAMILY_GGA .and. &
+&      xc_func%family/=XC_FAMILY_MGGA.and. &
+&      xc_func%family/=XC_FAMILY_HYB_GGA) then
      write(msg, '(a,i8,2a,i8,6a)' )&
 &      'Invalid IXC = ',ixc,ch10,&
 &      'The LibXC functional family ',xc_func%family,&
 &      ' is currently unsupported by ABINIT',ch10,&
 &      '(-1 means the family is unknown to the LibXC itself)',ch10,&
 &      'Please consult the LibXC documentation',ch10
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
@@ -550,7 +601,7 @@ contains
    success_c=xc_func_init(xc_func%conf,func_id_c,nspin_c)
    if (success_c/=0) then
      msg='Error in libXC functional initialization!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Special treatment for LDA_C_XALPHA functional
@@ -563,7 +614,7 @@ contains
    if (xc_func%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
      if (.not.present(xc_tb09_c)) then
        msg='xc_tb09_c argument is mandatory for TB09 functional!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
      xc_func%xc_tb09_c=xc_tb09_c
     end if
@@ -585,7 +636,8 @@ contains
    end if
 
 !  Retrieve parameters for hybrid functionals
-   if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_HYB_MGGA) then
+   xc_func%is_hybrid=(xc_func_is_hybrid_from_id(xc_func%id)==1)
+   if (xc_func%is_hybrid) then
      call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
      xc_func%hyb_mixing=real(alpha_c,kind=dp)
      xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
@@ -638,8 +690,8 @@ end subroutine libxc_functionals_init
 !!                     Handle for XC functionals
 !!
 !! PARENTS
-!!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
-!!      xchybrid_ncpp_cc
+!!      m_driver,m_drivexc,m_invars2,m_kxc,m_rhotoxc,m_vhxc_me,m_xc_vdw
+!!      m_xchybrid
 !!
 !! CHILDREN
 !!
@@ -675,6 +727,7 @@ end subroutine libxc_functionals_init
    xc_func%has_fxc=.false.
    xc_func%has_kxc=.false.
    xc_func%needs_laplacian=.false.
+   xc_func%is_hybrid=.false.
    xc_func%hyb_mixing=zero
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
@@ -781,6 +834,10 @@ end subroutine libxc_functionals_init
 !!
 !! OUTPUT
 !! xcrefs(:)= references(s) of the functional
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1099,17 +1156,55 @@ end function libxc_functionals_ismgga
 ! *************************************************************************
 
  libxc_functionals_is_hybrid = .false.
- if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
 
  if (present(xc_functionals)) then
-   libxc_functionals_is_hybrid=(any(xc_functionals%family==XC_FAMILY_HYB_GGA) .or. &
-&                               any(xc_functionals%family==XC_FAMILY_HYB_MGGA))
+   libxc_functionals_is_hybrid=(any(xc_functionals%is_hybrid))
  else
-   libxc_functionals_is_hybrid=(any(xc_global%family==XC_FAMILY_HYB_GGA) .or. &
-&                               any(xc_global%family==XC_FAMILY_HYB_MGGA))
+   libxc_functionals_is_hybrid=(any(xc_global%is_hybrid))
  end if
 
 end function libxc_functionals_is_hybrid
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_is_hybrid_from_id
+!! NAME
+!!  libxc_functionals_is_hybrid_from_id
+!!
+!! FUNCTION
+!!  Test function to identify whether a functional is hybrid or not, from its id
+!!
+!! INPUTS
+!!  xcid= id of a LibXC functional
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ function libxc_functionals_is_hybrid_from_id(xcid)
+
+!Arguments ------------------------------------
+ logical :: libxc_functionals_is_hybrid_from_id
+ integer,intent(in) :: xcid
+!Local variables-------------------------------
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ integer(C_INT) :: xcid_c
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ xcid_c=int(xcid,kind=C_INT)
+ libxc_functionals_is_hybrid_from_id =(xc_func_is_hybrid_from_id(xcid_c)==1)
+#else
+ libxc_functionals_is_hybrid_from_id = .false.
+ if (.false.) write(std_out,*) xcid
+#endif
+
+end function libxc_functionals_is_hybrid_from_id
 !!***
 
 !----------------------------------------------------------------------
@@ -1153,6 +1248,49 @@ function libxc_functionals_has_kxc(xc_functionals)
  end do
 
 end function libxc_functionals_has_kxc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_has_k3xc
+!! NAME
+!!  libxc_functionals_has_k3xc
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  provides K3xc or not (kxc in the libXC convention)
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function libxc_functionals_has_k3xc(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libxc_functionals_has_k3xc
+ type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: ii
+
+! *************************************************************************
+
+ libxc_functionals_has_k3xc=.true.
+
+ do ii=1,2
+   if (present(xc_functionals)) then
+     if (.not.xc_functionals(ii)%has_kxc) libxc_functionals_has_k3xc=.false.
+   else
+     if (.not.xc_global(ii)%has_kxc) libxc_functionals_has_k3xc=.false.
+   end if
+ end do
+
+end function libxc_functionals_has_k3xc
 !!***
 
 !----------------------------------------------------------------------
@@ -1228,7 +1366,7 @@ end function libxc_functionals_nspin
 !!                     Handle for XC functionals
 !!
 !! PARENTS
-!!      drivexc,m_pawxc,m_xc_vdwvxclrho
+!!      m_drivexc,m_pawxc,m_xc_vdw
 !!
 !! CHILDREN
 !!
@@ -1261,13 +1399,14 @@ end function libxc_functionals_nspin
 #endif
 !arrays
  real(dp),target :: rhotmp(nspden),sigma(3),vxctmp(nspden),vsigma(3)
- real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6),v3rho3(4)
+ real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6)
+ real(dp),target :: v3rho3(4),v3rho2sigma(9),v3rhosigma2(12),v3sigma3(10)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libxc_functional_type),pointer :: xc_funcs(:)
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2)
+ type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2),vlrho_c(2),vtau_c(2)
  type(C_PTR) :: v2rho2_c(2),v2rhosigma_c(2),v2sigma2_c(2)
- type(C_PTR) :: v3rho3_c(2),vlrho_c(2),vtau_c(2)
+ type(C_PTR) :: v3rho3_c(2),v3rho2sigma_c(2),v3rhosigma2_c(2),v3sigma3_c(2)
 #endif
 
 ! *************************************************************************
@@ -1287,17 +1426,17 @@ end function libxc_functionals_nspin
 
  if (is_gga.and.(.not.present(grho2))) then
    msg='GGA needs gradient of density!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (is_mgga) then
    if (present(vxctau).and.(.not.present(tau))) then
      msg='meta-GGA needs tau!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (needs_laplacian) then
      if (present(vxclrho).and.(.not.present(lrho))) then
        msg='meta-GGA needs lrho!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  endif
@@ -1329,7 +1468,7 @@ end function libxc_functionals_nspin
      vtau_c(ii)=C_NULL_PTR
      vlrho_c(ii)=C_NULL_PTR
    end if
-   if ((xc_funcs(ii)%has_fxc).and.(order**2>1)) then
+   if ((xc_funcs(ii)%has_fxc).and.(abs(order)>1)) then
      v2rho2_c(ii)=c_loc(v2rho2)
      v2sigma2_c(ii)=c_loc(v2sigma2)
      v2rhosigma_c(ii)=c_loc(v2rhosigma)
@@ -1338,10 +1477,16 @@ end function libxc_functionals_nspin
      v2sigma2_c(ii)=C_NULL_PTR
      v2rhosigma_c(ii)=C_NULL_PTR
    end if
-   if ((xc_funcs(ii)%has_kxc).and.(order**2>4)) then
+   if ((xc_funcs(ii)%has_kxc).and.(abs(order)>2)) then
      v3rho3_c(ii)=c_loc(v3rho3)
+     v3sigma3_c(ii)=c_loc(v3sigma3)
+     v3rho2sigma_c(ii)=c_loc(v3rho2sigma)
+     v3rhosigma2_c(ii)=c_loc(v3rhosigma2)
    else
      v3rho3_c(ii)=C_NULL_PTR
+     v3sigma3_c(ii)=C_NULL_PTR
+     v3rho2sigma_c(ii)=C_NULL_PTR
+     v3rhosigma2_c(ii)=C_NULL_PTR
    end if
  end do
 #endif
@@ -1401,30 +1546,32 @@ end function libxc_functionals_nspin
    do ii = 1,2
      if (xc_funcs(ii)%id<=0) cycle
 
-!    Get the potential (and possibly the energy)
+!    Get the energy and the potential (and possibly the other derivatives)
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
      exctmp=zero ; vxctmp=zero
 !    ===== LDA =====
      if (xc_funcs(ii)%family==XC_FAMILY_LDA) then
        exctmp=zero ; vxctmp=zero ; v2rho2=zero ; v3rho3=zero
-       call xc_lda(xc_funcs(ii)%conf,1,rho_c, &
+       call xc_get_lda(xc_funcs(ii)%conf,1,rho_c, &
 &                  exc_c(ii),vxc_c(ii),v2rho2_c(ii),v3rho3_c(ii))
 !    ===== GGA =====
      else if (xc_funcs(ii)%family==XC_FAMILY_GGA.or. &
 &             xc_funcs(ii)%family==XC_FAMILY_HYB_GGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero
        v2rho2=zero ; v2sigma2=zero ; v2rhosigma=zero
-       call xc_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
+       v3rho3=zero ; v3rho2sigma=zero ; v3rhosigma2=zero ; v3sigma3=zero
+       call xc_get_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
 &                  exc_c(ii),vxc_c(ii),vsigma_c(ii), &
 &                  v2rho2_c(ii),v2rhosigma_c(ii),v2sigma2_c(ii), &
-&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+&                  v3rho3_c(ii),v3rho2sigma_c(ii),v3rhosigma2_c(ii),v3sigma3_c(ii))
 !    ===== mGGA =====
-     else if (xc_funcs(ii)%family==XC_FAMILY_MGGA) then
+     else if (xc_funcs(ii)%family==XC_FAMILY_MGGA.or. &
+&             xc_funcs(ii)%family==XC_FAMILY_HYB_MGGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero ; vlrho=zero ; vtau=zero
-       call xc_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
-&                   exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
-&                   C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
-&                   C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+       call xc_get_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
+&                  exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
+&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
+&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
      end if
 #endif
 
@@ -1432,16 +1579,16 @@ end function libxc_functionals_nspin
      vxc(ipts,1:nspden) = vxc(ipts,1:nspden) + vxctmp(1:nspden)
 
 !    Deal with fxc and kxc
-     if (order**2>1) then
+     if (abs(order)>1) then
 !      ----- LDA -----
        if (xc_funcs(ii)%family==XC_FAMILY_LDA) then
          if (nspden==1) then
            if(order>=2) then
              dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
-             if(order==3) then
+             if(order>2) then
                d2vxc(ipts,1)=d2vxc(ipts,1)+v3rho3(1)
              endif
-           else
+           else if (order==-2) then
              dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
              dvxc(ipts,2)=dvxc(ipts,2)+v2rho2(1)
            endif
@@ -1449,7 +1596,7 @@ end function libxc_functionals_nspin
            dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
            dvxc(ipts,2)=dvxc(ipts,2)+v2rho2(2)
            dvxc(ipts,3)=dvxc(ipts,3)+v2rho2(3)
-           if(order==3) then
+           if(abs(order)>2) then
              d2vxc(ipts,1)=d2vxc(ipts,1)+v3rho3(1)
              d2vxc(ipts,2)=d2vxc(ipts,2)+v3rho3(2)
              d2vxc(ipts,3)=d2vxc(ipts,3)+v3rho3(3)
@@ -1543,7 +1690,7 @@ end subroutine libxc_functionals_getvxc
 !!  [hyb_range]    = Range (for separation)
 !!
 !! PARENTS
-!!      invars2,rhotoxc
+!!      m_invars2,m_rhotoxc
 !!
 !! CHILDREN
 !!
@@ -1581,7 +1728,7 @@ subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
          hyb_mixing=xc_func%hyb_mixing
        else
          msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1593,7 +1740,7 @@ subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
          hyb_mixing_sr=xc_func%hyb_mixing_sr
        else
          msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1605,7 +1752,7 @@ subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
          hyb_range=xc_func%hyb_range
        else
          msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end if
    end if
@@ -1634,7 +1781,7 @@ end subroutine libxc_functionals_get_hybridparams
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_vhxc_me,m_fock
+!!      m_fock,m_vhxc_me
 !!
 !! CHILDREN
 !!
@@ -1677,7 +1824,7 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
 !  Doesnt work with all hybrid functionals
    if (is_pbe0.or.is_hse) then
      msg='Invalid XC functional: contains 2 hybrid exchange functionals!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    is_pbe0=(xc_func%id==id_pbe0)
    is_hse=((xc_func%id==id_hse03).or.(xc_func%id==id_hse06))
@@ -1721,7 +1868,7 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
    write(msg,'(3a,2i6,a,a,i6,a,i6,a,i6,a)')'Invalid XC functional: not able to change parameters for this functional !',ch10,&
 &      'The IDs are ',func_id(:),ch10,&
 &      'Allowed HYB_GGA_XC_PBEH, HYB_GGA_XC_HSE03, and HYB_GGA_XC_HSE06 with IDs =',id_pbe0,',',id_hse03,',',id_hse06,'.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine libxc_functionals_set_hybridparams
@@ -1765,7 +1912,8 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
  type(libxc_functional_type),intent(inout),optional,target :: xc_functionals(2)
 !Local variables -------------------------------
 !scalars
- integer :: family,ii
+ integer :: ii
+ logical :: is_hybrid
  character(len=100) :: c_name,x_name,msg
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xc_name
@@ -1778,15 +1926,19 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
  libxc_functionals_gga_from_hybrid=.false.
 
+ is_hybrid=.false.
  if (present(hybrid_id)) then
    trial_id(1)=hybrid_id
    trial_id(2)=0
+   is_hybrid=libxc_functionals_is_hybrid_from_id(trial_id(1))
  else if (present(xc_functionals)) then
    trial_id(1)=xc_functionals(1)%id
    trial_id(2)=xc_functionals(2)%id
+   is_hybrid=libxc_functionals_is_hybrid(xc_functionals)
  else
    trial_id(1)=xc_global(1)%id
    trial_id(2)=xc_global(2)%id
+   is_hybrid=libxc_functionals_is_hybrid(xc_global)
  end if
 
  c_name="unknown" ; x_name="unknown"
@@ -1805,13 +1957,11 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 
  do ii = 1, 2
 
-   if (trial_id(ii)<=0) cycle
-   family=libxc_functionals_family_from_id(trial_id(ii))
-   if (family/=XC_FAMILY_HYB_GGA.and.family/=XC_FAMILY_HYB_MGGA) cycle
+   if ((trial_id(ii)<=0).or.(.not.is_hybrid)) cycle
 
    if (libxc_functionals_gga_from_hybrid) then
      msg='Invalid XC functional: contains 2 hybrid functionals!'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
@@ -1899,8 +2049,8 @@ end function libxc_functionals_gga_from_hybrid
  type(libxc_functional_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- integer(C_INT) :: npar_c=int(1,kind=C_INT)
- real(C_DOUBLE) :: param_c(1)
+ integer(C_INT) :: npar_c=int(2,kind=C_INT)
+ real(C_DOUBLE) :: param_c(2)
 #endif
 
 ! *************************************************************************
@@ -1930,7 +2080,7 @@ end function libxc_functionals_gga_from_hybrid
      call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
-     ABI_ALLOCATE(gnon,(npts))
+     ABI_MALLOC(gnon,(npts))
      do ipts=1,npts
        if (sum(rho(ipts,:))<=1e-7_dp) then
          gnon(ipts)=zero
@@ -1943,7 +2093,7 @@ end function libxc_functionals_gga_from_hybrid
        end if
      end do
      cc= -0.012_dp + 1.023_dp*sqrt(sum(gnon)/npts)
-     ABI_DEALLOCATE(gnon)
+     ABI_FREE(gnon)
      write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
      call wrtout(std_out,msg,'COLL')
    end if
@@ -1952,7 +2102,7 @@ end function libxc_functionals_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
-       param_c(1)=real(cc,kind=C_DOUBLE)
+       param_c(1)=real(cc,kind=C_DOUBLE) ; param_c(2)=real(0._dp,kind=C_DOUBLE)
        call xc_func_set_params(xc_funcs(ii)%conf,param_c,npar_c)
 #endif
      end if
@@ -2010,6 +2160,17 @@ end function xc_char_to_c
 !! Helper function to convert a C string to a Fortran string
 !! Based on a routine by Joseph M. Krahn
 !!
+!! NOTES
+!!   non-ascii chars are replaced by "?" as outputting strings containing non-ascii entries
+!!   can lead to IO error with ifort when running in parallel (don't know why sequential execution is OK, though)
+!!
+!!   forrtl: severe (38): error during write, unit 6, file /proc/3478/fd/1
+!!   Image              PC                Routine            Line        Source
+!!   libifcoremt.so.5   00007FEA9BA95F46  for__io_return        Unknown  Unknown
+!!   libifcoremt.so.5   00007FEA9BB03A99  for_write_seq_fmt     Unknown  Unknown
+!!   libifcoremt.so.5   00007FEA9BB0193A  for_write_seq_fmt     Unknown  Unknown
+!!   abinit             000000000285EB7A  m_io_tools_mp_wri        1218  m_io_tools.F90
+!!
 !! INPUTS
 !!  c_string=C string
 !!
@@ -2036,7 +2197,12 @@ subroutine xc_char_to_f(c_string,f_string)
 
  ii=1
  do while(c_string(ii)/=C_NULL_CHAR.and.ii<=len(f_string))
-   f_string(ii:ii)=c_string(ii) ; ii=ii+1
+   if (iachar(c_string(ii)) <= 127) then
+     f_string(ii:ii)=c_string(ii)
+   else
+     f_string(ii:ii)="?"
+   end if
+   ii=ii+1
  end do
  if (ii<len(f_string)) f_string(ii:)=' '
 end subroutine xc_char_to_f

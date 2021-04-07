@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_onsite
 !! NAME
 !!  m_paw_onsite
@@ -8,7 +7,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2021 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,9 +79,10 @@ CONTAINS
 !!  elements of \nabla instead of the elements of the momentum operator p.
 !!
 !! PARENTS
+!!      m_bethe_salpeter,m_paw_optics,m_screening_driver
 !!
 !! CHILDREN
-!!      setnabla_ylm,nderiv_gen,pawrad_deducer0,simp_gen
+!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 
@@ -112,7 +112,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
    write(msg,'(3a)')&
 &   'Not designed for angular momentum greater than 3 ',ch10,&
 &   'Modification in the table defined in routine setnabla_ylm is required.'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Integration of the angular part: all angular integrals have been computed 
@@ -246,9 +246,10 @@ end subroutine pawnabla_init
 !!  elements of \nabla instead of the elements of the momentum operator p.
 !!
 !! PARENTS
+!!      m_paw_optics
 !!
 !! CHILDREN
-!!      setnabla_ylm,nderiv_gen,pawrad_deducer0,simp_gen
+!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 
@@ -286,17 +287,17 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    write(msg,'(3a)')&
 &   'Not designed for angular momentum greater than 3 ',ch10,&
 &   'Modification in the table defined in routine setnabla_ylm is required.'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !if (mesh_size_cor/=pawrad(1)%mesh_size) then
 !  write(msg,'(a)') 'Wrong mesh_size_cor value (1)!'
-!  MSG_BUG(msg)
+!  LIBPAW_BUG(msg)
 !end if
 !if (any(mesh_size_cor/=pawtab(:)%mesh_size)) then
 !  write(msg,'(3a)') 'Wrong mesh_size_cor value (2)!',ch10,&
 !&                    'Should have only one type of atom.'
-!  MSG_ERROR(msg)
+!  LIBPAW_ERROR(msg)
 !end if
 
 !Integration of the angular part: all angular integrals have been computed

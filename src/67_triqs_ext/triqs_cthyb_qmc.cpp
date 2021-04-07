@@ -83,7 +83,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
     int n_cycles = n_cycles_;
     int nspin = 2;                      //always it's Nature
     
-    //Print informations about the Solver Parameters 
+    //Print information about the Solver Parameters 
     if(rank==0 && verbo>0){
         std::cout << endl <<"   == Key Input Parameters for the TRIQS CTHYB solver ==	"<<endl<<endl;
     

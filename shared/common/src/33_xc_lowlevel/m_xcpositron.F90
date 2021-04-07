@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xcpositron
 !! NAME
 !!  m_xcpositron
@@ -7,7 +6,7 @@
 !! Compute electron-positron correlation potentials and energy density.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (GJ,MT)
+!!  Copyright (C) 1998-2021 ABINIT group (GJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -92,7 +91,7 @@ contains
 !!         [5] B. Barbiellini, M.J. Puska, T. Torsti and R.M.Nieminen, Phys. Rev. B 51, 7341 (1995) [[cite:Barbiellini1995]]
 !!
 !! PARENTS
-!!      m_pawxc,rhohxcpositron,rhotoxc
+!!      m_electronpositron,m_pawxc,m_rhotoxc
 !!
 !! CHILDREN
 !!      invcb
@@ -145,23 +144,23 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
 
  if (gga.and.ixcpositron==2) then
    msg = 'xcpositron: GGA not yet implemented for ixcpositron=2 !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (posdensity0_limit.and.ixcpositron==2) then
    msg = 'xcpositron: ixcpositron=2 cannot be treated in the zero positron density limit !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (abs(ixcpositron)/=1.and.ixcpositron/=11.and.ixcpositron/=2.and.ixcpositron/=3.and.ixcpositron/=31) then
    msg = 'xcpositron: unknown electron-positron correlation !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Compute density radii for rhor_el, rhor_pos
- ABI_ALLOCATE(rsepts,(npt))
+ ABI_MALLOC(rsepts,(npt))
  call invcb(rhoer(:),rsepts,npt)
  rsepts(:)=rsfac*rsepts(:)
  if (ixcpositron==2) then
-   ABI_ALLOCATE(rsppts,(npt))
+   ABI_MALLOC(rsppts,(npt))
    call invcb(rhopr(:),rsppts,npt)
    rsppts(:)=rsfac*rsppts(:)
  end if
@@ -255,7 +254,7 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
      nqtf2=(rhoe*sqrt(four*kf/pi))**2
      eps=grhoe2(ipt)/nqtf2
      if (eps<zero) then
-       MSG_ERROR('xcpositron: problem, negative GGA espilon !')
+       ABI_ERROR('xcpositron: problem, negative GGA espilon !')
      end if
      expgga=exp(-alpha_gga*eps*third)
 
@@ -362,9 +361,9 @@ subroutine xcpositron(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_limit,rhoer,rh
 
  end do ! ipt
 
- ABI_DEALLOCATE(rsepts)
+ ABI_FREE(rsepts)
  if (ixcpositron==2) then
-   ABI_DEALLOCATE(rsppts)
+   ABI_FREE(rsppts)
  end if
 
 !Convert everything in Hartree units

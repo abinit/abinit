@@ -9,7 +9,7 @@
 !!    - pawpwij_t: Onsite matrix elements of a plane wave for a given atom type.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG,GKA)
+!! Copyright (C) 2008-2021 ABINIT group (MG,GKA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ CONTAINS  !=====================================================================
 !!  Paw_pwff(%ntypat) <pawpwff_t>=Object storing the form factors
 !!                                    for the spline used in pawpwij_init.
 !! PARENTS
-!!      bethe_salpeter,m_shirley,screening,sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -214,7 +214,7 @@ subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
      dim1 = Pawtab(itypat)%l_size**2
      dim2 = Pawtab(itypat)%lmn2_size
    case default
-     MSG_BUG("Wrong method")
+     ABI_BUG("Wrong method")
    end select
 
    Paw_pwff(itypat)%dim1 = dim1
@@ -255,7 +255,7 @@ end subroutine pawpwff_init
 !!  Paw_pwff(:)=<pawpwff_t>=Object storing form factors for the spline of wf into PAW spheres
 !!
 !! PARENTS
-!!      bethe_salpeter,m_shirley,screening,sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -318,8 +318,7 @@ end subroutine pawpwff_free
 !!   Completely initialized in output.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
-!!      exc_build_block,exc_build_ham,m_shirley,prep_calc_ucrpa
+!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -614,7 +613,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
    ! Is mesh beginning with r=0 ?
    if (ABS(Pawrad(itypat)%rad(1))>tol10) then
-     MSG_ERROR("Radial mesh starts with r/=0")
+     ABI_ERROR("Radial mesh starts with r/=0")
    end if
    !
    ! === Initialize temporary arrays and variables ===
@@ -737,7 +736,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
    ! Is mesh beginning with r=0 ?
    if (ABS(Pawrad(itypat)%rad(1))>tol10) then
-     MSG_ERROR("Radial mesh starts with r/=0")
+     ABI_ERROR("Radial mesh starts with r/=0")
    end if
    !
    ! === Initialize temporary arrays and variables ===
@@ -831,7 +830,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
  CASE DEFAULT
    write(msg,'(a,i3)')' Called with wrong value for method ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
 
  DBG_EXIT("COLL")
@@ -933,7 +932,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
 &    ' Function values are being requested outside range of data. ',ch10,&
 &    ' Max qpg_norm = ',MAXVAL(qpg_norm),' Max qgrid_spl = ',MAXVAL(qgrid_spl),ch10,&
 &    ' Increase ecut(wfn), check qrid_ff and gsqcut '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(wk_ffnl,(nq_spl,2))
@@ -1073,7 +1072,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
 
  CASE DEFAULT
    write(msg,'(a,i3)')' Wrong value for method= ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
 
  ABI_FREE(wk_ffnl)
@@ -1219,7 +1218,7 @@ end subroutine paw_rho_tw_g
 !! OUTPUT
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,prep_calc_ucrpa
+!!      m_chi0,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!      fftbox_execute,fftbox_plan3_many,fftpad
@@ -1302,7 +1301,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
      end do
 
    CASE DEFAULT
-     MSG_BUG("Wrong map2sphere")
+     ABI_BUG("Wrong map2sphere")
    END SELECT
 
    RETURN
@@ -1310,20 +1309,20 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
  CASE (2) ! Spinorial case.
 
    isprot1=spinrot1(1); isprot2=spinrot2(1) ! This is to bypass abirule
-   MSG_ERROR("Spinorial case not implemented yet")
+   ABI_ERROR("Spinorial case not implemented yet")
 
    SELECT CASE (map2sphere)
 
    CASE (0) ! Need results on the full FFT box thus cannot use zero-padded FFT.
    CASE (1) ! Need results on the G-sphere. Call zero-padded FFT routines if required.
    CASE DEFAULT
-     MSG_BUG("Wrong map2sphere")
+     ABI_BUG("Wrong map2sphere")
    END SELECT
 
    RETURN
 
  CASE DEFAULT
-   MSG_BUG('Wrong nspinor')
+   ABI_BUG('Wrong nspinor')
  END SELECT
 
 end subroutine paw_cross_rho_tw_g

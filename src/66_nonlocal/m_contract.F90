@@ -6,7 +6,7 @@
 !! Low-level procedeures used in nonlop_pl to contract tensors
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT, GZ)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, MT, GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ contains
 !! $rank1(i)=gmet(i,j) gxa(j)$
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -160,7 +160,7 @@ end subroutine cont13
 !! $rank2(a,b)=2 Re[gxa(i,a)^"*" gmet(i,j) gxa(j,b)]$.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -283,7 +283,7 @@ end subroutine cont22
 !!\end{equation} }}
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -395,7 +395,7 @@ end subroutine cont22cso
 !! Note that, since amet is antisymmetric, amet(i,i)=0
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -542,7 +542,7 @@ end subroutine cont22so
 !! so the expressions below do not carry the 2.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -648,7 +648,7 @@ end subroutine cont24
 !!  rank2 is stored in the compressed form 11 22 33 32 31 21.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -882,7 +882,7 @@ end subroutine cont3
 !! \end{eqnarray} }}
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1099,7 +1099,7 @@ end subroutine cont33cso
 !! \end{eqnarray} }}
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1367,7 +1367,7 @@ end subroutine cont33so
 !! of gxa for off-diagonal elements.
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1526,7 +1526,7 @@ end subroutine cont35
 !!  weights    1      3      3      6      3      3      1      3      3       1
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -1734,7 +1734,7 @@ subroutine metcon(rank,gmet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains
@@ -1839,7 +1839,7 @@ end subroutine metcon
 !!  weights    1      3      3      6      3      3      1      3      3       1
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!
@@ -2015,7 +2015,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
    write(message, '(a,i0,a,a,a)' )&
 &   'Input rank=',rank,' not allowed.',ch10,&
 &   'Possible values are 0,1,2,3 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  contains
@@ -2111,7 +2111,7 @@ end subroutine metcon_so
 !! Amet and Pauli are complex
 !!
 !! PARENTS
-!!      nonlop_pl
+!!      m_nonlop_pl
 !!
 !! CHILDREN
 !!

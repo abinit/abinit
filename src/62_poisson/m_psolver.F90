@@ -6,7 +6,7 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,11 +84,10 @@ contains
 !!  In ABINIT (dtset%usewvl != 1), the same convention is used as in psolver.
 !!
 !! PARENTS
-!!      energy,rhotov,scfcv,setvtr
+!!      m_dft_energy,m_rhotov,m_scfcv_core,m_setvtr
 !!
 !! CHILDREN
-!!      h_potential,mean_fftr,metric,mkdenpos,psolver_kernel,wrtout
-!!      wvl_rhov_abi2big,xc_potential
+!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
 !!
 !! SOURCE
 
@@ -167,11 +166,11 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
      write(message,'(a,a,a,2(i0,1x))')&
 &     'nfft and n3xccc should be equal,',ch10,&
 &     'however, nfft and n3xccc=',nfft,n3xccc
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
  if(nspden==4) then
-   MSG_ERROR('nspden==4 not coded yet')
+   ABI_ERROR('nspden==4 not coded yet')
  end if
 
  if (ixc==0) then
@@ -179,7 +178,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    test_nhat=.false.
 
 !  No xc at all is applied (usually for testing)
-   MSG_WARNING('Note that no xc is applied (ixc=0).')
+   ABI_WARNING('Note that no xc is applied (ixc=0).')
 
  else if (ixc/=20) then
 
@@ -215,7 +214,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    write(message, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin is allowed,',ch10,&
 &   'while the argument nspden = ', nspden
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !We do the computation.
@@ -241,7 +240,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  if(usewvl==1) then
    if(wvl_den%denspot%rhov_is .ne. ELECTRONIC_DENSITY) then
      message= "psolver_rhohxc: rhov should contain the electronic density"
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -273,7 +272,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
    if(usewvl==1 .and. usepaw==0)  rhocore=> wvl_den%denspot%rho_C
  else
    if(usepaw==1) then
-     ABI_ALLOCATE(rhocore,(n1i,n2i,n3d,1)) !not spin dependent
+     ABI_MALLOC(rhocore,(n1i,n2i,n3d,1)) !not spin dependent
      call wvl_rhov_abi2big(1,xccc3d,rhocore)
 
 !    Make rhocore positive to avoid numerical instabilities in V_xc
@@ -290,7 +289,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  if(test_nhat .and. .not. rest_hat_n_here) then
 !  rhohat => nhat !do not know how to point 4 index to 2 index
 !  here we have to copy since convention for spin changes.
-   ABI_ALLOCATE(rhohat,(n1i,n2i,n3d,nspden))
+   ABI_MALLOC(rhohat,(n1i,n2i,n3d,nspden))
    call wvl_rhov_abi2big(1,nhat,rhohat)
  else
    nullify(rhohat)
@@ -341,7 +340,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 !  - if nhat does not have to be included in XC
 
 !  save rhor in rhonow to avoid modifying it.
-   ABI_ALLOCATE(rhonow,(nfft,nspden))
+   ABI_MALLOC(rhonow,(nfft,nspden))
 !  copy rhor into rhonow:
 !  ABINIT convention is followed: (ispin=1: for spin up + spin down)
    do ispin=1,nspden
@@ -424,7 +423,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 !  envxc=zero
 
 !  deallocate temporary array
-   ABI_DEALLOCATE(rhonow)
+   ABI_FREE(rhonow)
 
  else
 !  NC case: here we optimize memory, and we reuse vhartree to store rhor:
@@ -490,13 +489,13 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !Nullify pointers and deallocate arrays
  if(test_nhat .and. .not. rest_hat_n_here) then
-!  if(nspden==2) ABI_DEALLOCATE(rhohat)
-   ABI_DEALLOCATE(rhohat)
+!  if(nspden==2) ABI_FREE(rhohat)
+   ABI_FREE(rhohat)
    if(associated(rhohat)) nullify(rhohat)
  end if
  if( n3xccc>0 .and. .not. add_n_c_here) then
    if(usepaw==1) then
-     ABI_DEALLOCATE(rhocore)
+     ABI_FREE(rhocore)
    end if
  end if
  if(associated(rhocore))  nullify(rhocore)
@@ -544,10 +543,10 @@ end subroutine psolver_rhohxc
 !!  In ABINIT (dtset%usewvl != 1), the same convention is used as in PSolver.
 !!
 !! PARENTS
-!!      mklocl_realspace,nres2vres
+!!      m_forstr,m_mklocl_realspace
 !!
 !! CHILDREN
-!!      h_potential,psolver_kernel,wrtout
+!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
 !!
 !! SOURCE
 
@@ -599,7 +598,7 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
    write(message, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin is allowed for wavelets,',ch10,&
 &   'while the argument nspden = ', nspden
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !We do the computation.
@@ -673,8 +672,7 @@ end subroutine psolver_hartree
 !!  kernel= associated kernel on build (iaction = 1) and get action (iaction = 2).
 !!
 !! PARENTS
-!!      gstate,mklocl_realspace,psolver_hartree,psolver_rhohxc
-!!      wvl_wfsinp_reformat
+!!      m_gstate,m_mklocl_realspace,m_psolver,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout

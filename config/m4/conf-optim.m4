@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2009-2020 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2009-2021 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -74,4 +74,5 @@ AC_DEFUN([ABI_OPTIM_INIT],[
       AC_MSG_NOTICE([optimization profile overriden by user-defined FCFLAGS])
     fi
   fi
+  AC_SUBST(abi_optim_flavor)
 ]) # ABI_OPTIM_INIT

@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2020 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2021 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,6 @@ MODULE m_ddb_hdr
  use m_abicore
  use m_xmpi
  use m_dtset
-
 
  use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
@@ -142,15 +141,24 @@ MODULE m_ddb_hdr
 
    type(pseudopotential_type) :: psps
 
+ contains
+
+   procedure :: malloc => ddb_hdr_malloc
+    ! Allocate dynamic memory.
+
+   procedure :: free => ddb_hdr_free
+    ! Free dynamic memory.
+
+   procedure :: open_write => ddb_hdr_open_write
+    ! Open the DDB file and write the header.
+
+   procedure :: compare => ddb_hdr_compare
+    ! Compare two DDB headers.
 
  end type ddb_hdr_type
 
  public :: ddb_hdr_init            ! Construct object
- public :: ddb_hdr_malloc          ! Allocate dynamic memory.
- public :: ddb_hdr_free            ! Free dynamic memory.
- public :: ddb_hdr_open_write      ! Open the DDB file and write the header.
  public :: ddb_hdr_open_read       ! Open the DDB file and read the header.
- public :: ddb_hdr_compare         ! Compare two DDB headers.
 
 CONTAINS  !===========================================================
 !!***
@@ -169,9 +177,10 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_eig2d,m_gstate,m_longwave,m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -192,7 +201,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 
 !Local variables -------------------------
  integer :: ii, nn
-
 
 ! ************************************************************************
 
@@ -243,7 +251,7 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
 
  ddb_hdr%fullinit = 1
 
- call ddb_hdr_malloc(ddb_hdr)
+ call ddb_hdr%malloc()
 
  ! Copy arrays from dtset
  ddb_hdr%acell(:) = dtset%acell_orig(1:3,1)
@@ -270,7 +278,6 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  else
    ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol,1)
  end if
-
 
  ! GA: I had way too much problems implementing pawtab_copy.
  !     The script check-libpaw would report all sorts of errors.
@@ -301,21 +308,17 @@ end subroutine ddb_hdr_init
 !! FUNCTION
 !!  Allocate dynamic memory.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! PARENTS
-!!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine ddb_hdr_malloc(ddb_hdr)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(inout) :: ddb_hdr
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
 
 ! ************************************************************************
 
@@ -337,7 +340,7 @@ subroutine ddb_hdr_malloc(ddb_hdr)
  ABI_MALLOC(ddb_hdr%znucl,(ddb_hdr%mtypat))
 
  ! types
- ABI_DATATYPE_ALLOCATE(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+ ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
  call pawtab_nullify(ddb_hdr%pawtab)
 
 end subroutine ddb_hdr_malloc
@@ -350,23 +353,19 @@ end subroutine ddb_hdr_malloc
 !! ddb_hdr_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Free memory
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,eig2tot,gstate,m_ddb,m_effective_potential_file
-!!      m_gruneisen,mblktyp1,mblktyp5,mrgddb,nonlinear,respfn,thmeig
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine ddb_hdr_free(ddb_hdr)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(inout) :: ddb_hdr
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
 
 ! ************************************************************************
 
@@ -392,7 +391,7 @@ subroutine ddb_hdr_free(ddb_hdr)
 
  if (allocated(ddb_hdr%pawtab)) then
    call pawtab_free(ddb_hdr%pawtab)
-   ABI_DATATYPE_DEALLOCATE(ddb_hdr%pawtab)
+   ABI_FREE(ddb_hdr%pawtab)
  end if
 
 end subroutine ddb_hdr_free
@@ -412,17 +411,16 @@ end subroutine ddb_hdr_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      ddb_interpolate,dfpt_looppert,eig2tot,gstate,mblktyp1,mblktyp5
-!!      nonlinear,respfn
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(inout) :: ddb_hdr
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
  character(len=*),intent(in) :: filnam
  integer,intent(in) :: unddb
  integer,intent(in),optional :: fullinit
@@ -470,10 +468,11 @@ end subroutine ddb_hdr_open_write
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,mblktyp1,mblktyp5
-!!      mrgddb,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,m_ifc,m_thmeig
+!!      mrgddb
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -549,11 +548,11 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
  end if
 
  ! Allocate the memory
- call ddb_hdr_malloc(ddb_hdr)
+ call ddb_hdr%malloc()
 
- ABI_ALLOCATE(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
- ABI_ALLOCATE(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
- ABI_ALLOCATE(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+ ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+ ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+ ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
 
  ! This is needed to read the DDBs in the old format
  ! GA : Not sure why this is required
@@ -608,62 +607,61 @@ end subroutine ddb_hdr_open_read
 !! OUTPUT
 !!
 !! PARENTS
-!!      mblktyp1,mblktyp5
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(inout) :: ddb_hdr1, ddb_hdr2
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr1, ddb_hdr2
 
 !Local variables -------------------------
 
 ! ************************************************************************
 
-!    Should also compare indlmn and pspso ... but suppose that
-!    the checking of ekb is enough for the psps.
-!    Should also compare many other variables ... this is still
-!    to be done ...
+ ! Should also compare indlmn and pspso ... but suppose that
+ ! the checking of ekb is enough for the psps.
+ ! Should also compare many other variables ... this is still to be done ...
  call compare_ddb_variables(&
-&     ddb_hdr1%matom, ddb_hdr2%matom,&
-&     ddb_hdr1%mtypat, ddb_hdr2%mtypat,&
-&     ddb_hdr1%mkpt, ddb_hdr2%mkpt,&
-&     ddb_hdr1%mband, ddb_hdr2%mband,&
-&     ddb_hdr1%msym, ddb_hdr2%msym,&
-&     ddb_hdr1%acell, ddb_hdr2%acell,&
-&     ddb_hdr1%amu, ddb_hdr2%amu,&
-&     ddb_hdr1%psps%dimekb,&
-&     ddb_hdr1%ecut, ddb_hdr2%ecut,&
-&     ddb_hdr1%psps%ekb, ddb_hdr2%psps%ekb,&
-&     ddb_hdr1%fullinit, ddb_hdr2%fullinit,&
-&     ddb_hdr1%iscf, ddb_hdr2%iscf,&
-&     ddb_hdr1%ixc, ddb_hdr2%ixc,&
-&     ddb_hdr1%kpt, ddb_hdr2%kpt,&
-&     ddb_hdr1%kptnrm, ddb_hdr2%kptnrm,&
-&     ddb_hdr1%natom, ddb_hdr2%natom,&
-&     ddb_hdr1%nband, ddb_hdr2%nband,&
-&     ddb_hdr1%ngfft, ddb_hdr2%ngfft,&
-&     ddb_hdr1%nkpt, ddb_hdr2%nkpt,&
-&     ddb_hdr1%nsppol, ddb_hdr2%nsppol,&
-&     ddb_hdr1%nsym, ddb_hdr2%nsym,&
-&     ddb_hdr1%ntypat, ddb_hdr2%ntypat,&
-&     ddb_hdr1%occ, ddb_hdr2%occ,&
-&     ddb_hdr1%occopt, ddb_hdr2%occopt,&
-&     ddb_hdr1%pawecutdg, ddb_hdr2%pawecutdg,&
-&     ddb_hdr1%pawtab, ddb_hdr2%pawtab,&
-&     ddb_hdr1%rprim, ddb_hdr2%rprim,&
-&     ddb_hdr1%dfpt_sciss, ddb_hdr2%dfpt_sciss,&
-&     ddb_hdr1%symrel, ddb_hdr2%symrel,&
-&     ddb_hdr1%tnons, ddb_hdr2%tnons,&
-&     ddb_hdr1%tolwfr, ddb_hdr2%tolwfr,&
-&     ddb_hdr1%typat, ddb_hdr2%typat,&
-&     ddb_hdr1%usepaw,&
-&     ddb_hdr1%wtk, ddb_hdr2%wtk,&
-&     ddb_hdr1%xred, ddb_hdr2%xred,&
-&     ddb_hdr1%zion, ddb_hdr2%zion)
+     ddb_hdr1%matom, ddb_hdr2%matom,&
+     ddb_hdr1%mtypat, ddb_hdr2%mtypat,&
+     ddb_hdr1%mkpt, ddb_hdr2%mkpt,&
+     ddb_hdr1%mband, ddb_hdr2%mband,&
+     ddb_hdr1%msym, ddb_hdr2%msym,&
+     ddb_hdr1%acell, ddb_hdr2%acell,&
+     ddb_hdr1%amu, ddb_hdr2%amu,&
+     ddb_hdr1%psps%dimekb,&
+     ddb_hdr1%ecut, ddb_hdr2%ecut,&
+     ddb_hdr1%psps%ekb, ddb_hdr2%psps%ekb,&
+     ddb_hdr1%fullinit, ddb_hdr2%fullinit,&
+     ddb_hdr1%iscf, ddb_hdr2%iscf,&
+     ddb_hdr1%ixc, ddb_hdr2%ixc,&
+     ddb_hdr1%kpt, ddb_hdr2%kpt,&
+     ddb_hdr1%kptnrm, ddb_hdr2%kptnrm,&
+     ddb_hdr1%natom, ddb_hdr2%natom,&
+     ddb_hdr1%nband, ddb_hdr2%nband,&
+     ddb_hdr1%ngfft, ddb_hdr2%ngfft,&
+     ddb_hdr1%nkpt, ddb_hdr2%nkpt,&
+     ddb_hdr1%nsppol, ddb_hdr2%nsppol,&
+     ddb_hdr1%nsym, ddb_hdr2%nsym,&
+     ddb_hdr1%ntypat, ddb_hdr2%ntypat,&
+     ddb_hdr1%occ, ddb_hdr2%occ,&
+     ddb_hdr1%occopt, ddb_hdr2%occopt,&
+     ddb_hdr1%pawecutdg, ddb_hdr2%pawecutdg,&
+     ddb_hdr1%pawtab, ddb_hdr2%pawtab,&
+     ddb_hdr1%rprim, ddb_hdr2%rprim,&
+     ddb_hdr1%dfpt_sciss, ddb_hdr2%dfpt_sciss,&
+     ddb_hdr1%symrel, ddb_hdr2%symrel,&
+     ddb_hdr1%tnons, ddb_hdr2%tnons,&
+     ddb_hdr1%tolwfr, ddb_hdr2%tolwfr,&
+     ddb_hdr1%typat, ddb_hdr2%typat,&
+     ddb_hdr1%usepaw,&
+     ddb_hdr1%wtk, ddb_hdr2%wtk,&
+     ddb_hdr1%xred, ddb_hdr2%xred,&
+     ddb_hdr1%zion, ddb_hdr2%zion)
 
 end subroutine ddb_hdr_compare
 !!***
@@ -715,6 +713,7 @@ end subroutine ddb_hdr_compare
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -753,7 +752,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    write(message, '(a,i10,a,a,i10,a)' )&
     'the psddb8 DDB version number=',vrsio8,ch10,&
     'is not equal to the calling code DDB version number=',vrsddb,'.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Check the value of choice
@@ -761,7 +760,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    write(message, '(a,a,a,i10,a)' )&
     'The permitted values for choice are 1 or 2.',ch10,&
     'The calling routine asks ',choice,'.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !==================================================================================
@@ -793,7 +792,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
        read(nunit, '(10x,i3)') usepaw0
        if (usepaw/=usepaw0) then
          write(message, '(a,i1,a,i1,a)' )'usepaw is announced to be ',usepaw,' but read usepaw is ',usepaw0,' !'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        if (usepaw==0) then
          read (nunit, '(10x,i3,14x,i3)' )dimekb0,lmnmax0
@@ -812,7 +811,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          if(nekb>dimekb)then
            write(message, '(a,i8,a,a,a,i3,a)' )&
             '  ',nekb,' components of ekb are announced',ch10,'but dimekb=',dimekb,'.'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          read(nunit,*)
          ilmn=0;iproj0=0
@@ -876,13 +875,13 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          if (lmn_size0>lmnmax) then
            write(message, '(a,i5,3a,i5,a)' )&
              'max. value of ',lmnmax,' for lmn_size is announced',ch10,'but ',lmn_size0,' is read.'
-           MSG_BUG(message)
+           ABI_BUG(message)
          end if
          if (allocated(pawtab(itypat)%dij0)) then
            if (lmn_size0>pawtab(itypat)%lmn_size) then
              write(message, '(a,i5,3a,i5,a)' )&
               'lmn_size=,',pawtab(itypat)%lmn_size,' is announced',ch10,'but ',lmn_size0,' is read.'
-             MSG_BUG(message)
+             ABI_BUG(message)
            end if
          end if
          ABI_MALLOC(nprj,(0:maxval(orbitals)))
@@ -928,7 +927,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !    --------------------------------------------
    else if (string==' Description')then
      if (usepaw==1) then
-       MSG_BUG("old DDB pspformat not compatible with PAW")
+       ABI_BUG("old DDB pspformat not compatible with PAW")
      end if
 
      read (nunit, '(10x,i3,10x,i3)' )nproj,npsang
@@ -937,10 +936,10 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
      if(nekb>dimekb)then
        write(message, '(a,i8,a,a,a,i3,a)' )&
         '  ',nekb,' components of ekb are announced',ch10,'but the maximum is dimekb=',dimekb,'.'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
      if(useylm/=0)then
-       MSG_BUG('useylm must be 0 !')
+       ABI_BUG('useylm must be 0 !')
      end if
 !    Read the data
      ABI_MALLOC(ekb0,(dimekb,dimekb))
@@ -971,7 +970,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    else if(string==' No informat')then
      fullinit=0
    else
-     MSG_BUG('Error when reading the psp information')
+     ABI_BUG('Error when reading the psp information')
    end if
 
 !  Now, the number of blocks
@@ -1163,6 +1162,7 @@ end subroutine psddb8
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1202,14 +1202,14 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
    write(message, '(a,i10,a,a,i10,a)' )&
     'The input/output DDB version number=',vrsio8,ch10,&
     'is not equal to the DDB version number=',vrsddb,'.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Open the input derivative database.
  write(message,'(a,a)')' About to open file ',TRIM(filnam)
  call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check the compatibility of the input DDB with the DDB code
@@ -1222,7 +1222,7 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
    write(message, '(a,i10,2a,3(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
     'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
@@ -1322,7 +1322,7 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
     '    occopt,  between 0 and 7        ',trim(name(7)),' =',occopt
    call wrtout(std_out,message,'COLL')
 
-   MSG_ERROR('See the error message above.')
+   ABI_ERROR('See the error message above.')
  end if
 
 !One more set of parameters define the dimensions of the
@@ -1367,13 +1367,13 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
      write(message, '(a,i4,a,i4,3a)' )&
 &     'For ikpt = ',ikpt,'  nband = ',nband(ikpt),' is negative.',ch10,&
 &     'Action: correct your DDB.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    else if(nband(ikpt)>mband)then
      write(message, '(a,i4,a,i4,a,a,i4,3a)' )&
 &     'For ikpt = ',ikpt,', nband = ',nband(ikpt),ch10,&
 &     'is larger than mband = ',mband,'.',ch10,&
 &     'Action: recompile the calling code with a larger mband.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    bantot=bantot+nband(ikpt)
  end do
@@ -1753,6 +1753,7 @@ end subroutine ioddb8_in
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1831,6 +1832,7 @@ end subroutine ddb_getdims
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1869,13 +1871,13 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,i0,2a,i0)' )&
 &   'The input/output DDB version number= ',vrsio8,ch10,&
 &   'is not equal to the DDB version number= ',vrsddb
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Open the input derivative database.
  call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check the compatibility of the input DDB with the DDB code
@@ -1887,7 +1889,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,i10,2a,3(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
 &   'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Read the 4 n-integers, also testing the names of data,
@@ -1981,7 +1983,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,a,a,i10)' )'    occopt,     equal to 0,1 or 2   ',trim(name(7)),' =',occopt
    call wrtout(std_out,message,'COLL')
 
-   MSG_ERROR('See the error message above.')
+   ABI_ERROR('See the error message above.')
  end if
 
 !One more set of parameters define the dimensions of the
@@ -2027,7 +2029,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      write(message, '(a,i0,a,i0,3a)' )&
 &     'For ikpt = ',ikpt,'  nband = ',nband(ikpt),' is negative.',ch10,&
 &     'Action: correct your DDB.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    bantot=bantot+nband(ikpt)
  end do
@@ -2195,7 +2197,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
  else if(string==' Description')then
    if (usepaw==1) then
-     MSG_BUG('old DDB pspformat not compatible with PAW 1')
+     ABI_BUG('old DDB pspformat not compatible with PAW 1')
    end if
 
    read (unddb, '(10x,i3,10x,i3)' )mproj,mpsang
@@ -2222,7 +2224,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    write(message, '(a,a,a,a)' )&
 &   'Error when reading the psp information',ch10,&
 &   'String=',trim(string)
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !Now, the number of blocks
@@ -2257,7 +2259,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 &       'Action: check your DDB.',ch10,&
 &       'Note: If you did use an abinit version prior to 6.12 to generate your DDB',&
 &       'pay attention to the change:: 2rd derivatives ==> 2nd derivatives'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
      if(blktyp==1.or.blktyp==2)then
@@ -2327,6 +2329,7 @@ end subroutine inprep8
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2361,7 +2364,7 @@ subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
 &   '             and name found is "',trim(nmfond_),'"',ch10,&
 &   'Likely your DDB is incorrect.',ch10,&
 &   'Action: correct your DDB, or contact the ABINIT group.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine ddb_chkname
@@ -2379,7 +2382,7 @@ end subroutine ddb_chkname
 !! as well as psp information.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (XG,MT,GA)
+!! Copyright (C) 1999-2021 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2434,6 +2437,7 @@ end subroutine ddb_chkname
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2486,15 +2490,15 @@ subroutine compare_ddb_variables(&
 
 ! *********************************************************************
 
-
-!Compare all the preliminary information
-!1. natom
+ !Compare all the preliminary information
+ !1. natom
  call chki8(natom,natom8,' natom')
-!2. nkpt
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file
-!There can also be the case of perturbation at Gamma, that
-!only need half of the number of k points.
+
+ ! 2. nkpt
+ ! Compares the input and transfer values only if the input has not
+ ! been initialized by a ground state input file
+ ! There can also be the case of perturbation at Gamma, that
+ ! only need half of the number of k points.
  if(fullinit/=0)then
    if(nkpt/=2*nkpt8 .and. 2*nkpt/=nkpt8)then
 
@@ -2503,23 +2507,24 @@ subroutine compare_ddb_variables(&
      !      with TRS only for certain q-points.
      !call chki8(nkpt,nkpt8,'  nkpt')
    else
-     write(std_out,*)' compar8 : assume that one of the DDB to be',&
-&     ' merged use Time-Reversal to'
+     write(std_out,*)' compar8 : assume that one of the DDB to be',' merged use Time-Reversal to'
      write(std_out,*)' decrease the number of k-points'
    end if
  else
-!  Otherwise, takes the meaningful value
+   !Otherwise, takes the meaningful value
    nkpt=nkpt8
  end if
-!3a. occopt
-!Because the program will stop if the bloks
-!do not compare well, take here the most favorable case.
+
+ ! 3a. occopt
+ ! Because the program will stop if the bloks
+ ! do not compare well, take here the most favorable case.
  if(occop8==0)occopt=0
-!3b. nband
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file
-!There can also be the case of perturbation at Gamma, that
-!only need half of the number of k points.
+
+ ! 3b. nband
+ ! Compares the input and transfer values only if the input has not
+ ! been initialized by a ground state input file
+ ! There can also be the case of perturbation at Gamma, that
+ ! only need half of the number of k points.
  if(fullinit==0 .or. nkpt8==2*nkpt)then
    bantot=0
    do ii=1,nkpt8
@@ -2535,46 +2540,46 @@ subroutine compare_ddb_variables(&
      bantot=bantot+nband(ii)
    end do
  end if
-!9. nsppol
+ !9. nsppol
  call chki8(nsppol,nsppol8,'nsppol')
-!4. nsym
+ !4. nsym
  if(nsym/=1 .and. nsym8/=1)then
    call chki8(nsym,nsym8,'  nsym')
  end if
-!5. ntypat
+ !5. ntypat
  call chki8(ntypat,ntypat8,'ntypat')
-!6. acell
+ !6. acell
  do ii=1,3
    call chkr8(acell(ii),acell8(ii),' acell',tol)
  end do
-!7. amu
+ !7. amu
  do ii=1,ntypat
    call chkr8(amu(ii),amu8(ii),'   amu',tol)
  end do
-!9. date
-!10. ecut
+ !9. date
+ !10. ecut
  call chkr8(ecut,ecut8,'  ecut',tol)
-!10b. pawecutdg (PAW only)
+ !10b. pawecutdg (PAW only)
  if (usepaw==1) then
    call chkr8(pawecutdg,pawecutdg8,'  ecut',tol)
  end if
-!11. iscf
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file
+ !11. iscf
+ !Compares the input and transfer values only if the input has not
+ !been initialized by a ground state input file
  if(fullinit/=0)then
    call chki8(iscf,iscf8,'  iscf')
  else
-!  Otherwise, takes the meaningful value
+   ! Otherwise, takes the meaningful value
    iscf=iscf8
  end if
-!12. ixc
+ !12. ixc
  call chki8(ixc,ixc8,'   ixc')
-!13. kpt and 14. kptnrm
-!Compares the input and transfer values only if the input
-!has not been initialized by a ground state input file
-!and if the number of k points is identical
+ ! 13. kpt and 14. kptnrm
+ ! Compares the input and transfer values only if the input
+ ! has not been initialized by a ground state input file
+ ! and if the number of k points is identical
  if(nkpt8 == 2*nkpt .or. fullinit==0)then
-!  Copy the largest number of k points in the right place
+   ! Copy the largest number of k points in the right place
    do ij=1,nkpt8
      do ii=1,3
        kpt(ii,ij)=kpt8(ii,ij)
@@ -2584,22 +2589,22 @@ subroutine compare_ddb_variables(&
  else if (nkpt==nkpt8)then
    do ij=1,nkpt
      do ii=1,3
-!      Compares the input and transfer values only if the input
-!      has not been initialized by a ground state input file
+       ! Compares the input and transfer values only if the input
+       ! has not been initialized by a ground state input file
        call chkr8(kpt(ii,ij)/kptnrm,kpt8(ii,ij)/kptnrm8,'   kpt',tol)
      end do
    end do
  end if
-!16. ngfft
-!MT dec 2013: deactivate the stop on ngfft to allow for
-! (nfft-converged) DFPT calculations with GS WFK obtained with a different ngfft
+ !16. ngfft
+ !MT dec 2013: deactivate the stop on ngfft to allow for
+ ! (nfft-converged) DFPT calculations with GS WFK obtained with a different ngfft
  do ii=1,3
    if (ngfft(ii) == ngfft8(ii)) cycle
    write(msg,'(3a,i10,3a,i10,a)') &
-&   'Comparing integers for variable ngfft.',ch10,&
-&   'Value from input DDB is',ngfft(ii),' and',ch10,&
-&   'from transfer DDB is',ngfft8(ii),'.'
-   MSG_WARNING(msg)
+    'Comparing integers for variable ngfft.',ch10,&
+    'Value from input DDB is',ngfft(ii),' and',ch10,&
+    'from transfer DDB is',ngfft8(ii),'.'
+   ABI_WARNING(msg)
  end do
 !17. occ
 !Compares the input and transfer values only if the input has not
@@ -2734,7 +2739,7 @@ subroutine compare_ddb_variables(&
        pawtab(itypat)%shape_type =pawtab8(itypat)%shape_type
        if (pawtab8(itypat)%lmn2_size>0) then
          if (pawtab(itypat)%lmn2_size==0)  then
-           ABI_ALLOCATE(pawtab(itypat)%dij0,(pawtab8(itypat)%lmn2_size))
+           ABI_MALLOC(pawtab(itypat)%dij0,(pawtab8(itypat)%lmn2_size))
          end if
          do ii=1,pawtab8(itypat)%lmn2_size
            pawtab(itypat)%dij0(ii)=pawtab8(itypat)%dij0(ii)
@@ -2774,6 +2779,7 @@ end subroutine compare_ddb_variables
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2796,7 +2802,7 @@ subroutine chkr8(reali,realt,name,tol)
    'Value from input DDB is',reali,' and',ch10,&
    'from transfer DDB is',realt,'.',ch10,&
    'Action: check your DDBs.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  end subroutine chkr8
@@ -2827,6 +2833,7 @@ subroutine chkr8(reali,realt,name,tol)
 !!      m_ddb_hdr
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2849,7 +2856,7 @@ subroutine chki8(inti,intt,name)
    'Value from input DDB is',inti,' and',ch10,&
    'from transfer DDB is',intt,'.',ch10,&
    'Action: check your DDBs.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  end subroutine chki8
@@ -2981,7 +2988,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !like for the output file)
  ierr = open_file(filnam,message,unit=unddb,status='unknown',form='formatted')
  if (ierr /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Write the heading

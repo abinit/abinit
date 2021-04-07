@@ -6,6 +6,7 @@ program test_spline_integrate
 
 use defs_basis
 use m_splines
+use m_xmpi
 implicit none
 
 real(dp), parameter :: int_tol = 5.0e-3_dp

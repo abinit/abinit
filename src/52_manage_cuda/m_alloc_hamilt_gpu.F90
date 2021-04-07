@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2020 ABINIT group (MT, FDahm)
+!!  Copyright (C) 2000-2021 ABINIT group (MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,7 +71,7 @@ contains
 !!  (no output - only allocation on GPU)
 !!
 !! PARENTS
-!!      gstate,respfn
+!!      m_gstate,m_respfn_driver
 !!
 !! CHILDREN
 !!      free_gpu_fourwf,free_nonlop_gpu
@@ -170,7 +170,7 @@ end subroutine alloc_hamilt_gpu
 !!  (no output - only deallocation on GPU)
 !!
 !! PARENTS
-!!      gstate,respfn
+!!      m_gstate,m_respfn_driver
 !!
 !! CHILDREN
 !!      free_gpu_fourwf,free_nonlop_gpu

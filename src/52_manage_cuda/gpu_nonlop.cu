@@ -19,7 +19,7 @@
 //   - using Spherical Harmonics Ylm (N-conserving or PAW ; compulsory for PAW)
 //
 // COPYRIGHT
-// Copyright (C) 1998-2020 ABINIT group (MT,FDahm)
+// Copyright (C) 1998-2021 ABINIT group (MT,FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +85,7 @@
 //  lmnmax=max. number of (l,m,n) components over all types of atoms
 //  matblk=dimension of the arrays ph3din and ph3dout
 //  mgfft=maximum size of 1D FFTs
-//  mpi_enreg=informations about MPI parallelization
+//  mpi_enreg=information about MPI parallelization
 //  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 //  mpssoang= 1+max(spin*angular momentum) for nonlocal pseudopotentials
 //  natom=number of atoms in cell

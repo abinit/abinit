@@ -22,7 +22,7 @@ the *fold2Bloch* utility. See also the [[help:fold2bloch]].
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Creating a Hydrogen supercell structure
 
@@ -61,43 +61,45 @@ for the other tutorials. Why not Work_fold2Bloch?*
 
 In order to use the *fold2Bloch*, you need to first generate a wave function file (*WFK* file).
 
-In the directory ~abinit/tests/tutorial/Input/Work_fold2Bloch, copy the files
-tests/tutorial/Input/tfold2bloch_1.files and tests/tutorial/Input/tfold2bloch_1.in.
+For this purpose, copy the file
+tests/tutorial/Input/tfold2bloch_1.abi in the directory ~abinit/tests/tutorial/Input/Work_fold2Bloch.
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_fold2Bloch
 cd Work_fold2Bloch
-cp ../tfold2bloch_1.files .   # You will need to edit this file.
-cp ../tfold2bloch_1.in .
+cp ../tfold2bloch_1.abi .
 ```
 
-{% dialog tests/tutorial/Input/tfold2bloch_1.files tests/tutorial/Input/tfold2bloch_1.in %}
+{% dialog tests/tutorial/Input/tfold2bloch_1.abi %}
 
 The input file has two datasets,
 the first to generate the *WFK* file, and the second to draw the band structure.
 Now you are ready to run Abinit. Issue the following:
 
-    abinit < tfold2bloch_1.files > & tfold1bloch_1.log &
+    abinit tfold2bloch_1.abi > tfold1bloch_1.log &
 
 This will generate a self consistent charge density for the 6 Hydrogen atom
-supercell structure, and the wave function file, *tfold2bloch_1o_WFK*, which is
+supercell structure, and the wave function file, *tfold2bloch_1o_DS1_WFK*, which is
 needed for unfolding with *fold2Bloch*.
 
 ## Folded band structure
 
 Before we proceed with the unfolding, let's plot the "standard" band structure
 of a supercell. We will be looking for signatures of the zone folding. In
-order to do this you will need the following scripts:
+order to do this, there are several possibilities. You might e.g. rely on Abipy (see below), or on Matlab.
+This tutorial was initally illustrated using Matlab, for which 
+you will need the following scripts 
 
 1.  energy_eig-abinit.sh
 2.  plot_band.m
 
-which are located at $ABI_HOME/doc/tutorial/fold2Bloch_assets/
+that are located at $ABI_HOME/doc/tutorial/fold2Bloch_assets/ .
+Copy them to your work directory.
 
 Execute the *energy_eig-abinit.sh* script
 
-    ./energy_eig-abinit.sh tfold2bloch_1o_DS2_EIG_
+    ./energy_eig-abinit.sh tfold2bloch_1o_DS2_EIG
 
 This will generate an output file: *tfold2bloch_1o_DS2_EIG.dat*
 
@@ -144,20 +146,23 @@ Execute the following command:
 You should see the following:
 
 ```
-      ***********************
-      ** Fold2Bloch V 1.0  **
-      **Build  Oct 16, 2014**
-      ***********************
-    2% Processing K point:    0.000000   -0.500000    0.000000
-    4% Processing K point:    0.000000   -0.450000    0.000000
-    6% Processing K point:    0.000000   -0.400000    0.000000
+           ***********************
+           ** Fold2Bloch V 1.1  **
+           **Build  Mar 16, 2015**
+           ***********************
+ Reading eigenvalues from: tfold2bloch_1o_DS2_WFK , with iomode: IO_MODE_MPI
+ wfk_read_eigenvalues completed. cpu:  0.03 [s] , wall:  0.04 [s] <<< TIME
+- Creating netcdf file WITHOUT MPI-IO support: tfold2bloch_FOLD2BLOCH.nc
+         2% Processing K point:    0.000000   -0.500000    0.000000
+         4% Processing K point:    0.000000   -0.450000    0.000000
+         7% Processing K point:    0.000000   -0.400000    0.000000
 ...
-   95% Processing K point:    0.000000    0.000000    0.400000
-   97% Processing K point:    0.000000    0.000000    0.450000
-  100% Processing K point:    0.000000    0.000000    0.500000
- Number of K points processed:          43
- Data was written to: fold2Bloch.f2b
- Data format: KX, KY, KZ, Eigenvalue(Ha), Weight
+        95% Processing K point:    0.000000    0.000000    0.400000
+        97% Processing K point:    0.000000    0.000000    0.450000
+       100% Processing K point:    0.000000    0.000000    0.500000
+      Number of K points processed:          42
+      Data was written to: tfold2bloch.f2b
+      Data format: KX, KY, KZ, Eigenvalue(Ha), Weight
 ```
 
 That output tells us which K-point was processed, total number of K-points
@@ -165,33 +170,35 @@ processed, output file, and the format that the data is written in.
 
 Now take a look at the *tfold2Bloch.f2b*. The first few lines should be as follows:
 
-    less tfold2Bloch.f2b
-
-    0.000000  -0.250000   0.000000  -0.317960   0.579542
-    0.000000  -0.250000   0.333333  -0.317960   0.000000
-    0.000000  -0.250000  -0.333333  -0.317960   0.000000
-    0.000000   0.250000   0.000000  -0.317960   0.420458
-    0.000000   0.250000   0.333333  -0.317960   0.000000
-    0.000000   0.250000  -0.333333  -0.317960   0.000000
-    0.000000  -0.250000   0.000000  -0.317960   0.420458
-    0.000000  -0.250000   0.333333  -0.317960   0.000000
-    0.000000  -0.250000  -0.333333  -0.317960   0.000000
-    0.000000   0.250000   0.000000  -0.317960   0.579542
-    0.000000   0.250000   0.333333  -0.317960   0.000000
-    0.000000   0.250000  -0.333333  -0.317960   0.000000
-    0.000000  -0.250000   0.000000  -0.093527   0.000000
-    0.000000  -0.250000   0.333333  -0.093527   0.315820
-    0.000000  -0.250000  -0.333333  -0.093527   0.251111
-    0.000000   0.250000   0.000000  -0.093527   0.000000
-    0.000000   0.250000   0.333333  -0.093527   0.144884
-    0.000000   0.250000  -0.333333  -0.093527   0.288185
-    0.000000  -0.250000   0.000000  -0.093527   0.000000
-    0.000000  -0.250000   0.333333  -0.093527   0.494070
-    0.000000  -0.250000  -0.333333  -0.093527   0.103712
-    0.000000   0.250000   0.000000  -0.093527   0.000000
-    0.000000   0.250000   0.333333  -0.093527   0.386301
-    0.000000   0.250000  -0.333333  -0.093527   0.015917
+```
+   0.000000  -0.250000   0.000000  -0.308342   0.589037
+   0.000000  -0.250000   0.333333  -0.308342   0.000000
+   0.000000  -0.250000  -0.333333  -0.308342   0.000000
+   0.000000   0.250000   0.000000  -0.308342   0.410963
+   0.000000   0.250000   0.333333  -0.308342   0.000000
+   0.000000   0.250000  -0.333333  -0.308342   0.000000
+   0.000000  -0.250000   0.000000  -0.308342   0.410963
+   0.000000  -0.250000   0.333333  -0.308342   0.000000
+   0.000000  -0.250000  -0.333333  -0.308342   0.000000
+   0.000000   0.250000   0.000000  -0.308342   0.589037
+   0.000000   0.250000   0.333333  -0.308342   0.000000
+   0.000000   0.250000  -0.333333  -0.308342   0.000000
+   0.000000  -0.250000   0.000000  -0.083709   0.000000
+   0.000000  -0.250000   0.333333  -0.083709   0.593925
+   0.000000  -0.250000  -0.333333  -0.083709   0.025041
+   0.000000   0.250000   0.000000  -0.083709   0.000000
+   0.000000   0.250000   0.333333  -0.083709   0.133575
+   0.000000   0.250000  -0.333333  -0.083709   0.247460
+   0.000000  -0.250000   0.000000  -0.083709   0.000000
+   0.000000  -0.250000   0.333333  -0.083709   0.193298
+   0.000000  -0.250000  -0.333333  -0.083709   0.218686
+   0.000000   0.250000   0.000000  -0.083709   0.000000
+   0.000000   0.250000   0.333333  -0.083709   0.564322
+   0.000000   0.250000  -0.333333  -0.083709   0.023694
+   0.000000  -0.225000   0.000000  -0.332652   1.000000
+   0.000000  -0.225000   0.333333  -0.332652   0.000000
     ...
+```
 
 Let's take a moment to analyse the output. Columns 1-3 correspond to kx, ky
 and kz of the unfolded bands; the 4th column is the energy eigenvalue in [Ha]
@@ -243,7 +250,7 @@ G = [0.3333333 0.0000000 0.0000000;
    0.000000  0.000000  0.1111111]; % Reciprocal latt. vect. [Bohr^-1] from *.out
 ```
 
-Reciprocal lattice vector information must match that in *tfold2bloch_1.out*:
+Reciprocal lattice vector information must match that in *tfold2bloch_1.abo*:
 
     Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
      R(1)=  3.0000000  0.0000000  0.0000000  G(1)=  0.3333333  0.0000000  0.0000000
@@ -268,10 +275,11 @@ To analyze the results with AbiPy use:
 
     abiopen.py tfold2bloch_FOLD2BLOCH.nc
 
-to open the file inside |ipython| and then type:
+to open the file inside |ipython| and then type, at the request of ipython:
 
 ```ipython
 # Plot unfolded bands along the path defined by kbounds.
+# 'In [x]' are ipython prompts, do no type them, type only 'kbounds ...' then 'klabels ...' then 'abifile...'
 In [1] kbounds = [0, 1/2, 0, 0, 0, 0, 0, 0, 1/2]
 In [2] klabels = ["Y", r"$\Gamma$", "X"]
 In [3] abifile.plot_unfolded(kbounds, klabels, title="Unfolded bands")

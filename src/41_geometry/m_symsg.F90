@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (RC,XG)
+!!  Copyright (C) 1999-2021 ABINIT group (RC,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,10 +70,9 @@ contains
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata,timab
 !!
 !! SOURCE
 
@@ -558,10 +557,9 @@ end subroutine symsgcube
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata
 !!
 !! SOURCE
 
@@ -899,10 +897,9 @@ end subroutine symsghexa
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      spgdata
 !!
 !! SOURCE
 
@@ -1444,10 +1441,9 @@ end subroutine symsgmono
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata
 !!
 !! SOURCE
 
@@ -1939,10 +1935,9 @@ end subroutine symsgortho
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
 !! PARENTS
-!!      gensymspgr
+!!      m_spgbuilder
 !!
 !! CHILDREN
-!!      bldgrp,spgdata
 !!
 !! SOURCE
 
@@ -2391,7 +2386,7 @@ end subroutine symsgtetra
 !! nogen = number of generators, number of operations to be applied onto themselves
 !!
 !! PARENTS
-!!      symsgcube,symsghexa,symsgortho,symsgtetra
+!!      m_symsg
 !!
 !! CHILDREN
 !!
@@ -2439,7 +2434,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
 &   'and it should be greater than one',ch10,&
 &   'This is not allowed.  ',ch10,&
 &   'Action: Contact ABINIT group '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Transfer the generators to bcksymrel
@@ -2535,7 +2530,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
    write(message, '(a,i7,a,a,i7)' )&
 &   'The symmetries obtained are  ',nogen,ch10,&
 &   'and they should be ',nsym
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !DEBUG

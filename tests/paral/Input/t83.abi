@@ -1,0 +1,98 @@
+# _== Convergency and starting
+# DATASET 1: LDA 
+# DATASET 2: LDA+DMFT
+ndtset 2
+jdtset 1 2
+prtvol    4
+pawprtvol 3
+getwfk -1
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep2   2
+nline2 5
+nnsclo2 5
+ecut      16 # low cutoff !
+pawecutdg 60
+tolvrs 1.0d-7
+nband     22
+nbdbuf 4
+occopt 3 tsmear 2000 K
+
+##### PHYSICAL PARAMETERS
+nspinor 2
+nsppol  1
+nspden  4
+pawspnorb 1
+natom 1 ntypat 1 typat 1
+znucl  23.0 
+# V Sr O*3
+xred 0.00 0.00 0.00
+acell   3*7.00 # not physical
+pawovlp -1
+rprim 0.5 0.5 0.0
+      0.0 0.5 0.5
+      0.5 0.0 0.5 
+
+# == Points k and symetries
+kptopt 4
+kptrlatt 3 0 0 0 3 0 0 0 3 # insufficient nb of k-points.
+nshiftk 4
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1
+
+# == LDA+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 9 
+dmftbandf 20 
+dmft_nwlo 100
+dmft_nwli 100000
+dmft_iter 1
+dmftcheck 0  
+dmft_rslf 0
+dmft_mxsf 0.7
+dmft_dc 1
+
+# == CTQMC
+dmft_solv 8 # CTQMC
+dmftqmc_l 20
+dmftqmc_n 1.d6
+dmftqmc_therm 10000
+#dmftctqmc_gmove 0
+
+
+# == DFT+U
+usepawu     1  #  For density matrix printout.
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2 
+upawu1  0.0  eV
+upawu2  4.1   eV
+f4of2_sla3    0.0 
+jpawu2  0.5   eV
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%                  t83.abo,  tolnlines =0, tolabs =1.1e-16, tolrel = 2.0e-16, fld_options=-medium ;
+#%% [paral_info]
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [NCPU_10]
+#%% files_to_test = 
+#%%   t83_MPI10.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t83_MPI10o_DS2_atom_01_Gtau_offdiag_02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% description = DFT+DMFT for Vanadium using off diag CTQMC code
+#%% topics = DMFT
+#%%<END TEST_INFO>

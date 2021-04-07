@@ -1,0 +1,58 @@
+# Test a dihydrogen molecule with BigDFT
+# Compute forces in addition to ground state.
+
+ nstep 20
+
+ acell 3*10
+ ecut 10
+ kptopt 0
+ kpt   0 0 0
+ istwfk 1
+ natom  5
+ nband 4
+ nkpt  1
+ nsym  1
+ ntypat  2
+ rprim   1 0 0  0 1 0  0 0 1
+ symrel  1 0 0  0 1 0  0 0 1
+ toldfe 1.0d-6
+ typat  1 2 2 2 2
+ xcart  5.00 5.00 5.00
+        6.62 6.62 6.62
+        3.38 3.38 6.62
+        3.38 6.62 3.38
+        6.62 3.38 3.38
+ znucl 14 1
+
+ usewvl 1
+ iscf 0
+ optstress 0
+ wvl_hgrid 0.5
+ icoulomb 1
+ nscforder 14
+ wvl_nprccg 5
+ wvl_bigdft_comp 1 #to follow the BigDFT workflow
+
+# Avoid print densities, wavefunctions and eigenvalues
+ prteig 0
+ prtden 0
+ prtwf  0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth, PseudosGTH_pwteter/01h.pspgth"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines = 0, tolabs = 1.510e-10, tolrel = 5.338e-09
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   SiH4 molecule with default parameters. This routine tests the program with several different atoms.
+#%% topics = Wavelets
+#%%<END TEST_INFO>

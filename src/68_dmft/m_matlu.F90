@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,7 +136,7 @@ CONTAINS  !=====================================================================
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! PARENTS
-!!      m_datafordmft,hubbard_one,m_green,m_matlu,m_oper,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
 !!
 !! CHILDREN
 !!
@@ -170,10 +170,10 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
   lpawu=lpawu_natom(iatom)
   matlu(iatom)%lpawu=lpawu
   if(lpawu.ne.-1) then
-   ABI_ALLOCATE(matlu(iatom)%mat,(2*lpawu+1,2*lpawu+1,nsppol,nspinor,nspinor))
+   ABI_MALLOC(matlu(iatom)%mat,(2*lpawu+1,2*lpawu+1,nsppol,nspinor,nspinor))
    matlu(iatom)%mat=czero
   else
-   ABI_ALLOCATE(matlu(iatom)%mat,(0,0,nsppol,nspinor,nspinor))
+   ABI_MALLOC(matlu(iatom)%mat,(0,0,nsppol,nspinor,nspinor))
   endif
  enddo
 
@@ -195,7 +195,7 @@ end subroutine init_matlu
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
 !! PARENTS
-!!      m_green,m_matlu
+!!      m_forctqmc,m_green,m_matlu,m_self
 !!
 !! CHILDREN
 !!
@@ -259,7 +259,7 @@ end subroutine zero_matlu
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_datafordmft,hubbard_one,m_green,m_matlu,m_oper,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
 !!
 !! CHILDREN
 !!
@@ -283,7 +283,7 @@ subroutine destroy_matlu(matlu,natom)
 
  do iatom=1,natom
   if ( allocated(matlu(iatom)%mat) )   then
-    ABI_DEALLOCATE(matlu(iatom)%mat)
+    ABI_FREE(matlu(iatom)%mat)
   end if
  enddo
 
@@ -305,8 +305,8 @@ end subroutine destroy_matlu
 !!  maltu2 <type(matlu_type)>= density matrix matlu2 in the local orbital basis and related variables
 !!
 !! PARENTS
-!!      m_datafordmft,hubbard_one,m_green,m_matlu,m_oper,m_self,qmc_prep_ctqmc
-!!      spectral_function
+!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
+!!      m_self
 !!
 !! CHILDREN
 !!
@@ -384,8 +384,8 @@ end subroutine copy_matlu
 !! OUTPUT
 !!
 !! PARENTS
-!!      compute_levels,m_datafordmft,hubbard_one,impurity_solve,m_green,m_matlu
-!!      m_oper,m_self,psichi_renormalization,qmc_prep_ctqmc
+!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
+!!      m_self
 !!
 !! CHILDREN
 !!
@@ -506,7 +506,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
          end do ! ispinor1
        end do ! ispinor
        if(nspinor==2.and.prtopt>=5) then
-         ABI_DATATYPE_ALLOCATE(matlu_tmp,(0:natom))
+         ABI_MALLOC(matlu_tmp,(0:natom))
          call init_matlu(natom,nspinor,nsppol,matlu(1:natom)%lpawu,matlu_tmp)
          matlu_tmp(iatom)%mat(m1,m,isppol,1,1)= matlu(iatom)%mat(m1,m,isppol,1,1)+matlu(iatom)%mat(m1,m,isppol,2,2)
          matlu_tmp(iatom)%mat(m1,m,isppol,2,2)= matlu(iatom)%mat(m1,m,isppol,1,1)+matlu(iatom)%mat(m1,m,isppol,2,2)
@@ -522,7 +522,7 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
            end do ! ispinor1
          end do ! ispinor
          call destroy_matlu(matlu_tmp,natom)
-         ABI_DATATYPE_DEALLOCATE(matlu_tmp)
+         ABI_FREE(matlu_tmp)
        endif
      enddo ! isppol
 !     if(nsppol==1.and.nspinor==1) then
@@ -544,7 +544,7 @@ end subroutine print_matlu
 !! Symetrise local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -563,8 +563,7 @@ end subroutine print_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      compute_levels,m_datafordmft,hybridization_asymptotic_coefficient,m_green
-!!      psichi_renormalization,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green
 !!
 !! CHILDREN
 !!
@@ -615,9 +614,9 @@ end subroutine print_matlu
  nsppol=gloc(1)%nsppol
  natom=cryst_struc%natom
 
- ABI_DATATYPE_ALLOCATE(glocnm,(natom))
- ABI_DATATYPE_ALLOCATE(glocnms,(natom))
- ABI_DATATYPE_ALLOCATE(glocsym,(natom))
+ ABI_MALLOC(glocnm,(natom))
+ ABI_MALLOC(glocnms,(natom))
+ ABI_MALLOC(glocsym,(natom))
  call init_matlu(natom,nspinor,nsppol,gloc(1:natom)%lpawu,glocnm)
  call init_matlu(natom,nspinor,nsppol,gloc(1:natom)%lpawu,glocnms)
  call init_matlu(natom,nspinor,nsppol,gloc(1:natom)%lpawu,glocsym)
@@ -691,15 +690,15 @@ end subroutine print_matlu
   do iatom=1,cryst_struc%natom
    if(gloc(iatom)%lpawu/=-1) then
     ndim=2*gloc(iatom)%lpawu+1
-    ABI_DEALLOCATE(glocnm(iatom)%mat)
-    ABI_DEALLOCATE(glocnms(iatom)%mat)
-    ABI_DEALLOCATE(glocsym(iatom)%mat)
-    ABI_ALLOCATE(glocnm(iatom)%mat,(ndim,ndim,nsppol,4,1))
-    ABI_ALLOCATE(glocnms(iatom)%mat,(ndim,ndim,nsppol,4,1))
-    ABI_ALLOCATE(glocsym(iatom)%mat,(ndim,ndim,nsppol,2,2))
+    ABI_FREE(glocnm(iatom)%mat)
+    ABI_FREE(glocnms(iatom)%mat)
+    ABI_FREE(glocsym(iatom)%mat)
+    ABI_MALLOC(glocnm(iatom)%mat,(ndim,ndim,nsppol,4,1))
+    ABI_MALLOC(glocnms(iatom)%mat,(ndim,ndim,nsppol,4,1))
+    ABI_MALLOC(glocsym(iatom)%mat,(ndim,ndim,nsppol,2,2))
    endif
   enddo
-  ABI_ALLOCATE(symrec_cart,(3,3,cryst_struc%nsym))
+  ABI_MALLOC(symrec_cart,(3,3,cryst_struc%nsym))
 
 !==  Compute symrec_cart
   do irot=1,cryst_struc%nsym
@@ -789,15 +788,15 @@ end subroutine print_matlu
     endif
   end do ! iatom
 
-  ABI_DEALLOCATE(symrec_cart)
+  ABI_FREE(symrec_cart)
  endif
 
  call destroy_matlu(glocnm,cryst_struc%natom)
  call destroy_matlu(glocnms,cryst_struc%natom)
  call destroy_matlu(glocsym,cryst_struc%natom)
- ABI_DATATYPE_DEALLOCATE(glocnm)
- ABI_DATATYPE_DEALLOCATE(glocnms)
- ABI_DATATYPE_DEALLOCATE(glocsym)
+ ABI_FREE(glocnm)
+ ABI_FREE(glocnms)
+ ABI_FREE(glocsym)
 !==============end of nspinor==2 case ===========
 
 
@@ -814,7 +813,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -861,11 +860,11 @@ end subroutine print_matlu
  nsppol=matlu(1)%nsppol
  if(prtopt>0) then
  endif
- ABI_DATATYPE_ALLOCATE(gathermatlu,(natom))
+ ABI_MALLOC(gathermatlu,(natom))
  do iatom=1,natom
    if(matlu(iatom)%lpawu.ne.-1) then
      tndim=nsppol*nspinor*(2*matlu(iatom)%lpawu+1)
-     ABI_ALLOCATE(gathermatlu(iatom)%value,(tndim,tndim))
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
      gathermatlu(iatom)%value=czero
    endif
  enddo
@@ -882,10 +881,10 @@ end subroutine print_matlu
 
  do iatom=1,natom
    if(matlu(iatom)%lpawu.ne.-1) then
-     ABI_DEALLOCATE(gathermatlu(iatom)%value)
+     ABI_FREE(gathermatlu(iatom)%value)
    endif
  enddo
- ABI_DATATYPE_DEALLOCATE(gathermatlu)
+ ABI_FREE(gathermatlu)
  end subroutine inverse_matlu
 !!***
 
@@ -909,7 +908,7 @@ end subroutine print_matlu
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_datafordmft,m_green,m_oper,qmc_prep_ctqmc
+!!      m_datafordmft,m_forctqmc,m_green,m_oper
 !!
 !! CHILDREN
 !!
@@ -976,7 +975,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_o
    write(message,'(5a,3x,3a,3x,e12.4,a,e12.4)') ch10,&
 &   'Differences between ',trim(char1),' and ',ch10,trim(char2),' is too large:',&
 &   ch10,matludiff,' is larger than',toldiff
-   MSG_WARNING(message)
+   ABI_WARNING(message)
 !   write(message,'(8a,4x,e12.4,a,e12.4)') ch10,"  Matrix for ",trim(char1)
    write(message,'(a,3x,a)') ch10,trim(char1)
    call wrtout(std_out,message,'COLL')
@@ -995,7 +994,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_o
    else 
      if(option==1) then
        call flush_unit(std_out)
-       MSG_ERROR("option==1, aborting now!")
+       ABI_ERROR("option==1, aborting now!")
      end if
    end if
    if(present(ierr)) ierr=-1
@@ -1022,8 +1021,7 @@ end subroutine diff_matlu
 !!  maltu3 <type(matlu_type)>= density matrix matlu3, sum/substract matlu1 and matlu2
 !!
 !! PARENTS
-!!      dyson,hybridization_asymptotic_coefficient,m_green
-!!      psichi_renormalization,qmc_prep_ctqmc
+!!      m_datafordmft,m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
 !!
@@ -1060,7 +1058,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1178,7 +1176,7 @@ end subroutine add_matlu
   end do ! iatom
  else
   message = "stop in chg_repr_matlu"
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  endif
 
 
@@ -1233,7 +1231,7 @@ end subroutine add_matlu
  if(present(trace_loc)) then
    traceloc=>trace_loc
  else
-   ABI_ALLOCATE(traceloc,(natom,matlu(1)%nsppol+1))
+   ABI_MALLOC(traceloc,(natom,matlu(1)%nsppol+1))
  endif
 
  traceloc=zero
@@ -1282,7 +1280,7 @@ end subroutine add_matlu
    endif
  enddo
  if(.not.present(trace_loc)) then
-  ABI_DEALLOCATE(traceloc)
+  ABI_FREE(traceloc)
   traceloc => null()
  endif
 
@@ -1297,7 +1295,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1317,7 +1315,7 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_matlu,psichi_renormalization
+!!      m_datafordmft,m_matlu
 !!
 !! CHILDREN
 !!
@@ -1415,7 +1413,7 @@ end subroutine add_matlu
 !! Diagonalize matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1437,7 +1435,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      hubbard_one,qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one,m_self
 !!
 !! CHILDREN
 !!
@@ -1555,11 +1553,11 @@ end subroutine add_matlu
 ! ===========================
 ! Define gathermatlu
 ! ===========================
-   ABI_DATATYPE_ALLOCATE(gathermatlu,(natom))
+   ABI_MALLOC(gathermatlu,(natom))
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
        tndim=nspinor*(2*matlu(iatom)%lpawu+1)
-       ABI_ALLOCATE(gathermatlu(iatom)%value,(tndim,tndim))
+       ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
        gathermatlu(iatom)%value=czero
      endif
    enddo
@@ -1568,6 +1566,7 @@ end subroutine add_matlu
    else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
      do iatom=1,natom
        if(matlu(iatom)%lpawu.ne.-1) then
+         tndim=nspinor*(2*matlu(iatom)%lpawu+1)
          do im1=1,tndim
            do im2=1,tndim
              gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,isppol,1,1)
@@ -1586,22 +1585,22 @@ end subroutine add_matlu
 !debug       allocate(temp_mat2(tndim,tndim))
 !debug       temp_mat2=zero
          lwork=2*tndim-1
-         ABI_ALLOCATE(rwork,(3*tndim-2))
+         ABI_MALLOC(rwork,(3*tndim-2))
          rwork = zero
 
          lworkr=tndim*(tndim+2)*2
-         ABI_ALLOCATE(work,(lworkr))
+         ABI_MALLOC(work,(lworkr))
          work = zero
-         ABI_ALLOCATE(valuer,(tndim,tndim))
-!         ABI_ALLOCATE(valuer2,(tndim,tndim))
-!         ABI_ALLOCATE(valuer3,(tndim,tndim))
-!         ABI_ALLOCATE(valuer4,(tndim,tndim))
-         ABI_ALLOCATE(zwork,(lwork))
+         ABI_MALLOC(valuer,(tndim,tndim))
+!         ABI_MALLOC(valuer2,(tndim,tndim))
+!         ABI_MALLOC(valuer3,(tndim,tndim))
+!         ABI_MALLOC(valuer4,(tndim,tndim))
+         ABI_MALLOC(zwork,(lwork))
 !         valuer2=zero
 !         valuer3=zero
 !         valuer4=zero
          zwork = czero
-         ABI_ALLOCATE(eig,(tndim))
+         ABI_MALLOC(eig,(tndim))
          eig = zero
          info = 0
          if(prtopt>=4) then
@@ -1703,7 +1702,7 @@ end subroutine add_matlu
          else
            if(present(optreal).and.maxval(abs(aimag(gathermatlu(iatom)%value(:,:))))>tol8) then
              write(message,'(a)') " Local hamiltonian in correlated basis is complex"
-             MSG_COMMENT(message)
+             ABI_COMMENT(message)
            endif
            call zheev('v','u',tndim,gathermatlu(iatom)%value,tndim,eig,zwork,lwork,rwork,info)
            !call blockdiago_forzheev(gathermatlu(iatom)%value,tndim,eig)
@@ -1747,14 +1746,14 @@ end subroutine add_matlu
            !call wrtout(std_out,message,'COLL')
             !write(std_out,*) "EIG", eig
          endif
-         ABI_DEALLOCATE(zwork)
-         ABI_DEALLOCATE(rwork)
-         ABI_DEALLOCATE(work)
-         ABI_DEALLOCATE(valuer)
-!         ABI_DEALLOCATE(valuer2)
-!         ABI_DEALLOCATE(valuer3)
-!         ABI_DEALLOCATE(valuer4)
-         ABI_DEALLOCATE(eig)
+         ABI_FREE(zwork)
+         ABI_FREE(rwork)
+         ABI_FREE(work)
+         ABI_FREE(valuer)
+!         ABI_FREE(valuer2)
+!         ABI_FREE(valuer3)
+!         ABI_FREE(valuer4)
+         ABI_FREE(eig)
 !     endif
 !   enddo
 ! ===========================
@@ -1779,8 +1778,8 @@ end subroutine add_matlu
 ! rotation matrix: it have to be checked afterwards that the matrix is
 ! diagonal
 ! ===================================================================
-         ABI_ALLOCATE(temp_mat,(tndim,tndim))
-         ABI_ALLOCATE(temp_mat2,(tndim,tndim))
+         ABI_MALLOC(temp_mat,(tndim,tndim))
+         ABI_MALLOC(temp_mat2,(tndim,tndim))
          temp_mat(:,:)=czero
 !        input matrix: gathermatlu
 !        rotation matrix: eigvectmatlu
@@ -1838,11 +1837,11 @@ end subroutine add_matlu
              call wrtout(std_out,message,'COLL')
            end do
            if(iatom==2) then
-             MSG_ERROR("iatom==2")
+             ABI_ERROR("iatom==2")
            end if
          endif
-         ABI_DEALLOCATE(temp_mat)
-         ABI_DEALLOCATE(temp_mat2)
+         ABI_FREE(temp_mat)
+         ABI_FREE(temp_mat2)
        endif
 
 
@@ -1887,10 +1886,10 @@ end subroutine add_matlu
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
 !debug       deallocate(temp_mat2)
-       ABI_DEALLOCATE(gathermatlu(iatom)%value)
+       ABI_FREE(gathermatlu(iatom)%value)
      endif
    enddo
-   ABI_DATATYPE_DEALLOCATE(gathermatlu)
+   ABI_FREE(gathermatlu)
  enddo ! isppol
 
  end subroutine diag_matlu
@@ -1904,7 +1903,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1923,7 +1922,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      hubbard_one,qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one,m_self
 !!
 !! CHILDREN
 !!
@@ -1956,23 +1955,23 @@ end subroutine add_matlu
  endif
  nsppol=matlu(1)%nsppol
  nspinor=matlu(1)%nspinor
-! ABI_DATATYPE_ALLOCATE(rot_mat_orig,(natom,matlu(1)%nsppol))
+! ABI_MALLOC(rot_mat_orig,(natom,matlu(1)%nsppol))
 
  do isppol=1,nsppol
 
 ! ===========================
 ! Define gathermatlu and rot_mat_orig and allocate
 ! ===========================
-   ABI_DATATYPE_ALLOCATE(rot_mat_orig,(natom))
-   ABI_DATATYPE_ALLOCATE(gathermatlu,(natom))
+   ABI_MALLOC(rot_mat_orig,(natom))
+   ABI_MALLOC(gathermatlu,(natom))
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
        tndim=nspinor*(2*matlu(iatom)%lpawu+1)
-       ABI_ALLOCATE(gathermatlu(iatom)%value,(tndim,tndim))
+       ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
        gathermatlu(iatom)%value=czero
-!       ABI_ALLOCATE(rot_mat_orig(iatom,isppol)%value,(tndim,tndim))
+!       ABI_MALLOC(rot_mat_orig(iatom,isppol)%value,(tndim,tndim))
 !       rot_mat_orig(iatom,isppol)%value(:,:)=rot_mat(iatom,isppol)%value(:,:)
-       ABI_ALLOCATE(rot_mat_orig(iatom)%value,(tndim,tndim))
+       ABI_MALLOC(rot_mat_orig(iatom)%value,(tndim,tndim))
        rot_mat_orig(iatom)%value(:,:)=rot_mat(iatom,isppol)%value(:,:)
      endif
    enddo
@@ -1981,6 +1980,7 @@ end subroutine add_matlu
    else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
      do iatom=1,natom
        if(matlu(iatom)%lpawu.ne.-1) then
+         tndim=nspinor*(2*matlu(iatom)%lpawu+1)
          do im1=1,tndim
            do im2=1,tndim
              gathermatlu(iatom)%value(im1,im2)=matlu(iatom)%mat(im1,im2,isppol,1,1)
@@ -2028,7 +2028,7 @@ end subroutine add_matlu
 ! ===========================
 ! Rotate
 ! ===========================
-   ABI_ALLOCATE(temp_mat,(tndim,tndim))
+   ABI_MALLOC(temp_mat,(tndim,tndim))
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
        tndim=nspinor*(2*matlu(iatom)%lpawu+1)
@@ -2065,8 +2065,8 @@ end subroutine add_matlu
    !    end do
    !  endif
    !enddo
-   ABI_DEALLOCATE(temp_mat)
-     !MSG_ERROR("Aborting now")
+   ABI_FREE(temp_mat)
+     !ABI_ERROR("Aborting now")
 
 ! Choose inverse rotation: reconstruct correct rot_mat from rot_mat_orig
 ! ========================================================================
@@ -2092,6 +2092,7 @@ end subroutine add_matlu
    else if((nsppol==2.or.nsppol==1).and.nspinor==1) then
      do iatom=1,natom
        if(matlu(iatom)%lpawu.ne.-1) then
+         tndim=nspinor*(2*matlu(iatom)%lpawu+1)
          do im1=1,tndim
            do im2=1,tndim
              matlu(iatom)%mat(im1,im2,isppol,1,1)= gathermatlu(iatom)%value(im1,im2)
@@ -2105,13 +2106,13 @@ end subroutine add_matlu
 ! ===========================
    do iatom=1,natom
      if(matlu(iatom)%lpawu.ne.-1) then
-       ABI_DEALLOCATE(gathermatlu(iatom)%value)
-!       ABI_DEALLOCATE(rot_mat_orig(iatom,isppol)%value)
-       ABI_DEALLOCATE(rot_mat_orig(iatom)%value)
+       ABI_FREE(gathermatlu(iatom)%value)
+!       ABI_FREE(rot_mat_orig(iatom,isppol)%value)
+       ABI_FREE(rot_mat_orig(iatom)%value)
      endif
    enddo
-   ABI_DATATYPE_DEALLOCATE(gathermatlu)
-   ABI_DATATYPE_DEALLOCATE(rot_mat_orig)
+   ABI_FREE(gathermatlu)
+   ABI_FREE(rot_mat_orig)
  enddo ! isppol
 
  end subroutine rotate_matlu
@@ -2125,7 +2126,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2143,7 +2144,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      m_green,m_self,qmc_prep_ctqmc
+!!      m_forctqmc,m_green,m_self
 !!
 !! CHILDREN
 !!
@@ -2197,7 +2198,7 @@ end subroutine add_matlu
 !! Check that matlu is real in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2212,7 +2213,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -2267,17 +2268,17 @@ end subroutine add_matlu
 &   ' Diagonal part of the occupation matrix is complex: the imaginary part ',&
 &     maximagdiag,' is larger than',tol,ch10  &
 &    , "The calculation cannot handle it : check that your calculation is meaningfull"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if (maximag>tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
 &   ' Off diag occupation matrix is complex: the imaginary part ',maximag,' is larger than',tol,ch10&
     , "Check that your calculation is meaningfull"
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
 &   ' Occupation matrix is real: the imaginary part ',maximag,' is lower than',tol
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
  endif
  if (maxoffdiag>tol) then
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
@@ -2285,11 +2286,11 @@ end subroutine add_matlu
 &    , "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10&
 &    , "(Except if dmft_solv=8,9 where these elements are taken into accounts)",ch10&
 &    , "This is an approximation"
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,&
 &   ' Occupation matrix is diagonal : the off-diag part ',maxoffdiag,' is lower than',tol
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
  endif
 
  end subroutine checkreal_matlu
@@ -2303,7 +2304,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2318,7 +2319,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      compute_levels
+!!      m_datafordmft
 !!
 !! CHILDREN
 !!
@@ -2357,8 +2358,8 @@ end subroutine add_matlu
  !                call wrtout(std_out,message,'COLL')
  !                write(message,'(a,3e16.5)')" checkdiag_matlu: Warning ",matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor),tol
  !                call wrtout(std_out,message,'COLL')
- !                if(.not.present(opt)) MSG_ERROR("not present(opt)")
- !                if(matlu(1)%nspinor==1) MSG_ERROR("matlu%nspinor==1")
+ !                if(.not.present(opt)) ABI_ERROR("not present(opt)")
+ !                if(matlu(1)%nspinor==1) ABI_ERROR("matlu%nspinor==1")
  !              endif
 !             endif
              do ispinor1=1,matlu(1)%nspinor
@@ -2373,7 +2374,7 @@ end subroutine add_matlu
                !  call wrtout(std_out,message,'COLL')
                !  write(message,'(5i5)') im,im1,isppol,ispinor,ispinor
                !  call wrtout(std_out,message,'COLL')
-               !  if(matlu(1)%nspinor==1) MSG_ERROR("matlu%nspinor==1")
+               !  if(matlu(1)%nspinor==1) ABI_ERROR("matlu%nspinor==1")
                !endif
              enddo
            enddo ! ispinor
@@ -2394,7 +2395,7 @@ end subroutine add_matlu
 !! Do the matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2411,7 +2412,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      m_oper,qmc_prep_ctqmc
+!!      m_forctqmc,m_oper
 !!
 !! CHILDREN
 !!
@@ -2470,7 +2471,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2532,7 +2533,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2576,7 +2577,7 @@ end subroutine add_matlu
            if( real(matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor))<zero) then
              write(message,'(2a,2es13.5,a)') ch10," ln_matlu: PROBLEM " &
 &             , matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor)
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            endif
            matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor)= &
 &           log(matlu1(iatom)%mat(im,im,isppol,ispinor,ispinor))
@@ -2597,7 +2598,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2612,7 +2613,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc,m_hubbard_one
 !!
 !! CHILDREN
 !!
@@ -2645,7 +2646,7 @@ end subroutine add_matlu
    lpawu=matlu(iatom)%lpawu
    if(lpawu.ne.-1) then
      ll=lpawu
-     ABI_ALLOCATE(slm2ylm,(2*ll+1,2*ll+1))
+     ABI_MALLOC(slm2ylm,(2*ll+1,2*ll+1))
      slm2ylm=czero
      do im=1,2*ll+1
        mm=im-ll-1;jm=-mm+ll+1
@@ -2674,8 +2675,8 @@ end subroutine add_matlu
      do isppol=1,matlu(1)%nsppol
        do ispinor=1,matlu(1)%nspinor
          do ispinor2=1,matlu(1)%nspinor
-           ABI_ALLOCATE(mat_out_c,(2*ll+1,2*ll+1))
-           ABI_ALLOCATE(mat_inp_c,(2*ll+1,2*ll+1))
+           ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+           ABI_MALLOC(mat_inp_c,(2*ll+1,2*ll+1))
            mat_inp_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
            mat_out_c=czero
 
@@ -2718,12 +2719,12 @@ end subroutine add_matlu
            endif
 
            matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)=mat_out_c(:,:)
-           ABI_DEALLOCATE(mat_out_c)
-           ABI_DEALLOCATE(mat_inp_c)
+           ABI_FREE(mat_out_c)
+           ABI_FREE(mat_inp_c)
          enddo ! im
        enddo ! ispinor
      enddo ! isppol
-     ABI_DEALLOCATE(slm2ylm)
+     ABI_FREE(slm2ylm)
    endif ! lpawu
  enddo ! iatom
 
@@ -2739,7 +2740,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2757,7 +2758,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -2808,7 +2809,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2826,7 +2827,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!
@@ -2887,7 +2888,7 @@ end subroutine add_matlu
 !! Make the matlu the identity
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2903,7 +2904,7 @@ end subroutine add_matlu
 !! NOTES
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
 !!

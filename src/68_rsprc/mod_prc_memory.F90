@@ -7,7 +7,7 @@
 !! preconditionning of potential residuals.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (PMA).
+!! Copyright (C) 2009-2021 ABINIT group (PMA).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +56,7 @@ public :: prc_mem_free
 !! This subroutine allocates the module's main component
 !!
 !! PARENTS
-!!      prcrskerker1
+!!      m_prcref
 !!
 !! CHILDREN
 !!
@@ -72,11 +72,11 @@ integer, intent(in) :: nfft
 ! *********************************************************************
 
    if (.not. allocated(rdiemac))  then
-     ABI_ALLOCATE(rdiemac,(nfft))
+     ABI_MALLOC(rdiemac,(nfft))
    end if
    if(nfft.ne.size(rdiemac)) then ! This steps should be done over "istep" instead
-     ABI_DEALLOCATE(rdiemac)
-     ABI_ALLOCATE(rdiemac,(nfft))
+     ABI_FREE(rdiemac)
+     ABI_MALLOC(rdiemac,(nfft))
      cycle=0
    end if
 
@@ -91,7 +91,7 @@ integer, intent(in) :: nfft
 !! This subroutine deallocates the module's main component
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
 !!
@@ -104,7 +104,7 @@ implicit none
 ! *********************************************************************
 
    if (allocated(rdiemac))  then
-     ABI_DEALLOCATE(rdiemac)
+     ABI_FREE(rdiemac)
    end if
 
  end subroutine prc_mem_free

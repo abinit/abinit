@@ -1,0 +1,39 @@
+!Input file for the anaddb code. Analysis of the BaTiO3 DDB
+
+!Flags - no flags
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l    2      ! number of phonons in list 1
+  qph1l   0.0    0.0    0.0       1.0   ! (G point)
+          0.5    0.0    0.0       1.0   ! (X point)
+
+
+!Wavevector list number 2 (Gamma point only, with limiting direction
+!           in cartesian coordinates. )
+  nph2l  1         ! number of phonons in list 2
+  qph2l  0.0 0.0 1.0    0.0
+  asr 0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t23.ddb.out
+#%% test_chain = t23.abi, t24.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t24.abo,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Analyze the DDB of test23. Uses asr=0. 
+#%%   If asr is set to 1, the results of test 18 are recovered.
+#%%   The effect of asr choice is important in the case
+#%%   of BaTiO3, with the pseudopotentials that were used,
+#%%   see Ph. Ghosez's thesis.
+#%%   The option asr is shown to work on both Gamma and X points :
+#%%   the correction is obtained at Gamma, and transferred to X.
+#%%   Note that a DDB MUST include the Gamma point.
+#%%<END TEST_INFO>

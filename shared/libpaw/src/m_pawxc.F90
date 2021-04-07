@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawxc
 !! NAME
 !!  m_pawxc
@@ -7,7 +6,7 @@
 !!  XC+PAW related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2020 ABINIT group (MT, FJ, TR, GJ, TD)
+!!  Copyright (C) 2013-2021 ABINIT group (MT, FJ, TR, GJ, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -223,7 +222,7 @@ subroutine pawxc_xcpositron_local()
 
 ! *************************************************************************
 
- MSG_BUG(msg)
+ LIBPAW_BUG(msg)
 
 end subroutine pawxc_xcpositron_local
 !!***
@@ -268,6 +267,7 @@ end subroutine pawxc_xcpositron_wrapper
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -318,6 +318,7 @@ contains
 !!      m_pawxc
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -370,9 +371,10 @@ subroutine pawxc_size_dvxc_local()
 !Second derivative(s) of XC functional wrt density
  ndvxc_=0
  if (abs(order)>=2) then
-   if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
+   if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
+&      ixc==21.or.ixc==22) then
      ndvxc_=min(nspden,2)+1
-   else if ((ixc>=2.and.ixc<=6).or.ixc==50) then
+   else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
      ndvxc_=1
    else if (ixc==12.or.ixc==24) then
      ndvxc_=8
@@ -380,7 +382,8 @@ subroutine pawxc_size_dvxc_local()
 &           ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
      ndvxc_=15
    else if (ixc<0) then
-     ndvxc_=3 ; if (need_gradient) ndvxc_=15
+     ndvxc_=2*min(nspden,2)+1 ; if (order==-2) ndvxc_=2
+     if (need_gradient) ndvxc_=15
    end if
  end if
 
@@ -684,7 +687,7 @@ subroutine pawxc_mkdenpos_local()
    end if  ! option
  else
    msg='nspden>2 not allowed !'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if ! End choice between non-spin polarized and spin-polarized.
 
  if (numneg>0) then
@@ -693,7 +696,7 @@ subroutine pawxc_mkdenpos_local()
 &     'Density went too small (lower than xc_denpos) at',numneg,' points',ch10,&
 &     'and was set to xc_denpos=',xc_denpos,'.  Lowest was ',worst,'.',ch10,&
 &     'Likely due to too low boxcut or too low ecut for','pseudopotential core charge.'
-     MSG_WARNING(msg)
+     LIBPAW_WARNING(msg)
    end if
    iwarn=iwarn+1
  end if
@@ -918,7 +921,7 @@ end function pawxc_get_uselaplacian
 !!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
 !!
 !! PARENTS
-!!      m_pawpsp,pawdenpot
+!!      m_paw_denpot,m_pawpsp
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -983,47 +986,47 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !Compatibility tests
  if(nspden==4.and.nk3xc>0) then
    msg='K3xc for nspden=4 not implemented!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nk3xc>0.and.nkxc_updn==0) then
    msg='nkxc must be non-zero if nk3xc is!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2) then
    msg='GGA/mGGA for nspden=4 not implemented!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(pawang%angl_size==0) then
    msg='pawang%angl_size=0!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(.not.allocated(pawang%ylmr)) then
    msg='pawang%ylmr must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(xclevel==2.and.(.not.allocated(pawang%ylmrgr))) then
    msg='pawang%ylmrgr must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(option==4.or.option==5) then
    if (pawang%angl_size/=1) then
      msg='When option=4 or 5, pawang%angl_size must be 1!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (pawang%ylm_size/=1) then
      msg='When option=4 or 5, pawang%ylm_size must be 1!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (abs(pawang%anginit(1,1)-one)>tol12.or.abs(pawang%anginit(2,1))>tol12.or. &
 &   abs(pawang%anginit(3,1))>tol12) then
      msg='When option=4 or 5, pawang%anginit must be (1 0 0)!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
  if (option/=1.and.option/=5) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1048,7 +1051,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
  if (xclevel==0.or.ixc==0) then
    msg='Note that no xc is applied (ixc=0).'
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
 
  else
 
@@ -1084,14 +1087,14 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        with_taur=.true. ; tau_=> taur
        if (size(taur)/=nrad*lm_size*nspden) then
          msg='wrong size for taur!'
-         MSG_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      end if
      if (present(vxctau)) then
        need_vxctau=.true. ; vxctau_ => vxctau
        if (size(vxctau)/=nrad*pawang%angl_size*nspden) then
          msg='wrong size for vxctau!'
-         MSG_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      else if (option==0.or.option==2) then
        !Need to compute vxctau temporarily
@@ -1102,7 +1105,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        usecoretau=usecore
        if (size(coretau)/=nrad) then
          msg='wrong size for coretau!'
-         MSG_BUG(msg)
+         LIBPAW_BUG(msg)
        end if
      end if
    end if
@@ -1346,7 +1349,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
          end if
        else
          msg='MetaGGA ixc=34 is not yet allowed with a core kinetic energy density!'
-         MSG_ERROR(msg)
+         LIBPAW_ERROR(msg)
        end if
      end if
 
@@ -1806,7 +1809,7 @@ end subroutine pawxc
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -1847,24 +1850,24 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 !----- Check options
  if(ixcpositron==3.or.ixcpositron==31) then
    msg='GGA is not implemented (use pawxcdev/=0)!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(calctype/=1.and.calctype/=2) then
    msg='Invalid value for calctype!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(pawang%angl_size==0) then
    msg='pawang%angl_size=0!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(.not.allocated(pawang%ylmr)) then
    msg='pawang%ylmr must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1884,7 +1887,7 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 
  if (ixcpositron==0) then ! No xc at all is applied (usually for testing)
    msg = 'Note that no xc is applied (ixcpositron=0). Returning'
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -2116,7 +2119,7 @@ end subroutine pawxcpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -2183,35 +2186,35 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 
  if(option<0.or.option>3) then
    msg='wrong option!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(option/=3) then
    call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
    if (nkxc/=nkxc_cur) then
      msg='Wrong dimension for array kxc!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if(xclevel==2.and.nspden==4) then
      msg='PAW non-collinear magnetism not compatible with GGA!'
-     MSG_ERROR(msg)
+     LIBPAW_ERROR(msg)
    end if
  end if
  if(pawang%angl_size==0) then
    msg='pawang%angl_size=0!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(.not.allocated(pawang%ylmr)) then
    msg='pawang%ylmr must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(xclevel==2.and.(.not.allocated(pawang%ylmrgr))) then
    msg='pawang%ylmrgr must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -2233,7 +2236,7 @@ subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
 !Special case: no XC applied
  if (ixc==0.or.(nkxc==0.and.option/=3)) then
    msg='Note that no xc is applied (ixc=0). Returning'
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -3005,15 +3008,15 @@ end subroutine pawxc_dfpt
    write(msg, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin-densities are allowed,',ch10,&
 &   'while the argument nspden=',nspden
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(nkxc>3)then
    msg='nkxc>3 not allowed (GGA)!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(nrad>pawrad%mesh_size)then
    msg='nrad > mesh size!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Compute sizes of arrays and flags
@@ -3279,11 +3282,11 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
    write(msg, '(a,a,a,i0)' )&
 &   'Only non-spin-polarised or collinear spin-densities are allowed,',ch10,&
 &   'while the argument nspden=',nspden
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(nrad>pawrad%mesh_size)then
    msg='nrad > mesh size!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Compute sizes of arrays and flags
@@ -3582,7 +3585,7 @@ end subroutine pawxcsph_dfpt
 
  if(nrad>pawrad%mesh_size)then
    msg='nrad > mesh size!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Need gradient of density for GGA
@@ -3674,7 +3677,7 @@ end subroutine pawxcsphpositron
 !!    sum2(cplexsum*nrad,lm_size,nsums)=second order sums
 !!
 !! PARENTS
-!!      m_pawxc,poslifetime,posratecore
+!!      m_pawxc,m_positron
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -3704,11 +3707,11 @@ end subroutine pawxcsphpositron
 
  if(nsums/=1.and.nsums/=3) then
    msg='nsums must be 1 or 3!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(pawang%gnt_option==0) then
    msg='pawang%gnt_option=0!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  if (option>=1) then
@@ -4055,7 +4058,7 @@ end subroutine pawxcsphpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      m_pawpsp,pawdenpot
+!!      m_paw_denpot,m_pawpsp
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -4103,17 +4106,17 @@ end subroutine pawxcsphpositron
 !************************************************************************
 
  if(nkxc>3) then
-   msg='Kxc not implemented for GGA!'
-   MSG_ERROR(msg)
+   msg='Kxc not implemented for GGA! Use pawxcdev 0 '
+   LIBPAW_ERROR(msg)
  end if
  if(nkxc>0.and.nspden==4) then
    msg='Kxc not implemented for non-collinear magnetism!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if (option/=1.and.option/=5) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -4136,7 +4139,7 @@ end subroutine pawxcsphpositron
 
  if (xclevel==0.or.ixc==0) then ! No xc at all is applied (usually for testing)
    msg='Note that no xc is applied (ixc=0). Returning'
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -4847,7 +4850,7 @@ end subroutine pawxcsphpositron
 !!      Input  if option==3
 !!
 !! PARENTS
-!!      pawdenpot,pawdfptenergy
+!!      m_paw_denpot,m_paw_dfpt
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -4901,23 +4904,23 @@ end subroutine pawxcsphpositron
 
  if(option<0.or.option>3) then
    msg='wrong option!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if(option/=3) then
    call pawxc_get_nkxc(nkxc_cur,nspden,xclevel)
    if(nkxc/=nkxc_cur) then
      msg='Wrong size for kxc array!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
  if(nspden==4.and.option/=3) then
    msg='nspden=4 not implemented (for vxc)!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -4939,7 +4942,7 @@ end subroutine pawxcsphpositron
 !Special case: no XC applied
  if (ixc==0.or.(nkxc==0.and.option/=3)) then
    msg='Note that no xc is applied (ixc=0). Returning'
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -5197,7 +5200,7 @@ end subroutine pawxcsphpositron
 !! NOTES
 !!
 !! PARENTS
-!!      pawdenpot
+!!      m_paw_denpot
 !!
 !! CHILDREN
 !!      rotate_back_mag_dfpt
@@ -5245,12 +5248,12 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
 !----- Check options
  if(calctype/=1.and.calctype/=2) then
    msg='Invalid value for calctype'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (option/=1) then
    if (nrad<pawrad%int_meshsz) then
      msg='When option=0,2,3,4, nrad must be greater than pawrad%int_meshsz!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -5270,7 +5273,7 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
 
  if (ixcpositron==0) then ! No xc at all is applied (usually for testing)
    msg='Note that no xc is applied (ixc=0). Returning'
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
    return
  end if
 
@@ -5697,9 +5700,10 @@ end subroutine pawxcmpositron
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
 !!
 !! PARENTS
-!!      m_pawxc,respfn,nonlinear
+!!      m_nonlinear,m_pawxc,m_respfn_driver
 !!
 !! CHILDREN
+!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -5797,7 +5801,7 @@ end subroutine pawxcmpositron
 #else
  write(msg,'(5a)') 'libPAW XC driving routine only implemented in the following cases:',ch10, &
 &                  ' - ABINIT',ch10,' - libXC'
- MSG_BUG(msg)
+ LIBPAW_BUG(msg)
 #endif
 
  if (.false.) write(std_out,*) el_temp
@@ -5834,7 +5838,7 @@ subroutine pawxc_drivexc_abinit()
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))
  if (.not.test_args) then
    msg='missing mandatory arguments in pawxc_drivexc_wrapper'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  if (uselaplacian==1.or.usekden==1) then
@@ -5904,37 +5908,37 @@ subroutine pawxc_drivexc_libxc()
 !Check the compatibility of input arguments
  if (ixc>=0) then
    msg='ixc argument should be negative!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (ixc/=libxc_functionals_ixc()) then
    msg='The value of ixc differs from the one used to initialize the functional!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if ((order<1.and.order/=-2).or.order>4) then
    msg='The only allowed values for order are 1, 2, -2, or 3!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if ((order**2>1).and.(.not.present(dvxc))) then
    msg='The value of order is not compatible with the presence of the array dvxc!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if ((order==3).and.(.not.present(d2vxc))) then
    msg='The value of order is not compatible with the presence of the array d2vxc!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (libxc_functionals_isgga().or.libxc_functionals_ismgga()) then
    if ((.not.present(grho2)).or.(.not.present(vxcgrho)).or.&
 &      (usegradient==0).or.(nvxcgrho==0))  then
      write(msg,'(3a)') 'At least one of the functionals is a GGA,',ch10, &
 &      'but not all the necessary optional arguments are present.'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (libxc_functionals_needs_laplacian()) then
      if ((.not.present(lrho)).or.(.not.present(vxclrho)).or.&
 &        (uselaplacian==0).or.(nvxclrho==0))  then
        write(msg,'(3a)') 'At least one of the functionals is a mGGA,',ch10, &
 &        'but not all the necessary optional arguments are present.'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
    if (libxc_functionals_ismgga()) then
@@ -5942,13 +5946,13 @@ subroutine pawxc_drivexc_libxc()
 &        (usekden==0).or.(nvxctau==0))  then
        write(msg,'(3a)') 'At least one of the functionals is a mGGA,',ch10, &
 &        'but not all the necessary optional arguments are present.'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
  if ((uselaplacian==1.or.usekden==1).and.(usegradient==0)) then
    msg='Laplacian or kinetic energy density needs gradient!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Call LibXC routines
@@ -6206,7 +6210,7 @@ end subroutine pawxc_rotate_back_mag
  call rotate_back_mag_dfpt(1,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,1)
 #else
  msg='[LIBPAW] Non-collinear DFPT not available (only in ABINIT)!'
- MSG_ERROR(msg)
+ LIBPAW_ERROR(msg)
 #endif
 
 end subroutine pawxc_rotate_back_mag_dfpt

@@ -30,9 +30,9 @@ Subsequently, the GKK file is used to compute many quantities, as explained in
 [[topic:PhononWidth]], [[topic:TDepES]] and [[topic:ElPhonTransport]].
 
 A brand new ABINIT driver, focusing on the treatment of electron-phonon
-interaction is under development. Most of the input variables for experts,
-with [[optdriver]]==7 are related to this development, that is not yet
-operational as of v8.5.
+interaction is under heavy development. Most of the input variables for experts,
+with [[optdriver]]==7 are related to this development. It is operational
+as of v9.2, although the documentation is not yet fully upgraded.
 
 ## Related Input Variables
 
@@ -45,5 +45,11 @@ operational as of v8.5.
 ## Tutorials
 
 * [[tutorial:rf1|The tutorial Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
-* [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 
+* (Legacy implementation) [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+Also there is a tutorial for [[tutorial:tdepes|the temperature dependence of the electronic structure]]:.
+
+* (New implementation) Three tutorials for the new procedure are available at [[tutorial:eph_intro|an overview of the EPH code]], 
+[[tutorial:eph4zpr|Zero-point renormalization of the band gap and temperature-dependent band gaps]], and
+[[tutorial:eph4mob|Phonon-limited mobility]]
+:.

@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_Projected_AT
+!!      m_gwls_Projected_AT
 !!
 !! CHILDREN
 !!

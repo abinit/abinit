@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the Abinit software package. For license information,
 # please see the COPYING file in the top-level directory of the Abinit source
@@ -241,6 +241,14 @@ AC_DEFUN([ABI_INIT_CPU_INFO],[
           abi_cpu_model="opteron"
         fi
       fi
+      dnl EPYC ?
+      if test "${abi_cpu_model}" = ""; then
+        abi_cpu_model=`cat cpuinfo | grep -i 'EPYC'`
+        if test "${abi_cpu_model}" != ""; then
+          abi_cpu_vendor="amd"
+          abi_cpu_model="epyc"
+        fi
+      fi
       dnl Sempron ?
       if test "${abi_cpu_model}" = ""; then
         abi_cpu_model=`cat cpuinfo | grep 'Sempron'`
@@ -353,7 +361,7 @@ AC_DEFUN([ABI_INIT_OS_INFO],[
 AC_DEFUN([ABI_INIT_HEADER],[
   dnl Set top of file ...
   AH_TOP([/*
- * Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
+ * Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
  *
  * This file is part of the Abinit software package. For license information,
  * please see the COPYING file in the top-level directory of the Abinit source

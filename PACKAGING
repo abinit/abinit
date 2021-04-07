@@ -17,19 +17,17 @@ Development releases should not be packaged.
 
 
 
-External packages buildable within Abinit
------------------------------------------
+External packages on which Abinit is dependent
+----------------------------------------------
 
 Abinit depends on several other packages:
 
   * BLAS (mandatory)
   * LAPACK (mandatory)
-  * NetCDF (will become mandatory soon)
-  * ETSF I/O (might become mandatory soon)
-  * LibXC (recommended)
-  * FoX (may be safely disabled)
+  * NetCDF (mandatory)
+  * LibXC (mandatory)
   * AtomPAW (may safely be disabled)
-  * BigDFT (recommended)
+  * BigDFT (may safely be disabled)
   * Wannier90 (recommended)
 
 It is possible to build them within Abinit, by using the corresponding

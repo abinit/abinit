@@ -6,7 +6,7 @@
 !!   Screening object used in the BSE code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (MG)
+!!  Copyright (C) 2014-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@ MODULE m_screen
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t 
+ use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
 &                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
@@ -568,7 +568,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
    select case (W%fgg_qbz_stat)
    case (FGG_QBZ_ISALLOCATED)
      call fgg_free_0D(W%Fgg_qbz)
-     ABI_DT_FREE(W%Fgg_qbz)
+     ABI_FREE(W%Fgg_qbz)
      nullify(W%Fgg_qbz)
      W%fgg_qbz_stat = FGG_QBZ_ISPOINTER
 
@@ -577,7 +577,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
      nullify(W%Fgg_qbz)
 
    case default
-     MSG_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
+     ABI_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
    end select
 
  else if (firstchar(how,(/"A"/)) ) then
@@ -587,7 +587,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
    case (FGG_QBZ_ISPOINTER)
      ! Allocate memory
      nullify(W%Fgg_qbz)
-     ABI_DT_MALLOC(W%Fgg_qbz,)
+     ABI_MALLOC(W%Fgg_qbz,)
 
      call fgg_init(W%Fgg_qbz,W%npw,W%nomega,nqlwl)
      W%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
@@ -596,11 +596,11 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
      W%Fgg_qbz%has_mat = MAT_ALLOCATED  ! STORED --> ALLOCATED
 
    case default
-     MSG_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
+     ABI_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
    end select
 
  else
-   MSG_BUG(sjoin("Wrong how:", how))
+   ABI_BUG(sjoin("Wrong how:", how))
  end if
 
 end subroutine screen_fgg_qbz_set
@@ -684,7 +684,7 @@ end function screen_ihave_fgg
 !! W<screen_t>=The data structure to be nullified.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_screen
+!!      m_bethe_salpeter,m_screen
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -724,7 +724,7 @@ end subroutine screen_nullify
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -776,7 +776,7 @@ subroutine screen_free(W)
  select case (W%fgg_qbz_stat)
  case (FGG_QBZ_ISALLOCATED)
    call fgg_free_0D(W%Fgg_qbz)
-   ABI_DT_FREE(W%Fgg_qbz)
+   ABI_FREE(W%Fgg_qbz)
    nullify(W%Fgg_qbz)
    W%fgg_qbz_stat=FGG_QBZ_ISPOINTER
 
@@ -791,7 +791,7 @@ subroutine screen_free(W)
  ! Free the Fgg matrices.
  if (associated(W%Fgg)) then
    call fgg_free(W%Fgg)
-   ABI_DT_FREE(W%Fgg)
+   ABI_FREE(W%Fgg)
  end if
  !
  ! Free the plasmon pole tables.
@@ -833,7 +833,7 @@ end subroutine screen_free
 !!  W<screen_t>=The structure initialized with basic dimensions and arrays.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -902,7 +902,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
  !if (ALL(id_required /= (/MAT_W_M1, MAT_W/)) ) then
  if (all(id_required /= [MAT_INV_EPSILON])) then
-   MSG_ERROR(sjoin("id_required:",itoa(id_required),"not available"))
+   ABI_ERROR(sjoin("id_required:",itoa(id_required),"not available"))
  end if
 
  ! This part must be rationalized.
@@ -952,7 +952,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  W%has_fgg=0; if ( ANY(W%Info%wint_method == (/WINT_CONTOUR, WINT_AC/)) ) W%has_fgg=1
 
  if (W%has_fgg>0 .and. W%has_ppmodel>0) then
-   MSG_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory")
+   ABI_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory")
  end if
 
  ! G-sphere for W and Sigma_c is initialized from the SCR file.
@@ -1000,20 +1000,20 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
        write(msg,'(a,i8,2a,i8)')&
         'The number of G-vectors saved on file is less than the value required = ',npw_asked,ch10,&
         'Calculation will proceed with the Max available npw = ',Hscr%npwe
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      else
        W%npw=npw_asked ! Redefine the no. of G"s for W.
        write(msg,'(a,i8,2a,i8)')&
         'The Number of G-vectors saved on file is larger than the value required = ',npw_asked,ch10,&
         'Calculation will proceed with npw = ',W%npw
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
      end if
    end if
    !
    ! consistency check on G-vectors and q-points.
    if ( ANY(Hscr%gvec(:,1:W%npw) /= Gsph%gvec(:,1:W%npw)) ) then
      !write(std_out) W%gvec, Gsph%gvec
-     MSG_ERROR("Hscr%gvec /= Gsph%gvec(1:W%npw)")
+     ABI_ERROR("Hscr%gvec /= Gsph%gvec(1:W%npw)")
    end if
    ABI_CHECK(Hscr%nqibz==Qmesh%nibz,"Mismatch in the number of q-points")
    ierr=0
@@ -1050,7 +1050,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  nomega = W%nomega
  nI     = W%ni
  nJ     = W%nj
- ABI_DT_MALLOC(W%Fgg,(nqibz))
+ ABI_MALLOC(W%Fgg,(nqibz))
 
  if (from_file) then
 
@@ -1060,14 +1060,14 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      call wrtout(std_out,strcat("Em1 will be initialized from SCR file: ",W%fname),"COLL")
      !
    case  (MAT_CHI0)  ! Write new SCR file.
-     MSG_ERROR("Not coded yet")
+     ABI_ERROR("Not coded yet")
      sus_fname = W%fname; scr_fname="TESTING_SUS2SCR"
 
      W%fname = scr_fname  ! Change the name of the file associated to W.
      !
    case default
      write(msg,'(a,i0)')" Unsupported conversion from mat_type ",mat_type_read
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end select
 
    do iq_ibz=1,nqibz
@@ -1109,7 +1109,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      ! Calculate the model. Note that mdielf awaits an index in the BZ.
      found = has_bz_item(Qmesh,Qmesh%ibz(:,iq_ibz),iq_bz,g0)
      if (.not.found.or.ANY(g0/=0)) then
-       MSG_ERROR("Problem in retrieving ibz point")
+       ABI_ERROR("Problem in retrieving ibz point")
      end if
      !
      ! Allocate F_{GG'}(w).
@@ -1139,7 +1139,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  !
  ! Init plasmon-pole parameters.
  if (W%has_ppmodel>0) then
-   MSG_WARNING("Calculating PPmodel parameters")
+   ABI_WARNING("Calculating PPmodel parameters")
    ppmodel = W%Info%use_ppm; drude_plsmf = W%Info%drude_plsmf
    call ppm_init(W%PPm,W%mqmem,W%nqibz,W%npw,ppmodel,drude_plsmf,W%Info%invalid_freq)
 
@@ -1196,7 +1196,7 @@ end subroutine screen_init
 !!  to reconstruct the BZ.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -1256,7 +1256,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
    end if
 
  else if (screen_ihave_fgg(W,iq_ibz,how="Allocated")) then
-   MSG_ERROR("Fgg_iqibz is allocated but not initialized!")
+   ABI_ERROR("Fgg_iqibz is allocated but not initialized!")
 
  else
    if (W%fgg_qbz_idx /= iq_bz) then
@@ -1290,7 +1290,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
    ! Ppmodel calculations with ppm tables in memory.
    ! TODO treat the case in which IBZ tables are stored in memory.
    if (W%has_ppmodel>0) then
-     MSG_ERROR("Not implemented error")
+     ABI_ERROR("Not implemented error")
      ! Symmetrize the ppmodel using em1_qibz.
      !%call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,em1_qibz,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
      call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg_qbz%mat ,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
@@ -1347,7 +1347,7 @@ end subroutine screen_symmetrizer
 !!   *  where alpha and beta are scalars, x and y are vectors and A is an m by n matrix.
 !!
 !! PARENTS
-!!      exc_build_block
+!!      m_exc_build
 !!
 !! CHILDREN
 !!      get_bz_item,sqmat_itranspose
@@ -1394,7 +1394,7 @@ subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out
          out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig) + beta * out_ket(ig)
        end do
      else
-       MSG_ERROR(sjoin("Wrong trans:", trans))
+       ABI_ERROR(sjoin("Wrong trans:", trans))
      end if
 
    else
@@ -1408,7 +1408,7 @@ subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out
          out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig)
        end do
      else
-       MSG_ERROR(sjoin("Wrong trans:", trans))
+       ABI_ERROR(sjoin("Wrong trans:", trans))
      end if
 
    end if

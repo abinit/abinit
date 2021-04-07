@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2021 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,10 +86,13 @@ contains
 !!    at output, values at time t+dt
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
-!!      pimd_energies,pimd_initvel,pimd_print,pimd_stresses,xcart2xred
+!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
+!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_mass_spring
+!!      pimd_nosehoover_forces,pimd_nosehoover_propagate,pimd_predict_taylor
+!!      pimd_predict_verlet,pimd_print,pimd_stresses,wrtout,xcart2xred
 !!      xred2xcart
 !!
 !! SOURCE
@@ -129,13 +132,13 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !############# Initializations ###########################
 
 !Allocation of local arrays
- ABI_ALLOCATE(xcart,(3,natom,trotter))
- ABI_ALLOCATE(xcart_prev,(3,natom,trotter))
- ABI_ALLOCATE(xcart_next,(3,natom,trotter))
- ABI_ALLOCATE(forces_orig,(3,natom,trotter))
- ABI_ALLOCATE(forces_pimd,(3,natom,trotter))
- ABI_ALLOCATE(inertmass,(natom))
- ABI_ALLOCATE(quantummass,(natom))
+ ABI_MALLOC(xcart,(3,natom,trotter))
+ ABI_MALLOC(xcart_prev,(3,natom,trotter))
+ ABI_MALLOC(xcart_next,(3,natom,trotter))
+ ABI_MALLOC(forces_orig,(3,natom,trotter))
+ ABI_MALLOC(forces_pimd,(3,natom,trotter))
+ ABI_MALLOC(inertmass,(natom))
+ ABI_MALLOC(quantummass,(natom))
 
 !Fill in the local variables
  ndof=3*natom*trotter
@@ -153,9 +156,9 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !qmass(nnos) = masses of thermostats
 !specific to PIMD: pitransform = coordinate transformation (0:no; 1:normal mode; 2:staging)
  nnos=pimd_param%nnos
- ABI_ALLOCATE(qmass,(nnos))
- ABI_ALLOCATE(zeta,(nnos))
- ABI_ALLOCATE(dzeta,(3,natom,trotter,nnos))
+ ABI_MALLOC(qmass,(nnos))
+ ABI_MALLOC(zeta,(nnos))
+ ABI_MALLOC(dzeta,(3,natom,trotter,nnos))
  qmass(1:nnos)=pimd_param%qmass(1:nnos)
  zeta=zero;dzeta=zero
 
@@ -214,18 +217,18 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  end do
 
 !Free memory
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xcart_prev)
- ABI_DEALLOCATE(xcart_next)
- ABI_DEALLOCATE(forces_orig)
- ABI_DEALLOCATE(forces_pimd)
- ABI_DEALLOCATE(inertmass)
- ABI_DEALLOCATE(quantummass)
- ABI_DEALLOCATE(masseff)
- ABI_DEALLOCATE(springeff)
- ABI_DEALLOCATE(qmass)
- ABI_DEALLOCATE(dzeta)
- ABI_DEALLOCATE(zeta)
+ ABI_FREE(xcart)
+ ABI_FREE(xcart_prev)
+ ABI_FREE(xcart_next)
+ ABI_FREE(forces_orig)
+ ABI_FREE(forces_pimd)
+ ABI_FREE(inertmass)
+ ABI_FREE(quantummass)
+ ABI_FREE(masseff)
+ ABI_FREE(springeff)
+ ABI_FREE(qmass)
+ ABI_FREE(dzeta)
+ ABI_FREE(zeta)
 
 end subroutine pimd_nosehoover_npt
 !!***
@@ -273,7 +276,7 @@ end subroutine pimd_nosehoover_npt
 !!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996) [[cite:Tuckerman1996]]
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
 !!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
@@ -322,13 +325,13 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !############# Initializations ###########################
 
 !Allocation of local arrays
- ABI_ALLOCATE(xcart,(3,natom,trotter))
- ABI_ALLOCATE(xcart_prev,(3,natom,trotter))
- ABI_ALLOCATE(xcart_next,(3,natom,trotter))
- ABI_ALLOCATE(forces_orig,(3,natom,trotter))
- ABI_ALLOCATE(forces_pimd,(3,natom,trotter))
- ABI_ALLOCATE(inertmass,(natom))
- ABI_ALLOCATE(quantummass,(natom))
+ ABI_MALLOC(xcart,(3,natom,trotter))
+ ABI_MALLOC(xcart_prev,(3,natom,trotter))
+ ABI_MALLOC(xcart_next,(3,natom,trotter))
+ ABI_MALLOC(forces_orig,(3,natom,trotter))
+ ABI_MALLOC(forces_pimd,(3,natom,trotter))
+ ABI_MALLOC(inertmass,(natom))
+ ABI_MALLOC(quantummass,(natom))
 
 !Fill in the local variables
  ndof=3*natom*trotter
@@ -348,11 +351,11 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !qmass(nnos) = masses of thermostats
 !specific to PIMD: pitransform = coordinate transformation (0:no; 1:normal mode; 2:staging)
  nnos=pimd_param%nnos
- ABI_ALLOCATE(qmass,(nnos))
- ABI_ALLOCATE(zeta_prev,(3,natom,trotter,nnos))
- ABI_ALLOCATE(zeta,(3,natom,trotter,nnos))
- ABI_ALLOCATE(zeta_next,(3,natom,trotter,nnos))
- ABI_ALLOCATE(dzeta,(3,natom,trotter,nnos))
+ ABI_MALLOC(qmass,(nnos))
+ ABI_MALLOC(zeta_prev,(3,natom,trotter,nnos))
+ ABI_MALLOC(zeta,(3,natom,trotter,nnos))
+ ABI_MALLOC(zeta_next,(3,natom,trotter,nnos))
+ ABI_MALLOC(dzeta,(3,natom,trotter,nnos))
 !initialization
  qmass(1:nnos)=pimd_param%qmass(1:nnos)
  zeta_prev(:,:,:,:)=pimd_param%zeta_prev(:,:,:,:)
@@ -362,11 +365,11 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !Masses and spring constants (according to pitransform)
  select case(pitransform)
  case(0)
-   ABI_ALLOCATE(mass,(natom,1))
-   ABI_ALLOCATE(spring,(natom,1))
+   ABI_MALLOC(mass,(natom,1))
+   ABI_MALLOC(spring,(natom,1))
  case(1,2)
-   ABI_ALLOCATE(mass,(natom,trotter))
-   ABI_ALLOCATE(spring,(natom,trotter))
+   ABI_MALLOC(mass,(natom,trotter))
+   ABI_MALLOC(spring,(natom,trotter))
  end select
  spring_prim(:)=quantummass(:)*dble(trotter)*kt*kt
 
@@ -506,20 +509,20 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  pimd_param%dzeta(:,:,:,:)    =dzeta(:,:,:,:)
 
 !Free memory
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xcart_prev)
- ABI_DEALLOCATE(xcart_next)
- ABI_DEALLOCATE(forces_orig)
- ABI_DEALLOCATE(forces_pimd)
- ABI_DEALLOCATE(inertmass)
- ABI_DEALLOCATE(quantummass)
- ABI_DEALLOCATE(mass)
- ABI_DEALLOCATE(spring)
- ABI_DEALLOCATE(qmass)
- ABI_DEALLOCATE(zeta_prev)
- ABI_DEALLOCATE(zeta)
- ABI_DEALLOCATE(zeta_next)
- ABI_DEALLOCATE(dzeta)
+ ABI_FREE(xcart)
+ ABI_FREE(xcart_prev)
+ ABI_FREE(xcart_next)
+ ABI_FREE(forces_orig)
+ ABI_FREE(forces_pimd)
+ ABI_FREE(inertmass)
+ ABI_FREE(quantummass)
+ ABI_FREE(mass)
+ ABI_FREE(spring)
+ ABI_FREE(qmass)
+ ABI_FREE(zeta_prev)
+ ABI_FREE(zeta)
+ ABI_FREE(zeta_next)
+ ABI_FREE(dzeta)
 
 end subroutine pimd_nosehoover_nvt
 !!***

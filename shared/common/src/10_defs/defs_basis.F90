@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_basis
 !! NAME
 !! defs_basis
@@ -8,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2020 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2021 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -137,6 +136,9 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+ real(sp), parameter :: zero_sp=0._sp
+ real(sp), parameter :: one_sp=1._sp
+
 !Fractionary real constants
  real(dp), parameter :: half=0.50_dp
  real(dp), parameter :: onehalf=1.50_dp
@@ -190,6 +192,9 @@ module defs_basis
  real(dp), parameter :: tol14=0.00000000000001_dp
  real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
+ real(dp), parameter :: tol17=0.00000000000000010_dp
+ real(dp), parameter :: tol18=0.000000000000000001_dp
+ real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
  real(dp), parameter :: tol30=1.0d-30
 
@@ -250,15 +255,21 @@ module defs_basis
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 !Complex constants
- complex(dpc), parameter :: czero=(0._dp,0._dp)
- complex(dpc), parameter :: cone =(1._dp,0._dp)
- complex(dpc), parameter :: j_dpc=(0._dp,1.0_dp)
+ !double precision
+ complex(dpc), parameter :: czero = (0._dp,0._dp)
+ complex(dpc), parameter :: cone  = (1._dp,0._dp)
+ complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
+
+ ! single-precision
+ complex(spc), parameter :: czero_sp = (0._sp,0._sp)
+ complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
  complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
-&                                                         czero,cone,cone,czero,&
-&                                                         czero,j_dpc,-j_dpc,czero,&
-&                                                         cone,czero,czero,-cone], [2,2,4])
+                                                          czero,cone,cone,czero,&
+                                                          czero,j_dpc,-j_dpc,czero,&
+                                                          cone,czero,czero,-cone], [2,2,4])
 
 !Character constants
  character(len=1), parameter :: ch10 = char(10)
@@ -294,7 +305,7 @@ module defs_basis
  integer, parameter, public :: RUNL_WFK        = 8
  integer, parameter, public :: RUNL_GWLS       = 66
  integer, parameter, public :: RUNL_BSE        = 99 !9
- integer, parameter, public :: RUNL_LONGWAVE   = 10 
+ integer, parameter, public :: RUNL_LONGWAVE   = 10
 
  ! Integer flags defining the task to be performed in wfk_analyze
  integer,public,parameter :: WFK_TASK_NONE      = 0
@@ -410,7 +421,7 @@ CONTAINS  !=====================================================================
 !!  new_do_write_status=new value for do_write_status
 !!
 !! PARENTS
-!!      iofn1,m_argparse
+!!      m_argparse,m_dtfil
 !!
 !! CHILDREN
 !!
@@ -448,10 +459,10 @@ CONTAINS  !=====================================================================
 !!  new_io_comm=new value for IO MPI communicator
 !!
 !! PARENTS
-!!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver
-!!      dummy_tests,fftprof,fold2Bloch,initmpi_world,ioprof,lapackprof
-!!      m_io_redirect,macroave,memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr
-!!      multibinit,optic,ujdet,vdw_kernelgen
+!!      abinit,abitk,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
+!!      fold2Bloch,ioprof,lapackprof,m_driver,m_io_redirect,m_memeval
+!!      m_mpi_setup,m_mpinfo,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit
+!!      optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!
@@ -488,7 +499,7 @@ CONTAINS  !=====================================================================
 !!   Only printing.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_argparse
+!!      abinit,m_argparse,m_errors
 !!
 !! CHILDREN
 !!

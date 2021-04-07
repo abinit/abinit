@@ -1,0 +1,70 @@
+# Fe atom in a big box
+# Perform the computation of the Gamma dynamical matrix.
+
+ ndtset 2
+
+#Dataset 1 : SCF
+  tolvrs1  1.0d-13
+   nstep1  30
+
+#Dataset 2 : RF at q=0 0 0   (this is always needed for IFCs)
+
+  getwfk2  1
+    nqpt2  1
+     qpt2  0.0 0.0 0.0
+ rfatpol2  1 1
+   rfdir2  1 1 1
+  rfphon2  1
+  tolvrs2  1.0d-10
+   nstep2  15
+
+#Common data
+
+ ecut 18
+ diemac 2.0
+ diemix 0.4
+ acell 3*7.00
+
+ ixc    1
+ natom  1
+ nband 2*7
+ nline 6
+ nsppol 2
+ spinat 0.0 0.0 4.0
+ ntypat  1
+ occopt 2
+ occ 6*1.0    1*0.0
+     6*1/3     1*0.0
+  kptopt 0
+ nkpt  1
+ kpt 0.0 0.0 0.0
+ wtk 1.0
+
+ typat  1
+ xred  0.0 0.0 0.0
+ znucl 26.0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/26fe.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t19.abo, tolnlines = 1, tolabs = 1.010e-03, tolrel = 4.000e-04, fld_options =  -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = NC, DFPT
+#%% description = 
+#%%     Fe, one atom in a big box.
+#%%     Test spin-polarized GS and RF calculation, at fixed occupation
+#%%     number. Check acoustic sum rule.
+#%%     The ecut is 18 Hartree. It seems quite low, but gives
+#%%     phonon frequency of 3.83i cm-1, which is quite small,
+#%%     while increasing it to 22 Ha or 26 Ha, respectively,
+#%%     gives 4.73i cm-1 and 1.32i cm-1, respectively.
+#%%<END TEST_INFO>

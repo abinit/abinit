@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2020 ABINIT group (MG)
+!! Copyright (C) 2010-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,7 +71,7 @@ ABI_MALLOC(class_names,(1))
  class_names(1) = "1+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (1))
+ ABI_MALLOC(Irr, (1))
  Irr(1)%name = "A"
  Irr(1)%dim = 1
  Irr(1)%nsym = 1

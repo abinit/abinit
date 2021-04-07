@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_io
 !! NAME
 !!  m_paw_io
@@ -7,7 +6,7 @@
 !!  PAW I/O related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (MT, TR)
+!!  Copyright (C) 2012-2021 ABINIT group (MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,8 +82,7 @@ CONTAINS !===========================================================
 !!  Ha_or_eV= 1: output in hartrees, 2: output in eV
 !!
 !! PARENTS
-!!      m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij,pawmkrhoij,pawprt
-!!      setrhoijpbe0,wfd_pawrhoij
+!!      m_paw_correlations,m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij
 !!
 !! CHILDREN
 !!      wrtout

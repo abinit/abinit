@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_flexo
 !! NAME
 !!  m_ddb_flexo
@@ -7,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019 ABINIT group (MR,MS)
+!!  Copyright (C) 2019-2021 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,9 +74,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!  anaddb
+!!      anaddb
 !!
 !! CHILDREN
+!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -350,9 +350,10 @@ end subroutine ddb_flexo
 !! ciflexo(3,3,3,3) = type-II Clamped Ion Flexoelectric Tensor
 !!
 !! PARENTS
-!!      m_ddb
+!!      m_ddb_flexo
 !!
 !! CHILDREN
+!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -460,9 +461,10 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix
 !!
 !! PARENTS
-!!      m_ddb
+!!      m_ddb_flexo
 !!
 !! CHILDREN
+!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -690,9 +692,10 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! lattflexo(3,3,3,3) = type-II lattice contribution to the Flexoelectric Tensor
 !!
 !! PARENTS
-!!      m_ddb
+!!      m_ddb_flexo
 !!
 !! CHILDREN
+!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -1277,7 +1280,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 &   '  are too large at Gamma point.',ch10,&
 &   '  Increase cutoff energy or k-points sampling.',ch10,&
 &   '  The three eigenvalues are:',Apmatr(3*natom-2,3*natom-2),Apmatr(3*natom-1,natom-1),Apmatr(3*natom,3*natom)
-   MSG_WARNING(message)
+   ABI_WARNING(message)
    call wrtout(iout,message,'COLL')
  end if
 

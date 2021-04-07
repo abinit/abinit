@@ -11,7 +11,7 @@
 !!   one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -203,7 +203,6 @@ CONTAINS  !=====================================================================
 !!      m_gsphere
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -249,7 +248,7 @@ subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,gr
 &         'G-shell not closed',ch10,&
 &         '  Initial G vector ',ig1,'/',npw,gbase(:),' Rotated G vector ',grot(:),ch10,&
 &         '  Through sym ',isym,' and itim ',itim
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
      end do
    end do
@@ -287,11 +286,10 @@ end subroutine setup_G_rotation
 !!  gvec are supposed to be ordered with increasing norm.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,m_gsphere,mrgscr,setup_bse,setup_bse_interp
-!!      setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_gsphere,m_gwls_hamiltonian,m_screening_driver
+!!      m_sigma_driver,mrgscr
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -340,7 +338,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
 
  if (PRESENT(gvec)) then
    if (PRESENT(ecut)) then
-     MSG_BUG("ecut cannot be present when gvec is used")
+     ABI_BUG("ecut cannot be present when gvec is used")
    end if
    Gsph%ng= ng
    ABI_MALLOC(Gsph%gvec,(3,ng))
@@ -361,7 +359,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
 
  else
    ! To be consistent with the previous implementation.
-   MSG_WARNING("Init from ecut has to be tested")
+   ABI_WARNING("Init from ecut has to be tested")
    !call setshells(ecut,npw,nsh,nsym,Cryst%gmet,Cryst%gprimd,Cryst%symrel,tag,Cryst%ucvol)
    Gsph%ecut = ecut
    pinv=+1; kptns1(:,1)=k_gamma
@@ -451,7 +449,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
        img = isearch; exit
      end if
    end do
-   if (img==0) MSG_ERROR("Cannot find -G in G-sphere!")
+   if (img==0) ABI_ERROR("Cannot find -G in G-sphere!")
    gsph%g2mg(ig) = img
  end do
 
@@ -485,11 +483,9 @@ end subroutine gsph_init
 !!  The routine will stop if any G-G0 happens to be outside the FFT box.
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
-!!      exc_build_block,exc_build_ham,prep_calc_ucrpa
+!!      m_chi0,m_cohsex,m_exc_build,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -516,7 +512,7 @@ subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 ! *************************************************************************
 
  if (mgfft/=MAXVAL(ngfft(1:3))) then
-   MSG_ERROR("mgfft/-MAXVAL(ngfft(1:3)")
+   ABI_ERROR("mgfft/-MAXVAL(ngfft(1:3)")
  end if
 
  ng = Gsph%ng
@@ -536,7 +532,7 @@ subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 
  if (ierr/=0) then
    write(msg,'(a,i0,a)')'Found ',ierr,' G-G0 vectors falling outside the FFT box. This is not allowed '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! Evaluate the tables needed for the padded FFT performed in rhotwg. Note that we have
@@ -577,10 +573,9 @@ end subroutine gsph_fft_tabs
 !!   completetly initialized in output.
 !!
 !! PARENTS
-!!      cchi0,cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -648,7 +643,7 @@ subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
  end do star_loop
 
  if (npw<Gsph%ng) then
-   MSG_COMMENT("Have to reinit Gpshere")
+   ABI_COMMENT("Have to reinit Gpshere")
    ABI_MALLOC(gvec,(3,npw))
    gvec =Gsph%gvec(:,1:npw)
    call gsph_free(Gsph)
@@ -678,10 +673,9 @@ end subroutine gsph_in_fftbox
 !!  Only writing.
 !!
 !! PARENTS
-!!      cchi0q0,gwls_hamiltonian,setup_bse,setup_bse_interp
+!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -718,7 +712,7 @@ subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
  CASE (2)
    call wrtout(my_unt,' Time reversal symmetry is used',my_mode)
  CASE DEFAULT
-   MSG_BUG("Wrong timrev")
+   ABI_BUG("Wrong timrev")
  END SELECT
 
  if (my_prtvol/=0) then
@@ -750,11 +744,10 @@ end subroutine print_gsphere
 !!   Gsph = datatype to be freed
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0,cchi0q0,gwls_hamiltonian,m_gsphere,mrgscr
-!!      screening,sigma
+!!      m_bethe_salpeter,m_chi0,m_gsphere,m_gwls_hamiltonian,m_screening_driver
+!!      m_sigma_driver,mrgscr
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -963,91 +956,6 @@ end function gsph_gmg_fftidx
 
 !----------------------------------------------------------------------
 
-!!****f* m_gsphere/prune_g1mg2
-!! NAME
-!! prune_g1mg2
-!!
-!! FUNCTION
-!! Given a list of G-vectors, evalute any possible difference G1-G2
-!! remove duplicated differences and report the list of inequivalent G-vectors.
-!!
-!! INPUTS
-!!  npw=Number of plane waves
-!!  gvec(3,npw)= the reciprocal lattice vectors of the PW
-!!
-!! OUTPUT
-!!  ngdiff=Number of inequivalent differences G1-G2
-!!  g1mg2(3,ngdiff)=The set of inequivalent G1-G2 vectors.
-!!
-!! TODO
-!!  Loop by shells to have better scaling.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      gsph_free,gsph_init
-!!
-!! SOURCE
-
-subroutine prune_g1mg2(npw,gvec,ngdiff,g1mg2)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: npw
- integer,intent(out) :: ngdiff
-!arrays
- integer,intent(in) :: gvec(3,npw)
- integer,allocatable,intent(out) :: g1mg2(:,:)
-
-!Local variables ------------------------------
-!scalars
- integer :: ii,ig1,ig2
- logical :: found
- character(len=500) :: msg
-!arrays
- integer :: gdiff(3)
- integer,allocatable :: g1mg2_tmp(:,:)
-
-!************************************************************************
-
- ABI_MALLOC(g1mg2_tmp,(3,9*npw))
-
- ngdiff=0
- do ig2=1,npw
-   do ig1=1,npw
-    gdiff = gvec(:,ig1) - gvec(:,ig2)
-
-    found=.FALSE. ; ii=0
-    do while (.not.found .and. ii<ngdiff)
-      ii = ii+1
-      found = ALL(gdiff == g1mg2_tmp(:,ii) )
-    end do
-
-    if (.not.found) then
-      ngdiff = ngdiff + 1
-      if (ngdiff > 9*npw) GOTO 100
-      g1mg2_tmp(:,ngdiff) = gdiff
-    end if
-
-   end do
- end do
-
- ! * Save results
- ABI_MALLOC(g1mg2,(3,ngdiff))
- g1mg2 = g1mg2_tmp(:,1:ngdiff)
- ABI_FREE(g1mg2_tmp)
-
- RETURN
-
-100 continue
- write(msg,'(2(a,i6))')' ngdiff = ',ngdiff,' > 9*npw = ',9*npw
- MSG_BUG(msg)
-
-end subroutine prune_g1mg2
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gsphere/merge_and_sort_kg
 !! NAME
 !!  merge_and_sort_kg
@@ -1077,10 +985,9 @@ end subroutine prune_g1mg2
 !!               where nbase is the number of irreducible G"s found.
 !!
 !! PARENTS
-!!      m_gsphere,m_io_kss,outkss,setup_sigma
+!!      m_gsphere,m_io_kss,m_sigma_driver
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1164,7 +1071,7 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    call kpgsph(ecut,exchn2n3d,gmet,ikg,0,istwf_k,gcurr,kpoint,mkmem_,MPI_enreg_seq,npw_k,onpw_k)
 
    if (ANY(gcurr(:,1)/=0)) then
-     MSG_BUG("gcurr(:,1)/=0")
+     ABI_BUG("gcurr(:,1)/=0")
    end if
    !
    ! * Search for the G"s generating the others by symmetry.
@@ -1183,7 +1090,7 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
 
  call merge_kgirr(nsym2,pinv,nkpt,mpw,sizepw,symrec2t,nbasek,cnormk,gbasek,nbase,gbase,cnorm,ierr)
  if (ierr/=0) then
-   MSG_ERROR('merge_kgirr returned a non-zero status error')
+   ABI_ERROR('merge_kgirr returned a non-zero status error')
  end if
 
  ABI_FREE(nbasek)
@@ -1237,7 +1144,7 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    if ((maxpw+nshell(in)) > sizepw) then
      ! We need to increase the size of the gbase, gbig and cnorm arrays while still keeping their content.
      ! This is done using two temporary arrays gtmp and ctmp
-     MSG_WARNING("Had to reallocate gbase, gbig, cnorm")
+     ABI_WARNING("Had to reallocate gbase, gbig, cnorm")
      ABI_MALLOC(ctmp,(sizepw))
      ABI_MALLOC(gtmp,(3,sizepw))
      sizeold=sizepw
@@ -1354,7 +1261,6 @@ end subroutine merge_and_sort_kg
 !!      m_gsphere
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1383,7 +1289,7 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
  if (pinv/=1.and.pinv/=-1) then
    write(msg,'(a,i6)')&
 &   ' The argument pinv should be -1 or 1, however, pinv =',pinv
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! === Reorder base g-vectors in order of increasing module ===
@@ -1432,7 +1338,7 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
      write(msg,'(a,i6,2a)')&
 &     ' Number of G in sphere exceeds maximum allowed value =',sizepw,ch10,&
 &     ' check the value of sizepw in calling routine '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      ierr=1; RETURN
    end if
    !
@@ -1498,7 +1404,6 @@ end subroutine getfullg
 !!      m_gsphere,m_skw
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1528,7 +1433,7 @@ subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
  DBG_ENTER("COLL")
 
  if (pinv/=1.and.pinv/=-1) then
-   MSG_BUG(sjoin('pinv should be -1 or 1, however, pinv =', itoa(pinv)))
+   ABI_BUG(sjoin('pinv should be -1 or 1, however, pinv =', itoa(pinv)))
  end if
 
  ! Zero irred G vectors found, zeroing output arrays.
@@ -1595,7 +1500,6 @@ end subroutine get_irredg
 !!      m_gsphere
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1626,7 +1530,7 @@ subroutine merge_kgirr(nsym,pinv,nkpt,mpw,sizepw,symrec,nbasek,cnormk,gbasek,nba
 
  if (pinv/=1.and.pinv/=-1) then
    write(msg,'(a,i6)')' The argument pinv should be -1 or 1, however, pinv =',pinv
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! === Start with zero number of G found ===
@@ -1655,7 +1559,7 @@ subroutine merge_kgirr(nsym,pinv,nkpt,mpw,sizepw,symrec,nbasek,cnormk,gbasek,nba
        if (nbase>sizepw) then
          write(msg,'(2(a,i5),a)')&
 &         ' nbase (',nbase,') became greater than sizepw = ',sizepw,' returning ierr=1 '
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          ierr=1; RETURN
        end if
        cnorm(nbase)=cnormk(irgk,ikpt)
@@ -1696,10 +1600,9 @@ end subroutine merge_kgirr
 !!  nsh=number of shells
 !!
 !! PARENTS
-!!      invars2m,setup_screening,setup_sigma
+!!      m_invars2,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -1738,7 +1641,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    write(msg,'(8a)')&
     'One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
     'must be non-null. Returning.'
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    RETURN
  end if
  ! 2-> one and only one should be non-null
@@ -1746,19 +1649,19 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    write(msg,'(6a)')&
     'Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
     'can be non-null. Modify the value of one of these in input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ecut>tol6.and.npw/=0) then
    write(msg,'(6a)')&
     'Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
     'can be non-null. Modify the value of one of these in input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (ecut>tol6.and.nsh/=0) then
    write(msg,'(6a)')&
     'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
     'can be non-null Action : modify the value of one of these in input file.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Calculate an upper bound for npw.
@@ -1851,13 +1754,12 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 
    if(ecut>tol6) then
      ! ecut is given in the input
-     if (ecut_found<ecut-0.1) then
-       write(msg,'(3a,e14.6,9a,e14.6,3a)')&
-        'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
-        'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
-        'This value will be adopted for the calculation.',ch10
-       MSG_WARNING(msg)
-     end if
+     !if (ecut_found<ecut-0.1) then
+     !  write(msg,'(3a,e14.6,9a,e14.6,3a)')&
+     !   'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
+     !   'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10
+     !  ABI_COMMENT(msg)
+     !end if
      ifound=1
    else if (npw/=0) then
      ! If npw is given in the input
@@ -1884,7 +1786,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
           'The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
           'The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
           'This value will be adopted for the calculation.',ch10
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
@@ -1910,7 +1812,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
           'The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
           'cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
           'This value will be adopted for the calculation.',ch10
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
@@ -1925,7 +1827,10 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      ABI_FREE(insort)
      ABI_FREE(npw_sh)
    else
-     ecut=ecut_found
+     ! ecut was not provided as an input, then set it now!
+     if (ecut<tol6) then
+       ecut=ecut_found
+     end if
      npw=npw_found
      nsh=nsh_found
    end if
@@ -1966,7 +1871,6 @@ end subroutine setshells
 !!      m_wfd
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -2044,7 +1948,6 @@ end subroutine kg_map
 !! PARENTS
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -2114,7 +2017,7 @@ subroutine make_istwfk_table(istwf_k,ng1,ng2,ng3,ig1_inver,ig2_inver,ig3_inver)
 
  case default
    write(msg,'(a,i0)')" Wrong value for istwf_k: ",istwf_k
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
 end subroutine make_istwfk_table
@@ -2207,10 +2110,9 @@ end subroutine table_gbig2kg
 !! OUTPUT
 !!
 !! PARENTS
-!!      setup_bse,setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
-!!      gsph_free,gsph_init
 !!
 !! SOURCE
 
@@ -2301,7 +2203,7 @@ end subroutine gsph_extend
 !!  kpgnorm(npw_k)=norms of the k+G vectors
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
 !!
@@ -2382,7 +2284,7 @@ end subroutine getkpgnorm
 !! tmrev_g(npwdiel)=index list of inverted G vectors (time-reversed)
 !!
 !! PARENTS
-!!      suscep_stat
+!!      m_suscep_stat
 !!
 !! CHILDREN
 !!
@@ -2440,7 +2342,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 !  Treat first time-reversal symmetry
    trevg=grid(-g1,-g2,-g3)
    if(trevg==0)then
-     MSG_BUG('Do not find the time-reversed symmetric of a G-vector.')
+     ABI_BUG('Do not find the time-reversed symmetric of a G-vector.')
    end if
    tmrev_g(ipw)=trevg
 
@@ -2459,7 +2361,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 &     symrel(2,3,isym)*g2+symrel(3,3,isym)*g3
      symmg=grid(j1,j2,j3)
      if(symmg==0)then
-       MSG_BUG('Do not find the spatially symmetric of a G-vector.')
+       ABI_BUG('Do not find the spatially symmetric of a G-vector.')
      end if
      sym_g(ipw,isym)=symmg
 

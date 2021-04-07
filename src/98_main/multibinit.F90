@@ -6,7 +6,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (AM)
+!! Copyright (C) 1999-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,16 +21,9 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abihist_bcast,abihist_free
-!!      abimem_init,abinit_doctor,compute_anharmonics
-!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
-!!      effective_potential_file_maphisttoref,effective_potential_file_read
-!!      effective_potential_file_readmdfile,effective_potential_free
-!!      effective_potential_setconfinement,effective_potential_writenetcdf
-!!      effective_potential_writexml,fit_polynomial_coeff_fit
-!!      fit_polynomial_printsystemfiles,flush_unit,herald,init10,instrng
-!!      inupper,invars10,isfile,mover_effpot,multibinit_dtset_free
-!!      outvars_multibinit,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
+!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,herald,init10
+!!      isfile,multibinit_main,multibinit_main2,timein,wrtout,xmpi_init
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -160,7 +153,7 @@ program multibinit
      call isfile(tmpfilename,'new')
      if (open_file(tmpfilename,message,unit=ab_out,form="formatted",status="new",&
           &   action="write") /= 0) then
-        MSG_ERROR(message)
+        ABI_ERROR(message)
      end if
      !  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
      rewind (unit=ab_out)

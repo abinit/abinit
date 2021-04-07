@@ -12,7 +12,7 @@
 !!  matrix elements of [H.r].
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,7 +99,7 @@ CONTAINS  !=====================================================================
 !!  Deallocate memory 
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0q0,cchi0q0_intraband
+!!      m_bethe_salpeter,m_chi0
 !!
 !! CHILDREN
 !!      simp_gen
@@ -326,7 +326,7 @@ end function paw_ihr
 !!  The cross-term contribution is added to the commutator 
 !!
 !! PARENTS
-!!      cchi0q0
+!!      m_chi0
 !!
 !! CHILDREN
 !!      simp_gen
@@ -418,7 +418,7 @@ end subroutine paw_cross_ihr_comm
 !! OUTPUT
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0q0,cchi0q0_intraband
+!!      m_bethe_salpeter,m_chi0
 !!
 !! CHILDREN
 !!      simp_gen

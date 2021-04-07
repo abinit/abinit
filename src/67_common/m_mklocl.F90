@@ -6,7 +6,7 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +40,7 @@ module m_mklocl
  use m_pawtab,   only : pawtab_type
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
  use m_fft,      only : fourdp
+ use m_gtermcutoff,only : termcutoff
 
  use m_splines,  only : splfit
 
@@ -128,11 +129,10 @@ contains
 !! as to make the two routine different.
 !!
 !! PARENTS
-!!      forces,prcref,prcref_PMA,respfn,setvtr
+!!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
 !!
 !! CHILDREN
-!!      mklocl_realspace,mklocl_recipspace,mklocl_wavelets,wvl_rho_abi2big
-!!      xred2xcart
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -174,29 +174,29 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'The only allowed values are between 1 and 4.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. .not.psps%vlspl_recipSpace) then
    write(message,'(a,i0,a,a,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but the local part of the pseudo-potential is in real space.',ch10,&
 &   'Action: set icoulomb = 0 to turn-off real space computations.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. dtset%usewvl == 1) then
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but this is not implemented yet from wavelets.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
-&     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
-&     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
-&     psps%vlspl,vprtrb,vpsp)
+     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,&
+&     dtset%icutcoul,lpsstr,mgfft,mpi_enreg,psps%mqgrid_vl,natom,nattyp, &
+&     nfft,ngfft,dtset%nkpt,ntypat,option,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,&
+&     rhog,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
 &     ngfft,dtset%nscforder,nspden,ntypat,option,pawtab,psps,rhog,rhor, &
@@ -204,7 +204,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    end if
  else
 !  Store xcart for each atom
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
 !  Eventually retrieve density
 #if defined HAVE_BIGDFT
@@ -217,7 +217,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    call mklocl_wavelets(dtset%efield, grtn, mpi_enreg, dtset%natom, &
 &   nfft, nspden, option, rprimd, vpsp, &
 &   wvl_den, wvl, xcart)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
  end if
 
 end subroutine mklocl
@@ -278,21 +278,21 @@ end subroutine mklocl
 !! as to make the two routine different.
 !!
 !! PARENTS
-!!      dfpt_dyfro,mklocl,stress
+!!      m_mklocl,m_respfn_driver,m_stress
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,timab,wrtout,xmpi_sum
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
-subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
-&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
-&  rhog,ucvol,vlspl,vprtrb,vpsp)
+subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,mgfft,&
+&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,qprtrb,&
+&  rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option
- real(dp),intent(in) :: eei,gsqcut,ucvol
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,nkpt,ntypat,option,icutcoul
+ real(dp),intent(in) :: eei,gsqcut,rcut,rprimd(3,3),ucvol,vcutgeo(3)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
@@ -318,6 +318,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gcart(3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
 
 ! *************************************************************************
@@ -355,9 +356,10 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
 !Zero out array to permit accumulation over atom types below:
  if(option==1)then
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(:,:)=zero
  end if
+
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
  dqm1=1.0_dp/dq
@@ -372,6 +374,9 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  dyfrlo(:,:,:)=zero
  me_g0=0
  ia1=1
+
+ !Initialize Gcut-off array from m_gtermcutoff
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -413,7 +418,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
              dd = bb*(bb**2-1.0_dp)*dq2div6
 
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) +&
-&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar
+&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar * gcutoff(ii)
 
              if(option==1)then
 
@@ -520,7 +525,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
              else
                write(message, '(a,i0,a)' )' mklocl: Option=',option,' not allowed.'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if ! End option choice
 
 !            End skip G**2 outside cutoff:
@@ -588,9 +593,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    xnorm=1.0_dp/ucvol
    vpsp(:)=vpsp(:)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
  end if
+
+ ABI_FREE(gcutoff) 
 
  if(option==2)then
 !  Init mpi_comm
@@ -733,10 +740,11 @@ end subroutine mklocl_recipspace
 !!    (including the minus sign, forgotten in the paper non-linear..
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfptnl_loop
+!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
+!!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -783,7 +791,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -881,7 +889,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -997,10 +1005,10 @@ end subroutine dfpt_vlocal
 !! * The routine was adapted from mklocl.F90
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_nselt,dfpt_nstpaw
+!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp
+!!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1072,7 +1080,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
    write(message, '(a,i10,a,a,a)' )&
 &   ' Input istr=',istr,' not allowed.',ch10,&
 &   ' Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -1088,7 +1096,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Zero out array to permit accumulation over atom types below:
- ABI_ALLOCATE(work1,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
  work1(:,:)=0.0_dp
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -1213,7 +1221,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  xnorm=1.0_dp/ucvol
  vpsp1(:)=vpsp1(:)*xnorm
 
- ABI_DEALLOCATE(work1)
+ ABI_FREE(work1)
 
  contains
 
@@ -1301,13 +1309,6 @@ end subroutine vlocalstr
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cplex: if 1, real space 1-order functions on FFT grid
@@ -1350,7 +1351,7 @@ end subroutine vlocalstr
 !!    in the matrix element calculation.
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp,splfit
@@ -1403,7 +1404,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1420,7 +1421,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Determination of the atom type
@@ -1492,7 +1493,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1dq(1:cplex*nfft)=vpsp1dq(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1568,13 +1569,6 @@ end subroutine dfpt_vlocaldq
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cplex: if 1, real space 1-order functions on FFT grid
@@ -1620,7 +1614,7 @@ end subroutine dfpt_vlocaldq
 !!     
 !!
 !! PARENTS
-!!      dfpt_qdrpwf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp,splfit
@@ -1681,7 +1675,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    if (alpha==gamma) delag=1.0_dp
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1698,7 +1692,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Determination of the atom type
@@ -1777,7 +1771,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1858,13 +1852,6 @@ end subroutine dfpt_vlocaldqdq
 !! Cartesian coordinates are employed to define the direction of the 
 !! metric perturbation and the two q-gradients.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cplex: if 1, real space 1-order functions on FFT grid
 !!    are REAL, if 2, COMPLEX
@@ -1918,11 +1905,9 @@ end subroutine dfpt_vlocaldqdq
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
 !!
 !! PARENTS
-!!
-!!      dfpt_flexowf
+!!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!
 !!      fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
@@ -1982,7 +1967,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (beta==gamma) delbg=1.0_dp
    if (delta==gamma) deldg=1.0_dp
 
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1999,7 +1984,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    ia1=1
@@ -2158,7 +2143,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  End the calculation of the Hartree contribution 
    end if
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !End the condition of non-electric-field
  end if

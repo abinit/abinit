@@ -6,7 +6,7 @@
 !!  Solve the Eliashberg equations in the isotropic case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MVer)
+!!  Copyright (C) 2008-2021 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,7 +64,7 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!      elphon
+!!      m_elphon
 !!
 !! CHILDREN
 !!
@@ -111,10 +111,10 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
  nmatsu = 50
 !write(std_out,*) ' eliashberg_1d : nmatsu = ', nmatsu
 
- ABI_ALLOCATE(lambda_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(z_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(delta_1d,(-nmatsu:nmatsu))
- ABI_ALLOCATE(mm_1d,(-nmatsu:nmatsu,-nmatsu:nmatsu))
+ ABI_MALLOC(lambda_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(z_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(delta_1d,(-nmatsu:nmatsu))
+ ABI_MALLOC(mm_1d,(-nmatsu:nmatsu,-nmatsu:nmatsu))
 
  unit_lam=get_unit()
  fname=trim(elph_ds%elph_base_name) // "_LAM"
@@ -220,10 +220,10 @@ subroutine eliashberg_1d(a2f_1d,elph_ds,mustar)
    write(std_out,*) 'Eliashberg Tc nonetheless = ', tc, ' (Ha) = ', tc/kb_HaK, ' (K)'
  end if
 
- ABI_DEALLOCATE(lambda_1d)
- ABI_DEALLOCATE(z_1d)
- ABI_DEALLOCATE(delta_1d)
- ABI_DEALLOCATE(mm_1d)
+ ABI_FREE(lambda_1d)
+ ABI_FREE(z_1d)
+ ABI_FREE(delta_1d)
+ ABI_FREE(mm_1d)
 
  close (UNIT=unit_z)
  close (UNIT=unit_lam)
@@ -252,7 +252,7 @@ end subroutine eliashberg_1d
 !!   delta_1d = imaginary gap function as a function of frequency changed
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!
@@ -369,7 +369,7 @@ end subroutine eli_app_m_1d
 !!   delta_1d = imaginary gap function as a function of frequency
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!
@@ -473,7 +473,7 @@ end subroutine eli_diag_m_1d
 !!   lambda_1d = coupling constant as a function of frequency
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!
@@ -548,7 +548,6 @@ end subroutine eli_lambda_1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      eli_app_m_1d
 !!
 !! SOURCE
 
@@ -675,7 +674,7 @@ end subroutine eli_m_iter_1d
 !!   z_1d = renormalizing Z as a function of frequency
 !!
 !! PARENTS
-!!      eliashberg_1d
+!!      m_eliashberg_1d
 !!
 !! CHILDREN
 !!

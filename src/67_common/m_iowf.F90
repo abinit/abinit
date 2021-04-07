@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,7 +107,7 @@ CONTAINS  !=====================================================================
 !! * The name of the file wff2 might be the same as that of the file wff1.
 !!
 !! PARENTS
-!!      berryphase_new,dfpt_looppert,gstate
+!!      m_berryphase_new,m_dfpt_looppert,m_gstate
 !!
 !! CHILDREN
 !!      xmpi_sum_master
@@ -156,7 +156,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
 #ifdef HAVE_NETCDF
- integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, timrev
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
  type(crystal_t) :: crystal
 #endif
@@ -183,7 +183,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    'and Kpt-band-FFT parallelization is active !',ch10,&
    'This is only allowed for testing purposes.',ch10,&
    'The produced WF file will be incomplete and not useable.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 !If parallel HF calculation
@@ -198,7 +198,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    'and HF parallelization is active !',ch10,&
    'This is only allowed for testing purposes.',ch10,&
    'The produced WF file will be incomplete and not useable.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ! check consistency between dimensions and input hdr.
@@ -346,8 +346,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
-       timrev = 2 ! FIXME: Use abinit convention for timrev
-       crystal = hdr%get_crystal(timrev)
+       crystal = hdr%get_crystal()
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -392,7 +391,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      if (done) return
      ! If cg_ncwrite cannot handle the IO because HDF5 + MPI-IO support is missing, we fallback to Fortran + MPI-IO.
      msg = "Could not produce a netcdf file in parallel (MPI-IO support is missing). Will fallback to MPI-IO with Fortran"
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
      iomode=IO_MODE_MPI
    end if
 #endif
@@ -403,29 +402,20 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    ! Create an ETSF file for the wavefunctions
    if (iomode == IO_MODE_ETSF) then
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
-#ifdef HAVE_ETSF_IO
-     call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr%get_crystal(2)
-     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
-     !call crystal%free()
-     !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
-     !NCF_CHECK(ncerr)
-#else
-     MSG_ERROR("ETSF_IO is not activated")
+     ABI_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
-#endif
    end if
 
    call WffOpen(iomode,spaceComm,filnam,ierr,wff2,master,me0,unwff2,spaceComm_io)
    ! Conduct wavefunction output to wff2
 
-   ABI_ALLOCATE(kg_disk,(3,mpw))
+   ABI_MALLOC(kg_disk,(3,mpw))
 
    mcg_disk=mpw*my_nspinor*mband
    formeig=0; if (response==1) formeig=1
 
-   ABI_ALLOCATE(eig_k,( (2*mband)**formeig * mband))
-   ABI_ALLOCATE(occ_k,(mband))
+   ABI_MALLOC(eig_k,( (2*mband)**formeig * mband))
+   ABI_MALLOC(occ_k,(mband))
 
 #ifdef HAVE_MPI
    call xmpi_barrier(spaceComm)
@@ -654,13 +644,13 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      end do ! ikpt
    end do ! spin
 
-   ABI_DEALLOCATE(kg_disk)
+   ABI_FREE(kg_disk)
 #ifdef HAVE_MPI
-   ABI_DEALLOCATE(cg_disk)
+   ABI_FREE(cg_disk)
 #endif
 
-   ABI_DEALLOCATE(eig_k)
-   ABI_DEALLOCATE(occ_k)
+   ABI_FREE(eig_k)
+   ABI_FREE(occ_k)
 
 !  Close the wavefunction file (and do NOT delete it !)
    !if (wff2%iomode /= IO_MODE_NETCDF) then
@@ -741,7 +731,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
  integer :: comm_cell,comm_fft,comm_bandfft,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
- integer :: timrev,paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
+ integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
  integer :: bandpp,nproc_band,nproc_fft,nproc_spinor,me_fft,nproc_cell,nwrites
  integer :: comm_mpiio,nranks,bstart,bcount !nbdblock,nblocks,
@@ -781,7 +771,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  ! FIXME
  my_nspinor = max(1, nspinor/nproc_spinor)
  if (nspinor == 2 .and. my_nspinor == 1) then
-   MSG_ERROR("Spinor parallelization not coded yet")
+   ABI_ERROR("Spinor parallelization not coded yet")
  end if
 
  ! TODO: Be careful with response == 1 in parallel because the distribution of the cg
@@ -790,16 +780,14 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  if (size(hdr%nband) == size(nband)) then
    ABI_CHECK(all(Hdr%nband == nband),"nband")
  else
-   MSG_ERROR("hdr%nband and nband have different size!")
+   ABI_ERROR("hdr%nband and nband have different size!")
  end if
 
  if (xmpi_comm_size(comm_cell) == 1) then
    ABI_CHECK(all(npwarr == hdr%npwarr), "npwarr != hdr%npwarr")
  end if
 
- ! FIXME: Use abinit convention for timrev
- timrev = 2
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  ! TODO
  ! Be careful with response == 1.
@@ -819,7 +807,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 1
  end if
 
- ! same_layout is set to True if the interal representation of the cgs
+ ! same_layout is set to True if the internal representation of the cgs
  ! is compatible with the representation on file.
  iomode = IO_MODE_ETSF
  if (response == 0) then
@@ -872,8 +860,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK(crystal%ncwrite(ncid))
 
        if (response == 0) then
+         ! Write Gs bands
          NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
        else
+         ! Write H1 matrix elements and occupancies.
+         ! Note that GS eigens are not written here.
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
 
@@ -914,7 +905,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      comm_mpiio = comm_cell
 
      if (min_cnt <= 0) then
-       MSG_COMMENT("Will create subcommunicator to exclude idle processors from MPI-IO collective calls")
+       ABI_COMMENT("Will create subcommunicator to exclude idle processors from MPI-IO collective calls")
        ABI_CHECK(paral_kgb == 0, "paral_kgb == 1 with idle processors should never happen")
 
        ! Prepare the call to xmpi_subcomm that will replace comm_mpiio.
@@ -1037,7 +1028,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 ! HAVE_NETCDF
    else ! single_writer
      if (nproc_cell > 1) then
-       MSG_WARNING("Slow version without MPI-IO support. Processors send data to master...")
+       ABI_WARNING("Slow version without MPI-IO support. Processors send data to master...")
      else
        call wrtout(std_out, "Using netcdf library without MPI-IO support")
      end if
@@ -1351,9 +1342,9 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 !Local variables-------------------------------
 !scalars
  integer :: idx,spin,ikpt,nband_k,ib2,ib1
- integer :: ncerr,occ_varid,h1mat_varid
+ integer :: ncerr,occ_varid,h1mat_varid,eigens_varid
 !arrays
- real(dp),allocatable :: h1mat(:,:,:,:,:)
+ real(dp),allocatable :: h1mat(:,:,:,:,:), fake_eigens(:,:,:)
 
 ! *************************************************************************
 
@@ -1384,6 +1375,7 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 
  NCF_CHECK(nf90_inq_varid(ncid, "occupations", occ_varid))
  NCF_CHECK(nf90_inq_varid(ncid, "h1_matrix_elements", h1mat_varid))
+ NCF_CHECK(nf90_inq_varid(ncid, "eigenvalues", eigens_varid))
 
  ! Write data
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -1391,6 +1383,11 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
  NCF_CHECK_MSG(nf90_put_var(ncid, h1mat_varid, h1mat), "putting h1mat")
 
  ABI_FREE(h1mat)
+
+ ! GS eigenvalues are set to zero.
+ ABI_CALLOC(fake_eigens, (mband,nkpt,nsppol))
+ NCF_CHECK_MSG(nf90_put_var(ncid, eigens_varid, fake_eigens), "putting fake eigens")
+ ABI_FREE(fake_eigens)
 
 end subroutine ncwrite_eigen1_occ
 !!***

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_copy
 !! NAME
 !!  m_copy
@@ -10,7 +9,7 @@
 !!  addr_copy: used to copy the address contained in a pointer
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2021 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,10 +41,9 @@
 MODULE m_copy
 
  use defs_basis,  only : dp, spc, dpc
+ use iso_c_binding
+
  use m_abicore
-#if defined HAVE_FC_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
-#endif
 
  implicit none
 
@@ -88,6 +86,7 @@ MODULE m_copy
   module procedure alloc_copy_int1d
   module procedure alloc_copy_int2d
   module procedure alloc_copy_int3d
+  module procedure alloc_copy_int4d_1b
   module procedure alloc_copy_int4d
   module procedure alloc_copy_rdp1d
   module procedure alloc_copy_rdp2d
@@ -1173,6 +1172,42 @@ end subroutine alloc_copy_int3d
 
 !----------------------------------------------------------------------
 
+!!****f* m_copy/alloc_copy_int4d_1b
+!! NAME
+!! alloc_copy_int4d_1b
+!!
+!! FUNCTION
+!!  Performs a copy of an array.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      c_f_pointer
+!!
+!! SOURCE
+
+subroutine alloc_copy_int4d_1b(xval, copy)
+
+!Arguments ------------------------------------
+ integer(c_int8_t),intent(in) :: xval(:,:,:,:)
+ integer(c_int8_t),allocatable,intent(out) :: copy(:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: il1,iu1,il2,iu2,il3,iu3,il4,iu4
+! *********************************************************************
+
+ il1=lbound(xval,DIM=1); iu1=ubound(xval,DIM=1)
+ il2=lbound(xval,DIM=2); iu2=ubound(xval,DIM=2)
+ il3=lbound(xval,DIM=3); iu3=ubound(xval,DIM=3)
+ il4=lbound(xval,DIM=4); iu4=ubound(xval,DIM=4)
+ ABI_MALLOC(copy,(il1:iu1,il2:iu2,il3:iu3,il4:iu4))
+ copy(:,:,:,:)=xval(:,:,:,:)
+
+end subroutine alloc_copy_int4d_1b
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_copy/alloc_copy_int4d
 !! NAME
 !! alloc_copy_int4d
@@ -1187,7 +1222,7 @@ end subroutine alloc_copy_int3d
 !!
 !! SOURCE
 
-subroutine alloc_copy_int4d(xval,copy)
+subroutine alloc_copy_int4d(xval, copy)
 
 !Arguments ------------------------------------
  integer,intent(in) :: xval(:,:,:,:)
@@ -1909,7 +1944,7 @@ subroutine addr_copy_int1d(xval,copy)
      ham_ptr=c_loc(xval(1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0))
+     ABI_MALLOC(copy,(0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -1958,7 +1993,7 @@ subroutine addr_copy_int2d(xval,copy)
      ham_ptr=c_loc(xval(1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0))
+     ABI_MALLOC(copy,(0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2007,7 +2042,7 @@ subroutine addr_copy_int3d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0))
+     ABI_MALLOC(copy,(0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2056,7 +2091,7 @@ subroutine addr_copy_int4d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0,0))
+     ABI_MALLOC(copy,(0,0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2105,7 +2140,7 @@ subroutine addr_copy_dp1d(xval,copy)
      ham_ptr=c_loc(xval(1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0))
+     ABI_MALLOC(copy,(0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2154,7 +2189,7 @@ subroutine addr_copy_dp2d(xval,copy)
      ham_ptr=c_loc(xval(1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0))
+     ABI_MALLOC(copy,(0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2203,7 +2238,7 @@ subroutine addr_copy_dp3d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0))
+     ABI_MALLOC(copy,(0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2252,7 +2287,7 @@ subroutine addr_copy_dp4d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0,0))
+     ABI_MALLOC(copy,(0,0,0,0))
    end if
 #else
    copy=transfer(xval,copy)
@@ -2301,7 +2336,7 @@ subroutine addr_copy_dp5d(xval,copy)
      ham_ptr=c_loc(xval(1,1,1,1,1))
      call c_f_pointer(ham_ptr,copy,shp)
    else
-     ABI_ALLOCATE(copy,(0,0,0,0,0))
+     ABI_MALLOC(copy,(0,0,0,0,0))
    end if
 #else
    copy=transfer(xval,copy)

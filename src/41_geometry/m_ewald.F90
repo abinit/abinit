@@ -6,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2021 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,9 @@ module m_ewald
  use m_errors
  use m_splines
  use m_time
+ use m_xmpi
 
+ use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
  use m_symtk,          only : matr3inv
 
@@ -70,34 +72,36 @@ contains
 !! grewtn(3,natom)=grads of eew wrt xred(3,natom), hartrees.
 !!
 !! PARENTS
-!!      setvtr
+!!      m_setvtr
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
-subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
+subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rmet,rprimd,typat,ucvol,vcutgeo,xred,zion)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,ntypat
- real(dp),intent(in) :: ucvol
+ integer,intent(in) :: icutcoul,natom,nkpt,ntypat
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
  real(dp),intent(out) :: eew
 !arrays
- integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: gmet(3,3),rmet(3,3),xred(3,natom),zion(ntypat)
+ integer,intent(in) :: ngfft(18),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),rmet(3,3),rprimd(3,3),xred(3,natom),vcutgeo(3),zion(ntypat)
  real(dp),intent(out) :: grewtn(3,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,ib,ig1,ig2,ig3,ir1,ir2,ir3,newg,newr,ng,nr
+ integer  :: ia,ib,ig1,ig2,ig3,ig23,ii,ir1,ir2,ir3,newg,newr,ng,nr
  real(dp) :: arg,c1i,ch,chsq,derfc_arg,direct,drdta1,drdta2,drdta3,eta,fac
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term
+ real(dp) :: t1,term,zcut
  !character(len=500) :: message
+!arrays
+ real(dp),allocatable :: gcutoff(:)
 
 ! *************************************************************************
 
@@ -122,12 +126,23 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+if(icutcoul.eq.1) then
+   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+ else if (icutcoul.eq.2) then
+   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+   eta=SQRT(8.0_dp/zcut)
+ else
+   eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+ end if
 
 !Conduct reciprocal space summations
  fac=pi**2/eta
  gsum=0._dp
  grewtn(:,:)=0.0_dp
+
+ !Initialize Gcut-off array from m_gtermcutoff
+ !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
 !Sum over G space, done shell after shell until all
 !contributions are too small.
@@ -140,13 +155,12 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !   if (ng > 20 .and. mod(ng,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
-!      MSG_WARNING(message)
+!      ABI_WARNING(message)
 !   end if
-
+   ii=1
    do ig3=-ng,ng
      do ig2=-ng,ng
        do ig1=-ng,ng
-
 !        Exclude shells previously summed over
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 ) then
 
@@ -163,9 +177,22 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              if (arg <= -minexparg ) then
 !              When any term contributes then include next shell
                newg=1
-               term=exp(-arg)/gsq
+
+               if((abs(ig1).lt.ngfft(1)).and.&
+                 &(abs(ig2).lt.ngfft(2)).and.&
+                 &(abs(ig3).lt.ngfft(3))) then
+                  ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
+                  ii=abs(ig1)+ig23+1
+                  term=exp(-arg)/gsq*gcutoff(ii)
+               else if (icutcoul.ne.3) then
+                  term=zero !exp(-arg)/gsq
+               else
+                  term=exp(-arg)/gsq
+               endif
+
                summr = 0.0_dp
                summi = 0.0_dp
+ 
 
 !              XG 20180531  : the two do-loops on ia should be merged, in order to spare
 !              the waste of computing twice the sin and cos.
@@ -245,7 +272,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !   if (nr > 20 .and. mod(nr,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  nr = ", nr
-!      MSG_WARNING(message)
+!      ABI_WARNING(message)
 !   end if
 !
    do ir3=-nr,nr
@@ -316,10 +343,16 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  end do ! End loop on nr (new shells). Note that there is an exit within the loop
 !
  sumr=0.5_dp*sumr
- fac=pi*ch**2/(2.0_dp*eta*ucvol)
-
+ fac=pi*ch**2.0_dp/(2.0_dp*eta*ucvol)
+ 
 !Finally assemble Ewald energy, eew
- eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+ if(icutcoul.ne.3) then
+   eew=sumg+sumr-chsq*reta/sqrt(pi)
+ else
+   eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+ end if
+
+ ABI_FREE(gcutoff) 
 
 !DEBUG
 !write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
@@ -366,10 +399,10 @@ end subroutine ewald
 !! tensor in the order 11 22 33 32 31 21.
 !!
 !! PARENTS
-!!      stress
+!!      m_stress
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
@@ -583,7 +616,6 @@ end subroutine ewald2
 !!***
 
 !!****f* m_ewald/ewald9
-!!
 !! NAME
 !! ewald9
 !!
@@ -634,22 +666,21 @@ end subroutine ewald2
 !! not perfectly symmetric ....
 !!
 !! PARENTS
-!!      ddb_hybrid,m_dynmat,m_effective_potential,m_ifc
+!!      m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      matr3inv,spline
+!!      dsyev,matr3inv,timab,wrtout
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
-      qdrp_cart,option,dipquad,quadquad)
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, qdrp_cart, &
+                  option, dipquad, quadquad)  ! optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
- integer,optional,intent(in) :: option
+ integer,optional,intent(in) :: option, dipquad, quadquad
  real(dp),intent(in) :: ucvol
- integer,optional,intent(in) :: dipquad, quadquad
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
@@ -679,7 +710,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: c3r(2*mr+1),cosqxred(natom),wdielt(3,3),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
- real(dp) :: gprimbyacell(3,3),tsec(2)
+ real(dp) :: gprimbyacell(3,3) !,tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  real(dp),allocatable :: work(:)
  complex(dpc) :: exp2piqx(natom)
@@ -695,7 +726,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do_quadrupole = any(qdrp_cart /= zero)
 
  ! Keep track of total time spent.
- call timab(1749, 1, tsec)
+ !call timab(1749, 1, tsec)
 
  ! Initialize dipquad and quadquad options
  dipquad_=0; if(present(dipquad)) dipquad_=dipquad
@@ -717,9 +748,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    exp2piqx(ia) = exp(arga*j_dpc)
  end do
  ng_expxq = 1000
- ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
- ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
- ABI_ALLOCATE(expx3, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
+ ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
  do ia = 1, natom
    do ig1 = -ng_expxq, ng_expxq
      expx1(ig1, ia) = exp(ig1*two_pi*xred(1,ia)*j_dpc)
@@ -742,20 +773,20 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  ! Compute a material-dependent width for the Gaussians that hopefully
  ! will make the Ewald real-space summation innecessary.
- if (ewald_option == 1) then 
+ if (ewald_option == 1) then
 
    wdielt(:,:)=dielt(:,:)
 
    !Diagonalize dielectric matrix
    lwork=-1
-   ABI_ALLOCATE(work,(10))
+   ABI_MALLOC(work,(10))
    call dsyev('N','U',3, wdielt, 3, eig_dielt, work, lwork,info)
    lwork=nint(work(1))
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
-   ABI_ALLOCATE(work,(lwork))
+   ABI_MALLOC(work,(lwork))
    call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
    !This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
@@ -767,9 +798,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    if (firstcall) then
      firstcall = .FALSE.
      write(message, '(4a,f9.4,9a)' ) ch10,&
-    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, & 
+    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, &
     &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', ch10, &
-    &' One should check whether this choice leads to correct results for the specific system under study', & 
+    &' One should check whether this choice leads to correct results for the specific system under study', &
     &' and q-point grid.',ch10, &
     &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', ch10, &
     &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.', ch10
@@ -779,13 +810,13 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    !Internally eta is the square of the gaussians width
    eta=eta*eta
 
- end if 
+ end if
 
  inv4eta = one / four / eta
 
- ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
- ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
- ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
+ ABI_MALLOC(dyddt,(2,3,natom,3,natom))
+ ABI_MALLOC(dydqt,(2,3,natom,3,natom,3))
+ ABI_MALLOC(dyqqt,(2,3,natom,3,natom,3,3))
 
  dyddt = zero
  dydqt = zero
@@ -799,16 +830,16 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 ! if needed, update the complex phases for larger G vectors
    if (ng > ng_expxq) then
      !write(std_out,*)"have to realloc"
-     ABI_DEALLOCATE(expx1)
-     ABI_DEALLOCATE(expx2)
-     ABI_DEALLOCATE(expx3)
+     ABI_FREE(expx1)
+     ABI_FREE(expx2)
+     ABI_FREE(expx3)
 
      ng_expxq = ng_expxq*2
 ! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
 ! present duplication avoids if statements inside the loop, however
-     ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
-     ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
-     ABI_ALLOCATE(expx3, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx1, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx2, (-ng_expxq:ng_expxq, natom))
+     ABI_MALLOC(expx3, (-ng_expxq:ng_expxq, natom))
      do ia = 1, natom
        do ig1 = -ng_expxq, ng_expxq
          expx1(ig1, ia) = exp(ig1*two_pi*xred(1,ia)*j_dpc)
@@ -845,7 +876,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &               'The phonon wavelength should not be zero :',ch10,&
 &               'there are non-analytical terms that cannot be treated.',ch10,&
 &               'Action: subtract this wavelength from the input file.'
-               MSG_ERROR(message)
+               ABI_ERROR(message)
              end if
 
            else
@@ -982,7 +1013,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &   'because you not are dealing with an insulator, so that',ch10,&
 &   'your dielectric matrix was simply set to zero in the Derivative DataBase.',ch10,&
 &   'Action: set the input variable dipdip to 0 .'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  inv_detdlt = one / sqrt(detdlt)
@@ -1094,7 +1125,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                        'The distance between two atoms seem to vanish.',ch10,&
                        'This is not allowed.',ch10,&
                        'Action: check the input for the atoms number',ia,' and',ib,'.'
-                     MSG_ERROR(message)
+                     ABI_ERROR(message)
                    else
                      ! This is the correction when the atoms are identical
                      do nu=1,3
@@ -1115,7 +1146,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    ! Check if new shell must be calculated
    if(newr==0)exit
-   if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
+   if(newr==1 .and. nr==mr) ABI_BUG('mr is too small')
  end do
  end if ! check if should compute real part
 
@@ -1187,14 +1218,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    end do
  end do
 
- ABI_DEALLOCATE(expx1)
- ABI_DEALLOCATE(expx2)
- ABI_DEALLOCATE(expx3)
- ABI_DEALLOCATE(dyddt)
- ABI_DEALLOCATE(dydqt)
- ABI_DEALLOCATE(dyqqt)
+ ABI_FREE(expx1)
+ ABI_FREE(expx2)
+ ABI_FREE(expx3)
+ ABI_FREE(dyddt)
+ ABI_FREE(dydqt)
+ ABI_FREE(dyqqt)
 
- call timab(1749, 2, tsec)
+ !call timab(1749, 2, tsec)
 
 end subroutine ewald9
 !!***

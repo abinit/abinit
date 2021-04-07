@@ -8,7 +8,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (TO, hexu, NH)
+!! Copyright (C) 2001-2021 ABINIT group (TO, hexu, NH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module  m_slc_potential
 
   use m_hashtable_strval, only: hash_table_t
   use m_abstract_potential, only : abstract_potential_t
-  use m_dynamic_array, only: int2d_array_type
+  !use m_dynamic_array, only: int2d_array_type
   use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -49,6 +49,7 @@ module  m_slc_potential
      type(ndcoo_mat_t) :: niuv_sc          ! parameter values linquad term
      type(ndcoo_mat_t) :: oiju_sc          ! parameter values quadlin term
      type(ndcoo_mat_t) :: tijuv_sc         ! parameter values biquad term
+     type(ndcoo_mat_t) :: tuvij_sc         ! same as tijuv but sorted differently
 
      ! magnetic moments
      real(dp), allocatable :: ms(:)
@@ -102,12 +103,13 @@ contains
     
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%natom, master, comm, ierr)
-    ABI_ALLOCATE(self%ms, (self%nspin))
+    ABI_MALLOC(self%ms, (self%nspin))
   end subroutine initialize
 
   subroutine finalize(self)
 
     class(slc_potential_t), intent(inout):: self
+    ABI_SFREE(self%ms)
 
     if(self%has_bilin) then 
       call self%liu_sc%finalize()
@@ -123,6 +125,7 @@ contains
     endif 
     if(self%has_biquad) then
       call self%tijuv_sc%finalize()
+      call self%tuvij_sc%finalize()
       call self%tuvref%finalize()
     endif
 
@@ -136,7 +139,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_params(self, params)
     class(slc_potential_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), intent(inout) :: params
 
     integer :: master, my_rank, comm, nproc, ierr, coupling
     logical :: iam_master
@@ -197,31 +200,26 @@ contains
   subroutine calculate_ref(self)
     class(slc_potential_t), intent(inout) :: self
 
-    integer :: ii
     real(dp) :: spref(1:3*self%nspin), beta
     real(dp), allocatable :: force(:)
-    type(ndcoo_mat_t) :: m2dim
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-
-    ABI_UNUSED(ii)
-    ABI_UNUSED_A(m2dim)
 
     spref(:) = reshape(self%supercell%spin%Sref, (/ 3*self%nspin/))
 
     beta = 0.5_dp
 
-    ABI_ALLOCATE(force, (3*self%natom))
+    ABI_MALLOC(force, (3*self%natom))
     if(self%has_bilin) then 
-      ABI_ALLOCATE(self%luref, (3*self%natom))
+      ABI_MALLOC(self%luref, (3*self%natom))
       self%luref=0.0d0
       force = 0.0d0
       call self%liu_sc%vec_product2d(1, spref, 2, force)
       self%luref(:) = - force(:)
     endif
     if(self%has_quadlin) then
-      ABI_ALLOCATE(self%ouref, (3*self%natom))     
+      ABI_MALLOC(self%ouref, (3*self%natom))     
       force = 0.0d0
       call self%oiju_sc%vec_product(1, spref, 2, spref, 3, force)
       self%ouref(:) = - beta*force(:)
@@ -306,6 +304,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     if(iam_master) then
        call self%tijuv_sc%add_entry(ind=[i,j,u,v],val=val)
+       call self%tuvij_sc%add_entry(ind=[u,v,i,j],val=val)
     endif
   end subroutine add_tijuv_term
 
@@ -360,7 +359,7 @@ contains
       endif
       if(self%has_biquad) then
         b1(:) = 0.0d0
-        call self%tijuv_sc%vec_product4d(1, sp, 3, disp, 4, disp, 2, b1)
+        call self%tuvij_sc%vec_product4d(disp, disp, 3, sp, 4, b1)
         bslc(:) = bslc(:) + beta*b1(:)
       endif
       btmp = reshape(bslc, (/ 3, self%nspin /))
@@ -370,10 +369,10 @@ contains
       bfield(:,:) = bfield(:,:) + btmp(:,:)
 
       ! TESTING: write magnetic fields to a file
-      write(201,*) 'Magnetic fields are'
-      do ii = 1, self%nspin
-        write(201,*) ii, btmp(:,ii)
-      enddo
+      !write(201,*) 'Magnetic fields are'
+      !do ii = 1, self%nspin
+      !  write(201,*) ii, btmp(:,ii)
+      !enddo
     endif
 
     ! Force and energy
@@ -430,7 +429,7 @@ contains
       if(self%has_biquad) then
         f1(:) = 0.0d0
         eterm = 0.0d0
-        call self%tijuv_sc%vec_product4d(1, sp, 2, sp, 3, disp, 4, f1)
+        call self%tijuv_sc%vec_product4d(sp, sp, 3, disp, 4, f1)
         fslc(:) = fslc(:) + beta*f1(:)
         eterm = - 0.5_dp*beta*dot_product(f1, disp)
         ! add contributions from reference spin structure
@@ -449,10 +448,10 @@ contains
     if(present(force)) then
       force(:,:) = force(:,:) + reshape(fslc, (/3, self%natom /))
       !TESTING write forces to file
-      write(200,*) 'Forces are'
-      do ii = 1, self%natom
-        write(200,*) ii, force(:,ii)
-      enddo
+      !write(200,*) 'Forces are'
+      !do ii = 1, self%natom
+      !  write(200,*) ii, force(:,ii)
+      !enddo
     endif
 
     if(present(energy)) energy =  energy + eslc

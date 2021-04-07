@@ -119,7 +119,7 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
         ;;
 
       dir)
-        sd_netcdf_fortran_cppflags="${sd_netcdf_fortran_cppflags_def} -I${sd_etcdf_fortran_prefix}/include"
+        sd_netcdf_fortran_cppflags="${sd_netcdf_fortran_cppflags_def} -I${sd_netcdf_fortran_prefix}/include"
         sd_netcdf_fortran_cflags="${sd_netcdf_fortran_cflags_def}"
         sd_netcdf_fortran_cxxflags="${sd_netcdf_fortran_cxxflags_def}"
         sd_netcdf_fortran_fcflags="${sd_netcdf_fortran_fcflags_def} -I${sd_netcdf_fortran_prefix}/include"

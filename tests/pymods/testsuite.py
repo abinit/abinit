@@ -32,7 +32,7 @@ else:
 
 from collections import OrderedDict
 from .jobrunner import TimeBomb
-from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor)
+from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
 from .xyaptu import xcopier
 from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemFile
@@ -296,7 +296,6 @@ class FileToTest(object):
         ("diff_fname", "", str),
         ("use_yaml", "no", str),
         ("verbose_report", "no", str),
-        # ("pydiff_fname","",str),
     ]
 
     def __init__(self, dic):
@@ -310,8 +309,7 @@ class FileToTest(object):
                 raise ValueError("%s must be defined" % atr_name)
 
             value = f(value)
-            if hasattr(value, "strip"):
-                value = value.strip()
+            if hasattr(value, "strip"): value = value.strip()
             self.__dict__[atr_name] = value
 
         # Postprocess fld_options
@@ -322,6 +320,11 @@ class FileToTest(object):
 
         self.has_line_count_error = False
         self.do_html_diff = False
+
+        # Initialize variables that will be set by fldiff to be on the safe side.
+        self.fld_isok = False
+        self.fld_status = "failed"
+        self.fld_msg = "Initialized in __init__"
 
     @lazy__str__
     def __str__(self): pass
@@ -336,6 +339,7 @@ class FileToTest(object):
         # FIXME Hack due to the stdout-out ambiguity
         if not os.path.exists(ref_fname) and ref_fname.endswith(".stdout"):
             ref_fname = ref_fname[:-7] + ".out"
+            #ref_fname = ref_fname[:-7] + ".abo"
         out_fname = os.path.abspath(os.path.join(workdir, self.name))
 
         opts = {
@@ -486,6 +490,7 @@ TESTCNF_KEYWORDS = {
                                                            ),
     "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Psps_for_tests directory)."),
     "extra_inputs"   : (_str2list,        "", "files", "List of extra input files."),
+    "use_git_submodule"   : (str,        "", "files", "Take input files from git submodule in ~/abinit/tests/modules_with_data/."),
     # [shell]
     "pre_commands"   : (_str2cmds, "", "shell", "List of commands to execute before starting the test"),
     "post_commands"  : (_str2cmds, "", "shell", "List of commands to execute after the test is completed"),
@@ -621,7 +626,7 @@ class AbinitTestInfoParser(object):
             inp_fname: test input file
             defaults: default values passed to the INI parser.
         """
-        logger.info("Parsing TEST_INFO section from input file : " + str(inp_fname))
+        #print("Parsing TEST_INFO section from input file : " + str(inp_fname))
 
         self.inp_fname = os.path.abspath(inp_fname)
         self.inp_dir, x = os.path.split(self.inp_fname)
@@ -775,6 +780,7 @@ class AbinitTestInfoParser(object):
                 # print(self.inp_fname, d["max_nprocs"])
 
         # Add the name of the input file.
+        #print("Before AbiitTestInfo", self.inp_fname)
         d['inp_fname'] = self.inp_fname
 
         return AbinitTestInfo(d)
@@ -809,6 +815,8 @@ class AbinitTestInfoParser(object):
         parse = TESTCNF_KEYWORDS[opt][0]
 
         fnames = parse(self.parser.get(section, opt))
+        # HACK
+        fnames = [f.replace(".in", ".abi") for f in fnames]
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
     def yaml_test(self):
@@ -1220,6 +1228,7 @@ def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None,
     Factory function to generate a Test object from the input file inp_fname
     """
     inp_fname = os.path.abspath(inp_fname)
+    #print("make_abitest_from_input got inp_fname", inp_fname)
 
     parser = AbinitTestInfoParser(inp_fname)
 
@@ -1260,7 +1269,7 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
     while inp_fnames:
         inp_fname = inp_fnames.pop(0)
 
-        # print("inp_fname", inp_fname)
+        #print("inp_fname", inp_fname)
         parser = AbinitTestInfoParser(inp_fname)
         nprocs_to_test = parser.nprocs_to_test
 
@@ -1280,13 +1289,14 @@ def make_abitests_from_inputs(input_fnames, abenv, keywords=None, need_cpp_vars=
                 out_tests.append(cls(test_info, abenv))
 
         else:
-            logger.info("got chain input %s" % inp_fname)
+            #print("got chain input for inp_fname:", inp_fname)
             # print(parser.chain_inputs())
 
             # Build the test chain with np nprocessors.
             for np in nprocs_to_test:
                 tchain_list = []
                 for cht_fname in parser.chain_inputs():
+                    #print("cht_fname", cht_fname)
                     t = make_abitest_from_input(cht_fname, abenv, keywords=keywords, need_cpp_vars=need_cpp_vars, with_np=np)
                     tchain_list.append(t)
 
@@ -1417,6 +1427,17 @@ class BaseTest(object):
             second_names.append(s)
 
         self._authors_snames = set(second_names)
+
+        if self.executable == "abinit" and self.psp_files and not self.use_files_file:
+            raise RuntimeError("""
+In: %s
+
+The `psp_files` entry in the TEST_INFO section is needed only if `use_files_file = 'yes'`
+In all the other cases use the Abinit input variables:
+
+pseudos "foo.psp8, bar.psp8"
+pp_dirpath $ABI_PSPDIR
+""" % self.inp_fname )
 
     def __repr__(self):
         return self.full_id
@@ -1785,12 +1806,16 @@ class BaseTest(object):
             compilers.append(compiler)
             slaves.append(host)
 
-        # Find the slave and compare the name of the compiler.
+        # Find the slave
+        # Use short hostname i.e. the toke before '.' so alps.pcml.ucl.ac.be becomes alps
         try:
-            idx = slaves.index(self.build_env.hostname)
+            #idx = slaves.index(self.build_env.hostname)
+            short_hostname = self.build_env.hostname.split('.', 1)[0]
+            idx = slaves.index(short_hostname)
         except ValueError:
             return False
 
+        # Compare the name of the compiler.
         return compilers[idx] == self.build_env.fortran_compiler.name
 
     def skip_buildbot_builder(self):
@@ -1903,6 +1928,22 @@ class BaseTest(object):
             self.cprint(msg, status2txtcolor[self._status])
             can_run = False
 
+        if self.use_git_submodule:
+            # Create link in workdir pointing to ~abinit/tests/modules_with_data/MODULE_DIRNAME
+            dst = os.path.join(self.workdir, self.use_git_submodule)
+            src = os.path.join(self.abenv.tests_dir, "modules_with_data", self.use_git_submodule)
+
+            if not os.path.exists(os.path.join(src, "README.md")):
+                self._status = "skipped"
+                msg = self.full_id + ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
+                msg += "\tbut cannot find README.md file in dir\n"
+                msg += "\tUse:\n\t\t`git submodule init && git submodule update --recursive --remote`\n\tto fetch the last version from the remote url."
+                self.cprint(msg, status2txtcolor[self._status])
+                can_run = False
+            else:
+                if not os.path.exists(dst):
+                    os.symlink(src, dst)
+
         self.run_etime = 0.0
 
         if can_run:
@@ -1925,9 +1966,14 @@ class BaseTest(object):
             self.stderr_fname = os.path.join(self.workdir, self.id + ".stderr")
 
             # Run the code (run_etime is the wall time spent to execute the test)
-            # FIXME: Add support for more executables
+
+            # Here we decided whether we should invoke the executable with/without files file.
+            # Note that not all the executables have removed support for the files file, moreover we still have
+            # a couple of Abinit tests in which the files file sytenx is still used (use_files_file option in TEST_INFO)
+            # just to make sure we still support the legacy mode.
+
             use_files_file = self.use_files_file
-            if self.executable not in ("abinit", "anaddb"):
+            if self.executable not in ("abinit", "anaddb", "optic"):  # FIXME: Add support for more executables
                 use_files_file = True
 
             if use_files_file:
@@ -1939,8 +1985,9 @@ class BaseTest(object):
                 bin_argstr = " " + self.exec_args
 
             else:
-                # New CLI mode: invoke exec with syntax `abinit run.abi`
-                # stdin_fname won't be created
+                # New CLI mode: invoke executable with syntax `abinit run.abi`. stdin_fname won't be created
+                # The subclass should implement prepare_new_cli_invokation that performs all the operations
+                # needed to prepare the input files. May be empty.
                 self.keep_files([self.stdout_fname, self.stderr_fname])
                 stdin_fname = ""
                 self.prepare_new_cli_invokation()
@@ -1987,33 +2034,52 @@ class BaseTest(object):
 
                 if not self.exec_error and f.has_line_count_error: f.do_html_diff = True
 
+                if f.do_html_diff:
+                    # Disable html diff if file size is >= 150 Kb or files do not exist.
+                    html_max_bites = 150 * 1000
+                    out_size_bites = ref_size_bites = html_max_bites
+                    try:
+                        out_size_bites = os.path.getsize(os.path.join(self.workdir, f.name))
+                        ref_size_bites = os.path.getsize(os.path.join(self.ref_dir, f.name))
+                    except OSError:
+                        pass
+                    if out_size_bites >= html_max_bites or ref_size_bites >= html_max_bites:
+                        f.do_html_diff = False
+
                 self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
                             status2txtcolor[status])
 
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
-                    print("\tTest %s failed but note that the feature being tested is not portable" % self.full_id)
-                    print("\tas this test is partly disabled on the Abinit testfarm.")
-                    if self.exclude_hosts: print("\texclude_hosts:", self.exclude_hosts)
-                    if self.exclude_builders: print("\texclude_builder:", self.exclude_builders)
+                    cprint("\tTest `%s` with keywords: `%s` failed." % (self.full_id, str(self.keywords)), color="yellow")
+                    cprint("\tNote however that this feature is not portable", color="yellow")
+                    cprint("\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
+                    if self.exclude_hosts: cprint("\t\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")
+                    if self.exclude_builders: cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
+
+                if status == "failed" and self.use_git_submodule:
+                    cprint("\tTest %s failed. Note, however, that this test requires external files in %s" % (
+                          self.full_id, self.use_git_submodule), color="yellow")
+                    cprint("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.",
+                           color="yellow")
 
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "Test has reached timeout and has been killed by SIGTERM"
+                msg = self.full_id + " Test has reached timeout and has been killed by SIGTERM"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "Test has reached timeout and has been killed by SIGKILL"
+                msg = self.full_id + " Test has reached timeout and has been killed by SIGKILL"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
-                msg = (self.full_id + "Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
+                msg = (self.full_id + " Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
                 self.cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
@@ -2193,7 +2259,12 @@ class BaseTest(object):
                         os.remove(entry)
                     except OSError:
                         pass
+                elif os.path.islink(entry):
+                    # directory is a link.
+                    pass
                 else:
+                    # real directory that should be removed
+                    # At present no test copies directories so we leave this raise.
                     raise NotImplementedError("Found directory: %s in workdir!!" % entry)
 
     def patch(self, patcher=None):
@@ -2225,6 +2296,7 @@ class BaseTest(object):
 
             if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
                 ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
 
             out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
 
@@ -2237,7 +2309,7 @@ class BaseTest(object):
             f.hdiff_fname = hdiff_fname
 
             x, ext = os.path.splitext(f.name)
-            safe_hdiff = ext in {".out", ".stdout"}  # Create HTML diff file only for these files
+            safe_hdiff = ext in {".out", ".abo", ".stdout"}  # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
                 out_opt = "-m"
@@ -2275,6 +2347,7 @@ class BaseTest(object):
 
             if not os.path.isfile(ref_fname) and ref_fname.endswith(".stdout"):
                 ref_fname = ref_fname[:-7] + ".out"  # FIXME Hack due to the stdout-out ambiguity
+                #ref_fname = ref_fname[:-7] + ".abo"  # FIXME Hack due to the stdout-out ambiguity
 
             out_fname = os.path.abspath(os.path.join(self.workdir, f.name))
 
@@ -2412,10 +2485,11 @@ class BaseTest(object):
                 </tr>
                 <py-open>for idx, f in enumerate(self.files_to_test):</py-open>
                  <tr valign="top" align="left">
+                  <py-line code = "out_link = html_link(basename(f.name))"/>
                   <py-line code = "fld_link = html_link(basename(f.fldiff_fname))"/>
                   <py-line code = "txt_diff_link = html_link(basename(f.diff_fname))"/>
                   <py-line code = "html_diff_link = html_link(basename(f.hdiff_fname))"/>
-                  <py-line code = "tab_row = args2htmltr(f.name, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
+                  <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
                   ${tab_row}
                  </tr>
                 <py-close/>
@@ -2504,7 +2578,7 @@ class AbinitTest(BaseTest):
         # and we might want to change it especially if we are debugging the code
         inp_fname = self.inp_fname
         t_stdin.write(os.path.basename(inp_fname) + "\n")
-        t_stdin.write(self.id + ".out" + "\n")
+        t_stdin.write(self.id + ".abo" + "\n")
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2535,27 +2609,8 @@ class AbinitTest(BaseTest):
         app = extra.append
 
         if 'output_file = "' not in line:
-            app('output_file = "%s"' % (self.id + ".out"))
-
-        # This is needed for ATOMPAW as the pseudo will be generated at runtime.
-        #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
-        #if dirname is not None:
-        #    app('pp_dirpath = "%s"' % (dirname))
-        #    app('pseudos = "%s"' % (",".join(pp_names)))
-        #else:
-        #    app('pseudos = "%s"' % (",\n".join(pp_names)))
-
-        # This is to check whether the parser supports "long strings"
-        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
-
-        # Need to add pseudopotential info to input.
-        if 'pseudos = ' not in line:
-            app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
-
-        #pp_paths = self.get_pseudo_paths()
-        #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
-        #app('pp_dirpath = "$ABI_PSPDIR"')
-        #app('pp_dirpath = %s' % self.abenv.psps_dir)
+            #app('output_file = "%s"' % (self.id + ".out"))
+            app('output_file = "%s"' % (self.id + ".abo"))
 
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
@@ -2563,12 +2618,9 @@ class AbinitTest(BaseTest):
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id  + "t"
 
-        if 'indata_prefix = ' not in line:
-            app('indata_prefix = "%s"' % i_prefix)
-        if 'outdata_prefix = ' not in line:
-            app('outdata_prefix = "%s"' % o_prefix)
-        if 'tmpdata_prefix = ' not in line:
-            app('tmpdata_prefix = "%s"' % t_prefix)
+        if 'indata_prefix = ' not in line: app('indata_prefix = "%s"' % i_prefix)
+        if 'outdata_prefix = ' not in line: app('outdata_prefix = "%s"' % o_prefix)
+        if 'tmpdata_prefix = ' not in line: app('tmpdata_prefix = "%s"' % t_prefix)
 
         app("# end runtests.py section\n\n")
 
@@ -2618,7 +2670,7 @@ class AnaddbTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + ".abo" + "\n")       # 2) formatted output file e.g. t13.abo
         t_stdin.write(self.get_ddb_path() + "\n")    # 3) input derivative database e.g. t13.ddb.in
         t_stdin.write(self.id + ".md" + "\n")        # 4) output molecular dynamics e.g. t13.md
         t_stdin.write(self.get_gkk_path() + "\n")    # 5) input elphon matrix elements  (GKK file) :
@@ -2642,7 +2694,7 @@ class AnaddbTest(BaseTest):
             app('ddb_filepath = "%s"' % (self.get_ddb_path()))
 
         if 'output_file = "' not in line:
-            app('output_file = "%s"' % (self.id + ".out"))
+            app('output_file = "%s"' % (self.id + ".abo"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
@@ -2672,7 +2724,7 @@ class MultibinitTest(BaseTest):
         t_stdin = StringIO()
 
         t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + ".abo" + "\n")       # 2) formatted output file e.g. t13.abo
 
         if self.input_ddb:
             iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
@@ -2736,7 +2788,7 @@ class TdepTest(BaseTest):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
         t_stdin.write(md_hist_fname + "\n")
-        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.abo
 
         return t_stdin.getvalue()
 
@@ -2780,13 +2832,14 @@ class OpticTest(BaseTest):
     """
     def make_stdin(self):
         t_stdin = StringIO()
-
         t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + ".out\n")     # Output. e.g t57.out
+        t_stdin.write(self.id + ".abo\n")     # Output. e.g t57.abo
         t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
-                                               # and also for roots for temporaries
-
+                                              # and also for roots for temporaries
         return t_stdin.getvalue()
+
+    def prepare_new_cli_invokation(self):
+        """Empty implementation"""
 
 
 class Band2epsTest(BaseTest):
@@ -3173,6 +3226,91 @@ class AbinitTestSuite(object):
             assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
 
+    #def git_rename(self):
+
+    #    import subprocess
+    #    seen = set()
+    #    def rename(test):
+    #        #print(test, type(test))
+    #        if test.inp_fname in seen: return
+    #        seen.add(test.inp_fname)
+
+    #        root, ext = os.path.splitext(test.inp_fname)
+    #        #assert ext == ".in"
+    #        new = root + ".abi"
+    #        inbase = os.path.basename(root)
+    #        cmd = f"git mv {test.inp_fname} {new}"
+
+    #        #print("cmd", cmd)
+    #        #subprocess.run(cmd, shell=True, check=True)
+    #        #call(cmd)
+    #        #print("inp_fname", test.inp_fname)
+
+    #        # Rename ref files
+    #        old_new = []
+    #        for f in test.files_to_test:
+    #            root, ext = os.path.splitext(test.inp_fname)
+    #            if not f.name.endswith(".out"): continue
+    #            if f.name == inbase + ".out" or "MPI" in f.name:
+    #                old_ref = os.path.join(test.ref_dir, f.name)
+    #                new, ext = os.path.splitext(old_ref)
+    #                new = new + ".abo"
+    #                cmd = f"git mv {old_ref} {new}"
+    #                print(cmd)
+    #                if os.path.exists(old_ref) and not os.path.exists(new):
+    #                    subprocess.run(cmd, shell=True, check=True)
+    #                if not os.path.exists(old_ref):
+    #                    print("Warning. unexistent:", old_ref)
+    #                old_new.append((os.path.basename(old_ref), os.path.basename(new)))
+
+    #            else:
+    #                continue
+    #                #print("strange f.name", f.name)
+
+    #        # Change names in TEST_INFO section
+    #        if old_new:
+    #            with open(test.inp_fname, "rt") as fh:
+    #                s = fh.read()
+    #                for old, new in old_new:
+    #                    print("replacing`", old, "`with:`", new, "`in:", test.inp_fname)
+    #                    s = s.replace(old, new)
+    #            #print(s)
+    #            with open(test.inp_fname, "wt") as fh:
+    #                fh.write(s)
+
+    #    def rename_chain(chain):
+    #        old_new = []
+    #        for test in chain:
+    #            print(test)
+    #            root, ext = os.path.splitext(test.inp_fname)
+    #            #assert ext == ".abi"
+    #            old = os.path.basename(root + ".in")
+    #            new = os.path.basename(root + ".abi")
+    #            #inbase = os.path.basename(root)
+    #            #cmd = f"git mv {test.inp_fname} {new}"
+    #            old_new.append((old, new))
+
+    #        # Change names in TEST_INFO section
+    #        if old_new:
+    #            for test in chain:
+    #                with open(test.inp_fname, "rt") as fh:
+    #                    s = fh.read()
+    #                    for old, new in old_new:
+    #                        print("replacing test_chain`", old, "`with:`", new, "`in:", test.inp_fname)
+    #                        s = s.replace(old, new)
+    #                #print(s)
+    #                with open(test.inp_fname, "wt") as fh:
+    #                    fh.write(s)
+
+    #    for test in self:
+    #        if isinstance(test, ChainOfTests):
+    #            #print("Skipping test chain")
+    #            #rename_chain(test)
+    #            for t in test:
+    #                rename(t)
+    #        else:
+    #            rename(test)
+
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
 
@@ -3523,11 +3661,9 @@ class AbinitTestSuite(object):
                 msg = (
                     "Timeout occured while trying to acquire lock in:\n\t{}\n"
                     "Perhaps a previous run did not exit cleanly or another "
-                    "process is running in the same directory.\n If you are"
-                    "sure no other process is in execution, remove the "
-                    "directory with `rm -rf` and rerun.\n"
+                    "process is running in the same directory.\n If you are "
+                    "sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n"
                 ).format(self.workdir)
-
                 cprint(msg, "red")
                 return
 
@@ -3624,8 +3760,15 @@ class AbinitTestSuite(object):
                     stats_suite[test.suite_name] = d
 
                 stats_suite[test.suite_name][test.status] += 1
-                stats_suite[test.suite_name]["run_etime"] += test.run_etime
-                stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
+                try:
+                    stats_suite[test.suite_name]["run_etime"] += test.run_etime
+                    stats_suite[test.suite_name]["tot_etime"] += test.tot_etime
+                except AttributeError:
+                    print("Cannot access run_etime, tot_etime attributes of test:\n\t%s" % str(test))
+                    print("Likely due to timeout error.")
+                    print("Continuing anyway despite the error.")
+                    stats_suite[test.suite_name]["run_etime"] += 0.0
+                    stats_suite[test.suite_name]["tot_etime"] += 0.0
 
             suite_names = sorted(stats_suite.keys())
 
@@ -3920,19 +4063,22 @@ class Results(object):
     def outref_files(self, status):
         """
         Return (out_files, ref_files)
-        where out and ref are list with the output files and the reference
+        where out_files and ref_files are lists with the output files and the reference
         files of the tests with the given status.
         """
         out_files, ref_files = [], []
-        for test in (self.tests_with_status(status)):
+        for test in self.tests_with_status(status):
             for f in test.files_to_test:
-                # if status != "all" and f.status != status: continue
+                #print(f"status: {status}, f.fld_status: {f.fld_status}")
+                #print(f)
+                #if status != "all" and f.fld_status != status: continue
 
                 out_files.append(os.path.join(test.workdir, f.name))
                 ref_fname = os.path.join(test.ref_dir, f.name)
                 # FIXME Hack due to the ambiguity stdout, out!
                 if not os.path.exists(ref_fname) and ref_fname.endswith(".stdout"):
                     ref_fname = ref_fname[:-7] + ".out"
+                    #ref_fname = ref_fname[:-7] + ".abo"
                 ref_files.append(ref_fname)
 
         return out_files, ref_files

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_numeric_tools
 !! NAME
 !!  m_numeric_tools
@@ -7,7 +6,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
+!! Copyright (C) 2008-2021 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,6 +97,7 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
+ public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -304,7 +304,6 @@ CONTAINS  !===========================================================
 
 pure function arth_int(start, step, nn)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -324,7 +323,7 @@ pure function arth_int(start, step, nn)
    end do
 
  case (0)
-   RETURN
+   return
  end select
 
 end function arth_int
@@ -346,7 +345,6 @@ end function arth_int
 
 pure function arth_rdp(start, step, nn)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -358,16 +356,14 @@ pure function arth_rdp(start, step, nn)
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  arth_rdp(1)=start
-  do ii=2,nn
-   arth_rdp(ii)=arth_rdp(ii-1)+step
-  end do
+   arth_rdp(1)=start
+   do ii=2,nn
+    arth_rdp(ii)=arth_rdp(ii-1)+step
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function arth_rdp
@@ -387,31 +383,28 @@ end function arth_rdp
 !!
 !! SOURCE
 
-pure function linspace(start,stop,nn)
-
+pure function linspace(start, stop, nn)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
- real(dp),intent(in) :: start,stop
- real(dp) :: length
+ real(dp),intent(in) :: start, stop
  real(dp) :: linspace(nn)
 
 !Local variables-------------------------------
+ real(dp) :: length
  integer :: ii
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  length = stop-start
-  do ii=1,nn
-   linspace(ii)=start+length*(ii-1)/(nn-1)
-  end do
+   length = stop-start
+   do ii=1,nn
+     linspace(ii)=start+length*(ii-1)/(nn-1)
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function linspace
@@ -440,7 +433,6 @@ end function linspace
 
 
 pure function geop(start,factor,nn) result(res)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -477,7 +469,6 @@ end function geop
 
 subroutine reverse_int(arr)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: arr(:)
@@ -513,7 +504,6 @@ end subroutine reverse_int
 !! SOURCE
 
 subroutine reverse_rdp(arr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -555,7 +545,6 @@ end subroutine reverse_rdp
 
 pure subroutine unit_matrix_int(matrix)
 
-
 !Arguments ------------------------------------
  integer,intent(inout) :: matrix(:,:)
 
@@ -592,7 +581,6 @@ end subroutine unit_matrix_int
 !! SOURCE
 
 pure subroutine unit_matrix_rdp(matrix)
-
 
 !Arguments ------------------------------------
  real(dp),intent(inout) :: matrix(:,:)
@@ -631,7 +619,6 @@ end subroutine unit_matrix_rdp
 
 pure subroutine unit_matrix_cdp(matrix)
 
-
 !Arguments ------------------------------------
  complex(dpc),intent(inout) :: matrix(:,:)
 
@@ -667,7 +654,6 @@ end subroutine unit_matrix_cdp
 !! SOURCE
 
 pure function get_trace_int(matrix) result(trace)
-
 
 !Arguments ------------------------------------
  integer :: trace
@@ -705,7 +691,6 @@ end function get_trace_int
 
 pure function get_trace_rdp(matrix) result(trace)
 
-
 !Arguments ------------------------------------
  real(dp) :: trace
  real(dp),intent(in) :: matrix(:,:)
@@ -739,7 +724,6 @@ end function get_trace_rdp
 !! SOURCE
 
 pure function get_trace_cdp(matrix) result(trace)
-
 
 !Arguments ------------------------------------
  complex(dpc) :: trace
@@ -775,7 +759,6 @@ end function get_trace_cdp
 
 function get_diag_int(mat) result(diag)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mat(:,:)
@@ -785,11 +768,10 @@ function get_diag_int(mat) result(diag)
  integer :: ii
 ! *************************************************************************
 
- ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ ii = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  do ii=1,SIZE(mat,1)
-  diag(ii)=mat(ii,ii)
+   diag(ii)=mat(ii,ii)
  end do
 
 end function get_diag_int
@@ -811,8 +793,8 @@ end function get_diag_int
 !!  diag(:)=the diagonal
 !!
 !! SOURCE
-function get_diag_rdp(mat) result(diag)
 
+function get_diag_rdp(mat) result(diag)
 
 !Arguments ------------------------------------
 !scalars
@@ -823,11 +805,10 @@ function get_diag_rdp(mat) result(diag)
  integer :: ii
 ! *************************************************************************
 
- ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ ABI_CHECK(SIZE(mat,1) == SIZE(mat,2), 'Matrix not square')
 
  do ii=1,SIZE(mat,1)
-  diag(ii)=mat(ii,ii)
+   diag(ii) = mat(ii,ii)
  end do
 
 end function get_diag_rdp
@@ -858,11 +839,10 @@ function get_diag_cdp(cmat) result(cdiag)
  integer :: ii
 ! *************************************************************************
 
- ii=assert_eq(SIZE(cmat,1),SIZE(cmat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ ABI_CHECK(SIZE(cmat,1) == SIZE(cmat,2), 'Matrix not square')
 
  do ii=1,SIZE(cmat,1)
-  cdiag(ii)=cmat(ii,ii)
+   cdiag(ii)=cmat(ii,ii)
  end do
 
 end function get_diag_cdp
@@ -915,7 +895,6 @@ end function isdiagmat_int
 
 pure logical function isdiagmat_rdp(mat, atol) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: mat(:,:)
@@ -957,7 +936,6 @@ end function isdiagmat_rdp
 
 pure function l2int_1D(larr) result(int_arr)
 
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: larr(:)
@@ -990,7 +968,6 @@ end function l2int_1D
 
 pure function l2int_2D(larr) result(int_arr)
 
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: larr(:,:)
@@ -1022,7 +999,6 @@ end function l2int_2D
 !! SOURCE
 
 pure function l2int_3D(larr) result(int_arr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1059,7 +1035,6 @@ end function l2int_3D
 
 pure function rdp2cdp_1D(rr) result(cc)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:)
@@ -1087,7 +1062,6 @@ end function rdp2cdp_1D
 !! SOURCE
 
 pure function rdp2cdp_2D(rr) result(cc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1117,7 +1091,6 @@ end function rdp2cdp_2D
 
 pure function rdp2cdp_3D(rr) result(cc)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:)
@@ -1145,7 +1118,6 @@ end function rdp2cdp_3D
 !! SOURCE
 
 pure function rdp2cdp_4D(rr) result(cc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1175,7 +1147,6 @@ end function rdp2cdp_4D
 
 pure function rdp2cdp_5D(rr) result(cc)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:)
@@ -1203,7 +1174,6 @@ end function rdp2cdp_5D
 !! SOURCE
 
 pure function rdp2cdp_6D(rr) result(cc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1236,7 +1206,6 @@ end function rdp2cdp_6D
 
 pure function cdp2rdp_1D(cc) result(rr)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: cc(:)
@@ -1266,7 +1235,6 @@ end function cdp2rdp_1D
 
 pure function cdp2rdp_2D(cc) result(rr)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: cc(:,:)
@@ -1294,7 +1262,6 @@ end function cdp2rdp_2D
 !! SOURCE
 
 pure function cdp2rdp_3D(cc) result(rr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1325,7 +1292,6 @@ end function cdp2rdp_3D
 
 pure function cdp2rdp_4D(cc) result(rr)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: cc(:,:,:,:)
@@ -1353,7 +1319,6 @@ end function cdp2rdp_4D
 !! SOURCE
 
 pure function cdp2rdp_5D(cc) result(rr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1385,7 +1350,6 @@ end function cdp2rdp_5D
 
 elemental function iseven(nn)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -1413,7 +1377,6 @@ end function iseven
 !! SOURCE
 
 pure function is_integer_0d(rr,tol) result(ans)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1444,7 +1407,6 @@ end function is_integer_0d
 !! SOURCE
 
 pure function is_integer_1d(rr,tol) result(ans)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1483,7 +1445,6 @@ end function is_integer_1d
 
 function is_zero_rdp_0d(rr,tol) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: tol
@@ -1513,7 +1474,6 @@ end function is_zero_rdp_0d
 
 function is_zero_rdp_1d(rr,tol) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: tol
@@ -1540,7 +1500,6 @@ end function is_zero_rdp_1d
 
 pure logical function inrange_int(xval, win)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: xval,win(2)
@@ -1564,7 +1523,6 @@ end function inrange_int
 
 pure logical function inrange_dp(xval, win)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: xval, win(2)
@@ -1587,7 +1545,6 @@ end function inrange_dp
 !! SOURCE
 
 pure function bisect_rdp(AA,xx) result(loc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1644,7 +1601,6 @@ end function bisect_rdp
 !! SOURCE
 pure function bisect_int(AA,xx) result(loc)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: AA(:)
@@ -1695,7 +1651,6 @@ end function bisect_int
 
 pure function imax_loc_int(iarr,mask)
 
-
 !Arguments ------------------------------------
 !scalars
  integer :: imax_loc_int
@@ -1732,7 +1687,6 @@ end function imax_loc_int
 !! SOURCE
 pure function imax_loc_rdp(arr,mask)
 
-
 !Arguments ------------------------------------
 !scalars
  integer :: imax_loc_rdp
@@ -1765,8 +1719,7 @@ end function imax_loc_rdp
 !!
 !! SOURCE
 
-pure function imin_loc_int(arr,mask)
-
+pure function imin_loc_int(arr, mask)
 
 !Arguments ------------------------------------
 !scalars
@@ -1804,7 +1757,6 @@ end function imin_loc_int
 !! SOURCE
 
 pure function imin_loc_rdp(arr,mask)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1849,7 +1801,6 @@ end function imin_loc_rdp
 !! SOURCE
 
 integer pure function lfind(mask, back)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1916,7 +1867,6 @@ end function lfind
 !! SOURCE
 
 subroutine list2blocks(list,nblocks,blocks)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1989,7 +1939,6 @@ end subroutine list2blocks
 !! SOURCE
 
 subroutine mask2blocks(mask,nblocks,blocks)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2074,7 +2023,6 @@ end subroutine mask2blocks
 !! SOURCE
 
 function linfit_rdp(nn,xx,yy,aa,bb) result(res)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2182,7 +2130,6 @@ end function linfit_spc
 
 function linfit_dpc(nn,xx,zz,aa,bb) result(res)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -2245,7 +2192,6 @@ end function linfit_dpc
 
 subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfuncs
@@ -2276,12 +2222,9 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  real(dp),allocatable :: work(:),Vt(:,:),U(:,:),S(:)
 ! *************************************************************************
 
- npts=assert_eq(SIZE(xx),SIZE(yy),SIZE(sigma),'Wrong size in xx,yy,sigma',&
-& __FILE__,__LINE__)
- call assert((npts>=nfuncs),'No. of functions must greater than no. of points',&
-& __FILE__,__LINE__)
- ii=assert_eq(nfuncs,SIZE(cov,1),SIZE(cov,2),SIZE(var),'Wrong size in covariance',&
-& __FILE__,__LINE__)
+ npts = assert_eq(SIZE(xx),SIZE(yy),SIZE(sigma),'Wrong size in xx,yy,sigma', __FILE__, __LINE__)
+ call assert((npts>=nfuncs),'No. of functions must greater than no. of points', __FILE__, __LINE__)
+ ii = assert_eq(nfuncs,SIZE(cov,1),SIZE(cov,2),SIZE(var),'Wrong size in covariance', __FILE__, __LINE__)
 
  !
  ! === Calculate design matrix and b vector ===
@@ -2364,7 +2307,6 @@ end subroutine llsfit_svd
 
 subroutine polyn_interp(xa,ya,x,y,dy)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: xa(:),ya(:)
@@ -2377,8 +2319,7 @@ subroutine polyn_interp(xa,ya,x,y,dy)
  real(dp),dimension(SIZE(xa)) :: c,d,den,ho
 ! *************************************************************************
 
- n=assert_eq(SIZE(xa),SIZE(ya),'Different size in xa and ya',&
-& __FILE__,__LINE__)
+ n = assert_eq(SIZE(xa),SIZE(ya),'Different size in xa and ya',__FILE__,__LINE__)
 
  ! === Initialize the tables of c and d ===
  c(:)=ya(:) ; d(:)=ya(:) ; ho(:)=xa(:)-x
@@ -2390,7 +2331,7 @@ subroutine polyn_interp(xa,ya,x,y,dy)
  do m=1,n-1
   den(1:n-m)=ho(1:n-m)-ho(1+m:n)
   if (ANY(den(1:n-m)==zero)) then
-   MSG_ERROR('Two input xa are identical')
+   ABI_ERROR('Two input xa are identical')
   end if
 
   den(1:n-m)=(c(2:n-m+1)-d(1:n-m))/den(1:n-m)
@@ -2444,7 +2385,6 @@ end subroutine polyn_interp
 !! SOURCE
 
 recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2509,7 +2449,7 @@ recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
 
  case (:0)
    write(msg,'(a,i3)')'Wrong value for nn ',nn
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine trapezoidal_
@@ -2549,7 +2489,6 @@ end subroutine trapezoidal_
 !! SOURCE
 
  recursive subroutine midpoint_(func,nn,xmin,xmax,quad)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2607,7 +2546,7 @@ end subroutine trapezoidal_
 
  case (:0)
    write(msg,'(a,i3)')' wrong value for nn ',nn
-   MSG_BUG('Wrong value for nn')
+   ABI_BUG('Wrong value for nn')
  end select
 
 end subroutine midpoint_
@@ -2649,7 +2588,6 @@ end subroutine midpoint_
 !! SOURCE
 
 recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,npts)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2822,12 +2760,12 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
 
  case default
    write(msg,'(a,i3)')'Wrong value for qopt',qopt
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
  write(msg,'(a,i0,2(a,es14.6))')&
 &  "Results are not converged within the given accuracy. ntrial= ",NT,"; EPS= ",EPS,"; TOL= ",TOL
- MSG_WARNING(msg)
+ ABI_WARNING(msg)
  ierr = -1
 
 end subroutine quadrature
@@ -2851,14 +2789,13 @@ end subroutine quadrature
 !! NOTES
 !!
 !! PARENTS
-!!      psden,psp11lo,psp11nl,psp5lo,psp5nl,psp8lo,psp8nl,vhtnzc
+!!      m_phonons,m_psp6,m_psptk,m_unittests,m_upf2abinit
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine ctrap(imax,ff,hh,ans)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3017,7 +2954,6 @@ end subroutine ctrap
 
 subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
 
-
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: ntab
@@ -3045,7 +2981,7 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
     write(std_out,'(a)' ) ' '
     write(std_out,'(a)' ) 'CSPINT - Fatal error!'
     write(std_out,'(a,i6)' ) '  NTAB must be at least 3, but input NTAB = ',ntab
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
   end if
 
   do i = 1, ntab-1
@@ -3057,7 +2993,7 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
       write(std_out,'(a,i6)' ) '  XTAB(I) <= XTAB(I-1) for I=',i
       write(std_out,'(a,g14.6)' ) '  XTAB(I) = ',xtab(i)
       write(std_out,'(a,g14.6)' ) '  XTAB(I-1) = ',xtab(i-1)
-      MSG_ERROR("Aborting now")
+      ABI_ERROR("Aborting now")
     end if
 
   end do
@@ -3169,15 +3105,13 @@ end subroutine cspint
 !! weights(n)=array of integration weights
 !!
 !! PARENTS
-!!      calc_rpa_functional,calc_sigc_me,integrho,integvol,m_numeric_tools
-!!      screening,surf
+!!      m_bader,m_numeric_tools,m_screening_driver,m_sigc
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3256,7 +3190,6 @@ end subroutine coeffs_gausslegint
 
 function simpson_cplx(npts,step,ff)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npts
@@ -3274,7 +3207,7 @@ function simpson_cplx(npts,step,ff)
  my_n=npts; if ((npts/2)*2 == npts) my_n=npts-3
 
  if (my_n<2) then
-   MSG_ERROR("Too few points")
+   ABI_ERROR("Too few points")
  end if
 
  sum_odd=czero
@@ -3327,7 +3260,6 @@ end function simpson_cplx
 
 subroutine hermitianize_spc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3341,8 +3273,7 @@ subroutine hermitianize_spc(mat,uplo)
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
 
@@ -3381,7 +3312,7 @@ subroutine hermitianize_spc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine hermitianize_spc
@@ -3417,7 +3348,6 @@ end subroutine hermitianize_spc
 
 subroutine hermitianize_dpc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3431,8 +3361,7 @@ subroutine hermitianize_dpc(mat,uplo)
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
 
@@ -3470,7 +3399,7 @@ subroutine hermitianize_dpc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine hermitianize_dpc
@@ -3501,7 +3430,6 @@ end subroutine hermitianize_dpc
 !! SOURCE
 
 pure subroutine mkherm(array,ndim)
-
 
 !Arguments -------------------------------
 !scalars
@@ -3556,15 +3484,13 @@ end subroutine mkherm
 !!  Interface allows aliasing
 !!
 !! PARENTS
-!!      extrapwf,subdiago
+!!      m_cgtools,m_extraprho
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
-subroutine hermit(chmin,chmout,ierr,ndim)
-
+subroutine hermit(chmin, chmout, ierr, ndim)
 
 !Arguments ------------------------------------
 !scalars
@@ -3580,7 +3506,7 @@ subroutine hermit(chmin,chmout,ierr,ndim)
  integer :: idim,merrors,nerrors
  real(dp),parameter :: eps=epsilon(0.0d0)
  real(dp) :: ch_im,ch_re,moduls,tol
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -3605,18 +3531,18 @@ subroutine hermit(chmin,chmout,ierr,ndim)
    if( abs(ch_im) > tol .or. abs(ch_im) > tol8*abs(ch_re)) nerrors=1
 
    if( (abs(ch_im) > tol .and. nmesgs<mmesgs) .or. nerrors==2)then
-     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
-&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+     ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+     ' for component:',idim,' Im part is: ',ch_im,', Re part is: ',ch_re,'.'
+     call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
    if( ( abs(ch_im) > tol8*abs(ch_re) .and. nmesgs<mmesgs) .or. nerrors==2)then
-     write(message, '(3a,i0,a,es20.12,a,es20.12,a)' )&
-&     'Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
-&     'for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(3a,i0,a,es20.12,a,es20.12,a)' )&
+     ' Input Hermitian matrix has nonzero relative Im part on diagonal:',ch10,&
+     ' for component',idim,' Im part is',ch_im,', Re part is',ch_re,'.'
+     call wrtout(std_out,msg)
      nmesgs=nmesgs+1
    end if
 
@@ -3635,10 +3561,10 @@ subroutine hermit(chmin,chmout,ierr,ndim)
 
  if(merrors==2)then
    ierr=1
-   write(message, '(3a)' )&
-&   'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
-&   'See previous messages.'
-   MSG_BUG(message)
+   write(msg, '(3a)' )&
+    'Imaginary part(s) of diagonal Hermitian matrix element(s) is too large.',ch10,&
+    'See previous messages.'
+   ABI_BUG(msg)
  end if
 
 end subroutine hermit
@@ -3674,7 +3600,6 @@ end subroutine hermit
 
 subroutine symmetrize_spc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3688,8 +3613,7 @@ subroutine symmetrize_spc(mat,uplo)
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
 
@@ -3719,7 +3643,7 @@ subroutine symmetrize_spc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine symmetrize_spc
@@ -3755,7 +3679,6 @@ end subroutine symmetrize_spc
 
 subroutine symmetrize_dpc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3769,11 +3692,9 @@ subroutine symmetrize_dpc(mat,uplo)
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
-
  case ("A","a") ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
@@ -3800,7 +3721,7 @@ subroutine symmetrize_dpc(mat,uplo)
   end do
 
  case default
-   MSG_ERROR("Wrong uplo"//TRIM(uplo))
+   ABI_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
 end subroutine symmetrize_dpc
@@ -3815,14 +3736,14 @@ end subroutine symmetrize_dpc
 !!
 !! INPUTS
 !! N: size of matrix
-!! cplx: is the matrix complex
-!! mat_in(2, N*N)= matrix to be packed
+!! cplx: 2 if matrix is complex, 1 for real matrix.
+!! mat_in(cplx, N*N)= matrix to be packed
 !!
 !! OUTPUT
-!! mat_out(N*N+1)= packed matrix
+!! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
 !! PARENTS
-!!      rayleigh_ritz
+!!      m_rayleigh_ritz
 !!
 !! CHILDREN
 !!
@@ -3830,10 +3751,11 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
-
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
  real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
+
+!local variables
  integer :: isubh, i, j
 
  ! *************************************************************************
@@ -3884,7 +3806,6 @@ end subroutine pack_matrix
 
 subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r
@@ -3906,7 +3827,7 @@ subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -3945,7 +3866,6 @@ end subroutine print_arr1d_spc
 
 subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r
@@ -3967,7 +3887,7 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
-  MSG_BUG(msg)
+  ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -4006,7 +3926,6 @@ end subroutine print_arr1d_dpc
 
 subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r,max_c
@@ -4029,7 +3948,7 @@ subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
    write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -4072,7 +3991,6 @@ end subroutine print_arr2d_spc
 
 subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r,max_c
@@ -4095,7 +4013,7 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 
  if (mode/='COLL'.and.mode/='PERS') then
    write(msg,'(2a)')'Wrong value of mode_paral ',mode
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! === Print out matrix ===
@@ -4130,7 +4048,6 @@ end subroutine print_arr2d_dpc
 !! SOURCE
 
 function pade(n,z,f,zz)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4178,7 +4095,6 @@ end function pade
 !! SOURCE
 
 function dpade(n,z,f,zz)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4244,7 +4160,6 @@ end function dpade
 
 subroutine calculate_pade_a(a,n,z,f)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -4289,7 +4204,6 @@ end subroutine calculate_pade_a
 
 function newrap_step(z,f,df)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: z,f,df
@@ -4319,7 +4233,6 @@ end function newrap_step
 !!
 pure function cross_product_int(vec1,vec2) result(res)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: vec1(3),vec2(3)
  integer :: res(3)
@@ -4342,7 +4255,6 @@ end function cross_product_int
 !!  Return the cross product of two vectors with real double precision components.
 !!
 pure function cross_product_rdp(vec1,vec2) result(res)
-
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: vec1(3),vec2(3)
@@ -4367,7 +4279,6 @@ end function cross_product_rdp
 !!
 
 pure function l2norm_rdp(vec) result(res)
-
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: vec(:)
@@ -4415,7 +4326,6 @@ end function l2norm_rdp
 
 subroutine remove_copies(n_in,set_in,n_out,is_equal)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n_in
@@ -4445,7 +4355,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
 
 ! *************************************************************************
 
- ABI_DATATYPE_ALLOCATE(Ap,(n_in))
+ ABI_MALLOC(Ap,(n_in))
  Ap(1)%idx = 1
  Ap(1)%rpt => set_in(:,1)
 
@@ -4476,7 +4386,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
    end do
  end if
 
- ABI_DATATYPE_DEALLOCATE(Ap)
+ ABI_FREE(Ap)
 
 end subroutine remove_copies
 !!***
@@ -4500,7 +4410,6 @@ end subroutine remove_copies
 !! SOURCE
 
 integer function denominator(dd,ierr,tolerance)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4549,7 +4458,6 @@ end function denominator
 
 integer function mincm(ii,jj)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ii,jj
@@ -4557,7 +4465,7 @@ integer function mincm(ii,jj)
 !************************************************************************
 
  if (ii==0.or.jj==0) then
-   MSG_BUG('ii==0 or jj==0')
+   ABI_BUG('ii==0 or jj==0')
  end if
 
  mincm=MAX(ii,jj)
@@ -4601,14 +4509,13 @@ end function mincm
 !!  spectrum(nz)=Contains f(z) on the input mesh.
 !!
 !! PARENTS
-!!      bsepostproc,m_haydock
+!!      m_haydock
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4647,7 +4554,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    ! Be careful with the sign of the SQRT.
    div(:) = half*(bb(nlev)/(bb_inf))**2 * ( zpts-aa_inf - SQRT((zpts-aa_inf)**2 - four*bb_inf**2) )
  case (2)
-   MSG_ERROR("To be tested")
+   ABI_ERROR("To be tested")
    div = zero
    if (nlev>4) then
      bg=zero; bu=zero
@@ -4673,7 +4580,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
 
  case default
    write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end select
 
  do it=nlev,2,-1
@@ -4718,7 +4625,6 @@ end subroutine continued_fract
 !! SOURCE
 
 subroutine cmplx_sphcart(carr, from, units)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4773,7 +4679,7 @@ subroutine cmplx_sphcart(carr, from, units)
 
  case default
    msg = " Wrong value for from: "//TRIM(from)
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end subroutine cmplx_sphcart
@@ -4806,7 +4712,6 @@ end subroutine cmplx_sphcart
 
 subroutine pfactorize(nn,nfactors,pfactors,powers)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn,nfactors
@@ -4834,7 +4739,7 @@ subroutine pfactorize(nn,nfactors,pfactors,powers)
  end do fact_loop
 
  if ( nn /= tnn * PRODUCT( pfactors**powers(1:nfactors)) ) then
-   MSG_BUG('nn/=tnn!')
+   ABI_BUG('nn/=tnn!')
  end if
 
  powers(nfactors+1) = tnn
@@ -4865,7 +4770,6 @@ end subroutine pfactorize
 !! SOURCE
 
 function isordered_rdp(nn,arr,direction,tol) result(isord)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4905,7 +4809,7 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
 
  CASE DEFAULT
    msg = "Wrong direction: "//TRIM(direction)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  END SELECT
 
 end function isordered_rdp
@@ -4913,13 +4817,12 @@ end function isordered_rdp
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_numeric_tools/stats_eval
 !! NAME
 !!  stats_eval
 !!
 !! FUNCTION
-!!  Helper function used to calculate the statistical parameters of a data set.
+!!  Helper function used to calculate the statistical parameters of a dataset.
 !!
 !! INPUT
 !!  arr(:)=Array with the values.
@@ -4936,7 +4839,6 @@ end function isordered_rdp
 
 pure function stats_eval(arr) result(stats)
 
-
 !Arguments ------------------------------------
 !scalars
  type(stats_t) :: stats
@@ -4950,13 +4852,11 @@ pure function stats_eval(arr) result(stats)
 
 ! *************************************************************************
 
- !@stats_t
  stats%min   = +HUGE(one)
  stats%max   = -HUGE(one)
  stats%mean  = zero
 
  nn = SIZE(arr)
-
  do ii=1,nn
    xx = arr(ii)
    stats%max  = MAX(stats%max, xx)
@@ -5009,8 +4909,7 @@ end function stats_eval
 !!
 !! SOURCE
 
-elemental subroutine wrap2_zero_one(num,red,shift)
-
+elemental subroutine wrap2_zero_one(num, red, shift)
 
 !Arguments ------------------------------------
 !scalars
@@ -5060,7 +4959,6 @@ end subroutine wrap2_zero_one
 
 elemental subroutine wrap2_pmhalf(num,red,shift)
 
-
 !Arguments -------------------------------
 !scalars
  real(dp),intent(in) :: num
@@ -5108,12 +5006,11 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
-
+pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1,nr2,nr3
+ integer,intent(in) :: nr1, nr2, nr3
  real(dp) :: res
 !arrays
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
@@ -5134,14 +5031,14 @@ pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
 
 !calculation of the density value
  res=zero
- res=res + grid(ir1,ir2,ir3)*(one-x1)*(one-x2)*(one-x3)
- res=res + grid(pr1,ir2,ir3)*x1*(one-x2)*(one-x3)
- res=res + grid(ir1,pr2,ir3)*(one-x1)*x2*(one-x3)
- res=res + grid(ir1,ir2,pr3)*(one-x1)*(one-x2)*x3
- res=res + grid(pr1,pr2,ir3)*x1*x2*(one-x3)
- res=res + grid(ir1,pr2,pr3)*(one-x1)*x2*x3
- res=res + grid(pr1,ir2,pr3)*x1*(one-x2)*x3
- res=res + grid(pr1,pr2,pr3)*x1*x2*x3
+ res=res + grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res=res + grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res=res + grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res=res + grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res=res + grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res=res + grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res=res + grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res=res + grid(pr1, pr2, pr3) * x1*x2*x3
 
 end function interpol3d
 !!***
@@ -5174,7 +5071,6 @@ end function interpol3d
 !! SOURCE
 
 pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
-
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5248,7 +5144,6 @@ end subroutine interpol3d_indices
 
 subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_rhor)
 
-
 !Arguments-------------------------------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden
@@ -5319,16 +5214,15 @@ end subroutine interpolate_denpot
 !!  int_values(npts)=integral of values.
 !!
 !! PARENTS
-!!      eliashberg_1d,evdw_wannier,kramerskronig,m_ebands,m_exc_spectra
-!!      m_numeric_tools,m_phgamma,m_phonons,m_xc_vdw,mka2f,mka2fQgrid,mka2f_tr
-!!      mka2f_tr_lova,mlwfovlp_projpaw,mlwfovlp_radial,outscfcv,radsintr
+!!      m_a2ftr,m_ebands,m_eliashberg_1d,m_elphon,m_evdw_wannier,m_exc_spectra
+!!      m_integrals,m_mlwfovlp,m_numeric_tools,m_outscfcv,m_phgamma,m_phonons
+!!      m_rta,m_tdep_psij,m_xc_vdw
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine simpson_int(npts,step,values,int_values)
-
+subroutine simpson_int(npts, step, values, int_values)
 
 !Arguments ------------------------------------
 !scalars
@@ -5350,7 +5244,7 @@ subroutine simpson_int(npts,step,values,int_values)
 
  if (npts < 6) then
    write(msg,"(a,i0)")"Number of points in integrand function must be >=6 while it is: ",npts
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !-----------------------------------------------------------------
@@ -5398,8 +5292,7 @@ end subroutine simpson_int
 !!
 !! SOURCE
 
-function simpson(step,values) result(res)
-
+function simpson(step, values) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -5443,7 +5336,6 @@ end function simpson
 !! SOURCE
 
 pure subroutine rhophi(cx,phi,rho)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -5583,7 +5475,6 @@ end function vdiff_eval
 
 subroutine vdiff_print(vd, unit)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit
@@ -5620,7 +5511,7 @@ end subroutine vdiff_print
 !!  a(mesh)=Input values, smoothed in output
 !!
 !! PARENTS
-!!      psp6cc,upf2abinit
+!!      m_psp6,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -5686,7 +5577,7 @@ end subroutine smooth
 !!  zz(ndim)= first or second derivative of y
 !!
 !! PARENTS
-!!      upf2abinit
+!!      m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -5842,15 +5733,15 @@ real(dp) function central_finite_diff(order, ipos, npts) result(fact)
    if (ipos < 1 .or. ipos > 7 .or. npts /= 7) goto 10
    fact = d6(ipos)
  case default
-   MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
+   ABI_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
  end select
 
  if (fact == empty) then
-   MSG_ERROR(sjoin("Invalid ipos:",itoa(ipos),"for order", itoa(order), "npts", itoa(npts)))
+   ABI_ERROR(sjoin("Invalid ipos:",itoa(ipos),"for order", itoa(order), "npts", itoa(npts)))
  end if
  return
 
-10 MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
+10 ABI_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
 
 end function central_finite_diff
 !!***
@@ -5893,7 +5784,7 @@ function uniformrandom(seed)
  integer :: kk
  real(dp) :: im1inv,im2inv
  real(dp), save :: table(97)
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -5926,8 +5817,8 @@ function uniformrandom(seed)
  ii3=mod(ia3*ii3+ic3,im3)
  kk=1+(97*ii3)/im3
  if (kk<1.or.kk>97) then
-   write(message,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
-   MSG_ERROR(message)
+   write(msg,'(a,2i0,a)' ) ' trouble in uniformrandom; ii3,kk=',ii3,kk,' =>stop'
+   ABI_ERROR(msg)
  end if
  uniformrandom=table(kk)
 
@@ -5983,7 +5874,6 @@ end function uniformrandom
 !!      m_bfgs
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -6004,7 +5894,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
  real(dp) :: aa,bb,bbp,cc,ccp,d_lambda,dd
  real(dp) :: discr,ee,eep,lambda_shift,sum1,sum2,sum3,uu
  real(dp) :: uu3,vv,vv3
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -6021,8 +5911,7 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !ENDDEBUG
 
  if(abs(lambda_1-1.0_dp)>tol12 .or. abs(lambda_2)>tol12) then
-   message = '  For choice=4, lambda_1 must be 1 and lambda_2 must be 0.'
-   MSG_BUG(message)
+   ABI_BUG('For choice=4, lambda_1 must be 1 and lambda_2 must be 0.')
  end if
 
 !Evaluate quartic interpolation
@@ -6045,21 +5934,20 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
    d2edv2_predict=0.0
 
 !  Even if there is a problem, try to keep going ...
-   message = 'The 2nd degree equation has no positive root (choice=4).'
-   MSG_WARNING(message)
+   ABI_WARNING('The 2nd degree equation has no positive root (choice=4).')
    status=2
    if(etotal_1<etotal_2)then
-     write(message, '(a,a,a)' )&
-&     'Will continue, since the new total energy is lower',ch10,&
-&     'than the old. Take a larger step in the same direction.'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a)' )&
+      'Will continue, since the new total energy is lower',ch10,&
+      'than the old. Take a larger step in the same direction.'
+     ABI_COMMENT(msg)
      lambda_predict=2.5_dp
    else
-     write(message, '(a,a,a,a,a)' )&
-&     'There is a problem, since the new total energy is larger',ch10,&
-&     'than the old (choice=4).',ch10,&
-&     'I take a point between the old and new, close to the old .'
-     MSG_COMMENT(message)
+     write(msg, '(a,a,a,a,a)' )&
+     'There is a problem, since the new total energy is larger',ch10,&
+     'than the old (choice=4).',ch10,&
+     'I take a point between the old and new, close to the old .'
+     ABI_COMMENT(msg)
      lambda_predict=0.25_dp
    end if
 !  Mimick a zero-gradient lambda, in order to avoid spurious
@@ -6122,18 +6010,18 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 
  end if
 
- write(message, '(a,i3)' )'   line minimization, algorithm ',4
- call wrtout(std_out,message,'COLL')
- write(message, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
- call wrtout(std_out,message,'COLL')
- write(message, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
- call wrtout(std_out,message,'COLL')
- write(message, '(a)' ) ' '
- call wrtout(std_out,message,'COLL')
+ write(msg, '(a,i3)' )'   line minimization, algorithm ',4
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,a)' )'                        lambda      etotal ','           dedv        d2edv2    '
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   old point         :',lambda_2,etotal_2,dedv_2,d2edv2_2
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   new point         :',lambda_1,etotal_1,dedv_1,d2edv2_1
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a,es12.4,es18.10,2es12.4)' )'   predicted point   :',lambda_predict,etotal_predict,dedv_predict,d2edv2_predict
+ call wrtout(std_out,msg,'COLL')
+ write(msg, '(a)' ) ' '
+ call wrtout(std_out,msg,'COLL')
 
 end subroutine findmin
 !!***
@@ -6166,10 +6054,9 @@ end subroutine findmin
 !! Inspired to check_kramerskronig of the DP code
 !!
 !! PARENTS
-!!      linear_optics_paw
+!!      m_paw_optics
 !!
 !! CHILDREN
-!!      simpson_int,wrtout
 !!
 !! SOURCE
 
@@ -6198,10 +6085,10 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  do ii=2,nomega
    if (ABS(domega-(omega(ii)-omega(ii-1))) > 0.001) then
      if (only_check/=1) then
-       MSG_WARNING("Check cannot be performed since the frequency step is not constant")
+       ABI_WARNING("Check cannot be performed since the frequency step is not constant")
        RETURN
      else
-       MSG_ERROR('Cannot perform integration since frequency step is not constant')
+       ABI_ERROR('Cannot perform integration since frequency step is not constant')
      end if
    end if
  end do
@@ -6209,10 +6096,10 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 !Check whether omega(1) is small or not
  if (omega(1) > 0.1/Ha_eV) then
    if (only_check/=1) then
-     MSG_WARNING('Check cannot be performed since first frequency on the grid > 0.1 eV')
+     ABI_WARNING('Check cannot be performed since first frequency on the grid > 0.1 eV')
      RETURN
    else
-     MSG_ERROR('Cannot perform integration since first frequency on the grid > 0.1 eV')
+     ABI_ERROR('Cannot perform integration since first frequency on the grid > 0.1 eV')
    end if
  end if
 
@@ -6223,7 +6110,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 &   'Im epsilon for omega = ',omega(nomega)*Ha_eV,' eV',ch10,&
 &   'is not yet zero, epsilon_2 = ',AIMAG(eps(nomega)),ch10,&
 &   'Kramers Kronig could give wrong results'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    if (enough==50) then
      write(msg,'(3a)')' sufficient number of WARNINGS-',ch10,' stop writing '
      call wrtout(std_out,msg,'COLL')
@@ -6265,7 +6152,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
  case default
    write(msg,'(a,i0)')' Wrong value for method ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 !at this point real part is in e1kk, need to put it into eps
@@ -6370,7 +6257,7 @@ end function dotproduct
 !!  rspts(npts)=inverse cubic root of rhoarr
 !!
 !! PARENTS
-!!      drivexc,gammapositron,xchcth,xcpbe,xcpositron,xctfw
+!!      m_drivexc,m_gammapositron,m_xchcth,m_xclda,m_xcpbe,m_xcpositron
 !!
 !! CHILDREN
 !!
@@ -6462,11 +6349,11 @@ end subroutine invcb
 !!
 !! SOURCE
 
-elemental subroutine safe_div( n, d, altv, q )
+elemental subroutine safe_div(n, d, altv, q)
 
 !Arguments ----------------------------------------------
 !scalars
- real(dp), intent(in) :: n, d, altv
+ real(dp),intent(in) :: n, d, altv
  real(dp),intent(out) :: q
 
 ! *********************************************************************
@@ -6478,6 +6365,44 @@ elemental subroutine safe_div( n, d, altv, q )
  endif
 
 end subroutine safe_div
+!!***
+
+!!****f* ABINIT/bool2index
+!! NAME
+!! bool2index
+!!
+!! FUNCTION
+!!  Allocate and return array with the indices in the input boolean array `bool_list` that evaluates to .True.
+!!
+!! PARENTS
+!!      m_wfd
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine bool2index(bool_list, out_index)
+
+!Arguments ----------------------------------------------
+!scalars
+ logical,intent(in) :: bool_list(:)
+ integer,allocatable,intent(inout) :: out_index(:)
+
+!Local variables-------------------------------
+ integer :: ii, cnt
+! *********************************************************************
+
+ cnt = count(bool_list)
+ ABI_REMALLOC(out_index, (cnt))
+ cnt = 0
+ do ii=1,size(bool_list)
+   if (bool_list(ii)) then
+     cnt = cnt + 1
+     out_index(cnt) = ii
+   end if
+ end do
+
+end subroutine bool2index
 !!***
 
 END MODULE m_numeric_tools

@@ -60,9 +60,10 @@ module m_rot_cg
 !!   cwavef_rot(2, npw, nband) = fourier coefficient of wave functions for all bands rotated in the band space
 !!
 !! PARENTS
-!!      mkrho
+!!      m_rot_cg
 !!
 !! CHILDREN
+!!      diag_occ
 !!
 !! SOURCE
 !!
@@ -106,14 +107,14 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 !! Get diagonal occupations and associeted base
 
 ! Compute the optimal working array size
-  ABI_ALLOCATE(work,(1))
+  ABI_MALLOC(work,(1))
   work = czero
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, -1, rwork, info)
   lwork = int(work(1))
-  ABI_DEALLOCATE(work)
+  ABI_FREE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors
-  ABI_ALLOCATE(work,(lwork))
+  ABI_MALLOC(work,(lwork))
   work = czero
 
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, lwork, rwork, info)
@@ -121,18 +122,18 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 !! obtain the true eigen values of occupation matrix in descending order
   occ_diag = -occ_diag
 
-  ABI_DEALLOCATE(work)
+  ABI_FREE(work)
 
   if (info > 0) then
     message=""
     write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
 &the occupation matrix (did't converge), info=",info
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   else if (info < 0) then
     message=""
     write(message, "(a,i5)") " something wrong happened with the diagonalisation of &
 &the occupation matrix (bad input argument), info=",info
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
   DBG_EXIT("COLL")
@@ -167,9 +168,10 @@ end subroutine diag_occ
 !!   cwavef is rotated with the unitary matrix obtained from the diagonalisation
 !!   of occupations (occ_nd)
 !! PARENTS
-!!      mkrho
+!!      m_mkrho
 !!
 !! CHILDREN
+!!      diag_occ
 !!
 !! SOURCE
 !!
@@ -207,7 +209,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
 
   if(nband /= blocksize) then
     message = " DMFT in KGB cannot be used with multiple blocks yet. Make sure that bandpp*npband = nband."
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
 !! Initialisation

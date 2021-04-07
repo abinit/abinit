@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawtab
 !! NAME
 !!  m_pawtab
@@ -9,7 +8,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT)
+!! Copyright (C) 2013-2021 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1150,7 +1149,7 @@ end subroutine pawtab_set_flags_1D
 !!  Only writing
 !!
 !! PARENTS
-!!      bethe_salpeter,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -1353,8 +1352,9 @@ end subroutine pawtab_print
 !!   l_size_atm(natom)=output array of l_size values (for each atom)
 !!
 !! PARENTS
-!!      bethe_salpeter,classify_bands,d2frnl,denfgr,exc_plot,m_wfd,pawmkaewf
-!!      respfn,scfcv,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_nonlinear
+!!      m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -1387,7 +1387,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
  natom_typat=count(typat>0)
  if (size(pawtab)<maxval(typat)) then
    msg='error on pawtab size!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  if (.not.allocated(l_size_atm)) then
@@ -1412,7 +1412,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 !2nd case: parallel mode
    if (.not.present(mpi_atmtab)) then
      msg='optional args error!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    do ia=1,natom
      ityp=typat(mpi_atmtab(ia))
@@ -1853,7 +1853,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    if (trim(msg)/='') then
      write(msg0,'(3a)') &
 &     'There is a problem with the size of the following array(s):',ch10,trim(msg)
-     MSG_BUG(msg0)
+     LIBPAW_BUG(msg0)
    end if
 
  end if ! me=0
@@ -2029,7 +2029,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    if (ii/=nn_int+nn_int_arr) then
      msg='the number of loaded integers is not correct!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
  end if ! me=0
@@ -2221,7 +2221,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    if (ii/=nn_int+nn_int_arr) then
      msg='the number of broadcasted integers is not correct!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
  end if ! me/=0
@@ -2466,7 +2466,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    ii=ii-1
    if (ii/=nn_dpr+nn_dpr_arr) then
      msg='the number of loaded reals is not correct!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
  end if ! me=0
@@ -2912,7 +2912,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
    if (ii/=nn_dpr+nn_dpr_arr) then
      msg='the number of broadcasted reals is not correct!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
  end if ! me/=0

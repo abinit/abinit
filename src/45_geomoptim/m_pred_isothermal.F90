@@ -10,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,11 +84,10 @@ contains
 !!                               acell, rprimd, stresses
 !!
 !! PARENTS
-!!      mover
+!!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      dsyev,hist2var,isopress,isostress,isotemp,metric,mkrdim,var2hist,wrtout
-!!      xcart2xred,xred2xcart
+!!      dsyev
 !!
 !! SOURCE
 
@@ -129,7 +128,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -141,10 +139,10 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  if(iexit/=0)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
    return
  end if
@@ -168,18 +166,18 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  if(itime==1)then
    if (allocated(fcart_m))       then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    if (allocated(vel_nexthalf))  then
-     ABI_DEALLOCATE(vel_nexthalf)
+     ABI_FREE(vel_nexthalf)
    end if
  end if
 
  if (.not.allocated(fcart_m))       then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
  if (.not.allocated(vel_nexthalf))  then
-   ABI_ALLOCATE(vel_nexthalf,(3,ab_mover%natom))
+   ABI_MALLOC(vel_nexthalf,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'isothermal 02'
@@ -219,19 +217,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  acell0(:)=acell(:)
  rprimd0(:,:)=rprimd(:,:)
  ucvol0=ucvol
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'isothermal 03'
 !##########################################################
@@ -545,7 +530,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(message, '(a,i12,a,a)' )&
 &   '  Disallowed value for optcell=',ab_mover%optcell,ch10,&
 &   '  Allowed values with ionmov==13 : 0 to 2.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !write(std_out,*) 'OLD PARAMETERS'
@@ -633,7 +618,7 @@ end subroutine pred_isothermal
 !!  vel=update the velocities
 !!
 !! PARENTS
-!!      pred_isothermal
+!!      m_pred_isothermal
 !!
 !! CHILDREN
 !!      dsyev
@@ -669,9 +654,9 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 !Beginning of executable session
 !***************************************************************************
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -735,9 +720,9 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
  mttk_vars%glogs(:)=glogs(:)
  mttk_vars%vlogs(:)=vlogs(:)
  mttk_vars%xlogs(:)=xlogs(:)
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 !DEBUG
 !write(std_out,*)'ekin added',half*qmass(1)*vlogs(1)**2,xlogs(1)*(nfree)*ktemp
 !ENDEBUG
@@ -772,7 +757,7 @@ end subroutine isotemp
 !!  vel=update the velocities
 !!
 !! PARENTS
-!!      pred_isothermal
+!!      m_pred_isothermal
 !!
 !! CHILDREN
 !!      dsyev
@@ -823,9 +808,9 @@ end subroutine isotemp
    write(std_out,*)' ucvol=',ucvol
  end if
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -905,9 +890,9 @@ end subroutine isotemp
  end do
 !Barostat
  ekin=ekin+half*bmass*vlogv**2+prtarget*ucvol
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 
 !DEBUG
 !write(std_out,*) 'EKIN',ekin
@@ -946,7 +931,7 @@ end subroutine isopress
 !!  vel=update the velocities
 !!
 !! PARENTS
-!!      pred_isothermal
+!!      m_pred_isothermal
 !!
 !! CHILDREN
 !!      dsyev
@@ -1000,9 +985,9 @@ end subroutine isopress
    write(std_out,*)' ucvol=',ucvol
  end if
 
- ABI_ALLOCATE(glogs,(nnos))
- ABI_ALLOCATE(vlogs,(nnos))
- ABI_ALLOCATE(xlogs,(nnos))
+ ABI_MALLOC(glogs,(nnos))
+ ABI_MALLOC(vlogs,(nnos))
+ ABI_MALLOC(xlogs,(nnos))
  glogs(:)=mttk_vars%glogs(:)
  vlogs(:)=mttk_vars%vlogs(:)
  xlogs(:)=mttk_vars%xlogs(:)
@@ -1187,9 +1172,9 @@ end subroutine isopress
  mttk_vars%glogs(:)=glogs(:)
  mttk_vars%vlogs(:)=vlogs(:)
  mttk_vars%xlogs(:)=xlogs(:)
- ABI_DEALLOCATE(glogs)
- ABI_DEALLOCATE(vlogs)
- ABI_DEALLOCATE(xlogs)
+ ABI_FREE(glogs)
+ ABI_FREE(vlogs)
+ ABI_FREE(xlogs)
 
  if(DEBUG) then
 !  write(std_out,*)'ekin added T',half*qmass(:)*vlogs(:)**2,xlogs(:)*(nfree)*ktemp

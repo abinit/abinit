@@ -8,7 +8,7 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -147,18 +147,18 @@ MODULE m_paw_atomorb
    ! klm_diag(lmn2_size)
    ! 1 il==jl and im==jm, 0 otherwise.
 
-  integer, allocatable :: klmntomn(:,:) 
+  integer, allocatable :: klmntomn(:,:)
    ! klmntomn(4,lmn2_size)
    ! Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
    ! Note: ilmn=(il,im,in) and ilmn<=jlmn
    ! NB: klmntomn is an application and not a bijection
 
-  integer, allocatable :: kln2ln(:,:) 
+  integer, allocatable :: kln2ln(:,:)
    ! kln2ln(6,ln2_size)
    ! Table giving il, jl ,in, jn, iln, jln for each kln=(iln,jln)
    ! where iln=(il,in) and iln<=jln. NB: kln2ln is an application and not a bijection
 
-  integer, allocatable :: mode(:,:) 
+  integer, allocatable :: mode(:,:)
   ! mode(ln_size,nsppol)
   ! Flag defining how the orbital is treated.
   ! During the pseudopotential generation we can have: ORB_FROZEN or ORB_VALENCE
@@ -168,7 +168,7 @@ MODULE m_paw_atomorb
   ! a relaxed core calculation.
   ! TODO define function to test the type, much safer!
 
-  real(dp), allocatable :: eig(:,:) 
+  real(dp), allocatable :: eig(:,:)
   ! eig(ln_size,nsppol)
   ! Eigenvalues for each ln channel and spin.
 
@@ -323,7 +323,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  integer :: ii,unt,iln,ir,nmesh,imsh
  integer :: iread1,pspcod,msz,isppol
  integer :: mesh_type,mesh_size
- real(dp) :: charge
+ real(dp) :: corecharge
  real(dp) :: my_rcore
  real(dp) :: rstep,lstep
  real(dp):: occ,ene
@@ -377,7 +377,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  !@atomorb_type
  ierr=0
  if (open_file(filename,msg,newunit=unt,form="formatted",status="old",action="read") /=0) then
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=1; RETURN
  end if
 
@@ -419,7 +419,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
    write(msg,'(a,i2,3a)')&
 &   'This version of core psp file (',version,') is not compatible with',ch10,&
 &   'the current version of Abinit.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(unit=line(6:80),fmt=*,ERR=10) creatorid
@@ -439,12 +439,12 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  lmax = MAXVAL(orbitals)
  if (lmax+1/=Atm%l_max) then
    write(msg,'(a)')" lmax read from file does not agree with orbitals. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! 7)
  read(unt,*)nmesh
- ABI_DT_MALLOC(Radmesh,(nmesh))
+ ABI_MALLOC(Radmesh,(nmesh))
  do imsh=1,nmesh
    lstep=zero
    read(unt,'(a80)') line
@@ -464,7 +464,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
 &    " Truncating radial mesh for core orbitals using new rcore = ",Atm%rcore," (",my_rcore,")"
    call wrtout(std_out,msg,'COLL')
    if (rcut > my_rcore) then
-     MSG_ERROR("rcut should not exceed my_rcore")
+     ABI_ERROR("rcut should not exceed my_rcore")
    end if
  end if
 
@@ -506,7 +506,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
        write(msg,'(3a)')&
 &       ' All Phi core must be given on the same radial mesh !',ch10,&
 &       ' Action: check your pseudopotential file.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      read(unt,*,ERR=10)nn,ll,ii
      ABI_CHECK(ii==isppol,"Wrong spin index")
@@ -572,9 +572,9 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  call pawrad_print(Atmrad,header="Final mesh",prtvol=prtvol)
 
  ABI_MALLOC(radens,(Atm%mesh_size,Atm%nspden))
- call get_atomorb_charge(Atm,Atmrad,charge,radens=radens)
+ call get_atomorb_charge(Atm,Atmrad,corecharge,radens=radens)
 
- write(std_out,*)"core charge  = ",charge
+ write(std_out,*)"core charge  = ",corecharge
  !do ii=1,Atmrad%mesh_size
  ! write(77,*)Atmrad%rad(ii),(radens(ii,isppol),isppol=1,Atm%nspden)
  !end do
@@ -584,7 +584,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  ! Free temporary allocated space
 
  call pawrad_free(Radmesh)
- ABI_DT_FREE(Radmesh)
+ ABI_FREE(Radmesh)
 
  ! * Setup of indlmn
  ABI_MALLOC(Atm%indlmn,(6,Atm%lmn_size))
@@ -632,7 +632,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  ! === Propagate the error ===
 10 continue
  ierr=2
- MSG_WARNING("Wrong file format")
+ ABI_WARNING("Wrong file format")
  return
 
 end subroutine init_atomorb
@@ -685,7 +685,7 @@ subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
 !************************************************************************
 
  if (Atm%nsppol==2) then
-   MSG_ERROR("nsppol==2 is Working in progress")
+   ABI_ERROR("nsppol==2 is Working in progress")
  end if
 
  ABI_MALLOC(phi2nl,(Atm%mesh_size))
@@ -780,7 +780,7 @@ subroutine get_overlap(Atm,Atmesh,Radmesh2,isppol,nphi,phi,phi_indln,overlap)
 
  ! === Spline valence onto Atom mesh (natural spline) ===
  if (do_spline==1) then
-   MSG_COMMENT("Splining in overlap")
+   ABI_COMMENT("Splining in overlap")
 
    my_mesh_size  =  Atmesh%mesh_size
    my_pts        => Atmesh%rad(1:my_mesh_size)
@@ -883,7 +883,7 @@ subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
    msg = "  Spin unrestricted"
  case default
    write(msg,'(a,i3)')" Wrong method= ",Atm%method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
  call wrtout(my_unt,msg,my_mode)
 
@@ -960,7 +960,7 @@ function my_mode2str(mode) result(str)
    str="Valence Orbital"
  case default
    write(msg,'(a,i3)')" Wrong mode= ",mode
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end select
 
 end function my_mode2str

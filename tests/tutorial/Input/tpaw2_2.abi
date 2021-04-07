@@ -1,0 +1,94 @@
+# Input for PAW2 tutorial
+# Nickel ferromagnetic fcc structure
+# Testing ecut convergence
+
+#Define the different datasets
+#ndtset 7         # 7 datasets. Uncomment this line for the tutorial
+ ndtset 1         # 1 datasets. Comment this line for the tutorial
+
+acell: 3*3.5150 angstrom   # The starting values of the cell parameters
+acell+ 3*0.0025 angstrom   # The increment of acell from one dataset to the other
+getwfk -1         # The starting wave-functions are those of the previous dataset
+
+#-------------------------------------------------------------------------------
+#The rest of this file defines the parameters cmmon to all datasets
+
+#Definition of the unit cell
+acell 3*3.52 angstrom  # Lengths of the primitive vectors (angstrom)
+rprim             # 3 orthogonal primitive vectors (FCC lattice)
+  0.0 1/2 1/2 
+  1/2 0.0 1/2
+  1/2 1/2 0.0
+nsym 0            # Automatic detection of symetries
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 28          # Atomic number of the possible type(s) of atom. Here Nickel.
+pp_dirpath "$ABI_PSPDIR"                    # Path to the directory were
+                                            #   pseudopotentials for tests are stored
+pseudos "Ni.GGA-PBE-paw.rrkj.xml"           # Name and location of the pseudopotential
+                         
+#Definition of the atoms
+natom 1           # There is one atom
+typat 1           # It is of type 1, that is, Nickel
+xred              # Location of the atom:
+  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom
+
+#Definition of bands and occupation numbers
+nband 12          # Compute 12 bands
+nsppol 2          # We perform a spin-polarized calculations (nickel is magnetic)
+spinat 0. 0. 4.   # Initial spin for the atom (high value to "push" the calculation)
+occopt 7          # Automatic generation of occupation numbers, as a metal
+tsmear 0.0075     # Smearing temperature for the metallic occupation scheme (Hartree)
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 15.0         # Maximal plane-wave kinetic energy cut-off, in Hartree (not used here)
+pawecutdg 40.     # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+ecutsm 0.5        # Introduce a smooth PW cutoff within an 0.5 Ha region
+kptopt 1          # Automatic generation of k points, taking into account the symmetry
+ngkpt 8 8 8       # This is a 8x8x8 grid based on the primitive vectors
+nshiftk 4         # of the reciprocal space, repeated four times,
+shiftk            # with different shifts:
+  0.5 0.5 0.5
+  0.5 0.0 0.0
+  0.0 0.5 0.0
+  0.0 0.0 0.5
+
+#Parameters for the SCF procedure
+nstep 35          # Maximal number of SCF cycles
+tolvrs 1.0d-12    # Will stop when, twice in a row, the difference 
+                  # between two consecutive evaluations of potential residual 
+                  # differ by less than tolvrs
+
+#Miscelaneous parameters
+prtwf 1           # Print wavefunctions (re-used from one dataset to the other)
+prtden 0          # Do not print density
+prteig 0          # Do not print eigenvalues
+
+fftalg 112        # This impose the use of ABINIT internal FFT
+                  #   This is only to numerically stabilize the results
+                  #   and make them more reproducible (in terms of the number of
+                  #   SCF iterations). But it could affect the performances.
+                  # !! !Please, do not put this keyword this in normal use.
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tpaw2_2.abo, tolnlines= 15, tolabs=  2.5e-3,    tolrel=  3.6e-1, fld_options=-easy
+#%% output_file = "tpaw2_2.abo"
+#%% [paral_info]
+#%% max_nprocs = 6
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description =
+#%%   Input for PAW2 tutorial
+#%%   Nickel ferromagnetic fcc structure
+#%%   Testing ecut convergence
+#%%<END TEST_INFO>

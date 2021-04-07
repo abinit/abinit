@@ -65,7 +65,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 2he.psphgh
+#%% psp_files = PseudosHGH_pwteter/2he.2.hgh
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

@@ -8,18 +8,21 @@ tasks
 1
 20
 
-!species
-! 12 : atomic number
-! 'Mg'
-! 'magnesium'
-! 44305.30461        : atomic mass
-! 1.899259351   37.6052   : muffin-tin radius
-!   5                : number of occ. states
-!   1   0   1   2    : 1s
-!   2   0   1   2    : 2s
-!   2   1   1   2    : 2p m=0
-!   2   1   2   4    : 2p m=1
-!   3   0   1   2    : 3s
+ecvcut
+ -6.0
+
+species
+ 12 : atomic number
+ 'Mg'
+ 'magnesium'
+ 44305.30461        : atomic mass
+ 1.899259351   37.6052   : muffin-tin radius
+   5                : number of occ. states
+   1   0   1   2    : 1s
+   2   0   1   2    : 2s
+   2   1   1   2    : 2p m=0
+   2   1   2   4    : 2p m=1
+   3   0   1   2    : 3s
 !  -6.0              : core-valence cutoff energy
 
 ! Tolerance on convegence of band energies (absolute)
@@ -38,7 +41,7 @@ epsengy
 ! 1 - Adaptive linear
 ! 2 - Pulay mixing
 mixtype
- 2
+ 3
 
 ! Exchange-correlation functional to use
 ! LDA (PW92) is 3 (default) (equiv. Abinit ixc 7)

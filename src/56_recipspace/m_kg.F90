@@ -6,7 +6,7 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2021 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ MODULE m_kg
  use defs_abitypes, only : MPI_type
  use m_fftcore,     only : kpgsph, bound
  use m_mpinfo,      only : proc_distrb_cycle
+ use m_time,        only : timab
 
  implicit none
 
@@ -97,11 +98,10 @@ contains
 !! ecut (currently in hartree) is proportional to gcut(sphere)**2.
 !!
 !! PARENTS
-!!      dfpt_looppert,dfpt_scfcv,m_pawfgr,nonlinear,respfn,scfcv,setup1
-!!      setup_positron
+!!      m_common,m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_nonlinear,m_pawfgr
+!!      m_positron,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
-!!      bound,wrtout
 !!
 !! SOURCE
 
@@ -120,21 +120,21 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !scalars
  integer :: plane
  real(dp) :: boxsq,cutrad,ecut_pw,effcut,largesq,sphsq
- character(len=1000) :: message
+ character(len=1000) :: msg
 !arrays
  integer :: gbound(3)
 
 ! *************************************************************************
 
-!This is to treat the case where ecut has not been initialized,
-!for wavelet computations. The default for ecut is -1.0 , allowed only for wavelets calculations
+ ! This is to treat the case in which ecut has not been initialized e.g. for wavelet computations.
+ ! The default for ecut is -1.0 , allowed only for wavelets calculations
  ecut_pw=ecut
  if(ecut<-tol8)ecut_pw=ten
 
-!gcut(box)**2=boxsq; gcut(sphere)**2=sphsq
-!get min. d**2 to boundary of fft box:
-!(gmet sets dimensions: bohr**-2)
-!ecut(sphere)=0.5*(2 pi)**2 * sphsq:
+ !gcut(box)**2=boxsq; gcut(sphere)**2=sphsq
+ !get min. d**2 to boundary of fft box:
+ !(gmet sets dimensions: bohr**-2)
+ !ecut(sphere)=0.5*(2 pi)**2 * sphsq:
  call bound(largesq,boxsq,gbound,gmet,kpt,ngfft,plane)
  effcut=0.5_dp * (two_pi)**2 * boxsq
  sphsq=2._dp*ecut_pw/two_pi**2
@@ -143,67 +143,66 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
    boxcut=10._dp
    gsqcut=(largesq/sphsq)*(2.0_dp*ecut)/two_pi**2
 
-   write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,a,a)' ) ch10,&
-&   ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
-&   '         ecut(hartree)=',ecut_pw+tol8,ch10,'=> whole FFT box selected'
-   if(iout/=std_out) call wrtout(iout,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-
+   write(msg, '(a,a,3f8.4,a,3i4,a,a,f11.3,a,a)' ) ch10,&
+   ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
+   '         ecut(hartree)=',ecut_pw+tol8,ch10,'=> whole FFT box selected'
+   if(iout/=std_out) call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  else
 
-!  Get G^2 cutoff for sphere of double radius of basis sphere
-!  for selecting G s for rho(G), V_Hartree(G), and V_psp(G)--
-!  cut off at fft box boundary or double basis sphere radius, whichever
-!  is smaller.  If boxcut were 2, then relation would be
-!$ecut_eff = (1/2) * (2 Pi Gsmall)^2 and gsqcut=4*Gsmall^2$.
+  ! Get G^2 cutoff for sphere of double radius of basis sphere
+  ! for selecting G s for rho(G), V_Hartree(G), and V_psp(G)--
+  ! cut off at fft box boundary or double basis sphere radius, whichever
+  ! is smaller.  If boxcut were 2, then relation would be
+  ! $ecut_eff = (1/2) * (2 Pi Gsmall)^2 and gsqcut=4*Gsmall^2$.
    boxcut = sqrt(boxsq/sphsq)
    cutrad = min(2.0_dp,boxcut)
    gsqcut = (cutrad**2)*(2.0_dp*ecut_pw)/two_pi**2
 
    if(ecut>-tol8)then
 
-     write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,3x,a,f10.5)' ) ch10,&
-&     ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
-&     '         ecut(hartree)=',ecut+tol8,'=> boxcut(ratio)=',boxcut+tol8
-     if(iout/=std_out) call wrtout(iout,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     write(msg, '(a,a,3f8.4,a,3i4,a,a,f11.3,3x,a,f10.5)' ) ch10,&
+     ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
+     '         ecut(hartree)=',ecut+tol8,'=> boxcut(ratio)=',boxcut+tol8
+     if(iout/=std_out) call wrtout(iout,msg)
+     call wrtout(std_out,msg)
 
      if (boxcut<1.0_dp) then
-       write(message, '(9a,f12.6,6a)' )&
-&       '  Choice of acell, ngfft, and ecut',ch10,&
-&       '  ===> basis sphere extends BEYOND fft box !',ch10,&
-&       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Action: try larger ngfft or smaller ecut.',ch10,&
-&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
-&       '  This situation might happen when optimizing the cell parameters.',ch10,&
-&       '  Your starting geometry might be crazy.',ch10,&
-&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
-       if(iout/=std_out) call wrtout(iout,message,'COLL')
-       MSG_ERROR(message)
+       write(msg, '(9a,f12.6,6a)' )&
+       'Choice of acell, ngfft, and ecut',ch10,&
+       '===> basis sphere extends BEYOND fft box !',ch10,&
+       'Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
+       'Action: try larger ngfft or smaller ecut.',ch10,&
+       'Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
+       'This situation might happen when optimizing the cell parameters.',ch10,&
+       'Your starting geometry might be crazy.',ch10,&
+       'See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
+       if(iout/=std_out) call wrtout(iout,msg)
+       ABI_ERROR(msg)
      end if
 
      if (boxcut>2.2_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,a,a,f12.6,a,a)' ) ch10,&
-&       ' getcut : COMMENT -',ch10,&
-&       '  Note that boxcut > 2.2 ; recall that',' boxcut=Gcut(box)/Gcut(sphere) = 2',ch10,&
-&       '  is sufficient for exact treatment of convolution.',ch10,&
-&       '  Such a large boxcut is a waste : you could raise ecut',ch10,&
-&       '  e.g. ecut=',effcut*0.25_dp+tol8,' Hartrees makes boxcut=2',ch10
-       if(iout/=std_out) call wrtout(iout,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       write(msg, '(a,a,a,a,a,a,a,a,a,a,a,f12.6,a,a)' ) ch10,&
+       ' getcut : COMMENT -',ch10,&
+       '  Note that boxcut > 2.2 ; recall that',' boxcut=Gcut(box)/Gcut(sphere) = 2',ch10,&
+       '  is sufficient for exact treatment of convolution.',ch10,&
+       '  Such a large boxcut is a waste : you could raise ecut',ch10,&
+       '  e.g. ecut=',effcut*0.25_dp+tol8,' Hartrees makes boxcut=2',ch10
+       if(iout/=std_out) call wrtout(iout,msg)
+       call wrtout(std_out,msg)
      end if
 
      if (boxcut<1.5_dp) then
-       write(message, '(15a)' ) ch10,&
-&       ' getcut : WARNING -',ch10,&
-&       '  Note that boxcut < 1.5; this usually means',ch10,&
-&       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
-&       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
-&       '  This situation might happen when optimizing the cell parameters.',ch10,&
-&       '  Your starting geometry might be crazy.',ch10,&
-&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
-       if(iout/=std_out) call wrtout(iout,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       write(msg, '(15a)' ) ch10,&
+       ' getcut : WARNING -',ch10,&
+       '  Note that boxcut < 1.5; this usually means',ch10,&
+       '  that the forces are being fairly strongly affected by',' the smallness of the fft box.',ch10,&
+       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
+       '  This situation might happen when optimizing the cell parameters.',ch10,&
+       '  Your starting geometry might be crazy.',ch10,&
+       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
+       if(iout/=std_out) call wrtout(iout,msg)
+       call wrtout(std_out,msg)
      end if
 
    end if
@@ -236,10 +235,9 @@ end subroutine getcut
 !!  (for one processor of the WF group)
 !!
 !! PARENTS
-!!      dfpt_looppert,memory_eval,mpi_setup,scfcv
+!!      m_dfpt_looppert,m_dfpt_lw,m_memeval,m_mpi_setup,m_scfcv_core
 !!
 !! CHILDREN
-!!      kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -260,7 +258,7 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
  integer :: ikpt,istwf_k,npw
 ! integer :: npwwrk,pad=50
 ! real(dp) :: scale=1.3_dp
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: kg(:,:)
  real(dp) :: kpoint(3)
@@ -276,7 +274,7 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 !npwave=nint(ucvol*(2.0_dp*ecut)**1.5_dp/(6.0_dp*pi**2))
 !npwwrk=nint(dble(npwave)*scale)+pad
 
- ABI_ALLOCATE(kg,(3,100))
+ ABI_MALLOC(kg,(3,100))
 
 !set mpw to zero, as needed for only counting in kpgsph
  mpw = 0
@@ -290,10 +288,10 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
    mpw = max(npw,mpw)
  end do
 
- write(message,'(a,i0)') ' getmpw: optimal value of mpw= ',mpw
- call wrtout(std_out,message,'COLL')
+ write(msg,'(a,i0)') ' getmpw: optimal value of mpw= ',mpw
+ call wrtout(std_out,msg)
 
- ABI_DEALLOCATE(kg)
+ ABI_FREE(kg)
 
 end subroutine getmpw
 !!***
@@ -338,8 +336,8 @@ end subroutine getmpw
 !! by one part over 1.0e12 of the metric tensor elements (1,1) and (3,3)
 !!
 !! PARENTS
-!!      calc_vhxc_me,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_rhofermi,energy
-!!      getgh1c,ks_ddiago,m_io_kss,m_vkbr,mkffnl,vtorho
+!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_getgh1c
+!!      m_io_kss,m_ksdiago,m_mkffnl,m_orbmag,m_vhxc_me,m_vkbr,m_vtorho
 !!
 !! CHILDREN
 !!
@@ -364,11 +362,14 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
  real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
 !arrays
- real(dp) :: gmet_break(3,3)
+ real(dp) :: gmet_break(3,3) !, tsec(2)
 
 ! *************************************************************************
-!
-!htpisq is (1/2) (2 Pi) **2:
+
+ ! Keep track of time spent in mkffnl
+ !call timab(1906, 1, tsec)
+
+ ! htpisq is (1/2) (2 Pi) **2:
  htpisq=0.5_dp*(two_pi)**2
 
  ecutsm_inv=0.0_dp
@@ -455,6 +456,8 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  end do
 !$OMP END PARALLEL DO
 
+ !call timab(1906, 2, tsec)
+
 end subroutine mkkin
 !!***
 
@@ -492,11 +495,10 @@ end subroutine mkkin
 !! and spin-down bands must be equal at each k points
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptff_initberry,gstate,initmv,inwffil,m_cut3d,nonlinear
-!!      respfn,scfcv
+!!      m_cut3d,m_dfpt_fef,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_inwffil
+!!      m_longwave,m_nonlinear,m_respfn_driver,m_scfcv_core
 !!
 !! CHILDREN
-!!      kpgsph,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -518,7 +520,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !scalars
  integer :: ierr,ikg,ikpt,istwf_k,me,nband_down,nband_k,npw1
  logical :: test_npw
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: kpoint(3)
 
@@ -533,15 +535,15 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
        nband_k=nband(ikpt)
        nband_down=nband(ikpt+nkpt)
        if(nband_k/=nband_down)then
-         write(message,'(a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,i4,a,a,a)')ch10,&
-&         ' kpgio : ERROR -',ch10,&
-&         '  Band parallel case, one must have same number',ch10,&
-&         '  of spin up and spin down bands, but input is :',ch10,&
-&         '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
-&         '  for ikpt=',ikpt,'.',ch10,&
-&         '  Action: correct nband in your input file.'
+         write(msg,'(a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,i4,a,a,a)')ch10,&
+         ' kpgio : ERROR -',ch10,&
+         '  Band parallel case, one must have same number',ch10,&
+         '  of spin up and spin down bands, but input is :',ch10,&
+         '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
+         '  for ikpt=',ikpt,'.',ch10,&
+         '  Action: correct nband in your input file.'
 !        MG: Tests v3(10,11,17) and v6(67) fail if this test is enabled
-!        call wrtout(std_out,message,mode_paral)
+!        call wrtout(std_out,msg,mode_paral)
        end if
      end do
    end if
@@ -576,13 +578,13 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 
 !  Make sure npw < nband never happens:
 !  if (npw1<nband(ikpt)) then
-!  write(message, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
+!  write(msg, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
 !  &   ' kpgio : ERROR -',ch10,&
 !  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
 !  &   '  Action: change either ecut or nband in input file.'
-!  MSG_ERROR(message)
+!  ABI_ERROR(msg)
 !  end if
 
 !  Find boundary of G sphere for efficient zero padding,
@@ -640,8 +642,8 @@ end subroutine kpgio
 !!   and for atoms in the range iatom to jatom with respect to ph1d
 !!
 !! PARENTS
-!!      cg_rotate,ctocprj,getcprj,m_cut3d,m_epjdos,m_fock,m_hamiltonian,m_wfd
-!!      nonlop_pl,nonlop_ylm,partial_dos_fractions,suscep_stat,wfconv
+!!      m_cgprj,m_cgtk,m_cut3d,m_epjdos,m_fock,m_hamiltonian,m_inwffil
+!!      m_nonlop_pl,m_nonlop_ylm,m_orbmag,m_suscep_stat,m_wfd
 !!
 !! CHILDREN
 !!
@@ -662,22 +664,22 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
 !scalars
  integer :: i1,ia,iatblk,ig,shift1,shift2,shift3
  real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r,ph3i,ph3r,phkxi,phkxr
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: ph1kxred(:,:)
 
 ! *************************************************************************
 
  if(matblk-1 < jatom-iatom)then
-   write(message,'(a,a,a,a,a,i0,a,a,i0,a,i0,a)')&
-&   'Input natom-1 must be larger or equal to jatom-iatom,',ch10,&
-&   'while their value is : ',ch10,&
-&   'natom-1 = ',natom-1,ch10,&
-&   'jatom=',jatom,', iatom=',iatom,'.'
-   MSG_BUG(message)
+   write(msg,'(a,a,a,a,a,i0,a,a,i0,a,i0,a)')&
+   'Input natom-1 must be larger or equal to jatom-iatom,',ch10,&
+   'while their value is : ',ch10,&
+   'natom-1 = ',natom-1,ch10,&
+   'jatom=',jatom,', iatom=',iatom,'.'
+   ABI_BUG(msg)
  end if
 
- ABI_ALLOCATE(ph1kxred,(2,-n1:n1))
+ ABI_MALLOC(ph1kxred,(2,-n1:n1))
 
  ! ia runs from iatom to jatom
  do ia=iatom,jatom
@@ -712,7 +714,7 @@ subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d
 !$OMP END PARALLEL DO
  end do
 
- ABI_DEALLOCATE(ph1kxred)
+ ABI_FREE(ph1kxred)
 
 end subroutine ph1d3d
 !!***
@@ -740,10 +742,11 @@ end subroutine ph1d3d
 !!   Real and imag given in usual Fortran convention.
 !!
 !! PARENTS
-!!      afterscfloop,bethe_salpeter,cg_rotate,dfpt_looppert,dfptnl_loop
-!!      extrapwf,gstate,m_cut3d,m_fock,m_gkk,m_hamiltonian,m_phgamma,m_phpi
-!!      m_sigmaph,m_wfd,partial_dos_fractions,prcref,prcref_PMA,respfn,scfcv
-!!      screening,sigma,update_e_field_vars,wfconv
+!!      m_afterscfloop,m_berryphase_new,m_bethe_salpeter,m_cgtk,m_cut3d
+!!      m_dfpt_looppert,m_dfpt_lw,m_epjdos,m_extraprho,m_fock,m_gkk,m_gstate
+!!      m_hamiltonian,m_inwffil,m_nonlinear,m_orbmag,m_pead_nl_loop,m_phgamma
+!!      m_phpi,m_prcref,m_respfn_driver,m_scfcv_core,m_screening_driver
+!!      m_sigma_driver,m_sigmaph,m_wfd
 !!
 !! CHILDREN
 !!
@@ -771,7 +774,7 @@ subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
  ph1d_size1=size(ph1d,1);ph1d_size2=size(ph1d,2)
  ph1d_sizemin=(2*n1+1+2*n2+1+2*n3+1)*natom
  if (ph1d_size1/=2.or.ph1d_size2<ph1d_sizemin) then
-   MSG_BUG('Wrong ph1d sizes!')
+   ABI_BUG('Wrong ph1d sizes!')
  end if
 
  do ia=1,natom
@@ -835,7 +838,7 @@ end subroutine getph
 !!  Src_6response/kpg3.f
 !!
 !! PARENTS
-!!      dfpt_nsteltwf,dfpt_nstpaw,dfpt_rhofermi,getgh1c
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_getgh1c
 !!
 !! CHILDREN
 !!
@@ -858,7 +861,7 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
  real(dp) :: dfsm,dkinetic,dkpg2,ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq
 ! real(dp) :: d2fsm ! used in commented section below
  real(dp) :: kpg2,xx
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  real(dp) :: dgmetds(3,3)
@@ -873,10 +876,10 @@ subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
 
 !Compute derivative of metric tensor wrt strain component istr
  if(istr<1 .or. istr>6)then
-   write(message, '(a,i10,a,a,a)' )&
-&   'Input istr=',istr,' not allowed.',ch10,&
-&   'Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   write(msg, '(a,i10,a,a,a)' )&
+   'Input istr=',istr,' not allowed.',ch10,&
+   'Possible values are 1,2,3,4,5,6 only.'
+   ABI_BUG(msg)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -945,17 +948,16 @@ end subroutine kpgstr
 !!    kpg(npw,4:9)= [(k+G)_a].[(k+G)_b] quantities
 !!
 !! PARENTS
-!!      ctocprj,d2frnl,debug_tools,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
-!!      dfptnl_resp,fock2ACE,forstrnps,getcprj,getgh1c,ks_ddiago,m_io_kss
-!!      m_shirley,m_wfd,nonlop_test,nonlop_ylm,prep_bandfft_tabs,vtorho
-!!      wfd_vnlpsi
+!!      m_bandfft_kpt,m_cgprj,m_d2frnl,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfptnl_pert,m_fock_getghc,m_forstr,m_getgh1c,m_io_kss,m_ksdiago
+!!      m_nonlop_test,m_nonlop_ylm,m_orbmag,m_pead_nl_loop,m_vtorho,m_wfd
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 
-subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
+subroutine mkkpg(kg, kpg, kpt, nkpg, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -968,23 +970,21 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 !Local variables-------------------------------
 !scalars
  integer :: ipw,mu,mua,mub
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  if (nkpg==0) return
 
-!-- Test nkpg --
+ !-- Test nkpg --
  if (nkpg/=3.and.nkpg/=9) then
-   write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
-   MSG_BUG(message)
+   write(msg, '(a,i0)' )' Bad value for nkpg !',nkpg
+   ABI_BUG(msg)
  end if
 
-!-- Compute (k+G) --
+ !-- Compute (k+G) --
 !$OMP PARALLEL DO COLLAPSE(2) &
 !$OMP PRIVATE(mu,ipw)
  do ipw=1,npw
@@ -994,7 +994,7 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
  end do
 !$OMP END PARALLEL DO
 
-!-- Compute [(k+G)_a].[(k+G)_b] --
+ !-- Compute [(k+G)_a].[(k+G)_b] --
  if (nkpg==9) then
 !$OMP PARALLEL DO COLLAPSE(2) &
 !$OMP PRIVATE(ipw,mu,mua,mub)
@@ -1007,8 +1007,6 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 !$OMP END PARALLEL DO
  end if
 
- DBG_EXIT("COLL")
-
 end subroutine mkkpg
 !!***
 
@@ -1020,13 +1018,6 @@ end subroutine mkkpg
 !! Make plane wave index at k point for basis at second k point,
 !! needed to compute overlaps $\langle u_{k,n}|u_{k+b,n}\rangle$
 !! as appear in Berry phase derived quantities
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !! dk(3)=real vector difference of ket kpt - bra kpt
@@ -1052,10 +1043,9 @@ end subroutine mkkpg
 !! NOTES
 !!
 !! PARENTS
-!!      chern_number
+!!      m_orbmag
 !!
 !! CHILDREN
-!!      kpgsph
 !!
 !! SOURCE
 
@@ -1095,13 +1085,13 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
   ! Build basis sphere of plane waves for the k-point
   ! we avoid using the global kg data because of difficulties in parallel-ism
-  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
+  ABI_MALLOC(kg_k,(3,dtset%mpw))
   kg_k(:,:) = 0
   kpt(:) = dtset%kptns(:,ikpti)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
   ! Build basis sphere of plane waves for the nearest neighbour of the k-point
-  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
+  ABI_MALLOC(kg1_k,(3,dtset%mpw))
   kg1_k(:,:) = 0
   kpt1(:) = dtset%kptns(:,ikpt1i)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
@@ -1165,14 +1155,13 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
              &     (iadum(2) == iadum1(2)).and. &
              &     (iadum(3) == iadum1(3)) ) then
            pwind_k1(ipw) = jpw
-           ! write(std_out,'(a,2i4)')'JWZ debug : bg ipw == jpw ',ipw,jpw
            exit
         end if
      end do
   end do
 
-  ABI_DEALLOCATE(kg_k)
-  ABI_DEALLOCATE(kg1_k)
+  ABI_FREE(kg_k)
+  ABI_FREE(kg1_k)
 
 end subroutine mkpwind_k
 !!***
@@ -1196,7 +1185,7 @@ end subroutine mkpwind_k
 !!  kpg(npw,3)= (k+G) components
 !!
 !! PARENTS
-!!  nonlop_ylm  
+!!      m_nonlop_ylm
 !!
 !! CHILDREN
 !!
@@ -1217,7 +1206,7 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 !Local variables-------------------------------
 !scalars
  integer :: ipw,mu
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: kpg(:,:)
 
@@ -1229,12 +1218,12 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
 !-- Test nkpg --
  if (nkpg/=3) then
-   write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
-   MSG_BUG(message)
+   write(msg, '(a,i0)' )' Bad value for nkpg !',nkpg
+   ABI_BUG(msg)
  end if
 
 !-- Compute (k+G) --
- ABI_ALLOCATE(kpg,(npw,nkpg))
+ ABI_MALLOC(kpg,(npw,nkpg))
 !$OMP PARALLEL DO COLLAPSE(2) &
 !$OMP PRIVATE(mu,ipw)
  do ipw=1,npw
@@ -1252,14 +1241,13 @@ subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
    kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
  end do
 !$OMP END PARALLEL DO
- ABI_DEALLOCATE(kpg)
+ ABI_FREE(kpg)
 
  DBG_EXIT("COLL")
 
 end subroutine mkkpgcart
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkkin_metdqdq
 !! NAME
 !! mkkin_metdqdq
@@ -1268,12 +1256,6 @@ end subroutine mkkpgcart
 !! Compute elements of the second q-gradient of the metric
 !! kinetic energy operator in reciprocal
 !! space at given k point wrt cartesian q components.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (DRH, XG)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  effmass=effective mass for electrons (1. in common case)
@@ -1303,15 +1285,13 @@ end subroutine mkkpgcart
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
 !!
 !! PARENTS
-!!      getgh1dqc_setup
+!!      m_getgh1c
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

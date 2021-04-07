@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_finegrid
 !! NAME
 !!  m_paw_finegrid
@@ -8,7 +7,7 @@
 !!  on the fine grid around a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2021 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,8 +82,7 @@ CONTAINS
 !!    gylmgr2(6,nfgd,lm_size)= second derivatives of g_l(r-R)*Y_lm(r-R) wrt cart. coordinates
 !!
 !! PARENTS
-!!      m_pawdij,nhatgrid,paw_mknewh0,pawgrnl,pawmknhat,pawmknhat_psipsi
-!!      pawnhatfr,wvl_nhatgrid
+!!      m_paw_denpot,m_paw_dfpt,m_paw_nhat,m_pawdij
 !!
 !! CHILDREN
 !!
@@ -130,15 +128,15 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 !==========================================================
  if (size(rfgd)/=3*nfgd) then
    msg='rfgd array must be allocated at rfgd(3,nfgd)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (pawtab%lcut_size>9) then
    msg='l_size>10 forbidden!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (pawtab%shape_type==1.and.pawtab%shape_lambda<2) then
    msg='Exponent lambda of gaussian shape function must be > 1!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 !Initializations
@@ -958,9 +956,9 @@ end subroutine pawgylm
 !!  gylmg(npw,lmax**2,ntypat)=Fourier transform of each g_l(r).Y_lm(r) function
 !!
 !! PARENTS
+!!      m_suscep_stat
 !!
 !! CHILDREN
-!!      paw_uniform_splfit
 !!
 !! SOURCE
 
@@ -1072,7 +1070,7 @@ end subroutine pawgylmg
 !!  rfgd(3,nfgd)= cartesian coordinates of r-R.
 !!
 !! PARENTS
-!!      nhatgrid,pawgrnl
+!!      m_paw_dfpt,m_paw_nhat
 !!
 !! CHILDREN
 !!
@@ -1163,7 +1161,7 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
              nfgd=nfgd+1
              if (nfgd>ncmax) then
                msg='Number of fft points around atom exceeds max. allowed!'
-               MSG_BUG(msg)
+               LIBPAW_BUG(msg)
              end if
              rfgd_tmp(1,nfgd)=rx
              rfgd_tmp(2,nfgd)=ry
@@ -1229,7 +1227,7 @@ end subroutine pawrfgd_fft
 !!  rfgd(3,nfgd)= cartesian coordinates of r-R.
 !!
 !! PARENTS
-!!      wvl_nhatgrid
+!!      m_paw_nhat
 !!
 !! CHILDREN
 !!
@@ -1395,7 +1393,7 @@ end subroutine pawrfgd_wvl
 !!                                 Not allocated if q=0 !
 !!
 !! PARENTS
-!!      m_pawdij,pawgrnl,pawmknhat,pawmknhat_psipsi,respfn
+!!      m_paw_dfpt,m_paw_nhat,m_pawdij,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -1423,7 +1421,7 @@ subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
 
  if (size(rfgd)/=3*nfgd) then
    msg='rfgd array must be allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  qne0=(qphon(1)**2+qphon(2)**2+qphon(3)**2>=1.d-15)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawxmlps
 !! NAME
 !! m_pawxmlps
@@ -8,7 +7,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2021 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -257,6 +256,7 @@ type, public :: paw_setup_t
   real(dpxml)                  :: rpaw
   real(dpxml)                  :: ex_cc
   character(len=4)             :: idgrid
+  character(len=12)            :: optortho
   type(atom_t)                 :: atom
   type(xc_functional_t)        :: xc_functional
   type(generator_t)            :: generator
@@ -374,28 +374,28 @@ select case(name)
          value = getValue(attributes,"symbol")
          if (value == "" ) then
            msg="Cannot determine atomic symbol"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%atom%symbol = trim(value)
 
          value = getValue(attributes,"Z") 
          if (value == "" ) then
            msg="Cannot determine znucl"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%atom%znucl
 
          value = getValue(attributes,"core")
          if (value == "" ) then
            msg="Cannot determine zion"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%atom%zion
 
          value = getValue(attributes,"valence")
          if (value == "" ) then
            msg="Cannot determine zval"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%atom%zval
 
@@ -405,14 +405,14 @@ select case(name)
          value = getValue(attributes,"type")
          if (value == "" ) then
            msg="Cannot determine xc-functional-type"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%xc_functional%functionaltype = trim(value)
 
          value = getValue(attributes,"name")
          if (value == "" ) then
            msg="Cannot determine xc-functional-name "
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%xc_functional%name= trim(value)
 
@@ -431,7 +431,7 @@ select case(name)
          value = getValue(attributes,"rpaw")
          if (value == "" ) then
            msg="Cannot determine rpaw"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) paw_setuploc%rpaw
 
@@ -455,7 +455,7 @@ select case(name)
          value = getValue(attributes,"l")
          if (value == "" ) then
            msg="Cannot determine l"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) valstate(ival)%ll
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
@@ -470,14 +470,14 @@ select case(name)
          value = getValue(attributes,"rc")
          if (value == "" ) then
            msg="Cannot determine rc"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) valstate(ival)%rc
 
          value = getValue(attributes,"e")
          if (value == "" ) then
            msg="Cannot determine e"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) valstate(ival)%ee
 
@@ -522,14 +522,14 @@ select case(name)
          value = getValue(attributes,"istart")
          if (value == "" ) then
            msg="Cannot determine istart"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) grids(igrid)%istart
 
          value = getValue(attributes,"iend")
          if (value == "" ) then
            msg="Cannot determine iend"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(unit=value,fmt=*) grids(igrid)%iend
 
@@ -566,7 +566,7 @@ select case(name)
          if (value == "" ) then
            if(paw_setuploc%shape_function%gtype /="num") then
               msg="Cannot determine rc"
-              MSG_ERROR(msg)
+              LIBPAW_ERROR(msg)
            end if
          else
            read(unit=value,fmt=*) paw_setuploc%shape_function%rc
@@ -590,7 +590,7 @@ select case(name)
          value = getValue(attributes,"state")
          if (value == "" ) then
            msg="Cannot determine pseudo_partial_wave state"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%pseudo_partial_wave(ipswf)%state=trim(value)
 
@@ -615,7 +615,7 @@ select case(name)
 
          value = getValue(attributes,"state")
          if (value == "" ) then
-           MSG_ERROR("Cannot determine ae_partial_wave state")
+           LIBPAW_ERROR("Cannot determine ae_partial_wave state")
          end if
          paw_setuploc%ae_partial_wave(iaewf)%state=trim(value)
 
@@ -641,7 +641,7 @@ select case(name)
          value = getValue(attributes,"state")
          if (value == "" ) then
            msg="Cannot determine projector_function state"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%projector_function(iproj)%state=trim(value)
 
@@ -667,7 +667,7 @@ select case(name)
          value = getValue(attributes,"state")
          if (value == "" ) then
            msg="Cannot determine projector_fit state"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          paw_setuploc%projector_fit(iprojfit)%state=trim(value)
 
@@ -679,14 +679,14 @@ select case(name)
          value = getValue(attributes,"factor")
          if (value == "" ) then
            msg="Cannot determine gaussian factor"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(value(2:100), *) paw_setuploc%projector_fit(iprojfit)%factors(1, igauss)
          read(value(index(value, ',') + 1:100), *) paw_setuploc%projector_fit(iprojfit)%factors(2, igauss)
          value = getValue(attributes,"exponent")
          if (value == "" ) then
            msg="Cannot determine gaussian exponent"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          read(value(2:100), *) paw_setuploc%projector_fit(iprojfit)%expos(1, igauss)
          read(value(index(value, ',') + 1:100), *) paw_setuploc%projector_fit(iprojfit)%expos(2, igauss)
@@ -933,7 +933,7 @@ select case(name)
         in_valenceStates = .false.
         if(ival>50) then
           msg="ival>50"
-          MSG_ERROR(msg)
+          LIBPAW_ERROR(msg)
         end if
         if(ival>0)then
           LIBPAW_DATATYPE_ALLOCATE(paw_setuploc%valence_states%state,(ival))
@@ -957,7 +957,7 @@ select case(name)
       case ("paw_setup")
         if(igrid>10) then
           msg="igrid>10"
-          MSG_ERROR(msg)
+          LIBPAW_ERROR(msg)
         end if
         LIBPAW_DATATYPE_ALLOCATE(paw_setuploc%radial_grid,(igrid))
         paw_setuploc%radial_grid(igrid)%tread=.true.
@@ -973,7 +973,7 @@ select case(name)
         end do
         if(ishpf>10) then
           msg="ishpf>7"
-          MSG_ERROR(msg)
+          LIBPAW_ERROR(msg)
         end if
         LIBPAW_ALLOCATE(paw_setuploc%shape_function%data,(mesh_size,ishpf))
         do ii=1,ishpf
@@ -1049,7 +1049,7 @@ end subroutine paw_end_element1
 !! PARENTS
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 subroutine pawdata_chunk(chunk)
@@ -1094,14 +1094,14 @@ if (in_data) then
 
   if ((ndata+ntokens)>size(x)) then 
     msg="data array full"
-    MSG_ERROR(msg)
+    LIBPAW_ERROR(msg)
   end if
 
 ! Take the string and turn it into useful reals
   read(unit=str(1:last_pos),fmt=*,iostat=status) x(ndata+1:ndata+ntokens)
   if (status/=0) then
     msg="real conversion error"
-    MSG_ERROR(msg)
+    LIBPAW_ERROR(msg)
   end if
   ndata=ndata+ntokens
 
@@ -1129,10 +1129,10 @@ end subroutine pawdata_chunk
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
 !!
 !! PARENTS
-!!      abinit,inpspheads
+!!      m_pspheads,m_pspini
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1255,10 +1255,9 @@ end subroutine paw_setup_free
 !!  paw_setupout<paw_setup_type>=output paw_setup datastructure
 !!
 !! PARENTS
-!!      inpspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1280,6 +1279,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%tread=paw_setupin%tread
  paw_setupout%ngrid=paw_setupin%ngrid
  paw_setupout%idgrid=paw_setupin%idgrid
+ paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
  paw_setupout%ex_cc=paw_setupin%ex_cc
  paw_setupout%atom%tread=paw_setupin%atom%tread
@@ -1494,7 +1494,7 @@ end subroutine paw_setup_copy
 !!      m_pawxmlps
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1542,10 +1542,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      pawpsxml2ab
+!!      m_pspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -1706,7 +1706,7 @@ end subroutine paw_setup_copy
          if (ival>50) then
            close(funit)
            msg="Error in rdpawps1xml: basis size too large (>50)!"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
          if (strg == "" ) then 
@@ -1827,7 +1827,7 @@ end subroutine paw_setup_copy
      if(igrid>10)then
        close(funit)
        msg="igrid>10"
-       MSG_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
      cycle
    end if
@@ -1881,7 +1881,7 @@ end subroutine paw_setup_copy
          else
            write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &           "Action: Modify your XML PAW data file"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
        end if
      end if
@@ -1930,10 +1930,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      pawpsxml2ab
+!!      m_pspheads
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -2066,7 +2066,7 @@ end subroutine paw_setup_copy
          if (ival>50) then
            close(funit)
            msg="Error in rdpawps1xml: basis size too large (>50)!"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
          if (strg == "" ) then 
@@ -2187,7 +2187,7 @@ end subroutine paw_setup_copy
      if(igrid>10)then
        close(funit)
        msg="igrid>10"
-       MSG_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
      cycle
    end if
@@ -2241,7 +2241,7 @@ end subroutine paw_setup_copy
          else
            write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &           "Action: Modify your XML PAW data file"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
        end if
      end if
@@ -2254,7 +2254,7 @@ end subroutine paw_setup_copy
  if(igrid==0.or.ival==0) then
    write(msg,'(a,a,a)')"the grids and the states must be read before the shapefunction",ch10,&
 &   "Action: Modify your XML PAW data file"
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if(ishpf>0)then
    LIBPAW_ALLOCATE(paw_setup%shape_function%data,(mesh_size,ishpf))
@@ -2666,6 +2666,18 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+!  --Read orthogonalisation scheme
+   if (line(1:18)=='<orthogonalisation') then
+     call paw_rdfromline(" scheme",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%optortho
+     else
+       read(unit=strg,fmt=*) paw_setup%optortho
+     end if
+     cycle
+   end if
+
 !  --Read the Atompaw input file
    ir=0
    if ((line(1:13)=='<!-- Program:').and.(ir==1)) then
@@ -2689,24 +2701,24 @@ end subroutine paw_setup_copy
 
  if (.not.paw_setup%atom%tread) then
    msg="ATOM SYMBOL not found !"
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
  if (.not.paw_setup%valence_states%tread) then
    msg="VALENCE STATES not found!"
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
  if (.not.paw_setup%xc_functional%tread) then
    msg="EXCHANGE/CORRELATION not found !"
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
  if (.not.paw_setup%shape_function%tread) then
    msg="SHAPE FUNCTION TYPE not found !"
-   MSG_WARNING(msg)
+   LIBPAW_WARNING(msg)
  end if
 
  if (.not.found) then
    msg="Aborting now"
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  
  end subroutine rdpawpsxml
@@ -2729,10 +2741,10 @@ end subroutine paw_setup_copy
 !!  paw_setup=pseudopotential data structure
 !!
 !! PARENTS
-!!      m_pawpsprdpawpsxml_core
+!!      m_pawpsp
 !!
 !! CHILDREN
-!!      paw_rdfromline
+!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_init
 !!
 !! SOURCE
 
@@ -2802,7 +2814,7 @@ end subroutine paw_setup_copy
          if (icor>50) then
            close(funit)
            msg="basis size too large (>50)!"
-           MSG_ERROR(msg)
+           LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
          if (strg == "" ) then 
@@ -2926,7 +2938,7 @@ end subroutine paw_setup_copy
      if(igrid>10)then
        close(funit) 
        msg="igrid>10"
-       MSG_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
      found=.true.
      cycle
@@ -2956,7 +2968,7 @@ end subroutine paw_setup_copy
          write(msg, '(3a)' )&
 &         '  the grid r=a*i/(1-b*i) is not implemented in ABINIT !',ch10,&
 &         '  Action: check your psp file.'
-         MSG_ERROR(msg)
+         LIBPAW_ERROR(msg)
        case("r=a*i/(n-i)")
          mesh_shift(imsh)=0
          radmesh(imsh)%mesh_type=5
@@ -2980,7 +2992,7 @@ end subroutine paw_setup_copy
          write(msg, '(3a)' )&
 &       '  the grid r=(i/n+a)^5/a-a^4 is not implemented in ABINIT !',ch10,&
 &       '  Action: check your psp file.'
-         MSG_ERROR(msg)
+         LIBPAW_ERROR(msg)
      end select
    end do
  end if
@@ -3060,15 +3072,30 @@ end subroutine paw_setup_copy
    end do
  end if
 
- LIBPAW_DATATYPE_DEALLOCATE(radmesh)
- LIBPAW_DATATYPE_DEALLOCATE(mesh_shift)
+ if (allocated(radmesh)) then
+   call pawrad_free(radmesh)
+   LIBPAW_DATATYPE_DEALLOCATE(radmesh)
+ end if
+ if (allocated(mesh_shift)) then
+   LIBPAW_DATATYPE_DEALLOCATE(mesh_shift)
+ end if
 
- LIBPAW_DATATYPE_DEALLOCATE(grids)
- LIBPAW_DATATYPE_DEALLOCATE(corestate)
+ if (allocated(grids)) then
+   LIBPAW_DATATYPE_DEALLOCATE(grids)
+ end if
+ if (allocated(corestate)) then
+   LIBPAW_DATATYPE_DEALLOCATE(corestate)
+ end if
 
- LIBPAW_DATATYPE_DEALLOCATE(gridwf)
- LIBPAW_DATATYPE_DEALLOCATE(statewf)
- LIBPAW_DEALLOCATE(phitmp)
+ if (allocated(gridwf)) then
+   LIBPAW_DATATYPE_DEALLOCATE(gridwf)
+ end if
+ if (allocated(statewf)) then
+   LIBPAW_DATATYPE_DEALLOCATE(statewf)
+ end if
+ if (allocated(phitmp)) then
+   LIBPAW_DEALLOCATE(phitmp)
+ end if
 
 !Close the XML atomicdata file
  close(funit)

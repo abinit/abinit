@@ -6,7 +6,7 @@
 !!  This module contains miscelaneous routines used in the PAW context.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (FJ,MT)
+!! Copyright (C) 2018-2021 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,6 +61,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  natom=number of atoms in cell.
+!!  nremit [optional] = if non-zero initialize the number of possible remits before stop
 !!  ntypat=number of types of atoms in unit cell.
 !!  pawovlp=percentage of voluminal overlap ratio allowed to continue execution
 !!          (if negative value, execution always continues)
@@ -75,18 +76,23 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      bethe_salpeter,respfn,scfcv,screening,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_nonlinear,m_respfn_driver,m_scfcv_core
+!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
-!!      wrtout
+!!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
+!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
+!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
+!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 
-subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
+subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred,nremit)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
+ integer,intent(in),optional :: nremit
  real(dp) :: pawovlp
 !arrays
  integer,intent(in) :: typat(natom)
@@ -95,7 +101,8 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: ia,ib,ii,t1,t2,t3
+ integer :: decrease_nremit,ia,ib,ii,t1,t2,t3
+ integer,save :: nremit_counter=0
  logical :: stop_on_error
  real(dp) :: dd,dif1,dif2,dif3,ha,hb,norm2
  real(dp) :: ratio_percent,va,vb,vv
@@ -108,6 +115,29 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+! if(present(nremit))then
+!   if(nremit/=0)nremit_counter=abs(nremit)
+! else
+!   nremit_counter=0
+! endif
+
+!DEBUG
+!    write(std_out,'(a,a,i4)')ch10,' m_paw_tools, chkpawovlp : enter, saved nremit_counter=',nremit_counter
+!ENDDEBUG
+
+ if(present(nremit))then
+   if(nremit/=0)nremit_counter=abs(nremit)
+!DEBUG
+!    write(std_out,'(a,i4)')' m_paw_tools, chkpawovlp : optional arg nremit present, nremit=',nremit
+!ENDDEBUG
+ else
+   nremit_counter=0
+ endif
+ !DEBUG
+!    write(std_out,'(a,i4)')' m_paw_tools, chkpawovlp : after init, nremit_counter=',nremit_counter
+!ENDDEBUG
+
 
  iamax(:)=-1;ibmax(:)=-1
  norm2_min(:)=-1.d0;ratio_percent_max(:)=-1.d0
@@ -164,55 +194,72 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
    end do
  end do
 
- stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.ratio_percent_max(1)>pawovlp))
+ !DEBUG
+ !write(std_out,'(a,f8.4)')' chkpawovlp : maxval(ratio_percent_max(1:2))=',maxval(ratio_percent_max(1:2))
+ !ENDDEBUG
+
+ stop_on_error=(abs(pawovlp)<=tol6.or.(pawovlp>tol6.and.(maxval(ratio_percent_max(1:2))>pawovlp)))
+ decrease_nremit=0
 
 !Print adapted message with overlap value
  if (iovl(1)+iovl(2)>0) then
 
-   !ii=1: PAW augmentation regions overlap
-   !ii=2: compensation charges overlap
-   if (iovl(2)==0) ii=1
-   if (iovl(2)> 0) ii=2
+   do ii=1,2
 
-   if (iovl(ii)>0) then
+     if(ratio_percent_max(ii)>zero)then
+       if (ii==1) write(message,' (a)' ) 'PAW SPHERES ARE OVERLAPPING!'
+       if (ii==2) write(message, '(a)' ) 'PAW COMPENSATION DENSITIES ARE OVERLAPPING !'
 
-     if (ii==1) write(message,' (a)' ) 'PAW SPHERES ARE OVERLAPPING!'
-     if (ii==2) write(message, '(2a)' )'PAW COMPENSATION DENSITIES ARE OVERLAPPING !!!!'
+       if (iovl(ii)==1) then
+         write(message, '(3a)' ) trim(message),ch10,&
+&         '   There is one pair of overlapping atoms.'
+       else
+         write(message, '(3a,i5,a)' ) trim(message),ch10,&
+&         '   There are ', iovl(ii),' pairs of overlapping atoms.'
+       end if
+       write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
+        '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
+       write(message, '(2a,2(a,i3),a,f9.5)' ) trim(message),ch10,&
+&       '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii))
+       if(ii==1)then
+         write(message, '(2a,2(a,i3,a,f9.5,a))' ) trim(message),ch10,&
+&         '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
+&         '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10
+       else if(ii==2)then
+         write(message, '(2a,2(a,i3,a,f9.5,a))' ) trim(message),ch10,&
+&         '    | Radius of the compensation sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rshp,ch10,&
+&         '    | Radius of the compensation sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rshp,ch10
+       endif
+       write(message, '(2a,f5.2,a)' ) trim(message),&
+&       '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
+       if (ii==1) then
+         write(message, '(3a)' ) trim(message),ch10,&
+&         'THIS IS DANGEROUS, as PAW formalism assumes non-overlapping PAW spheres.'
+       else if (ii==2) then
+         write(message, '(3a)' ) trim(message),ch10,&
+&         'THIS IS DANGEROUS, as PAW formalism assumes non-overlapping compensation densities.'
+       end if
+       if (stop_on_error .and. nremit_counter==0) then
+         ABI_ERROR_NOSTOP(message,ia) !ia is dummy
+       else
+         ABI_WARNING(message)
+         if(stop_on_error .and. nremit_counter/=0)decrease_nremit=1
+       end if
+     endif ! ratio_percent_max(ii)>zero
 
-     if (iovl(ii)==1) then
-       write(message, '(3a)' ) trim(message),ch10,&
-&       '   There is one pair of overlapping atoms.'
-     else
-       write(message, '(3a,i5,a)' ) trim(message),ch10,&
-&       '   There are ', iovl(1),' pairs of overlapping atoms.'
-     end if
-     write(message, '(3a,i3,a,i3,a)' ) trim(message),ch10,&
-     '   The maximum overlap percentage is obtained for the atoms ',iamax(ii),' and ',ibmax(ii),'.'
-     write(message, '(2a,2(a,i3),a,f9.5,a,2(a,i3,a,f9.5,a),a,f5.2,a)' ) trim(message),ch10,&
-&     '    | Distance between atoms ',iamax(ii),' and ',ibmax(ii),' is  : ',sqrt(norm2_min(ii)),ch10,&
-&     '    | PAW radius of the sphere around atom ',iamax(ii),' is: ',pawtab(typat(iamax(ii)))%rpaw,ch10,&
-&     '    | PAW radius of the sphere around atom ',ibmax(ii),' is: ',pawtab(typat(ibmax(ii)))%rpaw,ch10,&
-&     '    | This leads to a (voluminal) overlap ratio of ',ratio_percent_max(ii),' %'
-     if (ii==2) then
-       write(message, '(3a)' ) trim(message),ch10,&
-&       'THIS IS DANGEROUS !, as PAW formalism assumes non-overlapping compensation densities.'
-     end if
-
-     if (stop_on_error) then
-       MSG_ERROR_NOSTOP(message,ia) !ia is dummy
-     else
-       MSG_WARNING(message)
-     end if
-
-   end if
+   enddo ! ii
 
 !  Print advice
    if (stop_on_error) then
      write(message, '(3a)' )&
 &     '  Action: 1- decrease cutoff radius of PAW dataset',ch10,&
 &     '    OR  2- ajust "pawovlp" input variable to allow overlap (risky)'
-     MSG_ERROR(message)
+     if(nremit_counter==0)then
+       ABI_ERROR(message)
+     endif
    end if
+
+   nremit_counter=nremit_counter-decrease_nremit
 
 !  Print last message if execution continues:
    if (pawovlp<=tol6) then
@@ -221,12 +268,17 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 &     '       and even inaccurate (if overlap is too big) !',ch10,&
 &     '       Assume experienced user. Execution will continue.',ch10
      call wrtout(std_out,message,'COLL')
-   else if (ratio_percent_max(1)<=pawovlp) then
+   else if (ratio_percent_max(1)<=pawovlp .and. ratio_percent_max(2)<=pawovlp) then
      write(message, '(8a)' ) &
 &     '       Overlap ratio seems to be acceptable (less than value',ch10,&
 &     '       of "pawovlp" input parameter): execution will continue.',ch10,&
 &     '       But be aware that results might be approximate,',ch10,&
 &     '       and even inaccurate (depending on your physical system) !',ch10
+     call wrtout(std_out,message,'COLL')
+   else if(decrease_nremit==1)then
+          write(message, '(3a)' ) &
+&     '       First time that overlap is bigger than "pawovlp" input parameter.',ch10,&
+&     '       Execution will continue, but such overlap will not be tolerated twice.'
      call wrtout(std_out,message,'COLL')
    end if
 
@@ -262,7 +314,7 @@ end subroutine chkpawovlp
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2021 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -289,13 +341,13 @@ end subroutine chkpawovlp
 !!  (only printing)
 !!
 !! PARENTS
-!!      bethe_salpeter,outscfcv,screening,sigma
+!!      m_bethe_salpeter,m_outscfcv,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
-!!      paw_ij_gather,paw_ij_nullify,pawio_print_ij,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,setnoccmmp,wrtout,xmpi_comm_group
-!!      xmpi_group_free,xmpi_group_translate_ranks
+!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
+!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
+!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 
@@ -364,7 +416,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Initializations
  natprt=natmax;if (dtset%natom==1) natprt=1
  if (dtset%pawprtvol<0) natprt=dtset%natom
- ABI_ALLOCATE(jatom,(natprt))
+ ABI_MALLOC(jatom,(natprt))
  if (natprt==1) then
    jatom(1)=1
  else if (natprt==2) then
@@ -374,7 +426,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      jatom(iat)=iat
    end do
  else
-   MSG_BUG("invalid value of natprt!")
+   ABI_BUG("invalid value of natprt!")
  end if
  usepawu=(count(pawtab(:)%usepawu/=0)>0)
  useexexch=(count(pawtab(:)%useexexch/=0)>0)
@@ -395,10 +447,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !If atomic data are distributed, retrieve all Dij on master proc
  if (paral_atom) then
    if (me_atom==0) then
-     ABI_DATATYPE_ALLOCATE(paw_ij_all,(dtset%natom))
+     ABI_MALLOC(paw_ij_all,(dtset%natom))
      call paw_ij_nullify(paw_ij_all)
    else
-     ABI_DATATYPE_ALLOCATE(paw_ij_all,(0))
+     ABI_MALLOC(paw_ij_all,(0))
    end if
    call paw_ij_gather(paw_ij,paw_ij_all,0,my_comm_atom)
  else
@@ -442,15 +494,15 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  end if
  if (paral_atom.and.(.not.usepawu).and.(.not.useexexch)) then
    call paw_ij_free(paw_ij_all)
-   ABI_DATATYPE_DEALLOCATE(paw_ij_all)
+   ABI_FREE(paw_ij_all)
  end if
 
 !If atomic data are distributed, retrieve all Rhoij on master proc
  if (paral_atom) then
    if (me_atom==0) then
-     ABI_DATATYPE_ALLOCATE(pawrhoij_all,(dtset%natom))
+     ABI_MALLOC(pawrhoij_all,(dtset%natom))
    else
-     ABI_DATATYPE_ALLOCATE(pawrhoij_all,(0))
+     ABI_MALLOC(pawrhoij_all,(0))
    end if
    call pawrhoij_nullify(pawrhoij_all)
    call pawrhoij_gather(pawrhoij,pawrhoij_all,0,my_comm_atom,&
@@ -510,7 +562,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        ll=-1;if (pawtab(itypat)%usepawu/=0) ll=pawtab(itypat)%lpawu
        llp=-1;if (pawtab(itypat)%useexexch/=0) llp=pawtab(itypat)%lexexch
        if (ll/=llp.and.ll/=-1.and.llp/=-1) then
-         MSG_BUG("lpawu/=lexexch forbidden!")
+         ABI_BUG("lpawu/=lexexch forbidden!")
        end if
        ll=max(ll,llp)
        if (ll>=0) then
@@ -601,9 +653,9 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
          end do
 !        Transformation matrices: real->complex spherical harmonics
          if(paw_ij_all(iatom)%ndij==4) then
-           ABI_ALLOCATE(noccmmp_ylm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
+           ABI_MALLOC(noccmmp_ylm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
            noccmmp_ylm=czero
-           ABI_ALLOCATE(noccmmp_slm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
+           ABI_MALLOC(noccmmp_slm,(2*ll+1,2*ll+1,paw_ij_all(iatom)%ndij))
            noccmmp_slm=czero
 !          Go from real notation for complex noccmmp to complex notation in noccmmp_slm
            noccmmp_slm(:,:,:)=cmplx(paw_ij_all(iatom)%noccmmp(1,:,:,:),paw_ij_all(iatom)%noccmmp(2,:,:,:))
@@ -624,7 +676,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            write(msg,'(a)') ch10
            call wrtout(unitfi,msg,'COLL')
            if (dtset%pawspnorb>0) then
-             ABI_ALLOCATE(noccmmp_jmj,(2*(2*ll+1),2*(2*ll+1)))
+             ABI_MALLOC(noccmmp_jmj,(2*(2*ll+1),2*(2*ll+1)))
              noccmmp_jmj=czero
              ii=std_out;if (unitfi==ab_out) ii=-1
              call mat_mlms2jmj(ll,noccmmp_ylm,noccmmp_jmj,paw_ij_all(iatom)%ndij,&
@@ -638,10 +690,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
              end do
              write(msg,'(a)') ch10
              call wrtout(unitfi,msg,'COLL')
-             ABI_DEALLOCATE(noccmmp_jmj)
+             ABI_FREE(noccmmp_jmj)
            end if ! pawspnorb
-           ABI_DEALLOCATE(noccmmp_ylm)
-           ABI_DEALLOCATE(noccmmp_slm)
+           ABI_FREE(noccmmp_ylm)
+           ABI_FREE(noccmmp_slm)
          end if ! ndij==4
        end if ! ((ll>=0).and.(pawtab(itypat)%usepawu/=0))
      end do
@@ -656,8 +708,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
      cplex_dij=paw_ij_all(iatom)%cplex_dij
      if (ll>=0.and.pawtab(itypat)%useexexch/=0) then
-       ABI_ALLOCATE(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
-       ABI_ALLOCATE(paw_ij_all(iatom)%nocctot,(nspden))
+       ABI_MALLOC(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
+       ABI_MALLOC(paw_ij_all(iatom)%nocctot,(nspden))
      end if
    end do
    call setnoccmmp(1,0,rdum4,0,0,idum3,dtset%natom,dtset%natom,0,1,nsppol,0,dtset%ntypat,&
@@ -696,10 +748,10 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    end do
    do iatom=1,dtset%natom
      if (allocated(paw_ij_all(iatom)%noccmmp)) then
-       ABI_DEALLOCATE(paw_ij_all(iatom)%noccmmp)
+       ABI_FREE(paw_ij_all(iatom)%noccmmp)
      end if
      if (allocated(paw_ij_all(iatom)%nocctot)) then
-       ABI_DEALLOCATE(paw_ij_all(iatom)%nocctot)
+       ABI_FREE(paw_ij_all(iatom)%nocctot)
      end if
    end do
  end if
@@ -709,14 +761,14 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  call wrtout(std_out,msg,'COLL')
 
 !Destroy temporary stored atomic data
- ABI_DEALLOCATE(jatom)
+ ABI_FREE(jatom)
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
  if (paral_atom) then
    call pawrhoij_free(pawrhoij_all)
-   ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
+   ABI_FREE(pawrhoij_all)
    if (usepawu.or.useexexch) then
      call paw_ij_free(paw_ij_all)
-     ABI_DATATYPE_DEALLOCATE(paw_ij_all)
+     ABI_FREE(paw_ij_all)
    end if
  end if
 

@@ -6,7 +6,7 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2021 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,9 +78,9 @@ contains
 !!      abinit
 !!
 !! CHILDREN
-!!      abi_io_redirect,getdim_nloc,getmpw,getng,libpaw_write_comm_set
-!!      littlegroup_q,mati3inv,memorf,memory,metric,mkrdim,prtspgroup,setmqgrid
-!!      wvl_memory
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -163,7 +163,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    use_gpu_cuda=dtsets(idtset)%use_gpu_cuda
    xclevel=dtsets(idtset)%xclevel
 
-   ABI_ALLOCATE(symrel,(3,3,nsym))
+   ABI_MALLOC(symrel,(3,3,nsym))
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
 
 !  Space group output
@@ -182,7 +182,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &   dtsets(idtset)%d3e_pert2_phon>0.or.dtsets(idtset)%d3e_pert3_phon>0) optphon=1
    if (dtsets(idtset)%rfstrs>0) optstrs=1
 
-   ABI_ALLOCATE(nband,(nkpt*nsppol))
+   ABI_MALLOC(nband,(nkpt*nsppol))
    nband(1:nkpt*nsppol)=dtsets(idtset)%nband(1:nkpt*nsppol)
    mband=maxval(nband(1:nkpt*nsppol))
    dtsets(idtset)%mband=mband
@@ -306,15 +306,15 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
    else
 !    Compute the value of cplex, for which one needs symrec
-     ABI_ALLOCATE(symq,(4,2,nsym))
-     ABI_ALLOCATE(symrec,(3,3,nsym))
+     ABI_MALLOC(symq,(4,2,nsym))
+     ABI_MALLOC(symrec,(3,3,nsym))
      do isym=1,nsym
        call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
      end do
      call littlegroup_q(nsym,qphon,symq,symrec,dtsets(idtset)%symafm,timrev)
      cplex=2-timrev
-     ABI_DEALLOCATE(symq)
-     ABI_DEALLOCATE(symrec)
+     ABI_FREE(symq)
+     ABI_FREE(symrec)
      mkmems(1)=dtsets(idtset)%mkmem
      mkmems(2)=dtsets(idtset)%mkqmem
      mkmems(3)=dtsets(idtset)%mk1mem
@@ -329,8 +329,8 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  Deallocate temporary arrays (when they will really be temporary !)
-   ABI_DEALLOCATE(nband)
-   ABI_DEALLOCATE(symrel)
+   ABI_FREE(nband)
+   ABI_FREE(symrel)
 
  end do ! idtset
 
@@ -479,10 +479,12 @@ end subroutine memory_eval
 !! This is because there are allocated arrays in these routines.
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
-!!      memana,wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -552,7 +554,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  if(option<0 .or. option>2)then
    write(msg,'(A,I0,A)')'option=',option,' while the only allowed values are 0, 1, or 2.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
@@ -683,14 +685,14 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !PAW: store useful dims
  if (usepaw==1) then
-   ABI_ALLOCATE(basis_size,(npsp))
-   ABI_ALLOCATE(l_size,(npsp))
-   ABI_ALLOCATE(lmn_size,(npsp))
-   ABI_ALLOCATE(lmn2_size,(npsp))
-   ABI_ALLOCATE(mesh_size,(npsp))
-   ABI_ALLOCATE(shape_type,(npsp))
-   ABI_ALLOCATE(pawver,(npsp))
-   ABI_ALLOCATE(rshp,(npsp))
+   ABI_MALLOC(basis_size,(npsp))
+   ABI_MALLOC(l_size,(npsp))
+   ABI_MALLOC(lmn_size,(npsp))
+   ABI_MALLOC(lmn2_size,(npsp))
+   ABI_MALLOC(mesh_size,(npsp))
+   ABI_MALLOC(shape_type,(npsp))
+   ABI_MALLOC(pawver,(npsp))
+   ABI_MALLOC(rshp,(npsp))
    do ii=1,npsp
      basis_size(ii)=pspheads(ii)%pawheader%basis_size
      mesh_size(ii)=pspheads(ii)%pawheader%mesh_size
@@ -704,7 +706,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    l_max=maxval(pspheads(:)%lmax)
    l_size_max=maxval(pspheads(:)%pawheader%l_size)
    rhoij_nspden=nspden;if (pawspnorb>0) rhoij_nspden=4
-   ABI_ALLOCATE(my_nattyp,(ntypat))
+   ABI_MALLOC(my_nattyp,(ntypat))
    if ((mpi_enreg%nproc_atom<=1).or.(.not.associated(mpi_enreg%my_atmtab))) then
      my_nattyp=nattyp
    else
@@ -717,15 +719,15 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    qphase_rhoij=merge(2,1,any(qphon(:)>tol8))
  else
 !  Do the allocation to avoid uninitialised variables.
-   ABI_ALLOCATE(my_nattyp,(1))
-   ABI_ALLOCATE(basis_size,(1))
-   ABI_ALLOCATE(l_size,(1))
-   ABI_ALLOCATE(lmn_size,(1))
-   ABI_ALLOCATE(lmn2_size,(1))
-   ABI_ALLOCATE(mesh_size,(1))
-   ABI_ALLOCATE(shape_type,(1))
-   ABI_ALLOCATE(pawver,(1))
-   ABI_ALLOCATE(rshp,(1))
+   ABI_MALLOC(my_nattyp,(1))
+   ABI_MALLOC(basis_size,(1))
+   ABI_MALLOC(l_size,(1))
+   ABI_MALLOC(lmn_size,(1))
+   ABI_MALLOC(lmn2_size,(1))
+   ABI_MALLOC(mesh_size,(1))
+   ABI_MALLOC(shape_type,(1))
+   ABI_MALLOC(pawver,(1))
+   ABI_MALLOC(rshp,(1))
    rhoij_nspden=nspden
    l_size_max=1
    l_max=1
@@ -1310,15 +1312,15 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  end if
 
 !-------------------------------------------------------------------------
- ABI_DEALLOCATE(my_nattyp)
- ABI_DEALLOCATE(basis_size)
- ABI_DEALLOCATE(l_size)
- ABI_DEALLOCATE(lmn_size)
- ABI_DEALLOCATE(lmn2_size)
- ABI_DEALLOCATE(mesh_size)
- ABI_DEALLOCATE(pawver)
- ABI_DEALLOCATE(shape_type)
- ABI_DEALLOCATE(rshp)
+ ABI_FREE(my_nattyp)
+ ABI_FREE(basis_size)
+ ABI_FREE(l_size)
+ ABI_FREE(lmn_size)
+ ABI_FREE(lmn2_size)
+ ABI_FREE(mesh_size)
+ ABI_FREE(pawver)
+ ABI_FREE(shape_type)
+ ABI_FREE(rshp)
 
 !---------------------------------------------------------------------
 !Now, analyze the data
@@ -1381,10 +1383,12 @@ end subroutine memory
 !!  (only writing)
 !!
 !! PARENTS
-!!      memorf,memory
+!!      m_memeval
 !!
 !! CHILDREN
-!!      wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -1423,24 +1427,24 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 
 !write(std_out,*)' memana : nchain=',nchain
 
- ABI_ALLOCATE(cdpfftf,(nchain))
- ABI_ALLOCATE(cdpfft,(nchain))
- ABI_ALLOCATE(cdpmpw,(nchain))
- ABI_ALLOCATE(cintfftf,(nchain))
- ABI_ALLOCATE(cintfft,(nchain))
- ABI_ALLOCATE(cintmpw,(nchain))
- ABI_ALLOCATE(cdpadd,(nchain))
- ABI_ALLOCATE(cintadd,(nchain))
- ABI_ALLOCATE(mbdpadd,(nchain))
- ABI_ALLOCATE(mbdpfftf,(nchain))
- ABI_ALLOCATE(mbdpfft,(nchain))
- ABI_ALLOCATE(mbdpmpw,(nchain))
- ABI_ALLOCATE(mbintadd,(nchain))
- ABI_ALLOCATE(mbintfftf,(nchain))
- ABI_ALLOCATE(mbintfft,(nchain))
- ABI_ALLOCATE(mbintmpw,(nchain))
- ABI_ALLOCATE(mbother,(nchain))
- ABI_ALLOCATE(mbtot,(nchain))
+ ABI_MALLOC(cdpfftf,(nchain))
+ ABI_MALLOC(cdpfft,(nchain))
+ ABI_MALLOC(cdpmpw,(nchain))
+ ABI_MALLOC(cintfftf,(nchain))
+ ABI_MALLOC(cintfft,(nchain))
+ ABI_MALLOC(cintmpw,(nchain))
+ ABI_MALLOC(cdpadd,(nchain))
+ ABI_MALLOC(cintadd,(nchain))
+ ABI_MALLOC(mbdpadd,(nchain))
+ ABI_MALLOC(mbdpfftf,(nchain))
+ ABI_MALLOC(mbdpfft,(nchain))
+ ABI_MALLOC(mbdpmpw,(nchain))
+ ABI_MALLOC(mbintadd,(nchain))
+ ABI_MALLOC(mbintfftf,(nchain))
+ ABI_MALLOC(mbintfft,(nchain))
+ ABI_MALLOC(mbintmpw,(nchain))
+ ABI_MALLOC(mbother,(nchain))
+ ABI_MALLOC(mbtot,(nchain))
 
  biggest=0
  mbbiggest=0.0_dp
@@ -1689,7 +1693,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 
 !  Test the ability to allocate the biggest array
    nquarter_mbytes=4.0_dp*mbbigarr+1.0_dp
-   ABI_STAT_ALLOCATE(bigarray,(32*1024,nquarter_mbytes), ier)
+   ABI_STAT_MALLOC(bigarray,(32*1024,nquarter_mbytes), ier)
    if(ier/=0)then
      write(msg,'(a,f11.3,a,a,a,a,a,a,a)')&
 &     'Test failed to allocate an array of',mbbigarr,' Mbytes',ch10,&
@@ -1698,9 +1702,9 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     'increase limit on maximal array size or set mem_test to 0 to disable this test.'
      call wrtout(std_out,msg,'PERS')
      if(option==1)then
-       MSG_ERROR_CLASS(msg, "MemanaError")
+       ABI_ERROR_CLASS(msg, "MemanaError")
      else
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        quit=1
      end if
    end if
@@ -1709,21 +1713,21 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      call wrtout(std_out,msg,'COLL')
    end if
    if(allocated(bigarray)) then
-     ABI_DEALLOCATE(bigarray)
+     ABI_FREE(bigarray)
    end if
 
 !  Test the ability to allocate the needed total memory : use 8 segments,
 !  hoping that the maximal segment size is not so much smaller than the
 !  total memory
    nquarter_mbytes=0.5_dp*mbbiggest+1.0_dp
-   ABI_STAT_ALLOCATE(bigarray1,(32*1024,nquarter_mbytes), ier1)
-   ABI_STAT_ALLOCATE(bigarray2,(32*1024,nquarter_mbytes), ier2)
-   ABI_STAT_ALLOCATE(bigarray3,(32*1024,nquarter_mbytes), ier3)
-   ABI_STAT_ALLOCATE(bigarray4,(32*1024,nquarter_mbytes), ier4)
-   ABI_STAT_ALLOCATE(bigarray5,(32*1024,nquarter_mbytes), ier5)
-   ABI_STAT_ALLOCATE(bigarray6,(32*1024,nquarter_mbytes), ier6)
-   ABI_STAT_ALLOCATE(bigarray7,(32*1024,nquarter_mbytes), ier7)
-   ABI_STAT_ALLOCATE(bigarray8,(32*1024,nquarter_mbytes), ier8)
+   ABI_STAT_MALLOC(bigarray1,(32*1024,nquarter_mbytes), ier1)
+   ABI_STAT_MALLOC(bigarray2,(32*1024,nquarter_mbytes), ier2)
+   ABI_STAT_MALLOC(bigarray3,(32*1024,nquarter_mbytes), ier3)
+   ABI_STAT_MALLOC(bigarray4,(32*1024,nquarter_mbytes), ier4)
+   ABI_STAT_MALLOC(bigarray5,(32*1024,nquarter_mbytes), ier5)
+   ABI_STAT_MALLOC(bigarray6,(32*1024,nquarter_mbytes), ier6)
+   ABI_STAT_MALLOC(bigarray7,(32*1024,nquarter_mbytes), ier7)
+   ABI_STAT_MALLOC(bigarray8,(32*1024,nquarter_mbytes), ier8)
 
    if(ier1/=0 .or. ier2/=0 .or. ier3/=0 .or. ier4/=0 .or. ier5/=0 .or. ier6/=0 .or. ier7/=0 .or. ier8/=0) then
      write(msg,'(a,f11.3,a,a,a,a,a,a,a)')&
@@ -1732,9 +1736,9 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     'Action: modify input variables or submission parameters to fit the available memory,',ch10,&
 &     'increase limit on available memory or set mem_test to 0 to disable this test.'
      if(option==1)then
-       MSG_ERROR_CLASS(msg, "MemanaError")
+       ABI_ERROR_CLASS(msg, "MemanaError")
      else
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        quit=1
      end if
    end if
@@ -1746,28 +1750,28 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      call wrtout(std_out,msg,'COLL')
    end if
    if(allocated(bigarray1)) then
-     ABI_DEALLOCATE(bigarray1)
+     ABI_FREE(bigarray1)
    end if
    if(allocated(bigarray2)) then
-     ABI_DEALLOCATE(bigarray2)
+     ABI_FREE(bigarray2)
    end if
    if(allocated(bigarray3)) then
-     ABI_DEALLOCATE(bigarray3)
+     ABI_FREE(bigarray3)
    end if
    if(allocated(bigarray4)) then
-     ABI_DEALLOCATE(bigarray4)
+     ABI_FREE(bigarray4)
    end if
    if(allocated(bigarray5)) then
-     ABI_DEALLOCATE(bigarray5)
+     ABI_FREE(bigarray5)
    end if
    if(allocated(bigarray6)) then
-     ABI_DEALLOCATE(bigarray6)
+     ABI_FREE(bigarray6)
    end if
    if(allocated(bigarray7)) then
-     ABI_DEALLOCATE(bigarray7)
+     ABI_FREE(bigarray7)
    end if
    if(allocated(bigarray8)) then
-     ABI_DEALLOCATE(bigarray8)
+     ABI_FREE(bigarray8)
    end if
 
  end if
@@ -1793,7 +1797,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !  ii=10 leads to 28 MB, ii=15 leads to 85 MB, ii=18 leads to 165 MB,
 !  ii=30 is over 2 GB
    do ii=1,30
-     ABI_STAT_ALLOCATE(bigarray,(32*1024,nquarter_mbytes), ier)
+     ABI_STAT_MALLOC(bigarray,(32*1024,nquarter_mbytes), ier)
      if(ier/=0)then
        write(msg,'(a,i0,a)')' memana : failed to allocate ',nmbytes,' Mbytes'
        call wrtout(std_out,msg,'PERS')
@@ -1808,37 +1812,37 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !    end do
 !    write(std_out,*)' memana : wrote ',kk,' quarter of mbytes'
 !    end do
-     ABI_DEALLOCATE(bigarray)
+     ABI_FREE(bigarray)
      nquarter_mbytes=dble(nquarter_mbytes)*1.25_dp
      nmbytes=nquarter_mbytes/4.0_dp
    end do
    if(allocated(bigarray)) then
-     ABI_DEALLOCATE(bigarray)
+     ABI_FREE(bigarray)
    end if
 
-   MSG_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
+   ABI_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
  end if !  End the test of the available memory
 
 !--------------------------------------------------------------------
 
- ABI_DEALLOCATE(cdpfftf)
- ABI_DEALLOCATE(cdpfft)
- ABI_DEALLOCATE(cdpmpw)
- ABI_DEALLOCATE(cintfftf)
- ABI_DEALLOCATE(cintfft)
- ABI_DEALLOCATE(cintmpw)
- ABI_DEALLOCATE(cdpadd)
- ABI_DEALLOCATE(cintadd)
- ABI_DEALLOCATE(mbdpadd)
- ABI_DEALLOCATE(mbdpfftf)
- ABI_DEALLOCATE(mbdpfft)
- ABI_DEALLOCATE(mbdpmpw)
- ABI_DEALLOCATE(mbintadd)
- ABI_DEALLOCATE(mbintfftf)
- ABI_DEALLOCATE(mbintfft)
- ABI_DEALLOCATE(mbintmpw)
- ABI_DEALLOCATE(mbother)
- ABI_DEALLOCATE(mbtot)
+ ABI_FREE(cdpfftf)
+ ABI_FREE(cdpfft)
+ ABI_FREE(cdpmpw)
+ ABI_FREE(cintfftf)
+ ABI_FREE(cintfft)
+ ABI_FREE(cintmpw)
+ ABI_FREE(cdpadd)
+ ABI_FREE(cintadd)
+ ABI_FREE(mbdpadd)
+ ABI_FREE(mbdpfftf)
+ ABI_FREE(mbdpfft)
+ ABI_FREE(mbdpmpw)
+ ABI_FREE(mbintadd)
+ ABI_FREE(mbintfftf)
+ ABI_FREE(mbintfft)
+ ABI_FREE(mbintmpw)
+ ABI_FREE(mbother)
+ ABI_FREE(mbtot)
 
 end subroutine memana
 !!***
@@ -1938,10 +1942,12 @@ end subroutine memana
 !!  have been done : nsym=nsym1, nkpt=nkpt_rbz, mpw=mpw1 ...
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
-!!      memana,wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -1991,7 +1997,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
  if(option<0 .or. option>2)then
    write(msg, '(a,i0,a)')'option= ',option,' while the only allowed values are 0, 1, or 2.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
@@ -2266,13 +2272,13 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 !write(std_out,*)' memorf : nchain=',nchain
 !ENDDEBUG
 
- ABI_ALLOCATE(cfft_dum,(marrays))
+ ABI_MALLOC(cfft_dum,(marrays))
  cfft_dum=zero
  mbgylm=zero
  call memana(cadd,cfft,cfft_dum,chain,cmpw,dttyp,iout,iprcel,iscf,&
 & marrays,mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm,mffmem,&
 & mpw,natom,nchain,nfft,nfft,occopt,option,prtvol)
- ABI_DEALLOCATE(cfft_dum)
+ ABI_FREE(cfft_dum)
 
 end subroutine memorf
 !!***
@@ -2302,10 +2308,12 @@ end subroutine memorf
 !!  lnmaxso=maximum number of l,n projectors, taking into account the spin-orbit
 !!
 !! PARENTS
-!!      m_psps,memory_eval
+!!      m_memeval,m_psps
 !!
 !! CHILDREN
-!!      wrtout
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -2333,12 +2341,12 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 
 !write(std_out,*)' getdim_nloc: 'pspheads(1)%nproj(0:3)=',pspheads(1)%nproj(0:3)
 
- ABI_ALLOCATE(lmnproj_typat,(ntypat))
- ABI_ALLOCATE(lmnprojso_typat,(ntypat))
- ABI_ALLOCATE(lnproj_typat,(ntypat))
- ABI_ALLOCATE(lnprojso_typat,(ntypat))
- ABI_ALLOCATE(nproj_typat,(0:3,ntypat))
- ABI_ALLOCATE(nprojso_typat,(3,ntypat))
+ ABI_MALLOC(lmnproj_typat,(ntypat))
+ ABI_MALLOC(lmnprojso_typat,(ntypat))
+ ABI_MALLOC(lnproj_typat,(ntypat))
+ ABI_MALLOC(lnprojso_typat,(ntypat))
+ ABI_MALLOC(nproj_typat,(0:3,ntypat))
+ ABI_MALLOC(nprojso_typat,(3,ntypat))
  lmnproj_typat(:)=0 ; lmnprojso_typat(:)=0
  lnproj_typat(:)=0 ; lnprojso_typat(:)=0
  nproj_typat(:,:)=0 ; nprojso_typat(:,:)=0
@@ -2401,7 +2409,7 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
    write(msg, '(3a)' )&
     'Despite there is only a local part to pseudopotential(s),',ch10,&
     'lmnmax and lnmax are set to 1.'
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
 !XG040806 : These lines make modifications of lnmax and lmnmax
@@ -2420,12 +2428,12 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 & '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
  call wrtout(std_out,msg,'COLL')
 
- ABI_DEALLOCATE(lmnproj_typat)
- ABI_DEALLOCATE(lmnprojso_typat)
- ABI_DEALLOCATE(lnproj_typat)
- ABI_DEALLOCATE(lnprojso_typat)
- ABI_DEALLOCATE(nproj_typat)
- ABI_DEALLOCATE(nprojso_typat)
+ ABI_FREE(lmnproj_typat)
+ ABI_FREE(lmnprojso_typat)
+ ABI_FREE(lnproj_typat)
+ ABI_FREE(lnprojso_typat)
+ ABI_FREE(nproj_typat)
+ ABI_FREE(nprojso_typat)
 
 end subroutine getdim_nloc
 !!***
@@ -2449,9 +2457,12 @@ end subroutine getdim_nloc
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_psps,memory_eval
+!!      m_memeval,m_psps
 !!
 !! CHILDREN
+!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
+!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
+!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -2482,7 +2493,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &   'The number of points "mqgrid" in reciprocal space used for the',ch10,&
 &   'description of the pseudopotentials has been set automatically',ch10,&
 &   'by abinit to: ',mqgrid,'.'
-   !MSG_COMMENT(msg)
+   !ABI_COMMENT(msg)
  else
    mqgrid2=ceiling(gmax/gvecnorm*nptsgvec)
    if (mqgrid2>mqgrid) then
@@ -2491,14 +2502,14 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &     'description of the pseudopotentials is : ',mqgrid,'.',ch10,&
 &     'It would be better to increase it to at least ',mqgrid2,', or',ch10,&
 &     'let abinit choose it automatically by setting mqgrid = 0.'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
  if (usepaw==1) then
    if(ecutdg<tol6)then
      write(msg,'(a)')'The value of (paw)ecutdg is zero or negative, which is forbidden.'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    gmaxdg=one/(sqrt2*pi)*sqrt(ecutdg)
    if (mqgriddg == 0) then
@@ -2508,7 +2519,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &     'The number of points "mqgriddg" in reciprocal space used for the',ch10,&
 &     'description of the pseudopotentials has been set automatically',ch10,&
 &     'by abinit to: ',mqgriddg,'.'
-     !MSG_COMMENT(msg)
+     !ABI_COMMENT(msg)
    else
      mqgriddg2=ceiling(gmax/gvecnorm*nptsgvec)
      if (mqgriddg2>mqgriddg) then
@@ -2517,7 +2528,7 @@ subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 &       'description of the pseudopotentials (fine grid) is :',mqgriddg,'.',ch10,&
 &       'It would be better to increase it to at least ',mqgriddg2,', or',ch10,&
 &       'let abinit choose it automatically by setting mqgrid = 0.'
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
    end if
  end if
@@ -2555,7 +2566,7 @@ end subroutine setmqgrid
 !! The estimator is the one provided by BigDFT.
 !!
 !! PARENTS
-!!      memory_eval
+!!      m_memeval
 !!
 !! CHILDREN
 !!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
@@ -2664,7 +2675,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  call wrtout(std_out,msg,'COLL')
 
 !First, use eleconf to get radii_cf().
- ABI_ALLOCATE(radii_cf,(npsp, 3))
+ ABI_MALLOC(radii_cf,(npsp, 3))
  do ityp = 1, npsp, 1
    call atomic_info(int(pspheads(ityp)%znuclpsp), int(pspheads(ityp)%zionpsp), ehomo = ehomo)
 
@@ -2682,7 +2693,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 !Compute the shifted positions and acell
  acell = dtset%acell_orig(1:3,1)
  call wvl_descr_atoms_set(acell, dtset%icoulomb, dtset%natom, dtset%ntypat, dtset%typat, wvl)
- ABI_ALLOCATE(xred,(3, dtset%natom))
+ ABI_MALLOC(xred,(3, dtset%natom))
  xred = dtset%xred_orig(:,:,1)
  rprimd = dtset%rprimd_orig(1:3,1:3,1)
  wvl%h(:) = dtset%wvl_hgrid
@@ -2690,7 +2701,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 & wvl, dtset%wvl_crmult, dtset%wvl_frmult)
 !Compute acell and rprim from rprimd
  call mkradim(acell,rprim,rprimd)
- ABI_ALLOCATE(xcart,(3, dtset%natom))
+ ABI_MALLOC(xcart,(3, dtset%natom))
  call xred2xcart(dtset%natom, rprimd, xcart, xred)
  call createWavefunctionsDescriptors(me, wvl%h(1), wvl%h(2), wvl%h(3), &
 & wvl%atoms, xcart, radii_cf, dtset%wvl_crmult, dtset%wvl_frmult, wvl%Glr)
@@ -2700,9 +2711,9 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
  call deallocate_lr(wvl%Glr)
  call wvl_descr_free(wvl)
- ABI_DEALLOCATE(radii_cf)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(radii_cf)
+ ABI_FREE(xred)
+ ABI_FREE(xcart)
 
  write(msg,'(80a,a)') ('=',mu=1,80), ch10
  call wrtout(ab_out,msg,'COLL')

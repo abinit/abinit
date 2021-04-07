@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (MG, FB, BG)
+!! Copyright (C) 1999-2021 ABINIT group (MG, FB, BG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,6 @@ CONTAINS
 !!      m_ppmodel,m_vcoul
 !!
 !! CHILDREN
-!!      calck0,paw_jbessel,quadrature
 !!
 !! SOURCE
 
@@ -90,7 +89,7 @@ subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
  end do
 
  if (ALL(ABS(q(:,iq))<tol3)) then !FIXED<--FIXME avoid this, everything should be under the control of the programmer.
-   ! * Treat q as it were zero except when G=0
+   ! * Treat q as if it were zero except when G=0
    qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
    do ig=2,npwvec
      gpq(:)=gvec(:,ig)

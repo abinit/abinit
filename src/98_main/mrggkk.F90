@@ -7,7 +7,7 @@
 !! different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2020 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2021 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,9 +32,10 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,destroy_mpi_enreg,flush_unit
-!!      hdr_echo,hdr_fort_read,hdr_fort_write,hdr_free,herald,initmpi_seq
-!!      wfk_close,wfk_open_read,wfk_read_eigk,wrtout,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,gs_wfk%close
+!!      gs_wfk%hdr%echo,gs_wfk%hdr%fort_write,gs_wfk%read_eigk,hdr%free
+!!      hdr1%echo,hdr1%fort_write,hdr1%free,hdr_fort_read,herald,ph_wfk%close
+!!      ph_wfk%read_eigk,wfk_open_read,wrtout,xmpi_end,xmpi_init
 !!
 !! SOURCE
 
@@ -165,7 +166,7 @@ program mrggkk
    ios = open_file(outfile,message,unit=unitout,form='formatted')
    rdwrout = 4
  else
-   MSG_ERROR(' binascii must be between 0 and 2')
+   ABI_ERROR(' binascii must be between 0 and 2')
  end if
 
  ABI_CHECK(ios==0,message)
@@ -325,7 +326,7 @@ program mrggkk
    call wrtout(std_out,' normal input for GKK file',"COLL")
 
    if (open_file(filegkk,message,unit=unitgkk,form='unformatted',status='old') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind (unitgkk)
 
@@ -356,7 +357,7 @@ program mrggkk
      call hdr_fort_read(hdr1, unitgkk, fform)
      if (fform == 0) then
        write(message,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
 !    copy header of 1WF file to output

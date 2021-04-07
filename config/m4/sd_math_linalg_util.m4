@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 Yann Pouillon, Marc Torrent
+# Copyright (C) 2005-2019 ABINIT group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -72,6 +72,25 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
     AC_DEFINE([HAVE_LINALG_GEMM3M], 1,
       [Define to 1 if you have GEMM3M BLAS3 extensions.])
   fi
+
+  # gemmt family
+  AC_MSG_CHECKING([for GEMMT in the BLAS libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call sgemmt
+      call dgemmt
+      call cgemmt
+      call zgemmt
+    ]])], [sd_linalg_has_gemmt="yes"], [sd_linalg_has_gemmt="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_gemmt}])
+
+  if test "${sd_linalg_has_gemmt}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_GEMMT], 1,
+      [Define to 1 if you have GEMMT BLAS3 extensions.])
+  fi
+
 ]) # _SD_LINALG_CHECK_BLAS_EXTS
 
 
@@ -382,6 +401,11 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
         [Define to 1 if you have the ELPA Fortran 2008 API support.])
     fi
   fi
+
+  if test "${sd_linalg_has_elpa}" != "yes"; then
+     sd_linalg_has_elpa="no"
+  fi
+  AC_SUBST(sd_linalg_has_elpa)
 ]) # _SD_LINALG_CHECK_ELPA
 
 

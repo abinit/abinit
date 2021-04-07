@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@
 #endif
 
 #include "abi_common.h"
+
 
 module m_spin_mover
 
@@ -173,19 +174,19 @@ contains
     call xmpi_bcast(self%temperature, master, comm, ierr)
     call xmpi_bcast(self%method, master, comm, ierr)
 
-    ABI_ALLOCATE(self%ms, (self%nspin) )
-    ABI_ALLOCATE(self%gyro_ratio, (self%nspin) )
-    ABI_ALLOCATE(self%damping, (self%nspin) )
-    ABI_ALLOCATE(self%gamma_l, (self%nspin) )
-    ABI_ALLOCATE(self%H_lang_coeff, (self%nspin) )
+    ABI_MALLOC(self%ms, (self%nspin) )
+    ABI_MALLOC(self%gyro_ratio, (self%nspin) )
+    ABI_MALLOC(self%damping, (self%nspin) )
+    ABI_MALLOC(self%gamma_l, (self%nspin) )
+    ABI_MALLOC(self%H_lang_coeff, (self%nspin) )
 
-    ABI_ALLOCATE(self%Heff_tmp, (3,self%nspin) )
-    ABI_ALLOCATE(self%Htmp, (3,self%nspin) )
-    ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
-    ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
-    ABI_ALLOCATE(self%Stmp2, (3,self%nspin) )
-    ABI_ALLOCATE(self%buffer, (3,self%nspin) )
-    ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
+    ABI_MALLOC(self%Heff_tmp, (3,self%nspin) )
+    ABI_MALLOC(self%Htmp, (3,self%nspin) )
+    ABI_MALLOC(self%Hrotate, (3,self%nspin) )
+    ABI_MALLOC(self%Stmp, (3,self%nspin) )
+    ABI_MALLOC(self%Stmp2, (3,self%nspin) )
+    ABI_MALLOC(self%buffer, (3,self%nspin) )
+    ABI_MALLOC(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
     call self%mps%initialize(ntasks=nspin,master=master, comm=comm)
@@ -222,7 +223,7 @@ contains
     else
       call self%set_initial_state(mode=params%spin_init_state)
     endif
-      
+
     ! observable
     if(iam_master) then
        call self%spin_ob%initialize(self%supercell, params)
@@ -272,7 +273,7 @@ contains
     msg="The number of spins in histfile is not equal & & to the present calculation." // &
          & " Please check if the file is consistent."
     if (nspin /= self%nspin) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
     end if
 
 
@@ -294,7 +295,7 @@ contains
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
-    MSG_ERROR("spin_init_state set to 4 but abinit is not compiled with netcdf.")
+    ABI_ERROR("spin_init_state set to 4 but abinit is not compiled with netcdf.")
 #endif 
 
   end subroutine read_hist_spin_state
@@ -334,7 +335,8 @@ contains
            write(msg,*) "Initial spins set to random values."
            call wrtout(ab_out,msg,'COLL')
            call wrtout(std_out,msg,'COLL')
-           call random_number(self%Stmp)
+           !call random_number(self%Stmp)
+           call self%rng%rand_unif_01_array(self%Stmp, self%nspin*3 )
            self%Stmp=self%Stmp-0.5
            do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
@@ -355,7 +357,7 @@ contains
            call wrtout(ab_out,msg,'COLL')
            call wrtout(std_out,msg,'COLL')
 
-           ABI_ALLOCATE(Sprim, (3,self%supercell%unitcell%spin%nspin) )
+           ABI_MALLOC(Sprim, (3,self%supercell%unitcell%spin%nspin) )
 
            ! set inital spin state using the input variables
            ! set spin to ferromagnetic along init_orientation then rotate
@@ -376,7 +378,7 @@ contains
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
           if (.not. present(restart_hist_fname)) then
-             MSG_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
+             ABI_ERROR("Spin initialize mode set to 4, but restart_hist_fname is not used.")
            end if
            call self%read_hist_spin_state(fname=restart_hist_fname)
 
@@ -468,9 +470,11 @@ contains
   !! etot: energy (scalar)
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, &
        & etot, displacement, strain, lwf, energy_table)
@@ -541,9 +545,11 @@ contains
   !! etot: energy (scalar)
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_one_step_dummy(self, effpot, S_in, etot, &
        & displacement, strain, lwf, energy_table)
@@ -667,7 +673,7 @@ contains
     real(dp), intent(out) ::  etot
     type(hash_table_t),optional, intent(inout) :: energy_table
     if(present(displacement) .or. present(lwf) .or. present(strain)) then
-       MSG_BUG("Monte Carlo only implemented for spin.")
+       ABI_BUG("Monte Carlo only implemented for spin.")
        call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
     end if
     call energy_table%put(self%label, etot)
@@ -680,7 +686,7 @@ contains
     real(dp) ::  etot
     type(hash_table_t),optional, intent(inout) :: energy_table
 
-    if(present(spin)) MSG_ERROR("spin should not be input for spin mover.")
+    if(present(spin)) ABI_ERROR("spin should not be input for spin mover.")
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot=effpot, S_in=self%Stmp, etot=etot, &
             displacement=displacement, strain=strain, lwf=lwf, energy_table=energy_table)
@@ -689,7 +695,7 @@ contains
             displacement=displacement, strain=strain, lwf=lwf, energy_table=energy_table)
     else if (self%method==3) then
        if(present(displacement) .or. present(strain) .or. present(lwf)) then
-          MSG_ERROR("Monte carlo not implemented for lattice and lwf yet.")
+          ABI_ERROR("Monte carlo not implemented for lattice and lwf yet.")
        endif
        call self%run_one_step_MC(effpot, self%Stmp, etot, energy_table=energy_table)
     else if (self%method==20) then
@@ -720,9 +726,11 @@ contains
   !!
   !!
   !! PARENTS
-  !!
+!!
   !! CHILDREN
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine spin_mover_t_run_time(self, calculator, displacement, strain, spin, lwf, energy_table)
 
@@ -736,12 +744,13 @@ contains
     !type(spin_ncfile_t), intent(inout) :: ncfile
     !type(spin_observable_t), intent(inout) :: ob
     !real(dp) ::  S(3, self%nspin)
-    real(dp):: t
+    real(dp):: t, etotal
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     t=0.0
@@ -784,9 +793,10 @@ contains
              if(mod(counter, self%hist%spin_nctime)==0) then
                 call self%spin_ob%get_observables( self%hist%S(:,:, self%hist%ihist_prev), &
                      self%hist%Snorm(:,self%hist%ihist_prev),self%hist%etot(self%hist%ihist_prev))
+                etotal = energy_table%sum_val()
                 write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                      & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
-                     & self%hist%etot(self%hist%ihist_prev)/self%spin_ob%nscell
+                     & etotal/self%spin_ob%nscell
                 ! total : 13+4+...= 64 
                 call wrtout(std_out,msg,'COLL')
                 call wrtout(ab_out, msg, 'COLL')
@@ -799,14 +809,17 @@ contains
        counter=0
        if (iam_master) then
           call self%hist%reset(array_to_zero=.False.)
-          msg="Measurement run:"
-          call wrtout(std_out,msg,'COLL')
-          call wrtout(ab_out, msg, 'COLL')
        end if
     endif
     if(iam_master) then
        call self%spin_ob%reset()
     endif
+
+    if (iam_master) then
+       msg="Measurement run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+    end if
 
     do while(t<self%total_time)
        counter=counter+1
@@ -818,9 +831,10 @@ contains
                self%hist%Snorm(:,self%hist%ihist_prev), self%hist%etot(self%hist%ihist_prev))
           if(modulo(counter, self%hist%spin_nctime)==0) then
              call self%spin_ncfile%write_one_step(self%hist)
+             etotal = energy_table%sum_val()
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                   & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
-                  & self%hist%etot(self%hist%ihist_prev)/self%spin_ob%nscell
+                  & etotal/self%spin_ob%nscell
              call wrtout(std_out,msg,'COLL')
              call wrtout(ab_out, msg, 'COLL')
           endif
@@ -891,11 +905,11 @@ contains
   !! OUTPUT
   !!
   !! PARENTS
-  !!
-  !!
+!!
   !! CHILDREN
-  !!
-  !!
+!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%spin_ob%finalize
+!!
   !! SOURCE
   subroutine  run_MvT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
     class(spin_mover_t), intent(inout) :: self
@@ -939,12 +953,12 @@ contains
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
 
-       ABI_ALLOCATE(Tlist, (T_nstep))
-       ABI_ALLOCATE(chi_list, (T_nstep))
-       ABI_ALLOCATE(Cv_list, (T_nstep))
-       ABI_ALLOCATE(binderU4_list, (T_nstep))
-       ABI_ALLOCATE(Mst_sub_norm_list, (self%spin_ob%nsublatt, T_nstep))
-       ABI_ALLOCATE( Mst_norm_total_list, (T_nstep))
+       ABI_MALLOC(Tlist, (T_nstep))
+       ABI_MALLOC(chi_list, (T_nstep))
+       ABI_MALLOC(Cv_list, (T_nstep))
+       ABI_MALLOC(binderU4_list, (T_nstep))
+       ABI_MALLOC(Mst_sub_norm_list, (self%spin_ob%nsublatt, T_nstep))
+       ABI_MALLOC( Mst_norm_total_list, (T_nstep))
     end if
 
     call xmpi_bcast(T_nstep, 0, comm, ierr)
@@ -1040,12 +1054,12 @@ contains
        end do
        iostat= close_unit(unit=Tfile, iomsg=iomsg)
 
-       ABI_DEALLOCATE(Tlist)
-       ABI_DEALLOCATE(chi_list)
-       ABI_DEALLOCATE(Cv_list)
-       ABI_DEALLOCATE(binderU4_list)
-       ABI_DEALLOCATE(Mst_sub_norm_list)
-       ABI_DEALLOCATE( Mst_norm_total_list)
+       ABI_FREE(Tlist)
+       ABI_FREE(chi_list)
+       ABI_FREE(Cv_list)
+       ABI_FREE(binderU4_list)
+       ABI_FREE(Mst_sub_norm_list)
+       ABI_FREE( Mst_norm_total_list)
 
     endif
   end subroutine run_MvT
@@ -1107,23 +1121,23 @@ contains
 
     class(spin_mover_t), intent(inout):: self
     if(allocated(self%gyro_ratio) ) then
-       ABI_DEALLOCATE(self%gyro_ratio)
+       ABI_FREE(self%gyro_ratio)
     end if
 
     if(allocated(self%damping) ) then
-       ABI_DEALLOCATE(self%damping)
+       ABI_FREE(self%damping)
     end if
 
     if(allocated(self%gamma_l) ) then
-       ABI_DEALLOCATE(self%gamma_l)
+       ABI_FREE(self%gamma_l)
     end if
 
     if(allocated(self%H_lang_coeff) ) then
-       ABI_DEALLOCATE(self%H_lang_coeff)
+       ABI_FREE(self%H_lang_coeff)
     end if
 
     if(allocated(self%ms) ) then
-       ABI_DEALLOCATE(self%ms)
+       ABI_FREE(self%ms)
     end if
 
 
@@ -1133,32 +1147,32 @@ contains
     end if
 
     if(allocated(self%Stmp)) then
-       ABI_DEALLOCATE(self%Stmp)
+       ABI_FREE(self%Stmp)
     end if
 
     if(allocated(self%Stmp2)) then
-       ABI_DEALLOCATE(self%Stmp2)
+       ABI_FREE(self%Stmp2)
     end if
 
 
     if(allocated(self%Heff_tmp)) then
-       ABI_DEALLOCATE(self%Heff_tmp)
+       ABI_FREE(self%Heff_tmp)
     end if
 
     if(allocated(self%Htmp)) then
-       ABI_DEALLOCATE(self%Htmp)
+       ABI_FREE(self%Htmp)
     end if
 
     if(allocated(self%Hrotate)) then
-       ABI_DEALLOCATE(self%Hrotate)
+       ABI_FREE(self%Hrotate)
     end if
 
     if(allocated(self%H_lang)) then
-       ABI_DEALLOCATE(self%H_lang)
+       ABI_FREE(self%H_lang)
     end if
 
     if(allocated(self%buffer)) then
-       ABI_DEALLOCATE(self%buffer)
+       ABI_FREE(self%buffer)
     end if
 
 

@@ -8,7 +8,7 @@
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (YG, SP, MJV)
+!! Copyright (C) 2008-2021 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -167,9 +167,10 @@ CONTAINS  !=====================================================================
 !!  grid = double_grid to be created
 !!
 !! PARENTS
-!!      setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -199,8 +200,8 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 
  grid%nbz_coarse = Kmesh_coarse%nbz
 
- ABI_ALLOCATE(grid%shiftk_coarse,(3,grid%nshiftk_coarse))
- ABI_ALLOCATE(grid%shiftk_dense,(3,grid%nshiftk_dense))
+ ABI_MALLOC(grid%shiftk_coarse,(3,grid%nshiftk_coarse))
+ ABI_MALLOC(grid%shiftk_dense,(3,grid%nshiftk_dense))
 
  grid%shiftk_coarse(:,:) = Kmesh_coarse%shift(:,:)
  grid%shiftk_dense(:,:) = Kmesh_dense%shift(:,:)
@@ -216,10 +217,10 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
  grid%kmult(:) = kmult(:)
  grid%ndiv = kmult(1)*kmult(2)*kmult(3)
 
- ABI_ALLOCATE(grid%indices_dense,(6,Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%g0_dense,(3,Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%iktoint_dense,(Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%inttoik_dense,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%indices_dense,(6,Kmesh_dense%nbz))
+ ABI_MALLOC(grid%g0_dense,(3,Kmesh_dense%nbz))
+ ABI_MALLOC(grid%iktoint_dense,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%inttoik_dense,(Kmesh_dense%nbz))
 
  grid%maxcomp_coarse(:) = -1
 
@@ -235,10 +236,10 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
    grid%nbz_closedcoarse = grid%nbz_closedcoarse*(grid%maxcomp_coarse(ii)+1)
  end do
 
- ABI_ALLOCATE(grid%indices_coarse,(3,grid%nbz_closedcoarse))
- ABI_ALLOCATE(grid%g0_coarse,(3,grid%nbz_closedcoarse))
- ABI_ALLOCATE(grid%iktoint_coarse,(Kmesh_coarse%nbz))
- ABI_ALLOCATE(grid%inttoik_coarse,(grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%indices_coarse,(3,grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%g0_coarse,(3,grid%nbz_closedcoarse))
+ ABI_MALLOC(grid%iktoint_coarse,(Kmesh_coarse%nbz))
+ ABI_MALLOC(grid%inttoik_coarse,(grid%nbz_closedcoarse))
 
  ! We should pass 'grid' at this stage !
 
@@ -250,8 +251,8 @@ subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 &    grid%nshiftk_dense, grid%shiftk_dense, grid%kmult, grid%indices_dense, grid%g0_dense, grid%iktoint_dense, &
 &    grid%inttoik_dense)
 
- ABI_ALLOCATE(grid%dense_to_coarse,(Kmesh_dense%nbz))
- ABI_ALLOCATE(grid%coarse_to_dense,(Kmesh_coarse%nbz,grid%ndiv))
+ ABI_MALLOC(grid%dense_to_coarse,(Kmesh_dense%nbz))
+ ABI_MALLOC(grid%coarse_to_dense,(Kmesh_coarse%nbz,grid%ndiv))
 
  call compute_neighbours(grid%nbz_dense, grid%iktoint_dense, grid%indices_dense, &
 & grid%maxcomp_coarse, grid%inttoik_coarse, grid%g0_coarse, grid%nbz_closedcoarse, grid%nbz_coarse,&
@@ -288,6 +289,7 @@ end subroutine double_grid_init
 !!      m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -337,7 +339,7 @@ subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_c
        if (.not. found) then
          write(std_out,*) "curk1 = ",curk1
          write(std_out,*) bz
-         MSG_ERROR("A k-point generated from kptrlatt cannot be found in the BZ")
+         ABI_ERROR("A k-point generated from kptrlatt cannot be found in the BZ")
        end if
      end do
    end do
@@ -370,6 +372,7 @@ end subroutine create_indices_coarse
 !!      m_bseinterp,m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -427,6 +430,7 @@ end subroutine get_kpt_from_indices_coarse
 !!      m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -488,7 +492,7 @@ subroutine create_indices_dense(klatt_coarse, maxcomp, &
              if(.not. found) then
                write(std_out,*) "curk1 = ",curk1
                write(std_out,*) bz_dense
-               MSG_ERROR("Problem when creating indices")
+               ABI_ERROR("Problem when creating indices")
              end if
            end do
          end do
@@ -578,6 +582,7 @@ end subroutine get_kpt_from_indices_dense
 !!      m_double_grid
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -656,6 +661,7 @@ end subroutine compute_neighbours
 !!      m_hexc
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -717,9 +723,10 @@ end subroutine compute_corresp
 !! All allocated memory is released.
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -775,9 +782,10 @@ end subroutine double_grid_free
 !!  wgt_sub(nkpt_sub) = weight of the k-points of the fine grid that are around center(3).
 !!
 !! PARENTS
-!!      eig2stern,eig2tot
+!!      m_eig2d
 !!
 !! CHILDREN
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -808,8 +816,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
 
 ! *************************************************************************
 
- ABI_ALLOCATE(kpt_fine_sub_tmp,(nkpt_fine))
- ABI_ALLOCATE(wgt_sub_tmp,(nkpt_fine))
+ ABI_MALLOC(kpt_fine_sub_tmp,(nkpt_fine))
+ ABI_MALLOC(wgt_sub_tmp,(nkpt_fine))
 
 !It is easier to work in real space using the qptrlatt matrices because in this
 !referential any k-points sampling will be cast into an orthorhombic shape.
@@ -849,8 +857,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
  end do
 
  nkpt_sub = ii-1
- ABI_ALLOCATE(kpt_fine_sub,(nkpt_sub))
- ABI_ALLOCATE(wgt_sub,(nkpt_sub))
+ ABI_MALLOC(kpt_fine_sub,(nkpt_sub))
+ ABI_MALLOC(wgt_sub,(nkpt_sub))
 
  do jj=1,nkpt_sub
    kpt_fine_sub(jj) = kpt_fine_sub_tmp(jj)
@@ -900,8 +908,8 @@ subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,w
    end do
  end do
 
- ABI_DEALLOCATE(kpt_fine_sub_tmp)
- ABI_DEALLOCATE(wgt_sub_tmp)
+ ABI_FREE(kpt_fine_sub_tmp)
+ ABI_FREE(wgt_sub_tmp)
 
 end subroutine kptfine_av
 !!***
@@ -930,7 +938,7 @@ end subroutine kptfine_av
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_rank,interpol3d_indices,wrap2_zero_one
+!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 

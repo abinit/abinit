@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,18 +63,17 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      ab7_invars_free,ab7_invars_get_abinit_vars,ab7_invars_load
-!!      ab7_invars_set_flags,abi_io_redirect,abimem_init,abinit_doctor
-!!      bigdft_init_errors,bigdft_init_timing_categories,chkinp,chkvars
-!!      clnmpi_atom,clnmpi_grid,clnmpi_img,clnmpi_pert,date_and_time
-!!      delete_file,destroy_mpi_enreg,destroy_results_out,driver,dump_config
-!!      dump_cpp_options,dump_optim,f_lib_finalize,f_lib_initialize,flush_unit
-!!      gather_results_out,herald,init_results_out,iofn1,libpaw_spmsg_getcount
-!!      memory_eval,mpi_allreduce,mpi_setup,nctk_test_mpiio,out_acknowl,outvars
-!!      outxml_finalise,outxml_open,parsefile,paw_setup_free,print_kinds
-!!      setdevice_cuda,specialmsg_getcount,status,testfi,timab,timana
-!!      time_set_papiopt,timein,unsetdevice_cuda,wrtout,xmpi_init
-!!      xmpi_show_info,xomp_show_info,xpapi_init,xpapi_show_info,xpapi_shutdown
+!!      abi_io_redirect,abimem_init,abinit_doctor,bigdft_init_errors
+!!      bigdft_init_timing_categories,chkinp,chkvars,clnmpi_atom,clnmpi_grid
+!!      clnmpi_img,clnmpi_pert,date_and_time,destroy_mpi_enreg
+!!      destroy_results_out,driver,dtsets,dump_config,dump_cpp_options
+!!      dump_optim,f_lib_finalize,f_lib_initialize,flush_unit
+!!      gather_results_out,get_dtsets_pspheads,herald,init_results_out,iofn1
+!!      libpaw_spmsg_getcount,memory_eval,mpi_setup,nctk_test_mpiio,out_acknowl
+!!      outvars,outxml_finalise,outxml_open,print_kinds,setdevice_cuda
+!!      specialmsg_getcount,testfi,timab,timana,timein,unsetdevice_cuda,wrtout
+!!      xmpi_init,xmpi_show_info,xmpi_sum,xomp_show_info,xpapi_init
+!!      xpapi_show_info,xpapi_shutdown
 !!
 !! SOURCE
 
@@ -123,14 +122,15 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
- use m_driver,       only : driver
+ use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
 #endif
 
 #if defined HAVE_BIGDFT
- use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
+ use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories,&
+ &                         f_timing_initialize,f_timing_reset,wvl_timing => timing
 #endif
 
  use m_common, only : get_dtsets_pspheads
@@ -164,13 +164,12 @@ program abinit
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
  integer,allocatable :: nband(:),npwtot(:)
- real(dp) :: etotal
- real(dp) :: tcpui,twalli
+ real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
- real(dp),allocatable :: fred(:,:),xred(:,:)
+ real(dp),allocatable :: gred(:,:),xred(:,:)
  character(len=24) :: codename
  character(len=24) :: start_datetime
- character(len=5000) :: message
+ character(len=5000) :: msg
  character(len=strlen) :: string
  character(len=fnlen) :: filstat
  character(len=fnlen) :: filnam(5)
@@ -241,12 +240,12 @@ program abinit
 
  if (me==0) then
 #ifdef FC_NAG
-   open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", recl=ABI_RECL, iomsg=message, iostat=ios)
+   open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", recl=ABI_RECL, iomsg=msg, iostat=ios)
 #else
-   open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", iomsg=message, iostat=ios)
+   open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", iomsg=msg, iostat=ios)
 #endif
-   ABI_CHECK(ios == 0, message)
-   rewind (unit=ab_out)
+   ABI_CHECK(ios == 0, msg)
+!  rewind (unit=ab_out)
    codename='ABINIT'//repeat(' ',18)
    call herald(codename,abinit_version,ab_out)
    call herald(codename,abinit_version,std_out)
@@ -254,12 +253,12 @@ program abinit
    call dump_optim(std_out)
    call dump_cpp_options(std_out)
    ! Write names of files
-   write(message, '(a,a,a,a,a,a,a,a,a,a,a,a)' )&
+   write(msg, '(a,a,a,a,a,a,a,a,a,a,a,a)' )&
     '- input  file    -> ',trim(filnam(1)),ch10,&
     '- output file    -> ',trim(filnam(2)),ch10,&
     '- root for input  files -> ',trim(filnam(3)),ch10,&
     '- root for output files -> ',trim(filnam(4)),ch10
-   call wrtout([std_out, ab_out], message)
+   call wrtout([std_out, ab_out], msg)
  end if
 
  call timab(44,1,tsec)
@@ -277,6 +276,10 @@ program abinit
  call f_lib_initialize()
  call bigdft_init_errors()
  call bigdft_init_timing_categories()
+ if (timopt==10) then
+   call delete_file('wvl_timings.yaml',ierr)
+   call f_timing_reset(filename='wvl_time.yaml',master=me==0,verbose_mode=.false.)
+ end if
 #endif
 
  ABI_MALLOC(mpi_enregs, (0:max(1,ndtset)))
@@ -348,7 +351,7 @@ program abinit
  call timab(45,3,tsec)
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
-!Check whether the string only contains valid keywords
+ ! Check whether the string only contains valid keywords
  call chkvars(string)
 
 !At this stage, all the information from the "files" file and "input" file have been read and checked.
@@ -384,8 +387,8 @@ program abinit
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
  if (prtvol == -level .or. prtvol == -2 .or. args%dry_run /= 0) then
-   write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip driver '
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip driver '
+   call wrtout([std_out, ab_out], msg)
    test_exit=.true.
  end if
 
@@ -398,8 +401,8 @@ program abinit
  ! 16) Give final echo of coordinates, etc.
  call timab(46,1,tsec)
 
- write(message,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
- call wrtout([std_out, ab_out], message)
+ write(msg,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
+ call wrtout([std_out, ab_out], msg)
 
  ! Gather contributions to results_out from images of the cell, if needed
  if (test_img) then
@@ -412,8 +415,8 @@ program abinit
 
  if(me==0) then
    if(test_exit)then
-     write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip outvars '
-     call wrtout([std_out, ab_out], message)
+     write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip outvars '
+     call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
      choice=2
@@ -442,11 +445,11 @@ program abinit
 
  ABI_MALLOC(nband,(nkpt*nsppol))
  ABI_MALLOC(npwtot,(nkpt))
- ABI_MALLOC(fred,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
  ABI_MALLOC(xred,(3,natom))
 
  etotal=results_out(1)%etotal(1)
- fred(:,:)  =results_out(1)%fred(:,1:natom,1)
+ gred(:,:)  =results_out(1)%gred(:,1:natom,1)
  nband(:)   =dtsets(1)%nband(1:nkpt*nsppol)
  npwtot(:)  =results_out(1)%npwtot(1:nkpt,1)
  strten(:)  =results_out(1)%strten(:,1)
@@ -457,7 +460,7 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 17) Timing analysis
- if(timopt/=0)then
+ if(mod(timopt,10)/=0)then
    call timana (mpi_enregs(1), natom, nband, ndtset, nfft, nkpt, npwtot, nsppol, timopt)
  else
 #if defined HAVE_MPI
@@ -472,8 +475,8 @@ program abinit
  ! 18) Bibliographical recommendations
  if(me==0) then
    if(test_exit)then
-     write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
-     call wrtout([std_out, ab_out], message)
+     write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
+     call wrtout([std_out, ab_out], msg)
    else
      do ii=1,2
        if(ii==1)iounit=ab_out
@@ -487,13 +490,13 @@ program abinit
 
  ! 19) Delete the status file, and, for build-in tests, analyse the correctness of results.
  if (ndtset == 0) then
-   call testfi(dtsets(1)%builtintest,etotal,filstat,fred,natom,strten,xred)
+   call testfi(dtsets(1)%builtintest,etotal,filstat,gred,natom,strten,xred)
  end if
 
  ! One should have here the explicit deallocation of all arrays
  call destroy_results_out(results_out)
 
- ABI_FREE(fred)
+ ABI_FREE(gred)
  ABI_FREE(nband)
  ABI_FREE(npwtot)
  ABI_FREE(results_out)
@@ -522,19 +525,19 @@ program abinit
  write(ab_out, '(a,a,a,f13.1,a,f13.1)' )'-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
 #endif
 
- write(message,'(a,80a,a,a,a)' ) ch10,('=',mu=1,80),ch10,ch10,' Calculation completed.'
- call wrtout(ab_out,message,'COLL')
- write(message,fmt=warn_fmt) '.Delivered',nwarning,' WARNINGs and',ncomment,' COMMENTs to log file.'
- if (nexit/=0) write(message,'(3a)') trim(message),ch10,' Note : exit requested by the user.'
- call wrtout(ab_out,message,'COLL')
+ write(msg,'(a,80a,a,a,a)' ) ch10,('=',mu=1,80),ch10,ch10,' Calculation completed.'
+ call wrtout(ab_out, msg)
+ write(msg,fmt=warn_fmt) '.Delivered',nwarning,' WARNINGs and',ncomment,' COMMENTs to log file.'
+ if (nexit/=0) write(msg,'(3a)') trim(msg),ch10,' Note : exit requested by the user.'
+ call wrtout(ab_out, msg)
 
  if (me==0) then
    write(ab_out, '(a,f13.1,a,f13.1)' )'+Overall time at end (sec) : cpu=',tsec(1),'  wall=',tsec(2)
-   write(message, '(a,a)' ) ch10,' Calculation completed.'
-   call wrtout(std_out,message,'COLL')
-   write(message,fmt=warn_fmt) '.Delivered',nwarning,' WARNINGs and',ncomment,' COMMENTs to log file.'
-   if (nexit/=0) write(message,'(3a)') trim(message),ch10,' Note : exit requested by the user.'
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,a)' ) ch10,' Calculation completed.'
+   call wrtout(std_out, msg)
+   write(msg,fmt=warn_fmt) '.Delivered',nwarning,' WARNINGs and',ncomment,' COMMENTs to log file.'
+   if (nexit/=0) write(msg,'(3a)') trim(msg),ch10,' Note : exit requested by the user.'
+   call wrtout(std_out, msg)
  end if
 
  if (me==0) then
@@ -593,16 +596,19 @@ program abinit
    end if
  end do
 
+#if defined HAVE_BIGDFT
+ if (timopt==10) then
+   call wvl_timing(xmpi_world,'== POSTPRC','PR')
+ end if
+ call f_lib_finalize()
+#endif
+
  ! Here we deallocate dtsets. Do not access dtsets after this line!
  do ii=0,size(dtsets)-1,1
    call dtsets(ii)%free()
  end do
  ABI_FREE(dtsets)
  ABI_FREE(pspheads)
-
-#if defined HAVE_BIGDFT
- call f_lib_finalize()
-#endif
 
 #if defined HAVE_GPU_CUDA
  call unsetdevice_cuda(use_gpu_cuda)

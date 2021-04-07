@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_type_pair_list
 !! NAME
 !!  m_pair_list
@@ -8,7 +7,7 @@
 !!  of pair_list. See m_pair_list.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -6,7 +6,7 @@
 !!  Contains simple functions for LOTF
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (MMancini)
+!! Copyright (C) 2005-2021 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,7 +68,7 @@ contains
   !--Control
   if(nitex < 0) then
     write(message,'(a,i4,a)') '  LOTF: pinterp nitex =',nitex,'smaller than 0'
-    MSG_ERROR(message)
+    ABI_ERROR(message)
 
   elseif(nitex >= 1) then
     ainterpoled = a0 + (n/real(nitex,dp))*(a1-a0) 

@@ -1,0 +1,58 @@
+ndtset 2
+
+#1st dataset: generate GGA-PBE wave functions
+ixc1 -101130   nstep1 5   prtwf1 1
+
+#2nd dataset: Tran-Blaha mGGA
+ixc2 -012208   usekden2 1   getwfk2 -1
+
+
+# Definition of the k-point grid
+ngkpt    4 4 4
+nshiftk 4
+shiftk  0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+tolwfr  1.0d-10
+
+
+# Definition of the planewave basis set
+ecut 20
+
+# Definition of the unit cell: fcc
+acell 3*3.5670/0.529177
+rprim  0.0  0.5  0.5
+       0.5  0.0  0.5   
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl  6
+
+# Definition of the atoms
+natom 2
+typat  1 1     
+xred # Reduced coordinate of atoms
+       0.0   0.0   0.0
+       0.25  0.25  0.25
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6-C.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t09.abo, tolnlines = 1, tolabs = 1.1e-6, tolrel = 4.0e-4, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Diamond. Test the mGGA functional from Tran and Blaha (correction to Becke-Johnson).
+#%%   To make the test more poratble, we generate GGA-PBE wave functions as starting point.
+#%%<END TEST_INFO>

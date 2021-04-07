@@ -13,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,6 +63,7 @@ module m_lattice_harmonic_primitive_potential
                                  !  The indices are (ind_R, i, j). Note that xyz is included in i and j.
      integer, allocatable :: Rlist(:,:) ! The list of R points (3, number of R-points)
                                         !. Rlist(:, ind_R) is a R-vector.
+     real(dp) :: ref_energy=0.0                  ! reference energy
    contains
      procedure:: initialize
      procedure:: finalize
@@ -99,7 +100,7 @@ contains
   subroutine finalize(self)
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     call self%coeff%finalize()
-    ABI_DEALLOCATE(self%Rlist)
+    ABI_FREE(self%Rlist)
     nullify(self%primcell)
     self%natom=0
     self%label="Destroyed lattice_harmonic_primitive_potential"
@@ -131,6 +132,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ncid, ierr
     integer :: iR, nR, natom, natom3
+    real(dp) :: ref_energy
     real(dp) :: cell(3,3)
     real(dp), allocatable :: xcart(:,:), masses(:)
     integer, allocatable :: zion(:)
@@ -145,12 +147,18 @@ contains
     ierr=nctk_get_dim(ncid, "natom3", natom3)
 
 
-    ABI_ALLOCATE(masses, (natom))
-    ABI_ALLOCATE(xcart, (3, natom))
-    ABI_ALLOCATE(zion,(natom))
+    ABI_MALLOC(masses, (natom))
+    ABI_MALLOC(xcart, (3, natom))
+    ABI_MALLOC(zion,(natom))
 
-    ABI_ALLOCATE(ifc_vallist, (natom3, natom3, nR))
-    ABI_ALLOCATE(self%Rlist,(3, nR))
+    ABI_MALLOC(ifc_vallist, (natom3, natom3, nR))
+    ABI_MALLOC(self%Rlist,(3, nR))
+
+
+    ierr =nf90_inq_varid(ncid, "ref_energy", varid)
+    NCF_CHECK_MSG(ierr, "ref_energy")
+    ierr = nf90_get_var(ncid, varid, masses)
+    NCF_CHECK_MSG(ierr, "ref_energy")
 
 
     ierr =nf90_inq_varid(ncid, "ref_masses", varid)
@@ -173,11 +181,14 @@ contains
     ierr = nf90_get_var(ncid, varid, zion)
     NCF_CHECK_MSG(ierr, "ref_zion")
 
+    ! Unit conversions
+    ref_energy = ref_energy * eV_Ha
     masses(:)  = masses(:) * amu_emass
     cell(:,:) = cell(:,:) / Bohr_Ang
     xcart(:,:) = xcart(:,:) /Bohr_Ang
 
     self%natom=natom
+    self%ref_energy=ref_energy
     call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
 
     call self%coeff%initialize([ nR, natom3, natom3 ])
@@ -207,10 +218,10 @@ contains
     ierr=nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 
-    ABI_DEALLOCATE(masses)
-    ABI_DEALLOCATE(xcart)
-    ABI_DEALLOCATE(zion)
-    ABI_DEALLOCATE(ifc_vallist)
+    ABI_FREE(masses)
+    ABI_FREE(xcart)
+    ABI_FREE(zion)
+    ABI_FREE(ifc_vallist)
 #else
     NETCDF_NOTENABLED_ERROR()
 #endif
@@ -249,7 +260,7 @@ contains
 
     !! NOTE: the code below can be used as a pattern to build supercell from primitivecell.
     ! Step 1: allocate the scpot as a corresponding supercell potential
-    ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_potential_t, scpot)
+    ABI_MALLOC_TYPE_SCALAR(lattice_harmonic_potential_t, scpot)
     ! Fortran does not know the functions specific to the derived class pointer.
     ! Only the ones inheritated from abstract class,
     ! unless select type is used:
@@ -281,6 +292,8 @@ contains
              call scpot%add_term(ilist_sc(icell), jlist_sc(icell), val )
           end do
        end do
+
+       call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
 
        ! Test the phonon energy
        !call COO_to_dense(scpot%coeff, real_sc_evecs)
@@ -329,6 +342,7 @@ contains
     real(dp), intent(inout) :: evals(:)
     complex(dp), intent(inout) :: evecs(:,:)
     call self%get_hamk(kpoint, evecs)
+    ! The evecs array is reused both as the matrix and eigenvectors.
     call eigensh(evals, evecs)
   end subroutine get_eigen
 

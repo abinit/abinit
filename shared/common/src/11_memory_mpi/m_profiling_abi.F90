@@ -10,7 +10,7 @@
 !!  defined in abi_common
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2020 ABINIT group (MG)
+!! Copyright (C) 2010-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_profiling_abi
 
  use defs_basis
  use iso_c_binding
- !use m_clib
+ use m_clib
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -166,6 +166,8 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
  logical :: file_exists
  character(len=500) :: msg
 ! *************************************************************************
+
+ !write(std_out, "(a,i0)")"Initializing abimem profiling with level: ", level
 
  minfo%level = level
  !start_time = abimem_wtime()

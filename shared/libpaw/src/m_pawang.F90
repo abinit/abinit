@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawang
 !! NAME
 !!  m_pawang
@@ -10,7 +9,7 @@
 !!  regions and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT, FJ, BA)
+!! Copyright (C) 2013-2021 ABINIT group (MT, FJ, BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,7 +193,7 @@ CONTAINS
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
 !!
 !! PARENTS
-!!      dfpt_looppert,pawinit
+!!      m_dfpt_looppert,m_nonlinear,m_paw_init
 !!
 !! CHILDREN
 !!
@@ -327,7 +326,7 @@ end subroutine pawang_init
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
 !!
 !! PARENTS
-!!      dfpt_looppert,driver,pawinit
+!!      m_dfpt_looppert,m_driver,m_nonlinear,m_paw_init
 !!
 !! CHILDREN
 !!
@@ -444,7 +443,7 @@ subroutine pawang_lsylm(pawang)
 
  if (pawang%use_ls_ylm==0) then
    msg='  ls_ylm pointer is not allocated !'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Initialization
@@ -664,7 +663,7 @@ subroutine pawang_lsylm(pawang)
    write(msg, '(a,i4,a,a,i4)' ) &
 &   '  anginit%npoints =',npoints,ch10,&
 &   '        angl_size =',pawang%angl_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine initang
@@ -691,6 +690,7 @@ end subroutine initang
 !!     For each point of the angular mesh, gives the weight of the corresponding point on an unitary sphere.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!

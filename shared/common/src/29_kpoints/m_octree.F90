@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_octree
 !! NAME
 !! m_octree
@@ -7,7 +6,7 @@
 !!  A structure to find nearest neightbour k-points
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT group (HM)
+!!  Copyright (C) 2010-2021 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -14,7 +14,7 @@
   !!
   !!
   !! COPYRIGHT
-  !! Copyright (C) 2001-2020 ABINIT group (hexu)
+  !! Copyright (C) 2001-2021 ABINIT group (hexu)
   !! This file is distributed under the terms of the
   !! GNU General Public License, see ~abinit/COPYING
   !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,11 +56,11 @@ contains
   !! OUTPUT
   !!
   !! PARENTS
-  !!
-  !!
+!!      multibinit
+!!
   !! CHILDREN
-  !!
-  !!
+!!      manager%run_all
+!!
   !! SOURCE
   subroutine multibinit_main2(filnam)
     character(len=fnlen), intent(inout) :: filnam(17)

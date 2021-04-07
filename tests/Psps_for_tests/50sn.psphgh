@@ -1,9 +1,0 @@
-Hartwigsen-Goedecker-Hutter psp for Tin,  from PRB58, 3641 (1998) paper
-50  4   980509                     zatom,zion,pspdat
-3   1   2    0    2001    0        pspcod,pspxc,lmax,lloc,mmax,r2well
-0.605000  4.610912 0         0        0   rloc, c1, c2, c3, c4
-0.663544  1.648791 -.141974  -.576546     rs, h11s, h22s, h33s
-0.745865  0.769355 -.445070  0            rp, h11p, h22p, h33p
-          0.103931 0.005057  0                k11p, k22p, k33p
-0.944459  0.225115 0         0            rd, h11d, h23d, h33d
-          0.007066 0         0                k11d, k22d, k33d           

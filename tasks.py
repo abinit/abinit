@@ -27,6 +27,9 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
+# Set ABI_PSPDIR env variable to point to the absolute path of Psps_for_tests
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 
 ALL_BINARIES = [
     "abinit",
@@ -77,8 +80,16 @@ def cd(path):
 
 
 @task
-def make(ctx, jobs="auto", touch=False, clean=False):
-    """Touch all modified files and recompile the code with -jNUM."""
+def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
+    """
+    Touch all modified files and recompile the code
+
+    Args:
+        jobs: Use `jobs` threads for make -jNUM
+        touch: Touch all changed files
+        clean: Issue `make clean` before `make`.
+        binary: Binary to recompile, default: all
+    """
     if touch:
         with cd(ABINIT_ROOTDIR):
             cmd = "./abisrc.py touch"
@@ -95,9 +106,9 @@ def make(ctx, jobs="auto", touch=False, clean=False):
         if clean:
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
-        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
+        cmd = "make -j%d %s > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % (jobs, binary)
         cprint("Executing: %s" % cmd, "yellow")
-        retcode = ctx.run(cmd, pty=True)
+        results = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
@@ -197,8 +208,8 @@ def mksite(ctx):
     Build the Abinit documentation by running the mksite.py script and open the main page in the browser.
     """
     with cd(ABINIT_ROOTDIR):
+        webbrowser.open_new_tab("http://127.0.0.1:8000")
         ctx.run("./mksite.py serve --dirtyreload", pty=True)
-        return webbrowser.open_new_tab("http://127.0.0.1:8000")
 
 
 @task
@@ -223,7 +234,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -239,7 +250,8 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -281,29 +293,218 @@ def vimt(ctx, tagname):
 
 
 @task
+def env(ctx):
+    """Print sh code to set $PATH and $ABI_PSPDIR in order to work with build directory."""
+    print("\nExecute the following lines in the shell to set the env:\n")
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main")
+    print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
+    print(f"export PATH={binpath}:$PATH")
+
+@task
+def diff2(ctx, filename="run.abo"):
+    """
+    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    """
+    vimdiff = "vimdiff"
+    if which("mvimdiff") is not None: vimdiff = "mvimdiff"
+    files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
+    if not files: return
+    cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def diff3(ctx, filename="run.abo"):
+    """
+    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    """
+    vimdiff = "vimdiff"
+    if which("mvimdiff") is not None: vimdiff = "vimdiff"
+    files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
+    if not files: return
+    if len(files) > 2:
+        cmd = "%s %s %s %s" % (vimdiff, filename, files[-2], files[-1])
+    else:
+        cmd = "%s %s %s" % (vimdiff, filename, files[-1])
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def add_trunk(ctx):
+    """Register trunk as remote."""
+    cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+#@task
+#def gdb(ctx, input_name, exec_name="abinit", run_make=False):
+#    """
+#    Execute `lldb` debugger with the given `input_name`.
+#    """
+#    if run_make: make(ctx)
+#
+#    top = find_top_build_tree(".", with_abinit=True)
+#    binpath = os.path.join(top, "src", "98_main", exec_name)
+#    cprint(f"Using binpath: {binpath}", "green")
+#    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
+#    cprint(f"Executing gdb command: {cmd}", color="green")
+#    # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
+#    #cprint("Type run to start lldb debugger", color="green")
+#    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
+#    ctx.run(cmd, pty=True)
+
+
+@task
+def lldb(ctx, input_name, exec_name="abinit", run_make=False):
+    """
+    Execute `lldb` debugger with the given `input_name`.
+    """
+    if run_make: make(ctx)
+
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main", exec_name)
+    cprint(f"Using binpath: {binpath}", "green")
+    cmd = f"lldb {binpath} --one-line 'settings set target.run-args {input_name}'"
+    cprint(f"Executing lldb command: {cmd}", color="green")
+    cprint("Type run to start lldb debugger", color="green")
+    cprint("Then use `bt` to get the backtrace\n\n", color="green")
+    ctx.run(cmd, pty=True)
+
+
+@task
+def abinit(ctx, input_name, run_make=False):
+    """
+    Execute `abinit` with the given `input_name`.
+    """
+    _run(ctx, input_name, exec_name="abinit", run_make=run_make)
+
+
+@task
+def anaddb(ctx, input_name, run_make=False):
+    """"execute `anaddb` with the given `input_name`."""
+    _run(ctx, input_name, exec_name="anaddb", run_make=run_make)
+
+
+def _run(ctx, input_name, exec_name, run_make):
+    """"Execute `exec_name input_name`"""
+    if run_make: make(ctx)
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main", exec_name)
+    cprint(f"Using binpath: {binpath}", "green")
+    cmd = f"{binpath} {input_name}"
+    cprint(f"Executing {cmd}", color="green")
+    ctx.run(cmd, pty=True)
+
+
+@task
 def pull_trunk(ctx):
     """"Execute `git stash && git pull trunk develop && git stash apply`"""
     ctx.run("git stash")
     ctx.run("git pull trunk develop")
     ctx.run("git stash apply")
 
+@task
+def pull(ctx):
+    """"Execute `git stash && git pull --recurse-submodules && git stash apply`"""
+    ctx.run("git stash")
+    ctx.run("git pull --recurse-submodules")
+    ctx.run("git stash apply")
+
+
+@task
+def submodules(ctx):
+    """Update submodules."""
+    with cd(ABINIT_ROOTDIR):
+        # https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules
+        ctx.run("git submodule update --remote --init")
+        #ctx.run("git submodule update --remote")
+        ctx.run("git submodule update --recursive --remote")
 
 @task
 def branchoff(ctx, start_point):
     """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
-    remote, branch = start_point.split("/")
+    try:
+        remote, branch = start_point.split("/")
+    except:
+        remote = "trunk"
+
     def run(cmd):
-        cprint(f"Executing: `{cmd}`", "green")
+        cprint(f"Executing: `{cmd}`", color="green")
         ctx.run(cmd)
 
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
     # git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
-    my_branch = "my_" + branch
+    my_branch = "my_" + start_point.replace("/", "-")
     run(f"git checkout -b {my_branch} {start_point}")
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")
     run("git push origin HEAD")
+
+
+@task
+def watchdog(ctx, jobs="auto", sleep_time = 5):
+    """
+    Start watchdog service to watch F90 files and execute `make` when changes are detected.
+    """
+    cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", color="green")
+    cprint("Enter <CTRL + C> in the terminal to kill the service.", color="green")
+
+    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", color="green")
+    top = find_top_build_tree(".", with_abinit=True)
+    jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+
+    # http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/
+    # https://stackoverflow.com/questions/19991033/generating-multiple-observers-with-python-watchdog
+    import time
+    from watchdog.observers import Observer
+    from watchdog.events import PatternMatchingEventHandler
+    event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
+                                                ignore_directories=False, case_sensitive=True)
+
+    def on_created(event):
+        print(f"hey, {event.src_path} has been created!")
+
+    def on_deleted(event):
+        print(f"what the f**k! Someone deleted {event.src_path}!")
+
+    def on_modified(event):
+        print(f"hey buddy, {event.src_path} has been modified")
+        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
+        cprint("Executing: %s" % cmd, color="yellow")
+        with cd(top):
+            try:
+                result = ctx.run(cmd, pty=True)
+                if result.ok:
+                    cprint("Make completed successfully", color="green")
+                    cprint("Watching for changes ...", color="green")
+            except Exception:
+                cprint(f"Make returned non-zero exit status", color="red")
+                cprint(f"Keep on watching for changes hoping you get it right ...", color="red")
+
+    def on_moved(event):
+        print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
+
+    event_handler.on_created = on_created
+    event_handler.on_deleted = on_deleted
+    event_handler.on_modified = on_modified
+    event_handler.on_moved = on_moved
+
+    observer = Observer()
+    path = ABINIT_SRCDIR
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(sleep_time)
+    except KeyboardInterrupt:
+        observer.stop()
+        observer.join()
 
 
 def which(cmd):

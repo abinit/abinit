@@ -7,14 +7,16 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 ------------------------------------------------------------------
 
-* Tests 1-20 concern ground state 
+* Tests 1-30 concern ground state 
 
-* Tests 21-40 concern GW/BSE
+* Tests 31-40 concern GW/BSE
 
-* Tests 41-50 concern response functions except electron-phonon 
+* Tests 41-49 concern response functions except electron-phonon 
 
-* Tests 51-... concern electron-phonon
+* Tests 50-80 concern electron-phonon
 
-* Tests 81-90 concern multibinit
+* Tests 81-89 concern multibinit
+
+* Tests 90-99 concern ground state
 
 ------------------------------------------------------------------

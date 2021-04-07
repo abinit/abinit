@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_linalg_interfaces
 !! NAME
 !!  m_linalg_interfaces
@@ -7,7 +6,7 @@
 !!  Interfaces for the BLAS and LAPACK linear algebra routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2021 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

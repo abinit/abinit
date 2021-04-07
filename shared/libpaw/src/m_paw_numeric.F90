@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_numeric
 !! NAME
 !!  m_paw_numeric
@@ -7,7 +6,7 @@
 !!  Wrappers for various numeric operations (spline, sort, ...)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (MT,TR)
+!!  Copyright (C) 2012-2021 ABINIT group (MT,TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -71,7 +70,7 @@ CONTAINS
 !!    Work space, real(dp) DIAG(N) - should be removed ...
 !!
 !! PARENTS
-!!      dfpt_eltfrxc,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
+!!      m_dfpt_elt,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
 !!      m_pawpwij,m_pawxmlps,m_psps
 !!
 !! CHILDREN
@@ -159,7 +158,7 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 &   'SPLINE_CUBIC_SET - Fatal error!',ch10, &
 &   '  The number of knots must be at least 2.',ch10, &
 &   '  The input value of N = ', n
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  LIBPAW_ALLOCATE(tmp,(n))
@@ -171,7 +170,7 @@ subroutine paw_spline(t,y,n,ybcbeg,ybcend,ypp)
 &   '  The knots must be strictly increasing, but',ch10, &
 &   '  T(',  i,') = ', t(i), ch10, &
 &   '  T(',i+1,') = ', t(i+1)
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
    end if
  end do
 
@@ -239,8 +238,8 @@ end subroutine paw_spline
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      m_paw_atom,m_paw_finegrid,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
-!!      m_pawxmlps,mkcore,mkcore_inner,mkcore_wvl,mklocl_realspace
+!!      m_mkcore,m_mklocl_realspace,m_paw_atom,m_paw_finegrid,m_paw_gaussfit
+!!      m_paw_pwaves_lmn,m_pawpsp,m_pawxmlps,mkcore_wvl
 !!
 !! CHILDREN
 !!      paw_jbessel
@@ -282,7 +281,7 @@ subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
          else
            msg='xfit not properly ordered'
          end if
-         MSG_ERROR(msg)
+         LIBPAW_ERROR(msg)
        end if
        delarg= xspline(right) - xspline(left)
        invdelarg= 1.0_dp/delarg
@@ -325,7 +324,7 @@ end subroutine paw_splint
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      mkcore_inner,mklocl_realspace,mklocl_wavelets
+!!      m_mklocl_realspace,mkcore_wvl
 !!
 !! CHILDREN
 !!      paw_jbessel
@@ -367,7 +366,7 @@ subroutine paw_splint_der(nspline,xspline,yspline,ysplin2,nfit,xfit,dydxfit,ierr
          else
            msg='xfit not properly ordered'
          end if
-         MSG_ERROR(msg)
+         LIBPAW_ERROR(msg)
        end if
        delarg= xspline(right) - xspline(left)
        invdelarg= 1.0_dp/delarg
@@ -421,8 +420,10 @@ end subroutine paw_splint_der
 !!  if ider=2, compute only the second derivative of the function (in derfun)
 !!
 !! PARENTS
+!!      m_paw_finegrid
 !!
 !! CHILDREN
+!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -451,7 +452,7 @@ subroutine paw_uniform_splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
 
  if(delarg<tol12)then
    write(msg,'(a,es16.8)') 'delarg should be strictly positive, while delarg= ',delarg
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  endif
 
  jspl=-1
@@ -653,7 +654,7 @@ subroutine paw_sort_dp(n,list,iperm,tol)
    write(msg,'(a,i12,2a)') &
 &   'paw_sort_dp has been called with array length n=',n, ch10, &
 &   ' having a value less than 1.  This is not allowed.'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 !Conduct the usual sort
@@ -719,7 +720,7 @@ end subroutine paw_sort_dp
 !!  bespp= second derivative of j_l at xx (only if order=2)
 !!
 !! PARENTS
-!!      m_paw_atom,m_paw_finegrid,m_paw_numeric,m_vcoul
+!!      m_cutoff_cylinder,m_gtermcutoff,m_paw_atom,m_paw_finegrid,m_paw_numeric
 !!
 !! CHILDREN
 !!      paw_jbessel
@@ -746,7 +747,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
 
  if (order>2) then
    msg='Wrong order in paw_jbessel!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  if (abs(xx)<prec) then
@@ -784,7 +785,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
    bes=jn*fact
    if (abs(jr)>prec) then
      msg='Bessel function did not converge!'
-     MSG_ERROR(msg)
+     LIBPAW_ERROR(msg)
    end if
    if (order>=1) then
      factp=fact*xx/dble(2*ll+3)
@@ -796,7 +797,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
      besp=-jnp*factp+jn*fact*xxinv*dble(ll)
      if (abs(jr)>prec) then
        msg='1st der. of Bessel function did not converge!'
-       MSG_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
    end if
    if (order==2) then
@@ -809,7 +810,7 @@ subroutine paw_jbessel(bes,besp,bespp,ll,order,xx)
      besp1=-jnpp*factpp+jnp*factp*xxinv*dble(ll+1)
      if (abs(jr)>prec) then
        msg='2nd der. of Bessel function did not converge !'
-       MSG_ERROR(msg)
+       LIBPAW_ERROR(msg)
      end if
    end if
  else
@@ -981,7 +982,7 @@ subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
  if (order>2) then
    msg='Wrong order in paw_jbessel_4spline'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  select case (ll)
@@ -1026,7 +1027,7 @@ subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
  case default
    write(msg,'(a,i4)')' wrong value for ll = ',ll
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end select
 
 end subroutine paw_jbessel_4spline

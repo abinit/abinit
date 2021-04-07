@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawrhoij
 !! NAME
 !!  m_pawrhoij
@@ -9,7 +8,7 @@
 !!  pawrhoij_type variables define rhoij occupancies matrixes used within PAW formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2020 ABINIT group (MT, FJ)
+!! Copyright (C) 2012-2021 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -232,11 +231,11 @@ CONTAINS
 !! If both are present, only pawtab(:) is used.
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,dfpt_nstpaw,dfpt_rhofermi,dfpt_scfcv
-!!      dfpt_vtorho,energy,extraprho,initrhoij,m_electronpositron,m_hdr,m_ioarr
-!!      m_pawrhoij,m_qparticles,paw_qpscgw,posdoppler,respfn,screening
-!!      setup_bse,setup_positron,setup_screening,setup_sigma,sigma,vtorho
-!!      wfk_analyze
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy
+!!      m_electronpositron,m_extraprho,m_hdr,m_ioarr,m_nonlinear
+!!      m_paw_occupancies,m_pawrhoij,m_positron,m_qparticles,m_respfn_driver
+!!      m_screening_driver,m_sigma_driver,m_vtorho,m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -271,7 +270,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
  nrhoij=size(pawrhoij);natom=size(typat)
  if (nrhoij>natom) then
    msg=' wrong sizes (1) !'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Select lmn_size for each atom type
@@ -279,7 +278,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
    nn1=size(pawtab)
    if (maxval(typat)>nn1) then
      msg=' wrong sizes (2) !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    LIBPAW_POINTER_ALLOCATE(lmn_size,(nn1))
    do itypat=1,nn1
@@ -289,12 +288,12 @@ subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
    nn1=size(lmnsize)
    if (maxval(typat)>nn1) then
      msg=' wrong sizes (3) !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    lmn_size => lmnsize
  else
    msg=' one of the 2 arguments pawtab or lmnsize must be present !'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Set up parallelism over atoms
@@ -392,11 +391,12 @@ end subroutine pawrhoij_alloc
 !! pawrhoij(:)<type(pawrhoij_type)>= rhoij datastructure
 !!
 !! PARENTS
-!!      bethe_salpeter,d2frnl,dfpt_looppert,dfpt_nstpaw,dfpt_rhofermi
-!!      dfpt_scfcv,dfpt_vtorho,energy,gstate,m_electronpositron,m_hdr,m_ioarr
-!!      m_paral_pert,m_pawrhoij,m_scf_history,mrgscr,pawgrnl,pawmkrho
-!!      pawmkrhoij,pawprt,posdoppler,respfn,screening,setup_bse,setup_positron
-!!      setup_screening,setup_sigma,sigma,vtorho,wfk_analyze
+!!      m_bethe_salpeter,m_d2frnl,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy
+!!      m_electronpositron,m_gstate,m_hdr,m_ioarr,m_nonlinear,m_outscfcv
+!!      m_paral_pert,m_paw_dfpt,m_paw_mkrho,m_paw_occupancies,m_paw_tools
+!!      m_pawrhoij,m_positron,m_respfn_driver,m_scf_history,m_screening_driver
+!!      m_sigma_driver,m_vtorho,m_wfk_analyze,mrgscr
 !!
 !! CHILDREN
 !!
@@ -463,8 +463,9 @@ end subroutine pawrhoij_free
 !! pawrhoij(:)<type(pawrhoij_type)>= rhoij datastructure
 !!
 !! PARENTS
-!!      d2frnl,dfpt_looppert,m_ioarr,m_pawrhoij,m_scf_history,outscfcv,pawgrnl
-!!      pawmkrho,pawprt,posdoppler,respfn
+!!      m_d2frnl,m_dfpt_looppert,m_dfptnl_loop,m_dfptnl_pert,m_ioarr
+!!      m_nonlinear,m_outscfcv,m_paw_dfpt,m_paw_mkrho,m_paw_tools,m_pawrhoij
+!!      m_positron,m_respfn_driver,m_scf_history
 !!
 !! CHILDREN
 !!
@@ -539,9 +540,10 @@ end subroutine pawrhoij_nullify
 !!  In case of a single copy operation pawrhoij_out must have been allocated.
 !!
 !! PARENTS
-!!      bethe_salpeter,dfpt_looppert,gstate,inwffil,m_electronpositron,m_hdr
-!!      m_ioarr,m_pawrhoij,m_wfk,outscfcv,pawmkrho,respfn,screening,setup_bse
-!!      setup_positron,setup_screening,setup_sigma,sigma,wfk_analyze
+!!      m_bethe_salpeter,m_dfpt_looppert,m_electronpositron,m_gstate,m_hdr
+!!      m_inwffil,m_ioarr,m_nonlinear,m_outscfcv,m_paw_mkrho,m_pawrhoij
+!!      m_positron,m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk
+!!      m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -608,7 +610,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        pawrhoij_out => pawrhoij_cpy
      else
        msg=' nrhoij_out should be equal to my_natom !'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    else                            ! Parallelism: the copy operation is a gather
      call get_my_natom(my_comm_atom,my_nrhoij,nrhoij_out)
@@ -634,7 +636,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        end if
      else
        msg=' nrhoij_in should be equal to my_natom!'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
@@ -675,7 +677,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
      pawrhoij_out(irhoij)%nrhoijsel=nselect+0
 !    if (pawrhoij_out(irhoij)%itypat/=pawrhoij_in(jrhoij)%itypat) then
 !    write(unit=msg,fmt='(a,i3,a)') 'Type of atom ',jrhoij,' is different (dont copy it) !'
-!    MSG_COMMENT(msg)
+!    LIBPAW_COMMENT(msg)
 !    end if
 
 !    Optional pointer: non-zero elements of rhoij
@@ -1236,7 +1238,7 @@ end subroutine pawrhoij_copy
 !!  The gathered structure are ordered like in sequential mode.
 !!
 !! PARENTS
-!!      d2frnl,m_pawrhoij,pawgrnl,pawprt,posdoppler
+!!      m_d2frnl,m_paw_dfpt,m_paw_tools,m_pawrhoij,m_positron
 !!
 !! CHILDREN
 !!
@@ -1289,12 +1291,12 @@ end subroutine pawrhoij_copy
  if (master==-1) then
    if (nrhoij_out/=nrhoij_in_sum) then
      msg='Wrong sizes sum[nrhoij_ij]/=nrhoij_out !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  else
    if (me_atom==master.and.nrhoij_out/=nrhoij_in_sum) then
      msg='(2) pawrhoij_gathered wrongly allocated !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1416,7 +1418,7 @@ end subroutine pawrhoij_copy
 !Check
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
    write(msg,*) 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Communicate (1 gather for integers, 1 gather for reals)
@@ -1539,7 +1541,7 @@ end subroutine pawrhoij_copy
    end do
    if ((indx_int/=1+buf_int_size_all).or.(indx_dp/=1+buf_dp_size_all)) then
      write(msg,*) 'Wrong buffer sizes: buf_int_size_all=',buf_int_size_all,' buf_dp_size_all=',buf_dp_size_all
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1574,7 +1576,7 @@ end subroutine pawrhoij_gather
 !!    Eventually distributed according to comm_atom communicator
 !!
 !! PARENTS
-!!      respfn
+!!      m_nonlinear,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -1617,7 +1619,7 @@ end subroutine pawrhoij_gather
    paral_atom=(nproc_atom>1)
    if (my_comm_atom/=mpicomm.and.nproc_atom/=1) then
      msg='wrong comm_atom communicator !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -1642,7 +1644,7 @@ end subroutine pawrhoij_gather
  end if
  if (me==master.and.nrhoij_in/=nrhoij_out_all) then
    msg='pawrhoij_in or pawrhoij_out wrongly allocated!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Retrieve table(s) of atoms (if necessary)
@@ -1715,7 +1717,7 @@ end subroutine pawrhoij_gather
    end do
    if (buf_int_size_all/=sum(count_int).or.buf_dp_size_all/=sum(count_dp)) then
      msg='(1) Wrong buffer sizes !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    buf_int_size=count_int(me_atom+1)
    buf_dp_size =count_dp(me_atom+1)
@@ -1814,7 +1816,7 @@ end subroutine pawrhoij_gather
 ! Check
   if ((indx_int-1/=buf_int_size_all).or.(indx_dp-1/=buf_dp_size_all)) then
     msg='(2) Wrong buffer sizes !'
-    MSG_BUG(msg)
+    LIBPAW_BUG(msg)
   end if
  end if ! me=master
 
@@ -1906,7 +1908,7 @@ end subroutine pawrhoij_gather
 !Check
  if ((indx_int/=1+buf_int_size).or.(indx_dp/=1+buf_dp_size)) then
    msg='(3) Wrong buffer sizes !'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Free memory
@@ -2367,12 +2369,12 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  if (present(mpi_atmtab)) then
    if (.not.associated(mpi_atmtab)) then
      msg='mpi_atmtab not associated (pawrhoij_io)'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    my_atmtab=>mpi_atmtab
  else if (my_natom/=natom) then
    msg='my_natom /=natom, mpi_atmtab should be in argument (pawrhoij_io)'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  iomode = fort_binary
@@ -2383,13 +2385,13 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
    case ("NETCDF")
      iomode = netcdf_io
    case default
-     MSG_ERROR("Wrong form: "//trim(form))
+     LIBPAW_ERROR("Wrong form: "//trim(form))
    end select
  end if
 
 #ifndef LIBPAW_HAVE_NETCDF
  if (iomode == netcdf_io) then
-   MSG_ERROR("iomode == netcdf_io but netcdf library is missing.")
+   LIBPAW_ERROR("iomode == netcdf_io but netcdf library is missing.")
  end if
 #endif
  ncid = unitfi
@@ -2406,7 +2408,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          read(unitfi,*) ((nsel44(ispden,iatom),ispden=1,nspden_in),iatom=1,natom)
 #ifdef LIBPAW_HAVE_NETCDF
        else if (iomode == netcdf_io) then
-         MSG_ERROR("header in 44-56 not compatible with Netcdf")
+         LIBPAW_ERROR("header in 44-56 not compatible with Netcdf")
 #endif
        end if
        call pawrhoij_alloc(pawrhoij,1,nspden_in,nspinor_in,nsppol_in,typat,lmnsize=nlmn_type)
@@ -2550,7 +2552,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
        else
          ! This happens in v5[40] and bsize == 0 corresponds to NC_UNLIMITED
-         MSG_COMMENT("All rhoij entries are zero. No netcdf entry produced")
+         LIBPAW_COMMENT("All rhoij entries are zero. No netcdf entry produced")
        end if
 
        ! Write nsel56
@@ -2722,7 +2724,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 
    case default
      msg='Wrong rdwr_mode'//TRIM(rdwr_mode)
-     MSG_ERROR(msg)
+     LIBPAW_ERROR(msg)
 
  end select
 
@@ -2744,7 +2746,7 @@ end subroutine pawrhoij_io
 !!   * If use_rhoij_/=1, rhoij_ is allocated and the corresponding flag is set to 1.
 !!
 !! PARENTS
-!!      paw_qpscgw
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -2815,7 +2817,8 @@ end subroutine pawrhoij_unpack
 !!   * In output the rhoij_ array is allocated
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy,pawmkrhoij
+!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dfptnl_pert,m_dft_energy
+!!      m_paw_occupancies
 !!
 !! CHILDREN
 !!
@@ -2868,7 +2871,7 @@ end subroutine pawrhoij_init_unpacked
 !!   * In output the rhoij_ array is deallocated
 !!
 !! PARENTS
-!!      dfpt_rhofermi,energy,pawmkrho
+!!      m_dfpt_scfcv,m_dft_energy,m_paw_mkrho
 !!
 !! CHILDREN
 !!
@@ -3116,7 +3119,7 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!               next value are irrelevant
 !!
 !! PARENTS
-!!      m_pawrhoij, newrho, newvtr
+!!      m_dfpt_scfcv,m_extraprho,m_newrho,m_newvtr,m_odamix,m_pawrhoij
 !!
 !! CHILDREN
 !!
@@ -3246,6 +3249,11 @@ end subroutine pawrhoij_filter
 !!  [nspden_rhoij]= value of nspden associated to pawrhoij
 !!
 !! PARENTS
+!!      m_bethe_salpeter,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtorho,m_dfptnl_loop,m_dfptnl_pert,m_dft_energy,m_extraprho
+!!      m_hdr,m_nonlinear,m_paw_occupancies,m_positron,m_qparticles
+!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_vtorho
+!!      m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -3277,7 +3285,7 @@ subroutine pawrhoij_inquire_dim(cplex,cpxocc,nspden,qpt,spnorb, &
    qphase_rhoij=1
    if (present(cplex).and.present(qpt)) then
      msg='only one argument cplex or qpt should be passed!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    if (present(cplex)) qphase_rhoij=merge(1,2,cplex==1)
    if (present(qpt)) then
@@ -3327,7 +3335,7 @@ end subroutine pawrhoij_inquire_dim
 !! NOTES
 !!
 !! PARENTS
-!!      m_pawrhoij
+!!      m_paw_tools,m_pawrhoij,m_wfd
 !!
 !! CHILDREN
 !!
@@ -3373,7 +3381,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 
  if (my_l_only>=0.and.(.not.present(indlmn))) then
    msg='pawrhoij_print_rhoij: l_only>=0 and indlmn not present!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Title
@@ -3536,7 +3544,7 @@ end subroutine pawrhoij_print_rhoij
 !!  (in that case pawrhoij_unsym should not be distributed over atomic sites).
 !!
 !! PARENTS
-!!      d2frnl,energy,paw_qpscgw,pawmkrho,posdoppler
+!!      m_d2frnl,m_dft_energy,m_paw_mkrho,m_positron,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -3613,7 +3621,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 &      (choice==3.and.ngrhoij/=6).or.(choice==23.and.ngrhoij/=9).or. &
 &      (choice==4.and.ngrhoij/=6).or.(choice==24.and.ngrhoij/=9) ) then
      msg='Inconsistency between variables choice and ngrhoij !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
  end if
 
@@ -3635,7 +3643,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
    if (present(qphon)) then
      if (any(abs(qphon(1:3))>tol8).and.(.not.has_qphase)) then
        msg='Should have qphase=2 for a non-zero q!'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
@@ -3665,19 +3673,19 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
    if (nrhoij>0) then
      if (choice>2.and.pawrhoij(1)%nspden==4) then
        msg='For the time being, choice>2 is not compatible with nspden=4 !'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
 
 !  Symetry matrixes must be in memory
    if (pawang%nsym==0) then
      msg='pawang%zarot must be allocated !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
    if (has_qphase.and.choice>1) then
      msg='choice>1 not compatible with q-phase !'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
 !  Several inits/allocations
@@ -4239,7 +4247,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
    if (antiferro) then
      msg=' In the antiferromagnetic case, nsym cannot be 1'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
 
    if (optrhoij==1) then
@@ -4423,7 +4431,7 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
    jrhoij= atm_indx_recv(iatom_tot)
    if (jrhoij==-1)  then
      msg="Error in pawrhoij_isendreceive_getbuffer atom not found"
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    pawrhoij1=>pawrhoij(jrhoij)
 
@@ -4498,7 +4506,7 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
  end do !irhoij_send
  if ((indx_int/=1+buf_int_size).or.(indx_dp/=1+buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine pawrhoij_isendreceive_getbuffer
@@ -4569,7 +4577,7 @@ subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,
    irhoij=atm_indx_send(iatom_tot)
    if (irhoij == -1) then
      msg="Error in pawrhoij_isendreceive_fillbuffer atom not found"
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    pawrhoij1=>pawrhoij(irhoij)
    cplex    =pawrhoij1%cplex_rhoij
@@ -4673,7 +4681,7 @@ subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,
 !Check
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
    write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine pawrhoij_isendreceive_fillbuffer

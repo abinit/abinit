@@ -7,7 +7,7 @@
 !! and their related ini and free routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
+!! Copyright (C) 2001-2021 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -291,7 +291,7 @@ type, public :: abiforstr
   ! arrays
   real(dp),allocatable :: fcart(:,:)
    ! Cartesian forces
-  real(dp),allocatable :: fred(:,:)
+  real(dp),allocatable :: gred(:,:)
    ! Reduced forces
   real(dp) :: strten(6)
     ! Stress tensor (Symmetrical 3x3 matrix)
@@ -412,7 +412,7 @@ contains  !=============================================================
 !! NOTES
 !!
 !! PARENTS
-!!      mover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -481,7 +481,7 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%znucl       =>dtset%znucl
 
  ab_mover%amu_curr    =>amu_curr
- ABI_ALLOCATE(ab_mover%amass,(natom))
+ ABI_MALLOC(ab_mover%amass,(natom))
  do iatom=1,natom
    ab_mover%amass(iatom)=amu_emass*amu_curr(dtset%typat(iatom))
  end do
@@ -781,9 +781,21 @@ case (15)
    specs%method = 'training set generator'
 !  Number of history
    specs%nhist = -1
+
+ case (28)
+   ! Values used in XML Output
+   specs%type4xml='simple'
+   specs%crit4xml='tolmxf'
+   !  Name of specs%method
+   specs%method = "i-pi protocol"
+   ! Number of history
+   !specs%nhist = 3
+   ! This is the initialization for ionmov==6
+
  case default
+   ! MG TODO: Why is this check deactivated. We should have an empty case for all the ionmov that can use the default values
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
-   !MSG_ERROR(msg)
+   !ABI_ERROR(msg)
  end select
 
 end subroutine abimover_ini
@@ -802,7 +814,10 @@ end subroutine abimover_ini
 !!  ab_mover <type(abimover)> = The abimover structure to be destroyed
 !!
 !! PARENTS
-!!      m_abimover,mover
+!!      m_m1geo,m_mover
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -932,7 +947,7 @@ end subroutine abimover_print
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -944,9 +959,9 @@ subroutine mttk_ini(mttk_vars,nnos)
  integer,intent(in)  :: nnos
  type(mttk_type), intent(out) :: mttk_vars
 
- ABI_ALLOCATE(mttk_vars%glogs,(nnos))
- ABI_ALLOCATE(mttk_vars%vlogs,(nnos))
- ABI_ALLOCATE(mttk_vars%xlogs,(nnos))
+ ABI_MALLOC(mttk_vars%glogs,(nnos))
+ ABI_MALLOC(mttk_vars%vlogs,(nnos))
+ ABI_MALLOC(mttk_vars%xlogs,(nnos))
 
 end subroutine mttk_ini
 !!***
@@ -967,7 +982,7 @@ end subroutine mttk_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -978,15 +993,9 @@ subroutine mttk_fin(mttk_vars)
 
  type(mttk_type), intent(inout) :: mttk_vars
 
- if(allocated(mttk_vars%glogs))  then
-  ABI_DEALLOCATE(mttk_vars%glogs)
- end if
- if(allocated(mttk_vars%vlogs))  then
-  ABI_DEALLOCATE(mttk_vars%vlogs)
- end if
- if(allocated(mttk_vars%xlogs))  then
-  ABI_DEALLOCATE(mttk_vars%xlogs)
- end if
+ ABI_SFREE(mttk_vars%glogs)
+ ABI_SFREE(mttk_vars%vlogs)
+ ABI_SFREE(mttk_vars%xlogs)
 
 end subroutine mttk_fin
 !!***
@@ -1007,7 +1016,7 @@ end subroutine mttk_fin
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1019,8 +1028,8 @@ subroutine abiforstr_ini(forstr,natom)
  integer,intent(in)  :: natom
  type(abiforstr), intent(out) :: forstr
 
- ABI_ALLOCATE(forstr%fcart,(3,natom))
- ABI_ALLOCATE(forstr%fred,(3,natom))
+ ABI_MALLOC(forstr%fcart,(3,natom))
+ ABI_MALLOC(forstr%gred,(3,natom))
 
 end subroutine abiforstr_ini
 !!***
@@ -1041,7 +1050,7 @@ end subroutine abiforstr_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      mover
+!!      m_mover,m_precpred_1geo
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1052,12 +1061,8 @@ subroutine abiforstr_fin(forstr)
 
  type(abiforstr), intent(inout) :: forstr
 
- if(allocated(forstr%fcart))  then
-    ABI_DEALLOCATE(forstr%fcart)
- end if
- if(allocated(forstr%fred))  then
-    ABI_DEALLOCATE(forstr%fred)
- end if
+ ABI_SFREE(forstr%fcart)
+ ABI_SFREE(forstr%gred)
 
 end subroutine abiforstr_fin
 !!***
@@ -1116,7 +1121,7 @@ end subroutine abiforstr_fin
 !!   to be less dependent of the internals already incorporated.
 !!
 !! PARENTS
-!!      pred_delocint
+!!      m_pred_delocint
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1158,7 +1163,7 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 
  call make_angles(deloc,natom)
 
- ABI_ALLOCATE(badangles,(deloc%nang))
+ ABI_MALLOC(badangles,(deloc%nang))
  badangles(:) = 0
  do iang=1,deloc%nang
    write(std_out,'(a,i4,3(2i5,2x))') 'angle ', iang, deloc%angs(:,:,iang)
@@ -1211,7 +1216,7 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
  end do
 
  call make_dihedrals(badangles,deloc)
- ABI_DEALLOCATE(badangles)
+ ABI_FREE(badangles)
 
  do idihed=1,deloc%ndihed
    write(std_out,'(a,i4,4(2i5,2x))') 'dihedral ', idihed, deloc%dihedrals(:,:,idihed)
@@ -1244,10 +1249,8 @@ subroutine make_prim_internals(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
      deloc%ncart = deloc%ncart + 4-particip_atom(iatom)
    end if
  end do
- if (allocated(deloc%carts)) then
-   ABI_FREE(deloc%carts)
- end if
- ABI_ALLOCATE(deloc%carts ,(2,deloc%ncart))
+ ABI_SFREE(deloc%carts)
+ ABI_MALLOC(deloc%carts ,(2,deloc%ncart))
  icart = 0
  do iatom=1,natom
    if (particip_atom(iatom) < 4) then
@@ -1273,13 +1276,10 @@ end subroutine make_prim_internals
 !! make_angles
 !!
 !! FUNCTION
-!!  (to be completed)
 !!
 !! INPUTS
-!!  (to be completed)
 !!
 !! OUTPUT
-!!  (to be completed)
 !!
 !! PARENTS
 !!      m_abimover
@@ -1307,7 +1307,7 @@ subroutine make_angles(deloc,natom)
 ! *************************************************************************
 
 !tentative first allocation: < 6 angles per bond.
- ABI_ALLOCATE(angs_tmp,(2,3,72*natom))
+ ABI_MALLOC(angs_tmp,(2,3,72*natom))
 
  deloc%nang = 0
 
@@ -1349,20 +1349,18 @@ subroutine make_angles(deloc,natom)
 
        end if
        if (deloc%nang > 72*natom) then
-         MSG_ERROR('too many angles found > 72*natom')
+         ABI_ERROR('too many angles found > 72*natom')
        end if
      end do
    end do ! jbond do
  end do ! ibond
 
- if (allocated(deloc%angs)) then
-   ABI_FREE(deloc%angs)
- end if
- ABI_ALLOCATE(deloc%angs,(2,3,deloc%nang))
+ ABI_SFREE(deloc%angs)
+ ABI_MALLOC(deloc%angs,(2,3,deloc%nang))
  do iang=1,deloc%nang
    deloc%angs(:,:,iang) = angs_tmp(:,:,iang)
  end do
- ABI_DEALLOCATE(angs_tmp)
+ ABI_FREE(angs_tmp)
 
 end subroutine make_angles
 !!***
@@ -1374,13 +1372,10 @@ end subroutine make_angles
 !! make_dihedrals
 !!
 !! FUNCTION
-!!  (to be completed)
 !!
 !! INPUTS
-!!  (to be completed)
 !!
 !! OUTPUT
-!!  (to be completed)
 !!
 !! PARENTS
 !!      m_abimover
@@ -1409,7 +1404,7 @@ subroutine make_dihedrals(badangles,deloc)
 ! *************************************************************************
 
 !tentative first allocation: < 6 dihedrals per angle.
- ABI_ALLOCATE(diheds_tmp,(2,4,6*deloc%nang))
+ ABI_MALLOC(diheds_tmp,(2,4,6*deloc%nang))
 
  deloc%ndihed = 0
  diheds_tmp(:,:,:) = 0
@@ -1468,7 +1463,7 @@ subroutine make_dihedrals(badangles,deloc)
          end if
        end if
        if (deloc%ndihed > 6*deloc%nang) then
-         MSG_ERROR('make_dihedrals : too many dihedrals found > 6*nang')
+         ABI_ERROR('make_dihedrals : too many dihedrals found > 6*nang')
        end if
        if (chkdihed == 1) then
          if (   diheds_tmp(1,4,deloc%ndihed) == diheds_tmp(1,1,deloc%ndihed) .and.&
@@ -1484,11 +1479,9 @@ subroutine make_dihedrals(badangles,deloc)
  end do
 !end iang do
 
- if (allocated(deloc%dihedrals)) then
-   ABI_FREE(deloc%dihedrals)
- end if
+ ABI_SFREE(deloc%dihedrals)
 
- ABI_ALLOCATE(deloc%dihedrals,(2,4,deloc%ndihed))
+ ABI_MALLOC(deloc%dihedrals,(2,4,deloc%ndihed))
  do idihed=1,deloc%ndihed
    deloc%dihedrals(:,:,idihed) = diheds_tmp(:,:,idihed)
 
@@ -1504,12 +1497,10 @@ subroutine make_dihedrals(badangles,deloc)
    minshift = minval(diheds_tmp(2,:,idihed))
    maxshift = maxval(diheds_tmp(2,:,idihed))
    if (minshift <= 0 .or. maxshift > deloc%nrshift) then
-     write(std_out,*) ' make_dihedrals : Error : dihedral extends beyond '
-     write(std_out,*) '  first neighboring unit cells ! '
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("dihedral extends beyond first neighboring unit cells!")
    end if
  end do
- ABI_DEALLOCATE(diheds_tmp)
+ ABI_FREE(diheds_tmp)
 
 end subroutine make_dihedrals
 !!***
@@ -1521,13 +1512,10 @@ end subroutine make_dihedrals
 !! make_bonds
 !!
 !! FUNCTION
-!!  (to be completed)
 !!
 !! INPUTS
-!!  (to be completed)
 !!
 !! OUTPUT
-!!  (to be completed)
 !!
 !! PARENTS
 !!      m_abimover
@@ -1571,7 +1559,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 !write(std_out,*) ' natom =',natom
 
 !tentative first allocation: < 12 bonds per atom.
- ABI_ALLOCATE(bonds_tmp,(2,2,12*natom))
+ ABI_MALLOC(bonds_tmp,(2,2,12*natom))
 
  bondfudge = 1.1_dp
 
@@ -1593,7 +1581,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
        if (bondfudge*(rcov1+rcov2) - bl > tol6) then
          deloc%nbond = deloc%nbond+1
          if (deloc%nbond > 12*natom) then
-           MSG_ERROR('make_bonds: error too many bonds !')
+           ABI_ERROR('make_bonds: error too many bonds !')
          end if
          bonds_tmp(1,1,deloc%nbond) = iatom
          bonds_tmp(2,1,deloc%nbond) = deloc%icenter
@@ -1606,11 +1594,9 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
    end do
  end do ! iatom
 
- if (allocated(deloc%bonds)) then
-   ABI_FREE(deloc%bonds)
- end if
+ ABI_SFREE(deloc%bonds)
 
- ABI_ALLOCATE(deloc%bonds,(2,2,deloc%nbond))
+ ABI_MALLOC(deloc%bonds,(2,2,deloc%nbond))
  do ibond=1,deloc%nbond
    deloc%bonds(:,:,ibond) = bonds_tmp(:,:,ibond)
  end do
@@ -1620,7 +1606,7 @@ subroutine make_bonds(deloc,natom,ntypat,rprimd,typat,xcart,znucl)
 ! write(std_out,*) ' make_bonds : deloc%bonds ', ibond, deloc%bonds(:,:,ibond)
 ! end do
 
-  ABI_DEALLOCATE(bonds_tmp)
+  ABI_FREE(bonds_tmp)
 
 end subroutine make_bonds
 !!***
@@ -1664,7 +1650,7 @@ end subroutine make_bonds
 !! NOTES
 !!
 !! PARENTS
-!!      pred_delocint,xcart2deloc
+!!      m_pred_delocint
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -1966,7 +1952,7 @@ end function angle_dihedral
 !!                       adition of covalent radius to decide if a bond is created
 !!
 !! PARENTS
-!!      prec_simple
+!!      m_pred_simple
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -2050,13 +2036,13 @@ real(dp) :: rpt(3)
  bonds_tmp%tolerance=bonds%tolerance
  ibond=0
 
- ABI_ALLOCATE(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
- ABI_ALLOCATE(bonds_tmp%bond_length,(natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
 !indexi contains the indeces to the bonds
- ABI_ALLOCATE(bonds_tmp%indexi,(natom,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
- ABI_ALLOCATE(bonds_tmp%nbondi,(natom))
+ ABI_MALLOC(bonds_tmp%nbondi,(natom))
 
  bonds_tmp%indexi(:,:)=0
  bonds_tmp%nbondi(:)=0
@@ -2176,10 +2162,10 @@ real(dp) :: rpt(3)
 
  if (bonds%nbonds>0) then
 !  Allocate the arrays with exactly the rigth nbonds
-   ABI_ALLOCATE(bonds%bond_vect,(3,bonds%nbonds))
-   ABI_ALLOCATE(bonds%bond_length,(bonds%nbonds))
-   ABI_ALLOCATE(bonds%indexi,(natom,bonds%nbonds))
-   ABI_ALLOCATE(bonds%nbondi,(natom))
+   ABI_MALLOC(bonds%bond_vect,(3,bonds%nbonds))
+   ABI_MALLOC(bonds%bond_length,(bonds%nbonds))
+   ABI_MALLOC(bonds%indexi,(natom,bonds%nbonds))
+   ABI_MALLOC(bonds%nbondi,(natom))
 
 !  Fill the values
    bonds%bond_vect(:,1:bonds%nbonds)=bonds_tmp%bond_vect(:,1:bonds%nbonds)
@@ -2203,7 +2189,7 @@ end subroutine make_bonds_new
 !!  Free memory
 !!
 !! PARENTS
-!!      m_abimover,prec_simple
+!!      m_abimover,m_pred_simple
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -2217,21 +2203,10 @@ subroutine bonds_free(bonds)
 
 ! *********************************************************************
 
- if (allocated(bonds%bond_vect))then
-   ABI_DEALLOCATE(bonds%bond_vect)
- end if
-
- if (allocated(bonds%bond_length))then
-   ABI_DEALLOCATE(bonds%bond_length)
- end if
-
- if (allocated(bonds%nbondi))then
-   ABI_DEALLOCATE(bonds%nbondi)
- end if
-
- if (allocated(bonds%indexi))then
-   ABI_DEALLOCATE(bonds%indexi)
- end if
+ ABI_SFREE(bonds%bond_vect)
+ ABI_SFREE(bonds%bond_length)
+ ABI_SFREE(bonds%nbondi)
+ ABI_SFREE(bonds%indexi)
 
 end subroutine bonds_free
 !!***
@@ -2310,11 +2285,9 @@ subroutine print_bonds(amu,bonds,natom,ntypat,symbol,typat,znucl)
  end do
 
  do ii=1,bonds%nbonds
-
    write(std_out,'(a,i3)') 'BOND Index=',ii
    write(std_out,'(a,3f8.3)') '    Vector',bonds%bond_vect(:,ii)
    write(std_out,'(a,f8.3)')  '    bond Length',bonds%bond_length(ii)
-
  end do
 
 end subroutine print_bonds
@@ -2338,8 +2311,10 @@ end subroutine print_bonds
 !! deloc= container object for delocalized internal coordinates
 !!
 !! PARENTS
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
+!!      atomdata_from_znucl,bonds_free,print_bonds
 !!
 !! SOURCE
 
@@ -2359,7 +2334,7 @@ subroutine delocint_ini(deloc)
    deloc%nrshift=(2*nshell+1)**3
    deloc%icenter = nshell*(2*nshell+1)**2 + nshell*(2*nshell+1) + nshell + 1
 
-   ABI_ALLOCATE(deloc%rshift,(3,deloc%nrshift))
+   ABI_MALLOC(deloc%rshift,(3,deloc%nrshift))
    irshift=0
    do ii=-nshell,nshell
      do jj=-nshell,nshell
@@ -2389,7 +2364,7 @@ end subroutine delocint_ini
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_abimover
+!!      m_m1geo,m_mover
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,bonds_free,print_bonds
@@ -2400,21 +2375,11 @@ subroutine delocint_fin(deloc)
 
  type(delocint), intent(inout) :: deloc
 
- if(allocated(deloc%angs))  then
-   ABI_DEALLOCATE(deloc%angs)
- end if
- if(allocated(deloc%bonds))  then
-   ABI_DEALLOCATE(deloc%bonds)
- end if
- if(allocated(deloc%carts))  then
-   ABI_DEALLOCATE(deloc%carts)
- end if
- if(allocated(deloc%dihedrals))  then
-   ABI_DEALLOCATE(deloc%dihedrals)
- end if
- if(allocated(deloc%rshift))  then
-   ABI_DEALLOCATE(deloc%rshift)
- end if
+ ABI_SFREE(deloc%angs)
+ ABI_SFREE(deloc%bonds)
+ ABI_SFREE(deloc%carts)
+ ABI_SFREE(deloc%dihedrals)
+ ABI_SFREE(deloc%rshift)
 
 end subroutine delocint_fin
 !!***
@@ -2503,7 +2468,7 @@ real(dp) :: rpt(3)
 !***************************************************************************
 !Beginning of executable session
 !***************************************************************************
- MSG_ERROR("This routine is not tested")
+ ABI_ERROR("This routine is not tested")
 
 !write(std_out,*) 'make_bonds 01'
 !##########################################################
@@ -2547,13 +2512,13 @@ real(dp) :: rpt(3)
  bonds_tmp%tolerance=bonds%tolerance
  ibond=0
 
- ABI_ALLOCATE(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
- ABI_ALLOCATE(bonds_tmp%bond_length,(natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
 !indexi contains the indeces to the bonds
- ABI_ALLOCATE(bonds_tmp%indexi,(natom,natom*natom*14-natom))
+ ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
- ABI_ALLOCATE(bonds_tmp%nbondi,(natom))
+ ABI_MALLOC(bonds_tmp%nbondi,(natom))
 
  bonds_tmp%indexi(:,:)=0
  bonds_tmp%nbondi(:)=0
@@ -2671,10 +2636,10 @@ real(dp) :: rpt(3)
 
  if (bonds%nbonds>0) then
 !  Allocate the arrays with exactly the rigth nbonds
-   ABI_ALLOCATE(bonds%bond_vect,(3,bonds%nbonds))
-   ABI_ALLOCATE(bonds%bond_length,(bonds%nbonds))
-   ABI_ALLOCATE(bonds%indexi,(natom,bonds%nbonds))
-   ABI_ALLOCATE(bonds%nbondi,(natom))
+   ABI_MALLOC(bonds%bond_vect,(3,bonds%nbonds))
+   ABI_MALLOC(bonds%bond_length,(bonds%nbonds))
+   ABI_MALLOC(bonds%indexi,(natom,bonds%nbonds))
+   ABI_MALLOC(bonds%nbondi,(natom))
 
 !  Fill the values
    bonds%bond_vect(:,1:bonds%nbonds)=bonds_tmp%bond_vect(:,1:bonds%nbonds)

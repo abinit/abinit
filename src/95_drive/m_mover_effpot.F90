@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (AM)
+!!  Copyright (C) 2008-2021 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,12 +43,12 @@ module m_mover_effpot
  use m_args_gs
  use m_ifc
 
- use defs_datatypes, only : pseudopotential_type
- use defs_abitypes, only : MPI_type
- use m_geometry, only : xcart2xred, xred2xcart
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential,only : effective_potential_type
- use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML, &
+ use defs_datatypes,          only : pseudopotential_type
+ use defs_abitypes,           only : MPI_type
+ use m_geometry,              only : xcart2xred, xred2xcart
+ use m_multibinit_dataset,    only : multibinit_dtset_type
+ use m_effective_potential,   only : effective_potential_type
+ use m_fit_polynomial_coeff,  only : polynomial_coeff_writeXML, &
    fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
  use m_polynomial_coeff,only : polynomial_coeff_getNorder
 ! use m_pawang,       only : pawang_type, pawang_free
@@ -56,7 +56,7 @@ module m_mover_effpot
 ! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
 ! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
 !&                       paw_setup_copy, paw_setup_free, getecutfromxml
- use m_abihist, only : abihist
+ use m_abihist 
  use m_ewald
  use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
  use m_copy            , only : alloc_copy
@@ -65,13 +65,15 @@ module m_mover_effpot
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
-
+ use m_symfind
+ use m_symtk,            only: matr3inv,symatm,mati3inv
  implicit none
 
  private
 !!***
 
  public :: mover_effpot
+ private :: checksymmetrygroup
 !!***
 
 contains
@@ -100,16 +102,10 @@ contains
 !!
 !!
 !! PARENTS
-!!      multibinit
+!!      m_multibinit_driver
 !!
 !! CHILDREN
-!!      alloc_copy,destroy_mpi_enreg,destroy_results_gs,dtset_free
-!!      effective_potential_setcoeffs,effective_potential_setsupercell
-!!      fit_polynomial_coeff_fit,fit_polynomial_coeff_getpositive,generelist
-!!      init_results_gs,mover,polynomial_coeff_free,polynomial_coeff_getnorder
-!!      polynomial_coeff_init,polynomial_coeff_setcoefficient
-!!      polynomial_coeff_writexml,scfcv_destroy,wrtout,xcart2xred,xmpi_barrier
-!!      xred2xcart
+!!      matr3inv,symanal,symfind,symlatt
 !!
 !! SOURCE
 
@@ -127,15 +123,15 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: filetype,icoeff_bound,ii, unit_out
+ integer :: filetype,icoeff_bound,ii, unit_out,msym,nsym
 !integer :: iexit,initialized
  integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
- integer :: model_bound,model_ncoeffbound,my_rank
+ integer :: model_bound,model_ncoeffbound,my_rank,ptgroupma,spgroup
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
- real(dp):: cutoff,freq_q,freq_b,qmass,bmass
+ real(dp):: cutoff,freq_q,freq_b,qmass,bmass,tolsym
 ! real(dp):: time_q,time_b
- logical :: iam_master
+ logical :: iam_master,isVused,isARused,readOnlyLast
  integer, parameter:: master=0
  logical :: verbose,writeHIST,file_opened
  !type 
@@ -163,7 +159,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  integer,pointer :: indsym(:,:,:)
  integer,allocatable :: listcoeff(:),listcoeff_bound(:,:),list_tmp(:),list_bound(:,:)
  integer,allocatable :: isPositive(:)
- integer,allocatable :: symrel(:,:,:)
+ integer,allocatable :: symrel(:,:,:),symrec(:,:,:)
 !integer,allocatable :: npwtot(:)
  real(dp) :: acell(3)
 !real(dp) :: ecut_tmp(3,2,10)
@@ -171,11 +167,11 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
- real(dp),allocatable :: fred(:,:),fcart(:,:)
+ real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
- character(len=fnlen) :: filename
+ character(len=fnlen) :: filename,md_hist_name
  character(len=fnlen) :: name_file 
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
@@ -186,6 +182,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !type(wvl_data) :: wvl
 !type(pawang_type) :: pawang
 !type(scf_history_type) :: scf_history
+ type(abihist) :: hist_tmp
 
 !******************************************************************
 
@@ -221,8 +218,8 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    acell = one
    rprimd = effective_potential%crystal%rprimd
 
-   ABI_ALLOCATE(xred,(3,effective_potential%crystal%natom))
-   ABI_ALLOCATE(xcart,(3,effective_potential%crystal%natom))
+   ABI_MALLOC(xred,(3,effective_potential%crystal%natom))
+   ABI_MALLOC(xcart,(3,effective_potential%crystal%natom))
 
 !  convert new xcart
    call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
@@ -231,8 +228,8 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !  Generate supercell for the simulation
    call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
 
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(xcart)
+ABI_FREE(xred) 
+ABI_FREE(xcart)
 
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
@@ -241,7 +238,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !     We may just need to provide AB_MOVER wich is the main object
 !     for mover and set  scfcv_args as an optional and depending on
 !     the kind of calculation (abinit or multibinit), we provide
-!     to mover scfcv_args or effective_potential...
+!!     to mover scfcv_args or effective_potential...
 !***************************************************************
 !  Free dtset
    call dtset%free()
@@ -253,7 +250,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !  Set the abinit dataset for mover with fake values
 !  Scalar
    dtset%dmft_entropy = 0
-   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
+   dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics information
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
@@ -278,7 +275,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
      dtset%ph_ngqpt(ii) = inp%ngqpt((ii))
    end do
    dtset%ph_nqshift = inp%nqshft
-   dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
    dtset%strprecon = 1  ! STRess PRECONditioner
@@ -286,7 +282,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    do ii=1,3
      dtset%supercell_latt(ii) = sc_size(ii)
    end do
-   dtset%tolmxf = 2.0d-5
+   dtset%tolmxf = inp%tolmxf
    dtset%tsmear = 0.009500446 !
    dtset%vis = 100      ! VIScosity
    dtset%usewvl = 0     !
@@ -302,37 +298,95 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 ! &         ' You need to provide DDB file in the input to compute ahnarmonic',ch10,&
 ! &         ' part of effective Hamiltionian',ch10,&
 ! &         'Action: add DDB file in the inputs'
-!        MSG_BUG(message)
+!        ABI_BUG(message)
 !      end if
 !      call ddb_to_dtset(comm, dtset,filnam(3),psps)
-!      ABI_ALLOCATE(dtset%kptns,(3,dtset%nkpt))
+!      ABI_MALLOC(dtset%kptns,(3,dtset%nkpt))
 !      dtset%kptns(:,:) = dtset%kpt(:,:)
-!      ABI_ALLOCATE(dtset%istwfk,(dtset%nkpt))
+!      ABI_MALLOC(dtset%istwfk,(dtset%nkpt))
 !      dtset%istwfk(:) = 1
 
 !    else
-!    Need to init some values
-   ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
-   call alloc_copy(symrel,dtset%symrel)
-   ABI_ALLOCATE(tnons,(3,dtset%nsym))
-   tnons = zero
-   call alloc_copy(tnons,dtset%tnons)
+ !    Need to init some values
+!   dtset%nsym = 1       ! Number of SYMmetry operations
+!   ABI_MALLOC(symrel,(3,3,dtset%nsym))
+!   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
+!   call alloc_copy(symrel,dtset%symrel)
+!   ABI_MALLOC(tnons,(3,dtset%nsym))
+!   tnons = zero
+!   call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat,dtset%typat)
    call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)
-   ABI_DEALLOCATE(symrel)
-   ABI_DEALLOCATE(tnons)
+!   ABI_FREE(symrel)
+!   ABI_FREE(tnons)
 !   end if
+ !Find symmetry for simulation 
+   if(inp%dyn_chksym == 1)then 
+       write(message,'(2a)')&
+&       ' Check Symmetry of Start Structure and Impose it for dynamics run',ch10
+       call wrtout(std_out,message,"COLL")
+       call wrtout(ab_out,message,"COLL")
+      !read md_hist 
+      if(inp%restartxf < 0)then 
+         md_hist_name=trim(filnam(2))//'_HIST.nc'
+         write(message,'(3a)')&
+&         ' Restart from external structure stored in file: ',md_hist_name,ch10
+         call wrtout(std_out,message,"COLL")
+         call wrtout(ab_out,message,"COLL")
+         isVused  = .true.
+         isARused = .true.
+         readOnlyLast = .true.
+         call read_md_hist(md_hist_name,hist_tmp,isVused,isARused,readOnlyLast)
+         write(message,'(2a)')&
+&         ' Map external structure to internal ordering of reference structure: ',ch10
+         call wrtout(std_out,message,"COLL")
+         call effective_potential_file_mapHistToRef(effective_potential,hist_tmp,comm,verbose=.True.) ! Map Hist to Ref to order atoms
+      endif
+      msym = 96*PRODUCT(sc_size)
+      ABI_MALLOC(symrel,(3,3,msym))
+      ABI_MALLOC(symrec,(3,3,msym))
+      ABI_MALLOC(tnons,(3,msym))
+      tolsym = inp%dyn_tolsym
+      call checksymmetrygroup(hist_tmp%rprimd,hist_tmp%xred,&
+&                             effective_potential%supercell%typat,msym,effective_potential%supercell%natom,&
+&                             ptgroupma,spgroup,symrel,tnons,nsym,tolsym)
+      dtset%nsym = nsym
+      do ii=1,nsym
+        call mati3inv(symrel(:,:,ii),symrec(:,:,ii))
+      end do
+      !Get Indsym
+      ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
+      call symatm(indsym,dtset%natom,dtset%nsym,symrec,tnons,tolsym,effective_potential%supercell%typat,hist_tmp%xred)
+      call alloc_copy(symrel,dtset%symrel)
+      call alloc_copy(tnons,dtset%tnons)
+      scfcv_args%indsym => indsym
+      call abihist_free(hist_tmp)
+      ABI_FREE(symrec)
+   else 
+      dtset%nsym = 1       ! Number of SYMmetry operations
+      ABI_MALLOC(symrel,(3,3,dtset%nsym))
+      symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
+      call alloc_copy(symrel,dtset%symrel)
+      ABI_MALLOC(tnons,(3,dtset%nsym))
+      tnons = zero
+      call alloc_copy(tnons,dtset%tnons)
+      ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
+      indsym = 0
+      scfcv_args%indsym => indsym
+   endif
+
+   ABI_FREE(symrel)
+   ABI_FREE(tnons)
 
    !array
-   ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
-   dtset%iatfix = 0
+   ABI_MALLOC(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
+   dtset%iatfix = inp%iatfix
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
-   ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
+   ABI_MALLOC(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = 0
-   ABI_ALLOCATE(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
+   ABI_MALLOC(dtset%mixalch_orig,(dtset%npspalch,dtset%ntypalch,1))
    dtset%mixalch_orig(:,:,:)=zero
-   ABI_ALLOCATE(dtset%ph_qshift,(3,dtset%ph_nqshift))
+   ABI_MALLOC(dtset%ph_qshift,(3,dtset%ph_nqshift))
    dtset%ph_qshift = inp%q1shft
    if(option  > 0)then
      verbose = .TRUE.
@@ -344,6 +398,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
      dtset%restartxf = inp%restartxf  ! RESTART from (X,F) history
      dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures
      dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures
+     dtset%strfact = inp%strfact ! STRess FACTor
      dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
    else if(option == -1.or.option == -2) then
 !    Set default for the fit
@@ -356,6 +411,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic
      dtset%mdtemp(1) = inp%bound_temp   !Molecular Dynamics Temperatures
      dtset%mdtemp(2) = inp%bound_temp !Molecular Dynamics Temperatures
+     dtset%strfact = 100.0d0
      dtset%strtarget(1:6) = zero
    end if
 
@@ -396,14 +452,14 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
      if(dtset%nnos==0) then
        dtset%nnos = 1
-       ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
+       ABI_MALLOC(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
        write(message,'(3a,F30.10,a)')&
 &       ' WARNING: nnos is set to zero in the input',ch10,&
 &       '          value by default for qmass: ',dtset%qmass(:),ch10
        if(verbose)call wrtout(std_out,message,"COLL")
      else
-       ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
+       ABI_MALLOC(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
        dtset%qmass(:) = inp%qmass(:)
      end if
      if (abs(inp%bmass) < tol10) then
@@ -424,60 +480,23 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
        write(message, '(5a)' )&
 &       ' The file ',trim(filnam(3)),' is not a DDB',ch10,&
 &       ' It is not compatible with ionmov 27'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
 
    end if
 
 !  set psps
    psps%useylm = dtset%useylm
-!    if(option == -3)then
-!      mtypalch = 0
-!      npsp = dtset%ntypat
-!      call psps_free(psps)
-!      filename_psp(1) = "/home/alex/calcul/psp/Sr.LDA_PW-JTH.xml"
-!      filename_psp(2) = "/home/alex/calcul/psp/Ti.LDA_PW-JTH.xml"
-!      filename_psp(3) = "/home/alex/calcul/psp/O.LDA_PW-JTH.xml"
-!      ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
-!      call inpspheads-rw-rw-r-- 1 mschmitt mschmitt  22004 Nov 28 14:30 log-MPI16-t98-new-4-8-from-ddb-large-coeff_ini-(filename_psp,npsp,pspheads,ecut_tmp)
-!      call psps_init_global(mtypalch, npsp, psps, pspheads)
-!      call psps_init_from_dtset(dtset, 1, psps, pspheads)
-!    end if
 
-! !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
-! !  pawrad/tab(ipsp) is invoked with ipsp<=npsp. So, in order to avoid any problem,
-! !  declare pawrad/tab at paw_size=max(ntypat,npsp).
-!    paw_size=0;if (psps%usepaw==1) paw_size=max(dtset%ntypat,dtset%npsp)
-!    if (paw_size/=paw_size_old) then
-!      if (paw_size_old/=-1) then
-!        call pawrad_free(pawrad)
-!        call pawtab_free(pawtab)
-!        ABI_DATATYPE_DEALLOCATE(pawrad)
-!        ABI_DATATYPE_DEALLOCATE(pawtab)
-!      end if
-!      ABI_DATATYPE_ALLOCATE(pawrad,(paw_size))
-!      ABI_DATATYPE_ALLOCATE(pawtab,(paw_size))
-!      call pawtab_nullify(pawtab)
-!      paw_size_old=paw_size
-!    end if
-
-!  set args_gs
-!    if (option == -3 then
-!      call args_gs_init(args_gs, &
-! &       effective_potential%crystal%amu(:),dtset%mixalch_orig(:,:,1),&
-! &       dtset%dmatpawu(:,:,:,:,1),dtset%upawu(:,1),dtset%jpawu(:,1),&
-! &       dtset%rprimd_orig(:,:,1))
-!      ABI_ALLOCATE(npwtot,(dtset%nkpt))
-!    end if
 !  initialisation of results_gs
    call init_results_gs(dtset%natom,1,1,results_gs)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
    scfcv_args%dtset     => dtset
-   ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
-   indsym = 0
-   scfcv_args%indsym => indsym
+   !ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
+   !indsym = 0
+   !scfcv_args%indsym => indsym
    scfcv_args%mpi_enreg => mpi_enreg
    scfcv_args%ndtpawuj  => zero_integer
    scfcv_args%results_gs => results_gs
@@ -490,20 +509,20 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    dtfil%filnam_ds(4)=filnam(2)
    dtfil%filstat='_STATUS'
    nullify (electronpositron)
-   ABI_ALLOCATE(rhog,(2,1))
-   ABI_ALLOCATE(rhor,(2,1))
+   ABI_MALLOC(rhog,(2,1))
+   ABI_MALLOC(rhor,(2,1))
 
 !  Initialize xf history (should be put in inwffil)
 !  Not yet implemented for ionmov 2 3 10 11 22 (memory problem...)
 !  ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5
    ab_xfh%nxfh = 0
    ab_xfh%mxfh = 1
-   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+   ABI_MALLOC(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
    if (any((/3,10,11/)==dtset%ionmov)) then
      write(message, '(3a)' )&
 &     ' This dynamics can not be used with effective potential',ch10,&
 &     'Action: correct dynamics input'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
   !Get SCALE-UP INPUT
@@ -516,17 +535,17 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !***************************************************************
 
    if (allocated(dtset%rprimd_orig)) then
-     ABI_DEALLOCATE(dtset%rprimd_orig)
+     ABI_FREE(dtset%rprimd_orig)
    end if
-   ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
+   ABI_MALLOC(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
 
 
-   ABI_ALLOCATE(xred,(3,dtset%natom))
-   ABI_ALLOCATE(xred_old,(3,dtset%natom))
-   ABI_ALLOCATE(vel,(3,dtset%natom))
-   ABI_ALLOCATE(fred,(3,dtset%natom))
-   ABI_ALLOCATE(fcart,(3,dtset%natom))
+   ABI_MALLOC(xred,(3,dtset%natom))
+   ABI_MALLOC(xred_old,(3,dtset%natom))
+   ABI_MALLOC(vel,(3,dtset%natom))
+   ABI_MALLOC(gred,(3,dtset%natom))
+   ABI_MALLOC(fcart,(3,dtset%natom))
 
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
 &   effective_potential%supercell%xcart,xred)
@@ -593,7 +612,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !        Fill the list for the fixcoeff input of the fit_polynomial_coeff_fit routine
 !        Store the number of coefficients before adding other coeff for the bounding
          ncoeff = effective_potential%anharmonics_terms%ncoeff
-         ABI_ALLOCATE(listcoeff,(ncoeff))
+         ABI_MALLOC(listcoeff,(ncoeff))
          do ii=1,ncoeff
            listcoeff(ii)=ii
          end do
@@ -605,13 +624,13 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
 &         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
 !        Store all the coefficients in coeffs_all
-         ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff_max))
-         ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncoeff_max))
+         ABI_MALLOC(coeffs_all,(ncoeff_max))
+         ABI_MALLOC(coeffs_tmp,(ncoeff_max))
          do ii=1,ncoeff_max
            call polynomial_coeff_init(&
 &           effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
@@ -652,7 +671,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !          Reset the simulation and set the coefficients of the model
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&           -1,1,comm,verbose=.true.,positive=.false.)
+&           -1,1,comm,verbose=.true.,positive=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -661,7 +680,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
            xred_old = xred
            vel_cell(:,:) = zero
            vel(:,:)      = zero
-           fred(:,:)     = zero
+           gred(:,:)     = zero
            fcart(:,:)    = zero
 
 !          Run mover to check if the model is bound
@@ -707,7 +726,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
          call xmpi_barrier(comm)
 !      Store all the initial coefficients
          ncoeff = effective_potential%anharmonics_terms%ncoeff
-         ABI_DATATYPE_ALLOCATE(coeffs_all,(ncoeff+ncoeff_bound))
+         ABI_MALLOC(coeffs_all,(ncoeff+ncoeff_bound))
          do ii=1,ncoeff
            call polynomial_coeff_init(effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%nterm,&
@@ -728,7 +747,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
 !      Copy the fixed coefficients from the model (without bound coeff)
          ncoeff = effective_potential%anharmonics_terms%ncoeff
-         ABI_DATATYPE_ALLOCATE(coeffs_tmp,(ncoeff+ncoeff_bound))
+         ABI_MALLOC(coeffs_tmp,(ncoeff+ncoeff_bound))
          do ii=1,ncoeff
            call polynomial_coeff_init(effective_potential%anharmonics_terms%coefficients(ii)%coefficient,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%nterm,&
@@ -739,7 +758,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
          end do
 
          ncoeff_max = ncoeff+ncoeff_bound
-         ABI_ALLOCATE(listcoeff,(ncoeff_max))
+         ABI_MALLOC(listcoeff,(ncoeff_max))
          listcoeff = 0
          do jj=1,ncoeff
            listcoeff(jj) = jj
@@ -751,8 +770,8 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
          do ii=2,inp%bound_maxCoeff
 !        Compute the number of possible combination
            nmodels = 1
-           ABI_ALLOCATE(list_bound,(nmodels,ii))
-           ABI_ALLOCATE(list_tmp,(ii))
+           ABI_MALLOC(list_bound,(nmodels,ii))
+           ABI_MALLOC(list_tmp,(ii))
            list_bound = 0; list_tmp = 0; kk = 0;  jj = 1
 
 !        Generate the list of possible combinaison 1st count
@@ -764,13 +783,13 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
            call wrtout(std_out,message,'COLL')
 
 !        allocate and generate combinaisons
-           ABI_DEALLOCATE(list_bound)
-           ABI_DEALLOCATE(list_tmp)
-           ABI_ALLOCATE(coeff_values,(nmodels,ncoeff+ii))
-           ABI_ALLOCATE(listcoeff_bound,(nmodels,ncoeff+ii))
-           ABI_ALLOCATE(list_bound,(nmodels,ii))
-           ABI_ALLOCATE(list_tmp,(ii))
-           ABI_ALLOCATE(isPositive,(nmodels))
+           ABI_FREE(list_bound)
+           ABI_FREE(list_tmp)
+           ABI_MALLOC(coeff_values,(nmodels,ncoeff+ii))
+           ABI_MALLOC(listcoeff_bound,(nmodels,ncoeff+ii))
+           ABI_MALLOC(list_bound,(nmodels,ii))
+           ABI_MALLOC(list_tmp,(ii))
+           ABI_MALLOC(isPositive,(nmodels))
            list_bound = 0;  listcoeff_bound = 0;  list_tmp = 0; isPositive = 0; kk = 0; jj = 1
            call genereList(kk,jj,ii,ncoeff_bound,list_tmp,list_bound,nmodels,.true.)
 !        Generate the models
@@ -846,7 +865,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
                  xred_old = xred
                  vel_cell(:,:) = zero
                  vel(:,:)      = zero
-                 fred(:,:)     = zero
+                 gred(:,:)     = zero
                  fcart(:,:)    = zero
 
 !              Run mover
@@ -870,9 +889,9 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
              end do
            end if
 
-           ABI_DEALLOCATE(list_tmp)
-           ABI_DEALLOCATE(list_bound)
-           ABI_DEALLOCATE(isPositive)
+           ABI_FREE(list_tmp)
+           ABI_FREE(list_bound)
+           ABI_FREE(isPositive)
 
 !        Exit if the model is bounded
            if(effective_potential%anharmonics_terms%bounded) then
@@ -890,18 +909,18 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 &               coeffs_bound(icoeff_bound)%name,&
 &               check=.false.)
              end do
-             ABI_DEALLOCATE(coeff_values)
-             ABI_DEALLOCATE(listcoeff_bound)
+             ABI_FREE(coeff_values)
+             ABI_FREE(listcoeff_bound)
              exit
            end if
-           ABI_DEALLOCATE(coeff_values)
+           ABI_FREE(coeff_values)
 
          end do
 
          do ii=1,ncoeff_bound
            call polynomial_coeff_free(coeffs_bound(ii))
          end do
-         if(allocated(coeffs_bound)) ABI_DEALLOCATE(coeffs_bound)
+         if(allocated(coeffs_bound)) ABI_FREE(coeffs_bound)
 
        end if
 
@@ -918,7 +937,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&       -1,1,comm,verbose=.false.)
+&       -1,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
@@ -933,16 +952,16 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
        end do
 
 !      Deallocation
-       ABI_DEALLOCATE(listcoeff)
+       ABI_FREE(listcoeff)
        do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_tmp(ii))
        end do
-       if(allocated(coeffs_tmp)) ABI_DEALLOCATE(coeffs_tmp)
+       if(allocated(coeffs_tmp)) ABI_FREE(coeffs_tmp)
 
        do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_all(ii))
        end do
-       if(allocated(coeffs_all)) ABI_DEALLOCATE(coeffs_all)
+       if(allocated(coeffs_all)) ABI_FREE(coeffs_all)
 
      end if
 
@@ -969,15 +988,15 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 ! 5   Deallocation of array
 !***************************************************************
 
-   ABI_DEALLOCATE(fred)
-   ABI_DEALLOCATE(fcart)
-   ABI_DEALLOCATE(indsym)
-   ABI_DEALLOCATE(rhog)
-   ABI_DEALLOCATE(rhor)
-   ABI_DEALLOCATE(vel)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(xred_old)
-   ABI_DEALLOCATE(ab_xfh%xfhist)
+   ABI_FREE(gred)
+   ABI_FREE(fcart)
+   ABI_FREE(indsym)
+   ABI_FREE(rhog)
+   ABI_FREE(rhor)
+   ABI_FREE(vel)
+   ABI_FREE(xred)
+   ABI_FREE(xred_old)
+   ABI_FREE(ab_xfh%xfhist)
 
    ! if(option == -3)then
    !   call args_gs_free(args_gs)
@@ -985,14 +1004,14 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    !   do ii = 1,npsp
    !     call paw_setup_free(paw_setup(ii))
    !   end do
-   !   ABI_DEALLOCATE(paw_setup)
-   !   ABI_DEALLOCATE(ipsp2xml)
-   !   ABI_DEALLOCATE(pspheads)
+   !   ABI_FREE(paw_setup)
+   !   ABI_FREE(ipsp2xml)
+   !   ABI_FREE(pspheads)
    !   call pawrad_free(pawrad)
    !   call pawtab_free(pawtab)
-   !   ABI_DATATYPE_DEALLOCATE(pawrad)
-   !   ABI_DATATYPE_DEALLOCATE(pawtab)
-   !   ABI_DEALLOCATE(npwtot)
+   !   ABI_FREE(pawrad)
+   !   ABI_FREE(pawtab)
+   !   ABI_FREE(npwtot)
    ! end if
    call dtset%free()
    call destroy_results_gs(results_gs)
@@ -1007,6 +1026,99 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  call wrtout(std_out,message,'COLL')
 
 end subroutine mover_effpot
+!!***
+
+!!****f* ABINIT/chksymmetrygroup
+!! NAME
+!! checksymmetrygroup
+!!
+!! FUNCTION
+!! Find the ptgroup and symmetry relations (symre,tnons) of crystal by the lattice constants 
+!! rprimd and the reduced coordinates
+!!
+!! INPUTS
+!! rprimd 
+!! xred 
+!! typat 
+!! msym : maximum symmetries defines sizes of symrel and tnons
+!! natom 
+!!
+!!
+!! OUTPUT
+!! ptgroupma 
+!! spgroup: index of spacegroup 
+!! symrel(3,3,msym): symmetry relations
+!! tnons(3,msym): translations
+!!
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!!
+!! PARENTS
+!!      m_mover_effpot
+!!
+!! CHILDREN
+!!      matr3inv,symanal,symfind,symlatt
+!!
+!! SOURCE
+
+subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,symrel_out,tnons_out,nsym,tolsym)
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer,intent(in) :: msym,natom
+  integer,intent(in)  :: typat(natom)
+  integer,intent(out) :: ptgroupma,spgroup,nsym
+  real(dp),intent(inout) :: tolsym
+! Arrays
+  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
+  integer,intent(out) :: symrel_out(3,3,msym)
+  real(dp),intent(out) :: tnons_out(3,msym)
+
+!Local variables ---------------------------------------
+!scalars
+  integer :: berryopt,jellslab,noncoll,nptsym,nzchempot,use_inversion
+  integer :: chkprim
+! Arraiys
+  integer :: bravais(11),ptsymrel(3,3,msym)
+  integer :: symafm(msym),symrel(3,3,msym)
+  real(dp) :: efield(3)=0,gprimd(3,3),spinat(3,natom)
+  real(dp) :: tnons(3,msym)
+  real(dp) :: genafm(3)
+
+! given the acel, rprim and coor
+! this suroutine find the symmetry group
+berryopt = 0 
+jellslab = 0
+noncoll  = 0 
+nzchempot= 0
+spinat   = 0
+efield   = 0
+chkprim  = 0
+use_inversion = 0
+
+!write(std_out,*) "tolsym", tolsym, "tol3", tol3
+ 
+  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol4)
+!write(std_out,*) 'nptsym', nptsym
+
+  call matr3inv(rprimd,gprimd)
+  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+
+!write(std_out,*) 'nsym', nsym
+  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
+
+!write(std_out,*) 'nsym', nsym
+symrel_out = symrel 
+tnons_out  = tnons
+
+
+end subroutine checksymmetrygroup
 !!***
 
 end module m_mover_effpot

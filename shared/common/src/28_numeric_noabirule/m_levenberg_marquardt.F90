@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_levenberg_marquardt
 !! NAME
 !! m_levenberg_marquardt
@@ -14,7 +13,7 @@
 !!        evaluations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MS)
+!!  Copyright (C) 2008-2021 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

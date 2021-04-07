@@ -7,7 +7,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2021 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ module m_psps
  use netcdf
 #endif
 
- use m_fstrings,      only : itoa, sjoin, yesno
+ use m_fstrings,      only : itoa, sjoin, yesno, atoi
  use m_io_tools,      only : open_file
  use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
@@ -87,7 +87,7 @@ contains
 !!  useupf=1 if UPF file.
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -103,7 +103,7 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
 !Local variables-------------------------------
 !scalars
- integer :: temp_unit
+ integer :: temp_unit, ii
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
 
@@ -113,17 +113,30 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
  usexml = 0; xmlpaw = 0; useupf = 0
 
  if (open_file(path,msg,newunit=temp_unit,form='formatted',status='old') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  rewind (unit=temp_unit,err=10,iomsg=errmsg)
 
- read(temp_unit,*,err=10,iomsg=errmsg) testxml
+ read(temp_unit, "(a)",err=10,iomsg=errmsg) testxml
  if(testxml(1:5)=='<?xml')then
    usexml = 1
    read(temp_unit,*,err=10,iomsg=errmsg) testxml
    if(testxml(1:4)=='<paw') xmlpaw = 1
  else
    usexml = 0
+   if (testxml(1:4) == '<UPF') then
+     ! Make sure this is not UPF version >= 2
+     ! "<UPF version="2.0.1">
+     ii = index(testxml, '"')
+     if (ii /= 0) then
+       if (atoi(testxml(ii+1:ii+1)) >= 2) then
+         ABI_ERROR(sjoin("UPF version >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Pseudo:", path))
+       end if
+     else
+       ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", path))
+     end if
+
+   end if
  end if
 
  !Check if pseudopotential file is a Q-espresso UPF file
@@ -141,7 +154,7 @@ subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
  ! Handle IO error
 10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine test_xml_xmlpaw_upf
 !!***
@@ -164,7 +177,7 @@ end subroutine test_xml_xmlpaw_upf
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -187,14 +200,14 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
- ABI_ALLOCATE(psps%filpsp,(npsp))
- ABI_ALLOCATE(psps%pspcod,(npsp))
- ABI_ALLOCATE(psps%pspdat,(npsp))
- ABI_ALLOCATE(psps%pspso,(npsp))
- ABI_ALLOCATE(psps%pspxc,(npsp))
- ABI_ALLOCATE(psps%title,(npsp))
- ABI_ALLOCATE(psps%zionpsp,(npsp))
- ABI_ALLOCATE(psps%znuclpsp,(npsp))
+ ABI_MALLOC(psps%filpsp,(npsp))
+ ABI_MALLOC(psps%pspcod,(npsp))
+ ABI_MALLOC(psps%pspdat,(npsp))
+ ABI_MALLOC(psps%pspso,(npsp))
+ ABI_MALLOC(psps%pspxc,(npsp))
+ ABI_MALLOC(psps%title,(npsp))
+ ABI_MALLOC(psps%zionpsp,(npsp))
+ ABI_MALLOC(psps%znuclpsp,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -207,7 +220,7 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  psps%znuclpsp(1:npsp)=pspheads(1:npsp)%znuclpsp
 
  ! Transfer md5 checksum
- ABI_ALLOCATE(psps%md5_pseudos, (npsp))
+ ABI_MALLOC(psps%md5_pseudos, (npsp))
  psps%md5_pseudos = pspheads(1:npsp)%md5_checksum
 !Set values independant from dtset
  psps%npsp   = npsp
@@ -251,7 +264,7 @@ end subroutine psps_init_global
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver
+!!      m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -322,14 +335,14 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
  if (idtset > 1) then
    if (allocated(psps%algalch))  then
-     ABI_DEALLOCATE(psps%algalch)
+     ABI_FREE(psps%algalch)
    end if
    if (allocated(psps%mixalch))  then
-     ABI_DEALLOCATE(psps%mixalch)
+     ABI_FREE(psps%mixalch)
    end if
  end if
- ABI_ALLOCATE(psps%algalch,(psps%ntypalch))
- ABI_ALLOCATE(psps%mixalch,(psps%npspalch,psps%ntypalch))
+ ABI_MALLOC(psps%algalch,(psps%ntypalch))
+ ABI_MALLOC(psps%mixalch,(psps%npspalch,psps%ntypalch))
  psps%algalch(1:psps%ntypalch)=dtset%algalch(1:psps%ntypalch)
 !This value will be overwritten elsewhere in case there are different images ...
  psps%mixalch(1:psps%npspalch,1:psps%ntypalch)=dtset%mixalch_orig(1:psps%npspalch,1:psps%ntypalch,1)
@@ -343,7 +356,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
      psps%pspso(ipsp)=0
      ! This is needed to treate SOC perturbatively in sigma.
      !if (dtset%optdriver == RUNL_SIGMA .and. dtset%so_psp(ipsp) /= 0) then
-     !  MSG_WARNING("Setting pspso to 2 although nspinor == 1")
+     !  ABI_WARNING("Setting pspso to 2 although nspinor == 1")
      !  psps%pspso(ipsp) = 2
      !end if
 !    Ideally the following line should not exist,
@@ -393,10 +406,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%ekb))  then
-       ABI_DEALLOCATE(psps%ekb)
+       ABI_FREE(psps%ekb)
      end if
    end if
-   ABI_ALLOCATE(psps%ekb,(psps%dimekb,dtset%ntypat*(1-psps%usepaw)))
+   ABI_MALLOC(psps%ekb,(psps%dimekb,dtset%ntypat*(1-psps%usepaw)))
    dimekb_old=psps%dimekb
  end if
 
@@ -404,10 +417,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%indlmn))  then
-       ABI_DEALLOCATE(psps%indlmn)
+       ABI_FREE(psps%indlmn)
      end if
    end if
-   ABI_ALLOCATE(psps%indlmn,(6,psps%lmnmax,dtset%ntypat))
+   ABI_MALLOC(psps%indlmn,(6,psps%lmnmax,dtset%ntypat))
    lmnmax_old=psps%lmnmax
  end if
 
@@ -415,14 +428,14 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%ffspl))  then
-       ABI_DEALLOCATE(psps%ffspl)
+       ABI_FREE(psps%ffspl)
      end if
      if (allocated(psps%qgrid_ff))  then
-       ABI_DEALLOCATE(psps%qgrid_ff)
+       ABI_FREE(psps%qgrid_ff)
      end if
    end if
-   ABI_ALLOCATE(psps%ffspl,(psps%mqgrid_ff,2,psps%lnmax,dtset%ntypat))
-   ABI_ALLOCATE(psps%qgrid_ff,(psps%mqgrid_ff))
+   ABI_MALLOC(psps%ffspl,(psps%mqgrid_ff,2,psps%lnmax,dtset%ntypat))
+   ABI_MALLOC(psps%qgrid_ff,(psps%mqgrid_ff))
    mqgridff_old=psps%mqgrid_ff
    lnmax_old=psps%lnmax
  end if
@@ -431,37 +444,37 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%qgrid_vl))  then
-       ABI_DEALLOCATE(psps%qgrid_vl)
+       ABI_FREE(psps%qgrid_vl)
      end if
      if (allocated(psps%vlspl))  then
-       ABI_DEALLOCATE(psps%vlspl)
+       ABI_FREE(psps%vlspl)
      end if
      if (allocated(psps%nctab)) then
        do ii=1,size(psps%nctab)
          call nctab_free(psps%nctab(ii))
        end do
-       ABI_DT_FREE(psps%nctab)
+       ABI_FREE(psps%nctab)
      end if
    end if
    if (idtset/=1 .and. .not.psps%vlspl_recipSpace) then
      if (allocated(psps%dvlspl))  then
-       ABI_DEALLOCATE(psps%dvlspl)
+       ABI_FREE(psps%dvlspl)
      end if
    end if
 
-   ABI_ALLOCATE(psps%qgrid_vl,(psps%mqgrid_vl))
-   ABI_ALLOCATE(psps%vlspl,(psps%mqgrid_vl,2,dtset%ntypat))
+   ABI_MALLOC(psps%qgrid_vl,(psps%mqgrid_vl))
+   ABI_MALLOC(psps%vlspl,(psps%mqgrid_vl,2,dtset%ntypat))
 
    if (psps%usepaw == 0) then
      ! If you change usepaw in the input, you will get what you deserve!
-     ABI_DT_MALLOC(psps%nctab, (dtset%ntypat))
+     ABI_MALLOC(psps%nctab, (dtset%ntypat))
      do itypat=1,dtset%ntypat
        call nctab_init(psps%nctab(itypat), psps%mqgrid_vl, .False., .False.)
      end do
    end if
 
    if (.not.psps%vlspl_recipSpace) then
-     ABI_ALLOCATE(psps%dvlspl,(psps%mqgrid_vl,2,dtset%ntypat))
+     ABI_MALLOC(psps%dvlspl,(psps%mqgrid_vl,2,dtset%ntypat))
    end if
    mqgridvl_old=psps%mqgrid_vl
  end if
@@ -470,10 +483,10 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%xccc1d))  then
-       ABI_DEALLOCATE(psps%xccc1d)
+       ABI_FREE(psps%xccc1d)
      end if
    end if
-   ABI_ALLOCATE(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
+   ABI_MALLOC(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
    usepaw_old=psps%usepaw
  end if
 
@@ -481,18 +494,18 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      if (allocated(psps%xcccrc))  then
-       ABI_DEALLOCATE(psps%xcccrc)
+       ABI_FREE(psps%xcccrc)
      end if
      if (allocated(psps%ziontypat))  then
-       ABI_DEALLOCATE(psps%ziontypat)
+       ABI_FREE(psps%ziontypat)
      end if
      if (allocated(psps%znucltypat))  then
-       ABI_DEALLOCATE(psps%znucltypat)
+       ABI_FREE(psps%znucltypat)
      end if
    end if
-   ABI_ALLOCATE(psps%xcccrc,(dtset%ntypat))
-   ABI_ALLOCATE(psps%znucltypat,(dtset%ntypat))
-   ABI_ALLOCATE(psps%ziontypat,(dtset%ntypat))
+   ABI_MALLOC(psps%xcccrc,(dtset%ntypat))
+   ABI_MALLOC(psps%znucltypat,(dtset%ntypat))
+   ABI_MALLOC(psps%ziontypat,(dtset%ntypat))
    ntypat_old=dtset%ntypat
  end if
 
@@ -516,7 +529,7 @@ end subroutine psps_init_from_dtset
 !! psps=<type pseudopotential_type>the pseudopotentials description
 !!
 !! PARENTS
-!!      driver,m_ddb_hdr
+!!      m_ddb_hdr,m_driver
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -566,7 +579,7 @@ subroutine psps_free(psps)
    do ii=1,size(psps%nctab)
      call nctab_free(psps%nctab(ii))
    end do
-   ABI_DT_FREE(psps%nctab)
+   ABI_FREE(psps%nctab)
  end if
 
 end subroutine psps_free
@@ -695,9 +708,9 @@ subroutine psps_copy(pspsin, pspsout)
  end if
 
  ! allocate and copy character strings
- ABI_ALLOCATE(pspsout%filpsp,(pspsout%npsp))
- ABI_ALLOCATE(pspsout%title,(pspsout%npsp))
- ABI_ALLOCATE(pspsout%md5_pseudos,(pspsout%npsp))
+ ABI_MALLOC(pspsout%filpsp,(pspsout%npsp))
+ ABI_MALLOC(pspsout%title,(pspsout%npsp))
+ ABI_MALLOC(pspsout%md5_pseudos,(pspsout%npsp))
  do ii=1,pspsout%npsp
    pspsout%filpsp(ii) = pspsin%filpsp(ii)
    pspsout%title(ii) = pspsin%title(ii)
@@ -706,7 +719,7 @@ subroutine psps_copy(pspsin, pspsout)
 
  ! allocate and copy objects
  if (allocated(pspsin%nctab)) then
-   ABI_DATATYPE_ALLOCATE(pspsout%nctab,(pspsout%ntypat))
+   ABI_MALLOC(pspsout%nctab,(pspsout%ntypat))
    do ii=1,pspsout%ntypat
      call nctab_copy(pspsin%nctab(ii), pspsout%nctab(ii))
    end do
@@ -736,7 +749,7 @@ end subroutine psps_copy
 !!  Only writing
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -943,7 +956,7 @@ end subroutine psps_print
 !!   path=File name.
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1058,7 +1071,7 @@ subroutine psps_ncwrite(psps, path)
  NCF_CHECK(nf90_close(ncid))
 
 #else
- MSG_WARNING("netcdf support not activated. psps file cannot be created!")
+ ABI_WARNING("netcdf support not activated. psps file cannot be created!")
 #endif
 
 contains
@@ -1108,23 +1121,23 @@ subroutine psp2params_init(gth_params, npsp)
 ! *********************************************************************
 
 !Check array, no params are currently set.
- ABI_ALLOCATE(gth_params%set,(npsp))
+ ABI_MALLOC(gth_params%set,(npsp))
  gth_params%set(:) = .false.
 
 !Check array, have geometric information been filled?
- ABI_ALLOCATE(gth_params%hasGeometry,(npsp))
+ ABI_MALLOC(gth_params%hasGeometry,(npsp))
  gth_params%hasGeometry(:) = .false.
 
 !Coefficients for local part and projectors
- ABI_ALLOCATE(gth_params%psppar,(0:4, 0:6, npsp))
+ ABI_MALLOC(gth_params%psppar,(0:4, 0:6, npsp))
  gth_params%psppar = zero
 
 !Coefficients for spin orbit part
- ABI_ALLOCATE(gth_params%psp_k_par,(1:4, 1:3, npsp))
+ ABI_MALLOC(gth_params%psp_k_par,(1:4, 1:3, npsp))
  gth_params%psp_k_par = zero
 
 !Different radii
- ABI_ALLOCATE(gth_params%radii_cf,(npsp, 3))
+ ABI_MALLOC(gth_params%radii_cf,(npsp, 3))
 
 end subroutine psp2params_init
 !!***
@@ -1235,7 +1248,7 @@ end subroutine psp2params_free
 !!  has_tvale=True if the atomic valence density is available.
 !!
 !! PARENTS
-!!      m_psps,pspini
+!!      m_pspini,m_psps
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1261,7 +1274,7 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
  nctab%tcorespl = zero
- 
+
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
  nctab%dnvdq0 = zero
@@ -1281,7 +1294,7 @@ end subroutine nctab_init
 !! Free memory allocated in nctab_t
 !!
 !! PARENTS
-!!      m_psps,pspini
+!!      m_pspini,m_psps
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1364,7 +1377,7 @@ end subroutine nctab_copy
 !!  nctab%d2ncdq0
 !!
 !! PARENTS
-!!      psp8in,psp9in
+!!      m_psp8,m_psp9
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1435,7 +1448,7 @@ end subroutine nctab_eval_tvalespl
 !!  nctab%dncdq0
 !!
 !! PARENTS
-!!      pspatm
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init
@@ -1508,7 +1521,7 @@ end subroutine nctab_eval_tcorespl
 !! mixtabs(ntypalch)=NC tables describing the alchemical pseudos
 !!
 !! PARENTS
-!!      pspini
+!!      m_pspini
 !!
 !! CHILDREN
 !!      nctab_free,nctab_init

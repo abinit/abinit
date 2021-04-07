@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawrad
 !! NAME
 !! m_pawrad
@@ -7,7 +6,7 @@
 !! Module containing all the functions related to the PAW radial meshes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT,FJ,MG)
+!! Copyright (C) 2013-2021 ABINIT group (MT,FJ,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -179,8 +178,8 @@ CONTAINS
 !!    %rmax = Max. value of r = rad(mesh_size)
 !!
 !! PARENTS
-!!      dfpt_eltfrxc,m_atom,m_paw_gaussfit,m_pawpsp,m_pawpwij,m_pawxmlps,m_psps
-!!      mkcore,mkcore_paw,mkcore_wvl,psp8in,psp9in,wvl_initro
+!!      m_dfpt_elt,m_mkcore,m_paw_atomorb,m_paw_gaussfit,m_pawpsp,m_pawpwij
+!!      m_pawxmlps,m_psp8,m_psp9,m_psps,m_wvl_rho,mkcore_wvl
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -274,7 +273,7 @@ subroutine pawrad_init(mesh,mesh_size,mesh_type,rstep,lstep,r_for_intg)
 
  else !  Other values of mesh_type are not allowed (see psp7in.F90)
   write(msg,'(a,i0)')" Unknown value of mesh_type: ",mesh%mesh_type
-  MSG_ERROR(msg)
+  LIBPAW_ERROR(msg)
  end if
 
  mesh%int_meshsz=mesh%mesh_size
@@ -409,7 +408,7 @@ end subroutine pawrad_free_1D
 !!  Only writing.
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -465,7 +464,7 @@ subroutine pawrad_print(Rmesh,header,unit,prtvol,mode_paral)
 
  CASE DEFAULT
    msg = ' Unknown mesh type! Action : check your pseudopotential or input file.'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  END SELECT
 
  call wrtout(my_unt,msg,my_mode)
@@ -504,7 +503,7 @@ end subroutine pawrad_print
 !!    * 2 if Rmesh2 is denser than Rmesh1
 !!
 !! PARENTS
-!!      m_atom,m_paw_slater
+!!      m_paw_atomorb,m_paw_slater
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -547,7 +546,7 @@ subroutine pawrad_isame(Rmesh1,Rmesh2,hasameq,whichdenser)
 
  CASE DEFAULT
    msg='Unknown mesh type'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
 
  END SELECT
 
@@ -644,9 +643,9 @@ end subroutine pawrad_copy
 !!  func(funcsz)=array containing values of function to extrapolate
 !!
 !! PARENTS
-!!      denfgr,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_paw_slater,m_pawdij
-!!      m_pawpsp,m_pawrad,m_pawxc,make_efg_onsite,optics_paw,optics_paw_core
-!!      pawdenpot,pawdensities,pawnabla_init
+!!      m_orbmag,m_paw_atom,m_paw_denpot,m_paw_gaussfit,m_paw_init,m_paw_mkrho
+!!      m_paw_nmr,m_paw_onsite,m_paw_pwaves_lmn,m_paw_slater,m_pawdij,m_pawpsp
+!!      m_pawrad,m_pawxc
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -726,7 +725,7 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
      isz1=size(pawrad%rad)
      if(isz1/=pawrad%mesh_size) then
        msg='rad: sz1 /= pawrad%mesh_size (1)'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
    if (allocated(pawrad%radfact)) then
@@ -734,7 +733,7 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
      isz1=size(pawrad%radfact)
      if(isz1/=pawrad%mesh_size) then
        msg='radfact: sz1 /= pawrad%mesh_size (2)'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
    if (allocated(pawrad%simfact)) then
@@ -742,7 +741,7 @@ subroutine pawrad_bcast(pawrad,comm_mpi)
      isz1=size(pawrad%simfact)
      if(isz1/=pawrad%mesh_size) then
        msg='simfact: sz1 /= pawrad%mesh_size (3)'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
  end if
@@ -854,11 +853,10 @@ end subroutine pawrad_bcast
 !!  intg=resulting integral by Simpson rule
 !!
 !! PARENTS
-!!      calc_ubare,m_atom,m_paw_atom,m_paw_slater,m_pawdij,m_pawhr,m_pawpsp
-!!      m_pawpwij,m_pawrad,m_pawxc,m_plowannier,m_psps,make_efg_onsite
-!!      mlwfovlp_projpaw,optics_paw,optics_paw_core,partial_dos_fractions_paw
-!!      pawdensities,pawinit,pawnabla_init,pawpuxinit,posdoppler,poslifetime
-!!      posratecore,qijb_kk,smatrix_pawinit
+!!      m_epjdos,m_mlwfovlp,m_orbmag,m_paw_atom,m_paw_atomorb
+!!      m_paw_correlations,m_paw_denpot,m_paw_dfptnl,m_paw_hr,m_paw_init
+!!      m_paw_nmr,m_paw_onsite,m_paw_overlap,m_paw_slater,m_pawdij,m_pawpsp
+!!      m_pawpwij,m_pawrad,m_pawxc,m_plowannier,m_positron,m_psps
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -912,7 +910,7 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
    if (int_meshsz>radmesh%mesh_size.or.int_meshsz>size(func)) then
      write(msg,'(3(a,i4))')"int_meshsz= ",int_meshsz," > mesh_size=",radmesh%mesh_size,&
 &                          ", size(func)=",size(func)
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    isim=3; if (radmesh%mesh_type==3)isim=4
    LIBPAW_ALLOCATE(simfact,(radmesh%mesh_size))
@@ -938,7 +936,7 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
  else
    if (radmesh%int_meshsz>size(func)) then
      write(msg,'(2(a,i4))')"int_meshsz= ",int_meshsz," > size(func)=",size(func)
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    nn=radmesh%int_meshsz
    simp=zero
@@ -981,8 +979,8 @@ end subroutine simp_gen
 !!  [der2(:)]= -- optional -- 2nd derivative of input function
 !!
 !! PARENTS
-!!      m_paw_pwaves_lmn,m_pawdij,m_pawpsp,m_pawxc,optics_paw,optics_paw_core
-!!      pawinit,pawnabla_init,poslifetime,posratecore,spline_paw_fncs
+!!      m_paw_init,m_paw_onsite,m_paw_pwaves_lmn,m_pawdij,m_pawpsp,m_pawxc
+!!      m_positron
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -1017,7 +1015,7 @@ subroutine nderiv_gen(der,func,radmesh,der2)
  msz=size(func)
  if (size(der)/=msz.or.msz>radmesh%mesh_size) then
    msg='wrong sizes for in/out arrays!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  compute_2der=(present(der2))
@@ -1184,7 +1182,7 @@ end subroutine nderiv_lin
 !!  yp1,ypn= derivatives of func at r(1) and r(n)
 !!
 !! PARENTS
-!!      m_paw_atom,m_pawpsp,m_pawxmlps,outscfcv
+!!      m_outscfcv,m_paw_atom,m_pawpsp,m_pawxmlps
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -1240,7 +1238,7 @@ end subroutine bound_deriv
 !!                                   +(r^l) int[r''^(1-l)g(r'')dr''])
 !!
 !! PARENTS
-!!      calc_ubare,m_paw_atom,m_pawpsp,m_pawrad,pawdenpot,pawinit,pawpuxinit
+!!      m_paw_atom,m_paw_correlations,m_paw_denpot,m_paw_init,m_pawpsp,m_pawrad
 !!
 !! CHILDREN
 !!      poisson,simp_gen
@@ -1272,7 +1270,7 @@ subroutine poisson(den,ll,radmesh,rv,screened_sr_separation,qq)
 
  mesh_size=size(den)
  if (size(rv)/=mesh_size.or.mesh_size>radmesh%mesh_size) then
-   MSG_BUG('wrong sizes!')
+   LIBPAW_BUG('wrong sizes!')
  end if
 
  use_numerov=(radmesh%mesh_type==1)
@@ -1523,7 +1521,7 @@ function pawrad_ifromr(radmesh,rr)
  else
 !  Other values of mesh_type are not allowed (see psp7in.F90)
    write(msg,'(a,i0)')" Unknown value of %mesh_type ",radmesh%mesh_type
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 end function pawrad_ifromr
@@ -1571,7 +1569,7 @@ function screened_coul_kernel(order,r1,r2,formula)
 
  if (order>6) then
    msg='PAW screened exchange not coded for l>2!'
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 !Use max and min of arguments
@@ -1819,7 +1817,7 @@ subroutine calc_slatradl(ll,mesh_size,ff1,ff2,Pawrad,integral)
 
  if (mesh_size > Pawrad%mesh_size) then
    msg='mesh_size > pawrad%mesh_size!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  LIBPAW_ALLOCATE(hh,(mesh_size))

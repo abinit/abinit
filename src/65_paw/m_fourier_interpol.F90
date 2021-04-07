@@ -7,7 +7,7 @@
 !!  Mainly used in PAW to interpol data from/to the coarse FFT grid from/to the fine FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG)
+!! Copyright (C) 2018-2021 ABINIT group (FJ, MT, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,11 +91,12 @@ CONTAINS  !=====================================================================
 !!    rhorf(cplex*nfftf,nspden)=output density/potential in r space on the fine grid
 !!
 !! PARENTS
-!!      dfpt_looppert,energy,fourier_interpol,getgh1c,gstate,ks_ddiago,m_io_kss
-!!      pawmkrho,respfn,scfcv,vtorho,vtorhorec
+!!      m_afterscfloop,m_dfpt_looppert,m_dft_energy,m_fourier_interpol
+!!      m_getgh1c,m_gstate,m_io_kss,m_ksdiago,m_nonlinear,m_orbmag,m_paw_mkrho
+!!      m_respfn_driver,m_scfcv_core,m_vtorho,m_vtorhorec
 !!
 !! CHILDREN
-!!      fourdp,indirect_parallel_fourier,zerosym
+!!      indgrid,pawfgr_destroy,transgrid
 !!
 !! SOURCE
 
@@ -125,7 +126,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !Tests
  if(pawfgr%nfft<pawfgr%nfftc) then
    write(msg,'(a,2(i0,1x))')' nfft (fine grid) must be >= nfft (coarse grid) while: ',pawfgr%nfft, pawfgr%nfftc
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !Store FFT dimensions
@@ -138,20 +139,20 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      rhorf=rhor
      if (optout==1.and.optin==1) rhogf=rhog
      if (optout==1.and.optin/=1) then
-       ABI_ALLOCATE(workfft,(cplex*nfftc))
+       ABI_MALLOC(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
        call fourdp(cplex,rhogf,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
      end if
    end if
    if (optgrid==-1) then
      rhor=rhorf
      if (optout==1.and.optin==1) rhog=rhogf
      if (optout==1.and.optin/=1) then
-       ABI_ALLOCATE(workfft,(cplex*nfftc))
+       ABI_MALLOC(workfft,(cplex*nfftc))
        workfft(:)=rhorf(:,1)
        call fourdp(cplex,rhog,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
      end if
    end if
    return
@@ -164,13 +165,13 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !Then calculate the FT back to get rhorf on the fine grid
  if (optgrid==1) then
 
-   ABI_ALLOCATE(work,(2,nfftc))
+   ABI_MALLOC(work,(2,nfftc))
 
 !  First spin component
 !  --------------------------------------------------------------
    if (optout==0) then
 !    if optout=0, rhog on the fine grid is temporary (in vectg)
-     ABI_ALLOCATE(vectg,(2,nfftf))
+     ABI_MALLOC(vectg,(2,nfftf))
      vectg(:,:)=zero
      if (optin==1) then
        call zerosym(rhog,2,ngfftc(1),ngfftc(2),ngfftc(3),&
@@ -184,10 +185,10 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
          end do
        end if
      else
-       ABI_ALLOCATE(workfft,(cplex*nfftc))
+       ABI_MALLOC(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
        call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
@@ -201,11 +202,11 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      end if
 !    call zerosym(vectg,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !    &        comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_ALLOCATE(workfft,(cplex*nfftf))
+     ABI_MALLOC(workfft,(cplex*nfftf))
      call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
      rhorf(:,1)=workfft(:)
-     ABI_DEALLOCATE(workfft)
-     ABI_DEALLOCATE(vectg)
+     ABI_FREE(workfft)
+     ABI_FREE(vectg)
    else
 !    if optout=1, rhog on the fine grid is saved
      call zerosym(rhog,2,ngfftc(1),ngfftc(2),ngfftc(3),&
@@ -221,10 +222,10 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
          end do
        end if
      else
-       ABI_ALLOCATE(workfft,(cplex*nfftc))
+       ABI_MALLOC(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
        call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
@@ -238,22 +239,22 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      end if
 !    call zerosym(rhogf,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !    &        comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_ALLOCATE(workfft,(cplex*nfftf))
+     ABI_MALLOC(workfft,(cplex*nfftf))
      call fourdp(cplex,rhogf,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
      rhorf(:,1)=workfft(:)
-     ABI_DEALLOCATE(workfft)
+     ABI_FREE(workfft)
    end if
 
 !  Additional spin components
 !  ----------------------------------------------------
    if (nspden>=2) then
-     ABI_ALLOCATE(vectg,(2,nfftf))
+     ABI_MALLOC(vectg,(2,nfftf))
      do ispden=2,nspden
        vectg(:,:)=zero
-       ABI_ALLOCATE(workfft,(cplex*nfftc))
+       ABI_MALLOC(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,ispden)
        call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
@@ -266,15 +267,15 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        end if
 !      call zerosym(vectg,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !      &          comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-       ABI_ALLOCATE(workfft,(cplex*nfftf))
+       ABI_MALLOC(workfft,(cplex*nfftf))
        call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
        rhorf(:,ispden)=workfft(:)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
      end do
-     ABI_DEALLOCATE(vectg)
+     ABI_FREE(vectg)
    end if
 
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
 
 !  ====== FROM THE FINE GRID TOWARDS THE COARSE GRID =============
@@ -284,23 +285,23 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !  Then calculate the FT back to get rhor on the coarse grid
  else if (optgrid==-1) then
 
-   ABI_ALLOCATE(work,(2,nfftf))
+   ABI_MALLOC(work,(2,nfftf))
 
 !  First spin component
 !  --------------------------------------------------------------
    if (optout==0) then
 !    if optout=0, rhog on the fine grid is temporary (in vectg)
-     ABI_ALLOCATE(vectg,(2,nfftc))
+     ABI_MALLOC(vectg,(2,nfftc))
      vectg(:,:)=zero
      if (optin==1) then
        do i1=1,nfftf
          if (pawfgr%fintocoa(i1)/=0) vectg(:,pawfgr%fintocoa(i1))=rhogf(:,i1)
        end do
      else
-       ABI_ALLOCATE(workfft,(cplex*nfftf))
+       ABI_MALLOC(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,1)
        call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
 &         (pawfgr%fintocoa,vectg,mpi_enreg,ngfftc,ngfftf,nfftc,nfftf,paral_kgb,work,nfftftot)
@@ -312,11 +313,11 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      end if
      call zerosym(vectg,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_ALLOCATE(workfft,(cplex*nfftc))
+     ABI_MALLOC(workfft,(cplex*nfftc))
      call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
      rhor(:,1)=workfft(:)
-     ABI_DEALLOCATE(workfft)
-     ABI_DEALLOCATE(vectg)
+     ABI_FREE(workfft)
+     ABI_FREE(vectg)
    else
 !    if optout=1, rhog on the fine grid is saved
      rhog(:,:)=zero
@@ -325,10 +326,10 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
          if (pawfgr%fintocoa(i1)/=0) rhog(:,pawfgr%fintocoa(i1))=rhogf(:,i1)
        end do
      else
-       ABI_ALLOCATE(workfft,(cplex*nfftf))
+       ABI_MALLOC(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,1)
        call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
 &         (pawfgr%fintocoa,rhog,mpi_enreg,ngfftc,ngfftf,nfftc,nfftf,paral_kgb,work,nfftftot)
@@ -340,22 +341,22 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      end if
      call zerosym(rhog,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_ALLOCATE(workfft,(cplex*nfftc))
+     ABI_MALLOC(workfft,(cplex*nfftc))
      call fourdp(cplex,rhog,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
      rhor(:,1)=workfft(:)
-     ABI_DEALLOCATE(workfft)
+     ABI_FREE(workfft)
    end if
 
 !  Additional spin components
 !  ----------------------------------------------------
    if (nspden>=2) then
-     ABI_ALLOCATE(vectg,(2,nfftc))
+     ABI_MALLOC(vectg,(2,nfftc))
      do ispden=2,nspden
        vectg(:,:)=zero
-       ABI_ALLOCATE(workfft,(cplex*nfftf))
+       ABI_MALLOC(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,ispden)
        call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
 &         (pawfgr%fintocoa,vectg,mpi_enreg,ngfftc,ngfftf,nfftc,nfftf,paral_kgb,work,nfftftot)
@@ -366,15 +367,15 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        end if
        call zerosym(vectg,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-       ABI_ALLOCATE(workfft,(cplex*nfftc))
+       ABI_MALLOC(workfft,(cplex*nfftc))
        call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
        rhor(:,ispden)=workfft(:)
-       ABI_DEALLOCATE(workfft)
+       ABI_FREE(workfft)
      end do
-     ABI_DEALLOCATE(vectg)
+     ABI_FREE(vectg)
    end if
 
-   ABI_DEALLOCATE(work)
+   ABI_FREE(work)
 
  end if
 

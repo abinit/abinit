@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_atom
 !! NAME
 !!  m_paw_atom
@@ -7,7 +6,7 @@
 !!  atompaw related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (T. Rangel, MT, JWZ, GJ)
+!!  Copyright (C) 2012-2021 ABINIT group (T. Rangel, MT, JWZ, GJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +72,7 @@ CONTAINS !===========================================================
 !!   type  3: g(r)=alpha1.jl(q1.r)+alpha2.jl(q2.r)
 !!
 !! PARENTS
-!!      m_paw_atom,m_pawpsp,pawinit
+!!      m_paw_atom,m_paw_init,m_pawpsp
 !!
 !! CHILDREN
 !!      atompaw_shpfun,atompaw_vhnzc,bound_deriv,paw_spline,paw_splint,simp_gen
@@ -104,7 +103,7 @@ subroutine atompaw_shpfun(ll,mesh,norm,pawtab,shapefunc)
 
  mesh_size=size(shapefunc)
  if (mesh_size>mesh%mesh_size) then
-   MSG_BUG('wrong size!')
+   LIBPAW_BUG('wrong size!')
  end if
 
 !Index for shape function cut-off radius
@@ -281,7 +280,7 @@ end subroutine atompaw_shapebes
 
  mesh_size=size(ncore)
  if (mesh_size/=size(vhnzc).or.mesh_size>radmesh_core%mesh_size) then
-   MSG_BUG('wrong sizes!')
+   LIBPAW_BUG('wrong sizes!')
  end if
 
  LIBPAW_ALLOCATE(nwk,(mesh_size))

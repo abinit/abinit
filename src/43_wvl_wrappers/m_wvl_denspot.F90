@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (DC)
+!!  Copyright (C) 2008-2021 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,11 +64,11 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
-!!      allocaterhopot,density_descriptors,dpbox_set
-!!      initialize_dft_local_fields,wrtout,xred2xcart
+!!      deallocate_denspot_distribution,deallocate_rho_descriptors
+!!      denspot_free_history,f_free_ptr
 !!
 !! SOURCE
 
@@ -119,7 +119,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
  groupsize=0
 
 !Store xcart for each atom
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 
  call initialize_DFT_local_fields(den%denspot, ixc, nsppol)
@@ -148,10 +148,10 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 !Note: change allocateRhoPot
  call allocateRhoPot(wvl%Glr,nsppol,wvl%atoms,xcart,den%denspot)
 
-!Aditional informations.
+!Aditional information.
  den%symObj = wvl%atoms%astruct%sym%symObj
 
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
 
 #else
  BIGDFT_NOTENABLED_ERROR()
@@ -177,7 +177,7 @@ end subroutine wvl_denspot_set
 !! OUTPUT
 !!
 !! PARENTS
-!!      gstate,wvl_wfsinp_reformat
+!!      m_gstate,m_wvl_wfsinp
 !!
 !! CHILDREN
 !!      deallocate_denspot_distribution,deallocate_rho_descriptors

@@ -16,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -190,9 +190,13 @@ module m_linked_list
        do while(associated(self%iter))
           ! at the begining i<i0
           ! before the end,
-          if (i>self%iter%i .and. associated(self%iter%next) .and. i<self%iter%next%i) then
-             call llist_insert_after(self,self%iter,i,val)
-             return
+          if (i>self%iter%i) then
+             if (associated(self%iter%next)) then
+                 if (i<self%iter%next%i) then
+                    call llist_insert_after(self,self%iter,i,val)
+                    return
+                 end if
+             end if
           else if(i==self%iter%i) then
              ! i<i0 or i>i
              if(mode==0) then
@@ -209,7 +213,7 @@ module m_linked_list
           call llist_append(self,i,val)
           return
        else
-          MSG_BUG("m_linked_list cannot find proper place to insert")
+          ABI_BUG("m_linked_list cannot find proper place to insert")
        endif
     endif
 
@@ -228,8 +232,8 @@ module m_linked_list
     integer, allocatable, intent(inout)::ilist(:)
     real(dp),allocatable, intent(inout)::vallist(:)
     integer::ind=1
-    ABI_ALLOCATE(ilist,(self%length))
-    ABI_ALLOCATE(vallist, (self%length))
+    ABI_MALLOC(ilist,(self%length))
+    ABI_MALLOC(vallist, (self%length))
     call llist_iter_restart(self)
     do while(associated(self%iter))
        ilist(ind)=self%iter%i

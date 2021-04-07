@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fstrings
 !! NAME
 !!  m_fstrings
@@ -7,7 +6,7 @@
 !!  This module contains basic tools to operate on Fortran strings.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, XG, MT, DC)
+!! Copyright (C) 2008-2021 ABINIT group (MG, XG, MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +24,8 @@
 #include "abi_common.h"
 
 MODULE m_fstrings
+
+ use iso_c_binding
 
  use defs_basis, only : dp, std_out, ch10
 
@@ -57,6 +58,7 @@ MODULE m_fstrings
  public :: itoa            ! Convert an integer into a string
  public :: ftoa            ! Convert a float into a string
  public :: ktoa            ! Convert a k-point into a string.
+ public :: stoa            ! Convert a spin index into a string
  public :: ltoa            ! Convert a list into a string.
  public :: atoi            ! Convert a string into a integer
  public :: atof            ! Convert a string into a floating-point number.
@@ -65,7 +67,7 @@ MODULE m_fstrings
  public :: startswith      ! Returns .TRUE. is the string starts with the specified prefix.
  public :: endswith        ! Returns .True if the string ends with the specified suffix.
  public :: indent          ! Indent text
- public :: prep_dash       ! Prepend `-` to each line in a string.
+ public :: prep_char       ! Prepend `char` to each line in a string.
  public :: int2char4       ! Convert a positive integer number (zero included) to a character(len=*)
                            ! with trailing zeros if the number is <=9999
  public :: int2char10      ! Convert a positive integer number (zero included) to a character(len=10)
@@ -75,6 +77,10 @@ MODULE m_fstrings
  public :: inupper         ! Maps all characters in string to uppercase except for tokens between quotation marks.
 
  !TODO method to center a string
+ interface itoa
+   module procedure itoa_1b
+   module procedure itoa_4b
+ end interface itoa
 
  interface write_num
    module procedure write_rdp_0D
@@ -346,7 +352,6 @@ end function tolower
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -420,9 +425,9 @@ end subroutine replace_ch0
 !!
 !! SOURCE
 
-function replace(s, text, rep)  result(outs)
+function replace(s, text, rep) result(outs)
 
- character(len=*),intent(in) :: s,text,rep
+ character(len=*),intent(in) :: s, text, rep
  character(len(s)+500) :: outs     ! provide outs with extra 500 char len
 
 !Local variables-------------------------------
@@ -692,7 +697,6 @@ end function rmquotes
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -726,7 +730,6 @@ end subroutine write_rdp_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -766,7 +769,6 @@ end subroutine write_int_0D
 !!      m_fstrings
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 ! NOT sure it will work
@@ -820,7 +822,6 @@ end subroutine trimzero
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 subroutine writeq_rdp_0D(unit,namestr,value,fmt)
@@ -857,7 +858,6 @@ end subroutine writeq_rdp_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      trimzero,write_num
 !!
 !! SOURCE
 
@@ -1178,33 +1178,46 @@ real(dp) function atof(string)
 end function atof
 !!***
 
-!!****f* m_fstrings/itoa
+!!****f* m_fstrings/itoa_1b
 !! NAME
-!! itoa
+!! itoa_1b
 !!
 !! FUNCTION
 !!  Convert an integer into a string
 !!
-!! INPUTS
-!!  value=The integer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
+pure function itoa_1b(value)
 
-pure function itoa(value)
-
- integer,intent(in) :: value
- character(len=22) :: itoa
+ integer(c_int8_t),intent(in) :: value
+ character(len=22) :: itoa_1b
 
 ! *********************************************************************
 
  ! len=22 is large enough to contain integer*8
- write(itoa,"(i0)")value
- itoa = ADJUSTL(itoa)
+ write(itoa_1b,"(i0)")value
+ itoa_1b = ADJUSTL(itoa_1b)
 
-end function itoa
+end function itoa_1b
+!!***
+
+!!****f* m_fstrings/itoa_4b
+!! NAME
+!! itoa_4b
+!!
+!! FUNCTION
+!!  Convert an integer into a string
+!!
+pure function itoa_4b(value)
+
+ integer,intent(in) :: value
+ character(len=22) :: itoa_4b
+
+! *********************************************************************
+
+ ! len=22 is large enough to contain integer*8
+ write(itoa_4b,"(i0)")value
+ itoa_4b = ADJUSTL(itoa_4b)
+
+end function itoa_4b
 !!***
 
 !----------------------------------------------------------------------
@@ -1253,7 +1266,7 @@ end function ftoa
 !! CHILDREN
 !!
 
-pure function ktoa(kpt,fmt)
+pure function ktoa(kpt, fmt)
 
  real(dp),intent(in) :: kpt(3)
  character(len=*),optional,intent(in) :: fmt
@@ -1269,6 +1282,38 @@ pure function ktoa(kpt,fmt)
  ktoa = ADJUSTL(ktoa)
 
 end function ktoa
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/stoa
+!! NAME
+!! stoa
+!!
+!! FUNCTION
+!!  Convert a spin index into a string
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+
+character(len=4) pure function stoa(spin)
+
+  integer,intent(in) :: spin
+
+! *********************************************************************
+
+ select case (spin)
+ case (1)
+   stoa = "UP"
+ case (2)
+   stoa = "DOWN"
+ case default
+   stoa = "????"
+ end select
+
+end function stoa
 !!***
 
 !----------------------------------------------------------------------
@@ -1316,9 +1361,9 @@ pure function ltoa_int(list) result(str)
      write(temp, "(i0,a)")list(ii),", "
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)//" "
+     base = len_trim(str) + 2
    else
      return
    end if
@@ -1375,9 +1420,9 @@ pure function ltoa_dp(list, fmt) result(str)
      write(temp, fa) list(ii),","
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)// " "
+     base = len_trim(str) + 2
    else
      return
    end if
@@ -1646,12 +1691,12 @@ end function indent
 
 !----------------------------------------------------------------------
 
-!!****f* m_fstrings/prep_dash
+!!****f* m_fstrings/prep_char
 !! NAME
-!!  prep_dash
+!!  prep_char
 !!
 !! FUNCTION
-!!  Prepend `-` to each line in a string.
+!!  Prepend `char` to each line in a string.
 !!
 !! INPUTS
 !!   istr=Input string
@@ -1662,10 +1707,11 @@ end function indent
 !!
 !! SOURCE
 
-pure function prep_dash(istr) result(ostr)
+pure function prep_char(istr, one_char) result(ostr)
 
  character(len=*),intent(in) :: istr
  character(len=2*len(istr)) :: ostr
+ character(len=1),intent(in) :: one_char
 
 !Local variables-------------------------------
  integer :: ii,jj
@@ -1673,7 +1719,7 @@ pure function prep_dash(istr) result(ostr)
 
 ! *********************************************************************
  ostr = ""
- jj = 1; ostr(jj:jj) = "-"
+ jj = 1; ostr(jj:jj) = one_char
  !jj = 0
 
  do ii=1,LEN_TRIM(istr)
@@ -1681,7 +1727,7 @@ pure function prep_dash(istr) result(ostr)
    jj = jj + 1
    if (ch == ch10) then
       ostr(jj:jj) = ch10
-      ostr(jj+1:jj+1) = "-"
+      ostr(jj+1:jj+1) = one_char
       jj = jj+1
    else
      ostr(jj:jj) = ch
@@ -1689,7 +1735,7 @@ pure function prep_dash(istr) result(ostr)
  end do
  !ostr(jj+1:) = "H"
 
-end function prep_dash
+end function prep_char
 !!***
 
 !----------------------------------------------------------------------
@@ -1941,8 +1987,8 @@ end function next_token
 !!          (output) same character string mapped to upper case
 !!
 !! PARENTS
-!!      anaddb,band2eps,chkvars,intagm,invars1,m_ab7_invars_f90
-!!      m_anaddb_dataset,m_exit,multibinit,parsefile
+!!      anaddb,band2eps,m_anaddb_dataset,m_dtset,m_exit,m_invars1
+!!      m_multibinit_driver,m_multibinit_manager,m_parser
 !!
 !! CHILDREN
 !!

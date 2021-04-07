@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT, DRH)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +85,7 @@ contains
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
 !!
 !! PARENTS
-!!      opernl3,opernl4a,opernl4b
+!!      m_opernl
 !!
 !! CHILDREN
 !!
@@ -651,7 +651,7 @@ end subroutine dfpt_mkffkg
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
 !!
 !! PARENTS
-!!      opernl2
+!!      m_opernl
 !!
 !! CHILDREN
 !!

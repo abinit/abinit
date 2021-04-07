@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_splines
 !! NAME
 !!  m_splines
@@ -7,7 +6,7 @@
 !!  This module contains routines for spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT group (YP, BAmadon)
+!!  Copyright (C) 2010-2021 ABINIT group (YP, BAmadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +28,9 @@ module m_splines
  use defs_basis
  use m_abicore
  use m_errors
+
+ use m_fstrings, only : sjoin, itoa, ftoa
+ !use m_time,   only : timab
 
  implicit none
 
@@ -56,15 +58,13 @@ contains
 !!  splfit
 !!
 !! FUNCTION
-!!  Evaluate cubic spline fit to get function values on input set
-!!  of ORDERED, UNFORMLY SPACED points.
+!!  Evaluate cubic spline fit to get function values on input set of ORDERED, UNFORMLY SPACED points.
 !!  Optionally gives derivatives (first and second) at those points too.
 !!  If point lies outside the range of arg, assign the extremal
 !!  point values to these points, and zero derivative.
 !!
 !! INPUTS
-!!  arg(numarg)=equally spaced arguments (spacing delarg) for data
-!!   to which spline was fit.
+!!  arg(numarg)=equally spaced arguments (spacing de) for data to which spline was fit.
 !!  fun(numarg,2)=function values to which spline was fit and spline
 !!   fit to second derivatives (from Numerical Recipes spline).
 !!  ider=  see above
@@ -82,122 +82,126 @@ contains
 !!        if ider=0, compute only the function (contained in fun)
 !!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
 !!        if ider=2, compute only the second derivative of the function (in derfun)
+!!
 !! PARENTS
-!!      getnel,m_pawpwij,mkffnl,pawgylmg,psp8lo
+!!      m_mkffnl,m_mklocl,m_occ,m_pawpwij,m_psptk
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
+subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
 
- integer, intent(in) :: ider,numarg,numnew
- real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
+ integer, intent(in) :: ider, numarg, numnew
+ real(dp), intent(in) :: arg(numarg), fun(numarg,2), newarg(numnew)
  real(dp), intent(out) :: derfun(numnew)
  real(dp), intent(inout) :: newfun(numnew)
 
+!Local variables---------------------------------------
  integer :: i,jspl
- real(dp) :: argmin,delarg,d,aa,bb,cc,dd
- character(len=500) :: msg
+ real(dp) :: argmin,de,d,aa,bb,cc,dd,de2_dby_six,de_dby_six
+ !real(dp) :: tsec(2)
 
-!argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
- argmin=arg(1)
- delarg=(arg(numarg)-argmin)/dble(numarg-1)
+! *************************************************************************
 
- if(delarg<tol12)then
-   write(msg,'(a,es16.8)') ' delarg should be strictly positive, while delarg= ',delarg
-   MSG_ERROR(msg)
+ ! Keep track of time spent in mkffnl
+ !call timab(1905, 1, tsec)
+
+ ! argmin is smallest x value in spline fit; de is uniform spacing of spline argument
+ argmin = arg(1)
+ de = (arg(numarg) - argmin) / dble(numarg-1)
+ de2_dby_six = de**2 / six
+ de_dby_six = de / six
+
+ if (de < tol12) then
+   ABI_ERROR(sjoin('spacing should be strictly positive, while de is: ', ftoa(de)))
  endif
 
- jspl=-1
+ jspl = -1
 
-!Do one loop for no grads, other for grads:
- if (ider==0) then
-! Spline index loop for no grads:
+ ! Do one loop for no grads, other for grads
+ select case (ider)
+ case (0)
+
+  ! Spline index loop for no grads:
   do i=1,numnew
-   if (newarg(i).ge.arg(numarg)) then
-! MJV 6/4/2009 FIXME this message is never used
-    write(msg,1000)char(10),i,newarg(i), &
-&     jspl,char(10),numarg,arg(numarg),char(10),char(10),char(10)
-1000 format(a1,' splfit: for arg number',i8,2x,'of value', &
-&    1p,e12.4,1x,'jspl=',i8,a1,' is >= numarg=',i8,  &
-&    '  (max arg(numarg)=',e12.4,')',a1,             &
-&    ' Means function values are being requested outside',       &
-&    ' range of data.',a1,' Function and slope will be set to',  &
-&    ' values at upper end of data.',a1)
+    if (newarg(i) >= arg(numarg)) then
+      ! function values are being requested outside range of data.',a1,'
+      ! Function and slope will be set to values at upper end of data.
 
-    newfun(i)=fun(numarg,1)
+      newfun(i) = fun(numarg,1)
 
-   else if (newarg(i).le.arg(1)) then
-    newfun(i)=fun(1,1)
+    else if (newarg(i) <= arg(1)) then
+      newfun(i) = fun(1,1)
 
-   else
-    jspl=1+int((newarg(i)-argmin)/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
-   end if
+    else
+      jspl = 1 + int((newarg(i) - argmin)/de)
+      d = newarg(i) - arg(jspl)
+      bb = d / de
+      aa = one - bb
+      cc = aa*(aa**2 -one) * de2_dby_six
+      dd = bb*(bb**2 -one) * de2_dby_six
+      newfun(i)= aa * fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
+    end if
   enddo
 
- else if(ider==1)then
+ case (1)
 
-! Spline index loop includes grads:
-  do i=1,numnew
+   ! Spline index loop includes grads:
+   do i=1,numnew
 
-   if (newarg(i).ge.arg(numarg)) then
-    newfun(i)=fun(numarg,1)
-    derfun(i)=0.0d0
+     if (newarg(i) >= arg(numarg)) then
+       newfun(i) = fun(numarg,1)
+       derfun(i) = zero
 
-   else if (newarg(i).le.arg(1)) then
-    newfun(i)=fun(1,1)
-    derfun(i)=0.0d0
+     else if (newarg(i) <= arg(1)) then
+       newfun(i) = fun(1,1)
+       derfun(i) = zero
 
-   else
+     else
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - arg(1)) / de)
+       d = newarg(i) - arg(jspl)
+       bb = d / de
+       aa = one - bb
+       cc = aa*(aa**2 - one) * de2_dby_six
+       dd = bb*(bb**2 - one) * de2_dby_six
+       newfun(i) = aa*fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
+       ! spline fit to first derivative:
+       ! note correction of Numerical Recipes sign error
+       derfun(i) = (fun(jspl+1,1)-fun(jspl,1)) / de +    &
+          (-(3.d0*aa**2 -one) * fun(jspl,2) + (3.d0*bb**2 -one) * fun(jspl+1,2)) * de_dby_six
 
-!   cubic spline interpolation:
-    jspl=1+int((newarg(i)-arg(1))/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
-!   spline fit to first derivative:
-!   note correction of Numerical Recipes sign error
-    derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
-&      (-(3.d0*aa**2-1.d0)*fun(jspl,2)+                 &
-&        (3.d0*bb**2-1.d0)*fun(jspl+1,2)) * delarg/6.0d0
+     end if
+   enddo
 
-          end if
-  enddo
+ case (2)
 
- else if (ider==2) then
+   do i=1,numnew
 
-  do i=1,numnew
+     if (newarg(i) >= arg(numarg)) then
+       derfun(i) = zero
 
-   if (newarg(i).ge.arg(numarg)) then
-    derfun(i)=0.0d0
+     else if (newarg(i) <= arg(1)) then
+       derfun(i) = zero
 
-   else if (newarg(i).le.arg(1)) then
-    derfun(i)=0.0d0
+     else
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - argmin) / de)
+       d = newarg(i) - arg(jspl)
+       bb = d / de
+       aa = one - bb
+       ! second derivative of spline (piecewise linear function)
+       derfun(i) = aa*fun(jspl,2) + bb*fun(jspl+1,2)
 
-   else
+     end if
+   enddo
 
-!   cubic spline interpolation:
-    jspl=1+int((newarg(i)-argmin)/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-!   second derivative of spline (piecewise linear function)
-    derfun(i) = aa*fun(jspl,2)+bb*fun(jspl+1,2)
+ case default
+   ABI_ERROR(sjoin("Invalid ider:", itoa(ider)))
+ end select
 
-   end if
-  enddo
-
- end if
+ !call timab(1905, 2, tsec)
 
 end subroutine splfit
 !!***
@@ -230,12 +234,10 @@ end subroutine splfit
 !!    Work space, double precision DIAG(N) - should be removed ...
 !!
 !! PARENTS
-!!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_ewald,m_paw_slater
-!!      m_special_funcs,m_splines,outscfcv,pawinit,predict_string,psp10in
-!!      psp10nl,psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc
-!!      psp5in,psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in
-!!      random_stopping_power,spline_paw_fncs,upf2abinit,vso_realspace_local
+!!      m_a2ftr,m_bader,m_dens,m_entropyDMFT,m_mkrho,m_occ,m_outscfcv
+!!      m_paw_atomorb,m_paw_init,m_paw_mkrho,m_paw_slater,m_predict_string
+!!      m_psp1,m_psp5,m_psp6,m_psp8,m_psp9,m_psp_hgh,m_psptk,m_screening_driver
+!!      m_sigc,m_special_funcs,m_spin_current,m_splines,m_upf2abinit
 !!
 !! CHILDREN
 !!
@@ -379,10 +381,10 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
     write(std_out,* ) 'SPLINE_CUBIC_SET - Fatal error!'
     write(std_out,* ) '  The number of knots must be at least 2.'
     write(std_out,* ) '  The input value of N = ', n
-    MSG_ERROR("Fatal error")
+    ABI_ERROR("Fatal error")
   end if
 
-  ABI_ALLOCATE(tmp,(n))
+  ABI_MALLOC(tmp,(n))
 
   do i = 1, n-1
     if ( t(i) >= t(i+1) ) then
@@ -391,7 +393,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
       write(std_out,* ) '  The knots must be strictly increasing, but'
       write(std_out,* ) '  T(',  i,') = ', t(i)
       write(std_out,* ) '  T(',i+1,') = ', t(i+1)
-      MSG_ERROR("Fatal error")
+      ABI_ERROR("Fatal error")
     end if
   end do
 !
@@ -435,9 +437,7 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
    ypp(k)=ypp(k)*ypp(k+1)+tmp(k)
   enddo
 
-  ABI_DEALLOCATE(tmp)
-
-  return
+  ABI_FREE(tmp)
 end subroutine spline
 !!***
 
@@ -570,10 +570,10 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  ybcbeg=czero
  ybcend=czero
 
- ABI_ALLOCATE(ysplin2_lo,(nomega_lo))
+ ABI_MALLOC(ysplin2_lo,(nomega_lo))
  call spline_complex(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
  call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, nomega_li, omega_li, splined_li)
- ABI_DEALLOCATE(ysplin2_lo)
+ ABI_FREE(ysplin2_lo)
 
 end subroutine spline_c
 !!***
@@ -629,10 +629,10 @@ subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
  real(dp) :: ybcend_i
  real(dp), allocatable :: ypp_i(:)
 
- ABI_ALLOCATE(y_r,(n))
- ABI_ALLOCATE(ypp_r,(n))
- ABI_ALLOCATE(y_i,(n))
- ABI_ALLOCATE(ypp_i,(n))
+ ABI_MALLOC(y_r,(n))
+ ABI_MALLOC(ypp_r,(n))
+ ABI_MALLOC(y_i,(n))
+ ABI_MALLOC(ypp_i,(n))
  y_r=real(y)
  y_i=aimag(y)    !vz_d
  ybcbeg_r=real(ybcbeg)
@@ -642,10 +642,10 @@ subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
  call spline( t, y_r, n, ybcbeg_r, ybcend_r, ypp_r )
  call spline( t, y_i, n, ybcbeg_i, ybcend_i, ypp_i )
  ypp=cmplx(ypp_r,ypp_i)
- ABI_DEALLOCATE(y_r)
- ABI_DEALLOCATE(ypp_r)
- ABI_DEALLOCATE(y_i)
- ABI_DEALLOCATE(ypp_i)
+ ABI_FREE(y_r)
+ ABI_FREE(ypp_r)
+ ABI_FREE(y_i)
+ ABI_FREE(ypp_i)
 
 end subroutine spline_complex
 !!***
@@ -674,10 +674,10 @@ end subroutine spline_complex
 !!    The input value is incremented by the number of such points.
 !!
 !! PARENTS
-!!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_special_funcs,m_splines
-!!      outscfcv,partial_dos_fractions,predict_string,psp6cc
-!!      random_stopping_power,spline_paw_fncs,vso_realspace_local,wvl_initro
+!!      m_a2ftr,m_cut3d,m_entropyDMFT,m_epjdos,m_mkrho,m_outscfcv,m_paw_atomorb
+!!      m_paw_mkrho,m_paw_slater,m_predict_string,m_psp6,m_psptk
+!!      m_screening_driver,m_sigc,m_special_funcs,m_spin_current,m_splines
+!!      m_wvl_rho
 !!
 !! CHILDREN
 !!
@@ -712,11 +712,11 @@ subroutine splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
          left = k-1
        else
          if (k-1.eq.1 .and. i.eq.1) then
-           MSG_ERROR('xfit(1) < xspline(1)')
+           ABI_ERROR('xfit(1) < xspline(1)')
            !my_err=my_err+1
            !exit
          else
-           MSG_ERROR('xfit not properly ordered')
+           ABI_ERROR('xfit not properly ordered')
          end if
        end if
        delarg= xspline(right) - xspline(left)
@@ -783,12 +783,12 @@ subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
  real(dp), allocatable :: yfit_r(:)
  real(dp), allocatable :: yfit_i(:)
 
- ABI_ALLOCATE(yspline_r,(nspline))
- ABI_ALLOCATE(yspline_i,(nspline))
- ABI_ALLOCATE(ysplin2_r,(nspline))
- ABI_ALLOCATE(ysplin2_i,(nspline))
- ABI_ALLOCATE(yfit_r,(nfit))
- ABI_ALLOCATE(yfit_i,(nfit))
+ ABI_MALLOC(yspline_r,(nspline))
+ ABI_MALLOC(yspline_i,(nspline))
+ ABI_MALLOC(ysplin2_r,(nspline))
+ ABI_MALLOC(ysplin2_i,(nspline))
+ ABI_MALLOC(yfit_r,(nfit))
+ ABI_MALLOC(yfit_i,(nfit))
 
 !local
 
@@ -800,12 +800,12 @@ subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
  call splint (nspline,xspline,yspline_r,ysplin2_r,nfit,xfit,yfit_r)
  call splint (nspline,xspline,yspline_i,ysplin2_i,nfit,xfit,yfit_i)
  yfit=cmplx(yfit_r,yfit_i)
- ABI_DEALLOCATE(yspline_r)
- ABI_DEALLOCATE(yspline_i)
- ABI_DEALLOCATE(ysplin2_r)
- ABI_DEALLOCATE(ysplin2_i)
- ABI_DEALLOCATE(yfit_r)
- ABI_DEALLOCATE(yfit_i)
+ ABI_FREE(yspline_r)
+ ABI_FREE(yspline_i)
+ ABI_FREE(ysplin2_r)
+ ABI_FREE(ysplin2_i)
+ ABI_FREE(yfit_r)
+ ABI_FREE(yfit_i)
 
 end subroutine splint_complex
 !!***
@@ -816,14 +816,6 @@ end subroutine splint_complex
 !!
 !! FUNCTION
 !!  Calculates an integral using cubic spline interpolation.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT Group (Yann Pouillon)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!  For the initials of contributors, see
-!!  ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  npts= number of grid points of input mesh

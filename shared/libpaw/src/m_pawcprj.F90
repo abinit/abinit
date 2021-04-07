@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* abinit/m_pawcprj
 !! NAME
 !!  m_pawcprj
@@ -11,7 +10,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2020 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2021 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,22 +120,18 @@ CONTAINS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
-!!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,chern_number
-!!      classify_bands,cohsex_me,ctocprj,d2frnl,m_datafordmft,debug_tools
-!!      dfpt_accrho,dfpt_cgwf,dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk
-!!      dfpt_wfkfermi,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
-!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,initberry,ks_ddiago
-!!      lincom_cgcprj,m_electronpositron,m_fock,m_invovl,m_io_kss,m_pawcprj
-!!      m_plowannier,m_shirley,m_wfd,make_grad_berry,nonlop,optics_paw
-!!      optics_paw_core,outkss,partial_dos_fractions_paw,paw_symcprj,pawmkaewf
-!!      pawmkrhoij,posdoppler,prep_calc_ucrpa,rf2_init,scfcv,setup_positron
-!!      sigma,smatrix_pawinit,suscep_stat,update_e_field_vars,vtorho,vtowfk
-!!      wf_mixing,wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
+!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_chebfi,m_chi0
+!!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
+!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
+!!      m_dfptnl_pert,m_dft_energy,m_electronpositron,m_epjdos,m_exc_analyze
+!!      m_exc_build,m_extraprho,m_fock,m_fock_getghc,m_forstr,m_getgh1c
+!!      m_getgh2c,m_getghc,m_gstate,m_invovl,m_io_kss,m_ksdiago,m_mlwfovlp_qp
+!!      m_nonlop,m_orbmag,m_paw_mkaewf,m_paw_occupancies,m_paw_optics
+!!      m_paw_overlap,m_paw_sym,m_pawcprj,m_plowannier,m_positron
+!!      m_prep_calc_ucrpa,m_rf2_init,m_scfcv_core,m_sigc,m_sigma_driver,m_sigx
+!!      m_suscep_stat,m_vhxc_me,m_vtorho,m_vtowfk,m_wfd,m_wfd_optic,m_wvl_psi
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -159,7 +154,7 @@ CONTAINS
  n1dim=size(cprj,dim=1);n2dim=size(cprj,dim=2);nn=size(nlmn,dim=1)
  if (nn/=n1dim) then
    write(msg,*) 'wrong sizes (pawcprj_alloc)! :',nn,n1dim
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  do jj=1,n2dim
@@ -198,23 +193,19 @@ end subroutine pawcprj_alloc
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
-!!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,chern_number
-!!      classify_bands,cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools
-!!      dfpt_accrho,dfpt_cgwf,dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk
-!!      dfpt_wfkfermi,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy
-!!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
-!!      forstrnps,getgh1c,getgh2c,getghc,getgsc,ks_ddiago,lincom_cgcprj
-!!      m_efield,m_electronpositron,m_fock,m_gkk,m_invovl,m_io_kss,m_pawcprj
-!!      m_phgamma,m_phpi,m_plowannier,m_scf_history,m_shirley,m_sigmaph,m_wfd
-!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
-!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
-!!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
-!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wf_mixing,wfd_pawrhoij
-!!      wfd_vnlpsi
+!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_chebfi,m_chi0
+!!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
+!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
+!!      m_dfptnl_pert,m_dft_energy,m_efield,m_electronpositron,m_epjdos
+!!      m_exc_analyze,m_exc_build,m_extraprho,m_fock,m_fock_getghc,m_forstr
+!!      m_getgh1c,m_getgh2c,m_getghc,m_gkk,m_gstate,m_invovl,m_io_kss,m_ksdiago
+!!      m_mlwfovlp_qp,m_nonlop,m_orbmag,m_paw_mkaewf,m_paw_occupancies
+!!      m_paw_optics,m_paw_overlap,m_paw_sym,m_pawcprj,m_phgamma,m_phpi
+!!      m_plowannier,m_positron,m_prep_calc_ucrpa,m_rf2_init,m_scf_history
+!!      m_scfcv_core,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_suscep_stat
+!!      m_vhxc_me,m_vtorho,m_vtowfk,m_wfd,m_wfd_optic
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -261,10 +252,9 @@ end subroutine pawcprj_free
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      ctocprj,dfpt_cgwf,m_fock
+!!      m_cgprj,m_dfpt_cgwf,m_fock,m_orbmag
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -316,14 +306,13 @@ end subroutine pawcprj_set_zero
 !!  MG: What about an option to report a pointer to cprj_in?
 !!
 !! PARENTS
-!!      berryphase_new,calc_sigc_me,calc_sigx_me,cchi0q0,cchi0q0_intraband,cgwf
-!!      chebfi,classify_bands,cohsex_me,corrmetalwf1,dfpt_looppert,dfpt_nstpaw
-!!      dfpt_vtowfk,dfpt_wfkfermi,extrapwf,getgsc,m_electronpositron,m_fock
-!!      m_pawcprj,m_wfd,make_grad_berry,nonlop,outkss,paw_symcprj,posdoppler
-!!      prep_calc_ucrpa,setup_positron,vtowfk
+!!      m_berryphase_new,m_cgwf,m_chebfi,m_chi0,m_classify_bands,m_cohsex
+!!      m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
+!!      m_electronpositron,m_extraprho,m_fock,m_getghc,m_io_kss,m_nonlop
+!!      m_orbmag,m_paw_sym,m_pawcprj,m_positron,m_prep_calc_ucrpa,m_sigc,m_sigx
+!!      m_vtowfk,m_wfd
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -351,15 +340,15 @@ end subroutine pawcprj_set_zero
 
  if (n1dim_in/=n1dim_out) then
    write(msg,'(a,2(1x,i0))')" Error in pawcprj_copy: n1 wrong sizes ",n1dim_in,n1dim_out
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if (n2dim_in/=n2dim_out) then
    write(msg,'(a,2(1x,i0))')" Error in pawcprj_copy: n2 wrong sizes ",n2dim_in,n2dim_out
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
  if (ncpgr_in<ncpgr_out)  then
    write(msg,'(a,2(1x,i0))')" Error in pawcprj_copy: ncpgr wrong sizes ",ncpgr_in,ncpgr_out
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
 !Check if icgr is present and if dcp have to be copy
@@ -427,10 +416,10 @@ end subroutine pawcprj_copy
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
 !! PARENTS
-!!      chebfi,dfpt_cgwf,dfpt_wfkfermi,getdc1,m_invovl,wf_mixing
+!!      m_chebfi,m_dfpt_cgwf,m_dfpt_scfcv,m_extraprho,m_getgh1c,m_invovl
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -458,7 +447,7 @@ end subroutine pawcprj_copy
    if (n2dimx/=n2dimy) msg = TRIM(msg)//"Error in pawcprj_axpby: n2 wrong sizes !"//ch10
    if (ncpgrx/=ncpgry) msg = TRIM(msg)//"Error in pawcprj_axpby: ncpgr wrong sizes !"//ch10
    if (LEN_TRIM(msg) > 0) then
-     MSG_ERROR(msg)
+     LIBPAW_ERROR(msg)
    end if
  else
    n1dimx=0;n2dimx=0;ncpgrx=0
@@ -549,10 +538,9 @@ end subroutine pawcprj_axpby
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
 !! PARENTS
-!!      corrmetalwf1,extrapwf
+!!      m_dfpt_vtowfk,m_extraprho
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -583,7 +571,7 @@ end subroutine pawcprj_axpby
    if (n2dimx/=n2dimy) msg = TRIM(msg)//"Error in pawcprj_zaxpby: n2 wrong sizes !"//ch10
    if (ncpgrx/=ncpgry) msg = TRIM(msg)//"Error in pawcprj_zaxpby: ncpgr wrong sizes !"//ch10
    if (LEN_TRIM(msg) > 0) then
-     MSG_ERROR(msg)
+     LIBPAW_ERROR(msg)
    end if
  end if
 
@@ -849,10 +837,9 @@ end subroutine pawcprj_projbd
 !!  whether it is implemented correctly for nonsymmorphic symmetries.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,m_fock,make_grad_berry
+!!      m_berryphase_new,m_cgwf,m_fock,m_orbmag
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -982,7 +969,6 @@ end subroutine pawcprj_projbd
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1048,10 +1034,9 @@ end subroutine pawcprj_conjg
 !!  cprj_in and cprj_out must be dimensionned as cprj_in(n1,n2*nn) and cprj_in(n1,n2)
 !!
 !! PARENTS
-!!      extrapwf,getdc1,lincom_cgcprj,wf_mixing
+!!      m_cgcprj,m_extraprho,m_getgh1c,m_scfcv_core
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1082,7 +1067,7 @@ end subroutine pawcprj_conjg
  if (n2in/=n2out*nn) msg = TRIM(msg)//"Bug in pawcprj_lincom: n2 wrong sizes!"//ch10
  if (ncpgrin/=ncpgrout) msg = TRIM(msg)//"Bug in pawcprj_lincom: ncpgr wrong sizes!"//ch10
  if (LEN_TRIM(msg) > 0) then
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  do jj=1,n2out
@@ -1150,7 +1135,6 @@ end subroutine pawcprj_lincom
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1231,14 +1215,12 @@ end subroutine pawcprj_output
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= output cprj datastructure
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,chern_number,datafordmft,dfpt_nstpaw,dfpt_vtowfk
-!!      dfpt_wfkfermi,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,extrapwf
-!!      fock2ACE,forstrnps,m_plowannier,make_grad_berry,optics_paw
-!!      optics_paw_core,pawmkrhoij,posdoppler,rf2_init,smatrix_pawinit
-!!      suscep_stat,wf_mixing
+!!      m_berryphase_new,m_cgcprj,m_cgwf,m_datafordmft,m_dfpt_nstwf
+!!      m_dfpt_scfcv,m_dfpt_vtowfk,m_extraprho,m_fock_getghc,m_forstr,m_orbmag
+!!      m_paw_occupancies,m_paw_optics,m_paw_overlap,m_plowannier,m_positron
+!!      m_rf2_init,m_scfcv_core,m_suscep_stat
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1272,11 +1254,11 @@ end subroutine pawcprj_output
  has_icpgr=(icpgr_>0.and.icpgr_<=ncpgr_)
  if (present(icpgr).and.(.not.present(ncpgr))) then
    msg='ncpgr must be present when icpgr is present (pawcprj_get)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (has_icpgr.and.cprj_k(1,1)%ncpgr<1) then
    msg='cprj_k%ncpgr not consistent with icpgr (pawcprj_get)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !MPI data
@@ -1284,7 +1266,7 @@ end subroutine pawcprj_output
  if (has_distrb) then
    if (.not.present(mpicomm)) then
      msg='mpicomm must be present when proc_distrb is present (pawcprj_get)!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    me=xmpi_comm_rank(mpicomm)
  end if
@@ -1295,7 +1277,7 @@ end subroutine pawcprj_output
      read(uncp) nband0
      if (nband_k/=nband0) then
        msg='_PAW file was not created with the right options (pawcprj_get)!'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
    end if
 
@@ -1460,10 +1442,10 @@ end subroutine pawcprj_get
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=output cprj (used if mkmem/=0)
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,ctocprj,dfpt_vtowfk,extrapwf,vtowfk,wf_mixing
+!!      m_berryphase_new,m_cgprj,m_cgwf,m_dfpt_vtowfk,m_extraprho,m_orbmag
+!!      m_scfcv_core,m_vtowfk
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1502,7 +1484,7 @@ end subroutine pawcprj_get
  if (has_distrb) then
    if (.not.present(mpicomm)) then
      msg='mpicomm must be present when proc_distrb is present (pawcprj_put)!'
-     MSG_BUG(msg)
+     LIBPAW_BUG(msg)
    end if
    me=xmpi_comm_rank(mpicomm)
  end if
@@ -1662,10 +1644,9 @@ end subroutine pawcprj_put
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      fock2ACE,forstrnps,ks_ddiago,scfcv
+!!      m_fock_getghc,m_forstr,m_ksdiago,m_scfcv_core
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1693,7 +1674,7 @@ end subroutine pawcprj_put
 
  if (n1cprj/=n1atindx) then
    msg='wrong sizes (pawcprj_reorder)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Nothing to do when the atoms are already sorted
@@ -1762,10 +1743,9 @@ end subroutine pawcprj_reorder
 !!  It should be easy to avoid this additional copy in the calling routine.
 !!
 !! PARENTS
-!!      outkss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1816,7 +1796,7 @@ subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,re
  if (rank/=sender.and.rank/=receiver) then
    write(msg,'(a,3i0)') &
 &   'rank is not equal to sender or receiver (pawcprj_mpi_exch): ',rank, sender, receiver
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -1892,10 +1872,9 @@ end subroutine pawcprj_mpi_exch
 !!   convenient for coding to have separate send and recieve routines.
 !!
 !! PARENTS
-!!      berryphase_new,posdoppler
+!!      m_berryphase_new,m_orbmag,m_positron
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1932,15 +1911,15 @@ subroutine pawcprj_mpi_send(natom,n2dim,nlmn,ncpgr,cprj_out,receiver,spaceComm,i
 
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_mpi_send)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (t2dim/=n2dim) then
    msg='size mismatch in dim=2 (pawcprj_mpi_send)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (tcpgr/=ncpgr) then
    msg='size mismatch in ncpgr (pawcprj_mpi_send)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -2004,10 +1983,9 @@ end subroutine pawcprj_mpi_send
 !!   convenient for coding to have separate send and receive routines.
 !!
 !! PARENTS
-!!      berryphase_new,posdoppler
+!!      m_berryphase_new,m_orbmag,m_positron
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2044,15 +2022,15 @@ subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr
 
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_mpi_recv)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (t2dim/=n2dim) then
    msg='size mismatch in dim=2 (pawcprj_mpi_recv)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (tcpgr/=ncpgr) then
    msg='size mismatch in ncpgr (pawcprj_mpi_recv)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -2107,10 +2085,9 @@ end subroutine pawcprj_mpi_recv
 !!  ierr=Error status.
 !!
 !! PARENTS
-!!      ctocprj
+!!      m_cgprj
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2210,10 +2187,9 @@ end subroutine pawcprj_mpi_sum
 !!  ierr=Error status.
 !!
 !! PARENTS
-!!      berryphase_new,cgwf,optics_paw,optics_paw_core,suscep_stat
+!!      m_berryphase_new,m_cgwf,m_paw_optics,m_suscep_stat
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2255,23 +2231,23 @@ subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,n2std,nlmn,ncpgr,
 
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (t2dim/=n2dim) then
    msg='size mismatch in dim=2 (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (tg2dim/=n2dim*nproc) then
    msg='size mismatch in dim=2 (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (tcpgr/=ncpgr) then
    msg='size mismatch in ncpgr (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (mod(n2dim,n2std)/=0) then
    msg='n2std should divide n2dim (pawcprj_mpi_allgather)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  rank_ordered_=.false.;if(present(rank_ordered)) rank_ordered_=rank_ordered
@@ -2346,10 +2322,9 @@ end subroutine pawcprj_mpi_allgather
 !!  Cprj(natom,n2dim)<pawcprj_type>=The datatype to be transmitted by master and received by the others nodes.
 !!
 !! PARENTS
-!!      m_fock,posdoppler
+!!      m_fock,m_positron
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2383,7 +2358,7 @@ subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
  n1dim=size(Cprj,dim=1)
  if (nn/=n1dim) then
    msg='size mismatch in natom (pawcprj_bcast)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  ntotcp=n2dim*SUM(nlmn(:))
@@ -2468,7 +2443,6 @@ end subroutine pawcprj_bcast
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2523,7 +2497,7 @@ end subroutine pawcprj_bcast
 &   size21==natom.and.size22==nbb*bpp*nspinor) then
  else
    msg='wrong cprjin/cprjout sizes (pawcprj_transpose)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Compute size of atom bloc (wr to cprj)
@@ -2634,7 +2608,7 @@ end subroutine pawcprj_bcast
      end if
      if (buf_indx/=sbufsize) then
        msg='wrong buffer size for sending (pawcprj_transpose)!'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
 
 !    Main call to MPI_ALLTOALL
@@ -2666,7 +2640,7 @@ end subroutine pawcprj_bcast
      end if
      if (buf_indx/=rbufsize) then
        msg='wrong buffer size for receiving (pawcprj_transpose)!'
-       MSG_BUG(msg)
+       LIBPAW_BUG(msg)
      end if
 
 !    Deallocation of buffers
@@ -2714,10 +2688,9 @@ end subroutine pawcprj_bcast
 !! the inner quantities being nspinor
 !!
 !! PARENTS
-!!      energy,pawmkrhoij
+!!      m_dft_energy,m_paw_occupancies
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
  subroutine pawcprj_gather_spin(cprj,cprj_gat,natom,n2size,nspinor,nspinortot,&
@@ -2746,7 +2719,7 @@ end subroutine pawcprj_bcast
  n2dim_gat=size(cprj_gat,dim=2)
  if (n2dim_gat/=(nspinortot/nspinor)*n2dim) then
    msg='wrong dims (pawcprj_gather_spin)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
  do iatom=1,natom
@@ -2832,12 +2805,11 @@ end subroutine pawcprj_bcast
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
 !! PARENTS
-!!      afterscfloop,berryphase_new,chern_number,dfpt_looppert,dfpt_scfcv
-!!      extrapwf,forstr,getghc,initberry,m_fock,m_hamiltonian,mlwfovlp_qp
-!!      outkss,scfcv,smatrix_pawinit,wf_mixing
+!!      m_afterscfloop,m_berryphase_new,m_dfpt_looppert,m_dfpt_scfcv
+!!      m_extraprho,m_fock,m_forstr,m_getghc,m_gstate,m_hamiltonian,m_io_kss
+!!      m_mlwfovlp_qp,m_orbmag,m_paw_overlap,m_scfcv_core
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2876,7 +2848,7 @@ subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
 
  CASE DEFAULT
   msg='Wrong value for sort_mode: '//TRIM(sort_mode)
-  MSG_ERROR(msg)
+  LIBPAW_ERROR(msg)
  END SELECT
 
 end subroutine pawcprj_getdim
@@ -2931,7 +2903,7 @@ function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
 
  if (SIZE(cprj1,DIM=1)/=SIZE(cprj2,DIM=1) .or. SIZE(cprj1,DIM=1)/=natom) then
    write(msg,'(a,3i4)')' Wrong size in typat, cprj1, cprj2 : ',natom,SIZE(cprj1),SIZE(cprj2)
-   MSG_ERROR(msg)
+   LIBPAW_ERROR(msg)
  end if
 
  nspinor = SIZE(cprj1,DIM=2)
@@ -2992,7 +2964,7 @@ end function paw_overlap
 !!  [buffer_gr] = if present the gradient data packed, dim : (2, ncpgr, n2dim*sum(nlmn))
 !!
 !! PARENTS
-!!  pawmkrhoij
+!!      m_paw_occupancies
 !!
 !! CHILDREN
 !!
@@ -3025,11 +2997,11 @@ subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
 
  if (natom/=n1dim) then
    msg='size mismatch in natom (pawcprj_pack)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (n2dim*SUM(nlmn)/=n2buffer) then
    msg='size mismatch in dim=2 (pawcprj_pack)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  ncpgr=0
  if (present(buffer_gr)) then
@@ -3071,7 +3043,7 @@ end subroutine pawcprj_pack
 !!  cprj=The datatype unpacked
 !!
 !! PARENTS
-!!  pawmkrhoij
+!!      m_paw_occupancies
 !!
 !! CHILDREN
 !!
@@ -3104,11 +3076,11 @@ subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
 
  if (natom/=n1dim) then
    msg='size mismatch in natom (pawcprj_unpack)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  if (n2dim*SUM(nlmn)/=n2buffer) then
    msg='size mismatch in dim=2 (pawcprj_unpack)!'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
  ncpgr=0
  if (present(buffer_gr)) then

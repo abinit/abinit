@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2020 ABINIT group (BXU, MVer)
+!!  Copyright (C) 2012-2021 ABINIT group (BXU, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,9 +72,10 @@ contains
 !!  elph_ds%k_phon%vvelocwtk = velocity^2 time integration weights of the coarse FS k-grid
 !!
 !! PARENTS
-!!      elphon,get_nv_fs_en
+!!      m_elphon
 !!
 !! CHILDREN
+!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -107,13 +108,13 @@ subroutine d2c_weights(elph_ds,elph_tr_ds)
  nscale2 = dble(nkpt_fine2/nkpt_phon2)
  nscale3 = dble(nkpt_fine3/nkpt_phon3)
  if (abs(INT(nscale1)-nscale1) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale2)-nscale2) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale3)-nscale3) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  nscale1 = INT(nscale1)
  nscale2 = INT(nscale2)
@@ -913,9 +914,10 @@ end subroutine d2c_weights
 !!  elph_ds%k_phon%wtq = integration weights of the coarse k-grid
 !!
 !! PARENTS
-!!      mka2f,mka2f_tr
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
+!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -945,13 +947,13 @@ subroutine d2c_wtq(elph_ds)
  nscale2 = dble(nkpt_fine2/nkpt_phon2)
  nscale3 = dble(nkpt_fine3/nkpt_phon3)
  if (abs(INT(nscale1)-nscale1) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale2)-nscale2) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  if (abs(INT(nscale3)-nscale3) > 0.01) then
-   MSG_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
+   ABI_ERROR('The denser k-gird MUST be multiples of the phon k-grid')
  end if
  nscale1 = INT(nscale1)
  nscale2 = INT(nscale2)
@@ -1363,7 +1365,7 @@ end subroutine d2c_wtq
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
 !! PARENTS
-!!      get_nv_fs_en,get_tau_k
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
 !!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
@@ -1444,9 +1446,9 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
 !  fix small window around fermie for tetrahedron weight calculation
    deltaene = (enemax-enemin)/dble(nene-1)
 
-   ABI_ALLOCATE(tmp_eigen,(k_obj%nkpt))
-   ABI_ALLOCATE(tweight,(k_obj%nkpt,nene))
-   ABI_ALLOCATE(dtweightde,(k_obj%nkpt,nene))
+   ABI_MALLOC(tmp_eigen,(k_obj%nkpt))
+   ABI_MALLOC(tweight,(k_obj%nkpt,nene))
+   ABI_MALLOC(dtweightde,(k_obj%nkpt,nene))
 
    do iband = 1,nFSband
 !    for each spin pol
@@ -1466,9 +1468,9 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
        tmp_wtk(iband,:,isppol,:) = dtweightde(:,:)*k_obj%nkpt
      end do
    end do
-   ABI_DEALLOCATE(tmp_eigen)
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
+   ABI_FREE(tmp_eigen)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 
    call destroy_tetra(tetrahedra)
    !call tetrahedra%free()
@@ -1559,7 +1561,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
 
  else
    write (message,'(a,i0)')" telphint should be between 0 and 3, found: ",telphint
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if ! if telphint
 
 end subroutine ep_el_weights
@@ -1608,10 +1610,10 @@ end subroutine ep_el_weights
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
 !! PARENTS
-!!      elphon,get_nv_fs_en,get_nv_fs_temp
+!!      m_elphon
 !!
 !! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv,wrtout
+!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -1693,9 +1695,9 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
    enemin = fermie - dble(ifermi-1)*deltaene
    enemax = enemin + dble(nene-1)*deltaene
 
-   ABI_ALLOCATE(tmp_eigen,(k_obj%nkpt))
-   ABI_ALLOCATE(tweight,(k_obj%nkpt,nene))
-   ABI_ALLOCATE(dtweightde,(k_obj%nkpt,nene))
+   ABI_MALLOC(tmp_eigen,(k_obj%nkpt))
+   ABI_MALLOC(tweight,(k_obj%nkpt,nene))
+   ABI_MALLOC(dtweightde,(k_obj%nkpt,nene))
 
    do iband = 1,nFSband
 !    for each spin pol
@@ -1716,9 +1718,9 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
      end do
 
    end do
-   ABI_DEALLOCATE(tmp_eigen)
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
+   ABI_FREE(tmp_eigen)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 
    call destroy_tetra(tetrahedra)
 
@@ -1799,7 +1801,7 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
 
  else
    write (message,'(a,i0)')" telphint should be between 0 and 3, found: ",telphint
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if ! if telphint
 
 end subroutine ep_fs_weights
@@ -1836,7 +1838,7 @@ end subroutine ep_fs_weights
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
 !! PARENTS
-!!      get_tau_k,mka2f,mka2f_tr
+!!      m_a2ftr,m_elphon
 !!
 !! CHILDREN
 !!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
@@ -1904,8 +1906,8 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
 
 !  do all the omega points for tetrahedron weight calculation
 
-   ABI_ALLOCATE(tweight,(k_obj%nkpt,nomega))
-   ABI_ALLOCATE(dtweightde,(k_obj%nkpt,nomega))
+   ABI_MALLOC(tweight,(k_obj%nkpt,nomega))
+   ABI_MALLOC(dtweightde,(k_obj%nkpt,nomega))
 
    do ibranch = 1,nbranch
      call get_tetra_weight(phfrq(ibranch,:),omega_min,omega_max,&
@@ -1914,8 +1916,8 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
 
      tmp_wtq(ibranch,:,:) = dtweightde(:,:)*k_obj%nkpt
    end do
-   ABI_DEALLOCATE(tweight)
-   ABI_DEALLOCATE(dtweightde)
+   ABI_FREE(tweight)
+   ABI_FREE(dtweightde)
 
    call destroy_tetra(tetrahedra)
 

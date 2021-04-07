@@ -6,7 +6,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2020 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2021 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,6 @@ module m_wfutils
  use m_abicore
  use m_errors
 
- use m_cgtools,  only : cg_to_reim, cg_from_reim
  use m_time,     only : timab
 
  implicit none
@@ -142,7 +141,7 @@ integer function wfindex(iblocksize,indtype)
  case ('W')
    wfindex=x_windex(iblocksize)
  case default
-   MSG_ERROR("Wrong indtype: "//trim(indtype))
+   ABI_ERROR("Wrong indtype: "//trim(indtype))
  end select
 
 end function wfindex
@@ -157,7 +156,7 @@ end function wfindex
 !! called from lobpcg in REAL or COMPLEX wave functions.
 !!
 !! INPUTS
-!!   direction=copy direction 
+!!   direction=copy direction
 !!                'D' direct (global array to local)
 !!                'I' indirect (local to global)
 !!   size=number of elements
@@ -254,7 +253,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
          call dcopy(rvectsize-1,tsrc(2,g1:g2),1,tdest(rvectsize+1:vectsize,iblocksize),1)
          tdest(rvectsize+1:vectsize,iblocksize) = factor * tdest(rvectsize+1:vectsize,iblocksize)
          ! MG FIXME: Here gfortran4.9 allocates temporary arrays due to factor.
-         !call cg_to_reim(rvectsize-1,ndat1,tsrc(1:,g1:),factor,tdest(2:,iblocksize))
        else
          g1 = wfindex(iband,  indtype)
          g2 = wfindex(iband+1,indtype)-1
@@ -263,7 +261,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
 
          call dcopy(rvectsize,tsrc(2,g1:g2),1,tdest(rvectsize+1:vectsize,iblocksize),1)
          tdest(rvectsize+1:vectsize,iblocksize) = factor * tdest(rvectsize+1:vectsize,iblocksize)
-         !call cg_to_reim(rvectsize,ndat1,tsrc(1:,g1:),factor,tdest(1:,iblocksize))
        end if
      end do
    else
@@ -306,7 +303,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
 
          call dcopy(rvectsize-1,tsrc(rvectsize+1:vectsize,iblocksize),1,tdest(2,g1:g2),1)
          tdest(2,g1:g2) = factor * tdest(2,g1:g2)
-         !call cg_from_reim(rvectsize-1,ndat1,tsrc(2:,iblocksize),factor,tdest(1,g1:))
        else
          g1 = wfindex(iband,indtype)
          g2 = wfindex(iband+1,indtype)-1
@@ -314,7 +310,6 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
          tdest(1,g1:g2) = factor * tdest(1,g1:g2)
          call dcopy(rvectsize,tsrc(rvectsize+1:vectsize,iblocksize),1,tdest(2,g1:g2),1)
          tdest(2,g1:g2) = factor * tdest(2,g1:g2)
-         !call cg_from_reim(rvectsize,ndat1,tsrc(1:,iblocksize),factor,tdest(1:,g1))
        end if
      end do
    else
@@ -330,8 +325,8 @@ subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indt
        call zcopy(size,tsrc,1,tdest,1)
      end if
    end if
- else 
-   MSG_ERROR("Wrong direction: "//trim(direction))
+ else
+   ABI_ERROR("Wrong direction: "//trim(direction))
  endif
 
  if (present(tim_wfcopy).and.present(timopt)) then

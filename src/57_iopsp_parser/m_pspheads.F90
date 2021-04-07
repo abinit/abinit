@@ -6,7 +6,7 @@
 !!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ MODULE m_pspheads
  use defs_datatypes, only : pspheader_type
  use m_time,     only : timab
  use m_io_tools, only : open_file
- use m_fstrings, only : basename, lstrip, sjoin, startswith
+ use m_fstrings, only : basename, lstrip, sjoin, startswith, atoi
  use m_read_upf_pwscf,  only : read_pseudo
  use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps, only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
@@ -78,15 +78,14 @@ contains
 !!  ecut_tmp(3,2,npsp)= possible ecut values as read in psp files
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      atomic_info,pawpsxml2ab
-!!      psp_from_data,psxml2abheader,upfheader2abi,wrtout
+!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
-subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
+subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
 !Arguments ------------------------------------
 !scalars
@@ -136,12 +135,13 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
    ! Check if the file is written in XML
    usexml = 0
-   if (open_file(filnam(ipsp),msg,newunit=unt,form="formatted",status="old") /= 0) then
-     MSG_ERROR(msg)
+   if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
+     ABI_ERROR(msg)
    end if
 
    rewind(unit=unt, err=10, iomsg=errmsg)
-   read(unt,*, err=10, iomsg=errmsg) testxml
+   read(unt, "(a)", err=10, iomsg=errmsg) testxml
+
    if(testxml(1:5)=='<?xml')then
      usexml = 1
      read(unt,*, err=10, iomsg=errmsg) testxml
@@ -154,15 +154,28 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      usexml = 0
    end if
 
-   close(unit=unt, err=10, iomsg=errmsg)
-
-!  Check if pseudopotential file is a Q-espresso UPF file
-   useupf = 0
-   if (open_file(filnam(ipsp),msg,newunit=unt,form="formatted",status="old") /= 0) then
-     MSG_ERROR(msg)
+   if (testxml(1:4) == '<UPF') then
+     ! Make sure this is not UPF version >= 2
+     ! "<UPF version="2.0.1">
+     ii = index(testxml, '"')
+     if (ii /= 0) then
+       if (atoi(testxml(ii+1:ii+1)) >= 2) then
+         ABI_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
+       end if
+     else
+       ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", filnam(ipsp)))
+     end if
    end if
 
-   rewind(unit=unt,err=10,iomsg=errmsg)
+   close(unit=unt, err=10, iomsg=errmsg)
+
+   ! Check if pseudopotential file is a Q-espresso UPF1 file
+   useupf = 0
+   if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
+     ABI_ERROR(msg)
+   end if
+
+   rewind(unit=unt, err=10, iomsg=errmsg)
    read(unt,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
    if (testxml(1:9)=='<PP_INFO>') then
      useupf = 1
@@ -175,7 +188,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
    if (usexml /= 1 .and. useupf /= 1) then
      ! Open the psp file and read a normal abinit style header
      if (open_file(filnam(ipsp), msg, newunit=unt, form='formatted', status='old') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      rewind (unit=unt, err=10, iomsg=errmsg)
@@ -197,8 +210,9 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
    else if (usexml==1 .and. test_paw==0) then
 #if defined HAVE_LIBPSML
-     write(msg,'(2a)')  &
-       '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
+     write(msg,'(4a)')  &
+       '- inpspheads : Reading pseudopotential header in XML form from ',ch10,&
+&      '-   ',trim(filnam(ipsp))
      call wrtout([std_out, ab_out], msg)
 
      ! could pass pspheads(ipsp) directly and fill all of it in psxml2ab
@@ -213,14 +227,15 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 #else
      write(msg, '(2a)') "XML norm-conserving pseudopotential has been input,", &
        " but abinit is not compiled with libPSML support. Reconfigure and recompile."
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
 #endif
 
    else if(usexml==1.and.test_paw==1)then
 
-     write(msg,'(a,a)')  &
-       '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
-     call wrtout([std_out, ab_out],  msg)
+     write(msg,'(4a)')  &
+       '- inpspheads : Reading pseudopotential header in XML form from ',ch10,&
+&      '-   ',trim(filnam(ipsp))
+     call wrtout([std_out, ab_out], msg)
 
      call pawpsxml2ab(filnam(ipsp),ecut_tmp(:,:,ipsp), pspheads(ipsp),1)
      pspcod=17; pspheads(ipsp)%pspcod=pspcod
@@ -230,12 +245,8 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
      pspheads(ipsp)%xccc  = n1xccc_default ! will be set to 0 if no nlcc
      ! call upfoctheader2abi (filnam(ipsp),  &
-     call upfheader2abi (filnam(ipsp),  &
-       pspheads(ipsp)%znuclpsp, &
-       pspheads(ipsp)%zionpsp,  &
-       pspheads(ipsp)%pspxc,    &
-       pspheads(ipsp)%lmax,     &
-       pspheads(ipsp)%xccc,     &
+     call upfheader2abi(filnam(ipsp), &
+       pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, &
        nproj, nprojso)
 
      pspcod = pspheads(ipsp)%pspcod
@@ -343,11 +354,11 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      read (unt,'(a80)', err=10, iomsg=errmsg) pspline
      pspline=adjustl(pspline)
      if (pspline(1:3)=="paw".or.pspline(1:3)=="PAW") &
-&     read(unit=pspline(4:80),fmt=*, err=10, iomsg=errmsg) pspheads(ipsp)%pawheader%pawver
+&      read(unit=pspline(4:80),fmt=*, err=10, iomsg=errmsg) pspheads(ipsp)%pawheader%pawver
      if (pspheads(ipsp)%pawheader%pawver==1) then   ! Compatibility with Abinit v4.2.x
        read (unit=pspline,fmt=*, err=10, iomsg=errmsg) pspheads(ipsp)%pawheader%basis_size,&
-&       pspheads(ipsp)%pawheader%lmn_size
-       ABI_ALLOCATE(orb,(pspheads(ipsp)%pawheader%basis_size))
+         pspheads(ipsp)%pawheader%lmn_size
+       ABI_MALLOC(orb,(pspheads(ipsp)%pawheader%basis_size))
        orb(:)=0
        read (unt,*, err=10, iomsg=errmsg) (orb(ii), ii=1,pspheads(ipsp)%pawheader%basis_size)
        read (unt,*, err=10, iomsg=errmsg)
@@ -357,9 +368,8 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
        read (unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%pawheader%shape_type
        if (pspheads(ipsp)%pawheader%shape_type==3) pspheads(ipsp)%pawheader%shape_type=-1
      else
-       read (unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%pawheader%basis_size,&
-&       pspheads(ipsp)%pawheader%lmn_size
-       ABI_ALLOCATE(orb,(pspheads(ipsp)%pawheader%basis_size))
+       read (unt,*, err=10, iomsg=errmsg) pspheads(ipsp)%pawheader%basis_size,pspheads(ipsp)%pawheader%lmn_size
+       ABI_MALLOC(orb,(pspheads(ipsp)%pawheader%basis_size))
        orb(:)=0
        read (unt,*, err=10, iomsg=errmsg) (orb(ii), ii=1,pspheads(ipsp)%pawheader%basis_size)
        pspheads(ipsp)%pawheader%mesh_size=mmax
@@ -373,7 +383,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
        pspline=adjustl(pspline); write(std_out,*) pspline
        read(unit=pspline,fmt=*) pspheads(ipsp)%pawheader%shape_type
        if (pspheads(ipsp)%pawheader%pawver==2.and.&
-&       pspheads(ipsp)%pawheader%shape_type==3) pspheads(ipsp)%pawheader%shape_type=-1
+           pspheads(ipsp)%pawheader%shape_type==3) pspheads(ipsp)%pawheader%shape_type=-1
        if (pspheads(ipsp)%pawheader%pawver>=3.and.pspheads(ipsp)%pawheader%shape_type==-1) then
          rr=zero;read(unit=pspline,fmt=*,err=20,end=20) ii,rr
          20       continue
@@ -387,7 +397,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      end do
      pspheads(ipsp)%pawheader%l_size=2*maxval(orb)+1
      pspheads(ipsp)%xccc=1  ! We suppose apriori that cc is used (but n1xccc is not used in PAW)
-     ABI_DEALLOCATE(orb)
+     ABI_FREE(orb)
 
 #if defined HAVE_BIGDFT
      ! WVL+PAW case, need to define GTHradii
@@ -405,7 +415,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
          write(msg,'(4a)')ch10,&
           "Chemical element not found in BigDFT table",ch10,&
           "Action: upgrade BigDFT table"
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
 !
 !      pspheads(ipsp)%pawheader%rpaw/4.0d0
@@ -419,7 +429,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
    else if(pspcod==8)then
 
-!    DRH pseudopotentials
+     ! DRH pseudopotentials
      read(unt,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
      if (fchrg>1.d-15) pspheads(ipsp)%xccc=n1xccc_default
      read(unt,*, err=10, iomsg=errmsg) nproj(0:lmax)
@@ -433,15 +443,15 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      pspheads(ipsp)%pspso=pspso
 
    else if(pspcod==9)then
-! placeholder: nothing to do everything is read above
+      ! placeholder: nothing to do everything is read above
 
    else if(pspcod==10)then
 
-!    HGH pseudopotentials, full h/k matrices
+     ! HGH pseudopotentials, full h/k matrices
      read (unt,*,err=10,iomsg=errmsg) pspheads(ipsp)%GTHradii(0) !rloc
      read (unt,*,err=10,iomsg=errmsg) idum
      if(idum-1/=lmax) then
-       MSG_ERROR("in inpspheads: nnonloc-1 /= lmax")
+       ABI_ERROR("in inpspheads: nnonloc-1 /= lmax")
      end if
      do ilmax=0,lmax
        read (unt,*,err=10,iomsg=errmsg) &
@@ -460,15 +470,15 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      end do
 
    else if (pspcod == 11.or.pspcod == 17) then
-     !    already done above
+     ! already done above
 
    else
      write(msg, '(a,i0,4a)' )&
        'The pseudopotential code (pspcod) read from file is ',pspcod,ch10,&
        'This value is not allowed (should be between 1 and 10). ',ch10,&
        'Action: use a correct pseudopotential file.'
-     MSG_ERROR(msg)
-   end if ! pspcod=...
+     ABI_ERROR(msg)
+   end if ! pspcod
 
    ! Store in pspheads
    if (pspcod /= 17) then
@@ -507,7 +517,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
         'One pseudopotential is PAW (pspcod=7 or 17) !',ch10,&
         'All pseudopotentials must be PAW (this is not the case here) !',ch10,&
         'Action: use only PAW pseudopotential files.'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
  end if
@@ -516,7 +526,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
  ! Handle IO error
  10 continue
- MSG_ERROR(errmsg)
+ ABI_ERROR(errmsg)
 
 end subroutine inpspheads
 !!***
@@ -538,10 +548,10 @@ end subroutine inpspheads
 !!   on all processors at output
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
+!!      m_common
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast
+!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -571,8 +581,8 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 
  comm = xmpi_world
 
-!Broadcast the characters (file names and titles)
- ABI_ALLOCATE(list_char,(3*npsp))
+ ! Broadcast the characters (file names and titles)
+ ABI_MALLOC(list_char,(3*npsp))
  list_char(1:npsp)=pspheads(1:npsp)%filpsp
  list_char(npsp+1:2*npsp)=pspheads(1:npsp)%title
  list_char(2*npsp+1:3*npsp)=pspheads(1:npsp)%md5_checksum
@@ -582,10 +592,10 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  pspheads(1:npsp)%filpsp=list_char(1:npsp)
  pspheads(1:npsp)%title=list_char(npsp+1:2*npsp)
  pspheads(1:npsp)%md5_checksum=list_char(2*npsp+1:3*npsp)(1:md5_slen)
- ABI_DEALLOCATE(list_char)
+ ABI_FREE(list_char)
 
-!Brodcast the integers
- ABI_ALLOCATE(list_int,(1+13*npsp))
+ ! Brodcast the integers
+ ABI_MALLOC(list_int,(1+13*npsp))
  list_int(1        :   npsp) = pspheads(1:npsp)%nproj(0)
  list_int(1+   npsp: 2*npsp) = pspheads(1:npsp)%nproj(1)
  list_int(1+ 2*npsp: 3*npsp) = pspheads(1:npsp)%nproj(2)
@@ -617,18 +627,17 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  pspheads(1:npsp)%nprojso(2) = list_int(1+11*npsp:12*npsp)
  pspheads(1:npsp)%nprojso(3) = list_int(1+12*npsp:13*npsp)
  test_paw                    = list_int(1+13*npsp)
- ABI_DEALLOCATE(list_int)
+ ABI_FREE(list_int)
 
-!Unbeliveable, this cannot be sent with the others, for woopy
- ABI_ALLOCATE(list_int,(npsp))
+ ! Unbeliveable, this cannot be sent with the others, for woopy
+ ABI_MALLOC(list_int,(npsp))
  list_int(1:npsp) = pspheads(1:npsp)%usewvl
  call xmpi_bcast(list_int,master,comm,ierr)
  pspheads(1:npsp)%usewvl     = list_int(1:npsp)
- ABI_DEALLOCATE(list_int)
+ ABI_FREE(list_int)
 
-
-!Broadcast zionpsp and znuclpsp
- ABI_ALLOCATE(list_dpr,(7*npsp))
+ ! Broadcast zionpsp and znuclpsp
+ ABI_MALLOC(list_dpr,(7*npsp))
  list_dpr(1       :  npsp) = pspheads(1:npsp)%zionpsp
  list_dpr(1+  npsp:2*npsp) = pspheads(1:npsp)%znuclpsp
  list_dpr(1+2*npsp:3*npsp) = pspheads(1:npsp)%GTHradii(0)
@@ -646,11 +655,11 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  pspheads(1:npsp)%GTHradii(2) = list_dpr(1+4*npsp:5*npsp)
  pspheads(1:npsp)%GTHradii(3) = list_dpr(1+5*npsp:6*npsp)
  pspheads(1:npsp)%GTHradii(4) = list_dpr(1+6*npsp:7*npsp)
- ABI_DEALLOCATE(list_dpr)
+ ABI_FREE(list_dpr)
 
-!Broadcast additional integers for PAW psps (testpaw was spread, previously)
+ ! Broadcast additional integers for PAW psps (testpaw was spread, previously)
  if (test_paw==1) then
-   ABI_ALLOCATE(list_int,(6*npsp))
+   ABI_MALLOC(list_int,(6*npsp))
    list_int(1       :  npsp)=pspheads(1:npsp)%pawheader%basis_size
    list_int(1+  npsp:2*npsp)=pspheads(1:npsp)%pawheader%l_size
    list_int(1+2*npsp:3*npsp)=pspheads(1:npsp)%pawheader%lmn_size
@@ -666,10 +675,10 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
    pspheads(1:npsp)%pawheader%mesh_size =list_int(1+3*npsp:4*npsp)
    pspheads(1:npsp)%pawheader%pawver    =list_int(1+4*npsp:5*npsp)
    pspheads(1:npsp)%pawheader%shape_type=list_int(1+5*npsp:6*npsp)
-   ABI_DEALLOCATE(list_int)
+   ABI_FREE(list_int)
 
-!  broadcast rpaw values
-   ABI_ALLOCATE(list_dpr,(2*npsp))
+   ! broadcast rpaw values
+   ABI_MALLOC(list_dpr,(2*npsp))
 
    list_dpr(1       :  npsp) = pspheads(1:npsp)%pawheader%rpaw
    list_dpr(1+1*npsp:2*npsp) = pspheads(1:npsp)%pawheader%rshp
@@ -679,13 +688,13 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
    pspheads(1:npsp)%pawheader%rpaw = list_dpr(1       :  npsp)
    pspheads(1:npsp)%pawheader%rshp = list_dpr(1+  npsp:2*npsp)
 
-   ABI_DEALLOCATE(list_dpr)
+   ABI_FREE(list_dpr)
  end if
 
  call timab(48,2,tsec)
 
 #else
-!Code to use unused dummy arguments
+ ! Code to use unused dummy arguments
  if(pspheads(1)%lmax == -10) pspheads(1)%lmax=-10
  if(test_paw == -1) test_paw = -1
 #endif
@@ -710,10 +719,10 @@ end subroutine pspheads_comm
 !! pspheads data structure is filled
 !!
 !! PARENTS
-!!      inpspheads
+!!      m_pspheads,m_pspini
 !!
 !! CHILDREN
-!!      pawpsp_read_header_xml,pawpsp_read_pawheader
+!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -744,8 +753,7 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
    call rdpawpsxml(filnam,paw_setuploc)
  end if
 
- call pawpsp_read_header_xml(lloc,lmax,pspcod,&
-&   pspxc,paw_setuploc,r2well,zionpsp,znuclpsp)
+ call pawpsp_read_header_xml(lloc,lmax,pspcod, pspxc,paw_setuploc,r2well,zionpsp,znuclpsp)
 
  pspheads%lmax=lmax
  pspheads%pspxc=pspxc
@@ -753,10 +761,10 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
  pspheads%znuclpsp=znuclpsp
 
  call pawpsp_read_pawheader(pspheads%pawheader%basis_size,&
-&   pspheads%lmax,pspheads%pawheader%lmn_size,&
-&   pspheads%pawheader%l_size,pspheads%pawheader%mesh_size,&
-&   pspheads%pawheader%pawver,paw_setuploc,pspheads%pawheader%rpaw,&
-&   pspheads%pawheader%rshp,pspheads%pawheader%shape_type)
+   pspheads%lmax,pspheads%pawheader%lmn_size,&
+   pspheads%pawheader%l_size,pspheads%pawheader%mesh_size,&
+   pspheads%pawheader%pawver,paw_setuploc,pspheads%pawheader%rpaw,&
+   pspheads%pawheader%rshp,pspheads%pawheader%shape_type)
 
  pspheads%nproj=0
  do il=0,pspheads%lmax
@@ -764,15 +772,14 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
      if(paw_setuploc%valence_states%state(ii)%ll==il) pspheads%nproj(il)=pspheads%nproj(il)+1
    end do
  end do
+
  pspheads%nprojso=0
  pspheads%pspdat=27061961
  pspheads%pspso=1
  pspheads%xccc=1
  pspheads%title=paw_setuploc%atom%symbol
 
- if (option==1) then
-   call paw_setup_free(paw_setuploc)
- end if
+ if (option==1) call paw_setup_free(paw_setuploc)
 
 end subroutine pawpsxml2ab
 !!***
@@ -799,7 +806,7 @@ end subroutine pawpsxml2ab
 !!  nprojso_l= number of projectors for each channel for SO correction projectors
 !!
 !! PARENTS
-!!      inpspheads
+!!      m_pspheads
 !!
 !! CHILDREN
 !!      set_dft_from_indices,set_dft_from_name
@@ -826,7 +833,7 @@ subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, np
 
 !call pwscf routine for reading in UPF
  if (open_file(filpsp, msg, newunit=iunit, status='old',form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !read in psp data to static data in pseudo module, for ipsx == 1
@@ -877,7 +884,7 @@ end subroutine upfheader2abi
 !!   Left without defs_basis or calls to abinit routines ON PURPOSE
 !!
 !! PARENTS
-!!      upf2abinit,upfheader2abi
+!!      m_pspheads,m_upf2abinit
 !!
 !! CHILDREN
 !!      set_dft_from_indices,set_dft_from_name
@@ -952,7 +959,7 @@ subroutine upfxc2abi(dft, pspxc)
 !    make general approach: check gradient parts first, then lda.
 !    event. check if they are consistent.
  case default
-   MSG_ERROR('upf2abinit: XC functional not recognized')
+   ABI_ERROR('upf2abinit: XC functional not recognized')
  end select
 
 end subroutine upfxc2abi

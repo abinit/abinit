@@ -11,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,7 +228,7 @@ MODULE m_bz_mesh
 
   integer,allocatable :: ndivs(:)
    ! ndivs(nbounds-1)
-   ! Number of division for each segment.
+   ! Number of divisions for each segment.
 
   integer,allocatable :: bounds2kpt(:)
    ! bounds2kpt(nbounds)
@@ -257,6 +257,7 @@ MODULE m_bz_mesh
  end type kpath_t
 
  public :: kpath_new        ! Construct a new path
+ !public :: kpath_from_cryst ! High-level API to construct a path from a crystal_t
  public :: make_path        ! Construct a normalized path. TODO: Remove
 !!***
 
@@ -390,8 +391,8 @@ CONTAINS  !=====================================================================
 !!  Kmesh<kmesh_t>=Datatype gathering information on the k point sampling.
 !!
 !! PARENTS
-!!      cchi0q0_intraband,gwls_hamiltonian,m_bz_mesh,mlwfovlp_qp,mrgscr
-!!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_bz_mesh,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
+!!      m_screening_driver,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -429,7 +430,7 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  ABI_CHECK(ltest, sjoin('Wrong value for timrev= ', itoa(Cryst%timrev)))
 
  if (ALL(kptopt/=(/1,3/))) then
-   MSG_WARNING(sjoin("Not allowed value for kptopt: ", itoa(kptopt)))
+   ABI_WARNING(sjoin("Not allowed value for kptopt: ", itoa(kptopt)))
  end if
 
  Kmesh%kptopt = kptopt
@@ -504,7 +505,7 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  end if
 
  if (do_hack) then
-   MSG_WARNING("Hacking the rottb tables!")
+   ABI_WARNING("Hacking the rottb tables!")
    do ik_bz=1,nkbz
      Kmesh%rottbm1(ik_bz,:,:) = ik_bz
      Kmesh%rottb  (ik_bz,:,:) = ik_bz
@@ -554,8 +555,8 @@ end subroutine kmesh_init
 !! Kmesh<kmesh_t>=The datatype to be freed.
 !!
 !! PARENTS
-!!      bethe_salpeter,cchi0q0_intraband,gwls_hamiltonian,m_shirley,mlwfovlp_qp
-!!      mrgscr,screening,sigma
+!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
+!!      m_screening_driver,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
 !!
@@ -610,8 +611,8 @@ end subroutine kmesh_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,mrgscr,setup_bse,setup_bse_interp,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!
@@ -667,7 +668,7 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 &    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
+   ABI_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
  END SELECT
 
  call wrtout(my_unt,msg,my_mode)
@@ -834,7 +835,7 @@ subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
 &          'Initial k-point ',ik,'/',nbz,kbase(:),ch10,&
 &          'Rotated k-point (not found) ',krot(:),ch10,&
 &          'Through symmetry operation ',isym,' and itim ',itim
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end do
@@ -842,7 +843,7 @@ subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
  end do
 
  if (.not.isok) then
-   MSG_ERROR('k-mesh not closed')
+   ABI_ERROR('k-mesh not closed')
  end if
 
  DBG_EXIT("COLL")
@@ -876,11 +877,10 @@ end subroutine setup_k_rotation
 !! [isirred]=.TRUE. if the k-point belongs to IBZ.
 !!
 !! PARENTS
-!!      calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_ucrpa,cchi0,cchi0q0
-!!      cchi0q0_intraband,cohsex_me,debug_tools,exc_build_block,exc_build_ham
-!!      m_dyson_solver,m_ppmodel,m_screen,m_screening,m_shirley,m_vcoul,m_wfd
-!!      paw_symcprj,prep_calc_ucrpa,random_stopping_power,read_plowannier
-!!      setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_calc_ucrpa,m_chi0,m_cohsex,m_dyson_solver
+!!      m_exc_build,m_paw_sym,m_plowannier,m_ppmodel,m_prep_calc_ucrpa
+!!      m_read_plowannier,m_screen,m_screening,m_screening_driver,m_sigc
+!!      m_sigma_driver,m_sigx,m_vcoul,m_wfd,m_wfd_optic
 !!
 !! CHILDREN
 !!
@@ -907,7 +907,7 @@ subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
  if (ik_bz>Kmesh%nbz.or.ik_bz<=0) then
    write(msg,'(a,2i3)')' Wrong value for ik_bz: ',ik_bz,Kmesh%nbz
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  kbz    = Kmesh%bz(:,ik_bz)
@@ -944,7 +944,7 @@ end subroutine get_bz_item
 !!  Add mapping ibz2bz, ibz2star
 !!
 !! PARENTS
-!!      paw_symcprj
+!!      m_paw_sym
 !!
 !! CHILDREN
 !!
@@ -963,7 +963,7 @@ subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 ! *********************************************************************
 
  if (ik_ibz>Kmesh%nibz.or.ik_ibz<=0) then
-   MSG_BUG(sjoin('wrong value for ik_ibz: ',itoa(ik_ibz)))
+   ABI_BUG(sjoin('wrong value for ik_ibz: ',itoa(ik_ibz)))
  end if
 
  kibz=Kmesh%ibz(:,ik_ibz)
@@ -993,7 +993,7 @@ end subroutine get_IBZ_item
 !!  nfound= the number of points in the BZ that are equal to k1-k2 (should be 1 if everything is OK)
 !!
 !! PARENTS
-!!      cchi0
+!!      m_chi0
 !!
 !! CHILDREN
 !!
@@ -1021,7 +1021,7 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 
  if (.not.has_BZ_item(Kmesh,k1,ikp,umklp)) then
    write(msg,'(a,3f12.6)')' first point must be in BZ: ',k1
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  kdiff   = k1-k2
@@ -1042,15 +1042,15 @@ subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
  ! * For extremely dense meshes, tol1q in defs_basis might be too large!
  if (nfound/=1) then
    if (nfound==0) then
-     MSG_WARNING(" k1-k2-G0 not found in BZ")
+     ABI_WARNING(" k1-k2-G0 not found in BZ")
    else
-     MSG_WARNING(sjoin(' Multiple k1-k2-G0 found in BZ, nfound= ', itoa(nfound)))
+     ABI_WARNING(sjoin(' Multiple k1-k2-G0 found in BZ, nfound= ', itoa(nfound)))
    end if
    write(msg,'(4a,3(a,3f12.6,a))')&
 &    ' k1    = ',k1   ,ch10,&
 &    ' k2    = ',k2   ,ch10,&
 &    ' k1-k2 = ',kdiff,ch10
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
 end subroutine get_BZ_diff
@@ -1194,7 +1194,7 @@ logical function has_BZ_item(Kmesh,item,ikbz,g0)
  end do
 
  if (yetfound/=0.and.yetfound/=1) then
-   MSG_ERROR('Multiple k-points found')
+   ABI_ERROR('Multiple k-points found')
  end if
 
 end function has_BZ_item
@@ -1255,7 +1255,7 @@ logical function has_IBZ_item(Kmesh,item,ikibz,g0)
  end do
 
  if (yetfound/=0.and.yetfound/=1) then
-   MSG_BUG("multiple k-points found")
+   ABI_BUG("multiple k-points found")
  end if
 
 end function has_IBZ_item
@@ -1327,7 +1327,7 @@ end function bz_mesh_isirred
 !! Kmesh<kmesh_t>=Object gathering info on the sampling of the Brillouin zone.
 !!
 !! PARENTS
-!!      m_shirley,setup_bse,setup_bse_interp
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
 !!
@@ -1364,7 +1364,7 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  !@kmesh_t
  !if (ALL(kptopt/=(/1,2,3,4/))) then
  if (ALL(kptopt/=(/1,3/))) then
-   MSG_WARNING(sjoin(" Not allowed value for kptopt: ", itoa(kptopt)))
+   ABI_WARNING(sjoin(" Not allowed value for kptopt: ", itoa(kptopt)))
  end if
  !
  ! ======================================================================
@@ -1523,7 +1523,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
            is_irred_set=.FALSE.
            write(msg,'(2(a,3f8.4),2(a,i2))')&
 &            ' k1 = ',k1,' is symmetrical of k2 = ',k2,' through sym = ',isym,' itim = ',itim
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
        end do
      end do
@@ -1535,7 +1535,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
 
  if (.not.is_irred_set) then
    msg = "Input array kibz does not constitute an irreducible set."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
  !
  ! === Loop over k-points in IBZ ===
@@ -1567,7 +1567,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
          nkbz=nkbz+1
          wtk(ikibz)=wtk(ikibz)+one
          if (nkbz>nkbzmx) then
-           MSG_BUG(sjoin('nkbzmx too small, nkbzmx = ',itoa(nkbzmx),', increase nkbzmx !'))
+           ABI_BUG(sjoin('nkbzmx too small, nkbzmx = ',itoa(nkbzmx),', increase nkbzmx !'))
          end if
          kbz(:,nkbz) = knew(:)
          ktab (nkbz) = ikibz
@@ -1587,7 +1587,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
    ltest = (nkref>=nkbz.and.nkref<=nkbzmx)
    if (.not.ltest) then
      write(msg,'(3(a,i0))')" Wrong value for nkref: nkref= ",nkref," nkbz= ",nkbz," nkbzmx =",nkbzmx
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    do ikref=1,nkref
@@ -1617,7 +1617,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
 
      if (.not.found) then
        write(msg,'(a,3es16.8)')" One of the k-point in ref_bz is not a symmetrical image of the IBZ: ",kref
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
    !
@@ -1663,7 +1663,7 @@ end subroutine identk
 !!  opt_ng0(3)=Minimal reduced components of the G0 vectors to account for umklapps.
 !!
 !! PARENTS
-!!      setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -1764,7 +1764,7 @@ subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 &        'Not able to found umklapp G0 vector such as k1-k2 = kf+G0',ch10,&
 &        'point1 = ',i1,kbz1(:,i1),ch10,&
 &        'point2 = ',i2,kbz2(:,i2),ch10
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      else
        ! We have found one k, extracting the max g0
        roundk(:) = ABS(kbigdiff(:) - kbigfold(:,iperm(ind)))
@@ -1823,7 +1823,7 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 &       'This is likely related to a truncation error for a k-point in the input file',ch10,&
 &       'Always prefer fractional numbers in the input file instead of truncated ones',ch10,&
 &       '(e.g. 1/6 instead of 0.166666667)',ch10
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  norm = (vect(1)*factor+vect(2))*factor+vect(3)
@@ -1856,13 +1856,13 @@ end subroutine getkptnorm_bycomponent
 !!    contain the path in reduced coordinates.
 !!
 !! PARENTS
-!!      m_bz_mesh,m_nesting,m_phonons,mkph_linwid
+!!      m_bz_mesh,m_elphon,m_nesting,m_phonons
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
+subroutine make_path(nbounds, bounds, met, space, ndivsm, ndivs, npts, path, unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -1899,9 +1899,9 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
  nfact=MINVAL(lng)
  if (ABS(nfact)<tol6) then
    write(msg,'(3a)')&
-&    'Found two equivalent consecutive points in the path ',ch10,&
-&    'This is not allowed, modify the path in your input file'
-   MSG_ERROR(msg)
+     'Found two equivalent consecutive points in the path ',ch10,&
+     'This is not allowed, modify the path in your input file'
+   ABI_ERROR(msg)
  end if
 
  nfact=nfact/ndivsm
@@ -1909,20 +1909,20 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
  npts=SUM(ndivs)+1 !1 for the first point
 
  write(msg,'(2a,i0,2a)')ch10,&
-&  ' Total number of points in the path: ',npts,ch10,&
-&  ' Number of divisions for each segment of the normalized path: '
- call wrtout(ount,msg,'COLL')
+  ' Total number of points in the path: ',npts,ch10,&
+  ' Number of divisions for each segment of the normalized path: '
+ call wrtout(ount,msg)
 
  do ii=1,nbounds-1
    write(msg,'(2(3f8.5,a),i0,a)')bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndivs : ',ndivs(ii),' )'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  end do
- call wrtout(ount,ch10,'COLL')
+ call wrtout(ount,ch10)
 
  ! Allocate and construct the path.
  ABI_MALLOC(path,(3,npts))
 
- if (prtvol > 0) call wrtout(ount,' Normalized Path: ','COLL')
+ if (prtvol > 0) call wrtout(ount,' Normalized Path: ')
  idx=0
  do ii=1,nbounds-1
    do jp=1,ndivs(ii)
@@ -1930,7 +1930,7 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
      path(:,idx)=bounds(:,ii)+(jp-1)*(bounds(:,ii+1)-bounds(:,ii))/ndivs(ii)
      if (prtvol > 0) then
        write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-       call wrtout(ount,msg,'COLL')
+       call wrtout(ount,msg)
      end if
    end do
  end do
@@ -1938,7 +1938,7 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 
  if (prtvol > 0) then
    write(msg,'(i0,4x,3(f8.5,1x))')npts,path(:,npts)
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  end if
 
 end subroutine make_path
@@ -1965,8 +1965,8 @@ end subroutine make_path
 !!  Qmesh<kmesh_t>=datatype gathering information on the q point sampling.
 !!
 !! PARENTS
-!!      gwls_hamiltonian,mrgscr,setup_bse,setup_bse_interp,setup_screening
-!!      setup_sigma
+!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
+!!      mrgscr
 !!
 !! CHILDREN
 !!
@@ -2179,7 +2179,7 @@ subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
    if (.not.found) then
      iq=iq+1
      if (iq>nqibz) then
-       MSG_BUG(sjoin('iq > nqibz= ',itoa(nqibz)))
+       ABI_BUG(sjoin('iq > nqibz= ',itoa(nqibz)))
      end if
      qibz(:,iq)=qposs(:)
    end if
@@ -2187,7 +2187,7 @@ subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
 
  if (iq/=nqibz) then
    write(msg,'(2(a,i5))')' iq= ',iq,'/= nqibz= ',nqibz
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  !
  ! * Translate q-points to 1st BZ in the interval [-1/2,1/2[
@@ -2221,8 +2221,8 @@ end subroutine findq
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,m_gkk,m_phpi
-!!      m_sigma,prep_calc_ucrpa
+!!      m_cohsex,m_exc_build,m_gkk,m_phpi,m_prep_calc_ucrpa,m_sigc,m_sigma
+!!      m_sigx
 !!
 !! CHILDREN
 !!
@@ -2263,7 +2263,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    end do
 
    if (iq==0) then
-     MSG_BUG('Wrong list of q-points: q=0 not present.')
+     ABI_BUG('Wrong list of q-points: q=0 not present.')
    end if
    g0(:)=0; RETURN
 
@@ -2349,7 +2349,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
    if (iq==0) then
      write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
  end if
@@ -2403,7 +2403,7 @@ end subroutine findqg0
 !!   must be considered in the calculation of \chi_o, 0 otherwise
 !!
 !! PARENTS
-!!      cchi0q0_intraband,setup_screening,sigma
+!!      m_chi0,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -2489,7 +2489,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &    'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
 &    'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
 &    'To run a GW calculation with an old KSS file, use version < 5.5 '
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Find operations in the little group as well as umklapp vectors G0 ===
@@ -2622,7 +2622,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
         end do
         if (.not.found) then
           write(msg,'(a,3f12.6,a)')'Not able to find the ',knew(:),' in the array BZ '
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
         end if
       end if
 
@@ -2634,11 +2634,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  ABI_FREE(ktest)
 
  if (ntest/=nbz) then
-   MSG_BUG(sjoin('ntest - nbz = ',itoa(ntest-nbz)))
+   ABI_BUG(sjoin('ntest - nbz = ',itoa(ntest-nbz)))
  end if
 
  if (SUM(Ltg%wtksym)/=nbz) then
-   MSG_BUG(sjoin('sum(Ltg%wtksym)-nbz = ', itoa(SUM(Ltg%wtksym)-nbz)))
+   ABI_BUG(sjoin('sum(Ltg%wtksym)-nbz = ', itoa(SUM(Ltg%wtksym)-nbz)))
  end if
 
  Ltg%max_kin_gmG0=zero
@@ -2679,7 +2679,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &              'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&
 &              'Minimum required cutoff energy for G-G0 sphere= ',kin,ch10,&
 &              'G0 = ',g0(:)
-             MSG_ERROR(msg)
+             ABI_ERROR(msg)
            end if
          end do
        end if
@@ -2695,7 +2695,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
      write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
      write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
      write(std_out,*)ik,Kmesh%bz(:,ik)
-     MSG_BUG("Wrong weight")
+     ABI_BUG("Wrong weight")
    end if
  end do
  do ik=1,nbz
@@ -2703,7 +2703,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    if (.not.isamek(knew,Kmesh%bz(:,ik),gg)) then
      write(std_out,*)knew,Kmesh%bz(:,ik)
      write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
-     MSG_BUG("Wrong tables")
+     ABI_BUG("Wrong tables")
    end if
  end do
 #endif
@@ -2817,7 +2817,7 @@ end subroutine littlegroup_free_1D
 !!  Only printing
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
+!!      m_chi0,m_cohsex,m_sigc,m_sigx
 !!
 !! CHILDREN
 !!
@@ -2952,7 +2952,7 @@ function box_len(qpt,gprimd)
    end if
 
    if (ALL(q0box==(/-1,-1,-1/) )) then
-     MSG_BUG("Cannot found q0box")
+     ABI_BUG("Cannot found q0box")
    end if
 
    box_len = normv(q0box,gmet,"G")
@@ -2975,9 +2975,7 @@ end function box_len
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
 !!  ndivsm=Number of divisions to be used for the smallest segment.
-!!
-!! OUTPUT
-!!  Kpath<type(kpath_t)>=Object with the normalized path.
+!!   A negative value activates a specialized mode if with bounds is suppose to supply the full list of k-points.
 !!
 !! PARENTS
 !!      wfk_analyze
@@ -2998,12 +2996,11 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
  integer :: ii
 !arrays
  real(dp) :: dk(3)
- real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")
- ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
+ !ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
  Kpath%nbounds = size(bounds, dim=2)
  Kpath%ndivsm = ndivsm
 
@@ -3011,14 +3008,19 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
  Kpath%gprimd = gprimd; Kpath%gmet = matmul(transpose(gprimd), gprimd)
 
  ABI_MALLOC(Kpath%ndivs, (Kpath%nbounds-1))
- call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndivsm,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
 
- ABI_MALLOC(Kpath%bounds, (3,Kpath%nbounds))
+ if (kpath%ndivsm > 0) then
+   call make_path(Kpath%nbounds, bounds, Kpath%gmet, "G", ndivsm, Kpath%ndivs, Kpath%npts, kpath%points, unit=dev_null)
+ else
+   ! Get list of points directly.
+   kpath%ndivs = 1
+   kpath%npts = kpath%nbounds
+   ABI_MALLOC(Kpath%points, (3, Kpath%npts))
+   kpath%points = bounds
+ end if
+
+ ABI_MALLOC(Kpath%bounds, (3, Kpath%nbounds))
  Kpath%bounds = bounds
-
- ABI_MALLOC(Kpath%points, (3,Kpath%npts))
- Kpath%points = pts
- ABI_FREE(pts)
 
  ! Compute distance between point i-1 and i
  ABI_CALLOC(kpath%dl, (kpath%npts))
@@ -3047,7 +3049,6 @@ end function kpath_new
 !!  Free memory allocated in the object
 !!
 !! PARENTS
-!!      m_ebands,m_gruneisen,m_ifc,m_phgamma,m_phonons,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -3089,7 +3090,6 @@ end subroutine kpath_free
 !!  Only printing
 !!
 !! PARENTS
-!!      m_ebands,m_gruneisen,m_phgamma
 !!
 !! CHILDREN
 !!
@@ -3115,8 +3115,8 @@ subroutine kpath_print(kpath, header, unit, prtvol, pre)
  if (unt <= 0) return
 
  if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(my_pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
- write(unt, "(a)") sjoin(my_pre, "Boundaries and corresponding index in the k-points array:")
+ write(unt, "(a)") sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
+ write(unt, "(a)") sjoin(my_pre, " Boundaries and corresponding index in the k-points array:")
  do ii=1,kpath%nbounds
    write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
  end do

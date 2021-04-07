@@ -1,0 +1,75 @@
+#Si under applied stress
+
+ndtset 2
+
+# Set 1 : initial self-consistency
+
+kptopt1   1
+tolvrs1 1.0d-18
+
+
+# Set 2 : response-function strain calculation
+
+rfphon2 1
+rfatpol2 1 2
+rfdir2 1 1 1
+nqpt2 1
+qpt2 0 0 0
+rfstrs2  3
+getwfk2 -1
+kptopt2 2
+tolvrs2 1.0d-10
+
+
+
+#comon input data
+
+ acell   10.215 10.215  9.70
+ diemac   12.0
+   ecut   5.0
+  natom   2
+  ngkpt   2 2 2
+nshiftk   4
+shiftk  0.5 0.5 0.5  # These shifts will be the same for all grids
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+ nstep  50
+ nband   4
+ ntypat   1
+ prtvol   10
+rprim  0.02498958  0.499375130  0.5
+       0.499375130 0.02498958   0.5
+       0.5243647   0.5243647  0.0
+typat 1 1
+#coordinates were optimized
+xred  3.2588142207E-03  3.2588142207E-03  2.8033396556E-04
+      2.4674118578E-01  2.4674118578E-01  2.4971966604E-01
+
+
+znucl     14.00000
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t81.abi, t82.abi, t83.abi 
+#%% [files]
+#%% files_to_test = 
+#%%   t81.abo, tolnlines = 1, tolabs = 3.810e-09, tolrel = 2.000e-02
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = X. Wu
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Highly Strained Si (diamond) structure.
+#%%   Self-consistent and response function calculations with respect to
+#%%   strains and displacements in 3 direction are computed. The structure
+#%%   is obtained from relaxing atoms only, after 5% strains eta_3 and eta_6
+#%%   were applied on purpose. In this run, two DDB files are generated,
+#%%   which are first order and second order derivative data base respectively.
+#%%<END TEST_INFO>

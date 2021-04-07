@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (GA)
+!!  Copyright (C) 2008-2021 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,8 +75,6 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_block
-!!      gtblk9,gtdyn9,outddbnc,wrtout
 !!
 !! SOURCE
 
@@ -274,7 +272,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    unddb = get_unit()
 
    ! Write the DDB header
-   call ddb_hdr_open_write(ddb_hdr, ddb_out_filename, unddb)
+   call ddb_hdr%open_write(ddb_out_filename, unddb)
 
    ! Write the whole database
    call wrtout(std_out,' write the DDB ','COLL')
@@ -351,7 +349,7 @@ end subroutine ddb_interpolate
 !!  Only writing
 !!
 !! PARENTS
-!!      ddb_interpolate,respfn
+!!      m_ddb_interpolate,m_respfn_driver
 !!
 !! CHILDREN
 !!
@@ -385,10 +383,10 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  natom = Crystal%natom
 
- ABI_ALLOCATE(dynmat, (2,3,natom,3,natom))
- ABI_ALLOCATE(dynmat_mask, (3,natom,3,natom))
- ABI_ALLOCATE(born_effective_charge_tensor, (3,natom,3))
- ABI_ALLOCATE(born_effective_charge_tensor_mask, (3,natom,3))
+ ABI_MALLOC(dynmat, (2,3,natom,3,natom))
+ ABI_MALLOC(dynmat_mask, (3,natom,3,natom))
+ ABI_MALLOC(born_effective_charge_tensor, (3,natom,3))
+ ABI_MALLOC(born_effective_charge_tensor_mask, (3,natom,3))
 
  ! Initialize NetCDF file.
  NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))
@@ -487,7 +485,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  ABI_FREE(born_effective_charge_tensor_mask)
 
 #else
- MSG_ERROR("NETCDF support required to write DDB.nc file.")
+ ABI_ERROR("NETCDF support required to write DDB.nc file.")
 #endif
 
  contains

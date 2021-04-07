@@ -1,0 +1,116 @@
+# Finite difference calculation of the relaxed ion
+# piezoelectric constants of AlP
+#
+# The calculation proceeds by computing the change in cell
+# polarization by a Berrys phase formula, due to changes 
+# in the strain of the unit cell. In this case, the ion positions
+# will be allowed to relax to to their new equilibrium positions
+# within the strain cell.
+
+# Berry phase calculation of the polarization
+# berryopt -1 triggers the implementation of M. Viethen
+berryopt -1
+rfdir 1 1 1
+
+# three cell geometries will be computed
+ndtset 3
+
+#Definition of the unit cell
+acell     3*7.2728565836E+00
+
+# rprim = strain tensor x rprim0, where
+# rprim0 is the unstrained rprim
+# strain: e4 = 0.00
+rprim1       
+0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
+7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
+7.0710678119E-01  7.0710678119E-01  0.0000000000E+00 
+
+#strain: e4 = 0.01
+rprim2 
+0.0000000000E+00  7.1064231509E-01  7.1064231509E-01
+7.0710678119E-01  3.535533906E-03   7.0710678119E-01
+7.0710678119E-01  7.0710678119E-01  3.535533906E-03
+
+# strain: e4 = -0.01
+rprim3
+0.0000000000E+00  7.0357124728E-01  7.0357124728E-01
+7.0710678119E-01 -3.535533906E-03   7.0710678119E-01
+7.0710678119E-01  7.0710678119E-01 -3.535533906E-03
+
+tolsym 1.0e-8 # Since we make rather small lattice vector changes, with the default value of tolsym
+              # ABINIT will recognize that we are close to a more symmetric
+              # configuration, and will resymmetrize the primitive vectors, something we want to avoid ...
+
+#Definition of the atom types and pseudopotentials
+ ntypat 2 # two types of atoms 
+ znucl 15 13 # the atom types are Phosphorous and Aluminum
+
+# the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
+# available through www.pseudo-dojo.org
+# this set uses the Perdew-Wang parameterization of LDA for the xc model
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+
+#Definition of the atoms
+ natom 2 # two atoms in the cell
+ typat 1 2 # type 1 is Phosphorous, type 2 is Aluminum (order defined by znucl above and pseudos list)
+ nband 4 # nband is restricted here to the number of filled bands only, no empty bands. The theory of
+         # the Berrys phase polarization formula assumes filled bands only. Our pseudopotential choice
+         # includes 5 valence electrons on P, 3 on Al, for 8 total in the primitive unit cell, hence
+         # 4 filled bands.
+
+#atomic positions, given in units of the cell vectors. Thus as the cell vectors
+#change due to strain the atoms will move as well.
+xred 
+1/4 1/4 1/4
+0 0 0
+
+# Relaxation of atomic positions
+optcell 0 # the cell geometry is not allowed to changed
+ionmov 2 # the ion positions will be relaxed
+tolmxf 1.0d-5
+ntime 13
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut  5 # this value is very low but is used here to achieve very low calculation times.
+        # in a production environment this should be checked carefully for convergence and
+        # a more reasonable value is probably around 20
+ecutsm 0.5
+dilatmx 1.05
+ngkpt 6 6 6
+nshiftk 4 # this Monkhorst-Pack shift pattern is used so that the symmetry of the shifted grid
+          # is correct. A gamma-centered grid would also have the correct symmetry but would be
+          # less efficient.
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+#Parameters for the SCF procedure
+tolvrs 1.0D-19
+nstep 8
+
+# suppress printing of density, wavefunctions, etc for this tutorial
+prtwf 0
+prtden 0
+prteig 0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tffield_5.abo, tolnlines=  22, tolabs=  1.100e-08, tolrel=  4.500e-04
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = J. Zwanziger, M. Veithen
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Finite difference calculation of the clamped-ion
+#%%   piezoelectric constants of AlP
+#%%<END TEST_INFO>

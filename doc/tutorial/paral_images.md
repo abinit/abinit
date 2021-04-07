@@ -1,25 +1,27 @@
 ---
-authors: MT, GG
+authors: MT, GG, JB
 ---
 
 # Parallelism on images, the string method
 
 ## String method for the computation of minimum energy paths, in parallel.
 
-This tutorial aims at showing how to perform a calculation of a minimum energy
-path (MEP) using the string method.
+This tutorial aims at showing how to use the parallelism on images, by performing a calculation of a minimum energy
+path (MEP) using the string method. 
 
 You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
-efficiency of the parallelism on "images".
+efficiency of the parallelism on *images*. Other algorithms use images, 
+e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[imgmov]].
+The parallelism on images can be used for all these algorithms.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
 [A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
 
-This tutorial should take about 1.5 hour and requires to have at least a 200 CPU
-cores parallel computer.
+This tutorial should take about 1.5 hour and requires to have at least a 10 CPU
+core parallel computer.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1 Summary of the String Method
 
@@ -32,22 +34,29 @@ iterative procedure in which each iteration consists of two steps:
 1. **Evolution step**: the images are moved following the atomic forces.
 2. **Reparametrization step**: the images are equally redistributed along the string.
 
-The algorithm presently implemented in ABINIT is the so-called "simplified string method" [[cite:Weinan2007]].
+The algorithm presently implemented in ABINIT is the so-called *simplified string method* [[cite:Weinan2007]].
 It has been designed for the sampling of smooth energy landscapes.
 
 *Before continuing you might work in a different subdirectory as for the other
-tutorials. Why not work_paral_string?*
+tutorials. Why not work_paral_images?*
 
 !!! important
 
     In what follows, the names of files are mentioned as if you were in this subdirectory.
-    All the input files can be found in the *\$ABI_TESTS/tutoparal/Input* directory.
-    You can compare your results with reference output files located in *\$ABI_TESTS/tutoparal/Refs*.
+    All the input files can be found in the `\$ABI_TESTS/tutoparal/Input` directory.
+    You can compare your results with reference output files located in `\$ABI_TESTS/tutoparal/Refs`.
 
     In the following, when "run ABINIT over _nn_ CPU cores" appears, you have to use
     a specific command line according to the operating system and architecture of
-    the computer you are using. This can be for instance: mpirun -n _nn_ abinit < abinit.files
+    the computer you are using. This can be for instance: `mpirun -n nn abinit input.abi`
     or the use of a specific submission file.
+
+!!! tip
+    
+    In this tutorial, most of the images and plots are easily obtained using the post-processing tool
+    [qAgate](https://github.com/piti-diablotin/qAgate) or [agate](https://github.com/piti-diablotin/agate), 
+    its core engine.
+    Any post-process tool will work though !!
 
 ## 2 Computation of the initial and final configurations
 
@@ -62,79 +71,90 @@ Starting from an hydronium ion and an ammoniac molecule, we obtain as final
 state a water molecule and an ammonium ion NH<sub>4</sub><sup>+</sup>. In such a process, the MEP
 and the barrier are dependent on the distance between the hydronium ion and
 the NH<sub>3</sub> molecule. Thus we choose to fix the O atom of H<sub>3</sub>O<sup>+</sup> and the N atom of
-NH<sub>3</sub> at a given distance from each other (4.0 Å). The calculation is performed
+NH<sub>3</sub> at a given distance from each other (4.0 Å = 7.5589 bohr). The calculation is performed
 using a LDA exchange-correlation functional.
 
 You can visualize the initial and final states of the reaction below (H atoms
-are in white, the O atom is in red and the N atom in grey).
+are in white, the O atom is in red and the N atom in blue).
 
 ![initial state](paral_images_assets/Initial1.png)
 
 ![final state](paral_images_assets/Initial2.png)
 
+!!! tip
+    To obtain these images, open the `timages_01.abi` and `timages_02.abi` files with `agate` 
+    or `qAgate`
+
 Before using the string method, it is necessary to optimize the initial and
-final points. The input files *tstring_01.in* and *tstring_02.in* contain
+final points. The input files `timages_01.abi` and `timages_02.abi` contain
 respectively two geometries close to the initial and final states of the
 system. You have first to optimize properly these initial and final
 configurations, using for instance the Broyden algorithm implemented in ABINIT.
 
-{% dialog tests/tutoparal/Input/tstring_01.in tests/tutoparal/Input/tstring_02.in %}
+{% dialog tests/tutoparal/Input/timages_01.abi tests/tutoparal/Input/timages_02.abi %}
 
-Open the *tstring_01.in* file and look at it carefully. The unit cell is defined
-at the end. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
+Open the `timages_01.abi` file and look at it carefully. The unit cell is defined
+at the begining. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
 fixed the positions of the O and N atoms. The cell is tetragonal and its size
 is larger along x so that the periodic images of the system are separated by
-4.0 Å of vacuum in the three directions. The keyword [[charge]] is used to
+4.0 Å (7.5589 bohr) of vacuum in the three directions. The keyword [[cellcharge]] is used to
 remove an electron of the system and thus obtain a protonated molecule
 (neutrality is recovered by adding a uniform compensating charge background).
 
-The exchange-correlation functional uses the external library _libxc_. You have
-to compile ABINIT using the _libxc_ plugin (if not, simply replace
-[[ixc]] = -001009 by [[ixc]] 7). This input file has to be run in parallel using
-20 CPU cores. You might use the *tstring.files* file. Edit it and adapt it with
-the appropriate file names.
+Although this input file will run on a single core, the [[paral_kgb]] keyword is set to 1 
+to activate the LOBPCG [[cite:Bottin2008]] algorithm.
+Note the use of [[bandpp]] 10 to accelerate the convergence.
 
-Then run the calculation in parallel over 20 CPU cores, first for the initial
-configuration (*tstring_01.in*), and then for the final one (*tstring_02.in*). You
+!!! important
+    If your system were larger and required more CPU time, all the usual variables for parallelism
+    [[npkpt]], [[npband]], [[npfft]], [[npspinor]] could be used wisely.
+
+Then run the calculation in sequential, first for the initial
+configuration (`timages_01.abi`), and then for the final one (`timages_02.abi`). You
 should obtain the following positions:
 
-1) for the initial configuration:
+1. for the initial configuration:
 
-```
-xcart       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           -3.7593832509E-01 -2.8581911534E-01  8.7109635973E-01
-           -3.8439081179E-01  8.6764073738E-01 -2.8530130333E-01
-            4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            4.3461703447E+00 -9.9808458269E-02 -9.5466143436E-01
-            4.3190273240E+00 -7.8675247603E-01  5.6699786920E-01
-            4.3411410402E+00  8.7383785043E-01  4.0224838603E-01
-            1.0280313162E+00  2.2598784215E-02  1.5561763093E-02   Angstrom
-```
+    ```
+    xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+              -7.1119330966E-01 -5.3954252784E-01  1.6461078895E+00
+              -7.2706367116E-01  1.6395559231E+00 -5.3864186404E-01
+               7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
+               8.2134747935E+00 -1.8873337293E-01 -1.8040045499E+00
+               8.1621251369E+00 -1.4868515614E+00  1.0711027413E+00
+               8.2046046694E+00  1.6513534511E+00  7.5956562273E-01
+               1.9429112745E+00  4.2303909125E-02  2.9000318893E-02
+    ```
 
-2) for the final configuration:
+2. for the final configuration:
 
-```
-xcart       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           -3.0400286349E-01 -1.9039526061E-01  9.0873550186E-01
-           -3.2251946581E-01  9.0284480687E-01 -1.8824324581E-01
-            4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            4.4876385468E+00 -1.4925704575E-01 -8.9716581956E-01
-            4.2142401901E+00 -7.8694929117E-01  6.3097154506E-01
-            4.3498225718E+00  8.7106686509E-01  4.2709343135E-01
-            2.9570301511E+00  5.5992672027E-02 -1.3560839453E-01    Angstrom
-```
+    ```
+    xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+              -5.8991482730E-01 -3.6948430331E-01  1.7099330811E+00
+              -6.3146217793E-01  1.6964706443E+00 -3.6340264832E-01
+               7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
+               8.4775515860E+00 -2.9286989031E-01 -1.6949564152E+00
+               7.9555913454E+00 -1.4851844626E+00  1.1974660442E+00
+               8.2294855730E+00  1.6454040992E+00  8.0048724879E-01
+               5.5879660323E+00  1.1438061815E-01 -2.5524007156E-01
+    
+    ```
+
 
 ## 3 Related keywords
 
 Once you have properly optimized the initial and final states of the process,
-you can turn to the computation of the MEP. Let us first have a look at the related keywords.
+you can turn to the computation of the MEP. 
+Let us first have a look at the related keywords.
 
 [[imgmov]]
 :       Selects an algorithm using replicas of the unit cell.
         For the string method, choose 2.
 
 [[nimage]]
-:       gives the number of replicas of the unit cell including the initial and final ones.
+:       gives the number of replicas of the unit cell including the initial and final ones. Note that when [[nimage]]>1, 
+        the default value of several print input variables changes from one to zero. You might want to explicitly set [[prtgsr]] to 1
+        to print the _GSR file, and get some visualization possibilities using Abipy.
 
 [[dynimage]]([[nimage]])
 :       arrays of flags specifying if the image evolves or not (0: does not evolve; 1: evolves).
@@ -165,37 +185,34 @@ You can now start with the string method.
 First, for test purpose, we will not use the parallelism over images and will
 thus only perform one step of string method.
 
-{% dialog tests/tutoparal/Input/tstring_03.in %}
+{% dialog tests/tutoparal/Input/timages_03.abi %}
 
-Open the *tstring_03.in* file and look at it. The initial and final
-configurations are specified at the end through the keywords [[xcart] and
+Open the `timages_03.abi` file and look at it. The initial and final
+configurations are specified at the end through the keywords [[xcart]] and
 [[nimage|xcart_lastimg]]. By default, ABINIT generates the intermediate
 images by a linear interpolation between these two configurations. In this
 first calculation, we will sample the MEP with 12 points (2 are fixed and
 correspond to the initial and final states, 10 are evolving). [[nimage]] is
-thus set to 12. The keyword [[npimage]] is set to 1 (no parallelism over
+thus set to 12. The [[npimage]] variable is not used yet (no parallelism over
 images) and [[ntimimage]] is set to 1 (only one time step).
 
-You might use the *tstring.files* file. Edit it and adapt it with the
-appropriate file names. Since the parallelism over the images is not used,
-this calculation has to be run over 20 CPU cores.
+Since the parallelism over the images is not used, this calculation still 
+runs over 1 CPU core.
 
 ## 5 Computation of the MEP using parallelism over images
 
 Now you can perform the complete computation of the MEP using the parallelism over the images.
 
-{% dialog tests/tutoparal/Input/tstring_04.in %}
+{% dialog tests/tutoparal/Input/timages_04.abi %}
 
-Open the *tstring_04.in* file. The keyword [[npimage]] has been set to 10, and
+Open the `timages_04.abi` file. The keyword [[npimage]] has been added and set to 10, and
 [[ntimimage]] has been increased to 50.
-This calculation has thus to be run over 200 CPU cores. Note that the output
-file is very big, so that no reference file is provided in the ABINIT package.
+This calculation has thus to be run over 10 CPU cores.
 
 The convergence of the string method algorithm is controlled by [[tolimg]],
 which has been set to 0.0001 Ha. In order to obtain a more lisible output
 file, you can decrease the printing volume and set [[prtvolimg]] to 2.
-Here again, you might use the *tstring.files*. Edit it and adapt it with the
-appropriate file names. Then run ABINIT over 200 CPU cores.
+Then run ABINIT over 10 CPU cores.
 
 When the calculation is completed, ABINIT provides you with 12 configurations
 that sample the Minimum Energy Path between the initial (_i_) and final (_f_)
@@ -205,39 +222,39 @@ separates (_i_) from (_f_). In our case, a natural reaction coordinate can be th
 distance between the hopping proton and the O atom of H<sub>2</sub>O (d<sub>OH</sub>), or
 equivalently the distance between the proton and the N atom (d<sub>HN</sub>). The graph
 below shows the total energy as a function of the OH distance along the MEP.
-It indicates that the barrier for crossing from H<sub>2</sub>O to NH<sub>3</sub> is ~ 1.36 eV. The
+It indicates that the barrier for crossing from H<sub>2</sub>O to NH<sub>3</sub> is ~1.36 eV. The
 6th image gives an approximate geometry of the transition state. Note that in
 the initial state, the OH distance is significantly stretched, due to the
 presence of the NH<sub>3</sub> molecule.
 
-Note that the total energy of each of the 12 replicas of the simulation cell
-can be found at the end of the output file in the section:
+!!! tip
+    Note that the total energy of each of the 12 replicas of the simulation cell
+    can be found at the end of the output file in the section:
+    
+    ```
+    -outvars: echo values of variables after computation  --------
+    ```
+    The total energies are printed out as: etotal_1img, etotal_2img, ...., etotal_12img.
 
-```
--outvars: echo values of variables after computation  --------
-```
+!!! tip
+    Also, you can can have a look at the atomic positions in each image: in
+    cartesian coordinates (xcart_1img, xcart_2img, ...) or in reduced coordinates
+    (xred_1img, xred_2img, ...) to compute the OH distance.
 
-The total energies are printed out as: etotal_1img, etotal_2img, ...., etotal_12img.
-Also, you can can have a look at the atomic positions in each image: in
-cartesian coordinates (xcart_1img, xcart_2img, ...) or in reduced coordinates
-(xred_1img, xred_2img, ...). Similarly, the forces are printed out:
-fcart_1img, fcart_2img, ..., fcart_12img.
 
+!!! tip
+    You can issue the command `:plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"` in `agate` or `qAgate`
 ![courbe 1](paral_images_assets/curve1.png)
 
 Total energy as a function of OH distance for the path computed with 12 images
+
 and [[tolimg]]=0.0001 (which is very close to the x coordinate of the proton:
 first coordinate of xcart  for the 8th atom in the output file).
 
-The keyword [[npimage]] can be automatically set by ABINIT. It takes the
-requested total number of CPU cores divided by the number of dynamical images.
-The remaining cores are, if possible, distributed over k-points, bands and FFT.
+The keyword [[npimage]] can be automatically set by ABINIT if [[autoparal]] is set to 1. 
 
-Let us test this functionality. Edit again the `tstring_04.in` file and comment
-the [[npimage]] line. Then run the calculation again over a number of cores of
-your choice (less than 200). If the code stops with an error message
-indicating that the number of k-point, band and FFT processors is not correct,
-adapt the value of [[npband]] and [[npfft]].
+Let us test this functionality. Edit again the `timages_04.abi` file and comment
+the [[npimage]] line, then add [[autoparal]]=1. Then run the calculation again over 10 CPU cores.
 
 Open the output file and look at the [[npimage]] value ...
 
@@ -247,42 +264,61 @@ Like all physical quantities, the MEP has to be converged with respect to some
 numerical parameters. The two most important are the number of points along
 the path ([[nimage]]) and the convergence criterion ([[tolimg]]).
 
-1) [[nimage]]
-Increase the number of images to 22 (2 fixed + 20 evolving) and recompute the
-MEP. The graph below superimposes the previous MEP (black curve, calculated
-with 12 images) and the new one obtained by using 22 images (red curve). You
-can see that the global profile is almost not modified as well as the energy
-barrier.
+1. [[nimage]]
 
-![curve 2](paral_images_assets/curve2.png)
+    Increase the number of images to 22 (2 fixed + 20 evolving) and recompute the
+    MEP. 
+    Don't forget to update [[dynimage]] to `0 20*1 0` ! And you have 20 CPU cores 
+    available then set [[npimage]] to 20 and run ABINIT over 20 CPU cores.
+    The graph below superimposes the previous MEP (grey curve, calculated
+    with 12 images) and the new one obtained by using 22 images (cyan curve). You
+    can see that the global profile is almost not modified as well as the energy
+    barrier.
+    
+    ![curve 2](paral_images_assets/curve2.png)
+    
+    Total energy as a function of OH distance for the path computed with 12 images
+    and [[tolimg]]=0.0001 (grey curve) and the one computed with 22 images and
+    [[tolimg]]=0.0001 (red curve).
 
-Total energy as a function of OH distance for the path computed with 12 images
-and [[tolimg]]=0.0001 (black curve) and the one computed with 22 images and
-[[tolimg]]=0.0001 (red curve).
+    !!! tip
+        The image can be obtained with `agate` or `qagate` with the following commands
+            ```
+            :open timages_04_MPI10o_HIST.nc # 12 images calculation
+            :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV" hold=true
+            :open timages_04_MPI10_22o_HIST.nc # 22 images calculation
+            :plot xy x="distance 1 8 dunit=A" y="etotal eunit=eV"
+            ```
+        Replace `plot` with `print` to get the `gnuplot` script.
+    
+    The following animation is made by putting together the 22
+    images obtained at the end of this calculation, from (_i_) to (_f_) and then from
+    (_f_) to (_i_). It allows to visualize the MEP.
 
-The following animation (animated gif file) is made by putting together the 22
-images obtained at the end of this calculation, from (_i_) to (_f_) and then from
-(_f_) to (_i_). It allows to visualize the MEP.
+    !!! tip
+        Open the `timages_04o_HIST.nc` file with `agate` or `qAgate` to produce this animation.
+    
+  <video id="video_string" controls autoplay loop style="width: 100%;">
+  <source src="../paral_images_assets/stringvideo.mp4" type="video/mp4">
+  <source src="../paral_images_assets/stringvideo.webm" type="video/webm">
+  You browser does not support the video tag. Download the file [here](paral_images_assets/stringvideo.mp4).
+  </video>
+    
+2. [[tolimg]]
 
-
-[![image](paral_images_assets/start.gif)](paral_images_assets/stringvideo.gif)
-
-Click on the above image to visualize the animation (that should open in another window).
-
-2) [[tolimg]]
-Come back to [[nimage]]=12. First you can increase [[tolimg]] to 0.001 and
-recompute the MEP. This will be much faster than in the previous case.
-
-Then you should decrease [[tolimg]] to 0.00001 and recompute the MEP. To gain
-CPU time, you can start your calculation by using the 12 images obtained at
-the end of the calculation that used [[tolimg]] = 0.0001. In your input file,
-these starting images will be specified by the keywords [[xcart]],
-[[nimage|xcart_2img]], [[nimage|xcart_3img]] ... [[nimage|xcart_12img]].
-You can copy them directly from the output file obtained at the previous
-section. The graph below superimposes the path obtained with 12 images and
-[[tolimg]]=0.001 (red curve) and the one with 12 images and [[tolimg]]=0.0001 (black curve).
-
-![image](paral_images_assets/curve3.png)
-
-Total energy as a function of OH distance for the path computed with 12 images
-and [[tolimg]]=0.0001 (black curve) and the one computed with 12 images and [[tolimg]]=0.001 (red curve).
+    Come back to [[nimage]]=12. First you can increase [[tolimg]] to 0.001 and
+    recompute the MEP. This will be much faster than in the previous case.
+    
+    Then you should decrease [[tolimg]] to 0.00001 and recompute the MEP. To gain
+    CPU time, you can start your calculation by using the 12 images obtained at
+    the end of the calculation that used [[tolimg]] = 0.0001. In your input file,
+    these starting images will be specified by the keywords [[xcart]],
+    [[nimage|xcart_2img]], [[nimage|xcart_3img]] ... [[nimage|xcart_12img]].
+    You can copy them directly from the output file obtained at the previous
+    section. The graph below superimposes the path obtained with 12 images and
+    [[tolimg]]=0.001 (grey curve) and the one with 12 images and [[tolimg]]=0.0001 (cyan curve).
+    
+    ![image](paral_images_assets/curve3.png)
+    
+    Total energy as a function of OH distance for the path computed with 12 images
+    and [[tolimg]]=0.0001 (cyan curve) and the one computed with 12 images and [[tolimg]]=0.001 (grey curve).

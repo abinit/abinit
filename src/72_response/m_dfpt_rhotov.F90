@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,11 +108,9 @@ contains
 !!    vtrial1(cplex*nfft,nspden)= new value of 1st-order trial potential
 !!
 !! PARENTS
-!!      dfpt_scfcv
+!!      m_dfpt_lw,m_dfpt_scfcv,m_dfptnl_loop
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_v1zeeman,dotprod_vn
-!!      hartre,hartrestr,sqnorm_v,timab
 !!
 !! SOURCE
 
@@ -154,6 +152,7 @@ contains
 !arrays
  integer,intent(in)   :: ngfft(18)
  real(dp)             :: tsec(20)
+ real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
 
@@ -164,7 +163,7 @@ contains
  !FR EB SPr
  if (nspden==4) then
    if(usepaw==1) then
-     MSG_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
+     ABI_ERROR('DFPT with nspden=4 works only for norm-conserving psp!')
    end if
  end if
 
@@ -176,18 +175,18 @@ contains
  if (vhartr1_allocated) then
    vhartr1_ => vhartr1
  else
-   ABI_ALLOCATE(vhartr1_,(cplex*nfft))
+   ABI_MALLOC(vhartr1_,(cplex*nfft))
  end if
  vxc1_allocated=(size(vxc1)>0)
  if (vxc1_allocated) then
    vxc1_ => vxc1
  else
-   ABI_ALLOCATE(vxc1_,(cplex*nfft,nspden))
+   ABI_MALLOC(vxc1_,(cplex*nfft,nspden))
  end if
 
 !If needed, store pseudo density without charge compensation
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+   ABI_MALLOC(rhor1_,(cplex*nfft,nspden))
    rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
  else
    rhor1_ => rhor1
@@ -195,13 +194,13 @@ contains
 
 
  if(ipert==natom+5)then
-   ABI_ALLOCATE(v1zeeman,(cplex*nfft,nspden))
+   ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
- call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,rhog1,rprimd,vhartr1_,qpt=qphon)
+ call hartre(cplex,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,dummyvgeo,vhartr1_,qpt=qphon)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)
@@ -209,7 +208,7 @@ contains
 
  if (optene>0) ehart01=zero
  if(ipert==natom+3 .or. ipert==natom+4) then
-   ABI_ALLOCATE(vhartr01,(cplex*nfft))
+   ABI_MALLOC(vhartr01,(cplex*nfft))
    call hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,rhog,rprimd,vhartr01)
    if (optene>0) then
      call dotprod_vn(cplex,rhor1,ehart01,doti,nfft,nfftot,1,1,vhartr01,ucvol)
@@ -219,7 +218,7 @@ contains
 !  Note that there is a factor 2.0_dp difference with the similar GS formula
    vhartr1_(:)=vhartr1_(:)+vhartr01(:)
 
-   ABI_DEALLOCATE(vhartr01)
+   ABI_FREE(vhartr01)
  end if
 
 !------ Compute 1st-order XC potential (and energy) ----------------------
@@ -257,11 +256,11 @@ contains
      end if
    else
      if (usexcnhat/=0) then
-       ABI_ALLOCATE(rhor1_nohat,(cplex*nfft,1))
+       ABI_MALLOC(rhor1_nohat,(cplex*nfft,1))
        rhor1_nohat(:,1)=rhor1(:,1)-nhat1(:,1)
        call dotprod_vn(cplex,rhor1      ,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
        call dotprod_vn(cplex,rhor1_nohat,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-       ABI_DEALLOCATE(rhor1_nohat)
+       ABI_FREE(rhor1_nohat)
      else
        call dotprod_vn(cplex,rhor1_,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
        call dotprod_vn(cplex,rhor1_,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
@@ -275,7 +274,7 @@ contains
 
 !Compute XC valence contribution exc1 and complete eventually Vxc^(1)
  if (optene>0) then
-   ABI_ALLOCATE(vxc1val,(cplex*nfft,nspden))
+   ABI_MALLOC(vxc1val,(cplex*nfft,nspden))
    vxc1val=zero
    option=2
 !FR SPr EB non-collinear magnetism
@@ -290,11 +289,11 @@ contains
    end if !nspden==4
    vxc1_(:,:)=vxc1_(:,:)+vxc1val(:,:)
    call dotprod_vn(cplex,rhor1_,exc1,doti,nfft,nfftot,nspden,1,vxc1val,ucvol)
-   ABI_DEALLOCATE(vxc1val)
+   ABI_FREE(vxc1val)
  end if
 
  if (usepaw==1.and.usexcnhat==0) then
-   ABI_DEALLOCATE(rhor1_)
+   ABI_FREE(rhor1_)
  end if
 
 !DEBUG (do not take away)
@@ -366,14 +365,14 @@ contains
 
 !Release temporary memory space
  if (.not.vhartr1_allocated) then
-   ABI_DEALLOCATE(vhartr1_)
+   ABI_FREE(vhartr1_)
  end if
  if (.not.vxc1_allocated) then
-   ABI_DEALLOCATE(vxc1_)
+   ABI_FREE(vxc1_)
  end if
 
  if (ipert==natom+5) then
-   ABI_DEALLOCATE(v1zeeman)
+   ABI_FREE(v1zeeman)
  end if
 
  call timab(157,2,tsec)
@@ -412,7 +411,7 @@ end subroutine dfpt_rhotov
 !!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
 !!
 !! PARENTS
-!!      dfpt_rhotov
+!!      m_dfpt_rhotov
 !!
 !! CHILDREN
 !!
@@ -436,14 +435,14 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
 !   write(msg,'(3a,i0)')&
 !&   'The argument option should be 1 or 2,',ch10,&
 !&   'however, option=',option
-!   MSG_BUG(msg)
+!   ABI_BUG(msg)
 ! end if
 !
 ! if (sizein<1) then
 !   write(msg,'(3a,i0)')&
 !&   'The argument sizein should be a positive number,',ch10,&
 !&   'however, sizein=',sizein
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 ! end if
 
  DBG_EXIT("COLL")

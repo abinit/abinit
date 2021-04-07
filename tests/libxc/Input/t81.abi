@@ -1,0 +1,105 @@
+# Si in diamond structure
+acell 3*10.22
+rprim   0 .5 .5  .5 0 .5  .5 .5 0
+natom  2
+ntypat  1
+typat 2*1
+xred   0.125  0.125  0.125
+       0.875  0.875  0.875
+znucl  14.0
+ecut   3
+
+enunit 2
+
+ngkpt         2 2 2
+nshiftk       4
+shiftk        0.5 0.5 0.5
+              0.5 0.0 0.0
+              0.0 0.5 0.0
+              0.0 0.0 0.5
+
+occopt        1
+
+nstep         3
+
+ndtset       21
+udtset      3 7
+ixc?1         2
+ixc?2        -001009
+ixc?3        11
+ixc?4        -101130
+ixc?5         7
+ixc?6        -001012
+ixc?7        -001013
+
+intxc         0
+
+kptopt1?      1
+tolvrs1?      1.0d-10
+
+kptopt2?      2
+iscf2?       -3
+nqpt2?        1
+qpt2?         0.0 0.0 0.0
+rfelfd2?      2
+rfdir2?       1 0 0
+tolwfr2?      1.0d-22
+getwfk21     11
+getwfk22     11
+getwfk23     13
+getwfk24     13
+getwfk25     15
+getwfk26     15
+getwfk27     15
+
+kptopt3?      2
+nqpt3?        1
+qpt3?         0.0 0.0 0.0
+rfphon3?      1
+rfatpol3?     1 1
+rfdir3?       1 0 0
+tolvrs3?      1.0d-10
+getwfk31     11
+getwfk32     11
+getwfk33     13
+getwfk34     13
+getwfk35     15
+getwfk36     15
+getwfk37     15
+getddk31     21
+getddk32     21
+getddk33     23
+getddk34     23
+getddk35     25
+getddk36     25
+getddk37     25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14-Si.nlcc.fhi"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t81.abo, tolnlines = 5, tolabs = 1.1e-3, tolrel = 1.0e-4, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = G.-M. Rignanese
+#%% keywords = NC, DFPT
+#%% description = 
+#%%   Silicon
+#%%   Test the equivalence between the internal and LibXC implementations
+#%%   of various XC functionals for the response functions
+#%%   (thus, the XC kernel is also tested).
+#%%   The test includes 3 different functionals:
+#%%   1) Perdew-Zunger: ixc=2 and ixc=-001009
+#%%   2) PBE: ixc=11 and ixc=-101130
+#%%   3) Perdew-Wang92: ixc=7, ixc=-001012, and ixc=-001013
+#%%   The results for PBE and Perdew-Wang92 (ixc=-001013) are not equivalent
+#%%   unless some constants are changed in 56_xc/xcpbe.F90 by uncommenting
+#%%   some lines indicated by GMR.
+#%%   Note that the underlying FFT grid does not have the symmetry of the
+#%%   lattice.
+#%%<END TEST_INFO>

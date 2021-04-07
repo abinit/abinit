@@ -8,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2020 ABINIT group (AM)
+!! Copyright (C) 2000-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +34,8 @@ module m_effective_potential_file
  use m_anharmonics_terms
  use m_effective_potential
  use m_ifc
+ use m_ddb
+ use m_ddb_hdr
 #if defined HAVE_NETCDF
  use netcdf
 #endif
@@ -226,10 +228,10 @@ CONTAINS  !=====================================================================
 !! comm=MPI communicator
 !!
 !! OUTPUT
-!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
+!! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !!
 !! PARENTS
-!!      compute_anharmonics,multibinit
+!!      m_compute_anharmonics,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -237,9 +239,7 @@ CONTAINS  !=====================================================================
 
 subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
-  use m_effective_potential
   use m_multibinit_dataset
-  use m_ddb, only : ddb_from_file
   use m_strain
   use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
@@ -258,6 +258,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !scalars
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
+  type(ddb_hdr_type) :: ddb_hdr
 !array
   integer,allocatable :: atifc(:)
 
@@ -271,7 +272,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       write(message, '(4a)' )&
 &        ' effective_potential_file_read: you need to give input file to compute ',&
 &        'the response fonction from DDB file ',ch10
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     if(filetype ==1) then
@@ -288,20 +289,21 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !     In multibinit the conversion is done directly in m_multibinit_dataset.
 !     So in the next routine, we set natifc to 0 to ignore the conversion.
 !     To keep the intent(in) of the inp parameters, we need to use local variables:
-      ABI_ALLOCATE(atifc,(inp%natom))
+      ABI_MALLOC(atifc,(inp%natom))
       atifc = inp%atifc
 
-      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
+      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc, ddb_hdr, Crystal,comm)
+      call ddb_hdr%free()
 
 !     And finaly, we can check if the value of atifc is not change...
       if (.not.all(atifc.EQ.inp%atifc)) then
         write(message, '(3a)' )&
 &        ' effective_potential_file_read: problem with atifc input variables ',&
 &        'in ddb_from_file',ch10
-        MSG_BUG(message)
+        ABI_BUG(message)
       end if
 
-      ABI_DEALLOCATE(atifc)
+      ABI_FREE(atifc)
 
 !     Transfert the ddb to the effective potential
       call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
@@ -388,7 +390,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 &            ' The number of coefficients in the XML file is superior to the ',ch10,&
 &            'number of coefficients in the input ',ch10,&
 &            'Action: correct your input file or change the file'
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         end if
         do ii = 1,eff_pot%anharmonics_terms%ncoeff
           call polynomial_coeff_setCoefficient(inp%coefficients(ii),&
@@ -408,14 +410,14 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
        write(message, '(3a)' )&
 &         'There is no hist argument ',ch10,&
 &         'Action: add hist argument'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    end if
  else
    write(message, '(5a)' )&
 &      ' The file ',trim(filename),' is not readable with Multibinit',ch10,&
 &      ' Action: Change the file.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 ! Deallocation of array
@@ -446,7 +448,7 @@ end subroutine effective_potential_file_read
 !!             41 ASCII file with history of MD or snapshot
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_mover_effpot,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -477,7 +479,7 @@ subroutine effective_potential_file_getType(filename,filetype)
  filetype = 0
 
  if (open_file(filename,message,unit=ddbun,form="formatted",status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Check if the file is a XML file or a DDB and in this case, store the DDB code.
@@ -570,16 +572,13 @@ end subroutine effective_potential_file_getType
 !! nrpt  = number of rpt points
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_multibinit_driver,m_multibinit_manager
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
-
- use m_ddb
- use m_ddb_hdr
 
 !Arguments ------------------------------------
 !scalars
@@ -619,14 +618,14 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
 
  else if (filetype==2 .or. filetype==23) then
    write(message, '(5a)' )ch10,' The file ',trim(filename),&
-&                ' is XML file (extraction of all informations)'
+&                ' is XML file (extraction of all information)'
    call wrtout(std_out,message,'COLL')
 
    call system_getDimFromXML(filename,natom,ntypat,nqpt,nrpt)
@@ -634,7 +633,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
  else
    write(message, '(a,a,a,a)' )&
 &   ' The file ',trim(filename),' is not compatible with multibinit',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! TODO hexu: temporarily disabled. Discuss with alex how to do this properly.
@@ -643,7 +642,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !   write(message, '(a,a,a,a,a)' )&
 !&   ' Unable to read the number of atom from ',trim(filename),ch10,&
 !&   'This file  is not compatible with multibinit',ch10
-!   MSG_ERROR(message)
+!   ABI_ERROR(message)
 ! end if
 !
 ! if (filetype==2 .or. filetype==23) then
@@ -651,19 +650,19 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 !   if (natom < 1) then
 !     write(message, '(a,a,a)' )&
 !&     ' Unable to read the number of atom from ',trim(filename),ch10
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   end if
 !
 !   if (nrpt < 1) then
 !     write(message, '(a,a,a)' )&
 !&     ' Unable to read the number of rpt points ',trim(filename),ch10
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   end if
 !
 !   if (ntypat < 1) then
 !     write(message, '(a,a,a)' )&
 !&     ' Unable to read the number of type of atoms ',trim(filename),ch10
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   end if
 !
 ! end if
@@ -739,7 +738,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 
    if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &                action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  First parse to know the number of coefficients
@@ -797,7 +796,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !  Maybe one day add an other type of file...
    write(message, '(a,a,a,a)' )&
 &   ' The file ',trim(filename),' is not compatible with multibinit',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 ! Do some checks
@@ -805,7 +804,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
    write(message, '(5a)' )&
 &   ' Unable to read the number of coeff from ',trim(filename),ch10,&
 &   ' This file is not compatible with multibinit',ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine effective_potential_file_getDimCoeff
@@ -868,7 +867,7 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
    if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &                action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !  First parse to know the number of atoms
@@ -988,7 +987,7 @@ subroutine effective_potential_file_getDimMD(filename,natom,nstep)
 !  try to read ASCII file...
    if (open_file(filename,msg,unit=unit_md,form="formatted",&
 &       status="old",action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
 !  Start a reading loop in fortran to get the dimension of the file
@@ -1144,7 +1143,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
  if (open_file(filename,message,unit=funit,form="formatted",status="old",&
 &              action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !First parse to know the number of atoms
@@ -1179,7 +1178,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
  end do
 
 !second parse to get the number of typat
- ABI_ALLOCATE(typat,(natom))
+ ABI_MALLOC(typat,(natom))
  typat = 0
  iatom = 0
 
@@ -1212,7 +1211,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
  end do
 
  close(funit)
- ABI_DEALLOCATE(typat)
+ ABI_FREE(typat)
 
 #endif
 
@@ -1236,7 +1235,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 &   ' The number of total IFC  (',nrpt2,') is inferior to  ',ch10,&
 &   ' the number of short range IFC (',nrpt1,') in ',filename,ch10,&
 &   ' This is not possible',ch10
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -1256,13 +1255,13 @@ end subroutine system_getDimFromXML
 !! and store them in effective potentential type
 !!
 !! INPUTS
-!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
+!! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !! comm=MPI communicator
 !! character(len=*) filnam: name of input or output file
 !! strcpling = optional,logical to disable the strcpling
 !!
 !! OUTPUT
-!! eff_pot<type(effective_potential_type)> = datatype with all the informations for effective potential
+!! eff_pot<type(effective_potential_type)> = datatype with all the information for effective potential
 !!
 !! PARENTS
 !!      m_effective_potential_file
@@ -1274,7 +1273,6 @@ end subroutine system_getDimFromXML
  subroutine system_xml2effpot(eff_pot,filename,comm,strcpling)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
@@ -1344,34 +1342,34 @@ end subroutine system_getDimFromXML
  call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt)
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
  elastic_constants = zero; epsilon_inf = zero; ncoeff = 0
- ABI_ALLOCATE(all_amu,(ntypat))
- ABI_ALLOCATE(cell_local,(3,nrpt))
- ABI_ALLOCATE(cell_total,(3,nrpt))
- ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
- ABI_ALLOCATE(ifcs%atmfrc,(3,natom,3,natom,nrpt))
- ABI_ALLOCATE(ifcs%cell,(3,nrpt))
- ABI_ALLOCATE(ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
- ABI_ALLOCATE(ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
- ABI_ALLOCATE(strain_coupling,(6,3,natom))
- ABI_ALLOCATE(total_atmfrc,(3,natom,3,natom,nrpt))
- ABI_ALLOCATE(local_atmfrc,(3,natom,3,natom,nrpt))
- ABI_ALLOCATE(dynmat,(2,3,natom,3,natom,nph1l))
- ABI_ALLOCATE(typat,(natom))
- ABI_ALLOCATE(phfrq,(3*natom,nph1l))
- ABI_ALLOCATE(qph1l,(3,nph1l))
- ABI_ALLOCATE(xcart,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
- ABI_ALLOCATE(zeff,(3,3,natom))
- ABI_ALLOCATE(zion,(ntypat))
- ABI_ALLOCATE(znucl,(ntypat))
+ ABI_MALLOC(all_amu,(ntypat))
+ ABI_MALLOC(cell_local,(3,nrpt))
+ ABI_MALLOC(cell_total,(3,nrpt))
+ ABI_MALLOC(elastic_displacement,(6,6,3,natom))
+ ABI_MALLOC(ifcs%atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(ifcs%cell,(3,nrpt))
+ ABI_MALLOC(ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(strain_coupling,(6,3,natom))
+ ABI_MALLOC(total_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(local_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(dynmat,(2,3,natom,3,natom,nph1l))
+ ABI_MALLOC(typat,(natom))
+ ABI_MALLOC(phfrq,(3*natom,nph1l))
+ ABI_MALLOC(qph1l,(3,nph1l))
+ ABI_MALLOC(xcart,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
+ ABI_MALLOC(zeff,(3,3,natom))
+ ABI_MALLOC(zion,(ntypat))
+ ABI_MALLOC(znucl,(ntypat))
 
- ABI_DATATYPE_ALLOCATE(phonon_strain,(6))
+ ABI_MALLOC(phonon_strain,(6))
  nrpt_scoupling = 0
  do ii = 1,6
 !  Get The size of the strainPhonon-coupling
    call effective_potential_file_getDimStrainCoupling(filename,nrpt_scoupling,ii-1)
-   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt_scoupling))
-   ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt_scoupling))
+   ABI_MALLOC(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt_scoupling))
+   ABI_MALLOC(phonon_strain(ii)%cell,(3,nrpt_scoupling))
    phonon_strain(ii)%nrpt   = nrpt_scoupling
    phonon_strain(ii)%atmfrc = zero
    phonon_strain(ii)%cell   = 0
@@ -1426,8 +1424,8 @@ end subroutine system_getDimFromXML
 !  Get the Phonon Strain coupling
    do voigt = 1,6
      nrpt_scoupling = phonon_strain(voigt)%nrpt
-     ABI_ALLOCATE(phonon_straincell,(3,nrpt_scoupling))
-     ABI_ALLOCATE(phonon_strain_atmfrc,(3,natom,3,natom,nrpt_scoupling))
+     ABI_MALLOC(phonon_straincell,(3,nrpt_scoupling))
+     ABI_MALLOC(phonon_strain_atmfrc,(3,natom,3,natom,nrpt_scoupling))
 
 !      Get The value
        call effpot_xml_readStrainCoupling(char_f2c(trim(filename)),natom,nrpt_scoupling,(voigt-1),&
@@ -1441,8 +1439,8 @@ end subroutine system_getDimFromXML
        phonon_strain(voigt)%cell(:,:)   = phonon_straincell(:,:)
        if(any(phonon_strain(voigt)%atmfrc > tol10)) has_anharmonics = .TRUE.
 
-       ABI_DEALLOCATE(phonon_straincell)
-       ABI_DEALLOCATE(phonon_strain_atmfrc)
+       ABI_FREE(phonon_straincell)
+       ABI_FREE(phonon_strain_atmfrc)
    end do
 #else
 
@@ -1455,7 +1453,7 @@ end subroutine system_getDimFromXML
 
    if (open_file(filename,message,unit=funit,form="formatted",&
 &               status="old",action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !Start a reading loop in fortran
@@ -1658,7 +1656,7 @@ end subroutine system_getDimFromXML
              if ((line(1:5)=='<data')) then
                call rdfromline_value('data',line,strg)
                if (strg/="") then
-                 ABI_ALLOCATE(work2,(3*natom,3*natom))
+                 ABI_MALLOC(work2,(3*natom,3*natom))
                  strg1=trim(strg)
                  read(strg1,*) (work2(1,nu),nu=1,3*natom)
                  do mu=2,3*natom-1
@@ -1675,14 +1673,14 @@ end subroutine system_getDimFromXML
                  end if
                  read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
                  local_atmfrc(:,:,:,:,irpt1) = reshape(work2,(/3,natom,3,natom/))
-                 ABI_DEALLOCATE(work2)
+                 ABI_FREE(work2)
                else
-                 ABI_ALLOCATE(work2,(3*natom,3*natom))
+                 ABI_MALLOC(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
                  local_atmfrc(:,:,:,:,irpt1) =  reshape(work2,(/3,natom,3,natom/))
-                 ABI_DEALLOCATE(work2)
+                 ABI_FREE(work2)
                end if
              end if
              if ((line(1:5)=='<cell')) then
@@ -1709,7 +1707,7 @@ end subroutine system_getDimFromXML
              if ((line(1:5)=='<data')) then
                call rdfromline_value('data',line,strg)
                if (strg/="") then
-                 ABI_ALLOCATE(work2,(3*natom,3*natom))
+                 ABI_MALLOC(work2,(3*natom,3*natom))
                  strg1=trim(strg)
                  read(strg1,*) (work2(1,nu),nu=1,3*natom)
                  do mu=2,3*natom-1
@@ -1726,14 +1724,14 @@ end subroutine system_getDimFromXML
                  end if
                  read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
                  total_atmfrc(:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
-                 ABI_DEALLOCATE(work2)
+                 ABI_FREE(work2)
                else
-                 ABI_ALLOCATE(work2,(3*natom,3*natom))
+                 ABI_MALLOC(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
                  total_atmfrc(:,:,:,:,irpt2) = reshape(work2,(/3,natom,3,natom/))
-                 ABI_DEALLOCATE(work2)
+                 ABI_FREE(work2)
                end if
              end if
              if ((line(1:5)=='<cell')) then
@@ -1775,7 +1773,7 @@ end subroutine system_getDimFromXML
          if ((line(1:17)=='<dynamical_matrix')) then
            call rdfromline_value('dynamical_matrix',line,strg)
            if (strg/="") then
-             ABI_ALLOCATE(work2,(3*natom,3*natom))
+             ABI_MALLOC(work2,(3*natom,3*natom))
              strg1=trim(strg)
              read(strg1,*) (work2(nu,1),nu=1,3*natom)
              do mu=2,3*natom-1
@@ -1792,14 +1790,14 @@ end subroutine system_getDimFromXML
              end if
              read(strg1,*) (work2(nu,3*natom),nu=1,3*natom)
              dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
-             ABI_DEALLOCATE(work2)
+             ABI_FREE(work2)
            else
-             ABI_ALLOCATE(work2,(3*natom,3*natom))
+             ABI_MALLOC(work2,(3*natom,3*natom))
              do mu=1,3*natom
                read(funit,*)(work2(nu,mu),nu=1,3*natom)
              end do
              dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
-             ABI_DEALLOCATE(work2)
+             ABI_FREE(work2)
            end if
          end if
 
@@ -1839,7 +1837,7 @@ end subroutine system_getDimFromXML
          if ((line(1:22)=='<correction_force unit')) then
            call rdfromline_value('correction_force',line,strg)
            if (strg/="") then
-             ABI_ALLOCATE(work2,(3,natom))
+             ABI_MALLOC(work2,(3,natom))
              strg1=trim(strg)
              read(strg1,*) (work2(nu,1),nu=1,3)
              do mu=2,natom-1
@@ -1857,14 +1855,14 @@ end subroutine system_getDimFromXML
                read(strg1,*) (work2(nu,natom),nu=1,3)
              end if
              strain_coupling(voigt,:,:) = work2(:,:)
-             ABI_DEALLOCATE(work2)
+             ABI_FREE(work2)
            else
-             ABI_ALLOCATE(work2,(3,natom))
+             ABI_MALLOC(work2,(3,natom))
              do mu=1,natom
                read(funit,*)(work2(nu,mu),nu=1,3)
              end do
              strain_coupling(voigt,:,:) = work2(:,:)
-             ABI_DEALLOCATE(work2)
+             ABI_FREE(work2)
            end if
          end if
 
@@ -1899,7 +1897,7 @@ end subroutine system_getDimFromXML
          if ((line(1:29)=='<correction_strain_force unit')) then
            call rdfromline_value('correction_strain_force',line,strg)
            if (strg/="") then
-             ABI_ALLOCATE(work2,(3*6,natom))
+             ABI_MALLOC(work2,(3*6,natom))
              strg1=trim(strg)
              read(strg1,*) (work2(nu,1),nu=1,3*6)
              do mu=2,natom-1
@@ -1917,14 +1915,14 @@ end subroutine system_getDimFromXML
                read(strg1,*) (work2(nu,natom),nu=1,3*6)
              end if
              elastic_displacement(voigt,:,:,:) = reshape(work2(:,:),(/6,3,natom/))
-             ABI_DEALLOCATE(work2)
+             ABI_FREE(work2)
            else
-             ABI_ALLOCATE(work2,(3*6,natom))
+             ABI_MALLOC(work2,(3*6,natom))
              do mu=1,natom
                read(funit,*)(work2(nu,mu),nu=1,3*6)
              end do
              elastic_displacement(voigt,:,:,:) = reshape(work2(:,:),(/6,3,natom/))
-             ABI_DEALLOCATE(work2)
+             ABI_FREE(work2)
            end if
          end if
 
@@ -1937,7 +1935,7 @@ end subroutine system_getDimFromXML
              if ((line(1:5)=='<data')) then
                call rdfromline_value('data',line,strg)
                if (strg/="") then
-                 ABI_ALLOCATE(work2,(3*natom,3*natom))
+                 ABI_MALLOC(work2,(3*natom,3*natom))
                  strg1=trim(strg)
                  read(strg1,*) (work2(1,nu),nu=1,3*natom)
                  do mu=2,3*natom-1
@@ -1956,15 +1954,15 @@ end subroutine system_getDimFromXML
                  end if
                  phonon_strain(voigt)%atmfrc(:,:,:,:,irpt) = &
 &                           reshape(work2,(/3,natom,3,natom/))
-                 ABI_DEALLOCATE(work2)
+                 ABI_FREE(work2)
                else
-                 ABI_ALLOCATE(work2,(3*natom,3*natom))
+                 ABI_MALLOC(work2,(3*natom,3*natom))
                  do mu=1,3*natom
                    read(funit,*)(work2(mu,nu),nu=1,3*natom)
                  end do
                  phonon_strain(voigt)%atmfrc(:,:,:,:,irpt) =&
 &              reshape(work2,(/3,natom,3,natom/))
-                 ABI_DEALLOCATE(work2)
+                 ABI_FREE(work2)
                end if
                has_anharmonics = .true.
              end if
@@ -2025,14 +2023,14 @@ end subroutine system_getDimFromXML
        if(irpt3 /= irpt1)then
          write(message, '(4a)' )ch10,&
 &         ' There is several similar short IFC in ',filename,ch10
-         MSG_BUG(message)
+         ABI_BUG(message)
        end if
      else
        write(message, '(2a,I5,3a,I5,5a)' )ch10,&
 &     ' The number of total IFC  (',irpt2,') is inferior to  ',ch10,&
 &     ' the number of short range IFC (',irpt1,') in ',filename,ch10,&
 &     ' This is not possible',ch10
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
 
@@ -2040,19 +2038,19 @@ end subroutine system_getDimFromXML
    if (any(typat==0)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the type of atoms ',trim(filename),ch10
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (any(abs(znucl)<tol16)) then
      write(message, '(a,a,a)' )&
 &      ' Unable to read the atomic number ',trim(filename),ch10
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (any(abs(all_amu)<tol16)) then
      write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic mass ',trim(filename),ch10
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    close(unit=funit)
@@ -2096,11 +2094,11 @@ end subroutine system_getDimFromXML
 !Re-generate symmetry operations from the lattice and atomic coordinates
  tolsym=tol8
  msym = 384
- ABI_ALLOCATE(spinat,(3,natom))
- ABI_ALLOCATE(ptsymrel,(3,3,msym))
- ABI_ALLOCATE(symafm,(msym))
- ABI_ALLOCATE(symrel,(3,3,msym))
- ABI_ALLOCATE(tnons,(3,msym))
+ ABI_MALLOC(spinat,(3,natom))
+ ABI_MALLOC(ptsymrel,(3,3,msym))
+ ABI_MALLOC(symafm,(msym))
+ ABI_MALLOC(symrel,(3,3,msym))
+ ABI_MALLOC(tnons,(3,msym))
  use_inversion=1
  spinat = 0;
  symrel = 0;
@@ -2114,7 +2112,7 @@ end subroutine system_getDimFromXML
 
 !Initialisation of crystal
  npsp = ntypat; timrev = 1
- ABI_ALLOCATE(title, (ntypat))
+ ABI_MALLOC(title, (ntypat))
  do ii=1,ntypat
    write(title(ii),'(a,i0)')"No title for typat ",ii
  end do
@@ -2127,11 +2125,11 @@ end subroutine system_getDimFromXML
 !amu is not fill in crystal_init...
  Crystal%amu(:) = all_amu(:)
 
- ABI_DEALLOCATE(symrel)
- ABI_DEALLOCATE(symafm)
- ABI_DEALLOCATE(tnons)
- ABI_DEALLOCATE(spinat)
- ABI_DEALLOCATE(ptsymrel)
+ ABI_FREE(symrel)
+ ABI_FREE(symafm)
+ ABI_FREE(tnons)
+ ABI_FREE(spinat)
+ ABI_FREE(ptsymrel)
 
 !if strcpling is set to 0 by the user, need to set the flag to false for
 !the initialisation of the effective potential
@@ -2150,35 +2148,35 @@ end subroutine system_getDimFromXML
 &                              has_anharmonicsTerms=has_anharmonics,zeff=zeff)
 
 !DEALLOCATION OF ARRAYS
- ABI_DEALLOCATE(all_amu)
- ABI_DEALLOCATE(cell_local)
- ABI_DEALLOCATE(cell_total)
- ABI_DEALLOCATE(total_atmfrc)
- ABI_DEALLOCATE(local_atmfrc)
- ABI_DEALLOCATE(ifcs%atmfrc)
- ABI_DEALLOCATE(ifcs%cell)
- ABI_DEALLOCATE(ifcs%short_atmfrc)
- ABI_DEALLOCATE(ifcs%ewald_atmfrc)
- ABI_DEALLOCATE(dynmat)
- ABI_DEALLOCATE(strain_coupling)
- ABI_DEALLOCATE(phfrq)
- ABI_DEALLOCATE(qph1l)
- ABI_DEALLOCATE(title)
- ABI_DEALLOCATE(typat)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xred)
- ABI_DEALLOCATE(zeff)
- ABI_DEALLOCATE(zion)
- ABI_DEALLOCATE(znucl)
+ ABI_FREE(all_amu)
+ ABI_FREE(cell_local)
+ ABI_FREE(cell_total)
+ ABI_FREE(total_atmfrc)
+ ABI_FREE(local_atmfrc)
+ ABI_FREE(ifcs%atmfrc)
+ ABI_FREE(ifcs%cell)
+ ABI_FREE(ifcs%short_atmfrc)
+ ABI_FREE(ifcs%ewald_atmfrc)
+ ABI_FREE(dynmat)
+ ABI_FREE(strain_coupling)
+ ABI_FREE(phfrq)
+ ABI_FREE(qph1l)
+ ABI_FREE(title)
+ ABI_FREE(typat)
+ ABI_FREE(xcart)
+ ABI_FREE(xred)
+ ABI_FREE(zeff)
+ ABI_FREE(zion)
+ ABI_FREE(znucl)
  do ii = 1,6
    phonon_strain(ii)%nrpt   = nrpt
    phonon_strain(ii)%atmfrc = zero
    phonon_strain(ii)%cell   = 0
-   ABI_DEALLOCATE(phonon_strain(ii)%atmfrc)
-   ABI_DEALLOCATE(phonon_strain(ii)%cell)
+   ABI_FREE(phonon_strain(ii)%atmfrc)
+   ABI_FREE(phonon_strain(ii)%cell)
  end do
  ABI_FREE(phonon_strain)
- ABI_DEALLOCATE(elastic_displacement)
+ ABI_FREE(elastic_displacement)
 
 !DEALLOCATION OF TYPES
  call ifcs%free()
@@ -2214,18 +2212,11 @@ end subroutine system_xml2effpot
 
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
- use defs_basis
- use m_errors
- use m_abicore
  use m_dynmat
- use m_xmpi
 
- use m_ddb
- use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !Arguments ------------------------------------
 !scalars
@@ -2281,7 +2272,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   msize=3*mpert*3*mpert;
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
-  ABI_ALLOCATE(blkval,(2,3,mpert,3,mpert,nblok))
+  ABI_MALLOC(blkval,(2,3,mpert,3,mpert,nblok))
   blkval = 0
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
@@ -2289,11 +2280,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Transfert crystal values
 !**********************************************************************
 ! Re-generate symmetry operations from the lattice and atomic coordinates
-  ABI_ALLOCATE(spinat,(3,natom))
-  ABI_ALLOCATE(ptsymrel,(3,3,msym))
-  ABI_ALLOCATE(symafm,(msym))
-  ABI_ALLOCATE(symrel,(3,3,msym))
-  ABI_ALLOCATE(tnons,(3,msym))
+  ABI_MALLOC(spinat,(3,natom))
+  ABI_MALLOC(ptsymrel,(3,3,msym))
+  ABI_MALLOC(symafm,(msym))
+  ABI_MALLOC(symrel,(3,3,msym))
+  ABI_MALLOC(tnons,(3,msym))
   spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
   call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
   call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
@@ -2316,11 +2307,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &                   symrel=symrel,tnons=tnons,&
 &                   symafm=symafm)
 
-  ABI_DEALLOCATE(spinat)
-  ABI_DEALLOCATE(ptsymrel)
-  ABI_DEALLOCATE(symafm)
-  ABI_DEALLOCATE(symrel)
-  ABI_DEALLOCATE(tnons)
+  ABI_FREE(spinat)
+  ABI_FREE(ptsymrel)
+  ABI_FREE(symafm)
+  ABI_FREE(symrel)
+  ABI_FREE(tnons)
 
 !**********************************************************************
 ! Transfert energy from input file
@@ -2357,9 +2348,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !**********************************************************************
 ! Dielectric Tensor and Effective Charges
 !**********************************************************************
-  ABI_ALLOCATE(zeff,(3,3,natom))
-  ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%zeff,(3,3,natom))
+  ABI_MALLOC(zeff,(3,3,natom))
+  ABI_MALLOC(qdrp_cart,(3,3,3,natom))
+  ABI_MALLOC(effective_potential%harmonics_terms%zeff,(3,3,natom))
 
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
@@ -2384,7 +2375,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  ABI_ALLOCATE(effective_potential%fcart,(3,natom))
+  ABI_MALLOC(effective_potential%fcart,(3,natom))
   effective_potential%fcart = zero
   effective_potential%strten = zero
 
@@ -2545,7 +2536,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !   Acoustic Sum Rule
 !***************************************************************************
 ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  ABI_ALLOCATE(d2asr,(2,3,natom,3,natom))
+  ABI_MALLOC(d2asr,(2,3,natom,3,natom))
 
   write(message, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of acoustic sum rule',ch10
@@ -2589,15 +2580,15 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Interpolation of the dynamical matrix for each qpoint from ifc
 !***************************************************************************
 
-  ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
-  ABI_ALLOCATE(displ,(2*3*natom*3*natom))
-  ABI_ALLOCATE(eigval,(3,natom))
-  ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
-  ABI_ALLOCATE(phfrq,(3*natom))
+  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
+  ABI_MALLOC(displ,(2*3*natom*3*natom))
+  ABI_MALLOC(eigval,(3,natom))
+  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
+  ABI_MALLOC(phfrq,(3*natom))
 
-  ABI_ALLOCATE(effective_potential%harmonics_terms%dynmat,(2,3,natom,3,natom,inp%nph1l))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%phfrq,(3*natom,inp%nph1l))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%qpoints,(3,inp%nph1l))
+  ABI_MALLOC(effective_potential%harmonics_terms%dynmat,(2,3,natom,3,natom,inp%nph1l))
+  ABI_MALLOC(effective_potential%harmonics_terms%phfrq,(3*natom,inp%nph1l))
+  ABI_MALLOC(effective_potential%harmonics_terms%qpoints,(3,inp%nph1l))
 
   write(message,'(a,(80a),3a)')ch10,('=',ii=1,80),ch10,ch10,&
 &     ' Calculation of dynamical matrix for each ph1l points '
@@ -2643,11 +2634,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &   ' The highest frequency found is ',max_phfq,' cm-1'
   call wrtout(std_out,message,'COLL')
 
-  ABI_DEALLOCATE(d2cart)
-  ABI_DEALLOCATE(displ)
-  ABI_DEALLOCATE(eigval)
-  ABI_DEALLOCATE(eigvec)
-  ABI_DEALLOCATE(phfrq)
+  ABI_FREE(d2cart)
+  ABI_FREE(displ)
+  ABI_FREE(eigval)
+  ABI_FREE(eigvec)
+  ABI_FREE(phfrq)
 
 !**********************************************************************
 ! Transfert inter-atomic forces constants in reduced coordinates
@@ -2675,9 +2666,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   nrpt_new = product(cell_number(:))
 
 ! Allocate temporary array
-  ABI_ALLOCATE(atmfrc_red,(3,natom,3,natom,nrpt_new))
-  ABI_ALLOCATE(wghatm_red,(natom,natom,nrpt_new))
-  ABI_ALLOCATE(cell_red,(3,nrpt_new))
+  ABI_MALLOC(atmfrc_red,(3,natom,3,natom,nrpt_new))
+  ABI_MALLOC(wghatm_red,(natom,natom,nrpt_new))
+  ABI_MALLOC(cell_red,(3,nrpt_new))
 
   wghatm_red(:,:,:) = zero
 
@@ -2770,11 +2761,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new2
 
 ! Allocation of the final arrays
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new2))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%wghatm,(natom,natom,nrpt_new2))
+  ABI_MALLOC(effective_potential%harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_MALLOC(effective_potential%harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_MALLOC(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt_new2))
+  ABI_MALLOC(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new2))
+  ABI_MALLOC(effective_potential%harmonics_terms%ifcs%wghatm,(natom,natom,nrpt_new2))
 
   irpt2 = 0
   do irpt = 1,nrpt_new
@@ -2801,9 +2792,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   end do
 
 
-  ABI_DEALLOCATE(atmfrc_red)
-  ABI_DEALLOCATE(wghatm_red)
-  ABI_DEALLOCATE(cell_red)
+  ABI_FREE(atmfrc_red)
+  ABI_FREE(wghatm_red)
+  ABI_FREE(cell_red)
 
 ! Final check
   wcount2 = 0
@@ -2814,7 +2805,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (abs(wcount1-wcount2)/(wcount1+wcount2)>tol8) then
     write(message,'(2a,es15.4,a,es15.4,a,es15.4)')'The total wghatm has changed',ch10,&
 &    wcount1,' before and ', wcount2, ' now, difference being ',wcount1-wcount2
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if
 
 
@@ -2825,7 +2816,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &   ' Calculation of the internal-strain  tensor'
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
-  ABI_ALLOCATE(instrain,(3*natom,6))
+  ABI_MALLOC(instrain,(3*natom,6))
 ! looking after the no. of blok that contains the internal strain tensor
   qphon(:,1)=zero
   qphnrm(1)=zero
@@ -2835,7 +2826,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rftyp=1
   call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
-  ABI_ALLOCATE(effective_potential%harmonics_terms%strain_coupling,(6,3,natom))
+  ABI_MALLOC(effective_potential%harmonics_terms%strain_coupling,(6,3,natom))
   effective_potential%harmonics_terms%strain_coupling = zero
 
   if (iblok /=0) then
@@ -2862,11 +2853,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   end if
 !-------------------------------------------------------------------------------------
 ! DEALLOCATION OF ARRAYS
-  ABI_DEALLOCATE(blkval)
-  ABI_DEALLOCATE(zeff)
-  ABI_DEALLOCATE(qdrp_cart)
-  ABI_DEALLOCATE(instrain)
-  ABI_DEALLOCATE(d2asr)
+  ABI_FREE(blkval)
+  ABI_FREE(zeff)
+  ABI_FREE(qdrp_cart)
+  ABI_FREE(instrain)
+  ABI_FREE(d2asr)
   call asrq0%free()
 
   write(message,'(a)')ch10
@@ -2901,7 +2892,6 @@ end subroutine system_ddb2effpot
 subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_polynomial_coeff
  use m_polynomial_term
  use m_crystal, only : symbols_crystal
@@ -2933,6 +2923,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character (len=XML_RECL) :: strg,strg1
 #endif
  character(len=500) :: message
+ character(len=264) :: filename_tmp
  character(len=5),allocatable :: symbols(:)
  integer,parameter :: master=0
  logical :: iam_master
@@ -2946,9 +2937,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 ! *************************************************************************
 
-
+ filename_tmp = trim(filename)  
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')'-Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename_tmp
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -2967,17 +2958,17 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  if (nterm_max<=0) then
    write(message, '(a,a,a)' )&
 &     ' Unable to read the number of terms in ',trim(filename),ch10
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
   if (ndisp_max<=0) then
     write(message, '(a,a,a)' )&
 &    ' Unable to read the number of displacement in ',trim(filename),ch10
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
 !Allocation ov the polynomial coeff type
- ABI_DATATYPE_ALLOCATE(coeffs,(ncoeff))
+ ABI_MALLOC(coeffs,(ncoeff))
 
  if(iam_master)then
 
@@ -2992,7 +2983,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    call wrtout(std_out,message,'COLL')
 
 
-   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
+   ABI_MALLOC(symbols,(eff_pot%crystal%natom))
 !  Get the symbols arrays
    call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,&
 &                       eff_pot%crystal%npsp,symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
@@ -3001,15 +2992,15 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  !Read with libxml librarie
 #if defined HAVE_XML
 
-   ABI_DATATYPE_ALLOCATE(terms,(ncoeff,nterm_max))
-   ABI_ALLOCATE(atindx,(ncoeff,nterm_max,2,ndisp_max))
-   ABI_ALLOCATE(coefficient,(ncoeff))
-   ABI_ALLOCATE(cell,(ncoeff,nterm_max,3,2,ndisp_max))
-   ABI_ALLOCATE(direction,(ncoeff,nterm_max,ndisp_max))
-   ABI_ALLOCATE(strain,(ncoeff,nterm_max,ndisp_max))
-   ABI_ALLOCATE(power_disp,(ncoeff,nterm_max,ndisp_max))
-   ABI_ALLOCATE(power_strain,(ncoeff,nterm_max,ndisp_max))
-   ABI_ALLOCATE(weight,(ncoeff,nterm_max))
+   ABI_MALLOC(terms,(ncoeff,nterm_max))
+   ABI_MALLOC(atindx,(ncoeff,nterm_max,2,ndisp_max))
+   ABI_MALLOC(coefficient,(ncoeff))
+   ABI_MALLOC(cell,(ncoeff,nterm_max,3,2,ndisp_max))
+   ABI_MALLOC(direction,(ncoeff,nterm_max,ndisp_max))
+   ABI_MALLOC(strain,(ncoeff,nterm_max,ndisp_max))
+   ABI_MALLOC(power_disp,(ncoeff,nterm_max,ndisp_max))
+   ABI_MALLOC(power_strain,(ncoeff,nterm_max,ndisp_max))
+   ABI_MALLOC(weight,(ncoeff,nterm_max))
 
 !  Read the values of this term with libxml
    call effpot_xml_readCoeff(char_f2c(trim(filename)),ncoeff,ndisp_max,nterm_max,&
@@ -3047,20 +3038,20 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    end do
 
 #else
-   ABI_DATATYPE_ALLOCATE(terms,(1,nterm_max))
-   ABI_ALLOCATE(atindx,(1,1,2,ndisp_max))
-   ABI_ALLOCATE(coefficient,(1))
-   ABI_ALLOCATE(cell,(1,1,3,2,ndisp_max))
-   ABI_ALLOCATE(direction,(1,1,ndisp_max))
-   ABI_ALLOCATE(strain,(1,1,ndisp_max))
-   ABI_ALLOCATE(power_disp,(1,1,ndisp_max))
-   ABI_ALLOCATE(power_strain,(1,1,ndisp_max))
-   ABI_ALLOCATE(weight,(1,1))
+   ABI_MALLOC(terms,(1,nterm_max))
+   ABI_MALLOC(atindx,(1,1,2,ndisp_max))
+   ABI_MALLOC(coefficient,(1))
+   ABI_MALLOC(cell,(1,1,3,2,ndisp_max))
+   ABI_MALLOC(direction,(1,1,ndisp_max))
+   ABI_MALLOC(strain,(1,1,ndisp_max))
+   ABI_MALLOC(power_disp,(1,1,ndisp_max))
+   ABI_MALLOC(power_strain,(1,1,ndisp_max))
+   ABI_MALLOC(weight,(1,1))
 !  Loop over the file
 !  Read the values of all the terms with fortran
    if (open_file(filename,message,unit=funit,form="formatted",&
 &              status="old",action="read") /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 !    Start a reading loop in fortran
@@ -3244,16 +3235,16 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      close(unit=funit)
 
 #endif
-     ABI_DATATYPE_DEALLOCATE(terms)
-     ABI_DEALLOCATE(atindx)
-     ABI_DEALLOCATE(coefficient)
-     ABI_DEALLOCATE(cell)
-     ABI_DEALLOCATE(direction)
-     ABI_DEALLOCATE(strain)
-     ABI_DEALLOCATE(power_disp)
-     ABI_DEALLOCATE(power_strain)
-     ABI_DEALLOCATE(weight)
-     ABI_DEALLOCATE(symbols)
+     ABI_FREE(terms)
+     ABI_FREE(atindx)
+     ABI_FREE(coefficient)
+     ABI_FREE(cell)
+     ABI_FREE(direction)
+     ABI_FREE(strain)
+     ABI_FREE(power_disp)
+     ABI_FREE(power_strain)
+     ABI_FREE(weight)
+     ABI_FREE(symbols)
    end if !End if master
 
 !9-MPI BROADCAST
@@ -3300,7 +3291,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  do ii=1,ncoeff
    call polynomial_coeff_free(coeffs(ii))
  end do
- ABI_DATATYPE_DEALLOCATE(coeffs)
+ ABI_FREE(coeffs)
 
 end subroutine coeffs_xml2effpot
 !!***
@@ -3323,7 +3314,7 @@ end subroutine coeffs_xml2effpot
 !! hist<type(abihist)> = datatype with the  history of the MD
 !!
 !! PARENTS
-!!      m_effective_potential_file,multibinit
+!!      m_effective_potential_file,m_multibinit_driver
 !!
 !! CHILDREN
 !!
@@ -3366,7 +3357,7 @@ subroutine effective_potential_file_readMDfile(filename,hist,option)
    ii  = 1
    ios = 0
 
-   ABI_ALLOCATE(xcart,(3,natom))
+   ABI_MALLOC(xcart,(3,natom))
    call abihist_free(hist)
    call abihist_init(hist,natom,nstep,.FALSE.,.FALSE.)
 
@@ -3402,7 +3393,7 @@ subroutine effective_potential_file_readMDfile(filename,hist,option)
      end do
    end do
    close(unit_md)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
 
  end if!end if type
 
@@ -3436,13 +3427,14 @@ end subroutine effective_potential_file_readMDfile
 !! hist<type(abihist)> = The history of the MD
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,multibinit
+!!      m_fit_polynomial_coeff,m_mover,m_mover_effpot,m_multibinit_driver
+!!      m_opt_effpot
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose)
 
 !Arguments ------------------------------------
 !scalars
@@ -3451,15 +3443,16 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
+ integer,optional,allocatable,intent(inout) :: iatfix(:,:)
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
- real(dp):: factor
- logical :: revelant_factor,need_map,need_verbose
+ real(dp):: factor,ratio
+ logical :: revelant_factor,need_map,need_verbose,need_fixmap
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
  integer :: ncell(3),scale_cell(3)
- integer,allocatable  :: shift(:,:)
+ integer,allocatable  :: shift(:,:),iatfix_tmp(:,:)
  integer,allocatable  :: list_map(:) !blkval(:),
  real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
@@ -3469,7 +3462,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 !Set optional values
  need_verbose = .false.
+ need_fixmap = .FALSE.
  if (present(verbose)) need_verbose = verbose
+ if (present(iatfix)) need_fixmap = .TRUE.
 
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
@@ -3499,7 +3494,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
      write(msg, '(3a)' )&
 &         'unable to map the hist file ',ch10,&
 &         'Action: check/change your MD file'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      ncell(ia) = int(factor)
    end if
@@ -3507,22 +3502,35 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
  ncells = product(ncell)
 
-!Check if the energy store in the hist is revelant, sometimes some MD files gives
+!Check if the energy stored in the hist is revelant, sometimes some MD files gives
 !the energy of the unit cell... This is not suppose to happen... But just in case...
  do ii=1,nstep_hist
-   factE_hist = int(anint(hist%etot(ii) / eff_pot%energy))
-   if(factE_hist == 1) then
-!    In this case we mutiply the energy of the hist by the number of cell
-     hist%etot(ii) = hist%etot(ii)  * ncells
-   end if
-   if(factE_hist /=1 .and. factE_hist /= ncells)then
-     write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+   if(abs(eff_pot%energy)>tol12)then
+     ratio=hist%etot(ii) / eff_pot%energy
+     if(abs(ratio)<real(huge(factE_hist))*half)then
+       factE_hist = nint(ratio)
+       if(factE_hist == 1) then
+!      In this case we mutiply the energy of the hist by the number of cell
+         hist%etot(ii) = hist%etot(ii)  * ncells
+       end if
+       if(factE_hist /=1 .and. factE_hist /= ncells)then
+         write(msg, '(4a,I0,a,I0,2a,I0,3a,I0,3a)' )ch10,&
+&            ' --- !WARNING',ch10,&
+&            '     The energy of the history step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
+&            '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
+&            '     Please check the energy of the step ',ii,ch10,&
+&            ' ---',ch10
+         if(need_verbose) call wrtout(std_out,msg,'COLL')
+       endif
+     else
+       write(msg, '(4a,i0,3a,es16.6,5a)' )ch10,&
 &          ' --- !WARNING',ch10,&
-&          '     The energy of the step ',ii,' seems to be with multiplicity of ',factE_hist,ch10,&
-&          '     However, the multiplicity of the cell is ',ncells,'.',ch10,&
-&          '     Please check the energy of the step ',ii,ch10,&
+&          '     The energy of the history step ',ii,' is apparently not initialized.',ch10,&
+&          '     Its current value is',hist%etot(ii),ch10,&
+&          '     This does not allow to perform checking on the multiplicity of the cell ',ch10,&
 &          ' ---',ch10
-     if(need_verbose) call wrtout(std_out,msg,'COLL')
+       if(need_verbose) call wrtout(std_out,msg,'COLL')
+     end if
    end if
  end do
 
@@ -3531,13 +3539,13 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  call effective_potential_setSupercell(eff_pot,comm,ncell)
 
 !allocation
- ABI_ALLOCATE(shift,(3,natom_hist))
- ABI_ALLOCATE(list_map,(natom_hist))
- ABI_ALLOCATE(list_reddist,(3,natom_hist))
- ABI_ALLOCATE(list_absdist,(3,natom_hist))
- ABI_ALLOCATE(list_dist,(natom_hist))
- ABI_ALLOCATE(xred_ref,(3,natom_hist))
-
+ ABI_MALLOC(shift,(3,natom_hist))
+ ABI_MALLOC(list_map,(natom_hist))
+ ABI_MALLOC(list_reddist,(3,natom_hist))
+ ABI_MALLOC(list_absdist,(3,natom_hist))
+ ABI_MALLOC(list_dist,(natom_hist))
+ ABI_MALLOC(xred_ref,(3,natom_hist))
+ 
  !Putting maping list to zero
  list_map = 0
 
@@ -3612,7 +3620,7 @@ end do  ! ia
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
 &         'Action: change the MD file'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
    end if
 
  need_map = .FALSE.
@@ -3647,7 +3655,7 @@ end do  ! ia
      hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
      hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
-
+  
 ! free the old hist and reinit
    call abihist_free(hist)
    call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
@@ -3659,15 +3667,25 @@ end do  ! ia
    end do
    hist_tmp%mxhist = nstep_hist
    call abihist_free(hist_tmp)
+
+   !map also fixes if present
+   if(need_fixmap)then  
+     ABI_MALLOC(iatfix_tmp,(3,natom_hist))
+     do ia=1,natom_hist
+        iatfix_tmp(:,ia) = iatfix(:,list_map(ia))
+     end do
+     iatfix = iatfix_tmp 
+     ABI_FREE(iatfix_tmp)  
+   end if
  end if !need map
 
 !deallocation
- ABI_DEALLOCATE(shift)
- ABI_DEALLOCATE(list_map)
- ABI_DEALLOCATE(list_dist)
- ABI_DEALLOCATE(list_reddist)
- ABI_DEALLOCATE(list_absdist)
- ABI_DEALLOCATE(xred_ref)
+ ABI_FREE(shift)
+ ABI_FREE(list_map)
+ ABI_FREE(list_dist)
+ ABI_FREE(list_reddist)
+ ABI_FREE(list_absdist)
+ ABI_FREE(xred_ref)
 end subroutine effective_potential_file_mapHistToRef
 !!***
 
@@ -3715,7 +3733,7 @@ subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 
  if (open_file(filename,message,unit=funit,form="formatted",&
    status="old",action="read") /= 0) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  write(message, '(2a)' ) " Read displacements from ", trim(filename)

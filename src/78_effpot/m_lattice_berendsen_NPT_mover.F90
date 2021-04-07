@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,10 +79,10 @@ contains
     type(mbsupercell_t), target, intent(in) :: supercell
     type(rng_t), target, intent(in) :: rng
     self%taut = params%latt_taut
-    self%taup = params%latt_taup
-    self%compressibility =params%latt_compressibility
+    !self%taup = params%latt_taup
+    !self%compressibility =params%latt_compressibility
     call self%lattice_mover_t%initialize(params, supercell, rng)
-    MSG_ERROR("The Berendsen NPT mover has not yet been implemented")
+    ABI_ERROR("The Berendsen NPT mover has not yet been implemented")
     !TODO: Implement
   end subroutine initialize
 
@@ -105,7 +105,7 @@ contains
     old_temperature=self%T_ob
     tmp=1.0 +(self%temperature / old_temperature - 1.0) *    tautscl
     if(tmp< 0.0) then
-       MSG_ERROR("The time scale for the Berendsen Algorithm should be at least larger than dtion.")
+       ABI_ERROR("The time scale for the Berendsen Algorithm should be at least larger than dtion.")
     else
        scale_temperature=sqrt(tmp)
     end if

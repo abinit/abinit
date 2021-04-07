@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nctk
 !! NAME
 !! m_nctk
@@ -7,7 +6,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG)
+!!  Copyright (C) 2008-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,8 +78,10 @@ MODULE m_nctk
 #endif
 
 #ifdef HAVE_NETCDF
- ! netcdf4-hdf5
+ ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
+ ! netcdf4 classic
+ !integer,save,private :: def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
 #endif
 
  character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &
@@ -257,7 +258,7 @@ MODULE m_nctk
  ! If cache_preemption is provided when opening a netCDF-4/HDF5 file, it will be used
  ! instead of the default (0.75) as the preemption value for the HDF5 chunk cache.
 
- logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .False.
+ logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .false.
  ! This flag is set to true if the netcdf library supports parallel IO.
  ! Cannot use CPP flags because nf90_open_par and other similar functions are always
  ! exported by netcdf. As a consequence we have to check at run-time if we can
@@ -284,7 +285,7 @@ subroutine nctk_use_classic_for_seq()
 #ifdef HAVE_NETCDF
  ! Use netcdf classic mode.
  def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
- MSG_COMMENT("Using netcdf-classic mode")
+ ABI_COMMENT("Using netcdf-classic mode")
 #endif
 
 end subroutine nctk_use_classic_for_seq
@@ -321,10 +322,10 @@ integer function nctk_idname(ncid, varname) result(varid)
    write(msg,'(5a)')&
      "NetCDF library returned: ",trim(nf90_strerror(ncerr)),ch10,&
      "while trying to get the ncid of variable: ",trim(varname)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 #else
- MSG_ERROR("Netcdf support is not activated")
+ ABI_ERROR("Netcdf support is not activated")
  write(std_out,*)ncid,varname
 #endif
 
@@ -416,13 +417,14 @@ end function nctk_string_from_occopt
 !! OUTPUT
 !!  iomode=Flag selecting the IO library. Set to IO_MODE_ETSF if netcdf file, else IO_MODE_MPI
 !!    if MPI supports it, finally IO_MODE_FORTRAN
-!!  errmsg=String with error message. Use `if (len_trim(errmsg) /= 0) MSG_ERROR(errmsg)`
+!!  errmsg=String with error message. Use `if (len_trim(errmsg) /= 0) ABI_ERROR(errmsg)`
 !!    to handle possible errors in the caller.
 !!
 !! PARENTS
-!!      conducti_nc,optic
+!!      m_conducti,optic
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -505,7 +507,7 @@ integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
      filename = nctk_ncify(filename)
    end if
    if (.not. file_exists(filename)) then
-     ierr = 1; errmsg = 'Missing file: '//trim(filename)
+     ierr = 1; errmsg = 'Cannot find file: '//trim(filename)
    end if
  end if
 
@@ -528,6 +530,7 @@ end function nctk_try_fort_or_ncfile
 !!      abinit
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -555,14 +558,14 @@ subroutine nctk_test_mpiio()
 
    if (ncerr == nf90_noerr) then
      nctk_has_mpiio = .True.
-     call wrtout(std_out,"Netcdf library supports MPI-IO", "COLL")
+     call wrtout(std_out," Netcdf library supports MPI-IO", "COLL")
    else if (ncerr == nf90_enopar) then
      ! This is the value returned by the C function ifndef USE_PARALLEL
-     MSG_WARNING(sjoin("netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
+     ABI_WARNING(sjoin("Netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    else
      ! Maybe something wrong in the low-level layer!
-     MSG_WARNING(sjoin("Strange, netcdf seems to support MPI-IO but: ", nf90_strerror(ncerr)))
+     ABI_WARNING(sjoin("Strange, netcdf seems to support MPI-IO but: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    end if
 
@@ -578,13 +581,13 @@ subroutine nctk_test_mpiio()
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
       "Action: install a netcdf4+HDF5 library with MPI-IO support."
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 #endif
 
 #ifdef HAVE_NETCDF_DEFAULT
  if (.not. nctk_has_mpiio) then
-   MSG_ERROR("--netcdf-default is on but netcdf library does not support MPI-IO. Aborting now")
+   ABI_ERROR("--netcdf-default is on but netcdf library does not support MPI-IO. Aborting now")
  end if
 #endif
 
@@ -600,7 +603,7 @@ end subroutine nctk_test_mpiio
 !! FUNCTION
 !!  Return the netcdf type from a string. Possible values:
 !!    c or ch   for NF90_CHAR
-!!    i or int  for NF90_INT
+!!    i or int  for NF90_INTtrue
 !!   sp         for NF90_FLOAT
 !!   dp         for NF90_DOUBLE
 !!
@@ -631,7 +634,7 @@ integer function str2xtype(string) result(xtype)
  case ("dp")
    xtype = NF90_DOUBLE
  case default
-   MSG_ERROR(sjoin("Invalid string type:", string))
+   ABI_ERROR(sjoin("Invalid string type:", string))
  end select
 
 end function str2xtype
@@ -709,7 +712,7 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
                      comm=comm, info=xmpio_info, ncid=ncid)
 #else
    ncerr = nf90_einval
-   MSG_WARNING("Netcdf without MPI support. Cannot open file, will abort in caller")
+   ABI_WARNING("Netcdf without MPI support. Cannot open file, will abort in caller")
 #endif
    NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
  else
@@ -721,7 +724,7 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
    !end if
    if (nprocs > 1) then
      ncerr = nf90_einval
-     MSG_WARNING("netcdf without MPI-IO support with nprocs > 1! Will abort in the caller")
+     ABI_WARNING("netcdf without MPI-IO support with nprocs > 1! Will abort in the caller")
    end if
  endif
 
@@ -777,7 +780,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    cmode = def_cmode_for_seq_create
    ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
    if (xmpi_comm_size(comm) > 1) then
-     MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
+     ABI_WARNING("netcdf without MPI-IO support with nprocs > 1!")
    end if
  end if
  NCF_CHECK(ncerr)
@@ -798,7 +801,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ! Write string with input.
    my_string = trim(INPUT_STRING)
    if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then
-     my_string = "jdtset " // itoa(DTSET_IDX) // ch10 // trim(INPUT_STRING)
+     my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
    input_len = len_trim(my_string)
@@ -847,7 +850,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 ! *********************************************************************
 
  if (.not. nctk_has_mpiio .and. xmpi_comm_size(comm) > 1) then
-   MSG_ERROR("netcdf without MPI-IO support with nprocs > 1!")
+   ABI_ERROR("netcdf without MPI-IO support with nprocs > 1!")
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
@@ -857,7 +860,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
      comm=comm, info=xmpio_info, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open_par: ", path))
 #else
-   MSG_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
+   ABI_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
 #endif
  else
    call wrtout(std_out, sjoin("- Opening netcdf file without MPI-IO support:", path))
@@ -1059,13 +1062,13 @@ integer function nctk_set_collective(ncid, varid) result(ncerr)
 !Arguments ------------------------------------
  integer,intent(in) :: ncid,varid
 
-! *********************************************************************
+! *********************************************************************true
 
   ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
   ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
 #else
-  MSG_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
+  ABI_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
   ABI_UNUSED((/ncid, varid/))
 #endif
 
@@ -1136,7 +1139,7 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
      write(msg, "(2a,2(a,i0))")&
         "dimension already exists with a different value",ch10,&
         "file = ", dimlen, "; write = ", nctkdim%value
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else
    ncerr = nf90_def_dim(ncid, dname, nctkdim%value, dimid)
@@ -1318,9 +1321,10 @@ end function nctk_def_basedims
 !!  (only writing)
 !!
 !! PARENTS
-!!      m_abihist,m_bse_io,m_effective_potential,write_eig
+!!      m_abihist,m_bse_io,m_effective_potential,m_nctk,m_spin_ncfile
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -1410,7 +1414,7 @@ integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode, prefix) r
        call var_from_id(ncid, varid, var)
 
        if (.not. (var%xtype == xtype .and. var%ndims == 0)) then
-         MSG_ERROR("variable already exists with a different definition.")
+         ABI_ERROR("variable already exists with a different definition.")
        else
          cycle ! Dimension matches, skip definition.
        end if
@@ -1618,14 +1622,14 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid, prefix) re
         "variable ",trim(vname)," already exists with a different definition:",ch10,&
         "In file:     xtype = ",var%xtype,", ndims = ",var%ndims,ch10,&
         "From caller: xtype = ",xtype,", ndims = ",cnt,ch10
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
    if (any(dimvals(1:cnt) /= var%dimlens(1:var%ndims))) then
       write(msg,"(4a,2(3a))")&
         "variable ",trim(vname)," already exists but with different shape.",ch10,&
         "In file:     dims = ",trim(ltoa(var%dimlens(:var%ndims))),ch10,&
         "From caller  dims = ",trim(ltoa(dimvals(:cnt))),ch10
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
    if (present(varid)) varid = vid
    return
@@ -2086,7 +2090,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
    case ("create")
      ncerr = nctk_open_create(ncid, path, comm_fft)
    case default
-     MSG_ERROR(sjoin("Wrong action: ", my_action))
+     ABI_ERROR(sjoin("Wrong action: ", my_action))
    end select
 
  else
@@ -2102,7 +2106,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
        ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=comm_fft, info=xmpio_info, ncid=ncid)
      case default
-       MSG_ERROR(strcat("Wrong action:", my_action))
+       ABI_ERROR(strcat("Wrong action:", my_action))
      end select
 #endif
    else
@@ -2117,7 +2121,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
          cmode = def_cmode_for_seq_create
          ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
        case default
-         MSG_ERROR(strcat("Wrong action:", my_action))
+         ABI_ERROR(strcat("Wrong action:", my_action))
        end select
      end if
    end if
@@ -2375,6 +2379,7 @@ end function nctk_read_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2456,6 +2461,7 @@ end subroutine collect_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2524,6 +2530,7 @@ end subroutine distrib_datar
 !!      m_nctk
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2583,6 +2590,7 @@ end subroutine var_from_id
 !! PARENTS
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2610,7 +2618,7 @@ end subroutine var_from_name
 !! nctk_defwrite_nonana_terms
 !!
 !! FUNCTION
-!!  Write phonon frequencies and displacements for q-->0 in the presence of non-analytical behaviour.
+!!  Write to ncfile the phonon frequencies and displacements for q --> 0 in the presence of non-analytical behaviour.
 !!
 !! INPUTS
 !!  ncid=netcdf file id.
@@ -2630,6 +2638,7 @@ end subroutine var_from_name
 !!      anaddb,m_ifc
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2676,7 +2685,7 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
    NCF_CHECK(ncerr)
 
  case default
-   MSG_ERROR(sjoin("Wrong value for mode", mode))
+   ABI_ERROR(sjoin("Wrong value for mode", mode))
  end select
 
 end subroutine nctk_defwrite_nonana_terms
@@ -2703,6 +2712,7 @@ end subroutine nctk_defwrite_nonana_terms
 !!      anaddb
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2743,7 +2753,7 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
    NCF_CHECK(ncerr)
 
  case default
-   MSG_ERROR(sjoin("Wrong value for mode", mode))
+   ABI_ERROR(sjoin("Wrong value for mode", mode))
  end select
 
 end subroutine nctk_defwrite_nonana_raman_terms
@@ -2768,6 +2778,7 @@ end subroutine nctk_defwrite_nonana_raman_terms
 !!      anaddb
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2819,9 +2830,10 @@ end subroutine nctk_defwrite_raman_terms
 !!  Remove
 !!
 !! PARENTS
-!!      outvars
+!!      m_outvars
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2878,9 +2890,10 @@ integer :: ncerr, cmode
 !!  (only writing)
 !!
 !! PARENTS
-!!      prttagm,prttagm_images
+!!      m_parser
 !!
 !! CHILDREN
+!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2961,7 +2974,7 @@ end subroutine write_var_netcdf
 !!  (only writing)
 !!
 !! PARENTS
-!!      clnup1
+!!      m_gstate
 !!
 !! CHILDREN
 !!      ab_define_var

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -204,10 +204,10 @@ CONTAINS
 !! green  = variable of type green_type
 !!
 !! PARENTS
-!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -247,26 +247,26 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  green%dmft_nwli=paw_dmft%dmft_nwli
  green%charge_ks=zero
  green%has_charge_matlu=0
- ABI_ALLOCATE(green%charge_matlu,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu=zero
  green%has_charge_matlu=1
  green%has_greenmatlu_xsum=0
 
  green%has_charge_matlu_solver=0
- ABI_ALLOCATE(green%charge_matlu_solver,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu_solver,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu_solver=zero
  green%has_charge_matlu_solver=1
 
  green%has_charge_matlu_prev=0
- ABI_ALLOCATE(green%charge_matlu_prev,(paw_dmft%natom,paw_dmft%nsppol+1))
+ ABI_MALLOC(green%charge_matlu_prev,(paw_dmft%natom,paw_dmft%nsppol+1))
  green%charge_matlu_prev=zero
  green%has_charge_matlu_prev=1
 
  call init_oper(paw_dmft,green%occup,opt_ksloc=3)
 
 !  built simple arrays to distribute the tasks in compute_green.
- ABI_ALLOCATE(green%procb,(nw,paw_dmft%nkpt))
- ABI_ALLOCATE(green%proct,(nw,0:paw_dmft%nproc-1))
+ ABI_MALLOC(green%procb,(nw,paw_dmft%nkpt))
+ ABI_MALLOC(green%proct,(nw,0:paw_dmft%nproc-1))
 
  call distrib_paral(paw_dmft%nkpt,paw_dmft%nproc,nw,nw_perproc,green%procb,green%proct)
  green%nw=nw
@@ -274,7 +274,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 !  need to distribute memory over frequencies
 
 !!  begin of temporary modificatios
-! ABI_DATATYPE_ALLOCATE(green%oper,(green%nw_perproc))
+! ABI_MALLOC(green%oper,(green%nw_perproc))
 ! do ifreq=1,green%nw_perproc
 !  call init_oper(paw_dmft,green%oper(ifreq),opt_ksloc=optoper_ksloc)
 ! enddo
@@ -290,7 +290,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 !
 !
 !!  end of temporary modificatios
- ABI_DATATYPE_ALLOCATE(green%oper,(green%nw))
+ ABI_MALLOC(green%oper,(green%nw))
  do ifreq=1,green%nw
   call init_oper(paw_dmft,green%oper(ifreq),opt_ksloc=optoper_ksloc)
  enddo
@@ -298,7 +298,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  green%ichargeloc_cv=0
 
  if(paw_dmft%dmft_solv>=4) then
-   ABI_ALLOCATE(green%ecorr_qmc,(paw_dmft%natom))
+   ABI_MALLOC(green%ecorr_qmc,(paw_dmft%natom))
  end if
  if(paw_dmft%dmft_solv>=4) green%ecorr_qmc(:)=zero
 
@@ -325,10 +325,10 @@ end subroutine init_green
 !!  green  <type(green_type)>= green function data
 !!
 !! PARENTS
-!!      impurity_solve,m_green
+!!      m_dmft,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -355,14 +355,14 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
  endif
 
  green%dmftqmc_l=paw_dmft%dmftqmc_l
- ABI_ALLOCATE(green%tau,(green%dmftqmc_l))
+ ABI_MALLOC(green%tau,(green%dmftqmc_l))
  do itau=1,green%dmftqmc_l
   green%tau(itau)=float(itau-1)/float(green%dmftqmc_l)/paw_dmft%temp
  enddo
 
  call init_oper(paw_dmft,green%occup_tau,optksloc)
 
- ABI_DATATYPE_ALLOCATE(green%oper_tau,(paw_dmft%dmftqmc_l))
+ ABI_MALLOC(green%oper_tau,(paw_dmft%dmftqmc_l))
  do itau=1,green%dmftqmc_l
   call init_oper(paw_dmft,green%oper_tau(itau),optksloc)
  enddo
@@ -383,10 +383,10 @@ end subroutine init_green_tau
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green,m_hubbard_one,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -405,31 +405,31 @@ subroutine destroy_green(green)
    do ifreq=1,green%nw
     call destroy_oper(green%oper(ifreq))
    enddo
-   ABI_DATATYPE_DEALLOCATE(green%oper)
+   ABI_FREE(green%oper)
  end if
  if ( allocated(green%charge_matlu))       then
-   ABI_DEALLOCATE(green%charge_matlu)
+   ABI_FREE(green%charge_matlu)
  end if
  green%has_charge_matlu=0
 
  if ( allocated(green%charge_matlu_prev))       then
-   ABI_DEALLOCATE(green%charge_matlu_prev)
+   ABI_FREE(green%charge_matlu_prev)
  end if
  green%has_charge_matlu_prev=0
 
  if ( allocated(green%charge_matlu_solver))       then
-   ABI_DEALLOCATE(green%charge_matlu_solver)
+   ABI_FREE(green%charge_matlu_solver)
  end if
  green%has_charge_matlu_solver=0
 
  if ( allocated(green%ecorr_qmc))   then
-    ABI_DEALLOCATE(green%ecorr_qmc)
+    ABI_FREE(green%ecorr_qmc)
  end if
  if ( allocated(green%procb))   then
-    ABI_DEALLOCATE(green%procb)
+    ABI_FREE(green%procb)
  end if
  if ( allocated(green%proct))   then
-    ABI_DEALLOCATE(green%proct)
+    ABI_FREE(green%proct)
  end if
  green%omega => null()
 
@@ -449,10 +449,10 @@ end subroutine destroy_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green
+!!      m_dmft,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -477,10 +477,10 @@ subroutine destroy_green_tau(green)
    do itau=1,green%dmftqmc_l
     call destroy_oper(green%oper_tau(itau))
    enddo
-   ABI_DATATYPE_DEALLOCATE(green%oper_tau)
+   ABI_FREE(green%oper_tau)
  end if
  if ( allocated(green%tau))            then
-   ABI_DEALLOCATE(green%tau)
+   ABI_FREE(green%tau)
  end if
 
 end subroutine destroy_green_tau
@@ -503,10 +503,10 @@ end subroutine destroy_green_tau
 !! OUTPUT
 !!
 !! PARENTS
-!!      dyson,impurity_solve,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -565,10 +565,10 @@ end subroutine copy_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,impurity_solve,m_green,qmc_prep_ctqmc
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -671,10 +671,10 @@ end subroutine printocc_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,m_forctqmc,m_green,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -718,7 +718,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 
 !  == Print local Green Function
  if(option==1.or.option==3) then
-   ABI_ALLOCATE(unitgreenfunc_arr,(natom*nsppol*nspinor))
+   ABI_MALLOC(unitgreenfunc_arr,(natom*nsppol*nspinor))
    iall=0
    do iatom=1,natom
      if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
@@ -793,12 +793,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo ! isppol
      endif ! lpawu=/-1
    enddo ! iatom
-   ABI_DEALLOCATE(unitgreenfunc_arr)
+   ABI_FREE(unitgreenfunc_arr)
  endif
 
 !  == Print ks green function
  if((option==2.or.option==3).and.green%oper(1)%has_operks==1) then
-   ABI_ALLOCATE(unitgreenloc_arr,(nsppol*nkpt))
+   ABI_MALLOC(unitgreenloc_arr,(nsppol*nkpt))
    iall=0
    do isppol = 1 , nsppol
      write(tag_is,'(i1)')isppol
@@ -860,7 +860,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo ! ikpt
    enddo ! isppol
-   ABI_DEALLOCATE(unitgreenloc_arr)
+   ABI_FREE(unitgreenloc_arr)
  endif
 
  if((green%w_type=="real".and.option>=4).and.green%oper(1)%has_operks==1) then
@@ -869,17 +869,17 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
    if (option==4) then
      tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
      if (open_file(tmpfil, message, newunit=spf_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    endif
    if (option==5) then
      tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
      if (open_file(tmpfil, message, newunit=spfkresolved_unt, status='unknown', form='formatted') /= 0) then
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
    endif
-   ABI_ALLOCATE(sf,(green%nw))
-   ABI_ALLOCATE(sf_corr,(green%nw))
+   ABI_MALLOC(sf,(green%nw))
+   ABI_MALLOC(sf_corr,(green%nw))
    iall=0
    if (option==5) then
        do ikpt = 1, nkpt
@@ -933,7 +933,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
          ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
          tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
          if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
          write(message,*) "#", nspinor,nsppol,ndim,green%nw
          call wrtout(spcorb_unt,message,'COLL')
@@ -964,8 +964,8 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
      enddo
    endif
    close(spf_unt)
-   ABI_DEALLOCATE(sf)
-   ABI_DEALLOCATE(sf_corr)
+   ABI_FREE(sf)
+   ABI_FREE(sf_corr)
  endif
 
  if(optwt==2.and.(option==1.or.option==3)) then
@@ -998,10 +998,10 @@ end subroutine print_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_dmft,fermi_green,m_green,newton,spectral_function
+!!      m_dmft,m_green,m_outscfcv
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1043,7 +1043,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  !if(lintegrate.and.green%w_type=="real") then
  !if(green%w_type=="real") then
  !  message = 'integrate_green not implemented for real frequency'
- !  MSG_BUG(message)
+ !  ABI_BUG(message)
  !endif
  call timab(624,1,tsec)
  if(present(opt_self)) then
@@ -1069,7 +1069,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 
  if(self%nw/=green%nw)  then
    message = ' BUG: frequencies for green and self not coherent'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! Initialise spaceComm, myproc, and nproc
@@ -1092,7 +1092,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! ==============================
 ! Initialise Identity
 ! ==============================
- ABI_ALLOCATE(Id,(paw_dmft%mbandc,paw_dmft%mbandc))
+ ABI_MALLOC(Id,(paw_dmft%mbandc,paw_dmft%mbandc))
  Id=zero
  do ib=1, paw_dmft%mbandc
    Id(ib,ib)=one
@@ -1133,7 +1133,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! == Compute Green function G(k)
 ! ================================
  green%occup%ks=czero
- ABI_ALLOCATE(procb_ifreq,(paw_dmft%nkpt))
+ ABI_MALLOC(procb_ifreq,(paw_dmft%nkpt))
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
 !   ====================================================
@@ -1278,7 +1278,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! call flush(std_out)
    endif ! parallelisation
  enddo ! ifreq
- ABI_DEALLOCATE(procb_ifreq)
+ ABI_FREE(procb_ifreq)
 
 ! =============================================
 ! built total green function (sum over procs).
@@ -1295,7 +1295,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
      call xmpi_sum(green%oper(ifreq)%ks,spacecomm,ierr)
    else if(optnonxsum==0.and.green%oper(ifreq)%has_operks==0) then
      message = 'optnonxsum==0 and green%oper(ifreq)%has_operks==0: not compatible'
-     MSG_BUG(message)
+     ABI_BUG(message)
    endif
 !   endif
 ! enddo ! ifreq
@@ -1341,7 +1341,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  endif
 ! call flush(std_out)
 
- ABI_DEALLOCATE(Id)
+ ABI_FREE(Id)
  call timab(624,2,tsec)
 
 end subroutine compute_green
@@ -1374,10 +1374,10 @@ end subroutine compute_green
 !!   green%occup = occupations
 !!
 !! PARENTS
-!!      m_dmft,fermi_green,impurity_solve,m_green,newton
+!!      m_dmft,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1422,7 +1422,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
  if(green%w_type=="real") then
    message = 'integrate_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
  if(present(opt_nonxsum)) then
    optnonxsum=opt_nonxsum
@@ -1464,20 +1464,20 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
  if(optaftsolv==1.and.abs(optksloc)/=2) then
     message = "integration of ks green function should not be done after call to solver : it has not been computed"
-    MSG_BUG(message)
+    ABI_BUG(message)
  endif
  if(abs(optksloc)>=2.and.green%has_greenmatlu_xsum==0) then
     write(message,'(4a)') ch10,&
 &     "BUG: integrate_green is asked to integrate local green function",ch10,&
 &    " and local green function was non broadcasted in compute_green"
-    MSG_BUG(message)
+    ABI_BUG(message)
  endif
 
 ! Allocations
- ABI_DATATYPE_ALLOCATE(matlu_temp,(natom))
+ ABI_MALLOC(matlu_temp,(natom))
  call init_matlu(natom,nspinor,nsppol,green%oper(1)%matlu(:)%lpawu,matlu_temp)
 
- ABI_ALLOCATE(ff,(green%nw))
+ ABI_MALLOC(ff,(green%nw))
 
 ! =================================================
 ! == Integrate Local Green function ===============
@@ -1589,7 +1589,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
          write(message,'(a,a,i3)') ch10,&
 &        "  = BUG : has_charge_matlu_solver should be 2 and is",&
 &        green%has_charge_matlu_solver
-         MSG_BUG(message)
+         ABI_BUG(message)
        endif
        if(paw_dmft%dmft_solv<=4) then
          call trace_oper(green%occup,green%charge_ks,green%charge_matlu_solver,2)
@@ -1801,9 +1801,9 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  endif
 
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
  call destroy_matlu(matlu_temp,natom)
- ABI_DATATYPE_DEALLOCATE(matlu_temp)
+ ABI_FREE(matlu_temp)
 ! deallocate(charge_loc_old)
  call timab(625,2,tsec)
  DBG_EXIT("COLL")
@@ -1821,7 +1821,7 @@ end subroutine integrate_green
 !! INPUTS
 !!  char1 = character which precises the type of green function computed.
 !!  cryst_struc <type(crystal_t)>= crystal structure data.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  green  <type(green_type)>= green function data
 !!  pawang <type(pawang)>=paw angular mesh and related data
@@ -1835,7 +1835,7 @@ end subroutine integrate_green
 !!      m_dmft
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1929,10 +1929,10 @@ end subroutine icip_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      impurity_solve,m_green,qmc_prep_ctqmc
+!!      m_dmft,m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -1977,7 +1977,7 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
 ! Only imaginary frequencies here
  if(green%w_type=="real") then
    message = 'fourier_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
 ! Initialise temporary green function
@@ -1985,8 +1985,8 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
  call init_green_tau(green_temp,paw_dmft)
 
  !green%oper(:)%matlu(1)%mat(1,1,1,1,1)
- ABI_ALLOCATE(fw,(green%nw))
- ABI_ALLOCATE(ft,(green%dmftqmc_l))
+ ABI_MALLOC(fw,(green%nw))
+ ABI_MALLOC(ft,(green%dmftqmc_l))
 
 !==============================================
 ! == Inverse fourier transformation ===========
@@ -2189,8 +2189,8 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
      enddo
    endif ! opt_ksloc=2
  endif ! opt_tw==-1
- ABI_DEALLOCATE(fw)
- ABI_DEALLOCATE(ft)
+ ABI_FREE(fw)
+ ABI_FREE(ft)
  call destroy_green_tau(green_temp)
  call destroy_green(green_temp)
 
@@ -2217,7 +2217,7 @@ end subroutine fourier_green
 !!      m_dmft
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2238,7 +2238,7 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 ! Only imaginary frequencies here
  if(green%w_type=="real") then
    message = 'check_fourier_green not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  endif
 
  call init_green(green_check,paw_dmft)
@@ -2291,7 +2291,7 @@ end subroutine check_fourier_green
 !! PARENTS
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2357,7 +2357,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2377,7 +2377,7 @@ end subroutine compa_occup_ks
 !!      m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo,dmft_nwlo)
@@ -2444,7 +2444,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2463,10 +2463,10 @@ end subroutine add_int_fct
 !!  ft= function is time space
 !!
 !! PARENTS
-!!      m_green,qmc_prep_ctqmc
+!!      m_forctqmc,m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
@@ -2486,7 +2486,7 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
  character(len=500) :: message
  integer :: ifreq
 ! *********************************************************************
- ABI_ALLOCATE(procb2,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(procb2,(paw_dmft%dmft_nwlo))
  if(present(procb).and.present(myproc)) then
    do ifreq=1,paw_dmft%dmft_nwlo
     procb2(ifreq)=(procb(ifreq)==myproc)
@@ -2494,11 +2494,11 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
  else if(present(procb).and..not.present(myproc)) then
    write(message,'(a,a,2(e15.4))') ch10,&
 &    "BUG: procb is present and not myproc in int_fct"
-   MSG_BUG(message)
+   ABI_BUG(message)
  else if(.not.present(procb).and.present(myproc)) then
    write(message,'(a,a,2(e15.4))') ch10,&
 &    "BUG: procb is not present and myproc is in int_fct"
-   MSG_BUG(message)
+   ABI_BUG(message)
  else
    do ifreq=1,paw_dmft%dmft_nwlo
      procb2(ifreq)=(1==1)
@@ -2558,7 +2558,7 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
     enddo
   endif
  endif  ! ldiag
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
 end subroutine int_fct
 !!***
@@ -2572,7 +2572,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2589,10 +2589,10 @@ end subroutine int_fct
 !!  ft= function is time space
 !!
 !! PARENTS
-!!      local_ks_green,m_green
+!!      m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
@@ -2625,25 +2625,25 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 ! == inverse fourier transform
  if(opt_four==-1) then
 
-   ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(splined_li,(paw_dmft%dmft_nwli))
 !   allocate(fw1(0:paw_dmft%dmft_nwlo-1))
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+     ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
      call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
      call spline_c(paw_dmft%dmft_nwlo,paw_dmft%dmft_nwli,paw_dmft%omega_lo,&
 &                   omega_li,splined_li,fw)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      splined_li=fw
    endif
    call invfourier(splined_li,ft,paw_dmft%dmft_nwli,ltau,iflag,beta)
 !   deallocate(fw1)
-   ABI_DEALLOCATE(splined_li)
+   ABI_FREE(splined_li)
 
 ! == direct fourier transform
  else if(opt_four==1) then
 
-   ABI_ALLOCATE(ftr,(ltau))
+   ABI_MALLOC(ftr,(ltau))
 
    iwarn=0
    do itau=1,ltau
@@ -2651,7 +2651,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
        if(ldiag) then
          write(message,'(a,a,2(e15.4))') ch10,&
 &          "green function is not real in imaginary time space",ft(itau)
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        else
          iwarn=iwarn+1
          ftr(itau)=real(ft(itau))
@@ -2663,7 +2663,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 !       write(std_out,*) itau,ftr(itau)
    enddo
 
-   ABI_ALLOCATE(tospline_li,(paw_dmft%dmft_nwli))
+   ABI_MALLOC(tospline_li,(paw_dmft%dmft_nwli))
    if (log_direct==1) then
 !   do not have a physical meaning..because the log frequency is not
 !   one of the linear frequency.
@@ -2678,19 +2678,19 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
         !write(1112,*) paw_dmft%omega_li(ifreq),real(tospline_li(ifreq)),aimag(tospline_li(ifreq))
      enddo
      if(paw_dmft%dmft_log_freq==1) then
-       ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+       ABI_MALLOC(omega_li,(1:paw_dmft%dmft_nwli))
        call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
        call spline_c(paw_dmft%dmft_nwli,paw_dmft%dmft_nwlo,omega_li,&
 &                 paw_dmft%omega_lo,fw,tospline_li)
-       ABI_DEALLOCATE(omega_li)
+       ABI_FREE(omega_li)
      else
        fw=tospline_li
      endif
    endif
 
-   ABI_DEALLOCATE(tospline_li)
+   ABI_FREE(tospline_li)
 
-   ABI_DEALLOCATE(ftr)
+   ABI_FREE(ftr)
    if(iwarn>0) then
      write(message,'(a,a,2(e15.4))') ch10,&
 &     "WARNING: off-diag green function is not real in imaginary time space",xsto
@@ -2711,7 +2711,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2731,7 +2731,7 @@ end subroutine fourier_fct
 !! PARENTS
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2757,11 +2757,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
 !   allocate(fw1(0:paw_dmft%dmft_nwlo-1))
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:size_fw2))
+     ABI_MALLOC(omega_li,(1:size_fw2))
      call construct_nwli_dmft(paw_dmft,size_fw2,omega_li)
      call spline_c(size_fw1,size_fw2,paw_dmft%omega_lo(1:size_fw1),&
 &                   omega_li(1:size_fw2),fw2,fw1)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      fw2=fw1
    endif
@@ -2771,11 +2771,11 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
 
    if(paw_dmft%dmft_log_freq==1) then
-     ABI_ALLOCATE(omega_li,(1:size_fw2))
+     ABI_MALLOC(omega_li,(1:size_fw2))
      call construct_nwli_dmft(paw_dmft,size_fw2,omega_li)
      call spline_c(size_fw2,size_fw1,omega_li(1:size_fw2),&
 &                 paw_dmft%omega_lo(1:size_fw1),fw1,fw2)
-     ABI_DEALLOCATE(omega_li)
+     ABI_FREE(omega_li)
    else
      fw1=fw2
    endif
@@ -2798,10 +2798,10 @@ end subroutine spline_fct
 !! OUTPUT
 !!
 !! PARENTS
-!!      qmc_prep_ctqmc
+!!      m_forctqmc
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2816,7 +2816,7 @@ subroutine occup_green_tau(green)
  complex(dpc), allocatable :: shift(:)
 ! *********************************************************************
 
- ABI_ALLOCATE(shift,(green%oper_tau(1)%natom))
+ ABI_MALLOC(shift,(green%oper_tau(1)%natom))
  do iatom=1,green%oper_tau(1)%natom
    shift(iatom)=-cone
    lpawu=green%oper_tau(1)%matlu(iatom)%lpawu
@@ -2827,7 +2827,7 @@ subroutine occup_green_tau(green)
    endif
  enddo
  call shift_matlu(green%occup_tau%matlu,green%occup_tau%natom,shift)
- ABI_DEALLOCATE(shift)
+ ABI_FREE(shift)
 
 
 end subroutine occup_green_tau
@@ -2891,7 +2891,7 @@ end subroutine occup_green_tau
 !!      m_green
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -2915,7 +2915,7 @@ end subroutine occup_green_tau
  if(nproc.ge.2*nw) then
  !write(6,*) "AA"
    ratio=nproc/nw
-   ABI_ALLOCATE(proca,(nw,nproc/nw))
+   ABI_MALLOC(proca,(nw,nproc/nw))
    do ir=1,ratio
      do iw=1,nw
        proca(iw,ir)=iw+(ir-1)*nw-1
@@ -2942,7 +2942,7 @@ end subroutine occup_green_tau
      enddo
    enddo
    nw_perproc=1
-   ABI_DEALLOCATE(proca)
+   ABI_FREE(proca)
 
  else if (nproc.ge.nw) then
  !write(6,*) "BB"
@@ -3001,7 +3001,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3014,7 +3014,7 @@ end subroutine occup_green_tau
 !! PARENTS
 !!
 !! CHILDREN
-!!      loc_oper,print_matlu,sym_matlu,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3043,7 +3043,7 @@ end subroutine occup_green_tau
 
      !  write(6,*) green%oper(1)%ks(1,1,1,1)
  if(green%oper(1)%has_operks==0) then
-  MSG_ERROR("greendft%oper(1)%ks not allocated")
+  ABI_ERROR("greendft%oper(1)%ks not allocated")
  endif
 
 !======================================
@@ -3091,7 +3091,7 @@ end subroutine occup_green_tau
 !!  Compute Fermi level for DMFT or DFT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3110,7 +3110,7 @@ end subroutine occup_green_tau
 !!      m_dmft
 !!
 !! CHILDREN
-!!      compute_green,integrate_green,newton,wrtout
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3237,7 +3237,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3253,10 +3253,10 @@ end subroutine fermi_green
 !!  ierr_hh      : different from zero if an error occurs
 !!
 !! PARENTS
-!!      fermi_green
+!!      m_green
 !!
 !! CHILDREN
-!!      compute_green,integrate_green
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3459,10 +3459,10 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 !!  Fxdouble     : Value of F''(x)
 !!
 !! PARENTS
-!!      newton
+!!      m_green
 !!
 !! CHILDREN
-!!      compute_green,integrate_green
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3555,10 +3555,10 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 !! nb_elec_x    : Number of electrons for the value of x
 !!
 !! PARENTS
-!!      newton
+!!      m_green
 !!
 !! CHILDREN
-!!      compute_green,integrate_green
+!!      fourier_fct,wrtout
 !!
 !! SOURCE
 
@@ -3605,7 +3605,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3615,7 +3615,7 @@ end subroutine newton
 !!  cryst_struc
 !!  istep    =  step of iteration for DFT.
 !!  dft_occup
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! OUTPUT
@@ -3653,7 +3653,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
  nkpt=paw_dmft%nkpt
  nsppol=paw_dmft%nsppol
  ltau=128
- ABI_ALLOCATE(tau,(ltau))
+ ABI_MALLOC(tau,(ltau))
  do itau=1,ltau
    tau(itau)=float(itau-1)/float(ltau)/paw_dmft%temp
  end do
@@ -3662,14 +3662,14 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Only imaginary frequencies here
  if(green%w_type=="real") then
    message = ' compute_energy not implemented for real frequency'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================
 !Compute local band ks green function
 ! should be computed in compute_green: it would be less costly in memory.
 !=========================================
- ABI_ALLOCATE(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
+ ABI_MALLOC(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
  if(green%oper(1)%has_operks==1) then
    loc_ks(:,:,:)=czero
    do isppol=1,nsppol
@@ -3684,16 +3684,16 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
    end do
  else
    message = ' green fct is not computed in ks space'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !=========================================
 !Compute fourier transformation
 !=========================================
 
- ABI_ALLOCATE(loc_ks_tau,(nsppol,mbandc,ltau))
- ABI_ALLOCATE(fw,(paw_dmft%dmft_nwlo))
- ABI_ALLOCATE(ft,(ltau))
+ ABI_MALLOC(loc_ks_tau,(nsppol,mbandc,ltau))
+ ABI_MALLOC(fw,(paw_dmft%dmft_nwlo))
+ ABI_MALLOC(ft,(ltau))
  loc_ks_tau(:,:,:)=czero
  do isppol=1,nsppol
    do iband=1,mbandc
@@ -3706,8 +3706,8 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
      end do
    end do
  end do
- ABI_DEALLOCATE(fw)
- ABI_DEALLOCATE(ft)
+ ABI_FREE(fw)
+ ABI_FREE(ft)
  do isppol=1,nsppol
    do iband=1,mbandc
      do itau=1,ltau
@@ -3720,7 +3720,7 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 !Print out ksloc green function
 !=========================================
  if(abs(prtopt)==1) then
-   ABI_ALLOCATE(unitgreenlocks_arr,(nsppol))
+   ABI_MALLOC(unitgreenlocks_arr,(nsppol))
    do isppol=1,nsppol
      write(tag_is,'(i1)')isppol
      tmpfil = trim(paw_dmft%filapp)//'Gtau_locks_isppol'//tag_is
@@ -3750,13 +3750,13 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
      end do
 !    call flush(unitgreenlocks_arr(isppol))
    end do
-   ABI_DEALLOCATE(unitgreenlocks_arr)
+   ABI_FREE(unitgreenlocks_arr)
  end if
 
 !Deallocations
- ABI_DEALLOCATE(loc_ks)
- ABI_DEALLOCATE(loc_ks_tau)
- ABI_DEALLOCATE(tau)
+ ABI_FREE(loc_ks)
+ ABI_FREE(loc_ks_tau)
+ ABI_FREE(tau)
 
 end subroutine local_ks_green
 !!***

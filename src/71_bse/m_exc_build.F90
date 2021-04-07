@@ -7,7 +7,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2020 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2021 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,7 @@ module m_exc_build
  use mpi
 #endif
  use m_hdr
+ use m_wfd
 
  use defs_datatypes, only : pseudopotential_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
@@ -46,14 +47,13 @@ module m_exc_build
  use m_geometry,     only : normv
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t, gsph_fft_tabs
- use m_vcoul,        only : vcoul_t 
+ use m_vcoul,        only : vcoul_t
  use m_bz_mesh,      only : kmesh_t, get_BZ_item, get_BZ_diff, has_BZ_item, isamek, findqg0
  use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_sym,      only : paw_symcprj_op
- use m_wfd,          only : wfd_t
  use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
 
  implicit none
@@ -151,9 +151,12 @@ contains
 !!      -----------------------------------
 !!
 !! PARENTS
-!!      exc_build_ham
+!!      m_exc_build
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -208,6 +211,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  logical :: use_mpiio,do_coulomb_term,do_exchange_term,w_is_diagonal,isirred
  logical :: is_qeq0
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_ck,  wave_ckp, wave_vk, wave_vkp
 !arrays
  integer :: bidx(2,4),g0(3),spin_ids(2,3)
  integer(i8b) :: nels_block(3)
@@ -263,7 +267,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_CHECK(nfftot_osc==PRODUCT(ngfft_osc(1:3)),"mismatch in FFT size")
 
  if (Wfd%nsppol==2) then
-   MSG_WARNING("nsppol==2 is still under testing")
+   ABI_WARNING("nsppol==2 is still under testing")
  end if
  !
  ! MPI variables.
@@ -314,22 +318,22 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_MALLOC(ur_vk ,(nspinor*nfftot_osc))
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp_vk,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_vk,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vk,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_ck,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_ck,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_ck,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_ckp,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_ckp,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_ckp,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_vkp,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_vkp,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vkp,0,Wfd%nlmn_atm)
 
-   ABI_DT_MALLOC(Cp_tmp1,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp1,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp2,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp2,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp2,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp3,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp3,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp3,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp4,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp4,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp4,0,Wfd%nlmn_atm)
  end if
  !
@@ -396,7 +400,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  if (my_rank==master) then
 
    if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="write") /= 0) then
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
    end if
    call exc_write_bshdr(bsh_unt,Bsp,Hdr_bse)
    ! To force the writing (needed for MPI-IO).
@@ -404,7 +408,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
    if (.not.use_mpiio) then ! Reopen the file and skip the header.
      if (open_file(fname,msg,newunit=bsh_unt,form="unformatted",action="readwrite") /= 0) then
-        MSG_ERROR(msg)
+        ABI_ERROR(msg)
      end if
      call exc_skip_bshdr(bsh_unt,ierr)
    end if
@@ -414,15 +418,15 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ii = LEN_TRIM(fname)
      tmpfname(ii-2:ii+1) = 'ABSR'
      if (open_file(tmpfname,msg,newunit=a_unt,form='unformatted',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      tmpfname(ii-2:ii+1) = 'BBSR'
      if (open_file(tmpfname,msg,newunit=b_unt,form='unformatted',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      tmpfname(ii-2:ii+1) = 'CBSR'
      if (open_file(tmpfname,msg,newunit=c_unt,form='unformatted',action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call exc_write_bshdr(a_unt,Bsp,Hdr_bse)
      call exc_write_bshdr(b_unt,Bsp,Hdr_bse)
@@ -433,17 +437,17 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      if (.not.use_mpiio) then ! Reopen the file and skip the header.
        tmpfname(ii-2:ii+1) = 'ABSR'
        if (open_file(tmpfname,msg,newunit=a_unt,form='unformatted',action="readwrite") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
        call exc_skip_bshdr(a_unt,ierr)
        tmpfname(ii-2:ii+1) = 'BBSR'
        if (open_file(tmpfname,msg,newunit=b_unt,form='unformatted',action="readwrite") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
        call exc_skip_bshdr(b_unt,ierr)
        tmpfname(ii-2:ii+1) = 'CBSR'
        if (open_file(tmpfname,msg,newunit=c_unt,form='unformatted',action="readwrite") /= 0) then
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
        end if
        call exc_skip_bshdr(c_unt,ierr)
      end if
@@ -532,11 +536,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    my_hsize = hsize_of(my_rank)
    if (my_hsize<=0) then
      write(msg,'(a,i0)')"Wrong number of transitions: my_hsize= ",my_hsize
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (my_hsize /= INT(my_hsize,KIND=i4b)) then
      write(msg,'(a,i0)')"Size of local block too large for a default integer, Increase the number of CPUs: my_hsize= ",my_hsize
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    my_cols=0
@@ -687,7 +691,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! === Evaluate oscillator matrix elements ===
          ! * $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
          if (Wfd%usepaw==1.and.ik_bz/=ikp_bz) then
-           ABI_DT_MALLOC(Pwij_q,(Cryst%ntypat))
+           ABI_MALLOC(Pwij_q,(Cryst%ntypat))
            call pawpwij_init(Pwij_q,npweps,Qmesh%bz(:,iq_bz),Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
          end if
 
@@ -696,8 +700,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! =======================================
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
-           if (wfd%ihave_ur(ic,ik_ibz,spin1,how="Stored")) then
-             ptur_ck => Wfd%Wave(ic,ik_ibz,spin1)%ur
+           ABI_CHECK(wfd%get_wave_ptr(ic, ik_ibz, spin1, wave_ck, msg) == 0, msg)
+           if (wave_ck%has_ur == WFD_STORED) then
+             ptur_ck => wave_ck%ur
            else
              call wfd%get_ur(ic,ik_ibz,spin1,ur_ck)
              ptur_ck => ur_ck
@@ -706,8 +711,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
            ! Get cprj for this (c,kbz,s1) in the BZ.
            ! phase due to the umklapp G0 in k-q is already included.
            if (Wfd%usepaw==1) then
-             if (wfd%ihave_cprj(ic,ik_ibz,spin1,how="Stored")) then
-               ptcp_ck => Wfd%Wave(ic,ik_ibz,spin1)%cprj
+             if (wave_ck%has_cprj == WFD_STORED) then
+               ptcp_ck => wave_ck%cprj
              else
                call wfd%get_cprj(ic,ik_ibz,spin1,Cryst,Cp_tmp1,sorted=.FALSE.)
                ptcp_ck => Cp_tmp1
@@ -725,8 +730,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ! Calculate matrix element from wfr.
                ! TODO: change the order of the loops.
 
-               if (wfd%ihave_ur(icp,ikp_ibz,spin2,how="Stored")) then
-                 ptur_ckp => Wfd%Wave(icp,ikp_ibz,spin2)%ur
+               ABI_CHECK(wfd%get_wave_ptr(icp, ikp_ibz, spin2, wave_ckp, msg) == 0, msg)
+               if (wave_ckp%has_ur == WFD_STORED) then
+                 ptur_ckp => wave_ckp%ur
                else
                  call wfd%get_ur(icp,ikp_ibz,spin2,ur_ckp)
                  ptur_ckp => ur_ckp
@@ -735,8 +741,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ! Load cprj for this (c,k,s2) in the BZ.
                ! Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
-                 if (wfd%ihave_cprj(icp,ikp_ibz,spin2,how="Stored")) then
-                   ptcp_ckp =>  Wfd%Wave(icp,ikp_ibz,spin2)%cprj
+                 if (wave_ckp%has_cprj == WFD_STORED) then
+                   ptcp_ckp =>  wave_ckp%cprj
                  else
                    call wfd%get_cprj(icp,ikp_ibz,spin2,Cryst,Cp_tmp2,sorted=.FALSE.)
                    ptcp_ckp =>  Cp_tmp2
@@ -745,13 +751,13 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                end if
 
                call rho_tw_g(nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere,use_padfft,igfftg0,gbound,&
-&                ptur_ckp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
-&                ptur_ck ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
-&                dim_rtwg,rhxtwg_cpc)
+                 ptur_ckp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
+                 ptur_ck ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
+                 dim_rtwg,rhxtwg_cpc)
 
                if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
                  call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-&                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
+                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
                end if
              end if
 
@@ -795,18 +801,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ene_t = BSp%Trans(it,spin1)%en
 
                ! TODO: use this but change the order of the loops.
-               if (wfd%ihave_ur(iv,ik_ibz,spin1,how="Stored")) then
-                 ptur_vk => Wfd%Wave(iv,ik_ibz,spin1)%ur
+               ABI_CHECK(wfd%get_wave_ptr(iv, ik_ibz, spin1, wave_vk, msg) == 0, msg)
+
+               if (wave_vk%has_ur == WFD_STORED) then
+                 ptur_vk => wave_vk%ur
                else
                  call wfd%get_ur(iv,ik_ibz,spin1,ur_vk)
                  ptur_vk => ur_vk
                end if
                !
                ! Load cprj for this (v,k,s1) in the BZ.
-               ! * Do not care about umklapp G0 in k-q as the phase is already included.
+               ! Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
-                 if (wfd%ihave_cprj(iv,ik_ibz,spin1,how="Stored")) then
-                   ptcp_vk => Wfd%Wave(iv,ik_ibz,spin1)%cprj
+                 if (wave_vk%has_cprj == WFD_STORED) then
+                   ptcp_vk => wave_vk%cprj
                  else
                    call wfd%get_cprj(iv,ik_ibz,spin1,Cryst,Cp_tmp3,sorted=.FALSE.)
                    ptcp_vk => Cp_tmp3
@@ -841,9 +849,12 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    rhxtwg_vpv(:) = sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npweps,rhxtwg_q0(:,ivp,iv,ik_ibz,spin1),Gsph_c)
 
                  else
+
+                   ABI_CHECK(wfd%get_wave_ptr(ivp, ikp_ibz, spin2, wave_vkp, msg) == 0, msg)
+
                    ! Calculate matrix element from wfr.
-                   if (wfd%ihave_ur(ivp,ikp_ibz,spin2,how="Stored")) then
-                     ptur_vkp => Wfd%Wave(ivp,ikp_ibz,spin2)%ur
+                   if (wave_vkp%has_ur == WFD_STORED) then
+                     ptur_vkp => wave_vkp%ur
                    else
                      call wfd%get_ur(ivp,ikp_ibz,spin2,ur_vkp)
                      ptur_vkp => ur_vkp
@@ -852,8 +863,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    ! Load cprj for this (vp,kp,s2) in the BZ.
                    ! Do not care about umklapp G0 in k-q as the phase is already included.
                    if (Wfd%usepaw==1) then
-                     if (wfd%ihave_cprj(ivp,ikp_ibz,spin2,how="Stored")) then
-                       ptcp_vkp =>  Wfd%Wave(ivp,ikp_ibz,spin2)%cprj
+                     if (wave_vkp%has_cprj == WFD_STORED) then
+                       ptcp_vkp =>  wave_vkp%cprj
                      else
                        call wfd%get_cprj(ivp,ikp_ibz,spin2,Cryst,Cp_tmp4,sorted=.FALSE.)
                        ptcp_vkp => Cp_tmp4
@@ -862,13 +873,13 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                    end if
 
                    call rho_tw_g(nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere,use_padfft,igfftg0,gbound,&
-&                     ptur_vkp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
-&                     ptur_vk ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
-&                     dim_rtwg,rhxtwg_vpv)
+                     ptur_vkp,itim_kp,ktabr_kp,ph_mkpt,spinrot_kp,&
+                     ptur_vk ,itim_k ,ktabr_k ,ph_mkt ,spinrot_k ,&
+                     dim_rtwg,rhxtwg_vpv)
 
                    if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
                      call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-&                      Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
+                       Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
                    end if
                  end if
 
@@ -877,7 +888,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                  if (ir<t_start(my_rank).or.ir>t_stop(my_rank)) then
                    write(msg,'(a,3(1x,i0))')" Gonna SIGFAULT, ir, t_start, t_stop ",ir,t_start(my_rank),t_stop(my_rank)
-                   MSG_ERROR(msg)
+                   ABI_ERROR(msg)
                  end if
                  !ABI_CHECK(itp >= it,"itp < it")
 
@@ -933,7 +944,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
          if (Wfd%usepaw==1.and.ik_bz/=ikp_bz) then ! Free the onsite contribution for this q.
            call pawpwij_free(Pwij_q)
-           ABI_DT_FREE(Pwij_q)
+           ABI_FREE(Pwij_q)
          end if
 
        end do ! ik_bz
@@ -960,7 +971,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ierr = SUM(SUM(ttp_check,DIM=2),DIM=1)
      if (ierr/=my_hsize) then
        write(msg,'(a,2i0)')"ierr/=my_hsize",ierr,my_hsize
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ABI_FREE(ttp_check)
 #endif
@@ -1011,7 +1022,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
        end do
      else
-        MSG_ERROR("iq_ibz should be 1")
+        ABI_ERROR("iq_ibz should be 1")
      end if
 
      do itp=1,BSp%nreh(block) ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -1175,7 +1186,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 #ifdef HAVE_MPI_IO
      ! Write the Hamiltonian with collective MPI-IO.
      if (BSp%prep_interp) then
-       MSG_ERROR("Preparation of interpolation technique not yet coded with MPI-IO")
+       ABI_ERROR("Preparation of interpolation technique not yet coded with MPI-IO")
      end if
      ABI_CHECK(nsppol==1,"nsppol==2 not coded, offset is wrong")
      !
@@ -1186,7 +1197,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        write(msg,"(3a)")&
 &        "Global position index cannot be stored in a standard Fortran integer. ",ch10,&
 &        "BSE matrix cannot be written with a single MPI-IO call. "
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      !
      ! Each node uses a different offset to skip the header and the blocks written by the other CPUs.
@@ -1199,7 +1210,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
 
      if (hsize_of(my_rank) /= INT(hsize_of(my_rank),kind=i4b) ) then
-       MSG_ERROR("Wraparound error")
+       ABI_ERROR("Wraparound error")
      end if
 
      tmp_size = INT(hsize_of(my_rank))
@@ -1219,7 +1230,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_CHECK(ierr==0,"Error while writing Fortran markers")
      ABI_FREE(bsize_frecord)
 #else
-     MSG_BUG("You should not be here!")
+     ABI_BUG("You should not be here!")
 #endif
    else
      ! Use FORTRAN IO with sequential access mode.
@@ -1354,7 +1365,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
          if (iend/=hsize_of(sender)) then
            write(msg,'(2(a,i0))')" Wraparound error: iend=",iend," my_hsize=",hsize_of(sender)
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          ABI_SFREE(prev_col)
          if (BSp%prep_interp) then
@@ -1409,7 +1420,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
    my_cols(1) = col_start(my_rank)
    my_cols(2) = col_stop (my_rank)
    if (my_cols(2)-my_cols(1)<=0) then
-     MSG_ERROR("One of the processors has zero columns!")
+     ABI_ERROR("One of the processors has zero columns!")
    end if
 
    ABI_MALLOC(ncols_of,(0:nproc-1))
@@ -1450,7 +1461,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
        end do
      else
-        MSG_ERROR("iq_ibz should be 1")
+        ABI_ERROR("iq_ibz should be 1")
      end if
 
      do itp=1,neh2 ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -1547,7 +1558,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
      ABI_CHECK(ierr==0,"Error while writing Fortran markers")
      ABI_FREE(bsize_frecord)
 #else
-     MSG_BUG("You should not be here")
+     ABI_BUG("You should not be here")
 #endif
    else
      ! Use FORTRAN IO with sequential access mode.
@@ -1632,21 +1643,21 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ! Deallocation for PAW.
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_vk)
-   ABI_DT_FREE(Cp_vk)
+   ABI_FREE(Cp_vk)
    call pawcprj_free(Cp_ck)
-   ABI_DT_FREE(Cp_ck)
+   ABI_FREE(Cp_ck)
    call pawcprj_free(Cp_ckp)
-   ABI_DT_FREE(Cp_ckp)
+   ABI_FREE(Cp_ckp)
    call pawcprj_free(Cp_vkp)
-   ABI_DT_FREE(Cp_vkp)
+   ABI_FREE(Cp_vkp)
    call pawcprj_free(Cp_tmp1)
-   ABI_DT_FREE(Cp_tmp1)
+   ABI_FREE(Cp_tmp1)
    call pawcprj_free(Cp_tmp2)
-   ABI_DT_FREE(Cp_tmp2)
+   ABI_FREE(Cp_tmp2)
    call pawcprj_free(Cp_tmp3)
-   ABI_DT_FREE(Cp_tmp3)
+   ABI_FREE(Cp_tmp3)
    call pawcprj_free(Cp_tmp4)
-   ABI_DT_FREE(Cp_tmp4)
+   ABI_FREE(Cp_tmp4)
  end if
 
  call xmpi_barrier(comm)
@@ -1726,6 +1737,9 @@ end subroutine exc_build_block
 !! PARENTS
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1887,7 +1901,7 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
        vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
      end do
    else
-      MSG_ERROR("iq_ibz should be 1")
+      ABI_ERROR("iq_ibz should be 1")
    end if
 
    do itp=1,BSp%nreh(block) ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -1968,7 +1982,7 @@ if (nsppol==2) then
  my_cols(1) = col_start(my_rank)
  my_cols(2) = col_stop (my_rank)
  if (my_cols(2)-my_cols(1)<=0) then
-   MSG_ERROR("One of the processors has zero columns!")
+   ABI_ERROR("One of the processors has zero columns!")
  end if
 
  ABI_MALLOC(ncols_of,(0:nproc-1))
@@ -2006,7 +2020,7 @@ if (nsppol==2) then
        vc_sqrt_qbz(ISg)=Vcp%vcqlwl_sqrt(ig,1)
      end do
    else
-      MSG_ERROR("iq_ibz should be 1")
+      ABI_ERROR("iq_ibz should be 1")
    end if
 
    do itp=1,neh2 ! Loop over transition tp = (kp,vp,cp,spin2)
@@ -2098,9 +2112,12 @@ end subroutine exc_build_v
 !!  The excitonic Hamiltonian is saved on an external binary file (see below).
 !!
 !! PARENTS
-!!      bethe_salpeter
+!!      m_bethe_salpeter
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2143,7 +2160,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  ABI_CHECK(nfftot_osc==PRODUCT(ngfft_osc(1:3)),"mismatch in FFT size")
 
  if (BSp%have_complex_ene) then
-   MSG_ERROR("Complex energies are not supported yet")
+   ABI_ERROR("Complex energies are not supported yet")
  end if
 
  ! Do we have to compute some block?
@@ -2224,9 +2241,12 @@ end subroutine exc_build_ham
 !!     Allocated here and filled with the matrix elements on each node.
 !!
 !! PARENTS
-!!      exc_build_ham
+!!      m_exc_build
 !!
 !! CHILDREN
+!!      cwtime,get_bz_item,gsph_fft_tabs,paw_rho_tw_g,pawcprj_alloc
+!!      pawcprj_free,pawpwij_free,pawpwij_init,rho_tw_g,timab,wfd%change_ngfft
+!!      wfd%get_cprj,wfd%get_ur,wrtout,xmpi_distab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2258,6 +2278,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  real(dp) :: cpu,wall,gflops !q0vol,fcc_const
  complex(dpc) :: ph_mkt
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,allocatable :: igfftg0(:),task_distrib(:,:,:,:)
  integer,allocatable :: gbound(:,:),id_tab(:)
@@ -2277,9 +2298,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
  lomo_min = MINVAL(lomo_spin); humo_max = MAXVAL(humo_spin)
 
- if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
- end if
+ if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
 
  mgfft_osc   = MAXVAL(ngfft_osc(1:3))
  fftalga_osc = ngfft_osc(7)/100 !; fftalgc_osc=MOD(ngfft_osc(7),10)
@@ -2306,9 +2325,9 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ! &              * (Cryst%ucvol*Kmesh%nbz)/(2*pi)**3. * QL*QL
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
  end if
 
@@ -2326,7 +2345,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  call get_BZ_item(Qmesh,iqbz0,qbz,iq_ibz,isym_q,itim_q)
 
  if (Wfd%usepaw==1) then ! Prepare onsite contributions at q==0
-   ABI_DT_MALLOC(Pwij_q0,(Cryst%ntypat))
+   ABI_MALLOC(Pwij_q0,(Cryst%ntypat))
    call pawpwij_init(Pwij_q0,npweps,Qmesh%bz(:,iqbz0),Gsph_x%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
  end if
  !
@@ -2370,45 +2389,46 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
      do iv=lomo_spin(spin),humo_spin(spin) ! Loop over band V
        if ( ALL(task_distrib(:,iv,ik_ibz,1)/=Wfd%my_rank) ) CYCLE
 
-       if (wfd%ihave_ur(iv,ik_ibz,spin,how="Stored")) then
-         ptr_ur1 =>  Wfd%Wave(iv,ik_ibz,spin)%ur
+       ABI_CHECK(wfd%get_wave_ptr(iv, ik_ibz, spin, wave_v, msg) == 0, msg)
+
+       if (wave_v%has_ur == WFD_STORED) then
+         ptr_ur1 =>  wave_v%ur
        else
          call wfd%get_ur(iv,ik_ibz,spin,ur1)
          ptr_ur1 =>  ur1
        end if
 
-       if (Wfd%usepaw==1) then
-         call wfd%get_cprj(iv,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
-       end if
+       if (Wfd%usepaw==1) call wfd%get_cprj(iv,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
 
        ! Loop over band C
        do ic=lomo_spin(spin),humo_spin(spin)
          if ( task_distrib(ic,iv,ik_ibz,1)/=Wfd%my_rank ) CYCLE
 
-         if (wfd%ihave_ur(ic,ik_ibz,spin,how="Stored")) then
-           ptr_ur2 =>  Wfd%Wave(ic,ik_ibz,spin)%ur
+         ABI_CHECK(wfd%get_wave_ptr(ic, ik_ibz, spin, wave_c, msg) == 0, msg)
+
+         if (wave_c%has_ur == WFD_STORED) then
+           ptr_ur2 =>  wave_c%ur
          else
            call wfd%get_ur(ic,ik_ibz,spin,ur2)
            ptr_ur2 =>  ur2
          end if
 
-         if (Wfd%usepaw==1) then
-           call wfd%get_cprj(ic,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
-         end if
+         if (Wfd%usepaw==1) call wfd%get_cprj(ic,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
 
          call rho_tw_g(Wfd%nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere1,use_padfft,igfftg0,gbound,&
-&          ptr_ur1,1,id_tab,ph_mkt,spinrot_k,&
-&          ptr_ur2,1,id_tab,ph_mkt,spinrot_k,&
-&          dim_rtwg1,rhotwg1)
+           ptr_ur1,1,id_tab,ph_mkt,spinrot_k,&
+           ptr_ur2,1,id_tab,ph_mkt,spinrot_k,&
+           dim_rtwg1,rhotwg1)
 
-         if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
+         if (Wfd%usepaw==1) then
+           ! Add PAW onsite contribution.
            call paw_rho_tw_g(npweps,dim_rtwg1,Wfd%nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-&            Cp1,Cp2,Pwij_q0,rhotwg1)
+             Cp1,Cp2,Pwij_q0,rhotwg1)
          end if
 
          ! If q=0 treat Exchange and Coulomb-term independently
          if (iv <= homo_spin(spin) .and. ic <= homo_spin(spin) .or. &
-&            iv >  homo_spin(spin) .and. ic >  homo_spin(spin)) then
+             iv >  homo_spin(spin) .and. ic >  homo_spin(spin)) then
 
            if (iv/=ic) then !COULOMB term: C/=V: ignore them
              rhotwg1(1) = czero_gw
@@ -2474,11 +2494,11 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  if (Wfd%usepaw==1) then
    ! Deallocation for PAW.
    call pawpwij_free(Pwij_q0)
-   ABI_DT_FREE(Pwij_q0)
+   ABI_FREE(Pwij_q0)
    call pawcprj_free(Cp1)
-   ABI_DT_FREE(Cp1)
+   ABI_FREE(Cp1)
    call pawcprj_free(Cp2)
-   ABI_DT_FREE(Cp2)
+   ABI_FREE(Cp2)
  end if
 
  call timab(671,2,tsec)

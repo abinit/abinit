@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_mlwfovlp_qp
 !! NAME
 !!  m_mlwfovlp_qp
@@ -6,7 +7,7 @@
 !!  Interpolate GW corrections with Wannier functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (DRH)
+!!  Copyright (C) 2008-2021 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,12 +105,10 @@ contains
 !!   checking, so the user must be very careful or the results may be invalid.
 !!
 !! PARENTS
-!!      outscfcv
+!!      m_outscfcv
 !!
 !! CHILDREN
-!!      crystal_free,crystal_from_hdr,destroy_mpi_enreg,ebands_free,ebands_init
-!!      initmpi_seq,kmesh_free,kmesh_init,listkk,metric,pawcprj_getdim,rdgw
-!!      rdqps,sort_dp,update_cprj,wrtout,zgemm
+!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -139,7 +138,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  integer :: iband,icg,icg_shift,ii,ipw,isppol,my_nspinor,nband_k,ord_iband
  integer :: nfftot,ikpt,irzkpt,npw_k,ikg
  integer :: nscf,nbsc,itimrev,band_index,nkibz,nkbz
- integer :: gw_timrev,input !,jb_idx,ib_idx,ijpack, jband,
+ integer :: input !,jb_idx,ib_idx,ijpack, jband,
  integer :: nprocs,ios
  real(dp) :: TOL_SORT=tol12
  real(dp) :: dksqmax,ucvol !ortho_err,
@@ -191,7 +190,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  nprocs=MPI_enreg%nproc_cell
 
  if (nprocs/=1) then
-   MSG_ERROR("mlwfovlp_qp not programmed for parallel execution")
+   ABI_ERROR("mlwfovlp_qp not programmed for parallel execution")
  end if
 
  ! Compute reciprocal space metric gmet for unit cell of disk wf
@@ -207,7 +206,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 &    'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
 &    'with full-zone set being used for wannier90 setup.',ch10,&
 &    'Action: correct input data'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  !
  ! === Initialize object defining the Band strucuture ===
@@ -222,8 +221,8 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! on ab_out thus we should be consistent. Ideally Cryst should be
  ! one of the basic abinit objects and it should be passed to this routine.
 
- gw_timrev=1; if (timrev==1) gw_timrev=2 !different conventions are used in GW and abinit!!
- cryst = hdr%get_crystal(gw_timrev)
+ !different conventions are used in GW and abinit!!
+ cryst = hdr%get_crystal(gw_timrev=timrev+1)
  call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
  call cryst%free()
@@ -241,7 +240,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
      'Set of GW irreducible-zone kptgw in input file is inconsistent',ch10,&
      'with full-zone set being used for wannier90 setup.',ch10,&
      'Action: correct input data'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(npwarr_ibz,(nkibz))
@@ -274,10 +273,17 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
    end do
  end do
 
- call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
+ ! CP modified
+! call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
+!  nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
+!  dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
+!  dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
+ call ebands_init(bantot_ibz,QP_bst,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+  doccde_ibz,eigen_ibz,istwfk_ibz,kibz,nband_ibz,&
   nkibz,npwarr_ibz,nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact_ibz,wtk_ibz,&
-  dtset%charge,dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
+  dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig,&
   dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
+ ! End CP modified
 
  ABI_FREE(kibz)
  ABI_FREE(wtk_ibz)
@@ -311,23 +317,23 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  g0w0_exists = .FALSE.
  inquire(file=gw_fname,iostat=ios,exist=g0w0_exists)
  if (ios/=0) then
-   MSG_ERROR('File g0w0 exists but iostat returns nonzero value!')
+   ABI_ERROR('File g0w0 exists but iostat returns nonzero value!')
  end if
 
  if (.not.g0w0_exists) then ! read QPS file (default behavior).
    input = from_QPS_FILE
-   ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Dtset%usepaw))
+   ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Dtset%usepaw))
    ABI_MALLOC(qp_rhor,(nfftot,nspden*dimrho))
 
    call rdqps(QP_bst,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,dimrho,nscf,&
     nfftot,my_ngfft,ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,qp_rhor,prev_Pawrhoij)
 
    ABI_FREE(qp_rhor)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
  else
    ! Read GW file (m_ks_to_qp has been already set to 1, no extrapolation is performed)
-   MSG_WARNING(' READING GW CORRECTIONS FROM FILE g0w0 !')
+   ABI_WARNING(' READING GW CORRECTIONS FROM FILE g0w0 !')
    input = from_GW_FILE
    ABI_MALLOC(igwene,(QP_bst%mband,QP_bst%nkpt,QP_bst%nsppol))
    call rdgw(QP_bst,gw_fname,igwene,extrapolate=.FALSE.)
@@ -355,7 +361,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
        'specified for wannier90 calculation',ch10,&
        'Action: correct input so all band numbers are equal for GW',ch10,&
        'and wannier90 datasets.'
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
     end if
 
     ! Load KS states for this kbz and spin
@@ -374,7 +380,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       m_tmp(:,:)=conjg(m_ks_to_qp(:,:,irzkpt,isppol))
     else
       write(msg,'(2(a,i0))')'Invalid indkk(ikpt,6) ',itimrev,'from routine listkk for k-point ',ikpt
-      MSG_BUG(msg)
+      ABI_BUG(msg)
     end if
 
     call ZGEMM('N','N',npw_k,mband,mband,cone,cg_k,mpw,m_tmp,mband,czero,cg_qpk,mpw)
@@ -407,7 +413,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
     !&    '  orthonormality error for quasiparticle wave functions.',ch10,&
     !&    '  spin=',isppol,'  k point=',ikpt,'  ortho_err=',ortho_err,' >1E-6',ch10,&
     !&    '  Action: Be sure input nband>=maxval(bndgw)'
-    !  MSG_ERROR(msg)
+    !  ABI_ERROR(msg)
     !end if
     !deallocate(ortho)
 
@@ -418,7 +424,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       write(msg,'(3a)')&
       " QP energies read from QPS file are not ordered, likely nband_k>nbdgw. ",ch10,&
       " Change nband in the input file so that it equals the number of GW states calculated"
-      MSG_WARNING(msg)
+      ABI_WARNING(msg)
     end if
 
     if ( .TRUE. ) then
@@ -436,7 +442,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
       write(msg,'(2a,3f8.4,3a)')ch10,&
         "QP energies at k-point ",QP_bst%kptns(:,irzkpt)," are not sorted in ascending numerical order!",ch10,&
         "Performing reordering of energies and wavefunctions to be written on the final WKF file."
-      MSG_ERROR(msg)
+      ABI_ERROR(msg)
       !write(std_out,*)"eig",(QP_bst%eig(ii,irzkpt,isppol),ii=1,nband_k)
       ABI_MALLOC(sorted_qpene,(nband_k))
       ABI_MALLOC(iord,(nband_k))
@@ -496,7 +502,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
          m_ks_to_qp_BZ(:,:,ikbz,isppol)=CONJG(m_ks_to_qp(:,:,ikibz,isppol))
        case default
          write(msg,'(a,i3)')"Wrong itimrev= ",itimrev
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end select
      end do
    end do
@@ -546,7 +552,7 @@ end subroutine mlwfovlp_qp
 !! To be moved to cprj_utils, although here we use complex variables.
 !!
 !! PARENTS
-!!      mlwfovlp_qp
+!!      m_mlwfovlp_qp
 !!
 !! CHILDREN
 !!      pawcprj_alloc,pawcprj_free
@@ -575,13 +581,13 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
 
  DBG_ENTER("COLL")
 
- ABI_DATATYPE_ALLOCATE(Cprj_ks,(natom,nspinor*nbnds))
+ ABI_MALLOC(Cprj_ks,(natom,nspinor*nbnds))
  call pawcprj_alloc(Cprj_ks,0,dimlmn)
 
- ABI_ALLOCATE(re_p,(nbnds))
- ABI_ALLOCATE(im_p,(nbnds))
- ABI_ALLOCATE(vect,(2,nbnds))
- ABI_ALLOCATE(umat,(2,nbnds,nbnds))
+ ABI_MALLOC(re_p,(nbnds))
+ ABI_MALLOC(im_p,(nbnds))
+ ABI_MALLOC(vect,(2,nbnds))
+ ABI_MALLOC(umat,(2,nbnds,nbnds))
  !
  ! $ \Psi^{QP}_{r,b} = \sum_n \Psi^{KS}_{r,n} M_{n,b} $
  !
@@ -644,13 +650,13 @@ subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_ks_to_qp,dimlmn,Cprj_i
    end do !ik
  end do !is
 
- ABI_DEALLOCATE(re_p)
- ABI_DEALLOCATE(im_p)
- ABI_DEALLOCATE(vect)
- ABI_DEALLOCATE(umat)
+ ABI_FREE(re_p)
+ ABI_FREE(im_p)
+ ABI_FREE(vect)
+ ABI_FREE(umat)
 
  call pawcprj_free(Cprj_ks)
- ABI_DATATYPE_DEALLOCATE(Cprj_ks)
+ ABI_FREE(Cprj_ks)
 
  DBG_EXIT("COLL")
 

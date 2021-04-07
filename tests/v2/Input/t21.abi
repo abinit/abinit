@@ -1,0 +1,43 @@
+!Input file for the anaddb code. Analysis of the BaTiO3 DDB
+
+!Flags
+ dieflag   2     ! 2=> electronic dielectric tensor only
+
+!Eigenvectors
+  eivec    1
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l    1      ! number of phonons in list 1
+  qph1l 0.0 0.0 0.0    1.0
+
+!Wavevector list number 2 (Gamma point only, with limiting direction
+!           in cartesian coordinates. )
+  nph2l  1         ! number of phonons in list 2
+  qph2l  1.0 0.0 0.0    0.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% input_ddb = t18.ddb.in
+#%% test_chain = t18.abi, t19.abi, t20.abi, t21.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t21.abo, tolnlines = 14, tolabs = 2.510e-10, tolrel = 1.000e-07
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% keywords = 
+#%% authors = Unknown
+#%% description = 
+#%%   Analyze a DDB for BaTiO3, same as test18.
+#%%   Compute the phonon frequencies at Gamma, and also output
+#%%   the corresponing eigenvectors. These data can be compared
+#%%   with those published by Ghosez et al, Ferroelectrics 194, 39 (1997),
+#%%   TABLE II, although the normalisation factor is different.
+#%%   For example, the z displacement of mode 1 given by the code
+#%%   is ( .25d-4 , .158d-2 , -.261d-2, -.118d-2 , -.118d-2 ), that
+#%%   multiplied by -60.54 and rounded to the third digit, 
+#%%   gives values that appear in the first line of that TABLE II :
+#%%   ( -0.002 , -0.096 , 0.158 , 0.071 , 0.071 )
+#%% topics = Phonons
+#%%<END TEST_INFO>

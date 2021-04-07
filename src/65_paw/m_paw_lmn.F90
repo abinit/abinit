@@ -7,7 +7,7 @@
 !!  over the the (l,m,n) channels of the PAW partial waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ subroutine ilm2lm(ilm,ll,mm)
 ! *********************************************************************
 
  if (ilm<1) then 
-   MSG_ERROR("Wrong ilm")
+   ABI_ERROR("Wrong ilm")
  end if
 
  ll = -1
@@ -94,7 +94,7 @@ subroutine ilm2lm(ilm,ll,mm)
  mm = ilm - ll**2 -ll-1
 
  if (ll==-1) then
-   MSG_ERROR("l>100 not programmed!")
+   ABI_ERROR("l>100 not programmed!")
  end if
 
 end subroutine ilm2lm
@@ -118,7 +118,7 @@ end subroutine ilm2lm
 !!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!
@@ -143,7 +143,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
 
 !************************************************************************
 
- ABI_ALLOCATE(nprj,(0:MAXVAL(orbitals)))
+ ABI_MALLOC(nprj,(0:MAXVAL(orbitals)))
 
  ilmn=0; iln=0; nprj=0
  do ib=1,ln_size
@@ -161,7 +161,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
    ilmn=ilmn+2*il+1
  end do
 
- ABI_DEALLOCATE(nprj)
+ ABI_FREE(nprj)
 
 end subroutine make_indlmn
 !!***
@@ -189,7 +189,7 @@ end subroutine make_indlmn
 !!  klm_diag(lmn2_size)=1 il==jl and im==jm, 0 otherwise.
 !!
 !! PARENTS
-!!      m_atom
+!!      m_paw_atomorb
 !!
 !! CHILDREN
 !!
@@ -277,7 +277,7 @@ end subroutine make_indklmn
 !!  where iln=(il,in) and iln<=jln. NB: kln2ln is an application and not a bijection
 !!
 !! PARENTS
-!!      m_atom,m_paw_slater
+!!      m_paw_atomorb,m_paw_slater
 !!
 !! CHILDREN
 !!
@@ -413,7 +413,7 @@ subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
  end do !klmn
 
  if (ANY(klm2lm==0)) then
-   MSG_BUG("check klm2lm")
+   ABI_BUG("check klm2lm")
  end if
 
 !DEBUG
@@ -482,7 +482,7 @@ subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
    end do
  end do
 
- MSG_BUG("Not able to found ilmn and jlmn")
+ ABI_BUG("Not able to found ilmn and jlmn")
 
 end subroutine klmn2ijlmn
 !!***

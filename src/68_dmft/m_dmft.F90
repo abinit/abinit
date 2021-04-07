@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,16 +93,12 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      check_fourier_green,compute_energy,compute_green,compute_dftu_energy
-!!      data4entropydmft_setdc,data4entropydmft_sethu,dc_self,destroy_energy
-!!      destroy_green,destroy_hu,destroy_self,diff_oper,dyson,fermi_green
-!!      icip_green,impurity_solve,init_energy,init_green,init_hu
-!!      initialize_self,integrate_green,local_ks_green,make_qmcshift_self
-!!      new_self,print_self,printocc_green,psichi_renormalization,rw_self
-!!      m_spectral_function,timab,wrtout
+!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
+!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -172,7 +168,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
 
  if(istep==0) then
    message = ' istep should not be equal to zero'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
  spaceComm=paw_dmft%spacecomm
  !if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
@@ -215,9 +211,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
      natomcor=natomcor+1
    end if
  end do
- opt_renorm=3
-! write(6,*) "natomcor",natomcor
-! if(natomcor>1) opt_renorm=2
+ opt_renorm=paw_dmft%dmft_wanorthnorm
+!if(natomcor>1) opt_renorm=2 ! if number of atoms is larger than one, one must use a new orthogonalization scheme.
  if(paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9)) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
@@ -272,7 +267,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
  call wrtout(std_out,message,'COLL')
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
+ ABI_MALLOC(hu,(cryst_struc%ntypat))
  call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call initialize_self(self,paw_dmft)
 
@@ -553,7 +548,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,pawprtv
 & '========'
  call wrtout(std_out,message,'COLL')
 
- ABI_DATATYPE_DEALLOCATE(hu)
+ ABI_FREE(hu)
 
  DBG_EXIT("COLL")
 
@@ -584,9 +579,9 @@ end subroutine dmft_solve
 !!      m_dmft
 !!
 !! CHILDREN
-!!      copy_green,destroy_green_tau,flush_unit,fourier_green,m_hubbard_one
-!!      init_green_tau,integrate_green,dftu_self,print_green,print_matlu
-!!      printocc_green,qmc_prep_ctqmc,timab,trace_oper,wrtout
+!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
+!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -699,7 +694,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
    call copy_green(weiss,green,opt_tw=1)
 !  call qmc_prep
    message = '  ===  QMC not yet distributed '
-   MSG_ERROR(message)
+   ABI_ERROR(message)
 !   call qmc_prep(cryst_struc,green,hu,mpi_enreg,paw_dmft,pawang&
 !&   ,pawprtvol,self_old%qmc_xmu,weiss)
 
@@ -833,7 +828,7 @@ end subroutine impurity_solve
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  istep    =  step of iteration for DFT.
 !!  dft_occup
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  opt_weissgreen= 1: compute weiss from green and self
 !!                = 2: compute green from weiss and self
@@ -847,10 +842,12 @@ end subroutine impurity_solve
 !! NOTES
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
-!!      add_matlu,copy_green,destroy_green,init_green,inverse_oper,timab,wrtout
+!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
+!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -931,7 +928,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
    ! write(66,*) paw_dmft%omega_lo(ifreq), real(self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)),aimag(self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1))
    else
      message = " BUG in dyson.F90"
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end do
 
@@ -970,7 +967,7 @@ end subroutine dyson
 !!
 !! CHILDREN
 !!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dyson,hubbard_one,init_green,initialize_self,dftu_self,print_green
+!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
 !!      rw_self,wrtout
 !!
 !! SOURCE
@@ -1028,14 +1025,14 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 !  == Nothing
 !  -------------------
    message = "spectral_function: This section of code is disabled!"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
    call copy_green(weissr,greenr,opt_tw=1)
 
  else if(abs(paw_dmft%dmft_solv)>=5) then
 
 !  == Nothing
 !  -------------------
-   MSG_ERROR("Stopping before copy_green")
+   ABI_ERROR("Stopping before copy_green")
    call copy_green(weissr,greenr,opt_tw=1)
 
  else if(abs(paw_dmft%dmft_solv)==0) then

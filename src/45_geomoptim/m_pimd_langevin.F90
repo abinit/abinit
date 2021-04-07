@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2020 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2021 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,13 +94,14 @@ contains
 !!  and Comput. Phys. Comm. 169, 322 (2005) [[cite:Quigley2005]]
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
-!!      matr3inv,pimd_apply_constraint,pimd_energies,pimd_forces,pimd_initvel
-!!      pimd_langevin_forces,pimd_langevin_random,pimd_langevin_random_bar
-!!      pimd_langevin_random_init,pimd_mass_spring,pimd_print,pimd_stresses
-!!      xcart2xred,xred2xcart
+!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
+!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_langevin_forces
+!!      pimd_langevin_random,pimd_langevin_random_init,pimd_langevin_random_qtb
+!!      pimd_mass_spring,pimd_predict_taylor,pimd_predict_verlet,pimd_print
+!!      pimd_stresses,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -153,13 +154,13 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !############# Initializations ###########################
 
 !Allocation of local arrays
- ABI_ALLOCATE(xcart,(3,natom,trotter))
- ABI_ALLOCATE(xcart_prev,(3,natom,trotter))
- ABI_ALLOCATE(xcart_next,(3,natom,trotter))
- ABI_ALLOCATE(forces_orig,(3,natom,trotter))
- ABI_ALLOCATE(forces_pimd,(3,natom,trotter))
- ABI_ALLOCATE(inertmass,(natom))
- ABI_ALLOCATE(quantummass,(natom))
+ ABI_MALLOC(xcart,(3,natom,trotter))
+ ABI_MALLOC(xcart_prev,(3,natom,trotter))
+ ABI_MALLOC(xcart_next,(3,natom,trotter))
+ ABI_MALLOC(forces_orig,(3,natom,trotter))
+ ABI_MALLOC(forces_pimd,(3,natom,trotter))
+ ABI_MALLOC(inertmass,(natom))
+ ABI_MALLOC(quantummass,(natom))
 
 !Fill in the local variables
  ndof=3*natom*trotter
@@ -177,13 +178,13 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  forces_orig=forces
 
 !Masses and spring constants
- ABI_ALLOCATE(mass,(natom,1))
- ABI_ALLOCATE(spring,(natom,1))
+ ABI_MALLOC(mass,(natom,1))
+ ABI_MALLOC(spring,(natom,1))
  call pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,0,trotter)
 
 !Initialize random forces
- ABI_ALLOCATE(alea,(3,natom,trotter))
- ABI_ALLOCATE(langev,(natom,trotter))
+ ABI_MALLOC(alea,(3,natom,trotter))
+ ABI_MALLOC(langev,(natom,trotter))
  langev(:,1)=sqrt(two*friction*inertmass(:)*kt/dtion)
  if(ilangevin==1)then
    langev(:,1)=langev(:,1)*sqrt(one-(friction*dtion/(two*inertmass(:))))
@@ -215,10 +216,10 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !  ========================= FIRST TIME STEP =======================================
 
-   ABI_ALLOCATE(hxredpoint,(3,natom,trotter))
-   ABI_ALLOCATE(xredpoint,(3,natom,trotter))
-   ABI_ALLOCATE(forces_pimd_red,(3,natom))
-   ABI_ALLOCATE(fsup,(3,natom))
+   ABI_MALLOC(hxredpoint,(3,natom,trotter))
+   ABI_MALLOC(xredpoint,(3,natom,trotter))
+   ABI_MALLOC(forces_pimd_red,(3,natom))
+   ABI_MALLOC(fsup,(3,natom))
 
    do iimage=1,trotter
      hxredpoint(:,:,iimage)=vel(:,:,iimage) - matmul(ddh(:,:),xred(:,:,iimage))
@@ -288,20 +289,20 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !  Compute new temperature
    temperature2=pimd_temperature(mass,vel)*rescale_temp
 
-   ABI_DEALLOCATE(hxredpoint)
-   ABI_DEALLOCATE(xredpoint)
-   ABI_DEALLOCATE(forces_pimd_red)
-   ABI_DEALLOCATE(fsup)
+   ABI_FREE(hxredpoint)
+   ABI_FREE(xredpoint)
+   ABI_FREE(forces_pimd_red)
+   ABI_FREE(fsup)
 
  else
 
 !  ========================= OTHER TIME STEPS ======================================
 
 !  Additional allocations
-   ABI_ALLOCATE(hxredpoint,(3,natom,trotter))
-   ABI_ALLOCATE(xredpoint,(3,natom,trotter))
-   ABI_ALLOCATE(forces_pimd_red,(3,natom))
-   ABI_ALLOCATE(fsup,(3,natom))
+   ABI_MALLOC(hxredpoint,(3,natom,trotter))
+   ABI_MALLOC(xredpoint,(3,natom,trotter))
+   ABI_MALLOC(forces_pimd_red,(3,natom))
+   ABI_MALLOC(fsup,(3,natom))
 
 !  first estimation of ddh, pg and its trace:
    call matr3inv(rprimd,invrprimd)
@@ -430,10 +431,10 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    stress_pimd=-stress_pimd
 
 !  Deallocations (Verlet algo)
-   ABI_DEALLOCATE(xredpoint)
-   ABI_DEALLOCATE(hxredpoint)
-   ABI_DEALLOCATE(forces_pimd_red)
-   ABI_DEALLOCATE(fsup)
+   ABI_FREE(xredpoint)
+   ABI_FREE(hxredpoint)
+   ABI_FREE(forces_pimd_red)
+   ABI_FREE(fsup)
 
  end if ! itimimage==1
 
@@ -469,17 +470,17 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  end do
 
 !Free memory
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xcart_prev)
- ABI_DEALLOCATE(xcart_next)
- ABI_DEALLOCATE(forces_orig)
- ABI_DEALLOCATE(forces_pimd)
- ABI_DEALLOCATE(inertmass)
- ABI_DEALLOCATE(quantummass)
- ABI_DEALLOCATE(mass)
- ABI_DEALLOCATE(spring)
- ABI_DEALLOCATE(alea)
- ABI_DEALLOCATE(langev)
+ ABI_FREE(xcart)
+ ABI_FREE(xcart_prev)
+ ABI_FREE(xcart_next)
+ ABI_FREE(forces_orig)
+ ABI_FREE(forces_pimd)
+ ABI_FREE(inertmass)
+ ABI_FREE(quantummass)
+ ABI_FREE(mass)
+ ABI_FREE(spring)
+ ABI_FREE(alea)
+ ABI_FREE(langev)
 
 end subroutine pimd_langevin_npt
 !!***
@@ -524,7 +525,7 @@ end subroutine pimd_langevin_npt
 !!   See Quigley,Probert, JCP 120, 11432 (2004) [[cite:Quigley2004]], part III
 !!
 !! PARENTS
-!!      predict_pimd
+!!      m_predict_pimd
 !!
 !! CHILDREN
 !!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
@@ -572,7 +573,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 ! *************************************************************************
 
  if (pimd_param%use_qtb==1.and.pimd_param%qtb_file_unit<=0) then
-   MSG_BUG('piqtb_force not open!')
+   ABI_BUG('piqtb_force not open!')
  end if
 
 !############# Initializations ###########################
@@ -588,13 +589,13 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  if(pimd_param%constraint==1) zeroforce=0
 
 !Allocation of local arrays
- ABI_ALLOCATE(xcart,(3,natom,trotter))
- ABI_ALLOCATE(xcart_prev,(3,natom,trotter))
- ABI_ALLOCATE(xcart_next,(3,natom,trotter))
- ABI_ALLOCATE(forces_orig,(3,natom,trotter))
- ABI_ALLOCATE(forces_pimd,(3,natom,trotter))
- ABI_ALLOCATE(inertmass,(natom))
- ABI_ALLOCATE(quantummass,(natom))
+ ABI_MALLOC(xcart,(3,natom,trotter))
+ ABI_MALLOC(xcart_prev,(3,natom,trotter))
+ ABI_MALLOC(xcart_next,(3,natom,trotter))
+ ABI_MALLOC(forces_orig,(3,natom,trotter))
+ ABI_MALLOC(forces_pimd,(3,natom,trotter))
+ ABI_MALLOC(inertmass,(natom))
+ ABI_MALLOC(quantummass,(natom))
 
 !Fill in the local variables
  use_qtb=pimd_param%use_qtb
@@ -612,19 +613,19 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !Masses and spring constants
  select case(pitransform)
  case(0)
-   ABI_ALLOCATE(mass,(natom,1))   ! This second dimension is needed
-   ABI_ALLOCATE(spring,(natom,1))
-   ABI_ALLOCATE(langev,(natom,1))
+   ABI_MALLOC(mass,(natom,1))   ! This second dimension is needed
+   ABI_MALLOC(spring,(natom,1))
+   ABI_MALLOC(langev,(natom,1))
  case(1,2)
-   ABI_ALLOCATE(mass,(natom,trotter))
-   ABI_ALLOCATE(spring,(natom,trotter))
-   ABI_ALLOCATE(langev,(natom,trotter))
+   ABI_MALLOC(mass,(natom,trotter))
+   ABI_MALLOC(spring,(natom,trotter))
+   ABI_MALLOC(langev,(natom,trotter))
  end select
  spring_prim(:)=quantummass(:)*dble(trotter)*kt*kt
  call pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,pitransform,trotter)
 
 !Initialize random forces
- ABI_ALLOCATE(alea,(3,natom,trotter))
+ ABI_MALLOC(alea,(3,natom,trotter))
  if (use_qtb==0) then
    langev(:,:)=sqrt(two*friction*mass(:,:)*kt/dtion)
  else
@@ -757,17 +758,17 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  end do
 
 !Free memory
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(xcart_prev)
- ABI_DEALLOCATE(xcart_next)
- ABI_DEALLOCATE(forces_orig)
- ABI_DEALLOCATE(forces_pimd)
- ABI_DEALLOCATE(inertmass)
- ABI_DEALLOCATE(quantummass)
- ABI_DEALLOCATE(mass)
- ABI_DEALLOCATE(spring)
- ABI_DEALLOCATE(alea)
- ABI_DEALLOCATE(langev)
+ ABI_FREE(xcart)
+ ABI_FREE(xcart_prev)
+ ABI_FREE(xcart_next)
+ ABI_FREE(forces_orig)
+ ABI_FREE(forces_pimd)
+ ABI_FREE(inertmass)
+ ABI_FREE(quantummass)
+ ABI_FREE(mass)
+ ABI_FREE(spring)
+ ABI_FREE(alea)
+ ABI_FREE(langev)
 
 end subroutine pimd_langevin_nvt
 !!***

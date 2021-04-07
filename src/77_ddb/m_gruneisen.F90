@@ -7,7 +7,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2020 ABINIT group (MG)
+!! Copyright (C) 2011-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -132,8 +132,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
 
 !Local variables-------------------------------
  integer,parameter :: natifc0=0,master=0
- integer :: ivol,iblock,natom,ddbun
- integer :: nprocs,my_rank,ierr
+ integer :: ivol,iblock,natom,ddbun, nprocs,my_rank,ierr
  character(len=500) :: msg
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
@@ -158,11 +157,13 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
    call ddb_hdr_open_read(ddb_hdr, ddb_filepaths(ivol), ddbun, DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    ABI_MALLOC(atifc0, (natom))
    atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
+   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, &
+                      ddb_hdr, new%cryst_vol(ivol), comm)
+   call ddb_hdr%free()
    ABI_FREE(atifc0)
    if (my_rank == master) then
      call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
@@ -206,7 +207,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  end do
  if (ierr /= 0) then
    msg = ltoa([(new%cryst_vol(ivol)%ucvol, ivol=1,new%nvols)])
-   MSG_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
+   ABI_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
  end if
 
 end function gruns_new
@@ -246,6 +247,8 @@ end function gruns_new
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -337,6 +340,8 @@ end subroutine gruns_fourq
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -386,7 +391,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
  ! Write text files with phonon frequencies and gruneisen on the path.
  if (my_rank == master) then
    if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
@@ -466,6 +471,8 @@ end subroutine gruns_qpath
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -516,7 +523,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
  ! Build tetrahedra
  tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, comm, msg, ierr)
- if (ierr /= 0) MSG_ERROR(msg)
+ if (ierr /= 0) ABI_ERROR(msg)
 
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
  ABI_CALLOC(gvals_qibz, (gruns%natom3, nqibz))
@@ -583,7 +590,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
 
    ! Write text files with Gruneisen and DOSes.
    if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(unt,'(a)')'# Phonon density of states, Gruneisen DOS and phonon group velocity DOS'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
@@ -685,6 +692,8 @@ end subroutine gruns_qmesh
 !!      m_gruneisen
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -745,6 +754,8 @@ end subroutine gruns_free
 !!      anaddb
 !!
 !! CHILDREN
+!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
+!!      qpath%free
 !!
 !! SOURCE
 
@@ -818,7 +829,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
-   MSG_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
+   ABI_WARNING("Cannot compute Gruneisen parameters on q-mesh because ng2qpt == 0")
  end if
 
  ! Compute gruneisen on the q-path.
@@ -827,7 +838,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
    call qpath%free()
  else
-   MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
+   ABI_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if
 
  ! Compute speed of sound for V0.

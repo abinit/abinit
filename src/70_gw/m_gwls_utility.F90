@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,7 +107,7 @@ end function complex_vector_product
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_GWlanczos
+!!      m_gwls_GWlanczos
 !!
 !! CHILDREN
 !!      matrix_function,xmpi_sum,zgemm
@@ -145,7 +145,7 @@ integer :: ierr
 ! *************************************************************************
 
 
-ABI_ALLOCATE(C,(Qsize,Xsize))
+ABI_MALLOC(C,(Qsize,Xsize))
 
 ! Compute Q^dagger . X
 call ZGEMM(            'C',   & ! Hermitian conjugate the first array
@@ -180,7 +180,7 @@ cmplx_1,   & ! beta constant
 X,   & ! matrix C
 Hsize)     ! LDC
 
-ABI_DEALLOCATE(C)
+ABI_FREE(C)
 
 end subroutine orthogonalize
 !!***
@@ -197,7 +197,7 @@ end subroutine orthogonalize
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_DielectricArray,gwls_GenerateEpsilon
+!!      m_gwls_DielectricArray,m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      matrix_function,xmpi_sum,zgemm
@@ -258,7 +258,7 @@ end subroutine driver_invert_positive_definite_hermitian_matrix
 !! OUTPUT
 !!
 !! PARENTS
-!!      gwls_ComputePoles,gwls_GenerateEpsilon
+!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon
 !!
 !! CHILDREN
 !!      matrix_function,xmpi_sum,zgemm
@@ -337,10 +337,10 @@ logical        :: head_node
 
 ! *************************************************************************
 
-ABI_ALLOCATE(check_matrix,(lmax,lmax))
-ABI_ALLOCATE(yl,(Hsize))
-ABI_ALLOCATE(rl,(Hsize))
-ABI_ALLOCATE(Ayl,(Hsize))
+ABI_MALLOC(check_matrix,(lmax,lmax))
+ABI_MALLOC(yl,(Hsize))
+ABI_MALLOC(rl,(Hsize))
+ABI_MALLOC(Ayl,(Hsize))
 
 mpi_rank  = xmpi_comm_rank(mpi_communicator)
 
@@ -437,10 +437,10 @@ if (head_node) then
 end if
 
 
-ABI_DEALLOCATE(check_matrix)
-ABI_DEALLOCATE(yl)
-ABI_DEALLOCATE(rl)
-ABI_DEALLOCATE(Ayl)
+ABI_FREE(check_matrix)
+ABI_FREE(yl)
+ABI_FREE(rl)
+ABI_FREE(Ayl)
 
 
 10 format(A)

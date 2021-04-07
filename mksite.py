@@ -149,10 +149,11 @@ def main():
         website.generate_markdown_files()
 
     if "--dry-run" in sys.argv: return 0
-    print("Invoking mkdocs.__main__ to build HTML from MD files. It may take a while...")
+    print("Invoking mkdocs.__main__ to build HTML from MD files. It may take a few minutes ...")
     mkdocs_retcode = mkdocs.__main__.cli()
     return mkdocs_retcode + len(website.warnings)
 
 
 if __name__ == '__main__':
     sys.exit(main())
+

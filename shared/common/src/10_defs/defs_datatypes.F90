@@ -1,4 +1,4 @@
-!{\src2tex{textfont=tt}}
+! CP modified
 !!****m* ABINIT/defs_datatypes
 !! NAME
 !! defs_datatypes
@@ -26,7 +26,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG)
+!! Copyright (C) 2001-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,10 +64,8 @@ module defs_datatypes
 
  type ebands_t
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
-! declared in another part of ABINIT, that might need to take into account your modification.
-
   integer :: bantot                ! total number of bands (sum(nband(:))
+  integer :: ivalence              ! CP added: highest valence band index (useful when occopt=9 only)
   integer :: mband                 ! Max number of bands i.e MAXVAL(nband) (to dimension arrays)
   integer :: nkpt                  ! number of k points
   integer :: nspinor               ! 1 for collinear, 2 for noncollinear.
@@ -76,10 +74,17 @@ module defs_datatypes
   integer :: occopt                ! Occupation option, see input variable.
 
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
-  real(dp) :: fermie               ! Fermi energy
+  real(dp) :: fermie               ! Fermi energy ! CP: when occopt = 9, fermi energy of the quasi-FD distribution of excited
+! electrons in the conduction bands above ivalence
+  real(dp) :: fermih               ! CP added: Fermi energy of the excited holes in the valence bands <= ivalence (occopt = 9 only)
   real(dp) :: nelect               ! Number of electrons.
+  real(dp) :: ne_qFD               ! CP added: Number of electrons excited in the bands > ivalence (occopt = 9 only)
+  real(dp) :: nh_qFD               ! CP added: Number of holes     excited in the bands <=ivalence (occopt = 9 only)
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
+
+  !real(dp) :: spinmagntarget
+  ! TODO This should be set via dtset%spinmagntarget to simplify the API.
 
   integer,allocatable :: istwfk(:)
   ! istwfk(nkpt)
@@ -104,21 +109,23 @@ module defs_datatypes
   real(dp),allocatable :: linewidth(:,:,:,:)
   ! linewidth(itemp,mband,nkpt,nsppol)
   ! Linewidth of each band
+  ! MG: TODO: This array should be removed (I think Yannick introduced it, see also Ktmesh)
 
-  real(dp),allocatable :: kTmesh(:)
+  !real(dp),allocatable :: kTmesh(:)
   ! kTmesh(ntemp)
   ! List of temperatures (KT units).
 
-  real(dp),allocatable :: velocity(:,:,:,:)
+  !real(dp),allocatable :: velocity(:,:,:,:)
   ! velocity(3,mband,nkpt,nsppol)
   ! Group velocity of each band
+  ! MG: TODO: This array should be removed (I think HM introduced it)
 
   real(dp),allocatable :: occ(:,:,:)
-  ! occ(mband,nkpt,nsppol)
+  ! occ(mband, nkpt, nsppol)
   ! occupation of each band.
 
   real(dp),allocatable :: doccde(:,:,:)
-  ! doccde(mband,nkpt,nsppol)
+  ! doccde(mband, nkpt, nsppol)
   ! derivative of the occupation of each band wrt energy (needed for RF).
 
   real(dp),allocatable :: wtk(:)
@@ -131,18 +138,29 @@ module defs_datatypes
   integer :: nshiftk_orig, nshiftk
   ! original number of shifts given in input and the actual value (changed in inkpts)
 
-  real(dp) :: charge
-  ! nelect = zion - charge
+  real(dp) :: cellcharge
+  ! nelect = zion - cellcharge
+  ! Extra charge added to the unit cell when performing GS calculations
+  ! To treat a system missing one electron per unit cell, charge is set to +1.
+  ! When reading the band structure from an external file,
+  ! charge is mainly used as metadata describing the GS calculation that procuded the ebands_t object.
+  ! To simulate doping in a post-processing tool, use ebands_set_extrael that defines the value of %extra_el.
+  ! and changes %nelect, accordingly.
+
+  real(dp) :: extrael = zero
+  ! Extra number of electrons.
+  ! This variable is mainly used to simulate doping in the rigid band approximation.
+  ! Set by ebands_set_extrael method.
 
   integer :: kptrlatt_orig(3,3), kptrlatt(3,3)
   ! Original value of kptrlatt and value after the call to inkpts
 
   real(dp),allocatable :: shiftk_orig(:,:)
-  ! shiftk_orig(3,nshiftk_orig)
+  ! shiftk_orig(3, nshiftk_orig)
   ! original shifts given in input (changed in inkpts).
 
   real(dp),allocatable :: shiftk(:,:)
-  ! shiftk(3,nshiftk)
+  ! shiftk(3, nshiftk)
 
  end type ebands_t
 !!***

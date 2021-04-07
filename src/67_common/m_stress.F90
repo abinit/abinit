@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,7 +91,7 @@ contains
 !!  ixc = choice of exchange-correlation functional
 !!  kinstr(6)=kinetic energy part of stress tensor
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
@@ -166,11 +166,10 @@ contains
 !!   (7) Ewald energy.
 !!
 !! PARENTS
-!!      forstr
+!!      m_forstr
 !!
 !! CHILDREN
-!!      atm2fft,ewald2,fourdp,metric,mkcore,mkcore_alt,mklocl_recipspace
-!!      stresssym,strhar,timab,vdw_dftd2,vdw_dftd3,wrtout,zerosym
+!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -197,27 +196,27 @@ contains
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
- real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),rprimd(3,3),strsxc(6)
+ real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
  real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
- real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden),rprimd(3,3)
  real(dp),intent(out) :: strten(6)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu
+ integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu,nkpt=1
  integer :: optatm,optdyfr,opteltfr,opt_hybr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
- real(dp) :: e_dum,strsii,ucvol,vol_element
+ real(dp) :: e_dum,dum_rcut=zero,strsii,ucvol,vol_element
  character(len=500) :: message
  logical :: calc_epaw3_stress, efield_flag
 !arrays
- integer :: qprtrb_dum(3)
- real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3)
+ integer :: qprtrb_dum(3),icutcoul=3
+ real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3),vcutgeo(3)
  real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),taustr(6),tsec(2),uncorr(3)
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: Maxstr(6),ModE !Maxwell-stress constribution, and magnitude of efield
@@ -265,15 +264,15 @@ contains
    call timab(551,1,tsec)
 !  Compute Vxc in reciprocal space
    if (coredens_method==1.and.n3xccc>0) then
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
    else
-     ABI_ALLOCATE(vxctotg,(0,0))
+     ABI_MALLOC(vxctotg,(0,0))
    end if
 !  Compute contribution to stresses from Vloc and/or pseudo core density
    optv=0;if (vloc_method==1) optv=1
@@ -283,26 +282,26 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,dum_rcut,rhog,rprimd,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
    if (n3xccc==0.and.coredens_method==1) corstr=zero
-   ABI_DEALLOCATE(vxctotg)
+   ABI_FREE(vxctotg)
    if (usekden==1.and.coretau_method==1..and.n3xccc>0) then
 !    Compute contribution to stresses from pseudo kinetic energy core density
      optv=0;optn=1;optn2=4
-     ABI_ALLOCATE(v_dum,(nfft))
-     ABI_ALLOCATE(vxctotg,(2,nfft))
+     ABI_MALLOC(v_dum,(nfft))
+     ABI_MALLOC(vxctotg,(2,nfft))
      v_dum(:)=vxctau(:,1,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxctau(:,2,1))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(v_dum)
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,dum_rcut,rhog,rprimd,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      corstr(1:6)=corstr(1:6)+taustr(1:6)
@@ -313,15 +312,15 @@ contains
 !Local ionic potential by method 2
  if (vloc_method==2) then
    option=3
-   ABI_ALLOCATE(dyfr_dum,(3,3,natom))
-   ABI_ALLOCATE(gr_dum,(3,natom))
-   ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
-&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,&
-&   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
-   ABI_DEALLOCATE(dyfr_dum)
-   ABI_DEALLOCATE(gr_dum)
-   ABI_DEALLOCATE(v_dum)
+   ABI_MALLOC(dyfr_dum,(3,3,natom))
+   ABI_MALLOC(gr_dum,(3,natom))
+   ABI_MALLOC(v_dum,(nfft))
+   call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,icutcoul,lpsstr,mgfft,&
+&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,&
+&   qprtrb_dum,dum_rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb_dum,v_dum)
+   ABI_FREE(dyfr_dum)
+   ABI_FREE(gr_dum)
+   ABI_FREE(v_dum)
  end if
 
 !Pseudo core electron density by method 2
@@ -329,9 +328,9 @@ contains
    if (n1xccc/=0) then
      call timab(55,1,tsec)
      option=3
-     ABI_ALLOCATE(dyfr_dum,(3,3,natom))
-     ABI_ALLOCATE(gr_dum,(3,natom))
-     ABI_ALLOCATE(v_dum,(nfft))
+     ABI_MALLOC(dyfr_dum,(3,3,natom))
+     ABI_MALLOC(gr_dum,(3,natom))
+     ABI_MALLOC(v_dum,(nfft))
      if (coredens_method==2) then
        if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
          if(opt_hybr==0) then
@@ -356,9 +355,9 @@ contains
 &       usekden=.true.)
 
      end if
-     ABI_DEALLOCATE(dyfr_dum)
-     ABI_DEALLOCATE(gr_dum)
-     ABI_DEALLOCATE(v_dum)
+     ABI_FREE(dyfr_dum)
+     ABI_FREE(gr_dum)
+     ABI_FREE(v_dum)
      call timab(55,2,tsec)
    else
      corstr(:)=zero
@@ -562,14 +561,14 @@ contains
    if (vdw_xc>=5.and.vdw_xc<=7) vdwstr(:)=zero
  end if
  if (abs(ipositron)==2) then
-   ABI_ALLOCATE(rhog_ep,(2,nfft))
-   ABI_ALLOCATE(dummy,(6))
+   ABI_MALLOC(rhog_ep,(2,nfft))
+   ABI_MALLOC(dummy,(6))
    call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    rhog_ep=-rhog_ep
    call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
-   ABI_DEALLOCATE(rhog_ep)
-   ABI_DEALLOCATE(dummy)
+   ABI_FREE(rhog_ep)
+   ABI_FREE(dummy)
  end if
  if (ipositron>0) strten(:)=strten(:)+electronpositron%stress_ep(:)
 
@@ -720,7 +719,7 @@ end subroutine stress
 !!  ehart=Hartree energy (hartree)
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
@@ -734,7 +733,7 @@ end subroutine stress
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
 !!
 !! PARENTS
-!!      stress
+!!      m_stress
 !!
 !! CHILDREN
 !!      metric,ptabs_fourdp,timab,xmpi_sum

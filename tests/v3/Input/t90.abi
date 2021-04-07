@@ -1,0 +1,20 @@
+1           # Number of files to be analyzed
+t89o_SCR    # File to be analyzed.
+1           # Option for q-point recovery.
+3           # Number of q-points to recover
+t90o_SCR    # Output file (should not exist)
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgscr
+#%% test_chain = t87.abi, t88.abi, t89.abi, t90.abi, t91.abi
+#%% [files]
+#%% files_to_test=t90.stdout, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = GW
+#%% authors = M. Giantomassi
+#%% description =
+#%%   Test of mrgscr utility. Option for q-point recovery
+#%%<END TEST_INFO>

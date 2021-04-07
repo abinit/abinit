@@ -60,7 +60,7 @@ EXTERNAL_MODS = {
     #"m_build_info",
     #"m_optim_dumper",
     "libxc_functionals",
-    #Scale-UP for effective models 
+    #Scale-UP for effective models
     "scup_global"
 }
 
@@ -583,8 +583,10 @@ class AbinitProject(NotebookWriter):
         Return list of directory names containing source files.
         """
         l = []
+
         for src_dir in self.all_src_dirs:
-            assert os.path.isdir(src_dir)
+            if not os.path.isdir(src_dir):
+                raise RuntimeError("Not a directory: %s" % (src_dir))
             #print("src_dir", src_dir) #, os.listdir(src_dir))
             dpaths = [os.path.join(src_dir, d) for d in os.listdir(src_dir)]
             s = [d for d in dpaths if os.path.isdir(d)
@@ -993,7 +995,7 @@ class AbinitProject(NotebookWriter):
             for fort_file in fort_files:
                 outside_dir.extend(m.dirname for m in fort_file.all_used_mods)
 
-	    # Write abinit.dir
+	        # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))
             s += "include_dirs = \\\n" + pformat(sorted(set(outside_dir)))
             abinitdir_path = os.path.join(dirpath, "abinit.dir")

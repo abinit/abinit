@@ -6,7 +6,7 @@
 !! This module contains definitions for a number of named constants used in the GW part of abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2021 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,6 +38,7 @@ MODULE m_gwdefs
  integer,public,parameter :: unt_sig = 22  ! Self-energy as a function of frequency
  integer,public,parameter :: unt_sgr = 23  ! Derivative wrt omega of the Self-energy
  integer,public,parameter :: unt_sgm = 20  ! Sigma on the Matsubara axis
+ integer,public,parameter :: unt_sigc = 24 ! Sigma_c as a function of (epsilon_i) MRM
  integer,public,parameter :: unt_gwdiag  = 40 ! GW diagonal
 
  real(dp),public,parameter :: GW_TOLQ =0.0001_dp
@@ -349,7 +350,7 @@ MODULE m_gwdefs
   real(dp) :: omegasimax                 ! Max omega for Sigma along the imag axis in case of analytic continuation
   real(dp) :: omegasimin                 ! min omega for Sigma along the imag axis in case of analytic continuation
 
-  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element. 
+  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element.
                                          ! Usually one, except for the hybrid functionals.
 
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
@@ -407,7 +408,7 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
-!!      screening
+!!      m_screening_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -449,7 +450,7 @@ end subroutine em1params_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_gwdefs,setup_sigma
+!!      m_gwdefs,m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -475,7 +476,7 @@ subroutine sigijtab_free(Sigijtab)
       do kk=ilow,iup
         ABI_FREE(Sigijtab(ii,jj)%col(kk)%bidx)
       end do
-      ABI_DT_FREE(Sigijtab(ii,jj)%col)
+      ABI_FREE(Sigijtab(ii,jj)%col)
 
     end do
   end do
@@ -497,7 +498,7 @@ end subroutine sigijtab_free
 !! OUTPUT
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!      sigijtab_free
@@ -582,7 +583,7 @@ function sigma_type_from_key(key) result(sigma_type)
 
  if (sigma_type == "None") then
    write(msg,'(a,i0)')" Unknown value for key= ",key
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end function sigma_type_from_key
@@ -728,7 +729,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 !************************************************************************
 
  if (delta_ene**2>tol14) then
-   sgn=delta_ene/ABS(delta_ene)
+   sgn=SIGN(1.0_dp,delta_ene)
    !
    if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
      if (DABS(REAL(omega))>TOL_W0) then
@@ -748,7 +749,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 
    else
      write(msg,'(a,i0)')" Wrong value for opt_poles: ",opt_poles
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if ! opt_poles
 
  else ! delta_ene**2<tol14

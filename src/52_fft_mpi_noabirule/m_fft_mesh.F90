@@ -8,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2021 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,6 +47,8 @@ MODULE m_fft_mesh
  public :: check_rot_fft       ! Test whether the mesh is compatible with the rotational part of the space group.
  public :: fft_check_rotrans   ! Test whether the mesh is compatible with the symmetries of the space group.
  public :: rotate_fft_mesh     ! Calculate the FFT index of the rotated mesh.
+ public :: denpot_project      ! Compute n(r) + n( $R^{-1}(r-\tau)$ in) / 2
+                               ! Mainly used with R = inversion to select the even/odd part under inversion
  public :: cigfft              ! Calculate the FFT index of G-G0.
  public :: ig2gfft             ! Returns the component of a G in the FFT Box from its sequential index.
  public :: g2ifft              ! Returns the index of the G in the FFT box from its reduced coordinates.
@@ -57,7 +59,7 @@ MODULE m_fft_mesh
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
- public :: mkgrid_fft          !  It sets the grid of fft (or real space) points to be treated.
+ public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -122,7 +124,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -206,7 +208,7 @@ end subroutine zpad_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -218,13 +220,8 @@ subroutine zpad_free(zpad)
 
 ! *************************************************************************
 
- if (allocated(zpad%zplane)) then
-   ABI_FREE(zpad%zplane)
- end if
-
- if (allocated(zpad%linex2ifft_yz)) then
-   ABI_FREE(zpad%linex2ifft_yz)
- end if
+ ABI_SFREE(zpad%zplane)
+ ABI_SFREE(zpad%linex2ifft_yz)
 
 end subroutine zpad_free
 !!***
@@ -274,10 +271,10 @@ end subroutine zpad_free
 !!  See defs_fftdata for a list of allowed sizes of FFT.
 !!
 !! PARENTS
-!!      m_shirley,setup_bse,setup_screening,setup_sigma
+!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -313,7 +310,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 
  if (ANY(mg0<0)) then
    write(msg,'(a,3(i0,1x))')' called with wrong value of mG0 = ',mG0
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  tnons_warn = "Check your fractional translations tnons. "//ch10//&
@@ -367,7 +364,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    n2=ngfft(2)
    n3=ngfft(3)
    write(msg,'(3(a,i3))')' Mesh size enforced by user = ',n1,'x',n2,'x',n3
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
 
    ngfft(1)=n1
    ngfft(2)=n2
@@ -447,7 +444,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      ig2max=MAX(2*m2+1,2*mm2+1,mm2+m2+1)
      ig3max=MAX(2*m3+1,2*mm3+1,mm3+m3+1)
    else
-     MSG_BUG(sjoin("Wrong method:", itoa(method)))
+     ABI_BUG(sjoin("Wrong method:", itoa(method)))
    end if
 
    m1=-1; m2=-1; m3=-1
@@ -468,7 +465,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    end do
 
  case default
-   MSG_BUG(sjoin('Method > 3 or < 0 not allowed in setmesh while method:', itoa(method)))
+   ABI_BUG(sjoin('Method > 3 or < 0 not allowed in setmesh while method:', itoa(method)))
  end select
  !
  ! * Warning if low npwwfn.
@@ -477,7 +474,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
     'Note that npwwfn is small with respect to npweps or with respect to npwsigx. ',ch10,&
     'Such a small npwwfn is a waste: ',ch10,&
     'You could raise npwwfn without loss in cpu time. '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
  !
  ! Keep the largest of the m/mm and and find the FFT grid which is compatible
@@ -511,10 +508,10 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    !
    ! * Warn if not compatibile with tnons or rotational part.
    if (.not.fft_ok) then
-    MSG_WARNING('FFT mesh is not compatible with non-symmorphic translations')
+    ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
    end if
    if (.not.(check_rot_fft(nsym,symrel,n1,n2,n3))) then
-     MSG_WARNING('FFT mesh is not compatible with rotations')
+     ABI_WARNING('FFT mesh is not compatible with rotations')
    end if
 
  else
@@ -531,7 +528,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
        if (((fftnons(ii)/nt)*nt)/=fftnons(ii)) fftnons(ii)=mincm(fftnons(ii),nt)
      end do
    end do
-   write(msg,'(a,3(i0,1x))')' setmesh: divisor mesh',fftnons(:)
+   write(msg,'(a,3(i0,1x))')' setmesh: divisor mesh ',fftnons(:)
    call wrtout(ount,msg,'COLL')
    !
    ! 2) Check if also rotations preserve the grid.
@@ -568,11 +565,11 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
            ( MOD(fftsym(2),fftnons(2))/=0) .and.  &
            ( MOD(fftsym(3),fftnons(3))/=0)        &
      ) then
-     MSG_BUG('Not able to generate a symmetric FFT')
+     ABI_BUG('Not able to generate a symmetric FFT')
    end if
  end if ! enforce_sym
 
- write(msg,'(3(a,i3),2a,i8,a)')&
+ write(msg,'(3(a,i5),2a,i12,a)')&
   ' setmesh: FFT mesh size selected  = ',n1,'x',n2,'x',n3,ch10,&
   '          total number of points  = ',nfftot,ch10
  call wrtout(ount,msg,'COLL')
@@ -595,7 +592,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
     "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
     "Action : check the value of fftalg in your input file, ",ch10,&
     "or modify setmesh.F90 to make sure the FFT mesh is compatible with the FFT library. "
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! TODO Had to change setmesh to avoid bad values for FFTW3
@@ -608,7 +605,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 !     if (powers(6)/=1 .or. powers(4)/=0 .or. powers(5)/=0) then
 !       write(msg,'(a,i0,a)')&
 !&        "ngfft(ii) ",ngfft(ii)," contains powers of 7-11 or greater; FFTW3 is not optimal "
-!       MSG_WARNING(msg)
+!       ABI_WARNING(msg)
 !     end if
 !   end do
 !   ABI_FREE(pfactors)
@@ -756,7 +753,7 @@ function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
    if (ANY(err(:,isym)>tol6)) then
      isok=.FALSE.
      !write(msg,'(a,i3,a,3es14.6)')' symmetry ',isym,') not compatible with FFT grid, error ',err(:,isym)
-     !MSG_WARNING(msg)
+     !ABI_WARNING(msg)
    end if
  end do
 
@@ -792,11 +789,11 @@ end function fft_check_rotrans
 !!  final results, in particular in the description of degenerate states.
 !!
 !! PARENTS
-!!      bethe_salpeter,calc_sigc_me,calc_sigx_me,cchi0q0_intraband
-!!      classify_bands,cohsex_me,m_dvdb,m_wfd,prep_calc_ucrpa,screening
+!!      m_bethe_salpeter,m_chi0,m_classify_bands,m_cohsex,m_dvdb,m_fft_mesh
+!!      m_prep_calc_ucrpa,m_screening_driver,m_sigc,m_sigx,m_wfd
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -869,11 +866,78 @@ subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
    if (ANY(err(:,isym)>tol6)) then
      preserve=.FALSE.
      !write(msg,'(a,i3,a,3es14.6)')' symmetry ',isym,') not compatible with FFT grid, error ',err(:,isym)
-     !MSG_WARNING(msg)
+     !ABI_WARNING(msg)
    end if
  end do
 
 end subroutine rotate_fft_mesh
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/denpot_project
+!! NAME
+!!
+!! FUNCTION
+!!  Compute n(r) + n( $R^{-1}(r-\tau)$ in) / 2
+!!  Mainly used with R = inversion to select the even/odd part under inversion
+!!
+!! INPUTS
+!!  cplex=1 for real, 2 for complex data.
+!!  ngfft(3)=Mesh divisions of input array
+!!  nspden=Number of density components.
+!!  in_rhor(cplex * nfftot * nspden)=Input array
+!!  one_symrel(3,3)= R operation
+!!  tau(3)=Fractional translation.
+!!
+!! OUTPUT
+!!  out_rhor(cplex * nfftot * nspden)=Output array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons, out_rhor)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nspden
+!arrays
+ integer,intent(in) :: ngfft(18), one_symrel(3,3)
+ real(dp),intent(in) :: in_rhor(cplex, product(ngfft(1:3)), nspden)
+ real(dp),intent(in) :: one_tnons(3)
+ real(dp),intent(out) :: out_rhor(cplex, product(ngfft(1:3)), nspden)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer,parameter :: nsym1 = 1, isgn = 1
+ integer :: ispden, ii, ifft, ifft_rot, nfft
+ logical :: preserve
+!arrays
+ integer,allocatable :: irottb(:)
+
+! *************************************************************************
+
+ nfft = product(ngfft(1:3))
+ ABI_MALLOC(irottb, (nfft))
+
+ call rotate_fft_mesh(nsym1, one_symrel, one_tnons, ngfft, irottb, preserve)
+ ABI_CHECK(preserve, "FFT mesh is not compatible with {R, tau}")
+
+ do ispden=1,nspden
+   do ifft=1,nfft
+     ifft_rot = irottb(ifft)
+     do ii=1,cplex
+       out_rhor(cplex, ifft, ispden) = (in_rhor(cplex, ifft, ispden) + isgn * in_rhor(cplex, ifft_rot, ispden)) * half
+     end do
+   end do
+ end do
+
+ ABI_FREE(irottb)
+
+end subroutine denpot_project
 !!***
 
 !----------------------------------------------------------------------
@@ -900,7 +964,7 @@ end subroutine rotate_fft_mesh
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -927,7 +991,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
 
  if (ANY(mg0<0)) then
    write(msg,'(a,3i4)')' Found negative value of mg0= ',mg0
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  n1=ngfft(1)
@@ -961,7 +1025,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
    write(msg,'(a,i0,3a)')&
     'Found ',ierr,' G-G0 vectors falling outside the FFT box. ',ch10,&
     'igfft will be set to zero for these particular G-G0 '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  DBG_EXIT("COLL")
@@ -1091,7 +1155,7 @@ end function g2ifft
 !!
 !! SOURCE
 
-pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
+pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -1154,7 +1218,7 @@ end subroutine get_gftt
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1224,7 +1288,7 @@ end subroutine calc_ceigr_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      xcopy
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1552,9 +1616,10 @@ end subroutine times_eikr
 !! Simply suppresses the corresponding sine.
 !!
 !! PARENTS
-!!      xcden,xcpot
+!!      m_xctk
 !!
 !! CHILDREN
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1593,14 +1658,14 @@ end subroutine phase
 !!  mkgrid_fft
 !!
 !! FUNCTION
-!!  It sets the grid of fft (or real space) points to be treated.
+!!  Sets the grid of fft (or real space) points to be treated.
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
 !! PARENTS
-!!      mkcore_paw,mklocl_realspace
+!!      m_mklocl_realspace
 !!
 !! CHILDREN
 !!      xred2xcart

@@ -8,7 +8,7 @@
 !!  of KS states.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (FB, MG)
+!! Copyright (C) 2008-2021 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ MODULE m_qparticles
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : get_valence_idx
+ use m_ebands,         only : ebands_get_valence_idx
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim
@@ -110,7 +110,7 @@ CONTAINS  !=====================================================================
 !!   | QP density in real space.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -154,7 +154,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
  end if
 
  if (open_file(fname,msg,newunit=unqps,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unqps,*)nscf+1
@@ -188,7 +188,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
      end do
    end do
  else
-   MSG_ERROR(sjoin("Wrong nscf ",itoa(nscf)))
+   ABI_ERROR(sjoin("Wrong nscf ",itoa(nscf)))
  end if
 
  ABI_FREE(mtmp)
@@ -265,7 +265,7 @@ end subroutine wrqps
 !!  The value of nspden is not reported in the QPS file thus we have a possible undetected error.
 !!
 !! PARENTS
-!!      bethe_salpeter,mlwfovlp_qp,screening,sigma
+!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -334,7 +334,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
  if (.not.isncfile(fname)) then
    if (open_file(fname,msg,newunit=unqps,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ! TODO the _QPS file should contain additional information
@@ -345,7 +345,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    read(unqps,*)nkibzR
    if (nkibzR/=BSt%nkpt) then
      write(msg,'(2(a,i0))')'Wrong number of k-points; Expected: ',BSt%nkpt,', Found: ',nkibzR
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    read(unqps,*)nbandR
@@ -355,14 +355,14 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
      write(msg,'(3a,i4,a,i4)')&
       'QPS file contains less bands than that used in the present calculation ',ch10,&
       'Required: ',BSt%mband,', Found: ',nbandR
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    if (nbsc/=nbandR) then
      write(msg,'(3a,i4,a)')&
       'The QPS file contains more bands than that used in the present calculation ',ch10,&
       'only the first ',nbandR,' bands will be read'
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
 
    ABI_MALLOC(mtmp,(nbandR,nbandR))
@@ -400,7 +400,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        uerr=MAXVAL(ABS(utest))
        if (uerr>tol6) then
          write(msg,'(a,es16.8)')' KS -> QP matrix is not unitary, MAX error = ',uerr
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
        ABI_FREE(utest)
      end do !ik
@@ -420,7 +420,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        write(msg,'(2a,a,5(i3,a),i3)')&
         'FFT meshes differ. Performing Fourier interpolation. ',ch10,&
         'Found: ',n1,' x',n2,' x',n3,'; Expected: ',ngfftf(1),' x',ngfftf(2),' x',ngfftf(3)
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
 
        ABI_MALLOC(rhor_tmp,(n1*n2*n3,nspden))
        read(unqps,*)rhor_tmp(:,:)
@@ -479,7 +479,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        read(unqps,*,iostat=ios)natomR,ntypatR
        if (ios/=0) then
          msg="Old version of QPS file found. DO NOT USE rhoqpmix for this run."
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          call wrtout(ab_out,msg,"COLL")
          ! Init dummy rhoij just to avoid problems in sigma when rhoij is freed.
          call pawrhoij_inquire_dim(nspden_rhoij=nspdenR, nspden=nspden)
@@ -499,7 +499,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        read(unqps,*)(nlmn_type(itypat), itypat=1,ntypatR)
        do itypat =1,Cryst%ntypat
          if (nlmn_type(itypat)/=Pawtab(itypat)%lmn_size) then
-           MSG_ERROR("mismatch in nlmn_type, check QPS file")
+           ABI_ERROR("mismatch in nlmn_type, check QPS file")
          end if
        end do
 
@@ -520,7 +520,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    close(unqps)
 
  else
-   MSG_ERROR("netdf format not implemented")
+   ABI_ERROR("netdf format not implemented")
  end if
 
  DBG_EXIT("COLL")
@@ -559,7 +559,7 @@ end subroutine rdqps
 !!  Only master node should call this routine.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -699,7 +699,7 @@ end subroutine show_QP
 !!   igwene(Bst%mband,Bst%nkpt,Bst%nsppol)= The imaginary part of the QP energies.
 !!
 !! PARENTS
-!!      mlwfovlp_qp,screening,setup_bse,sigma
+!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -732,7 +732,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
  ABI_CHECK(ALL(Bst%nband==Bst%mband),"nband must be constant")
 
  if (open_file(fname,msg,newunit=unt,status='old') /=0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  read(unt,*)nkibzR,nsppolR
@@ -742,7 +742,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
    write(msg,'(a,i4,a,i4,2a)')&
 &   'Found less k-points than that required ',nkibzR,'/',Bst%nkpt,ch10,&
 &   'Some k-points will be skipped. Continuing anyway '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
  end if
 
  ABI_MALLOC(gwcorr,(Bst%mband,Bst%nkpt,Bst%nsppol))
@@ -776,7 +776,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
      do ik=1,Bst%nkpt
        if (seen(ik)/=1) then
          write(msg,'(a,3f8.3,a)')" k-point: ",Bst%kptns(:,ik)," not found in the GW file!"
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
        end if
      end do
    end if
@@ -797,11 +797,11 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
      write(msg,'(4a)')ch10,&
 &      "The GW file contains QP energies with non-zero imaginary part",ch10,&
 &      "Extrapolation not coded, change the source! "
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ABI_MALLOC(vbik,(BSt%nkpt,BSt%nsppol))
-   vbik(:,:) = get_valence_idx(BSt)
+   vbik(:,:) = ebands_get_valence_idx(BSt)
 
    do is=1,Bst%nsppol
      do ik=1,Bst%nkpt
@@ -908,7 +908,7 @@ end subroutine rdgw
 !!  Only master node should call this routine.
 !!
 !! PARENTS
-!!      sigma
+!!      m_sigma_driver
 !!
 !! CHILDREN
 !!

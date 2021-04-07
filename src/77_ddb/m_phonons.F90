@@ -8,7 +8,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (XG, MG, MJV, GMR)
+!! Copyright (C) 1999-2021 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -193,11 +193,10 @@ CONTAINS  !=====================================================================
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,eph,m_tdep_phdos
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -228,12 +227,12 @@ subroutine phdos_print(PHdos,fname)
  case (2)
    write(msg_method,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
  case default
-   MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
+   ABI_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
 
  ! Open external file and write results
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom type projected DOS'
  call wrtout(unt,msg)
@@ -253,7 +252,7 @@ subroutine phdos_print(PHdos,fname)
 
  fname_by_atom = trim(fname) // "_by_atom"
  if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom projected DOS'
  call wrtout(unt_by_atom,msg)
@@ -273,7 +272,7 @@ subroutine phdos_print(PHdos,fname)
 
  fname_msqd = trim(fname) // "_msqd"
  if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix (set to zero below 1e-12)'
  call wrtout(unt_msqd,msg)
@@ -322,11 +321,10 @@ end subroutine phdos_print
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
-!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
-!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -428,9 +426,10 @@ end subroutine phdos_print_debye
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -461,7 +460,7 @@ subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 
  ! open THERMO file
  if (open_file(fname, msg, newunit=tunt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(msg, '(3a)' )&
@@ -540,9 +539,10 @@ end subroutine phdos_print_thermo
 !! PHdos= container object for phonon DOS
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -581,8 +581,11 @@ end subroutine phdos_free
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -675,9 +678,11 @@ end subroutine phdos_init
 !!   In output: min and max frequency obtained after interpolating the IFCs on the dense q-mesh dos_ngqpt
 !!
 !! PARENTS
-!!      anaddb,eph,m_tdep_phdos
+!!      anaddb,m_eph_driver,m_tdep_phdos
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -731,7 +736,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
 
  ! Consistency check.
  if (all(prtdos /= [1, 2])) then
-   MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
+   ABI_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
  dosdeltae = dosdeltae_in; refine_dosdeltae = .false.
  if (dosdeltae <= zero) then
@@ -739,7 +744,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    ABI_CHECK(nprocs == 1, "refine_dosdeltae cannot be used with nprocs > 1")
  end if
  if (prtdos == 1 .and. dossmear <= zero) then
-   MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
+   ABI_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
  end if
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -920,7 +925,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
      full_eigvec(:,:,:,:,iq_ibz) = eigvec
 
    case default
-     MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
+     ABI_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
    end select
  end do ! iq_ibz
 
@@ -1045,7 +1050,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
          write(msg,'(a,f6.2,a,i4,2a,e10.3,a,e10.3)') "The value of the integral is", phdos_int, &
                       " but it should be", crystal%natom*3, ch10,&
                       "I will decrease dosdeltae from: ", dosdeltae, " to: ", dosdeltae/two
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          dosdeltae = dosdeltae / two
          call phdos%free()
          call phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
@@ -1085,7 +1090,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    call htetraq%free()
  else
 #ifdef HAVE_NETCDF
-   MSG_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
+   ABI_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
 #endif
  end if ! tetrahedra
 
@@ -1188,6 +1193,8 @@ end subroutine mkphdos
 !!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1224,7 +1231,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
    write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
      ' non diagonal supercells.',ch10,' rlatt for temp 1 = ', rlatt, ' Returning '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -1302,8 +1309,9 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      sigma = sqrt( (bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode) )
 
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
-     freeze_displ = modesign * sigma
-     call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+       freeze_displ = modesign * sigma
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full
@@ -1359,8 +1367,11 @@ end subroutine zacharias_supercell_make
 !! NOTES
 !!
 !! PARENTS
+!!      m_generate_training_set
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1397,7 +1408,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
    write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
 &    ' non diagonal supercells.',ch10,' rlatt for temp 1 = ', rlatt, ' Returning '
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
 
@@ -1499,7 +1510,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
              write (msg, '(a,I0,a,3es12.5,2a,I0)') ' The amplitude of the unstable mode ',&
 &                int(imode),' of the qpt ',thm_scells(iconfig)%qphon(:), ch10,&
 &                'is set to zero for the configuration ',iconfig
-             MSG_WARNING(msg)
+             ABI_WARNING(msg)
            end if
          end select
        end if
@@ -1552,9 +1563,11 @@ end subroutine thermal_supercell_make
 !! NOTES
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_generate_training_set
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1568,7 +1581,7 @@ subroutine thermal_supercell_free(nscells, thm_scells)
 ! local
  integer :: icell
 
- if(allocated(thm_scells)) then
+ if (allocated(thm_scells)) then
    do icell = 1, nscells
      call destroy_supercell(thm_scells(icell))
    end do
@@ -1594,6 +1607,8 @@ end subroutine thermal_supercell_free
 !!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1640,9 +1655,10 @@ end subroutine zacharias_supercell_print
 !! NOTES
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1692,9 +1708,10 @@ end subroutine thermal_supercell_print
 !!  Frequencies are in eV, DOS are in states/eV.
 !!
 !! PARENTS
-!!      anaddb,eph
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1751,7 +1768,7 @@ subroutine phdos_ncwrite(phdos, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'shiftq'), phdos%shiftq))
 
 #else
- MSG_ERROR("netcdf support not enabled")
+ ABI_ERROR("netcdf support not enabled")
  ABI_UNUSED((/ncid, phdos%nomega/))
 #endif
 
@@ -1784,6 +1801,8 @@ end subroutine phdos_ncwrite
 !!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1940,7 +1959,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! TODO: generalize for other q-point little groups.
    if (sum(abs(qphon)) < DDB_QTOL) then
      call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
-&      Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
+&      Crystal%symafm,Crystal%symrel,Crystal%tnons,tol5,verbose=.TRUE.)
      call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
    end if
 
@@ -2025,14 +2044,14 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      end if
 
    case default
-     MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
+     ABI_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
    end select
 
    ! write out DOS file for q along this path
    cfact=one
    unitname = 'Ha'
    if (open_file('PHBST_partial_DOS',msg,newunit=unt,form="formatted",action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write(msg,'(3a)')'# ',ch10,'# Partial phonon density of states for q along a band structure path'
    call wrtout(unt, msg)
@@ -2086,6 +2105,8 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2153,6 +2174,8 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2215,9 +2238,10 @@ end subroutine phdos_print_vsound
 !!   to file only
 !!
 !! PARENTS
-!!      anaddb
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2244,11 +2268,11 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 
  fname_msqd = trim(fname) //"_MSQD_T"
  if (open_file(fname_msqd, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  fname_veloc = trim(fname) // "_MSQV_T"
  if (open_file(fname_veloc, msg, newunit=junit, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! write the header
@@ -2379,6 +2403,8 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2406,7 +2432,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
    nctkdim_t("number_of_qpoints", nqpts), nctkdim_t('number_of_phonon_modes', nphmodes)])
  NCF_CHECK(ncerr)
 
-! define arrays
+ ! Define arrays
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t('qpoints', "dp" , 'number_of_reduced_dimensions, number_of_qpoints'),&
    nctkarr_t('qweights',"dp", 'number_of_qpoints'),&
@@ -2414,7 +2440,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
    nctkarr_t('phdispl_cart',"dp", 'complex, number_of_phonon_modes, number_of_phonon_modes, number_of_qpoints')])
  NCF_CHECK(ncerr)
 
-!Write variables.
+ ! Write variables.
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, vid('qpoints'), qpoints))
  NCF_CHECK(nf90_put_var(ncid, vid('qweights'), weights))
@@ -2459,6 +2485,8 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2487,7 +2515,7 @@ end subroutine phonons_ncwrite
  dummy = qpoints(1,1); dummy = weights(1)
 
  if (open_file(path, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (iunit, '(a)')  '# ABINIT generated phonon band structure file. All in Ha atomic units'
@@ -2505,7 +2533,7 @@ end subroutine phonons_ncwrite
 
  if (.False.) then
    if (open_file(strcat(path, "_PHDISPL"), msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iunit, '(a)')     '# ABINIT generated phonon displacements, along points in PHFRQ file. All in Ha atomic units'
@@ -2559,6 +2587,8 @@ end subroutine phonons_write_phfrq
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2600,7 +2630,7 @@ subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbound
  end if
 
  if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unt,'(a)') "# Grace project file"
@@ -2655,9 +2685,7 @@ subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbound
 
  close(unt)
 
- if (allocated(bounds2qpt)) then
-   ABI_FREE(bounds2qpt)
- end if
+ ABI_SFREE(bounds2qpt)
 
 end subroutine phonons_write_xmgrace
 !!***
@@ -2686,6 +2714,8 @@ end subroutine phonons_write_xmgrace
 !!      m_phonons
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2729,10 +2759,10 @@ subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
 
  datafile = strcat(prefix, "_PHBANDS.data")
  if (open_file(datafile, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (open_file(strcat(prefix, "_PHBANDS.gnuplot"), msg, newunit=gpl_unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  basefile = basename(datafile)
 
@@ -2809,9 +2839,11 @@ end subroutine phonons_write_gnuplot
 !!  Only writing.
 !!
 !! PARENTS
-!!      eph
+!!      m_eph_driver
 !!
 !! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2827,11 +2859,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: master=0
- integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr,nph2l
+ integer,parameter :: master = 0
+ integer :: iqpt, nqpts, natom, ncid, nprocs, my_rank, ierr, nph2l
 #ifdef HAVE_NETCDF
- character(len=17) :: c17
- character(len=22) :: c22
+ integer :: ncerr
 #endif
  type(kpath_t) :: qpath
 !arrays
@@ -2843,9 +2874,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
+   ABI_COMMENT("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. Returning")
    return
  end if
+
  call wrtout(std_out, " Writing phonon bands, use prtphbands 0 to disable this part")
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2859,7 +2891,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  ABI_CALLOC(eigvec, (2,3,natom,3,natom))
 
  do iqpt=1,nqpts
-   if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
+   if (mod(iqpt, nprocs) /= my_rank) cycle ! MPI-parallelism
    ! Get phonon frequencies and displacements in cartesian coordinates for this q-point
    call ifc%fourq(cryst, qpath%points(:,iqpt), phfrqs(:,iqpt), phdispl_cart(:,:,:,iqpt), out_eigvec=eigvec)
  end do
@@ -2872,9 +2904,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    weights = one
 
    ! Compute directions for non-analytical behaviour.
-   ! TODO: The same approach should be used in anaddb.
+   ! TODO: The same approach should be used in anaddb at the level of the parser.
    ABI_MALLOC(qph2l, (3, 2*dtset%ph_nqpath))
    ABI_MALLOC(qnrml2, (2*dtset%ph_nqpath))
+
    nph2l = 0
    if (any(ifc%zeff /= zero)) then
      do iqpt=1,dtset%ph_nqpath
@@ -2891,6 +2924,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
          end if
        end if
      end do
+
      ! Convert to Cartesian coordinates.
      do iqpt=1,nph2l
        qph2l(:, iqpt) = matmul(cryst%gprimd, qph2l(:, iqpt))
@@ -2901,13 +2935,17 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 #ifdef HAVE_NETCDF
    ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
    ! Should centralize everything in a single routine
-   c17='atomic_mass_units' ; c22='number_of_atom_species' ! To avoid long lines (>132)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(cryst%ncwrite(ncid))
    call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t(c17,"dp",c22)], defmode=.True.))
+   ! This flag tells AbiPy that all the non-analytic directions have been computed.
+   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["has_abipy_non_anal_ph"], [1]))
+   ncerr = nctk_def_arrays(ncid, &
+     [nctkarr_t("atomic_mass_units", "dp", "number_of_atom_species")], &
+   defmode=.True.)
+   NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid,c17), ifc%amu))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "atomic_mass_units"), ifc%amu))
    if (nph2l /= 0) call ifc%calcnwrite_nana_terms(cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif
@@ -2923,7 +2961,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    case (3)
      call phonons_write_phfrq(strcat(prefix, "_PHFRQ"), natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    case default
-     MSG_WARNING(sjoin("Unsupported value for prtphbands:", itoa(dtset%prtphbands)))
+     ABI_WARNING(sjoin("Unsupported value for prtphbands:", itoa(dtset%prtphbands)))
    end select
 
    ABI_FREE(weights)
@@ -2963,10 +3001,11 @@ end subroutine ifc_mkphbs
 !! OUTPUT
 !!
 !! PARENTS
-!!      anaddb,m_phonons
+!!      m_phonons
 !!
 !! CHILDREN
-!!      matr3inv,mkrdim,wrtout
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 

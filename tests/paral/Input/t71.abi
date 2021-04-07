@@ -1,0 +1,121 @@
+# Crystalline silicon
+# Calculation of the GW correction to the direct band gap in Gamma
+# Dataset 1: ground state calculation 
+# Dataset 2: calculation of the WFK file 
+# Dataset 3: calculation of the screening (epsilon^-1 matrix for W)
+# Dataset 4: calculation of the Self-Energy matrix elements (GW corrections)
+
+ndtset    4 
+gwpara    1
+
+ngkpt    4 4 4         # Density of k points
+
+# Dataset1: usual self-consistent ground-state calculation
+# Definition of the k-point grid
+nkpt1    10
+nshiftk1  4
+shiftk1  0.5 0.5 0.5  # This grid is the most economical
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+prtden1  1         # Print out density
+
+# Common to all GW calculations.
+nkpt    19             # A set of 19 k-points containing Gamma
+nshiftk  4
+shiftk  0.0 0.0 0.0  # This grid contains the Gamma point
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+istwfk  *1                    # Option needed for Gamma
+
+# Dataset2: calculation of WFK file
+# Definition of k-points
+iscf2    -2             # Non self-consistent calculation
+getden2  -1             # Read previous density file
+nband2    17
+nbdbuf2    5
+
+# Dataset3: Calculation of the screening (epsilon^-1 matrix)
+optdriver3  3        # Screening calculation
+getwfk3     -1       # Obtain WFK file from previous dataset
+nband3      12       # Bands to be used in the screening calculation
+ecutwfn3    4.5      # Planewaves to be used to represent the wavefunctions
+ecuteps3    3.0      # Dimension of the screening matrix
+ppmfrq3    16.7 eV  # Imaginary frequency where to calculate the screening
+inclvkb 0
+
+# Dataset4: Calculation of the Self-Energy matrix elements (GW corrections)
+optdriver4  4        # Self-Energy calculation
+getwfk4     -2       # Obtain WFK file from dataset 1
+getscr4     -1       # Obtain SCR file from previous dataset
+nband4      12      # Bands to be used in the Self-Energy calculation
+ecutwfn4    4.5      # Planewaves to be used to represent the wavefunctions
+ecutsigx4   2.0      # Dimension of the G sum in Sigma_x
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+nkptgw4      1                # number of k-point where to calculate the GW correction
+kptgw4                       # k-points
+  0.000    0.000    0.000    # (Gamma)
+bdgw4       4  5             # calculate GW corrections for bands from 4 to 5
+gw_icutcoul4  3   #  old deprecated value of icutcoul, only used for legacy
+
+
+
+# Definition of the unit cell: fcc
+acell  3*5.43 angstrom       # This is equivalent to   10.217 10.217 10.217
+rprim  0.0  0.5  0.5  # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1         # There is only one type of atom
+znucl 14          # The keyword "znucl" refers to the atomic number of the 
+                  # possible type(s) of atom. The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Silicon.
+                         
+# Definition of the atoms
+natom 2           # There are two atoms
+typat  1 1        # They both are of type 1, that is, Silicon.
+xred              # Reduced coordinate of atoms
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+ecut 4.5          # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the SCF procedure
+nstep   100        # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+tolwfr  1.0d-10   
+nsym 0
+paral_kgb 0
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1,2,4,10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% files_to_test = t71_MPI1.abo, tolnlines=   12,   tolabs=  1.1e-3,      tolrel= 1.1e-1
+#%% [NCPU_2]
+#%% files_to_test = t71_MPI2.abo, tolnlines=   12,   tolabs=  1.1e-3,      tolrel= 1.1e-1
+#%% [NCPU_4]
+#%% files_to_test = t71_MPI4.abo, tolnlines=   12,   tolabs=  1.1e-3,      tolrel= 1.1e-1
+#%% [NCPU_10]
+#%% files_to_test = t71_MPI10.abo, tolnlines=   12,   tolabs=  1.1e-3,      tolrel= 1.1e-1
+#%% [extra_info]
+#%% keywords = NC, GW
+#%% authors = R. Shaltaf
+#%% description = Si, Bulk, 2 atoms, one-shot GW calculation, parallelism over k points.
+#%%<END TEST_INFO>
