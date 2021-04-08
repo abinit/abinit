@@ -813,7 +813,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
      cadd(16)=cadd(16)+my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc ! Rhoij and related data
      cadd(17)=cadd(17)+my_nattyp(ii)*(2+lmn2_size(ii))    ! (rhoijselect, ...)
    end do
-!!PAW:cprj
+   !PAW:cprj
    do ii=1,ntypat
      cadd(16)=cadd(16)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
    end do
@@ -1099,7 +1099,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  end if
 
 
-!(8)                     in cgwf_paw-------------------------------------
+!(8)                     in cgwf_cprj-------------------------------------
 
 !conjgr, direc, direc_tmp, gvnlx
  cmpw(81)=2*4*nspinor          ; dttyp(81)=8
