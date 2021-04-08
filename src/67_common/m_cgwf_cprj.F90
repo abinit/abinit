@@ -206,9 +206,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
  if (cprj_update_lvl==-1) then
-   call timab(1203,1,tsec)
+   call timab(1293,1,tsec)
    call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
-   call timab(1203,2,tsec)
+   call timab(1293,2,tsec)
  end if
 
  ! Big iband loop
@@ -335,9 +335,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        ! Project the steepest descent direction:
        ! direc(2,npw)=<G|H|Cnk> - \sum_{(i/=n)} <G|H|Cik>
        if(ortalg>=0)then
-         call timab(1203,1,tsec)
+         call timab(1293,1,tsec)
          call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
-         call timab(1203,2,tsec)
+         call timab(1293,2,tsec)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,tim_getcsc)
          scprod = reshape(scprod_csc,(/2,nband/))
@@ -371,9 +371,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
        ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
        ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
-       call timab(1203,1,tsec)
+       call timab(1293,1,tsec)
        call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
-       call timab(1203,2,tsec)
+       call timab(1293,2,tsec)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &       gs_hamk,mpi_enreg,nband,tim_getcsc)
 !       if (abs(xnorm-one)>tol10) then ! True if iline==1 and if input WFs are random
@@ -609,9 +609,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        end do
        call timab(1305,2,tsec)
        if (cprj_update_lvl<=0.and.cprj_update_lvl>=-1) then
-         call timab(1203,1,tsec)
+         call timab(1293,1,tsec)
          call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
-         call timab(1203,1,tsec)
+         call timab(1293,1,tsec)
        else
          call timab(1302,1,tsec)
          call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
@@ -673,9 +673,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  !  ======================================================================
 
  if (cprj_update_lvl<=2.and.cprj_update_lvl>=-1) then
-   call timab(1203,1,tsec)
+   call timab(1293,1,tsec)
    call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
-   call timab(1203,2,tsec)
+   call timab(1293,2,tsec)
  end if
 
  sij_opt=0

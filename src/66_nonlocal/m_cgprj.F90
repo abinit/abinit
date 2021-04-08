@@ -159,7 +159,7 @@ contains
 
  DBG_ENTER('COLL')
 
- call timab(1200,1,tsec)
+ call timab(1290,1,tsec)
 
 !Nothing to do in that case
  if (cpopt==1.and.choice==1) return
@@ -285,17 +285,17 @@ contains
 
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
      if (abs(choice_)>1.or.nloalg(1)==4) then
-       call timab(1201,1,tsec)
+       call timab(1291,1,tsec)
        call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
 &       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
 &       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
-       call timab(1201,2,tsec)
+       call timab(1291,2,tsec)
      else
-       call timab(1202,1,tsec)
+       call timab(1292,1,tsec)
        call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx,&
 &       ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
 &       nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef)
-       call timab(1202,2,tsec)
+       call timab(1292,2,tsec)
      end if
 
 !    Transfer result to output variable cwaveprj
@@ -372,7 +372,7 @@ contains
    ABI_FREE(ph3d_)
  end if
 
- call timab(1200,2,tsec)
+ call timab(1290,2,tsec)
 
  DBG_EXIT('COLL')
 
@@ -879,14 +879,14 @@ contains
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
          iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
-         call timab(1204,1,tsec)
+         call timab(1294,1,tsec)
          do jdir=istart,iend
            call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
 &           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
          end do
-         call timab(1204,2,tsec)
+         call timab(1294,2,tsec)
        end do
 !      Export cwaveprj to big array cprj
        call pawcprj_put(atindx_atm,cwaveprj,cprj,ncprj,iband_start,ibgb,ikpt,iorder_cprj,isppol,&

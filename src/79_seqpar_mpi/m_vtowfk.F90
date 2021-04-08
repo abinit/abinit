@@ -401,9 +401,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
      if (cprj_in_memory_.and.update_cprj) then
        cprj_cwavef => cprj_cwavef_bands(:,my_nspinor*(iband-1)+1:my_nspinor*iband)
-       call timab(1205,1,tsec)
+       call timab(1295,1,tsec)
        call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg)
-       call timab(1205,2,tsec)
+       call timab(1295,2,tsec)
      end if
    end do
 
@@ -640,9 +640,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (cprj_in_memory_) then
    update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2.and.dtset%cprj_update_lvl>=-1
    if (update_cprj) then
-     call timab(1205,1,tsec)
+     call timab(1295,1,tsec)
      call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)
-     call timab(1205,2,tsec)
+     call timab(1295,2,tsec)
    end if
  end if
 

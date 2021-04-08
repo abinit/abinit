@@ -894,8 +894,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1222)='gstate                          '
 
  names(1290)='getcprj(all)                    '
- names(1291)='getcprj%opernla                 '; basic(1201)=1
- names(1292)='getcprj%opernla_mv              '; basic(1202)=1
+ names(1291)='getcprj%opernla                 '; basic(1291)=1
+ names(1292)='getcprj%opernla_mv              '; basic(1292)=1
  names(1293)='getcprj(cgwf_cprj)              '
  names(1294)='getcprj(ctocprj)                '
  names(1295)='getcprj(vtowfk)                 '
@@ -1220,7 +1220,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(8)
      tslots(:4)=(/803, 842,843,846/)
    case(9)
-     tslots(:10)=(/804, 845,847,848,850,854,858,859,861,862/)
+     tslots(:11)=(/804, 845,847,848,850,854,858,859,861,862,880/)
    case(10)
      tslots(:6)=(/805, 849,851,857,871,872/)
    case(11)
@@ -1338,7 +1338,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:5)=(/1299,1290,-1293,-1294,-1295/)
    case(48)
 !      Estimate the complement of cgwf_cprj
-     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1203,-1363,-1370,-201,-211,-880/)
+     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1293,-1363,-1370,-201,-211,-880/)
    case(49)
 !      Sum calls of getcsc
      tslots(:3)=(/1360,1363,1364/)
@@ -1724,7 +1724,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(78)
          list(:8)=(/ (ii,ii=1662,1669,1) /)                          ; msg='low-level xgTransposer type '
        case(79)
-         list(:12)=(/1300,1203,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
+         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
          msg='cgwf_cprj'
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
