@@ -255,7 +255,6 @@ contains
   call xmpi_bcast(ncfilename,master,xmpi_world,ierr)
   call xmpi_bcast(Invar%output_prefix,master,xmpi_world,ierr)
   call xmpi_bcast(Invar%input_prefix,master,xmpi_world,ierr)
-  write(6,*) 'After bcast'
 
   if (me==0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
 
