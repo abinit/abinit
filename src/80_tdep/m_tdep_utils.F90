@@ -12,6 +12,7 @@ module m_tdep_utils
   use m_abicore
   use m_xmpi
   use m_wffile
+  use m_numeric_tools,    only : uniformrandom
   use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
   use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
   use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_1at
@@ -68,7 +69,7 @@ module m_tdep_utils
 contains
 
 !=====================================================================================================
- subroutine tdep_calc_MoorePenrose(CoeffMoore,Forces,order,Invar,IFC_coeff,MPIdata)
+ subroutine tdep_calc_MoorePenrose(CoeffMoore,Forces,simult,Invar,IFC_coeff,MPIdata)
 
   implicit none 
 
@@ -77,7 +78,7 @@ contains
   double precision, intent(in)  :: Forces(3*Invar%natom*Invar%my_nstep)
   double precision, intent(out)  :: IFC_coeff(CoeffMoore%ntotcoeff,1)
   type(MPI_enreg_type), intent(in) :: MPIdata
-  integer, intent(in) :: order
+  integer, intent(in) :: simult
   
   integer :: INFO,ntotcoeff,ntotconst
   integer :: natnstep,nconcoef,ierr,ncoeff_prev,nconst_prev,iconst,icoeff
@@ -90,26 +91,26 @@ contains
   write(Invar%stdout,*) '#############################################################################'
   natnstep=3*Invar%natom*Invar%my_nstep
 
-  if (order.eq.0) then
-!   Simultaneously (Invar%together=0) 
+  if (simult.eq.0) then
+!   Simultaneously (Invar%together=1) 
     ncoeff_prev=0
     nconst_prev=0
     ntotcoeff=CoeffMoore%ntotcoeff
     ntotconst=CoeffMoore%ntotconst
-  else if (order.eq.1) then  
-!   Successively (Invar%together=1 and Invar%order=2)
+  else if (simult.eq.1) then  
+!   Successively (Invar%together=0 and Invar%order=2)
     ncoeff_prev=0
     nconst_prev=0
     ntotcoeff=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd
     ntotconst=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd
-  else if (order.eq.2) then  
-!   Successively (Invar%together=1 and Invar%order=3)
+  else if (simult.eq.2) then  
+!   Successively (Invar%together=0 and Invar%order=3)
     ncoeff_prev=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd
     nconst_prev=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd
     ntotcoeff=CoeffMoore%ncoeff3rd
     ntotconst=CoeffMoore%nconst_3rd
-  else if (order.eq.3) then  
-!   Successively (Invar%together=1 and Invar%order=4)
+  else if (simult.eq.3) then  
+!   Successively (Invar%together=0 and Invar%order=4)
     ncoeff_prev=CoeffMoore%ncoeff1st +CoeffMoore%ncoeff2nd +CoeffMoore%ncoeff3rd
     nconst_prev=CoeffMoore%nconst_1st+CoeffMoore%nconst_2nd+CoeffMoore%nconst_3rd
     ntotcoeff=CoeffMoore%ncoeff4th
@@ -121,7 +122,7 @@ contains
 !  write(Invar%stdout,*) 'ntotconst=',ntotconst
 !  write(Invar%stdout,*) 'ntotcoeff=',ntotcoeff
 !  write(Invar%stdout,*) 'nconcoef=',nconcoef
-  if ((ntotconst.gt.0).and.(order.ge.2)) then 
+  if ((ntotconst.gt.0).and.(simult.ge.2)) then 
     ABI_MALLOC(b_const,(ntotconst)) ; b_const(:)=0.d0
     do iconst=1,ntotconst
       do icoeff=1,ncoeff_prev
@@ -162,7 +163,7 @@ contains
 !FB    ABI_FREE(CoeffMoore%const)
   end if  
   b_tot(1:ntotcoeff)=fforces_tmp(:)
-  if ((ntotconst.gt.0).and.(order.ge.2)) then
+  if ((ntotconst.gt.0).and.(simult.ge.2)) then
     b_tot(ntotcoeff+1:nconcoef)=-b_const(1:ntotconst)
     ABI_FREE(b_const)
   end if  
@@ -833,7 +834,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 
   integer :: ii,jj,kk,ll,isym,LWORK,INFO,const_tot,itemp,nconst_perm,nconst_loc
   integer :: ncount,icoeff,jatcell,katcell,latcell,mu,nu,xi,zeta
-  integer :: inv,watom,xatom,yatom,zatom,isyminv,nsyminv,facorder
+  integer :: inv,watom,xatom,yatom,zatom,isyminv,nsyminv,facorder,iseed
   integer, allocatable :: iconst(:)
   double precision :: prod_scal,drandom
   double precision :: eigvec(3,3)
@@ -1679,12 +1680,14 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 ! On cherche les (norder-ncount) vecteurs orthogonaux aux vecteurs non-nuls
 ! --> Orthogonalisation de Gram-Schmidt
   ABI_MALLOC(tab_vec,(norder,norder)); tab_vec(:,:)=czero
+  iseed=-5
   do kk=1,norder
     if (kk.le.ncount) then
       tab_vec(:,kk)=temp(:,kk)
     else  
       do jj=1,norder
-        call random_number(drandom)
+!FB        call random_number(drandom)
+        drandom=uniformrandom(iseed)
         tab_vec(jj,kk)=dcmplx(drandom,zero)
       end do  
       do jj=1,kk-1

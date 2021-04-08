@@ -267,6 +267,7 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
   integer :: ishell,isym,jatom,katom
   integer :: iatref,jatref,katref,iatshell,itrans
   integer :: ii,jj
+  double precision :: tmp1,tmp2,tmp3
   double precision, allocatable :: Phi3_333(:,:,:)
 
   write(Invar%stdout,*) ' '
@@ -293,18 +294,29 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
-        write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta x}='
-        do ii=1,3
-          write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi3_333(ii,jj,1),jj=1,3)
-        end do
-        write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta y}='
-        do ii=1,3
-          write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi3_333(ii,jj,2),jj=1,3)
-        end do
-        write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta z}='
-        do ii=1,3
-          write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi3_333(ii,jj,3),jj=1,3)
-        end do
+        do jj=1,3
+          if (jj==1) write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta x}='
+          if (jj==2) write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta y}='
+          if (jj==3) write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta z}='
+          do ii=1,3
+            if (abs(Phi3_333(ii,1,jj)).lt.5.d-7) then
+              tmp1=0.d0
+            else
+              tmp1=Phi3_333(ii,1,jj)
+            end if
+            if (abs(Phi3_333(ii,2,jj)).lt.5.d-7) then
+              tmp2=0.d0
+            else
+              tmp2=Phi3_333(ii,2,jj)
+            end if
+            if (abs(Phi3_333(ii,3,jj)).lt.5.d-7) then
+              tmp3=0.d0
+            else
+              tmp3=Phi3_333(ii,3,jj)
+            end if
+            write(Invar%stdout,'(2x,3(f9.6,1x))') tmp1,tmp2,tmp3
+          end do
+        end do  
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (i,j) vector components:', (distance(iatref,jatom,jj+1),jj=1,3)
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(jatom ,katom,jj+1),jj=1,3)
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (k,i) vector components:', (distance(katom,iatref,jj+1),jj=1,3)

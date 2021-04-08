@@ -375,7 +375,7 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 
   integer :: iatcell,ishell,jshell,jatom
   integer :: nshell,ii,this_shell,iatshell
-  double precision :: max_bound,min_bound,dist_shell
+  double precision :: max_bound,min_bound,dist_shell,tmp1,tmp2,tmp3
   integer,allocatable :: tab_shell(:)
 
   write(Invar%stdout,*) ' '
@@ -420,8 +420,22 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
           jatom=Shell2at%neighbours(iatcell,this_shell)%atomj_in_shell(iatshell)
           write(Invar%stdout,'(a,i4,a,i4)') '  For jatom=',jatom,' ,with type=',mod(jatom-1,Invar%natom_unitcell)+1
           do ii=1,3
-            write(Invar%stdout,'(2x,3(f9.6,1x))') Phi2((iatcell-1)*3+ii,(jatom-1)*3+1),Phi2((iatcell-1)*3+ii,(jatom-1)*3+2),&
-&             Phi2((iatcell-1)*3+ii,(jatom-1)*3+3)
+            if (abs(Phi2((iatcell-1)*3+ii,(jatom-1)*3+1)).lt.5.d-7) then 
+              tmp1=0.d0 
+            else
+              tmp1=Phi2((iatcell-1)*3+ii,(jatom-1)*3+1)
+            end if
+            if (abs(Phi2((iatcell-1)*3+ii,(jatom-1)*3+2)).lt.5.d-7) then
+              tmp2=0.d0      
+            else
+              tmp2=Phi2((iatcell-1)*3+ii,(jatom-1)*3+2)
+            end if
+            if (abs(Phi2((iatcell-1)*3+ii,(jatom-1)*3+3)).lt.5.d-7) then
+              tmp3=0.d0      
+            else
+              tmp3=Phi2((iatcell-1)*3+ii,(jatom-1)*3+3)
+            end if        
+            write(Invar%stdout,'(2x,3(f9.6,1x))') tmp1,tmp2,tmp3
           end do
           write(Invar%stdout,'(a,3(1x,f11.6))') '  The components of the vector are:', distance(iatcell,jatom,2:4)
           write(Invar%stdout,'(a,(1x,f9.6))') '  Trace=',Phi2((iatcell-1)*3+1,(jatom-1)*3+1)+Phi2((iatcell-1)*3+2,&

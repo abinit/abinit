@@ -86,6 +86,7 @@ module m_tdep_readwrite
     integer, allocatable :: my_nshell(:)
     integer :: my_nstep
     logical :: iam_master
+    integer, allocatable :: nstep_acc(:)
     integer, allocatable :: nstep_all(:)
     integer, allocatable :: shft_step(:)
     logical, allocatable :: my_shell(:)
@@ -154,7 +155,7 @@ contains
   type(abihist), intent(out) :: Hist
 
   integer :: values(8)  
-  integer :: ncid, ncerr
+  integer :: ncid, ncerr, me,ierr,master
   integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
   integer :: ntypat_id
   integer :: ii,jj,tmp
@@ -167,7 +168,7 @@ contains
   character (len=5) :: zone
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
-  character(len=500) :: filename,inputfilename
+  character(len=500) :: ncfilename,inputfilename
   logical :: has_nimage
   real(dp), allocatable :: znucl(:)
 
@@ -218,6 +219,9 @@ contains
   Invar%ngqpt1(:)=8
   Invar%ngqpt2(:)=32
 
+  me = xmpi_comm_rank(xmpi_world)
+  if (me==0) then
+
 ! Check if a NetCDF file is available
   write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
   read(*, '(a)',err=10) inputfilename
@@ -227,9 +231,9 @@ contains
   write(Invar%stdlog,'(a)',err=11) ' Give root name for generic input files (NetCDF or ASCII)'
   read(*, '(a)',err=11) Invar%input_prefix
   if ( Invar%input_prefix == "" ) then
-    filename='HIST.nc'
+    ncfilename='HIST.nc'
   else
-    filename=trim(Invar%input_prefix)//'HIST.nc'  
+    ncfilename=trim(Invar%input_prefix)//'HIST.nc'  
   end if  
   write(Invar%stdlog, '(a)',err=11) '.'//trim(Invar%input_prefix)
 11 continue
@@ -243,18 +247,26 @@ contains
   write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
 12 continue
   if ( inputfilename == "" ) inputfilename='input.in'
-  if ( filename == "" ) filename='HIST.nc'
+  if ( ncfilename == "" ) ncfilename='HIST.nc'
 
-  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.abo')
+  end if !me
+  master = 0
+  call xmpi_bcast(inputfilename,master,xmpi_world,ierr)
+  call xmpi_bcast(ncfilename,master,xmpi_world,ierr)
+  call xmpi_bcast(Invar%output_prefix,master,xmpi_world,ierr)
+  call xmpi_bcast(Invar%input_prefix,master,xmpi_world,ierr)
+  write(6,*) 'After bcast'
+
+  if (me==0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
 
 #if defined HAVE_NETCDF
  !Open netCDF file
-  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+  ncerr=nf90_open(path=trim(ncfilename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(Invar%stdlog,'(3a)') '-'//'Could not open ',trim(filename),', starting from scratch'
+    write(Invar%stdlog,'(3a)') '-'//'Could not open ',trim(ncfilename),', starting from scratch'
     Invar%netcdf=.false.
   else
-    write(Invar%stdlog,'(3a)') '-'//'Succesfully open ',trim(filename),' for reading'
+    write(Invar%stdlog,'(3a)') '-'//'Succesfully open ',trim(ncfilename),' for reading'
     write(Invar%stdlog,'(a)') ' Extracting information from NetCDF file...'
     Invar%netcdf=.true.
   end if
@@ -274,7 +286,7 @@ contains
     ! .true. -> acell and rprimd may change (2017_04 only NVT/isoK used but maybe
     ! .false. -> read all times
     ! NPT one day ?)
-    call read_md_hist(filename,Hist,.false.,.true.,.false.)
+    call read_md_hist(ncfilename,Hist,.false.,.true.,.false.)
   end if
 #endif
 
@@ -290,18 +302,18 @@ contains
   else
     ABI_ERROR('Please use recent format for the input file')
   end if  
-  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2021 ABINIT group (FB,JB).'
-  write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
-  write(InVar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
-  write(InVar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
-  write(InVar%stdout,'(a)') ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
-  write(InVar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
-  write(InVar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
-  write(InVar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
-  write(InVar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
-  write(InVar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
+  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2021 ABINIT group (FB,JB).'
+  write(Invar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
+  write(Invar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
+  write(Invar%stdout,'(a)') ' under certain conditions (GNU General Public License,'
+  write(Invar%stdout,'(a)') ' see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).'
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
+  write(Invar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
+  write(Invar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
+  write(Invar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
+  write(Invar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
+  write(Invar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
 
   call date_and_time(date,time,zone,values)
   write(Invar%stdout,'(/,a,i2,1x,a,1x,i4,a)') '.Starting date : ',values(3),month_names(values(2)),values(1),'.'
@@ -638,7 +650,6 @@ contains
   type(Input_Variables_type), intent(in) :: Invar
   type(MPI_enreg_type), intent(out) :: MPIdata
   integer :: ii,remain,ierr,iproc,istep
-  integer, allocatable :: nstep_acc(:)
   integer, allocatable :: tab_step(:)
   character(len=500) :: message
   
@@ -745,12 +756,12 @@ contains
     write(Invar%stdout,'(a,1000(1x,i5))') '-Distribution of number of steps wrt the number of processors=',MPIdata%nstep_all(:)
   end if
 
-  ABI_MALLOC(nstep_acc,(MPIdata%nproc_step+1)); nstep_acc(:)=zero
-  nstep_acc(1)=0
+  ABI_MALLOC(MPIdata%nstep_acc,(MPIdata%nproc_step+1)); MPIdata%nstep_acc(:)=zero
+  MPIdata%nstep_acc(1)=0
   do ii=2,MPIdata%nproc_step+1
-    nstep_acc(ii)=nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
+    MPIdata%nstep_acc(ii)=MPIdata%nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
   end do
-  if (nstep_acc(MPIdata%nproc_step+1).ne.Invar%nstep_tot) then
+  if (MPIdata%nstep_acc(MPIdata%nproc_step+1).ne.Invar%nstep_tot) then
     write(Invar%stdlog,*) 'STOP : pb in nstep_acc'
     stop
   end if
@@ -759,7 +770,7 @@ contains
   ABI_MALLOC(MPIdata%my_step ,(Invar%nstep_tot)); MPIdata%my_step (:)=.false.
   do iproc=1,MPIdata%nproc_step
     do istep=1,Invar%nstep_tot
-      if ((istep.gt.nstep_acc(iproc)).and.(istep.le.nstep_acc(iproc+1))) then
+      if ((istep.gt.MPIdata%nstep_acc(iproc)).and.(istep.le.MPIdata%nstep_acc(iproc+1))) then
         tab_step(istep)=iproc-1
       end if
     end do
@@ -773,7 +784,6 @@ contains
   do ii=2,MPIdata%nproc_step
     MPIdata%shft_step(ii)=MPIdata%shft_step(ii-1)+MPIdata%nstep_all(ii-1)
   end do
-  ABI_FREE(nstep_acc)
   ABI_FREE(tab_step)
 
  end subroutine tdep_init_MPIdata

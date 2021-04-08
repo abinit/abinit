@@ -291,6 +291,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
   integer :: ishell,isym,jatom,katom,latom
   integer :: iatref,jatref,katref,latref,iatshell,itrans
   integer :: ii,jj,kk
+  double precision :: tmp1,tmp2,tmp3
   double precision, allocatable :: Phi4_3333(:,:,:,:)
 
   write(Invar%stdout,*) ' '
@@ -323,9 +324,24 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         do ii=1,3
           do jj=1,3
             write(Invar%stdout,'(a,i2,i2,a)') '  \Psi^{',ii,jj,'kl}='
-            write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,1),kk=1,3)
-            write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,2),kk=1,3)
-            write(Invar%stdout,'(2x,3(f9.6,1x))') (Phi4_3333(ii,jj,kk,3),kk=1,3)
+            do kk=1,3
+              if (abs(Phi4_3333(ii,jj,1,kk)).lt.5.d-7) then
+                tmp1=0.d0
+              else
+                tmp1=Phi4_3333(ii,jj,1,kk)
+              end if
+              if (abs(Phi4_3333(ii,jj,2,kk)).lt.5.d-7) then
+                tmp2=0.d0
+              else
+                tmp2=Phi4_3333(ii,jj,2,kk)
+              end if
+              if (abs(Phi4_3333(ii,jj,3,kk)).lt.5.d-7) then
+                tmp3=0.d0
+              else
+                tmp3=Phi4_3333(ii,jj,3,kk)
+              end if
+              write(Invar%stdout,'(2x,3(f9.6,1x))') tmp1,tmp2,tmp3
+            end do
           end do
         end do
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (i,j) vector components:', (distance(iatref,jatom,jj+1),jj=1,3)
