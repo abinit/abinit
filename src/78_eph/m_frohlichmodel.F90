@@ -7,7 +7,7 @@
 !!  using the Frohlich model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2020 ABINIT group (XG)
+!!  Copyright (C) 2018-2021 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ module m_frohlichmodel
  use m_ifc
  use m_dtset
 
+ use m_fstrings,            only : sjoin, itoa
  use m_gaussian_quadrature, only : cgqf
 
  implicit none
@@ -83,15 +84,17 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 !Local variables ------------------------------
 !scalars
  logical :: sign_warn
- integer :: deg_dim,iband,ideg,ikpt,imode,info,iphi,iqdir,itheta
+ integer :: deg_dim,iband,ideg,idir,ikpt,imode,info,ipar,iphi,iqdir,itheta
  integer :: jband,lwork,nphi,nqdir,ntheta
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
  real(dp) :: zpr_frohlich,zpr_q0_avg,zpr_q0_fact
  !character(len=500) :: msg
 !arrays
  logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
- real(dp) :: kpt(3)
+ logical :: lutt_found(3), lutt_warn(3)
+ real(dp) :: kpt(3), lutt_params(3), lutt_unit_kdir(3,3)
  real(dp), allocatable :: eigenval(:), rwork(:), unit_qdir(:,:)
+ real(dp), allocatable :: lutt_dij(:,:), lutt_eigenval(:,:)
  real(dp), allocatable :: m_avg(:), m_avg_frohlich(:)
  real(dp), allocatable :: gq_points_th(:),gq_weights_th(:)
  real(dp), allocatable :: gq_points_cosph(:),gq_points_sinph(:)
@@ -114,13 +117,13 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
  nphi     = 2*ntheta
  nqdir     = nphi*ntheta
 
- ABI_ALLOCATE(gq_points_th,(ntheta))
- ABI_ALLOCATE(gq_weights_th,(ntheta))
- ABI_ALLOCATE(gq_points_cosph,(nphi))
- ABI_ALLOCATE(gq_points_sinph,(nphi))
+ ABI_MALLOC(gq_points_th,(ntheta))
+ ABI_MALLOC(gq_weights_th,(ntheta))
+ ABI_MALLOC(gq_points_cosph,(nphi))
+ ABI_MALLOC(gq_points_sinph,(nphi))
 
- ABI_ALLOCATE(unit_qdir,(3,nqdir))
- ABI_ALLOCATE(weight_qdir,(nqdir))
+ ABI_MALLOC(unit_qdir,(3,nqdir))
+ ABI_MALLOC(weight_qdir,(nqdir))
 
  call cgqf(ntheta,1,zero,zero,zero,pi,gq_points_th,gq_weights_th)
  weight_phi=two*pi/real(nphi,dp)
@@ -146,17 +149,17 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
    enddo
  enddo
 
- ABI_DEALLOCATE(gq_points_th)
- ABI_DEALLOCATE(gq_weights_th)
- ABI_DEALLOCATE(gq_points_cosph)
- ABI_DEALLOCATE(gq_points_sinph)
+ ABI_FREE(gq_points_th)
+ ABI_FREE(gq_weights_th)
+ ABI_FREE(gq_points_cosph)
+ ABI_FREE(gq_points_sinph)
 
- ABI_ALLOCATE(polarity_qdir,(3,3*cryst%natom,nqdir))
- ABI_ALLOCATE(proj_polarity_qdir,(3*cryst%natom,nqdir))
- ABI_ALLOCATE(zpr_q0_phononfactor_qdir,(nqdir))
- ABI_ALLOCATE(frohlich_phononfactor_qdir,(nqdir))
- ABI_ALLOCATE(phfrq_qdir,(3*cryst%natom,nqdir))
- ABI_ALLOCATE(dielt_qdir,(nqdir))
+ ABI_MALLOC(polarity_qdir,(3,3*cryst%natom,nqdir))
+ ABI_MALLOC(proj_polarity_qdir,(3*cryst%natom,nqdir))
+ ABI_MALLOC(zpr_q0_phononfactor_qdir,(nqdir))
+ ABI_MALLOC(frohlich_phononfactor_qdir,(nqdir))
+ ABI_MALLOC(phfrq_qdir,(3*cryst%natom,nqdir))
+ ABI_MALLOC(dielt_qdir,(nqdir))
 
  !Compute phonon frequencies and mode-polarity for each qdir
  call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
@@ -211,7 +214,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
      deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
 
-     ABI_ALLOCATE(eig2_diag_cart,(3,3,deg_dim,deg_dim))
+     ABI_MALLOC(eig2_diag_cart,(3,3,deg_dim,deg_dim))
 
      !Convert eig2_diag to cartesian coordinates
      do iband=1,deg_dim
@@ -222,13 +225,13 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
         enddo
      enddo
 
-     ABI_ALLOCATE(f3d,(deg_dim,deg_dim))
-     ABI_ALLOCATE(m_avg,(deg_dim))
-     ABI_ALLOCATE(m_avg_frohlich,(deg_dim))
-     ABI_ALLOCATE(zpr_frohlich_avg,(deg_dim))
-     ABI_ALLOCATE(eigenval,(deg_dim))
-     ABI_ALLOCATE(saddle_warn,(deg_dim))
-     ABI_ALLOCATE(start_eigf3d_pos,(deg_dim))
+     ABI_MALLOC(f3d,(deg_dim,deg_dim))
+     ABI_MALLOC(m_avg,(deg_dim))
+     ABI_MALLOC(m_avg_frohlich,(deg_dim))
+     ABI_MALLOC(zpr_frohlich_avg,(deg_dim))
+     ABI_MALLOC(eigenval,(deg_dim))
+     ABI_MALLOC(saddle_warn,(deg_dim))
+     ABI_MALLOC(start_eigf3d_pos,(deg_dim))
 
      m_avg=zero
      m_avg_frohlich=zero
@@ -237,16 +240,89 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      !Initializations for the diagonalization routine
      if(deg_dim>1)then
 
-       ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
+       ABI_MALLOC(eigenvec,(deg_dim,deg_dim))
        lwork=-1
-       ABI_ALLOCATE(rwork,(3*deg_dim-2))
-       ABI_ALLOCATE(work,(1))
+       ABI_MALLOC(rwork,(3*deg_dim-2))
+       ABI_MALLOC(work,(1))
        call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
        lwork=int(work(1))
-       ABI_DEALLOCATE(work)
-       ABI_ALLOCATE(work,(lwork))
+       ABI_FREE(work)
+       ABI_MALLOC(work,(lwork))
 
      endif
+
+     !Compute the Luttinger parameters for the cubic case (deg_dim=3)
+     if(deg_dim==3) then
+
+       ABI_MALLOC(lutt_eigenval, (3,deg_dim))
+       ABI_MALLOC(lutt_dij, (deg_dim, deg_dim))
+
+       !Define unit_kdir for Luttinger parameters
+       lutt_unit_kdir(:,1) = (/1,0,0/)
+       lutt_unit_kdir(:,2) = 1/sqrt(2.0)*(/1,1,0/)
+       lutt_unit_kdir(:,3) = 1/sqrt(3.0)*(/1,1,1/)
+
+       !Degeneracy problems warning
+       lutt_warn=(/.false.,.false.,.false./)
+
+       !Inverse effective mass tensor eigenvalues in lutt_unit_kdir directions
+       do idir=1,3
+         do iband=1,deg_dim
+           do jband=1,deg_dim
+             lutt_dij(iband,jband)=&
+&             DOT_PRODUCT(lutt_unit_kdir(:,idir),MATMUL(eig2_diag_cart(:,:,iband,jband),lutt_unit_kdir(:,idir)))
+           enddo
+         enddo
+
+         eigenvec=lutt_dij ; lutt_eigenval(idir,:)=zero
+         work=zero     ; rwork=zero
+         call zheev('V','U',deg_dim,eigenvec,deg_dim,lutt_eigenval(idir,:),work,lwork,rwork,info)
+         ABI_CHECK(info == 0, sjoin("zheev returned info:", itoa(info)))
+       enddo
+
+       !Check degeneracies in (100) direction, and evaluate A and B.
+       !Eigenvalues are 2*A (d=1), 2*B (d=2)
+       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
+         lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)
+         lutt_params(1)=0.5*lutt_eigenval(1,1)
+       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol5) then
+         lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,1))/2)
+         lutt_params(1)=0.5*lutt_eigenval(1,3)
+       else
+         lutt_warn(1)=.true.
+       endif
+
+       !Check degeneracies in (111) direction and evaluate C
+       !Eigenvalues are 2/3*(A+2B-C) (d=2), 2/3*(A+2B+2C) (d=1)
+       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol5) then
+         lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,3)))
+       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol5) then
+         lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,1)))
+       else
+         lutt_warn(2)=.true.
+       endif
+
+       !Verify that the (110) direction eigenvalues are coherent with Luttinger parameters
+       !Eigenvalues are 2B, A+B-C, A+B+C
+       lutt_found=(/.false.,.false.,.false./)
+       do ipar=1,deg_dim
+         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol4) then
+           lutt_found(1)=.true.
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol4) then
+           lutt_found(2)=.true.
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol4) then
+           lutt_found(3)=.true.
+         endif
+       enddo
+
+       if(.not. (all(lutt_found))) then
+         lutt_warn(3)=.true.
+       endif
+
+       ABI_FREE(lutt_eigenval)
+       ABI_FREE(lutt_dij)
+
+     endif !Luttinger parameters
 
      !Perform the integral over the sphere
      zpr_frohlich_avg=zero
@@ -263,6 +339,7 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
          eigenvec = f3d ; eigenval = zero
          work=zero      ; rwork=zero
          call zheev('V','U',deg_dim,eigenvec,deg_dim,eigenval,work,lwork,rwork,info)
+         ABI_CHECK(info == 0, sjoin("zheev returned info:", itoa(info)))
        endif
 
        m_avg = m_avg + weight_qdir(iqdir)*eigenval
@@ -281,9 +358,9 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
      enddo
 
      if(deg_dim>1)then
-       ABI_DEALLOCATE(eigenvec)
-       ABI_DEALLOCATE(rwork)
-       ABI_DEALLOCATE(work)
+       ABI_FREE(eigenvec)
+       ABI_FREE(rwork)
+       ABI_FREE(work)
      endif
 
      m_avg = quarter*piinv*m_avg
@@ -302,6 +379,28 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
        write(ab_out,'(2a,3(f6.3,a),i5,a,i5)')ch10,&
 &        ' - At k-point (',kpt(1),',',kpt(2),',',kpt(3),'), bands ',&
 &        efmasdeg(ikpt)%degs_bounds(1,ideg),' through ',efmasdeg(ikpt)%degs_bounds(2,ideg)
+     endif
+
+     !Print the Luttinger for the cubic case (deg_dim=3)
+     if(deg_dim==3) then
+       if (.not. (any(saddle_warn))) then
+         if(any(lutt_warn)) then
+           ! Warn for degeneracy breaking in inverse effective mass tensor eigenvalues
+           write(ab_out, '(2a)') ch10, ' Luttinger parameters could not be determined:'
+           if (lutt_warn(1)) then
+             write(ab_out, '(a)') '     Predicted degeneracies for deg_dim = 3 are not met for (100) direction.'
+           endif
+           if (lutt_warn(2)) then
+             write(ab_out, '(a)') '     Predicted degeneracies for deg_dim = 3 are not met for (111) direction.'
+           endif
+           if (lutt_warn(3)) then
+             write(ab_out, '(a)') '     Predicted inverse effective mass tensor eigenvalues for direction (110) are not met.'
+           endif
+           write(ab_out, '(a)') ch10
+         else
+           write(ab_out, '(a,3f14.6)') ' Luttinger parameters (A, B, C) [at. units]: ',lutt_params(:)
+         endif
+       endif
      endif
 
      sign_warn=.false.
@@ -337,26 +436,26 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 &        ' Angular and band average effective mass for Frohlich model cannot be defined because of a sign problem.'
      endif
 
-     ABI_DEALLOCATE(eig2_diag_cart)
-     ABI_DEALLOCATE(f3d)
-     ABI_DEALLOCATE(m_avg)
-     ABI_DEALLOCATE(m_avg_frohlich)
-     ABI_DEALLOCATE(zpr_frohlich_avg)
-     ABI_DEALLOCATE(eigenval)
-     ABI_DEALLOCATE(saddle_warn)
-     ABI_DEALLOCATE(start_eigf3d_pos)
+     ABI_FREE(eig2_diag_cart)
+     ABI_FREE(f3d)
+     ABI_FREE(m_avg)
+     ABI_FREE(m_avg_frohlich)
+     ABI_FREE(zpr_frohlich_avg)
+     ABI_FREE(eigenval)
+     ABI_FREE(saddle_warn)
+     ABI_FREE(start_eigf3d_pos)
 
    enddo ! ideg
  enddo ! ikpt
 
- ABI_DEALLOCATE(unit_qdir)
- ABI_DEALLOCATE(weight_qdir)
- ABI_DEALLOCATE(polarity_qdir)
- ABI_DEALLOCATE(proj_polarity_qdir)
- ABI_DEALLOCATE(phfrq_qdir)
- ABI_DEALLOCATE(dielt_qdir)
- ABI_DEALLOCATE(zpr_q0_phononfactor_qdir)
- ABI_DEALLOCATE(frohlich_phononfactor_qdir)
+ ABI_FREE(unit_qdir)
+ ABI_FREE(weight_qdir)
+ ABI_FREE(polarity_qdir)
+ ABI_FREE(proj_polarity_qdir)
+ ABI_FREE(phfrq_qdir)
+ ABI_FREE(dielt_qdir)
+ ABI_FREE(zpr_q0_phononfactor_qdir)
+ ABI_FREE(frohlich_phononfactor_qdir)
 
  end subroutine frohlichmodel
 

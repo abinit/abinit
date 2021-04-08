@@ -7,7 +7,7 @@
 !!    optical conductivity, X spectroscopy, linear susceptibility, ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (SM,VR,FJ,MT,PGhosh)
+!! Copyright (C) 2018-2021 ABINIT group (SM,VR,FJ,MT,PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,7 +191,7 @@ CONTAINS  !=====================================================================
  iorder_cprj=0
 
 !Initialize main variables
- ABI_ALLOCATE(psinablapsi,(2,3,mband,mband))
+ ABI_MALLOC(psinablapsi,(2,3,mband,mband))
  psinablapsi=zero
 
 !open _OPT file for proc 0
@@ -226,13 +226,13 @@ CONTAINS  !=====================================================================
        istwf_k=dtset%istwfk(ikpt)
        npw_k=npwarr(ikpt)
        cplex=2;if (istwf_k>1) cplex=1
-       ABI_ALLOCATE(kg_k,(3,npw_k))
-       ABI_ALLOCATE(kpg_k,(npw_k*dtset%nspinor,3))
+       ABI_MALLOC(kg_k,(3,npw_k))
+       ABI_MALLOC(kpg_k,(npw_k*dtset%nspinor,3))
 
 !      Extract cprj for this k-point according to mkmem
        nband_cprj_k=nband_k;if (cprj_paral_band) nband_cprj_k=nband_k/mpi_enreg%nproc_band
        if (mkmem*nsppol/=1) then
-         ABI_DATATYPE_ALLOCATE(cprj_k_loc,(natom,my_nspinor*nband_cprj_k))
+         ABI_MALLOC(cprj_k_loc,(natom,my_nspinor*nband_cprj_k))
          call pawcprj_alloc(cprj_k_loc,0,dimcprj)
          call pawcprj_get(atindx1,cprj_k_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isppol,&
 &         mband_cprj,mkmem,natom,nband_cprj_k,nband_cprj_k,my_nspinor,nsppol,dtfil%unpaw,&
@@ -243,7 +243,7 @@ CONTAINS  !=====================================================================
 
 !      if cprj are distributed over bands, gather them (because we need to mix bands)
        if (cprj_paral_band) then
-         ABI_DATATYPE_ALLOCATE(cprj_k,(natom,my_nspinor*nband_k))
+         ABI_MALLOC(cprj_k,(natom,my_nspinor*nband_k))
          call pawcprj_alloc(cprj_k,0,dimcprj)
          call pawcprj_mpi_allgather(cprj_k_loc,cprj_k,natom,my_nspinor*nband_cprj_k,mpi_enreg%bandpp,&
 &         dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.false.)
@@ -269,13 +269,13 @@ CONTAINS  !=====================================================================
        end do !ipw
        kpg_k=two_pi*kpg_k
        if (dtset%nspinor==2) kpg_k(npw_k+1:2*npw_k,1:3)=kpg_k(1:npw_k,1:3)
-       ABI_DEALLOCATE(kg_k)
+       ABI_FREE(kg_k)
 
 !      2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !      ----------------------------------------------------------------------------------
 !      Computation of (C_nk^*)*C_mk*(k+g) in cartesian coordinates
 
-       ABI_ALLOCATE(tnm,(2,3,nband_k,nband_k))
+       ABI_MALLOC(tnm,(2,3,nband_k,nband_k))
        tnm=zero
 
 !      Loops on bands
@@ -285,7 +285,7 @@ CONTAINS  !=====================================================================
            tmp_shape = shape(mpi_enreg%proc_distrb)
            if (ikpt > tmp_shape(1)) then
              message = ' optics_paw : ikpt out of bounds '
-             MSG_ERROR(message)
+             ABI_ERROR(message)
            end if
 !          MJV 6/12/2008: looks like mpi_enreg may not be completely initialized here
            if (abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-me_kpt)/=0) cycle
@@ -413,7 +413,7 @@ CONTAINS  !=====================================================================
        end if
 
        psinablapsi(:,:,:,:)=psinablapsi(:,:,:,:)+tnm(:,:,:,:)
-       ABI_DEALLOCATE(tnm)
+       ABI_FREE(tnm)
 
        if (mkmem/=0) then
          ibg = ibg +       my_nspinor*nband_cprj_k
@@ -422,13 +422,13 @@ CONTAINS  !=====================================================================
 
        if (cprj_paral_band) then
          call pawcprj_free(cprj_k)
-         ABI_DATATYPE_DEALLOCATE(cprj_k)
+         ABI_FREE(cprj_k)
        end if
        if (mkmem*nsppol/=1) then
          call pawcprj_free(cprj_k_loc)
-         ABI_DATATYPE_DEALLOCATE(cprj_k_loc)
+         ABI_FREE(cprj_k_loc)
        end if
-       ABI_DEALLOCATE(kpg_k)
+       ABI_FREE(kpg_k)
 
        if (me==0) then
          write(ount)((psinablapsi(1:2,1,ib,jb),ib=1,nband_k),jb=1,nband_k)
@@ -455,11 +455,11 @@ CONTAINS  !=====================================================================
  call WffClose(wff1,ierr)
 
 !Datastructures deallocations
- ABI_DEALLOCATE(psinablapsi)
+ ABI_FREE(psinablapsi)
  if (.not.already_has_nabla) then
    do itypat=1,dtset%ntypat
      if (allocated(pawtab(itypat)%nabla_ij)) then
-       ABI_DEALLOCATE(pawtab(itypat)%nabla_ij)
+       ABI_FREE(pawtab(itypat)%nabla_ij)
        pawtab(itypat)%has_nabla=0
      end if
    end do
@@ -481,7 +481,7 @@ CONTAINS  !=====================================================================
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (SM,MT)
+!! Copyright (C) 2005-2021 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -626,12 +626,12 @@ CONTAINS  !=====================================================================
    end do
  end if
 
- ABI_DEALLOCATE(ncor)
- ABI_DEALLOCATE(lcor)
- ABI_DEALLOCATE(phi_cor)
- ABI_DEALLOCATE(energy_cor)
+ ABI_FREE(ncor)
+ ABI_FREE(lcor)
+ ABI_FREE(phi_cor)
+ ABI_FREE(energy_cor)
 
- ABI_ALLOCATE(psinablapsi,(2,3,mband,nphicor,natom))
+ ABI_MALLOC(psinablapsi,(2,3,mband,nphicor,natom))
 
 !LOOP OVER SPINS
  ibg=0
@@ -655,7 +655,7 @@ CONTAINS  !=====================================================================
 !      Extract cprj for this k-point.
        nband_cprj_k=nband_k;if (cprj_paral_band) nband_cprj_k=nband_k/mpi_enreg%nproc_band
        if (mkmem*nsppol/=1) then
-         ABI_DATATYPE_ALLOCATE(cprj_k_loc,(natom,my_nspinor*nband_cprj_k))
+         ABI_MALLOC(cprj_k_loc,(natom,my_nspinor*nband_cprj_k))
          call pawcprj_alloc(cprj_k_loc,0,dimcprj)
          call pawcprj_get(atindx1,cprj_k_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isppol,&
 &         mband_cprj,mkmem,natom,nband_cprj_k,nband_cprj_k,my_nspinor,nsppol,dtfil%unpaw,&
@@ -666,7 +666,7 @@ CONTAINS  !=====================================================================
 
 !      if cprj are distributed over bands, gather them (because we need to mix bands)
        if (cprj_paral_band) then
-         ABI_DATATYPE_ALLOCATE(cprj_k,(natom,my_nspinor*nband_k))
+         ABI_MALLOC(cprj_k,(natom,my_nspinor*nband_k))
          call pawcprj_alloc(cprj_k,0,dimcprj)
          call pawcprj_mpi_allgather(cprj_k_loc,cprj_k,natom,my_nspinor*nband_cprj_k,mpi_enreg%bandpp,&
 &         dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.false.)
@@ -674,7 +674,7 @@ CONTAINS  !=====================================================================
          cprj_k => cprj_k_loc
        end if
 
-       ABI_ALLOCATE(tnm,(2,3,nband_k,nphicor,natom))
+       ABI_MALLOC(tnm,(2,3,nband_k,nphicor,natom))
        tnm=zero
 
 !      Loops on bands
@@ -732,17 +732,17 @@ CONTAINS  !=====================================================================
        end if
 
        psinablapsi(:,:,:,:,:)=psinablapsi(:,:,:,:,:)+tnm(:,:,:,:,:)
-       ABI_DEALLOCATE(tnm)
+       ABI_FREE(tnm)
 
        if (mkmem/=0) ibg = ibg + my_nspinor*nband_cprj_k
 
        if (cprj_paral_band) then
          call pawcprj_free(cprj_k)
-         ABI_DATATYPE_DEALLOCATE(cprj_k)
+         ABI_FREE(cprj_k)
        end if
        if (mkmem*nsppol/=1) then
          call pawcprj_free(cprj_k_loc)
-         ABI_DATATYPE_DEALLOCATE(cprj_k_loc)
+         ABI_FREE(cprj_k_loc)
        end if
 
        if (me==0) then
@@ -777,12 +777,12 @@ CONTAINS  !=====================================================================
  call WffClose(wff1,ierr)
 
 !Datastructures deallocations
- ABI_DEALLOCATE(indlmn_core)
- ABI_DEALLOCATE(psinablapsi)
+ ABI_FREE(indlmn_core)
+ ABI_FREE(psinablapsi)
  if (.not.already_has_nabla) then
    do itypat=1,dtset%ntypat
      if (allocated(pawtab(itypat)%nabla_ij)) then
-       ABI_DEALLOCATE(pawtab(itypat)%nabla_ij)
+       ABI_FREE(pawtab(itypat)%nabla_ij)
        pawtab(itypat)%has_nabla=0
      end if
    end do
@@ -869,7 +869,7 @@ CONTAINS  !=====================================================================
 
 !Read data file
  if (open_file(filnam,msg,newunit=inpunt,form='formatted') /= 0 ) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  rewind(inpunt)
@@ -885,7 +885,7 @@ CONTAINS  !=====================================================================
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
  call hdr%free()
  if (fform1 /= 610) then
-   MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
+   ABI_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
 
 !Open the conducti optic files
@@ -900,8 +900,8 @@ CONTAINS  !=====================================================================
  headform=hdr%headform
  bantot=hdr%bantot
  nkpt=hdr%nkpt
- ABI_ALLOCATE(kpts,(3,nkpt))
- ABI_ALLOCATE(wtk,(nkpt))
+ ABI_MALLOC(kpts,(3,nkpt))
+ ABI_MALLOC(wtk,(nkpt))
  kpts(:,:)=hdr%kptns(:,:)
  wtk(:)=hdr%wtk(:)
  nspinor=hdr%nspinor
@@ -910,12 +910,12 @@ CONTAINS  !=====================================================================
  rprimd(:,:)=hdr%rprimd(:,:)
  rprimdinv(:,:) = rprimd(:,:)
  call matrginv(rprimdinv,3,3) ! need the inverse of rprimd to symmetrize the tensors
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(occ,(bantot))
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(occ,(bantot))
  occ(1:bantot)=hdr%occ(1:bantot)
  nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
  nsym=hdr%nsym
- ABI_ALLOCATE(symrel,(3,3,nsym))
+ ABI_MALLOC(symrel,(3,3,nsym))
  symrel(:,:,:)=hdr%symrel(:,:,:)
 
 !Get mband, as the maximum value of nband(nkpt)
@@ -936,25 +936,25 @@ CONTAINS  !=====================================================================
  write(std_out,'(a,2i8)')      ' nkpt,mband        =',nkpt,mband
 
 !get eigen0
- ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
  read(wfunt)(eigen0(iband),iband=1,mband*nkpt*nsppol)
 
  read(inpunt,*)mbpt_sciss
  read(inpunt,*)dom,omin,omax,mom
  close(inpunt)
 
- ABI_ALLOCATE(oml1,(mom))
- ABI_ALLOCATE(e1,(3,3,mom))
- ABI_ALLOCATE(e2,(2,3,3,mom))
- ABI_ALLOCATE(epsilon_tot,(2,3,3,mom))
- ABI_ALLOCATE(eps_work,(mom))
+ ABI_MALLOC(oml1,(mom))
+ ABI_MALLOC(e1,(3,3,mom))
+ ABI_MALLOC(e2,(2,3,3,mom))
+ ABI_MALLOC(epsilon_tot,(2,3,3,mom))
+ ABI_MALLOC(eps_work,(mom))
  del=(omax-omin)/(mom-1)
  do iom=1,mom
    oml1(iom)=omin+dble(iom-1)*del
  end do
  write(std_out,'(a,i8,4f10.5,a)')' npts,omin,omax,width,mbpt_sciss      =',mom,omin,omax,dom,mbpt_sciss,' Ha'
 
- ABI_ALLOCATE(psinablapsi,(2,3,mband,mband))
+ ABI_MALLOC(psinablapsi,(2,3,mband,mband))
 
 !loop over spin components
  do isppol=1,nsppol
@@ -964,8 +964,8 @@ CONTAINS  !=====================================================================
 !
 !    number of bands for this k point
      nband_k=nband(ikpt+(isppol-1)*nkpt)
-     ABI_ALLOCATE(eig0_k,(nband_k))
-     ABI_ALLOCATE(occ_k,(nband_k))
+     ABI_MALLOC(eig0_k,(nband_k))
+     ABI_MALLOC(occ_k,(nband_k))
 !    eigenvalues for this k-point
      eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
 !    occupation numbers for this k-point
@@ -1008,8 +1008,8 @@ CONTAINS  !=====================================================================
        end do ! end loop over jband
      end do ! end loop over iband
 
-     ABI_DEALLOCATE(eig0_k)
-     ABI_DEALLOCATE(occ_k)
+     ABI_FREE(eig0_k)
+     ABI_FREE(occ_k)
      bdtot_index=bdtot_index+nband_k
    end do ! end loop over k points
  end do ! end loop over spin polarizations
@@ -1039,11 +1039,11 @@ CONTAINS  !=====================================================================
  end do ! end loop over ii
 
  if (open_file(trim(filnam_out)//'_imag',msg,newunit=reunt,form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (open_file(trim(filnam_out)//'_real',msg,unit=imunt,form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(reunt,'(a12,6a13)')' # Energy/Ha ','eps_2_xx','eps_2_yy','eps_2_zz',&
@@ -1063,15 +1063,15 @@ CONTAINS  !=====================================================================
  close(reunt)
  close(imunt)
 
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(oml1)
- ABI_DEALLOCATE(e2)
- ABI_DEALLOCATE(e1)
- ABI_DEALLOCATE(occ)
- ABI_DEALLOCATE(psinablapsi)
- ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(wtk)
- ABI_DEALLOCATE(kpts)
+ ABI_FREE(nband)
+ ABI_FREE(oml1)
+ ABI_FREE(e2)
+ ABI_FREE(e1)
+ ABI_FREE(occ)
+ ABI_FREE(psinablapsi)
+ ABI_FREE(eigen0)
+ ABI_FREE(wtk)
+ ABI_FREE(kpts)
 
  call hdr%free()
  call destroy_mpi_enreg(MPI_enreg_seq)

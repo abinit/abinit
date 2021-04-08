@@ -14,7 +14,7 @@
 !
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (TO, hexu)
+!! Copyright (C) 2001-2021 ABINIT group (TO, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@ contains
   subroutine finalize(self)
     class(lattice_effpot_t), intent(inout) :: self
     ABI_UNUSED_A(self)
-    MSG_ERROR("finalize for lattice_effpot not yet implemented")
+    ABI_ERROR("finalize for lattice_effpot not yet implemented")
   end subroutine finalize
 
   subroutine set_params(self, params)
@@ -67,7 +67,7 @@ contains
     type(multibinit_dtset_type), intent(inout) :: params
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(params)
-    MSG_ERROR("set_params for lattice_effpot not yet implemented")
+    ABI_ERROR("set_params for lattice_effpot not yet implemented")
   end subroutine set_params
 
 
@@ -98,7 +98,7 @@ contains
     ABI_UNUSED_A(energy)
     ABI_UNUSED_A(energy_table)
 
-    MSG_ERROR("calculate for lattice_effpot not yet implemented.")
+    ABI_ERROR("calculate for lattice_effpot not yet implemented.")
   end subroutine calculate
 
 end module m_lattice_effpot

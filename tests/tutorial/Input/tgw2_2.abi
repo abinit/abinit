@@ -6,7 +6,6 @@ optdriver    3
 gwcalctyp    2
 nband       30
 ecuteps     4.0
-ecutwfn     4.0
 
 nfreqim      4
 nfreqre     10
@@ -50,15 +49,18 @@ enunit     1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tgw2_1.abi, tgw2_2.abi, tgw2_3.abi, tgw2_4.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tgw2_2.abo, tolnlines= 32, tolabs=  1.1e-02, tolrel=  4.0e-01 
+#%%   tgw2_2.abo, tolnlines= 32, tolabs=  1.1e-02, tolrel=  2.0e-00
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp tgw2_2o_SCR tgw2_3i_SCR;

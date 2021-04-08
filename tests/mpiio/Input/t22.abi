@@ -60,7 +60,7 @@
  nband 12 occ 4*2 8*0
  ntypat 1 typat 1 1  natom 2
  timopt 0
- npkpt 1
+ np_spkpt 1
  npband 2
  npfft 2
  paral_kgb 1
@@ -73,7 +73,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = abiref_gnu_9.2_openmpi
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

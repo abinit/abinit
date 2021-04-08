@@ -17,28 +17,27 @@ You will learn about the smearing of the Brillouin zone integration, and also a 
 
 This tutorial should take about 1 hour and 30 minutes.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Total energy and lattice parameters at fixed smearing and k-point grid
 
 *Before beginning, you might consider to work in a different subdirectory, as for tutorials 1, 2 or 3.
 Why not Work4?*
 
-The file *tbase4_x.files* lists the file names and root names.
-You can copy it in the *Work4* directory (and change it, as usual).
-You can also copy the file *tbase4_1.in* in *Work4*.
+
+The following commands will move you to your working directory, create the *Work4* directory, and move you into that directory as you did in the previous tutorials.
+Then, we copy the file *tbase4_1.abi* inside the *Work4* directory. The commands are:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work4
 cd Work4
-cp ../tbase4_x.files .  # You will need to edit this file.
-cp ../tbase4_1.in .
+cp ../tbase4_1.abi .
 ```
 
-*tbase4_1.in* is our input file. You should edit it and read it carefully,
+*tbase4_1.abi* is our input file. You should edit it and read it carefully,
 
-{% dialog tests/tutorial/Input/tbase4_x.files tests/tutorial/Input/tbase4_1.in %}
+{% dialog tests/tutorial/Input/tbase4_1.abi %}
 
 and then a look at the following new input variables:
 
@@ -51,48 +50,46 @@ Note also the following:
    you should do a convergence test with respect to *ecut*.
    Here, a suitable *ecut* is given to you in order to save time.
    It will give a lattice parameter that is 0.2% off of the experimental value.
-   Note that this is the *softer* pseudopotential of those that we have used until now: the *01h.pspgth* for H needed 30 Ha
-   (it was rather hard), the *14si.pspnc* for Si needed 8 Ha. Se the end of this page for a
+   Note that this is the *softest* pseudopotential of those that we have used until now: the *01h.pspgth* for H needed 30 Ha
+   (it was rather hard), the *Si.psp8* for Si needed 12 Ha. See the end of this page for a
    discussion of *soft* and *hard* pseudopotentials.
 
 2. The input variable [[diemac]] has been suppressed.
-   Aluminum is a metal, and the default is tailored for that case.
+   Aluminum is a metal, and the default value for this input variable is tailored for that case.
 
 When you have read the input file, you can run the code, as usual (it will take a few seconds).
 
-```sh
-abinit < tbase4_x.files > log 2> err &
-```
+  abinit tbase4_1.abi > log 2> err &
 
-Then, read the output file quietly.
+Then, give a quick look at the output file.
 You should note that the Fermi energy and occupation numbers have been computed automatically:
 
-     Fermi (or HOMO) energy (hartree) =   0.26847   Average Vxc (hartree)=  -0.34746
-     Eigenvalues (hartree) for nkpt=   2  k points:
-     kpt#   1, nband=  3, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-       0.09425   0.25438   0.41909
-          occupation numbers for kpt#   1
-       2.00003   1.33307   0.00014
-     prteigrs : prtvol=0 or 1, do not print more k-points.
+    Fermi (or HOMO) energy (hartree) =   0.27151   Average Vxc (hartree)=  -0.36713
+    Eigenvalues (hartree) for nkpt=   2  k points:
+    kpt#   1, nband=  3, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+      0.09836    0.25743    0.42131
+        occupation numbers for kpt#   1
+      2.00003    1.33305    0.00015
+    prteigrs : prtvol=0 or 1, do not print more k-points.
 
 You should also note that the components of the total energy include an entropy term:
 
-     Components of total free energy (in Hartree):
-
-        Kinetic energy  =  8.70954971782498E-01
-        Hartree energy  =  3.84986358590396E-03
-        XC energy       = -8.08434339502224E-01
-        Ewald energy    = -2.72948286712169E+00
-        PspCore energy  =  3.78721653637092E-02
-        Loc. psp. energy=  8.26684645838168E-02
-        NL   psp  energy=  4.52588269933839E-01
-        >>>>> Internal E= -2.08998347137414E+00
-
-        -kT*entropy     = -7.99729047978171E-03
-        >>>>>>>>> Etotal= -2.09798076185393E+00
-
-     Other information on the energy :
-        Total energy(eV)= -5.70889598417024E+01 ; Band energy (Ha)=   3.6059822203E-01
+    --- !EnergyTerms
+    iteration_state     : {dtset: 1, itime: 3, icycle: 1, }
+    comment             : Components of total free energy in Hartree
+    kinetic             :  8.68009594268178E-01
+    hartree             :  3.75144741427686E-03
+    xc                  : -1.11506134985146E+00
+    Ewald energy        : -2.71387012800927E+00
+    psp_core            :  1.56870175692757E-02
+    local_psp           :  1.66222476058238E-01
+    non_local_psp       :  4.25215770913582E-01
+    internal            : -2.35004517163717E+00
+    '-kT*entropy'       : -7.99850001032776E-03
+    total_energy        : -2.35804367164750E+00
+    total_energy_eV     : -6.41656315078440E+01
+    band_energy         :  3.72511439902163E-01
+    ...
 
 ## The convergence study with respect to k-points
 
@@ -112,23 +109,23 @@ with the associated [[nkpt]]:
     nkpt3 28
     nkpt4 60
 
-The input file *tbase4_2.in* is an example:
+The input file *tbase4_2.abi* is an example:
 
-{% dialog tests/tutorial/Input/tbase4_2.in %}
+{% dialog tests/tutorial/Input/tbase4_2.abi %}
 
-while *tbase4_2.out* is a reference output file:
+while *tbase4_2.abo* is a reference output file:
 
-{% dialog tests/tutorial/Refs/tbase4_2.out %}
+{% dialog tests/tutorial/Refs/tbase4_2.abo %}
 
-The run might take about thirty seconds on a PC 3 GHz.
+The run might take a few seconds on a modern PC.
 
 You will see that, **for the particular value** [[tsmear]] = 0.05 Ha, the lattice parameter
 is already converged with [[nkpt]] = 10:
 
-    acell1     7.5588968086E+00  7.5588968086E+00  7.5588968086E+00 Bohr
-    acell2     7.5070431499E+00  7.5070431499E+00  7.5070431499E+00 Bohr
-    acell3     7.5016877756E+00  7.5016877756E+00  7.5016877756E+00 Bohr
-    acell4     7.4992662653E+00  7.4992662653E+00  7.4992662653E+00 Bohr
+  acell1     7.6023827082E+00  7.6023827082E+00  7.6023827082E+00 Bohr
+  acell2     7.5627822506E+00  7.5627822506E+00  7.5627822506E+00 Bohr
+  acell3     7.5543007304E+00  7.5543007304E+00  7.5543007304E+00 Bohr
+  acell4     7.5529744581E+00  7.5529744581E+00  7.5529744581E+00 Bohr
 
 Note that there is usually a **strong** cross-convergence effect between the number of
 k-points and the value of the broadening, [[tsmear]].
@@ -149,28 +146,28 @@ Use the double-loop capability of the multi-dataset mode,
 with the *tsmear* changes in the **inner** loop. This will saves CPU time, as the wavefunctions
 of the previous dataset will be excellent (no transfer to different k-points).
 
-The input file *tbase4_3.in* is an example:
+The input file *tbase4_3.abi* is an example:
 
-{% dialog tests/tutorial/Input/tbase4_3.in %}
+{% dialog tests/tutorial/Input/tbase4_3.abi %}
 
-while *tbase4_3.out* is thre reference output file.
+while *tbase4_3.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_3.out %}
+{% dialog tests/tutorial/Refs/tbase4_3.abo %}
 
 From the output file, here is the evolution of [[acell]]:
 
-    acell11    7.5587661702E+00  7.5587661702E+00  7.5587661702E+00 Bohr
-    acell12    7.5587696944E+00  7.5587696944E+00  7.5587696944E+00 Bohr
-    acell13    7.5587696871E+00  7.5587696871E+00  7.5587696871E+00 Bohr
-    acell14    7.5587710578E+00  7.5587710578E+00  7.5587710578E+00 Bohr
-    acell21    7.5055168997E+00  7.5055168997E+00  7.5055168997E+00 Bohr
-    acell22    7.5056781966E+00  7.5056781966E+00  7.5056781966E+00 Bohr
-    acell23    7.5018335937E+00  7.5018335937E+00  7.5018335937E+00 Bohr
-    acell24    7.5041510220E+00  7.5041510220E+00  7.5041510220E+00 Bohr
-    acell31    7.4963466654E+00  7.4963466654E+00  7.4963466654E+00 Bohr
-    acell32    7.4957099831E+00  7.4957099831E+00  7.4957099831E+00 Bohr
-    acell33    7.4969520318E+00  7.4969520318E+00  7.4969520318E+00 Bohr
-    acell34    7.4993529673E+00  7.4993529673E+00  7.4993529673E+00 Bohr
+    acell11    7.6022357792E+00  7.6022357792E+00  7.6022357792E+00 Bohr
+    acell12    7.6022341271E+00  7.6022341271E+00  7.6022341271E+00 Bohr
+    acell13    7.6022341214E+00  7.6022341214E+00  7.6022341214E+00 Bohr
+    acell14    7.6022357148E+00  7.6022357148E+00  7.6022357148E+00 Bohr
+    acell21    7.5604102145E+00  7.5604102145E+00  7.5604102145E+00 Bohr
+    acell22    7.5605496029E+00  7.5605496029E+00  7.5605496029E+00 Bohr
+    acell23    7.5565044147E+00  7.5565044147E+00  7.5565044147E+00 Bohr
+    acell24    7.5593333886E+00  7.5593333886E+00  7.5593333886E+00 Bohr
+    acell31    7.5483073963E+00  7.5483073963E+00  7.5483073963E+00 Bohr
+    acell32    7.5482393302E+00  7.5482393302E+00  7.5482393302E+00 Bohr
+    acell33    7.5497784006E+00  7.5497784006E+00  7.5497784006E+00 Bohr
+    acell34    7.5521340033E+00  7.5521340033E+00  7.5521340033E+00 Bohr
 
 These data should be analyzed properly. For [[tsmear]] = 0.01, the converged value,
 contained in *acell31*, must be compared to *acell11* and *acell21*:
@@ -190,32 +187,25 @@ For that particular value of *tsmear*, one can use the second k-point grid, givi
 
 In what follows, we will stick to these values of [[ecut]] and [[tsmear]] and try to use k-point grids with a similar resolution.
 
-Our final value for the aluminum lattice parameter, in the LDA, using the *13al.981214.fhi* pseudopotential,
-is thus 7.5041 Bohr.
-
-!!! note
-
-    For historical reasons (consistency with older versions of the tutorial), we will work on the following,
-    with a slightly different value, of 7.5056 Bohr, that is 3.9718 Angstrom.
-    The experimental value at 25 degree Celsius is 4.04958 Angstrom.
+Our final value for the aluminum lattice parameter, in the LDA, using the *Al.psp8* pseudopotential,
+is thus 7.5593 Bohr, which corresponds to 4.0002 Angstrom. The experimental value at 25 Celsius is 4.04958 Angstrom, hence our theoretical value has an error of 1.2%. We caution that converged parameters should be used to properly assess the accuracy of a pseudopotential and functional.
 
 The associated total energy and accuracy can be deduced from:
 
-    etotal11   -2.0916027819E+00
-    etotal12   -2.0931968906E+00
-    etotal13   -2.0947909992E+00
-    etotal14   -2.0963851177E+00
-    etotal21   -2.0969713557E+00
-    etotal22   -2.0975525285E+00
-    etotal23   -2.0978233733E+00
-    etotal24   -2.0979980153E+00
-    etotal31   -2.0983520905E+00
-    etotal32   -2.0983215368E+00
-    etotal33   -2.0983305960E+00
-    etotal34   -2.0984218116E+00
+    etotal11   -2.3516656074E+00
+    etotal12   -2.3532597160E+00
+    etotal13   -2.3548538247E+00
+    etotal14   -2.3564479440E+00
+    etotal21   -2.3568282638E+00
+    etotal22   -2.3574128355E+00
+    etotal23   -2.3576771874E+00
+    etotal24   -2.3578584768E+00
+    etotal31   -2.3582092001E+00
+    etotal32   -2.3581800122E+00
+    etotal33   -2.3581917663E+00
+    etotal34   -2.3582884106E+00
 
-**etotal** 24 is -2.0979980153E+00 Ha, with an accuracy of 0.0005 Ha.
-
+**etotal** 24 is -2.3578584768E+00 Ha, with an accuracy of 0.0005 Ha.
 
 !!! tip
 
@@ -245,16 +235,16 @@ There is no primitive cell of bulk aluminum based on these vectors, but a double
 We will first compute the total energy associated with this doubled cell.
 This is not strictly needed, but it is a valuable intermediate step towards the study of the surface.
 
-You might start from *tbase4_3.in*. You have to change [[rprim]]. Still, try to keep [[acell]]
+You might start from *tbase4_3.abi*. You have to change [[rprim]]. Still, try to keep [[acell]]
 at the values of bulk aluminum that were determined previously.
 But it is not all: the most difficult part in the passage to this doubled cell is the definition of the k-point grid.
 Of course, one could just take a homogeneous simple cubic grid of k-points, but this will not
-correspond exactly to the k-point grid used in the primitive cell in *tbase4_3.in*.
+correspond exactly to the k-point grid used in the primitive cell in *tbase4_3.abi*.
 This would not be a big problem, but you would miss some error cancellation.
 
-The answer to this problem is given in the input file *$ABI_TESTS/tutorial/Input/tbase4_4.in*.
+The answer to this problem is given in the input file *$ABI_TESTS/tutorial/Input/tbase4_4.abi*.
 
-{% dialog tests/tutorial/Input/tbase4_4.in %}
+{% dialog tests/tutorial/Input/tbase4_4.abi %}
 
 The procedure to do the exact translation of the k-point grid will not be explained here (sorry for this).
 If you do not see how to do it, just use homogeneous simple cubic grids, with about the same resolution
@@ -267,12 +257,12 @@ The grids of k-points should not be too anisotropic for this rough estimation to
 
 Note also the input variables [[rprim]] and [[chkprim]] in this input file.
 
-Now run *tbase4_4.in* (the reference file is *$ABI_TESTS/tutorial/Refs/tbase4_4.out*).
+Now run *tbase4_4.abi* (the reference file is *$ABI_TESTS/tutorial/Refs/tbase4_4.abo*).
 You should find the following total energy:
 
-    etotal     -4.1962972610E+00
+    etotal     -4.7164794308E+00
 
-It is not exactly twice the total energy for the primitive cell, mentioned above, but the difference is less than 0.0005 Ha.
+It is not exactly twice the total energy for the primitive cell, mentioned above, but the difference is less than 0.001 Ha.
 It is due to the different FFT grids used in the two runs, and affect the exchange-correlation energy.
 These grids are always homogeneous primitive 3D grids, so that changing the orientation of the lattice
 will give mutually incompatible lattices. Increasing the size of the FFT grid would improve the agreement.
@@ -293,7 +283,7 @@ It is convenient to take the vacuum region as having a multiple of the width of 
 The supercell to use is the double of the previous cell (that had two layers of Aluminum atoms along the `[0 0 1]` direction).
 Of course, the relaxation of the surface might give an important contribution to the total energy.
 
-You should start from *tbase4_4.in*.
+You should start from *tbase4_4.abi*.
 You have to modify [[rprim]] (double the cell along `[0 0 1]`), the atomic positions, as well as the k-point mesh.
 For the latter, it is supposed that the electrons cannot propagate from one slab to its image in the `[0 0 1]` direction,
 so that the $k_z$ component of the special k-points can be taken 0: only one layer of k-points is needed along the z-direction.
@@ -301,32 +291,32 @@ You should also allow the relaxation of atomic positions, but not the relaxation
 (the lattice parameters along x or y must be considered fixed to the bulk value, while, for the z direction,
 there is no interest to allow the vacuum region to collapse!
 
-The input file *tbase4_5.in* is an example,
+The input file *tbase4_5.abi* is an example,
 
-{% dialog tests/tutorial/Input/tbase4_5.in %}
+{% dialog tests/tutorial/Input/tbase4_5.abi %}
 
-while *tbase4_5.out* is the reference output file.
+while *tbase4_5.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_5.out %}
+{% dialog tests/tutorial/Refs/tbase4_5.abo %}
 
-The run might last one minute.
+The run will take a few second on a modern PC.
 
 The total energy after the first SCF cycle, when the atomic positions are equal to their starting values, is:
 
-    ETOT  6  -6.2619738807344
+    ETOT  5  -7.0427135007667
 
 The total energy of three aluminum atoms in the bulk,
-(from section 4.3, etotal24 multiplied by three) is -6.293994 Ha.
+(from section 4.3, etotal24 multiplied by three) is -7.0735754304 Ha.
 Comparing the non-relaxed slab energy and the bulk energy, one obtains
 the non-relaxed surface energy, per surface unit cell (there are two surfaces in our simulation cell!),
-namely 0.016010 Ha = 0.436 eV.
+namely 0.01543 Ha = 0.420 eV.
 
 The total energy after the Broyden relaxation is:
 
-    etotal     -6.2622251508E+00
+    etotal     -7.0429806856E+00
 
-The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the 
-relaxed slab energy, and gives 0.015885 Ha = 0.432eV.
+The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the
+relaxed slab energy, and gives 0.015297 Ha = 0.416 eV.
 It seems that the relaxation energy is very small, compared to the surface energy, but we need to do the convergence studies.
 
 ## Surface energy: increasing the number of vacuum layers
@@ -336,21 +326,21 @@ It is preferable to define atomic positions in Cartesian coordinates.
 The same coordinates will work for both 2 and 3 vacuum layers, while this is not the case for reduced coordinates,
 as the cell size increases.
 
-The input file *tbase4_6.in* is an example input file,
+The input file *tbase4_6.abi* is an example input file,
 
-{% dialog tests/tutorial/Input/tbase4_6.in %}
+{% dialog tests/tutorial/Input/tbase4_6.abi %}
 
-while *tbase4_6.out* is the reference output file.
+while *tbase4_6.abo* is the reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_6.out %}
+{% dialog tests/tutorial/Refs/tbase4_6.abo %}
 
-The run is on the order of thirty seconds on a PC 3 GHz.
+The run is on the order of of few seconds on a modern PC.
 
 In the Broyden step 0 of the first dataset, you will notice the WARNING:
 
-     scprqt:  WARNING -
-      nstep=    6 was not enough SCF cycles to converge;
-      maximum force difference=  5.493E-05 exceeds toldff=  5.000E-05
+    scprqt:  WARNING -
+     nstep=    6 was not enough SCF cycles to converge;
+     maximum force difference=  6.859E-05 exceeds toldff=  5.000E-05
 
 The input variable [[nstep]] was intentionally set to the rather low value of 6, to warn you about
 possible convergence difficulties.
@@ -362,14 +352,14 @@ was close of being fulfilled, but one should keep this in mind, as you will see.
 
 For the 2 vacuum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -6.2539524271719
+    ETOT  6  -7.0350152828531
 
-giving the unrelaxed surface energy 0.0200 Ha = 0.544 eV;
+giving the unrelaxed surface energy 0.0193 Ha = 0.525 eV;
 and for the relaxed case:
 
-    etotal1    -6.2547006435E+00
+    etotal1    -7.0358659542E+00
 
-(this one is converged to the required level) giving the relaxed surface energy 0.0196 Ha = 0.533 eV
+(this one is converged to the required level) giving the relaxed surface energy 0.0189 Ha = 0.514 eV
 
 Note that the difference between unrelaxed and relaxed case is a bit larger than in the case of one vacuum layer.
 This is because there was some interaction between slabs of different supercells.
@@ -381,13 +371,13 @@ However, for the Broyden steps number 2 and beyond, because one takes advantage 
 a sufficient convergence is reached.
 The total energy, in the relaxed case, is:
 
-    etotal2    -6.2559103620E+00
+    etotal2    -7.0371360761E+00
 
-giving the relaxed surface energy `0.0190 Ha = 0.515 eV`.
-There is a rather small 0.018 eV difference with the 2 vacuum layer case.
+giving the relaxed surface energy `0.0182 Ha = 0.495 eV`.
+There is a rather small 0.019 eV difference with the 2 vacuum layer case.
 
 For the next run, we will keep the 2 vacuum layer case, and we know that the accuracy
-of the coming calculation cannot be better than 0.016 eV. One might investigate the 4 vacuum layer case,
+of the coming calculation cannot be better than 0.019 eV. One might investigate the 4 vacuum layer case,
 but this is not worth, in the present tutorial.
 
 ## Surface energy: increasing the number of aluminum layers
@@ -398,13 +388,13 @@ One could use an effective dielectric constant of about 3 or 5, with a rather sm
 However, there is also another possibility, using an estimation of the dielectric matrix governed by [[iprcel]]=45.
 For comparison with the previous treatment of SCF, one can recompute the result with 3 aluminum layers.
 
-The input file *tbase4_7.in* is an example, while
+The input file *tbase4_7.abi* is an example, while
 
-{% dialog tests/tutorial/Input/tbase4_7.in %}
+{% dialog tests/tutorial/Input/tbase4_7.abi %}
 
-*tbase4_7.out* is a reference output file.
+*tbase4_7.abo* is a reference output file.
 
-{% dialog tests/tutorial/Refs/tbase4_7.out %}
+{% dialog tests/tutorial/Refs/tbase4_7.abo %}
 
 This run might take about one minute, and is the longest of the four basic tutorials. You should start it now.
 
@@ -412,62 +402,62 @@ You will notice that the SCF convergence is rather satisfactory, for all the cas
 
 For the 3 aluminum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -6.2539524363433
+    ETOT  6  -7.0350153035193
 
-(this quantity is converged, unlike in test 4.6) giving the unrelaxed surface energy 0.0200 Ha = 0.544 eV;
+(this quantity is converged, unlike in test 4.6) giving the unrelaxed surface energy 0.0193 Ha = 0.525 eV;
 and for the relaxed case:
 
-etotal1    -6.2547008127E+00
+    etotal1    -7.0358683757E+00
 
 (by contrast the difference with test 4.6 is less than 1 microHa) giving
-the relaxed surface energy 0.0196 Ha = 0.533 eV.
+the relaxed surface energy 0.0189 Ha = 0.514 eV.
 
 For the 4 aluminum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -8.3546873357119
+    ETOT  6  -9.3958299123967
 
-giving the unrelaxed surface energy 0.0186Ha = 0.506 eV; and for the relaxed case:
+giving the unrelaxed surface energy 0.0178 Ha = 0.484 eV; and for the relaxed case:
 
-    etotal2    -8.3565593186E+00
+    etotal2    -9.3978596458E+00
 
-giving the relaxed surface energy 0.0183 Ha = 0.498 eV.
+giving the relaxed surface energy 0.0168 Ha = 0.457 eV.
 
 For the 5 aluminum layer case, one has the non-relaxed total energy:
 
-    ETOT  6  -10.453642176439
+    ETOT  6  -11.754755842794
 
-giving the unrelaxed surface energy 0.0183Ha = 0.498 eV; and for the relaxed case:
+giving the unrelaxed surface energy 0.0173 Ha = 0.471 eV; and for the relaxed case:
 
-    etotal3    -1.0454163186E+01
+    etotal3    -1.1755343136E+01
 
-giving the relaxed surface energy 0.0180 Ha = 0.490 eV.
+giving the relaxed surface energy 0.0170 Ha = 0.463 eV.
 
-The relative difference in the surface energy of the 4 and 5 layer cases is on the order of 1.5%.
+The relative difference in the surface energy of the 4 and 5 layer cases is on the order of 1.2%.
 
 In the framework of this tutorial, we will not pursue this investigation, which is a simple application
 of the concepts already explored.
 
 Just for your information, and as an additional warning, when the work accomplished
 until now is completed with 6 and 7 layers without relaxation
-(see *\$ABI_TESTS/tutorial/Input/tbase4_8.in* and *\$ABI_TESTS/tutorial/Refs/tbase4_8.out* where 5, 6 and 7 layers are treated),
+(see *\$ABI_TESTS/tutorial/Input/tbase4_8.abi* and *\$ABI_TESTS/tutorial/Refs/tbase4_8.abo* where 5, 6 and 7 layers are treated),
 this non-relaxed energy surface energy behaves as follows:
 
 number of aluminum layers | surface energy
 --- | ---
-3   | 0.544 eV
-4   | 0.506 eV
-5   | 0.498 eV
-6   | 0.449 eV
-7   | 0.463 eV
+3   | 0.525 eV
+4   | 0.484 eV
+5   | 0.471 eV
+6   | 0.419 eV
+7   | 0.426 eV
 
 So, the surface energy convergence is rather difficult to reach. Our values, with a `4x4x1` grid,
-a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the *13al.981214.fhi* pseudopotential,
-still oscillate between 0.45 eV and 0.51 eV.
+a smearing of 0.04 Ha, a kinetic energy cut-off of 6 Ha, the *Al.psp8* pseudopotential,
+still oscillate between 0.42 eV and 0.53 eV.
 Increasing the k-point sampling might decrease slightly the oscillations, but note that this effect
 is intrinsic to the computation of properties of a metallic surface: the electrons are confined inside the slab potential,
 with sub-bands in the direction normal to the surface, and the Fermi energy oscillates with the width of the slab.
 This effect might be understood based on a comparison with the behaviour of a jellium slab.
-An error on the order of 0.016 eV is due to the thin vacuum layer.
+An error on the order of 0.019 eV is due to the thin vacuum layer.
 Other sources of errors might have to be rechecked, seeing the kind of accuracy that is needed.
 
 Experimental data give a surface energy around 0.55 eV (sorry, the reference is to be provided).

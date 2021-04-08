@@ -1,3 +1,4 @@
+! CP modified
 !!****m* ABINIT/m_eig2d
 !! NAME
 !!  m_eig2d
@@ -8,7 +9,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2020 ABINIT group (SP, PB, XG)
+!! Copyright (C) 2014-2021 ABINIT group (SP, PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -292,7 +293,7 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies'), eigr2d%eigr2d))
 
 #else
- MSG_ERROR("ETSF-IO support is not activated. ")
+ ABI_ERROR("ETSF-IO support is not activated. ")
 #endif
 
 
@@ -524,7 +525,7 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies_actif'), fan2d%fan2d))
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
@@ -611,7 +612,7 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid_, gkk2d%gkk2d))
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
@@ -868,14 +869,14 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
 !Init interpolation method
  if(present(eigenq_fine))then
-   ABI_ALLOCATE(center,(3))
+   ABI_MALLOC(center,(3))
  end if
 
  call timab(148,1,tsec)
 
  if(nsppol==2)then
    message = 'nsppol=2 is still under development. Be careful when using it ...'
-   MSG_COMMENT(message)
+   ABI_COMMENT(message)
  end if
 
  band2tot_index =0
@@ -888,8 +889,8 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 &   ' A scissor operator of ',dtset%dfpt_sciss*Ha_eV,' [eV] has been applied to the eigenenergies',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   ABI_ALLOCATE(eigen0tmp,(nkpt_rbz*mband*nsppol))
-   ABI_ALLOCATE(eigenqtmp,(nkpt_rbz*mband*nsppol))
+   ABI_MALLOC(eigen0tmp,(nkpt_rbz*mband*nsppol))
+   ABI_MALLOC(eigenqtmp,(nkpt_rbz*mband*nsppol))
    eigen0tmp =   eigen0(:)
    eigenqtmp =   eigenq(:)
    eigen0 = zero
@@ -904,12 +905,12 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  end if
 
  if(xmpi_paral==1) then
-   ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
-   ABI_ALLOCATE(nband_rbz,(nkpt_rbz*nsppol))
+   ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
+   ABI_MALLOC(nband_rbz,(nkpt_rbz*nsppol))
    if (allocated(mpi_enreg%my_kpttab)) then
-     ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+     ABI_FREE(mpi_enreg%my_kpttab)
    end if
-   ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
+   ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
    call distrb2(mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,nsppol,mpi_enreg)
@@ -917,7 +918,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
  icg2=0
  ipert1=1 ! Suppose that the situation is the same for all perturbations
- ABI_ALLOCATE(icg2_rbz,(nkpt_rbz,nsppol))
+ ABI_MALLOC(icg2_rbz,(nkpt_rbz,nsppol))
  do isppol=1,nsppol
    do ikpt=1,nkpt_rbz
      icg2_rbz(ikpt,isppol)=icg2
@@ -963,7 +964,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
      if(smdelta >0) then   !broadening
        if(.not.allocated(smdfun))  then
-         ABI_ALLOCATE(smdfun,(mband,mband))
+         ABI_MALLOC(smdfun,(mband,mband))
        end if
        smdfun(:,:) = zero
        do iband=1,mband
@@ -978,11 +979,11 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
      ipert1=1 ! Suppose all perturbations lead to the same number of planewaves
      npw1_k = npwar1(ikpt,ipert1)
-     ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
-     ABI_ALLOCATE(cwavef2,(2,npw1_k*nspinor))
-     ABI_ALLOCATE(gh,(2,npw1_k*nspinor))
-     ABI_ALLOCATE(gh1,(2,npw1_k*nspinor))
-     ABI_ALLOCATE(ghc,(2,npw1_k*nspinor))
+     ABI_MALLOC(cwavef,(2,npw1_k*nspinor))
+     ABI_MALLOC(cwavef2,(2,npw1_k*nspinor))
+     ABI_MALLOC(gh,(2,npw1_k*nspinor))
+     ABI_MALLOC(gh1,(2,npw1_k*nspinor))
+     ABI_MALLOC(ghc,(2,npw1_k*nspinor))
 
      do iband=1,bdeigrf
 
@@ -1130,17 +1131,17 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
      end do !iband
 
-     ABI_DEALLOCATE(cwavef)
-     ABI_DEALLOCATE(cwavef2)
-     ABI_DEALLOCATE(gh)
-     ABI_DEALLOCATE(gh1)
-     ABI_DEALLOCATE(ghc)
+     ABI_FREE(cwavef)
+     ABI_FREE(cwavef2)
+     ABI_FREE(gh)
+     ABI_FREE(gh1)
+     ABI_FREE(ghc)
      band2tot_index = band2tot_index + 2*mband**2
      bandtot_index = bandtot_index + mband
 
      if(present(eigenq_fine))then
-       ABI_DEALLOCATE(kpt_fine_sub) ! Deallocate the variable
-       ABI_DEALLOCATE(wgt_sub)
+       ABI_FREE(kpt_fine_sub) ! Deallocate the variable
+       ABI_FREE(wgt_sub)
      end if
 
    end do    !ikpt
@@ -1161,9 +1162,9 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
        call xmpi_sum(eigbrd,spaceworld,ierr)
      end if
    end if
-   ABI_DEALLOCATE(nband_rbz)
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
-   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+   ABI_FREE(nband_rbz)
+   ABI_FREE(mpi_enreg%proc_distrb)
+   ABI_FREE(mpi_enreg%my_kpttab)
  end if
 
  if(ieig2rf==1 .or. ieig2rf==2 ) then
@@ -1194,15 +1195,15 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  end if
 
  if(allocated(smdfun))  then
-   ABI_DEALLOCATE(smdfun)
+   ABI_FREE(smdfun)
  end if
- ABI_DEALLOCATE(icg2_rbz)
+ ABI_FREE(icg2_rbz)
  if(present(eigenq_fine))then
-   ABI_DEALLOCATE(center)
+   ABI_FREE(center)
  end if
  if (dtset%dfpt_sciss > tol6 ) then
-   ABI_DEALLOCATE(eigen0tmp)
-   ABI_DEALLOCATE(eigenqtmp)
+   ABI_FREE(eigen0tmp)
+   ABI_FREE(eigenqtmp)
  end if
 
  call timab(148,2,tsec)
@@ -1356,13 +1357,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
 !Init interpolation method
  if(present(eigenq_fine))then
-   ABI_ALLOCATE(center,(3))
+   ABI_MALLOC(center,(3))
  end if
 
  call timab(148,1,tsec)
 
  if(nsppol==2)then
-   MSG_COMMENT('nsppol=2 is still under development. Be careful when using it ...')
+   ABI_COMMENT('nsppol=2 is still under development. Be careful when using it ...')
  end if
 
  band2tot_index =0
@@ -1370,12 +1371,12 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  band_index=0
 
  if(xmpi_paral==1) then
-   ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
-   ABI_ALLOCATE(nband_rbz,(nkpt_rbz*nsppol))
+   ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
+   ABI_MALLOC(nband_rbz,(nkpt_rbz*nsppol))
    if (allocated(mpi_enreg%my_kpttab)) then
-     ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+     ABI_FREE(mpi_enreg%my_kpttab)
    end if
-   ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
+   ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
    call distrb2(mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,nsppol,mpi_enreg)
@@ -1432,7 +1433,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
      if(smdelta >0) then   !broadening
        if(.not.allocated(smdfun))  then
-         ABI_ALLOCATE(smdfun,(mband,mband))
+         ABI_MALLOC(smdfun,(mband,mband))
        end if
        smdfun(:,:) = zero
        do iband=1,mband
@@ -1593,8 +1594,8 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      bandtot_index = bandtot_index + mband
 
      if(present(eigenq_fine))then
-       ABI_DEALLOCATE(kpt_fine_sub) ! Deallocate the variable
-       ABI_DEALLOCATE(wgt_sub)
+       ABI_FREE(kpt_fine_sub) ! Deallocate the variable
+       ABI_FREE(wgt_sub)
      end if
 
    end do    !ikpt
@@ -1621,9 +1622,9 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call xmpi_sum(eigbrd,spaceworld,ierr)
      end if
    end if
-   ABI_DEALLOCATE(nband_rbz)
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
-   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+   ABI_FREE(nband_rbz)
+   ABI_FREE(mpi_enreg%proc_distrb)
+   ABI_FREE(mpi_enreg%my_kpttab)
  end if
 
  if(ieig2rf > 2) then
@@ -1663,10 +1664,10 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  end if
 
  if(allocated(smdfun))  then
-   ABI_DEALLOCATE(smdfun)
+   ABI_FREE(smdfun)
  end if
  if(present(eigenq_fine))then
-   ABI_DEALLOCATE(center)
+   ABI_FREE(center)
  end if
 
  master=0
@@ -1701,11 +1702,19 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &   dtset%symrel,dtset%tnons,dtset%symafm)
 !  Electronic band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-   call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+   ! CP modified
+!   call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+!&   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
+!&   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
+!&   hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+!&   hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+   call ebands_init(bantot,Bands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+&   doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-&   hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
+&   hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &   hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
+   ! End CP modified
 
 !  Second order derivative EIGR2D (real and Im)
    if(ieig2rf == 3 ) then
@@ -1737,11 +1746,11 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("Dynamical calculation with ieig2rf 4 only work with NETCDF support.")
+     ABI_ERROR("Dynamical calculation with ieig2rf 4 only work with NETCDF support.")
      ABI_UNUSED(ncid)
 #endif
-     ABI_DEALLOCATE(fan)
-     ABI_DEALLOCATE(eig2nkq_tmp)
+     ABI_FREE(fan)
+     ABI_FREE(eig2nkq_tmp)
    end if
 !  print _GKK.nc file for this perturbation. Note that the GKK file will only be produced if
 !  abinit is compiled with netcdf.
@@ -1756,11 +1765,11 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("Dynamical calculation with ieig2rf 5 only work with NETCDF support.")
+     ABI_ERROR("Dynamical calculation with ieig2rf 5 only work with NETCDF support.")
      ABI_UNUSED(ncid)
 #endif
-     ABI_DEALLOCATE(gkk)
-     ABI_DEALLOCATE(eig2nkq_tmp)
+     ABI_FREE(gkk)
+     ABI_FREE(eig2nkq_tmp)
    end if
 !  print _EIGI2D file for this perturbation
    if (ieig2rf /= 5 ) then
@@ -1794,13 +1803,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  end if
 
  if (allocated(fan)) then
-   ABI_DEALLOCATE(fan)
+   ABI_FREE(fan)
  end if
  if (allocated(eig2nkq_tmp)) then
-   ABI_DEALLOCATE(eig2nkq_tmp)
+   ABI_FREE(eig2nkq_tmp)
  end if
  if (allocated(gkk)) then
-   ABI_DEALLOCATE(gkk)
+   ABI_FREE(gkk)
  end if
 
  call crystal%free()
@@ -1998,7 +2007,7 @@ subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
 
  else
    write(message, '(a,i0,a)' )'  Smdelta= ',smdelta,' is not allowed in smdfunc'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 end subroutine smeared_delta
@@ -2073,7 +2082,7 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
 
  if(option/=1 .and. option/=2)then
    write(message,'(a,i0)')' The argument option should be 1 or 2, while it is found that option=',option
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  !printing options
@@ -2092,7 +2101,7 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
    end if
  end if
 
- ABI_ALLOCATE(eigen_corr_mode,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen_corr_mode,(mband*nkpt*nsppol))
 
  eigen_corr(:)=zero
  do imode=1,3*natom
@@ -2220,7 +2229,7 @@ subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,
    call wrtout(ab_out_default,message,'COLL')
  end if
 
- ABI_DEALLOCATE(eigen_corr_mode)
+ ABI_FREE(eigen_corr_mode)
 
 !DEBUG
 !write(std_out,*)' elph2_fanddw : exit'

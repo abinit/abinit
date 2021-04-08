@@ -2,7 +2,7 @@
 # Calculation of the GW corrections
 
 
-# Convergence with respect to the number of bands
+# Convergence with respect to the number of bands in Sigmac
 ndtset  5
 nband:  50
 nband+  50
@@ -12,14 +12,13 @@ optdriver  4
 getwfk     2
 getscr     3
 ecutsigx    8.0
-ppmfrq    16.7 eV
 nkptgw      1
 kptgw      0.000    0.000    0.000
 bdgw       4  5 
 
 
 # Definition of the unit cell: fcc
-acell  3*10.217        # This is equivalent to   10.217 10.217 10.217
+acell  3*10.26         # Experimental lattice constants
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0
@@ -42,19 +41,23 @@ xred              # Reduced coordinate of atoms
 ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 
 
-# Sampling of the BZ
-ngkpt   1 1 1
+# Definition of the k-point grid
+ngkpt   2 2 2
 nshiftk 1
 shiftk  0.0 0.0 0.0
 istwfk  *1         # This is mandatory in all the GW steps.
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_nag_7.0_.*
 #%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
 #%% [files]
 #%% files_to_test = 

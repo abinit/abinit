@@ -6,7 +6,7 @@
 !!  Utility for profiling Linear Algebra libraries used by Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2020 ABINIT group (MG)
+!! Copyright (C) 2004-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -441,7 +441,7 @@ program lapackprof
 #ifdef HAVE_LINALG_GEMM3M
           call ZGEMM3M("C", "N", nband, nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
 #else
-          MSG_ERROR("ZGEMM3M is not available")
+          ABI_ERROR("ZGEMM3M is not available")
 #endif
         end if
         call cwtime(ctime, wtime, gflops, "stop")
@@ -472,7 +472,7 @@ program lapackprof
 #ifdef HAVE_LINALG_GEMMT
           call ZGEMMT("U", "C", "N", nband, npw, cone, cg1, npw, cg2, npw, czero, cg3, nband)
 #else
-          MSG_ERROR("ZGEMMT is not available")
+          ABI_ERROR("ZGEMMT is not available")
 #endif
         end if
         call cwtime(ctime, wtime, gflops, "stop")
@@ -631,7 +631,7 @@ program lapackprof
    write(std_out,'(a)')trim(sjoin("END_BENCHMARK: ",command))
 
  case default
-   MSG_ERROR(sjoin("Wrong command:", command))
+   ABI_ERROR(sjoin("Wrong command:", command))
  end select
 
  ABI_FREE(sizes)

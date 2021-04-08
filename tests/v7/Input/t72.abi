@@ -67,9 +67,9 @@ nbandhf2 4         # number of occupied states
 nband 4  # number of occupied states
 
 # MG These variables are needed to run the test in parallel (bug or feature?)
-#npkpt2 2          # Number of processors for k-point parallelization
+#np_spkpt2 2          # Number of processors for k-point parallelization
 #nphf2  2           # Number of processors for occupied states parallelization
-                   # The calculation thus requires npkpt*nphf processors.
+                   # The calculation thus requires np_spkpt*nphf processors.
 
 
 
@@ -85,7 +85,7 @@ nband 4  # number of occupied states
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = HF, PBE0, FAILS_IFMPI
+#%% keywords = HF, PBE0
 #%% description = Test of Fock in sequential case, with RMM-DIIS and NC psps
 #%%  The energy computation is not variational. While residm and vres2 converge
 #%%  quite fast, the total energy convergence is lagging behind ...

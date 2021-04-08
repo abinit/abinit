@@ -4,8 +4,7 @@
 #Parameters for the GW calculation
 optdriver    4
 nband       30
-ecutsigx    6.5
-ecutwfn     6.5
+ecutsigx    8.0
 
 gwcalctyp   12
 symsigma     0
@@ -68,8 +67,11 @@ prtvol     5
 enunit     1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

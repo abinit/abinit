@@ -248,7 +248,7 @@ ABI_TOPICS = [
     "TDepES",
     "Temperature",
     "TransPath",
-    "TuningSpeed",
+    "TuningSpeedMem",
     "Unfolding",
     "UnitCell",
     "vdw",
@@ -1011,40 +1011,6 @@ class InputVariables(OrderedDict):
         for char, group in groupby(keys, key=lambda n: n[0].upper()):
             od[char] = [self[name] for name in group]
         return od
-
-    def get_vartabs_html(self, website, page_rpath):
-        """Return HTML string with all the variabes in tabular format."""
-        ch2vars = self.groupby_first_letter()
-        ch2vars["All"] = self.values()
-        # http://getbootstrap.com/javascript/#tabs
-        html = """\
-<div>
-<!-- Nav tabs -->
-<ul class="nav nav-pills" role="tablist">\n"""
-
-        idname = self.executable + "-tabs"
-        for i, char in enumerate(ch2vars):
-            id_char = "#%s-%s" % (idname, char)
-            if i == 0:
-                html += """\n
-<li role="presentation" class="active"><a href="%s" role="tab" data-toggle="tab">%s</a></li>\n""" % (id_char, char)
-            else:
-                html += """\
-<li role="presentation"><a href="%s" role="tab" data-toggle="tab">%s</a></li>\n""" % (id_char, char)
-        html += """\
-</ul>
-<!-- Tab panes -->
-<div class="tab-content">
-        """
-        for i, (char, vlist) in enumerate(ch2vars.items()):
-            id_char = "%s-%s" % (idname, char)
-            p = " ".join(v.internal_link(website, page_rpath, cls="small-grey-link") for v in vlist)
-            if i == 0:
-                html += '<div role="tabpanel" class="tab-pane active" id="%s">\n%s\n</div>\n' % (id_char, p)
-            else:
-                html += '<div role="tabpanel" class="tab-pane" id="%s">\n%s\n</div>\n' % (id_char, p)
-
-        return html + "</div></div>"
 
     def group_by_varset(self, names):
         """

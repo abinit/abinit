@@ -6,7 +6,7 @@
 !!  This module provides routines to read the Haydock file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2020 ABINIT group (YG)
+!!  Copyright (C) 2013-2021 ABINIT group (YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,7 +128,7 @@ subroutine open_haydock(filename, haydock_file)
 !************************************************************************
 
  if (open_file(filename,msg,newunit=haydock_file%unt,form="unformatted") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  haydock_file%version = CUR_VERSION
@@ -353,13 +353,13 @@ subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
  if(found_q) then
    niter = niter_file
-   ABI_ALLOCATE(aa,(niter))
-   ABI_ALLOCATE(bb,(niter))
+   ABI_MALLOC(aa,(niter))
+   ABI_MALLOC(bb,(niter))
    do inn=1,niter
      read(haydock_file%unt)it,aa(inn),bb(inn)
      if (inn/=it) then
        write(msg,'(2(a,i0))')" Found it_file: ",it," while it should be: ",inn
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end do
    ABI_MALLOC(phi_nm1,(haydock_file%hsize))

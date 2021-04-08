@@ -1,0 +1,595 @@
+
+.Version 9.3.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu8.3 computer) 
+
+.Copyright (C) 1998-2021 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Thu 10 Dec 2020.
+- ( at 09h48 )
+  
+- input  file    -> /home/marm314/abinit/tests/Test_suite/v9_t33-t34-t35/t35.abi
+- output file    -> t35.abo
+- root for input  files -> t35i
+- root for output files -> t35o
+
+
+ DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =      10  mpssoang =       2    mqgrid =    3001
+     natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       2
+-    mband =           8        mffmem =           1         mkmem =           6
+       mpw =          40          nfft =        1000          nkpt =           6
+================================================================================
+P This job should need less than                       0.811 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      5.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
+              amu      4.00260200E+00
+             bdgw           1       8       1       8       1       8       1       8
+                            1       8       1       8
+           diemac      1.20000000E+01
+             ecut      8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
+-          fftalg         512
+        gwcalctyp          21
+           gw1rdm           2
+           istwfk        0    0    1    0    1    1
+              ixc          11
+        ixc_sigma          11
+           jdtset        1
+              kpt     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+            kptgw     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptrlatt        2   -2    2     -2    2    2     -2   -2    2
+          kptrlen      1.00000000E+01
+P           mkmem           6
+            natom           1
+            nband           8
+           ndtset           1
+            ngfft          10      10      10
+             nkpt           6
+           nkptgw           6
+         nomegasi          40
+          npwsigx          27
+           npwwfn          27
+            nstep          20
+             nsym          48
+           ntypat           1
+              occ      2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver           4
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         225
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+         symsigma        0
+           toldfe      1.00000000E-06 Hartree
+            typat      1
+              wtk        0.18750    0.37500    0.09375    0.18750    0.12500    0.03125
+           xangst      1.3229430215E+00  1.3229430215E+00  1.3229430215E+00
+            xcart      2.5000000000E+00  2.5000000000E+00  2.5000000000E+00
+            x1rdm           1
+             xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+            znucl        2.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 6, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 40, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 21, }
+...
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+ SIGMA: Calculation of the GW corrections 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  2.5000000  2.5000000  G(1)= -0.2000000  0.2000000  0.2000000
+ R(2)=  2.5000000  0.0000000  2.5000000  G(2)=  0.2000000 -0.2000000  0.2000000
+ R(3)=  2.5000000  2.5000000  0.0000000  G(3)=  0.2000000  0.2000000 -0.2000000
+ Unit cell volume ucvol=  3.1250000E+01 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/marm314/abinit/tests/Psps_for_tests/He-GGA.psp8
+- pspatm: opening atomic psp file    /home/marm314/abinit/tests/Psps_for_tests/He-GGA.psp8
+- He    ONCVPSP-3.2.3.1  r_core=   1.26476   1.13601
+-  2.00000   2.00000    170510                znucl, zion, pspdat
+    8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     1
+     extension_switch     1
+  pspatm : epsatm=    1.47060613
+         --- l  ekb(1:nproj) -->
+             0   -3.515591   -0.802262
+             1   -0.679937
+ pspatm: atomic psp has been read  and splines computed
+
+   2.94121225E+00                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     6
+ Reduced coordinates and weights : 
+
+     1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
+     2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
+     4)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
+     5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields    32 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for screening function ====
+ Number of points in the irreducible wedge :     6
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
+     2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
+     3)     5.00000000E-01  2.50000000E-01  2.50000000E-01       0.37500
+     4)     0.00000000E+00  5.00000000E-01  0.00000000E+00       0.12500
+     5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
+     6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields    32 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =     9x    9x    9
+          total number of points  =          729
+
+ Number of electrons calculated from density =    2.0000; Expected =    2.0000
+ average of density, n =  0.064000
+ r_s =    1.5509
+ omega_plasma =   24.4031 [eV]
+
+
+ rdqps: reading QP wavefunctions of the previous step 
+        looking for file t35i_DS1_QPS
+ file not found, 1st iteration initialized with KS eigenelements 
+
+ Number of electrons calculated from density =    2.0000; Expected =    2.0000
+ average of density, n =  0.064000
+ r_s =    1.5509
+ omega_plasma =   24.4031 [eV]
+
+
+--------------------------------------------------------------------------------
+
+ QP results after the unitary transformation in the KS subspace: 
+
+  Number of electrons    =    2.0000
+
+  QP Band energy    [Ha] = -7.95592502835262E-01
+  QP Hartree energy [Ha] =  3.53069363469165E-01
+
+--------------------------------------------------------------------------------
+
+ === KS Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =  19.0877 [eV], located at k-point      :   0.5000  0.0000  0.0000
+   Fundamental gap    =  16.2302 [eV], Top of valence bands at :  -0.2500  0.5000  0.2500
+                                       Bottom of conduction at :   0.5000  0.0000  0.0000
+ SIGMA fundamental parameters:
+ ANALYTIC CONTINUATION
+ number of plane-waves for SigmaX                   27
+ number of plane-waves for SigmaC and W             15
+ number of plane-waves for wavefunctions            27
+ number of bands                                     8
+ number of independent spin polarizations            1
+ number of spinorial components                      1
+ number of k-points in IBZ                           6
+ number of q-points in IBZ                           6
+ number of symmetry operations                      48
+ number of k-points in BZ                           32
+ number of q-points in BZ                           32
+ number of frequencies for dSigma/dE                 9
+ frequency step for dSigma/dE [eV]                0.25
+ number of omega for Sigma on real axis              0
+ max omega for Sigma on real axis  [eV]           0.00
+ zcut for avoiding poles [eV]                     0.10
+ number of imaginary frequencies for Sigma          40
+
+ EPSILON^-1 parameters (SCR file):
+ dimension of the eps^-1 matrix on file             15
+ dimension of the eps^-1 matrix used                15
+ number of plane-waves for wavefunctions            27
+ number of bands                                     8
+ number of q-points in IBZ                           6
+ number of frequencies                             121
+ number of real frequencies                          1
+ number of imag frequencies                        120
+ Self-Consistent on Energies and Wavefunctions
+ Bands used for the GW 1RDM arrays        1        8
+ number of imaginary frequencies for Sigma_c        40
+
+ Computing the 1-RDM correction for  Sx-Vxc  and k-point:   -0.25000  -0.25000   0.00000
+ from band     1 to band    8
+ Occs. after updating with Sx-Vxc corr. at k-point:  -0.25000  -0.25000   0.00000
+    2.00154   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00154
+ Total occ. from band     1 to    8 at current k-point:    2.00000
+
+ Computing the 1-RDM correction for  Sx-Vxc  and k-point:   -0.25000   0.25000   0.00000
+ from band     1 to band    8
+ Occs. after updating with Sx-Vxc corr. at k-point:  -0.25000   0.25000   0.00000
+    2.00122   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00122
+ Total occ. from band     1 to    8 at current k-point:    2.00000
+
+ Computing the 1-RDM correction for  Sx-Vxc  and k-point:    0.50000   0.50000   0.00000
+ from band     1 to band    8
+ Occs. after updating with Sx-Vxc corr. at k-point:   0.50000   0.50000   0.00000
+    2.00054   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00054
+ Total occ. from band     1 to    8 at current k-point:    2.00000
+
+ Computing the 1-RDM correction for  Sx-Vxc  and k-point:   -0.25000   0.50000   0.25000
+ from band     1 to band    8
+ Occs. after updating with Sx-Vxc corr. at k-point:  -0.25000   0.50000   0.25000
+    2.00021   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00021
+ Total occ. from band     1 to    8 at current k-point:    2.00000
+
+ Computing the 1-RDM correction for  Sx-Vxc  and k-point:    0.50000   0.00000   0.00000
+ from band     1 to band    8
+ Occs. after updating with Sx-Vxc corr. at k-point:   0.50000   0.00000   0.00000
+    2.00007   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00007
+ Total occ. from band     1 to    8 at current k-point:    2.00000
+
+ Computing the 1-RDM correction for  Sx-Vxc  and k-point:    0.00000   0.00000   0.00000
+ from band     1 to band    8
+ Occs. after updating with Sx-Vxc corr. at k-point:   0.00000   0.00000   0.00000
+    2.00032   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00032
+ Total occ. from band     1 to    8 at current k-point:    2.00000
+
+
+ Total averaged occ. from all k-points:   2.00000
+
+
+ Computing band corrections Delta eik (eV)
+ -----------------------------------------
+
+
+ Band corrections Delta eik = <KS_i|K[NO]-a*K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik
+
+  -----------------------------------------------------------------------------------------------------------------------------
+  k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
+    1        1       -13.494       -22.412        -8.918       -23.984         0.000       -15.021         7.113         7.067
+    1        2        20.020        26.836         6.817        -5.740         0.000       -12.534         3.927         3.904
+    1        3        37.903        45.743         7.840        -2.854         0.000       -10.685         0.995         0.986
+    1        4        37.903        45.743         7.841        -2.853         0.000       -10.685         0.995         0.986
+    1        5        41.850        48.796         6.946        -1.373         0.000        -8.337        -2.180        -2.163
+    1        6        42.088        49.030         6.942        -1.168         0.000        -8.122        -1.983        -1.971
+    1        7        65.684        75.338         9.654        -2.639         0.000       -12.271         3.311         3.290
+    1        8        77.541        87.140         9.599        -1.884         0.000       -11.466         2.072         2.055
+  -----------------------------------------------------------------------------------------------------------------------------
+  k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
+    2        1       -11.110       -19.449        -8.339       -25.005         0.000       -16.607         9.395         9.335
+    2        2        14.098        20.287         6.189        -4.477         0.000       -10.661         1.164         1.158
+    2        3        23.721        30.494         6.773        -2.810         0.000        -9.583        -0.286        -0.286
+    2        4        40.528        47.729         7.202        -1.717         0.000        -8.929        -1.023        -1.013
+    2        5        42.660        51.030         8.370        -2.957         0.000       -11.313         1.804         1.789
+    2        6        57.976        66.210         8.235        -2.004         0.000       -10.238         0.570         0.569
+    2        7        63.769        72.311         8.541        -1.758         0.000       -10.297         0.289         0.287
+    2        8        65.601        74.067         8.466        -1.706         0.000       -10.168         0.385         0.381
+  -----------------------------------------------------------------------------------------------------------------------------
+  k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
+    3        1        -8.842       -16.593        -7.750       -26.234         0.000       -18.408        11.983        11.907
+    3        2        13.077        19.064         5.987        -3.473         0.000        -9.461        -0.432        -0.431
+    3        3        26.978        33.581         6.603        -1.913         0.000        -8.535        -1.910        -1.891
+    3        4        32.448        40.047         7.599        -3.152         0.000       -10.742         1.077         1.068
+    3        5        32.448        40.048         7.600        -3.152         0.000       -10.742         1.077         1.068
+    3        6        36.662        43.543         6.881        -1.298         0.000        -8.190        -1.904        -1.893
+    3        7        80.481        90.022         9.541        -1.567         0.000       -11.098         2.248         2.237
+    3        8        93.508       103.258         9.750        -1.690         0.000       -11.428         1.947         1.936
+  -----------------------------------------------------------------------------------------------------------------------------
+  k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
+    4        1        -7.657       -15.411        -7.754       -26.231         0.000       -18.401        11.883        11.808
+    4        2        18.408        24.800         6.392        -3.119         0.000        -9.512        -0.370        -0.370
+    4        3        18.408        24.801         6.393        -3.118         0.000        -9.512        -0.370        -0.370
+    4        4        20.122        26.371         6.249        -2.300         0.000        -8.565        -1.951        -1.935
+    4        5        52.392        60.167         7.774        -1.824         0.000        -9.601         0.071         0.074
+    4        6        57.020        65.903         8.882        -2.538         0.000       -11.410         1.643         1.632
+    4        7        61.535        69.472         7.937        -1.397         0.000        -9.336        -0.564        -0.562
+    4        8        61.535        69.468         7.934        -1.400         0.000        -9.336        -0.564        -0.562
+  -----------------------------------------------------------------------------------------------------------------------------
+  k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
+    5        1       -10.515       -18.853        -8.338       -25.602         0.000       -17.198        10.217        10.151
+    5        2         8.573        14.114         5.540        -3.419         0.000        -8.968        -1.242        -1.233
+    5        3        33.715        41.340         7.625        -3.107         0.000       -10.722         1.825         1.816
+    5        4        45.387        54.341         8.954        -3.398         0.000       -12.327         3.088         3.063
+    5        5        45.387        54.353         8.966        -3.385         0.000       -12.327         3.088         3.063
+    5        6        52.444        59.762         7.318        -1.084         0.000        -8.415        -1.896        -1.884
+    5        7        52.444        59.770         7.327        -1.075         0.000        -8.415        -1.896        -1.884
+    5        8        53.932        60.544         6.612        -0.730         0.000        -7.371        -3.491        -3.462
+  -----------------------------------------------------------------------------------------------------------------------------
+  k-point  band      eik^GS        eik^new     Delta eik         K[NO]       a*K[KS]         Vxc[KS]       vH[NO]        vH[KS]
+    6        1       -17.571       -27.491        -9.921       -24.102         0.000       -14.143         5.889         5.851
+    6        2        28.181        35.954         7.773        -5.656         0.000       -13.400         5.440         5.412
+    6        3        50.729        60.057         9.329        -3.264         0.000       -12.568         3.207         3.183
+    6        4        50.729        60.068         9.340        -3.252         0.000       -12.568         3.207         3.183
+    6        5        50.729        60.057         9.329        -3.264         0.000       -12.568         3.207         3.183
+    6        6        57.206        64.811         7.605        -1.132         0.000        -8.742        -1.180        -1.175
+    6        7        57.206        64.816         7.610        -1.127         0.000        -8.742        -1.180        -1.175
+    6        8        57.206        64.811         7.605        -1.132         0.000        -8.742        -1.180        -1.175
+  -----------------------------------------------------------------------------------------------------------------------------
+
+ -------------------------------------------------------------------------------------------------
+ Ekinetic   = :    2.10882 Ha ,    57.384 eV
+ Evext_l    = :   -1.38864 Ha ,   -37.787 eV
+ Evext_nl   = :   -0.98734 Ha ,   -26.867 eV
+ Epsp_core  = :    0.09412 Ha ,     2.561 eV
+ Ehartree   = :    0.35763 Ha ,     9.732 eV
+ Ex[SD]     = :   -0.92951 Ha ,   -25.293 eV
+ Exc[MBB]   = :   -0.93472 Ha ,   -25.435 eV
+ Enn        = :   -1.83394 Ha ,   -49.904 eV
+ -------------------------------------------------------------------------------------------------
+ Etot[SD]   = :   -2.57887 Ha ,   -70.175 eV
+ Etot[MBB]  = :   -2.58408 Ha ,   -70.316 eV
+ Vee[SD]    = :   -0.57188 Ha ,   -15.562 eV
+ Vee[MBB]   = :   -0.57708 Ha ,   -15.703 eV
+ Density    = :    2.00000
+ Vee[SD] (= Ehartree + Ex[SD]) energy obtained using GW 1-RDM:
+ Vee[MBB] (= Ehartree + Exc[MBB]) energy obtained using GW 1-RDM:
+ -------------------------------------------------------------------------------------------------
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      5.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
+              amu      4.00260200E+00
+             bdgw           1       8       1       8       1       8       1       8
+                            1       8       1       8
+           diemac      1.20000000E+01
+             ecut      8.00000000E+00 Hartree
+         ecutsigx      8.00000000E+00 Hartree
+          ecutwfn      8.00000000E+00 Hartree
+           etotal1     0.0000000000E+00
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         512
+        gwcalctyp          21
+           gw1rdm           2
+           istwfk        0    0    1    0    1    1
+              ixc          11
+        ixc_sigma          11
+           jdtset        1
+              kpt     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+            kptgw     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       0.00000000E+00  0.00000000E+00  0.00000000E+00
+         kptrlatt        2   -2    2     -2    2    2     -2   -2    2
+          kptrlen      1.00000000E+01
+P           mkmem           6
+            natom           1
+            nband           8
+           ndtset           1
+            ngfft          10      10      10
+             nkpt           6
+           nkptgw           6
+         nomegasi          40
+          npwsigx          27
+           npwwfn          27
+            nstep          20
+             nsym          48
+           ntypat           1
+              occ      2.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver           4
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         225
+           strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+         symsigma        0
+           toldfe      1.00000000E-06 Hartree
+            typat      1
+              wtk        0.18750    0.37500    0.09375    0.18750    0.12500    0.03125
+           xangst      1.3229430215E+00  1.3229430215E+00  1.3229430215E+00
+            xcart      2.5000000000E+00  2.5000000000E+00  2.5000000000E+00
+            x1rdm           1
+             xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+            znucl        2.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] Effect of self-consistency on quasiparticles in solids
+- F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
+- Comment: in case gwcalctyp >= 10.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bruneval2006
+-
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [4] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [5] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+
+================================================================================
+
+ Calculation completed.
+.Delivered   1 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.8  wall=          0.9

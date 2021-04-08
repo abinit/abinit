@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Author: Samuel Ponc\'e
-# Date: 26/06/2013
-# Script to create an corrected electronic bandstructure with lifetime broadening
+# Date: 26/06/2013 -- 22/12/2020
+# Script to create a corrected electronic bandstructure with lifetime broadening
 
 try:
   from rf_final import system
@@ -24,7 +24,7 @@ except ImportError:
   raise
 import matplotlib.pyplot as P
 from numpy.linalg import inv
-from scipy.interpolate import spline
+from scipy.interpolate import UnivariateSpline 
 
 
 #############
@@ -77,21 +77,21 @@ class find_special_kpt:
      
 
 # Interaction with the user
-print """
+print("""
   _____  _       _          ______ _____        ____   _____ 
  |  __ \| |     | |        |  ____|  __ \      |  _ \ / ____|
  | |__) | | ___ | |_ ______| |__  | |__) |_____| |_) | (___  
  |  ___/| |/ _ \| __|______|  __| |  ___/______|  _ < \___ \ 
  | |    | | (_) | |_       | |____| |          | |_) |____) |
  |_|    |_|\___/ \__|      |______|_|          |____/|_____/
-"""
-print """ 
+""")
+print(""" 
 This script allows you to plot an electronic bandstructure from en _EP.nc 
 file. If you computed the file including lifetime you can also plot 
 "fat-band".
-"""
+""")
 # Read the input file
-user_input = raw_input('Enter name of the _EP.nc file\n')
+user_input = input('Enter name of the _EP.nc file\n')
 EP_file = user_input.strip()
 EP = system(directory='.',filename=EP_file)
 
@@ -101,16 +101,16 @@ full_kpt = N.matrix(EP.kpt)*gprimd
 
 special = find_special_kpt(EP.kpt)
 
-print "The special k-points are:"
+print("The special k-points are:")
 for ikpt in N.arange(len(special.special_kpoints)):
-  print str(special.special_kpoints[ikpt])
-user_input = raw_input('Enter the name of the '+str(len(special.special_kpoints))+' special k-points \n')
+  print(str(special.special_kpoints[ikpt]))
+user_input = input('Enter the name of the '+str(len(special.special_kpoints))+' special k-points \n')
 
 special_name = user_input.split()
 for ii in N.arange(len(special_name)):
   special_name[ii] = "$\mathbf{"+str(special_name[ii])+"}$"
 
-user_input = raw_input('Enter energy limit for the plot in eV: e.g. -5 10\n')
+user_input = input('Enter energy limit for the plot in eV: e.g. -5 10\n')
 user_tmp = user_input.split()
 if len(user_tmp) != 2:
   raise Exception("You should provide only 2 numbers")
@@ -119,8 +119,8 @@ else: # Append and TRIM the input string with STRIP
   upper = N.float(user_tmp[1])
 
 if EP.ntemp > 0:
-  print "Enter the temperature at which you want to do the Bandstructure plot (in K)"
-  user_input = raw_input('The possible temperature are:\n'+str(EP.temp[:])+'\n')
+  print("Enter the temperature at which you want to do the Bandstructure plot (in K)")
+  user_input = input('The possible temperature are:\n'+str(EP.temp[:])+'\n')
   if len(user_input.split()) != 1:
     raise Exception("You should provide only 1 number")
   else: # Append and TRIM the input string with STRIP
@@ -134,7 +134,7 @@ if EP.ntemp > 0:
 for iband in N.arange(EP.nband):
   if (EP.occ[0,0,iband]==0):
     cond = iband
-    print "First Cond band ",cond
+    print("First Cond band ", cond)
     break
 
 # Definie the Fermi level as the highest band before 0 occupations
@@ -149,12 +149,14 @@ xspan = N.arange(0,EP.nkpt,1)
 
 xfine = N.arange(0,(EP.nkpt-1)+0.2,0.2)
 
-P.figure(1,figsize=(5.196,7.5))
-P.rc('text',usetex = True)
-P.hold('on')
+fig = P.figure(figsize=(5.196,7.5))
+#P.rc('text',usetex = True)
+#P.hold('on')
 P.grid('on')
 yprops = dict(rotation=0, horizontalalignment='right',verticalalignment='center',x=-0.01)
-ax = P.gca()
+
+ax = fig.add_subplot(111)
+#ax = P.gca()
 #ax.set_xticks(special.position_special,special_name)
 
 P.xticks(special.position_special,special_name,fontsize=16)
@@ -167,13 +169,16 @@ ax.set_ylim([lower,upper])
 for iband in N.arange(EP.nband):
   if iband < cond:
     eigen =(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev
-    eig_fine = spline(xspan,eigen,xfine)
-#    P.plot(xfine,eig_fine,linewidth=2,color='#0099FF')    
-    P.plot(xfine,eig_fine,linewidth=2,color='k')    
+    spl = UnivariateSpline(xspan,eigen,k=1)
+    eig_fine = spl(xfine)
+    #P.plot(xfine,eig_fine,linewidth=2,color='k')    
+    P.plot(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,linewidth=2,color='k')    
   else:
-    eig_fine = spline(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,xfine)
-    P.plot(xfine,eig_fine,linewidth=2,color='k')
-#    P.plot(xfine,eig_fine,linewidth=2,color='#FF6600')
+    eigen =(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev  
+    spl = UnivariateSpline(xspan,eigen, k=1)  
+    eig_fine = spl(xfine)
+    #P.plot(xfine,eig_fine,linewidth=2,color='k')
+    P.plot(xspan,(EP.eigenvalues[0,:,iband]-fermi)*csts.hartree2ev,linewidth=2,color='k')    
 
 # Plot renormalization
 if EP.ntemp > 0: 
@@ -182,24 +187,33 @@ if EP.ntemp > 0:
       #renormalization = real part of zpr
       renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[temp_index,0,:,iband,0])*csts.hartree2ev
       bandwith = EP.zpm[temp_index,0,:,iband,1]*csts.hartree2ev
-      renorm_fine = spline(xspan,renorm,xfine)
-      bandwith_fine = spline(xspan,bandwith,xfine)
-      P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3,color='b')
-      P.plot(xfine,renorm_fine,color='b',linestyle='--',linewidth=2)
+      #spl = UnivariateSpline(xspan,renorm)
+      #renorm_fine = spl(xfine)
+      #spl = UnivariateSpline(xspan,bandwith)
+      #bandwith_fine = spl(xfine)
+      #P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3,color='b')
+      #P.plot(xfine,renorm_fine,color='b',linestyle='--',linewidth=2)
+      P.fill_between(xspan, renorm + bandwith / 2, renorm - bandwith / 2, alpha=.3,color='b')
+      P.plot(xspan, renorm, color='b', linestyle='--', linewidth=2)
     else:
       #renormalization = real part of zpr
       renorm = (EP.eigenvalues[0,:,iband]-fermi + EP.zpm[temp_index,0,:,iband,0])*csts.hartree2ev
       bandwith = EP.zpm[temp_index,0,:,iband,1]*csts.hartree2ev
-      renorm_fine = spline(xspan,renorm,xfine)
-      bandwith_fine = spline(xspan,bandwith,xfine)
-      P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3, color='r')
-      P.plot(xfine,renorm_fine,color='r',linestyle='--',linewidth=2)
+      #spl = UnivariateSpline(xspan,renorm)
+      #renorm_fine = spl(xfine)
+      #spl = UnivariateSpline(xspan,bandwith)
+      #bandwith_fine = spl(xfine)
+      #P.fill_between(xfine,renorm_fine+bandwith_fine/2, renorm_fine-bandwith_fine/2, alpha=.3, color='r')
+      #P.plot(xfine,renorm_fine,color='r',linestyle='--',linewidth=2)
+      P.fill_between(xspan, renorm + bandwith / 2, renorm - bandwith / 2, alpha=.3,color='r')
+      P.plot(xspan, renorm, color='r', linestyle='--', linewidth=2)      
+
   bbox_props = dict(boxstyle="square", fc="w", ec="0.5", alpha=1.0)
   ax.text(EP.nkpt,upper, "Temperature: "+str(temp)+" K", ha="right", va="top", size=16,
         bbox=bbox_props)
 
 P.show()
-
+#P.savefig('plot4.png', bbox_inches='tight')
 
 
 
