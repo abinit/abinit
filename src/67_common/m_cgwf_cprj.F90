@@ -128,7 +128,7 @@ subroutine cgwf_cprj(cg,cprj_cwavef_bands,cprj_update_lvl,eig,&
  type(pawcprj_type),intent(inout),target :: cprj_cwavef_bands(:,:)
 
 !Local variables-------------------------------
-integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
+integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0,tim_getcprj=3
 integer,parameter :: useoverlap=0,tim_getcsc=3
  integer,save :: nskip=0
  integer :: cpopt,i1,i2,i3,iband,isubh,isubh0,jband,me_g0,igs
@@ -205,11 +205,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
- if (cprj_update_lvl==-1) then
-   call timab(1293,1,tsec)
-   call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
-   call timab(1293,2,tsec)
- end if
+ if (cprj_update_lvl==-1)  call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
 
  ! Big iband loop
  do iband=1,nband
@@ -335,9 +331,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        ! Project the steepest descent direction:
        ! direc(2,npw)=<G|H|Cnk> - \sum_{(i/=n)} <G|H|Cik>
        if(ortalg>=0)then
-         call timab(1293,1,tsec)
-         call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
-         call timab(1293,2,tsec)
+         call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg,tim_getcprj)
          call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &         gs_hamk,mpi_enreg,nband,tim_getcsc)
          scprod = reshape(scprod_csc,(/2,nband/))
@@ -371,9 +365,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
        ! ======= PROJECT THE PRECOND. STEEPEST DESCENT DIRECTION ==============
        ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
-       call timab(1293,1,tsec)
-       call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg)
-       call timab(1293,2,tsec)
+       call cprj_update_oneband(direc,cprj_direc,gs_hamk,mpi_enreg,tim_getcprj)
        call getcsc(scprod_csc,cpopt,direc,cwavef_bands,cprj_direc,cprj_cwavef_bands,&
 &       gs_hamk,mpi_enreg,nband,tim_getcsc)
 !       if (abs(xnorm-one)>tol10) then ! True if iline==1 and if input WFs are random
@@ -609,9 +601,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        end do
        call timab(1305,2,tsec)
        if (cprj_update_lvl<=0.and.cprj_update_lvl>=-1) then
-         call timab(1293,1,tsec)
-         call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
-         call timab(1293,1,tsec)
+         call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
        else
          call timab(1302,1,tsec)
          call pawcprj_axpby(sintn,costh,cprj_direc,cprj_cwavef)
@@ -672,11 +662,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
  !  ======================================================================
 
- if (cprj_update_lvl<=2.and.cprj_update_lvl>=-1) then
-   call timab(1293,1,tsec)
-   call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
-   call timab(1293,2,tsec)
- end if
+ if (cprj_update_lvl<=2.and.cprj_update_lvl>=-1) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
 
  sij_opt=0
 
@@ -849,10 +835,10 @@ end subroutine mksubovl
 !!
 !! SOURCE
 !!
-subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
+subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
 
 !Arguments ------------------------------------
- integer,intent(in) :: icg,nband
+ integer,intent(in) :: icg,nband,tim_getcprj
 !arrays
  type(pawcprj_type),intent(in),target :: cprj_cwavef_bands(:,:)
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -861,6 +847,7 @@ subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
 
 !Local variables-------------------------------
  integer :: choice,iband,wfsize
+ real(dp) :: tsec(2)
  real(dp),pointer :: cwavef(:,:),cwavef_bands(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef(:,:)
 
@@ -876,11 +863,13 @@ subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg)
    cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
    cprj_cwavef => cprj_cwavef_bands(:,gs_hamk%nspinor*(iband-1)+1:gs_hamk%nspinor*iband)
 
+   call timab(1290+tim_getcprj,1,tsec)
    call getcprj(choice,0,cwavef,cprj_cwavef,&
 &    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
 &    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+   call timab(1290+tim_getcprj,2,tsec)
  end do
 
 end subroutine cprj_update
@@ -912,17 +901,19 @@ end subroutine cprj_update
 !!
 !! SOURCE
 !!
-subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
+subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
 
 !Arguments ------------------------------------
 !arrays
+ integer,intent(in) :: tim_getcprj
+ real(dp),intent(inout) :: cwavef(:,:)
  type(pawcprj_type),intent(inout) :: cprj_cwavef(:,:)
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(MPI_type),intent(in) :: mpi_enreg
- real(dp),intent(inout) :: cwavef(:,:)
 
 !Local variables-------------------------------
  integer :: choice,wfsize
+ real(dp) :: tsec(2)
 
  wfsize=gs_hamk%npw_k*gs_hamk%nspinor
 
@@ -931,11 +922,13 @@ subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg)
    choice = 2
  end if
 
+ call timab(1290+tim_getcprj,1,tsec)
  call getcprj(choice,0,cwavef,cprj_cwavef,&
 &  gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
 &  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
 &  gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &  gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+ call timab(1290+tim_getcprj,2,tsec)
 
 end subroutine cprj_update_oneband
 !!***

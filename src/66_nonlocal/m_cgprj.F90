@@ -879,14 +879,14 @@ contains
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
          iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
-         call timab(1294,1,tsec)
          do jdir=istart,iend
+           call timab(1294,1,tsec)
            call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
 &           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+           call timab(1294,2,tsec)
          end do
-         call timab(1294,2,tsec)
        end do
 !      Export cwaveprj to big array cprj
        call pawcprj_put(atindx_atm,cwaveprj,cprj,ncprj,iband_start,ibgb,ikpt,iorder_cprj,isppol,&

@@ -903,7 +903,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1300)='cgwf_cprj                       '
  names(1301)='cgwf_cprj%other                 '
- names(1302)='pawcprj(zxpby)                  '
+ names(1302)='pawcprj(zaxpby)                 '
  names(1303)='pawcprj(projbd)                 '; basic(1303)=1
  names(1304)='subham(dotprod_g)               '; basic(1304)=1
  names(1305)='cgwf_cprj%npw_work              '; basic(1305)=1
@@ -1253,8 +1253,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
-!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-lobpcgwf2-chebfi )
-     tslots(:7)=(/-588, 39,-22,-530, -1300,-1600, -1650/)
+!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
+     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1650,-1295,-1364/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1316,8 +1316,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-788,781,782,783,784,785,786/)
    case(40)
 !      More complements in vtowfk
-!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon - cprj_rotate
-     tslots(:9)=(/-590,39,-22,-1300,-1600,-530,-585,-583,-578/)
+!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon - cprj_rotate - getcprj(vtowfk)
+     tslots(:10)=(/-590,39,-22,-1300,-1600,-530,-585,-583,-578,-1295/)
    case(41)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
@@ -1344,7 +1344,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:3)=(/1360,1363,1364/)
    case(50)
 !      Estimate the complement of getcsc
-     tslots(:4)=(/1362,1360,-1361,-236/)
+     tslots(:4)=(/1362,1360,-1363,-1364/)
    case(51)
 !      Estimate the complement of getchc
      tslots(:5)=(/1375,1370,-235,-1371,-1372/)
@@ -1608,7 +1608,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          msg= 'vtorho '
        case(7)
-         list(:17)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
+         list(:18)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1295,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
            list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
@@ -1733,7 +1733,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:4)=(/1290,1293,1294,1295,1299/)
          msg='getcprj'
        case(82)
-         list(:4)=(/1360,1361,236,1362/)
+         list(:4)=(/1360,1363,1364,1362/)
          msg='getcsc'
        case(83)
          list(:5)=(/1370,235,1371,1372,1375/)

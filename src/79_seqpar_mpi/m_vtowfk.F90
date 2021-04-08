@@ -197,7 +197,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: has_fock,newlobpcg,cprj_in_memory_,update_cprj,do_subdiago,do_ortho, rotate_subvnlx,use_rmm_diis
- integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
+ integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
 !     subovl should be Identity (in that case we should use use_subovl=0)
@@ -401,26 +401,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
      if (cprj_in_memory_.and.update_cprj) then
        cprj_cwavef => cprj_cwavef_bands(:,my_nspinor*(iband-1)+1:my_nspinor*iband)
-       call timab(1295,1,tsec)
-       call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg)
-       call timab(1295,2,tsec)
+       call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
      end if
    end do
-
-!   !  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
-!!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
-!   do ispinor=1,my_nspinor
-!     do iband=1,nband_k
-!       igs=(ispinor-1)*npw_k
-!       iwavef=(iband-1)*npw_k*my_nspinor+icg
-!        do ipw=1+igs,npw_k+igs
-!          if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
-!           cg(1,ipw+iwavef)=zero
-!           cg(2,ipw+iwavef)=zero
-!          end if
-!        end do
-!      end do
-!    end do
 
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
@@ -603,7 +586,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calculated in my lobpcg, we don't care about the phase of gsc !
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
-     else
+     else ! cprj_in_memory
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0,&
          & cprj=cprj_cwavef_bands,nspinor=dtset%nspinor)
      end if
@@ -639,11 +622,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  if (cprj_in_memory_) then
    update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2.and.dtset%cprj_update_lvl>=-1
-   if (update_cprj) then
-     call timab(1295,1,tsec)
-     call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg)
-     call timab(1295,2,tsec)
-   end if
+   if (update_cprj) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg,tim_getcprj)
  end if
 
  call timab(39,2,tsec)
