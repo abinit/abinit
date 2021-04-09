@@ -5678,7 +5678,7 @@ end function get_frohlich
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/pheigvec_new
+!!****f* m_sigmaph/pheigvec_rotate
 !! NAME
 !! pheigvec_rotate
 !!
@@ -5686,14 +5686,15 @@ end function get_frohlich
 !!  Obtain phonon frequencies and eigenvectors for q in the BZ from the symmetrical image in the IBZ.
 !!
 !! INPUTS
-!!  q
-!!  sq
+!!  cryst: crystal structure
+!!  q: q-point in the IBZ
+!!  sq: q-point in the BZ. sq = TS q_ibz
 !!  isym
 !!  itimrev
-!!  eigvec_in
+!!  eigvec_in: Input ph eigenvectors at q_ibz
 !!
 !! OUTPUT
-!!  eigvec_out
+!!  eigvec_out: Onput ph eigenvectors at q_bz
 !!
 
 subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
@@ -5787,12 +5788,12 @@ end subroutine pheigvec_rotate
 !!  Create new object with phonon quantities in the IBZ.
 !!
 !! INPUTS
-!!  ifc:
-!!  nqibz:
-!!  qibz:
-!!  use_ifc_fourq:
-!!  comm:
-!!
+!!  cryst: Crystal structure
+!!  ifc: Interatomic force constants.
+!!  nqibz: Number of q-points in the IBZ.
+!!  qibz: q-points in the IBZ
+!!  use_ifc_fourq:  True to replace symmetrization with call to ifc_fourq (debugging option)
+!!  comm: MPI communicator in which phonon arrays in the IBZ will be MPI distributed.
 
 type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, comm) result(new)
 
@@ -5855,7 +5856,7 @@ end function phstore_new
 !! phstore_free
 !!
 !! FUNCTION
-!!  Free memory.
+!!  Free dynamic memory.
 !!
 !! INPUTS
 
@@ -5884,8 +5885,8 @@ end subroutine phstore_free
 !! phstore_async_rotate
 !!
 !! FUNCTION
-!!  Beging non-blocking collective MPI communication to obtain phonon frequencies and eigenvectors
-!!  in the BZ from data in the IBZ.
+!!  Begin non-blocking collective MPI communication inside self%comm to obtain
+!!  phonon frequencies and eigenvectors in the BZ from data in the IBZ.
 !!
 !! INPUTS
 !!
@@ -5915,7 +5916,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
    return
  end if
 
- ! Find the rank storing the q-point in the IBZ.
+ ! Find the rank MPI storing the q-point in the IBZ.
  do rank=0,self%nprocs-1
    if (iq_ibz >= self%qibz_start(rank) .and. iq_ibz <= self%qibz_stop(rank)) then
      master = rank; exit
@@ -5932,18 +5933,19 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  isirr_q = (isym_q == 1 .and. trev_q == 0)
 
  if (self%my_rank == master) then
+   ! I own the data --> operate on it
    if (isirr_q) then
      ! q in IBZ --> no rotation is needed.
      call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, &
                               self%pheigvec_qibz(:,:,:,iq_ibz), self%displ_cart)
    else
-     ! q in BZ --> master rotates phonon eigenvectors.
+     ! q in BZ --> rotatee phonon eigenvectors.
      call pheigvec_rotate(cryst, self%qibz(:, iq_ibz), qpt_bz, isym_q, trev_q, self%pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
      call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, self%displ_cart)
    end if
  end if
 
- ! Begin non-blocking bcast for displ_cart.
+ ! Begin non-blocking bcast for displ_cart. Caller must wait (use phstore_wait)
  call xmpi_ibcast(self%displ_cart, master, self%comm, self%requests(2), ierr)
 
 end subroutine phstore_async_rotate
@@ -5990,7 +5992,7 @@ end subroutine phstore_wait
 !! test_phrotation
 !!
 !! FUNCTION
-!!  Test the symmetrization of ph eigenvalues and eigenvectors.
+!!  Test the symmetrization of the phonon eigenvalues and eigenvectors.
 !!
 !! INPUTS
 !!

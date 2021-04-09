@@ -170,8 +170,7 @@ module m_phonons
 
  end type phonon_dos_type
 
- public :: mkphdos
- ! Constructor
+ public :: mkphdos        ! Constructor
 !!**
 
 CONTAINS  !===============================================================================
@@ -195,12 +194,10 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
-subroutine phdos_print(PHdos,fname)
+subroutine phdos_print(PHdos, fname)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
@@ -323,8 +320,6 @@ end subroutine phdos_print
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -428,8 +423,6 @@ end subroutine phdos_print_debye
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -541,8 +534,6 @@ end subroutine phdos_print_thermo
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -584,8 +575,6 @@ end subroutine phdos_free
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -681,8 +670,6 @@ end subroutine phdos_init
 !!      anaddb,m_eph_driver,m_tdep_phdos
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1193,8 +1180,6 @@ end subroutine mkphdos
 !!      anaddb
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1370,8 +1355,6 @@ end subroutine zacharias_supercell_make
 !!      m_generate_training_set
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1566,8 +1549,6 @@ end subroutine thermal_supercell_make
 !!      anaddb,m_generate_training_set
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1607,8 +1588,6 @@ end subroutine thermal_supercell_free
 !!      anaddb
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1657,8 +1636,6 @@ end subroutine zacharias_supercell_print
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1710,8 +1687,6 @@ end subroutine thermal_supercell_print
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -1801,8 +1776,6 @@ end subroutine phdos_ncwrite
 !!      anaddb
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2105,8 +2078,6 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2174,8 +2145,6 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2240,8 +2209,6 @@ end subroutine phdos_print_vsound
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2403,8 +2370,6 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2485,8 +2450,6 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2587,8 +2550,6 @@ end subroutine phonons_write_phfrq
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2714,8 +2675,6 @@ end subroutine phonons_write_xmgrace
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -2842,8 +2801,6 @@ end subroutine phonons_write_gnuplot
 !!      m_eph_driver
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -3004,8 +2961,6 @@ end subroutine ifc_mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 
@@ -3230,8 +3185,6 @@ end subroutine dfpt_symph
 !!      m_phonons
 !!
 !! CHILDREN
-!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
-!!      prt_supercell_for_qpt
 !!
 !! SOURCE
 !!
