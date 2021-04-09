@@ -1281,6 +1281,7 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
 !                (-1) factor already present
 #ifdef DEV_MJV
 print *, "term1 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
+print *, 'has_dcwf, is_metal_or_qne0 ', has_dcwf, is_metal_or_qne0
 #endif
                  d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*elfd_fact*dotr
                  d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*elfd_fact*doti
