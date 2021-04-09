@@ -2033,6 +2033,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      end if
 
                      if (dtset%ibte_prep > 0) then
+                       ! Save scattering rates.
                        sigma%srate(ibsum_kq, ib_k, it, imyq) = sigma%srate(ibsum_kq, ib_k, it, imyq) + &
                          gkq2 * two_pi * ( &
                          (nqnu - f_nk  + one) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
@@ -2868,6 +2869,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  else
    ! Automatic grid generation.
 
+   ! TODO: Spin
    ! Automatic grid generation over q-points and spins.
    !if (new%nsppol == 2 .and. mod(nprocs, 2) == 0) then
    !  spin_comm%nproc = 2
