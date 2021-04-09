@@ -822,10 +822,10 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
 print *, ' rhog after nhat ', rhog(:,1:10)
 print *, ' rhor after nhat ', rhor(1:10,:)
 if(psps%usepaw==1)then
-print *, ' pawrhoij ', allocated (pawrhoij)
-call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
-  pawrhoij(1)%qphase,1,natom,&
-  unit=std_out,opt_prtvol=dtset%pawprtvol)
+print *, ' pawrhoij ', allocated (pawrhoij), ' qphas ', pawrhoij(1)%qphase, ' cplex ', pawrhoij(1)%cplex_rhoij 
+!call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
+!  pawrhoij(1)%qphase,1,natom,&
+!  unit=std_out,opt_prtvol=dtset%pawprtvol)
 endif
 #endif
 
@@ -956,10 +956,10 @@ print *, ' vtrial ', vtrial(1:10,1)
    call timab(561,2,tsec)
 
 #ifdef DEV_MJV
-print *, 'paw_ij'
-call pawdij_print_dij(paw_ij(1)%dij,paw_ij(1)%cplex_dij,&
-&  paw_ij(1)%qphase,1,natom,paw_ij(1)%nspden,&
-&  unit=std_out,Ha_or_eV=1,opt_prtvol=dtset%pawprtvol)
+print *, 'paw_ij cplx phas ', paw_ij(1)%cplex_dij, paw_ij(1)%qphase
+!call pawdij_print_dij(paw_ij(1)%dij,paw_ij(1)%cplex_dij,&
+!&  paw_ij(1)%qphase,1,natom,paw_ij(1)%nspden,&
+!&  unit=std_out,Ha_or_eV=1,opt_prtvol=dtset%pawprtvol)
 #endif
  end if
 

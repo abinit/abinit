@@ -1259,6 +1259,9 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
 !sum over all jband by combining the projbd
                call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr)
 
+#ifdef DEV_MJV
+print *, "iband_ gvnlx1_tmp ", iband_, gvnlx1_tmp(:,1:10)
+#endif
 ! keep my own gvnlx
                if (iband_ == iband) then
                  gvnlx1 = gvnlx1_tmp
