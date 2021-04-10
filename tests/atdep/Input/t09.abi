@@ -31,6 +31,7 @@ TheEnd
 #%%   t09omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t09thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = F. Bottin & J. Bouchet
