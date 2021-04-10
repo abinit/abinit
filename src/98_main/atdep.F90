@@ -86,6 +86,7 @@ program atdep
 
   integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
   integer :: stdout,nshell_max,ii
+  integer :: print_mem_report
   double precision :: U0
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
@@ -256,10 +257,11 @@ program atdep
  end if
 
 ! Initialize basic quantities
- natom         =Invar%natom
- natom_unitcell=Invar%natom_unitcell
- stdout        =Invar%stdout
- nshell_max    =500
+ print_mem_report = 1
+ natom            = Invar%natom
+ natom_unitcell   = Invar%natom_unitcell
+ stdout           = Invar%stdout
+ nshell_max       = 500
 
 !==========================================================================================
 !============== Define the ideal lattice, symmetries and Brillouin zone ===================
@@ -530,8 +532,8 @@ program atdep
 &                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
- write(Invar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
- write(Invar%stdout,'(a)') ' See also the DDB file'
+ write(stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
+ write(stdout,'(a)') ' See also the DDB file'
 
 !==========================================================================================
 !===================== Compute the elastic constants ======================================
@@ -558,6 +560,13 @@ program atdep
 
  if (Invar%order==2) then
    call tdep_print_Aknowledgments(Invar)
+
+   call abinit_doctor(trim(Invar%output_prefix)//'.abo', print_mem_report=print_mem_report)
+
+   call flush_unit(stdout)
+
+   if (MPIdata%iam_master) close(unit=stdout)
+
    call xmpi_end()
    stop
  end if
@@ -592,10 +601,11 @@ program atdep
 !==========================================================================================
  call tdep_print_Aknowledgments(Invar)
 
- call tdep_clean_mpi(MPIdata)
+ call abinit_doctor(trim(Invar%output_prefix)//'.abo', print_mem_report=print_mem_report)
 
-!FB if (iam_master) close(stdout)
- call abinit_doctor("__fftprof")
+ call flush_unit(stdout)
+
+ if (MPIdata%iam_master) close(unit=stdout)
 
 100 call xmpi_end()
 

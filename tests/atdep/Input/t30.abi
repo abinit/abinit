@@ -30,10 +30,10 @@ TheEnd
 #%% md_hist = t30
 #%% [files]
 #%% files_to_test = 
-#%%   t30.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t30.abo, tolnlines = 30, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t30omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%%   t30thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
-#%%   t30thermo3.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t30thermo3.dat, tolnlines = 10, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
