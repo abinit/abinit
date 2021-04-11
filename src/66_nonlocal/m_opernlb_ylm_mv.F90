@@ -148,6 +148,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 !Local variables-------------------------------
 !Arrays
 !scalars
+ logical :: use_dgemv
  integer :: ia,iaph3d
  integer :: il,ilmn,ipw,jpw,ipwshft,ispinor,nthreads
  real(dp) :: wt
@@ -176,9 +177,11 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  if (abs(choice)>1) then
    ABI_ERROR('Only abs(choice)<=1 is available for now.')
  end if
- if (nloalg(1)/=2.and.nloalg(1)/=3) then
-   ABI_ERROR('nloalg(1) should be 2 or 3.')
+ if (nloalg(1)<2.or.nloalg(1)>10) then
+   ABI_ERROR('nloalg(1) should be between 2 or 10.')
  end if
+
+ use_dgemv = nloalg(1)==2.or.nloalg(1)==6.or.nloalg(1)==10
 
 !Inits
  wt=four_pi/sqrt(ucvol)
@@ -262,7 +265,12 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
      if (paw_opt/=3) then
 
 !      Step (2) scal(g) = Sum_lmn f_nl(g).Y_lm(g).gxfac_(lmn)
-       if (nloalg(1)==3) then
+       if (use_dgemv) then
+!         call timab(1157,1,tsec)
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
+         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
+!         call timab(1157,2,tsec)
+       else
 !         call timab(1153,1,tsec)
          scalr(:) = zero
          scali(:) = zero
@@ -273,11 +281,6 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
            end do
          end do
 !         call timab(1153,2,tsec)
-       else if (nloalg(1)==2) then
-!         call timab(1157,1,tsec)
-         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
-         call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
-!         call timab(1157,2,tsec)
        end if
 
 !      Step (3) : vect(g) = exp(-2pi.i.g.R).scal(g)

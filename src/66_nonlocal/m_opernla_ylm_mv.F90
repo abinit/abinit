@@ -129,6 +129,7 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
 
 !Local variables-------------------------------
 !scalars
+ logical :: use_dgemv
  integer :: ia,iaph3d,ierr,il,ilmn,ipw,ipw0,ipwshft,ispinor,jpw,nthreads
  real(dp) :: wt
 !arrays
@@ -147,8 +148,8 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  if (abs(choice)>1) then
    ABI_ERROR('Only abs(choice)<=1 is available for now.')
  end if
- if (nloalg(1)/=2.and.nloalg(1)/=3) then
-   ABI_ERROR('nloalg(1) should be 2 or 3.')
+ if (nloalg(1)<2.or.nloalg(1)>10) then
+   ABI_ERROR('nloalg(1) should be between 2 and 10.')
  end if
  nthreads=1
 #if defined HAVE_OPENMP
@@ -157,6 +158,8 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  if (nthreads>1) then
    ABI_ERROR('Only nthreads=1 is available for now.')
  end if
+
+ use_dgemv = nloalg(1)==2.or.nloalg(1)==5.or.nloalg(1)==7
 
 !Useful variables
  wt=four_pi/sqrt(ucvol);if (cplex==1) wt=2.d0*wt
@@ -205,7 +208,12 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
      if (choice>=0) then
 
 !      Step (2) : Compute scal(lmn) = Sum_g[scal(g).f_nl(g).Y_lm(g)]
-       if (nloalg(1)==3) then
+       if (use_dgemv) then
+!         call timab(1134,1,tsec)
+         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
+         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
+!         call timab(1134,2,tsec)
+       else
 !         call timab(1132,1,tsec)
          scalr_lmn(:)=0.0_DP
          scali_lmn(:)=0.0_DP
@@ -216,11 +224,6 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
            end do
          end do
 !         call timab(1132,2,tsec)
-       else if (nloalg(1)==2) then
-!         call timab(1134,1,tsec)
-         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
-         call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
-!         call timab(1134,2,tsec)
        end if
 !      Step (3) : Compute gx(lmn) = 4pi/sqrt(vol) (i)^l scal(lmn)
 !       call timab(1133,1,tsec)

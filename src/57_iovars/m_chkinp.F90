@@ -1900,8 +1900,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nloalg(1)= nloc_alg
-!  Must be 2, 3, 4
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   if(dt%useylm==0) then
+!    Must be 2, 3, 4
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   else
+!    Must be between 2 and 10
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),9,(/2,3,4,5,6,7,8,9,10/),iout)
+   end if
 
 !  nloc_mem= nloalg(2)*(nloalg(3)+1)
 !  nloalg(2) must be -1 or 1 ; nloalg(3) is 0 or 1.

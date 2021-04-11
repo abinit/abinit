@@ -397,7 +397,7 @@ contains
  integer :: n1,n2,n3,nd2gxdt,ndat_left_,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
  real(dp) :: enlk, tsec(2)
- logical :: check,testnl
+ logical :: check,testnl,no_opernla_mv,no_opernlb_mv
  character(len=500) :: message
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -497,6 +497,23 @@ contains
  if (present(ndat_left)) then
    ndat_left_=ndat_left
  end if
+ ! Determine which implementation to use : matrix-vector (mv), matrix-vector with dgmev (mv-dgemv), or native
+ if (nloalg(1)<2.or.nloalg(1)>10) then
+   ABI_ERROR('nloalg(1) should be between 2 and 10.')
+ end if
+ !nloalg(1)|  opernla |  opernlb
+ !------------------------------
+ !    2    | mv-dgemv | mv-dgemv
+ !    3    |    mv    |    mv
+ !  4(def) |  native  |  native
+ !    5    | mv-dgemv |    mv
+ !    6    |    mv    | mv-dgemv
+ !    7    | mv-dgemv |  native
+ !    8    |  native  |    mv
+ !    9    |    mv    |  native
+ !   10    |  native  | mv-dgemv
+ no_opernla_mv = nloalg(1)==4.and.nloalg(1)==8.and.nloalg(1)==10
+ no_opernlb_mv = nloalg(1)==4.and.nloalg(1)==7.and.nloalg(1)==9
 
 !Define dimensions of projected scalars
 !==============================================================
@@ -859,7 +876,7 @@ contains
        ! OR <p_lmn|c> and first derivatives are in memory, but we need second derivatives : choice=8 or 81
        if (cpopt<=1.or.(cpopt<=3.and.abs(choice_a)>1).or.choice==8.or.choice==81) then
 !       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
-         if (abs(choice_a)>1.or.nloalg(1)==4) then
+         if (abs(choice_a)>1.or.no_opernla_mv) then
            call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
@@ -981,7 +998,7 @@ contains
            if(nloalg(2)<=0) then
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
-           if (abs(choice_b)>1.or.nloalg(1)==4) then
+           if (abs(choice_b)>1.or.no_opernlb_mv) then
              call timab(1103,1,tsec)
              call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
