@@ -2261,7 +2261,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         'in which the occupation numbers are to be determined automatically.     ... occopt=',dt%occopt,ch10,&
         'However, in this case, the target total spin magnetization',ch10,&
         'must be specified, while the default value is observed.                 ... spinmagntarget=',dt%spinmagntarget,ch10,&
-        'Action: if you are doing an antiferromagnetic calculation, please use nsppol=1 with nspden=2 ;',ch10,&
+        'Action: if you are doing an antiferromagnetic calculation, please use nsppol=1 with nspden=2;',ch10,&
         'on the other hand, if you are doing a ferromagnetic calculation, either specify your own spinmagntarget,',ch10,&
         'or let the code determine the total spin-polarization, by using a metallic value for occopt (e.g. 7 or 4 ...).'
        ABI_ERROR_NOSTOP(msg, ierr)

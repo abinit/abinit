@@ -1322,9 +1322,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Integrate delta functions inside miniBZ around Gamma.
      ! TODO: Remove?
-     if (sigma%frohl_model == 1 .and. sigma%imag_only) then
-       call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, dtset%prtvol, sigma%pqb_comm%value)
-     end if
+     !if (sigma%frohl_model == 1 .and. sigma%imag_only) then
+     !  call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, dtset%prtvol, sigma%pqb_comm%value)
+     !end if
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! and save KS energies in sigma%e0vals
@@ -5316,145 +5316,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 end subroutine sigmaph_get_all_qweights
 !!***
 
-!!****f* m_sigmaph/eval_sigfrohl_deltas
-!! NAME
-!!  eval_sigfrohl_deltas
-!!
-!! FUNCTION
-!!  Compute frohl_deltas_sphcorr array with contributions to the imaginary part
-!!  of the Fan-Migdal self-energy due the Frohlich divergence.
-!!  Use Verdi's model, group velocities and radial integration.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
-!!
-!! SOURCE
-
-subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol, comm)
-
-!Arguments ------------------------------------
- class(sigmaph_t),intent(inout) :: sigma
- type(crystal_t),intent(in) :: cryst
- type(ifc_type),intent(in) :: ifc
- type(ebands_t),intent(in) :: ebands
- integer,intent(in) :: ikcalc, spin, prtvol, comm
-
-!Local variables ------------------------------
-!scalars
- real(dp),parameter :: mytol = tol12
- integer :: nu, it, iatom, my_rank, nprocs !nbcalc_ks,
- integer :: ib_k, band_ks, ik_ibz, iang, ierr
- real(dp) :: wqnu, nqnu, eig0nk, f_nk, dfde_nk
- real(dp) :: inv_qepsq, q0rad, vnk_mod, cos_theta_qvnk, qroot, fact_qvers !, den
-! real(dp) :: cpu, wall, gflops
- complex(dpc) :: cnum
-!arrays
- real(dp) :: qvers_cart(3), vnk(3), nqnu_tlist(sigma%ntemp)
- real(dp) :: phfrq(cryst%natom*3), displ_cart(2,3,cryst%natom,3*cryst%natom)
- complex(dpc) :: cp3(3)
-
-! *************************************************************************
-
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
-
- ! Integrate delta functions inside the small sphere around the Gamma point.
- ! Radius of sphere with volume equivalent to the micro zone.
- q0rad = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
-
- ABI_MALLOC_IFNOT(sigma%frohl_deltas_sphcorr, (2, sigma%ntemp, sigma%max_nbcalc, 3 * cryst%natom))
- sigma%frohl_deltas_sphcorr = zero
-
- !kk = sigma%kcalc(:, ikcalc)
- ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
-
- ! Compute angular average.
- do iang=1,sigma%angl_size
-   if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
-   qvers_cart = sigma%qvers_cart(:, iang)
-   inv_qepsq = one / dot_product(qvers_cart, matmul(ifc%dielt, qvers_cart))
-
-   ! Compute phonons with NA behaviour along qvers_cart.
-   call ifc%fourq(cryst, qvers_cart, phfrq, displ_cart, nanaqdir="cart")
-
-   ! Note that acoustic modes are ignored.
-   do nu=4,3*cryst%natom
-     wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
-
-     ! Get phonon occupation for all temperatures.
-     nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
-
-     cp3 = czero
-     do iatom=1, cryst%natom
-      cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
-     end do
-     cnum = dot_product(qvers_cart, cp3)
-
-     ! For each band in sigma_(nk)
-     do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
-       band_ks = ib_k + sigma%bstart_ks(ikcalc, spin) - 1
-       vnk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
-       vnk_mod = sqrt(dot_product(vnk, vnk))
-       if (abs(vnk_mod) < mytol) cycle
-       cos_theta_qvnk = dot_product(qvers_cart, vnk) / vnk_mod
-       if (abs(cos_theta_qvnk) < mytol) cycle
-       ! The two possible roots (+- wqn / (v cos_theta_qvnk) must be inside the small sphere.
-       qroot = wqnu / (vnk_mod * cos_theta_qvnk)
-       if (abs(qroot) > q0rad) cycle
-
-       ! Use group velocities to expand e_kq and f_kq around (n, k)
-       ! NB: Don't know how to treat degeneracies correctly
-       ! Phonon quantities are not Taylor expanded, we just take into accout the angular dependence.
-       ! As a matter of fact, we have a non-analytical point and ph freqs are usually flat in this small region.
-       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-
-       ! Extract part of the integrand that does not depend on T.
-       !den = wqnu ** 2 * vnk_mod * cos_theta_qvnk; if (abs(den) < mytol) cycle
-       fact_qvers = sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 * vnk_mod * cos_theta_qvnk / wqnu ** 3
-
-       do it=1,sigma%ntemp
-         nqnu = nqnu_tlist(it)
-         ! f_{k+q} = df/dek vk.q
-         f_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
-         !dfde_nk = occ_dfde(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
-         ! TODO: I got NAN for T --> 0
-         !dfde_nk = zero
-
-         ! Different expressions for absorption and emission.
-         ! TODO: Check that terms are always >= 0
-         if (qroot >= zero) then
-           ! cos_theta >= 0
-           sigma%frohl_deltas_sphcorr(1, it, ib_k, nu) = sigma%frohl_deltas_sphcorr(1, it, ib_k, nu) + &
-             fact_qvers * (nqnu + f_nk + dfde_nk * wqnu)
-         else
-           ! cos_theta < 0
-           sigma%frohl_deltas_sphcorr(2, it, ib_k, nu) = sigma%frohl_deltas_sphcorr(2, it, ib_k, nu) + &
-             fact_qvers * (nqnu + one - f_nk + dfde_nk * wqnu)
-         end if
-       end do
-
-     end do ! ib_k
-   end do ! nu
- end do ! iang
-
- sigma%frohl_deltas_sphcorr = - four_pi * sigma%frohl_deltas_sphcorr / (two * pi ** 2 * cryst%ucvol)
- call xmpi_sum(sigma%frohl_deltas_sphcorr, comm, ierr)
-
- if (my_rank == 0 .and. prtvol > 1) then
-   write(std_out, *)" eval_sigfrohl_deltas: f+d+, f-d-, sum(f+d+, f-d-) for nu in 4, ... 3natom"
-   do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
-     do nu=4,3*cryst%natom
-       write(std_out, *)sum(sigma%frohl_deltas_sphcorr(:, 1, ib_k, nu), dim=1), sigma%frohl_deltas_sphcorr(:, 1, ib_k, nu)
-     end do
-   end do
- end if
-
-end subroutine eval_sigfrohl_deltas
-!!***
-
 !!****f* m_sigmaph/qpoints_oracle
 !! NAME
 !!  qpoints_oracle
@@ -5609,72 +5470,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  end if
 
 end subroutine qpoints_oracle
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_sigmaph/get_frohlich
-!! NAME
-!! ephwg_from_ebands
-!!
-!! FUNCTION
-!!  Compute the frohlich matrix elements
-!!
-!! INPUTS
-!!  iqpt=index of the qpoint in the IBZ
-!!  oscillator=oscillator matrix elements for the wavefunction to be used
-!!
-
-function get_frohlich(cryst, ifc, qpt, nu, phfrq, displ_cart, ngvecs, gvecs) result(gkqg_lr)
-
-!Arguments ------------------------------------
-!scalars
- type(crystal_t),target,intent(in) :: cryst
- type(ifc_type),intent(in) :: ifc
- integer,intent(in)  :: nu,ngvecs
- real(dp),intent(in) :: qpt(3)
- real(dp),intent(in) :: phfrq(3*cryst%natom)
- real(dp),intent(in) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
-!arrays
- integer,intent(in) :: gvecs(3,ngvecs)
- complex(dpc) :: gkqg_lr(ngvecs)
-
-!Local variables ------------------------------
- integer :: iatom, ig, ii
- real(dp) :: qG_mod, fqdamp, inv_qepsq, wqnu
- complex(dpc) :: cnum
- !arrays
- real(dp) :: qG_red(3), qG_cart(3)
- complex(dpc) :: cdd(3)
-
- gkqg_lr = zero
- wqnu = phfrq(nu)
- if (wqnu < tol8) return
- do ig=1,ngvecs
-   qG_red = qpt + gvecs(:,ig)
-   qG_cart = two_pi*matmul(cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   if (qG_mod < tol6) cycle
-   inv_qepsq = one / dot_product(qG_cart, matmul(ifc%dielt, qG_cart))
-   fqdamp = (four_pi / cryst%ucvol) * inv_qepsq !* exp(-qG_mod ** 2 / (four * qdamp))
-
-   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
-   cnum = zero
-   do iatom=1,cryst%natom
-     ! This is complex
-     cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
-           exp(-j_dpc * two_pi * dot_product(qG_red, cryst%xred(:, iatom)))
-     ! Dipoles term
-     cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
-     ! Quadrupoles term
-     do ii=1,3
-       cnum = cnum - j_dpc * cdd(ii) * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), qG_cart))
-     end do
-   end do
-   gkqg_lr(ig) = cnum * j_dpc * fqdamp
- end do
- gkqg_lr = gkqg_lr / sqrt(two * wqnu)
-
-end function get_frohlich
 !!***
 
 !----------------------------------------------------------------------
