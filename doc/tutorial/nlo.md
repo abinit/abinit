@@ -581,18 +581,19 @@ filename tnlo_4.abo
 # base name for Raman_spec.py output files
 outname AlP.out
 
-# temperature in Kelvin for spectrum
+# temperature in Kelvin for spectrum (default is zero K)
 temp 298.0
 
-# number frequencies (default is 1000, units of cm^-1)
+# number frequencies (default is 1000)
 n_freq 400
 
-# min and max frequencies (default is 0.95 and 1.05 of
-# bands found
+# min and max frequencies 
+# (default is 0.95 and 1.05 of bands found; default unit is cm^-1, user can instead specify Ha or Hz)
 min_freq 200.0
 max_freq 800.0
 
 # Lorentzian broadening to apply
+# (default is zero; default unit is cm^-1, user can instead specify Ha or Hz)
 spread 1.0
 
 # calculation type: 1 is powder
