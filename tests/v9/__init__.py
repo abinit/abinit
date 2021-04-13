@@ -90,4 +90,5 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
+"t100.abi",  # optic (same as t14 but prtlincompmatrixelements = 1)
 ]
