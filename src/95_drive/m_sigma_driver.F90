@@ -1914,7 +1914,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-   case (11,13)
+   case (11)
    !  LR+ALDA kernel
 !    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
      ABI_CHECK(Er%ID==0,"Er%ID should be 0")
@@ -1941,11 +1941,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end if ! Dtset%usepaw==1
 
      id_required=4; ikxc=7; dim_kxcg=1
-     if (Dtset%gwgamma<13) then
-        approx_type=7
-     else
-        approx_type=8
-     end if
+     approx_type=7
      option_test=1
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
