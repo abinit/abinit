@@ -290,9 +290,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  cprj_in_memory_ = cprj_in_memory(dtset)
  mgsc=0
  igsc=0
- if ((.not. newlobpcg .and. .not. cprj_in_memory_).or.dtset%rmm_diis/=0) then
+ if ((.not. newlobpcg .and. .not. cprj_in_memory_) .or. dtset%rmm_diis /= 0) then
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
-
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
  else
@@ -382,8 +381,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    !call cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg(:, icg+1))
 
-!!  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
-!!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
+!  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
+!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor+icg
      cwavef_iband => cg(:,1+iwavef:npw_k*my_nspinor+iwavef)
@@ -394,8 +393,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
            norm=cwavef_iband(1,ipw)**2+cwavef_iband(2,ipw)**2
            if (norm>tol15*tol15) update_cprj=.True.
-           cwavef_iband(1,ipw)=zero
-           cwavef_iband(2,ipw)=zero
+           cwavef_iband(:,ipw)=zero
          end if
        end do
      end do
@@ -469,12 +467,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call cgwf_cprj(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
 &             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
 &             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
-           else
-             call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
-&             gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
-&             mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
-&             dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&             subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+         else
+           call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
+&           gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
+&           mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
+&           dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
+&           subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
          end if
        else
          call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &

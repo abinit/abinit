@@ -90,5 +90,8 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
-"t100.abi", # test nloc_alg options
+"t100.abi", # test nloc_alg options, istwfk=1
+"t101.abi", # test nloc_alg options, istwfk>=2
+"t102.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
+"t103.abi", # test cprj_update_lvl options, forces computed during SCF iterations
 ]

@@ -146,6 +146,7 @@ contains
 
 !Local variables-------------------------------
 !scalars
+ logical :: no_opernla_mv
  integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat
  integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs
 !arrays
@@ -196,6 +197,8 @@ contains
      ABI_BUG('Incorrect size for ph3d!')
    end if
  end if
+
+ no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with nonlop_ylm
 
 !Define dimensions of projected scalars
  dimffnl=size(ffnl,2)
@@ -284,7 +287,7 @@ contains
      end if
 
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
-     if (abs(choice_)>1.or.nloalg(1)==4) then
+     if (abs(choice_)>1.or.no_opernla_mv) then
        call timab(1291,1,tsec)
        call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
 &       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&

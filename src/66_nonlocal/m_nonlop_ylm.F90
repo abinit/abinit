@@ -512,8 +512,8 @@ contains
  !    8    |  native  |    mv
  !    9    |    mv    |  native
  !   10    |  native  | mv-dgemv
- no_opernla_mv = nloalg(1)==4.and.nloalg(1)==8.and.nloalg(1)==10
- no_opernlb_mv = nloalg(1)==4.and.nloalg(1)==7.and.nloalg(1)==9
+ no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with getcprj
+ no_opernlb_mv = nloalg(1)==4.or.nloalg(1)==7.or.nloalg(1)==9
 
 !Define dimensions of projected scalars
 !==============================================================
