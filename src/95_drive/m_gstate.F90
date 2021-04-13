@@ -76,6 +76,7 @@ module m_gstate
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_correlations, only : pawpuxinit
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
+ use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
@@ -289,6 +290,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(macro_uj_type) :: dtpawuj(0)
+ type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(recursion_type) ::rec_set
@@ -443,7 +445,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
      if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
-!     if ((dtset%orbmag.NE.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
+     if ((dtset%orbmag.LT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
@@ -1242,6 +1244,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
+ !! orbital magnetization initialization, discretized wavefunction case
+ if (dtorbmag%orbmag .LT. 0) then
+   dtorbmag%orbmag = dtset%orbmag
+   call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
+&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
+&                   rprimd,symrec,xred)
+ end if
+
  fatvshift=one
 
 !Check whether exiting was required by the user. If found then do not start minimization steps
@@ -1669,6 +1679,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  ! deallocate efield
  call destroy_efield(dtefield)
+
+ ! deallocate dtorbmag
+ call destroy_orbmag(dtorbmag)
 
 !deallocate Recursion
  if (dtset%userec == 1) then
