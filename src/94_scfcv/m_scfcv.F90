@@ -52,6 +52,7 @@ module m_scfcv
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_uj,           only : macro_uj_type
+ use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_scfcv_core,       only : scfcv_core
 
@@ -99,6 +100,7 @@ module m_scfcv
    type(datafiles_type),pointer :: dtfil => null()
    type(dataset_type),pointer :: dtset => null()
    type(efield_type),pointer :: dtefield => null()
+   type(orbmag_type),pointer :: dtorbmag => null()
    type(electronpositron_type),pointer :: electronpositron => null()
    type(hdr_type),pointer :: hdr => null()
    type(pawfgr_type),pointer :: pawfgr => null()
@@ -178,7 +180,7 @@ contains
 !! SOURCE
 
 subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
-&  dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,&
+&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &  indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -197,6 +199,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(datafiles_type),intent(in),target :: dtfil
  type(dataset_type),intent(in),target :: dtset
  type(efield_type),intent(in),target :: dtefield
+ type(orbmag_type),intent(in),target :: dtorbmag
 ! type(electronpositron_type),pointer :: electronpositron
  type(hdr_type),intent(in),target :: hdr
  type(pawang_type),intent(in),target :: pawang
@@ -296,6 +299,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%cprj=>cprj
  this%dmatpawu=>dmatpawu
  this%dtefield=>dtefield
+ this%dtorbmag=>dtorbmag
  this%dtfil=>dtfil
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
@@ -401,6 +405,7 @@ type(scfcv_t), intent(inout) :: this
  this%dtfil => null()
  this%dtset => null()
  this%dtefield => null()
+ this%dtorbmag => null()
  this%electronpositron => null()
  this%hdr => null()
  this%pawfgr => null()
@@ -692,7 +697,8 @@ subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred,
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtpawuj,&
+   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
+    this%dtorbmag,this%dtpawuj,&
     this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
     this%initialized,this%irrzon,itimes,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
     this%nfftf,this%npwarr,&
