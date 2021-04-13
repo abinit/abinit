@@ -1335,7 +1335,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! LR+ALDA hybrid vertex kernel
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      ikxc=7; dim_kxcg=1 
-     MSG_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
+     ABI_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
      approx_type=7
      option_test=1  ! TESTELECTRON
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))

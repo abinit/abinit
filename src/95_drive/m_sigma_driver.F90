@@ -1923,11 +1923,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ! If we have PAW, we need the full density on the fine grid
        ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
-         MSG_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
+         ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
        end if
        call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
        if (.not. file_exists(dtfil%filpawdensin)) then
-         MSG_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
+         ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
        end if
 
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))

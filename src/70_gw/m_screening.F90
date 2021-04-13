@@ -1011,7 +1011,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
          if (approx_type<2 .or. approx_type>3) then 
-           MSG_WARNING('Entering out-of core RPA or Kxc branch')
+           ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self)
@@ -1663,7 +1663,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call wrtout(std_out,msg,'COLL')
    else 
      write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    ! 
    chi0 = chi0_save
@@ -1835,7 +1835,7 @@ CASE(6)
      write(msg,'(a,i4,3a)')&
 &     'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &     'Enlarge the FFT mesh to get rid of this problem. '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
    !FIXME "recheck TDDFT code and parallel"
    ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
@@ -2366,7 +2366,7 @@ subroutine atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,op
  ABI_UNUSED(chi0_uwing(1,1))
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
@@ -2447,7 +2447,7 @@ subroutine atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,op
    end do
 
  case default
-   MSG_BUG(sjoin('Wrong option_test:',itoa(option_test)))
+   ABI_BUG(sjoin('Wrong option_test:',itoa(option_test)))
  end select
 
  ABI_FREE(chitmp)
