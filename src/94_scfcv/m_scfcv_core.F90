@@ -2182,7 +2182,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&
 & prtxml,psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode)
 
 !Before leaving the present routine, save the current value of xred.

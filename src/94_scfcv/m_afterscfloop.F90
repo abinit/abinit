@@ -298,14 +298,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,with_vectornd
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -339,7 +339,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: tollist(12),vpsp(nfftf)
- real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -550,6 +550,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
 !         & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
 !         & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+!    call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
+!         & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+!         & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
+!         & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+
  end if
 
 
