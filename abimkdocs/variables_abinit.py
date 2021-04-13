@@ -13023,7 +13023,7 @@ Variable(
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
     added_in_version="before_v9",
     text=r"""
-Compute quantities related to orbital magnetization. The
+Compute quantities related to orbital magnetic moment. The
     implementation assumes an insulator, so no empty or partially
     filled bands, and currently restricted to [[nspinor]] 1. Such
     insulators have orbital magnetization zero, except in the presence
@@ -13031,24 +13031,15 @@ Compute quantities related to orbital magnetization. The
     is parallelized over k points only. The implementation follows the
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
-    standard output file, search for "Orbital magnetization" and "Chern number".
+    standard output file, search for "Orbital magnetic moment". This calculation requires
+    both the ground state and DDK wavefunctions, and is triggered at the end of a 
+    DDK calculation.
 
-* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the
-Berry curvature over the Brillouin zone) using both GS and DDK wavefunctions. This is
-the most robust method.
-* [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
-faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
-electronic current.
-* [[orbmag]] = 2: Compute electronic orbital magnetization.
-* [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
-
-[[orbmag]] values 1--3 use an implementation based on a discretization of the wavefunction
-derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
-same computations as the corresponding 1, 2, 3 values, but based on an implementation
-using a discretization of the density operator itself. Both methods should converge to
-the same values but in our experience the wavefunction-based method converges faster. The
-DDK method converges considerably faster than either of the above methods and is also robust
-in case of only a single kpt.
+* [[orbmag]] = 1: Compute orbital magnetization and integral of the 
+Berry curvature (Chern number) over the Brillouin zone.
+* [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
+orbital magnetic moment. 
+* [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
 """,
 ),
 
