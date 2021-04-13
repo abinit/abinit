@@ -50,6 +50,7 @@ module m_tdep_sym
  public :: tdep_SearchS_2at
  public :: tdep_SearchS_3at
  public :: tdep_SearchS_4at
+ public :: tdep_destroy_sym
  public :: tdep_calc_indsym2
 
 contains
@@ -190,6 +191,7 @@ contains
   ABI_MALLOC(tnons_tmp   ,(3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
   call symfind(berryopt,efield,Lattice%gprimd,jellslab,Sym%msym,Invar%natom_unitcell,noncoll,Sym%nptsym,nsym,&
 &      nzchempot,0,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,Invar%typat_unitcell,use_inversion,xred_temp)
+  ABI_FREE(spinat)
   if (Sym%nptsym.eq.nsym) then
     symrel(:,:,:) =symrel_tmp(:,:,:)
     Sym%tnons(:,:)=tnons_tmp   (:,:)
@@ -261,6 +263,7 @@ contains
   ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,Invar%natom)); Sym%indsym(:,:,:)=zero
   call symatm(Sym%indsym(:,:,1:Invar%natom_unitcell),Invar%natom_unitcell,Sym%nptsym,&
 &   Sym%symrec,Sym%tnons,tol8,Invar%typat_unitcell,xred_temp)
+  ABI_FREE(xred_temp)
 
 ! Store the positions of the atoms in the motif
   do iatom=1,Invar%natom_unitcell
@@ -737,6 +740,23 @@ contains
 !FB  end if
 
  end subroutine tdep_calc_indsym2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ subroutine tdep_destroy_sym(Sym)
+
+  implicit none
+  type(Symetries_Variables_type),intent(inout) :: Sym
+
+  ABI_FREE(Sym%ptsymrel)
+  ABI_FREE(Sym%S_ref)
+  ABI_FREE(Sym%S_inv)
+  ABI_FREE(Sym%xred_zero)
+  ABI_FREE(Sym%tnons)
+  ABI_FREE(Sym%symafm)
+  ABI_FREE(Sym%symrec)
+  ABI_FREE(Sym%indsym)
+
+ end subroutine tdep_destroy_sym
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module m_tdep_sym

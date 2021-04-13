@@ -104,6 +104,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_new,Rlatt4abi,Shell2at,Sym)
 !   Write IFC in ifc_check.dat (for check)
     call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
+    call Ifc_tmp%free()
 
 !   Write the Phi2-new.dat file
     if (Invar%debug) then
@@ -217,6 +218,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 ! Compute the frequencies (2)
 ! =======================
   ABI_MALLOC(displ,(2*3*natom_unitcell*3*natom_unitcell,Qpt%nqpt)); displ(:,:)=zero
+  Eigen2nd_path%eigenval=zero ; Eigen2nd_path%eigenvec=zero ; Eigen2nd_path%dynmat=zero
   do iqpt=1,Qpt%nqpt
     call ifc%fourq(Crystal,Qpt%qpt_red(:,iqpt),Eigen2nd_path%eigenval(:,iqpt),displ(:,iqpt),&
 &                  out_eigvec=Eigen2nd_path%eigenvec(:,:,:,:,:,iqpt),&

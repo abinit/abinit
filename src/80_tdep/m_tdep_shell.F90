@@ -117,7 +117,9 @@ contains
       if (ref1at(iatom,2).eq.ishell) counter=counter+1 
     end do
     Shell1at%neighbours(1,ishell)%n_interactions=counter
-    if (counter.eq.0) cycle
+    if (counter.eq.0) then 
+      cycle
+    end if  
     ABI_MALLOC(Shell1at%neighbours(1,ishell)%atomj_in_shell,(counter))
     ABI_MALLOC(Shell1at%neighbours(1,ishell)%sym_in_shell,(counter))
     Shell1at%neighbours(1,ishell)%atomj_in_shell(:)=zero
@@ -150,6 +152,12 @@ contains
     call tdep_calc_nbcoeff(distance,iatref,Invar,ishell,1,1,1,MPIdata,ncoeff,norder,Shell1at%nshell,order,proj,Sym)
     if (ncoeff.eq.0) then 
       Shell1at%neighbours(1,ishell)%n_interactions=0
+      if(allocated(Shell1at%neighbours(1,ishell)%atomj_in_shell)) then
+        ABI_FREE(Shell1at%neighbours(1,ishell)%atomj_in_shell)
+      end if  
+      if(allocated(Shell1at%neighbours(1,ishell)%sym_in_shell)) then
+        ABI_FREE(Shell1at%neighbours(1,ishell)%sym_in_shell)
+      end if  
     end if
     Shell1at%ncoeff     (ishell)=ncoeff
     Shell1at%ncoeff_prev(ishell)=ncoeff_prev
@@ -1193,25 +1201,34 @@ contains
   integer, intent(in) :: natom,order
   type(Shell_Variables_type),intent(inout) :: Shell
 
-  integer :: iatom,ishell
+  integer :: iatom,ishell,natref
 
   ABI_FREE(Shell%ncoeff)
   ABI_FREE(Shell%ncoeff_prev)
   ABI_FREE(Shell%iatref)
-  ABI_FREE(Shell%jatref)
-  ABI_FREE(Shell%ishell_self)
+  if (order.gt.1) then
+    ABI_FREE(Shell%jatref)
+    ABI_FREE(Shell%ishell_self)
+  end if
   if (order.gt.2) then
     ABI_FREE(Shell%katref)
   end if
   if (order.gt.3) then
     ABI_FREE(Shell%latref)
   end if
-  do iatom=1,natom
+  if (order.eq.1) then
+    natref=1      
+  else  
+    natref=natom
+  end if  
+  do iatom=1,natref
     do ishell=1,Shell%nshell
       if (Shell%neighbours(iatom,ishell)%n_interactions.ne.0) then
         ABI_FREE(Shell%neighbours(iatom,ishell)%atomj_in_shell)
         ABI_FREE(Shell%neighbours(iatom,ishell)%sym_in_shell)
-        ABI_FREE(Shell%neighbours(iatom,ishell)%transpose_in_shell)
+        if (order.gt.1) then
+          ABI_FREE(Shell%neighbours(iatom,ishell)%transpose_in_shell)
+        end if
         if (order.gt.2) then
           ABI_FREE(Shell%neighbours(iatom,ishell)%atomk_in_shell)
         end if

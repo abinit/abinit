@@ -36,6 +36,7 @@ module m_tdep_qpt
 
   public :: tdep_make_qptpath
   public :: tdep_make_specialqpt
+  public :: tdep_destroy_qpt
 
 contains
 
@@ -533,7 +534,23 @@ contains
     close(40)
   end if
   Qpt%nqpt=nqpt
+  ABI_FREE(QptBound)
  end subroutine tdep_make_qptpath
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ subroutine tdep_destroy_qpt(Qpt)
+
+  implicit none
+  type(Qpoints_type),intent(inout) :: Qpt
+
+  ABI_FREE(Qpt%special_qpt)
+  ABI_FREE(Qpt%special_red)
+  ABI_FREE(Qpt%special_cart)
+  ABI_FREE(Qpt%lgth_segments)
+  ABI_FREE(Qpt%qpt_red)
+  ABI_FREE(Qpt%qpt_cart)
+
+ end subroutine tdep_destroy_qpt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end module m_tdep_qpt

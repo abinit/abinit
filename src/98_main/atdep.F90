@@ -63,20 +63,21 @@ program atdep
   use m_argparse
 
   use m_ifc,              only : ifc_type
-  use m_crystal,          only : crystal_t
+  use m_crystal,          only : crystal_t, crystal_free
   use m_ddb,              only : ddb_type
-  use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb  
+  use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
+&                                tdep_destroy_qbz, tdep_destroy_ddb          
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
 &                                tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phi2,        only : tdep_calc_phi2fcoeff, tdep_calc_phi1fcoeff, tdep_calc_phi2, tdep_write_phi2, tdep_calc_ftot2, &
 &                                Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, tdep_write_phi1
   use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
-  use m_tdep_sym,         only : tdep_make_sym, Symetries_Variables_type
-  use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, tdep_clean_MPI, &
-&                                Input_Variables_type, MPI_enreg_type
+  use m_tdep_sym,         only : tdep_make_sym, Symetries_Variables_type, tdep_destroy_sym
+  use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, &
+&                                tdep_destroy_mpidata, Input_Variables_type, MPI_enreg_type, tdep_destroy_invar
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
-  use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type
+  use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type, tdep_destroy_qpt
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
   use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell4at, &
 &                                tdep_init_shell1at, tdep_destroy_shell
@@ -85,8 +86,8 @@ program atdep
   implicit none
 
   integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
-  integer :: stdout,nshell_max,ii
-  integer :: print_mem_report
+  integer :: stdout,stdlog,nshell_max,ii,ishell
+  integer :: print_mem_report,me
   double precision :: U0
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
@@ -129,6 +130,7 @@ program atdep
  call abi_io_redirect(new_io_comm=xmpi_world)
 ! Initialize MPI
  call xmpi_init()
+ me = xmpi_comm_rank(xmpi_world)
 
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
@@ -144,6 +146,7 @@ program atdep
  call tdep_read_input(Hist,Invar)
  call tdep_init_MPIdata(Invar,MPIdata)
  call tdep_distrib_data(Hist,Invar,MPIdata)
+ call abihist_free(Hist)
 
 !FB TEST
 !FB Invar%nstep_tot=10
@@ -261,6 +264,7 @@ program atdep
  natom            = Invar%natom
  natom_unitcell   = Invar%natom_unitcell
  stdout           = Invar%stdout
+ stdlog           = Invar%stdlog
  nshell_max       = 500
 
 !==========================================================================================
@@ -308,7 +312,9 @@ program atdep
  ABI_MALLOC(proj_tmp,(3,3,nshell_max)) ; proj_tmp(:,:,:)=0.d0
  call tdep_init_shell1at(distance,Invar,MPIdata,3,nshell_max,ncoeff1st,1,proj_tmp,Shell1at,Sym)
  ABI_MALLOC(proj1st  ,(3,3,Shell1at%nshell)) ; proj1st(:,:,:)=0.d0
- proj1st = reshape (proj_tmp, (/ 3,3,Shell1at%nshell /))
+ do ishell=1,Shell1at%nshell
+   proj1st(:,:,ishell) = proj_tmp(:,:,ishell)
+ end do
  ABI_FREE(proj_tmp)
 !Rotational invariances (1st order)
 !    constraints = 3
@@ -320,7 +326,9 @@ program atdep
  ABI_MALLOC(proj_tmp,(9,9,nshell_max)) ; proj_tmp(:,:,:)=0.d0
  call tdep_init_shell2at(distance,Invar,MPIdata,9,nshell_max,ncoeff2nd,2,proj_tmp,Shell2at,Sym)
  ABI_MALLOC(proj2nd  ,(9,9,Shell2at%nshell)) ; proj2nd(:,:,:)=0.d0
- proj2nd = reshape (proj_tmp, (/ 9,9,Shell2at%nshell /))
+ do ishell=1,Shell2at%nshell
+   proj2nd(:,:,ishell) = proj_tmp(:,:,ishell)
+ end do
  ABI_FREE(proj_tmp)
 !Rotational invariances (2nd order) + Symetry of the Dynamical Matrix + Huang invariances
 !    constraints = natom*3**2 + (3*natom_unitcell)**2 + 3**4
@@ -348,7 +356,9 @@ program atdep
  end if
  ABI_MALLOC(proj3rd  ,(27,27,Shell3at%nshell)) ; proj3rd(:,:,:)=0.d0
  if (Invar%order.ge.3) then
-   proj3rd = reshape (proj_tmp, (/ 27,27,Shell3at%nshell /))
+   do ishell=1,Shell3at%nshell
+     proj3rd(:,:,ishell) = proj_tmp(:,:,ishell)
+   end do
    ABI_FREE(proj_tmp)
 !  Rotational invariances (3rd order) + acoustic sum rules (3rd order)
 !    constraints = natom_unitcell*natom*3**4 + natom_unitcell*natom*3**3
@@ -369,7 +379,9 @@ program atdep
  end if
  ABI_MALLOC(proj4th  ,(81,81,Shell4at%nshell)) ; proj4th(:,:,:)=0.d0
  if (Invar%order==4) then
-   proj4th = reshape (proj_tmp, (/ 81,81,Shell4at%nshell /)) 
+   do ishell=1,Shell4at%nshell
+     proj4th(:,:,ishell) = proj_tmp(:,:,ishell)
+   end do
    ABI_FREE(proj_tmp)
 !  Rotational invariances (4th order) + acoustic sum rules (4th order)
 !    constraints = natom_unitcell*natom**2*3**5 + natom_unitcell*natom**2*3**4
@@ -433,6 +445,7 @@ program atdep
      call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1,Shell1at,Sym)
      call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2,Shell2at,Sym)
    end if
+   ABI_FREE(proj1st)
    ABI_FREE(proj2nd)
    ABI_FREE(Phi1_coeff)
    ABI_FREE(Phi2_coeff)
@@ -441,7 +454,6 @@ program atdep
      ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
      Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
      call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
-     ABI_FREE(proj3rd)
      ABI_FREE(Phi3_coeff)
      call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
    end if
@@ -449,7 +461,6 @@ program atdep
      ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
      Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
      call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
-     ABI_FREE(proj4th)
      ABI_FREE(Phi4_coeff)
      call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
    end if  
@@ -472,6 +483,7 @@ program atdep
          call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1,Shell1at,Sym)
          call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2,Shell2at,Sym)
        end if
+       ABI_FREE(proj1st)
        ABI_FREE(proj2nd)
        ABI_FREE(Phi1_coeff)
        ABI_FREE(Phi2_coeff)
@@ -480,14 +492,12 @@ program atdep
        ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
        Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
        call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
-       ABI_FREE(proj3rd)
        ABI_FREE(Phi3_coeff)
        call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
      else if (ii.eq.3) then 
        ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
        Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
        call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
-       ABI_FREE(proj4th)
        ABI_FREE(Phi4_coeff)
        call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
      end if  
@@ -499,6 +509,9 @@ program atdep
  ABI_FREE(Fresid)
  ABI_FREE(MP_coeff)
  ABI_FREE(ucart)
+ ABI_FREE(proj3rd)
+ ABI_FREE(proj4th)
+ call tdep_destroy_shell(natom,1,Shell1at)
 
 !==========================================================================================
 !=================== Write the IFC and check the constraints ==============================
@@ -557,16 +570,34 @@ program atdep
 !===================== Compute the thermodynamical quantities =============================
 !==========================================================================================
  call tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
+ call PHdos%free()
+
 
  if (Invar%order==2) then
+
+   ABI_FREE(distance)
+   ABI_FREE(Rlatt_cart)
+   ABI_FREE(Phi3_ref)
+   ABI_FREE(Phi4_ref)
+   call Ifc%free()
+   call crystal_free(Crystal)
+   call tdep_destroy_eigen2nd(Eigen2nd_path)
+   call tdep_destroy_eigen2nd(Eigen2nd_MP)
+   call tdep_destroy_sym(Sym)
+   call tdep_destroy_qbz(Qbz)
+   call tdep_destroy_qpt(Qpt)
+   call tdep_destroy_ddb(DDB)
+   call tdep_destroy_invar(Invar)
+   call tdep_destroy_mpidata(MPIdata)
+
    call tdep_print_Aknowledgments(Invar)
-
-   call abinit_doctor(trim(Invar%output_prefix)//'.abo', print_mem_report=print_mem_report)
-
+   if (me==0) close(unit=5)
+   if (me==0) close(unit=7)
    call flush_unit(stdout)
-
-   if (MPIdata%iam_master) close(unit=stdout)
-
+   if (me==0) close(unit=stdout)
+   call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
+   call flush_unit(stdlog)
+   if (me==0) close(unit=stdlog)
    call xmpi_end()
    stop
  end if
@@ -592,21 +623,30 @@ program atdep
  call tdep_destroy_shell(natom,3,Shell3at)
  ABI_FREE(distance)
  ABI_FREE(Phi3_ref)
+ ABI_FREE(Phi4_ref)
  if (Invar%order.eq.4) then
-   ABI_FREE(Phi4_ref)
    call tdep_destroy_shell(natom,4,Shell4at)
  end if  
+ call Ifc%free()
+ call crystal_free(Crystal)
+ call tdep_destroy_sym(Sym)
+ call tdep_destroy_qbz(Qbz)
+ call tdep_destroy_qpt(Qpt)
+ call tdep_destroy_ddb(DDB)
+ call tdep_destroy_invar(Invar)
+ call tdep_destroy_mpidata(MPIdata)
+
 !==========================================================================================
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
  call tdep_print_Aknowledgments(Invar)
-
- call abinit_doctor(trim(Invar%output_prefix)//'.abo', print_mem_report=print_mem_report)
-
+ if (me==0) close(unit=5)
+ if (me==0) close(unit=7)
  call flush_unit(stdout)
-
- if (MPIdata%iam_master) close(unit=stdout)
-
+ if (me==0) close(unit=stdout)
+ call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
+ call flush_unit(stdlog)
+ if (me==0) close(unit=stdlog)
 100 call xmpi_end()
 
  end program atdep

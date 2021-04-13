@@ -154,10 +154,6 @@ contains
   if (ntotconst.gt.0) then
     A_tot(ntotcoeff+1:nconcoef,1:ntotcoeff)=&
 &                     CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff)
-!FB    do iconst=1,ntotconst
-!FB      write(Invar%stdout,*) 'A_tot=',A_tot(ntotcoeff+iconst,1:ntotcoeff)
-!FB      write(Invar%stdout,*) 'const=',CoeffMoore%const(nconst_prev+iconst,:)
-!FB    end do  
     A_tot(1:ntotcoeff,ntotcoeff+1:nconcoef)=&
 &                     transpose(CoeffMoore%const(nconst_prev+1:nconst_prev+ntotconst,ncoeff_prev+1:ncoeff_prev+ntotcoeff))
 !FB    ABI_FREE(CoeffMoore%const)
@@ -1388,6 +1384,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     if (order==1.and.(iconst(isyminv).eq.3)) then
       ncoeff=0
       proj(:,:,ishell)=zero   
+      ABI_FREE(unchanged)
+      ABI_FREE(alphaij)
+      ABI_FREE(iconst)
       return
     else if (order==1.and.(iconst(isyminv).gt.3)) then
       ABI_BUG(' First order : There are more than 3 constraints')
@@ -1572,6 +1571,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       proj(ii,ii,ishell)=1.d0
     end do
     ncoeff=norder
+    ABI_FREE(unchanged)
+    ABI_FREE(alphaij)
+    ABI_FREE(iconst)
     return
   end if
 
@@ -1591,6 +1593,9 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       end do  
     end if  
   end do
+  ABI_FREE(unchanged)
+  ABI_FREE(alphaij)
+  ABI_FREE(iconst)
 ! Add the constraints coming from the symmetry of the IFCs (at the 3rd order)  
   if (nconst_perm.gt.0) then
     do jj=1,norder

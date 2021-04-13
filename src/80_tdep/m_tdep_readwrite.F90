@@ -99,7 +99,8 @@ module m_tdep_readwrite
  public :: tdep_distrib_data
  public :: tdep_init_MPIdata
 !FB public :: tdep_init_MPIshell
- public :: tdep_clean_MPI
+ public :: tdep_destroy_mpidata
+ public :: tdep_destroy_invar
 
 contains
 
@@ -175,7 +176,6 @@ contains
 ! Define output files  
   Invar%stdout=8
   Invar%stdlog=6
-  !open(unit=Invar%stdlog,file='data.log')
 
 ! Define Keywords
   NormalMode='NormalMode'
@@ -221,35 +221,36 @@ contains
 
   me = xmpi_comm_rank(xmpi_world)
   if (me==0) then
-
-! Check if a NetCDF file is available
-  write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
-  read(*, '(a)',err=10) inputfilename
-  if ( inputfilename == "" ) inputfilename='input.in'
-  write(Invar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
-10 continue
-  write(Invar%stdlog,'(a)',err=11) ' Give root name for generic input files (NetCDF or ASCII)'
-  read(*, '(a)',err=11) Invar%input_prefix
-  if ( Invar%input_prefix == "" ) then
-    ncfilename='HIST.nc'
-  else
-    ncfilename=trim(Invar%input_prefix)//'HIST.nc'  
-  end if  
-  write(Invar%stdlog, '(a)',err=11) '.'//trim(Invar%input_prefix)
-11 continue
-  write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
-  read (*, '(a)', err=12) Invar%output_prefix
-  if ( Invar%output_prefix == "" ) then
-    if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file='atdep.out')
-  else
-    if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.out')
-  end if  
-  write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
-12 continue
-  if ( inputfilename == "" ) inputfilename='input.in'
-  if ( ncfilename == "" ) ncfilename='HIST.nc'
-
+    open(unit=7,file='foo')
+    open(unit=Invar%stdlog,file='atdep.log')
+    write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
+    read(*, '(a)',err=10) inputfilename
+    if ( inputfilename == "" ) inputfilename='input.in'
+    write(Invar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
+10   continue
+!   Check if a NetCDF file is available
+    write(Invar%stdlog,'(a)',err=11) ' Give root name for generic input files (NetCDF or ASCII)'
+    read(*, '(a)',err=11) Invar%input_prefix
+    if ( Invar%input_prefix == "" ) then
+      ncfilename='HIST.nc'
+    else
+      ncfilename=trim(Invar%input_prefix)//'HIST.nc'  
+    end if  
+    write(Invar%stdlog, '(a)',err=11) '.'//trim(Invar%input_prefix)
+11   continue
+    write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
+    read (*, '(a)', err=12) Invar%output_prefix
+    if ( Invar%output_prefix == "" ) then
+      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file='atdep.out')
+    else
+      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.out')
+    end if  
+    write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
+12   continue
+    if ( inputfilename == "" ) inputfilename='input.in'
+    if ( ncfilename == "" ) ncfilename='HIST.nc'
   end if !me
+
   master = 0
   call xmpi_bcast(inputfilename,master,xmpi_world,ierr)
   call xmpi_bcast(ncfilename,master,xmpi_world,ierr)
@@ -788,17 +789,47 @@ contains
  end subroutine tdep_init_MPIdata
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_clean_mpi(MPIdata)
+ subroutine tdep_destroy_mpidata(MPIdata)
 
   implicit none 
 
   type(MPI_enreg_type), intent(inout) :: MPIdata
 
   ABI_FREE(MPIdata%shft_step)
+  ABI_FREE(MPIdata%nstep_acc)
   ABI_FREE(MPIdata%nstep_all)
   ABI_FREE(MPIdata%my_step)
 
- end subroutine tdep_clean_mpi
+ end subroutine tdep_destroy_mpidata
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ subroutine tdep_destroy_invar(Invar)
+
+  implicit none 
+
+  type(Input_Variables_type), intent(inout) :: Invar
+
+  ABI_FREE(Invar%amu)
+  ABI_FREE(Invar%typat)
+  ABI_FREE(Invar%xred_unitcell)
+  ABI_FREE(Invar%typat_unitcell)
+  if (Invar%bzpath.lt.0) then
+    ABI_FREE(Invar%qpt)
+  else if (Invar%bzpath.gt.0) then
+    ABI_FREE(Invar%special_qpt)
+    end if  
+  if (Invar%bzlength.gt.0) then 
+    ABI_FREE(Invar%lgth_segments)
+  end if  
+  ABI_FREE(Invar%xred)
+  ABI_FREE(Invar%fcart)
+  ABI_FREE(Invar%etot)
+  ABI_FREE(Invar%xred_ideal)
+  if (Invar%loto) then
+    ABI_FREE(Invar%born_charge)
+  end if  
+
+ end subroutine tdep_destroy_invar
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module m_tdep_readwrite

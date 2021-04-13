@@ -50,6 +50,8 @@ module m_tdep_abitypes
   public :: tdep_ifc2phi2
   public :: tdep_init_ddb
   public :: tdep_write_ddb
+  public :: tdep_destroy_qbz
+  public :: tdep_destroy_ddb
 
 contains
 
@@ -461,6 +463,7 @@ contains
 !FB  write(Invar%stdlog,*) 'BEFORE OPEN DDB'
 !FB TO REMOVE    call ddb_hdr_open_write(ddb_hdr, filename, unddb)
     call ddb_hdr%open_write(filename, unddb)
+  call ddb_hdr%free()
 
 !FB  write(Invar%stdlog,*) 'BEFORE WRITE BLOK'
 ! Print each blok of the DDB
@@ -753,4 +756,34 @@ subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rla
 end subroutine tdep_ifc2phi2
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+ subroutine tdep_destroy_qbz(Qbz)
+
+  implicit none
+  type(Qbz_type),intent(inout) :: Qbz
+
+  ABI_FREE(Qbz%qbz)
+  ABI_FREE(Qbz%qbz_cart)
+  ABI_FREE(Qbz%ibz2bz)
+  ABI_FREE(Qbz%wtq)
+  ABI_FREE(Qbz%wtqibz)
+  ABI_FREE(Qbz%qibz)
+  ABI_FREE(Qbz%qibz_cart)
+
+ end subroutine tdep_destroy_qbz
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ subroutine tdep_destroy_ddb(DDB)
+
+  implicit none
+  type(ddb_type),intent(inout) :: DDB
+
+  ABI_FREE(DDB%flg)
+  ABI_FREE(DDB%nrm)
+  ABI_FREE(DDB%qpt)
+  ABI_FREE(DDB%typ)
+  ABI_FREE(DDB%val)
+  ABI_FREE(DDB%amu)
+
+ end subroutine tdep_destroy_ddb
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module m_tdep_abitypes

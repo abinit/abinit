@@ -239,7 +239,7 @@ MODULE m_crystal
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
-
+ public :: crystal_free            ! Main Destruction method.
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
