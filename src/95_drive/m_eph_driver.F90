@@ -69,7 +69,7 @@ module m_eph_driver
  use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph, test_phrotation
+ use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
 
