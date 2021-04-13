@@ -2172,7 +2172,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
