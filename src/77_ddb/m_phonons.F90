@@ -175,7 +175,7 @@ module m_phonons
  public :: mkphdos        ! Constructor
 !!**
 
-!!****t* m_sigmaph/phstore_t
+!!****t* m_phonons/phstore_t
 !! NAME
 !! phstore_t
 !!
@@ -3288,27 +3288,27 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 
 ! *************************************************************************
 
-!determine supercell needed to freeze phonon
+ !determine supercell needed to freeze phonon
  call init_supercell_for_qpt(natom, qphon, rprimd, typat, xcart, znucl, scell)
 
  do jmode = 1, 3*natom
-! reset positions
+   ! reset positions
    scell%xcart = scell%xcart_ref
 
-!  displace atoms according to phonon jmode
+   ! displace atoms according to phonon jmode
    call freeze_displ_supercell(displ(:,:,jmode), freeze_displ, scell)
 
-!  print out everything for this wavevector and mode
+   ! print out everything for this wavevector and mode
    call prt_supercell_for_qpt (phfreq(jmode), jmode, outfile_radix, scell)
  end do
 
- call destroy_supercell (scell)
+ call destroy_supercell(scell)
 
 end subroutine freeze_displ_allmodes
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/pheigvec_rotate
+!!****f* m_phonons/pheigvec_rotate
 !! NAME
 !! pheigvec_rotate
 !!
@@ -3321,10 +3321,10 @@ end subroutine freeze_displ_allmodes
 !!  sq: q-point in the BZ. sq = TS q_ibz
 !!  isym
 !!  itimrev
-!!  eigvec_in: Input ph eigenvectors at q_ibz
+!!  eigvec_in: Input ph eigenvectors at q_ibz.
 !!
 !! OUTPUT
-!!  eigvec_out: Onput ph eigenvectors at q_bz
+!!  eigvec_out: Otput ph eigenvectors at q_bz.
 !!
 
 subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
@@ -3410,7 +3410,7 @@ end subroutine pheigvec_rotate
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_new
+!!****f* m_phonons/phstore_new
 !! NAME
 !! phstore_new
 !!
@@ -3481,7 +3481,8 @@ end function phstore_new
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_free
+
+!!****f* m_phonons/phstore_free
 !! NAME
 !! phstore_free
 !!
@@ -3510,7 +3511,7 @@ end subroutine phstore_free
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_async_rotate
+!!****f* m_phonons/phstore_async_rotate
 !! NAME
 !! phstore_async_rotate
 !!
@@ -3582,7 +3583,7 @@ end subroutine phstore_async_rotate
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/phstore_wait
+!!****f* m_phonons/phstore_wait
 !! NAME
 !! phstore_wait
 !!
@@ -3616,7 +3617,7 @@ end subroutine phstore_wait
 !!***
 
 !----------------------------------------------------------------------
-!!****f* m_sigmaph/test_phrotation
+!!****f* m_phonons/test_phrotation
 !! NAME
 !! test_phrotation
 !!

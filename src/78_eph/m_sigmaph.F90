@@ -4712,7 +4712,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  ABI_SFREE(a2few_avg)
 
  ! Compute QP energies and Gaps (Note that I'm assuming a non-magnetic semiconductor!)
- ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
+ ib_val = nint(ebands%nelect / (two / ebands%nspinor)); ib_cond = ib_val + 1
  kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
  qp_enes = huge(one) * tol6; qpoms_enes = huge(one) * tol6
  ks_enes = huge(one) * tol6; ze0_vals = huge(one) * tol6
@@ -4757,8 +4757,8 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
      end if
    end if
 
-   do ibc=1,self%nbcalc_ks(ikcalc,spin)
-     band_ks = self%bstart_ks(ikcalc,spin) + ibc - 1
+   do ibc=1,self%nbcalc_ks(ikcalc, spin)
+     band_ks = self%bstart_ks(ikcalc, spin) + ibc - 1
      kse = ebands%eig(band_ks, ik_ibz, spin)
      ks_enes(ibc) = kse
      sig0c = self%vals_e0ks(it, ibc)

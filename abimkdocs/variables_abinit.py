@@ -12714,7 +12714,7 @@ or half-occupied band, or other choices in special circumstances.
 
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
 If [[nsppol]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
-If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
+If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]],
 first spin up, in order of increasing electronic eigenenergy, then spin down, in order of increasing electronic eigenenergy.
 
 If [[occopt]] = 2, then the band occupancies must be provided explicitly for
@@ -13038,13 +13038,13 @@ Compute quantities related to orbital magnetic moment. The
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
-    both the ground state and DDK wavefunctions, and is triggered at the end of a 
+    both the ground state and DDK wavefunctions, and is triggered at the end of a
     DDK calculation.
 
-* [[orbmag]] = 1: Compute orbital magnetization and integral of the 
+* [[orbmag]] = 1: Compute orbital magnetization and integral of the
 Berry curvature (Chern number) over the Brillouin zone.
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment. 
+orbital magnetic moment.
 * [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
 """,
 ),
@@ -22298,8 +22298,8 @@ When performing structural relaxations, RMM-DIIS is activated after [[rmm_diis]]
 once the first GS calculation is completed.
 This means that using [[rmm_diis]] = 1 for a structural relaxation leads to:
 
-    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
-    - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
+        - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
+        - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
 
 A negative value [[rmm_diis]] (e.g. -3) can be used to bypass the initial CG/LOBPCG iterations
 but this option should be used with extreme care and it is not recommended in general.
@@ -22313,7 +22313,7 @@ However, the additional steps of the algorithm (subspace rotation and Cholesky o
 present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
 
 The algorithm can also be used for NSCF band structure calculations although one should not expect RMM-DIIS
-to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
+to provide **high-energy** states of the same quality as the one obtained with other eigenvalue solvers.
 Although RMM-DIIS can be used for computing band structures and electron DOS with [[iscf]] = -2, we do not recommend
 using this solver to produce WFK files with many empty states as required by many-body calculations.
 
@@ -22336,8 +22336,8 @@ for the Rayleigh-Ritz subspace rotation and this step is crucial for finding the
 to the eigenvectors before starting the DIIS optimization.
 
 For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
-For performance reasons, one should avoid using tight tolerances, .
-Something of the order of [[tolvrs] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
+For performance reasons, one should avoid using tight tolerances.
+Something of the order of [[tolvrs]] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
 Avoid using ([[tolwfr]]) (criterion on the residuals) as converge criterion for SCF cycles
 Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
 available for NSCF calculations).
