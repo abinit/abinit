@@ -1245,7 +1245,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
  !! orbital magnetization initialization, discretized wavefunction case
- if (dtorbmag%orbmag .LT. 0) then
+ if (dtset%orbmag .LT. 0) then
    dtorbmag%orbmag = dtset%orbmag
    call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 &                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&

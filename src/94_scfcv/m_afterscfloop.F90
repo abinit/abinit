@@ -59,7 +59,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag_type
+ use m_orbmag,           only : orbmag_type, orbmag_wf
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -550,10 +550,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
 !         & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
 !         & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
-!    call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
-!         & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-!         & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
-!         & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+   call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
+        & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+        & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
+        & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
  end if
 
