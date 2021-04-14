@@ -207,7 +207,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    if(prt_anh == 1) need_prt_anh = .TRUE.
  end if
  need_prt_GF_csv = .FALSE. 
- if(present(prt_GF_csv)) need_prt_GF_csv = .TRUE.
+ if(present(prt_GF_csv)) need_prt_GF_csv = prt_GF_csv
  need_prt_files = .TRUE.
  if(present(prt_files))need_prt_files=prt_files
  need_only_even_power = .FALSE.
