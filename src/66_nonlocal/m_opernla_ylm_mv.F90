@@ -161,10 +161,12 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  end if
 
  use_dgemv = nloalg(1)==2.or.nloalg(1)==5.or.nloalg(1)==7
- if (use_dgemv) then
-   if(opernla_mv_dgemv_counter>=0) opernla_mv_dgemv_counter = opernla_mv_dgemv_counter + 1
- else
-   if(opernla_mv_counter>=0) opernla_mv_counter = opernla_mv_counter + 1
+ if (choice>=0.or.abs(choice)>1) then
+   if (use_dgemv) then
+     if(opernla_mv_dgemv_counter>=0) opernla_mv_dgemv_counter = opernla_mv_dgemv_counter + 1
+   else
+     if(opernla_mv_counter>=0) opernla_mv_counter = opernla_mv_counter + 1
+   end if
  end if
 
 !Useful variables

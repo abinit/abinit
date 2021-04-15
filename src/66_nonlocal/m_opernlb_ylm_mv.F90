@@ -182,9 +182,15 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 
  use_dgemv = nloalg(1)==2.or.nloalg(1)==6.or.nloalg(1)==10
  if (use_dgemv) then
-   if(opernlb_mv_dgemv_counter>=0) opernlb_mv_dgemv_counter = opernlb_mv_dgemv_counter + 1
+   if(opernlb_mv_dgemv_counter>=0) then
+     opernlb_mv_dgemv_counter = opernlb_mv_dgemv_counter + 1
+     if (paw_opt==4) opernlb_mv_dgemv_counter = opernlb_mv_dgemv_counter + 1
+   end if
  else
-   if(opernlb_mv_counter>=0) opernlb_mv_counter = opernlb_mv_counter + 1
+   if(opernlb_mv_counter>=0) then
+     opernlb_mv_counter = opernlb_mv_counter + 1
+     if (paw_opt==4) opernlb_mv_counter = opernlb_mv_counter + 1
+   end if
  end if
 
 !Inits

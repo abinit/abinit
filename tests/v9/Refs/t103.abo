@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 15 Apr 2021.
-- ( at 08h37 )
+- ( at 10h28 )
   
 - input  file    -> /home/baguetl/PROGRAM/abinit/v9.4.1-cgwf-cprj/build/prof/Test_suite/v9_t103/t103.abi
 - output file    -> t103.abo
@@ -518,7 +518,7 @@ total_energy_dc_eV  : -2.34732797073326E+02
                   | total count (TC) |            TC/NC |         TC/NC/NB
  -------------------------------------------------------------------------
  opernla          |             9188 |             4594 |             71.8
- opernlb          |             7652 |             3826 |             59.8
+ opernlb          |            15048 |             7524 |            117.6
  -------------------------------------------------------------------------
 
 ================================================================================
@@ -568,12 +568,12 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  3  -8.6262695014927     1.603E-03 1.775E-05 1.497E-03 1.202E-03 3.140E-02
  ETOT  4  -8.6262704040334    -9.025E-07 1.271E-07 1.618E-04 8.565E-04 3.054E-02
  ETOT  5  -8.6262719451765    -1.541E-06 3.905E-08 6.515E-06 3.524E-04 3.089E-02
- ETOT  6  -8.6262719521504    -6.974E-09 1.075E-09 6.568E-07 1.443E-04 3.104E-02
- ETOT  7  -8.6262719405428     1.161E-08 1.182E-09 1.177E-08 2.616E-05 3.101E-02
- ETOT  8  -8.6262719413501    -8.073E-10 3.339E-12 3.828E-09 1.074E-05 3.100E-02
- ETOT  9  -8.6262719412176     1.325E-10 7.642E-12 1.167E-10 6.160E-06 3.101E-02
- ETOT 10  -8.6262719412220    -4.427E-12 4.607E-14 1.892E-11 1.150E-06 3.101E-02
- ETOT 11  -8.6262719412215     4.317E-13 3.058E-14 9.042E-13 6.192E-07 3.101E-02
+ ETOT  6  -8.6262719521503    -6.974E-09 1.075E-09 6.568E-07 1.443E-04 3.104E-02
+ ETOT  7  -8.6262719405427     1.161E-08 1.182E-09 1.177E-08 2.616E-05 3.101E-02
+ ETOT  8  -8.6262719413500    -8.073E-10 3.339E-12 3.828E-09 1.074E-05 3.100E-02
+ ETOT  9  -8.6262719412174     1.326E-10 7.642E-12 1.167E-10 6.160E-06 3.101E-02
+ ETOT 10  -8.6262719412221    -4.670E-12 4.607E-14 1.892E-11 1.150E-06 3.101E-02
+ ETOT 11  -8.6262719412215     6.075E-13 3.058E-14 9.042E-13 6.192E-07 3.101E-02
 
  At SCF step   11       nres2   =  9.04E-13 < tolvrs=  1.00E-12 =>converged.
 
@@ -593,7 +593,7 @@ lattice_vectors:
 lattice_lengths: [   6.81292,    7.52362,    7.59848, ]
 lattice_angles: [ 53.552,  56.858,  56.485, ] # degrees, (23, 13, 12)
 lattice_volume:   2.4693278E+02
-convergence: {deltae:  4.317E-13, res2:  9.042E-13, residm:  3.058E-14, diffor:  6.192E-07, }
+convergence: {deltae:  6.075E-13, res2:  9.042E-13, residm:  3.058E-14, diffor:  6.192E-07, }
 etotal    :  -8.62627194E+00
 entropy   :   0.00000000E+00
 fermie    :   1.33670714E-01
@@ -620,8 +620,8 @@ force_length_stats: {min:   4.01041974E-02, max:   4.01041974E-02, mean:   4.010
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.436651843940870
- Compensation charge over fine fft grid    =     -0.436654057903462
+ Compensation charge over spherical meshes =     -0.436651843940757
+ Compensation charge over fine fft grid    =     -0.436654057902936
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -676,21 +676,21 @@ force_length_stats: {min:   4.01041974E-02, max:   4.01041974E-02, mean:   4.010
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.8473E-01; max dE/dt=  2.6826E-01; dE/dt below (all hartree)
-    1      -0.268329753909     -0.124710369134     -0.121895913399
-    2       0.268257353985      0.124620073652      0.121808997319
+    1      -0.268329753904     -0.124710369131     -0.121895913396
+    2       0.268257353978      0.124620073648      0.121808997316
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.43576360234639     1.27248068286386     1.52585073033675
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00757528008542     0.02427815848194     0.03100859237735
-    2      0.00757528008542    -0.02427815848194    -0.03100859237735
+    1     -0.00757528008535     0.02427815848151     0.03100859237661
+    2      0.00757528008535    -0.02427815848151    -0.03100859237661
  frms,max,avg= 2.3154169E-02 3.1008592E-02   4.182E-06  3.126E-06  4.304E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.38953653125102     1.24843299964916     1.59452579672998
-    2      0.38953653125102    -1.24843299964916    -1.59452579672998
+    1     -0.38953653124767     1.24843299962694     1.59452579669222
+    2      0.38953653124767    -1.24843299962694    -1.59452579669222
  frms,max,avg= 1.1906351E+00 1.5945258E+00   2.151E-04  1.607E-04  2.213E-04 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
@@ -705,28 +705,28 @@ force_length_stats: {min:   4.01041974E-02, max:   4.01041974E-02, mean:   4.010
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.36979566770070E+00
-hartree             :  6.89979557026796E-01
-xc                  : -7.57852815536389E+00
+kinetic             :  3.36979566769887E+00
+hartree             :  6.89979557026573E-01
+xc                  : -7.57852815536369E+00
 Ewald energy        : -9.02427477561960E+00
 psp_core            :  1.02189418686273E+00
-local_psp           : -1.55738761368572E+00
-spherical_terms     :  4.45224860613774E+00
-total_energy        : -8.62627252694125E+00
-total_energy_eV     : -2.34732813011570E+02
+local_psp           : -1.55738761368516E+00
+spherical_terms     :  4.45224860613640E+00
+total_energy        : -8.62627252694388E+00
+total_energy_eV     : -2.34732813011642E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.07653658183748E-01
+band_energy         : -5.07653658187928E-01
 Ewald energy        : -9.02427477561960E+00
 psp_core            :  1.02189418686273E+00
-xc_dc               : -4.24872000788832E+00
-spherical_terms     :  4.13248231360739E+00
-total_energy_dc     : -8.62627194122155E+00
-total_energy_dc_eV  : -2.34732797073327E+02
+xc_dc               : -4.24872000788810E+00
+spherical_terms     :  4.13248231361144E+00
+total_energy_dc     : -8.62627194122146E+00
+total_energy_dc_eV  : -2.34732797073325E+02
 ...
 
 
@@ -1966,8 +1966,8 @@ P           mkmem          16
           spgroup           1
            strten1    -6.9644097590E-04 -7.6899290532E-04 -7.8335732949E-04
                        1.0370577308E-05  4.4351188628E-04  3.8730441123E-04
-           strten2    -6.9644097591E-04 -7.6899290533E-04 -7.8335732950E-04
-                       1.0370577308E-05  4.4351188628E-04  3.8730441124E-04
+           strten2    -6.9644097589E-04 -7.6899290531E-04 -7.8335732948E-04
+                       1.0370577308E-05  4.4351188628E-04  3.8730441123E-04
            strten3    -6.9644097592E-04 -7.6899290533E-04 -7.8335732950E-04
                        1.0370577309E-05  4.4351188628E-04  3.8730441124E-04
            strten4    -6.9644097592E-04 -7.6899290533E-04 -7.8335732950E-04
@@ -2077,10 +2077,10 @@ P           mkmem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.0  wall=          7.1
++Overall time at end (sec) : cpu=          8.4  wall=          8.4

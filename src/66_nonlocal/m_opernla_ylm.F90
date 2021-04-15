@@ -251,7 +251,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  nthreads=OMP_GET_NUM_THREADS()
 #endif
 
- if (opernla_counter>=0) opernla_counter = opernla_counter + 1
+ if (choice>=0.or.choice_>1) then
+   if (opernla_counter>=0) opernla_counter = opernla_counter + 1
+ end if
 
 !==========================================================================
 !========== STANDARD VERSION ==============================================

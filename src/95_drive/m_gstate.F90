@@ -284,7 +284,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
- integer :: iatm,ia1,ia2,ia3,ia4,ia5,mincat,nincat,nonlop_calls
+ integer :: iatm,ia1,ia2,ia3,ia4,ia5,mincat,nincat,opernl_calls
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -1619,7 +1619,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    write(msg,'(a)')                ' --- NONLOP YLM COUNTERS -------------------------------------------------'
    call wrtout([std_out,ab_out],msg,'COLL')
    mincat=min(NLO_MINCAT,maxval(nattyp))
-   ia1=1;iatm=0;nonlop_calls=0
+   ia1=1;iatm=0;opernl_calls=0
    do itypat=1,dtset%ntypat
 !    Get atom loop indices for different types:
      ia2=ia1+nattyp(itypat)-1;ia5=1
@@ -1627,7 +1627,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        ia4=min(ia2,ia3+mincat-1)
 !      Give the increment of number of atoms in this subset.
        nincat=ia4-ia3+1
-       nonlop_calls=nonlop_calls+1
+       opernl_calls=opernl_calls+1
 !      End sum on atom subset loop
        iatm=iatm+nincat;ia5=ia5+nincat
      end do
@@ -1637,7 +1637,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (iatm/=dtset%natom) then
      ABI_ERROR('iatm should be equal to natom!')
    end if
-   write(msg,'(a,i6)')             ' Number of Calls in nonlop_ylm : NC = ',nonlop_calls
+   write(msg,'(a,i6)')             ' Number of Calls in nonlop_ylm : NC = ',opernl_calls
    call wrtout([std_out,ab_out],msg,'COLL')
    write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
@@ -1654,37 +1654,37 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cnt=opernla_counter
    if (cnt>0) then
      write(msg,'(2(a,i16),a,f16.1)') ' opernla          | ',&
-       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+       & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
      call wrtout([std_out,ab_out],msg,'COLL')
    end if
    cnt=opernla_mv_counter
    if (cnt>0) then
      write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv       | ',&
-       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+       & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
      call wrtout([std_out,ab_out],msg,'COLL')
    end if
    cnt=opernla_mv_dgemv_counter
    if (cnt>0) then
      write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv_dgemv | ',&
-       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+       & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
      call wrtout([std_out,ab_out],msg,'COLL')
    end if
    cnt=opernlb_counter
    if (cnt>0) then
      write(msg,'(2(a,i16),a,f16.1)') ' opernlb          | ',&
-       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+       & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
      call wrtout([std_out,ab_out],msg,'COLL')
    end if
    cnt=opernlb_mv_counter
    if (cnt>0) then
      write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv       | ',&
-       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+       & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
      call wrtout([std_out,ab_out],msg,'COLL')
    end if
    cnt=opernlb_mv_dgemv_counter
    if (cnt>0) then
      write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv_dgemv | ',&
-       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+       & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
      call wrtout([std_out,ab_out],msg,'COLL')
    end if
    write(msg,'(a)')                ' -------------------------------------------------------------------------'
