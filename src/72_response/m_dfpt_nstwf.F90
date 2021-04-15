@@ -549,18 +549,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    call paw_ij_reset_flags(paw_ij1,dijhartree=.true.)
  end if
 
-#ifdef DEV_MJV
-npw1_k=npwar1(1)
-print *, "shape cgq ", shape(cgq), " npw1_k,nspinor ", npw1_k,nspinor
-call flush()
-icgq=0
-do kpert1=1,mband_mem_rbz
-  print *, "input iband icgq ", kpert1, icgq, ' cgq ',cgq(:,icgq+1:icgq+10) ! cgq(:,icgq+1:icgq+npw1_k*nspinor) 
-  call flush()
-  icgq=icgq + npw1_k*nspinor
-end do
-#endif
-
 
 !LOOP OVER PERTURBATION TYPES (j1)
  do kpert1=1,mpert1

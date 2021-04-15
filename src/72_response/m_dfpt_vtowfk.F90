@@ -687,12 +687,8 @@ print *, 'vtowfk : eig1_k ', eig1_k
 !For rf2 perturbation
  if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
 
-!#ifdef DEV_MJV
-!print *, 'vtowfk residk 643', resid_k
-!write (200+mpi_enreg%me_kpt, *) 'vtowfk residk 643', resid_k
-!#endif
-! call xmpi_sum(resid_k,mpi_enreg%comm_band,ierr)
 #ifdef DEV_MJV
+! call xmpi_sum(resid_k,mpi_enreg%comm_band,ierr)
 print *, 'vtowfk residk 647', resid_k
 write (200+mpi_enreg%me_kpt, *) 'vtowfk residk 647', resid_k
 #endif
