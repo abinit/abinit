@@ -864,10 +864,14 @@ write (1004,*) '# new kpert1 ', kpert1
        ABI_MALLOC(eig_kq,(nband_k))
        ABI_MALLOC(eig1_k,(2*nband_k**2))
        ABI_MALLOC(occ_k,(nband_k))
-       d2nl_k(:,:)=zero;d2ovl_k(:,:)=zero
+       d2nl_k(:,:)=zero
+       d2ovl_k(:,:)=zero
        eig_k (:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
        eig_kq(:)=eigenq(1+bdtot_index:nband_k+bdtot_index)
        eig1_k(:)=eigen1(1+bd2tot_index:2*nband_k**2+bd2tot_index)
+#ifdef DEV_MJV
+print *, " ikpt ", ikpt, " bd2tot_index ", bd2tot_index, " eig1_k ",eig1_k
+#endif
        occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
        nband_kocc=count(abs(occ_k(:))>tol8)
        kpoint(:)=kpt_rbz(:,ikpt)
@@ -1446,7 +1450,8 @@ print *, "dcwf2 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, do
                      dotr=dotr+arg*(dot1r*dot2r-dot1i*dot2i)
                      doti=doti+arg*(dot1r*dot2i+dot2r*dot1i)
 #ifdef DEV_MJV
-print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " eig1_k ", eig1_k(ii:ii+1), " arg ", arg, " invocc, rocceig(jband,iband) ", invocc, rocceig(jband,iband)
+print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " iband, jband ii ", iband,jband,ii 
+print *, " eig1_k ", eig1_k(ii:ii+1), " arg ", arg, " invocc, rocceig(jband,iband) ", invocc, rocceig(jband,iband)
 print *, "ismetal  dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
 #endif
                    end if

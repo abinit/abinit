@@ -653,8 +653,20 @@ print *, 'vtowfk iband cg1 : ', iband, cwave1(:,1:5)
 !==================  END LOOP OVER BANDS ==============================
 !======================================================================
 
-! collect full eig1 matrix for all bands at present k-point
- call xmpi_sum(eig1_k,mpi_enreg%comm_band,ierr)
+! select eig1 matrix for only my slice of bands at present k-point
+! this enables global xmpi_sum in dfpt_vtorho without double counting
+ ii = 0
+ do iband=1, nband_k
+   if(mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) then
+     eig1_k(ii+1:ii+2*nband_k) = zero
+   end if
+   ii = ii + 2*nband_k
+ end do
+
+#ifdef DEV_MJV
+print *, 'vtowfk : eig1_k before sum ', eig1_k
+#endif
+! call xmpi_sum(eig1_k,mpi_enreg%comm_band,ierr)
 
 ! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt, 
 !   and full mpi_sum will be done higher up.

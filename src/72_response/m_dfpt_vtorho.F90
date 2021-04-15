@@ -692,6 +692,7 @@ print *, 'eig0_kq  ',   eig0_kq
      eigen1 (1+bd2tot_index : 2*nband_k**2+bd2tot_index) = eig1_k(:)
      resid  (1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
 #ifdef DEV_MJV
+print *, '  eigen1 ', eigen1
 print *, ' resid total ', resid
 write (300+mpi_enreg%me_kpt, *) ' resid total ', resid
 #endif
