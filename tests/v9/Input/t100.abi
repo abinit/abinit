@@ -2,7 +2,7 @@
 
   nonlop_ylm_count 1 # enable nonlop counting
 
-  ndtset 9
+  ndtset 12
   nloc_alg1  2
   nloc_alg2  3
   nloc_alg3  4
@@ -12,6 +12,14 @@
   nloc_alg7  8
   nloc_alg8  9
   nloc_alg9  10
+
+  nloc_alg10  2
+  nloc_alg11  3
+  nloc_alg12  4
+
+  cprj_update_lvl10 -2
+  cprj_update_lvl11 -2
+  cprj_update_lvl12 -2
 
 # Elementary cell
 #*********************************
