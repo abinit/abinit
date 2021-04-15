@@ -300,6 +300,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  integer :: nband_me, iband_me, jband_me, iband_
+ integer :: do_scprod, do_bcast
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -536,7 +537,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      nzlmopt_ipert1=-1
    end if
    if (is_metal_or_qne0) then
-     ABI_MALLOC(cs1c,(2,mband_mem_rbz,dtset%mband,nkpt_me))
+     ABI_MALLOC(cs1c,(2,dtset%mband,mband_mem_rbz,nkpt_me))
      ABI_MALLOC(cs1c_tmp,(2,dtset%mband))
      cs1c(:,:,:,:)=zero
    end if
@@ -548,10 +549,29 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    call paw_ij_reset_flags(paw_ij1,dijhartree=.true.)
  end if
 
+#ifdef DEV_MJV
+print *, "shape cgq ", shape(cgq)
+icgq=0
+do kpert1=1,mband_mem_rbz
+  print *, "input iband icgq ", kpert1, icgq, ' cgq ',cgq(:,icgq+1:icgq+10) ! cgq(:,icgq+1:icgq+npw1_k*nspinor) 
+  call flush()
+  icgq=icgq + npw1_k*nspinor
+end do
+#endif
+
+
 !LOOP OVER PERTURBATION TYPES (j1)
  do kpert1=1,mpert1
    ipert1=jpert1(kpert1)
 
+print *, 'kpert1, ipert1, ipert ', kpert1, ipert1, ipert
+
+write (999,*) '# new kpert1 ', kpert1
+write (1000,*) '# new kpert1 ', kpert1
+write (1001,*) '# new kpert1 ', kpert1
+write (1002,*) '# new kpert1 ', kpert1
+write (1003,*) '# new kpert1 ', kpert1
+write (1004,*) '# new kpert1 ', kpert1
 !  Flag for use of DDK file
    need_ddk_file=(has_ddk_file.and.(ipert1==dtset%natom+1.or.ipert1==dtset%natom+2))
 
@@ -1042,6 +1062,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        iband_me = 0
        do iband=1,nband_k
 
+#ifdef DEV_MJV
+print *, ' iband, ikpt, xmpi_paral, mpi_enreg%proc_distrb(ikpt,iband,isppol),me ', &
+        &  iband, ikpt, xmpi_paral, mpi_enreg%proc_distrb(ikpt,iband,isppol),me
+#endif
 !        Skip band if not to be treated by this proc
          if (xmpi_paral==1) then
            if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
@@ -1077,6 +1101,9 @@ print *, 'nstpaw bands_treated_now ', bands_treated_now, 'ibands : ', iband_me, 
          do kdir1=1,mdir1
            idir1=jdir1(kdir1)
            istr1=idir1;if(ipert1==dtset%natom+4) istr1=idir1+3
+#ifdef DEV_MJV
+print *, 'kdir1 ', kdir1, idir1, istr1
+#endif
 
 !          Not able to compute if ipert1=(Elect. field) and no ddk WF file
            if (ipert1==dtset%natom+2.and.ddkfil(idir1)==0) cycle
@@ -1229,7 +1256,9 @@ print *, 'nstpaw bands_treated_now ', bands_treated_now, 'ibands : ', iband_me, 
 !          At first call (when j1=j2), ch1c=<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i> is stored
 !          For the next calls, it is re-used.
            if (has_dcwf.or.(ipert==ipert1.and.idir==idir1.and.usepaw==1)) then
+#ifdef DEV_MJV
 print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
+#endif
 !            note: gvnlx1 used as temporary space
              ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
              ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
@@ -1244,6 +1273,9 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
 ! distribute gvnlx1 to my subcomm
                if (iband_ == iband) then
                  gvnlx1_tmp = gvnlx1 
+#ifdef DEV_MJV
+write (999, *) "ipert ipert1 idir idir1 iband ikpt_me before gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1(:,1:10)
+#endif
                end if
                call xmpi_bcast(gvnlx1_tmp, band_procs(iband), mpi_enreg%comm_band, ierr)
                if (option == 1) then
@@ -1254,21 +1286,28 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
  
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
                call projbd(cgq,gvnlx1_tmp,-1,icgq,0,istwf_k,mcgq,0,nband_me,npw1_k,nspinor,&
-&               dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+&                 dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
 
 !sum over all jband by combining the projbd
                call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr)
-
-#ifdef DEV_MJV
-print *, "iband_ gvnlx1_tmp ", iband_, gvnlx1_tmp(:,1:10)
-#endif
 ! keep my own gvnlx
                if (iband_ == iband) then
-                 gvnlx1 = gvnlx1_tmp
+! if bands are parallelized, I have only projected against bands on my cpu
+!   Pc|work>  = |work> - Sum_l <psi_{k+q, l}|work> |psi_{k+q, l}>
+!             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
+!TODO: make this a blas call? zaxpy
+                 gvnlx1 = gvnlx1_tmp - (mpi_enreg%nproc_band-1)*gvnlx1
+#ifdef DEV_MJV
+write (1000, *) "ipert ipert1 idir idir1 iband ikpt_me gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1(:,1:10)
+#endif
                end if
+
                if (option == 0) then
 ! save ch1c for all of the iband_ on each proc, for later use. First band index only for my nband_me which matches cgq
                  ch1c(:,1:nband_me,iband_,ikpt_me) = ch1c_tmp(:,1:nband_me)
+#ifdef DEV_MJV
+write ( 1001,*) "ipert ipert1 idir idir1 iband  ikpt_me, ch1c ", ipert, ipert1, idir, idir1, iband,  ikpt_me, ch1c_tmp(:,1:nband_me)
+#endif
                end if
              end do ! iband_
              ABI_FREE(gvnlx1_tmp)
@@ -1285,6 +1324,8 @@ print *, "iband_ gvnlx1_tmp ", iband_, gvnlx1_tmp(:,1:10)
 #ifdef DEV_MJV
 print *, "term1 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
 print *, 'has_dcwf, is_metal_or_qne0 ', has_dcwf, is_metal_or_qne0
+write ( 1002,*) "ipert ipert1 idir idir1 iband  ikpt_me, dotr, doti ", ipert, ipert1, idir, idir1, iband,  ikpt_me, dotr, doti
+call flush ()
 #endif
                  d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*elfd_fact*dotr
                  d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*elfd_fact*doti
@@ -1306,39 +1347,82 @@ print *, 'has_dcwf, is_metal_or_qne0 ', has_dcwf, is_metal_or_qne0
 !          For the next calls, it is re-used.
            if (has_dcwf.and.is_metal_or_qne0) then
              ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
+! dotX is local to my proc, and should accumulate sum over all jband, for my iband_me
              dotr=zero;doti=zero
-             invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
+! flag to broadcast the j dependent vector in the band pool, to get full sum over j
+             do_bcast = 0
+! flag to do scalar product: only needed if we are saving cs1c or if the band is occupied
+             do_scprod = 0
+             if ((ipert==ipert1.and.idir==idir1)) then
+               do_bcast = 1
+               do_scprod = 1
+             end if
+             invocc=zero
+             if (abs(occ_k(iband))>tol8) then
+               invocc=two/occ_k(iband)
+               do_scprod = 1
+             end if
+             ! does anyone else need the cgq(j) below?
+             do iband_ = 1, nband_k
+               if (bands_treated_now(iband_) > 0 .and. abs(occ_k(iband_))>tol8) then
+                 do_bcast = 1
+               end if
+             end do
+#ifdef DEV_MJV
+print *, " do_bcast do_scprod = ", do_bcast, do_scprod,  'iband_me ', iband_me
+call flush()
+#endif
+
+
              jband_me = 0
              do jband=1,nband_k
-               if (mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
-               jband_me = jband_me + 1
-
-!              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
-               if ((ipert==ipert1.and.idir==idir1).or.(abs(occ_k(iband))>tol8)) then
-                 gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
-                 call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
-                   cs1c(1,jband_me,iband,ikpt_me)=dot1r
-                   cs1c(2,jband_me,iband,ikpt_me)=dot1i
+               if (do_bcast > 0) then
+                 gvnlx1 = zero
+                 if (mpi_enreg%proc_distrb(ikpt,jband,isppol)==me) then
+                   jband_me = jband_me + 1
+! gvnlx1 depends on j only, I have it, and everyone needs it
+                   gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
                  end if
 #ifdef DEV_MJV
-print *, "initial ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot1r, dot1i ", dot1r, dot1i
+print *, " calling xmpibcast of gvnlx1 iband_me jband_me, jband icgq ", iband_me, jband_me, jband, icgq, ' shape ', shape(gvnlx1)
+call flush()
 #endif
-               end if
-
+! xmpi bcast the current jband to other procs in band pool
+                 call xmpi_bcast(gvnlx1, band_procs(jband), mpi_enreg%comm_band, ierr)
+#ifdef DEV_MJV
+print *, " ierr ", ierr
+print *, " gvnlx1 ", gvnlx1(:,1:10)
+write ( 1003,*) "ipert ipert1 idir idir1 iband  ikpt_me, gvnlx1 ", ipert, ipert1, idir, idir1, iband,  ikpt_me, gvnlx1(:,1:10)
+call flush()
+#endif
+!              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
+!                  do _I_ need to calculate the dot1X?
+                 if (do_scprod > 0) then
+                   call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                   if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
+                     cs1c(1,jband,iband_me,ikpt_me)=dot1r
+                     cs1c(2,jband,iband_me,ikpt_me)=dot1i
+                   end if
+#ifdef DEV_MJV
+print *, "initial ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot1r, dot1i ", dot1r, dot1i
+write ( 1004,*) "ipert ipert1 idir idir1 iband ikpt_me, dot1r dot1i ", ipert, ipert1, idir, idir1, iband,  ikpt_me, dot1r, dot1i
+#endif
+                 end if
+               end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
+  
                if (abs(occ_k(iband))>tol8) then
 !                Computation of term (I)
                  if (has_dcwf2) then
                    arg=eig_kq(jband)-eig_k(iband)
-                   dot2r=cs1c(1,jband_me,iband,ikpt_me)
-                   dot2i=cs1c(2,jband_me,iband,ikpt_me)
+                   dot2r=cs1c(1,jband,iband_me,ikpt_me)
+                   dot2i=cs1c(2,jband,iband_me,ikpt_me)
                    dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
                    doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
 #ifdef DEV_MJV
 print *, "dcwf2 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
 #endif
                  end if
-!                Computation of term (II)
+!                Computation of term (II) TODO: the next two ifs could be combined
                  if (is_metal) then
                    if (abs(rocceig(jband,iband))>tol8) then
                      ii=2*jband-1+(iband-1)*2*nband_k
@@ -1355,7 +1439,7 @@ print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, 
                end if ! occ bands
              end do ! jband
 #ifdef DEV_MJV
-print *, 'nstpaw checkpoint iband, ikpt_me, ipert1, idir1 ', iband, ikpt_me, ipert1, idir1
+print *, 'nstpaw checkpoint iband_me, ikpt_me, ipert1, idir1 ', iband_me, ikpt_me, ipert1, idir1
 print *, 'nstpaw ikpt_me cs1c ', ikpt_me, ' ipert idir ', ipert, idir
 print *, '   ',  cs1c(:,:,1,ikpt_me)
 print *, '   ',  cs1c(:,:,2,ikpt_me)
@@ -1363,12 +1447,9 @@ print *, '   ',  cs1c(:,:,3,ikpt_me)
 print *, '   ',  cs1c(:,:,4,ikpt_me)
 #endif
 
-! condense sum over all jband for dotr and doti
-             call xmpi_sum(dotr,mpi_enreg%comm_band,ierr)
-             call xmpi_sum(doti,mpi_enreg%comm_band,ierr)
-
              dotr=quarter*dotr
              doti=quarter*doti
+
 #ifdef DEV_MJV
 print *, "condense ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
 #endif
@@ -1552,6 +1633,11 @@ print *, ' nstpaw  d2ovl_k all idir; ipert1 idir ipert ', ipert1,idir,ipert, d2o
          icg1=icg1+npw1_k*nspinor*nband_me
          ikg1=ikg1+npw1_k
        end if
+
+#ifdef DEV_MJV
+print *, ' icg* ', icg, icgq, icg1
+print *, ' npw* ', npw_k, npw1_k
+#endif
 
      end do ! End loop over K-POINTS
 !----------------------------------------------------------------
