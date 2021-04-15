@@ -1,5 +1,7 @@
 # Test nloc_alg options (PAW, so useylm=1) on AlAs
 
+  nonlop_ylm_count 1 # enable nonlop counting
+
   ndtset 7
   # Depending on "cprj_update_lvl" value, cprj are computed (instead of "propagated") in different places in the code:
   # place A : at the beginning of a run (gstate), or after the move of atoms (scfcv_core)

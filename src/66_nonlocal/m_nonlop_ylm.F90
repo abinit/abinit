@@ -497,10 +497,10 @@ contains
  if (present(ndat_left)) then
    ndat_left_=ndat_left
  end if
- ! Determine which implementation to use : matrix-vector (mv), matrix-vector with dgmev (mv-dgemv), or native
  if (nloalg(1)<2.or.nloalg(1)>10) then
    ABI_ERROR('nloalg(1) should be between 2 and 10.')
  end if
+ ! Determine which implementation to use : matrix-vector (mv), matrix-vector with dgmev (mv-dgemv), or native
  !nloalg(1)|  opernla |  opernlb
  !------------------------------
  !    2    | mv-dgemv | mv-dgemv

@@ -104,6 +104,10 @@ module m_gstate
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
  use m_cgprj,            only : ctocprj
  use m_cgwf_cprj,        only : cprj_in_memory
+ use m_opernla_ylm,      only : opernla_counter
+ use m_opernla_ylm_mv,   only : opernla_mv_counter,opernla_mv_dgemv_counter
+ use m_opernlb_ylm,      only : opernlb_counter
+ use m_opernlb_ylm_mv,   only : opernlb_mv_counter,opernlb_mv_dgemv_counter
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -276,10 +280,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
  integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
+ integer :: nband_k,nbandtot,nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
+ integer :: iatm,ia1,ia2,ia3,ia4,ia5,mincat,nincat,nonlop_calls
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
@@ -663,11 +668,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
  ! Here we count the number of states treated by the proc. if cnt == 0, mcg is then set to 0.
  cnt = 0
+ nbandtot = 0
  do spin=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
-     do band=1,dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+     nband_k = dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+     do band=1,nband_k
        if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, band, band, spin, mpi_enreg%me_kpt)) cnt = cnt + 1
      end do
+     nbandtot = nbandtot + nband_k
    end do
  end do
 
@@ -770,6 +778,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ end if
+
+ ! Now that wavefunctions are initialized, calls of nonlocal operations are possible, so we start the counting (if enabled)
+ if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
+   opernla_counter = 0
+   opernlb_counter = 0
+   opernla_mv_counter = 0
+   opernlb_mv_counter = 0
+   opernla_mv_dgemv_counter = 0
+   opernlb_mv_dgemv_counter = 0
  end if
 
 !###########################################################
@@ -1593,6 +1611,84 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
+ end if
+
+ ! Write nonlop_ylm_counters (if enabled) in outputs
+ if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
+   call wrtout([std_out,ab_out],'','COLL')
+   write(msg,'(a)')                ' --- NONLOP YLM COUNTERS -------------------------------------------------'
+   call wrtout([std_out,ab_out],msg,'COLL')
+   mincat=min(NLO_MINCAT,maxval(nattyp))
+   ia1=1;iatm=0;nonlop_calls=0
+   do itypat=1,dtset%ntypat
+!    Get atom loop indices for different types:
+     ia2=ia1+nattyp(itypat)-1;ia5=1
+     do ia3=ia1,ia2,mincat
+       ia4=min(ia2,ia3+mincat-1)
+!      Give the increment of number of atoms in this subset.
+       nincat=ia4-ia3+1
+       nonlop_calls=nonlop_calls+1
+!      End sum on atom subset loop
+       iatm=iatm+nincat;ia5=ia5+nincat
+     end do
+!    End atom type loop
+     ia1=ia2+1
+   end do
+   if (iatm/=dtset%natom) then
+     ABI_ERROR('iatm should be equal to natom!')
+   end if
+   write(msg,'(a,i6)')             ' Number of Calls in nonlop_ylm : NC = ',nonlop_calls
+   call wrtout([std_out,ab_out],msg,'COLL')
+   write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+   write(msg,'(a)')                '                  | total count (TC) |            TC/NC |         TC/NC/NB'
+   call wrtout([std_out,ab_out],msg,'COLL')
+   write(msg,'(a)')                ' -------------------------------------------------------------------------'
+   call wrtout([std_out,ab_out],msg,'COLL')
+   call xmpi_sum(opernla_counter,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(opernlb_counter,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(opernla_mv_counter,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(opernlb_mv_counter,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(opernla_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(opernlb_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
+   cnt=opernla_counter
+   if (cnt>0) then
+     write(msg,'(2(a,i16),a,f16.1)') ' opernla          | ',&
+       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+     call wrtout([std_out,ab_out],msg,'COLL')
+   end if
+   cnt=opernla_mv_counter
+   if (cnt>0) then
+     write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv       | ',&
+       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+     call wrtout([std_out,ab_out],msg,'COLL')
+   end if
+   cnt=opernla_mv_dgemv_counter
+   if (cnt>0) then
+     write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv_dgemv | ',&
+       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+     call wrtout([std_out,ab_out],msg,'COLL')
+   end if
+   cnt=opernlb_counter
+   if (cnt>0) then
+     write(msg,'(2(a,i16),a,f16.1)') ' opernlb          | ',&
+       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+     call wrtout([std_out,ab_out],msg,'COLL')
+   end if
+   cnt=opernlb_mv_counter
+   if (cnt>0) then
+     write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv       | ',&
+       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+     call wrtout([std_out,ab_out],msg,'COLL')
+   end if
+   cnt=opernlb_mv_dgemv_counter
+   if (cnt>0) then
+     write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv_dgemv | ',&
+       & cnt,' | ',cnt/nonlop_calls,' | ',dble(cnt)/nonlop_calls/nbandtot
+     call wrtout([std_out,ab_out],msg,'COLL')
+   end if
+   write(msg,'(a)')                ' -------------------------------------------------------------------------'
+   call wrtout([std_out,ab_out],msg,'COLL')
  end if
 
  if(dtset%imgwfstor==1)then

@@ -41,6 +41,9 @@ module m_opernla_ylm_mv
 !!***
 
  public :: opernla_ylm_mv
+ integer,public,save :: opernla_mv_counter = -1
+ integer,public,save :: opernla_mv_dgemv_counter = -1
+!!***
 !!***
 
 contains
@@ -142,8 +145,6 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
 
  if (choice==-1) return
 
-! call timab(1130,1,tsec)
-
 !Some checks
  if (abs(choice)>1) then
    ABI_ERROR('Only abs(choice)<=1 is available for now.')
@@ -160,6 +161,11 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  end if
 
  use_dgemv = nloalg(1)==2.or.nloalg(1)==5.or.nloalg(1)==7
+ if (use_dgemv) then
+   if(opernla_mv_dgemv_counter>=0) opernla_mv_dgemv_counter = opernla_mv_dgemv_counter + 1
+ else
+   if(opernla_mv_counter>=0) opernla_mv_counter = opernla_mv_counter + 1
+ end if
 
 !Useful variables
  wt=four_pi/sqrt(ucvol);if (cplex==1) wt=2.d0*wt
@@ -187,7 +193,6 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Step (1) : Compute scal(g) = c(g).exp(2pi.i.g.R)
-     !call timab(1131,1,tsec)
      do ipw=ipw0,npw
        jpw=ipw+ipwshft
        scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
@@ -198,7 +203,6 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
        scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
        scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
      end if
-!     call timab(1131,2,tsec)
 
 !    --------------------------------------------------------------------
 !    ALL CHOICES:
@@ -209,12 +213,9 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
 
 !      Step (2) : Compute scal(lmn) = Sum_g[scal(g).f_nl(g).Y_lm(g)]
        if (use_dgemv) then
-!         call timab(1134,1,tsec)
          call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
          call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
-!         call timab(1134,2,tsec)
        else
-!         call timab(1132,1,tsec)
          scalr_lmn(:)=0.0_DP
          scali_lmn(:)=0.0_DP
          do ilmn=1,nlmn
@@ -223,10 +224,8 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
              scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl_loc(ipw,ilmn)
            end do
          end do
-!         call timab(1132,2,tsec)
        end if
 !      Step (3) : Compute gx(lmn) = 4pi/sqrt(vol) (i)^l scal(lmn)
-!       call timab(1133,1,tsec)
        if (cplex==2) then
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4)+1
@@ -241,7 +240,6 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
            gx(1,ilmn,ia,ispinor) = real(ctmp)
          end do
        end if
-!       call timab(1133,2,tsec)
 
      end if
 
@@ -263,8 +261,6 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
    end if
    call timab(48,2,tsec)
  end if
-
-! call timab(1130,2,tsec)
 
 end subroutine opernla_ylm_mv
 !!***

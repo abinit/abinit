@@ -992,6 +992,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%nonlinear_info
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nonlinear_info','INT',0)
 
+ intarr(1,:)=dtsets(:)%nonlop_ylm_count
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nonlop_ylm_count','INT',0)
+
  dprarr(1,:)=dtsets(:)%noseinert
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'noseinert','DPR',0)
 

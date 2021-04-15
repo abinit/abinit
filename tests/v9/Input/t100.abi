@@ -1,5 +1,7 @@
 # Test nloc_alg options (PAW, so useylm=1) on AlAs
 
+  nonlop_ylm_count 1 # enable nonlop counting
+
   ndtset 9
   nloc_alg1  2
   nloc_alg2  3

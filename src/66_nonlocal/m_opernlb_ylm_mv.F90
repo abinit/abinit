@@ -30,7 +30,6 @@ module m_opernlb_ylm_mv
 #if defined HAVE_OPENMP
  use OMP_LIB
 #endif
-! use m_time,only : timab
 
  implicit none
 
@@ -38,6 +37,8 @@ module m_opernlb_ylm_mv
 !!***
 
  public :: opernlb_ylm_mv
+ integer,public,save :: opernlb_mv_counter = -1
+ integer,public,save :: opernlb_mv_dgemv_counter = -1
 !!***
 
 contains
@@ -163,8 +164,6 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 
  DBG_ENTER("COLL")
 
-! call timab(1150,1,tsec)
-
 !Some checks
  nthreads=1
 #if defined HAVE_OPENMP
@@ -182,6 +181,11 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  end if
 
  use_dgemv = nloalg(1)==2.or.nloalg(1)==6.or.nloalg(1)==10
+ if (use_dgemv) then
+   if(opernlb_mv_dgemv_counter>=0) opernlb_mv_dgemv_counter = opernlb_mv_dgemv_counter + 1
+ else
+   if(opernlb_mv_counter>=0) opernlb_mv_counter = opernlb_mv_counter + 1
+ end if
 
 !Inits
  wt=four_pi/sqrt(ucvol)
@@ -216,7 +220,6 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Step (1) : scale gxfac with 4pi/sqr(omega).(-i)^l
-!     call timab(1151,1,tsec)
      if (paw_opt/=3) then
        if (cplex_fac==2) then
          do ilmn=1,nlmn
@@ -236,10 +239,8 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
          ABI_BUG('Error : should not be possible to be here')
        end if
      end if
-!     call timab(1151,2,tsec)
 
 !    Step (1) bis: Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
-!    call timab(1152,1,tsec)
      if (paw_opt>=3) then
        if (cplex==2) then
          do ilmn=1,nlmn
@@ -259,19 +260,15 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
          ABI_BUG('Error : should not be possible to be here')
        end if
      end if
-!     call timab(1152,2,tsec)
 
 !    Compute <g|Vnl|c> (or derivatives) for each plane wave:
      if (paw_opt/=3) then
 
 !      Step (2) scal(g) = Sum_lmn f_nl(g).Y_lm(g).gxfac_(lmn)
        if (use_dgemv) then
-!         call timab(1157,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
-!         call timab(1157,2,tsec)
        else
-!         call timab(1153,1,tsec)
          scalr(:) = zero
          scali(:) = zero
          do ilmn=1,nlmn
@@ -280,17 +277,14 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
              scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
            end do
          end do
-!         call timab(1153,2,tsec)
        end if
 
 !      Step (3) : vect(g) = exp(-2pi.i.g.R).scal(g)
-!       call timab(1155,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
          vect(1,jpw)=vect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          vect(2,jpw)=vect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
-!       call timab(1155,2,tsec)
 
      end if
 
@@ -299,7 +293,6 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 
 !      Step (2) (bis) scal(g) = Sum_lmn f_nl(g).Y_lm(g).gxfacs_(lmn)
        if (nloalg(1)==3) then
-!         call timab(1154,1,tsec)
          scalr(:) = zero
          scali(:) = zero
          do ilmn=1,nlmn
@@ -308,22 +301,17 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
              scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
            end do
          end do
-!         call timab(1154,2,tsec)
        else if (nloalg(1)==2) then
-!         call timab(1158,1,tsec)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
-!         call timab(1158,2,tsec)
        end if
 
 !      Step (3) (bis) : svect(g) = exp(-2pi.i.g.R).scal(g)
-!       call timab(1156,1,tsec)
        do ipw=1,npw
          jpw=ipw+ipwshft
          svect(1,jpw)=svect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          svect(2,jpw)=svect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
-!       call timab(1156,2,tsec)
 
      end if
 
@@ -340,8 +328,6 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  if (paw_opt>=3) then
    ABI_FREE(gxfacs_)
  end if
-
-! call timab(1150,2,tsec)
 
  DBG_EXIT("COLL")
 
