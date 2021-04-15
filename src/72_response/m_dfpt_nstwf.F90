@@ -550,7 +550,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  end if
 
 #ifdef DEV_MJV
-print *, "shape cgq ", shape(cgq)
+npw1_k=npwar1(1)
+print *, "shape cgq ", shape(cgq), " npw1_k,nspinor ", npw1_k,nspinor
+call flush()
 icgq=0
 do kpert1=1,mband_mem_rbz
   print *, "input iband icgq ", kpert1, icgq, ' cgq ',cgq(:,icgq+1:icgq+10) ! cgq(:,icgq+1:icgq+npw1_k*nspinor) 
@@ -1271,13 +1273,19 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
                if (bands_treated_now(iband_) == 0) cycle
 
 ! distribute gvnlx1 to my subcomm
+               gvnlx1_tmp = zero 
                if (iband_ == iband) then
                  gvnlx1_tmp = gvnlx1 
 #ifdef DEV_MJV
 write (999, *) "ipert ipert1 idir idir1 iband ikpt_me before gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1(:,1:10)
 #endif
                end if
-               call xmpi_bcast(gvnlx1_tmp, band_procs(iband), mpi_enreg%comm_band, ierr)
+! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
+               !call xmpi_bcast(gvnlx1_tmp, band_procs(iband_), mpi_enreg%comm_band, ierr)
+               call xmpi_sum(gvnlx1_tmp, mpi_enreg%comm_band, ierr)
+#ifdef DEV_MJV
+write (999, *) "****  ipert ipert1 idir idir1 iband ikpt_me before gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1_tmp(:,1:10)
+#endif
                if (option == 1) then
 ! in case I need to reuse the ch1c (option 1) then load them here
                  ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
@@ -1382,13 +1390,19 @@ call flush()
                    jband_me = jband_me + 1
 ! gvnlx1 depends on j only, I have it, and everyone needs it
                    gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
+#ifdef DEV_MJV
+print *, " bounds : ", 1+npw1_k*nspinor*(jband_me-1)+icgq, npw1_k*nspinor*jband_me+icgq
+#endif
                  end if
 #ifdef DEV_MJV
+print *, " gvnlx1 before bcast ", gvnlx1(:,1:10)
+print *, " band_procs(jband) ", band_procs(jband),  ' mpi_enreg%comm_band ', mpi_enreg%comm_band
 print *, " calling xmpibcast of gvnlx1 iband_me jband_me, jband icgq ", iband_me, jband_me, jband, icgq, ' shape ', shape(gvnlx1)
 call flush()
 #endif
 ! xmpi bcast the current jband to other procs in band pool
-                 call xmpi_bcast(gvnlx1, band_procs(jband), mpi_enreg%comm_band, ierr)
+                 !call xmpi_bcast(gvnlx1, band_procs(jband), mpi_enreg%comm_band, ierr)
+                 call xmpi_sum(gvnlx1, mpi_enreg%comm_band, ierr)
 #ifdef DEV_MJV
 print *, " ierr ", ierr
 print *, " gvnlx1 ", gvnlx1(:,1:10)
@@ -1432,7 +1446,8 @@ print *, "dcwf2 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, do
                      dotr=dotr+arg*(dot1r*dot2r-dot1i*dot2i)
                      doti=doti+arg*(dot1r*dot2i+dot2r*dot1i)
 #ifdef DEV_MJV
-print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
+print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " eig1_k ", eig1_k(ii:ii+1), " arg ", arg, " invocc, rocceig(jband,iband) ", invocc, rocceig(jband,iband)
+print *, "ismetal  dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
 #endif
                    end if
                  end if
