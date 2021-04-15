@@ -325,11 +325,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    ABI_MALLOC(cwaveprj,(0,0))
    ABI_MALLOC(cwaveprj1,(0,0))
  end if
-#ifdef DEV_MJV
-print *, 'vtowfk dims of cprj ', shape(cwaveprj)
-print *, 'vtowfk dims of cprj1 ', shape(cwaveprj1)
-print *, 'vtowfk dims of cprj0 ', shape(cwaveprj0)
-#endif
 
  energy_factor=two
  if(ipert==natom+10.or.ipert==natom+11) energy_factor=six
@@ -348,9 +343,6 @@ print *, 'vtowfk dims of cprj0 ', shape(cwaveprj0)
 
  call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
-#ifdef DEV_MJV
-print *, 'band_procs  ', band_procs
-#endif
 
  iband_me = 0
  do iband=1,nband_k
@@ -395,17 +387,8 @@ print *, 'calling pawcprj_get 370'
 !  The GS wavefunctions should already be non-zero
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw1_k
-#ifdef DEV_MJV
-print *, ' igs ', igs, '  huge 0, cutoff = ', huge(zero), huge(zero)*1.d-11
-#endif
      do ipw=1+igs,npw1_k+igs
-#ifdef DEV_MJV
-print *, 'ipw, igs kinpw1 ', ipw, igs, kinpw1(ipw-igs)
-#endif
        if(kinpw1(ipw-igs)>huge(zero)*1.d-20)then
-#ifdef DEV_MJV
-print *, 'zeroing ipw ', ipw
-#endif
          cwavef(1,ipw)=zero
          cwavef(2,ipw)=zero
        end if
@@ -454,14 +437,6 @@ print *, 'zeroing ipw ', ipw
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
-#ifdef DEV_MJV
-print *, ' vtowfk isppol, ikpt, nband_me iband iband_me ', isppol, ikpt, nband_me, iband, iband_me 
-print *, 'usedcwavef ', usedcwavef
-print *, ' occ_k, eig0nk,eig0_kq ', occ_k(iband), eig0nk,eig0_kq
-print *, 'cgwf cwavef 444 ', cwavef(:,1:5)
-print *, 'cgwf cwave0 444 ', cwave0(:,1:5)
-print *, 'cgwf cgq 444 ', cgq(:,1:5)
-#endif
        call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       rf2,dcwavef,&
 &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
@@ -480,11 +455,6 @@ print *, 'cgwf cgq 444 ', cgq(:,1:5)
 !    PAW: note that dcwavef (1st-order change of WF due to overlap change)
 !         remains in the subspace orthogonal to cgq
        call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb,ikpt,isppol,me)
-#ifdef DEV_MJV
-print *, 'prtfull1wf ', dtset%prtfull1wf
-print *, 'vtowfk before corrmetal iband, cwavef ', iband, cwavef(:,1:5)
-print *, 'vtowfk before corrmetal iband, gh0c1 ', iband, gh0c1(:,1:5)
-#endif
        if (dtset%prtfull1wf>0) then
          call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&
 &         eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
@@ -496,11 +466,6 @@ print *, 'vtowfk before corrmetal iband, gh0c1 ', iband, gh0c1(:,1:5)
 &         iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &         occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
        end if
-#ifdef DEV_MJV
-print *,'vtowfk after corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
-ii = (iband-1)*nband_k*2
-print *, 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
-#endif
        ABI_FREE (cycle_bands)
      else
        tocceig=0
@@ -523,9 +488,6 @@ print *, 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
      else
 !      Compute the 0-order kinetic operator contribution (with cwavef)
        call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
-#ifdef DEV_MJV
-print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:5) 
-#endif
 !      There is an additional factor of 2 with respect to the bare matrix element
        ek0_k(iband)=energy_factor*ar
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
@@ -574,9 +536,6 @@ print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:5)
 &         mpi_enreg%comm_fft)
        end if
        eeig0_k(iband)=-energy_factor*(eig0_k(iband)- (dtset%dfpt_sciss) )*scprod
-#ifdef DEV_MJV
-print *, 'iband, eeig0_k(iband), scprod, energy_factor 548 ', iband, eeig0_k(iband), scprod, energy_factor
-#endif
 
 !      Compute nonlocal psp contributions to nonlocal energy:
 !      <G|Vnl+VFockACE|C1nk(perp)> is contained in gvnlxc (with cwavef)
@@ -644,9 +603,6 @@ print *, 'shape(cprj1) ', shape(cprj1), '   ', mk1mem, gs_hamkq%dimcprj
 !&     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,to_be_gathered=.true.)
    end if
 
-#ifdef DEV_MJV
-print *, 'vtowfk iband cg1 : ', iband, cwave1(:,1:5)
-#endif
  end do
 
 !======================================================================
@@ -663,35 +619,16 @@ print *, 'vtowfk iband cg1 : ', iband, cwave1(:,1:5)
    ii = ii + 2*nband_k
  end do
 
-#ifdef DEV_MJV
-print *, 'vtowfk : eig1_k before sum ', eig1_k
-#endif
 ! call xmpi_sum(eig1_k,mpi_enreg%comm_band,ierr)
 
 ! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt, 
 !   and full mpi_sum will be done higher up.
 
-#ifdef DEV_MJV
-print *, 'vtowfk : partial energies for my k and bands:'
-print *, 'vtowfk : edocc_k ', edocc_k
-print *, 'vtowfk : eeig0_k ', eeig0_k
-print *, 'vtowfk : ek0_k ', ek0_k
-print *, 'vtowfk : ek1_k ', ek1_k
-print *, 'vtowfk : eloc0_k ', eloc0_k
-print *, 'vtowfk : enl0_k ', enl0_k
-print *, 'vtowfk : enl1_k ', enl1_k
-print *, 'vtowfk : eig1_k ', eig1_k
-#endif
 
 
 !For rf2 perturbation
  if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
 
-#ifdef DEV_MJV
-! call xmpi_sum(resid_k,mpi_enreg%comm_band,ierr)
-print *, 'vtowfk residk 647', resid_k
-write (200+mpi_enreg%me_kpt, *) 'vtowfk residk 647', resid_k
-#endif
 
 !Find largest resid over bands at this k point
  residk=maxval(resid_k(:))
@@ -1032,9 +969,6 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 ! I will save in _my_ array cwave1, if iband==iband_
  do iband_ = 1, nband
    if (bands_treated_now(iband_) == 0) cycle
-#ifdef DEV_MJV
-print *, 'iband_ ', iband_, ' nband ', nband
-#endif
 
    cwcorr = zero
    if (usepaw==1) then
@@ -1053,9 +987,6 @@ print *, 'iband_ ', iband_, ' nband ', nband
      do ibandkq=1,nband
        if(cycle_bands(ibandkq)) cycle
        ibandkq_me = ibandkq_me + 1
-#ifdef DEV_MJV
-print *, 'ibandkq ', ibandkq, ibandkq_me, rocceig(ibandkq,iband_)
-#endif
 
 !      Select bands with variable occupation
        if (abs(rocceig(ibandkq,iband_))>tol8) then
@@ -1071,9 +1002,6 @@ print *, 'ibandkq ', ibandkq, ibandkq_me, rocceig(ibandkq,iband_)
            factr=rocceig(ibandkq,iband_)*invocc*eig1(index_eig1)
          end if
          facti = rocceig(ibandkq,iband_)*invocc*eig1(index_eig1+1)
-#ifdef DEV_MJV
-print *, 'factr, facti index_eig1 eig1 ', factr, facti, index_eig1, eig1(index_eig1)
-#endif
 
 !        Apply correction to 1st-order WF
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwcorr,facti,factr,index_cgq,npw1,nspinor)
@@ -1090,9 +1018,6 @@ print *, 'factr, facti index_eig1 eig1 ', factr, facti, index_eig1, eig1(index_e
 
 !        The factor of two is needed because we compute the 2DTE, and not E(2)
          edocc_tmp = edocc_tmp-two*(factr*eig1(index_eig1)+facti*eig1(index_eig1+1))
-#ifdef DEV_MJV
-print *, 'edocc_tmp ', edocc_tmp
-#endif
 
        end if ! Variable occupations
      end do ! Loop over k+q subspace
@@ -1108,10 +1033,6 @@ print *, 'edocc_tmp ', edocc_tmp
 ! this sums over the k+q contributions to the present iband_
    call xmpi_sum(edocc_tmp, mpi_enreg%comm_band, ierr)
    call xmpi_sum(wf_corrected_, mpi_enreg%comm_band, ierr)
-#ifdef DEV_MJV
-print *, 'xmpisum edocc_tmp, wf_corrected_ ', edocc_tmp, wf_corrected_
-print *, 'iband_ cwcorr ', iband_, cwcorr(:,1:5)
-#endif
 
 
 ! 4) add correction to the cwave1
@@ -1129,11 +1050,6 @@ print *, 'iband_ cwcorr ', iband_, cwcorr(:,1:5)
    end if
  end do ! loop over all bands presently running in parallel
 
-#ifdef DEV_MJV
-print *, 'iband, wf_corrected edocc 1055 ', iband, wf_corrected, edocc
-print *, 'cwave1 1055 ', cwave1(:,1:5)
-print *, 'cwavef 1055 ', cwavef(:,1:5)
-#endif
 
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
  if (usepaw==1.and.wf_corrected==1) then
@@ -1144,10 +1060,6 @@ print *, 'cwavef 1055 ', cwavef(:,1:5)
    edocc(iband)=edocc(iband)+four*factr
  end if
 
-#ifdef DEV_MJV
-print *, 'edocc 1068 ', edocc
-print *, ' ghc 1068 ', ghc(:,1:5)
-#endif
 
  ABI_FREE(cwcorr)
  if (usepaw==1) then

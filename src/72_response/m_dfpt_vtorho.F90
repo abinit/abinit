@@ -524,9 +524,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      nband_k = nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
 ! enables variable nband less than the block size in serial case
      nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
-#ifdef DEV_MJV
-print *, ' vtorho nband_me ', nband_me
-#endif
      istwf_k = istwfk_rbz(ikpt)
      npw_k   = npwarr(ikpt,1)
      npw1_k  = npwar1(ikpt,1)
@@ -583,14 +580,6 @@ print *, ' vtorho nband_me ', nband_me
 !    For each pair of active bands (m,n), generates the ratios
 !    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
 !    and decide to which band to attribute it.
-#ifdef DEV_MJV
-print *, 'doccde_k',  doccde_k
-print *, 'doccde_kq ', doccde_kq
-print *, 'occ_k  ',   occ_k
-print *, 'occ_kq ',   occ_kq   
-print *, 'eig0_k  ',   eig0_k
-print *, 'eig0_kq  ',   eig0_kq
-#endif
      call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,dtset%occopt,occ_k,occ_kq,rocceig)
 
      ! These arrays are not needed anymore.
@@ -691,11 +680,6 @@ print *, 'eig0_kq  ',   eig0_kq
 !    Save eigenvalues (hartree), residuals (hartree**2)
      eigen1 (1+bd2tot_index : 2*nband_k**2+bd2tot_index) = eig1_k(:)
      resid  (1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
-#ifdef DEV_MJV
-print *, '  eigen1 ', eigen1
-print *, ' resid total ', resid
-write (300+mpi_enreg%me_kpt, *) ' resid total ', resid
-#endif
 
 !    Accumulate sum over k points for nonlocal and kinetic energies,
 !    also accumulate gradients of Enonlocal:
@@ -710,11 +694,6 @@ write (300+mpi_enreg%me_kpt, *) ' resid total ', resid
          end1=end1+wtk_k*occ_k(iband)*end1_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
-#ifdef DEV_MJV
-print *, ' wtk_k ', wtk_k, occ_k(iband) 
-print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
-&   ek0_k(iband), ek1_k(iband), eloc0_k(iband), enl0_k(iband), enl1_k(iband)
-#endif
        end do
      end if
 
@@ -763,12 +742,6 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
 ! FR EB for the non-collinear part see vtorho.F90
    if(iscf_mod>0) then
      if (psps%usepaw==0) then
-#ifdef DEV_MJV
-print *, " dims of rhor1 = ", cplex,nfftf,nspden
-print *, " dims of rhoaug1 ", cplex,n4,n5,n6,gs_hamkq%nvloc
-!print *, ' rhor1 726 ', rhor1(:,1:10)
-!print *, ' rhoaug1 my bands and k 726 ', rhoaug1(:,1:10,1,1)
-#endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhor1,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
          do ispden=2,4
@@ -776,10 +749,6 @@ print *, " dims of rhoaug1 ", cplex,n4,n5,n6,gs_hamkq%nvloc
          end do
        end if
      else
-#ifdef DEV_MJV
-print *, ' rho1wfr 737 ', rho1wfr(1:10,:)
-print *, ' rhoaug1 my bands and k 737 ', rhoaug1(:,1:10,1,1)
-#endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
          do ispden=2,4
@@ -858,14 +827,8 @@ print *, ' rhoaug1 my bands and k 737 ', rhoaug1(:,1:10,1,1)
      index1=cplex*dtset%nfft*nspden
      if (psps%usepaw==0) then
        rhor1(:,:)  =reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
-#ifdef DEV_MJV
-print *, 'vtorho rhor1 814 ', rhor1(1:5,:)
-#endif
      else
        rho1wfr(:,:)=reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
-#ifdef DEV_MJV
-print *, 'vtorho rho1wfr 814 ', rho1wfr(1:5,:)
-#endif
      end if
    else
      index1=0
@@ -889,9 +852,6 @@ print *, 'vtorho rho1wfr 814 ', rho1wfr(1:5,:)
      end do
    end do
    ABI_FREE(buffer1)
-#ifdef DEV_MJV
-print *, 'resid unpacked ',  resid
-#endif
 
 !  Accumulate PAW occupancies
    if (psps%usepaw==1.and.iscf_mod>0) then
@@ -915,19 +875,10 @@ print *, 'resid unpacked ',  resid
      rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
    end if
 !
-#ifdef DEV_MJV
-print *, ' calling symrhg '
-#endif
    if (psps%usepaw==0) then
-#ifdef DEV_MJV
-print *, 'rhog1 ', rhog1(:,1:10)
-#endif
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1)
    else
-#ifdef DEV_MJV
-print *, 'rho1wfg ', rho1wfg(:,1:10)
-#endif
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1)
    end if
@@ -957,18 +908,11 @@ print *, 'rho1wfg ', rho1wfg(:,1:10)
 !  Compute and add the 1st-order compensation density to rho1wfr
 !  to get the total 1st-order density
    if (psps%usepaw==1) then
-#ifdef DEV_MJV
-print *, 'calling pawmkrho ', my_natom, ' atmtab ', mpi_enreg%my_atmtab
-print *, 'calling pawmkrho rho1wfg ', rho1wfg(:,1:10)
-#endif
      call pawmkrho(1,arg,cplex,gprimd,idir,indsy1,ipert,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &     dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,dtset%qptn,rho1wfg,rho1wfr,&
 &     rhor1,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
 &     pawang_sym=pawang1,pawnhat=nhat1,pawrhoij0=pawrhoij,rhog=rhog1)
-#ifdef DEV_MJV
-print *, 'called pawmkrho ', rhor1(1:10,1)
-#endif
      ABI_FREE(rho1wfr)
      ABI_FREE(rho1wfg)
      if (paral_atom) then
@@ -981,9 +925,6 @@ print *, 'called pawmkrho ', rhor1(1:10,1)
    if (optres==1) then
      nvresid1=rhor1-nvresid1
      call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid1)
-#ifdef DEV_MJV
-print *, ' called sqnorm_v ', nres2, '   ', nvresid1(1:10,1)
-#endif
    end if
  end if ! iscf>0
 

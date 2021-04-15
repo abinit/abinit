@@ -1305,12 +1305,6 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 
  DBG_ENTER("COLL")
 
-#ifdef DEV_MJV
-!print *, ' getdc1 bands_treated_now ', bands_treated_now
-!print *, ' getdc1 band_procs ', band_procs
-!print *, ' getdc1 check ', band, ibgq,icgq, ' s1cwave0 ', any(isnan(s1cwave0))
-#endif
-
  ABI_MALLOC(dummy,(0,0))
  ABI_MALLOC(scprod,(2,nband_me))
  ABI_MALLOC(dcwavef_tmp,(2,npw1*nspinor))
@@ -1326,9 +1320,6 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 
 ! run over procs in my pool which have a dcwavef to projbd
  do band_ = 1, nband
-#ifdef DEV_MJV
-!print *, ' getdc1, band_ ', band_, ' optcprj ', optcprj
-#endif
    if (bands_treated_now(band_) == 0) cycle
    dcwavef_tmp = zero
 
@@ -1341,10 +1332,6 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
      end do
    end if
    call xmpi_bcast(dcwavef_tmp,band_procs(band_),mpi_enreg%comm_band,ierr)
-#ifdef DEV_MJV
-!print *, ' getdc1, after bcast band_ band ', band_, band, ' band_procs(band_) ', band_procs(band_)
-!print *, ' getdc1 check before proj ', band, ibgq,icgq, ' dcwavef_tmp ', any(isnan(dcwavef_tmp))
-#endif
 
 ! get the projbd onto my processor's bands dcwavef = dcwavef - <cgq|dcwavef>|cgq>
 ! dcwavef = <G|S^(1)|C_k> - Sum_{MYj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
@@ -1352,19 +1339,10 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
    call projbd(cgq,dcwavef_tmp,-1,icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
 &   dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
 
-#ifdef DEV_MJV
-!print *, ' getdc1, after proj band_ band, mpi_enreg%comm_band ', band_, band, mpi_enreg%comm_band
-!write(1000+100*mpi_enreg%me_kpt+band,*) 'band shape, dcwavef_tmp ', band, shape(dcwavef_tmp)
-!write(1000+100*mpi_enreg%me_kpt+band,*) dcwavef_tmp
-!print *, ' getdc1 check after proj ', band, ibgq,icgq, ' dcwavef_tmp ', any(isnan(dcwavef_tmp))
-#endif
 
 ! sum all of the corrections 
 ! dcwavef = Nprocband * <G|S^(1)|C_k> - Sum_{ALLj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
    call xmpi_sum(dcwavef_tmp,mpi_enreg%comm_band,ierr)
-#ifdef DEV_MJV
-!print *, ' getdc1, after sum band_ band ierr ', band_, band, ierr
-#endif
 
 ! save to my proc if it is my turn, and subtract Ntuple counted dcwavef
    if (band_ == band) then

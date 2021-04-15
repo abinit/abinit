@@ -857,9 +857,6 @@ write (1004,*) '# new kpert1 ', kpert1
        eig_k (:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
        eig_kq(:)=eigenq(1+bdtot_index:nband_k+bdtot_index)
        eig1_k(:)=eigen1(1+bd2tot_index:2*nband_k**2+bd2tot_index)
-#ifdef DEV_MJV
-print *, " ikpt ", ikpt, " bd2tot_index ", bd2tot_index, " eig1_k ",eig1_k
-#endif
        occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
        nband_kocc=count(abs(occ_k(:))>tol8)
        kpoint(:)=kpt_rbz(:,ikpt)
@@ -1056,10 +1053,6 @@ print *, " ikpt ", ikpt, " bd2tot_index ", bd2tot_index, " eig1_k ",eig1_k
        iband_me = 0
        do iband=1,nband_k
 
-#ifdef DEV_MJV
-print *, ' iband, ikpt, xmpi_paral, mpi_enreg%proc_distrb(ikpt,iband,isppol),me ', &
-        &  iband, ikpt, xmpi_paral, mpi_enreg%proc_distrb(ikpt,iband,isppol),me
-#endif
 !        Skip band if not to be treated by this proc
          if (xmpi_paral==1) then
            if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
@@ -1071,9 +1064,6 @@ print *, ' iband, ikpt, xmpi_paral, mpi_enreg%proc_distrb(ikpt,iband,isppol),me 
          bands_treated_now = 0
          bands_treated_now(iband) = 1
          call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-#ifdef DEV_MJV
-print *, 'nstpaw bands_treated_now ', bands_treated_now, 'ibands : ', iband_me, iband
-#endif
 
 !        Extract GS wavefunctions
          if (need_wfk) then
@@ -1095,9 +1085,6 @@ print *, 'nstpaw bands_treated_now ', bands_treated_now, 'ibands : ', iband_me, 
          do kdir1=1,mdir1
            idir1=jdir1(kdir1)
            istr1=idir1;if(ipert1==dtset%natom+4) istr1=idir1+3
-#ifdef DEV_MJV
-print *, 'kdir1 ', kdir1, idir1, istr1
-#endif
 
 !          Not able to compute if ipert1=(Elect. field) and no ddk WF file
            if (ipert1==dtset%natom+2.and.ddkfil(idir1)==0) cycle
@@ -1250,9 +1237,6 @@ print *, 'kdir1 ', kdir1, idir1, istr1
 !          At first call (when j1=j2), ch1c=<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i> is stored
 !          For the next calls, it is re-used.
            if (has_dcwf.or.(ipert==ipert1.and.idir==idir1.and.usepaw==1)) then
-#ifdef DEV_MJV
-print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
-#endif
 !            note: gvnlx1 used as temporary space
              ABI_MALLOC(gvnlx1,(2,npw1_k*nspinor))
              ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
@@ -1268,16 +1252,10 @@ print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
                gvnlx1_tmp = zero 
                if (iband_ == iband) then
                  gvnlx1_tmp = gvnlx1 
-#ifdef DEV_MJV
-write (999, *) "ipert ipert1 idir idir1 iband ikpt_me before gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1(:,1:10)
-#endif
                end if
 ! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
                !call xmpi_bcast(gvnlx1_tmp, band_procs(iband_), mpi_enreg%comm_band, ierr)
                call xmpi_sum(gvnlx1_tmp, mpi_enreg%comm_band, ierr)
-#ifdef DEV_MJV
-write (999, *) "****  ipert ipert1 idir idir1 iband ikpt_me before gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1_tmp(:,1:10)
-#endif
                if (option == 1) then
 ! in case I need to reuse the ch1c (option 1) then load them here
                  ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
@@ -1297,17 +1275,11 @@ write (999, *) "****  ipert ipert1 idir idir1 iband ikpt_me before gvnlx1 ", ipe
 !             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
 !TODO: make this a blas call? zaxpy
                  gvnlx1 = gvnlx1_tmp - (mpi_enreg%nproc_band-1)*gvnlx1
-#ifdef DEV_MJV
-write (1000, *) "ipert ipert1 idir idir1 iband ikpt_me gvnlx1 ", ipert, ipert1, idir, idir1, iband, ikpt_me, gvnlx1(:,1:10)
-#endif
                end if
 
                if (option == 0) then
 ! save ch1c for all of the iband_ on each proc, for later use. First band index only for my nband_me which matches cgq
                  ch1c(:,1:nband_me,iband_,ikpt_me) = ch1c_tmp(:,1:nband_me)
-#ifdef DEV_MJV
-write ( 1001,*) "ipert ipert1 idir idir1 iband  ikpt_me, ch1c ", ipert, ipert1, idir, idir1, iband,  ikpt_me, ch1c_tmp(:,1:nband_me)
-#endif
                end if
              end do ! iband_
              ABI_FREE(gvnlx1_tmp)
@@ -1321,12 +1293,6 @@ write ( 1001,*) "ipert ipert1 idir idir1 iband  ikpt_me, ch1c ", ipert, ipert1, 
 !                Add contribution to DDB
 !                Note: factor 2 (from d2E/dj1dj2=2E^(j1j2)) eliminated by factor 1/2
 !                (-1) factor already present
-#ifdef DEV_MJV
-print *, "term1 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
-print *, 'has_dcwf, is_metal_or_qne0 ', has_dcwf, is_metal_or_qne0
-write ( 1002,*) "ipert ipert1 idir idir1 iband  ikpt_me, dotr, doti ", ipert, ipert1, idir, idir1, iband,  ikpt_me, dotr, doti
-call flush ()
-#endif
                  d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*elfd_fact*dotr
                  d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*elfd_fact*doti
                end if
@@ -1368,10 +1334,6 @@ call flush ()
                  do_bcast = 1
                end if
              end do
-#ifdef DEV_MJV
-print *, " do_bcast do_scprod = ", do_bcast, do_scprod,  'iband_me ', iband_me
-call flush()
-#endif
 
 
              jband_me = 0
@@ -1382,25 +1344,10 @@ call flush()
                    jband_me = jband_me + 1
 ! gvnlx1 depends on j only, I have it, and everyone needs it
                    gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
-#ifdef DEV_MJV
-print *, " bounds : ", 1+npw1_k*nspinor*(jband_me-1)+icgq, npw1_k*nspinor*jband_me+icgq
-#endif
                  end if
-#ifdef DEV_MJV
-print *, " gvnlx1 before bcast ", gvnlx1(:,1:10)
-print *, " band_procs(jband) ", band_procs(jband),  ' mpi_enreg%comm_band ', mpi_enreg%comm_band
-print *, " calling xmpibcast of gvnlx1 iband_me jband_me, jband icgq ", iband_me, jband_me, jband, icgq, ' shape ', shape(gvnlx1)
-call flush()
-#endif
 ! xmpi bcast the current jband to other procs in band pool
                  !call xmpi_bcast(gvnlx1, band_procs(jband), mpi_enreg%comm_band, ierr)
                  call xmpi_sum(gvnlx1, mpi_enreg%comm_band, ierr)
-#ifdef DEV_MJV
-print *, " ierr ", ierr
-print *, " gvnlx1 ", gvnlx1(:,1:10)
-write ( 1003,*) "ipert ipert1 idir idir1 iband  ikpt_me, gvnlx1 ", ipert, ipert1, idir, idir1, iband,  ikpt_me, gvnlx1(:,1:10)
-call flush()
-#endif
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
 !                  do _I_ need to calculate the dot1X?
                  if (do_scprod > 0) then
@@ -1409,10 +1356,6 @@ call flush()
                      cs1c(1,jband,iband_me,ikpt_me)=dot1r
                      cs1c(2,jband,iband_me,ikpt_me)=dot1i
                    end if
-#ifdef DEV_MJV
-print *, "initial ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot1r, dot1i ", dot1r, dot1i
-write ( 1004,*) "ipert ipert1 idir idir1 iband ikpt_me, dot1r dot1i ", ipert, ipert1, idir, idir1, iband,  ikpt_me, dot1r, dot1i
-#endif
                  end if
                end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
   
@@ -1424,9 +1367,6 @@ write ( 1004,*) "ipert ipert1 idir idir1 iband ikpt_me, dot1r dot1i ", ipert, ip
                    dot2i=cs1c(2,jband,iband_me,ikpt_me)
                    dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
                    doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
-#ifdef DEV_MJV
-print *, "dcwf2 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
-#endif
                  end if
 !                Computation of term (II) TODO: the next two ifs could be combined
                  if (is_metal) then
@@ -1437,30 +1377,14 @@ print *, "dcwf2 ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dot2r, do
                      dot2i=eig1_k(ii+1)
                      dotr=dotr+arg*(dot1r*dot2r-dot1i*dot2i)
                      doti=doti+arg*(dot1r*dot2i+dot2r*dot1i)
-#ifdef DEV_MJV
-print *, "ismetal ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " iband, jband ii ", iband,jband,ii 
-print *, " eig1_k ", eig1_k(ii:ii+1), " arg ", arg, " invocc, rocceig(jband,iband) ", invocc, rocceig(jband,iband)
-print *, "ismetal  dot2r, dot2i ", dot2r, dot2i, " dotr, doti ", dotr, doti
-#endif
                    end if
                  end if
                end if ! occ bands
              end do ! jband
-#ifdef DEV_MJV
-print *, 'nstpaw checkpoint iband_me, ikpt_me, ipert1, idir1 ', iband_me, ikpt_me, ipert1, idir1
-print *, 'nstpaw ikpt_me cs1c ', ikpt_me, ' ipert idir ', ipert, idir
-print *, '   ',  cs1c(:,:,1,ikpt_me)
-print *, '   ',  cs1c(:,:,2,ikpt_me)
-print *, '   ',  cs1c(:,:,3,ikpt_me)
-print *, '   ',  cs1c(:,:,4,ikpt_me)
-#endif
 
              dotr=quarter*dotr
              doti=quarter*doti
 
-#ifdef DEV_MJV
-print *, "condense ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, doti ", dotr, doti
-#endif
 !            Note: factor 2 (from d2E/dj1dj2=2E^(j1j2))
 !  Note2: do not sum over bands here - comm_band is a sub communicator of spacecomm, and a full sum is done later
              d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*dotr
@@ -1482,9 +1406,6 @@ print *, "condense ikpt_me ", ikpt_me, ' ipert1 idir1 ', ipert1, idir1, " dotr, 
                d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*doti
              end if
 
-#ifdef DEV_MJV
-print *, ' nstpaw done with d2nl_k 1350'
-#endif
 !            Or compute localisation tensor (ddk)
 !            See M. Veithen thesis Eq(2.5)
 !            MT jan-2010: this is probably not correctly implemented for PAW !!!
@@ -1511,9 +1432,6 @@ print *, ' nstpaw done with d2nl_k 1350'
                d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband)*dotr/(nband_kocc*two)
                d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband)*doti/(nband_kocc*two)
              end if
-#ifdef DEV_MJV
-print *, ' nstpaw done with d2nl_k 1379'
-#endif
            end if
 
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
@@ -1523,15 +1441,6 @@ print *, ' nstpaw done with d2nl_k 1379'
              ABI_MALLOC(dcwavef,(2,npw1_k*nspinor))
              ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor))
              call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
-#ifdef DEV_MJV
-print *, ' nstpaw calling getdc1 iband, idir1, mband_mem_rbz ', iband, idir1, mband_mem_rbz
-print *, ' nstpaw nband_me =? ', nband_me, size(cgq,2), ' / ', mcgq, '  ', size(cprjq,2), ' / ', mcprjq
-print *, ' nstpaw band_procs ', band_procs
-print *, ' nstpaw bands_treated_now ', bands_treated_now
-print *, ' nstpaw cgq   check ', any(isnan(cgq))
-print *, ' nstpaw cprjq check ', any(isnan(cprjq(1,1)%cp))
-print *, ' nstpaw gs1   check ', any(isnan(gs1))
-#endif
 ! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
              call getdc1(iband,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
 &               ibgq,icgq,istwf_k,mcgq,&
@@ -1540,19 +1449,10 @@ print *, ' nstpaw gs1   check ', any(isnan(gs1))
              if (abs(occ_k(iband))>tol8) then
 !              Accumulate 1st-order density due to delta_u^(j1)
                option=1;wfcorr=0
-#ifdef DEV_MJV
-print *, ' nstpaw calling accrho dcwavef ', dcwavef(:,1:10)
-print *, ' nstpaw dcwavef check ', any(isnan(dcwavef))
-print *, ' nstpaw calling accrho dcwaveprj ', dcwaveprj(1,1)%cp(1,1:8)
-#endif
                call dfpt_accrho(cplex,cwave0,dcwavef,dcwavef,cwaveprj0_idir1,dcwaveprj,&
 &               lambda,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
 &               mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
 &               pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
-#ifdef DEV_MJV
-print *, ' nstpaw  accrho drhoaug1 ', idir1, drhoaug1(1:10,1,1,idir1)
-print *, ' nstpaw drhoaug1 check ', any(isnan(drhoaug1))
-#endif
              end if
 
              call pawcprj_free(dcwaveprj)
@@ -1574,9 +1474,6 @@ print *, ' nstpaw drhoaug1 check ', any(isnan(drhoaug1))
 !      Accumulate contribution of this k-point
        d2nl (:,:,ipert1,idir,ipert)=d2nl (:,:,ipert1,idir,ipert)+d2nl_k (:,:)
        if (usepaw==1) d2ovl(:,:,ipert1,idir,ipert)=d2ovl(:,:,ipert1,idir,ipert)+d2ovl_k(:,:)
-#ifdef DEV_MJV
-print *, ' nstpaw  d2ovl_k all idir; ipert1 idir ipert ', ipert1,idir,ipert, d2ovl_k(:,:)
-#endif
 
 
 !      Deallocations of arrays used for this k-point
@@ -1642,10 +1539,6 @@ print *, ' nstpaw  d2ovl_k all idir; ipert1 idir ipert ', ipert1,idir,ipert, d2o
          ikg1=ikg1+npw1_k
        end if
 
-#ifdef DEV_MJV
-print *, ' icg* ', icg, icgq, icg1
-print *, ' npw* ', npw_k, npw1_k
-#endif
 
      end do ! End loop over K-POINTS
 !----------------------------------------------------------------
@@ -1654,21 +1547,9 @@ print *, ' npw* ', npw_k, npw1_k
      if(has_drho) then
        do kdir1=1,mdir1
          idir1=jdir1(kdir1)
-#ifdef DEV_MJV
-print *, 'nstpaw idir1 drho1wfr ', idir1, drho1wfr(1:10,1,idir1)
-if (any(isnan(drho1wfr(:,:,idir1)))) then
-print *, 'found a NaN!!'
-end if
-#endif
          call fftpac(isppol,mpi_enreg,nspden,cplex*dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),&
 &         cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
 &         dtset%ngfft,drho1wfr(:,:,idir1),drhoaug1(:,:,:,idir1),1)
-#ifdef DEV_MJV
-print *, 'nstpaw idir1 drhoaug1 ', idir1, drhoaug1(1:10,1,1,idir1)
-if (any(isnan(drho1wfr(:,:,idir1)))) then
-print *, 'found a NaN!!'
-end if
-#endif
        end do
      end if
 
@@ -1689,10 +1570,6 @@ end if
    end if
    ABI_FREE(paw_ij10)
 
-#ifdef DEV_MJV
-print *, 'nstpaw has_drho, xmpi_paral ', has_drho, xmpi_paral
-print *, 'nstpaw mdir1, jdir1(:) ', mdir1, jdir1(:)
-#endif
 !  In case of parallelism, sum 1st-order density and occupation matrix over processors
    if (has_drho.and.xmpi_paral==1) then
 
@@ -1705,11 +1582,6 @@ print *, 'nstpaw mdir1, jdir1(:) ', mdir1, jdir1(:)
      drho1wfr(:,:,:)=reshape(buffer(1:bufsz),(/cplex*dtset%nfft,nspden,mdir1/))
      ABI_FREE(buffer)
      call timab(48,2,tsec)
-#ifdef DEV_MJV
-print *, 'nstpaw drho1wfr 1 ', 1, drho1wfr(1:10,:,1)
-print *, 'nstpaw drho1wfr 1 ', 2, drho1wfr(1:10,:,2)
-print *, 'nstpaw drho1wfr 1 ', 3, drho1wfr(1:10,:,3)
-#endif
 
 !    Accumulate 1st-order PAW occupancies
      if (usepaw==1) then
@@ -1733,9 +1605,6 @@ print *, 'nstpaw drho1wfr 1 ', 3, drho1wfr(1:10,:,3)
        call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &       nspden,nsppol,nsym1,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
 &       rprimd,symaf1,symrl1,tnons1)
-#ifdef DEV_MJV
-print *, 'nstpaw drho1wfr 2 ', idir1, drho1wfr(1:10,:,idir1)
-#endif
        if (dtset%pawstgylm/=0) then
          option=0
          call pawnhatfr(option,idir1,ipert1,my_natom,dtset%natom,nspden,dtset%ntypat,&
@@ -1748,11 +1617,6 @@ print *, 'nstpaw drho1wfr 2 ', idir1, drho1wfr(1:10,:,idir1)
 &       dtset%qptn,drho1wfg,drho1wfr(:,:,idir1),drhor1,rprimd,symaf1,symrc1,dtset%typat,&
 &       ucvol,dtset%usewvl,xred,pawang_sym=pawang1,pawnhat=dnhat1,pawrhoij0=pawrhoij)
        ABI_FREE(drho1wfg)
-#ifdef DEV_MJV
-print *, 'nstpaw vtrial1 ', vtrial1(1:5,:)
-print *, 'nstpaw drhor1 ', drhor1(1:10,:)
-print *, 'nstpaw dnhat1 ', dnhat1(1:10,:)
-#endif
 
 !      Compute plane-wave contribution to overlap contribution
 !      This is subtle as it is a mix of Eq(79) and Eq(80) of PRB 78, 035105 (2008) [[cite:Audouze2008]]
@@ -1776,9 +1640,6 @@ print *, 'nstpaw dnhat1 ', dnhat1(1:10,:)
          ABI_FREE(vtmp1)
        end if
        dotr=dot1r-dot2r;doti=dot1i-dot2i
-#ifdef DEV_MJV
-print *, 'nstpaw dotr doti ', dotr, doti
-#endif
 
 !      Compute on-site contributions to overlap contribution
 !      (two last terms of Eq(80) of PRB 78, 035105 (2008)) [[cite:Audouze2008]]
@@ -1794,9 +1655,6 @@ print *, 'nstpaw dotr doti ', dotr, doti
        dotr=dotr+epawnst(1);doti=-(doti+epawnst(2))
        d2ovl_drho(1,idir1,ipert1,idir,ipert)=elfd_fact*dotr
        d2ovl_drho(2,idir1,ipert1,idir,ipert)=elfd_fact*doti
-#ifdef DEV_MJV
-print *, 'OK nstpaw d2ovl_drho(1,idir1,ipert1,idir,ipert) ', idir1,ipert1,idir,ipert, d2ovl_drho(:,idir1,ipert1,idir,ipert)
-#endif
 
      end do ! End loop over perturbation directions
 
@@ -1852,15 +1710,9 @@ print *, 'OK nstpaw d2ovl_drho(1,idir1,ipert1,idir,ipert) ', idir1,ipert1,idir,i
    ABI_FREE(buffer)
  end if
 
-#ifdef DEV_MJV
-print *, 'nstpaw bare d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
-#endif
 !Build complete d2ovl matrix
  if (usepaw==1) d2ovl(:,:,:,idir,ipert)=d2ovl(:,:,:,idir,ipert)+d2ovl_drho(:,:,:,idir,ipert)
 
-#ifdef DEV_MJV
-print *, 'nstpaw completed d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
-#endif
  if (usepaw==1) then
    ABI_FREE(d2ovl_drho)
  end if
@@ -1893,9 +1745,6 @@ print *, 'nstpaw completed d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,id
  end if
  ABI_FREE(work)
 
-#ifdef DEV_MJV
-print *, 'nstpaw phon sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
-#endif
 !In the case of the strain perturbation time-reversal symmetry will always
 !be true so imaginary part of d2nl will be must be set to zero here since
 !the symmetry-reduced kpt set will leave a non-zero imaginary part.
@@ -1948,10 +1797,6 @@ print *, 'nstpaw phon sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idi
  end if
 !end if
 
-#ifdef DEV_MJV
-print *, 'nstpaw strain sym d2ovl(1,:,:,idir,ipert) ', idir,ipert, d2ovl(1,:,:,idir,ipert)
-print *, 'nstpaw strain sym d2nl(1,:,:,idir,ipert) ', idir,ipert, d2nl(1,:,:,idir,ipert)
-#endif
 !Must also symmetrize the electric field perturbation response !
 !Note: d2ovl is not symetrized because it is zero for electric field perturbation
  if (has_ddk_file) then
@@ -2132,14 +1977,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 ! filter for bands on this cpu for cg cg1 etc.
  distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
-#ifdef DEV_MJV
-print *, 'distrb_cycle ', distrb_cycle
-#endif
  call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,nband_k,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
-#ifdef DEV_MJV
-print *, 'band_procs ', band_procs
-#endif
 
 !Additional allocations
  if (.not.ddk) then
@@ -2266,9 +2105,6 @@ print *, 'band_procs ', band_procs
 
    end if 
    call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
-#ifdef DEV_MJV
-print *, " iband ", iband, " cwave0 ", cwave0(:,1:10)
-#endif
    call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
 
 !  In case non ddk perturbation
@@ -2428,9 +2264,6 @@ print *, " iband ", iband, " cwave0 ", cwave0(:,1:10)
          jband_me = 0
          do jband = 1,nband_k              !compute dot1 and dot2
            if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_kpt) then
-#ifdef DEV_MJV
-print *, " skipped for kpt index i j ", iband, jband, ' ikpt ', ikpt
-#endif
              cycle
            end if
            jband_me = jband_me + 1
@@ -2466,14 +2299,8 @@ print *, " skipped for kpt index i j ", iband, jband, ' ikpt ', ikpt
  end do !  End loop over iband
 
  if(dtset%prtbbb==1)then
-#ifdef DEV_MJV
-print *, "d2bbb_k before mpisum ", d2bbb_k
-#endif
    ! complete over jband index
    call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
-#ifdef DEV_MJV
-print *, "d2bbb_k after mpisum ", d2bbb_k
-#endif
  end if
 
 !Final deallocations

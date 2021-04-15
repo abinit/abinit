@@ -151,9 +151,6 @@ subroutine get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,nato
  if (.not.paral_atom) return
 
  if (comm_atom==xmpi_comm_self.or.comm_atom==xmpi_comm_null) paral_atom=.false.
-#ifdef DEV_MJV
-print *, 'get_my_atmtab, paral_atom ', paral_atom
-#endif
  if (paral_atom)  then
    nproc=xmpi_comm_size(comm_atom)
    paral_atom=(nproc>1)
@@ -182,10 +179,6 @@ print *, 'get_my_atmtab, paral_atom ', paral_atom
              my_atmtab(iatom)=iatom+natom_bef
            enddo
          end if
-#ifdef DEV_MJV
-print *, 'get_my_atmtab, my_atmtab, natom_bef, nmod, nproc, me ', &
-                         my_atmtab, natom_bef, nmod, nproc, me
-#endif
        end if
      else
        my_natom=size(my_atmtab)
@@ -198,9 +191,6 @@ print *, 'get_my_atmtab, my_atmtab, natom_bef, nmod, nproc, me ', &
      end if
    end if
  endif
-#ifdef DEV_MJV
-print *, 'get_my_atmtab, my_natom ', my_natom
-#endif
 
 end subroutine get_my_atmtab
 !!***

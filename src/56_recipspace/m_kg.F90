@@ -529,11 +529,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !Define me
  me=mpi_enreg%me_kpt
 
-#ifdef DEV_MJV
-print *, 'me mkmem, nkpt ', me, mkmem, nkpt
-print *, 'me mpi_enreg%proc_distrb ', me, mpi_enreg%proc_distrb
-#endif
-
  if((mpi_enreg%paralbd==1) .and. (mode_paral=='PERS')) then
    if(nsppol==2)then
      do ikpt=1,nkpt
@@ -565,23 +560,14 @@ print *, 'me mpi_enreg%proc_distrb ', me, mpi_enreg%proc_distrb
 
    nband_k = nband(ikpt)
 
-#ifdef DEV_MJV
-print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral, mode_paral
-#endif
    if(mode_paral=='PERS')then
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
    end if
 
-#ifdef DEV_MJV
-print *, '567'
-#endif
    kpoint(:)=kptns(:,ikpt)
    istwf_k=istwfk(ikpt)
    call kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpoint,mkmem,mpi_enreg,mpw,npw1)
 
-#ifdef DEV_MJV
-print *, '571'
-#endif
    test_npw=.true.
    if (xmpi_paral==1)then
      if (mode_paral=='PERS')then
@@ -590,9 +576,6 @@ print *, '571'
    end if
    if (test_npw) npwarr(ikpt)=npw1
 
-#ifdef DEV_MJV
-print *, '580'
-#endif
 !  Make sure npw < nband never happens:
 !  if (npw1<nband(ikpt)) then
 !  write(msg, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
@@ -611,16 +594,6 @@ print *, '580'
 
 ! TODO: this fails on some platforms if nproc > nkpt
  if(mode_paral == 'PERS') then
-#ifdef DEV_MJV
-print *, 'me = ', mpi_enreg%me_kpt, ' comm ',  mpi_enreg%comm_kpt
-print *, 'npwarr ', npwarr
-print *, 'mpi_enreg%comm_kpt ', mpi_enreg%comm_kpt
-print *, 'mpi_enreg%me_kpt ', mpi_enreg%me_kpt
-print *, 'mpi_enreg%nproc_spkpt ', mpi_enreg%nproc_spkpt
-print *, 'mpi_enreg%nproc ', mpi_enreg%nproc
-print *, 'mpi_enreg%comm_kptband ', mpi_enreg%comm_kptband
-print *, '610'
-#endif
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
 

@@ -468,9 +468,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
-#ifdef DEV_MJV
-print *, 'respfn dtset%mkmem ', dtset%mkmem
-#endif
 ! Initialize the wave function type and read GS WFK
  ABI_MALLOC(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
@@ -792,9 +789,6 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
  nhatgrdim=0;nhatdim=0
  ABI_MALLOC(nhatgr,(0,0,0))
  if (psps%usepaw==1.and. ((usexcnhat==0).or.(dtset%getden==0).or.dtset%xclevel==2)) then
-#ifdef DEV_MJV
- print *, ' adding nhat '
-#endif
    nhatdim=1
 
    ABI_MALLOC(nhat,(nfftf,dtset%nspden))
@@ -818,16 +812,6 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
  else
    ABI_MALLOC(nhat,(0,0))
  end if
-#ifdef DEV_MJV
-print *, ' rhog after nhat ', rhog(:,1:10)
-print *, ' rhor after nhat ', rhor(1:10,:)
-if(psps%usepaw==1)then
-print *, ' pawrhoij ', allocated (pawrhoij), ' qphas ', pawrhoij(1)%qphase, ' cplex ', pawrhoij(1)%cplex_rhoij 
-!call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
-!  pawrhoij(1)%qphase,1,natom,&
-!  unit=std_out,opt_prtvol=dtset%pawprtvol)
-endif
-#endif
 
 !The GS irrzon and phnons were only needed to symmetrize the GS density
  ABI_FREE(irrzon)
@@ -925,9 +909,6 @@ endif
    end do
  end if
  ABI_FREE(vhartr)
-#ifdef DEV_MJV
-print *, ' vtrial ', vtrial(1:10,1)
-#endif
 
  if(dtset%prtvol==-level)then
    call wrtout(std_out,' respfn: ground-state density and potential set up.','COLL')
@@ -955,12 +936,6 @@ print *, ' vtrial ', vtrial(1:10,1)
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call timab(561,2,tsec)
 
-#ifdef DEV_MJV
-print *, 'paw_ij cplx phas ', paw_ij(1)%cplex_dij, paw_ij(1)%qphase
-!call pawdij_print_dij(paw_ij(1)%dij,paw_ij(1)%cplex_dij,&
-!&  paw_ij(1)%qphase,1,natom,paw_ij(1)%nspden,&
-!&  unit=std_out,Ha_or_eV=1,opt_prtvol=dtset%pawprtvol)
-#endif
  end if
 
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE

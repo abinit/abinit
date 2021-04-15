@@ -404,9 +404,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nkpt_max=50;if (xmpi_paral==1) nkpt_max=-1
 !TODO: this flag for paral_atom is ignored below
  paral_atom=(dtset%natom/=my_natom)
-#ifdef DEV_MJV
-print *, 'paral_atom, dtset%natom, my_natom ', paral_atom, dtset%natom, my_natom
-#endif
  cplex=2-timrev !cplex=2 ! DEBUG: impose cplex=2
  first_entry=.true.
  initialized=0
@@ -657,9 +654,6 @@ print *, 'paral_atom, dtset%natom, my_natom ', paral_atom, dtset%natom, my_natom
 
 !*Redistribute PAW on-site data
  nullify(old_atmtab,pawfgrtab_pert,pawrhoij_pert,paw_an_pert,paw_ij_pert)
-#ifdef DEV_MJV
-print *, 'paral_pert_inplace ', paral_pert_inplace
-#endif
  if (paral_pert_inplace) then
    call set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &   paw_an,paw_ij,pawfgrtab,pawrhoij)
@@ -1002,12 +996,6 @@ print *, 'paral_pert_inplace ', paral_pert_inplace
    mkmem_rbz =my_nkpt_rbz ; mkqmem_rbz=my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
    ABI_UNUSED((/mkmem,mk1mem,mkqmem/))
 
-#ifdef DEV_MJV
-print *, ' dtset%mkmem, mkmem_rbz, nkpt_rbz ', dtset%mkmem, mkmem_rbz, nkpt_rbz
-print *, 'mband_mem_rbz ', mband_mem_rbz
-print *, 'call initmpi_band ', mkmem_rbz, mk1mem_rbz
-call flush()
-#endif
    call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
 
 ! given number of reduced kpt, store distribution of bands across procs
@@ -1016,9 +1004,6 @@ call flush()
 
    _IBM6("IBM6 before kpgio")
 
-#ifdef DEV_MJV
-print *, ' calling kpgio '
-#endif
 !  Set up the basis sphere of planewaves at k
    ABI_MALLOC(kg,(3,mpw*mkmem_rbz))
    call timab(143,1,tsec)
@@ -1026,9 +1011,6 @@ print *, ' calling kpgio '
 &    kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,&
 &    mpw,npwarr,npwtot,dtset%nsppol)
    call timab(143,2,tsec)
-#ifdef DEV_MJV
-print *, ' out of kpgio'
-#endif
 
 !  Set up the spherical harmonics (Ylm) at k
    useylmgr=0; option=0 ; nylmgr=0
@@ -1042,9 +1024,6 @@ print *, ' out of kpgio'
    ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    if (psps%useylm==1) then
-#ifdef DEV_MJV
-print *, ' call initylmg'
-#endif
      call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
 &     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
    end if
@@ -1119,9 +1098,6 @@ print *, ' call initylmg'
      ABI_ERROR(msg)
    end if
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
-#ifdef DEV_MJV
-print *, 'shape cg 1 ', shape(cg)
-#endif
 
    ABI_MALLOC(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
@@ -1155,10 +1131,6 @@ print *, 'shape cg 1 ', shape(cg)
 !TODO : distribute cprj by band as well?
        mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-#ifdef DEV_MJV
-print *, 'mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol    +  nband_rbz (for info)', &
-& mcprj, dtset%nspinor, mband_mem_rbz, mkmem_rbz, dtset%nsppol, nband_rbz
-#endif
        ABI_FREE(cprj)
        ABI_MALLOC(cprj,(dtset%natom,mcprj))
        call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
@@ -1358,9 +1330,6 @@ print *, 'eigenq ', eigenq
        ABI_MALLOC(cprjq,(dtset%natom,mcprjq))
        call pawcprj_alloc(cprjq,0,dimcprj_srt)
        if (ipert<=dtset%natom.and.(sum(dtset%qptn(1:3)**2)>=1.d-14)) then ! phonons at non-zero q
-#ifdef DEV_MJV
-print *, 'q/=0 cprjq calculated'
-#endif
          choice=1 ; iorder_cprj=0 ; idir0=0
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
@@ -1368,9 +1337,6 @@ print *, 'q/=0 cprjq calculated'
 &         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
-#ifdef DEV_MJV
-print *, 'q=0 cprjq copied over'
-#endif
          call pawcprj_copy(cprj,cprjq)
        end if
      end if

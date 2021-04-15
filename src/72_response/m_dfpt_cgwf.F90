@@ -260,10 +260,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  bands_treated_now = 0
  bands_treated_now(band) = 1
  call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-#ifdef DEV_MJV
-print *, 'bands_treated_now ', bands_treated_now
-print *, 'bands_skipped_now ', bands_skipped_now
-#endif
 
 
  skipme = 0
@@ -292,9 +288,6 @@ print *, 'bands_skipped_now ', bands_skipped_now
  if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
    ABI_MALLOC(gberry,(2,npw1*nspinor))
    gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,band)
-#ifdef DEV_MJV
-print *, 'gberry 294 ', gberry(:,1:10)
-#endif
  else
    ABI_MALLOC(gberry,(0,0))
  end if
@@ -305,10 +298,6 @@ print *, 'gberry 294 ', gberry(:,1:10)
 ! this is used many times - no use de and re allocating
  ABI_MALLOC(work,(2,npw1*nspinor))
 
-#ifdef DEV_MJV
-print *, 'bands_treated_now 308 ', bands_treated_now
-print *, 'bands_skipped_now 308 ', bands_skipped_now
-#endif
 !DEBUG!! Several checking statements
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
@@ -495,14 +484,7 @@ print *, 'bands_skipped_now 308 ', bands_skipped_now
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
      mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
-#ifdef DEV_MJV
-print *, 'gvnlx1 490 ', gvnlx1(:,1:10)
-print *, 'gh1c 490 ', gh1c(:,1:10)
-#endif
    if (gen_eigenpb) then
-#ifdef DEV_MJV
-print *, 'gs1c 490 ', gs1c(:,1:10)
-#endif
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
 !$OMP PARALLEL
 !$OMP DO
@@ -510,10 +492,6 @@ print *, 'gs1c 490 ', gs1c(:,1:10)
          gh1c (1:2,ipw)=gh1c (1:2,ipw)-eshift*gs1c(1:2,ipw)
        end do
 !$OMP END DO NOWAIT
-#ifdef DEV_MJV
-print *, 'eshift ', eshift
-print *, 'gh1c 491 ', gh1c(:,1:10)
-#endif
        if (opt_gvnlx1/=1) then
 !$OMP DO
          do ipw=1,npw1*nspinor
@@ -531,9 +509,6 @@ print *, 'gh1c 491 ', gh1c(:,1:10)
        call getdc1(band,band_procs,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
 &           0,icgq,istwf_k,mcgq,0,&
 &           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c)
-#ifdef DEV_MJV
-print *, 'dcwavef 490 ', dcwavef(:,1:10)
-#endif
      end if
    end if ! gen_eigenpb
 
@@ -585,9 +560,6 @@ print *, 'dcwavef 490 ', dcwavef(:,1:10)
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
 
-#ifdef DEV_MJV
-print *, 'gh1c 578 ', gh1c(:,1:10)
-#endif
  ! Projecting out all bands
  ! While we could avoid calculating all the eig1_k to obtain the perturbed density,
  ! we do need all of the matrix elements when outputing the full 1st-order wfn.
@@ -596,18 +568,11 @@ print *, 'gh1c 578 ', gh1c(:,1:10)
  ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
  eig1_k_loc = zero
  do iband = 1, nband
-#ifdef DEV_MJV
-print *, 'iband, bands_treated_now(iband), bands_skipped_now(iband) ', iband, bands_treated_now(iband), bands_skipped_now(iband)
-#endif
    if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
    work = zero
    if (iband == band) then
      work = gh1c
    end if
-#ifdef DEV_MJV
-print *, ' band_procs(iband), mpi_enreg%comm_band,mpi_enreg%nproc_band ', &
-           band_procs(iband), mpi_enreg%comm_band, mpi_enreg%nproc_band
-#endif
    call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
    if(gen_eigenpb)then
@@ -618,14 +583,8 @@ print *, ' band_procs(iband), mpi_enreg%comm_band,mpi_enreg%nproc_band ', &
        dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    end if
 
-#ifdef DEV_MJV
-print *, 'work1 611 ', work(:,1:10)
-#endif
 ! sum projections against all bands k+q
    call xmpi_sum(work,mpi_enreg%comm_band,ierr)
-#ifdef DEV_MJV
-print *, 'work2 616 ', work(:,1:10)
-#endif
 
    ! scprod now contains scalar products of band iband (runs over all bands in current queue) with local bands j
    jband_me = 0
@@ -641,14 +600,8 @@ print *, 'work2 616 ', work(:,1:10)
      gh1c = work - (mpi_enreg%nproc_band-1)*gh1c
    end if
 
-#ifdef DEV_MJV
-print *, 'eig1_k_loc 619 line for iband ', iband, eig1_k_loc(:,:,iband)
-#endif
  end do !iband
 
-#ifdef DEV_MJV
-print *, 'gh1c 619 ', gh1c(:,1:10)
-#endif
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
    ! For ipert=natom+10 or natom+11, this is done in rf2_init
@@ -681,9 +634,6 @@ print *, 'gh1c 619 ', gh1c(:,1:10)
          eig1_k_loc(2,jband,iband)=eig1_k_loc(2,jband,iband)-eshiftkq*doti
          indx_cgq=indx_cgq+npw1*nspinor
        end do
-#ifdef DEV_MJV
-print *, 'me ', me_band, ' eig1_k_loc 672 line for iband ', iband, eig1_k_loc(:,:,iband)
-#endif
      end do ! iband
    end if ! PAW and generalized eigenproblem
 
@@ -702,9 +652,6 @@ print *, 'me ', me_band, ' eig1_k_loc 672 line for iband ', iband, eig1_k_loc(:,
        eig1_k(2*jband-1+band_off)=eig1_k_loc(1,jband,iband)
        eig1_k(2*jband  +band_off)=eig1_k_loc(2,jband,iband)
      end do
-#ifdef DEV_MJV
-print *, 'me ', me_band, ' eig1_k 693 line for iband ', iband, eig1_k(band_off+1:band_off+2*nband)
-#endif
    end do
  end if ! ipert/=natom+10.and.ipert/=natom+11
 
@@ -719,10 +666,6 @@ print *, 'me ', me_band, ' eig1_k 693 line for iband ', iband, eig1_k(band_off+1
      end if
    end do
  end do
-#ifdef DEV_MJV
-print *, 'cwavef 670 ', cwavef(:,1:5)
-print *, 'mpi_enreg%nproc_band ', mpi_enreg%nproc_band
-#endif
 
  ! Apply the orthogonality condition: <C1 k,q|C0 k+q>=0 (NCPP) or <C1 k,q|S0|C0 k+q>=0 (PAW)
  ! Project out all bands from cwavef, i.e. apply P_c projector on cwavef
@@ -745,9 +688,6 @@ print *, 'mpi_enreg%nproc_band ', mpi_enreg%nproc_band
      cwavef = work - (mpi_enreg%nproc_band-1)*cwavef
    end if
  end do
-#ifdef DEV_MJV
-print *, 'cwavef 692 ', cwavef(:,1:5)
-#endif
 
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
@@ -757,9 +697,6 @@ print *, 'cwavef 692 ', cwavef(:,1:5)
      do ipw=1,npw1*nspinor
        cwavef(1:2,ipw)=cwavef(1:2,ipw)+dcwavef(1:2,ipw)
      end do
-#ifdef DEV_MJV
-print *, 'dcwavef 739 ', dcwavef(:,1:5)
-#endif
    end if
  else
    ! In 2nd order case, dcwavef/=0 even in NC, and it is already computed in rf2_init (called in dfpt_vtowfk.F90)
@@ -768,9 +705,6 @@ print *, 'dcwavef 739 ', dcwavef(:,1:5)
    end do
  end if
 
-#ifdef DEV_MJV
-print *, 'cwavef 739 ', cwavef(:,1:5)
-#endif
  if(band>max(1,nband-nbdbuf))then
    ! Treat the case of buffer bands
    cwavef=zero
@@ -792,9 +726,6 @@ print *, 'cwavef 739 ', cwavef(:,1:5)
    end if
   
    skipme = 1
-#ifdef DEV_MJV
-print *, 'skipping for buffer band'
-#endif
  end if
 
  ! If not a buffer band, perform the optimisation
@@ -813,11 +744,6 @@ print *, 'skipping for buffer band'
  cwaveq(:,:)=cgq(:,1+npw1*nspinor*(band_me-1)+icgq:npw1*nspinor*band_me+icgq)
  dotgp=one
 
-#ifdef DEV_MJV
-if (gen_eigenpb) then
-print *, 'cwave 807 ', cwaveprj(1,1)%cp(:,:)
-end if
-#endif
  ! Here apply H(0) at k+q to input orthogonalized 1st-order wfs
  sij_opt=0;if (gen_eigenpb) sij_opt=1
  cpopt=-1+usepaw
@@ -830,11 +756,6 @@ end if
  else
    call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
  end if
-#ifdef DEV_MJV
-print *, 'cwavef 763 ', cwavef(:,1:10)
-print *, 'ghc 778 ',band,  ghc(:,1:10)
-print *, 'gh1c 778 ',band,  gh1c(:,1:10)
-#endif
 
  ! Initialize resid, in case of nline==0
  resid=zero
@@ -875,9 +796,6 @@ print *, 'gh1c 778 ',band,  gh1c(:,1:10)
      end do
    end if
 
-#ifdef DEV_MJV
-print *, 'band gresid 821 ', band, gresid(:,1:5)
-#endif
    ! ======================================================================
    ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
    ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
@@ -917,9 +835,6 @@ print *, 'band gresid 821 ', band, gresid(:,1:5)
    end do
 
    call cg_zcopy(npw1*nspinor,gresid,direc)
-#ifdef DEV_MJV
-print *, ' cgwf band gresid 906 ', band, gresid (:,1:5)
-#endif
 
    ! ======================================================================
    ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
@@ -933,9 +848,6 @@ print *, ' cgwf band gresid 906 ', band, gresid (:,1:5)
 
    ! Compute residual (squared) norm
    call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
-#ifdef DEV_MJV
-print *, ' cgwf band, resid ', band, resid
-#endif
    if (prtvol==-level.or.prtvol==-19)then
      write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
       ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
@@ -977,9 +889,6 @@ print *, ' cgwf band, resid ', band, resid
 
 !DEBUG     exit ! Exit from the loop on iline
      skipme = 1
-#ifdef DEV_MJV
-print *, 'skipping for u1h0me0u1'
-#endif
    end if
 
    ! If residual sufficiently small stop line minimizations
@@ -991,9 +900,6 @@ print *, 'skipping for u1h0me0u1'
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
 !DEBUG     exit                         ! Exit from the loop on iline
      skipme = 1
-#ifdef DEV_MJV
-print *, 'skipping for resid'
-#endif
    end if
 
    ! If user require exiting the job, stop line minimisations
@@ -1120,9 +1026,6 @@ print *, 'skipping for resid'
    call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
    dedt=-two*two*dedt
 
-#ifdef DEV_MJV
-print *, 'gresid 781 ', gresid(1:2,1:5)
-#endif
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
    ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
    ABI_MALLOC(gh_direc,(2,npw1*nspinor))
@@ -1148,9 +1051,6 @@ print *, 'gresid 781 ', gresid(1:2,1:5)
        gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
      end do
    end if
-#ifdef DEV_MJV
-print *, 'gh_direc ', gh_direc(1:2,1:5)
-#endif
 
    ! compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
    ! with an additional factor of 2 for the difference
@@ -1167,9 +1067,6 @@ print *, 'gh_direc ', gh_direc(1:2,1:5)
    ! ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
    ! ======================================================================
 
-#ifdef DEV_MJV
-print *, 'dedt, d2edt2, theta 1120 ', dedt, d2edt2, theta
-#endif
 
    ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
    !
@@ -1199,9 +1096,6 @@ print *, 'dedt, d2edt2, theta 1120 ', dedt, d2edt2, theta
      write(msg,'(a)') 'DFPT_CGWF WARNING : d2edt2 is zero, skipping update'
      call wrtout(std_out,msg,'COLL')
      theta=zero
-#ifdef DEV_MJV
-print *, 'dedt, d2edt2, theta 1152 ', dedt, d2edt2, theta
-#endif
    end if
 
    ! Check that result is above machine precision
@@ -1212,19 +1106,12 @@ print *, 'dedt, d2edt2, theta 1152 ', dedt, d2edt2, theta
      end if
      nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
      skipme = 1
-#ifdef DEV_MJV
-print *, 'skipping for theta below machine prec'
-#endif
 !DEBUG     exit                        ! Exit from the loop on iline
    end if
 
    ! ======================================================================
    ! ================ GENERATE NEW |wf>, H|wf>, Vnl|Wf ... ================
    ! ======================================================================
-#ifdef DEV_MJV
-print *, 'skipme ', skipme
-print *, ' cwavef 1174 ', cwavef(:,1:5)
-#endif
 
    if (skipme == 0) then
      call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
@@ -1273,9 +1160,6 @@ print *, ' cwavef 1174 ', cwavef(:,1:5)
        end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        skipme = 1
-#ifdef DEV_MJV
-print *, 'skipping for deltae diff'
-#endif
 !DEBUG       exit                        ! Exit from the loop on iline
      end if
    end if
@@ -1285,13 +1169,7 @@ print *, 'skipping for deltae diff'
 !   even if the present band will not be updated
    bands_skipped_now(band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
-#ifdef DEV_MJV
-print *, 'bands_skipped_now 1 ', bands_skipped_now
-#endif
    bands_skipped_now = bands_skipped_now - bands_treated_now
-#ifdef DEV_MJV
-print *, 'bands_skipped_now 2 ', bands_skipped_now
-#endif
    if (sum(abs(bands_skipped_now)) == 0) exit
 
    ! ======================================================================
@@ -1300,16 +1178,7 @@ print *, 'bands_skipped_now 2 ', bands_skipped_now
 
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
-#ifdef DEV_MJV
-print *, 'cgwf  cwavef  1180 ',cwavef(:,1:5), cwavef(:,23)
-#endif
  end do ! iline
-#ifdef DEV_MJV
-print *, 'shape ', shape(cwavef)
-print *, 'cgwf band,  cwavef', band, cwavef(:,1:5)
-print *, 'cgwf  cwavef  1183 ',cwavef(:,23)
-print *, 'cgwf band,  ghc', band, ghc(:,1:5)
-#endif
 
 !--------------------------------------------------------------------------
 !             DEBUG
@@ -1563,9 +1432,6 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
  end if
  ABI_FREE(conjgrprj)
 
-#ifdef DEV_MJV
-print *, 'cgwf band, resid 1553   ', band, resid
-#endif
  if(band>max(1,nband-nbdbuf))then
    ! A small negative residual will be associated with these
    ! in the present algorithm all bands need to be in the loops over cgq etc... for the parallelization

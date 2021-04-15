@@ -1422,9 +1422,6 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    if (gs_ham%usecprj==1) then
      call pawcprj_copy(cprj(:,1+index_cprj:my_nspinor+index_cprj),cwaveprj)
    end if
-#ifdef DEV_MJV
-print *, ' iband cwaveprj 1448 ', iband, cwaveprj(1,1)%cp
-#endif
 
 !  Compute <g|S|Cnk>
    call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_ham,0,(/zero/),mpi_enreg,1,1,paw_opt,&

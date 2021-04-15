@@ -758,9 +758,6 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  proc_distrb_cycle=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
-#ifdef DEV_MJV
-print *, 'proc_distrb_cycle vals ', distrb(ikpt,iband1:iband2,:)-me
-#endif
 ! in this condition, if one of the distrb is for me, then the minval will be == 0, so it returns false
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,:)-me))/=0)
    else
@@ -1211,11 +1208,6 @@ subroutine initmpi_atom(dtset,mpi_enreg)
    end if
 
  end if
-#ifdef DEV_MJV
-print *, ' initmpi_atom mpi_enreg%my_natom, paral_atom, my_atmtab_allocated ', &
-&                       mpi_enreg%my_natom, paral_atom, my_atmtab_allocated 
-!print *, ' initmpi_atom shape(mpi_enreg%my_atmtab) ', shape(mpi_enreg%my_atmtab)
-#endif
 
  DBG_EXIT("COLL")
 
@@ -2226,15 +2218,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 !MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
  spacecomm=mpi_enreg%comm_kpt
  nproc=mpi_enreg%nproc_spkpt
-#ifdef DEV_MJV
-print *, 'enter initmpi_band'
-print *, ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
-print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
-write( 100+me, *)  'enter initmpi_band'
-write( 100+me, *)  ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
-write( 100+me, *)    mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
-call flush()
-#endif
 
 ! make sure we have saturated kpt parallelization 
  if (mpi_enreg%paralbd==1 .and. xmpi_paral==1 .and. nproc >= 2*nkpt*nsppol) then
@@ -2242,32 +2225,15 @@ call flush()
 ! number of procs per kpt/spin, on which we can distribute bands
    maxproc_bandpool=floor(nproc*one/(nkpt*nsppol))
    me=mpi_enreg%me_kpt
-#ifdef DEV_MJV
-print *, 'me, nproc, maxproc_bandpool, mkmem = ', me, nproc, maxproc_bandpool, mkmem
-write( 100+me, *)'me, nproc, maxproc_bandpool, mkmem = ', me, nproc, maxproc_bandpool, mkmem
-call flush()
-#endif
 
 !! total number of states/bands, over all k and spin
    nstates=sum(nband(1:nkpt*nsppol))
 ! number of bands per proc in the band pool
 !   nb_per_proc=nstates/maxproc_bandpool
    
-#ifdef DEV_MJV
-print *, 'nb_per_proc ', mband / maxproc_bandpool, ' vs old version ', nstates/nproc
-write( 100+me, *)'nb_per_proc ', mband / maxproc_bandpool, ' vs old version ', nstates/nproc
-call flush()
-#endif
    do nb_per_proc = mband / maxproc_bandpool, mband
      if (mod(mband,nb_per_proc)==0) exit
    end do 
-#ifdef DEV_MJV
-print *, 'nb_per_proc primed ',nb_per_proc, ' is a divisor of mband = ', mband
-print *, 'only using ', mband/nb_per_proc*nkpt, ' procs out of ', nproc
-write( 100+me, *) 'nb_per_proc primed ',nb_per_proc, ' is a divisor of mband = ', mband
-write( 100+me, *) 'only using ', mband/nb_per_proc*nkpt, ' procs out of ', nproc
-call flush()
-#endif
 
 
    nrank=0
@@ -2281,11 +2247,6 @@ call flush()
          if (nb_per_proc<nband_k) then
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
-#ifdef DEV_MJV
-print *, 'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
-write( 100+me, *)'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
-call flush()
-#endif
            if ((me>=iproc_min).and.(me<=iproc_max)) then
              colorcomm = 1
              nrank=iproc_max-iproc_min+1
@@ -2301,15 +2262,6 @@ call flush()
          end if
        end do
      end do
-#ifdef DEV_MJV
-print *, ' me nrank =', me, nrank
-write( 100+me, *)' me nrank =', me, nrank
-if (nrank>0) then
-print *, ' probable rank = ', mod(me, nrank)
-write( 100+me, *)' probable rank = ', mod(me, nrank)
-call flush()
-endif
-#endif
 
      if (.not.allocated(ranks)) then
        nrank = 0
@@ -2318,23 +2270,12 @@ endif
 
 !     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
-#ifdef DEV_MJV
-print *, 'call subcomm ',  spacecomm, nrank, ' ranks ', ranks
-write( 100+me, *)'call subcomm ',  spacecomm, nrank, ' ranks ', ranks
-call flush()
-#endif
-
 ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
      !call xmpi_comm_split(spacecomm,colorcomm,me,tmpcomm,mpierr)
      !mpi_enreg%comm_band=xmpi_subcomm(tmpcomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
-
-#ifdef DEV_MJV
-print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks, '    me_band ', mpi_enreg%me_band
-print *, ' mpi_enreg%comm_band ', mpi_enreg%comm_band, ' me = ', mpi_enreg%me_band
-#endif
 
      ABI_FREE(ranks)
    end if
@@ -2525,10 +2466,6 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 !******************************************************************
 
  nproc_spkpt=mpi_enreg%nproc_spkpt
-#ifdef DEV_MJV
-print *, ' nproc_spkpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', &
-&  nproc_spkpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
-#endif
  if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc
 ! if (mpi_enreg%paral_pert==1) nproc_spkpt=nproc/mpi_enreg%nproc_pert
 
@@ -2644,9 +2581,6 @@ print *, ' nproc_spkpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', &
 
 !    No possible band parallelization
      if (nproc<(nkpt*nsppol)) then
-#ifdef DEV_MJV
-print *, 'no band paral now'
-#endif
 
 !      Does not allow a processor to treat different spins
 !     NB: for odd nproc this will happen anyway for the middle proc - will this not unbalance things?
@@ -2679,29 +2613,17 @@ print *, 'no band paral now'
 
 !    Possible band parallelization
      else
-#ifdef DEV_MJV
-print *, 'yes band paral now'
-#endif
 !      Does not allow a processor to treat different spins
        ind0=0
        maxproc_bandpool=floor(nproc*one/(nkpt*nsppol))
-#ifdef DEV_MJV
-print *, ' maxproc_bandpool = ', maxproc_bandpool, " nkpt,nsppol ", nkpt, nsppol
-#endif
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
          minb_per_proc=floor(nband_k*one/maxproc_bandpool)
-#ifdef DEV_MJV
-print *, ' minb_per_proc = ', minb_per_proc
-#endif
          if (mod(nband_k,maxproc_bandpool)/=0) minb_per_proc=minb_per_proc+1
          do nb_per_proc = minb_per_proc, nband_k
            if (mod(nband_k,nb_per_proc)==0) exit
          end do
-#ifdef DEV_MJV
-print *, ' nb_per_proc = ', nb_per_proc
-#endif
 
          mband_mem_out = max(mband_mem_out,nb_per_proc)
          do iiband=1,nband_k
@@ -2784,33 +2706,14 @@ print *, ' nb_per_proc = ', nb_per_proc
    ikpt_this_proc=0
    do iikpt=1,nkpt
      nband_k=nband(iikpt+(iisppol-1)*nkpt)
-#ifdef DEV_MJV
-print *,  'iisppol, iikpt ', iisppol, iikpt, mpi_enreg%me_kpt
-#endif
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,1,nband_k,iisppol,mpi_enreg%me_kpt)) cycle
      ikpt_this_proc=ikpt_this_proc+1
-#ifdef DEV_MJV
-print *,  'me, ikpt_this_proc ', mpi_enreg%me_kpt, ikpt_this_proc
-#endif
      mpi_enreg%my_kpttab(iikpt)=ikpt_this_proc
      mpi_enreg%my_isppoltab(iisppol)=1
    end do
  end do
 
  if (mband_mem_out == 0) mband_mem_out = mband
-
-#ifdef DEV_MJV
-print *, 'mpi_enreg%my_kpttab ', mpi_enreg%my_kpttab
-print *, 'iisppol, iiband, iikpt, mpi_enreg%proc_distrb nkpt = ', nkpt
-do iisppol=1,nsppol
-do iikpt=1,nkpt
-do iiband=1,nband(iikpt)
-print *, iisppol, iiband, iikpt, mpi_enreg%proc_distrb(iikpt,iiband,iisppol)
-end do
-end do
-end do
-call flush()
-#endif
 
 end subroutine distrb2
 !!***

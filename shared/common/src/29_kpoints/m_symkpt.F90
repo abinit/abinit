@@ -803,10 +803,6 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
  ! Initialize 
  bz2kin_smap = 0
 
-#ifdef DEV_MJV
-print *, 'k_in ', k_in
-print *, 'kbz ', kbz
-#endif
  ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk
  do itim=0,timrev
    do isym=1,nsym
@@ -835,11 +831,6 @@ print *, 'kbz ', kbz
        bz2kin_smap(ikpt_found,   2) = isym
        bz2kin_smap(ikpt_found, 3:5) = nint(kbz(:,ikpt_found)-ksym)
        bz2kin_smap(ikpt_found,   6) = itim
-#ifdef DEV_MJV
-print *, 'bz2kin_smap(1,2,6, ikpt_found= ', ikpt_found, ' : ik_in,isym,itim  ', &
-&   bz2kin_smap(ikpt_found,1), bz2kin_smap(ikpt_found,2),bz2kin_smap(ikpt_found,6)
-print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(ikpt_found, 3:5)
-#endif
      end do
 
    end do

@@ -861,9 +861,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
        if (.not.kramers_deg) then
-#ifdef DEV_MJV
-print *, 'DFPT scfcv going into rhofermi for mq'
-#endif
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
 &         doccde_rbz,docckde_mq,dtfil,dtset,eigen_mq,eigen0,eigen1_mq,fe1fixed_mq,gmet,gprimd,idir,&
 &         indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,mband_mem_rbz,mkmem,mkqmem,mk1mem,mpi_enreg,&
@@ -940,9 +937,6 @@ print *, 'DFPT scfcv going into rhofermi for mq'
 &     dtset%prtvol,rhorfermi,ucvol,psps%usepaw,usexcnhat,vtrial1,vxc1,dtset%xclevel,&
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      if (.not.kramers_deg) then
-#ifdef DEV_MJV
-print *, 'DFPT scfcv going into newfermie for mq'
-#endif
        !fermie1_mq is updated as well at "-q"
        call newfermie1(cplex,fermie1_mq,fe1fixed_mq,ipert,istep,dtset%ixc,my_natom,dtset%natom,&
 &       nfftf,nfftotf,nhatfermi,nspden,dtset%ntypat,dtset%occopt,paw_an,paw_an1,paw_ij1,pawang,&
@@ -970,9 +964,6 @@ print *, 'DFPT scfcv going into newfermie for mq'
 &   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    if (.not.kramers_deg) then
-#ifdef DEV_MJV
-print *, 'DFPT scfcv going into vtorho for mq'
-#endif
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq=rhog1 !same for rhog1_pq
      !get the second term related to 1st order wf at -q
@@ -1196,9 +1187,6 @@ print *, 'DFPT scfcv going into vtorho for mq'
 !  Note that there are different "exit" instructions within the loop
 !  ######################################################################
  end do ! istep
-#ifdef DEV_MJV
-print *, 'istep loop finished'
-#endif
 
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)
@@ -1373,9 +1361,6 @@ print *, 'istep loop finished'
 
  if (psps%usepaw==0.and.dtset%userie/=919.and. &
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
-#ifdef DEV_MJV
-print *, 'calling nselt ', ipert
-#endif
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
@@ -1701,11 +1686,6 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
    ABI_BUG('Double-counting scheme not yet allowed!')
  end if
 
-#ifdef DEV_MJV
-print *, ' dfpt_etot : optene = ', optene
-print *, ' dfpt_etot : enes = , ek0,edocc,eeig0,eloc0,elpsp1,ehart1,exc1,enl0,enl1,epaw1,ek1 '
-print *, '        ',            ek0,edocc,eeig0,eloc0,elpsp1,ehart1,exc1,enl0,enl1,epaw1,ek1
-#endif
  if (optene>-1) then
 
 !  Compute 2nd-order variational energy by direct scheme
@@ -2571,10 +2551,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
      ban2tot = ban2tot + 2*nband_k**2
 
 ! asserts at least 1 band of the current k and spin is on present processor
-#ifdef DEV_MJV
-print *, ' ik, cycle, nband ', ikpt, proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&        proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
-#endif
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k
        bd2tot_index=bd2tot_index+2*nband_k**2
@@ -2990,9 +2966,6 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
        call dotprod_g(dotr,doti,gs_hamk%istwf_k,npw1_k*nspinor,2,cwavef,gvnlx1,&
 &         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-#ifdef DEV_MJV
-print *, 'nselt d2nl_k, wtk_k, occ_k, dotr, doti ', d2nl_k, ' %%% ', wtk_k, ' %%% ', occ_k, ' %%% ', dotr, ' %%% ', doti
-#endif
        d2nl_k(1,idir1,ipert1)= d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*2.0_dp*dotr
        d2nl_k(2,idir1,ipert1)= d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*2.0_dp*doti
 
@@ -3287,10 +3260,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      bantot = bantot + nband_k
      ban2tot = ban2tot + 2*nband_k**2
 
-#ifdef DEV_MJV
-print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&        ikpt, isppol, proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
-#endif
 
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k
@@ -3891,10 +3860,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      npw1_k=npwar1(ikpt)
      wtk_k=wtk_rbz(ikpt)
 
-#ifdef DEV_MJV
-print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&       proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
-#endif
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        eigen1(1+bd2tot_index : 2*nband_k**2+bd2tot_index) = zero
        bdtot_index=bdtot_index+nband_k
