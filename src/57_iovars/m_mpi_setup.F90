@@ -650,7 +650,6 @@ print *,  'bandpp ', dtsets(idtset)%bandpp
 #ifdef DEV_MJV
 print *, ' iikpt,iband,isppol   proc_distrb '
 print *, ' nkpt_me ', nkpt_me, ' mband_mem ', mband_mem
-#endif
 do isppol=1,nsppol
   nspink=0
   do iikpt=1,nkpt
@@ -659,6 +658,7 @@ do isppol=1,nsppol
     end do ! iband
   end do ! iikpt
 end do ! isppol
+#endif
 
 !  Take care of mkmems. Use the generic name -mkmem- for mkmem as well as mkqmem
 !  and mk1mem.
