@@ -590,7 +590,7 @@ contains
       end if  
     end do  
     Invar%natom_unitcell=Invar%natom_unitcell-shift
-    write(6,*) 'natom_unitcell=',Invar%natom_unitcell
+!    write(6,*) 'natom_unitcell=',Invar%natom_unitcell
     do iatom=1,Invar%natom
       if (Invar%typat(iatom).ge.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%typat(iatom)=Invar%typat(iatom) - 1
@@ -610,7 +610,7 @@ contains
       end if  
     end do  
     Invar%ntypat=Invar%ntypat-1
-    write(6,*) 'ntypat=',Invar%ntypat
+!    write(6,*) 'ntypat=',Invar%ntypat
     ABI_MALLOC(typat_unitcell_tmp,(  Invar%natom_unitcell))
     ABI_MALLOC(xred_unitcell_tmp ,(3,Invar%natom_unitcell))
     ABI_MALLOC(amu_tmp           ,(  Invar%ntypat))
@@ -641,10 +641,10 @@ contains
     if (Invar%loto) then
       ABI_FREE(born_charge_tmp)
     end if  
-    write(6,*)'typat_unitcell=',(Invar%typat_unitcell(ii),ii=1,Invar%natom_unitcell)
-    write(6,*)'xred_unitcell =',(Invar%xred_unitcell(:,ii),ii=1,Invar%natom_unitcell)
-    write(6,*)'typat=',(Invar%typat(ii),ii=1,Invar%natom)
-    write(6,*)'amu=',(Invar%amu(ii),ii=1,Invar%ntypat)
+!    write(6,*)'typat_unitcell=',(Invar%typat_unitcell(ii),ii=1,Invar%natom_unitcell)
+!    write(6,*)'xred_unitcell =',(Invar%xred_unitcell(:,ii),ii=1,Invar%natom_unitcell)
+!    write(6,*)'typat=',(Invar%typat(ii),ii=1,Invar%natom)
+!    write(6,*)'amu=',(Invar%amu(ii),ii=1,Invar%ntypat)
   end if
 
 ! Compute Nstep as a function of the slice
