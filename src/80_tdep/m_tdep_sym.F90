@@ -18,15 +18,6 @@ module m_tdep_sym
 
  implicit none
 
- type S_product
-
-   double precision, allocatable :: SS  (:,:,:)
-   double precision, allocatable :: SSS (:,:,:,:)
-   double precision, allocatable :: SSSS(:,:,:,:,:)
-
- end type S_product
-
-
  type,public :: Symetries_Variables_type
 
    integer :: msym
@@ -41,7 +32,6 @@ module m_tdep_sym
    double precision, allocatable :: S_inv(:,:,:,:)
    double precision, allocatable :: tnons(:,:)
    double precision, allocatable :: xred_zero(:,:)
-   type(S_product),allocatable :: Sprod(:,:)
 
  end type Symetries_Variables_type
 

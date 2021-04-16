@@ -825,15 +825,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  =   1 ,with type=   1
-  \Psi^{\alpha\beta x}=
+  \Phi3^{\alpha\beta x}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
-  \Psi^{\alpha\beta y}=
+  \Phi3^{\alpha\beta y}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
-  \Psi^{\alpha\beta z}=
+  \Phi3^{\alpha\beta z}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
@@ -934,9 +934,9 @@
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2              U_3            Delta_U          Delta_U2          Delta_F2          Sigma
  -1416.73102      -1416.77525          0.00000          0.04423          0.00000         -0.00000          0.05843          0.00369          0.42240
- TODO : write all the data in etotMDvsTDEP.dat & fcartMDvsTDEP.dat 
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.03878
  
+ See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
  
  #############################################################################
  ################# Thermodynamic quantities: Free energy,...##################

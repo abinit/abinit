@@ -75,7 +75,8 @@ end subroutine tdep_calc_orthonorm
 
 !====================================================================================================
 subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nshell2at,nshell3at,nshell4at,&
-&                                proj1st,proj2nd,proj3rd,proj4th,Shell1at,Shell2at,Shell3at,Shell4at,Sym) 
+&                                proj1st,proj2nd,Shell1at,Shell2at,Sym,&
+&                                proj3rd,Shell3at,proj4th,Shell4at) 
 
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   type(Input_Variables_type),intent(in) :: Invar
@@ -83,13 +84,13 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_Variables_type),intent(in) :: Shell1at
   type(Shell_Variables_type),intent(in) :: Shell2at
-  type(Shell_Variables_type),intent(in) :: Shell3at
-  type(Shell_Variables_type),intent(in) :: Shell4at
+  type(Shell_Variables_type),optional,intent(in) :: Shell3at
+  type(Shell_Variables_type),optional,intent(in) :: Shell4at
   integer, intent(in) :: nshell1at,nshell2at,nshell3at,nshell4at
   double precision, intent(in) :: proj1st(3 ,3 ,nshell1at)
   double precision, intent(in) :: proj2nd(9 ,9 ,nshell2at)
-  double precision, intent(in) :: proj3rd(27,27,nshell3at)
-  double precision, intent(in) :: proj4th(81,81,nshell4at)
+  double precision,optional, intent(in) :: proj3rd(27,27,nshell3at)
+  double precision,optional, intent(in) :: proj4th(81,81,nshell4at)
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
 
   integer :: ishell,ncoeff,ncoeff_prev,iatom,jatom,katom,latom,iatshell,counter
@@ -155,12 +156,12 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
               do gama=1,3
                 do xi=1,3
                   temp=Sym%S_ref(alpha,mu,isym,1)*Sym%S_ref(beta,nu,isym,1)*Sym%S_ref(gama,xi,isym,1)
-                  Const3%Sprod(isym,1)%SSS(alpha,xi+(nu-1)*3+(mu-1)*9,beta ,gama) =temp !\Psi_efg
-                  Const3%Sprod(isym,2)%SSS(alpha,xi+(nu-1)*3+(mu-1)*9,gama ,beta) =temp !\Psi_egf
-                  Const3%Sprod(isym,3)%SSS(beta ,xi+(nu-1)*3+(mu-1)*9,alpha,gama) =temp !\Psi_feg
-                  Const3%Sprod(isym,4)%SSS(beta ,xi+(nu-1)*3+(mu-1)*9,gama ,alpha)=temp !\Psi_fge
-                  Const3%Sprod(isym,5)%SSS(gama ,xi+(nu-1)*3+(mu-1)*9,alpha,beta) =temp !\Psi_gef
-                  Const3%Sprod(isym,6)%SSS(gama ,xi+(nu-1)*3+(mu-1)*9,beta ,alpha)=temp !\Psi_gfe
+                  Const3%Sprod(isym,1)%SSS(alpha,xi+(nu-1)*3+(mu-1)*9,beta ,gama) =temp !\Phi3_efg
+                  Const3%Sprod(isym,2)%SSS(alpha,xi+(nu-1)*3+(mu-1)*9,gama ,beta) =temp !\Phi3_egf
+                  Const3%Sprod(isym,3)%SSS(beta ,xi+(nu-1)*3+(mu-1)*9,alpha,gama) =temp !\Phi3_feg
+                  Const3%Sprod(isym,4)%SSS(beta ,xi+(nu-1)*3+(mu-1)*9,gama ,alpha)=temp !\Phi3_fge
+                  Const3%Sprod(isym,5)%SSS(gama ,xi+(nu-1)*3+(mu-1)*9,alpha,beta) =temp !\Phi3_gef
+                  Const3%Sprod(isym,6)%SSS(gama ,xi+(nu-1)*3+(mu-1)*9,beta ,alpha)=temp !\Phi3_gfe
                 end do
               end do
             end do
@@ -190,33 +191,33 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
                       counter=zeta+(xi-1)*3+(nu-1)*9+(mu-1)*27
                       temp=Sym%S_ref(alpha,mu,isym,1)*Sym%S_ref(beta  ,nu ,isym,1)*&
 &                          Sym%S_ref(gama,xi ,isym,1)*Sym%S_ref(delta,zeta,isym,1)
-                      Const4%Sprod(isym,1 )%SSSS(alpha,counter,beta,gama,delta)=temp !\Psi_efgh
-                      Const4%Sprod(isym,2 )%SSSS(alpha,counter,gama,beta,delta)=temp !\Psi_egfh
-                      Const4%Sprod(isym,3 )%SSSS(beta,counter,alpha,gama,delta)=temp !\Psi_fegh
-                      Const4%Sprod(isym,4 )%SSSS(beta,counter,gama,alpha,delta)=temp !\Psi_fgeh
-                      Const4%Sprod(isym,5 )%SSSS(gama,counter,alpha,beta,delta)=temp !\Psi_gefh
-                      Const4%Sprod(isym,6 )%SSSS(gama,counter,beta,alpha,delta)=temp !\Psi_gfeh
+                      Const4%Sprod(isym,1 )%SSSS(alpha,counter,beta,gama,delta)=temp !\Phi4_efgh
+                      Const4%Sprod(isym,2 )%SSSS(alpha,counter,gama,beta,delta)=temp !\Phi4_egfh
+                      Const4%Sprod(isym,3 )%SSSS(beta,counter,alpha,gama,delta)=temp !\Phi4_fegh
+                      Const4%Sprod(isym,4 )%SSSS(beta,counter,gama,alpha,delta)=temp !\Phi4_fgeh
+                      Const4%Sprod(isym,5 )%SSSS(gama,counter,alpha,beta,delta)=temp !\Phi4_gefh
+                      Const4%Sprod(isym,6 )%SSSS(gama,counter,beta,alpha,delta)=temp !\Phi4_gfeh
   
-                      Const4%Sprod(isym,7 )%SSSS(alpha,counter,beta,delta,gama)=temp !\Psi_efhg
-                      Const4%Sprod(isym,8 )%SSSS(alpha,counter,gama,delta,beta)=temp !\Psi_eghf
-                      Const4%Sprod(isym,9 )%SSSS(beta,counter,alpha,delta,gama)=temp !\Psi_fehg
-                      Const4%Sprod(isym,10)%SSSS(beta,counter,gama,delta,alpha)=temp !\Psi_fghe
-                      Const4%Sprod(isym,11)%SSSS(gama,counter,alpha,delta,beta)=temp !\Psi_gehf
-                      Const4%Sprod(isym,12)%SSSS(gama,counter,beta,delta,alpha)=temp !\Psi_gfhe
+                      Const4%Sprod(isym,7 )%SSSS(alpha,counter,beta,delta,gama)=temp !\Phi4_efhg
+                      Const4%Sprod(isym,8 )%SSSS(alpha,counter,gama,delta,beta)=temp !\Phi4_eghf
+                      Const4%Sprod(isym,9 )%SSSS(beta,counter,alpha,delta,gama)=temp !\Phi4_fehg
+                      Const4%Sprod(isym,10)%SSSS(beta,counter,gama,delta,alpha)=temp !\Phi4_fghe
+                      Const4%Sprod(isym,11)%SSSS(gama,counter,alpha,delta,beta)=temp !\Phi4_gehf
+                      Const4%Sprod(isym,12)%SSSS(gama,counter,beta,delta,alpha)=temp !\Phi4_gfhe
   
-                      Const4%Sprod(isym,13)%SSSS(alpha,counter,delta,beta,gama)=temp !\Psi_ehfg
-                      Const4%Sprod(isym,14)%SSSS(alpha,counter,delta,gama,beta)=temp !\Psi_ehgf
-                      Const4%Sprod(isym,15)%SSSS(beta,counter,delta,alpha,gama)=temp !\Psi_fheg
-                      Const4%Sprod(isym,16)%SSSS(beta,counter,delta,gama,alpha)=temp !\Psi_fhge
-                      Const4%Sprod(isym,17)%SSSS(gama,counter,delta,alpha,beta)=temp !\Psi_ghef
-                      Const4%Sprod(isym,18)%SSSS(gama,counter,delta,beta,alpha)=temp !\Psi_ghfe
+                      Const4%Sprod(isym,13)%SSSS(alpha,counter,delta,beta,gama)=temp !\Phi4_ehfg
+                      Const4%Sprod(isym,14)%SSSS(alpha,counter,delta,gama,beta)=temp !\Phi4_ehgf
+                      Const4%Sprod(isym,15)%SSSS(beta,counter,delta,alpha,gama)=temp !\Phi4_fheg
+                      Const4%Sprod(isym,16)%SSSS(beta,counter,delta,gama,alpha)=temp !\Phi4_fhge
+                      Const4%Sprod(isym,17)%SSSS(gama,counter,delta,alpha,beta)=temp !\Phi4_ghef
+                      Const4%Sprod(isym,18)%SSSS(gama,counter,delta,beta,alpha)=temp !\Phi4_ghfe
   
-                      Const4%Sprod(isym,19)%SSSS(delta,counter,alpha,beta,gama)=temp !\Psi_hefg
-                      Const4%Sprod(isym,20)%SSSS(delta,counter,alpha,gama,beta)=temp !\Psi_hegf
-                      Const4%Sprod(isym,21)%SSSS(delta,counter,beta,alpha,gama)=temp !\Psi_hfeg
-                      Const4%Sprod(isym,22)%SSSS(delta,counter,beta,gama,alpha)=temp !\Psi_hfge
-                      Const4%Sprod(isym,23)%SSSS(delta,counter,gama,alpha,beta)=temp !\Psi_hgef
-                      Const4%Sprod(isym,24)%SSSS(delta,counter,gama,beta,alpha)=temp !\Psi_hgfe
+                      Const4%Sprod(isym,19)%SSSS(delta,counter,alpha,beta,gama)=temp !\Phi4_hefg
+                      Const4%Sprod(isym,20)%SSSS(delta,counter,alpha,gama,beta)=temp !\Phi4_hegf
+                      Const4%Sprod(isym,21)%SSSS(delta,counter,beta,alpha,gama)=temp !\Phi4_hfeg
+                      Const4%Sprod(isym,22)%SSSS(delta,counter,beta,gama,alpha)=temp !\Phi4_hfge
+                      Const4%Sprod(isym,23)%SSSS(delta,counter,gama,alpha,beta)=temp !\Phi4_hgef
+                      Const4%Sprod(isym,24)%SSSS(delta,counter,gama,beta,alpha)=temp !\Phi4_hgfe
   
                     end do
                   end do
@@ -835,19 +836,19 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
 end subroutine tdep_calc_constraints
 
 !====================================================================================================
- subroutine tdep_check_constraints(distance,Invar,Phi2,Phi1,nshell3at,nshell4at,&
-&                 Phi3_ref,Phi4_ref,Shell3at,Shell4at,Sym)
+ subroutine tdep_check_constraints(distance,Invar,Phi2,Phi1,nshell3at,nshell4at,Sym,&
+&                                  Phi3_ref,Shell3at,Phi4_ref,Shell4at) !Optional
 
   type(Input_Variables_type),intent(in) :: Invar
   integer, intent(in)  :: nshell3at,nshell4at
   double precision, intent(in)  :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision, intent(in)  :: Phi1(3*Invar%natom)
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
-  type(Shell_Variables_type),intent(in) :: Shell3at
-  type(Shell_Variables_type),intent(in) :: Shell4at
   type(Symetries_Variables_type),intent(in) :: Sym
-  double precision, intent(in) :: Phi3_ref(3,3,3,nshell3at)
-  double precision, intent(in) :: Phi4_ref(3,3,3,3,nshell4at)
+  type(Shell_Variables_type),optional, intent(in) :: Shell3at
+  type(Shell_Variables_type),optional, intent(in) :: Shell4at
+  double precision,optional, intent(in) :: Phi3_ref(3,3,3,nshell3at)
+  double precision,optional, intent(in) :: Phi4_ref(3,3,3,3,nshell4at)
   
   integer :: ii,jj,kk,ll,iatom,jatom,katom,latom,isym,itrans
   integer :: alpha,beta,gama,lambda
@@ -983,11 +984,11 @@ end subroutine tdep_calc_constraints
           isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
           call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
-!         Compute the first ASR : sum_k Psi_ijk=0 
-!              --> Psi_iji+sum_{k.ne.i} Psi_ijk=0
-!              --> if i.eq.j Psi_iii+sum_{k.ne.i} Psi_iik
+!         Compute the first ASR : sum_k Phi3_ijk=0 
+!              --> Phi3_iji+sum_{k.ne.i} Phi3_ijk=0
+!              --> if i.eq.j Phi3_iii+sum_{k.ne.i} Phi3_iik
           asr3(1,jatom,:,:,:)=asr3(1,jatom,:,:,:)+Phi3_333(:,:,:)
-!         Compute the second ASR : sum_j Psi_ijk=0 
+!         Compute the second ASR : sum_j Phi3_ijk=0 
           asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Phi3_333(:,:,:)
 !         Compute the rotational invariance (third order)
           do alpha=1,3
@@ -1084,7 +1085,7 @@ end subroutine tdep_calc_constraints
           isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
           call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
-!         Compute the first ASR : sum_l Psi_ijkl=0 
+!         Compute the first ASR : sum_l Phi3_ijkl=0 
           asr4(jatom,katom,:,:,:,:)=asr4(jatom,katom,:,:,:,:)+Phi4_3333(:,:,:,:)
 !FB!         Compute the rotational invariance (third order)
 !FB          do alpha=1,3

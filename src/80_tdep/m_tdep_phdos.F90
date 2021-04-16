@@ -160,7 +160,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     do iomega=1,PHdos%nomega
       if (Invar%enunit.eq.0) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_eV*1000,PHdos%phdos(iomega)
       if (Invar%enunit.eq.1) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_cmm1   ,PHdos%phdos(iomega)
-      if (Invar%enunit.eq.2) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)           ,PHdos%phdos(iomega)
+      if (Invar%enunit.eq.2) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*1000      ,PHdos%phdos(iomega)
       if (Invar%enunit.eq.3) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_THz    ,PHdos%phdos(iomega)
     end do
     close(56)
@@ -205,7 +205,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    open(unit=53,file=trim(Invar%output_prefix)//'omega-path-1.dat')
 !FB    if (Invar%enunit.eq.0) write(53,'(a)') '# Phonon frequencies in meV'
 !FB    if (Invar%enunit.eq.1) write(53,'(a)') '# Phonon frequencies in cm-1'
-!FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
+!FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in mHa'
 !FB    if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
 !FB    do iqpt=1,Qpt%nqpt
 !FB      call tdep_write_dij(Eigen2nd_path,iqpt,Invar,Qpt%qpt_red(:,iqpt))
@@ -236,7 +236,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     open(unit=53,file=trim(Invar%output_prefix)//'omega.dat')
     if (Invar%enunit.eq.0) write(53,'(a)') '# Phonon frequencies in meV'
     if (Invar%enunit.eq.1) write(53,'(a)') '# Phonon frequencies in cm-1'
-    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
+    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in mHa'
     if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
     do iqpt=1,Qpt%nqpt
       call tdep_write_dij(Eigen2nd_path,iqpt,Invar,Qpt%qpt_red(:,iqpt))
@@ -287,7 +287,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    open(unit=53,file=trim(Invar%output_prefix)//'omega-MP-1.dat')
 !FB    if (Invar%enunit.eq.0) write(53,'(a)') '# Phonon frequencies in meV'
 !FB    if (Invar%enunit.eq.1) write(53,'(a)') '# Phonon frequencies in cm-1'
-!FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
+!FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in mHa'
 !FB    if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
 !FB    do iq_ibz=1,Qbz%nqibz
 !FB      call tdep_write_dij(Eigen2nd_MP,iq_ibz,Invar,Qbz%qibz(:,iq_ibz))
@@ -313,7 +313,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    open(unit=53,file=trim(Invar%output_prefix)//'omega-MP-2.dat')
 !FB    if (Invar%enunit.eq.0) write(53,'(a)') '# Phonon frequencies in meV'
 !FB    if (Invar%enunit.eq.1) write(53,'(a)') '# Phonon frequencies in cm-1'
-!FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in Ha'
+!FB    if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in mHa'
 !FB    if (Invar%enunit.eq.3) write(53,'(a)') '# Phonon frequencies in THz'
 !FB    do iq_ibz=1,Qbz%nqibz
 !FB      call tdep_write_dij(Eigen2nd_MP,iq_ibz,Invar,Qbz%qibz(:,iq_ibz))

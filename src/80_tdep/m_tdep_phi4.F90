@@ -140,33 +140,33 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
                     counter=delta+(gama-1)*3+(beta-1)*9+(alpha-1)*27
                     temp=Sym%S_ref(mu,alpha,isym,1)*Sym%S_ref(nu  ,beta ,isym,1)*&
 &                        Sym%S_ref(xi,gama ,isym,1)*Sym%S_ref(zeta,delta,isym,1)
-                    Const%Sprod(isym,1 )%SSSS(mu,counter,nu,xi,zeta)=temp !\Psi_efgh
-                    Const%Sprod(isym,2 )%SSSS(mu,counter,xi,nu,zeta)=temp !\Psi_egfh
-                    Const%Sprod(isym,3 )%SSSS(nu,counter,mu,xi,zeta)=temp !\Psi_fegh
-                    Const%Sprod(isym,4 )%SSSS(nu,counter,xi,mu,zeta)=temp !\Psi_fgeh
-                    Const%Sprod(isym,5 )%SSSS(xi,counter,mu,nu,zeta)=temp !\Psi_gefh
-                    Const%Sprod(isym,6 )%SSSS(xi,counter,nu,mu,zeta)=temp !\Psi_gfeh
+                    Const%Sprod(isym,1 )%SSSS(mu,counter,nu,xi,zeta)=temp !\Phi4_efgh
+                    Const%Sprod(isym,2 )%SSSS(mu,counter,xi,nu,zeta)=temp !\Phi4_egfh
+                    Const%Sprod(isym,3 )%SSSS(nu,counter,mu,xi,zeta)=temp !\Phi4_fegh
+                    Const%Sprod(isym,4 )%SSSS(nu,counter,xi,mu,zeta)=temp !\Phi4_fgeh
+                    Const%Sprod(isym,5 )%SSSS(xi,counter,mu,nu,zeta)=temp !\Phi4_gefh
+                    Const%Sprod(isym,6 )%SSSS(xi,counter,nu,mu,zeta)=temp !\Phi4_gfeh
 
-                    Const%Sprod(isym,7 )%SSSS(mu,counter,nu,zeta,xi)=temp !\Psi_efhg
-                    Const%Sprod(isym,8 )%SSSS(mu,counter,xi,zeta,nu)=temp !\Psi_eghf
-                    Const%Sprod(isym,9 )%SSSS(nu,counter,mu,zeta,xi)=temp !\Psi_fehg
-                    Const%Sprod(isym,10)%SSSS(nu,counter,xi,zeta,mu)=temp !\Psi_fghe
-                    Const%Sprod(isym,11)%SSSS(xi,counter,mu,zeta,nu)=temp !\Psi_gehf
-                    Const%Sprod(isym,12)%SSSS(xi,counter,nu,zeta,mu)=temp !\Psi_gfhe
+                    Const%Sprod(isym,7 )%SSSS(mu,counter,nu,zeta,xi)=temp !\Phi4_efhg
+                    Const%Sprod(isym,8 )%SSSS(mu,counter,xi,zeta,nu)=temp !\Phi4_eghf
+                    Const%Sprod(isym,9 )%SSSS(nu,counter,mu,zeta,xi)=temp !\Phi4_fehg
+                    Const%Sprod(isym,10)%SSSS(nu,counter,xi,zeta,mu)=temp !\Phi4_fghe
+                    Const%Sprod(isym,11)%SSSS(xi,counter,mu,zeta,nu)=temp !\Phi4_gehf
+                    Const%Sprod(isym,12)%SSSS(xi,counter,nu,zeta,mu)=temp !\Phi4_gfhe
 
-                    Const%Sprod(isym,13)%SSSS(mu,counter,zeta,nu,xi)=temp !\Psi_ehfg
-                    Const%Sprod(isym,14)%SSSS(mu,counter,zeta,xi,nu)=temp !\Psi_ehgf
-                    Const%Sprod(isym,15)%SSSS(nu,counter,zeta,mu,xi)=temp !\Psi_fheg
-                    Const%Sprod(isym,16)%SSSS(nu,counter,zeta,xi,mu)=temp !\Psi_fhge
-                    Const%Sprod(isym,17)%SSSS(xi,counter,zeta,mu,nu)=temp !\Psi_ghef
-                    Const%Sprod(isym,18)%SSSS(xi,counter,zeta,nu,mu)=temp !\Psi_ghfe
+                    Const%Sprod(isym,13)%SSSS(mu,counter,zeta,nu,xi)=temp !\Phi4_ehfg
+                    Const%Sprod(isym,14)%SSSS(mu,counter,zeta,xi,nu)=temp !\Phi4_ehgf
+                    Const%Sprod(isym,15)%SSSS(nu,counter,zeta,mu,xi)=temp !\Phi4_fheg
+                    Const%Sprod(isym,16)%SSSS(nu,counter,zeta,xi,mu)=temp !\Phi4_fhge
+                    Const%Sprod(isym,17)%SSSS(xi,counter,zeta,mu,nu)=temp !\Phi4_ghef
+                    Const%Sprod(isym,18)%SSSS(xi,counter,zeta,nu,mu)=temp !\Phi4_ghfe
 
-                    Const%Sprod(isym,19)%SSSS(zeta,counter,mu,nu,xi)=temp !\Psi_hefg
-                    Const%Sprod(isym,20)%SSSS(zeta,counter,mu,xi,nu)=temp !\Psi_hegf
-                    Const%Sprod(isym,21)%SSSS(zeta,counter,nu,mu,xi)=temp !\Psi_hfeg
-                    Const%Sprod(isym,22)%SSSS(zeta,counter,nu,xi,mu)=temp !\Psi_hfge
-                    Const%Sprod(isym,23)%SSSS(zeta,counter,xi,mu,nu)=temp !\Psi_hgef
-                    Const%Sprod(isym,24)%SSSS(zeta,counter,xi,nu,mu)=temp !\Psi_hgfe
+                    Const%Sprod(isym,19)%SSSS(zeta,counter,mu,nu,xi)=temp !\Phi4_hefg
+                    Const%Sprod(isym,20)%SSSS(zeta,counter,mu,xi,nu)=temp !\Phi4_hegf
+                    Const%Sprod(isym,21)%SSSS(zeta,counter,nu,mu,xi)=temp !\Phi4_hfeg
+                    Const%Sprod(isym,22)%SSSS(zeta,counter,nu,xi,mu)=temp !\Phi4_hfge
+                    Const%Sprod(isym,23)%SSSS(zeta,counter,xi,mu,nu)=temp !\Phi4_hgef
+                    Const%Sprod(isym,24)%SSSS(zeta,counter,xi,nu,mu)=temp !\Phi4_hgfe
 
                   end do
                 end do
@@ -209,13 +209,14 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
           iindex_l=3*(iatom-1)+3*Invar%natom*(istep-1)+1
           iindex_h=3*(iatom-1)+3*Invar%natom*(istep-1)+3
 !         F_i^{\mu}(t)=\sum_{\alpha\beta\gamma\delta,jkl,\nu\xi\zeta} S^{\mu\alpha}.S^{\nu\beta}.S^{\xi\gamma}.S^{\zeta\delta}.
-!                      \Chi_{ijkl}^{\alpha\beta\gamma\delta}.u_l^\zeta(t).u_k^\xi(t).u_j^\nu(t)
+!                      \Phi4_{ijkl}^{\alpha\beta\gamma\delta}.u_l^\zeta(t).u_k^\xi(t).u_j^\nu(t)
           do nu=1,3
             do xi=1,3
               do zeta=1,3
                 CoeffMoore%fcoeff(iindex_l:iindex_h,ncoeff_prev_l:ncoeff_prev_h)= &
 &               CoeffMoore%fcoeff(iindex_l:iindex_h,ncoeff_prev_l:ncoeff_prev_h)+&
-&               SSSS_proj(1:3,nu,xi,zeta,1:ncoeff)*ucart(nu,jatom,istep)*ucart(xi,katom,istep)*ucart(zeta,latom,istep)/6.d0
+&               SSSS_proj(1:3,nu,xi,zeta,1:ncoeff)*ucart(nu,jatom,istep)*ucart(xi,katom,istep)*ucart(zeta,latom,istep)/6.d0 *&
+&               Invar%weights(istep)
               end do  
             end do  
           end do  
@@ -323,7 +324,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For latom  =',latom ,' ,with type=',mod(latom -1,Invar%natom_unitcell)+1
         do ii=1,3
           do jj=1,3
-            write(Invar%stdout,'(a,i2,i2,a)') '  \Psi^{',ii,jj,'kl}='
+            write(Invar%stdout,'(a,i2,i2,a)') '  \Phi4^{',ii,jj,'kl}='
             do kk=1,3
               if (abs(Phi4_3333(ii,jj,1,kk)).lt.5.d-7) then
                 tmp1=0.d0
@@ -402,33 +403,33 @@ subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
     do jj=1,3
       do kk=1,3
         do ll=1,3
-          if (itrans==1) then ; ee=ii ; ff=jj ; gg=kk ; hh=ll ; endif !\Psi_ijkl
-          if (itrans==2) then ; ee=ii ; ff=kk ; gg=jj ; hh=ll ; endif !\Psi_ikjl
-          if (itrans==3) then ; ee=jj ; ff=ii ; gg=kk ; hh=ll ; endif !\Psi_jikl
-          if (itrans==4) then ; ee=jj ; ff=kk ; gg=ii ; hh=ll ; endif !\Psi_jkil
-          if (itrans==5) then ; ee=kk ; ff=ii ; gg=jj ; hh=ll ; endif !\Psi_kijl
-          if (itrans==6) then ; ee=kk ; ff=jj ; gg=ii ; hh=ll ; endif !\Psi_kjil
+          if (itrans==1) then ; ee=ii ; ff=jj ; gg=kk ; hh=ll ; endif !\Phi4_ijkl
+          if (itrans==2) then ; ee=ii ; ff=kk ; gg=jj ; hh=ll ; endif !\Phi4_ikjl
+          if (itrans==3) then ; ee=jj ; ff=ii ; gg=kk ; hh=ll ; endif !\Phi4_jikl
+          if (itrans==4) then ; ee=jj ; ff=kk ; gg=ii ; hh=ll ; endif !\Phi4_jkil
+          if (itrans==5) then ; ee=kk ; ff=ii ; gg=jj ; hh=ll ; endif !\Phi4_kijl
+          if (itrans==6) then ; ee=kk ; ff=jj ; gg=ii ; hh=ll ; endif !\Phi4_kjil
 
-          if (itrans==7 ) then ; ee=ii ; ff=jj ; gg=ll ; hh=kk ; endif !\Psi_ijlk
-          if (itrans==8 ) then ; ee=ii ; ff=kk ; gg=ll ; hh=jj ; endif !\Psi_iklj
-          if (itrans==9 ) then ; ee=jj ; ff=ii ; gg=ll ; hh=kk ; endif !\Psi_jilk
-          if (itrans==10) then ; ee=jj ; ff=kk ; gg=ll ; hh=ii ; endif !\Psi_jkli
-          if (itrans==11) then ; ee=kk ; ff=ii ; gg=ll ; hh=jj ; endif !\Psi_kilj
-          if (itrans==12) then ; ee=kk ; ff=jj ; gg=ll ; hh=ii ; endif !\Psi_kjli
+          if (itrans==7 ) then ; ee=ii ; ff=jj ; gg=ll ; hh=kk ; endif !\Phi4_ijlk
+          if (itrans==8 ) then ; ee=ii ; ff=kk ; gg=ll ; hh=jj ; endif !\Phi4_iklj
+          if (itrans==9 ) then ; ee=jj ; ff=ii ; gg=ll ; hh=kk ; endif !\Phi4_jilk
+          if (itrans==10) then ; ee=jj ; ff=kk ; gg=ll ; hh=ii ; endif !\Phi4_jkli
+          if (itrans==11) then ; ee=kk ; ff=ii ; gg=ll ; hh=jj ; endif !\Phi4_kilj
+          if (itrans==12) then ; ee=kk ; ff=jj ; gg=ll ; hh=ii ; endif !\Phi4_kjli
 
-          if (itrans==13) then ; ee=ii ; ff=ll ; gg=jj ; hh=kk ; endif !\Psi_iljk
-          if (itrans==14) then ; ee=ii ; ff=ll ; gg=kk ; hh=jj ; endif !\Psi_ilkj
-          if (itrans==15) then ; ee=jj ; ff=ll ; gg=ii ; hh=kk ; endif !\Psi_jlik
-          if (itrans==16) then ; ee=jj ; ff=ll ; gg=kk ; hh=ii ; endif !\Psi_jlki
-          if (itrans==17) then ; ee=kk ; ff=ll ; gg=ii ; hh=jj ; endif !\Psi_klij
-          if (itrans==18) then ; ee=kk ; ff=ll ; gg=jj ; hh=ii ; endif !\Psi_klji
+          if (itrans==13) then ; ee=ii ; ff=ll ; gg=jj ; hh=kk ; endif !\Phi4_iljk
+          if (itrans==14) then ; ee=ii ; ff=ll ; gg=kk ; hh=jj ; endif !\Phi4_ilkj
+          if (itrans==15) then ; ee=jj ; ff=ll ; gg=ii ; hh=kk ; endif !\Phi4_jlik
+          if (itrans==16) then ; ee=jj ; ff=ll ; gg=kk ; hh=ii ; endif !\Phi4_jlki
+          if (itrans==17) then ; ee=kk ; ff=ll ; gg=ii ; hh=jj ; endif !\Phi4_klij
+          if (itrans==18) then ; ee=kk ; ff=ll ; gg=jj ; hh=ii ; endif !\Phi4_klji
 
-          if (itrans==19) then ; ee=ll ; ff=ii ; gg=jj ; hh=kk ; endif !\Psi_lijk
-          if (itrans==20) then ; ee=ll ; ff=ii ; gg=kk ; hh=jj ; endif !\Psi_likj
-          if (itrans==21) then ; ee=ll ; ff=jj ; gg=ii ; hh=kk ; endif !\Psi_ljik
-          if (itrans==22) then ; ee=ll ; ff=jj ; gg=kk ; hh=ii ; endif !\Psi_ljki
-          if (itrans==23) then ; ee=ll ; ff=kk ; gg=ii ; hh=jj ; endif !\Psi_lkij
-          if (itrans==24) then ; ee=ll ; ff=kk ; gg=jj ; hh=ii ; endif !\Psi_lkji
+          if (itrans==19) then ; ee=ll ; ff=ii ; gg=jj ; hh=kk ; endif !\Phi4_lijk
+          if (itrans==20) then ; ee=ll ; ff=ii ; gg=kk ; hh=jj ; endif !\Phi4_likj
+          if (itrans==21) then ; ee=ll ; ff=jj ; gg=ii ; hh=kk ; endif !\Phi4_ljik
+          if (itrans==22) then ; ee=ll ; ff=jj ; gg=kk ; hh=ii ; endif !\Phi4_ljki
+          if (itrans==23) then ; ee=ll ; ff=kk ; gg=ii ; hh=jj ; endif !\Phi4_lkij
+          if (itrans==24) then ; ee=ll ; ff=kk ; gg=jj ; hh=ii ; endif !\Phi4_lkji
 
           Phi4_3333(ee,ff,gg,hh)=Phi4_tmp(ii,jj,kk,ll)
         end do

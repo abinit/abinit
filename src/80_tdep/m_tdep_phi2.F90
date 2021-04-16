@@ -181,9 +181,9 @@ subroutine tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj,Shell2at,Sym,ucart)
 
         do istep=1,Invar%my_nstep
 !         In order to impose the acoustic sum rule we use (u(j)-u(i))==u_j^\nu
-          udiff(1)=ucart(1,jatom,istep)-ucart(1,iatom,istep)
-          udiff(2)=ucart(2,jatom,istep)-ucart(2,iatom,istep)
-          udiff(3)=ucart(3,jatom,istep)-ucart(3,iatom,istep)
+          udiff(1)=(ucart(1,jatom,istep)-ucart(1,iatom,istep))*Invar%weights(istep)
+          udiff(2)=(ucart(2,jatom,istep)-ucart(2,iatom,istep))*Invar%weights(istep)
+          udiff(3)=(ucart(3,jatom,istep)-ucart(3,iatom,istep))*Invar%weights(istep)
             
 !         F_i^\mu(t)=\sum_{\alpha\beta,j,\nu}S^{\mu\alpha}.S^{\nu\beta}.\Phi_{ij}^{\alpha\beta}.u_j^\nu(t)
           SSu(:,:)=zero
@@ -619,7 +619,7 @@ subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
 ! Print the frequencies (omega)
   if (Invar%enunit.eq.0) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_eV*1000,ii=1,3*Invar%natom_unitcell)
   if (Invar%enunit.eq.1) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_cmm1   ,ii=1,3*Invar%natom_unitcell)
-  if (Invar%enunit.eq.2) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)           ,ii=1,3*Invar%natom_unitcell)
+  if (Invar%enunit.eq.2) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*1000      ,ii=1,3*Invar%natom_unitcell)
   if (Invar%enunit.eq.3) write(53,'(i5,1x,100(f15.3,1x))') iqpt,(omega(ii)*Ha_THz    ,ii=1,3*Invar%natom_unitcell)
 
 ! Print the eigenvectors (eigenV) 

@@ -146,12 +146,12 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
             do xi=1,3
               do gama=1,3
                 temp=Sym%S_ref(mu,alpha,isym,1)*Sym%S_ref(nu,beta,isym,1)*Sym%S_ref(xi,gama,isym,1)
-                Const%Sprod(isym,1)%SSS(mu,gama+(beta-1)*3+(alpha-1)*9,nu,xi)=temp !\Psi_efg
-                Const%Sprod(isym,2)%SSS(mu,gama+(beta-1)*3+(alpha-1)*9,xi,nu)=temp !\Psi_egf
-                Const%Sprod(isym,3)%SSS(nu,gama+(beta-1)*3+(alpha-1)*9,mu,xi)=temp !\Psi_feg
-                Const%Sprod(isym,4)%SSS(nu,gama+(beta-1)*3+(alpha-1)*9,xi,mu)=temp !\Psi_fge
-                Const%Sprod(isym,5)%SSS(xi,gama+(beta-1)*3+(alpha-1)*9,mu,nu)=temp !\Psi_gef
-                Const%Sprod(isym,6)%SSS(xi,gama+(beta-1)*3+(alpha-1)*9,nu,mu)=temp !\Psi_gfe
+                Const%Sprod(isym,1)%SSS(mu,gama+(beta-1)*3+(alpha-1)*9,nu,xi)=temp !\Phi3_efg
+                Const%Sprod(isym,2)%SSS(mu,gama+(beta-1)*3+(alpha-1)*9,xi,nu)=temp !\Phi3_egf
+                Const%Sprod(isym,3)%SSS(nu,gama+(beta-1)*3+(alpha-1)*9,mu,xi)=temp !\Phi3_feg
+                Const%Sprod(isym,4)%SSS(nu,gama+(beta-1)*3+(alpha-1)*9,xi,mu)=temp !\Phi3_fge
+                Const%Sprod(isym,5)%SSS(xi,gama+(beta-1)*3+(alpha-1)*9,mu,nu)=temp !\Phi3_gef
+                Const%Sprod(isym,6)%SSS(xi,gama+(beta-1)*3+(alpha-1)*9,nu,mu)=temp !\Phi3_gfe
               end do
             end do
           end do
@@ -191,12 +191,12 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
           udiff_ji(:)=ucart(:,jatom,istep)
           udiff_ki(:)=ucart(:,katom,istep)
 !         F_i^{\mu}(t)=\sum_{\alpha\beta\gamma,jk,\nu\xi} S^{\mu\alpha}.S^{\nu\beta}.S^{\xi\gamma}.
-!                      \Psi_{ijk}^{\alpha\beta\gamma}.udiff_k^\xi(t).udiff_j^\nu(t)
+!                      \Phi3_{ijk}^{\alpha\beta\gamma}.udiff_k^\xi(t).udiff_j^\nu(t)
           do nu=1,3
             do xi=1,3
               CoeffMoore%fcoeff(iindex+1:iindex+3,ncoeff_prev+1:ncoeff_prev+ncoeff)= &
 &             CoeffMoore%fcoeff(iindex+1:iindex+3,ncoeff_prev+1:ncoeff_prev+ncoeff)+&
-&             SSS_proj(1:3,nu,xi,1:ncoeff)*udiff_ji(nu)*udiff_ki(xi)/2.d0
+&             SSS_proj(1:3,nu,xi,1:ncoeff)*udiff_ji(nu)*udiff_ki(xi)/2.d0*Invar%weights(istep)
             end do  
           end do  
         end do !istep
@@ -295,9 +295,9 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
         do jj=1,3
-          if (jj==1) write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta x}='
-          if (jj==2) write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta y}='
-          if (jj==3) write(Invar%stdout,'(a)') '  \Psi^{\alpha\beta z}='
+          if (jj==1) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta x}='
+          if (jj==2) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta y}='
+          if (jj==3) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta z}='
           do ii=1,3
             if (abs(Phi3_333(ii,1,jj)).lt.5.d-7) then
               tmp1=0.d0
@@ -508,12 +508,12 @@ subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans)
   do ii=1,3
     do jj=1,3
       do kk=1,3
-        if (itrans==1) then ; ee=ii ; ff=jj ; gg=kk ; endif !\Psi_efg
-        if (itrans==2) then ; ee=ii ; ff=kk ; gg=jj ; endif !\Psi_egf
-        if (itrans==3) then ; ee=jj ; ff=ii ; gg=kk ; endif !\Psi_feg
-        if (itrans==4) then ; ee=jj ; ff=kk ; gg=ii ; endif !\Psi_fge
-        if (itrans==5) then ; ee=kk ; ff=ii ; gg=jj ; endif !\Psi_gef
-        if (itrans==6) then ; ee=kk ; ff=jj ; gg=ii ; endif !\Psi_gfe
+        if (itrans==1) then ; ee=ii ; ff=jj ; gg=kk ; endif !\Phi3_efg
+        if (itrans==2) then ; ee=ii ; ff=kk ; gg=jj ; endif !\Phi3_egf
+        if (itrans==3) then ; ee=jj ; ff=ii ; gg=kk ; endif !\Phi3_feg
+        if (itrans==4) then ; ee=jj ; ff=kk ; gg=ii ; endif !\Phi3_fge
+        if (itrans==5) then ; ee=kk ; ff=ii ; gg=jj ; endif !\Phi3_gef
+        if (itrans==6) then ; ee=kk ; ff=jj ; gg=ii ; endif !\Phi3_gfe
         Phi3_333(ee,ff,gg)=Phi3_tmp(ii,jj,kk)
       end do
     end do  

@@ -551,13 +551,13 @@ contains
 !       Classify the informations of the triplet in Shell3at
         do ii=1,6
 !         The Phi3 has to be symetric (transposition symetries)
-          if (ii==1) then ; watom=eatom ; xatom=fatom ; yatom=gatom ; endif !\Psi_ijk
-          if (ii==2) then ; watom=eatom ; xatom=gatom ; yatom=fatom ; endif !\Psi_ikj
-          if (ii==3) then ; watom=fatom ; xatom=eatom ; yatom=gatom ; endif !\Psi_jik
-          if (ii==4) then ; watom=fatom ; xatom=gatom ; yatom=eatom ; endif !\Psi_jki
-          if (ii==5) then ; watom=gatom ; xatom=eatom ; yatom=fatom ; endif !\Psi_kij
-          if (ii==6) then ; watom=gatom ; xatom=fatom ; yatom=eatom ; endif !\Psi_kji
-!         Do not overwrite the Psi_iik, Psi_iji, Psi_ijj or Psi_iii IFCs
+          if (ii==1) then ; watom=eatom ; xatom=fatom ; yatom=gatom ; endif !\Phi3_ijk
+          if (ii==2) then ; watom=eatom ; xatom=gatom ; yatom=fatom ; endif !\Phi3_ikj
+          if (ii==3) then ; watom=fatom ; xatom=eatom ; yatom=gatom ; endif !\Phi3_jik
+          if (ii==4) then ; watom=fatom ; xatom=gatom ; yatom=eatom ; endif !\Phi3_jki
+          if (ii==5) then ; watom=gatom ; xatom=eatom ; yatom=fatom ; endif !\Phi3_kij
+          if (ii==6) then ; watom=gatom ; xatom=fatom ; yatom=eatom ; endif !\Phi3_kji
+!         Do not overwrite the Phi3_iik, Phi3_iji, Phi3_ijj or Phi3_iii IFCs
 !         and avoid double counting of triplet interactions
           if ((eatom.eq.fatom).and.((ii.eq.3).or.(ii.eq.4).or.(ii.eq.6))) cycle
           if ((eatom.eq.gatom).and.((ii.gt.3))) cycle
@@ -626,12 +626,12 @@ contains
 !DEBUG            vectk(ii)=vectk(ii)+Sym%S_ref(ii,jj,isym,1)*distance(iatref,katref,jj+1)
 !DEBUG          end do  
 !DEBUG        end do
-!DEBUG        if (itrans==1) then ; vect1(:)= vectj(:)          ; vect2(:)= vectk(:)           ; endif !\Psi_ijk
-!DEBUG        if (itrans==2) then ; vect1(:)= vectk(:)          ; vect2(:)= vectj(:)           ; endif !\Psi_ikj
-!DEBUG        if (itrans==3) then ; vect1(:)=-vectj(:)          ; vect2(:)= vectk(:)-vectj(:)  ; endif !\Psi_jik
-!DEBUG        if (itrans==4) then ; vect1(:)= vectk(:)-vectj(:) ; vect2(:)=-vectj(:)           ; endif !\Psi_jki
-!DEBUG        if (itrans==5) then ; vect1(:)=-vectk(:)          ; vect2(:)= vectj(:)-vectk(:)  ; endif !\Psi_kij
-!DEBUG        if (itrans==6) then ; vect1(:)= vectj(:)-vectk(:) ; vect2(:)=-vectk(:)           ; endif !\Psi_kji
+!DEBUG        if (itrans==1) then ; vect1(:)= vectj(:)          ; vect2(:)= vectk(:)           ; endif !\Phi3_ijk
+!DEBUG        if (itrans==2) then ; vect1(:)= vectk(:)          ; vect2(:)= vectj(:)           ; endif !\Phi3_ikj
+!DEBUG        if (itrans==3) then ; vect1(:)=-vectj(:)          ; vect2(:)= vectk(:)-vectj(:)  ; endif !\Phi3_jik
+!DEBUG        if (itrans==4) then ; vect1(:)= vectk(:)-vectj(:) ; vect2(:)=-vectj(:)           ; endif !\Phi3_jki
+!DEBUG        if (itrans==5) then ; vect1(:)=-vectk(:)          ; vect2(:)= vectj(:)-vectk(:)  ; endif !\Phi3_kij
+!DEBUG        if (itrans==6) then ; vect1(:)= vectj(:)-vectk(:) ; vect2(:)=-vectk(:)           ; endif !\Phi3_kji
 !DEBUG        do ii=1,3
 !DEBUG          if ((abs(distance(iatom,jatom,ii+1)-vect1(ii)).gt.tol8).or.&
 !DEBUG&             (abs(distance(iatom,katom,ii+1)-vect2(ii)).gt.tol8)) then
@@ -1122,12 +1122,12 @@ contains
 !DEBUG            vectk(ii)=vectk(ii)+Sym%S_ref(ii,jj,isym,1)*distance(iatref,katref,jj+1)
 !DEBUG          end do  
 !DEBUG        end do
-!DEBUG        if (itrans==1) then ; vect1(:)= vectj(:)          ; vect2(:)= vectk(:)           ; endif !\Psi_ijk
-!DEBUG        if (itrans==2) then ; vect1(:)= vectk(:)          ; vect2(:)= vectj(:)           ; endif !\Psi_ikj
-!DEBUG        if (itrans==3) then ; vect1(:)=-vectj(:)          ; vect2(:)= vectk(:)-vectj(:)  ; endif !\Psi_jik
-!DEBUG        if (itrans==4) then ; vect1(:)= vectk(:)-vectj(:) ; vect2(:)=-vectj(:)           ; endif !\Psi_jki
-!DEBUG        if (itrans==5) then ; vect1(:)=-vectk(:)          ; vect2(:)= vectj(:)-vectk(:)  ; endif !\Psi_kij
-!DEBUG        if (itrans==6) then ; vect1(:)= vectj(:)-vectk(:) ; vect2(:)=-vectk(:)           ; endif !\Psi_kji
+!DEBUG        if (itrans==1) then ; vect1(:)= vectj(:)          ; vect2(:)= vectk(:)           ; endif !\Phi3_ijk
+!DEBUG        if (itrans==2) then ; vect1(:)= vectk(:)          ; vect2(:)= vectj(:)           ; endif !\Phi3_ikj
+!DEBUG        if (itrans==3) then ; vect1(:)=-vectj(:)          ; vect2(:)= vectk(:)-vectj(:)  ; endif !\Phi3_jik
+!DEBUG        if (itrans==4) then ; vect1(:)= vectk(:)-vectj(:) ; vect2(:)=-vectj(:)           ; endif !\Phi3_jki
+!DEBUG        if (itrans==5) then ; vect1(:)=-vectk(:)          ; vect2(:)= vectj(:)-vectk(:)  ; endif !\Phi3_kij
+!DEBUG        if (itrans==6) then ; vect1(:)= vectj(:)-vectk(:) ; vect2(:)=-vectk(:)           ; endif !\Phi3_kji
 !DEBUG        do ii=1,3
 !DEBUG          if ((abs(distance(iatom,jatom,ii+1)-vect1(ii)).gt.tol8).or.&
 !DEBUG&             (abs(distance(iatom,katom,ii+1)-vect2(ii)).gt.tol8)) then

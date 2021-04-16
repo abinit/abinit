@@ -38,6 +38,20 @@ This angle has to be defined if the bravais lattice is monoclinic. That is to sa
 ),
 
 Variable(
+    abivarname="born_charge@atdep",
+    varset="atdep",
+    vartype="real",
+    topics=['aTDEP_expert'],
+    dimensions=['[[atdep:ntypat]]'],
+    defaultval="[[atdep:ntypat]]*0.d0",
+    mnemonics="BORN effective CHARGE",
+    added_in_version="before_v9",
+    text=r"""
+OPTIONAL : Defines the Born effective charge (for each kind of atom) used to compute the dipole-dipole interaction.
+""",
+),
+
+Variable(
     abivarname="brav@atdep",
     varset="atdep",
     vartype="integer",
@@ -70,6 +84,20 @@ center=3        C-face centered
 ),
 
 Variable(
+    abivarname="bzlength@atdep",
+    varset="atdep",
+    vartype="integer+real",
+    topics=['aTDEP_expert'],
+    dimensions="'[[atdep:bzlength]](1)'+1",
+    defaultval="0",
+    mnemonics="Brillouin Zone LENGTH",
+    added_in_version="before_v9",
+    text=r"""
+OPTIONAL: Defines the length of the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of segments used in the path. The other values define the size of each segment.
+""",
+),
+
+Variable(
     abivarname="bzpath@atdep",
     varset="atdep",
     vartype="integer+letter",
@@ -80,6 +108,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calculation. The first value defines the number of special points used in the path. The other values define the special points of the BZ (only the letters fixed by convention for the present lattice are allowed: L, X, M... and G for $\Gamma$). 
+""",
+),
+
+Variable(
+    abivarname="dielec_constant@atdep",
+    varset="atdep",
+    vartype="real",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="DIELECtric CONSTANT",
+    added_in_version="before_v9",
+    text="""
+OPTIONAL: Defines the dielectric constant used to compute the dipole-dipole interaction.
 """,
 ),
 
@@ -259,6 +301,23 @@ Defines the cutoff radius used when the second order IFCs are computed. This one
 ),
 
 Variable(
+    abivarname="readifc@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="READ the Interatomic Force Constants",
+    added_in_version="before_v9",
+    text="""
+OPTIONAL: Defines the IO strategy used for the IFC. If :
+
+- [[atdep:readifc]] = 1 : Read the IFC coming from an input file.
+- [[atdep:readifc]] = 2 : Write and read the IFC coming from the calculation (for tests).
+""",
+),
+
+Variable(
     abivarname="rprimd@atdep",
     varset="atdep",
     vartype="real",
@@ -302,6 +361,23 @@ Defines the temperature of the system.
 ),
 
 Variable(
+    abivarname="together@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="1",
+    mnemonics="Are the different orders solved TOGETHER?",
+    added_in_version="9.5.1",
+    text="""
+OPTIONAL: Defines if the different [[atdep:order]] are solved together or not :
+
+- simultaneously : [[atdep:together]] = 1.
+- successively : [[atdep:together]] = 0.
+""",
+),
+
+Variable(
     abivarname="typat@atdep",
     varset="atdep",
     vartype="integer",
@@ -340,6 +416,20 @@ Variable(
     added_in_version="before_v9",
     text="""
 OPTIONAL: Defines if the ideal ([[atdep:use_ideal_positions]]=1) or averaged ([[atdep:use_ideal_positions]]=0) positions are used during the calculations. It can affect strongly the phonon spectrum (and other quantities) if the system is close to an instability (soft mode,...).
+""",
+),
+
+Variable(
+    abivarname="use_weights@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="USE the WEIGHTS",
+    added_in_version="9.5.1",
+    text="""
+OPTIONAL: Defines if a specific weight has to be used for each configuration ([[atdep:use_weights]]=1).
 """,
 ),
 

@@ -34,11 +34,15 @@ module m_tdep_readwrite
     integer :: enunit
     integer :: readifc
     integer :: together
+    integer :: alloy
+    integer :: ityp_alloy1
+    integer :: ityp_alloy2
     integer :: nproc(2)
     integer :: bzlength
     integer :: ngqpt1(3)
     integer :: ngqpt2(3)
     integer :: bravais(11)
+    integer :: use_weights
     integer, allocatable :: typat_unitcell(:)
     integer, allocatable :: typat(:)
     integer, allocatable :: lgth_segments(:)
@@ -66,9 +70,11 @@ module m_tdep_readwrite
     double precision, allocatable :: xred(:,:,:)
     double precision, allocatable :: fcart(:,:,:)
     double precision, allocatable :: etot(:)
+    double precision, allocatable :: weights(:)
     character (len=2), allocatable :: special_qpt(:)
     character (len=200) :: output_prefix
     character (len=200) :: input_prefix
+    character (len=200) :: foo
     
   end type Input_Variables_type
 
@@ -159,19 +165,20 @@ contains
   integer :: ncid, ncerr, me,ierr,master
   integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
   integer :: ntypat_id
-  integer :: ii,jj,tmp
-  double precision :: version_value,dtion
+  integer :: ii,jj,tmp,shift,iatom,itypat
+  double precision :: version_value,dtion,amu_average,born_average
   character (len=30):: string,NormalMode,DebugMode,use_ideal_positions
-  character (len=30):: born_charge,dielec_constant,tolmotifinboxmatch,TheEnd,bzpath
-  character (len=30):: order,slice,enunit,readifc,together,nproc,bzlength,ngqpt1,ngqpt2,dosdeltae
+  character (len=30):: born_charge,dielec_constant,tolmotifinboxmatch,TheEnd,bzpath,use_weights
+  character (len=30):: order,slice,enunit,readifc,together,alloy,nproc,bzlength,ngqpt1,ngqpt2,dosdeltae
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
   character(len=500) :: ncfilename,inputfilename
+  integer, allocatable :: typat_unitcell_tmp(:)
   logical :: has_nimage
-  real(dp), allocatable :: znucl(:)
+  real(dp), allocatable :: znucl(:),xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:)
 
 ! Define output files  
   Invar%stdout=8
@@ -191,9 +198,11 @@ contains
   enunit='enunit'
   readifc='readifc'
   together='together'
+  alloy='alloy'
   nproc='nproc'
   ngqpt1='ngqpt1'
   ngqpt2='ngqpt2'
+  use_weights='use_weights'
   tolmotifinboxmatch='tolmotifinboxmatch'
   TheEnd='TheEnd'
 ! Define default values
@@ -203,6 +212,9 @@ contains
   Invar%slice=1
   Invar%enunit=0
   Invar%together=1
+  Invar%alloy=0
+  Invar%ityp_alloy1=0
+  Invar%ityp_alloy2=0
   Invar%nproc(:)=1
   Invar%bzlength=0
   Invar%tolread=1.d-8
@@ -214,14 +226,16 @@ contains
   Invar%loto=.false.
   Invar%netcdf=.false.
   Invar%use_ideal_positions=0
+  Invar%use_weights=0
   version_value=3.d0
 ! In order to have an accuracy better than 1meV  
   Invar%ngqpt1(:)=8
   Invar%ngqpt2(:)=32
+  Invar%foo='foo'
 
   me = xmpi_comm_rank(xmpi_world)
   if (me==0) then
-    open(unit=7,file='foo')
+    open(unit=7,file=trim(Invar%foo))
     open(unit=Invar%stdlog,file='atdep.log')
     write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
     read(*, '(a)',err=10) inputfilename
@@ -241,9 +255,9 @@ contains
     write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
     read (*, '(a)', err=12) Invar%output_prefix
     if ( Invar%output_prefix == "" ) then
-      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file='atdep.out')
+      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file='atdep.abo')
     else
-      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.out')
+      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
     end if  
     write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
 12   continue
@@ -256,8 +270,6 @@ contains
   call xmpi_bcast(ncfilename,master,xmpi_world,ierr)
   call xmpi_bcast(Invar%output_prefix,master,xmpi_world,ierr)
   call xmpi_bcast(Invar%input_prefix,master,xmpi_world,ierr)
-
-  if (me==0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
 
 #if defined HAVE_NETCDF
  !Open netCDF file
@@ -483,7 +495,7 @@ contains
       read(40,*) string,Invar%enunit
       if (Invar%enunit.eq.0) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in meV)'
       if (Invar%enunit.eq.1) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in cm-1)'
-      if (Invar%enunit.eq.2) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in Ha)'
+      if (Invar%enunit.eq.2) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in mHa)'
       if (Invar%enunit.eq.3) write(Invar%stdout,'(1x,a20,1x,i4,1x,a)') string,Invar%enunit,'(Phonon frequencies in THz)'
     else if (string.eq.nproc) then  
       read(40,*) string,Invar%nproc(1),Invar%nproc(2)
@@ -497,6 +509,9 @@ contains
       else  
         write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%readifc
       end if  
+    else if (string.eq.alloy) then  
+      read(40,*) string,Invar%alloy,Invar%ityp_alloy1,Invar%ityp_alloy2
+      write(Invar%stdout,'(1x,a20,1x,3(i4,1x))') string,Invar%alloy,Invar%ityp_alloy1,Invar%ityp_alloy2
     else if (string.eq.together) then  
       read(40,*) string,Invar%together
       write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%together
@@ -518,6 +533,8 @@ contains
       write(Invar%stdout,'(1x,a20,f10.5)') 'tolmotif            ',Invar%tolmotif
       write(Invar%stdout,'(1x,a20,f10.5)') 'tolinbox            ',Invar%tolinbox
       write(Invar%stdout,'(1x,a20,f10.5)') 'tolmatch            ',Invar%tolmatch
+    else if (string.eq.use_weights) then
+      read(40,*) string,Invar%use_weights
     else if (string.eq.TheEnd) then
       exit
     else 
@@ -539,10 +556,96 @@ contains
   if ((Invar%together.ne.1).and.(Invar%together.ne.0)) then
     ABI_ERROR('STOP: The value of input variable TOGETHER is not allowed') 
   end if  
+  if ((Invar%alloy.ne.1).and.(Invar%alloy.ne.0)) then
+    ABI_ERROR('STOP: The value of input variable ALLOY is not allowed') 
+  end if  
+  if (Invar%alloy.ge.1) then
+    if ((Invar%ityp_alloy1.lt.1).or.(Invar%ityp_alloy2.lt.1).or.&
+&       (Invar%ityp_alloy1.gt.Invar%natom_unitcell).or.(Invar%ityp_alloy2.gt.Invar%natom_unitcell)) then     
+      ABI_ERROR('STOP: The value of input variables IALLOY are not allowed') 
+    end if  
+  end if  
+  
 ! Incompatible variables :
   if ((Invar%readifc.eq.1).and.(Invar%together.eq.1).and.(Invar%order.gt.2)) then
     ABI_ERROR('STOP: readifc=1, together=1 and order=3 or 4 are incompatible')
   end if  
+
+! If alloy=1 (VCA), redefine all the data depending on (n)typat(_unitcell) and natom_unitcell
+  if (Invar%alloy.eq.1) then
+    amu_average =(Invar%amu        (Invar%ityp_alloy1)+Invar%amu        (Invar%ityp_alloy2))/2.d0
+    if (Invar%loto) then
+      born_average=(Invar%born_charge(Invar%ityp_alloy1)+Invar%born_charge(Invar%ityp_alloy2))/2.d0
+    end if  
+    shift=0
+    do iatom=1,Invar%natom_unitcell
+      if (Invar%typat_unitcell(iatom).lt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+        Invar%typat_unitcell (iatom-shift)=Invar%typat_unitcell (iatom)
+        Invar%xred_unitcell(:,iatom-shift)=Invar%xred_unitcell(:,iatom)
+      else if (Invar%typat_unitcell(iatom).eq.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+        shift=shift+1      
+      else if (Invar%typat_unitcell(iatom).gt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+        Invar%typat_unitcell (iatom-shift)=Invar%typat_unitcell (iatom) - 1
+        Invar%xred_unitcell(:,iatom-shift)=Invar%xred_unitcell(:,iatom)
+      end if  
+    end do  
+    Invar%natom_unitcell=Invar%natom_unitcell-shift
+    write(6,*) 'natom_unitcell=',Invar%natom_unitcell
+    do iatom=1,Invar%natom
+      if (Invar%typat(iatom).ge.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+        Invar%typat(iatom)=Invar%typat(iatom) - 1
+      end if  
+    end do  
+    do itypat=1,Invar%ntypat
+      if (itypat.eq.min(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+        Invar%amu          (itypat)=amu_average
+        if (Invar%loto) then
+          Invar%born_charge(itypat)=born_average
+        end if  
+      else if (itypat.gt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+        Invar%amu          (itypat-1)=Invar%amu        (itypat)
+        if (Invar%loto) then
+          Invar%born_charge(itypat-1)=Invar%born_charge(itypat)
+        end if  
+      end if  
+    end do  
+    Invar%ntypat=Invar%ntypat-1
+    write(6,*) 'ntypat=',Invar%ntypat
+    ABI_MALLOC(typat_unitcell_tmp,(  Invar%natom_unitcell))
+    ABI_MALLOC(xred_unitcell_tmp ,(3,Invar%natom_unitcell))
+    ABI_MALLOC(amu_tmp           ,(  Invar%ntypat))
+    if (Invar%loto) then
+      ABI_MALLOC(born_charge_tmp ,(  Invar%ntypat))
+    end if
+    typat_unitcell_tmp (:)=Invar%typat_unitcell(1:Invar%natom_unitcell)
+    xred_unitcell_tmp(:,:)=Invar%xred_unitcell(:,1:Invar%natom_unitcell)
+    amu_tmp            (:)=Invar%amu(1:Invar%ntypat)
+    if (Invar%loto) then
+      born_charge_tmp  (:)=Invar%born_charge(1:Invar%ntypat)
+    end if
+    ABI_REMALLOC(Invar%typat_unitcell,(  Invar%natom_unitcell))
+    ABI_REMALLOC(Invar%xred_unitcell ,(3,Invar%natom_unitcell))
+    ABI_REMALLOC(Invar%amu           ,(  Invar%ntypat))
+    if (Invar%loto) then
+      ABI_REMALLOC(Invar%born_charge ,(  Invar%ntypat))
+    end if
+    Invar%typat_unitcell (:)=typat_unitcell_tmp (:)
+    Invar%xred_unitcell(:,:)=xred_unitcell_tmp(:,:)
+    Invar%amu            (:)=amu_tmp            (:)
+    if (Invar%loto) then
+      Invar%born_charge  (:)=born_charge_tmp (:)
+    end if  
+    ABI_FREE(typat_unitcell_tmp)
+    ABI_FREE(xred_unitcell_tmp)
+    ABI_FREE(amu_tmp)
+    if (Invar%loto) then
+      ABI_FREE(born_charge_tmp)
+    end if  
+    write(6,*)'typat_unitcell=',(Invar%typat_unitcell(ii),ii=1,Invar%natom_unitcell)
+    write(6,*)'xred_unitcell =',(Invar%xred_unitcell(:,ii),ii=1,Invar%natom_unitcell)
+    write(6,*)'typat=',(Invar%typat(ii),ii=1,Invar%natom)
+    write(6,*)'amu=',(Invar%amu(ii),ii=1,Invar%ntypat)
+  end if
 
 ! Compute Nstep as a function of the slice
   Invar%nstep_tot=int(float(Invar%nstep_max-Invar%nstep_min)/float(Invar%slice)+1)
@@ -572,8 +675,14 @@ contains
   ABI_MALLOC(Invar%xred,(3,Invar%natom,Invar%my_nstep))  ; Invar%xred(:,:,:)=0.d0
   ABI_MALLOC(Invar%fcart,(3,Invar%natom,Invar%my_nstep)) ; Invar%fcart(:,:,:)=0.d0
   ABI_MALLOC(Invar%etot,(Invar%my_nstep))                ; Invar%etot(:)=0.d0
+  ABI_MALLOC(Invar%weights,(Invar%my_nstep))             ; Invar%weights(:)=0.d0
   this_istep=0
   jstep=0
+  if (Invar%use_weights.eq.1) then
+    open(unit=30,file=trim(Invar%input_prefix)//'weights.dat')
+  else if (Invar%use_weights.eq.0) then
+    Invar%weights=1.0d0/real(Invar%nstep_tot)
+  endif
   if (Invar%netcdf) then
     do istep=Invar%nstep_min,Invar%nstep_max
       if (mod(istep-Invar%nstep_min,Invar%slice).ne.0) then
@@ -617,6 +726,9 @@ contains
         else
           this_istep=this_istep+1
           read(40,*) Invar%etot(this_istep)
+          if (Invar%use_weights.eq.1) then
+             read(30,*) Invar%weights(this_istep)
+          endif
           do iatom=1,Invar%natom
             read(50,*) Invar%xred (1,iatom,this_istep),Invar%xred (2,iatom,this_istep),Invar%xred (3,iatom,this_istep)
             read(60,*) Invar%fcart(1,iatom,this_istep),Invar%fcart(2,iatom,this_istep),Invar%fcart(3,iatom,this_istep)
@@ -629,6 +741,9 @@ contains
     close(60)
     write(Invar%stdout,'(a)') ' The Xred, Fcart and Etot data are extracted from the ASCII files: xred.dat, fcart.dat \& etot.dat'
   end if !netcdf
+  if (Invar%use_weights.eq.1) then
+    close(30)
+  end if  
 
  end subroutine tdep_distrib_data
 
@@ -824,6 +939,7 @@ contains
   ABI_FREE(Invar%xred)
   ABI_FREE(Invar%fcart)
   ABI_FREE(Invar%etot)
+  ABI_FREE(Invar%weights)
   ABI_FREE(Invar%xred_ideal)
   if (Invar%loto) then
     ABI_FREE(Invar%born_charge)

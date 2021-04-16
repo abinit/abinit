@@ -729,8 +729,8 @@ contains
     do iatom=1,Invar%natom
       do ii=1,3
         tmp(4)=tmp(4)+(Forces_MD(ii+3*(iatom-1)+3*Invar%natom*(istep-1))&
-&               -Forces_TDEP(ii+3*(iatom-1)+3*Invar%natom*(istep-1)))**2
-        tmp(5)=tmp(5)+Forces_MD(ii+3*(iatom-1)+3*Invar%natom*(istep-1))**2
+&               -Forces_TDEP(ii+3*(iatom-1)+3*Invar%natom*(istep-1)))**2*Invar%weights(istep)
+        tmp(5)=tmp(5)+Forces_MD(ii+3*(iatom-1)+3*Invar%natom*(istep-1))**2*Invar%weights(istep)
       end do
     end do  
   end do
@@ -739,32 +739,32 @@ contains
   ABI_MALLOC(U_MD,  (Invar%nstep_tot))  ; U_MD(:)  =0.d0
   ABI_MALLOC(Phi_tot,(MPIdata%my_nstep)); Phi_tot(:)=0.d0
   do istep=1,Invar%my_nstep
-    tmp(7) =tmp(7) +Invar%etot(istep)
-    tmp(10)=tmp(10)+Phi1Ui(istep)
-    tmp(6) =tmp(6) +Phi2UiUj(istep)
-    tmp(8) =tmp(8) +Phi3UiUjUk(istep)
-    tmp(11)=tmp(11)+Phi4UiUjUkUl(istep)
+    tmp(7) =tmp(7) +Invar%etot(istep)*Invar%weights(istep)
+    tmp(10)=tmp(10)+Phi1Ui(istep)*Invar%weights(istep)
+    tmp(6) =tmp(6) +Phi2UiUj(istep)*Invar%weights(istep)
+    tmp(8) =tmp(8) +Phi3UiUjUk(istep)*Invar%weights(istep)
+    tmp(11)=tmp(11)+Phi4UiUjUkUl(istep)*Invar%weights(istep)
   end do  
   call xmpi_sum(tmp,MPIdata%comm_step,ierr)
   tmp(1) = tmp(7)-tmp(10)-tmp(6)-tmp(8)-tmp(11)
-  Phi_tot(:)=tmp(1)/real(Invar%nstep_tot)+Phi1Ui(:)+Phi2UiUj(:)+Phi3UiUjUk(:)+Phi4UiUjUkUl(:)
+  Phi_tot(:)=tmp(1)+Phi1Ui(:)+Phi2UiUj(:)+Phi3UiUjUk(:)+Phi4UiUjUkUl(:)
   call xmpi_gatherv(Phi_tot,Invar%my_nstep,U_TDEP,MPIdata%nstep_all,MPIdata%shft_step,&
 &                   MPIdata%master,MPIdata%comm_step,ierr)
   call xmpi_gatherv(Invar%etot,Invar%my_nstep,U_MD,MPIdata%nstep_all,MPIdata%shft_step,&
 &                   MPIdata%master,MPIdata%comm_step,ierr)
   do istep=1,Invar%nstep_tot
-    tmp(2) =tmp(2) + (U_MD(istep)-U_TDEP(istep))
-    tmp(9) =tmp(9) + (U_MD(istep)-U_TDEP(istep))**2
+    tmp(2) =tmp(2) + (U_MD(istep)-U_TDEP(istep)) * Invar%weights(istep)
+    tmp(9) =tmp(9) + (U_MD(istep)-U_TDEP(istep))**2 * Invar%weights(istep)
   end do
-  U0       =tmp(1) /real(Invar%nstep_tot*Invar%natom)
-  UMD      =tmp(7) /real(Invar%nstep_tot*Invar%natom)
-  U_1      =tmp(10)/real(Invar%nstep_tot*Invar%natom)
-  U_2      =tmp(6) /real(Invar%nstep_tot*Invar%natom)
-  U_3      =tmp(8) /real(Invar%nstep_tot*Invar%natom)
-  U_4      =tmp(11)/real(Invar%nstep_tot*Invar%natom)
-  Delta_U  =tmp(2) /real(Invar%nstep_tot*Invar%natom)
-  Delta_U2 =tmp(9) /real(Invar%nstep_tot*Invar%natom)
-  Delta_F2 =tmp(4) /real(Invar%nstep_tot*Invar%natom*3)
+  U0       =tmp(1) /real(Invar%natom)
+  UMD      =tmp(7) /real(Invar%natom)
+  U_1      =tmp(10)/real(Invar%natom)
+  U_2      =tmp(6) /real(Invar%natom)
+  U_3      =tmp(8) /real(Invar%natom)
+  U_4      =tmp(11)/real(Invar%natom)
+  Delta_U  =tmp(2) /real(Invar%natom)
+  Delta_U2 =tmp(9) /real(Invar%natom)
+  Delta_F2 =tmp(4) /real(Invar%natom*3)
   if (tmp(5).eq.0.d0) then
     sigma    =0.d0
   else  
@@ -781,13 +781,13 @@ contains
 &     Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
   endif 
   ABI_FREE(tmp)
-  write(Invar%stdout,'(a)') ' TODO : write all the data in etotMDvsTDEP.dat & fcartMDvsTDEP.dat '
   write(Invar%stdout,'(a,1x,f12.5)') ' NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=',&
 &   3.d0/2.d0*kb_HaK*Ha_eV*Invar%temperature
 
 ! Write : i) (U_TDEP vs U_MD) in etotMDvsTDEP.dat
 !        ii) (Forces_TDEP vs Forces_MD) in fcartMDvsTDEP.dat
   write(Invar%stdout,'(a)') ' '
+  write(Invar%stdout,'(a)') ' See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files'
   if (MPIdata%iam_master) then
     open(unit=32,file=trim(Invar%output_prefix)//'etotMDvsTDEP.dat')
     open(unit=33,file=trim(Invar%output_prefix)//'fcartMDvsTDEP.dat')
@@ -924,12 +924,12 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       vect_trial1(:)=zero
       vect_trial2(:)=zero
       vect_trial3(:)=zero
-      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; endif !\Psi_ijk
-      if (inv==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; endif !\Psi_ikj
-      if (inv==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; endif !\Psi_jik
-      if (inv==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; endif !\Psi_jki
-      if (inv==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; endif !\Psi_kij
-      if (inv==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; endif !\Psi_kji
+      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; endif !\Phi3_ijk
+      if (inv==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; endif !\Phi3_ikj
+      if (inv==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; endif !\Phi3_jik
+      if (inv==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; endif !\Phi3_jki
+      if (inv==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; endif !\Phi3_kij
+      if (inv==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; endif !\Phi3_kji
       do ii=1,3
         do jj=1,3
           vect_trial1(ii)=vect_trial1(ii)+Sym%S_ref(ii,jj,isym,1)*distance(watom,xatom,jj+1)
@@ -966,33 +966,33 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       vect_trial4(:)=zero
       vect_trial5(:)=zero
       vect_trial6(:)=zero
-      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; zatom=latom   ; endif !\Psi_ijkl
-      if (inv==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; zatom=latom   ; endif !\Psi_ikjl
-      if (inv==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; zatom=latom   ; endif !\Psi_jikl
-      if (inv==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; zatom=latom   ; endif !\Psi_jkil
-      if (inv==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; zatom=latom   ; endif !\Psi_kijl
-      if (inv==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; zatom=latom   ; endif !\Psi_kjil
+      if (inv==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; zatom=latom   ; endif !\Phi4_ijkl
+      if (inv==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; zatom=latom   ; endif !\Phi4_ikjl
+      if (inv==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; zatom=latom   ; endif !\Phi4_jikl
+      if (inv==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; zatom=latom   ; endif !\Phi4_jkil
+      if (inv==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; zatom=latom   ; endif !\Phi4_kijl
+      if (inv==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; zatom=latom   ; endif !\Phi4_kjil
 
-      if (inv==7 ) then ; watom=iatcell ; xatom=jatom   ; yatom=latom   ; zatom=katom   ; endif !\Psi_ijlk
-      if (inv==8 ) then ; watom=iatcell ; xatom=katom   ; yatom=latom   ; zatom=jatom   ; endif !\Psi_iklj
-      if (inv==9 ) then ; watom=jatom   ; xatom=iatcell ; yatom=latom   ; zatom=katom   ; endif !\Psi_jilk
-      if (inv==10) then ; watom=jatom   ; xatom=katom   ; yatom=latom   ; zatom=iatcell ; endif !\Psi_jkli
-      if (inv==11) then ; watom=katom   ; xatom=iatcell ; yatom=latom   ; zatom=jatom   ; endif !\Psi_kilj
-      if (inv==12) then ; watom=katom   ; xatom=jatom   ; yatom=latom   ; zatom=iatcell ; endif !\Psi_kjli
+      if (inv==7 ) then ; watom=iatcell ; xatom=jatom   ; yatom=latom   ; zatom=katom   ; endif !\Phi4_ijlk
+      if (inv==8 ) then ; watom=iatcell ; xatom=katom   ; yatom=latom   ; zatom=jatom   ; endif !\Phi4_iklj
+      if (inv==9 ) then ; watom=jatom   ; xatom=iatcell ; yatom=latom   ; zatom=katom   ; endif !\Phi4_jilk
+      if (inv==10) then ; watom=jatom   ; xatom=katom   ; yatom=latom   ; zatom=iatcell ; endif !\Phi4_jkli
+      if (inv==11) then ; watom=katom   ; xatom=iatcell ; yatom=latom   ; zatom=jatom   ; endif !\Phi4_kilj
+      if (inv==12) then ; watom=katom   ; xatom=jatom   ; yatom=latom   ; zatom=iatcell ; endif !\Phi4_kjli
 
-      if (inv==13) then ; watom=iatcell ; xatom=latom   ; yatom=jatom   ; zatom=katom   ; endif !\Psi_iljk
-      if (inv==14) then ; watom=iatcell ; xatom=latom   ; yatom=katom   ; zatom=jatom   ; endif !\Psi_ilkj
-      if (inv==15) then ; watom=jatom   ; xatom=latom   ; yatom=iatcell ; zatom=katom   ; endif !\Psi_jlik
-      if (inv==16) then ; watom=jatom   ; xatom=latom   ; yatom=katom   ; zatom=iatcell ; endif !\Psi_jlki
-      if (inv==17) then ; watom=katom   ; xatom=latom   ; yatom=iatcell ; zatom=jatom   ; endif !\Psi_klij
-      if (inv==18) then ; watom=katom   ; xatom=latom   ; yatom=jatom   ; zatom=iatcell ; endif !\Psi_klji
+      if (inv==13) then ; watom=iatcell ; xatom=latom   ; yatom=jatom   ; zatom=katom   ; endif !\Phi4_iljk
+      if (inv==14) then ; watom=iatcell ; xatom=latom   ; yatom=katom   ; zatom=jatom   ; endif !\Phi4_ilkj
+      if (inv==15) then ; watom=jatom   ; xatom=latom   ; yatom=iatcell ; zatom=katom   ; endif !\Phi4_jlik
+      if (inv==16) then ; watom=jatom   ; xatom=latom   ; yatom=katom   ; zatom=iatcell ; endif !\Phi4_jlki
+      if (inv==17) then ; watom=katom   ; xatom=latom   ; yatom=iatcell ; zatom=jatom   ; endif !\Phi4_klij
+      if (inv==18) then ; watom=katom   ; xatom=latom   ; yatom=jatom   ; zatom=iatcell ; endif !\Phi4_klji
 
-      if (inv==19) then ; watom=latom   ; xatom=iatcell ; yatom=jatom   ; zatom=katom   ; endif !\Psi_lijk
-      if (inv==20) then ; watom=latom   ; xatom=iatcell ; yatom=katom   ; zatom=jatom   ; endif !\Psi_likj
-      if (inv==21) then ; watom=latom   ; xatom=jatom   ; yatom=iatcell ; zatom=katom   ; endif !\Psi_ljik
-      if (inv==22) then ; watom=latom   ; xatom=jatom   ; yatom=katom   ; zatom=iatcell ; endif !\Psi_ljki
-      if (inv==23) then ; watom=latom   ; xatom=katom   ; yatom=iatcell ; zatom=jatom   ; endif !\Psi_lkij
-      if (inv==24) then ; watom=latom   ; xatom=katom   ; yatom=jatom   ; zatom=iatcell ; endif !\Psi_lkji
+      if (inv==19) then ; watom=latom   ; xatom=iatcell ; yatom=jatom   ; zatom=katom   ; endif !\Phi4_lijk
+      if (inv==20) then ; watom=latom   ; xatom=iatcell ; yatom=katom   ; zatom=jatom   ; endif !\Phi4_likj
+      if (inv==21) then ; watom=latom   ; xatom=jatom   ; yatom=iatcell ; zatom=katom   ; endif !\Phi4_ljik
+      if (inv==22) then ; watom=latom   ; xatom=jatom   ; yatom=katom   ; zatom=iatcell ; endif !\Phi4_ljki
+      if (inv==23) then ; watom=latom   ; xatom=katom   ; yatom=iatcell ; zatom=jatom   ; endif !\Phi4_lkij
+      if (inv==24) then ; watom=latom   ; xatom=katom   ; yatom=jatom   ; zatom=iatcell ; endif !\Phi4_lkji
 
       do ii=1,3
         do jj=1,3
@@ -1019,32 +1019,32 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 &         (Sym%indsym(4,isym,zatom)==latcell)) then
         if (MPIdata%iam_master) then 
           if (inv==1 ) write(16,'(a,1x,i3)')'===========The bond is kept invariant for isym=',isym
-          if (inv==2 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,j,l) for isym=',isym !\Psi_ikjl
-          if (inv==3 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,k,l) for isym=',isym !\Psi_jikl
-          if (inv==4 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,i,l) for isym=',isym !\Psi_jkil
-          if (inv==5 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,j,l) for isym=',isym !\Psi_kijl
-          if (inv==6 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,i,l) for isym=',isym !\Psi_kjil
+          if (inv==2 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,j,l) for isym=',isym !\Phi4_ikjl
+          if (inv==3 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,k,l) for isym=',isym !\Phi4_jikl
+          if (inv==4 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,i,l) for isym=',isym !\Phi4_jkil
+          if (inv==5 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,j,l) for isym=',isym !\Phi4_kijl
+          if (inv==6 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,i,l) for isym=',isym !\Phi4_kjil
   
-          if (inv==7 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,j,l,k) for isym=',isym !\Psi_ijlk
-          if (inv==8 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,l,j) for isym=',isym !\Psi_iklj
-          if (inv==9 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,l,k) for isym=',isym !\Psi_jilk
-          if (inv==10) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,l,i) for isym=',isym !\Psi_jkli
-          if (inv==11) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,l,j) for isym=',isym !\Psi_kilj
-          if (inv==12) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,l,i) for isym=',isym !\Psi_kjli
+          if (inv==7 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,j,l,k) for isym=',isym !\Phi4_ijlk
+          if (inv==8 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,k,l,j) for isym=',isym !\Phi4_iklj
+          if (inv==9 ) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,i,l,k) for isym=',isym !\Phi4_jilk
+          if (inv==10) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,k,l,i) for isym=',isym !\Phi4_jkli
+          if (inv==11) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,i,l,j) for isym=',isym !\Phi4_kilj
+          if (inv==12) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,j,l,i) for isym=',isym !\Phi4_kjli
 
-          if (inv==13) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,l,j,k) for isym=',isym !\Psi_iljk
-          if (inv==14) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,l,k,j) for isym=',isym !\Psi_ilkj
-          if (inv==15) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,l,i,k) for isym=',isym !\Psi_jlik
-          if (inv==16) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,l,k,i) for isym=',isym !\Psi_jlki
-          if (inv==17) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,l,i,j) for isym=',isym !\Psi_klij
-          if (inv==18) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,l,j,i) for isym=',isym !\Psi_klji
+          if (inv==13) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,l,j,k) for isym=',isym !\Phi4_iljk
+          if (inv==14) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (i,l,k,j) for isym=',isym !\Phi4_ilkj
+          if (inv==15) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,l,i,k) for isym=',isym !\Phi4_jlik
+          if (inv==16) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (j,l,k,i) for isym=',isym !\Phi4_jlki
+          if (inv==17) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,l,i,j) for isym=',isym !\Phi4_klij
+          if (inv==18) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (k,l,j,i) for isym=',isym !\Phi4_klji
 
-          if (inv==19) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,i,j,k) for isym=',isym !\Psi_lijk
-          if (inv==20) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,i,k,j) for isym=',isym !\Psi_likj
-          if (inv==21) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,i,k) for isym=',isym !\Psi_ljik
-          if (inv==22) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,k,i) for isym=',isym !\Psi_ljki
-          if (inv==23) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,i,j) for isym=',isym !\Psi_lkij
-          if (inv==24) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,j,i) for isym=',isym !\Psi_lkji
+          if (inv==19) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,i,j,k) for isym=',isym !\Phi4_lijk
+          if (inv==20) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,i,k,j) for isym=',isym !\Phi4_likj
+          if (inv==21) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,i,k) for isym=',isym !\Phi4_ljik
+          if (inv==22) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,j,k,i) for isym=',isym !\Phi4_ljki
+          if (inv==23) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,i,j) for isym=',isym !\Phi4_lkij
+          if (inv==24) write(16,'(a,1x,i3)')'===========The bond is reversed with (i,j,k,l) --> (l,k,j,i) for isym=',isym !\Phi4_lkji
         end if  
       else
         cycle
@@ -1226,33 +1226,33 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
             do ll=1,3
               lambda=eigenvalues(ii)*eigenvalues(jj)*eigenvalues(kk)*eigenvalues(ll)
               if ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6)) then
-                if ((inv==1 )                                       .or.& !\Psi_ijkl
-&                 ((inv==2 ).and.(jj==kk))                          .or.& !\Psi_ikjl
-&                 ((inv==3 ).and.(ii==jj))                          .or.& !\Psi_jikl
-&                 ((inv==4 ).and.(ii==jj).and.(jj==kk))             .or.& !\Psi_jkil
-&                 ((inv==5 ).and.(ii==jj).and.(jj==kk))             .or.& !\Psi_kijl
-&                 ((inv==6 ).and.(ii==kk))                          .or.& !\Psi_kjil
+                if ((inv==1 )                                       .or.& !\Phi4_ijkl
+&                 ((inv==2 ).and.(jj==kk))                          .or.& !\Phi4_ikjl
+&                 ((inv==3 ).and.(ii==jj))                          .or.& !\Phi4_jikl
+&                 ((inv==4 ).and.(ii==jj).and.(jj==kk))             .or.& !\Phi4_jkil
+&                 ((inv==5 ).and.(ii==jj).and.(jj==kk))             .or.& !\Phi4_kijl
+&                 ((inv==6 ).and.(ii==kk))                          .or.& !\Phi4_kjil
 
-&                 ((inv==7 ).and.(kk==ll))                          .or.& !\Psi_ijlk
-&                 ((inv==8 ).and.(jj==kk).and.(kk==ll))             .or.& !\Psi_iklj
-&                 ((inv==9 ).and.(ii==jj).and.(kk==ll))             .or.& !\Psi_jilk
-&                 ((inv==10).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Psi_jkli
-&                 ((inv==11).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Psi_kilj
-&                 ((inv==12).and.(ii==kk).and.(kk==ll))             .or.& !\Psi_kjli
+&                 ((inv==7 ).and.(kk==ll))                          .or.& !\Phi4_ijlk
+&                 ((inv==8 ).and.(jj==kk).and.(kk==ll))             .or.& !\Phi4_iklj
+&                 ((inv==9 ).and.(ii==jj).and.(kk==ll))             .or.& !\Phi4_jilk
+&                 ((inv==10).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_jkli
+&                 ((inv==11).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_kilj
+&                 ((inv==12).and.(ii==kk).and.(kk==ll))             .or.& !\Phi4_kjli
 
-&                 ((inv==13).and.(jj==kk).and.(kk==ll))             .or.& !\Psi_iljk
-&                 ((inv==14).and.(jj==ll))                          .or.& !\Psi_ilkj
-&                 ((inv==15).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Psi_jlik
-&                 ((inv==16).and.(ii==jj).and.(jj==ll))             .or.& !\Psi_jlki
-&                 ((inv==17).and.(ii==kk).and.(jj==ll))             .or.& !\Psi_klij
-&                 ((inv==18).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Psi_klji
+&                 ((inv==13).and.(jj==kk).and.(kk==ll))             .or.& !\Phi4_iljk
+&                 ((inv==14).and.(jj==ll))                          .or.& !\Phi4_ilkj
+&                 ((inv==15).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_jlik
+&                 ((inv==16).and.(ii==jj).and.(jj==ll))             .or.& !\Phi4_jlki
+&                 ((inv==17).and.(ii==kk).and.(jj==ll))             .or.& !\Phi4_klij
+&                 ((inv==18).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_klji
 
-&                 ((inv==19).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Psi_lijk
-&                 ((inv==20).and.(ii==jj).and.(jj==ll))             .or.& !\Psi_likj
-&                 ((inv==21).and.(ii==kk).and.(kk==ll))             .or.& !\Psi_ljik
-&                 ((inv==22).and.(ii==ll))                          .or.& !\Psi_ljki
-&                 ((inv==23).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Psi_lkij
-&                 ((inv==24).and.(ii==ll).and.(jj==kk))) cycle            !\Psi_lkji
+&                 ((inv==19).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_lijk
+&                 ((inv==20).and.(ii==jj).and.(jj==ll))             .or.& !\Phi4_likj
+&                 ((inv==21).and.(ii==kk).and.(kk==ll))             .or.& !\Phi4_ljik
+&                 ((inv==22).and.(ii==ll))                          .or.& !\Phi4_ljki
+&                 ((inv==23).and.(ii==jj).and.(jj==kk).and.(kk==ll)).or.& !\Phi4_lkij
+&                 ((inv==24).and.(ii==ll).and.(jj==kk))) cycle            !\Phi4_lkji
               end if                
               unchanged(isyminv)=.true.
               iconst(isyminv)=iconst(isyminv)+1
@@ -1673,7 +1673,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     write(16,'(a,1x,i7,1x,a)') '  ======= Finally, there are ',ncount,' independent vectors'
   end if  
   if (ncount.gt.8.and.order==2) then
-    ABI_ERROR(' Order 2 : There are too many independant vectors')
+    ABI_ERROR(' Order 2 : There are too many independent vectors')
   end if
   if (ncount.gt.27.and.order==3) then
     ABI_ERROR(' Order 3 : There are too many independent vectors')
