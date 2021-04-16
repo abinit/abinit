@@ -642,15 +642,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (mband_mem == 0) mband_mem = mband_upper
    dtsets(idtset)%mband_mem = mband_mem
 
-do isppol=1,nsppol
-  nspink=0
-  do iikpt=1,nkpt
-    do iband=1,dtsets(idtset)%nband(iikpt+(isppol-1)*nkpt)
-       print *, iikpt,iband,isppol, mpi_enregs(idtset)%proc_distrb(iikpt,iband,isppol)
-    end do ! iband
-  end do ! iikpt
-end do ! isppol
-
 !  Take care of mkmems. Use the generic name -mkmem- for mkmem as well as mkqmem
 !  and mk1mem.
    nm_mkmem(1)='mkmem '
