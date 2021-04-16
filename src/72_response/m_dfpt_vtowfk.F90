@@ -355,12 +355,16 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 unit_me = 6
 !  Get ground-state wavefunctions
    ptr = 1+(iband_me-1)*npw_k*nspinor+icg
+#ifdef DEV_MJV
 print *, 'vtowfk icg, iband_me, ptr ', icg, iband_me, ptr
+#endif
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)
 
 !  Get PAW ground state projected WF (cprj)
    if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.ipert/=natom+10.and.ipert/=natom+11) then
+#ifdef DEV_MJV
 print *, 'calling pawcprj_get 370'
+#endif
      idir0 = idir
      if(ipert==natom+3.or.ipert==natom+4) idir0 =1
 ! PAW distributes cprj by band and k

@@ -2201,7 +2201,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  integer :: ii,ikpt,iproc_min,iproc_max,irank,isppol
  integer :: me,nband_k,nproc,nb_per_proc,nrank,nstates,spacecomm
  integer :: maxproc_bandpool, mband
- integer :: mpierr, tmpcomm, colorcomm
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
@@ -2213,6 +2212,8 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  mpi_enreg%nproc_band=1
 
  mband = maxval(nband)
+
+ ABI_UNUSED(mkmem)
 
 !  Comm_kpt is supposed to treat spins, k-points and bands
 !MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
@@ -2237,7 +2238,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 
    nrank=0
-   colorcomm=xmpi_undefined
 
    if (nb_per_proc<mband) then ! .and. mkmem > 0) then
      do isppol=1,nsppol
@@ -2248,7 +2248,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            if ((me>=iproc_min).and.(me<=iproc_max)) then
-             colorcomm = 1
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
@@ -2271,8 +2270,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 !     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
 ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
-     !call xmpi_comm_split(spacecomm,colorcomm,me,tmpcomm,mpierr)
-     !mpi_enreg%comm_band=xmpi_subcomm(tmpcomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
