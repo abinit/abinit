@@ -387,7 +387,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  Copy input values
    mkmems(1) = dtset%mkmem
-print *, 'driver dtset%mkmem ', dtset%mkmem
    mkmems(2) = dtset%mkqmem
    mkmems(3) = dtset%mk1mem
 
@@ -896,10 +895,7 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
    ABI_FREE(vel_cell_img)
    ABI_FREE(xred_img)
 
-print *, 'size ', size(dtset%ngfft)
-print *, 'driver 821 ', dtset%ngfft
    if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_cleanup()
-print *, 'driver 823 '
 
    if (dtset%ixc<0) then
      call libxc_functionals_end()

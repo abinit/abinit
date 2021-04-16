@@ -597,9 +597,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  ENDTODO
          mpi_enregs(idtset)%paralbd=1
 !        nproc=mpi_enregs(idtset)%nproc_cell*mpi_enregs(idtset)%nproc_pert
-print *, 'respfn call to distrb2 mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd'
-print *,                         mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd
-print *,  'bandpp ', dtsets(idtset)%bandpp
          call distrb2(mband_upper,mband_mem,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
          do isppol=1,nsppol
            nspink=0
@@ -645,8 +642,6 @@ print *,  'bandpp ', dtsets(idtset)%bandpp
    if (mband_mem == 0) mband_mem = mband_upper
    dtsets(idtset)%mband_mem = mband_mem
 
-print *, ' iikpt,iband,isppol   proc_distrb '
-print *, ' nkpt_me ', nkpt_me, ' mband_mem ', mband_mem
 do isppol=1,nsppol
   nspink=0
   do iikpt=1,nkpt

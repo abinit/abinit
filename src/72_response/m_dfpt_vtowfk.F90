@@ -592,10 +592,6 @@ unit_me = 6
 
 !  PAW: write first-order projected wavefunctions
    if (psps%usepaw==1.and.gs_hamkq%usecprj==1) then
-!TODO MJV: PAW distribute cprj and cprj1 over bands? mband_mem
-print *, 'ikpt iband, isppol, mk1mem ', ikpt, iband, isppol, mk1mem, mband
-print *, 'shape(cwaveprj) ', shape(cwaveprj)
-print *, 'shape(cprj1) ', shape(cprj1), '   ', mk1mem, gs_hamkq%dimcprj
      call pawcprj_put(gs_hamkq%atindx,cwaveprj,cprj1,natom,iband_me,ibg1,ikpt,iorder_cprj1,isppol,&
 &     mband_mem,mk1mem,natom,1,nband_me,gs_hamkq%dimcprj,nspinor,nsppol,dtfil%unpaw1)
 !&     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,to_be_gathered=.true.)
