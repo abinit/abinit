@@ -818,14 +818,12 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
  else
    ABI_MALLOC(nhat,(0,0))
  end if
+
 #ifdef DEV_MJV
 print *, ' rhog after nhat ', rhog(:,1:10)
 print *, ' rhor after nhat ', rhor(1:10,:)
 if(psps%usepaw==1)then
 print *, ' pawrhoij ', allocated (pawrhoij), ' qphas ', pawrhoij(1)%qphase, ' cplex ', pawrhoij(1)%cplex_rhoij 
-!call pawrhoij_print_rhoij(pawrhoij(1)%rhoijp,pawrhoij(1)%cplex_rhoij,&
-!  pawrhoij(1)%qphase,1,natom,&
-!  unit=std_out,opt_prtvol=dtset%pawprtvol)
 endif
 #endif
 

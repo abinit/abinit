@@ -1318,7 +1318,6 @@ print *, 'mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol    +  nband_r
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
-print *, 'eigenq ', eigenq 
    else
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&

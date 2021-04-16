@@ -554,6 +554,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  do kpert1=1,mpert1
    ipert1=jpert1(kpert1)
 
+#ifdef DEV_MJV
 print *, 'kpert1, ipert1, ipert ', kpert1, ipert1, ipert
 
 write (999,*) '# new kpert1 ', kpert1
@@ -562,6 +563,7 @@ write (1001,*) '# new kpert1 ', kpert1
 write (1002,*) '# new kpert1 ', kpert1
 write (1003,*) '# new kpert1 ', kpert1
 write (1004,*) '# new kpert1 ', kpert1
+#endif
 !  Flag for use of DDK file
    need_ddk_file=(has_ddk_file.and.(ipert1==dtset%natom+1.or.ipert1==dtset%natom+2))
 

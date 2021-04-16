@@ -387,7 +387,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  Copy input values
    mkmems(1) = dtset%mkmem
+#ifdef DEV_MJV
 print *, 'driver dtset%mkmem ', dtset%mkmem
+#endif
    mkmems(2) = dtset%mkqmem
    mkmems(3) = dtset%mk1mem
 
@@ -896,10 +898,14 @@ print *, 'driver dtset%mkmem ', dtset%mkmem
    ABI_FREE(vel_cell_img)
    ABI_FREE(xred_img)
 
+#ifdef DEV_MJV
 print *, 'size ', size(dtset%ngfft)
 print *, 'driver 821 ', dtset%ngfft
+#endif
    if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_cleanup()
+#ifdef DEV_MJV
 print *, 'driver 823 '
+#endif
 
    if (dtset%ixc<0) then
      call libxc_functionals_end()
