@@ -1144,7 +1144,7 @@ print *, 'shape cg 1 ', shape(cg)
      ncpgr=3 ! Valid for ipert<=natom (phonons), ipert=natom+2 (elec. field)
              ! or for ipert==natom+10,11
      if (ipert==dtset%natom+1) then
-       if (dtset%orbmag.GT.10) then
+       if (dtset%orbmag.NE.0) then
          ncpgr=3
        else
          ncpgr=1
@@ -1165,7 +1165,7 @@ print *, 'mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol    +  nband_r
        if (ipert<=dtset%natom) then
          choice=2; iorder_cprj=0; idir0=0
        else if (ipert==dtset%natom+1) then
-         if (dtset%orbmag.GT.10) then
+         if (dtset%orbmag.NE.0) then
            choice=5; iorder_cprj=0; idir0=0
          else
            choice=5; iorder_cprj=0; idir0=idir
@@ -1506,7 +1506,7 @@ print *, 'q=0 cprjq copied over'
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
-   if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
      ABI_MALLOC(cg1_orbmag,(2,mcg1,3))
      has_cg1_orbmag(:) = .FALSE.
    end if
@@ -2127,7 +2127,7 @@ print *, 'q=0 cprjq copied over'
 
    ! store DDK wavefunctions in memory for later call to orbmag-ddk
    ! only relevant for DDK pert with orbmag calculation
-   if( (dtset%orbmag .GE. 11) .AND. (ipert .EQ. dtset%natom+1) ) then
+   if( (dtset%orbmag .NE. 0) .AND. (ipert .EQ. dtset%natom+1) ) then
      cg1_orbmag(:,:,idir) = cg1(:,:)
      has_cg1_orbmag(idir) = .TRUE.
    end if
@@ -2219,7 +2219,7 @@ print *, 'q=0 cprjq copied over'
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .GE. 11) .AND. (dtset%rfddk .EQ. 1) .AND. &
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
      & (COUNT(has_cg1_orbmag) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
@@ -2227,7 +2227,7 @@ print *, 'q=0 cprjq copied over'
      end if
      vtrial_local = vtrial
      call orbmag_ddk(atindx,cg,cg1_orbmag,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
-       & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawtab,psps,rprimd,&
+       & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
        & vtrial_local,xred,ylm,ylmgr)
 
      if( ALLOCATED(vtrial_local) ) then
