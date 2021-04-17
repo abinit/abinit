@@ -696,7 +696,7 @@ contains
         Invar%etot(this_istep)     =Hist%etot     (istep)
       end if
     end do !istep  
-    write(Invar%stdout,'(a)') ' The Xred, Fcart, Etot and Stress data are extracted from the NetCDF file: HIST.nc '
+    write(Invar%stdout,'(a)') ' The positions, forces and energies are extracted from the NetCDF file: HIST.nc'
   else
     open(unit=60,file=trim(Invar%input_prefix)//'fcart.dat')
     open(unit=50,file=trim(Invar%input_prefix)//'xred.dat')
@@ -748,7 +748,8 @@ contains
     close(40)
     close(50)
     close(60)
-    write(Invar%stdout,'(a)') ' The Xred, Fcart and Etot data are extracted from the ASCII files: xred.dat, fcart.dat \& etot.dat'
+    write(Invar%stdout,'(2a)') ' The positions, forces and energies are extracted from the ASCII files:',&
+&                              ' xred.dat, fcart.dat & etot.dat'
   end if !netcdf
   if (Invar%use_weights.eq.1) then
     close(30)
@@ -869,13 +870,12 @@ contains
   ABI_MALLOC(MPIdata%nstep_all,(MPIdata%nproc_step)); MPIdata%nstep_all(:)=zero
   call xmpi_allgather(MPIdata%my_nstep,MPIdata%nstep_all,MPIdata%comm_step,ierr)
   write(Invar%stdout,'(a)') ' '
-  write(Invar%stdout,'(a)') ' WARNING: ALL the quantities are now computed :'
-  write(Invar%stdout,'(a,1x,i4)') '                                      from nstep_min=',Invar%nstep_min
-  write(Invar%stdout,'(a,1x,i4)') '                                        to nstep_max=',Invar%nstep_max
+  write(Invar%stdout,'(a,1x,i4)') ' All quantities are computed from nstep_min=',Invar%nstep_min
+  write(Invar%stdout,'(a,1x,i4)') '                               to nstep_max=',Invar%nstep_max
   if (Invar%slice.ne.1) then
     write(Invar%stdout,'(a,1x,i4)') '                                    by using a slice=',Invar%slice
   end if  
-  write(Invar%stdout,'(a,1x,i4)') '          So, the real number of time steps is nstep=',Invar%nstep_tot
+  write(Invar%stdout,'(a,1x,i4)') ' So, the real number of time steps is nstep=',Invar%nstep_tot
   if (MPIdata%nproc_step.gt.1) then
     write(Invar%stdout,'(a,1000(1x,i5))') '-Distribution of number of steps wrt the number of processors=',MPIdata%nstep_all(:)
   end if
