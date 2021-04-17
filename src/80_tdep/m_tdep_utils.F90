@@ -675,7 +675,7 @@ contains
   double precision :: Delta_F2,Delta_U,Delta_U2
   double precision :: sigma,U_1,U_2,U_3,U_4,UMD
   double precision, allocatable :: tmp(:),Phi_tot(:)
-  double precision, allocatable :: U_MD(:),U_TDEP(:)
+  double precision, allocatable :: U_MD(:),U_TDEP(:),weights_tot(:)
   integer :: ierr
 
   ierr = 0
@@ -735,16 +735,17 @@ contains
     end do  
   end do
 ! Compute energies
-  ABI_MALLOC(U_TDEP,(Invar%nstep_tot))  ; U_TDEP(:)=0.d0
-  ABI_MALLOC(U_MD,  (Invar%nstep_tot))  ; U_MD(:)  =0.d0
-  ABI_MALLOC(Phi_tot,(MPIdata%my_nstep)); Phi_tot(:)=0.d0
+  ABI_MALLOC(U_TDEP,     (Invar%nstep_tot)) ; U_TDEP(:)=0.d0
+  ABI_MALLOC(U_MD,       (Invar%nstep_tot)) ; U_MD(:)  =0.d0
+  ABI_MALLOC(weights_tot,(Invar%nstep_tot)) ; weights_tot(:)=0.d0
+  ABI_MALLOC(Phi_tot,    (MPIdata%my_nstep)); Phi_tot(:)=0.d0
   do istep=1,Invar%my_nstep
     tmp(7) =tmp(7) +Invar%etot(istep)*Invar%weights(istep)
     tmp(10)=tmp(10)+Phi1Ui(istep)*Invar%weights(istep)
     tmp(6) =tmp(6) +Phi2UiUj(istep)*Invar%weights(istep)
     tmp(8) =tmp(8) +Phi3UiUjUk(istep)*Invar%weights(istep)
     tmp(11)=tmp(11)+Phi4UiUjUkUl(istep)*Invar%weights(istep)
-  end do  
+  end do
   call xmpi_sum(tmp,MPIdata%comm_step,ierr)
   tmp(1) = tmp(7)-tmp(10)-tmp(6)-tmp(8)-tmp(11)
   Phi_tot(:)=tmp(1)+Phi1Ui(:)+Phi2UiUj(:)+Phi3UiUjUk(:)+Phi4UiUjUkUl(:)
@@ -752,9 +753,11 @@ contains
 &                   MPIdata%master,MPIdata%comm_step,ierr)
   call xmpi_gatherv(Invar%etot,Invar%my_nstep,U_MD,MPIdata%nstep_all,MPIdata%shft_step,&
 &                   MPIdata%master,MPIdata%comm_step,ierr)
+  call xmpi_gatherv(Invar%weights,Invar%my_nstep,weights_tot,MPIdata%nstep_all,MPIdata%shft_step,&
+&                   MPIdata%master,MPIdata%comm_step,ierr)
   do istep=1,Invar%nstep_tot
-    tmp(2) =tmp(2) + (U_MD(istep)-U_TDEP(istep)) * Invar%weights(istep)
-    tmp(9) =tmp(9) + (U_MD(istep)-U_TDEP(istep))**2 * Invar%weights(istep)
+    tmp(2) =tmp(2) + (U_MD(istep)-U_TDEP(istep)) * weights_tot(istep)
+    tmp(9) =tmp(9) + (U_MD(istep)-U_TDEP(istep))**2 * weights_tot(istep)
   end do
   U0       =tmp(1) /real(Invar%natom)
   UMD      =tmp(7) /real(Invar%natom)
@@ -810,6 +813,7 @@ contains
   ABI_FREE(U_MD)
   ABI_FREE(U_TDEP)
   ABI_FREE(Phi_tot)
+  ABI_FREE(weights_tot)
 
  end subroutine tdep_calc_model
 

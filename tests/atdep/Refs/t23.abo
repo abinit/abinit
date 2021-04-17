@@ -3113,7 +3113,7 @@
  ========================= Voigt average (constant strain) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt= 1270.720 and Shear G=  359.899
  Average of Young modulus E [in GPa]=  986.559 Lame modulus Lambda [in GPa]= 1030.787 and Poisson ratio Nu=    0.371
- Velocities [in m.s-1]: compressional Vp=11537.529  shear Vs= 5231.324  and bulk Vphi= 9829.830
+ Velocities [in m.s-1]: compressional Vp=11537.529  shear Vs= 5231.324  and bulk Vphi= 9829.831
  Debye velocity [in m.s-1]= 5898.126  and temperature [in K]=  915.707
  
  ========================= Reuss average (constant stress) ===================

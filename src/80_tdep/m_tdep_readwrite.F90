@@ -255,9 +255,9 @@ contains
     write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
     read (*, '(a)', err=12) Invar%output_prefix
     if ( Invar%output_prefix == "" ) then
-      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file='atdep.abo')
+      open(unit=Invar%stdout,file='atdep.abo')
     else
-      if (xmpi_comm_rank(xmpi_world).eq.0) open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
+      open(unit=Invar%stdout,file=trim(Invar%output_prefix)//'.abo')
     end if  
     write (Invar%stdlog, '(a)', err=12 ) '.'//trim(Invar%output_prefix)
 12   continue
@@ -702,6 +702,9 @@ contains
     open(unit=50,file=trim(Invar%input_prefix)//'xred.dat')
     open(unit=40,file=trim(Invar%input_prefix)//'etot.dat')
     do istep=1,Invar%nstep_min-1
+      if (Invar%use_weights.eq.1) then
+         read(30,*) tmp1
+      endif
       read(40,*) tmp1
       do iatom=1,Invar%natom
         read(50,*) tmp1,tmp2,tmp3
@@ -710,6 +713,9 @@ contains
     end do 
     do istep=Invar%nstep_min,Invar%nstep_max
       if (mod(istep-Invar%nstep_min,Invar%slice).ne.0) then
+        if (Invar%use_weights.eq.1) then
+           read(30,*) tmp1
+        endif
         read(40,*) tmp1
         do iatom=1,Invar%natom
           read(50,*) tmp1,tmp2,tmp3
@@ -718,6 +724,9 @@ contains
       else
         jstep=jstep+1
         if (.not.MPIdata%my_step(jstep)) then
+          if (Invar%use_weights.eq.1) then
+             read(30,*) tmp1
+          endif
           read(40,*) tmp1
           do iatom=1,Invar%natom
             read(50,*) tmp1,tmp2,tmp3
@@ -725,10 +734,10 @@ contains
           end do
         else
           this_istep=this_istep+1
-          read(40,*) Invar%etot(this_istep)
           if (Invar%use_weights.eq.1) then
              read(30,*) Invar%weights(this_istep)
           endif
+          read(40,*) Invar%etot(this_istep)
           do iatom=1,Invar%natom
             read(50,*) Invar%xred (1,iatom,this_istep),Invar%xred (2,iatom,this_istep),Invar%xred (3,iatom,this_istep)
             read(60,*) Invar%fcart(1,iatom,this_istep),Invar%fcart(2,iatom,this_istep),Invar%fcart(3,iatom,this_istep)
