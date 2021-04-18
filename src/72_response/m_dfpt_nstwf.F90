@@ -2098,9 +2098,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    end if 
    call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
    call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
-#ifdef DEV_MJV
-print *, " nstwf ikpt ", ikpt, " iband ", iband, " cwf ", cwavef(:,1:10)
-#endif
 
 !  In case non ddk perturbation
    if (ipert /= dtset%natom + 1) then
@@ -2117,9 +2114,6 @@ print *, " nstwf ikpt ", ikpt, " iband ", iband, " cwf ", cwavef(:,1:10)
            call gaugetransfo(cg_k,cwavef,cwavef_db,mpi_enreg%comm_band,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
 &            dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
            cwavef(:,:) = cwavef_db(:,:)
-#ifdef DEV_MJV
-print *, " nstwf gaugetransfo  ", ikpt, " iband ", iband, " idir1,ipert1 ", idir1, ipert1, " cwavef_db ", cwavef_db(:,1:10)
-#endif
          end if
 
 !        Define the direction along which to move the atom :
@@ -2138,9 +2132,6 @@ print *, " nstwf gaugetransfo  ", ikpt, " iband ", iband, " idir1,ipert1 ", idir
                call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnlx1,dum_grad_berry,&
 &               dum_gs1,gs_hamkq,dum_gvnlx1,idir1,ipert1,lambda,mpi_enreg,optlocal,&
 &               optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
-#ifdef DEV_MJV
-print *, " nstwf getgh1c  ", ikpt, " iband ", iband, " idir1,ipert1 ", idir1, ipert1, " gvnlx1(:,:) ", gvnlx1(:,1:10)
-#endif
 
 !              ==== Electric field perturbation
              else if( ipert1==dtset%natom+2 )then
@@ -2163,9 +2154,6 @@ print *, " nstwf getgh1c  ", ikpt, " iband ", iband, " idir1,ipert1 ", idir1, ip
                  call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
 &                  dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
-#ifdef DEV_MJV
-print *, " nstwf Efield gaugetr  ", ikpt, " iband ", iband, " idir1,ipert1 ", idir1, ipert1, " gvnlx1(:,:) ", gvnlx1(:,1:10)
-#endif
                end if
 !              Multiplication by -i
                do ipw=1,npw1_k*dtset%nspinor
@@ -2196,9 +2184,6 @@ print *, " nstwf Efield gaugetr  ", ikpt, " iband ", iband, " idir1,ipert1 ", id
              d2nl_k(1,idir1,ipert1)=d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*two*dotr
              d2nl_k(2,idir1,ipert1)=d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*two*doti
 
-#ifdef DEV_MJV
-print *, " nstwf ikpt ", ikpt, " iband ", iband, " idir1,ipert1 ", idir1, ipert1, " d2nl_k(1,id1,ip1) ", d2nl_k(1,idir1,ipert1)
-#endif
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
 !            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal

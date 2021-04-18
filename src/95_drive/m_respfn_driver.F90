@@ -1485,26 +1485,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call ddb_hdr%free()
 
 !  Output of the dynamical matrix (master only)
-#ifdef DEV_MJV
-!print *, ' d2k0 '
-!print *, '(4D20.10)', d2k0 
-print *, ' d2lo '
-print *, '(4D20.10)', d2lo
-!print *, ' d2loc0 '
-!print *, '(4D20.10)', d2loc0
-print *, ' d2matr '
-print *, '(4D20.10)', d2matr
-print *, ' d2nl '
-print *, '(4D20.10)', d2nl 
-!print *, ' d2nl0 '
-!print *, '(4D20.10)', d2nl0 
-!print *, ' d2nl1 '
-!print *, '(4D20.10)', d2nl1 
-!print *, ' d2ovl '
-!print *, '(4D20.10)', d2ovl 
-!print *, ' d2vn '
-!print *, '(4D20.10)', d2vn 
-#endif
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
 &   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
 &   d2k0,d2lo,d2loc0,d2matr,d2nl,d2nl0,d2nl1,d2ovl,d2vn,&
@@ -1536,10 +1516,6 @@ print *, '(4D20.10)', d2nl
 !    First, suppress the 'wings' elements,
 !    for which the diagonal element is not known
      call wings3(carflg,d2cart,mpert)
-#ifdef DEV_MJV
-print *, 'd2cart '
-print *, '(4D20.10)', d2cart
-#endif
 
 !    Check the analyticity of the dynamical matrix
      analyt=0
