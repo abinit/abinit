@@ -3388,6 +3388,7 @@ print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_dist
    d2nl(:,:,:,idir,ipert)=reshape(buffer2(:),(/2,3,mpert/))
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
+
    if(dtset%prtbbb==1)then
      ABI_MALLOC(buffer1,(2*3*dtset%mband*dtset%mband))
      ABI_MALLOC(buffer2,(2*3*dtset%mband*dtset%mband))
