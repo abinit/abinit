@@ -3357,6 +3357,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    d2nl(:,:,:,idir,ipert)=reshape(buffer2(:),(/2,3,mpert/))
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
+
    if(dtset%prtbbb==1)then
      ABI_MALLOC(buffer1,(2*3*dtset%mband*dtset%mband))
      ABI_MALLOC(buffer2,(2*3*dtset%mband*dtset%mband))
