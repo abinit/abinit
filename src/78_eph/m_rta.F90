@@ -1366,7 +1366,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
  character(len=500) :: msg, pre, rta_type
  integer :: unts(2)
  character(len=2) :: components(3)
- real(dp) :: work33(3,3), mat33(3,3)
+ real(dp) :: mat33(3,3) ! work33(3,3),
 
 !************************************************************************
 

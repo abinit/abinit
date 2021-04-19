@@ -173,14 +173,14 @@ module m_phonons
  end type phonon_dos_type
 
  public :: mkphdos        ! Constructor
-!!**
+!!***
 
 !!****t* m_phonons/phstore_t
 !! NAME
 !! phstore_t
 !!
 !! FUNCTION
-!!  This object store ph eigenvalues and eigenvectors in the IBZ and provides methods
+!!  This object stores ph eigenvalues and eigenvectors in the IBZ and provides methods
 !!  to compute the corresponding quantites in the full BZ using symmetries.
 !!  Useful for very intensive loops of q-points in the BZ in which the call to ifc_fourq
 !!  may become a significant bottleneck.

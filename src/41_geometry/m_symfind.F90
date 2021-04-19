@@ -167,6 +167,8 @@ contains
 ! call flush(6)
 !ENDDEBUG
 
+ ABI_UNUSED(prtvol)
+
 !Find the number of classes of atoms (type, chrg and spinat must be identical,
 !spinat might differ by a sign, if aligned with the z direction, or,
 ! type and nucdipmom must be identical)
