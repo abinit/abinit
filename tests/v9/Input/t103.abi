@@ -39,7 +39,8 @@
 
 # SCF procedure
 #*******************************
-   nstep    100
+   tolvrs   1.0d-12
+   nstep    5 # In order to have a fix number of iterations
 
 # Bands
 #*******************************
@@ -50,7 +51,7 @@
 #**************************************
        ecut  3.5
      ecutsm  0
-  pawecutdg  7.0
+  pawecutdg  7
 
 # K point grid
 #**************************************
@@ -62,7 +63,6 @@
                0.0 0.0 0.5
 
 # Ground state computation
-   tolvrs   1.0d-12
    kptopt   1
 
  pp_dirpath "$ABI_PSPDIR"
