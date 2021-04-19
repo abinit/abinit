@@ -2082,7 +2082,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
  real(dp) :: orbmagvec(2,3),rmet(3,3)
  real(dp),allocatable :: CCIterms(:,:,:),duqduchern(:,:,:),duqdumag(:,:,:),eeig(:,:),onsite_bm(:,:,:),onsite_l(:,:,:)
  real(dp),allocatable :: orbmag_terms(:,:,:),orbmag_trace(:,:)
- real(dp),allocatable :: rhorij1(:,:,:),s1trace(:,:,:),udsqduchern(:,:,:),udsqdumag(:,:,:),VVIIa(:,:,:)
+ real(dp),allocatable :: rhorij1(:,:,:),s1trace(:,:,:),udsqduchern(:,:,:),udsqdumag(:,:,:),VVIaterms(:,:,:)
  complex(dpc),allocatable :: onsite_bm_dir(:),onsite_l_dir(:),rhorij1_dir(:),s1trace_dir(:)
  type(pawcprj_type),allocatable ::  cprjg1(:,:,:)
 
@@ -2105,7 +2105,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
  ABI_MALLOC(rhorij1,(2,nband_k,3))
  ABI_MALLOC(onsite_bm_dir,(nband_k))
  ABI_MALLOC(onsite_bm,(2,nband_k,3))
- ABI_MALLOC(VVIIa,(2,nband_k,3))
+ ABI_MALLOC(VVIaterms,(2,nband_k,3))
  ABI_MALLOC(duqduchern,(2,nband_k,3))
  ABI_MALLOC(duqdumag,(2,nband_k,3))
  ABI_MALLOC(udsqduchern,(2,nband_k,3))
@@ -2148,7 +2148,8 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
       pwind,pwind_alloc,rmet,rprimd,udsqduchern,udsqdumag,xred,ylm,ylmgr)
 
  do adir=1, 3
-   orbmag_terms(adir,berrycurve,1:nband_k) = duqduchern(1,1:nband_k,adir)+udsqduchern(1,1:nband_k,adir)
+   ! this needs careful checking
+   orbmag_terms(adir,berrycurve,1:nband_k) = duqduchern(1,1:nband_k,adir)-half*udsqduchern(1,1:nband_k,adir)
  end do
 
  do adir = 1, 3
@@ -2185,17 +2186,17 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
  call duqhqdu(atindx1,cg,CCIterms,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
       & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
       & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
- ! CCIterms=-half*CCIterms
- ! sign of this term needs careful checking
 
- call udsdsu(atindx1,cg,VVIIa,cprj,dtorbmag,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+ call udsdsu(atindx1,cg,VVIaterms,cprj,dtorbmag,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
 
  do adir=1,3
+   ! duqhqdu returns i*epsabg*\sum_occ [<d_gdir u|QHQ|d_bdir u>]
+   ! CCI is (-i/2) times this
    orbmag_terms(adir,cci,1:nband_k)=half*CCIterms(1,1:nband_k,adir)
    orbmag_terms(adir,vvii,1:nband_k)=half*duqdumag(1,1:nband_k,adir)
    orbmag_terms(adir,vvib,1:nband_k)=udsqdumag(1,1:nband_k,adir)
-   orbmag_terms(adir,vvia,1:nband_k)=VVIIa(1,1:nband_k,adir)
+   orbmag_terms(adir,vvia,1:nband_k)=VVIaterms(1,1:nband_k,adir)
  end do
 
  trnrm = two/(dtorbmag%fnkpt)
@@ -2233,7 +2234,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
  ABI_FREE(onsite_bm)
  ABI_FREE(rhorij1_dir)
  ABI_FREE(rhorij1)
- ABI_FREE(VVIIa)
+ ABI_FREE(VVIaterms)
  ABI_FREE(duqduchern)
  ABI_FREE(duqdumag)
  ABI_FREE(udsqduchern)
@@ -3438,7 +3439,7 @@ end subroutine covar_cprj
 !! duqhqdu
 !!
 !! FUNCTION
-!! Return i*epsabg\sum_n <\partial_b u_kn|QH_kQ|\partial_g u_kn> where
+!! Return i*epsabg\sum_n <\partial_g u_kn|QH_kQ|\partial_b u_kn> where
 !! Q projects onto the conduction space.
 !!
 !! COPYRIGHT
@@ -3947,7 +3948,7 @@ end subroutine duqhqdu
 !! udsdsu
 !!
 !! FUNCTION
-!! Return i*epsabg\sum_{n,n}<u_kn|\partial_b S|u_kn'><u_kn|\partial_g S|u_kn>E_nk
+!! Return (-i/2)*epsabg\sum_{n,n}<u_kn|\partial_b S|u_kn'><u_kn|\partial_g S|u_kn>E_nk
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2020 ABINIT  group (JWZ)
@@ -4188,8 +4189,8 @@ subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprim
 
                  ujdsbu = cmplx(dotr,doti,KIND=dpc)
 
-                 ! accumulate i*epsabg*ENK\sum_occ [<u_nk|dS_bdir|u_n'k><u_n'k|dS_gdir|u_nk>]
-                 udsdsu_term = j_dpc*epsabg*ENK*CONJG(ujdsbu)*ujdsgu
+                 ! accumulate (-i/2)*epsabg*ENK\sum_occ [<u_nk|dS_bdir|u_n'k><u_n'k|dS_gdir|u_nk>]
+                 udsdsu_term = -half*j_dpc*epsabg*ENK*CONJG(ujdsbu)*ujdsgu
                  cnum_udsdsu(1,iband,adir) = cnum_udsdsu(1,iband,adir) + real(udsdsu_term)
                  cnum_udsdsu(2,iband,adir) = cnum_udsdsu(2,iband,adir) + aimag(udsdsu_term)
 
