@@ -4501,7 +4501,7 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
            klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
            kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
            ! compute <L_dir>
-           call slxyzs(jl,jm,idir,il,im,orbl_me)
+           call slxyzs(il,im,idir,jl,jm,orbl_me)
            ! compute integral of phi_i*phi_j - tphi_i*tphi_j
            if (abs(orbl_me) > tol8) then
               ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
@@ -4933,7 +4933,7 @@ subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
                     else
                        cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
                     end if
-                    rhorij1(nn)=rhorij1(nn)+half*j_dpc*epsabg*conjg(cpb)*cdij*cpk
+                    rhorij1(nn)=rhorij1(nn)-half*j_dpc*epsabg*conjg(cpb)*cdij*cpk
                  end do ! end loop over jlmn
               end do ! end loop over ilmn
            end do ! end loop over atoms
