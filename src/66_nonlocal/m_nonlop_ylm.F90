@@ -33,10 +33,10 @@ module m_nonlop_ylm
  use m_geometry,         only : strconv
  use m_kg,               only : ph1d3d, mkkpg
  use m_pawcprj,          only : pawcprj_type
- use m_opernla_ylm,      only : opernla_ylm
- use m_opernla_ylm_mv,   only : opernla_ylm_mv
- use m_opernlb_ylm,      only : opernlb_ylm
- use m_opernlb_ylm_mv,   only : opernlb_ylm_mv
+ use m_opernla_ylm,      only : opernla_ylm,opernla_counter
+ use m_opernla_ylm_mv,   only : opernla_ylm_mv,opernla_mv_counter,opernla_mv_dgemv_counter
+ use m_opernlb_ylm,      only : opernlb_ylm,opernlb_counter
+ use m_opernlb_ylm_mv,   only : opernlb_ylm_mv,opernlb_mv_counter,opernlb_mv_dgemv_counter
  use m_opernlc_ylm,      only : opernlc_ylm
  use m_opernld_ylm,      only : opernld_ylm
  use m_kg,               only : mkkpgcart
@@ -48,6 +48,9 @@ module m_nonlop_ylm
 !!***
 
  public :: nonlop_ylm
+ public :: nonlop_ylm_init_counters
+ public :: nonlop_ylm_stop_counters
+ public :: nonlop_ylm_output_counters
 !!***
 
 contains
@@ -1336,6 +1339,174 @@ contains
  DBG_EXIT("COLL")
 
 end subroutine nonlop_ylm
+!!***
+
+!!****f* ABINIT/nonlop_ylm_init_counters
+!! NAME
+!! nonlop_ylm_init_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlop_ylm_init_counters()
+
+   opernla_counter = 0
+   opernlb_counter = 0
+   opernla_mv_counter = 0
+   opernlb_mv_counter = 0
+   opernla_mv_dgemv_counter = 0
+   opernlb_mv_dgemv_counter = 0
+
+end subroutine nonlop_ylm_init_counters
+!!***
+
+!!****f* ABINIT/nonlop_ylm_stop_counters
+!! NAME
+!! nonlop_ylm_stop_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlop_ylm_stop_counters()
+
+   opernla_counter = -1
+   opernlb_counter = -1
+   opernla_mv_counter = -1
+   opernlb_mv_counter = -1
+   opernla_mv_dgemv_counter = -1
+   opernlb_mv_dgemv_counter = -1
+
+end subroutine nonlop_ylm_stop_counters
+!!***
+
+!!****f* ABINIT/nonlop_ylm_output_counters
+!! NAME
+!! nonlop_ylm_output_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlop_ylm_output_counters(natom,nbandtot,ntypat,typat,mpi_enreg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nbandtot,ntypat
+ integer,intent(in) :: typat(:)
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ integer :: cnt,ia1,ia2,ia3,ia4,ia5,iatm,ierr,itypat,mincat,nincat,opernl_calls
+!arrays
+ integer :: nattyp(ntypat)
+
+ do itypat=1,ntypat
+   nattyp(itypat)=0
+   do iatm=1,natom
+     if(typat(iatm)==itypat)then
+!       atindx(iatom)=indx
+!       atindx1(indx)=iatom
+!       indx=indx+1
+       nattyp(itypat)=nattyp(itypat)+1
+     end if
+   end do
+ end do
+ call wrtout([std_out,ab_out],'','COLL')
+ write(msg,'(a)')                ' --- NONLOP YLM COUNTERS -------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ mincat=min(NLO_MINCAT,maxval(nattyp))
+ ia1=1;iatm=0;opernl_calls=0
+ do itypat=1,ntypat
+!  Get atom loop indices for different types:
+   ia2=ia1+nattyp(itypat)-1;ia5=1
+   do ia3=ia1,ia2,mincat
+     ia4=min(ia2,ia3+mincat-1)
+!    Give the increment of number of atoms in this subset.
+     nincat=ia4-ia3+1
+     opernl_calls=opernl_calls+1
+!    End sum on atom subset loop
+     iatm=iatm+nincat;ia5=ia5+nincat
+   end do
+!  End atom type loop
+   ia1=ia2+1
+ end do
+ if (iatm/=natom) then
+   ABI_ERROR('iatm should be equal to natom!')
+ end if
+ write(msg,'(a,i6)')             ' Number of Calls in nonlop_ylm : NC = ',opernl_calls
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                '                  | total count (TC) |            TC/NC |         TC/NC/NB'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                ' -------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ call xmpi_sum(opernla_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernlb_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernla_mv_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernlb_mv_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernla_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernlb_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
+ cnt=opernla_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla          | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernla_mv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv       | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernla_mv_dgemv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv_dgemv | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernlb_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb          | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernlb_mv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv       | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernlb_mv_dgemv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv_dgemv | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ write(msg,'(a)')                ' -------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+
+end subroutine nonlop_ylm_output_counters
 !!***
 
 end module m_nonlop_ylm
