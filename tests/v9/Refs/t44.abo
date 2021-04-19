@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Mar 2021.
-- ( at 12h13 )
+.Starting date : Mon 19 Apr 2021.
+- ( at 09h50 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -701,6 +701,8 @@ tolerances: {tolwfr: 1.00E-20, }
  
 ====================================================
  
+ Orbital magnetic moment computed with DFTP derivative wavefunctions 
+ 
  Orbital magnetic moment, Cartesian directions :
  -8.50279572E-04  2.06901579E-13  8.72982578E-15
  
@@ -717,7 +719,7 @@ tolerances: {tolwfr: 1.00E-20, }
           Valence space Ib  :  -3.55678940E-06 -1.56554400E-15  1.87695605E-15
            S(1) PAW overlap :  -8.60186703E-07 -6.75842602E-17  8.98381471E-17
                   H(1) cprj :   1.36777864E-04 -3.37474629E-14  1.96755852E-16
-           H(1) on-site L_R :   7.26613294E-06  7.40280619E-15  8.38495194E-16
+    H(1) on-site 1/2 L_R.B  :   7.26613294E-06  7.40280619E-15  8.38495194E-16
          H(1) on-site A0.An :   2.43223203E-06 -8.86038072E-17 -2.40425703E-17
             Berry curvature :  -2.38914256E-03  7.59443302E-13 -6.77102835E-14
  
@@ -732,7 +734,7 @@ tolerances: {tolwfr: 1.00E-20, }
            Valence space Ib  :   1.81778773E-06  4.88630824E-16  2.34022977E-16
             S(1) PAW overlap :   3.79688274E-08  1.22387589E-16  6.71771071E-18
                    H(1) cprj :   4.14076749E-05 -1.16982962E-14 -1.04727347E-15
-            H(1) on-site L_R :   2.27451844E-07  1.28840020E-15  8.01644372E-17
+      H(1) on-site 1/2 L_R.B :   2.27451844E-07  1.28840020E-15  8.01644372E-17
           H(1) on-site A0.An :   3.04606829E-07  3.92701305E-17  2.62720540E-18
              Berry curvature :   9.40651507E-06 -1.93247876E-13  8.44675408E-15
  
@@ -744,7 +746,7 @@ tolerances: {tolwfr: 1.00E-20, }
            Valence space Ib  :  -9.64077097E-07 -6.36340985E-17  5.91305456E-17
             S(1) PAW overlap :   1.02714620E-07  1.26937132E-17  8.02958567E-18
                    H(1) cprj :   1.73823178E-04 -5.52298835E-15 -1.56290748E-16
-            H(1) on-site L_R :  -3.43543980E-06  1.27875280E-16 -2.94505415E-17
+      H(1) on-site 1/2 L_R.B :  -3.43543980E-06  1.27875280E-16 -2.94505415E-17
           H(1) on-site A0.An :   6.75167062E-07 -1.40342523E-18 -3.80445924E-18
              Berry curvature :   5.54833299E-04  3.81348581E-13 -1.62607666E-13
  
@@ -756,7 +758,7 @@ tolerances: {tolwfr: 1.00E-20, }
            Valence space Ib  :  -6.51537091E-03 -1.69550207E-12 -1.21238939E-12
             S(1) PAW overlap :  -7.59148738E-04 -2.63380010E-13 -1.27205167E-13
                    H(1) cprj :  -2.68429081E-02 -8.52902989E-12 -5.16220116E-12
-            H(1) on-site L_R :   4.87538237E-03  1.56404631E-12  8.22350217E-13
+      H(1) on-site 1/2 L_R.B :   4.87538237E-03  1.56404631E-12  8.22350217E-13
           H(1) on-site A0.An :   6.93570706E-07  1.18599672E-14  6.93377805E-15
              Berry curvature :   2.29976621E+00  2.04208295E-10  4.81801263E-10
  
@@ -768,7 +770,7 @@ tolerances: {tolwfr: 1.00E-20, }
            Valence space Ib  :   6.51096041E-03  1.69351153E-12  1.21397319E-12
             S(1) PAW overlap :   7.58147868E-04  2.63177344E-13  1.27280258E-13
                    H(1) cprj :   2.67644551E-02  8.51250371E-12  5.16360148E-12
-            H(1) on-site L_R :  -4.86490825E-03 -1.55805978E-12 -8.21562436E-13
+      H(1) on-site 1/2 L_R.B :  -4.86490825E-03 -1.55805978E-12 -8.21562436E-13
           H(1) on-site A0.An :   7.58887431E-07 -1.19864377E-14 -6.95664337E-15
              Berry curvature :  -2.30271960E+00 -2.03636953E-10 -4.81714812E-10
  
@@ -994,10 +996,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.3  wall=          6.5
+- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.6
  
 ================================================================================
  
  Calculation completed.
 .Delivered   9 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.3  wall=          6.5
++Overall time at end (sec) : cpu=          6.4  wall=          6.6
