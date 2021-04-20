@@ -12744,7 +12744,7 @@ Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 Possible values are from 0 to 9.
 For gapped materials (semiconductors, molecules, ...), [[occopt]]=1 is the favourite for most usages.
 For metallic situations (also molecules with degenerate levels at Fermi energy), [[occopt]]=7 is the favourite for most usages,
-and one needs to pay attention to the input variable [[tsmear]].
+and one needs moreover to control the input variable [[tsmear]].
 Use [[occopt]]=9 for quasi-Fermi energy calculations of excited states in gapped materials.
 
   * [[occopt]] = 0:
@@ -12776,7 +12776,7 @@ the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 Metallic occupation of levels, using different occupation schemes (see below).
 The corresponding thermal broadening, or cold smearing, is defined by the
 input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
-divided by [[tsmear]])
+divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
 number, read by the code.
@@ -12785,31 +12785,35 @@ the code to add to 1. The combination of a broadening and a physical temperature
 can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
-Fermi-Dirac smearing (finite-temperature metal) Smeared delta function:
-0.25/(cosh(xx/2.0)**2). For usual calculations, at zero temperature, do not use [[occopt]]=3,
+Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
+$\tilde{\delta}(x)=0.25 (\cosh(x/2.0))^{-2}$. For usual calculations, at zero temperature, do not use [[occopt]]=3,
 but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
 
     * [[occopt]] = 4:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.5634
-(minimization of the bump)
+(minimization of the bump).
 Smeared delta function:
-exp(-xx  2  )/sqrt(pi) * (1.5+xx*(-a*1.5+xx*(-1.0+a*xx)))
+$\tilde{\delta}(x)= (1.5+x(-1.5a+x(-1.0+ax))) \exp(-x^2)/\sqrt{\pi}$ .
+Must be used with caution, see the note below.
 
     * [[occopt]] = 5:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.8165 (monotonic
 function in the tail)
 Same smeared delta function as [[occopt]] = 4, with different a.
+Must be used with caution, see the note below.
 
     * [[occopt]] = 6:
 Smearing of Methfessel and Paxton [[cite:Methfessel1989]] with Hermite polynomial
 of degree 2, corresponding to "Cold smearing" of N. Marzari with a=0 (so, same
 smeared delta function as [[occopt]] = 4, with different a).
+Must be used with caution, see the note below.
 
     * [[occopt]] = 7:
-Gaussian smearing, corresponding to the 0 order Hermite polynomial of
+Gaussian smearing, corresponding to the 0-order Hermite polynomial of
 Methfessel and Paxton.
-Smeared delta function: 1.0*exp(-xx**2)/sqrt(pi)
+Smeared delta function: $\tilde{\delta}(x)=\exp(-x^2)/\sqrt{\pi}$ .
+Robust and quite efficient.
 
     * [[occopt]] = 8:
 Uniform smearing (the delta function is replaced by a constant function of
@@ -12817,7 +12821,7 @@ value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
     * [[occopt]] = 9:
-Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that occopt = 9 cannot be used with fixed magnetization calculation.
+Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that [[occopt]] = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
 
@@ -13023,7 +13027,7 @@ Variable(
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
     added_in_version="before_v9",
     text=r"""
-Compute quantities related to orbital magnetization. The
+Compute quantities related to orbital magnetic moment. The
     implementation assumes an insulator, so no empty or partially
     filled bands, and currently restricted to [[nspinor]] 1. Such
     insulators have orbital magnetization zero, except in the presence
@@ -13031,24 +13035,15 @@ Compute quantities related to orbital magnetization. The
     is parallelized over k points only. The implementation follows the
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
-    standard output file, search for "Orbital magnetization" and "Chern number".
+    standard output file, search for "Orbital magnetic moment". This calculation requires
+    both the ground state and DDK wavefunctions, and is triggered at the end of a 
+    DDK calculation.
 
-* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the
-Berry curvature over the Brillouin zone) using both GS and DDK wavefunctions. This is
-the most robust method.
-* [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
-faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
-electronic current.
-* [[orbmag]] = 2: Compute electronic orbital magnetization.
-* [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
-
-[[orbmag]] values 1--3 use an implementation based on a discretization of the wavefunction
-derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
-same computations as the corresponding 1, 2, 3 values, but based on an implementation
-using a discretization of the density operator itself. Both methods should converge to
-the same values but in our experience the wavefunction-based method converges faster. The
-DDK method converges considerably faster than either of the above methods and is also robust
-in case of only a single kpt.
+* [[orbmag]] = 1: Compute orbital magnetization and integral of the 
+Berry curvature (Chern number) over the Brillouin zone.
+* [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
+orbital magnetic moment. 
+* [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
 """,
 ),
 
