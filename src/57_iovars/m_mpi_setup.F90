@@ -199,7 +199,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'np_spkpt',tread(4),'INT')
    if(tread(4)==1)then
      dtsets(idtset)%np_spkpt=intarr(1)
-   else 
+   else
 !    npkpt is obsolete, but still read
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npkpt',tread(4),'INT')
      if(tread(4)==1)then
@@ -1610,8 +1610,10 @@ end subroutine mpi_setup
        !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
        write(ount,'(a)'   )'      vars: {'
        write(ount,'(a,i0,a)')'            npimage: ',my_distp(1,ii),','
-       write(ount,'(a,i0,a)')'            np_spkpt:',my_distp(2,ii),','
-       write(ount,'(a,i0,a)')'            npspinor:',my_distp(3,ii),','
+       ! Keep on using legacy npkpt instead of np_spkpt to maintain compatibility with AbiPy
+       write(ount,'(a,i0,a)')'            npkpt: ',my_distp(2,ii),','
+       !write(ount,'(a,i0,a)')'            np_spkpt: ',my_distp(2,ii),','
+       write(ount,'(a,i0,a)')'            npspinor: ',my_distp(3,ii),','
        write(ount,'(a,i0,a)')'            npfft: ', my_distp(4,ii),','
        write(ount,'(a,i0,a)')'            npband: ',my_distp(5,ii),','
        write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
@@ -1629,7 +1631,9 @@ end subroutine mpi_setup
        !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
        write(ount,'(a)'   )'      vars: {'
        write(ount,'(a,i0,a)')'             nppert: ', my_distp(1,ii),','
-       write(ount,'(a,i0,a)')'             np_spkpt: ', my_distp(2,ii),','
+       ! Keep on using legacy npkpt instead of np_spkpt to maintain compatibility with AbiPy
+       write(ount,'(a,i0,a)')'             npkpt: ', my_distp(2,ii),','
+       !write(ount,'(a,i0,a)')'             np_spkpt: ', my_distp(2,ii),','
        write(ount,'(a)')   '            }'
       end do
    end if
