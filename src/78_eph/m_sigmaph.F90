@@ -27,6 +27,7 @@ module m_sigmaph
  use iso_c_binding
  use m_abicore
  use m_xmpi
+ use m_mpinfo
  use m_errors
  use m_hide_blas
  use m_copy
@@ -632,6 +633,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1, ngvecs = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
+ integer :: band_me, nband_me
+! integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq, ib_k, band_ks, ibsum, ii, jj, iw !ib_kq,
@@ -670,6 +673,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
+ integer, allocatable :: band_procs(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
@@ -1335,6 +1339,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ignore_kq = ignore_kq + 1; cycle
        end if
 
+
        ! ====================================
        ! Get DFPT potentials for this q-point
        ! ====================================
@@ -1536,6 +1541,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! For the time being use mpw1 = 0 because mpw1 is not used in this call to dfpt_cgwf
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
+           ABI_MALLOC (band_procs, (nbcalc_ks))
+           call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
+&               mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+
            grad_berry_size_mpw1 = 0
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient)
@@ -1553,11 +1562,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
 
-             call dfpt_cgwf(band_ks, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
+!TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
+!  in the meanwhile should make a test for paralbd, to exclude it, I think
+             band_me = band_ks
+             !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_kq,isppol,me)
+             nband_me = nband_kq
+             call dfpt_cgwf(band_ks, band_me, band_procs, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
                cwaveprj, cwaveprj0, rf2, dcwavef, &
-               eig0nk, ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
+               ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
                gs_hamkq, gvnlxc, gvnlx1, icgq0, idir, ipert, igscq0, &
-               mcgq, mgscq, mpi_enreg, grad_berry_size_mpw1, cryst%natom, nband_kq, nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
+               mcgq, mgscq, mpi_enreg, grad_berry_size_mpw1, cryst%natom, nband_kq, nband_me, &
+               nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
                opt_gvnlx1, dtset%prtvol, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, -one, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
 
@@ -1580,6 +1595,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
 
            end do ! ib_k
+
+           ABI_FREE (band_procs)
 
            ABI_FREE(cgq)
            ABI_FREE(gscq)

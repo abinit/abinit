@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Tue  6 Apr 2021.
+- ( at 23h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t50.in
-- output file    -> t50.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t50.abi
+- output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
 
@@ -626,8 +626,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -902,7 +902,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -945,7 +944,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -959,13 +957,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   18.406400626893     -2.293E+02 2.404E+00 1.053E+04
- ETOT  2   9.5084698765159     -8.898E+00 1.396E-01 1.819E+02
- ETOT  3   9.3073733839010     -2.011E-01 3.339E-03 6.248E-01
- ETOT  4   9.3068493893730     -5.240E-04 9.839E-06 5.137E-03
- ETOT  5   9.3068452080698     -4.181E-06 2.186E-07 1.076E-04
- ETOT  6   9.3068451719676     -3.610E-08 4.019E-09 7.652E-05
+ ETOT  2   9.5084698765158     -8.898E+00 1.396E-01 1.819E+02
+ ETOT  3   9.3073733839009     -2.011E-01 3.339E-03 6.248E-01
+ ETOT  4   9.3068493893732     -5.240E-04 9.839E-06 5.137E-03
+ ETOT  5   9.3068452080699     -4.181E-06 2.186E-07 1.076E-04
+ ETOT  6   9.3068451719675     -3.610E-08 4.019E-09 7.652E-05
  ETOT  7   9.3068450426229     -1.293E-07 2.823E-10 1.476E-08
- ETOT  8   9.3068450426063     -1.668E-11 1.419E-11 1.407E-11
+ ETOT  8   9.3068450426062     -1.671E-11 1.419E-11 1.407E-11
 
  At SCF step    8       vres2   =  1.41E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1081,10 +1079,10 @@ tolerances: {tolvrs: 1.00E-10, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.4142222137         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.4142220811         0.0000000000
-   1    1   2    2        -0.0000000000         0.0000000000
+   1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
@@ -1102,10 +1100,10 @@ tolerances: {tolvrs: 1.00E-10, }
    3    1   3    2        -0.4142220811         0.0000000000
   
    1    2   1    1        -0.4142220811        -0.0000000000
-   1    2   2    1        -0.0000000000        -0.0000000000
+   1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2         0.4142222137         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
+   1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1         0.0000000000        -0.0000000000
@@ -1162,8 +1160,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1179,7 +1177,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1218,10 +1215,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1239,11 +1234,11 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  5   12.475312915728     -1.895E-02 4.204E-04 1.031E+00
  ETOT  6   12.474757800641     -5.551E-04 8.575E-06 1.849E-02
  ETOT  7   12.474748643324     -9.157E-06 1.764E-07 1.281E-04
- ETOT  8   12.474748564768     -7.856E-08 4.749E-09 8.390E-07
- ETOT  9   12.474748564379     -3.885E-10 2.857E-11 2.527E-09
- ETOT 10   12.474748564379      3.979E-13 9.943E-13 5.026E-10
- ETOT 11   12.474748564379      1.137E-13 1.464E-14 1.489E-10
- ETOT 12   12.474748564379     -9.095E-13 9.950E-16 6.466E-13
+ ETOT  8   12.474748564767     -7.856E-08 4.749E-09 8.390E-07
+ ETOT  9   12.474748564379     -3.884E-10 2.857E-11 2.527E-09
+ ETOT 10   12.474748564379      2.274E-13 9.943E-13 5.026E-10
+ ETOT 11   12.474748564379      2.274E-13 1.464E-14 1.489E-10
+ ETOT 12   12.474748564378     -1.137E-12 9.950E-16 6.466E-13
 
  At SCF step   12       vres2   =  6.47E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1280,10 +1275,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1300,9 +1293,9 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  4   9.4534343383586     -3.915E-04 2.700E-05 3.588E-03
  ETOT  5   9.4534321300075     -2.208E-06 3.207E-07 6.198E-04
  ETOT  6   9.4534317711687     -3.588E-07 8.922E-09 1.030E-04
- ETOT  7   9.4534316988929     -7.228E-08 3.523E-10 1.725E-07
- ETOT  8   9.4534316988146     -7.833E-11 5.075E-12 1.552E-08
- ETOT  9   9.4534316988072     -7.446E-12 7.279E-14 8.260E-12
+ ETOT  7   9.4534316988928     -7.228E-08 3.523E-10 1.725E-07
+ ETOT  8   9.4534316988147     -7.810E-11 5.075E-12 1.552E-08
+ ETOT  9   9.4534316988073     -7.475E-12 7.279E-14 8.260E-12
 
  At SCF step    9       vres2   =  8.26E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1472,8 +1465,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1489,7 +1482,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1531,10 +1523,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1553,7 +1543,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  6   12.215472607019     -1.259E-05 3.740E-06 2.759E-04
  ETOT  7   12.215472472867     -1.342E-07 1.721E-07 1.277E-06
  ETOT  8   12.215472471870     -9.973E-10 1.091E-08 2.751E-09
- ETOT  9   12.215472471868     -1.762E-12 5.614E-10 6.968E-11
+ ETOT  9   12.215472471868     -1.705E-12 5.614E-10 6.968E-11
 
  At SCF step    9       vres2   =  6.97E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1644,7 +1634,7 @@ tolerances: {tolvrs: 1.00E-10, }
    1    1   1    1         0.4157313432         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-   1    1   1    2        -0.0000000000         0.0000000000
+   1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2        -0.1422429581         0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
@@ -1662,7 +1652,7 @@ tolerances: {tolvrs: 1.00E-10, }
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0000000000         0.0000000000
   
-   1    2   1    1        -0.0000000000        -0.0000000000
+   1    2   1    1         0.0000000000        -0.0000000000
    1    2   2    1        -0.1422429581         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2         0.4157313432         0.0000000000
@@ -1722,8 +1712,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2382,10 +2372,10 @@ P          mk1mem6         29
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         25.4  wall=         25.6
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.4  wall=         25.6
+.Delivered   2 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.2  wall=         16.4
