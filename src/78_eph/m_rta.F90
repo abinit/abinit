@@ -2139,6 +2139,8 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
 !************************************************************************
 
+ ABI_UNUSED(kt)
+
  nprocs = xmpi_comm_size(comm)
 
  ! Copy important dimensions
