@@ -12744,7 +12744,7 @@ Controls how input parameters [[nband]], [[occ]], and [[wtk]] are handled.
 Possible values are from 0 to 9.
 For gapped materials (semiconductors, molecules, ...), [[occopt]]=1 is the favourite for most usages.
 For metallic situations (also molecules with degenerate levels at Fermi energy), [[occopt]]=7 is the favourite for most usages,
-and one needs to pay attention to the input variable [[tsmear]].
+and one needs moreover to control the input variable [[tsmear]].
 Use [[occopt]]=9 for quasi-Fermi energy calculations of excited states in gapped materials.
 
   * [[occopt]] = 0:
@@ -12776,7 +12776,7 @@ the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 Metallic occupation of levels, using different occupation schemes (see below).
 The corresponding thermal broadening, or cold smearing, is defined by the
 input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
-divided by [[tsmear]])
+divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
 number, read by the code.
@@ -12785,31 +12785,35 @@ the code to add to 1. The combination of a broadening and a physical temperature
 can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
-Fermi-Dirac smearing (finite-temperature metal) Smeared delta function:
-0.25/(cosh(xx/2.0)**2). For usual calculations, at zero temperature, do not use [[occopt]]=3,
+Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
+$\tilde{\delta}(x)=0.25 (\cosh(x/2.0))^{-2}$. For usual calculations, at zero temperature, do not use [[occopt]]=3,
 but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
 
     * [[occopt]] = 4:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.5634
-(minimization of the bump)
+(minimization of the bump).
 Smeared delta function:
-exp(-xx  2  )/sqrt(pi) * (1.5+xx*(-a*1.5+xx*(-1.0+a*xx)))
+$\tilde{\delta}(x)= (1.5+x(-1.5a+x(-1.0+ax))) \exp(-x^2)/\sqrt{\pi}$ .
+Must be used with caution, see the note below.
 
     * [[occopt]] = 5:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.8165 (monotonic
 function in the tail)
 Same smeared delta function as [[occopt]] = 4, with different a.
+Must be used with caution, see the note below.
 
     * [[occopt]] = 6:
 Smearing of Methfessel and Paxton [[cite:Methfessel1989]] with Hermite polynomial
 of degree 2, corresponding to "Cold smearing" of N. Marzari with a=0 (so, same
 smeared delta function as [[occopt]] = 4, with different a).
+Must be used with caution, see the note below.
 
     * [[occopt]] = 7:
-Gaussian smearing, corresponding to the 0 order Hermite polynomial of
+Gaussian smearing, corresponding to the 0-order Hermite polynomial of
 Methfessel and Paxton.
-Smeared delta function: 1.0*exp(-xx**2)/sqrt(pi)
+Smeared delta function: $\tilde{\delta}(x)=\exp(-x^2)/\sqrt{\pi}$ .
+Robust and quite efficient.
 
     * [[occopt]] = 8:
 Uniform smearing (the delta function is replaced by a constant function of
@@ -12817,7 +12821,7 @@ value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
     * [[occopt]] = 9:
-Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that occopt = 9 cannot be used with fixed magnetization calculation.
+Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that [[occopt]] = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
 
