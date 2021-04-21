@@ -3600,6 +3600,28 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
 
+ !Now all inputs are read, we can determine if "cprj_in_memory" implementation can be used or not
+ dtset%cprj_in_memory=0
+ if (dtset%cprj_update_lvl/=0) then
+   dtset%cprj_in_memory=1
+   ! Must be ground state computation...
+   if (dtset%optdriver/=0) dtset%cprj_in_memory = 0
+   ! ...with PAW...
+   if (dtset%usepaw/=1) dtset%cprj_in_memory = 0
+   ! ... and Conjugate Gradient...
+   if (dtset%wfoptalg/=10) dtset%cprj_in_memory = 0
+   ! ...without kgb parallelization...
+   if (dtset%paral_kgb/=0) dtset%cprj_in_memory = 0
+   ! ...without RMM-DIIS...
+   if (dtset%rmm_diis/=0) dtset%cprj_in_memory = 0
+   ! ...without electric field...
+   if (dtset%berryopt/=0) dtset%cprj_in_memory = 0
+   ! ...without Fock exchange...
+   if (dtset%usefock/=0) dtset%cprj_in_memory = 0
+   ! ...without nuclear dipolar moments...
+   if (sum(abs(dtset%nucdipmom))>tol16) dtset%cprj_in_memory = 0
+ end if
+
  call timab(191,2,tsec)
 
 end subroutine invars2

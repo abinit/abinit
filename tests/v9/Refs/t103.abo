@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 19 Apr 2021.
-- ( at 18h28 )
+.Starting date : Wed 21 Apr 2021.
+- ( at 17h48 )
   
 - input  file    -> /home/baguetl/PROGRAM/abinit/v9.4.1-cgwf-cprj/build/prof/Test_suite/v9_t103/t103.abi
 - output file    -> t103.abo
@@ -172,9 +172,9 @@ _ WF disk file :      0.081 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  cprj_update_lvl1         -2
-  cprj_update_lvl2         -1
-  cprj_update_lvl3          0
+  cprj_update_lvl1          0
+  cprj_update_lvl2         -2
+  cprj_update_lvl3         -1
   cprj_update_lvl4          1
   cprj_update_lvl5          2
   cprj_update_lvl6          3
@@ -615,7 +615,7 @@ force_length_stats: {min:   3.99997682E-02, max:   3.99997682E-02, mean:   3.999
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.436525435719017
- Compensation charge over fine fft grid    =     -0.436767130344573
+ Compensation charge over fine fft grid    =     -0.436767130345176
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -670,21 +670,21 @@ force_length_stats: {min:   3.99997682E-02, max:   3.99997682E-02, mean:   3.999
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.8420E-01; max dE/dt=  2.6711E-01; dE/dt below (all hartree)
-    1      -0.268041626410     -0.124456471403     -0.121788971240
-    2       0.267113757002      0.123702890434      0.121443561062
+    1      -0.268041626411     -0.124456471404     -0.121788971241
+    2       0.267113757003      0.123702890435      0.121443561063
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.43576360234639     1.27248068286386     1.52585073033675
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00757126201331     0.02425256035638     0.03089451030621
-    2      0.00757126201331    -0.02425256035638    -0.03089451030621
+    1     -0.00757126201330     0.02425256035653     0.03089451030639
+    2      0.00757126201330    -0.02425256035653    -0.03089451030639
  frms,max,avg= 2.3093877E-02 3.0894510E-02  -1.062E-06  1.915E-05  7.189E-05 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.38932991369308     1.24711669121900     1.58865946125865
-    2      0.38932991369308    -1.24711669121900    -1.58865946125865
+    1     -0.38932991369305     1.24711669122656     1.58865946126787
+    2      0.38932991369305    -1.24711669122656    -1.58865946126787
  frms,max,avg= 1.1875348E+00 1.5886595E+00  -5.462E-05  9.846E-04  3.697E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
@@ -699,26 +699,26 @@ force_length_stats: {min:   3.99997682E-02, max:   3.99997682E-02, mean:   3.999
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.37023101909798E+00
+kinetic             :  3.37023101909852E+00
 hartree             :  6.89097799661141E-01
-xc                  : -7.57798891727685E+00
+xc                  : -7.57798891727686E+00
 Ewald energy        : -9.02427477561960E+00
 psp_core            :  1.02189418686273E+00
 local_psp           : -1.55517501123707E+00
 spherical_terms     :  4.45248176166079E+00
-total_energy        : -8.62373393685088E+00
-total_energy_eV     : -2.34663734462158E+02
+total_energy        : -8.62373393685035E+00
+total_energy_eV     : -2.34663734462144E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.08501548146146E-01
+band_energy         : -5.08501548144770E-01
 Ewald energy        : -9.02427477561960E+00
 psp_core            :  1.02189418686273E+00
-xc_dc               : -4.24791262757685E+00
-spherical_terms     :  4.13252281930334E+00
+xc_dc               : -4.24791262757686E+00
+spherical_terms     :  4.13252281930197E+00
 total_energy_dc     : -8.62627194517653E+00
 total_energy_dc_eV  : -2.34732797180948E+02
 ...
@@ -1874,9 +1874,9 @@ total_energy_dc_eV  : -2.34732797180947E+02
  -outvars: echo values of variables after computation  --------
             acell      1.0640000000E+01  1.0640000000E+01  1.0640000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  cprj_update_lvl1         -2
-  cprj_update_lvl2         -1
-  cprj_update_lvl3          0
+  cprj_update_lvl1          0
+  cprj_update_lvl2         -2
+  cprj_update_lvl3         -1
   cprj_update_lvl4          1
   cprj_update_lvl5          2
   cprj_update_lvl6          3
@@ -1891,8 +1891,8 @@ total_energy_dc_eV  : -2.34732797180947E+02
            etotal7    -8.6262719452E+00
             fcart1    -7.5712620133E-03  2.4252560356E-02  3.0894510306E-02
                        7.5712620133E-03 -2.4252560356E-02 -3.0894510306E-02
-            fcart2    -7.5712620133E-03  2.4252560356E-02  3.0894510306E-02
-                       7.5712620133E-03 -2.4252560356E-02 -3.0894510306E-02
+            fcart2    -7.5712620133E-03  2.4252560357E-02  3.0894510306E-02
+                       7.5712620133E-03 -2.4252560357E-02 -3.0894510306E-02
             fcart3    -7.5712620133E-03  2.4252560356E-02  3.0894510306E-02
                        7.5712620133E-03 -2.4252560356E-02 -3.0894510306E-02
             fcart4    -7.5712620133E-03  2.4252560357E-02  3.0894510306E-02
@@ -1945,7 +1945,7 @@ P           mkmem          16
           spgroup           1
            strten1    -6.9406275502E-04 -7.6736018784E-04 -7.8184545720E-04
                        1.0081648133E-05  4.4284038594E-04  3.8658235449E-04
-           strten2    -6.9406275502E-04 -7.6736018784E-04 -7.8184545720E-04
+           strten2    -6.9406275503E-04 -7.6736018784E-04 -7.8184545721E-04
                        1.0081648133E-05  4.4284038594E-04  3.8658235450E-04
            strten3    -6.9406275502E-04 -7.6736018784E-04 -7.8184545720E-04
                        1.0081648133E-05  4.4284038594E-04  3.8658235449E-04
@@ -2056,10 +2056,10 @@ P           mkmem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.2
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.2
++Overall time at end (sec) : cpu=          4.7  wall=          4.7

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 19 Apr 2021.
-- ( at 18h28 )
+.Starting date : Wed 21 Apr 2021.
+- ( at 17h47 )
   
 - input  file    -> /home/baguetl/PROGRAM/abinit/v9.4.1-cgwf-cprj/build/prof/Test_suite/v9_t100/t100.abi
 - output file    -> t100.abo
@@ -276,9 +276,9 @@ _ WF disk file :      0.081 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
   cprj_update_lvl7          3
   cprj_update_lvl8          3
   cprj_update_lvl9          3
-  cprj_update_lvl10        -2
-  cprj_update_lvl11        -2
-  cprj_update_lvl12        -2
+  cprj_update_lvl10         0
+  cprj_update_lvl11         0
+  cprj_update_lvl12         0
              ecut      3.50000000E+00 Hartree
 -          fftalg         312
               ixc       -1012
@@ -3138,9 +3138,9 @@ total_energy_dc_eV  : -2.34732797180949E+02
   cprj_update_lvl7          3
   cprj_update_lvl8          3
   cprj_update_lvl9          3
-  cprj_update_lvl10        -2
-  cprj_update_lvl11        -2
-  cprj_update_lvl12        -2
+  cprj_update_lvl10         0
+  cprj_update_lvl11         0
+  cprj_update_lvl12         0
              ecut      3.50000000E+00 Hartree
            etotal1    -8.6262719452E+00
            etotal2    -8.6262719452E+00
@@ -3353,10 +3353,10 @@ P           mkmem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.1  wall=          6.1
++Overall time at end (sec) : cpu=          6.5  wall=          6.5

@@ -13,9 +13,9 @@
   cprj_update_lvl6  3 # A + B (default value)
   cprj_update_lvl5  2 # A + C
   cprj_update_lvl4  1 # A + B + C
-  cprj_update_lvl3  0 # A + B + C + D (for debugging only, poor performance)
-  cprj_update_lvl2 -1 # A + B + C + D + E (for debugging only, poor performance)
-  cprj_update_lvl1 -2 # "cprj_in_memory" implementation is disabled, use of the native implementation instead
+  cprj_update_lvl3 -1 # A + B + C + D (for debugging only, poor performance)
+  cprj_update_lvl2 -2 # A + B + C + D + E (for debugging only, poor performance)
+  cprj_update_lvl1  0 # "cprj_in_memory" implementation is disabled, use of the native implementation instead
 
   optforces 2
   optstress 1
@@ -79,4 +79,5 @@
 #%% authors = L. Baguet
 #%% keywords = PAW
 #%% description = Quick test on AlAs (PAW) to check that different cprj_update_lvl options give the correct energy.
+#%%               Compute forces and stress at the end of the run.
 #%%<END TEST_INFO>

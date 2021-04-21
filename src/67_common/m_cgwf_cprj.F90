@@ -56,7 +56,6 @@ module m_cgwf_cprj
  public :: cprj_update_oneband
  public :: cprj_check
  public :: get_cprj_id
- public :: cprj_in_memory
 
 !!***
 
@@ -205,7 +204,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
- if (cprj_update_lvl==-1)  call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+ if (cprj_update_lvl==-2)  call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
 
  ! Big iband loop
  do iband=1,nband
@@ -600,7 +599,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
          end do
        end do
        call timab(1305,2,tsec)
-       if (cprj_update_lvl<=0.and.cprj_update_lvl>=-1) then
+       if (cprj_update_lvl<0) then
          call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
        else
          call timab(1302,1,tsec)
@@ -662,7 +661,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
  !  ======================================================================
 
- if (cprj_update_lvl<=2.and.cprj_update_lvl>=-1) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+ if (cprj_update_lvl<=2) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
 
  sij_opt=0
 
@@ -1239,51 +1238,6 @@ subroutine get_cwavefr(cwavef,cwavef_r,gs_hamk,mpi_enreg)
  ABI_FREE(fofgout_dum)
 
 end subroutine get_cwavefr
-!!***
-
-!!****f* ABINIT/cprj_in_memory
-!!
-!! NAME
-!! cprj_in_memory
-!!
-!! FUNCTION
-!! Return a logical value determining if the "cprj_in_memory" implementation can be used or not
-!!
-!! INPUTS
-!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!
-!! OUTPUT
-!!  cprj_in_memory : true if "cprj_in_memory" implementation can be used
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-logical function cprj_in_memory(dtset)
-
-   type(dataset_type), intent(in) :: dtset
-
-   cprj_in_memory = .true.
-   ! Must be PAW...
-   if (dtset%usepaw/=1) cprj_in_memory = .false.
-   ! ... and Conjugate Gradient...
-   if (dtset%wfoptalg/=10) cprj_in_memory = .false.
-   ! ...without RMM-DIIS...
-   if (dtset%rmm_diis/=0) cprj_in_memory = .false.
-   ! ...with only parralelization over k point...
-   if (dtset%paral_kgb/=0) cprj_in_memory = .false.
-   ! ...without electric field...
-   if (dtset%berryopt/=0) cprj_in_memory = .false.
-   ! ...without Fock exchange...
-   if (dtset%usefock/=0) cprj_in_memory = .false.
-   ! ...without nuclear dipolar moments...
-   if (sum(abs(dtset%nucdipmom))>tol16) cprj_in_memory = .false.
-   ! ...with cprj_update_lvl>=-1 (so cprj_update_lvl<-1 is a simply way to disable cprj_in_memory)
-   if (dtset%cprj_update_lvl<-1) cprj_in_memory = .false.
-
-end function cprj_in_memory
 !!***
 
 end module m_cgwf_cprj

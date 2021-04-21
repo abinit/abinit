@@ -119,7 +119,6 @@ module m_scfcv_core
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
- use m_cgwf_cprj,        only : cprj_in_memory
 
  implicit none
 
@@ -1148,7 +1147,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
      if (initialized/=0.and.dtset%usewvl == 0.and.ipositron/=1) then
        ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
-       if (cprj_in_memory(dtset)) then
+       if (dtset%cprj_in_memory/=0) then
          iatom=0
          idir=0
          iorder_cprj=0

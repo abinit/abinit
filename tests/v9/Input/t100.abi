@@ -17,9 +17,9 @@
   nloc_alg11  3
   nloc_alg12  4
 
-  cprj_update_lvl10 -2
-  cprj_update_lvl11 -2
-  cprj_update_lvl12 -2
+  cprj_update_lvl10 0
+  cprj_update_lvl11 0
+  cprj_update_lvl12 0
 
 # Elementary cell
 #*********************************
@@ -80,4 +80,5 @@
 #%% authors = L. Baguet
 #%% keywords = PAW
 #%% description = Quick test on AlAs (PAW) to check that different nloc_alg options give the correct energy.
+#%%               Case istwfk=1.
 #%%<END TEST_INFO>

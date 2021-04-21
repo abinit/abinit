@@ -116,6 +116,7 @@ type, public :: dataset_type
  integer :: chksymbreak
  integer :: chksymtnons
  integer :: cineb_start
+ integer :: cprj_in_memory
  integer :: cprj_update_lvl
 
 !D
@@ -1373,6 +1374,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
+ dtout%cprj_in_memory     = dtin%cprj_in_memory
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
