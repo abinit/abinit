@@ -1782,6 +1782,116 @@ Incidentally, [[ionmov]]==4 is not allowed in the present implementation of cons
 """,
 ),
 
+Variable(
+    abivarname="cprj_in_memory",
+    varset="internal",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="C-PRoJectors IN MEMORY",
+    characteristics=['[[INTERNAL_ONLY]]'],
+    added_in_version="",
+    text=r"""
+Non-local operations are one of the most time-consuming part of the computation of the energy or the Hamiltonian, especially for systems with many atoms.
+The non-local contribution of the wave-function $\psi$ to the energy writes:
+
+$$ E_{non-local} = \sum_a\sum_{i,j} <\psi|p_{a,i}> e_{a,ij} <p_{a,j}|\psi> $$
+
+and the Hamiltonian applied to a wave-function is:
+
+$$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
+
+The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors in the pseudo-potential.
+$e_{a,ij}$ and $D_{a,ij}$ are scalars.
+Introducing the "cprj" coefficients:
+
+$$ cprj(a,i) = <p_{a,i}|\psi> $$
+
+the energy writes:
+
+$$ E_{non-local} = \sum_a\sum_{ij} \left(cprj(a,i)\right)^* e_{a,ij} cprj(a,j) $$
+
+and the Hamiltonian becomes:
+
+$$ H_{non-local}|\psi> = \sum_a\sum_{i,j} |p_{a,i}> D_{a,ij} cprj(a,j) $$
+
+With [[cprj_in_memory]] = 0, "cprj" coefficients are computed on-the-fly in many parts of the code, including ground-state computations.
+If [[cprj_in_memory]] = 1 (or any non-zero value), "cprj" coefficients are stored in memory during the whole computation, and they evolve as the wave-functions do.
+Some algorithms can take advantage of this feature and reduce the computational time.
+For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
+
+* [[optdriver]] = 0 : ground-state computation
+
+* [[usepaw]] = 1 : with PAW formalism
+
+* [[wfoptalg]] = 10 : using Congugate Gradient algorithm
+
+* [[paral_kgb]] = 0 : with simple parallelization over k-points only
+
+* [[rmm_diis]] = 0 : without the use of rmm_diis algorithm
+
+* [[berryopt]] = 0 : without finite electric-field
+
+* [[usefock]] = 0 : without Fock exchange term in the functional
+
+* [[nucdipmom]] = 0 : without nuclear dipolar moments
+
+If these conditions are met and [[cprj_update_lvl]] is non-zero, [[cprj_in_memory]] is set to 1.
+This way [[cprj_update_lvl]] = 0 forces the code to use the native implementation, where "cprj" coefficients are computed on-the-fly.
+
+""",
+),
+
+Variable(
+    abivarname="cprj_update_lvl",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="C-PRoJectors UPDATE LeVeL",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="",
+    text=r"""
+This variable is used to control the [[cprj_in_memory]] implementation, in which "cprj" coefficients are kept in memory during the computation:
+
+$$ cprj(a,i) = <p_{a,i}|\psi> $$
+
+Read the [[cprj_in_memory]] documentation for details about the notations.
+If [[cprj_update_lvl]] is set to 0, the [[cprj_in_memory]] implementation is disabled.
+Otherwise, "cprj" coefficients are computed at the beginning of the run and evolves as the wave-function do.
+In principle, there is no need to compute "cprj" coefficients directly from the wave-functions again after they are initialized.
+However, numerical errors can accumulate and lead to a significant differences between "cprj" coefficients and wave-functions.
+One can update the "cprj" coefficients from time to time, computing them directly from the wave-functions, in different places in the code:
+
+* A : at the beginning of the run, or after the move of atoms
+
+* B : after wave-functions orthogonalization
+
+* C : before the subspace diagonalization
+
+* D : at the end of an iteration in the conjugate gradient algorithm
+
+* E : at the beginning of the conjugate gradient algorithm
+
+The update is done depending on the [[cprj_update_lvl]] value according to the following table:
+
+cprj_update_lvl |   A |   B |   C |   D |   E
+---             | --- | --- | --- | --- | ---
+              4 |   X |     |     |     |
+    3 (default) |   X |   X |     |     |
+              2 |   X |     |   X |     |
+              1 |   X |   X |   X |     |
+             -1 |   X |   X |   X |   X |
+             -2 |   X |   X |   X |   X |   X
+
+Places B and C add one computation of "cprj" coefficients per SCF step (see [[nstep]]), whereas places D and E add one computation per "line" (see [[nline]]).
+Places D and E are activated only for negative values of [[cprj_update_lvl]] and should be used only for debugging.
+Indeed, in these cases performances are very likely worse than [[cprj_update_lvl]] = 0 (so [[cprj_in_memory]] = 0).
+One can count the number of non-local operations using [[nonlop_ylm_count]] to precisely measure the effect of [[cprj_update_lvl]].
+""",
+),
 
 Variable(
     abivarname="cpuh",
@@ -11296,6 +11406,24 @@ For [[useylm]] = 0 :
 
 For [[useylm]] = 1 :
 
+With spherical harmonics, the computation of non-local terms needs:
+
+$$ <p_{a,nlm}|\psi> = \frac{4\pi}\Omega \sum_{G} e^{iG.R_a} i^l ffnl_a(G,nlm) c(G) $$
+
+where c(G) are the coefficients of the wave-function $\psi$, $R_a$ the atomic position.
+
+Also:
+
+$$ <G|H_{non-local}|\psi> = \frac{4\pi}\Omega \sum_a \sum_{nlm} e^{-iG.R_a} (-i)^l ffnl_a(G,nlm) fac_a(nlm) $$
+
+A part of the computation can be done as a matrix-vector multiplication:
+
+$$ \sum_{G} ffnl_a(G,nlm) c(G) e^{iG.R_a} = \left(ffnl_a\right)_{nlm,G} \left( vect \right)_G $$
+
+and:
+
+$$ \sum_{nlm} ffnl_a(G,nlm) fac_a(nlm) = \left(ffnl_a\right)_{G,nlm} \left( fac_a \right)_{nlm} $$
+
   [[nloc_alg]] = 4 is historically the first implementation, in which some operations are treated "line-by-line".
   In an other implementation these operations are gathered as matrix-vector multiplications.
   One dimension of the matrix is the number of plane waves (see [[ecut]]), and the other is the number of projectors from the pseudo-potential.
@@ -11369,6 +11497,71 @@ Gives the number of thermostats in the chain of oscillators
 thermostats as proposed in [[cite:Martyna1996]]. The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]] = 13) or to perform Path Integral Molecular Dynamics
 (PIMD) ([[imgmov]] = 13).
 The mass of these thermostats is given by [[qmass]].
+""",
+),
+
+Variable(
+    abivarname="nonlop_ylm_count",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NON LOcal Operator (YLM version) COUNTer",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="",
+    text=r"""
+The non-local contribution of the wave-function $\psi$ to the energy writes:
+
+$$ E_{non-local} = \sum_a\sum_{i,j} <\psi|p_{a,i}> e_{a,ij} <p_{a,j}|\psi> $$
+
+and the Hamiltonian applied to a wave-function is:
+
+$$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
+
+The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors in the pseudo-potential.
+$e_{a,ij}$ and $D_{a,ij}$ are scalars.
+With the use of spherical harmonics ([[useylm]] = 1), the sum over "i" (or "j") is equivalent to a sum over the usual three indices "n", "l" and "m" used for atomic orbitals.
+The most time-consuming parts of the computation of non-local terms are :
+
+* the computation of $<p_{a,i}|\psi>$ for every "a" and "i"
+
+* the computation of $\sum_a\sum_i |p_{a,i}> f_{a,i}$ where $f_{a,i} = \sum_j D_{a,ij} <p_{a,j}|\psi>$
+
+The first operation is done in the routines "opernla_ylm", and the second one is done in "opernlb_ylm".
+Both operations scale like $O\left(N_{at}N_{proj}N_{pw}\right)$ where $N_{at}$ is the number of atoms ([[natom]]), $N_{proj}$ the number of projectors $|p_{a,i}>$ per atom, and $N_{pw}$ the number of plane waves.
+For systems with many atoms these two operations are the most time consuming, and can take a huge portion of the total computational time.
+For that reason, it is interesting to count the number of non-local operations in a dataset, which is done with [[nonlop_ylm_count]] = 1 (or any non-zero value).
+For now, this feature is available only in the following context:
+
+* [[useylm]] = 1 : use of spherical harmonics
+
+* [[optdriver]] = 0 : ground-state computation
+
+* [[paral_kgb]] = 0 : simple parallelization over k-points
+
+If the counting is activated, a little report is written in abinit output.
+Here an example:
+
+    --- NONLOP YLM COUNTERS -----------------------------------------------------
+    Number of Calls in nonlop_ylm : NC =      2
+    total Number of Bands         : NB =     64
+                         | total count (TC) |            TC/NC |         TC/NC/NB
+    -----------------------------------------------------------------------------
+    opernla_ylm          |             1152 |              576 |              9.0
+    opernla_ylm_mv(dgemv)|             4022 |             2011 |             31.4
+    opernlb_ylm_mv       |             3254 |             1627 |             25.4
+    -----------------------------------------------------------------------------
+
+The total count (TC) corresponds to the raw number of calls of the routine.
+In a call of "nonlop_ylm", the sum over atoms is divided by the number of atomic types, and then by blocks of 10 atoms, so in "opernl" routines the sum run over at most 10 atoms (of the same type).
+As a consequence, "opernl" routines are called NC times in one call of "nonlop_ylm" to compute the sum over all atoms.
+Finally, NB is the total number of bands, even the empty ones, summed over the k-points.
+
+With this report, one can look at the effect of [[cprj_in_memory]] and [[cprj_update_lvl]] on the total number of calls.
+
+Several versions of "opernla_ylm" and "opernlb_ylm" routines are implemented.
+The choice of the implementation has an effect on performances and is controlled by [[nloc_alg]].
 """,
 ),
 
@@ -12737,7 +12930,7 @@ or half-occupied band, or other choices in special circumstances.
 
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
 If [[nsppol]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
-If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
+If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]],
 first spin up, in order of increasing electronic eigenenergy, then spin down, in order of increasing electronic eigenenergy.
 
 If [[occopt]] = 2, then the band occupancies must be provided explicitly for

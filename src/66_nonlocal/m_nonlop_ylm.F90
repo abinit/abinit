@@ -1432,7 +1432,7 @@ subroutine nonlop_ylm_output_counters(natom,nbandtot,ntypat,typat,mpi_enreg)
    end do
  end do
  call wrtout([std_out,ab_out],'','COLL')
- write(msg,'(a)')                ' --- NONLOP YLM COUNTERS -------------------------------------------------'
+ write(msg,'(a)')                ' --- NONLOP YLM COUNTERS -----------------------------------------------------'
  call wrtout([std_out,ab_out],msg,'COLL')
  mincat=min(NLO_MINCAT,maxval(nattyp))
  ia1=1;iatm=0;opernl_calls=0
@@ -1457,9 +1457,9 @@ subroutine nonlop_ylm_output_counters(natom,nbandtot,ntypat,typat,mpi_enreg)
  call wrtout([std_out,ab_out],msg,'COLL')
  write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
  call wrtout([std_out,ab_out],msg,'COLL')
- write(msg,'(a)')                '                  | total count (TC) |            TC/NC |         TC/NC/NB'
+ write(msg,'(a)')                '                      | total count (TC) |            TC/NC |         TC/NC/NB'
  call wrtout([std_out,ab_out],msg,'COLL')
- write(msg,'(a)')                ' -------------------------------------------------------------------------'
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
  call wrtout([std_out,ab_out],msg,'COLL')
  call xmpi_sum(opernla_counter,mpi_enreg%comm_kpt,ierr)
  call xmpi_sum(opernlb_counter,mpi_enreg%comm_kpt,ierr)
@@ -1469,41 +1469,41 @@ subroutine nonlop_ylm_output_counters(natom,nbandtot,ntypat,typat,mpi_enreg)
  call xmpi_sum(opernlb_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
  cnt=opernla_counter
  if (cnt>0) then
-   write(msg,'(2(a,i16),a,f16.1)') ' opernla          | ',&
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_ylm          | ',&
      & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
  end if
  cnt=opernla_mv_counter
  if (cnt>0) then
-   write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv       | ',&
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_ylm_mv       | ',&
      & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
  end if
  cnt=opernla_mv_dgemv_counter
  if (cnt>0) then
-   write(msg,'(2(a,i16),a,f16.1)') ' opernla_mv_dgemv | ',&
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_ylm_mv(dgemv)| ',&
      & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
  end if
  cnt=opernlb_counter
  if (cnt>0) then
-   write(msg,'(2(a,i16),a,f16.1)') ' opernlb          | ',&
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_ylm          | ',&
      & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
  end if
  cnt=opernlb_mv_counter
  if (cnt>0) then
-   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv       | ',&
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_ylm_mv       | ',&
      & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
  end if
  cnt=opernlb_mv_dgemv_counter
  if (cnt>0) then
-   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_mv_dgemv | ',&
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_ylm_mv(dgemv)| ',&
      & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
    call wrtout([std_out,ab_out],msg,'COLL')
  end if
- write(msg,'(a)')                ' -------------------------------------------------------------------------'
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
  call wrtout([std_out,ab_out],msg,'COLL')
 
 end subroutine nonlop_ylm_output_counters
