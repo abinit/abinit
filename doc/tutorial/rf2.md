@@ -290,7 +290,7 @@ needed for the Fourier interpolation), but not printed.
 
 {% dialog tests/tutorespfn/Refs/trf2_5.abo %}
 
-Please, open also the other output file, named *trf2_5_B2EPS.out.freq*.
+Please, open also the other output file, named *trf2_5_B2EPS.freq*.
 It contains the frequencies, in a format suitable for graphical output, using the program
 *band2eps* (the latter should be more documented, and will not be described in the present tutorial).
 
@@ -300,19 +300,19 @@ You can copy the files *trf2_6.abi* and *trf2_6.files* to the *Work_rf2* directo
 
 {% dialog tests/tutorespfn/Input/trf2_6.files tests/tutorespfn/Input/trf2_6.abi %}
 
-The file *trf2_6.out.eps* has been produced. It is an .eps file (eps stand for
+The file *trf2_6.abo.eps* has been produced. It is an .eps file (eps stand for
 Encapsulated PostScript). You can use the program ghostview to vizualize it.
 The command to issue will depend on the way you have configured your machine,
 but the following might perhaps do the work:
 
-    gv trf2_6.out.eps
+    gv trf2_6.abo.eps
 
 You should see a nice phonon band structure for AlAs. Well, not so nice, after
 all, because there are two strange dips for the highest phonon band, at the Gamma point.
 This is due to the lack of LO-TO splitting for the ANADDB treatment of the first list of vector.
 The correct phonon band structure is:
 
-![](rf2_assets/trf2_6.out.png)
+![](rf2_assets/trf2_6.abo.png)
 
 You can correct the LO-TO splitting by the following little hack.
 
@@ -320,13 +320,13 @@ Open the file *trf2_5_B2EPS.freq*, and note that the value of the frequency, in
 the sixth column, has a discontinuity exactly for the Gamma point (the three
 first columns give the k point coordinates), that is, at lines 1 and 31:
 
-     0.000000D+00  0.000000D+00  0.000000D+00  0.156855D-02  0.156855D-02  0.156855D-02
+     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  0.1568561346E-02  0.1568561346E-02  0.1568561346E-02
 
 Replace these values (sixth column, line 1 and 31) by the correct value,
 including the LO-TO splitting, that you can find in the file *trf2_5.abo*, at
 the end, second list of vector. That is, the lines 1 and 31 should now read:
 
-     0.000000D+00  0.000000D+00  0.000000D+00  0.156855D-02  0.156855D-02  1.730353E-03
+     0.000000E+00  0.000000E+00  0.000000E+00  1.568561E-03  1.568561E-03  1.730570E-03
 
 Now, run *band2eps* again. Your phonon band structure should be perfect!
 
@@ -345,7 +345,7 @@ produced by *anaddb*.
 For instance:
 
 ```sh
-abiopen.py trf2_5.out_PHBST.nc --expose --seaborn=talk
+abiopen.py trf2_5_PHBST.nc --expose --seaborn=talk
 ```
 
 produces the following plot without LO-TO splitting:
@@ -363,7 +363,7 @@ All of this with just two lines:
 ```sh
 # Copy the tutorial output file to have the correct file extension (DDB)
 # otherwise abiview does not know how to handle our file.
-cp trf2_3.ddb.out trf2_3_DDB
+cp trf2_3.ddb.abo trf2_3_DDB
 
 abiview.py ddb trf2_3_DDB -sns=talk
 ```
@@ -433,7 +433,7 @@ and stishovite, published in [[cite:Lee1995]].
 
 You can copy the files *trf2_7.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work_rf2*
 and have a look at them.
-The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.out*.
+The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.abo*.
 
 {% dialog tests/tutorespfn/Input/trf2_7.files tests/tutorespfn/Input/trf2_7.abi %}
 
