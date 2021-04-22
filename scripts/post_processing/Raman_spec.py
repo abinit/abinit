@@ -18,6 +18,11 @@ Version: 0.0 - Initial building of program
          0.2 - Additional user input required and number of output files reduced
          0.3 - Moved all user prompted input to an input file
 
+Input:  Input variables : filename, temp, laser_freq, spread,
+        calctype, outname, relative_intensity, freq_unit, 
+        keep_file, n_freq, min_freq, max_freq.
+        See a minimal input file at the end of the tutorial nlo.
+
 Output: Program will output a text file containing the raman spectrum vs frequency
         and an outfile which outlines what happens in the calculation.
 
@@ -48,7 +53,7 @@ def READ_INPUT(user_filein):
     
     Output:  array of input information used by program
     """
-    #declare array of  values
+    #declare array of default values
     vararray = [0,0,[0,2],[0,2],0,0,False,2,False,1000,[-1.0,2],[-1.0,2]]
     
     #check if file exists
