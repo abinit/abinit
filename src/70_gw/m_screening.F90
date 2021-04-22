@@ -1401,11 +1401,12 @@ end subroutine decompose_epsm1
 subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,chi0_head,&
   chi0_lwing,chi0_uwing,chi0,spectra,comm,&
-  fxc_ADA) ! optional argument
+  fxc_ADA,rhor) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,nomega,dim_wing,approx_type,option_test,nkxc,nfftot,comm
+ real(dp),intent(in),optional :: rhor
  type(vcoul_t),target,intent(in) :: Vcp
  type(spectra_t),intent(out) :: Spectra
 !arrays
@@ -1437,9 +1438,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
 !bootstrap and LR
  integer :: istep,nstep
- real(dp) :: conv_err, alpha, Zr, qpg2
+ real(dp) :: conv_err, alpha, Zr, qpg2(3), qpg2_nrm
  real(gwpc) :: chi00_head, fxc_head
- complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
+ complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), vfxc_tmp(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 
 ! *************************************************************************
@@ -1842,6 +1843,7 @@ CASE(6)
 
    ! Now LR: (1-Z)*chi0^-1
    ABI_MALLOC_OR_DIE(vfxc_lr,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(vfxc_tmp,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
 
    if (iqibz==1) then
@@ -1852,7 +1854,7 @@ CASE(6)
 
    Zr = 0.78 
    chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
-   fxc_head = czero; vfxc_lr = czero; 
+   fxc_head = czero; vfxc_lr = czero; vfxc_tmp = czero
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
    call wrtout(std_out,msg,'COLL')
@@ -1860,20 +1862,23 @@ CASE(6)
    chi0_tmp = chi0(:,:,1)
    call xginv(chi0_tmp,npwe,comm=comm)
    vfxc_lr = (one-Zr)*chi0_tmp(:,:)
-   !do ig1=1,npwe
-   !  vfxc_lr(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_lr(ig1,:) 
-   !end do
    write(msg,'(a)') ' Constructing LR+ALDA fxc kernel'
    call wrtout(std_out,msg,'COLL')
-   do ig1=2,npwe
-     vfxc_lr(ig1,2:npwe) = kxcg_mat(ig1,2:npwe)
-     vfxc_lr(1,ig1) = vfxc_lr(1,ig1) + kxcg_mat(1,ig1)
-     vfxc_lr(ig1,1) = vfxc_lr(ig1,1) + kxcg_mat(ig1,1)
-   end do
-   if (iqibz > 1) then
-     vfxc_lr(1,1) = vfxc_lr(1,1) + kxcg_mat(1,1)
-   end if
    !
+   do ig1=1,npwe
+      do ig2=1,npwe
+       qpg2 = Vcp%qibz(:,iqibz) + gvec(:,ig1)
+       qpg2_nrm = normv(qpg2,gmet,"G")
+       qpg2 =  Vcp%qibz(:,iqibz) + gvec(:,ig2)
+       qpg2_nrm = SQRT(qpg2_nrm * normv(qpg2,gmet,"G"))
+       vfxc_tmp(ig1,ig2) = vfxc_lr(ig1,ig2)*exp(-(qpg2_nrm/k_thfermi(rhor))**2) + & 
+&        kxcg_mat(ig1,ig2)*(one - exp(-(qpg2_nrm/k_thfermi(rhor))**2))
+       !write(std_out,*) ig1, qpg2_nrm, k_thfermi(rhor), vfxc_lr(ig1,ig1), kxcg_mat(ig1,ig1), vfxc_tmp(ig1,ig1)
+      end do
+   end do
+   !
+   vfxc_lr = vfxc_tmp
+   
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_lr,kxcg_mat,option_test,my_nqlwl,dim_wing,omega(io),&
@@ -1887,6 +1892,7 @@ CASE(6)
    ABI_FREE(kxcg_mat)
    ABI_FREE(chi0_tmp)
    ABI_FREE(vfxc_lr)
+   ABI_FREE(vfxc_tmp)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
