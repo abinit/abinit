@@ -982,8 +982,8 @@ end subroutine print_efmas
           end do
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
             write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
-&            'but gradient of band(s) was found to be nonzero.'
-            ABI_ERROR(msg)
+&            'but gradient of band(s) was found to be nonzero. Abinit will continue anyway.'
+            ABI_WARNING(TRIM(msg))
           end if
         end do !adir=1,3
       end if !degenerate(1)
