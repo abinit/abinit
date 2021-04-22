@@ -453,19 +453,20 @@ The following additional input variables are present:
 Examine the input file, the input variables, then run anaddb as usual.
 Then, open the output file. You should be able to find the crucial section:
 
-    # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
-    # (A mol-c is the abbreviation of a mole-cell, that is, the
-    #  number of Avogadro times the atoms in a unit cell)
-     2.000E+01  8.1384755E+03  8.1463588E+03  3.9416455E-01  1.4169104E+00
-     4.000E+01  8.1061318E+03  8.2368069E+03  3.2668770E+00  7.8985031E+00
-     6.000E+01  7.9980215E+03  8.4575659E+03  7.6590742E+00  1.3992228E+01
-     8.000E+01  7.7974375E+03  8.7915524E+03  1.2426436E+01  1.9325166E+01
-     1.000E+02  7.5004822E+03  9.2274431E+03  1.7269609E+01  2.4175006E+01
-     1.200E+02  7.1069991E+03  9.7544364E+03  2.2061978E+01  2.8411189E+01
-     1.400E+02  6.6189291E+03  1.0359248E+04  2.6716565E+01  3.1955267E+01
-     1.600E+02  6.0396227E+03  1.1028289E+04  3.1179167E+01  3.4847423E+01
-     1.800E+02  5.3732223E+03  1.1749439E+04  3.5423427E+01  3.7183864E+01
-     2.000E+02  4.6241910E+03  1.2512641E+04  3.9442251E+01  3.9069448E+01
+     # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
+     # (A mol-c is the abbreviation of a mole-cell, that is, the
+     #  number of Avogadro times the atoms in a unit cell)
+      2.000E+01  8.1406018E+03  8.1484316E+03  3.9149240E-01  1.4057917E+00  7.2615609E+01
+      4.000E+01  8.1084535E+03  8.2384509E+03  3.2499352E+00  7.8730812E+00  9.4376064E+01
+      6.000E+01  8.0007856E+03  8.4587550E+03  7.6328229E+00  1.3972961E+01  1.1313071E+02
+      8.000E+01  7.8007781E+03  8.7924243E+03  1.2395577E+01  1.9312368E+01  1.3603493E+02
+      1.000E+02  7.5044659E+03  9.2281056E+03  1.7236397E+01  2.4166544E+01  1.5713727E+02
+      1.200E+02  7.1116611E+03  9.7549590E+03  2.2027483E+01  2.8405448E+01  1.7346361E+02
+      1.400E+02  6.6242892E+03  1.0359674E+04  2.6681323E+01  3.1951237E+01  1.8536427E+02
+      1.600E+02  6.0456925E+03  1.1028647E+04  3.1143464E+01  3.4844495E+01  1.9397760E+02
+      1.800E+02  5.3800094E+03  1.1749746E+04  3.5387425E+01  3.7181668E+01  2.0029176E+02
+      2.000E+02  4.6317003E+03  1.2512909E+04  3.9406045E+01  3.9067753E+01  2.0500949E+02
+
 
 There, one finds, the phonon free energy, the phonon internal energy, the
 phonon entropy and the phonon heat capacity.
