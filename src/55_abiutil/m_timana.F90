@@ -1756,7 +1756,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      if(xmpi_paral==1)then
        write(ount, '(a,/,a)' )'-','-Synchronisation (=leave_test) and MPI calls '
        nlist=14
-       list(:14)=(/48,61,62,63,64,65,66,67,71,85,86,543,544,787/)
+       list(:nlist)=(/48,61,62,63,64,65,66,67,71,85,86,543,544,787/)
        subcpu=zero; subwal=zero
        if(ncount(list(1))/=0)then
          do ilist=1,nlist
@@ -1783,7 +1783,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      end if !xmpi_paral
 
      nlist=25
-     list(:25)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333/)
+     list(:nlist)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -1799,7 +1799,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      end do
 
      nlist=23
-     list(:23)=(/550,551,552,553,554,555,556,558,559,560,561,562,563,564,565,566,567,593,594,595,596,597,598/)
+     list(:nlist)=(/550,551,552,553,554,555,556,558,559,560,561,562,563,564,565,566,567,593,594,595,596,597,598/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -1821,7 +1821,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
        nlist=8
-       list(:8)=(/802,803,9,75,76,77,210,11/)
+       list(:nlist)=(/802,803,9,75,76,77,210,11/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then
