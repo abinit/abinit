@@ -866,18 +866,23 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1209)='gstateimg(aft. loop img)        '
  names(1210)='gstateimg(finalize)             '
 
- names(1211)='gstate(pspini)                  '
- names(1213)='gstate->kpgsph                  '
- names(1214)='gstate  (2)                     '
- names(1215)='gstate(...scfcv)                '
- names(1216)='gstate(prt gap)                 '
- names(1217)='gstate(prtwf)                   '
- names(1218)='gstate(clnup1)                  '
- names(1219)='gstate(prtelfield)              '
- names(1220)='gstate(DDB)                     '
- names(1221)='gstate(clnup2)                  '
+ names(1211)='gstate(1)                       '
+ names(1212)='gstate(pspini)                  '
+ names(1213)='gstate(2)                       '
+ names(1214)='gstate(init rhor rhog)          '
+ names(1215)='gstate(init history)            '
+ names(1225)='gstate(...scfcv)                '
+ names(1226)='gstate(prt gap)                 '
+ names(1227)='gstate(prtwf)                   '
+ names(1228)='gstate(clnup1)                  '
+ names(1229)='gstate(prtelfield)              '
+ names(1230)='gstate(DDB)                     '
+ names(1231)='gstate(clnup2)                  '
 
- names(1222)='gstate                          '
+ names(1232)='gstate                          '
+
+ names(1280)='read_rho                        '
+ names(1281)='interpolate_denpot              '
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1538,7 +1543,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(2)
          list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)        ; msg='driver '
        case(3)
-         list(:22)=(/ (ii,ii=1200,1221,1) /)                         ; msg='gstateimg+gstate '
+         list(:32)=(/ (ii,ii=1200,1231,1) /)                         ; msg='gstateimg+gstate '
        case(4)
          list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); msg='scfcv_core '
        case(5)
@@ -1782,8 +1787,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if !ncount
      end if !xmpi_paral
 
-     nlist=25
-     list(:nlist)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333/)
+     nlist=27
+     list(:nlist)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,1280,1281/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
