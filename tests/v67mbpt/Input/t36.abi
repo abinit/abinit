@@ -1,4 +1,6 @@
 # GW band gap of diamond with bootstrap and LR+ALDA kernel
+# Results are meaningless due to the very low cutoff 
+# and the small number of bands
 ndtset 10
 jdtset 1 2 4 5 6 7 11 12 21 22
 
@@ -48,7 +50,7 @@ awtr       1
 gwgamma   -4   # bootstrap kernel in TC-TC dielectric function
 gwgamma1? -6   # bootstrap (head-only) kernel in TC-TC dielectric function
 gwgamma2? -11  # LR+ALDA kernel
-use_oldchi 0   
+use_oldchi 0 
 
 gwpara     2
 symchi     1
