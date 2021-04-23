@@ -740,7 +740,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
-   ! KS_BSt%eig=QP_BSt%eig
+   if (dtset%use_oldchi == 1) then
+     KS_BSt%eig=QP_BSt%eig
+   end if
 
    ! Calculate new occ. factors and fermi level.
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget)
