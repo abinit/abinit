@@ -1793,7 +1793,7 @@ Variable(
     characteristics=['[[INTERNAL_ONLY]]'],
     added_in_version="",
     text=r"""
-Non-local operations are one of the most time-consuming part of the computation of the energy or the Hamiltonian, especially for systems with many atoms.
+For systems with many atoms, non-local operations are the most time-consuming part of the computation.
 The non-local contribution of the wave-function $\psi$ to the energy writes:
 
 $$ E_{non-local} = \sum_a\sum_{i,j} <\psi|p_{a,i}> e_{a,ij} <p_{a,j}|\psi> $$
@@ -1804,6 +1804,7 @@ $$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
 
 The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors in the pseudo-potential.
 $e_{a,ij}$ and $D_{a,ij}$ are scalars.
+In the PAW formalism ([[usepaw]] = 1), the overlap operator has the same structure than $H_{non-local}$.
 Introducing the "cprj" coefficients:
 
 $$ cprj(a,i) = <p_{a,i}|\psi> $$
@@ -11406,17 +11407,22 @@ For [[useylm]] = 0 :
 
 For [[useylm]] = 1 :
 
-With spherical harmonics, the computation of non-local terms needs:
+With spherical harmonics, the computation of the scalar product between a wave function $\psi$ and the projector $p_{a,nlm}$ writes:
 
 $$ <p_{a,nlm}|\psi> = \frac{4\pi}\Omega \sum_{G} e^{iG.R_a} i^l ffnl_a(G,nlm) c(G) $$
 
-where c(G) are the coefficients of the wave-function $\psi$, $R_a$ the atomic position.
-
-Also:
+where $\Omega$ is the unit cell volume, $G$ a vector of the reciprocal lattice, $R_a$ the atomic position, $nlm$ are atomic quantum numbers, $ffnl_a(G,nlm)$ real scalars and $c(G)$ the coefficients of the wave-function $\psi$.
+This is computed in "opernla_ylm" routine, for every $nlm$ indices.
+The non-local term of the Hamiltonian has a similar structure:
 
 $$ <G|H_{non-local}|\psi> = \frac{4\pi}\Omega \sum_a \sum_{nlm} e^{-iG.R_a} (-i)^l ffnl_a(G,nlm) fac_a(nlm) $$
 
-A part of the computation can be done as a matrix-vector multiplication:
+where $fac_a(nlm)$ are complex scalars.
+This is computed in "opernlb_ylm" routine, for every $G$ vectors.
+
+In both "opernla_ylm" and "opernlb_ylm" routines, these operations are implemented straightforwardly, taking advantage of the real or pure imaginary nature of some terms.
+These implementations are used if [[nloc_alg]] = 4 (the default), or if derivatives are needed.
+However, for both operations, a part of the computation can be done as a matrix-vector multiplication:
 
 $$ \sum_{G} ffnl_a(G,nlm) c(G) e^{iG.R_a} = \left(ffnl_a\right)_{nlm,G} \left( vect \right)_G $$
 
@@ -11424,29 +11430,30 @@ and:
 
 $$ \sum_{nlm} ffnl_a(G,nlm) fac_a(nlm) = \left(ffnl_a\right)_{G,nlm} \left( fac_a \right)_{nlm} $$
 
-  [[nloc_alg]] = 4 is historically the first implementation, in which some operations are treated "line-by-line".
-  In an other implementation these operations are gathered as matrix-vector multiplications.
-  One dimension of the matrix is the number of plane waves (see [[ecut]]), and the other is the number of projectors from the pseudo-potential.
-  The matrix is real whereas the vector is complex, so it is not a standard case treated by linear algebra libraries,
-  and the optimal implementation depends on the architecture and the available libraries.
-  The best option could also be system dependent.
-  More detailed explanations:
+We note that in both cases the matrix is real, whereas the vector is complex.
+An alternative implementation is proposed in "opernla_ylm_mv" and "opernlb_ylm_mv" routines, but only for ground-state quantities.
+Forces and stress terms are always computed with "opernla_ylm" and "opernlb_ylm".
+The matrix-vector multiplication is implemented either using two calls of BLAS "dgemv" routine (one call for the real part and one for the imaginary part) with [[nloc_alg]] = 2, or straightforwardly [[nloc_alg]] = 3.
 
-  - [[nloc_alg]] = 2: matrix-vector operations are done with two BLAS calls (dgemv), one for the real part and one for the imaginary part.
-  - [[nloc_alg]] = 3: matrix-vector operations are done "by hand", so real and imaginary parts are computed at the same time, and compared to [[nloc_alg]] = 2 the matrix elements are read only once, not twice.
-  - [[nloc_alg]] = 4: matrix-vector operations are not treated as such, and are done "line-by-line" instead.
-    In some cases, there are simplifications which are not possible using matrix-vector operations.
+Tests showed that the most efficient implementation is machine and system dependent, so it is very hard to determine which implementation to use a priori.
+Furthermore, in some cases one implementation is the most efficient for "opernla" operation, but not for "opernlb".
+So a mix of different implementations can be used with other values of [[nloc_alg]], as shown in the following table:
 
-  The optimal choice is difficult to predict a priori, but the impact on performances could be large.
-  Indeed, there could be a factor of 2 between the computation time (of non-local operations only) of the worst choice of [[nloc_alg]] compared with the best choice.
-  [[nloc_alg]] = 2 seems to be the best choice if combined with the Intel MKL, but could be the worst choice otherwise.
-  Then [[nloc_alg]] = 3 could be prefered, especially if the vectorization is activated.
-  In order to know which option is the best, one can do quick tests with [[timopt]] /= 0, and look for the time spent in "nonlop(apply)" and in "getcprj%opernla" (or "opernla_mv").
-  Depending on the computation only "nonlop(apply)" could be present.
+nloc_alg     |  opernla | opernlb
+---          |      --- |     ---
+    2        | mv-dgemv | mv-dgemv
+    3        |    mv    |    mv
+ 4 (default) |  native  |  native
+    5        | mv-dgemv |    mv
+    6        |    mv    | mv-dgemv
+    7        | mv-dgemv |  native
+    8        |  native  |    mv
+    9        |    mv    |  native
+   10        |  native  | mv-dgemv
 
-  For now, only ground state quantities can be computed with matrix-vector operations.
-  The computations of derivatives (i.e. for forces, stress or DFPT) are done with the "line-by-line" implementation.
-  If [[nloc_alg]] /= 4, the code uses automatically the matrix-vector implementation for ground state quantities and the "line-by-line" implementation for derivatives.
+where "native" stands for "opernlX_ylm" routines, "mv" for "opernlX_ylm_mv" routines with straightforward implementation, and "mv-dgemv" for "opernlX_ylm_mv" routines with BLAS calls.
+
+The number of "opernla" and "opernlb" operations done in dataset can be written in the output using [[nonlop_ylm_count]].
 
 Note: internally, [[nloc_alg]] is stored in `dtset%nloalg(1)`. See also
 [[nloc_mem]] for the tuning of the memory used in the non-local operator application.
@@ -11519,16 +11526,16 @@ and the Hamiltonian applied to a wave-function is:
 
 $$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
 
-The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors in the pseudo-potential.
+The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors of the pseudo-potential.
 $e_{a,ij}$ and $D_{a,ij}$ are scalars.
-With the use of spherical harmonics ([[useylm]] = 1), the sum over "i" (or "j") is equivalent to a sum over the usual three indices "n", "l" and "m" used for atomic orbitals.
+In the PAW formalism ([[usepaw]] = 1), the overlap operator has the same structure than $H_{non-local}$.
 The most time-consuming parts of the computation of non-local terms are :
 
 * the computation of $<p_{a,i}|\psi>$ for every "a" and "i"
 
 * the computation of $\sum_a\sum_i |p_{a,i}> f_{a,i}$ where $f_{a,i} = \sum_j D_{a,ij} <p_{a,j}|\psi>$
 
-The first operation is done in the routines "opernla_ylm", and the second one is done in "opernlb_ylm".
+With the use of spherical harmonics ([[useylm]] = 1), the first operation is done in the routine "opernla_ylm", and the second one in "opernlb_ylm".
 Both operations scale like $O\left(N_{at}N_{proj}N_{pw}\right)$ where $N_{at}$ is the number of atoms ([[natom]]), $N_{proj}$ the number of projectors $|p_{a,i}>$ per atom, and $N_{pw}$ the number of plane waves.
 For systems with many atoms these two operations are the most time consuming, and can take a huge portion of the total computational time.
 For that reason, it is interesting to count the number of non-local operations in a dataset, which is done with [[nonlop_ylm_count]] = 1 (or any non-zero value).
@@ -11553,14 +11560,14 @@ Here an example:
     opernlb_ylm_mv       |             3254 |             1627 |             25.4
     -----------------------------------------------------------------------------
 
-The total count (TC) corresponds to the raw number of calls of the routine.
+The total count (TC) corresponds to the number of calls of the routine.
 In a call of "nonlop_ylm", the sum over atoms is divided by the number of atomic types, and then by blocks of 10 atoms, so in "opernl" routines the sum run over at most 10 atoms (of the same type).
 As a consequence, "opernl" routines are called NC times in one call of "nonlop_ylm" to compute the sum over all atoms.
-Finally, NB is the total number of bands, even the empty ones, summed over the k-points.
+Finally, NB is the total number of bands, including the empty ones, summed over the k-points.
 
 With this report, one can look at the effect of [[cprj_in_memory]] and [[cprj_update_lvl]] on the total number of calls.
 
-Several versions of "opernla_ylm" and "opernlb_ylm" routines are implemented.
+As shown in the example, several versions of "opernla_ylm" and "opernlb_ylm" routines are implemented.
 The choice of the implementation has an effect on performances and is controlled by [[nloc_alg]].
 """,
 ),
