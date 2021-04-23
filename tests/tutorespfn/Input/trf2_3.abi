@@ -1,4 +1,4 @@
-trf2_3.ddb.out
+trf2_3.ddb.abo
 AlAs phonons on 4 4 4 mesh
 8
 trf2_1o_DS3_DDB
@@ -19,7 +19,7 @@ trf2_1o_DS10_DDB
 #%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [files]
 #%% files_to_test = 
-#%%   trf2_3.ddb.out, tolnlines=  0, tolabs=  9.192e-10, tolrel=  4.000e-04, fld_options=-medium
+#%%   trf2_3.ddb.abo, tolnlines=  0, tolabs=  9.192e-10, tolrel=  4.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
