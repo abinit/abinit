@@ -128,7 +128,7 @@ Now, there might be two possibilities: either the trf2_1 run is finished, and
 you can continue the tutorial with the section 2 about the MRGDDB utility, or the run is not finished.
 In the latter case, instead of waiting for trf2_1 to be finished, we suggest
 you to pursue with section 3. You will use as DDB file the one that can be
-found in *\$ABI_TESTS/tutorespfn/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.out|trf2_3.ddb.out]],
+found in *\$ABI_TESTS/tutorespfn/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.abo|trf2_3.ddb.abo]],
 instead of the one that would result from the section 2.
 Copy this file to the present directory, then go to
 section section 3 of this tutorial. You might come back to section 2 afterwards.
@@ -141,7 +141,7 @@ Please, read it carefully now.
 Use MRGDDB to create the merge DDB from the eight DDB's corresponding to
 datasets 3 to 10 of the trf2_1 job, containing the dynamical matrices for the
 8 q points, as well as the response to the electric field (dielectric tensor
-and Born effective charges). Name the new DDB *trf2_3.ddb.out*.
+and Born effective charges). Name the new DDB *trf2_3.ddb.abo*.
 
 !!! note
 
