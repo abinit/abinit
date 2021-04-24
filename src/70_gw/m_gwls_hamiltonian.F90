@@ -1562,7 +1562,7 @@ call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
 call destroy_mpi_enreg(mpi_enreg)
 
 !NOTE : the syntax if(allocated(a)) ABI_FREE(a) result in an error if "a" is not allocated; since the macro replace
-!ABI_ALLOCATE by more than one line of text, the second lines and up get outside the if... if() then syntax is equired.
+!ABI_MALLOC by more than one line of text, the second lines and up get outside the if... if() then syntax is equired.
 if(allocated(cg)) then
   ABI_FREE(cg)
 end if

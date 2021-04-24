@@ -41,7 +41,7 @@ module m_berryphase_new
  use m_fftcore,      only : kpgsph
  use m_geometry,     only : xred2xcart, metric
  use m_io_tools,     only : open_file
- use m_iowf,         only : outwf
+ use m_iowf,         only : outwf, outresid
  use m_kg,           only : getph
  use m_kpts,         only : listkk, smpbz
  use m_mpinfo,       only : proc_distrb_cycle
@@ -993,7 +993,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if ((det_inv_smat == 10).or.(det_inv_smat == 11)) then
 
              if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
-               ! EB: the MSG_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
+               ! EB: the ABI_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
                ! This avoid the code to stop for phonons under E-field too.
                ! TODO: Since the same is done in m_cgwf.F90 and in m_berryphase_new.F90,
                ! rationalization should be done with one single module.
@@ -1112,10 +1112,14 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
      ABI_MALLOC(resid,(mband*nkpt*nsppol))
      resid(:) = zero
 
+     call outresid(dtset,dtset%kptns,mband,&
+&                dtset%nband,nkpt,&
+&                nsppol,resid)
+
      call outwf(cg1,dtset,psps,eig_dum,fiwf1o,hdr,kg,dtset%kptns,&
 &     mband,mcg,mkmem,mpi_enreg,mpw,natom,dtset%nband,&
 &     nkpt,npwarr,nsppol,&
-&     occ_dum,resid,response,dtfil%unwff2,wfs,wvl)
+&     occ_dum,response,dtfil%unwff2,wfs,wvl)
 
      ABI_FREE(resid)
    end if  ! ddkflag == 1
@@ -1281,7 +1285,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          end do
 
 
-!        correction to obtain a smouth logarithm of the determinant
+!        correction to obtain a smooth logarithm of the determinant
          ABI_MALLOC(str_flag,(nstr))
 !        DEBUG
 !        since we don't have any case of non-nul Chern number,
