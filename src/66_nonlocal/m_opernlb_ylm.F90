@@ -567,14 +567,12 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          end if
 
 !        ------
-         if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir-1)|psi>
-!                                                -<G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
+         if (choice==53) then ! twist derivative: <G|dp_i/dk_(idir+1)>V_ij<dp_j/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) - &
-&             ffnl(:,fdb,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) 
            end do
          end if
 
@@ -690,14 +688,12 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          end if
 
 !        ------
-         if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir-1)|psi>
-!                                                -<G|dp/dk_(idir-1)>S<dp/dk_(idir+1)|psi>
+         if (choice==53) then ! twist derivative: <G|dp_i/dk_(idir+1)>S_ij<dp_j/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp) - &
-&             ffnl(:,fdb,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
+&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)
            end do
          end if
 
@@ -1124,8 +1120,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !$OMP END DO
 
 !        ------
-         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir-1)|psi>
-!                                                     -<G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
+         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
 !$OMP DO
@@ -1133,8 +1128,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw) &
-&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) &
-&               -ffnl(ipw,fdb,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
+&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)
              end do
            end do
 !$OMP END DO
@@ -1302,8 +1296,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !$OMP END DO
 
 !        ------
-         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir-1)|psi> -
-!          <G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
+         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir+2)|psi> 
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
 !$OMP DO
@@ -1311,8 +1304,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw) &
-&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp) &
-&               -ffnl(ipw,fdb,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
+&               +ffnl(ipw,fdf,ilmn)*cmplx(dgxdtfacs_(1,2,ilmn),dgxdtfacs_(2,2,ilmn),kind=dp)
              end do
            end do
 !$OMP END DO

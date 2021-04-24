@@ -103,8 +103,7 @@ contains
 !!          =52 =>left 1st derivative(s) with respect to k wavevector, typically
 !!                sum_ij [ |dp_i/dk> D_ij < p_j| ]
 !!          =53 =>twist 1st derivative(s) with respect to k, typically
-!!                sum_ij [ |dp_i/dk_(idir+1)> D_ij <dp_j//dk_(idir-1)|
-!!                        -|dp_i/dk_(idir-1)> D_ij <dp_j//dk_(idir+1)|]
+!!                sum_ij [ |dp_i/dk_(idir+1)> D_ij <dp_j//dk_(idir+2)|
 !!          =54=> mixed 2nd derivative(s) with respect to atomic pos. and left k wavevector
 !!          =55=> mixed 2nd derivative(s) with respect to strain and right k wavevector
 !!          =7 => apply operator $\sum_i [ |p_i> <p_i| ],
@@ -143,7 +142,7 @@ contains
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2S)
-!!                          for choice 53, twisted derivative involves idir+1 and idir-1
+!!                          for choice 53, twisted derivative involves idir+1 and idir+2 (mod 3)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2)
 !!                        - (1:9) components to specify the atom to be moved and the second q-gradient
@@ -172,7 +171,7 @@ contains
 !!         choice   nnlout     |  choice   nnlout
 !!              1   1          |      51   6 (complex)
 !!              2   3*natom    |      52   6 (complex)
-!!              3   6          |      53   6
+!!              3   6          |      53   6 (complex)
 !!              4   6*natom    |      54   9*natom
 !!             23   6+3*natom  |      55   36 (complex)
 !!             24   9*natom    |       6   36+18*natom
@@ -433,7 +432,7 @@ contains
 &     choice==6 .or.choice==8 .or.choice==81)
    else if (paw_opt==3) then
      check=(choice== 0.or.choice== 1.or.choice== 2.or.choice==3.or.choice==5.or.&
-&     choice==23.or.choice==51.or.choice==52.or.choice==54.or.choice==55.or.&
+&     choice==23.or.choice==51.or.choice==52.or.choice==53.or.choice==54.or.choice==55.or.&
 &     choice== 8.or.choice==81)
    else
      check = .false.
@@ -835,6 +834,10 @@ contains
                else if (signs==2.and.ndgxdt_stored==3) then
                  if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir,1:nlmn)
+                 else if (choice==53) then ! ndgxdt=2
+                   idir1 = modulo(idir,3)+1; idir2 = modulo(idir+1,3)+1
+                   dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir1,1:nlmn)
+                   dgxdt(1:2,2,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir2,1:nlmn)
                  else if (choice==8) then ! ndgxdt=2
                    idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir1,1:nlmn)
@@ -858,6 +861,10 @@ contains
                  else if (signs==2.and.ndgxdt_stored==3) then
                    if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                      dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir,ilmn)
+                   else if (choice==53) then ! ndgxdt=2
+                     idir1 = modulo(idir,3)+1; idir2 = modulo(idir+1,3)+1
+                     dgxdt(1,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir1,1:nlmn)
+                     dgxdt(1,2,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(2),idir2,1:nlmn)
                    else if (choice==8) then ! ndgxdt=2
                      idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
                      dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir1,ilmn)

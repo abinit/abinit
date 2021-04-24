@@ -1342,6 +1342,8 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
  integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
+!TODO : may be needed to distribute cprj over band procs
+! integer,intent(in) :: mband_mem
  integer,intent(in),optional :: select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
@@ -1352,7 +1354,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,ierr,index_cg,index_cprj
+ integer :: choice,cpopt,dimenl1,dimenl2,iband,iband1,iband2,index_cg,index_cprj
  integer :: index_gsc,me,my_nspinor,paw_opt,select_k_,signs,tim_nonlop,useylm
  !character(len=500) :: msg
 !arrays
@@ -1396,6 +1398,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  index_cprj=ibg;index_cg=icg;index_gsc=igsc
  if (nband>0) then
    iband1=1;iband2=nband
+!only do 1 band in case nband < 0 (the |nband|th one)
  else if (nband<0) then
    iband1=abs(nband);iband2=iband1
    index_cprj=index_cprj+(iband1-1)*my_nspinor
@@ -1406,10 +1409,12 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  do iband=iband1,iband2
 
    if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
-     gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
-     index_cprj=index_cprj+my_nspinor
-     index_cg=index_cg+npw_k*my_nspinor
-     index_gsc=index_gsc+npw_k*my_nspinor
+! No longer needed 28/03/2020 to parallelize memory
+!     gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
+!     index_gsc=index_gsc+npw_k*my_nspinor
+     !index_cprj=index_cprj+my_nspinor
+     !index_cg=index_cg+npw_k*my_nspinor
+
      cycle
    end if
 
@@ -1430,13 +1435,6 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    index_cg=index_cg+npw_k*my_nspinor
    index_gsc=index_gsc+npw_k*my_nspinor
  end do
-
-!Reduction in case of parallelization
- if ((xmpi_paral==1)) then
-   call timab(48,1,tsec)
-   call xmpi_sum(gsc,mpi_enreg%comm_band,ierr)
-   call timab(48,2,tsec)
- end if
 
 !Memory deallocation
  ABI_FREE(cwavef)

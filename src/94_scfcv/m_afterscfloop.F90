@@ -59,7 +59,6 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -191,8 +190,6 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
-!!  with_vectornd = 1 if nuclear dipole vector potential allocated
-!!  vectornd(with_vectornd*nfftf,3)
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
@@ -242,7 +239,6 @@ contains
 !!       In case dtset%berryopt = 4/6/7/14/16/17, the overlap matrices computed
 !!       in this routine are stored in dtefield%smat in order
 !!       to be used in the electric field calculation.
-!! dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy(IN)=entropy due to the occupation number smearing (if metal)
@@ -292,23 +288,23 @@ contains
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,gred,grchempottn,grcondft,&
-& gresid,grewtn,grhf,grhor,grvdw,&
+& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
+& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,with_vectornd
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -317,7 +313,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
- type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
@@ -342,7 +337,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: tollist(12),vpsp(nfftf)
- real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -543,16 +538,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
- end if
-
-!----------------------------------------------------------------------
-! Orbital magnetization calculations
-!----------------------------------------------------------------------
-
- if(dtset%orbmag.NE.0) then
-    call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
-         & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
-         & vectornd,vtrial,with_vectornd,xred,ylm,ylmgr)
  end if
 
  call timab(252,2,tsec)

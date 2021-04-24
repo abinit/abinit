@@ -12,7 +12,7 @@ are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
 W. Chen, M. Cote, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
-B. Guster, T. Karatsu, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
+B. Guster, T. Karatsu, A. H. Larsen, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
 S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez-Mayorga, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
@@ -124,16 +124,15 @@ See the test examples [[test:v9_22]], [[test:psic_01]] and [[test:psic_03]].
 By X. Gonze (initial test from C. Tantardini) (MR770).
 
 **B.6** The computation of the electric conductivity has been implemented for metals
-in the relaxation-time approximation with transport lifetimes computed from the imaginary part of the Fan-Migdal self-energy
+in the relaxation-time approximation with transport lifetimes computed from the imaginary part of the Fan-Migdal self-energy.
 See tests [[test:v9_62]] to [[test:v9_65]].
 
 By O. Nadeau (MR756, MR716)
 
-
-**B.6** Implementation of the  i-pi client-server protocol as described in [[cite:Kapil2019]].
+**B.7** Implementation of the  i-pi client-server protocol as described in [[cite:Kapil2019]].
 This option requires [[ionmov]] 28 and the specification of the socket via command line options.
-For UNIX socket, use: --ipi {unixsocket}:UNIX
-For INET socket, use  --ipi {host}:{port}. 
+For UNIX socket, use: --ipi {unixsocket}:UNIX .
+For INET socket, use  --ipi {host}:{port} . 
 Usage example:
 
      abinit run.abi --ipi {unixsocket}:UNIX > run.log
@@ -249,7 +248,7 @@ In particular:
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...),
    as this was not sustainable (see [B.6](#v9.2.B.6)) and nowadays most users install prerequisite libraries themselves.
    See also the specialized INSTALL notes for
-   [CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
+   [CentOS](/INSTALL_CentOS), [EasyBuild](/INSTALL_EasyBuild), [MacOS](/INSTALL_MacOS), and [Ubuntu](/INSTALL_Ubuntu).
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
    This means that some user-developed parsing tools might not work anymore,
    and should be adapted to the new ABINITv9 output file (see [B.9](#v9.2.B.9)).
@@ -272,7 +271,7 @@ A version of this paper that is not formatted for J. Chem. Phys.
 [is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
+Other specific publications are mentioned in the [Suggested acknowledgment page](/theory/acknowledgments).
 
 <a name="v9.2.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
@@ -538,7 +537,7 @@ the build system will try to find them in the "usual" directories, and inform th
 The build system also can make suggestions to the user, to complete its *.ac9 file.
 
 Specialized INSTALL notes are available to help the user for
-[CentOS](../INSTALL_CentOS), [EasyBuild](../INSTALL_EasyBuild), [MacOS](../INSTALL_MacOS), and [Ubuntu](../INSTALL_Ubuntu).
+[CentOS](/INSTALL_CentOS), [EasyBuild](/INSTALL_EasyBuild), [MacOS](/INSTALL_MacOS), and [Ubuntu](/INSTALL_Ubuntu).
 
 By Y. Pouillon and JM Beuken
 
@@ -783,7 +782,6 @@ By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
@@ -1039,7 +1037,7 @@ A version of this paper that is not formatted for J. Chem. Phys.
 [is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
+Other specific publications are mentioned in the [Suggested acknowledgment page](/theory/acknowledgments).
 
 <a name="v9.0.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
@@ -1248,7 +1246,7 @@ New input variables tested and documented:
 [[spin_var_temperature@multibinit|spin_var_temperature]],
 [[spin_write_traj@multibinit|spin_write_traj]].
 Additionnal new input variables:
-[[slc_coupling@multibinit|slc_coupling]](NT),
+[[slc_coupling@multibinit|slc_coupling]] (NT),
 spin_calc_correlation_obs (NT and not documented),
 spin_calc_traj_obs (NT and not documented),
 [[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT).
@@ -1403,7 +1401,7 @@ By M. Giantomassi, G. Petretto, F. Naccarato.
 
 * * *
 
-### **C.** Changes for the developers (incluses information about compilers)
+### **C.** Changes for the developers (including information about compilers)
 
 **C.1** A python script to help ABINIT developers and development.
 
@@ -1516,7 +1514,6 @@ By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
@@ -1766,10 +1763,10 @@ C.1 All F90 ABINIT sources are now inside modules.
 C.2 Prepared the removal of the bindings subsystem.
     By Y. Pouillon and M. Torrent.
 
-C.2 New [Howto for developers](../developers/developers_howto) (variables, mkparents, robodoc, test_suite).
+C.2 New [Howto for developers](/developers/developers_howto) (variables, mkparents, robodoc, test_suite).
     By M. Giantomassi.
 
-C.3 New [Howto for the test suite](../developers/testsuite_howto).
+C.3 New [Howto for the test suite](/developers/testsuite_howto).
     By M. Giantomassi.
 
 * * *
@@ -1917,7 +1914,7 @@ B.1 The whole ABINIT documentation has been placed under the control of [mkdocs]
     The appearance is also new.
     The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
     central bibliographic database.
-    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](..).
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](/guide/new_user).
     By M. Giantomassi, with some help from X. Gonze.
 
 B.2 The DFPT has been extended to non-collinear systems ([[nspden]] = 4), with or without spin-orbit coupling,
@@ -1947,7 +1944,7 @@ B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the 
 
 B.6 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
     See the theory in [[cite:Ceresoli2006]].
-    Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
+    Associated input variable: [[orbmag]]. 
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
     this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call.
     Tutorial [[tutorial:nuc|nuc]] is nightly tested.
@@ -2153,12 +2150,12 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
     - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
     - possibly example input files;
     - list of references.
-    Entry point: see the new header of any ABINIT documentation file (e.g. the [new user's guide](..) )
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](/guide/new_user)
     By F. Jollet and X. Gonze (also tests/fixes by B. Amadon, M. Torrent).
 
 B.2 A central [[theory:bibliography]] database abiref.bib has been created, and linked to the
     above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
-    the tutorials, the theory documents, the acknowledgments ...).
+    the tutorials, the theory documents, the acknowledgments).
     More than 200 bibliographical references are present.  Not all bibliographical references of the doc have been entered in this
     central bibliographic database, though.
     By X. Gonze and F. Jollet.
@@ -2371,7 +2368,7 @@ B.1 Implementation of algorithms to interpolate the electronic band structure,
     [[tests/libxc/Input/t41.abi]], [[test:v8_04]].
     Work by M. Giantomassi
 
-B.2 The Fock mixing factor for the HSE hybrid functional can be tuned thanks to the input variable gwfockmix  .
+B.2 The Fock mixing factor for the HSE hybrid functional can be tuned thanks to the input variable gwfockmix.
     (Warning: this is for the GW-type approach to electronic structure only, not for total energies)
     See test Tlibxc#43 .
     Work by W. Chen.
