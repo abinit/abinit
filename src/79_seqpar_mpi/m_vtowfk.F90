@@ -212,7 +212,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock,norm
- real(dp) :: res,residk,weight,cpu,wall,gflops
+ real(dp) :: residk,weight,cpu,wall,gflops
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)

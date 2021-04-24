@@ -1034,6 +1034,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
  ABI_FREE(cprj_tmp)
 
 end subroutine cprj_check
+!!***
 
 !!****f* m_cgwf/cprj_check_oneband
 !! NAME
