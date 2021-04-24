@@ -1824,7 +1824,7 @@ For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
 * [[optdriver]] = 0 : ground-state computation
 
-* [[usepaw]] = 1 : with PAW formalism
+* [[usepaw]] = 1 : with PAW formalism (so [[useylm]] = 1)
 
 * [[wfoptalg]] = 10 : using Congugate Gradient algorithm
 
@@ -1887,10 +1887,10 @@ cprj_update_lvl |   A |   B |   C |   D |   E
              -1 |   X |   X |   X |   X |
              -2 |   X |   X |   X |   X |   X
 
-Places B and C add one computation of "cprj" coefficients per SCF step (see [[nstep]]), whereas places D and E add one computation per "line" (see [[nline]]).
+The updates B, C and E add one computation of "cprj" coefficients per SCF step (see [[nstep]]), whereas the update D add one computation per "line" (see [[nline]]).
 Places D and E are activated only for negative values of [[cprj_update_lvl]] and should be used only for debugging.
 Indeed, in these cases performances are very likely worse than [[cprj_update_lvl]] = 0 (so [[cprj_in_memory]] = 0).
-One can count the number of non-local operations using [[nonlop_ylm_count]] to precisely measure the effect of [[cprj_update_lvl]].
+One can count the number of non-local operations done in a dataset using [[nonlop_ylm_count]] to precisely measure the effect of [[cprj_update_lvl]].
 """,
 ),
 
@@ -11433,7 +11433,7 @@ $$ \sum_{nlm} ffnl_a(G,nlm) fac_a(nlm) = \left(ffnl_a\right)_{G,nlm} \left( fac_
 We note that in both cases the matrix is real, whereas the vector is complex.
 An alternative implementation is proposed in "opernla_ylm_mv" and "opernlb_ylm_mv" routines, but only for ground-state quantities.
 Forces and stress terms are always computed with "opernla_ylm" and "opernlb_ylm".
-The matrix-vector multiplication is implemented either using two calls of BLAS "dgemv" routine (one call for the real part and one for the imaginary part) with [[nloc_alg]] = 2, or straightforwardly [[nloc_alg]] = 3.
+The matrix-vector multiplication is implemented either using two calls of BLAS "dgemv" routine (one call for the real part and one for the imaginary part) with [[nloc_alg]] = 2, or straightforwardly with [[nloc_alg]] = 3.
 
 Tests showed that the most efficient implementation is machine and system dependent, so it is very hard to determine which implementation to use a priori.
 Furthermore, in some cases one implementation is the most efficient for "opernla" operation, but not for "opernlb".
