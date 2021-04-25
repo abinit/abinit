@@ -1922,7 +1922,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%efmas>0) then
    call intagm(dprarr,intarr,jdtset,marr,2*nkpt,string(1:lenstr),'efmas_bands',tread,'INT')
    if(tread==1) then
-     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt),(/2,nkpt/))
+     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt), [2,nkpt])
    else
      dtset%efmas_bands(1,:)=1
      dtset%efmas_bands(2,:)=dtset%nband(:)

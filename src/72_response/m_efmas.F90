@@ -79,25 +79,20 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
- subroutine efmasval_free(efmasval)
+subroutine efmasval_free(efmasval)
 
-   !Arguments ------------------------------------
-   type(efmasval_type),intent(inout) :: efmasval
+ !Arguments ------------------------------------
+ type(efmasval_type),intent(inout) :: efmasval
 
-   ! *********************************************************************
+ ! *********************************************************************
 
-   if(allocated(efmasval%ch2c)) then
-     ABI_FREE(efmasval%ch2c)
-   end if
-   if(allocated(efmasval%eig2_diag)) then
-     ABI_FREE(efmasval%eig2_diag)
-   end if
+ ABI_SFREE(efmasval%ch2c)
+ ABI_SFREE(efmasval%eig2_diag)
 
- end subroutine efmasval_free
+end subroutine efmasval_free
 !!***
 
 !----------------------------------------------------------------------
@@ -117,34 +112,33 @@ CONTAINS
 !!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
- subroutine efmasval_free_array(efmasval)
+subroutine efmasval_free_array(efmasval)
 
-   !Arguments ------------------------------------
-   type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
+ !Arguments ------------------------------------
+ type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
 
-   !!!Local variables-------------------------------
-   integer :: i,j,n(2)
+ !!!Local variables-------------------------------
+ integer :: i,j,n(2)
 
-   ! *********************************************************************
+ ! *********************************************************************
 
-   !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
-   write(std_out,*)' efmasval_free_array : enter '
+ !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
+ !write(std_out,*)' efmasval_free_array : enter '
 
-   if(allocated(efmasval)) then
-     n=shape(efmasval)
-     do i=1,n(1)
-       do j=1,n(2)
-         call efmasval_free(efmasval(i,j))
-       end do
+ if(allocated(efmasval)) then
+   n=shape(efmasval)
+   do i=1,n(1)
+     do j=1,n(2)
+       call efmasval_free(efmasval(i,j))
      end do
-     ABI_FREE(efmasval)
-   end if
+   end do
+   ABI_FREE(efmasval)
+ end if
 
- end subroutine efmasval_free_array
+end subroutine efmasval_free_array
 !!***
 
 !----------------------------------------------------------------------
@@ -164,23 +158,20 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
- subroutine efmasdeg_free(efmasdeg)
+subroutine efmasdeg_free(efmasdeg)
 
-   !Arguments ------------------------------------
-   type(efmasdeg_type),intent(inout) :: efmasdeg
+ !Arguments ------------------------------------
+ type(efmasdeg_type),intent(inout) :: efmasdeg
 
-   ! *********************************************************************
-   if(allocated(efmasdeg%degs_bounds)) then
-     ABI_FREE(efmasdeg%degs_bounds)
-   end if
-   if(allocated(efmasdeg%ideg)) then
-     ABI_FREE(efmasdeg%ideg)
-   end if
- end subroutine efmasdeg_free
+ ! *********************************************************************
+
+ ABI_SFREE(efmasdeg%degs_bounds)
+ ABI_SFREE(efmasdeg%ideg)
+
+end subroutine efmasdeg_free
 !!***
 
 !----------------------------------------------------------------------
@@ -200,26 +191,26 @@ CONTAINS
 !!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
  subroutine efmasdeg_free_array(efmasdeg)
 
-   !Arguments ------------------------------------
-   type(efmasdeg_type),allocatable,intent(inout) :: efmasdeg(:)
+ !Arguments ------------------------------------
+ type(efmasdeg_type),allocatable,intent(inout) :: efmasdeg(:)
 
-   !!!Local variables-------------------------------
-   integer :: i,n
+ !!!Local variables-------------------------------
+ integer :: i,n
 
-   ! *********************************************************************
-   if(allocated(efmasdeg)) then
-     n=size(efmasdeg)
-     do i=1,n
-       call efmasdeg_free(efmasdeg(i))
-     end do
-     ABI_FREE(efmasdeg)
-   end if
+ ! *********************************************************************
+ if(allocated(efmasdeg)) then
+   n=size(efmasdeg)
+   do i=1,n
+     call efmasdeg_free(efmasdeg(i))
+   end do
+   ABI_FREE(efmasdeg)
+ end if
+
  end subroutine efmasdeg_free_array
 !!***
 
@@ -240,7 +231,6 @@ CONTAINS
 !!      m_d2frnl
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -363,7 +353,6 @@ CONTAINS
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -381,13 +370,9 @@ CONTAINS
  integer :: deg_dim,eig2_diag_arr_dim
  integer :: iband,ideg,ideg_tot,ieig,ikpt
  integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval
- integer, allocatable :: nband_arr(:)
-integer, allocatable :: ndegs_arr(:)
- integer, allocatable :: degs_range_arr(:,:)
- integer, allocatable :: ideg_arr(:,:)
- integer, allocatable :: degs_bounds_arr(:,:)
- real(dp), allocatable :: ch2c_arr(:,:,:,:)
- real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
+ integer, allocatable :: nband_arr(:), ndegs_arr(:), degs_range_arr(:,:)
+ integer, allocatable :: ideg_arr(:,:), degs_bounds_arr(:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:)
  character(len=500) :: msg
 #ifdef HAVE_NETCDF
  integer :: ncerr
@@ -526,7 +511,6 @@ end subroutine print_efmas
 !!      m_eph_driver
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -544,13 +528,9 @@ end subroutine print_efmas
  integer :: deg_dim,eig2_diag_arr_dim
  integer :: iband,ideg,ideg_tot,ieig,ikpt
  integer :: jband,mband,nband,ndegs,ndegs_tot,nkpt
- integer, allocatable :: nband_arr(:)
- integer, allocatable :: ndegs_arr(:)
- integer, allocatable :: degs_range_arr(:,:)
- integer, allocatable :: ideg_arr(:,:)
- integer, allocatable :: degs_bounds_arr(:,:)
- real(dp), allocatable :: ch2c_arr(:,:,:,:)
- real(dp), allocatable :: eig2_diag_arr(:,:,:,:)
+ integer, allocatable :: nband_arr(:), ndegs_arr(:), degs_range_arr(:,:)
+ integer, allocatable :: ideg_arr(:,:), degs_bounds_arr(:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:)
 !----------------------------------------------------------------------
 
 #ifdef HAVE_NETCDF
@@ -652,7 +632,6 @@ end subroutine print_efmas
 !!      m_efmas
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -856,7 +835,6 @@ end subroutine print_efmas
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -882,38 +860,20 @@ end subroutine print_efmas
   type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
 
  !Local variables-------------------------------
-  logical :: degenerate
-  logical :: debug
-  integer :: ipert
-  integer :: isppol
+  logical :: degenerate, debug
+  integer :: ipert, isppol
   integer :: icg2   !TODOM : Reactivate the sections for icg2 / allow choice of k-point other than the first in the list.
-  integer :: npw_k
-  integer :: nband_k
-  integer :: nspinor
-  integer :: ideg
-  integer :: ikpt
-  integer :: istwf_k
-  integer :: master,me,spaceworld
-  integer :: band2tot_index
-  integer :: bandtot_index
-  integer :: iband, jband, kband
-  integer :: adir,bdir
-  integer :: deg_dim
-  integer :: degl
+  integer :: npw_k, nband_k, nspinor, ideg, ikpt
+  integer :: istwf_k, master,me,spaceworld
+  integer :: band2tot_index,  bandtot_index, iband, jband, kband
+  integer :: adir,bdir, deg_dim, degl
   character(len=500) :: msg
-  real(dp) :: deltae
-  real(dp) :: dot2i,dot2r,dot3i,dot3r,doti,dotr
-  real(dp), allocatable :: cg0(:,:)
-  real(dp), allocatable :: cg1_pert2(:,:),cg1_pert1(:,:)
+  real(dp) :: deltae, dot2i,dot2r,dot3i,dot3r,doti,dotr
+  real(dp), allocatable :: cg0(:,:), cg1_pert2(:,:),cg1_pert1(:,:)
   real(dp), allocatable :: gh1c_pert2(:,:),gh1c_pert1(:,:),gh0c1_pert1(:,:)
-  complex(dpc) :: eig2_part(3,3)
-  complex(dpc) :: eig2_ch2c(3,3)
-  complex(dpc) :: eig2_paral(3,3)
-  complex(dpc) :: eig2_gauge_change(3,3)
+  complex(dpc) :: eig2_part(3,3), eig2_ch2c(3,3), eig2_paral(3,3), eig2_gauge_change(3,3)
   complex(dpc) :: eig1a, eig1b, g_ch
-  complex(dpc), allocatable :: eigen1_deg(:,:)
-  complex(dpc), allocatable :: eig2_diag(:,:,:,:)
-  complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+  complex(dpc), allocatable :: eigen1_deg(:,:), eig2_diag(:,:,:,:), eig2_diag_cart(:,:,:,:)
 
 ! *********************************************************************
 
@@ -1145,7 +1105,6 @@ end subroutine print_efmas
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
-!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -1167,26 +1126,13 @@ end subroutine print_efmas
   logical :: debug
   logical :: print_fsph
   logical, allocatable :: saddle_warn(:), start_eigf3d_pos(:)
-  integer :: info
-  integer :: isppol
-  integer :: ideg,jdeg
-  integer :: ikpt
-  integer :: master,me,spaceworld
-  integer :: iband, jband
-  integer :: adir,bdir
-  integer :: deg_dim
-  integer :: degl
-  integer :: lwork
-  integer :: itheta, iphi
-  integer :: ntheta, nphi
-  integer :: mdim
-  integer :: cdirs, ndirs
+  integer :: info, isppol, ideg,jdeg, ikpt,  master,me,spaceworld
+  integer :: iband, jband, adir,bdir, deg_dim, degl, lwork
+  integer :: itheta, iphi, ntheta, nphi
+  integer :: mdim, cdirs, ndirs, io_unit
   integer :: ipiv(3)
-  integer :: io_unit
   character(len=500) :: msg, filename
-  real(dp) :: cosph,costh,sinph,sinth
-  real(dp) :: f3d_scal
-  real(dp) :: weight
+  real(dp) :: cosph,costh,sinph,sinth,f3d_scal,weight
   real(dp) :: gprimd(3,3)
   real(dp), allocatable :: unit_r(:), dr_dth(:), dr_dph(:)
   real(dp), allocatable :: eigenval(:), rwork(:)
@@ -1406,51 +1352,32 @@ end subroutine print_efmas
 
       !!! EQV_MASS
       if(degenerate .and. mdim==3) then
-        ABI_MALLOC(unit_r,(mdim))
-        ABI_MALLOC(dr_dth,(mdim))
-        ABI_MALLOC(dr_dph,(mdim))
-        ABI_MALLOC(f3d,(deg_dim,deg_dim))
-        ABI_MALLOC(df3d_dth,(deg_dim,deg_dim))
-        ABI_MALLOC(df3d_dph,(deg_dim,deg_dim))
-        ABI_MALLOC(unitary_tr,(deg_dim,deg_dim))
-        ABI_MALLOC(eigf3d,(deg_dim))
+        ABI_CALLOC(unit_r,(mdim))
+        ABI_CALLOC(dr_dth,(mdim))
+        ABI_CALLOC(dr_dph,(mdim))
+        ABI_CALLOC(f3d,(deg_dim,deg_dim))
+        ABI_CALLOC(df3d_dth,(deg_dim,deg_dim))
+        ABI_CALLOC(df3d_dph,(deg_dim,deg_dim))
+        ABI_CALLOC(unitary_tr,(deg_dim,deg_dim))
+        ABI_CALLOC(eigf3d,(deg_dim))
         ABI_MALLOC(saddle_warn,(deg_dim))
         ABI_MALLOC(start_eigf3d_pos,(deg_dim))
-        ABI_MALLOC(m_avg,(deg_dim))
-        ABI_MALLOC(m_avg_frohlich,(deg_dim))
-        ABI_MALLOC(m_cart,(ndirs,deg_dim))
-        ABI_MALLOC(deigf3d_dth,(deg_dim))
-        ABI_MALLOC(deigf3d_dph,(deg_dim))
-        ABI_MALLOC(unit_speed,(mdim,deg_dim))
-        ABI_MALLOC(transport_tensor,(mdim,mdim,deg_dim))
-        ABI_MALLOC(transport_tensor_eig,(mdim))
-        ABI_MALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
-        ABI_MALLOC(transport_eqv_eigval,(mdim,deg_dim))
-        ABI_MALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
+        ABI_CALLOC(m_avg,(deg_dim))
+        ABI_CALLOC(m_avg_frohlich,(deg_dim))
+        ABI_CALLOC(m_cart,(ndirs,deg_dim))
+        ABI_CALLOC(deigf3d_dth,(deg_dim))
+        ABI_CALLOC(deigf3d_dph,(deg_dim))
+        ABI_CALLOC(unit_speed,(mdim,deg_dim))
+        ABI_CALLOC(transport_tensor,(mdim,mdim,deg_dim))
+        ABI_CALLOC(transport_tensor_eig,(mdim))
+        ABI_CALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_CALLOC(transport_eqv_eigval,(mdim,deg_dim))
+        ABI_CALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
         ABI_MALLOC(prodc,(deg_dim,deg_dim))
         ABI_MALLOC(prodr,(mdim,mdim))
         !ABI_MALLOC(f3dfd,(2,nphi,deg_dim))
-        unit_r=zero
-        dr_dth=zero
-        dr_dph=zero
-        f3d=zero
-        df3d_dth=zero
-        df3d_dph=zero
-        unitary_tr=zero
-        eigf3d=zero
         saddle_warn=.false.
         start_eigf3d_pos=.true.
-        m_avg=zero
-        m_avg_frohlich=zero
-        m_cart=zero
-        deigf3d_dth=zero
-        deigf3d_dph=zero
-        unit_speed=zero
-        transport_tensor=zero
-        transport_tensor_eig=zero
-        transport_eqv_m=zero
-        transport_eqv_eigval=zero
-        transport_eqv_eigvec=zero
 
         !Hack to print f(theta,phi) & weights to a file
         if(print_fsph) then
@@ -1690,48 +1617,30 @@ end subroutine print_efmas
 
       elseif (degenerate .and. mdim==2) then
 
-        ABI_MALLOC(unit_r,(mdim))
-        ABI_MALLOC(dr_dph,(mdim))
-        ABI_MALLOC(f3d,(deg_dim,deg_dim))
-        ABI_MALLOC(df3d_dph,(deg_dim,deg_dim))
-        ABI_MALLOC(unitary_tr,(deg_dim,deg_dim))
-        ABI_MALLOC(eigf3d,(deg_dim))
+        ABI_CALLOC(unit_r,(mdim))
+        ABI_CALLOC(dr_dph,(mdim))
+        ABI_CALLOC(f3d,(deg_dim,deg_dim))
+        ABI_CALLOC(df3d_dph,(deg_dim,deg_dim))
+        ABI_CALLOC(unitary_tr,(deg_dim,deg_dim))
+        ABI_CALLOC(eigf3d,(deg_dim))
         ABI_MALLOC(saddle_warn,(deg_dim))
         ABI_MALLOC(start_eigf3d_pos,(deg_dim))
-        ABI_MALLOC(m_avg,(deg_dim))
-        ABI_MALLOC(m_avg_frohlich,(deg_dim))
-        ABI_MALLOC(m_cart,(ndirs,deg_dim))
-        ABI_MALLOC(deigf3d_dph,(deg_dim))
-        ABI_MALLOC(unit_speed,(mdim,deg_dim))
-        ABI_MALLOC(transport_tensor,(mdim,mdim,deg_dim))
-        ABI_MALLOC(cart_rotation,(mdim,mdim))
-        ABI_MALLOC(transport_tensor_eig,(mdim))
-        ABI_MALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
-        ABI_MALLOC(transport_eqv_eigval,(mdim,deg_dim))
-        ABI_MALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
-        ABI_MALLOC(transport_tensor_scale,(deg_dim))
+        ABI_CALLOC(m_avg,(deg_dim))
+        ABI_CALLOC(m_avg_frohlich,(deg_dim))
+        ABI_CALLOC(m_cart,(ndirs,deg_dim))
+        ABI_CALLOC(deigf3d_dph,(deg_dim))
+        ABI_CALLOC(unit_speed,(mdim,deg_dim))
+        ABI_CALLOC(transport_tensor,(mdim,mdim,deg_dim))
+        ABI_CALLOC(cart_rotation,(mdim,mdim))
+        ABI_CALLOC(transport_tensor_eig,(mdim))
+        ABI_CALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_CALLOC(transport_eqv_eigval,(mdim,deg_dim))
+        ABI_CALLOC(transport_eqv_eigvec,(mdim,mdim,deg_dim))
+        ABI_CALLOC(transport_tensor_scale,(deg_dim))
         ABI_MALLOC(prodc,(deg_dim,deg_dim))
         ABI_MALLOC(prodr,(mdim,mdim))
-        unit_r=zero
-        dr_dph=zero
-        f3d=zero
-        df3d_dph=zero
-        unitary_tr=zero
-        eigf3d=zero
         saddle_warn=.false.
         start_eigf3d_pos=.true.
-        m_avg=zero
-        m_avg_frohlich=zero
-        m_cart=zero
-        deigf3d_dph=zero
-        unit_speed=zero
-        transport_tensor=zero
-        cart_rotation=zero
-        transport_tensor_eig=zero
-        transport_eqv_m=zero
-        transport_eqv_eigval=zero
-        transport_eqv_eigvec=zero
-        transport_tensor_scale=zero
 
         do iphi=1,nphi
           cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
@@ -1904,23 +1813,15 @@ end subroutine print_efmas
 
       elseif (degenerate .and. mdim==1) then
 
-        ABI_MALLOC(f3d,(deg_dim,deg_dim))
-        ABI_MALLOC(unitary_tr,(deg_dim,deg_dim))
-        ABI_MALLOC(eigf3d,(deg_dim))
-        ABI_MALLOC(m_cart,(ndirs,deg_dim))
-        ABI_MALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
-        ABI_MALLOC(m_avg,(deg_dim))
-        ABI_MALLOC(m_avg_frohlich,(deg_dim))
+        ABI_CALLOC(f3d,(deg_dim,deg_dim))
+        ABI_CALLOC(unitary_tr,(deg_dim,deg_dim))
+        ABI_CALLOC(eigf3d,(deg_dim))
+        ABI_CALLOC(m_cart,(ndirs,deg_dim))
+        ABI_CALLOC(transport_eqv_m,(mdim,mdim,deg_dim))
+        ABI_CALLOC(m_avg,(deg_dim))
+        ABI_CALLOC(m_avg_frohlich,(deg_dim))
         ABI_MALLOC(saddle_warn,(deg_dim))
 
-
-        f3d=zero
-        unitary_tr=zero
-        eigf3d=zero
-        m_cart=zero
-        transport_eqv_m=zero
-        m_avg=zero
-        m_avg_frohlich=zero
         saddle_warn=.false.
 
         f3d(:,:) = eig2_diag_cart(1,1,:,:)
@@ -1981,14 +1882,10 @@ end subroutine print_efmas
         ABI_FREE(m_avg)
         ABI_FREE(m_avg_frohlich)
         ABI_FREE(saddle_warn)
-
-
       end if !(degenerate)
 
       ABI_FREE(eig2_diag_cart)
-
       ABI_FREE(eigenval)
-
       ABI_FREE(eigenvec)
     end do !ideg
 

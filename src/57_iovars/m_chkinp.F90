@@ -877,34 +877,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-!  efmas_calc_dirs
-   if(dt%efmas==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_calc_dirs',dt%efmas_calc_dirs,7,(/-3,-2,-1,0,1,2,3/),iout)
-   end if
+   if (dt%efmas==1) then
+     ! Consistency check for efmas calculations.
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_calc_dirs',dt%efmas_calc_dirs,7,[-3,-2,-1,0,1,2,3],iout)
 
-!  efmas_deg
-   if(dt%efmas==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_deg',dt%efmas_deg,2,(/0,1/),iout)
-   end if
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_deg',dt%efmas_deg,2,[0,1],iout)
 
-!  efmas_deg_tol
-   if(dt%efmas==1) then
      call chkdpr(0,0,cond_string,cond_values,ierr,'efmas_deg_tol',dt%efmas_deg_tol,1,0.0_dp,iout)
-   end if
 
-!  efmas_dim
-   if(dt%efmas==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_dim',dt%efmas_dim,3,(/1,2,3/),iout)
-   end if
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_dim',dt%efmas_dim,3,[1,2,3],iout)
 
-!  efmas_n_dirs
-   if(dt%efmas==1) then
      call chkint_ge(0,0,cond_string,cond_values,ierr,'efmas_n_dirs',dt%efmas_n_dirs,0,iout)
-   end if
 
-!  efmas_ntheta
-   if(dt%efmas==1) then
      call chkint_ge(0,0,cond_string,cond_values,ierr,'efmas_ntheta',dt%efmas_ntheta,1,iout)
+
+     ABI_CHECK_NOSTOP(all_nprocs == 1, "efmas 1 is not compabitle with MPI. Use 1 processor", ierr)
    end if
 
 !  enable_mpi_io

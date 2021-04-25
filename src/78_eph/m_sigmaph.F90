@@ -2551,6 +2551,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  call cwtime_report(" sigmaph_new: k-points", cpu, wall, gflops)
 
+ ! TODO: nkcalc should be spin dependent.
  if (dtset%nkptgw /= 0) then
 
    ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
@@ -2567,7 +2568,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      !
      !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
      ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
-     !           bands above and below the Fermi level.
+     !          bands above and below the Fermi level.
      ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
      !          Include all occupied states and `num` empty states.
 
