@@ -1,5 +1,4 @@
-
-.Version 9.3.3 of ABINIT
+.Version 9.4.1 of ABINIT
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer)
 
 .Copyright (C) 1998-2021 ABINIT group .
@@ -14,16 +13,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Dec 2020.
-- ( at 02h53 )
+.Starting date : Sat 24 Apr 2021.
+- ( at 12h08 )
 
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/TestBot_MPI1/tutoplugs_tw90_4/tw90_4.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.4.1-cgwf-cprj/tests/TestBot_MPI1/tutoplugs_tw90_4/tw90_4.abi
 - output file    -> tw90_4.abo
 - root for input  files -> tw90_4i
 - root for output files -> tw90_4o
 
 - inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.4.1-cgwf-cprj/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       6.376 Mbytes of memory.
+P This job should need less than                       6.386 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -57,7 +56,7 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       5.209 Mbytes of memory.
+P This job should need less than                       5.237 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.258 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -76,7 +75,7 @@ _ WF disk file :      0.258 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       7.512 Mbytes of memory.
+P This job should need less than                       7.593 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.053 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -85,10 +84,10 @@ _ WF disk file :      2.053 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                     
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file             
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -330,9 +329,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05572
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.4.1-cgwf-cprj/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.4.1-cgwf-cprj/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.4.1-cgwf-cprj/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -365,14 +364,14 @@ tolerances: {tolvrs: 1.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
  ETOT  1  -7.9926966706992    -7.993E+00 3.173E-02 1.398E+00 0.000E+00 0.000E+00
- ETOT  2  -8.0280939749724    -3.540E-02 1.151E-04 1.885E-01 3.148E-28 3.148E-28
- ETOT  3  -8.0266285208715     1.465E-03 1.596E-05 4.019E-03 3.148E-28 0.000E+00
- ETOT  4  -8.0266261988152     2.322E-06 2.274E-06 7.098E-04 3.778E-27 3.778E-27
- ETOT  5  -8.0266325577599    -6.359E-06 1.583E-07 3.412E-05 3.778E-27 0.000E+00
- ETOT  6  -8.0266322442110     3.135E-07 2.326E-08 1.318E-06 6.297E-28 6.297E-28
- ETOT  7  -8.0266322345609     9.650E-09 2.643E-09 2.363E-08 6.559E-28 2.624E-29
- ETOT  8  -8.0266322345104     5.047E-11 4.208E-10 6.819E-10 6.559E-29 3.935E-29
- ETOT  9  -8.0266322345174    -6.974E-12 5.475E-11 4.234E-11 1.968E-29 1.968E-29
+ ETOT  2  -8.0280939749724    -3.540E-02 1.151E-04 1.885E-01 0.000E+00 0.000E+00
+ ETOT  3  -8.0266285208715     1.465E-03 1.596E-05 4.019E-03 3.358E-27 3.358E-27
+ ETOT  4  -8.0266261988152     2.322E-06 2.274E-06 7.098E-04 5.877E-27 4.198E-27
+ ETOT  5  -8.0266325577599    -6.359E-06 1.583E-07 3.412E-05 4.198E-27 0.000E+00
+ ETOT  6  -8.0266322442110     3.135E-07 2.326E-08 1.318E-06 5.772E-28 5.772E-28
+ ETOT  7  -8.0266322345609     9.650E-09 2.643E-09 2.363E-08 5.247E-28 1.837E-28
+ ETOT  8  -8.0266322345105     5.040E-11 4.208E-10 6.819E-10 1.705E-28 3.935E-29
+ ETOT  9  -8.0266322345174    -6.901E-12 5.475E-11 4.234E-11 1.968E-29 1.968E-29
 
  At SCF step    9       nres2   =  4.23E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -392,7 +391,7 @@ lattice_vectors:
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7024832E+02
-convergence: {deltae: -6.974E-12, res2:  4.234E-11, residm:  5.475E-11, diffor:  1.968E-29, }
+convergence: {deltae: -6.901E-12, res2:  4.234E-11, residm:  5.475E-11, diffor:  1.968E-29, }
 etotal    :  -8.02663223E+00
 entropy   :   0.00000000E+00
 fermie    :   1.97271590E-01
@@ -405,9 +404,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -6.55910850E-30,  -1.31182170E-29,   1.96773255E-29, ]
-- [  6.55910850E-30,   1.31182170E-29,  -1.96773255E-29, ]
-force_length_stats: {min:   2.45419368E-29, max:   2.45419368E-29, mean:   2.45419368E-29, }
+- [ -6.55910850E-30,  -6.55910850E-30,   1.96773255E-29, ]
+- [  6.55910850E-30,   6.55910850E-30,  -1.96773255E-29, ]
+force_length_stats: {min:   2.17541019E-29, max:   2.17541019E-29, mean:   2.17541019E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -420,7 +419,7 @@ force_length_stats: {min:   2.45419368E-29, max:   2.45419368E-29, mean:   2.454
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     -0.255200919310595
- Compensation charge over fine fft grid    =     -0.255201897614921
+ Compensation charge over fine fft grid    =     -0.255201897614920
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -517,7 +516,7 @@ force_length_stats: {min:   2.45419368E-29, max:   2.45419368E-29, mean:   2.454
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.0283E-28; max dE/dt=  1.3463E-28; dE/dt below (all hartree)
+ rms dE/dt=  9.5199E-29; max dE/dt=  1.3463E-28; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000     -0.000000000000
 
@@ -528,12 +527,12 @@ force_length_stats: {min:   2.45419368E-29, max:   2.45419368E-29, mean:   2.454
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.4169294E-29 1.9677326E-29   0.000E+00  0.000E+00  0.000E+00 h/b
+ frms,max,avg= 1.2559737E-29 1.9677326E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 7.2861432E-28 1.0118487E-27   0.000E+00  0.000E+00  0.000E+00 e/A
+ frms,max,avg= 6.4584757E-28 1.0118487E-27   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263000000000 10.263000000000 10.263000000000 bohr
               =  5.430945691759  5.430945691759  5.430945691759 angstroms
  prteigrs : about to open file tw90_4o_DS1_EIG
@@ -554,12 +553,12 @@ force_length_stats: {min:   2.45419368E-29, max:   2.45419368E-29, mean:   2.454
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.03678739533017E+00
-hartree             :  5.54561056188010E-01
+hartree             :  5.54561056188002E-01
 xc                  : -4.82087000194368E+00
 Ewald energy        : -8.39800922793230E+00
 psp_core            :  2.32083792626005E-01
-local_psp           : -2.36486967374162E+00
-spherical_terms     :  3.73368448080423E+00
+local_psp           : -2.36486967374161E+00
+spherical_terms     :  3.73368448080422E+00
 total_energy        : -8.02663217866919E+00
 total_energy_eV     : -2.18415769316796E+02
 ...
@@ -568,13 +567,13 @@ total_energy_eV     : -2.18415769316796E+02
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  8.17083200366587E-02
+band_energy         :  8.17083200366521E-02
 Ewald energy        : -8.39800922793230E+00
 psp_core            :  2.32083792626005E-01
-xc_dc               : -1.86645591471870E+00
+xc_dc               : -1.86645591471868E+00
 spherical_terms     :  1.92404079547097E+00
-total_energy_dc     : -8.02663223451737E+00
-total_energy_dc_eV  : -2.18415770836502E+02
+total_energy_dc     : -8.02663223451736E+00
+total_energy_dc_eV  : -2.18415770836501E+02
 ...
 
 
@@ -680,7 +679,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =     -0.255200954249002
+ Compensation charge over spherical meshes =     -0.255200954249001
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -898,29 +897,29 @@ force_length_stats: {min: null, max: null, mean: null, }
    m=n=1:3, ikb=1, ik=1
 
 ;   (   0.994375  -0.006918 ,   0.050509  -0.058875 ,   0.000000   0.000000 ,    )
-;   (   0.025561  -0.000178 ,  -0.357344   0.416529 ,   0.104560   0.287243 ,    )
-;   (   0.023008  -0.000160 ,  -0.321659   0.374934 ,  -0.138044  -0.350235 ,    )
+;   (   0.025564  -0.000178 ,  -0.357379   0.416570 ,   0.104579   0.287218 ,    )
+;   (   0.023007  -0.000160 ,  -0.321640   0.374911 ,  -0.137604  -0.349585 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
 ;   (  -0.000002   0.000005 ,   0.000004  -0.000000 ,  -0.046797   0.209332 ,    )
-;   (  -0.029718  -0.103184 ,  -0.168265   0.068102 ,   0.000003  -0.000011 ,    )
-;   (  -0.159768   0.086110 ,  -0.060486  -0.088715 ,   0.000019   0.000015 ,    )
+;   (  -0.029694  -0.103193 ,  -0.168269   0.068088 ,   0.000003  -0.000011 ,    )
+;   (  -0.159760   0.086123 ,  -0.060508  -0.088703 ,   0.000019   0.000015 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
 ;   (   0.332048   0.000000 ,   0.332048  -0.000000 ,   0.332048   0.000000 ,    )
-;   (  -0.503327   0.000000 ,   0.173482   0.000000 ,  -0.205466  -0.000000 ,    )
-;   (  -0.453063   0.000000 ,   0.177723  -0.000000 ,   0.548432  -0.000000 ,    )
+;   (  -0.503376   0.000000 ,   0.173456   0.000000 ,  -0.205384  -0.000000 ,    )
+;   (  -0.453035   0.000000 ,   0.177026  -0.000000 ,   0.548820   0.000000 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
 ;   (  -0.111006  -0.068274 ,  -0.111008  -0.068275 ,  -0.111005  -0.068274 ,    )
 ;   (   0.155040   0.071068 ,   0.003004  -0.107120 ,  -0.158043   0.036046 ,    )
-;   (   0.063334   0.107082 ,  -0.178309  -0.035888 ,   0.114983  -0.071189 ,    )
+;   (   0.063335   0.107082 ,  -0.178309  -0.035888 ,   0.114983  -0.071189 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see tw90_4o_DS3_w90.wout for details.
@@ -934,8 +933,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.255200954249002
- Compensation charge over fine fft grid    =     -0.255201795217559
+ Compensation charge over spherical meshes =     -0.255200954249001
+ Compensation charge over fine fft grid    =     -0.255201795217696
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1029,8 +1028,8 @@ force_length_stats: {min: null, max: null, mean: null, }
            enunit2          0
            enunit3          0
            etotal1    -8.0266322345E+00
-            fcart1    -6.5591085042E-30 -1.3118217008E-29  1.9677325513E-29
-                       6.5591085042E-30  1.3118217008E-29 -1.9677325513E-29
+            fcart1    -6.5591085042E-30 -6.5591085042E-30  1.9677325513E-29
+                       6.5591085042E-30  6.5591085042E-30 -1.9677325513E-29
 -          fftalg         312
            getden1          0
            getden2          1
@@ -1316,10 +1315,10 @@ P           mkmem3         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         19.0  wall=         19.1
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         20.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  39 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.0  wall=         19.1
+.Delivered  40 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.3  wall=         20.5
