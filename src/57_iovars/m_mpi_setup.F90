@@ -273,7 +273,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if
    !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
-   ! Set cprj_in_memry to zero if paral_kgb has been activated by autoparal
+   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
    if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
