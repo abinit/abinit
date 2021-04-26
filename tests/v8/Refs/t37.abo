@@ -55,12 +55,11 @@
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
 -Number of processors    1    1
  
- WARNING: ALL the quantities are now computed :
-                                      from nstep_min=    1
-                                        to nstep_max=  101
-          So, the real number of time steps is nstep=  101
+ All quantities are computed from nstep_min=    1
+                               to nstep_max=  101
+ So, the real number of time steps is nstep=  101
  
- The Xred, Fcart, Etot and Stress data are extracted from the NetCDF file: HIST.nc 
+ The positions, forces and energies are extracted from the NetCDF file: HIST.nc
   
  #############################################################################
  ########################## Computed quantities ##############################

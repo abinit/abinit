@@ -59,12 +59,11 @@
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
 -Number of processors    1    1
  
- WARNING: ALL the quantities are now computed :
-                                      from nstep_min=    1
-                                        to nstep_max=   20
-          So, the real number of time steps is nstep=   20
+ All quantities are computed from nstep_min=    1
+                               to nstep_max=   20
+ So, the real number of time steps is nstep=   20
  
- The Xred, Fcart and Etot data are extracted from the ASCII files: xred.dat, fcart.dat \& etot.dat
+ The positions, forces and energies are extracted from the ASCII files: xred.dat, fcart.dat & etot.dat
   
  #############################################################################
  ########################## Computed quantities ##############################
