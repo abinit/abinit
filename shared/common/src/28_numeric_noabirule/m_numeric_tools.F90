@@ -230,6 +230,12 @@ MODULE m_numeric_tools
  interface isordered
    module procedure isordered_rdp
  end interface isordered
+
+ interface interpol3d
+   module procedure interpol3d_0d
+   module procedure interpol3d_1d
+ end interface interpol3d
+
 !!***
 
 !----------------------------------------------------------------------
@@ -4979,9 +4985,76 @@ end subroutine wrap2_pmhalf
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/interpol3d
+!!****f* m_numeric_tools/interpol3d_0d
 !! NAME
-!! interpol3d
+!! interpol3d_0d
+!!
+!! FUNCTION
+!! Computes the value at any point r by linear interpolation
+!! inside the eight vertices of the surrounding cube
+!! r is presumed to be normalized, in a unit cube for the full grid
+!!
+!! INPUTS
+!! r(3)=point coordinate
+!! nr1=grid size along x
+!! nr2=grid size along y
+!! nr3=grid size along z
+!! grid(nr1,nr2,nr3)=grid matrix
+!!
+!! OUTPUT
+!! res=Interpolated value
+!!
+!! PARENTS
+!!      integrate_gamma_alt,lin_interpq_gam,lineint,m_nesting,m_qparticles
+!!      planeint,pointint,volumeint
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function interpol3d_0d(r, nr1, nr2, nr3, grid) result(res)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: nr1, nr2, nr3
+ real(dp) :: res
+!arrays
+ real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: id,ir1,ir2,ir3,pr1,pr2,pr3
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
+ real(dp) :: x1,x2,x3
+
+! *************************************************************************
+
+ call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
+
+!weight
+ x1=one+r(1)*nr1-real(ir1)
+ x2=one+r(2)*nr2-real(ir2)
+ x3=one+r(3)*nr3-real(ir3)
+
+!calculation of the density value
+ res1=grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res2=grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res3=grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res4=grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res5=grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res6=grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res7=grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res8=grid(pr1, pr2, pr3) * x1*x2*x3
+ res=res1+res2+res3+res4+res5+res6+res7+res8
+
+end function interpol3d_0d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/interpol3d_1d
+!! NAME
+!! interpol3d_1d
 !!
 !! FUNCTION
 !! Computes the value at any point r by linear interpolation
@@ -5006,7 +5079,7 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r, nr1, nr2, nr3, grid, nd) result(res)
+pure function interpol3d_1d(r, nr1, nr2, nr3, grid, nd) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5043,7 +5116,7 @@ pure function interpol3d(r, nr1, nr2, nr3, grid, nd) result(res)
    res(id)=res1+res2+res3+res4+res5+res6+res7+res8
  enddo
 
-end function interpol3d
+end function interpol3d_1d
 !!***
 
 !----------------------------------------------------------------------
