@@ -2323,7 +2323,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 ! multiply by -1
  fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:)
 
-!ADD variation of the atomic displacement due to the strain
+!ADD stress due to forces on atoms and variation of disp with strain
  do icoeff=1,ncoeff
    do itime=1,ntime
      do ia1=1,natom_sc

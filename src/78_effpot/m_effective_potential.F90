@@ -2626,16 +2626,18 @@ energy = energy + energy_part
 fcart = fcart + fcart_part
 endif
 
+
+
+!-----------------------------------
+! 9 - Add stress due to forces on 
+!     atoms and variation of disp 
+!     due to strain 
+!-----------------------------------
+
 ! multiply forces by -1
   fcart = -1 * fcart
 
-
-!-----------------------------------
-! 9 - Add variation of the atomic
-!     displacement due to the strain
-!-----------------------------------
-  has_strain=.TRUE.
-  if (has_strain) then
+!Calculatei
     strten_part(:) = zero
     do ia = 1,eff_pot%supercell%natom
       do mu = 1,3
@@ -2645,12 +2647,12 @@ endif
       end do
     end do
     strten(:) = strten(:) + strten_part(:)
-  end if
 
 ! write(*,*) "--- STRTEN after du/deta application --- " 
 ! write(*,*) strten(:)
+
 !---------------------------------
-! 10 - Apply factors
+! 10 - Renormalize stress
 !---------------------------------
 
 ! divide stess tensor by ucvol
