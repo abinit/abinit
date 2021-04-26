@@ -35,6 +35,10 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  npimage 3
  np_spkpt 4
  npband 2
+#XG 20210421 : The next input variables allows a more efficient LOBPCG algorithm. As a side note, without them, the DATASET 4 abort with 
+#a floating point exception in the LOBPCG routines, with a too small residual, apparently problematic. This is to be understood/fixed.. 
+ bandpp 16  # This variable, combined with npband 2 (so npband*bandpp=nband), allows a more efficient LOBPCG algorithm than the default, at the expense of memory.
+ use_gemm_nonlop 1  # Also favoring speed
 
 ###########################################################################
 #Common to all images

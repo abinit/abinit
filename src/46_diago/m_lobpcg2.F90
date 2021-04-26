@@ -358,7 +358,7 @@ module m_lobpcg2
 
     nblock = lobpcg%nblock
     nline = lobpcg%nline
-    prevMaxResidu = huge(1d0)/100.d0 ! Divide by 100 to avoid 10*huge at the first iteration  which is a FPE
+    prevMaxResidu = huge(1d0)/1000.d0 ! Divide by 1000 to avoid 10*huge at the first iteration  which is a FPE
 
     call xgBlock_getSize(eigen,rows_tmp, cols_tmp)
     if ( rows_tmp /= lobpcg%neigenpairs .and. cols_tmp /= 1 ) then
