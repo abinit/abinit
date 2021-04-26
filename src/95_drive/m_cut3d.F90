@@ -37,7 +37,7 @@ MODULE m_cut3d
 
  use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
- use m_numeric_tools,    only : interpol3d
+ use m_numeric_tools,    only : interpol3d_0d
  use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
