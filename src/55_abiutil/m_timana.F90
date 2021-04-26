@@ -4,6 +4,9 @@
 !!
 !! FUNCTION
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
+!! number of calls to different routines is also provided, as comments,
+!! at the end of the routine, as well as, in the single dataset mode (ndtset<2),
+!! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
