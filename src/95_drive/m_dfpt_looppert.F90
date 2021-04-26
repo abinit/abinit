@@ -253,7 +253,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(inout) :: d2ovl(2,3,mpert,3,mpert*psps%usepaw) !vz_i
  real(dp), intent(out) :: eigbrd(2,dtset%mband*dtset%nsppol,nkpt,3,dtset%natom,3,dtset%natom*dim_eigbrd)
  real(dp), intent(out) :: eig2nkq(2,dtset%mband*dtset%nsppol,nkpt,3,dtset%natom,3,dtset%natom*dim_eig2nkq)
- type(efmasdeg_type),allocatable,intent(in) :: efmasdeg(:)
+ type(efmasdeg_type),allocatable,intent(inout) :: efmasdeg(:)
  type(efmasval_type),allocatable,intent(inout) :: efmasval(:,:)
  type(paw_an_type),allocatable,target,intent(inout) :: paw_an(:)
  type(paw_ij_type),allocatable,target,intent(inout) :: paw_ij(:)
@@ -1107,7 +1107,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &          formeig, istwfk_rbz, kpt_rbz, mcg, dtset%mband, mband_mem_rbz, mkmem_rbz, mpw,&
 &          dtset%natom, nkpt_rbz, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, occ=occ_disk)
-  
+
    call timab(144,2,tsec)
 
    ! Update energies GS energies at k

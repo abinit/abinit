@@ -372,7 +372,7 @@ end subroutine efmasdeg_free
  integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval
  integer, allocatable :: nband_arr(:), ndegs_arr(:), degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:), degs_bounds_arr(:,:)
- real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:), max_abs_eigen1(:)
  character(len=500) :: msg
 #ifdef HAVE_NETCDF
  integer :: ncerr
@@ -416,11 +416,13 @@ end subroutine efmasdeg_free
  ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
  ABI_MALLOC(ch2c_arr, (2,3,3,eig2_diag_arr_dim) )
  ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
+ ABI_MALLOC(max_abs_eigen1, (nkpt))
 
 !Prepare the arrays to be nc-written
  ideg_tot=1
  ieig=1
  do ikpt=1,nkpt
+   max_abs_eigen1(ikpt) = efmasdeg(ikpt)%max_abs_eigen1
    nband_arr(ikpt)=efmasdeg(ikpt)%nband
    ndegs_arr(ikpt)=efmasdeg(ikpt)%ndegs
    degs_range_arr(:,ikpt)=efmasdeg(ikpt)%deg_range(:)
@@ -462,6 +464,7 @@ end subroutine efmasdeg_free
 & nctkarr_t("degs_range_arr", "int", "two, number_of_kpoints"), &
 & nctkarr_t("ideg_arr", "int", "max_number_of_states, number_of_kpoints"), &
 & nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
+& nctkarr_t("max_abs_eigen1", "dp", "number_of_kpoints"), &
 & nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim"),  &
 & nctkarr_t("eig2_diag_arr","dp","real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")&
   ])
@@ -477,6 +480,7 @@ end subroutine efmasdeg_free
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "max_abs_eigen1"),            max_abs_eigen1))
 
 !Deallocate the arrays
  ABI_FREE(nband_arr)
@@ -486,6 +490,7 @@ end subroutine efmasdeg_free
  ABI_FREE(degs_bounds_arr)
  ABI_FREE(ch2c_arr)
  ABI_FREE(eig2_diag_arr)
+ ABI_FREE(max_abs_eigen1)
 #endif
 
 end subroutine print_efmas
@@ -530,7 +535,7 @@ end subroutine print_efmas
  integer :: jband,mband,nband,ndegs,ndegs_tot,nkpt
  integer, allocatable :: nband_arr(:), ndegs_arr(:), degs_range_arr(:,:)
  integer, allocatable :: ideg_arr(:,:), degs_bounds_arr(:,:)
- real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:)
+ real(dp), allocatable :: ch2c_arr(:,:,:,:), eig2_diag_arr(:,:,:,:), max_abs_eigen1(:)
 !----------------------------------------------------------------------
 
 #ifdef HAVE_NETCDF
@@ -549,6 +554,7 @@ end subroutine print_efmas
  ABI_MALLOC(degs_bounds_arr, (2,ndegs_tot) )
  ABI_MALLOC(ch2c_arr, (2,3,3,eig2_diag_arr_dim) )
  ABI_MALLOC(eig2_diag_arr, (2,3,3,eig2_diag_arr_dim) )
+ ABI_MALLOC(max_abs_eigen1, (nkpt))
 
 !Read from NetCDF file
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), kpt))
@@ -559,6 +565,7 @@ end subroutine print_efmas
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "degs_bounds_arr"),           degs_bounds_arr))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "max_abs_eigen1"),            max_abs_eigen1))
 
 !Prepare the efmas* datastructures
  ABI_MALLOC(efmasdeg,(nkpt))
@@ -570,6 +577,7 @@ end subroutine print_efmas
    efmasdeg(ikpt)%deg_range(:)=degs_range_arr(:,ikpt)
    nband=nband_arr(ikpt)
    efmasdeg(ikpt)%nband=nband
+   efmasdeg(ikpt)%max_abs_eigen1 = max_abs_eigen1(ikpt)
    ABI_MALLOC(efmasdeg(ikpt)%ideg, (nband))
    efmasdeg(ikpt)%ideg=ideg_arr(1:nband,ikpt)
    ndegs=ndegs_arr(ikpt)
@@ -608,6 +616,7 @@ end subroutine print_efmas
  ABI_FREE(degs_bounds_arr)
  ABI_FREE(ch2c_arr)
  ABI_FREE(eig2_diag_arr)
+ ABI_FREE(max_abs_eigen1)
 #endif
 
  end subroutine efmas_ncread
@@ -856,7 +865,7 @@ end subroutine print_efmas
   real(dp), intent(in) :: eigen1(nkpt_rbz*2*dtset%nsppol*dtset%mband**2,3,mpert)
   real(dp), intent(in) :: rprimd(3,3)
   real(dp), intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%nsppol*nkpt_rbz)
-  type(efmasdeg_type), allocatable,intent(in) :: efmasdeg(:)
+  type(efmasdeg_type), allocatable,intent(inout) :: efmasdeg(:)
   type(efmasval_type),  allocatable,intent(inout) :: efmasval(:,:)
 
  !Local variables-------------------------------
@@ -911,12 +920,14 @@ end subroutine print_efmas
   band2tot_index=0
   bandtot_index=0
 
+
   !XG20180519 : in the original coding by Jonathan, there is a lack of care about using dtset%nkpt or nkpt_rbz ...
   !Not important in the sequential case (?!) but likely problematic in the parallel case.
   do ikpt=1,dtset%nkpt
     npw_k = npwarr(ikpt,ipert)
     nband_k = dtset%nband(ikpt)
     nspinor = dtset%nspinor
+    efmasdeg(ikpt)%max_abs_eigen1 = zero
 
     ABI_MALLOC(cg1_pert2,(2,npw_k*nspinor))
     ABI_MALLOC(cg1_pert1,(2,npw_k*nspinor))
@@ -940,10 +951,13 @@ end subroutine print_efmas
 &              eigen1(2*(jband+degl)+(iband+degl-1)*2*nband_k,adir,ipert),dpc)
             end do
           end do
+
+          efmasdeg(ikpt)%max_abs_eigen1 = max(efmasdeg(ikpt)%max_abs_eigen1, maxval(abs(eigen1_deg)))
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
             write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
-&            'but gradient of band(s) was found to be nonzero.'
-            ABI_ERROR(msg)
+&            'but max abs gradient component of band(s) was found to be greater than 1e-5.'
+            ABI_WARNING(msg)
+            ABI_WARNING_UNIT(msg, ab_out)
           end if
         end do !adir=1,3
       end if !degenerate(1)

@@ -74,6 +74,12 @@ module m_efmas_defs
                                               ! possibly extended due to the degeneracies.
    integer,allocatable :: ideg(:)             ! ideg(nband_k)  index of the set to which a particular band belongs
 
+   real(dp) :: max_abs_eigen1 = zero
+   ! Stores max abs value of gradient component <b1|H1_i|b2> inside the degenerate subspace for this k-point
+   ! The code prints a warning if this quantity is > tol5 without stopping although the formalism
+   ! assumes the first order term to be zero.
+   ! Post-processing tools are responsible to check this value when analyzing the data.
+
  end type efmasdeg_type
 !!***
 
