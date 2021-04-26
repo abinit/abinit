@@ -83,7 +83,8 @@ MODULE m_numeric_tools
  public :: isordered             ! Check the ordering of a sequence.
  public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ where 1 is not included (tol12)
  public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] where -1/2 is not included (tol12)
- public :: interpol3d            ! Linear interpolation in 3D
+ public :: interpol3d_0d         ! Linear interpolation in 3D
+ public :: interpol3d_1d         ! Linear interpolation in 3D for an array
  public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
@@ -230,11 +231,6 @@ MODULE m_numeric_tools
  interface isordered
    module procedure isordered_rdp
  end interface isordered
-
- interface interpol3d
-   module procedure interpol3d_0d
-   module procedure interpol3d_1d
- end interface interpol3d
 
 !!***
 
@@ -5245,7 +5241,7 @@ subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_r
        do ir1=0,out_ngfft(1)-1
          rr(1) = DBLE(ir1)/out_ngfft(1)
          ifft = 1 + ir1 + ir2*out_ngfft(1) + ir3*out_ngfft(1)*out_ngfft(2)
-         out_rhor(1:cplex, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(:, :, ispden),cplex)
+         out_rhor(1:cplex, ifft, ispden) = interpol3d_1d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(:, :, ispden),cplex)
        end do
      end do
    end do
