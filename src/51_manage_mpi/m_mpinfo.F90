@@ -2282,7 +2282,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(a,2(1x,i0))') 'Present parallel dimensions: nkpt= ',nkpt,' nband per processor= ', nb_per_proc, ' npband= ',nrank
+     write(msg,'(3(a,i6))') 'Present parallel dimensions: nkpt= ',nkpt,' nband per processor= ', nb_per_proc, ' npband= ',nrank
      call wrtout(std_out,msg,'COLL')
 
      ABI_FREE(ranks)
