@@ -43,7 +43,7 @@ module m_scfcv_core
  use m_cgtools
  use m_dtfil
  use m_distribfft
- use m_hightemp
+ use m_extfpmd
 
  use m_nonlop,           only : nonlop_counter
  use defs_datatypes,     only : pseudopotential_type
@@ -264,7 +264,7 @@ contains
 !! SOURCE
 
 subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,&
-&  dtset,ecore,eigen,electronpositron,fatvshift,hdr,hightemp,indsym,&
+&  dtset,ecore,eigen,electronpositron,fatvshift,hdr,extfpmd,indsym,&
 &  initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,nfftf,npwarr,occ,&
 &  paw_dmft,pawang,pawfgr,pawrad,pawrhoij,pawtab,phnons,psps,pwind,&
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
@@ -283,7 +283,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
  type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer:: electronpositron
  type(hdr_type),intent(inout) :: hdr
- type(hightemp_type),pointer,intent(inout) :: hightemp
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(inout) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -1224,7 +1224,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
              ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 !          1-Compute density from WFs
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,&
-&                       rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,hightemp=hightemp)
+&                       rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
              call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
 !          2-Compute rhoij
              call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
@@ -1250,7 +1250,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
            else
              write(std_out,*)' scfcv_core : recompute the density after the wf mixing '
              call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,hightemp=hightemp)
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
              if(dtset%usekden==1)then
                call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,&
 &                         rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
@@ -1295,7 +1295,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    if (dtset%positron<0.or.(dtset%positron>0.and.istep==1)) then
      call setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,&
 &     etotal,electronpositron,energies,fock,forces_needed,fred,gmet,gprimd,&
-&     grchempottn,grcondft,grewtn,grvdw,gsqcut,hdr,hightemp,initialized0,indsym,istep,istep_mix,kg,&
+&     grchempottn,grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,initialized0,indsym,istep,istep_mix,kg,&
 &     kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,&
 &     nkxc,npwarr,nvresid,occ,optres,paw_ij,pawang,pawfgr,pawfgrtab,&
 &     pawrad,pawrhoij,pawtab,ph1df,ph1d,psps,rhog,rhor,rprimd,&
@@ -1568,7 +1568,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      call vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
-&     gmet,gprimd,grnl,gsqcut,hdr,hightemp,indsym,irrzon,irrzondiel,&
+&     gmet,gprimd,grnl,gsqcut,hdr,extfpmd,indsym,irrzon,irrzondiel,&
 &     istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &     my_natom,dtset%natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &     npwarr,npwdiel,res2,psps%ntypat,nvresid,occ,&
@@ -1649,7 +1649,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     elast,electronpositron,energies,&
 &     etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
-&     grxc,gsqcut,hightemp,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
+&     grxc,gsqcut,extfpmd,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,psps%ntypat,nvresid,n1xccc,n3xccc,&
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &     ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
@@ -1861,7 +1861,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
        call etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &       elast,electronpositron,energies,&
 &       etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
-&       grxc,gsqcut,hightemp,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
+&       grxc,gsqcut,extfpmd,indsym,kxc,maxfor,mgfftf,mpi_enreg,my_natom,&
 &       nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,dtset%ntypat,nvresid,n1xccc, &
 &       n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,&
 &       pawtab,ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
@@ -2052,7 +2052,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
    end if
 
    call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-&   energies,eigen,etotal,gsqcut,hightemp,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
+&   energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
 &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
 &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
 &   phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
@@ -2177,7 +2177,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,hightemp,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -2189,15 +2189,15 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 
 
 !blanchet write eigocc output file
- if(dtset%ht_prt_eigocc==1) then
-   if(associated(hightemp)) then
-     call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
+ if(dtset%extfpmd_prt_eig==1) then
+   if(associated(extfpmd)) then
+     call extfpmd_prt_eig(extfpmd%e_kin,extfpmd%e_shiftfactor,eigen,&
      & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
      & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
-     & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+     & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&
      & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
    else
-     call hightemp_prt_eigocc(zero,zero,eigen,&
+     call extfpmd_prt_eig(zero,zero,eigen,&
      & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
      & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
      & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
@@ -2516,7 +2516,7 @@ end subroutine scfcv_core
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  elast,electronpositron,energies,&
 &  etotal,favg,fcart,fock,forold,fred,gmet,grchempottn,grcondft,gresid,grewtn,grhf,grnl,grvdw,&
-&  grxc,gsqcut,hightemp,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
+&  grxc,gsqcut,extfpmd,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
 &  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,vxctau,wvl,wvl_den,xccc3d,xred)
@@ -2533,7 +2533,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(hightemp_type),pointer,intent(inout) :: hightemp
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
@@ -2714,14 +2714,14 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    end if
 
 !  Blanchet Add the energy contribution to the internal energy
-   if(associated(hightemp)) then
-     energies%entropy=energies%entropy+hightemp%ent_freeel
-     energies%e_kin_freeel=hightemp%e_kin_freeel
-     energies%e_shiftfactor=hightemp%e_shiftfactor
-     energies%edc_kin_freeel=hightemp%edc_kin_freeel
-     if(optene==0) etotal=etotal+energies%e_kin_freeel
-     if(optene==1) etotal=etotal+energies%e_kin_freeel+energies%edc_kin_freeel
-     etotal=etotal-dtset%tsmear*hightemp%ent_freeel
+   if(associated(extfpmd)) then
+     energies%entropy=energies%entropy+extfpmd%entropy
+     energies%extfpmd_e_kin=extfpmd%e_kin
+     energies%extfpmd_e_shiftfactor=extfpmd%e_shiftfactor
+     energies%extfpmd_edc_kin=extfpmd%edc_kin
+     if(optene==0) etotal=etotal+energies%extfpmd_e_kin
+     if(optene==1) etotal=etotal+energies%extfpmd_e_kin+energies%extfpmd_edc_kin
+     etotal=etotal-dtset%tsmear*extfpmd%entropy
    end if
 
 !  Compute energy residual

@@ -30,7 +30,7 @@ module m_stress
  use m_abicore
  use m_errors
  use m_xmpi
- use m_hightemp
+ use m_extfpmd
 
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
@@ -174,7 +174,7 @@ contains
 !!
 !! SOURCE
 
- subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,hightemp,&
+ subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,extfpmd,&
 &                  ixc,kinstr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
@@ -188,7 +188,7 @@ contains
  integer,intent(in) :: nsym,ntypat,prtvol,usefock,usekden,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
- type(hightemp_type),pointer,intent(inout) :: hightemp
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
  type(MPI_type),intent(in) :: mpi_enreg
@@ -590,9 +590,9 @@ contains
    strten(mu)=uncorr(mu)
  end do
 
-!Blanchet - Adding the hightemp continous contribution to stress tensor
- if(associated(hightemp)) then
-   strten(1:3)=strten(1:3)-(2./3.)*hightemp%e_kin_freeel/hightemp%ucvol
+!Blanchet - Adding the extfpmd continous contribution to stress tensor
+ if(associated(extfpmd)) then
+   strten(1:3)=strten(1:3)-(2./3.)*extfpmd%e_kin/extfpmd%ucvol
  end if
 
 !=======================================================================

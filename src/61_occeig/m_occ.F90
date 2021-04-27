@@ -31,7 +31,7 @@ module m_occ
  use m_abicore
  use m_splines
  use m_xmpi
- use m_hightemp
+ use m_extfpmd
 
  use m_time,         only : timab, cwtime, cwtime_report
  use m_fstrings,     only : sjoin, itoa
@@ -526,7 +526,7 @@ end subroutine getnel
 
 subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
   nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, stmbias, tphysel, tsmear, wtk, &
-  hightemp) ! Optional argument
+  extfpmd) ! Optional argument
   ! CP modified:
 !  added fermih, ivalence, ne_qFD, nh_qFD for occopt 9 case
 
@@ -535,7 +535,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
  real(dp),intent(in) :: spinmagntarget,nelect,stmbias,tphysel,tsmear
  real(dp),intent(out) :: entropy,fermie,fermih ! CP added fermih
- type(hightemp_type),pointer,intent(inout),optional :: hightemp
+ type(extfpmd_type),pointer,intent(inout),optional :: extfpmd
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
@@ -693,10 +693,10 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! Compute the number of free electrons with corresponding chemical
  ! potential and add to nelect bounds.
- if(present(hightemp)) then
-   if(associated(hightemp)) then
-     call hightemp%compute_nfreeel(fermie_lo,nelectlo,tsmear)
-     call hightemp%compute_nfreeel(fermie_hi,nelecthi,tsmear)
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     call extfpmd%compute_nelect(fermie_lo,nelectlo,tsmear)
+     call extfpmd%compute_nelect(fermie_hi,nelecthi,tsmear)
    end if
  end if
 
@@ -779,9 +779,9 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
        ! Blanchet - Compute the number of free electrons with corresponding chemical
        ! potential and add to nelect bounds.
-       if(present(hightemp)) then
-         if(associated(hightemp)) then
-           call hightemp%compute_nfreeel(fermie_mid,nelectmid,tsmear)
+       if(present(extfpmd)) then
+         if(associated(extfpmd)) then
+           call extfpmd%compute_nelect(fermie_mid,nelectmid,tsmear)
          end if
        end if
 

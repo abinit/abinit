@@ -39,7 +39,7 @@ module m_vtorho
  use m_hdr
  use m_dtset
  use m_dtfil
- use m_hightemp
+ use m_extfpmd
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -284,7 +284,7 @@ contains
 subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
-&           gmet,gprimd,grnl,gsqcut,hdr,hightemp,indsym,irrzon,irrzondiel,&
+&           gmet,gprimd,grnl,gsqcut,hdr,extfpmd,indsym,irrzon,irrzondiel,&
 &           istep,istep_mix,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
@@ -308,7 +308,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
- type(hightemp_type),pointer,intent(inout) :: hightemp
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1179,11 +1179,11 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      end if ! nproc_kpt>1
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
-     if(associated(hightemp)) then
-       hightemp%vtrial=vtrial
-       call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
+     if(associated(extfpmd)) then
+       extfpmd%vtrial=vtrial
+       call extfpmd%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
-       ! if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
+       ! if(dtset%userra/=zero) extfpmd%e_shiftfactor=dtset%userra
      end if
 
 !    Compute the new occupation numbers from eigen
@@ -1196,30 +1196,30 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
 &     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,&
-&     hightemp)
+&     extfpmd)
      ! End CP modified
      call timab(990,2,tsec)
 
 
 !    Blanchet Once we have occupation, compute number of free electrons
-     if(associated(hightemp)) then
-       hightemp%nfreeel=zero
-       call hightemp%compute_nfreeel(energies%e_fermie,hightemp%nfreeel,dtset%tsmear)
-       call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
+     if(associated(extfpmd)) then
+       extfpmd%nelect=zero
+       call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
+       call extfpmd%compute_e_kin(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
-       call hightemp%compute_ent_freeel(energies%e_fermie,dtset%tsmear)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
      end if
 
 !    Blanchet write eigocc output file
-     if(dtset%ht_prt_eigocc==1) then
-       if(associated(hightemp)) then
-         call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
+     if(dtset%extfpmd_prt_eig==1) then
+       if(associated(extfpmd)) then
+         call extfpmd_prt_eig(extfpmd%e_kin,extfpmd%e_shiftfactor,eigen,&
          & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
          & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
-         & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+         & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&
          & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
        else
-         call hightemp_prt_eigocc(zero,zero,eigen,&
+         call extfpmd_prt_eig(zero,zero,eigen,&
          & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
          & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
          & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
@@ -1484,11 +1484,11 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       hightemp=hightemp)
+&       extfpmd=extfpmd)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       hightemp=hightemp)
+&       extfpmd=extfpmd)
      end if
      call timab(992,2,tsec)
 
@@ -1730,7 +1730,7 @@ subroutine vtorho(itime,afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo
          if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
          bdtot_index=bdtot_index+1
        end do
-       if(min_occ>0.01_dp .and. .not. associated(hightemp))then
+       if(min_occ>0.01_dp .and. .not. associated(extfpmd))then
          if(dtset%nsppol==1)then
            write(msg, '(a,i0,3a,f7.3,5a)' )&
              'For k-point number: ',ikpt,',',ch10,&
