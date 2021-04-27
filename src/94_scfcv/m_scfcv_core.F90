@@ -1095,7 +1095,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !      Identify parts of the rectangular grid where the density has to be calculated
        optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
-       if (forces_needed==1.or.(dtset%xclevel==2.and.dtset%pawnhatxc>0.and.usexcnhat>0)) then
+       if ((forces_needed==1).or. &
+&          (dtset%xclevel==2.and.dtset%pawnhatxc>0.and.usexcnhat>0).or. &
+&          (dtset%positron/=0.and.forces_needed==2)) then
          optgr1=dtset%pawstgylm;if (stress_needed==1) optrad=1; if (dtset%pawprtwf==1) optrad=1
        end if
 
