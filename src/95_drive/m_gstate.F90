@@ -47,7 +47,7 @@ module m_gstate
  use m_hdr
  use m_ebands
  use m_dtfil
- use m_hightemp
+ use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : MPI_type
@@ -288,7 +288,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
- type(hightemp_type),pointer :: hightemp => null()
+ type(extfpmd_type),pointer :: extfpmd => null()
  type(macro_uj_type) :: dtpawuj(0)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
@@ -846,17 +846,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
  if (has_to_init) xred_old=xred
 
-!Initialize (eventually) hightemp object
- if(dtset%use_hightemp>=1.and.dtset%occopt==3) then
-   if(dtset%use_hightemp/=1.and.dtset%mband<dtset%ht_nbcut) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate hightemp routines.",ch10,&
-     & "nband=",dtset%mband," < ht_nbcut=",dtset%ht_nbcut,".",ch10,&
-     & "Action: Increase nband or decrease ht_nbcut."
+!Initialize (eventually) extfpmd object
+ if(dtset%use_extfpmd>=1.and.dtset%occopt==3) then
+   if(dtset%use_extfpmd/=1.and.dtset%mband<dtset%extfpmd_nbcut) then
+     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate extfpmd routines.",ch10,&
+     & "nband=",dtset%mband," < extfpmd_nbcut=",dtset%extfpmd_nbcut,".",ch10,&
+     & "Action: Increase nband or decrease extfpmd_nbcut."
      ABI_ERROR(msg)
    else
-     ABI_MALLOC(hightemp,)
-     call hightemp%init(dtset%mband,dtset%ht_nbcut,nfftf,&
-&     dtset%nspden,rprimd,dtset%use_hightemp)
+     ABI_MALLOC(extfpmd,)
+     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,nfftf,&
+&     dtset%nspden,rprimd,dtset%use_extfpmd)
    end if
  end if
 
@@ -892,18 +892,18 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   hightemp)
+&   extfpmd)
 ! End CP modified
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
 
-   if(associated(hightemp)) then
-     hightemp%nfreeel=zero
-     call hightemp%compute_nfreeel(results_gs%energies%e_fermie,hightemp%nfreeel,&
+   if(associated(extfpmd)) then
+     extfpmd%nelect=zero
+     call extfpmd%compute_nelect(results_gs%energies%e_fermie,extfpmd%nelect,&
 &     dtset%tsmear)
-     call hightemp%compute_efreeel(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
-&     dtset%tsmear,hightemp%vtrial)
+     call extfpmd%compute_e_kin(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
+&     dtset%tsmear,extfpmd%vtrial)
    end if
 
 !  Transfer occupations to bigdft object:
@@ -1139,7 +1139,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !        write(std_out,*) "mkrhogstate"
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         hightemp=hightemp)
+&         extfpmd=extfpmd)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
          if(dtset%usekden==1)then
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
@@ -1151,7 +1151,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        else
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         hightemp=hightemp)
+&         extfpmd=extfpmd)
          if(dtset%usekden==1)then
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &           mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
@@ -1311,7 +1311,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(1215,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,hightemp,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1648,10 +1648,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call data4entropyDMFT_destroy(paw_dmft%forentropyDMFT)
  end if
 
-!Destroy hightemp datastructure
- if(associated(hightemp)) then
-   call hightemp%destroy()
-   ABI_FREE(hightemp)
+!Destroy extfpmd datastructure
+ if(associated(extfpmd)) then
+   call extfpmd%destroy()
+   ABI_FREE(extfpmd)
  end if
 
 !Destroy electronpositron datastructure

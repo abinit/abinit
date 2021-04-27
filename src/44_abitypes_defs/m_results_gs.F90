@@ -93,8 +93,8 @@ MODULE m_results_gs
   real(dp) :: diffor
    ! maximal absolute value of changes in the components of force
 
-  real(dp) :: nfreeel
-   ! hightemp extended moodel number of free electrons
+  real(dp) :: extfpmd_nelect
+   ! Contribution of extended FPMD model to the number of electrons for high temperature simulations
 
 ! All the energies are in Hartree, obtained "per unit cell".
   type(energies_type) :: energies
@@ -284,7 +284,7 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%etotal =zero
  results_gs%fermie =zero
  results_gs%fermih =zero ! CP added for case occopt 9
- results_gs%nfreeel=zero
+ results_gs%extfpmd_nelect=zero
  results_gs%residm =zero
  results_gs%res2   =zero
  results_gs%vxcavg =zero
@@ -390,7 +390,7 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
        results_gs(jj,ii)%fermih =zero ! CP added for occopt 9 cases
-       results_gs(jj,ii)%nfreeel=zero
+       results_gs(jj,ii)%extfpmd_nelect=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
        results_gs(jj,ii)%vxcavg =zero
@@ -664,7 +664,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
  results_gs_out%fermih =results_gs_in%fermih ! CP added for occopt 9
- results_gs_out%nfreeel=results_gs_in%nfreeel
+ results_gs_out%extfpmd_nelect=results_gs_in%extfpmd_nelect
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
  results_gs_out%vxcavg =results_gs_in%vxcavg
@@ -743,7 +743,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
 !  "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih", "nfreeel", "residm", "res2"]) ! CP added fermih
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih", "extfpmd_nelect", "residm", "res2"]) ! CP added fermih
  ! End CP modified
  NCF_CHECK(ncerr)
 
@@ -773,8 +773,8 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
 !&  datamode=.True.)
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih', 'nfreeel', 'residm', 'res2'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih, res%nfreeel, res%residm, res%res2],&
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih', 'extfpmd_nelect', 'residm', 'res2'],&
+&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih, res%extfpmd_nelect, res%residm, res%res2],&
 &  datamode=.True.)
  ! End CP modified
  NCF_CHECK(ncerr)

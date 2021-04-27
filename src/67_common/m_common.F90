@@ -1261,7 +1261,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
           write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
           ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
           convrt*fermie,', ',convrt*fermih,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
-       else 
+       else
           write(msg, '(3a,f10.5,3a,f10.5)' ) &
           ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        end if
@@ -1524,9 +1524,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
-     if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
-       call edoc%add_real('kinetic_extended',energies%e_kin_freeel)
-       call edoc%add_real('total_kinetic',energies%e_kin_freeel+energies%e_kinetic)
+     if(abs(energies%extfpmd_e_kin)>tiny(0.0_dp)) then
+       call edoc%add_real('kinetic_extfpmd',energies%extfpmd_e_kin)
+       call edoc%add_real('total_kinetic',energies%extfpmd_e_kin+energies%e_kinetic)
      end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1619,8 +1619,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
    dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
-   if(abs(energies%e_kin_freeel)>tiny(0.0_dp)) then
-     call dc_edoc%add_real('kinetic_extended_dc',energies%edc_kin_freeel)
+   if(abs(energies%extfpmd_e_kin)>tiny(0.0_dp)) then
+     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%extfpmd_edc_kin)
    end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &

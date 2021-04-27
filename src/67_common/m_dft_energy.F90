@@ -35,7 +35,7 @@ module m_dft_energy
  use m_xcdata
  use m_cgtools
  use m_dtset
- use m_hightemp
+ use m_extfpmd
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -222,7 +222,7 @@ contains
 !! SOURCE
 
 subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-& energies,eigen,etotal,gsqcut,hightemp,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
+& energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
@@ -239,7 +239,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(hightemp_type),pointer,intent(inout) :: hightemp
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
@@ -833,15 +833,15 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
  end if
 
-!Blanchet Add the energy contribution to hightemp free electron model
- if(associated(hightemp)) then
-   energies%entropy=energies%entropy+hightemp%ent_freeel
-   energies%e_kin_freeel=hightemp%e_kin_freeel
-   energies%e_shiftfactor=hightemp%e_shiftfactor
-   energies%edc_kin_freeel=hightemp%edc_kin_freeel
-   if(optene==0.or.optene==2) etotal=etotal+energies%e_kin_freeel
-   if(optene==1.or.optene==3) etotal=etotal+energies%e_kin_freeel+energies%edc_kin_freeel
-   etotal=etotal-dtset%tsmear*hightemp%ent_freeel
+!Blanchet Add the energy contribution to extfpmd free electron model
+ if(associated(extfpmd)) then
+   energies%entropy=energies%entropy+extfpmd%entropy
+   energies%extfpmd_e_kin=extfpmd%e_kin
+   energies%extfpmd_e_shiftfactor=extfpmd%e_shiftfactor
+   energies%extfpmd_edc_kin=extfpmd%edc_kin
+   if(optene==0.or.optene==2) etotal=etotal+energies%extfpmd_e_kin
+   if(optene==1.or.optene==3) etotal=etotal+energies%extfpmd_e_kin+energies%extfpmd_edc_kin
+   etotal=etotal-dtset%tsmear*extfpmd%entropy
  end if
 
 !Compute new charge density based on incoming wf
@@ -853,7 +853,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    tim_mkrho=3
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs,&
-&   hightemp=hightemp)
+&   extfpmd=extfpmd)
    if(dtset%usekden==1)then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
@@ -883,7 +883,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    rhowfr(:,:)=zero
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs,&
-&   hightemp=hightemp)
+&   extfpmd=extfpmd)
 
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,0,dtset%paral_kgb,pawfgr,rhowfg,rhodum,rhowfr,rhor)
    rhor(:,:)=rhor(:,:)+nhat(:,:)

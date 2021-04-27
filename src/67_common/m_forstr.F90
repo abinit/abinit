@@ -35,7 +35,7 @@ module m_forstr
  use m_cgtools
  use m_xcdata
  use m_dtset
- use m_hightemp
+ use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -250,7 +250,7 @@ contains
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,hightemp,indsym,&
+&                 forold,fred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
@@ -269,7 +269,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(in) :: energies
- type(hightemp_type),pointer,intent(inout) :: hightemp
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -506,7 +506,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
-&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,hightemp,dtset%ixc,kinstr,mgfftf,&
+&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,extfpmd,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&

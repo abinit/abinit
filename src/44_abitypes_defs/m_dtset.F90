@@ -179,6 +179,8 @@ type, public :: dataset_type
  integer :: eph_transport = 0
  integer :: eph_use_ftinterp = 0
  integer :: exchn2n3d
+ integer :: extfpmd_nbcut = 25
+ integer :: extfpmd_prt_eig = 0
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -264,8 +266,6 @@ type, public :: dataset_type
 !H
  integer :: hmcsst
  integer :: hmctt
- integer :: ht_nbcut = 25
- integer :: ht_prt_eigocc = 0
 !I
  integer :: iboxcut
  integer :: icoulomb
@@ -586,7 +586,7 @@ type, public :: dataset_type
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
- integer :: use_hightemp = 0
+ integer :: use_extfpmd = 0
  integer :: use_yaml = 0
  integer :: use_slk
 !V
@@ -1481,6 +1481,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%exchn2n3d          = dtin%exchn2n3d
  dtout%expert_user        = dtin%expert_user
+ dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
+ dtout%extfpmd_prt_eig    = dtin%extfpmd_prt_eig
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -1572,8 +1574,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
- dtout%ht_nbcut             = dtin%ht_nbcut
- dtout%ht_prt_eigocc        = dtin%ht_prt_eigocc
  dtout%hyb_mixing      = dtin%hyb_mixing
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
  dtout%hyb_range_dft   = dtin%hyb_range_dft
@@ -1865,7 +1865,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
- dtout%use_hightemp       = dtin%use_hightemp
+ dtout%use_extfpmd       = dtin%use_extfpmd
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -3185,7 +3185,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
- list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extrapwf'
+ list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_prt_eig extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
@@ -3221,7 +3221,6 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !H
- list_vars=trim(list_vars)//' ht_nbcut ht_prt_eigocc'
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
@@ -3351,7 +3350,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk use_hightemp use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk use_extfpmd use_yaml'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

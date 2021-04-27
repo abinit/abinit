@@ -13019,9 +13019,9 @@ Compute quantities related to orbital magnetization. The
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetization" and "Chern number".
 
-* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the 
+* [[orbmag]] = 11: Compute orbital magnetization and Chern number (integral of the
 Berry curvature over the Brillouin zone) using both GS and DDK wavefunctions. This is
-the most robust method. 
+the most robust method.
 * [[orbmag]] = 1: Compute Chern number using discretized wavefunctions. This computation is
 faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
 electronic current.
@@ -13032,8 +13032,8 @@ electronic current.
 derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
 same computations as the corresponding 1, 2, 3 values, but based on an implementation
 using a discretization of the density operator itself. Both methods should converge to
-the same values but in our experience the wavefunction-based method converges faster. The 
-DDK method converges considerably faster than either of the above methods and is also robust 
+the same values but in our experience the wavefunction-based method converges faster. The
+DDK method converges considerably faster than either of the above methods and is also robust
 in case of only a single kpt.
 """,
 ),
@@ -22279,6 +22279,20 @@ The size of these arrays depends on the number of plane-waves treated by each pr
 The amount of memory scales with [[npband]] and [[npfft] yet this extra memory is not negligible and the code
 may go out of memory for large systems.
 In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-DIIS that avoids these extra allocations.
+""",
+),
+
+Variable(
+    abivarname="use_extfpmd",
+    varset="gstate",
+    vartype="integer",
+    topics=['ExtDFT_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Activate the Extended FPMD model",
+    added_in_version="9.?.?",
+    text=r"""
+
 """,
 ),
 
