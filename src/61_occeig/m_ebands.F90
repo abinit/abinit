@@ -54,7 +54,7 @@ MODULE m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
-                              isdiagmat, get_diag, interpol3d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -6332,7 +6332,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 
  ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, bsize, nsppol, ndat))
 
- ! Build array in the full BZ to prepare call to interpol3d.
+ ! Build array in the full BZ to prepare call to interpol3d_0d.
  ikf = 0
  do iz=1,nkz
    do iy=1,nky
@@ -6427,7 +6427,7 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%bsize
-        val = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
+        val = interpol3d_0d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
 
         !if (val <= zero) then
         !  vv(1) = self%data_uk_bsd(ir1, ir2, ir3, band, spin, idat)

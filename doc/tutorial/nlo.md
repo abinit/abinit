@@ -555,14 +555,17 @@ Everything is reported together (not only $d\chi / d\tau$ but also the full Rama
 polarizability tensors) and in appropriate units. It should therefore be
 considered as the better choice.
 
-## Calculation of the Raman Spectra
+## 4 Plotting the Raman Spectrum
 
-The ouptut of an ANADDB analysis, for example *tnlo_4.abo* as performed here, can be
+The output of an ANADDB analysis, for example *tnlo_4.abo* as performed here, can be
 used to plot a simulated Raman spectrum, including both peak positions and intensities,
 which can be compared to experiment. Many details of the process are outlined in [[cite:Caracas2006]].
 
-A post-processing script, written in Python, is available in the ABINIT system:
-see *$ABI_HOME/scripts/post_processing/Raman_spec.py*. This program reads an input file
+A post-processing script, written in Python, is available in the ABINIT package:
+see *$ABI_HOME/scripts/post_processing/Raman_spec.py*. If you have not installed the whole ABINIT package, but only are using
+compiled executables and the documentation on the web, you should make the extra effort of downloading the full package, as mentioned in the ABINIT install notes.
+
+This program reads an input file
 that sets the ANADDB file to read, the output file base name, and various processing
 parameters. To continue, we suggest copying this script into your working directory, or making
 a link to it.
@@ -578,18 +581,19 @@ filename tnlo_4.abo
 # base name for Raman_spec.py output files
 outname AlP.out
 
-# temperature in Kelvin for spectrum
+# temperature in Kelvin for spectrum (default is zero K)
 temp 298.0
 
-# number frequencies (default is 1000, units of cm^-1)
+# number frequencies (default is 1000)
 n_freq 400
 
-# min and max frequencies (default is 0.95 and 1.05 of
-# bands found
+# min and max frequencies 
+# (default is 0.95 and 1.05 of bands found; default unit is cm^-1, user can instead specify Ha or Hz)
 min_freq 200.0
 max_freq 800.0
 
 # Lorentzian broadening to apply
+# (default is zero; default unit is cm^-1, user can instead specify Ha or Hz)
 spread 1.0
 
 # calculation type: 1 is powder
@@ -609,6 +613,6 @@ the resulting spectra contains a single Raman TO mode corresponding to an XY pol
 
 ![](nlo_assets/AlP-Raman-ecut-2.8.png)
 
-Finally, if one includes a calculation of the frequency dependent dielectric tensor during the ANADDB calculation
+Finally, if one includes a calculation of the frequency-dependent dielectric tensor during the ANADDB calculation
 (see [[anaddb:dieflag]]),
 this program extracts that dielectric tensor and prints it to its own file.
