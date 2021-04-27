@@ -48,7 +48,7 @@ MODULE m_ioarr
  use defs_abitypes,   only : mpi_type
  use defs_datatypes,  only : ebands_t
  use defs_wvltypes,   only : wvl_denspot_type
- use m_time,          only : cwtime, cwtime_report
+ use m_time,          only : cwtime, cwtime_report, timab
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
  use m_fstrings,      only : sjoin, itoa, endswith, ltoa
  use m_numeric_tools, only : interpolate_denpot
@@ -1035,7 +1035,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !arrays
 !integer :: ngfft_file(18)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
 !real(dp) :: rhogdum(1)
  real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
@@ -1046,6 +1046,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); have_mpifft = (nfft /= product(ngfft(1:3)))
  allow_interp__ = .False.; if (present(allow_interp)) allow_interp__ = allow_interp
 
+ call timab(1280,1,tsec)
  call wrtout(std_out, sjoin(" About to read data(r) from:", fname), do_flush=.True.)
  call cwtime(cputime, walltime, gflops, "start")
 
@@ -1126,7 +1127,9 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      ABI_COMMENT(msg)
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
+     call timab(1281,1,tsec)
      call interpolate_denpot(cplex, ohdr%ngfft(1:3), ohdr%nspden, rhor_file, ngfft(1:3), rhor_tmp)
+     call timab(1281,2,tsec)
 
      ohdr%ngfft(1:3) = ngfft(1:3)
      nfftot_file = product(ohdr%ngfft(:3))
@@ -1257,6 +1260,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    end if
  end if
 
+ call timab(1280,2,tsec)
  call cwtime_report(" read_rhor", cputime, walltime, gflops)
  return
 
