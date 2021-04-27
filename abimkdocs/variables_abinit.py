@@ -6217,7 +6217,7 @@ Variable(
     abivarname="gwaclowrank",
     varset="gw",
     vartype="integer",
-    topics=['GW_basic', 'SelfEnergy_basic'],
+    topics=['GW_useful', 'SelfEnergy_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GW Analytic Continuation LOW RANK approximation",
