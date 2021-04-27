@@ -3500,7 +3500,7 @@ Variable(
     abivarname="ecutsigx",
     varset="gw",
     vartype="real",
-    topics=['SelfEnergy_compulsory'],
+    topics=['SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Energy CUT-off for SIGma eXchange",
@@ -3514,6 +3514,8 @@ calculations, it is pointless to have [[ecutsigx]] bigger than 4*[[ecut]],
 while for PAW calculations, the maximal useful value is [[pawecutdg]]. Thus,
 if you do not care about CPU time, please use these values. If you want to
 spare some CPU time, you might try to use a value between [[ecut]] and these upper limits.
+
+[[ecutsigx]] is actually used to initialize the internal variable [[npwsigx]].
 """,
 ),
 
@@ -3560,7 +3562,7 @@ Variable(
     abivarname="ecutwfn",
     varset="gw",
     vartype="real",
-    topics=['Susceptibility_compulsory', 'SelfEnergy_compulsory'],
+    topics=['Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[optdriver]] in [3, 4]': '[[ecut]]', 'defaultval': 0.0}),
     mnemonics="Energy CUT-off for WaveFunctioNs",
@@ -4423,7 +4425,7 @@ In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
 wavefunctions is given by [[ecutwfn]]. In the case of screening calculations,
 the number of **G** vectors in the above expression is defined by [[ecuteps]],
-while [[ecutsigx]] defined the number of **G** used in sigma calculations. To
+while [[ecutsigx]] defines the number of **G** used in sigma calculations. To
 improve the efficiency of the code, the oscillator matrix elements are
 evaluated in real space through FFT techniques, and the [[fftgw]] input
 variable is used to select the FFT mesh to be used.
@@ -11899,7 +11901,7 @@ Variable(
     text=r"""
 [[npwsigx]] determines the cut-off energy of the planewave set used to
 generate the exchange part of the self-energy operator.
-It is an internal variable, determined from [[ecutsigx]].
+It is an internal variable, determined from the largest of [[ecutsigx]] or [[ecutwfn]].
 """,
 ),
 
