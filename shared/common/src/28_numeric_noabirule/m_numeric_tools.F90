@@ -5019,7 +5019,7 @@ pure function interpol3d_0d(r, nr1, nr2, nr3, grid) result(res)
 
 !Local variables--------------------------------------------------------
 !scalars
- integer :: id,ir1,ir2,ir3,pr1,pr2,pr3
+ integer :: ir1,ir2,ir3,pr1,pr2,pr3
  real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
  real(dp) :: x1,x2,x3
 
@@ -5228,7 +5228,6 @@ subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_r
 !scalars
  integer :: ispden, ir1, ir2, ir3, ifft
  real(dp) :: rr(3)
- real(dp),allocatable :: re(:,:),im(:,:)
 
 ! *************************************************************************
 
