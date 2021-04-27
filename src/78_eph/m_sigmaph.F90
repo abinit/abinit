@@ -1339,7 +1339,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ignore_kq = ignore_kq + 1; cycle
        end if
 
-
        ! ====================================
        ! Get DFPT potentials for this q-point
        ! ====================================
@@ -1498,7 +1497,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
 
          if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
-           ! Activate Sternheimer (we are still inside the MPI loop over my_npert).
+           ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
            mcgq = npw_kq * nspinor * nband_kq
            mgscq = npw_kq * nspinor * nband_kq * psps%usepaw
@@ -1543,11 +1542,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !
            ABI_MALLOC (band_procs, (nbcalc_ks))
            call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
-&               mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+               mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
            grad_berry_size_mpw1 = 0
            do ib_k=1,nbcalc_ks
-             ! MPI parallelism inside bsum_comm (not very efficient)
+             ! MPI parallelism inside bsum_comm (not very efficient).
              ! TODO: To be replaced by MPI parallellism over bands in projbd inside dfpt_cgwf
              ! (pass optional communicator and band range treated by me.
              if (sigma%bsum_comm%skip(ib_k)) cycle
@@ -1562,8 +1561,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              call cwtime(cpu_stern, wall_stern, gflops_stern, "start")
 
-!TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
-!  in the meanwhile should make a test for paralbd, to exclude it, I think
+             !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
+             !       in the meanwhile should make a test for paralbd, to exclude it, I think
              band_me = band_ks
              !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_kq,isppol,me)
              nband_me = nband_kq
@@ -1597,7 +1596,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do ! ib_k
 
            ABI_FREE (band_procs)
-
            ABI_FREE(cgq)
            ABI_FREE(gscq)
            ABI_FREE(out_eig1_k)
@@ -1720,7 +1718,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
 
-         ! Get gkk(kcalc, q, idir_ipert) (atomic representation)
+         ! Get gkk(kcalc, q, idir_ipert) in the atomic representation.
          ! No need to handle istwf_kq because it's always 1.
          gkq_atm = zero; cnt = 0
          do imyp=1,my_npert
@@ -1822,7 +1820,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call timab(1906, 2, tsec)
          call timab(1907, 1, tsec)
 
-         ! Accumulate contribution to FM self-energy
+         ! Accumulate contribution to the FM self-energy
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
            ! Ignore unstable modes or modes that should be skipped.
@@ -4570,7 +4568,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 !arrays
  integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
- !real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:), rdata4(:,:,:,:), rdata5(:,:,:,:,:), rdata6(:,:,:,:,:,:)
  real(dp) :: qp_gaps(self%ntemp),qpoms_gaps(self%ntemp)
  real(dp),allocatable :: aw(:,:,:), a2few_avg(:,:), gather_srate(:,:,:,:), grp_srate(:,:,:,:)
  real(dp) :: ks_enes(self%max_nbcalc), ze0_vals(self%ntemp, self%max_nbcalc)
@@ -5087,7 +5084,7 @@ subroutine sigmaph_print(self, dtset, unt)
      exit
    end if
    do is=1,self%nsppol
-     if (self%nsppol == 2) write(unt,"(a,i1)")" For spin: ",is
+     if (self%nsppol == 2) write(unt,"(a,i1,a)")" For spin: ",is, ", ikcalc, spin, kpt, bstart, bstop"
      write(unt, "(2(i4,2x),a,2(i4,1x))") &
        ikc, is, trim(ktoa(self%kcalc(:,ikc))), self%bstart_ks(ikc,is), self%bstart_ks(ikc,is) + self%nbcalc_ks(ikc,is) - 1
      end do
