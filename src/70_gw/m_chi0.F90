@@ -1245,7 +1245,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  call timab(331,1,tsec) ! cchi0
  call cwtime(cpu_time,wall_time,gflops,"start")
-
+     call timab(334,1,tsec) ! cchi0_first_segment
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  is_metallic = ebands_has_metal_scheme(QP_BSt)
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
@@ -1310,7 +1310,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
  end if
 
- ! Setup weights (2 for spin unpolarized system, 1 for polarized).
+ ! Setup weights (2 for spin unpolarized sistem, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one. Consider also the AFM case.
  SELECT CASE (nsppol)
  CASE (1)
@@ -1539,6 +1539,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
+
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
      call gsph_fft_tabs(Gsph_epsG0,g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
@@ -1686,12 +1687,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            if (deltaeGW_b1kmq_b2k<0) CYCLE
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1kmq_b2k,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
-
+         call timab(334,2,tsec) ! cchi0_first_segment
+         write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+          call timab(332,1,tsec) ! rho_tw_g
          ! Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform.
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)
-
+           call timab(332,2,tsec) ! rho_tw_g
+            write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
          if (Psps%usepaw==1) then
            ! Add PAW on-site contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
@@ -1792,9 +1796,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 !             if(dtset%prtvol>=10) write(6,'(a,6i4,e15.5,a)') "*****FAC*********",ik_bz,ikmq_bz,band1,band2,m1,m2,fac," q/=0"
              green_w=green_w*fac
            endif
-
+           call timab(333,1,tsec) ! assemblychi0
            call assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
-
+           call timab(333,2,tsec) ! assemblychi0
+          write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
          CASE (1, 2)
            ! Spectral method (not yet adapted for nspinor=2)
            call assemblychi0sf(ik_bz,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
