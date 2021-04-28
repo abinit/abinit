@@ -10,6 +10,20 @@ Variable=dict
 variables = [
 
 Variable(
+    abivarname="alloy@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=['aTDEP_expert'],
+    dimensions="3",
+    defaultval="0",
+    mnemonics="ALLOY treatment",
+    added_in_version="9.5.1",
+    text=r"""
+OPTIONAL: Defines the treatment of the alloy. The first value defines the approximation used (0=nothing and 1=Virtual Crystal Approximation). The second and the third values define the [[typat_unitcell] of the atoms which have to be alloyed.
+""",
+),
+
+Variable(
     abivarname="amu@atdep",
     varset="atdep",
     vartype="real",
