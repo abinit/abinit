@@ -8,7 +8,7 @@
 !! pure planewaves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (A. Blanchet)
+!! Copyright (C) 2018-2021 ABINIT group (A. Blanchet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,9 +40,9 @@ module m_extfpmd
   use m_xmpi
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
-  use m_kg,             only : mkkin, kpgio
-  use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
-  use m_numeric_tools,  only : simpson, simpson_int
+  use m_kg,             only : mkkin,kpgio
+  use m_mpinfo,         only : ptabs_fourdp,proc_distrb_cycle
+  use m_numeric_tools,  only : simpson,simpson_int
   use m_spacepar,       only : meanvalue_g
 
   implicit none
