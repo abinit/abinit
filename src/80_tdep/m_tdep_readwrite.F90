@@ -165,7 +165,7 @@ contains
   integer :: ncid, ncerr, me,ierr,master
   integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
   integer :: ntypat_id
-  integer :: ii,jj,tmp,shift,iatom,itypat
+  integer :: ii,jj,tmp,shift,iatom,itypat,sum_alloy1,sum_alloy2
   double precision :: version_value,dtion,amu_average,born_average
   character (len=30):: string,NormalMode,DebugMode,use_ideal_positions
   character (len=30):: born_charge,dielec_constant,tolmotifinboxmatch,TheEnd,bzpath,use_weights
@@ -573,9 +573,21 @@ contains
 
 ! If alloy=1 (VCA), redefine all the data depending on (n)typat(_unitcell) and natom_unitcell
   if (Invar%alloy.eq.1) then
-    amu_average =(Invar%amu        (Invar%ityp_alloy1)+Invar%amu        (Invar%ityp_alloy2))/2.d0
+    sum_alloy1=0
+    sum_alloy2=0
+    do iatom=1,Invar%natom
+      if (Invar%typat(iatom).eq.Invar%ityp_alloy1) then
+        sum_alloy1=sum_alloy1+1      
+      end if  
+      if (Invar%typat(iatom).eq.Invar%ityp_alloy2) then
+        sum_alloy2=sum_alloy2+1      
+      end if  
+    end do
+    amu_average   =(Invar%amu        (Invar%ityp_alloy1)*sum_alloy1+&
+&                   Invar%amu        (Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
     if (Invar%loto) then
-      born_average=(Invar%born_charge(Invar%ityp_alloy1)+Invar%born_charge(Invar%ityp_alloy2))/2.d0
+      born_average=(Invar%born_charge(Invar%ityp_alloy1)*sum_alloy1+&
+&                   Invar%born_charge(Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
     end if  
     shift=0
     do iatom=1,Invar%natom_unitcell
@@ -645,6 +657,31 @@ contains
 !    write(6,*)'xred_unitcell =',(Invar%xred_unitcell(:,ii),ii=1,Invar%natom_unitcell)
 !    write(6,*)'typat=',(Invar%typat(ii),ii=1,Invar%natom)
 !    write(6,*)'amu=',(Invar%amu(ii),ii=1,Invar%ntypat)
+
+    write(Invar%stdout,'(a)') ' ==================== Virtual Crystal Approximation ==========================' 
+    write(Invar%stdout,'(a)') ' ================ Several input variables are modified =======================' 
+    write(Invar%stdout,'(a)') ' --> Beginning of the modifications'
+    write(Invar%stdout,'(1x,a20,1x,i4)') 'ntypat',Invar%ntypat
+    write(Invar%stdout,'(1x,a20,1x,i4)') 'natom_unitcell',Invar%natom_unitcell
+    write(Invar%stdout,'(1x,a20,20(1x,f15.10))') 'amu',(Invar%amu(jj),jj=1,Invar%ntypat)
+    write(Invar%stdout,'(1x,a20,20(1x,i4))') 'typat_unitcell',(Invar%typat_unitcell(jj),jj=1,Invar%natom_unitcell)
+    write(Invar%stdout,'(1x,a20)') 'xred_unitcell'
+    do ii=1,Invar%natom_unitcell
+      write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%xred_unitcell(jj,ii), jj=1,3)
+    end do  
+    if (Invar%loto) then
+      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') 'born_charge',(Invar%born_charge(jj),jj=1,Invar%ntypat)
+    end if
+    write(Invar%stdout,'(1x,a20)') 'typat'
+    do ii=1,Invar%natom,10
+      if (ii+9.lt.Invar%natom) then
+        write(Invar%stdout,'(22x,10(i4,1x))') (Invar%typat(ii+jj-1),jj=1,10)
+      else
+        write(Invar%stdout,'(22x,10(i4,1x))') (Invar%typat(jj),jj=ii,Invar%natom)
+      end if  
+    end do  
+    write(Invar%stdout,'(a)') ' --> End of the modifications'
+    write(Invar%stdout,'(a)') ' '
   end if
 
 ! Compute Nstep as a function of the slice
