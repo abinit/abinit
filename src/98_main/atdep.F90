@@ -87,7 +87,7 @@ program atdep
 
   integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
   integer :: stdout,stdlog,nshell_max,ii,jj,ishell,istep,iatom
-  integer :: print_mem_report,me,ierr
+  integer :: print_mem_report,ierr
   double precision :: U0
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
@@ -130,7 +130,6 @@ program atdep
  call abi_io_redirect(new_io_comm=xmpi_world)
 ! Initialize MPI
  call xmpi_init()
- me = xmpi_comm_rank(xmpi_world)
 
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
@@ -621,14 +620,12 @@ program atdep
    call tdep_destroy_mpidata(MPIdata)
 
    call tdep_print_Aknowledgments(Invar)
-   if (me==0) close(unit=5)
-   if (me==0) close(unit=7)
-   if (me==0) call delete_file(Invar%foo,ierr) 
+   call delete_file(Invar%foo,ierr) 
+   call delete_file('fort.8',ierr) 
    call flush_unit(stdout)
-   if (me==0) close(unit=stdout)
+   close(unit=stdout)
    call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
    call flush_unit(stdlog)
-   if (me==0) close(unit=stdlog)
    call xmpi_end()
    stop
  end if
@@ -671,14 +668,12 @@ program atdep
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
  call tdep_print_Aknowledgments(Invar)
- if (me==0) close(unit=5)
- if (me==0) close(unit=7)
- if (me==0) call delete_file(Invar%foo,ierr) 
+ call delete_file(Invar%foo,ierr) 
+ call delete_file('fort.8',ierr) 
  call flush_unit(stdout)
- if (me==0) close(unit=stdout)
+ close(unit=stdout)
  call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
  call flush_unit(stdlog)
- if (me==0) close(unit=stdlog)
 100 call xmpi_end()
 
  end program atdep
