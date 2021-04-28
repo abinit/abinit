@@ -1,5 +1,5 @@
 
-.Version 9.5.1 of ABINIT 
+.Version 9.4.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Apr 2021.
-- ( at 21h14 )
+.Starting date : Wed 28 Apr 2021.
+- ( at 06h31 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Test_suite/tutoparal_tpsic_02_MPI24/tpsic_02.abi
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Test_suite/tutoparal_tpsic_02_MPI24/tpsic_02.abi
 - output file    -> tpsic_02_MPI24.abo
 - root for input  files -> tpsic_02_MPI24i
 - root for output files -> tpsic_02_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
 
  DATASET    1 : space group Cm m m (# 65); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -431,9 +431,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -451,9 +451,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -786,9 +786,9 @@ total_energy_dc_eV  : -6.51577097972217E+03
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -806,9 +806,9 @@ total_energy_dc_eV  : -6.51577097972217E+03
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -1141,9 +1141,9 @@ total_energy_dc_eV  : -6.51565769556710E+03
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.16148
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Na.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60198715
@@ -1161,9 +1161,9 @@ total_energy_dc_eV  : -6.51565769556710E+03
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/I.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.30022271
@@ -14680,10 +14680,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        371.0  wall=        371.1
+- Proc.   0 individual time (sec): cpu=        291.2  wall=        291.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       8904.0  wall=       8903.8
++Overall time at end (sec) : cpu=       6988.2  wall=       6988.1
