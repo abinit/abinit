@@ -22286,7 +22286,7 @@ Variable(
     abivarname="use_extfpmd",
     varset="gstate",
     vartype="integer",
-    topics=['ExtDFT_basic'],
+    topics=[''],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Activate the Extended FPMD model",

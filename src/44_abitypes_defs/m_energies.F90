@@ -350,7 +350,7 @@ end subroutine energies_init
  energies_out%e_nucdip             = energies_in%e_nucdip
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
- energies_out%extfpmd_shiftfactor = energies_in%extfpmd_shiftfactor
+ energies_out%extfpmd_shiftfactor  = energies_in%extfpmd_shiftfactor
  energies_out%e_sicdc              = energies_in%e_sicdc
  energies_out%e_vdw_dftd           = energies_in%e_vdw_dftd
  energies_out%e_xc                 = energies_in%e_xc
@@ -476,7 +476,7 @@ end subroutine energies_copy
    energies%e_nlpsp_vfock        = energies_array(28)
    energies%e_paw                = energies_array(29)
    energies%e_pawdc              = energies_array(30)
-   energies%extfpmd_shiftfactor= energies_array(31)
+   energies%extfpmd_shiftfactor  = energies_array(31)
    energies%e_sicdc              = energies_array(32)
    energies%e_vdw_dftd           = energies_array(33)
    energies%e_xc                 = energies_array(34)
