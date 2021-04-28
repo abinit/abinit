@@ -1103,7 +1103,7 @@ contains
   !!  This file is intended to be used for custom DOS computation with external tools for example.
   !!
   !! INPUTS
-  !!  extfpmd_e_kin=kinetic energy contribution of free electrons after band cut
+  !!  e_kin_extfpmd=kinetic energy contribution of free electrons after band cut
   !!  shiftfactor=energy shift factor
   !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
   !!  etotal=total energy
@@ -1114,7 +1114,7 @@ contains
   !!  kptns(3,nkpt),kptns0(3,nkpt0)=k point sets (reduced coordinates)
   !!  mband=maximum number of bands
   !!  nband(nkpt*nsppol)=desired number of bands at each k point
-  !!  extfpmd_nelect=number free electrons
+  !!  nelect_extfpmd=number free electrons
   !!  nkpt=number of k points
   !!  nsppol=1 for unpolarized, 2 for spin-polarized
   !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
@@ -1132,13 +1132,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine extfpmd_prt_eig(extfpmd_e_kin,shiftfactor,eigen,etotal,energies,fnameabo,&
-  & iout,iter,kptns,mband,nband,extfpmd_nelect,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
+  subroutine extfpmd_prt_eig(e_kin_extfpmd,shiftfactor,eigen,etotal,energies,fnameabo,&
+  & iout,iter,kptns,mband,nband,nelect_extfpmd,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
   & strten,istep) ! Optional arguments
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
-    real(dp),intent(in) :: extfpmd_e_kin,shiftfactor,etotal,extfpmd_nelect,tsmear
+    real(dp),intent(in) :: e_kin_extfpmd,shiftfactor,etotal,nelect_extfpmd,tsmear
     character(len=*),intent(in) :: fnameabo
     type(energies_type),intent(in) :: energies
     integer,intent(in),optional :: istep
@@ -1187,8 +1187,8 @@ contains
     call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',extfpmd_e_kin,&
-    & ' Ha         Total kin. energy  = ',energies%e_kinetic+extfpmd_e_kin, ' Ha'
+    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',e_kin_extfpmd,&
+    & ' Ha         Total kin. energy  = ',energies%e_kinetic+e_kin_extfpmd, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
@@ -1223,7 +1223,7 @@ contains
 
     write(msg, '(a,i12,a,i12,a,ES15.8)') &
     & ' N. elec. iter      = ',istep,'            MD iteration       = ',iter,&
-    & '            N. free electrons  = ',extfpmd_nelect
+    & '            N. free electrons  = ',nelect_extfpmd
     call wrtout(temp_unit,msg,'COLL')
 
     ! Loop over spins

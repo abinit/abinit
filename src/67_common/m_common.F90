@@ -1525,9 +1525,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
-     if(abs(energies%extfpmd_e_kin)>tiny(0.0_dp)) then
-       call edoc%add_real('kinetic_extfpmd',energies%extfpmd_e_kin)
-       call edoc%add_real('total_kinetic',energies%extfpmd_e_kin+energies%e_kinetic)
+     if(abs(energies%e_kin_extfpmd)>tiny(0.0_dp)) then
+       call edoc%add_real('kinetic_extfpmd',energies%e_kin_extfpmd)
+       call edoc%add_real('total_kinetic',energies%e_kin_extfpmd+energies%e_kinetic)
      end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1620,8 +1620,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
    dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
-   if(abs(energies%extfpmd_e_kin)>tiny(0.0_dp)) then
-     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%extfpmd_edc_kin)
+   if(abs(energies%e_kin_extfpmd)>tiny(0.0_dp)) then
+     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%edc_kin_extfpmd)
    end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
