@@ -1245,7 +1245,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  call timab(331,1,tsec) ! cchi0
  call cwtime(cpu_time,wall_time,gflops,"start")
-     call timab(334,1,tsec) ! cchi0_first_segment
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  is_metallic = ebands_has_metal_scheme(QP_BSt)
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
@@ -1355,6 +1354,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
  ABI_MALLOC(bbp_mask,(mband,mband))
 
+call timab(334,1,tsec) ! first loop
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
      if (Ep%symchi==1) then
@@ -1377,7 +1377,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
-
+ call timab(334,2,tsec) ! first loop
+ !    write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbbpks," (b,b',k,s) states in chi0."
@@ -1443,6 +1444,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  ! === Loop on spin to calculate trace $\chi_{up,up}+\chi_{down,down}$ ===
  ! Only $\chi_{up,up} for AFM.
+ call timab(335,1,tsec) ! second loop
  do spin=1,nsppol
    if (ALL(bbp_ks_distrb(:,:,:,spin) /= Wfd%my_rank)) CYCLE
 
@@ -1658,7 +1660,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
                  end if
                end if !gwcomp==1
              end do !io
-
              if (Ep%gwcomp==1.and.band1==band2) then
                ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
                call calc_wfwfg(tabr_k,itim_k,spinrot_k,nfft,nspinor,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
@@ -1687,15 +1688,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            if (deltaeGW_b1kmq_b2k<0) CYCLE
            call approxdelta(Ep%nomegasf,omegasf,deltaeGW_b1kmq_b2k,Ep%spsmear,iomegal,iomegar,wl,wr,Ep%spmeth)
          END SELECT
-         call timab(334,2,tsec) ! cchi0_first_segment
-         write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+
           call timab(332,1,tsec) ! rho_tw_g
          ! Form rho-twiddle(r)=u^*_{b1,kmq_bz}(r) u_{b2,kbz}(r) and its FFT transform.
          call rho_tw_g(nspinor,Ep%npwepG0,nfft,ndat1,ngfft_gw,1,use_padfft,igfftepsG0,gw_gbound,&
 &          ur1_kmq_ibz,itim_kmq,tabr_kmq,ph_mkmqt,spinrot_kmq,&
 &          ur2_k_ibz,  itim_k  ,tabr_k  ,ph_mkt  ,spinrot_k,dim_rtwg,rhotwg)
            call timab(332,2,tsec) ! rho_tw_g
-            write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+            !write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
          if (Psps%usepaw==1) then
            ! Add PAW on-site contribution, projectors are already in the BZ.
            call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
@@ -1799,7 +1799,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
            call timab(333,1,tsec) ! assemblychi0
            call assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
            call timab(333,2,tsec) ! assemblychi0
-          write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+          !write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
          CASE (1, 2)
            ! Spectral method (not yet adapted for nspinor=2)
            call assemblychi0sf(ik_bz,Ep%symchi,Ltg_q,Ep%npwepG0,Ep%npwe,rhotwg,Gsph_epsG0,&
@@ -1871,7 +1871,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end if
    end if
  end do !spin
-
+call timab(335,2,tsec) ! second loop
+!write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
  ! After big loop over transitions, now MPI
  ! Master took care of the contribution in case of metallic|spin polarized systems.
  SELECT CASE (Ep%spmeth)
