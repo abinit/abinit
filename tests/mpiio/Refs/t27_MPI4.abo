@@ -210,12 +210,12 @@ P           mkmem6         10
 -           npfft4          2
 -           npfft5          1
 -           npfft6          4
--           npkpt1          2
--           npkpt2          1
--           npkpt3          1
--           npkpt4          1
--           npkpt5          1
--           npkpt6          1
+-        np_spkpt1          2
+-        np_spkpt2          1
+-        np_spkpt3          1
+-        np_spkpt4          1
+-        np_spkpt5          1
+-        np_spkpt6          1
             nstep1         30
             nstep2         30
             nstep3         30
@@ -1447,12 +1447,12 @@ P           mkmem6         10
 -           npfft4          2
 -           npfft5          1
 -           npfft6          4
--           npkpt1          2
--           npkpt2          1
--           npkpt3          1
--           npkpt4          1
--           npkpt5          1
--           npkpt6          1
+-        np_spkpt1          2
+-        np_spkpt2          1
+-        np_spkpt3          1
+-        np_spkpt4          1
+-        np_spkpt5          1
+-        np_spkpt6          1
             nstep1         30
             nstep2         30
             nstep3         30

@@ -254,10 +254,10 @@ P          mk1mem4         16
              nkpt2         32
              nkpt3         32
              nkpt4         32
--           npkpt1          2
--           npkpt2          2
--           npkpt3          1
--           npkpt4          1
+-        np_spkpt1          2
+-        np_spkpt2          2
+-        np_spkpt3          1
+-        np_spkpt4          1
 -          nppert1          1
 -          nppert2          1
 -          nppert3          1
@@ -1437,10 +1437,10 @@ P          mk1mem4         16
              nkpt2         32
              nkpt3         32
              nkpt4         32
--           npkpt1          2
--           npkpt2          2
--           npkpt3          1
--           npkpt4          1
+-        np_spkpt1          2
+-        np_spkpt2          2
+-        np_spkpt3          1
+-        np_spkpt4          1
 -          nppert1          1
 -          nppert2          1
 -          nppert3          1

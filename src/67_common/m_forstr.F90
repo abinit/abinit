@@ -209,11 +209,11 @@ contains
 !!   fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!     at input, previous value of forces,
 !!     at output, new value.
-!!     Note : unlike fred, this array has been corrected by enforcing
+!!     Note : unlike gred, this array has been corrected by enforcing
 !!     the translational symmetry, namely that the sum of force
 !!     on all atoms is zero.
 !!   forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
-!!   fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!   gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!   gresid(3,natom)=forces due to the residual of the density/potential
 !!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!   grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -250,7 +250,7 @@ contains
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
+&                 forold,gred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
@@ -295,7 +295,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout),target :: nvresid(nfftf,dtset%nspden)
  real(dp),intent(out) :: favg(3)
- real(dp),intent(inout) :: fcart(3,dtset%natom),fred(3,dtset%natom)
+ real(dp),intent(inout) :: fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),strten(6),synlgr(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
@@ -473,7 +473,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      resid => nvresid
    end if
 
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,grcondft,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
 &   nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
