@@ -2070,21 +2070,17 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,isppol,istwf_k,my_nspinor,nband_k,nn,npw_k,ncpgr,nterms
+ integer :: adir,isppol,istwf_k,my_nspinor,nband_k,nn,ncpgr,nterms
  real(dp) :: trnrm,ucvol
 
  !arrays
- integer :: nattyp_dum(dtset%ntypat)
  integer,parameter :: cci=1,vvii=2,vvia=3,vvib=4,rho0h1=5,rho0s1=6,lrb=7,a0an=8,berrycurve=9
- integer,allocatable :: dimlmn(:)
- real(dp) :: gmet(3,3),gprimd(3,3)
- real(dp) :: orbmagvec(2,3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: CCIterms(:,:,:),eeig(:,:),onsite_bm(:,:,:),onsite_l(:,:,:)
  real(dp),allocatable :: out_e(:,:,:),out_h(:,:,:),out_s(:,:,:)
  real(dp),allocatable :: orbmag_terms(:,:,:),orbmag_trace(:,:)
  real(dp),allocatable :: rhorij1(:,:,:),s1trace(:,:,:),udsqduchern(:,:,:),udsqdumag(:,:,:),VVIaterms(:,:,:)
  complex(dpc),allocatable :: onsite_bm_dir(:),onsite_l_dir(:),rhorij1_dir(:),s1trace_dir(:)
- type(pawcprj_type),allocatable ::  cprjg1(:,:,:)
 
  ! ***********************************************************************
  ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
