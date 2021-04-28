@@ -1204,7 +1204,6 @@ subroutine make_S1trace_k_n(adir,cprj_k,dtset,ENK,iband,nband_occ,pawtab,S1trace
   end do ! end loop over epsabg
 
 end subroutine make_S1trace_k_n
-
 !!***
 
 !!****f* ABINIT/make_rhorij1_k_n
@@ -2531,6 +2530,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  ABI_FREE(cwaveprj)
 
 end subroutine make_eeig
+!!***
 
 !!****f* ABINIT/duq_she_qdu
 !! NAME
@@ -3452,6 +3452,7 @@ subroutine mpicomm_helper(atindx1,bdir,bfor,cg,cgqb,cprj,cprj_kb,dimlmn,dtorbmag
   end if
 
 end subroutine mpicomm_helper
+!!***
 
 !!****f* ABINIT/udsqdu
 !! NAME
