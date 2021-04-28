@@ -904,7 +904,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
 &     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
-!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (npkpt 1).
+!TODO: find out why this combination of calls with fftdatar_write then out1dm fails on buda with 4 mpi-fft procs (np_spkpt 1).
 !      For the moment comment it out. Only DS2 of mpiio test 27 fails
 !     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
 !&         rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)

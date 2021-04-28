@@ -194,7 +194,6 @@ P          mk1mem           1
         optdriver4          1
         optdriver5          1
         pawecutdg      3.00000000E+01 Hartree
-          pawovlp      1.0000000000E+01
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          0       0       0
@@ -1681,7 +1680,6 @@ P          mk1mem           1
         optdriver4          1
         optdriver5          1
         pawecutdg      3.00000000E+01 Hartree
-          pawovlp      1.0000000000E+01
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          0       0       0

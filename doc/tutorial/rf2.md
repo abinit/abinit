@@ -20,7 +20,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Generation of a derivative database
 
@@ -46,7 +46,7 @@ It takes about 1-2 minutes to be completed on a PC 2.8 GHz.
 In order to do interatomic force constant (IFC) calculations, and to compute
 associated phonon band structure and thermodynamical properties, you should
 first have some theoretical background.
-Let us assume that you have read the litterature relative to the [first tutorial on DFPT](rf1).
+Let us assume that you have read the litterature relative to the [first tutorial on DFPT](/tutorial/rf1).
 You might find additional material, related to the present section, in
 [[cite:Gonze1997a]] -especially section IX-, [[cite:Lee1995]] and [[cite:Baroni2001]].
 If you haven't read parts of these references, we strongly advise you take the time to read them now.
@@ -128,7 +128,7 @@ Now, there might be two possibilities: either the trf2_1 run is finished, and
 you can continue the tutorial with the section 2 about the MRGDDB utility, or the run is not finished.
 In the latter case, instead of waiting for trf2_1 to be finished, we suggest
 you to pursue with section 3. You will use as DDB file the one that can be
-found in *\$ABI_TESTS/tutorespfn/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.out|trf2_3.ddb.out]],
+found in *\$ABI_TESTS/tutorespfn/Refs*, with the name [[tests/tutorespfn/Refs/trf2_3.ddb.abo|trf2_3.ddb.abo]],
 instead of the one that would result from the section 2.
 Copy this file to the present directory, then go to
 section section 3 of this tutorial. You might come back to section 2 afterwards.
@@ -141,7 +141,7 @@ Please, read it carefully now.
 Use MRGDDB to create the merge DDB from the eight DDB's corresponding to
 datasets 3 to 10 of the trf2_1 job, containing the dynamical matrices for the
 8 q points, as well as the response to the electric field (dielectric tensor
-and Born effective charges). Name the new DDB *trf2_3.ddb.out*.
+and Born effective charges). Name the new DDB *trf2_3.ddb.abo*.
 
 !!! note
 
@@ -290,7 +290,7 @@ needed for the Fourier interpolation), but not printed.
 
 {% dialog tests/tutorespfn/Refs/trf2_5.abo %}
 
-Please, open also the other output file, named *trf2_5_B2EPS.out.freq*.
+Please, open also the other output file, named *trf2_5_B2EPS.freq*.
 It contains the frequencies, in a format suitable for graphical output, using the program
 *band2eps* (the latter should be more documented, and will not be described in the present tutorial).
 
@@ -300,19 +300,19 @@ You can copy the files *trf2_6.abi* and *trf2_6.files* to the *Work_rf2* directo
 
 {% dialog tests/tutorespfn/Input/trf2_6.files tests/tutorespfn/Input/trf2_6.abi %}
 
-The file *trf2_6.out.eps* has been produced. It is an .eps file (eps stand for
+The file *trf2_6.abo.eps* has been produced. It is an .eps file (eps stand for
 Encapsulated PostScript). You can use the program ghostview to vizualize it.
 The command to issue will depend on the way you have configured your machine,
 but the following might perhaps do the work:
 
-    gv trf2_6.out.eps
+    gv trf2_6.abo.eps
 
 You should see a nice phonon band structure for AlAs. Well, not so nice, after
 all, because there are two strange dips for the highest phonon band, at the Gamma point.
 This is due to the lack of LO-TO splitting for the ANADDB treatment of the first list of vector.
 The correct phonon band structure is:
 
-![](rf2_assets/trf2_6.out.png)
+![](rf2_assets/trf2_6.abo.png)
 
 You can correct the LO-TO splitting by the following little hack.
 
@@ -320,13 +320,13 @@ Open the file *trf2_5_B2EPS.freq*, and note that the value of the frequency, in
 the sixth column, has a discontinuity exactly for the Gamma point (the three
 first columns give the k point coordinates), that is, at lines 1 and 31:
 
-     0.000000D+00  0.000000D+00  0.000000D+00  0.156855D-02  0.156855D-02  0.156855D-02
+     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  0.1568561346E-02  0.1568561346E-02  0.1568561346E-02
 
 Replace these values (sixth column, line 1 and 31) by the correct value,
 including the LO-TO splitting, that you can find in the file *trf2_5.abo*, at
 the end, second list of vector. That is, the lines 1 and 31 should now read:
 
-     0.000000D+00  0.000000D+00  0.000000D+00  0.156855D-02  0.156855D-02  1.730353E-03
+     0.000000E+00  0.000000E+00  0.000000E+00  1.568561E-03  1.568561E-03  1.730570E-03
 
 Now, run *band2eps* again. Your phonon band structure should be perfect!
 
@@ -345,7 +345,7 @@ produced by *anaddb*.
 For instance:
 
 ```sh
-abiopen.py trf2_5.out_PHBST.nc --expose --seaborn=talk
+abiopen.py trf2_5_PHBST.nc --expose --seaborn=talk
 ```
 
 produces the following plot without LO-TO splitting:
@@ -363,7 +363,7 @@ All of this with just two lines:
 ```sh
 # Copy the tutorial output file to have the correct file extension (DDB)
 # otherwise abiview does not know how to handle our file.
-cp trf2_3.ddb.out trf2_3_DDB
+cp trf2_3.ddb.abo trf2_3_DDB
 
 abiview.py ddb trf2_3_DDB -sns=talk
 ```
@@ -433,7 +433,7 @@ and stishovite, published in [[cite:Lee1995]].
 
 You can copy the files *trf2_7.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work_rf2*
 and have a look at them.
-The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.out*.
+The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.abo*.
 
 {% dialog tests/tutorespfn/Input/trf2_7.files tests/tutorespfn/Input/trf2_7.abi %}
 
@@ -453,19 +453,20 @@ The following additional input variables are present:
 Examine the input file, the input variables, then run anaddb as usual.
 Then, open the output file. You should be able to find the crucial section:
 
-    # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K))
-    # (A mol-c is the abbreviation of a mole-cell, that is, the
-    #  number of Avogadro times the atoms in a unit cell)
-     2.000E+01  8.1384755E+03  8.1463588E+03  3.9416455E-01  1.4169104E+00
-     4.000E+01  8.1061318E+03  8.2368069E+03  3.2668770E+00  7.8985031E+00
-     6.000E+01  7.9980215E+03  8.4575659E+03  7.6590742E+00  1.3992228E+01
-     8.000E+01  7.7974375E+03  8.7915524E+03  1.2426436E+01  1.9325166E+01
-     1.000E+02  7.5004822E+03  9.2274431E+03  1.7269609E+01  2.4175006E+01
-     1.200E+02  7.1069991E+03  9.7544364E+03  2.2061978E+01  2.8411189E+01
-     1.400E+02  6.6189291E+03  1.0359248E+04  2.6716565E+01  3.1955267E+01
-     1.600E+02  6.0396227E+03  1.1028289E+04  3.1179167E+01  3.4847423E+01
-     1.800E+02  5.3732223E+03  1.1749439E+04  3.5423427E+01  3.7183864E+01
-     2.000E+02  4.6241910E+03  1.2512641E+04  3.9442251E+01  3.9069448E+01
+     # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
+     # (A mol-c is the abbreviation of a mole-cell, that is, the
+     #  number of Avogadro times the atoms in a unit cell)
+      2.000E+01  8.1406018E+03  8.1484316E+03  3.9149240E-01  1.4057917E+00  7.2615609E+01
+      4.000E+01  8.1084535E+03  8.2384509E+03  3.2499352E+00  7.8730812E+00  9.4376064E+01
+      6.000E+01  8.0007856E+03  8.4587550E+03  7.6328229E+00  1.3972961E+01  1.1313071E+02
+      8.000E+01  7.8007781E+03  8.7924243E+03  1.2395577E+01  1.9312368E+01  1.3603493E+02
+      1.000E+02  7.5044659E+03  9.2281056E+03  1.7236397E+01  2.4166544E+01  1.5713727E+02
+      1.200E+02  7.1116611E+03  9.7549590E+03  2.2027483E+01  2.8405448E+01  1.7346361E+02
+      1.400E+02  6.6242892E+03  1.0359674E+04  2.6681323E+01  3.1951237E+01  1.8536427E+02
+      1.600E+02  6.0456925E+03  1.1028647E+04  3.1143464E+01  3.4844495E+01  1.9397760E+02
+      1.800E+02  5.3800094E+03  1.1749746E+04  3.5387425E+01  3.7181668E+01  2.0029176E+02
+      2.000E+02  4.6317003E+03  1.2512909E+04  3.9406045E+01  3.9067753E+01  2.0500949E+02
+
 
 There, one finds, the phonon free energy, the phonon internal energy, the
 phonon entropy and the phonon heat capacity.

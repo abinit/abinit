@@ -954,7 +954,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
      if (dt%eph_stern /= 0) then
        ! Check requirements for Sternheimer.
-       MSG_ERROR_NOSTOP_IF(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
+       if (dt%tolwfr == zero) then
+         ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
+       end if
        if (dt%getpot_filepath == ABI_NOFILE) then
          ABI_ERROR_NOSTOP(" getpot_filepath is required when eph_stern /= 0", ierr)
        end if
@@ -1938,9 +1940,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  At present, parallelism over images is not coded ...
 !  call chkint_eq(0,0,cond_string,cond_values,ierr,'npimage',dt%npimage,1,(/1/),iout)
 
-!  npkpt
+!  np_spkpt
 !  Must be greater or equal to 1
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'npkpt',dt%npkpt,1,iout)
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'np_spkpt',dt%np_spkpt,1,iout)
 
 !  nppert
    cond_string(1)='paral_rf' ; cond_values(1)=1
@@ -2482,8 +2484,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3, 11, -1, -2, -3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,8,(/-3,-2,-1,0,1,2,3,11/),iout)
+  ! only values of 0 (default) 1, 2, 3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag

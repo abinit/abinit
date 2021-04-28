@@ -17,7 +17,7 @@ the directory where all pseudos are located with [[pp_dirpath]].
 
 Note that one **cannot mix** NC pseudopotentials with PAW atomic data files in a single ABINIT run, 
 even for different datasets. One has to stick either to NC pseudopotentials or to PAW.
-The ultrasoft formalims is not implemented.
+The ultrasoft formalism is not implemented.
 
 **Norm-conserving pseudopotential tables**
 
@@ -34,7 +34,7 @@ is rather accurate, but requires often large
 [[ecut]]. The old Troullier-Martins type tables 
 are deprecated, because not accurate enough, and also not
 including spin-orbit coupling. The different formats for norm-conserving
-pseudopotentials are described in the Pseudos page of the [developers section](../developers).
+pseudopotentials are described in the Pseudos page of the [developers section](/developers/psp8_info/)
 A much more flexible and powerful file format (PSML) has been recently proposed in [[cite:Garcia2018]].
 The format is supported by Abinit via the psml library that must be activated by user during 
 the configuration of the package.

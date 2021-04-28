@@ -6,7 +6,7 @@ use_gemm_nonlop 1
 
 # Dataset 1
 rmm_diis1 +1
-npband1 4 bandpp1 2 npfft1 1 npkpt1 1 
+npband1 4 bandpp1 2 npfft1 1 np_spkpt1 1 
 toldfe1 1e-8
 #tolvrs1 1e-4
 #tolvrs1 1e-6
@@ -14,7 +14,7 @@ toldfe1 1e-8
 # Dataset 1
 rmm_diis2 -1
 getwfk2 -1
-npband2 1 bandpp2 8 npfft2 2 npkpt2 2
+npband2 1 bandpp2 8 npfft2 2 np_spkpt2 2
 toldfe2 1e-8
 #tolvrs2 1e-6
 #tolvrs2 1e-8  # Cannot go below this

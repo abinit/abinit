@@ -743,7 +743,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 !Initialization for parallelization data has changed
 !these lines aim to keep old original default values
  dtsets(0)%npimage=1
- dtsets(0)%npkpt=1
+ dtsets(0)%np_spkpt=1
  dtsets(0)%npspinor=1
  dtsets(0)%npfft=1
  dtsets(0)%npband=1
@@ -997,7 +997,7 @@ subroutine indefo1(dtset)
  dtset%npfft=1
  dtset%nphf=1
  dtset%npimage=1
- dtset%npkpt=1
+ dtset%np_spkpt=1
  dtset%nppert=1
  dtset%npspalch=0
  dtset%npspinor=1

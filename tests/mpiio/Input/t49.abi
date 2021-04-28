@@ -26,7 +26,7 @@ ngfft 8 8 8
  nband 8
  ntypat 1 typat 1 1  natom 2
  timopt -1
- npkpt 1
+ np_spkpt 1
  npband 2
  npfft 2
  paral_kgb 1

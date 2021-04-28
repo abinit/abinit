@@ -210,8 +210,8 @@ module defs_abitypes
    integer :: me_kpt
    ! Rank of my proc in the communicator over kpt
 
-   integer :: nproc_kpt
-   ! Number of procs on which we distribute kpt
+   integer :: nproc_spkpt
+   ! Number of procs on which we distribute spins and kpt
 
    integer, allocatable :: proc_distrb(:,:,:)
     ! proc_distrb(nkpt,mband,nsppol)

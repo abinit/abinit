@@ -58,7 +58,7 @@ module m_respfn_driver
  use m_ddb_interpolate, only : outddbnc
  use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasval_free_array
- use m_wfk,         only : wfk_read_eigenvalues
+ use m_wfk,         only : wfk_read_eigenvalues, wfk_read_my_kptbands
  use m_ioarr,       only : read_rhor
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
@@ -67,8 +67,10 @@ module m_respfn_driver
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
- use m_pawdij,      only : pawdij, symdij
+                           pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim, &
+                           pawrhoij_print_rhoij, pawrhoij_io
+
+ use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc
@@ -250,7 +252,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
- type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
  type(crystal_t) :: Crystal
  type(xcdata_type) :: xcdata
@@ -259,6 +260,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),l_size_atm(:),nattyp(:),npwarr(:)
  integer,allocatable :: pertsy(:,:),rfpert(:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
+ logical,allocatable :: distrb_flags(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
@@ -457,28 +459,25 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
 
- mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
- ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+
+ mcg=dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol
+ ABI_MALLOC(cg,(2,mcg))
+ !ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
  ABI_MALLOC(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
- hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
- call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
-& dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
-& dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
-& dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
- hdr%rprimd=rprimd
+! Initialize the wave function type and read GS WFK
+ ABI_MALLOC(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
+ distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
+ call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spaceworld, dtset%ecut*(dtset%dilatmx)**2, &
+&          formeig, dtset%istwfk, dtset%kptns, mcg, dtset%mband, dtset%mband_mem,dtset%mkmem,dtset%mpw,&
+&          dtset%natom, dtset%nkpt, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
+ ABI_FREE(distrb_flags)
 
-!Close wffgs, if it was ever opened (in inwffil)
- if (ireadwf0==1) then
-   call WffClose(wffgs,ierr)
- end if
-
- if (psps%usepaw==1.and.ireadwf0==1) then
+ if (psps%usepaw==1 .and. ireadwf0==1) then
 !  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
@@ -723,7 +722,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_MALLOC(paw_an,(0))
    ABI_MALLOC(paw_ij,(0))
    ABI_MALLOC(pawfgrtab,(0))
- end if
+ end if ! paw
 
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(rhor,(nfftf,dtset%nspden))
@@ -776,6 +775,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
      ABI_FREE(rhowfg)
      ABI_FREE(rhowfr)
@@ -790,6 +790,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(nhatgr,(0,0,0))
  if (psps%usepaw==1.and. ((usexcnhat==0).or.(dtset%getden==0).or.dtset%xclevel==2)) then
    nhatdim=1
+
    ABI_MALLOC(nhat,(nfftf,dtset%nspden))
    call timab(558,1,tsec)
    nhatgrdim=0;if (dtset%xclevel==2.and.dtset%pawnhatxc>0) nhatgrdim=usexcnhat
@@ -909,7 +910,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
  ABI_FREE(vhartr)
 
-
  if(dtset%prtvol==-level)then
    call wrtout(std_out,' respfn: ground-state density and potential set up.','COLL')
  end if
@@ -982,7 +982,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Compute the nonlocal part of the elastic tensor and/or dynamical matrix
  if (rfstrs/=0.or.rfphon==1.or.dtset%efmas>0.or.pawbec==1.or.pawpiezo==1)then
    call d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,&
-&   dyfr_nondiag,efmasdeg,efmasval,eigen0,eltfrnl,gsqcut,has_allddk,indsym,kg,mgfftf,&
+&   dyfr_nondiag,efmasdeg,efmasval,eigen0,eltfrnl,gsqcut,has_allddk,indsym,kg,&
+&   dtset%mband_mem,dtset%mkmem,mgfftf,&
 &   mpi_enreg,psps%mpsang,my_natom,natom,nfftf,ngfft,ngfftf,&
 &   npwarr,occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,&
 &   pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,rprimd,rfphon,&
@@ -1051,7 +1052,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Calculate the kinetic part of the elastic tensor
    call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
-&   dtset%istwfk,kg,dtset%kptns,dtset%mband,dtset%mgfft,dtset%mkmem,mpi_enreg,&
+&   dtset%istwfk,kg,dtset%kptns,dtset%mband,dtset%mband_mem,dtset%mgfft,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,ngfft,npwarr,&
 &   dtset%nspinor,dtset%nsppol,occ,rprimd,dtset%wtk)
 

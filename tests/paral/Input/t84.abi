@@ -77,7 +77,7 @@ jpawu2  0.5   eV
 
 paral_kgb1 0
 paral_kgb2 1
-npkpt2 5
+np_spkpt2 5
 npband2 2
 npfft2 1
 bandpp2 11

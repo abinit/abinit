@@ -2317,7 +2317,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval,iam_master
  logical :: need_prt_ph 
  !arrays
- real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
+ real(dp):: fcart(3,natom),gred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
  character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
@@ -2406,11 +2406,11 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
         end if 
    end if 
 #endif
-   call effective_potential_evaluate(eff_pot,energy_harm,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy_harm,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.False.,verbose=.false.,&
 &                                    elec_eval=need_elec_eval)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
 &                                    filename=file_anh,elec_eval=need_elec_eval)
 

@@ -20,7 +20,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-Smearing width for the Eliashberg $\\alpha^2$F function (similar to a phonon DOS),
+Smearing width for the Eliashberg $\alpha^2$F function (similar to a phonon DOS),
 which is sampled on a finite q and k grid. The Dirac delta functions in energy
 are replaced by Gaussians of width **a2fsmear** (by default in Hartree).
 """,
@@ -293,7 +293,7 @@ Variable(
   * 0 --> the dipole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
   * 1 --> the dipole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
     so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
-    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1 
+    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
     or a [[lw_flexo]] = 1 or 2 run.
 
 """,
@@ -686,15 +686,15 @@ Variable(
 Flag for calculation of bulk flexoelectrics tensors
 
   * 0 --> No flexoelectric tensor is calculated.
-  * 1 --> All the contributions to the bulk flexoelectric tensor (clamped-ion, mixed and lattice-mediated) and 
+  * 1 --> All the contributions to the bulk flexoelectric tensor (clamped-ion, mixed and lattice-mediated) and
           related quantities (piezoelectric and flexoelectric internal strain tensors and Lagrange elastic tensors)
-          are calculated. Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 run. 
-  * 2 --> The clamped-ion flexoelectric tensor is printed. Requires a preceding generation of 2nd and 3rd order 
+          are calculated. Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 run.
+  * 2 --> The clamped-ion flexoelectric tensor is printed. Requires a preceding generation of 2nd and 3rd order
           DDB with a [[lw_flexo]] = 1 or 2 run.
-  * 3 --> The mixed flexoelectric tensor is calculated and printed along with the piezoelectric internal strain tensors. 
+  * 3 --> The mixed flexoelectric tensor is calculated and printed along with the piezoelectric internal strain tensors.
           Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 3 run.
-  * 4 --> The lattice-mediated flexoelectric tensor is calculated and printed along with the piezoelectric and flexoelectric 
-          internal strain tensors and the Lagrange elastic tensors. 
+  * 4 --> The lattice-mediated flexoelectric tensor is calculated and printed along with the piezoelectric and flexoelectric
+          internal strain tensors and the Lagrange elastic tensors.
           Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 4 run.
 """,
 ),
@@ -1612,6 +1612,7 @@ Variable(
     text=r"""
 Only for electron-phonon calculations. This input variable is used to
 calculate the nesting function defined as:
+
 $$
 \chi_{nm}(q) = \sum_k\delta(\epsilon_{k,n}-\epsilon_F) \delta(\epsilon_{k+q,m}-\epsilon_F).
 $$

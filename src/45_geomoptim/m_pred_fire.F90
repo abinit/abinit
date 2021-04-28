@@ -32,7 +32,7 @@ module m_pred_fire
  use m_abimover
  use m_abihist
  use m_xfpack
- use m_geometry,    only : mkrdim, fcart2fred, metric, xred2xcart
+ use m_geometry,    only : mkrdim, fcart2gred, metric, xred2xcart
  use m_errors, only: unused_var
 
  implicit none
@@ -91,7 +91,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,metric,mkrdim,var2hist,xfpack_f2vout,xfpack_vin2x
+!!      fcart2gred,hist2var,metric,mkrdim,var2hist,xfpack_f2vout,xfpack_vin2x
 !!      xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
@@ -245,9 +245,9 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)=forstr%fred(:,:)
+   residual(:,:)=forstr%gred(:,:)
  end if
 
 !Save initial values
@@ -297,8 +297,8 @@ call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
-!transfer fred and strten to vout. 
-!Note: fred is not f in reduced co.
+!transfer gred and strten to vout. 
+!Note: gred is not f in reduced co.
 !but dE/dx
 
  call xfpack_f2vout(residual_corrected, ab_mover%natom, ndim,&

@@ -23,13 +23,13 @@ Finally, we will also compute the derivative of the susceptibility tensor with
 respect to atomic positions (Raman tensor), using finite differences.
 
 The user should have already completed several advanced tutorials, including:
-[Response-Function 1](rf1), [Response-Function 2](rf2),
-[Polarization and Finite electric fields](ffield), and the
-[Elastic properties](elastic).
+[Response-Function 1](/tutorial/rf1), [Response-Function 2](/tutorial/rf2),
+[Polarization and Finite electric fields](/tutorial/ffield), and the
+[Elastic properties](/tutorial/elastic).
 
 This tutorial should take about 1 hour and 30 minutes.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Ground-state properties of AlP and general parameters
 
@@ -53,7 +53,7 @@ properties).
 
 We will adopt the following set of generic parameters (quite similar to those
 in the
-[tutorial on Polarization and finite electric field](ffield)):
+[tutorial on Polarization and finite electric field](/tutorial/ffield)):
 ```
 acell   3*7.1391127387E+00
 rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
@@ -215,7 +215,7 @@ used later for a global and convenient analysis of the results using ANADDB.
 If not already done, the reader should read the part on the *PEAD* method.
 
 Contrary to *PEAD*, with *full DFPT* the electric field is treated analytically,
-the same way it is done for the computation of second-order derivatives of the energy (see [Response-Function 1](rf1)).
+the same way it is done for the computation of second-order derivatives of the energy (see [Response-Function 1](/tutorial/rf1)).
 One needs first order wavefunctions derivatives with respect to k-points (dataset 3 of *tnlo_2.abi*).
 to compute second order energy derivatives with an electric field perturbation (dataset 4 of *tnlo_2.abi*).
 It turns out that third-order derivatives of the energy, in this context, needs *second* derivatives of wavefunctions with respect to electric fields and k-points.
@@ -555,14 +555,17 @@ Everything is reported together (not only $d\chi / d\tau$ but also the full Rama
 polarizability tensors) and in appropriate units. It should therefore be
 considered as the better choice.
 
-## Calculation of the Raman Spectra
+## 4 Plotting the Raman Spectrum
 
-The ouptut of an ANADDB analysis, for example *tnlo_4.abo* as performed here, can be
+The output of an ANADDB analysis, for example *tnlo_4.abo* as performed here, can be
 used to plot a simulated Raman spectrum, including both peak positions and intensities,
 which can be compared to experiment. Many details of the process are outlined in [[cite:Caracas2006]].
 
-A post-processing script, written in Python, is available in the ABINIT system:
-see *$ABI_HOME/scripts/post_processing/Raman_spec.py*. This program reads an input file
+A post-processing script, written in Python, is available in the ABINIT package:
+see *$ABI_HOME/scripts/post_processing/Raman_spec.py*. If you have not installed the whole ABINIT package, but only are using
+compiled executables and the documentation on the web, you should make the extra effort of downloading the full package, as mentioned in the ABINIT install notes.
+
+This program reads an input file
 that sets the ANADDB file to read, the output file base name, and various processing
 parameters. To continue, we suggest copying this script into your working directory, or making
 a link to it.
@@ -578,18 +581,19 @@ filename tnlo_4.abo
 # base name for Raman_spec.py output files
 outname AlP.out
 
-# temperature in Kelvin for spectrum
+# temperature in Kelvin for spectrum (default is zero K)
 temp 298.0
 
-# number frequencies (default is 1000, units of cm^-1)
+# number frequencies (default is 1000)
 n_freq 400
 
-# min and max frequencies (default is 0.95 and 1.05 of
-# bands found
+# min and max frequencies 
+# (default is 0.95 and 1.05 of bands found; default unit is cm^-1, user can instead specify Ha or Hz)
 min_freq 200.0
 max_freq 800.0
 
 # Lorentzian broadening to apply
+# (default is zero; default unit is cm^-1, user can instead specify Ha or Hz)
 spread 1.0
 
 # calculation type: 1 is powder
@@ -609,6 +613,6 @@ the resulting spectra contains a single Raman TO mode corresponding to an XY pol
 
 ![](nlo_assets/AlP-Raman-ecut-2.8.png)
 
-Finally, if one includes a calculation of the frequency dependent dielectric tensor during the ANADDB calculation
+Finally, if one includes a calculation of the frequency-dependent dielectric tensor during the ANADDB calculation
 (see [[anaddb:dieflag]]),
 this program extracts that dielectric tensor and prints it to its own file.

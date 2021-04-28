@@ -44,7 +44,7 @@ module m_abihist
  use netcdf
 #endif
 
- use m_geometry,  only : fcart2fred, xred2xcart
+ use m_geometry,  only : fcart2gred, xred2xcart
 
  implicit none
 
@@ -1096,7 +1096,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 #if defined HAVE_NETCDF
 !scalars
  integer :: itime_file,ncerr,ncid,npsp
- integer :: xcart_id,xred_id,fcart_id,fred_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id
  integer :: vel_id,vel_cell_id,etotal_id,acell_id,rprimd_id,strten_id
  integer :: ekin_id,entropy_id,mdtime_id
  logical :: has_nimage=.false.,need_to_write
@@ -1156,11 +1156,11 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
  if(need_to_write) then
   !##### Write variables into the dataset
   !Get the IDs
-   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 !Write
    call write_vars_hist(ncid,hist,natom,has_nimage,1,itime_file,&
-&       xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+&       xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !##### Close the file
@@ -1236,7 +1236,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 !scalars
  integer :: ii,iimage,iimg,me_img,my_comm_img,my_nimage,ncerr
  integer :: ncid,nimage_,nproc_img,npsp,imgmov_
- integer :: xcart_id,xred_id,fcart_id,fred_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id
  integer :: vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  integer :: ekin_id,entropy_id,mdtime_id
@@ -1299,7 +1299,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 
 !    ##### Write variables into the dataset (loop over images)
 !    Get the IDs
-     call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+     call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &         rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !    Write
@@ -1307,7 +1307,7 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
        iimg=my_imgtab(iimage)
        hist_ => hist(iimage)
        call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,itime,&
-&           xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+&           xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &           rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
      end do
 
@@ -1364,7 +1364,7 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 !scalars
  integer :: ncerr,ncid,nimage,natom,time,start_time, ntypat
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
@@ -1402,7 +1402,7 @@ subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
  call abihist_init(hist,natom,time,isVused,isARused)
 
 !Get the ID of a variables from their name
- call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+ call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !Read variables from the dataset and write them into hist
@@ -1463,7 +1463,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
 !scalars
  integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage,natom,time
  integer :: nimage_id,natom_id,xyz_id,time_id,six_id, ntypat, ntypat_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id,ekin_id,entropy_id
  integer :: mdtime_id,vel_id,vel_cell_id,etotal_id
  integer :: acell_id,rprimd_id,strten_id
  logical :: has_nimage
@@ -1518,7 +1518,7 @@ subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
    call abihist_init(hist_,natom,time,isVused,isARused)
 
 !  Get the ID of a variables from their name
-   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !  Read variables from the dataset and write them into hist
@@ -1572,7 +1572,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 !scalars
  integer :: ncerr
  integer :: natom_id,nimage_id,ntypat_id,npsp_id,time_id,xyz_id,six_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id
+ integer :: xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
  integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
@@ -1646,7 +1646,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 
 !3.Define the evolving variables
 
-!xcart,xred,fcart,fred,vel
+!xcart,xred,fcart,gred,vel
  if (has_nimage) then
    call ab_define_var(ncid,dim0,imgmov_id,NF90_INT,&
   &  "imgmov","Image mover","Not relevant" )
@@ -1657,8 +1657,8 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 &   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
    call ab_define_var(ncid,dim4,fcart_id,NF90_DOUBLE,&
 &   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
-   call ab_define_var(ncid,dim4,fred_id,NF90_DOUBLE,&
-&   "fred","atom Forces in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim4,gred_id,NF90_DOUBLE,&
+&   "fred","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
    call ab_define_var(ncid,dim4,vel_id,NF90_DOUBLE,&
 &   "vel","VELocities of atoms","bohr*Ha/hbar" )
  else
@@ -1669,8 +1669,8 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 &   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
    call ab_define_var(ncid,dim3,fcart_id,NF90_DOUBLE,&
 &   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
-   call ab_define_var(ncid,dim3,fred_id,NF90_DOUBLE,&
-&   "fred","atom Forces in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim3,gred_id,NF90_DOUBLE,&
+&   "fred","atom Forces in REDuced coordinates","dimensionless" ) ! XG210315 : should be "Gradients in REDuced ..."
    call ab_define_var(ncid,dim3,vel_id,NF90_DOUBLE,&
 &   "vel","VELocities of atoms","bohr*Ha/hbar" )
  end if
@@ -1843,13 +1843,13 @@ end subroutine get_dims_hist
 !!
 !! SOURCE
 
-subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
+subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,&
 &          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
- integer,intent(out) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(out) :: xcart_id,xred_id,fcart_id,gred_id,vel_id
  integer,intent(out) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(out) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in)  :: has_nimage
@@ -1875,8 +1875,8 @@ subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell
  ncerr = nf90_inq_varid(ncid, "fcart", fcart_id)
  NCF_CHECK_MSG(ncerr," get the id for fcart")
 
- ncerr = nf90_inq_varid(ncid, "fred", fred_id)
- NCF_CHECK_MSG(ncerr," get the id for fred")
+ ncerr = nf90_inq_varid(ncid, "fred", gred_id)
+ NCF_CHECK_MSG(ncerr," get the id for fred") ! XG210315 : should be "gred"
 
  ncerr = nf90_inq_varid(ncid, "vel", vel_id)
  NCF_CHECK_MSG(ncerr," get the id for vel")
@@ -2087,13 +2087,13 @@ end subroutine write_csts_hist
 !! SOURCE
 
 subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
-&          xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,rprimd_id,&
+&          xcart_id,xred_id,fcart_id,gred_id,vel_id,vel_cell_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,iimg,itime
- integer,intent(in) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(in) :: xcart_id,xred_id,fcart_id,gred_id,vel_id
  integer,intent(in) :: vel_cell_id,rprimd_id,acell_id,strten_id
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in) :: has_nimage
@@ -2131,7 +2131,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 
  ABI_MALLOC(conv,(3,natom))
 
-!xcart,xred,fcart,fred,vel
+!xcart,xred,fcart,gred,vel
  if (has_nimage) then
    start4=(/1,1,iimg,itime/);count4=(/3,natom,1,1/)
    call xred2xcart(natom,rprimd,conv,xred)
@@ -2141,9 +2141,9 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable xred")
    ncerr = nf90_put_var(ncid,fcart_id,fcart,start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable fcart")
-   call fcart2fred(fcart,conv,rprimd,natom)
-   ncerr = nf90_put_var(ncid,fred_id,conv, start = start4,count = count4)
-   NCF_CHECK_MSG(ncerr," write variable fred")
+   call fcart2gred(fcart,conv,rprimd,natom)
+   ncerr = nf90_put_var(ncid,gred_id,conv, start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable fred") ! XG210315 : should be "gred"
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable vel")
  else
@@ -2155,9 +2155,9 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
    NCF_CHECK_MSG(ncerr," write variable xred")
    ncerr = nf90_put_var(ncid,fcart_id,fcart,start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable fcart")
-   call fcart2fred(fcart,conv,rprimd,natom)
-   ncerr = nf90_put_var(ncid,fred_id,conv, start = start3,count = count3)
-   NCF_CHECK_MSG(ncerr," write variable fred")
+   call fcart2gred(fcart,conv,rprimd,natom)
+   ncerr = nf90_put_var(ncid,gred_id,conv, start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable fred") ! XG210315 : should be "gred"
    ncerr = nf90_put_var(ncid,vel_id,vel, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable vel")
  end if

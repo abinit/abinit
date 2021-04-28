@@ -14,10 +14,10 @@ Additional examples are provided in this
 [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/sigeph/lesson_sigeph.ipynb)
 that explains how to use Abipy to automate the calculations and post-process the results for Diamond.
 
-It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
+It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and that he/she is familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
-The user should have read the [introduction tutorial for the EPH code](eph_intro)
+The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
 before running these examples.
 
 This lesson should take about 1.5 hour.
@@ -28,7 +28,7 @@ The electron-phonon self-energy, $\Sigma^{\text{e-ph}}$, describes the renormali
 charged electronic excitations due to the interaction with phonons.
 This term should be added to the electron-electron (e-e) self-energy $\Sigma^{\text{e-e}}$
 that encodes many-body effects induced by the Coulomb interaction beyond the classical electrostatic Hartree potential.
-The e-e contribution can be estimated using, for instance, the [$GW$ approximation](gw1) but
+The e-e contribution can be estimated using, for instance, the [$GW$ approximation](/tutorial/gw1) but
 in this tutorial we are mainly interested in $\Sigma^{\text{e-ph}}$ and its temperature dependence.
 
 In semiconductors and insulators, indeed, most of the temperature dependence of the electronic properties
@@ -228,7 +228,8 @@ some conduction states
 
 ## Typical workflow for ZPR
 
-A typical workflow for ZPR calculations involves the following steps (see the [introductory e-ph tutorial](eph_intro)):
+A typical workflow for ZPR calculations involves the following steps 
+(see the [introductory e-ph tutorial](/tutorial/eph_intro)):
 
 1. **GS calculation** to obtain the WFK and the DEN file.
    The $\kk$-mesh should be dense enough to converge both electronic and vibrational properties.
@@ -253,7 +254,7 @@ A typical workflow for ZPR calculations involves the following steps (see the [i
 
 ## Getting started
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
 Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
@@ -623,8 +624,8 @@ with the input file given by:
 At this point, it is worth commenting about the use of [[nbdbuf]].
 As mentioned in the documentation, **the highest energy states require more iterations to convergence**.
 To avoid wasting precious computing time, we use a buffer that is ~10% of [[nband]].
-This tricks significantly reduces the wall-time as the NSCF calculation completes when
-only the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
+This trick significantly reduces the wall-time as the NSCF calculation completes
+only when the first [[nband]] - [[nbdbuf]] states are converged within [[tolwfr]].
 Obviously, one should not use the last [[nbdbuf]] states in the subsequent EPH calculation.
 The same trick is highly recommended when computing WFK files for $GW$ calculations.
 
@@ -692,7 +693,7 @@ correspond to the one used for the input WFK file.
 [[ddb_ngqpt]] is set to 4x4x4 as this is the $\qq$-mesh used in the DFPT part to generate the DDB and DVDB files,
 but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate
-the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](eph_intro).
+the interpolation of the DFPT potentials as discussed in the [introduction to the EPH code](/tutorial/eph_intro).
 The $\qq$-space integration is defined by [[eph_intmeth]] and [[zcut]].
 <!--
 Default is standard quadrature (naive sum over $\qq$-points with weights to account for multiplicity).
@@ -733,9 +734,10 @@ First of all, we find a section that summarizes the most important parameters:
     are activated by default in v9.
 
 Then we find another section related to MPI parallelism.
-In this case we are running in sequential but the output will change if we run in paralle
+In this case we are running in sequential but the output will change if we run in parallel
 (see also [[eph_np_pqbks]]).
-The final message informs the user that the EPH code will either read the qpts from file (if the DVDB contains all of them, in case
+The final message informs the user that the EPH code will either read the qpts from file 
+(if the DVDB contains all of them, in case
 [[eph_ngqpt_fine]] is not defined in the input) or interpolate the scattering potentials
 from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
 
@@ -804,10 +806,10 @@ teph4zpr_4o_PHDOS.nc    teph4zpr_4o_PHBST.nc    teph4zpr_4o_SIGEPH.nc
 where:
 
 - EBANDS.agr --> Electron bands in |xmgrace| format. See also [[prtebands]]
-- PHBST.agr --> Phonon bands in |xmgrace| format. See also [[prtphbands]]
-                [[ph_ndivsm]], [[ph_nqpath]], and [[ph_qpath]].
-- PHDOS.nc  --> Phonon DOS in netcdf format (see [[prtphdos]] is given by [[ph_ngqpt]]).
-- PHPBST.nc  --> Phonon band structure in netcdf format
+- PHBST.agr  --> Phonon bands in |xmgrace| format. See also [[prtphbands]]
+                 [[ph_ndivsm]], [[ph_nqpath]], and [[ph_qpath]].
+- PHDOS.nc   --> Phonon DOS in netcdf format (see [[prtphdos]] is given by [[ph_ngqpt]]).
+- PHBST.nc   --> Phonon band structure in netcdf format
 - SIGEPH.nc  --> Netcdf file with $\Sigma^{\text{e-ph}}$ results.
 
 All the QP results are stored in the **SIGPEPH.nc** netcdf file for all $\kk$-points, spins and temperatures.
@@ -872,9 +874,9 @@ In our calculation, the Z factor for the VBM is 0.644 while for the CBM we obtai
 On physical grounds, these values are reasonable as Z corresponds to the area under the QP peak
 in the spectral function and values in [~0.7, 1] indicates a well-defined QP excitations.
 -->
-These values are reasonable, still it's not so uncommon to obtain unphysical Z factors in e-ph calculations i.e. values > 1,
-especially for states far from the band edge as the e-ph self-energy has a lot of structure in frequency-space
-and the linearized QP approach is not always justified.
+These values are reasonable, still it's not so uncommon to obtain **unphysical Z factors** in e-ph calculations 
+i.e. values > 1, especially for states far from the band edge as the e-ph self-energy has a lot of structure 
+in frequency-space and the linearized QP approach is not always justified.
 For this reason, in the rest of the tutorial, **we will be focusing on the analysis of the OTMS results**.
 
 !!! important
@@ -1277,7 +1279,7 @@ For ZPR calculations, the priorities are as follows:
 2. Once the memory for the wavefunctions reaches a reasonable level, activate the parallelism
    over perturbations to decrease the memory for $W(\rr, \RR, 3\times\text{natom})$.
    For better efficiency, *eph_nperts* should divide 3 * [[natom]].
-   As explained in the [introduction page for the EPH code](eph_intro), this MPI level
+   As explained in the [introduction page for the EPH code](/tutorial/eph_intro), this MPI level
    allows one to reduce the memory allocated for $W(\rr, \RR, 3\times\text{natom})$ so the number of procs
    in this communicator should divide 3 * [[natom]].
 

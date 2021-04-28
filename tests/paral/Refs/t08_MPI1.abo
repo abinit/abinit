@@ -7189,7 +7189,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.36280E-06 2.36280E-06 (free atoms)
   2.36279749587211E-06  2.36279994549306E-06  2.36279994549306E-06
  -2.36279749587211E-06 -2.36279994549306E-06 -2.36279994549306E-06
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -7.08842033498773E-06 -7.08842852086604E-06 -7.08842852086604E-06
   7.08836464024496E-06  7.08837115209231E-06  7.08837115209231E-06
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6717E+02 GPa]
@@ -7224,7 +7224,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.99916E-02 1.75209E-02 (free atoms)
   1.99916255347741E-02  1.61443398715495E-02  1.61443398715495E-02
  -1.99916255347741E-02 -1.61443398715495E-02 -1.61443398715495E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -5.99748765546742E-02 -4.84330196035580E-02 -4.84330196035580E-02
   5.99748766539707E-02  4.84330196257388E-02  4.84330196257388E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5110E+02 GPa]
@@ -7259,7 +7259,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.88336E-02 1.87138E-02 (free atoms)
   1.84718262853901E-02  1.88335960514223E-02  1.88335960514223E-02
  -1.84718262853901E-02 -1.88335960514223E-02 -1.88335960514223E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -5.54154788365917E-02 -5.65007881399314E-02 -5.65007881399314E-02
   5.54154788757487E-02  5.65007881686022E-02  5.65007881686022E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4295E+02 GPa]
@@ -7294,7 +7294,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.83438E-02 1.49776E-02 (free atoms)
  -1.54460907878642E-10  1.83437822651574E-02  1.83437822651574E-02
   1.54460907878642E-10 -1.83437822651574E-02 -1.83437822651574E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.76136738407378E-10 -5.50313467062662E-02 -5.50313467062662E-02
  -4.50628708864476E-10  5.50313468846782E-02  5.50313468846782E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4057E+02 GPa]
@@ -7329,7 +7329,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.88336E-02 1.87138E-02 (free atoms)
  -1.84718262869482E-02  1.88335960523654E-02  1.88335960523654E-02
   1.84718262869482E-02 -1.88335960523654E-02 -1.88335960523654E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.54154788809717E-02 -5.65007881830849E-02 -5.65007881830849E-02
  -5.54154788407178E-02  5.65007881311076E-02  5.65007881311076E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4295E+02 GPa]
@@ -7364,7 +7364,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.99916E-02 1.75209E-02 (free atoms)
  -1.99916255426473E-02  1.61443398729148E-02  1.61443398729148E-02
   1.99916255426473E-02 -1.61443398729148E-02 -1.61443398729148E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.99748766147244E-02 -4.84330196315663E-02 -4.84330196315663E-02
  -5.99748766411597E-02  4.84330196059224E-02  4.84330196059224E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5110E+02 GPa]
@@ -7399,7 +7399,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.36280E-06 2.36280E-06 (free atoms)
  -2.36279598752157E-06  2.36279835822594E-06  2.36279835822594E-06
   2.36279598752157E-06 -2.36279835822594E-06 -2.36279835822594E-06
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   7.08840880137452E-06 -7.08841758940528E-06 -7.08841758940528E-06
  -7.08836712375491E-06  7.08837255995036E-06  7.08837255995036E-06
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6717E+02 GPa]
@@ -7443,7 +7443,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.44027E-02 3.70571E-02 (free atoms)
  -4.44027208967012E-02 -3.27726435144323E-02 -3.27726435144323E-02
   4.44027208967012E-02  3.27726435144323E-02  3.27726435144323E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.33208163081326E-01  9.83179298785649E-02  9.83179298785649E-02
  -1.33208162298882E-01 -9.83179312080287E-02 -9.83179312080287E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.9227E+02 GPa]
@@ -7478,7 +7478,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.44715E-02 1.03947E-02 (free atoms)
   1.44715397996965E-02  7.57367176793739E-03  7.57367176793739E-03
  -1.44715397996965E-02 -7.57367176793739E-03 -7.57367176793739E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -4.34146181234417E-02 -2.27210158731429E-02 -2.27210158731429E-02
   4.34146206747374E-02  2.27210147344814E-02  2.27210147344814E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5717E+02 GPa]
@@ -7513,7 +7513,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.10861E-02 9.05172E-03 (free atoms)
  -1.34552111327475E-11  1.10860525847576E-02  1.10860525847576E-02
   1.34552111327475E-11 -1.10860525847576E-02 -1.10860525847576E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.13776160506952E-11 -3.32581584815586E-02 -3.32581584815586E-02
  -3.93536507457895E-11  3.32581570269869E-02  3.32581570269869E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4967E+02 GPa]
@@ -7548,7 +7548,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.44715E-02 1.03947E-02 (free atoms)
  -1.44715397960891E-02  7.57367176843528E-03  7.57367176843528E-03
   1.44715397960891E-02 -7.57367176843528E-03 -7.57367176843528E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.34146181159319E-02 -2.27210158710039E-02 -2.27210158710039E-02
  -4.34146206606028E-02  2.27210147396077E-02  2.27210147396077E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5717E+02 GPa]
@@ -7583,7 +7583,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.44027E-02 3.70571E-02 (free atoms)
   4.44027209267556E-02 -3.27726435324327E-02 -3.27726435324327E-02
  -4.44027209267556E-02  3.27726435324327E-02  3.27726435324327E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.33208163170648E-01  9.83179299325889E-02  9.83179299325889E-02
   1.33208162389886E-01 -9.83179312620075E-02 -9.83179312620075E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.9227E+02 GPa]
@@ -7628,7 +7628,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.15708E-02 1.93558E-02 (free atoms)
   1.39045931353272E-02  2.15708471255582E-02  2.15708471255582E-02
  -1.39045931353272E-02 -2.15708471255582E-02 -2.15708471255582E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -4.17137810002505E-02 -6.47125449235076E-02 -6.47125449235076E-02
   4.17137778117129E-02  6.47125378298415E-02  6.47125378298415E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3412E+02 GPa]
@@ -7663,7 +7663,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.76589E-03 3.30443E-03 (free atoms)
  -2.09614117924305E-03 -3.76589486307070E-03 -3.76589486307070E-03
   2.09614117924305E-03  3.76589486307070E-03  3.76589486307070E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   6.28842546026118E-03  1.12976851082823E-02  1.12976851082823E-02
  -6.28842161519709E-03 -1.12976840701419E-02 -1.12976840701419E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7010E+02 GPa]
@@ -7698,7 +7698,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.84815E-03 4.77499E-03 (free atoms)
  -3.19547174920913E-11  5.84814647517877E-03  5.84814647517877E-03
   3.19547174920913E-11 -5.84814647517877E-03 -5.84814647517877E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   9.68430874691642E-11 -1.75444397690478E-02 -1.75444397690478E-02
  -9.48852174833837E-11  1.75444390820249E-02  1.75444390820249E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5506E+02 GPa]
@@ -7733,7 +7733,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.76589E-03 3.30443E-03 (free atoms)
   2.09614109309234E-03 -3.76589481012243E-03 -3.76589481012243E-03
  -2.09614109309234E-03  3.76589481012243E-03  3.76589481012243E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -6.28842521020744E-03  1.12976849531397E-02  1.12976849531397E-02
   6.28842134834663E-03 -1.12976839075949E-02 -1.12976839075949E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7010E+02 GPa]
@@ -7768,7 +7768,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.15708E-02 1.93558E-02 (free atoms)
  -1.39045931240207E-02  2.15708471253472E-02  2.15708471253472E-02
   1.39045931240207E-02 -2.15708471253472E-02 -2.15708471253472E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.17137809628634E-02 -6.47125449202060E-02 -6.47125449202060E-02
  -4.17137777812610E-02  6.47125378318771E-02  6.47125378318771E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3412E+02 GPa]
@@ -7813,7 +7813,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.08792E-02 1.81984E-02 (free atoms)
   2.08792059862048E-02  1.66973605978117E-02  1.66973605978117E-02
  -2.08792059862048E-02 -1.66973605978117E-02 -1.66973605978117E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -6.26376154573475E-02 -5.00920827429145E-02 -5.00920827429145E-02
   6.26376204598811E-02  5.00920808439560E-02  5.00920808439560E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4769E+02 GPa]
@@ -7848,7 +7848,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.43295E-03 5.20793E-03 (free atoms)
  -4.72586074967323E-03 -5.43294609424263E-03 -5.43294609424263E-03
   4.72586074967323E-03  5.43294609424263E-03  5.43294609424263E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.41775820876549E-02  1.62988382874135E-02  1.62988382874135E-02
  -1.41775824103845E-02 -1.62988382780423E-02 -1.62988382780423E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7182E+02 GPa]
@@ -7883,7 +7883,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.29972E-03 2.69421E-03 (free atoms)
  -7.46943373661281E-11  3.29972015531592E-03  3.29972015531592E-03
   7.46943373661281E-11 -3.29972015531592E-03 -3.29972015531592E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.24854261921402E-10 -9.89916049702233E-03 -9.89916049702233E-03
  -2.23311762275367E-10  9.89916043487318E-03  9.89916043487318E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5782E+02 GPa]
@@ -7918,7 +7918,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.43295E-03 5.20793E-03 (free atoms)
   4.72586090162565E-03 -5.43294617441165E-03 -5.43294617441165E-03
  -4.72586090162565E-03  5.43294617441165E-03  5.43294617441165E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.41775825390732E-02  1.62988385310452E-02  1.62988385310452E-02
   1.41775828706807E-02 -1.62988385154247E-02 -1.62988385154247E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7182E+02 GPa]
@@ -7953,7 +7953,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.08792E-02 1.81984E-02 (free atoms)
  -2.08792059894302E-02  1.66973606161300E-02  1.66973606161300E-02
   2.08792059894302E-02 -1.66973606161300E-02 -1.66973606161300E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   6.26376154668857E-02 -5.00920827952280E-02 -5.00920827952280E-02
  -6.26376204696953E-02  5.00920809015521E-02  5.00920809015521E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4769E+02 GPa]
@@ -7998,7 +7998,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.07886E-02 2.51533E-02 (free atoms)
  -3.07885888320674E-02 -2.17959349304054E-02 -2.17959349304054E-02
   3.07885888320674E-02  2.17959349304054E-02  2.17959349304054E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   9.23657676442993E-02  6.53878040602221E-02  6.53878040602221E-02
  -9.23657653481050E-02 -6.53878055222102E-02 -6.53878055222102E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.8525E+02 GPa]
@@ -8033,7 +8033,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.25518E-02 8.72472E-03 (free atoms)
   1.25518237729495E-02  5.95038099252875E-03  5.95038099252875E-03
  -1.25518237729495E-02 -5.95038099252875E-03 -5.95038099252875E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -3.76554733018997E-02 -1.78511429199261E-02 -1.78511429199261E-02
   3.76554693357976E-02  1.78511430352464E-02  1.78511430352464E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5797E+02 GPa]
@@ -8068,7 +8068,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.01730E-03 1.64712E-03 (free atoms)
  -7.17310291831559E-11  2.01729678000696E-03  2.01729678000696E-03
   7.17310291831559E-11 -2.01729678000696E-03 -2.01729678000696E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.15971142385588E-10 -6.05189031678034E-03 -6.05189031678034E-03
  -2.14415032713348E-10  6.05189036326142E-03  6.05189036326142E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5933E+02 GPa]
@@ -8103,7 +8103,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.25518E-02 8.72472E-03 (free atoms)
  -1.25518238706558E-02  5.95038106709185E-03  5.95038106709185E-03
   1.25518238706558E-02 -5.95038106709185E-03 -5.95038106709185E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.76554736182048E-02 -1.78511431264899E-02 -1.78511431264899E-02
  -3.76554696057299E-02  1.78511432760612E-02  1.78511432760612E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5797E+02 GPa]
@@ -8138,7 +8138,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.07886E-02 2.51533E-02 (free atoms)
   3.07885888027845E-02 -2.17959349034629E-02 -2.17959349034629E-02
  -3.07885888027845E-02  2.17959349034629E-02  2.17959349034629E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -9.23657675643990E-02  6.53878039797905E-02  6.53878039797905E-02
   9.23657652523082E-02 -6.53878054409869E-02 -6.53878054409869E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.8525E+02 GPa]
@@ -8183,7 +8183,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.97710E-02 1.95447E-02 (free atoms)
   1.90840645248838E-02  1.97709508326864E-02  1.97709508326864E-02
  -1.90840645248838E-02 -1.97709508326864E-02 -1.97709508326864E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -5.72521949970562E-02 -5.93128552453234E-02 -5.93128552453234E-02
   5.72521921522467E-02  5.93128497507951E-02  5.93128497507951E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4171E+02 GPa]
@@ -8218,7 +8218,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.36178E-03 3.89080E-03 (free atoms)
  -2.71378938846238E-03 -4.36178327563039E-03 -4.36178327563039E-03
   2.71378938846238E-03  4.36178327563039E-03  4.36178327563039E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   8.14136961682635E-03  1.30853504891151E-02  1.30853504891151E-02
  -8.14136671394793E-03 -1.30853491646672E-02 -1.30853491646672E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7071E+02 GPa]
@@ -8253,7 +8253,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.30474E-03 1.06532E-03 (free atoms)
  -1.35591148736533E-11  1.30474184678526E-03  1.30474184678526E-03
   1.35591148736533E-11 -1.30474184678526E-03 -1.30474184678526E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.95138852569446E-11 -3.91422127046215E-03 -3.91422127046215E-03
  -4.18408039849750E-11  3.91422981024940E-03  3.91422981024940E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6024E+02 GPa]
@@ -8288,7 +8288,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.36178E-03 3.89080E-03 (free atoms)
   2.71378968071363E-03 -4.36178343295765E-03 -4.36178343295765E-03
  -2.71378968071363E-03  4.36178343295765E-03  4.36178343295765E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -8.14137049592023E-03  1.30853509660861E-02  1.30853509660861E-02
   8.14136758836153E-03 -1.30853496316598E-02 -1.30853496316598E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7071E+02 GPa]
@@ -8323,7 +8323,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.97710E-02 1.95447E-02 (free atoms)
  -1.90840645252332E-02  1.97709508191934E-02  1.97709508191934E-02
   1.90840645252332E-02 -1.97709508191934E-02 -1.97709508191934E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.72521949974935E-02 -5.93128551961195E-02 -5.93128551961195E-02
  -5.72521921539058E-02  5.93128497190407E-02  5.93128497190407E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4171E+02 GPa]
@@ -8368,7 +8368,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.61579E-03 1.35047E-03 (free atoms)
   4.99774637651859E-04 -1.61578951837034E-03 -1.61578951837034E-03
  -4.99774637651859E-04  1.61578951837034E-03  1.61578951837034E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.49932230413330E-03  4.84736783733686E-03  4.84736783733686E-03
   1.49932552177785E-03 -4.84736927288516E-03 -4.84736927288516E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6814E+02 GPa]
@@ -8403,7 +8403,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.22786E-03 5.03223E-03 (free atoms)
   8.22785813944346E-03  2.03375393651152E-03  2.03375393651152E-03
  -8.22785813944346E-03 -2.03375393651152E-03 -2.03375393651152E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.46835761436356E-02 -6.10126159902528E-03 -6.10126159902528E-03
   2.46835726930252E-02  6.10126202004382E-03  6.10126202004382E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6225E+02 GPa]
@@ -8438,7 +8438,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.76203E-04 7.15417E-04 (free atoms)
  -1.39987325325916E-11  8.76203496165357E-04  8.76203496165357E-04
   1.39987325325916E-11 -8.76203496165357E-04 -8.76203496165357E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   4.15518379141983E-11 -2.62860780002848E-03 -2.62860780002848E-03
  -4.24405572813511E-11  2.62861317696366E-03  2.62861317696366E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6081E+02 GPa]
@@ -8473,7 +8473,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.22786E-03 5.03223E-03 (free atoms)
  -8.22785840051444E-03  2.03375414695161E-03  2.03375414695161E-03
   8.22785840051444E-03 -2.03375414695161E-03 -2.03375414695161E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.46835769396838E-02 -6.10126221808182E-03 -6.10126221808182E-03
  -2.46835734634029E-02  6.10126266362785E-03  6.10126266362785E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6225E+02 GPa]
@@ -8508,7 +8508,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.61579E-03 1.35047E-03 (free atoms)
  -4.99774399402832E-04 -1.61578967985109E-03 -1.61578967985109E-03
   4.99774399402832E-04  1.61578967985109E-03  1.61578967985109E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.49932158111441E-03  4.84736832100769E-03  4.84736832100769E-03
  -1.49932481530258E-03 -4.84736975809883E-03 -4.84736975809883E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6814E+02 GPa]
@@ -8553,7 +8553,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.58140E-03 1.49971E-03 (free atoms)
   2.58139784879593E-03 -2.04648756408014E-04 -2.04648756408014E-04
  -2.58139784879593E-03  2.04648756408014E-04  2.04648756408014E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -7.74419679813947E-03  6.13946752942028E-04  6.13946752942028E-04
   7.74419029463613E-03 -6.13945785506054E-04 -6.13945785506054E-04
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6683E+02 GPa]
@@ -8588,7 +8588,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.89286E-03 3.32968E-03 (free atoms)
  -1.71798588223605E-03 -3.89286142037756E-03 -3.89286142037756E-03
   1.71798588223605E-03  3.89286142037756E-03  3.89286142037756E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.15395806877772E-03  1.16785848352153E-02  1.16785848352153E-02
  -5.15395722463860E-03 -1.16785836870501E-02 -1.16785836870501E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7009E+02 GPa]
@@ -8623,7 +8623,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.03540E-04 4.92789E-04 (free atoms)
  -2.71266467489185E-11  6.03540423609531E-04  6.03540423609531E-04
   2.71266467489185E-11 -6.03540423609531E-04 -6.03540423609531E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   8.15675891810499E-11 -1.81061949840204E-03 -1.81061949840204E-03
  -8.11922913124609E-11  1.81062304325515E-03  1.81062304325515E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6119E+02 GPa]
@@ -8658,7 +8658,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.89286E-03 3.32968E-03 (free atoms)
   1.71798607015622E-03 -3.89286151283142E-03 -3.89286151283142E-03
  -1.71798607015622E-03  3.89286151283142E-03  3.89286151283142E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -5.15395863130410E-03  1.16785851175485E-02  1.16785851175485E-02
   5.15395778963323E-03 -1.16785839594400E-02 -1.16785839594400E-02
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.7009E+02 GPa]
@@ -8693,7 +8693,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.58140E-03 1.49971E-03 (free atoms)
  -2.58139818355665E-03 -2.04648437808321E-04 -2.04648437808321E-04
   2.58139818355665E-03  2.04648437808321E-04  2.04648437808321E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   7.74419794480261E-03  6.13945805666477E-04  6.13945805666477E-04
  -7.74419115653728E-03 -6.13944821183448E-04 -6.13944821183448E-04
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6683E+02 GPa]
@@ -8738,7 +8738,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.46752E-03 2.05532E-03 (free atoms)
  -7.04100224312070E-04 -2.46751940244922E-03 -2.46751940244922E-03
   7.04100224312070E-04  2.46751940244922E-03  2.46751940244922E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.11230173806429E-03  7.40256101443140E-03  7.40256101443140E-03
  -2.11229960780813E-03 -7.40255540026390E-03 -7.40255540026390E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6891E+02 GPa]
@@ -8773,7 +8773,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.56390E-03 3.21400E-03 (free atoms)
   5.56390491947799E-03  1.27356669612181E-04  1.27356669612181E-04
  -5.56390491947799E-03 -1.27356669612181E-04 -1.27356669612181E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.66917151845226E-02 -3.82070250897363E-04 -3.82070250897363E-04
   1.66917143323453E-02  3.82069766775720E-04  3.82069766775720E-04
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6480E+02 GPa]
@@ -8808,7 +8808,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.23042E-04 3.45412E-04 (free atoms)
  -1.14093264957087E-11  4.23042095779341E-04  4.23042095779341E-04
   1.14093264957087E-11 -4.23042095779341E-04 -4.23042095779341E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   3.46511191586300E-11 -1.26912505874809E-03 -1.26912505874809E-03
  -3.38048398156219E-11  1.26912751592796E-03  1.26912751592796E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6145E+02 GPa]
@@ -8843,7 +8843,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.56391E-03 3.21400E-03 (free atoms)
  -5.56390508147105E-03  1.27356770761035E-04  1.27356770761035E-04
   5.56390508147105E-03 -1.27356770761035E-04 -1.27356770761035E-04
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.66917156770990E-02 -3.82070554572432E-04 -3.82070554572432E-04
  -1.66917148117273E-02  3.82070069993778E-04  3.82070069993778E-04
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6480E+02 GPa]
@@ -8878,7 +8878,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.46752E-03 2.05532E-03 (free atoms)
   7.04100926744328E-04 -2.46751992452779E-03 -2.46751992452779E-03
  -7.04100926744328E-04  2.46751992452779E-03  2.46751992452779E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -2.11230386385165E-03  7.40256263012340E-03  7.40256263012340E-03
   2.11230169661432E-03 -7.40255691704331E-03 -7.40255691704331E-03
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6891E+02 GPa]

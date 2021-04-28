@@ -377,15 +377,15 @@ P           mkmem9          1
 -           npfft7          1
 -           npfft8          1
 -           npfft9          1
--           npkpt1          1
--           npkpt2          1
--           npkpt3          2
--           npkpt4          2
--           npkpt5          1
--           npkpt6          1
--           npkpt7          2
--           npkpt8          2
--           npkpt9          2
+-        np_spkpt1          1
+-        np_spkpt2          1
+-        np_spkpt3          2
+-        np_spkpt4          2
+-        np_spkpt5          1
+-        np_spkpt6          1
+-        np_spkpt7          2
+-        np_spkpt8          2
+-        np_spkpt9          2
            nspden1          1
            nspden2          1
            nspden3          1
@@ -1842,7 +1842,7 @@ force_length_stats: {min:   4.08018454E-01, max:   4.08018454E-01, mean:   4.080
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.35570E-01 2.35570E-01 (free atoms)
  -2.35569564297612E-01 -2.35569564297612E-01 -2.35569564297612E-01
   2.35569564297612E-01  2.35569564297612E-01  2.35569564297612E-01
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.64898695008328E+00  1.64898695008328E+00  1.64898695008328E+00
  -1.64898695008328E+00 -1.64898695008328E+00 -1.64898695008328E+00
  Total energy (etotal) [Ha]= -1.04202713964044E+01
@@ -1991,7 +1991,7 @@ force_length_stats: {min:   6.83145804E-01, max:   6.83145804E-01, mean:   6.831
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.94414E-01 3.94414E-01 (free atoms)
  -3.94414414097004E-01 -3.94414414097004E-01 -3.94414414097004E-01
   3.94414414097004E-01  3.94414414097004E-01  3.94414414097004E-01
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.76090089867903E+00  2.76090089867903E+00  2.76090089867903E+00
  -2.76090089867903E+00 -2.76090089867903E+00 -2.76090089867903E+00
  Total energy (etotal) [Ha]= -1.05080004705943E+01
@@ -2144,7 +2144,7 @@ force_length_stats: {min:   3.38487609E-01, max:   3.38487609E-01, mean:   3.384
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.95426E-01 1.95426E-01 (free atoms)
   1.95425912356055E-01  1.95425912356054E-01  1.95425912356054E-01
  -1.95425912356055E-01 -1.95425912356054E-01 -1.95425912356054E-01
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.36798138649238E+00 -1.36798138649238E+00 -1.36798138649238E+00
   1.36798138649238E+00  1.36798138649238E+00  1.36798138649238E+00
  Total energy (etotal) [Ha]= -1.06550385141310E+01
@@ -2431,7 +2431,7 @@ force_length_stats: {min:   4.08012257E-01, max:   4.08012257E-01, mean:   4.080
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.35566E-01 2.35566E-01 (free atoms)
  -2.35565986281086E-01 -2.35565986281086E-01 -2.35565986281086E-01
   2.35565986281086E-01  2.35565986281086E-01  2.35565986281086E-01
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.64896190396760E+00  1.64896190396760E+00  1.64896190396760E+00
  -1.64896190396760E+00 -1.64896190396760E+00 -1.64896190396760E+00
  Total energy (etotal) [Ha]= -1.04202713961137E+01
@@ -2580,7 +2580,7 @@ force_length_stats: {min:   6.83129232E-01, max:   6.83129232E-01, mean:   6.831
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.94405E-01 3.94405E-01 (free atoms)
  -3.94404845799074E-01 -3.94404845799073E-01 -3.94404845799074E-01
   3.94404845799074E-01  3.94404845799073E-01  3.94404845799074E-01
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.76083392059351E+00  2.76083392059352E+00  2.76083392059351E+00
  -2.76083392059351E+00 -2.76083392059352E+00 -2.76083392059351E+00
  Total energy (etotal) [Ha]= -1.05079920541059E+01
@@ -2733,7 +2733,7 @@ force_length_stats: {min:   3.38399454E-01, max:   3.38399454E-01, mean:   3.383
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.95375E-01 1.95375E-01 (free atoms)
   1.95375016120725E-01  1.95375016120725E-01  1.95375016120725E-01
  -1.95375016120725E-01 -1.95375016120725E-01 -1.95375016120725E-01
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
  -1.36762511284508E+00 -1.36762511284508E+00 -1.36762511284508E+00
   1.36762511284508E+00  1.36762511284508E+00  1.36762511284508E+00
  Total energy (etotal) [Ha]= -1.06550489035362E+01
@@ -3044,7 +3044,7 @@ force_length_stats: {min:   1.47763545E-01, max:   1.47763545E-01, mean:   1.477
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.53113E-02 8.53113E-02 (free atoms)
  -8.53113227079386E-02 -8.53113227079386E-02 -8.53113227079386E-02
   8.53113227079386E-02  8.53113227079386E-02  8.53113227079386E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.97179258955570E-01  5.97179258955570E-01  5.97179258955570E-01
  -5.97179258955570E-01 -5.97179258955570E-01 -5.97179258955570E-01
  Scale of Primitive Cell (acell) [bohr]
@@ -3208,7 +3208,7 @@ force_length_stats: {min:   2.68354423E-02, max:   2.68354423E-02, mean:   2.683
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.54934E-02 1.54934E-02 (free atoms)
  -1.54934498100821E-02 -1.54934498100821E-02 -1.54934498100821E-02
   1.54934498100821E-02  1.54934498100821E-02  1.54934498100821E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.04511463288170E-01  1.04511463288170E-01  1.04511463288170E-01
  -1.04511463288170E-01 -1.04511463288170E-01 -1.04511463288170E-01
  Scale of Primitive Cell (acell) [bohr]
@@ -3376,7 +3376,7 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.85315E-03 1.85315E-03 (free atoms)
  -1.85315109536967E-03 -1.85315109536967E-03 -1.85315109536967E-03
   1.85315109536967E-03  1.85315109536967E-03  1.85315109536967E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.23992033327631E-02  1.23992033327631E-02  1.23992033327631E-02
  -1.23992033327631E-02 -1.23992033327631E-02 -1.23992033327631E-02
  Scale of Primitive Cell (acell) [bohr]
@@ -3675,7 +3675,7 @@ force_length_stats: {min:   1.47763545E-01, max:   1.47763545E-01, mean:   1.477
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.53113E-02 8.53113E-02 (free atoms)
  -8.53113227079386E-02 -8.53113227079386E-02 -8.53113227079386E-02
   8.53113227079386E-02  8.53113227079386E-02  8.53113227079386E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.97179258955570E-01  5.97179258955570E-01  5.97179258955570E-01
  -5.97179258955570E-01 -5.97179258955570E-01 -5.97179258955570E-01
  Scale of Primitive Cell (acell) [bohr]
@@ -3839,7 +3839,7 @@ force_length_stats: {min:   2.68354423E-02, max:   2.68354423E-02, mean:   2.683
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.54934E-02 1.54934E-02 (free atoms)
  -1.54934498100821E-02 -1.54934498100821E-02 -1.54934498100821E-02
   1.54934498100821E-02  1.54934498100821E-02  1.54934498100821E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.04511463288170E-01  1.04511463288170E-01  1.04511463288170E-01
  -1.04511463288170E-01 -1.04511463288170E-01 -1.04511463288170E-01
  Scale of Primitive Cell (acell) [bohr]
@@ -4007,7 +4007,7 @@ force_length_stats: {min:   3.20975185E-03, max:   3.20975185E-03, mean:   3.209
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.85315E-03 1.85315E-03 (free atoms)
  -1.85315109536967E-03 -1.85315109536967E-03 -1.85315109536967E-03
   1.85315109536967E-03  1.85315109536967E-03  1.85315109536967E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.23992033327631E-02  1.23992033327631E-02  1.23992033327631E-02
  -1.23992033327631E-02 -1.23992033327631E-02 -1.23992033327631E-02
  Scale of Primitive Cell (acell) [bohr]
@@ -4671,15 +4671,15 @@ P           mkmem9          1
 -           npfft7          1
 -           npfft8          1
 -           npfft9          1
--           npkpt1          1
--           npkpt2          1
--           npkpt3          2
--           npkpt4          2
--           npkpt5          1
--           npkpt6          1
--           npkpt7          2
--           npkpt8          2
--           npkpt9          2
+-        np_spkpt1          1
+-        np_spkpt2          1
+-        np_spkpt3          2
+-        np_spkpt4          2
+-        np_spkpt5          1
+-        np_spkpt6          1
+-        np_spkpt7          2
+-        np_spkpt8          2
+-        np_spkpt9          2
            nspden1          1
            nspden2          1
            nspden3          1

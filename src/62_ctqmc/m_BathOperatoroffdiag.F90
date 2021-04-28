@@ -994,7 +994,7 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
   !Compute the new M matrix
   !op%M(aF)%mat(PositionRow:new_tail,1:new_tail) = &
   !                   EOSHIFT(op%M(aF)%mat(PositionRow:new_tail,1:new_tail),SHIFT=-1, BOUNDARY=0.d0, DIM=1)
-  !op%M(aF)%mat(1:n12 characters (ABI_ALLOCATE) instead of 4 (FREE)ew_tail,PositionCol:new_tail) = &
+  !op%M(aF)%mat(1:n12 characters (ABI_MALLOC) instead of 4 (FREE)ew_tail,PositionCol:new_tail) = &
   !                   EOSHIFT(op%M(aF)%mat(1:new_tail,PositionCol:new_tail),SHIFT=-1, BOUNDARY=0.d0, DIM=2)
 ! ! op%M(aF)%mat(1:new_tail,1:new_tail) =  op%M(aF)%mat(1:new_tail,1:new_tail) + &
 ! ! Stilde * MATMUL(RESHAPE(op%Q%vec(1:new_tail),(/ new_tail,1 /)),RESHAPE(op%R%vec(1:new_tail),(/ 1,new_tail /)))

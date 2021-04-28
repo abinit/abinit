@@ -15,6 +15,8 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 50-80 concern electron-phonon
 
-* Tests 81-90 concern multibinit
+* Tests 81-89 concern multibinit
+
+* Tests 90-99 concern ground state
 
 ------------------------------------------------------------------

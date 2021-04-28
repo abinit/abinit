@@ -75,7 +75,7 @@ contains
 !!  === optional outputs ===
 !!  [dyn_vdw_dftd2(2,3,natom,3,natom)]=contribution to dynamical matrix from DFT-D2 dispersion potential
 !!  [elt_vdw_dftd2(6+3*natom,6)]=contribution to elastic tensor and internal strains from DFT-D2 disp. pot.
-!!  [fred_vdw_dftd2(3,natom)]=contribution to forces from DFT-D2 dispersion potential
+!!  [gred_vdw_dftd2(3,natom)]=contribution to gradients wrt nuclear positions from DFT-D2 dispersion potential
 !!  [str_vdw_dftd2(6)]=contribution to stress tensor from DFT-D2 dispersion potential
 !!
 !! NOTES
@@ -91,7 +91,7 @@ contains
 !! SOURCE
 
 subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xred,znucl,&
-&          dyn_vdw_dftd2,elt_vdw_dftd2,fred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
+&          dyn_vdw_dftd2,elt_vdw_dftd2,gred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
 
  implicit none
 
@@ -106,7 +106,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  real(dp),intent(in),optional :: qphon(3)
  real(dp),intent(out),optional :: dyn_vdw_dftd2(2,3,natom,3,natom)
  real(dp),intent(out),optional :: elt_vdw_dftd2(6+3*natom,6)
- real(dp),intent(out),optional :: fred_vdw_dftd2(3,natom)
+ real(dp),intent(out),optional :: gred_vdw_dftd2(3,natom)
  real(dp),intent(out),optional :: str_vdw_dftd2(6)
 
 !Local variables-------------------------------
@@ -155,7 +155,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  DBG_ENTER("COLL")
 
 !Extract options
- need_forces=present(fred_vdw_dftd2)
+ need_forces=present(gred_vdw_dftd2)
  need_stress=present(str_vdw_dftd2)
  need_dynmat=present(dyn_vdw_dftd2)
  need_elast=present(elt_vdw_dftd2)
@@ -232,7 +232,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !Set accumulated quantities to zero
  npairs=0
  e_vdw_dftd2=zero
- if (need_forces) fred_vdw_dftd2=zero
+ if (need_forces) gred_vdw_dftd2=zero
  if (need_stress) str_vdw_dftd2=zero
  if (need_dynmat) dyn_vdw_dftd2=zero
  if (need_elast)  elt_vdw_dftd2(1:6,1:6)=zero
@@ -298,11 +298,11 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
                    rcart(2)=rprimd(2,1)*r1+rprimd(2,2)*r2+rprimd(2,3)*r3
                    rcart(3)=rprimd(3,1)*r1+rprimd(3,2)*r2+rprimd(3,3)*r3
 
-!                  Contribution to forces
+!                  Contribution to gradients wrt nuclear positions
                    if (need_forces.and.ia/=ja) then
                      vec(1:3)=grad*rcart(1:3)
-                     fred_vdw_dftd2(1:3,ia)=fred_vdw_dftd2(1:3,ia)+vec(1:3)
-                     fred_vdw_dftd2(1:3,ja)=fred_vdw_dftd2(1:3,ja)-vec(1:3)
+                     gred_vdw_dftd2(1:3,ia)=gred_vdw_dftd2(1:3,ia)+vec(1:3)
+                     gred_vdw_dftd2(1:3,ja)=gred_vdw_dftd2(1:3,ja)-vec(1:3)
                    end if
 
 !                  Contribution to stress tensor
@@ -387,7 +387,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !Gradients: convert them from cartesian to reduced coordinates
  if (need_forces) then
    do ia=1,natom
-     call grad_cart2red(fred_vdw_dftd2(:,ia))
+     call grad_cart2red(gred_vdw_dftd2(:,ia))
    end do
  end if
  if (need_dynmat) then
@@ -423,7 +423,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !write(77,*) "E=",e_vdw_dftd2
 !if (need_forces) then
 ! do ia=1,natom
-!  write(77,*) "F=",ia,fred_vdw_dftd2(:,ia)
+!  write(77,*) "F=",ia,gred_vdw_dftd2(:,ia)
 ! end do
 !end if
 !if (need_stress) write(77,*) "S=",str_vdw_dftd2(:)

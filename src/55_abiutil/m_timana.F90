@@ -4,6 +4,9 @@
 !!
 !! FUNCTION
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
+!! number of calls to different routines is also provided, as comments,
+!! at the end of the routine, as well as, in the single dataset mode (ndtset<2),
+!! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
@@ -896,8 +899,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1515)='HF_getghc_main                  ';  basic(1515)=1  ! ulterior slot for test
 
  ! Chebfi
- names(1600) = 'chebfi                        '; basic(1601) = 1
- names(1601) = 'chebfi(alltoall)              '
+ names(1600) = 'chebfi                        '
+ names(1601) = 'chebfi(alltoall)              '; basic(1601) = 1
  names(1602) = 'chebfi(appinvovl)             '
  names(1603) = 'chebfi(rotation)              '
  names(1604) = 'chebfi(subdiago)              '
@@ -920,7 +923,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
- names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
+ names(1650) = 'lobpcgwf2                     '; 
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
  names(1653) = 'lobpcg_run                     '
@@ -1213,8 +1216,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
-!      vtowfk(ssdiag) (= vtowfk(loop)    - cgwf )
-     tslots(:5)=(/-588, 39,-22,-530, -1600/)
+!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-lobpcgwf2-chebfi )
+     tslots(:6)=(/-588, 39,-22,-530, -1600, -1650/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)

@@ -21,7 +21,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the total energy of silicon at a fixed number of k-points
 
@@ -318,7 +318,7 @@ with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the exper
 The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21.
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
-Theory: use the GW approximation. This is described in [the first tutorial on GW](gw1).
+Theory: use the GW approximation. This is described in [the first GW tutorial](/tutorial/gw1).
 
 For experimental data and band structure representation, see the book by M.L. Cohen and J.R. Chelikowski [[cite:Cohen1988]].
 
