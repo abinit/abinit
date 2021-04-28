@@ -171,7 +171,7 @@ module m_energies
   real(dp) :: e_pawdc=zero
    ! PAW spherical part double-counting energy
 
-  real(dp) :: extfpmd_e_shiftfactor=zero
+  real(dp) :: extfpmd_shiftfactor=zero
    ! Energy shift factor relative to homogeneous electron gas model
 
   real(dp) :: e_sicdc=zero
@@ -272,7 +272,7 @@ subroutine energies_init(energies)
  energies%e_nucdip      = zero
  energies%e_paw         = zero
  energies%e_pawdc       = zero
- energies%extfpmd_e_shiftfactor = zero
+ energies%extfpmd_shiftfactor = zero
  energies%e_sicdc       = zero
  energies%e_vdw_dftd    = zero
  energies%e_xc          = zero
@@ -350,7 +350,7 @@ end subroutine energies_init
  energies_out%e_nucdip             = energies_in%e_nucdip
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
- energies_out%extfpmd_e_shiftfactor = energies_in%extfpmd_e_shiftfactor
+ energies_out%extfpmd_shiftfactor = energies_in%extfpmd_shiftfactor
  energies_out%e_sicdc              = energies_in%e_sicdc
  energies_out%e_vdw_dftd           = energies_in%e_vdw_dftd
  energies_out%e_xc                 = energies_in%e_xc
@@ -434,7 +434,7 @@ end subroutine energies_copy
    energies_array(28)=energies%e_nlpsp_vfock
    energies_array(29)=energies%e_paw
    energies_array(30)=energies%e_pawdc
-   energies_array(31)=energies%extfpmd_e_shiftfactor
+   energies_array(31)=energies%extfpmd_shiftfactor
    energies_array(32)=energies%e_sicdc
    energies_array(33)=energies%e_vdw_dftd
    energies_array(34)=energies%e_xc
@@ -476,7 +476,7 @@ end subroutine energies_copy
    energies%e_nlpsp_vfock        = energies_array(28)
    energies%e_paw                = energies_array(29)
    energies%e_pawdc              = energies_array(30)
-   energies%extfpmd_e_shiftfactor= energies_array(31)
+   energies%extfpmd_shiftfactor= energies_array(31)
    energies%e_sicdc              = energies_array(32)
    energies%e_vdw_dftd           = energies_array(33)
    energies%e_xc                 = energies_array(34)
@@ -668,7 +668,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_fock", "e_fockdc", "e_fock0", "e_hartree", "extfpmd_e_kin", "extfpmd_edc_kin", &
   "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
-  "e_paw", "e_pawdc", "extfpmd_e_shiftfactor", "e_sicdc", "e_vdw_dftd",&
+  "e_paw", "e_pawdc", "extfpmd_shiftfactor", "e_sicdc", "e_vdw_dftd",&
   "e_xc", "e_xcdc", "e_xc_vdw",&
   "h0", "e_zeeman", "e_fermih"],& ! CP added fermih
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
@@ -679,7 +679,7 @@ subroutine energies_ncwrite(enes, ncid)
    enes%extfpmd_e_kin, enes%extfpmd_edc_kin, enes%e_hybcomp_E0, enes%e_hybcomp_v0,&
    enes%e_hybcomp_v, enes%e_kinetic,&
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
-   enes%e_paw, enes%e_pawdc, enes%extfpmd_e_shiftfactor, enes%e_sicdc, enes%e_vdw_dftd,&
+   enes%e_paw, enes%e_pawdc, enes%extfpmd_shiftfactor, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
    enes%h0,enes%e_zeeman,enes%e_fermih])
  ! End CP modified
