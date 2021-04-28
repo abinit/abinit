@@ -1079,7 +1079,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
- if (associated(extfpmd)) results_gs%extfpmd_nelect=extfpmd%nelect
+ if (associated(extfpmd)) then
+   results_gs%nelect_extfpmd=extfpmd%nelect
+   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+ end if
 
  results_gs%intgres(:,:)=zero
  results_gs%grcondft(:,:)=zero

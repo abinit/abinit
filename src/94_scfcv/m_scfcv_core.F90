@@ -2714,11 +2714,10 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !  Blanchet Add the energy contribution to the internal energy
    if(associated(extfpmd)) then
      energies%entropy=energies%entropy+extfpmd%entropy
-     energies%extfpmd_e_kin=extfpmd%e_kin
-     energies%extfpmd_shiftfactor=extfpmd%shiftfactor
-     energies%extfpmd_edc_kin=extfpmd%edc_kin
-     if(optene==0) etotal=etotal+energies%extfpmd_e_kin
-     if(optene==1) etotal=etotal+energies%extfpmd_e_kin+energies%extfpmd_edc_kin
+     energies%e_kin_extfpmd=extfpmd%e_kin
+     energies%edc_kin_extfpmd=extfpmd%edc_kin
+     if(optene==0) etotal=etotal+energies%e_kin_extfpmd
+     if(optene==1) etotal=etotal+energies%e_kin_extfpmd+energies%edc_kin_extfpmd
      etotal=etotal-dtset%tsmear*extfpmd%entropy
    end if
 
