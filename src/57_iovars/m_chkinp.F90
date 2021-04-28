@@ -971,7 +971,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 
      ! Check spin
-     if (dt%eph_np_pqbks(5) /= 0) then
+     if (all(dt%eph_np_pqbks(5) /= [0, 1])) then
        if (dt%nspinor == 2) then
          ABI_ERROR_NOSTOP("Spin parallelism cannot be used when nspinor == 2", ierr)
        else if (dt%nspinor == 1 .and. dt%eph_np_pqbks(5) > dt%nsppol) then

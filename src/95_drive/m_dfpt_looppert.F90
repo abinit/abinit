@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
 !!  m_dfpt_loopert
@@ -51,9 +50,9 @@ module m_dfpt_loopert
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
- use m_io_tools,   only : file_exists, iomode_from_fname, get_unit
+ use m_io_tools,   only : file_exists
  use m_time,       only : timab
- use m_fstrings,   only : strcat
+ use m_fstrings,   only : strcat, sjoin, ftoa
  use m_geometry,   only : mkrdim, metric, littlegroup_pert
  use m_exit,       only : exit_check, disable_timelimit
  use m_atomdata,   only : atom_gauss
@@ -1088,6 +1087,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
    mcg=mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
+
+  call wrtout(std_out, sjoin(" Memory required for psi0_k, psi0_kq psi1_kq: ", &
+    ftoa(3 * two * mcg * dp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
+
    if (one*mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol > huge(1)) then
      write (msg,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&

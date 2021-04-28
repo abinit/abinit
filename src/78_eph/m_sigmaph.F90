@@ -1499,10 +1499,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
            ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
-           mcgq = npw_kq * nspinor * nband_kq
-           mgscq = npw_kq * nspinor * nband_kq * psps%usepaw
-           ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_kq))
-           ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_kq*psps%usepaw))
+
+           ABI_MALLOC (band_procs, (nband_kq))
+           band_procs = 0
+           !call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
+           !    mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+           nband_me = nband_kq
+           !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb, ikpt, nband_kq, spin, me)
+
+           !mpi_enreg%comm_band = sigma%bsum_comm%value
+           !mpi_enreg%me_band = sigma%bsum_comm%me
+           !mpi_enreg%nproc_band = sigma%bsum_comm%nproc
+           !ABI_REMALLOC(mpi_enreg%proc_distrb, (dtset%mband, nkpt, nsppol))
+           !mpi_enreg%proc_distrb = -1
+           !mpi_enreg%proc_distrb, (sigma%my_bsum_start:sigma%my_bsum_stop, nkpt, nsppol) = sigma%bsum_comm%me
+           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_stop + 1
+
+           mcgq = npw_kq * nspinor * nband_me
+           mgscq = npw_kq * nspinor * nband_me * psps%usepaw
+           ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_me))
+           ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! TODO: Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
@@ -1518,6 +1534,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                  npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
               end if
               cgq(:, :, ibsum_kq) = bra_kq
+              !ii = ibsum_kq - sigma%my_bsum_start + 1
+              !cgq(:, :, ii) = bra_kq
            end do
            call xmpi_sum(cgq, sigma%bsum_comm%value, ierr)
 
@@ -1540,10 +1558,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! For the time being use mpw1 = 0 because mpw1 is not used in this call to dfpt_cgwf
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
-           ABI_MALLOC (band_procs, (nbcalc_ks))
-           call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
-               mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
-
            grad_berry_size_mpw1 = 0
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient).
@@ -1564,8 +1578,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
              !       in the meanwhile should make a test for paralbd, to exclude it, I think
              band_me = band_ks
-             !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_kq,isppol,me)
-             nband_me = nband_kq
+
              call dfpt_cgwf(band_ks, band_me, band_procs, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
                cwaveprj, cwaveprj0, rf2, dcwavef, &
                ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
@@ -1595,7 +1608,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            end do ! ib_k
 
-           ABI_FREE (band_procs)
+           ABI_FREE(band_procs)
            ABI_FREE(cgq)
            ABI_FREE(gscq)
            ABI_FREE(out_eig1_k)
@@ -3005,7 +3018,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ephtk_set_phmodes_skip(dtset, new%phmodes_skip)
 
  if (.not. new%imag_only) then
-   ! Split bands among the procs inside bsum_comm.
+   ! Split bands among the procs inside bsum_comm (block distribution)_
    call xmpi_split_work(new%nbsum, new%bsum_comm%value, new%my_bsum_start, new%my_bsum_stop)
    if (new%my_bsum_start == new%nbsum + 1) then
      ABI_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband or use eph_np_pqbks input var.")

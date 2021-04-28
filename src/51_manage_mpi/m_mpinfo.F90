@@ -834,10 +834,7 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
 
 ! *************************************************************************
 
- if (allocated(cycle_bands)) then
-   ABI_FREE (cycle_bands)
- end if
- ABI_MALLOC (cycle_bands, (size(distrb, 2)))
+ ABI_REMALLOC (cycle_bands, (size(distrb, 2)))
  cycle_bands=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
@@ -880,10 +877,7 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
 
 ! *************************************************************************
 
- if (allocated(kpt_band_procs)) then
-    ABI_FREE (kpt_band_procs)
- end if
- ABI_MALLOC (kpt_band_procs, (size(distrb, 2)))
+ ABI_REMALLOC(kpt_band_procs, (size(distrb, 2)))
  kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
@@ -1981,12 +1975,8 @@ subroutine clnmpi_img(mpi_enreg)
    mpi_enreg%comm_img=xmpi_comm_null
  end if
 
- if (allocated(mpi_enreg%my_imgtab))  then
-   ABI_FREE(mpi_enreg%my_imgtab)
- end if
- if (allocated(mpi_enreg%distrb_img))  then
-   ABI_FREE(mpi_enreg%distrb_img)
- end if
+ ABI_SFREE(mpi_enreg%my_imgtab)
+ ABI_SFREE(mpi_enreg%distrb_img)
 
  mpi_enreg%paral_img=0
  mpi_enreg%my_nimage=1
@@ -2148,9 +2138,7 @@ subroutine clnmpi_pert(mpi_enreg)
      mpi_enreg%comm_pert=xmpi_comm_null
    end if
 
-   if (allocated(mpi_enreg%distrb_pert))  then
-     ABI_FREE(mpi_enreg%distrb_pert)
-   end if
+   ABI_SFREE(mpi_enreg%distrb_pert)
 
    mpi_enreg%me_pert=0
    mpi_enreg%me_cell=0
@@ -2731,7 +2719,7 @@ end subroutine distrb2
 !!  distrb2_hf
 !!
 !! FUNCTION
-!!  Ceate the tabs of repartition of processors for sharing the jobs
+!!  Create the tabs of repartition of processors for sharing the jobs
 !!  on occupied states (labeled by k-points, bands and spin indices) for Hartree-Fock calculation.
 !!
 !! INPUTS
