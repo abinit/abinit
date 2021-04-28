@@ -1896,7 +1896,7 @@ subroutine orbmag_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_trace)
  end if
 
  if(dtset%orbmag .LT. 0) then
-   write(message,'(a,a)')' Orbital magnetic moment computed with PEAD derivative wavefunctions ',ch10
+   write(message,'(a,a)')' Orbital magnetic moment computed with Finite Difference derivative wavefunctions ',ch10
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -2609,7 +2609,7 @@ subroutine duq_she_qdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,&
   integer :: ngfft4,ngfft5,ngfft6,nkpg,npw_k,npw_k_,npw_kb,npw_kg,nproc,ntotcp
   integer :: shiftbd,smatrix_ddkflag,smatrix_job,spaceComm
   real(dp) :: deltab,deltag,doti,dotr,ecut_eff,ENK,lambda
-  complex(dpc) :: cgdijcb,cprefac,out_e_term,out_h_term,out_s_term
+  complex(dpc) :: cprefac,out_e_term,out_h_term,out_s_term
   logical :: has_vectornd
   type(gs_hamiltonian_type) :: gs_hamk
 
@@ -2926,9 +2926,11 @@ subroutine duq_she_qdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,&
                        dotr= DOT_PRODUCT(gwave(1,:),ghc(1,:))+DOT_PRODUCT(gwave(2,:),ghc(2,:))
                        doti=-DOT_PRODUCT(gwave(2,:),ghc(1,:))+DOT_PRODUCT(gwave(1,:),ghc(2,:))
 
-                       call cpg_dij_cpb(cgdijcb,cprj1_kb,cprj1_kg,dtset,iband,iband,my_nspinor,paw_ij,pawtab)
-
+                       !call cpg_dij_cpb(cgdijcb,cprj1_kb,cprj1_kg,dtset,iband,iband,my_nspinor,paw_ij,pawtab)
                        !out_h_term = cprefac*(cmplx(dotr,doti) + cgdijcb) 
+
+                       ! the following includes only the kinetic and local contributions from H_k, the
+                       ! onsite contributions, which are much more complex than paw_ij, have not been coded
                        out_h_term = cprefac*cmplx(dotr,doti)
 
                        out_h(1,iband,adir) = out_h(1,iband,adir) + real(out_h_term)

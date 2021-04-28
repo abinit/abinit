@@ -55,7 +55,8 @@ inp_files = [
 "t41.abi",
 "t42.abi",
 "t43.abi",
-"t44.abi", # test nuclear dipoles with DDK perturbation
+"t44.abi", # test orbital magnetism with DDK wavefunctions
+"t45.abi", # test orbital magnetism with finite difference wavefunctions
 # Electron-phonon
 "t50.abi",
 "t51.abi",
