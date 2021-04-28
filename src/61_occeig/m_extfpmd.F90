@@ -65,13 +65,13 @@ module m_extfpmd
   type,public :: extfpmd_type
     integer :: bcut,nbcut,nfftf,nspden,version
     real(dp) :: e_bcut,edc_kin,e_kin,entropy
-    real(dp) :: nelect,e_shiftfactor,ucvol
+    real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
   contains
     procedure :: compute_e_kin
     procedure :: compute_entropy
     procedure :: compute_nelect
-    procedure :: compute_e_shiftfactor
+    procedure :: compute_shiftfactor
     procedure :: init
     procedure :: destroy
   end type extfpmd_type
@@ -129,7 +129,7 @@ contains
     this%e_kin=zero
     this%entropy=zero
     this%nelect=zero
-    this%e_shiftfactor=zero
+    this%shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
   !!***
@@ -173,14 +173,14 @@ contains
     this%e_kin=zero
     this%entropy=zero
     this%nelect=zero
-    this%e_shiftfactor=zero
+    this%shiftfactor=zero
     this%ucvol=zero
   end subroutine destroy
   !!***
 
-  !!****f* ABINIT/m_extfpmd/compute_e_shiftfactor
+  !!****f* ABINIT/m_extfpmd/compute_shiftfactor
   !! NAME
-  !!  compute_e_shiftfactor
+  !!  compute_shiftfactor
   !!
   !! FUNCTION
   !!  Compute the energy shift factor $U_0$ corresponding to constant
@@ -205,7 +205,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
+  subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
@@ -228,7 +228,7 @@ contains
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1) then
-      this%e_shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
+      this%shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
 
       ! Compute the relative error of the model vs last eigenvalues
       if(me==0) then
@@ -239,10 +239,10 @@ contains
           do ikpt=1,nkpt
             nband_k=nband(ikpt+(isppol-1)*nkpt)
             rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k)-&
-            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%e_shiftfactor)/&
+            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)/&
             & eigen(band_index+nband_k))
             abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k)-&
-            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%e_shiftfactor)
+            & extfpmd_e_fg(dble(nband_k),this%ucvol)-this%shiftfactor)
             band_index=band_index+nband_k
           end do
         end do
@@ -262,42 +262,42 @@ contains
     ! eigenvalues and Fermi gas energies, averaged
     ! over lasts nbcut bands.
     if(this%version==2) then
-      this%e_shiftfactor=zero
+      this%shiftfactor=zero
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do ii=nband_k-this%nbcut+1,nband_k
-            this%e_shiftfactor=this%e_shiftfactor+&
+            this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-extfpmd_e_fg(dble(ii),this%ucvol))
           end do
           band_index=band_index+nband_k
         end do
       end do
-      this%e_shiftfactor=this%e_shiftfactor/this%nbcut
+      this%shiftfactor=this%shiftfactor/this%nbcut
     end if
 
     ! Compute U_0^K from the difference between
     ! eigenvalues and kinetic energies, averaged
     ! over lasts nbcut bands.
     if(this%version==3) then
-      this%e_shiftfactor=zero
+      this%shiftfactor=zero
       this%e_bcut=0
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do ii=nband_k-this%nbcut+1,nband_k
-            this%e_shiftfactor=this%e_shiftfactor+&
+            this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
           this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k)
           band_index=band_index+nband_k
         end do
       end do
-      this%e_shiftfactor=this%e_shiftfactor/this%nbcut
+      this%shiftfactor=this%shiftfactor/this%nbcut
     end if
-  end subroutine compute_e_shiftfactor
+  end subroutine compute_shiftfactor
   !!***
 
   !!****f* ABINIT/m_extfpmd/compute_nelect
@@ -344,7 +344,7 @@ contains
     ! over accessible states from bcut to infinity with
     ! order 1/2 incomplete Fermi-Dirac integral.
     if(this%version==1.or.this%version==2) then
-      gamma=(fermie-this%e_shiftfactor)/tsmear
+      gamma=(fermie-this%shiftfactor)/tsmear
       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
@@ -353,8 +353,8 @@ contains
     ! over energy from e_bcut to infinity with order 1/2
     ! incomplete Fermi-Dirac integral.
     if(this%version==3) then
-      gamma=(fermie-this%e_shiftfactor)/tsmear
-      xcut=(this%e_bcut-this%e_shiftfactor)/tsmear
+      gamma=(fermie-this%shiftfactor)/tsmear
+      xcut=(this%e_bcut-this%shiftfactor)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
 
@@ -422,7 +422,7 @@ contains
     ! over accessible states from bcut to infinity with
     ! order 3/2 incomplete Fermi-Dirac integral.
     if(this%version==1.or.this%version==2) then
-      gamma=(fermie-this%e_shiftfactor)/tsmear
+      gamma=(fermie-this%shiftfactor)/tsmear
       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
       this%e_kin=this%e_kin+factor*djp32(xcut,gamma)
     end if
@@ -431,8 +431,8 @@ contains
     ! over energy from e_bcut to infinity with order 3/2
     ! incomplete Fermi-Dirac integral.
     if(this%version==3) then
-      gamma=(fermie-this%e_shiftfactor)/tsmear
-      xcut=(this%e_bcut-this%e_shiftfactor)/tsmear
+      gamma=(fermie-this%shiftfactor)/tsmear
+      xcut=(this%e_bcut-this%shiftfactor)/tsmear
       this%e_kin=this%e_kin+factor*djp32(xcut,gamma)
     end if
 
@@ -507,13 +507,13 @@ contains
     ! substracting 0 to bcut contribution with numeric integration.
     if(this%version==1.or.this%version==2) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-      gamma=(fermie-this%e_shiftfactor)/tsmear
+      gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
 
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
         ix=dble(ii)-one
-        fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%shiftfactor,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
@@ -536,17 +536,17 @@ contains
     ! substracting 0 to bcut contribution with numeric integration.
     if(this%version==3) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-      gamma=(fermie-this%e_shiftfactor)/tsmear
+      gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
 
-      step=(this%e_bcut-this%e_shiftfactor)/(this%bcut)
+      step=(this%e_bcut-this%shiftfactor)/(this%bcut)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
-        ix=this%e_shiftfactor+(dble(ii)-one)*step
+        ix=this%shiftfactor+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
-          & extfpmd_dos(ix,this%e_shiftfactor,this%ucvol)
+          & extfpmd_dos(ix,this%shiftfactor,this%ucvol)
         else
           valuesent(ii)=zero
         end if
@@ -1037,7 +1037,7 @@ contains
   !!
   !! INPUTS
   !!  energy=get the value of the free particle density of states at this energy
-  !!  e_shiftfactor=energy shift factor
+  !!  shiftfactor=energy shift factor
   !!  ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
@@ -1048,15 +1048,15 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  function extfpmd_dos(energy,e_shiftfactor,ucvol)
+  function extfpmd_dos(energy,shiftfactor,ucvol)
     ! Arguments -------------------------------
     ! Scalars
-    real(dp),intent(in) :: energy,e_shiftfactor,ucvol
+    real(dp),intent(in) :: energy,shiftfactor,ucvol
     real(dp) :: extfpmd_dos
 
     ! *********************************************************************
 
-    extfpmd_dos=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
+    extfpmd_dos=sqrt(2.)*ucvol*sqrt(energy-shiftfactor)/(PI*PI)
   end function extfpmd_dos
   !!***
 
@@ -1104,7 +1104,7 @@ contains
   !!
   !! INPUTS
   !!  extfpmd_e_kin=kinetic energy contribution of free electrons after band cut
-  !!  e_shiftfactor=energy shift factor
+  !!  shiftfactor=energy shift factor
   !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
   !!  etotal=total energy
   !!  energies=object containing all energies
@@ -1132,13 +1132,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine extfpmd_prt_eig(extfpmd_e_kin,e_shiftfactor,eigen,etotal,energies,fnameabo,&
+  subroutine extfpmd_prt_eig(extfpmd_e_kin,shiftfactor,eigen,etotal,energies,fnameabo,&
   & iout,iter,kptns,mband,nband,extfpmd_nelect,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
   & strten,istep) ! Optional arguments
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
-    real(dp),intent(in) :: extfpmd_e_kin,e_shiftfactor,etotal,extfpmd_nelect,tsmear
+    real(dp),intent(in) :: extfpmd_e_kin,shiftfactor,etotal,extfpmd_nelect,tsmear
     character(len=*),intent(in) :: fnameabo
     type(energies_type),intent(in) :: energies
     integer,intent(in),optional :: istep
@@ -1193,7 +1193,7 @@ contains
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
     & ' Hartree energy     = ',energies%e_hartree,' Ha         Ewald energy       = ',energies%e_ewald,&
-    & ' Ha         E. Shift factor U0 = ',e_shiftfactor, ' Ha'
+    & ' Ha         E. Shift factor U0 = ',shiftfactor, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
     if (usepaw==0) then
@@ -1256,9 +1256,9 @@ contains
   end subroutine extfpmd_prt_eig
   !!***
 
-  !!****f* ABINIT/m_extfpmd/extfpmd_prt_eig
+  !!****f* ABINIT/m_extfpmd/extfpmd_prt_cg
   !! NAME
-  !!  extfpmd_prt_eig
+  !!  extfpmd_prt_cg
   !!
   !! FUNCTION
   !!  Printing plane wave coefficients in PW files.

@@ -2191,7 +2191,7 @@ subroutine scfcv_core(itime, atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil
 !blanchet write eigocc output file
  if(dtset%extfpmd_prt_eig==1) then
    if(associated(extfpmd)) then
-     call extfpmd_prt_eig(extfpmd%e_kin,extfpmd%e_shiftfactor,eigen,&
+     call extfpmd_prt_eig(extfpmd%e_kin,extfpmd%shiftfactor,eigen,&
      & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
      & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
      & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&
@@ -2717,7 +2717,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if(associated(extfpmd)) then
      energies%entropy=energies%entropy+extfpmd%entropy
      energies%extfpmd_e_kin=extfpmd%e_kin
-     energies%extfpmd_e_shiftfactor=extfpmd%e_shiftfactor
+     energies%extfpmd_shiftfactor=extfpmd%shiftfactor
      energies%extfpmd_edc_kin=extfpmd%edc_kin
      if(optene==0) etotal=etotal+energies%extfpmd_e_kin
      if(optene==1) etotal=etotal+energies%extfpmd_e_kin+energies%extfpmd_edc_kin

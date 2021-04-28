@@ -837,7 +837,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if(associated(extfpmd)) then
    energies%entropy=energies%entropy+extfpmd%entropy
    energies%extfpmd_e_kin=extfpmd%e_kin
-   energies%extfpmd_e_shiftfactor=extfpmd%e_shiftfactor
+   energies%extfpmd_shiftfactor=extfpmd%shiftfactor
    energies%extfpmd_edc_kin=extfpmd%edc_kin
    if(optene==0.or.optene==2) etotal=etotal+energies%extfpmd_e_kin
    if(optene==1.or.optene==3) etotal=etotal+energies%extfpmd_e_kin+energies%extfpmd_edc_kin
