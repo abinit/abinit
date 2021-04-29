@@ -708,6 +708,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  character(len=fnlen) :: sigeph_filepath
 !arrays
  integer :: g0_k(3),g0_kq(3), unts(2), work_ngfft(18), gmax(3)
+ integer,allocatable :: bands_treated_now(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
@@ -1605,7 +1606,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              band_me = band_ks
              !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_kq,isppol,me)
              nband_me = nband_kq
-             call dfpt_cgwf(band_ks, band_me, band_procs, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
+
+!TODO: to distribute cgq and kets memory, use mband_mem per core in band comm, but coordinate everyone with
+! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls 
+             ABI_MALLOC(bands_treated_now, (nband_kq))
+             bands_treated_now = 0
+             bands_treated_now(band_ks) = 1
+             call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+
+             call dfpt_cgwf(band_ks, band_me, band_procs, bands_treated_now, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
                cwaveprj, cwaveprj0, rf2, dcwavef, &
                ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
                gs_hamkq, gvnlxc, gvnlx1, icgq0, idir, ipert, igscq0, &
@@ -1613,6 +1622,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
                opt_gvnlx1, dtset%prtvol, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, -one, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
+
+             ABI_FREE(bands_treated_now)
 
              call cwtime(cpu_stern, wall_stern, gflops_stern, "stop")
 
@@ -2403,6 +2414,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(osc_gbound_q)
  ABI_FREE(ibzspin_2ikcalc)
  ABI_SFREE(vcar_ibz)
+
 
  call gs_hamkq%free()
  call wfd%free()

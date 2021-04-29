@@ -2238,7 +2238,8 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
    nrank=0
 
-   if (nb_per_proc<mband) then ! .and. mkmem > 0) then
+! NB: do this for all procs even if mkmem == 0, otherwise the subcomm call below fails
+   if (nb_per_proc<mband) then
      do isppol=1,nsppol
        do ikpt=1,nkpt
          ii=ikpt+(isppol-1)*nkpt
@@ -2247,6 +2248,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            if ((me>=iproc_min).and.(me<=iproc_max)) then
+#ifdef DEV_MJV
+print *, 'initmpi_bands ikpt ', ikpt, ' mpi_enreg%proc_distrb  ', mpi_enreg%proc_distrb(ikpt,:,isppol)
+#endif
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
@@ -2265,6 +2269,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
        nrank = 0
        ABI_MALLOC(ranks,(0))
      end if
+#ifdef DEV_MJV
+print *, 'initmpi_bands ranks ', ranks
+#endif
 
 !     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
@@ -2464,6 +2471,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Local variables-------------------------------
  integer :: maxproc_bandpool
+ integer :: nproc_band
  integer :: inb1,ind,ind0,nband_k,proc_max,proc_min
  integer :: nband_k_sp2,minb_per_proc
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nb_per_proc,nproc_spkpt,temp_unit
@@ -2632,10 +2640,12 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
          do nb_per_proc = minb_per_proc, nband_k
            if (mod(nband_k,nb_per_proc)==0) exit
          end do
+         nproc_band = nband_k / nb_per_proc
 
          mband_mem_out = max(mband_mem_out,nb_per_proc)
          do iiband=1,nband_k
            ind=mod((iiband-1)/nb_per_proc+ind0, nproc)
+           !ind = mod( mod((iiband-1),nproc_band) + ind0, nproc )
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
 !TODO : could end up with 0 bands on certain procs with this configuration and nband(k) /= constant
            if (nsppol==2 .and. iiband <= nband_k_sp2) then
@@ -2643,7 +2653,8 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
            end if
            !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
-         ind0=ind+1
+         ind0=ind+1 ! take last proc associated to the bands at iikpt, and increment
+         !ind0 = ind0 + nproc_band
        end do
 
 !      MT130831 : OLD CODING
