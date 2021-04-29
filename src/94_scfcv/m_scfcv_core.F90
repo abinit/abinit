@@ -2189,7 +2189,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !blanchet write eigocc output file
  if(dtset%extfpmd_prt_eig==1) then
    if(associated(extfpmd)) then
-     call extfpmd_prt_eig(extfpmd%e_kin,extfpmd%shiftfactor,eigen,&
+     call extfpmd_prt_eig(extfpmd%e_kinetic,extfpmd%shiftfactor,eigen,&
      & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
      & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
      & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&
@@ -2714,10 +2714,10 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !  Blanchet Add the energy contribution to the internal energy
    if(associated(extfpmd)) then
      energies%entropy=energies%entropy+extfpmd%entropy
-     energies%e_kin_extfpmd=extfpmd%e_kin
-     energies%edc_kin_extfpmd=extfpmd%edc_kin
-     if(optene==0) etotal=etotal+energies%e_kin_extfpmd
-     if(optene==1) etotal=etotal+energies%e_kin_extfpmd+energies%edc_kin_extfpmd
+     energies%e_extfpmd=extfpmd%e_kinetic
+     energies%edc_extfpmd=extfpmd%edc_kinetic
+     if(optene==0) etotal=etotal+energies%e_extfpmd
+     if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
      etotal=etotal-dtset%tsmear*extfpmd%entropy
    end if
 

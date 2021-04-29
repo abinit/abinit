@@ -108,6 +108,12 @@ module m_energies
   real(dp) :: e_ewald=zero
    ! Ewald energy (hartree), store also the ion/ion energy for free boundary conditions.
 
+  real(dp) :: e_extfpmd=zero
+   ! Kinetic energy contribution of the Extended FPMD model for high temperature simulations
+
+  real(dp) :: edc_extfpmd=zero
+   ! Double counting term of kinetic energy of the Extended FPMD model
+
   real(dp) :: e_fermie=zero
    ! Fermie energy
 
@@ -138,12 +144,6 @@ module m_energies
   real(dp) :: e_hybcomp_v=zero
    ! Third compensation energy in the case of hybrid functionals, due to the use of two different XC potentials
    ! Term related to potential, at optimized density
-
-  real(dp) :: e_kin_extfpmd=zero
-   ! Kinetic energy contribution of extended FPMD model for high temperature simulations
-
-  real(dp) :: edc_kin_extfpmd=zero
-   ! Double counting term of kinetic energy of free electrons gas
 
   real(dp) :: e_kinetic=zero
    ! Kinetic energy part of total energy.
@@ -250,6 +250,8 @@ subroutine energies_init(energies)
  energies%e_exactX      = zero
  energies%entropy       = zero
  energies%e_ewald       = zero
+ energies%e_extfpmd     = zero
+ energies%edc_extfpmd   = zero
  energies%e_fermie      = zero
  energies%e_fermih      = zero ! CP added (useful when occopt = 9)
  energies%e_fock        = zero
@@ -259,8 +261,6 @@ subroutine energies_init(energies)
  energies%e_hybcomp_E0  = zero
  energies%e_hybcomp_v0  = zero
  energies%e_hybcomp_v   = zero
- energies%e_kin_extfpmd = zero
- energies%edc_kin_extfpmd = zero
  energies%e_kinetic     = zero
  energies%e_localpsp    = zero
  energies%e_magfield    = zero
@@ -327,6 +327,8 @@ end subroutine energies_init
  energies_out%e_entropy            = energies_in%e_entropy
  energies_out%e_ewald              = energies_in%e_ewald
  energies_out%e_exactX             = energies_in%e_exactX
+ energies_out%e_extfpmd            = energies_in%e_extfpmd
+ energies_out%edc_extfpmd          = energies_in%edc_extfpmd
  energies_out%e_fermie             = energies_in%e_fermie
  energies_out%e_fermih             = energies_in%e_fermih ! CP added
  energies_out%e_fock               = energies_in%e_fock
@@ -336,8 +338,6 @@ end subroutine energies_init
  energies_out%e_hybcomp_E0         = energies_in%e_hybcomp_E0
  energies_out%e_hybcomp_v0         = energies_in%e_hybcomp_v0
  energies_out%e_hybcomp_v          = energies_in%e_hybcomp_v
- energies_out%e_kin_extfpmd        = energies_in%e_kin_extfpmd
- energies_out%edc_kin_extfpmd      = energies_in%edc_kin_extfpmd
  energies_out%e_kinetic            = energies_in%e_kinetic
  energies_out%e_localpsp           = energies_in%e_localpsp
  energies_out%e_magfield           = energies_in%e_magfield
@@ -412,16 +412,16 @@ end subroutine energies_copy
    energies_array(11)=energies%e_entropy
    energies_array(12)=energies%e_ewald
    energies_array(13)=energies%e_exactX
-   energies_array(14)=energies%e_fermie
-   energies_array(15)=energies%e_fock
-   energies_array(16)=energies%e_fockdc
-   energies_array(17)=energies%e_fock0
-   energies_array(18)=energies%e_hartree
-   energies_array(19)=energies%e_hybcomp_E0
-   energies_array(20)=energies%e_hybcomp_v0
-   energies_array(21)=energies%e_hybcomp_v
-   energies_array(22)=energies%e_kin_extfpmd
-   energies_array(23)=energies%edc_kin_extfpmd
+   energies_array(14)=energies%e_extfpmd
+   energies_array(15)=energies%edc_extfpmd
+   energies_array(16)=energies%e_fermie
+   energies_array(17)=energies%e_fock
+   energies_array(18)=energies%e_fockdc
+   energies_array(19)=energies%e_fock0
+   energies_array(20)=energies%e_hartree
+   energies_array(21)=energies%e_hybcomp_E0
+   energies_array(22)=energies%e_hybcomp_v0
+   energies_array(23)=energies%e_hybcomp_v
    energies_array(24)=energies%e_kinetic
    energies_array(25)=energies%e_localpsp
    energies_array(26)=energies%e_magfield
@@ -453,16 +453,16 @@ end subroutine energies_copy
    energies%e_entropy            = energies_array(11)
    energies%e_ewald              = energies_array(12)
    energies%e_exactX             = energies_array(13)
-   energies%e_fermie             = energies_array(14)
-   energies%e_fock               = energies_array(15)
-   energies%e_fockdc             = energies_array(16)
-   energies%e_fock0              = energies_array(17)
-   energies%e_hartree            = energies_array(18)
-   energies%e_hybcomp_E0         = energies_array(19)
-   energies%e_hybcomp_v0         = energies_array(20)
-   energies%e_hybcomp_v          = energies_array(21)
-   energies%e_kin_extfpmd        = energies_array(22)
-   energies%edc_kin_extfpmd      = energies_array(23)
+   energies%e_extfpmd            = energies_array(14)
+   energies%edc_extfpmd          = energies_array(15)
+   energies%e_fermie             = energies_array(16)
+   energies%e_fock               = energies_array(17)
+   energies%e_fockdc             = energies_array(18)
+   energies%e_fock0              = energies_array(19)
+   energies%e_hartree            = energies_array(20)
+   energies%e_hybcomp_E0         = energies_array(21)
+   energies%e_hybcomp_v0         = energies_array(22)
+   energies%e_hybcomp_v          = energies_array(23)
    energies%e_kinetic            = energies_array(24)
    energies%e_localpsp           = energies_array(25)
    energies%e_magfield           = energies_array(26)
@@ -577,7 +577,7 @@ end subroutine energies_to_array
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) eint=eint+energies%e_elecfield    !!HONG
    eint = eint + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
    if (positron) eint=eint+energies%e0_electronpositron+energies%e_electronpositron
-   if(abs(energies%e_kin_extfpmd)>tiny(0.0_dp)) eint=eint+energies%e_kin_extfpmd
+   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eint=eint+energies%e_extfpmd
  end if
  if (optdc>=1) then
    eintdc = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
@@ -589,7 +589,7 @@ end subroutine energies_to_array
    eintdc = eintdc + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd + energies%e_constrained_dft
    if (positron) eintdc=eintdc-energies%edc_electronpositron &
 &   +energies%e0_electronpositron+energies%e_electronpositron
-   if(abs(energies%e_kin_extfpmd)>tiny(0.0_dp)) eintdc=eintdc+energies%e_kin_extfpmd+energies%edc_kin_extfpmd
+   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eintdc=eintdc+energies%e_extfpmd+energies%edc_extfpmd
  end if
 
 end subroutine energies_eval_eint
@@ -657,24 +657,24 @@ subroutine energies_ncwrite(enes, ncid)
   "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
   "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
   "e_entropy", "entropy", "e_ewald", &
-  "e_exactX","e_fermie", &
-  "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", &
-  "e_hybcomp_v", "e_kin_extfpmd", "edc_kin_extfpmd", "e_kinetic", &
+  "e_exactX", "e_extfpmd", "edc_extfpmd", "e_fermie", &
+  "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
-  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd",&
-  "e_xc", "e_xcdc", "e_xc_vdw",&
-  "h0", "e_zeeman", "e_fermih"],& ! CP added fermih
+  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
+  "e_xc", "e_xcdc", "e_xc_vdw", &
+  "h0", "e_zeeman", "e_fermih"], & ! CP added fermih
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
    enes%e_entropy, enes%entropy, enes%e_ewald, &
-   enes%e_exactX, enes%e_fermie, &
-   enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, enes%e_hybcomp_E0, enes%e_hybcomp_v0, &
-   enes%e_hybcomp_v, enes%e_kin_extfpmd, enes%edc_kin_extfpmd, enes%e_kinetic, &
+   enes%e_exactX, enes%e_extfpmd, enes%edc_extfpmd, enes%e_fermie, &
+   enes%e_fock, enes%e_fockdc, enes%e_fock0, enes%e_hartree, &
+   enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-   enes%h0,enes%e_zeeman,enes%e_fermih])
+   enes%h0,enes%e_zeeman,enes%e_fermih]) ! CP added fermih
  ! End CP modified
+
  NCF_CHECK(ncerr)
 
 #else

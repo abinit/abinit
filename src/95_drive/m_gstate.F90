@@ -847,8 +847,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Initialize (eventually) extfpmd object
- if(dtset%use_extfpmd>=1.and.dtset%occopt==3) then
-   if(dtset%use_extfpmd/=1.and.dtset%mband<dtset%extfpmd_nbcut) then
+ if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
+   if(dtset%useextfpmd/=1.and.dtset%mband<dtset%extfpmd_nbcut) then
      write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate extfpmd routines.",ch10,&
      & "nband=",dtset%mband," < extfpmd_nbcut=",dtset%extfpmd_nbcut,".",ch10,&
      & "Action: Increase nband or decrease extfpmd_nbcut."
@@ -856,7 +856,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,nfftf,&
-&     dtset%nspden,rprimd,dtset%use_extfpmd)
+&     dtset%nspden,rprimd,dtset%useextfpmd)
    end if
  end if
 

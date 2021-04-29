@@ -1217,7 +1217,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Blanchet write eigocc output file
      if(dtset%extfpmd_prt_eig==1) then
        if(associated(extfpmd)) then
-         call extfpmd_prt_eig(extfpmd%e_kin,extfpmd%shiftfactor,eigen,&
+         call extfpmd_prt_eig(extfpmd%e_kinetic,extfpmd%shiftfactor,eigen,&
          & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
          & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
          & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&

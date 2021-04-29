@@ -94,7 +94,7 @@ MODULE m_results_gs
    ! maximal absolute value of changes in the components of force
 
   real(dp) :: nelect_extfpmd
-   ! Contribution of extended FPMD model to the number of electrons for high temperature simulations
+   ! Contribution of the Extended FPMD model to the number of electrons for high temperature simulations
 
 ! All the energies are in Hartree, obtained "per unit cell".
   type(energies_type) :: energies
@@ -196,7 +196,7 @@ MODULE m_results_gs
    ! ucvol times the ionic polarization in reduced coordinates
 
   real(dp) :: shiftfactor_extfpmd
-   ! Energy shift factor of extended FPMD model for high temperature simulations
+   ! Energy shift factor of the Extended FPMD model for high temperature simulations
 
   real(dp) :: strten(6)
    ! Stress tensor in cartesian coordinates (Hartree/Bohr^3)
