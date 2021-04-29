@@ -977,12 +977,12 @@ end subroutine print_efmas
           do iband=1,deg_dim
             do jband=1,deg_dim
               eigen1_deg(iband,jband) = cmplx(eigen1(2*(jband+degl)-1+(iband+degl-1)*2*nband_k,adir,ipert),&
-&              eigen1(2*(jband+degl)+(iband+degl-1)*2*nband_k,adir,ipert),dpc)
+&                                             eigen1(2*(jband+degl)  +(iband+degl-1)*2*nband_k,adir,ipert),dpc)
             end do
           end do
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
             write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
-&            'but gradient of band(s) was found to be nonzero. Abinit will continue anyway.'
+&                              'but gradient of band(s) was found to be nonzero. Abinit will continue anyway.'
             ABI_WARNING(TRIM(msg))
           end if
         end do !adir=1,3
