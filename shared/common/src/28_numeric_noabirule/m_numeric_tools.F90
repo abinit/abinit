@@ -250,7 +250,7 @@ MODULE m_numeric_tools
    real(dp) :: max
  end type stats_t
 
- public :: stats_eval  ! Calculate the statistical parameters of a data distribution.
+ public :: stats_eval  ! Calculate statistical parameters of a data distribution.
 !!***
 
 !----------------------------------------------------------------------

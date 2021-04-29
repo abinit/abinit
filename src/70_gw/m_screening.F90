@@ -601,7 +601,7 @@ end subroutine Epsm1_symmetrizer
 !!  Epsm1_symmetrizer_inplace
 !!
 !! FUNCTION
-!!  Same function as Epsm1_symmetrizer, ecept now the array Ep%epsm1 is modified inplace
+!!  Same function as Epsm1_symmetrizer, ecxept now the array Ep%epsm1 is modified inplace
 !!  thorugh an auxiliary work array of dimension (npwc,npwc)
 !!
 !! INPUTS
