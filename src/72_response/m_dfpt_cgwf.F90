@@ -151,7 +151,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 & rf2,dcwavef,&
 & eig0_k,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
@@ -175,6 +175,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
 !arrays
  integer,intent(in) :: band_procs(nband)
+ integer,intent(in) :: bands_treated_now (nband)
  real(dp),intent(in) :: cgq(2,mcgq),eig0_kq(nband)
  real(dp),intent(in) :: eig0_k(nband)
  real(dp),intent(in) :: grad_berry(2,mpw1*nspinor,nband),gscq(2,mgscq)
@@ -203,7 +204,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  integer :: skipme, bands_skipped_now(nband)
  character(len=500) :: msg
 !arrays
- integer :: bands_treated_now (nband)
  real(dp) :: dummy(0,0),tsec(2)
  real(dp) :: eig1_k_loc(2,nband,nband)
  real(dp),allocatable :: conjgr(:,:),cwaveq(:,:),cwwork(:,:),direc(:,:)
@@ -255,12 +255,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  me_band = mpi_enreg%me_band
  !unit_me = 300+band
  unit_me = 6
- bands_skipped_now = 0
-
- bands_treated_now = 0
- bands_treated_now(band) = 1
- call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-
 
  skipme = 0
 
@@ -312,7 +306,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
 !  Could be grouped outside the jband loop into 1 big one, but if the wf are big this is a waste. Tradeoffs...
    jband_me = 0
    do jband=1,nband
-     if (bands_treated_now(jband)-bands_skipped_now(jband) == 0) cycle
+     if (bands_treated_now(jband) == 0) cycle
      if (band_procs(jband) == me_band) then
        jband_me = jband_me + 1
        work(:,:)=cgq(:,1+npw1*nspinor*(jband_me-1)+icgq:npw1*nspinor*jband_me+icgq)
@@ -339,7 +333,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    ! NB - this does not depend on the "band" input
    jband_me = 0
    do jband=1,nband
-     if (bands_treated_now(jband)-bands_skipped_now(jband) == 0) cycle
+     if (bands_treated_now(jband) == 0) cycle
      if (band_procs(jband) == me_band) then
        jband_me = jband_me + 1
        work(:,:)=cgq(:,1+npw1*nspinor*(jband_me-1)+icgq:npw1*nspinor*jband_me+icgq)
@@ -372,7 +366,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    ! ===== Check Pc.Psi_k^(0)=0
    ! NB: this _does_ depend on the input band "band" stored in cwave0
    do iband = 1, nband
-     if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+     if (bands_treated_now(iband) == 0) cycle
      !if (band_procs(iband) == me_band) then ! these 2 conditions should be the same
      if (iband == band) then
        work(:,:)=cwave0(:,:)
@@ -400,7 +394,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    ! ===== Check Pc.dcwavef=0 (for 2nd order only)
    if(ipert==natom+10.or.ipert==natom+11) then
      do iband = 1, nband
-       if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+       if (bands_treated_now(iband) == 0) cycle
        !if (band_procs(iband) == me_band) then ! these 2 conditions should be the same
        if (iband == band) then
          work(:,:)=rf2%dcwavef(:,1+dc_shift_band:npw1*nspinor+dc_shift_band)
@@ -430,7 +424,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    if (gen_eigenpb) then
      jband_me = 0
      do jband=1,nband
-       if (bands_treated_now(jband)-bands_skipped_now(jband) == 0) cycle
+       if (bands_treated_now(jband) == 0) cycle
        if (band_procs(jband) == me_band) then
          jband_me = jband_me + 1
          work(:,:)=gscq(:,1+npw1*nspinor*(jband_me-1)+igscq:npw1*nspinor*jband_me+igscq)
@@ -522,7 +516,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    !Check that Pc^*.(H^(0)-E.S^(0)).delta_Psi^(1) is zero ! This is a consequence of P_c delta_Psi^(1) = 0
    ABI_MALLOC(cwwork,(2,npw1*nspinor))
    do iband = 1, nband
-     if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+     if (bands_treated_now(iband) == 0) cycle
      if (iband == band) then
        cwwork=dcwavef
        !  - Apply H^(0)-E.S^(0) to delta_Psi^(1)
@@ -568,7 +562,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
  eig1_k_loc = zero
  do iband = 1, nband
-   if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+   if (bands_treated_now(iband) == 0) cycle
    work = zero
    if (iband == band) then
      work = gh1c
@@ -614,7 +608,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    ! NB: 2019 11 15: MJV: I swapped the names of jband and iband to be more consistent with other loops above
    if (gen_eigenpb) then
      do iband=1,nband
-       if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+       if (bands_treated_now(iband) == 0) cycle
        work = zero
        if (iband==band) then
          work = gs1c
@@ -646,7 +640,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
    
 ! TODO: I think this is just a reshape
    do iband=1,nband
-     if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+     if (bands_treated_now(iband) == 0) cycle
      band_off=(iband-1)*2*nband
      do jband=1,nband
        eig1_k(2*jband-1+band_off)=eig1_k_loc(1,jband,iband)
@@ -671,7 +665,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  ! Project out all bands from cwavef, i.e. apply P_c projector on cwavef
  ! (this is needed when there are some partially or unoccupied states)
  do iband = 1, nband
-   if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+   if (bands_treated_now(iband) == 0) cycle
    if (iband == band) then
      work = cwavef
    end if
@@ -760,14 +754,20 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  ! Initialize resid, in case of nline==0
  resid=zero
 
-
+ bands_skipped_now = 0
+ bands_skipped_now(band) = skipme
+ call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
  ! ======================================================================
  ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
  ! ======================================================================
  do iline=1,nline
 
-   bands_skipped_now = 0
+
+! if all bands are skippable, we can exit the iline loop for good.
+!   otherwise, all procs are needed for the projbd and other operations,
+!   even if the present band will not be updated
+   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) exit
 
    ! ======================================================================
    ! ================= COMPUTE THE RESIDUAL ===============================
@@ -1164,13 +1164,11 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
      end if
    end if
 
-! if all bands are skippable, we can exit the iline loop for good.
-!   otherwise, all procs are needed for the projbd and other operations,
-!   even if the present band will not be updated
    bands_skipped_now(band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
-   bands_skipped_now = bands_skipped_now - bands_treated_now
-   if (sum(abs(bands_skipped_now)) == 0) exit
+
+!   bands_skipped_now = bands_skipped_now - bands_treated_now
+
 
    ! ======================================================================
    ! ================== END LOOP FOR GIVEN BAND ===========================
