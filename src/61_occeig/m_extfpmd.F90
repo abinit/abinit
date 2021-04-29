@@ -64,7 +64,7 @@ module m_extfpmd
   !! SOURCE
   type,public :: extfpmd_type
     integer :: bcut,nbcut,nfftf,nspden,version
-    real(dp) :: e_bcut,edc_kin,e_kin,entropy
+    real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
   contains
@@ -125,8 +125,8 @@ contains
     this%nfftf=nfftf
     this%nspden=nspden
     this%e_bcut=zero
-    this%edc_kin=zero
-    this%e_kin=zero
+    this%edc_kinetic=zero
+    this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
     this%shiftfactor=zero
@@ -169,8 +169,8 @@ contains
     this%nbcut=0
     this%version=1
     this%e_bcut=zero
-    this%edc_kin=zero
-    this%e_kin=zero
+    this%edc_kinetic=zero
+    this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
     this%shiftfactor=zero
@@ -415,7 +415,7 @@ contains
 
     ! *********************************************************************
 
-    this%e_kin=zero
+    this%e_kinetic=zero
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
 
     ! Compute extfpmd contribution to kinetic energy integrating
@@ -424,7 +424,7 @@ contains
     if(this%version==1.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
-      this%e_kin=this%e_kin+factor*djp32(xcut,gamma)
+      this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
 
     ! Compute extfpmd contribution to kinetic energy integrating
@@ -433,7 +433,7 @@ contains
     if(this%version==3) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
-      this%e_kin=this%e_kin+factor*djp32(xcut,gamma)
+      this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
 
     ! Compute extfpmd contribution to kinetic energy using a sum
@@ -444,7 +444,7 @@ contains
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
           xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
-          this%e_kin=this%e_kin+factor*djp32(xcut,gamma)/&
+          this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
           & (this%nfftf*this%nspden)
         end do
       end do
@@ -452,13 +452,13 @@ contains
 
     ! Compute the double counting term of the contribution to
     ! kinetic energy from the vtrial potential.
-    this%edc_kin=zero
+    this%edc_kinetic=zero
     do ispden=1,nspden
       do ifftf=1,nfftf
-        this%edc_kin=this%edc_kin+vtrial(ifftf,ispden)
+        this%edc_kinetic=this%edc_kinetic+vtrial(ifftf,ispden)
       end do
     end do
-    this%edc_kin=this%edc_kin*this%nelect/nspden/nfftf/nspden
+    this%edc_kinetic=this%edc_kinetic*this%nelect/nspden/nfftf/nspden
   end subroutine compute_e_kin
   !!***
 
@@ -1103,7 +1103,7 @@ contains
   !!  This file is intended to be used for custom DOS computation with external tools for example.
   !!
   !! INPUTS
-  !!  e_kin_extfpmd=kinetic energy contribution of free electrons after band cut
+  !!  e_extfpmd=kinetic energy contribution of free electrons after band cut
   !!  shiftfactor=energy shift factor
   !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
   !!  etotal=total energy
@@ -1132,13 +1132,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine extfpmd_prt_eig(e_kin_extfpmd,shiftfactor,eigen,etotal,energies,fnameabo,&
+  subroutine extfpmd_prt_eig(e_extfpmd,shiftfactor,eigen,etotal,energies,fnameabo,&
   & iout,iter,kptns,mband,nband,nelect_extfpmd,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
   & strten,istep) ! Optional arguments
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
-    real(dp),intent(in) :: e_kin_extfpmd,shiftfactor,etotal,nelect_extfpmd,tsmear
+    real(dp),intent(in) :: e_extfpmd,shiftfactor,etotal,nelect_extfpmd,tsmear
     character(len=*),intent(in) :: fnameabo
     type(energies_type),intent(in) :: energies
     integer,intent(in),optional :: istep
@@ -1187,8 +1187,8 @@ contains
     call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',e_kin_extfpmd,&
-    & ' Ha         Total kin. energy  = ',energies%e_kinetic+e_kin_extfpmd, ' Ha'
+    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',e_extfpmd,&
+    & ' Ha         Total kin. energy  = ',energies%e_kinetic+e_extfpmd, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &

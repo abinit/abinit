@@ -22298,16 +22298,49 @@ In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-
 ),
 
 Variable(
-    abivarname="use_extfpmd",
+    abivarname="useextfpmd",
     varset="gstate",
     vartype="integer",
-    topics=[''],
+    topics=['ExtFPMD_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Activate the Extended FPMD model",
-    added_in_version="9.?.?",
+    mnemonics="USE EXTended FPMD model",
+    added_in_version="9.5.1",
     text=r"""
+Enables the calculation of contributions to the energy, entropy, stresses and
+number of electrons using the extended first principle molecular dynamics model
+for high temperature simulations.
 
+  * **useextfpmd** = 1 *(Recommanded)*, the energy shift factor will be evaluated
+by making an integration of the trial potential over the real space and the
+contributions will be computed with integrals over the band number.
+
+  * **useextfpmd** = 2, the energy shift factor will be evaluated by making
+the average between the eigenvalues and the Fermi gas energy over the last
+[[extfpmd_nbcut]] bands, and the contributions will be computed with integrals
+over the band number.
+
+  * **useextfpmd** = 3, the energy shift factor will be evaluated by making the
+average between the eigenvalues and the kinetic energies over the last
+[[extfpmd_nbcut]] bands, and the contributions will be computed using the
+density of states of the Fermi gas.
+""",
+),
+
+Variable(
+    abivarname="extfpmd_nbcut",
+    varset="gstate",
+    vartype="integer",
+    topics=['ExtFPMD_basic'],
+    dimensions="scalar",
+    defaultval=25,
+    mnemonics="EXTended FPMD: Number of Bands at CUT",
+    added_in_version="9.5.1",
+    text=r"""
+Specify the number of bands to use when averaging over last bands to get the
+energy shift factor when [[useextfpmd]] = 2 or 3.
+
+**extfpmd_nbcut** must be less than [[nband]].
 """,
 ),
 

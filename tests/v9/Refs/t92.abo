@@ -168,9 +168,9 @@ P           mkmem           2
            tolsym      1.00000000E-08
            tsmear      1.00000000E+01 Hartree
             typat      1
-      use_extfpmd1          1
-      use_extfpmd2          2
-      use_extfpmd3          3
+      useextfpmd1          1
+      useextfpmd2          2
+      useextfpmd3          3
            useylm           1
               wtk        0.25000    0.75000
             znucl       13.00000
@@ -1012,9 +1012,9 @@ P           mkmem           2
            tolsym      1.00000000E-08
            tsmear      1.00000000E+01 Hartree
             typat      1
-      use_extfpmd1          1
-      use_extfpmd2          2
-      use_extfpmd3          3
+      useextfpmd1          1
+      useextfpmd2          2
+      useextfpmd3          3
            useylm           1
               wtk        0.25000    0.75000
             znucl       13.00000

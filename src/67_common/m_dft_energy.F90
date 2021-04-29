@@ -836,10 +836,10 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !Blanchet Add the energy contribution to extfpmd free electron model
  if(associated(extfpmd)) then
    energies%entropy=energies%entropy+extfpmd%entropy
-   energies%e_kin_extfpmd=extfpmd%e_kin
-   energies%edc_kin_extfpmd=extfpmd%edc_kin
-   if(optene==0.or.optene==2) etotal=etotal+energies%e_kin_extfpmd
-   if(optene==1.or.optene==3) etotal=etotal+energies%e_kin_extfpmd+energies%edc_kin_extfpmd
+   energies%e_extfpmd=extfpmd%e_kinetic
+   energies%edc_extfpmd=extfpmd%edc_kinetic
+   if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
+   if(optene==1.or.optene==3) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
    etotal=etotal-dtset%tsmear*extfpmd%entropy
  end if
 
