@@ -1876,21 +1876,23 @@ subroutine orbmag_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_trace)
  character(len=500) :: message
 
  !arrays
- real(dp) :: berrycurve_total(3),orbmag_total(3)
+ real(dp) :: orbmag_bb(3,2,nband_k),orbmag_total(3)
 
  ! ***********************************************************************
 
- orbmag_total=zero;berrycurve_total=zero
+ orbmag_bb=zero;orbmag_total=zero
  do iterms = 1, nterms-1
    orbmag_total(1:3)=orbmag_total(1:3) + orbmag_trace(1:3,iterms)
+   do iband=1, nband_k
+     orbmag_bb(1:3,1,iband) = orbmag_bb(1:3,1,iband) + orbmag_terms(1:3,iterms,iband)
+   end do
  end do
- berrycurve_total(1:3)=orbmag_trace(1:3,berrycurve)
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
 
  if(dtset%orbmag .GT. 0) then
-   write(message,'(a,a)')' Orbital magnetic moment computed with DFTP derivative wavefunctions ',ch10
+   write(message,'(a,a)')' Orbital magnetic moment computed with DFPT derivative wavefunctions ',ch10
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -1907,7 +1909,7 @@ subroutine orbmag_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_trace)
  call wrtout(ab_out,message,'COLL')
  write(message,'(a)')' Integral of Berry curvature, Cartesian directions : '
  call wrtout(ab_out,message,'COLL')
- write(message,'(3es16.8)') (berrycurve_total(adir),adir=1,3)
+ write(message,'(3es16.8)') (orbmag_trace(adir,berrycurve),adir=1,3)
  call wrtout(ab_out,message,'COLL')
  write(message,'(a,es16.8)')' Fermie energy : ',fermie
  call wrtout(ab_out,message,'COLL')
@@ -1946,6 +1948,8 @@ subroutine orbmag_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_trace)
      write(message,'(a)')ch10
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,i2,a,i2)') ' band ',iband,' of ',nband_k
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '        Total orbital moment : ',(orbmag_bb(adir,1,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '            Conduction space : ',(orbmag_terms(adir,cci,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
