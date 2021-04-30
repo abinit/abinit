@@ -55,7 +55,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- use m_rta,             only : rta_driver, rta_estimate_sigma_erange
+ use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -69,7 +69,7 @@ module m_eph_driver
  use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph, test_phrotation
+ use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
 
@@ -244,14 +244,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
- use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
+ use_wfq = ((dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .or. dtset%getwfq_filepath /= ABI_NOFILE) .and. dtset%eph_frohlichm /= 1)
 
  ! If eph_task is needed and ird/get variables are not provided, assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
    wfq_path = wfk0_path
    use_wfq = .True.
    write(msg, "(4a)")&
-     "eph_task requires WFQ but neither irdwfq nor getwfq are specified in the input.", ch10, &
+     "eph_task requires WFQ but none among (irdwfq, getwfq, getwfk_filepath) is specified in input.", ch10, &
      "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
    ABI_COMMENT(msg)
  end if
@@ -621,9 +621,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   ! Compute transport properties only if sigma_erange has been used
+   ! Compute transport properties in the RTA/IBTE only if sigma_erange has been used
    if (dtset%eph_task == -4 .and. any(abs(dtset%sigma_erange) > zero)) then
-     call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+     if (dtset%ibte_prep > 0) then
+       call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm) ! Solve IBTE
+     else
+       call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)  ! Compute RTA
+     end if
    end if
 
  case (5, -5)
@@ -638,9 +642,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Compute phonon-limited RTA from SIGEPH file.
    call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
- case (-7)
-   ! Estimate sigma_erange
-   call rta_estimate_sigma_erange(dtset, ebands, comm)
+ case (8)
+   ! Solve IBTE from SIGEPH file.
+   call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.

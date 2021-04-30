@@ -4104,6 +4104,8 @@ The choice is among:
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the generalized Frohlich model. Requires EFMAS.nc file. See [[cite:Miglio2020]].
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
+* 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
+        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task == -4.
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
@@ -12714,7 +12716,7 @@ or half-occupied band, or other choices in special circumstances.
 
 If [[occopt]] is not 2, then the occupancies must be the same for each k point.
 If [[nsppol]]=1, the total number of arrays which must be provided is [[nband]], in order of increasing energy.
-If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]], 
+If [[nsppol]]=2, the total number of arrays which must be provided is [[nband]]*[[nsppol]],
 first spin up, in order of increasing electronic eigenenergy, then spin down, in order of increasing electronic eigenenergy.
 
 If [[occopt]] = 2, then the band occupancies must be provided explicitly for
@@ -13038,13 +13040,13 @@ Compute quantities related to orbital magnetic moment. The
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
-    both the ground state and DDK wavefunctions, and is triggered at the end of a 
+    both the ground state and DDK wavefunctions, and is triggered at the end of a
     DDK calculation.
 
-* [[orbmag]] = 1: Compute orbital magnetization and integral of the 
+* [[orbmag]] = 1: Compute orbital magnetization and integral of the
 Berry curvature (Chern number) over the Brillouin zone.
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment. 
+orbital magnetic moment.
 * [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
 """,
 ),
@@ -21296,6 +21298,73 @@ obtained with a 50x50x50 without having to perform a full lifetime calculation o
 ),
 
 Variable(
+    abivarname="ibte_abs_tol",
+    varset="eph",
+    topics=['ElPhonInt_expert'],
+    vartype="real",
+    defaultval="1e-4",
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation: ALPHA TOLerance for convergence",
+    added_in_version="9.3.0",
+    text=r"""
+This variable is still under development.
+""",
+),
+
+Variable(
+    abivarname="ibte_alpha_mix",
+    varset="eph",
+    topics=['ElPhonInt_expert'],
+    vartype="real",
+    defaultval=0.7,
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation: ALPHA Mixing factor",
+    added_in_version="9.3.0",
+    text=r"""
+This variable defines the coefficient for the linear mixing used in the IBTE solver.
+If the algorithm has problems to converge try to decrease [[ibte_alpha_mix]] and increase [[ibte_niter]].
+""",
+),
+
+Variable(
+    abivarname="ibte_niter",
+    varset="eph",
+    topics=['ElPhonInt_useful'],
+    vartype="integer",
+    defaultval=100,
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation: max Number of ITERations",
+    added_in_version="9.3.0",
+    text=r"""
+This variable defines the maximum number of iterations of the IBTE solver.
+""",
+),
+
+Variable(
+    abivarname="ibte_prep",
+    varset="eph",
+    topics=['ElPhonInt_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    mnemonics="Iterative Boltzmann Equation PREPare",
+    added_in_version="9.3.0",
+    text=r"""
+This variable is used when computing the imaginary part of the e-ph self-energy ([[eph_task]] = - 4)
+to save the collision term to the SIGEPH file.
+This step is required for solving the iterative BTE.
+
+Note that, once you have a SIGEPH file with the collision terms, it is possible to run the IBTE solver in standalone
+mode by using [[eph_task]] = 8 with [[getsigeph_filepath]].
+
+!!! important
+
+    IBTE calculations cannot use [[sigma_ngkpt]] to donwsample the k-mesh.
+    The k-mesh ([[ngkpt]] and the q-mesh [[eph_ngqpt_fine]] must be equal.
+""",
+),
+
+Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],
@@ -22231,8 +22300,8 @@ When performing structural relaxations, RMM-DIIS is activated after [[rmm_diis]]
 once the first GS calculation is completed.
 This means that using [[rmm_diis]] = 1 for a structural relaxation leads to:
 
-    - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
-    - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
+        - 4 SCF iterations with the CG/LOBPCG eigensolver followed by RMM-DIIS when are performing the **first GS calculation**.
+        - 1 SCF iterations with CG/LOBPCG followed by RMM-DIIS for all the subsequent relaxation steps.
 
 A negative value [[rmm_diis]] (e.g. -3) can be used to bypass the initial CG/LOBPCG iterations
 but this option should be used with extreme care and it is not recommended in general.
@@ -22246,7 +22315,7 @@ However, the additional steps of the algorithm (subspace rotation and Cholesky o
 present poor MPI-scalability hence this part will start to dominate the wall-time in systems with large [[nband]].
 
 The algorithm can also be used for NSCF band structure calculations although one should not expect RMM-DIIS
-to provide **high-energy** states of the same quality as the one obtain with other eigenvalue solvers.
+to provide **high-energy** states of the same quality as the one obtained with other eigenvalue solvers.
 Although RMM-DIIS can be used for computing band structures and electron DOS with [[iscf]] = -2, we do not recommend
 using this solver to produce WFK files with many empty states as required by many-body calculations.
 
@@ -22269,8 +22338,8 @@ for the Rayleigh-Ritz subspace rotation and this step is crucial for finding the
 to the eigenvectors before starting the DIIS optimization.
 
 For a given precision, RMM-DIIS usually requires more iterations than the other eigensolvers.
-For performance reasons, one should avoid using tight tolerances, .
-Something of the order of [[tolvrs] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
+For performance reasons, one should avoid using tight tolerances.
+Something of the order of [[tolvrs]] = 1e-8 or [[toldfe]] = 1e-10 to stop the SCF cycle should be fine.
 Avoid using ([[tolwfr]]) (criterion on the residuals) as converge criterion for SCF cycles
 Use [[tolwfr]] only if you are using RMM-DIIS for NSCF band structure calculations (as this is the only converge criterion
 available for NSCF calculations).
