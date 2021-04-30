@@ -42,6 +42,7 @@ module m_dfpt_mkvxc
 
  public :: dfpt_mkvxc
  public :: dfpt_mkvxc_noncoll
+ public :: dfpt_mkvxcggadq
 !!***
 
 contains
@@ -927,6 +928,92 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
  DBG_EXIT("COLL")
 
 end subroutine dfpt_mkvxc_noncoll
+!!***
+
+!!****f* ABINIT/dfpt_mkvxcggadq
+!! NAME
+!! dfpt_mkvxcggadq
+!!
+!! FUNCTION
+!! Compute the first-order change of exchange-correlation potential
+!! in case of GGA functionals
+!! Use the q-gradient of the exchange-correlation kernel.
+!!
+!! INPUTS
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!    if 2, COMPLEX
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the kxc array
+!!  nspden=number of spin-density components
+!!  qdir= indicates the direction of the q-gradient (1,2 or 3)
+!!  rhor1tmp(cplex*nfft,2)=array for first-order electron spin-density
+!!   in electrons/bohr**3 (second index corresponds to spin-up and spin-down)
+!!
+!! OUTPUT
+!!  vxc1(cplex*nfft,nspden)=change in exchange-correlation potential
+!!
+!! NOTES
+!!  For the time being, a rather crude coding, to be optimized ...
+!!  Content of Kxc array:
+!!  Only works with nspden=1
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!
+!! PARENTS
+!!      m_dfpt_lw
+!!
+!! CHILDREN
+!!      dfpt_mkvxc,timab
+!!
+!! SOURCE
+
+subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
+&                    nkxc,nspden,qdir,rhor1,vxc1)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nfft,nkxc,nspden,qdir
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in),target :: rhor1(cplex*nfft,nspden)
+ real(dp),intent(out) :: vxc1(cplex*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,ir,ishift,ngrad,nspgrad,use_laplacian
+ logical :: test_nhat
+ real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
+ real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
+ real(dp) :: gradrho_gradrho1,gradrho_gradrho1_dn,gradrho_gradrho1_up
+ real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ character(len=500) :: msg
+!arrays
+ real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
+ real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
+ real(dp),allocatable :: dnexcdn(:,:),rho1now(:,:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
+
+! *************************************************************************
+
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_mkvxcggadq
 !!***
 
 end module m_dfpt_mkvxc

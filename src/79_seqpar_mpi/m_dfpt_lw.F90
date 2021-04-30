@@ -54,6 +54,7 @@ module m_dfpt_lw
  use m_abicore,    only : appdig
  use m_fft,        only : fourdp
  use m_dfpt_rhotov, only : dfpt_rhotov
+ use m_dfpt_mkvxc, only : dfpt_mkvxcggadq
  use m_spacepar,   only : hartredq, setsym
  use m_cgtools,    only : dotprod_vn
  use m_symkpt,     only : symkpt
@@ -509,11 +510,13 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
      ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
 
-     !Calculate the gradient of the XC potential if GGA 
+     !Calculate the gradient of the XC potential if GGA and incorporate it to
+     !the Hartree.  
      if (nkxc == 7) then
        rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
-     !  call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rhor1_tmp,vxc1dq)
+       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qdir,rhor1_tmp,vxc1dq)
        rhor1_tmp=zero
+       vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
      end if
 
      do iq2grad=1,nq2grad
