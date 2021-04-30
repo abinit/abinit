@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 19 Apr 2021.
-- ( at 09h50 )
+.Starting date : Fri 30 Apr 2021.
+- ( at 15h22 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -505,7 +505,6 @@ meta: {optdriver: 1, rfddk: 1, }
  
 --------------------------------------------------------------------------------
  
--inwffil : will read wavefunctions from disk file t44o_DS1_WFK.nc
  
  ==>  initialize data related to q vector <== 
  
@@ -524,7 +523,6 @@ meta: {optdriver: 1, rfddk: 1, }
  
 --------------------------------------------------------------------------------
  
--inwffil : will read wavefunctions from disk file t44o_DS1_WFK.nc
 --------------------------------------------------------------------------------
  
  Initialisation of the first-order wave-functions :
@@ -585,7 +583,6 @@ tolerances: {tolwfr: 1.00E-20, }
  
 --------------------------------------------------------------------------------
  
--inwffil : will read wavefunctions from disk file t44o_DS1_WFK.nc
 --------------------------------------------------------------------------------
  
  Initialisation of the first-order wave-functions :
@@ -646,7 +643,6 @@ tolerances: {tolwfr: 1.00E-20, }
  
 --------------------------------------------------------------------------------
  
--inwffil : will read wavefunctions from disk file t44o_DS1_WFK.nc
 --------------------------------------------------------------------------------
  
  Initialisation of the first-order wave-functions :
@@ -701,7 +697,7 @@ tolerances: {tolwfr: 1.00E-20, }
  
 ====================================================
  
- Orbital magnetic moment computed with DFTP derivative wavefunctions 
+ Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
  -8.50279572E-04  2.06901579E-13  8.72982578E-15
@@ -728,6 +724,7 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  1 of  4
+        Total orbital moment :   3.31654819E-05 -2.83984125E-14 -5.75215575E-16
             Conduction space :  -9.69745508E-06 -3.40097510E-14  9.14946224E-16
            Valence space IIb :  -9.50582000E-07  1.53573971E-14 -7.62662247E-16
   Valence space Ia+IIa+IIIa  :   1.80288090E-08  1.35488731E-17 -3.75840661E-18
@@ -740,6 +737,7 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  2 of  4
+        Total orbital moment :   1.29715190E-04  5.58778309E-14 -3.04468063E-14
             Conduction space :  -5.12506749E-05  4.38163146E-14 -2.71001637E-14
            Valence space IIb :   1.07526063E-05  1.75014294E-14 -3.22479309E-15
   Valence space Ia+IIa+IIIa  :   1.17156529E-08  7.54380919E-18  5.36147106E-19
@@ -752,6 +750,7 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  3 of  4
+        Total orbital moment :   4.74676301E-01  4.36968118E-11  1.01814490E-10
             Conduction space :   2.89488933E-01  2.43464661E-11  6.08040409E-11
            Valence space IIb :   2.14460872E-01  2.82717689E-11  4.66877219E-11
   Valence space Ia+IIa+IIIa  :  -3.21527582E-05 -9.41753476E-15 -4.76102259E-15
@@ -764,6 +763,7 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  4 of  4
+        Total orbital moment :  -4.75689461E-01 -4.35173896E-11 -1.01774738E-10
             Conduction space :  -2.90165912E-01 -2.41739251E-11 -6.07690524E-11
            Valence space IIb :  -2.14725089E-01 -2.82520293E-11 -4.66867854E-11
   Valence space Ia+IIa+IIIa  :   3.21255008E-05  9.41841418E-15  4.76370189E-15
@@ -996,10 +996,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.8
  
 ================================================================================
  
  Calculation completed.
-.Delivered   9 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.4  wall=          6.6
+.Delivered   5 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.6  wall=          6.8
