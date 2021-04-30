@@ -1733,7 +1733,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
          msg='nonlop_ylm'
        case(81)
-         list(:4)=(/1290,1293,1294,1295,1299/)
+         list(:5)=(/1290,1293,1294,1295,1299/)
          msg='getcprj'
        case(82)
          list(:4)=(/1360,1363,1364,1362/)
