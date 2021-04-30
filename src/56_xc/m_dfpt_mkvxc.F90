@@ -956,7 +956,7 @@ end subroutine dfpt_mkvxc_noncoll
 !!   in electrons/bohr**3 (second index corresponds to spin-up and spin-down)
 !!
 !! OUTPUT
-!!  vxc1(cplex*nfft,nspden)=change in exchange-correlation potential
+!!  vxc1(2*nfft,nspden)=change in exchange-correlation potential
 !!
 !! NOTES
 !!  For the time being, a rather crude coding, to be optimized ...
@@ -992,26 +992,65 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in),target :: rhor1(cplex*nfft,nspden)
- real(dp),intent(out) :: vxc1(cplex*nfft,nspden)
+ real(dp),intent(out) :: vxc1(2*nfft,nspden)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ishift,ngrad,nspgrad,use_laplacian
- logical :: test_nhat
+ integer :: id1,id2,id3,ii,ir,ishift,n1,n2,n3,ngrad,nspgrad
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: gradrho_gradrho1,gradrho_gradrho1_dn,gradrho_gradrho1_up
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ real(dp) :: r0,r1
  character(len=500) :: msg
 !arrays
- real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
+ real(dp) :: qphon(3)
+ real(dp) :: r0_dn(3),r0_up(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
- real(dp),allocatable :: dnexcdn(:,:),rho1now(:,:,:)
+ real(dp),allocatable :: dnexcdndq(:,:),rho1now(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
 
 ! *************************************************************************
 
  DBG_EXIT("COLL")
+
+ if (nkxc/=7) then
+   msg='Wrong nkxc value for GGA in the longwave driver (optdriver=10)!'
+   ABI_BUG(msg)
+ end if
+
+!Keep local copy of fft dimensions
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+
+!Initialize computation of G in cartesian coordinates
+ id1=n1/2+2  ; id2=n2/2+2  ; id3=n3/2+2
+
+
+!MR: this needs to be solved
+ !Get the distrib associated with this fft_grid
+ !call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!Compute the gradients of the first-order density
+!rho1now(:,:,1) contains the first-order density, and
+!rho1now(:,:,2:4) contains the gradients of the first-order density
+ ishift=0 ; ngrad=2
+ qphon(:)=zero 
+ rhor1_ptr => rhor1
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+
+!Apply the XC kernel
+!first the term with the real-space gradient of rho1
+ nspgrad=1
+ ABI_MALLOC(dnexcdndq,(2*nfft,nspgrad))
+ dnexcdndq=zero
+ do ir=1,nfft
+   r0=kxc(ir,4+qdir); r1=rho1now(ir,1,1+qdir)
+   dnexcdndq(2*ir,1)=r0*r1*kxc(ir,3)
+ end do
+ vxc1(:,:)=dnexcdndq(:,:)
+
+!Now the term whose real-space gradient has to be computed
 
 end subroutine dfpt_mkvxcggadq
 !!***

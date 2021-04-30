@@ -493,7 +493,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !Calculate the electrostatic contribution from the q-gradient of the Hxc kernel
  ABI_MALLOC(vqgradhart,(2*nfft))
  ABI_MALLOC(vxc1dq,(2*nfft,nspden))
- ABI_MALLOC(rhor1_tmp,(2*nfft,nspden))
+ ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
  ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_MALLOC(qdrflg,(matom,3,3,3))
  qdrflg=0
@@ -522,12 +522,12 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      do iq2grad=1,nq2grad
 
        !Calculate the electrostatic energy term with the first order electric field density
-       if (timrev==1) then
+       if (timrev==0) then
          do ii=1,nfft
            jj=ii*2
            rhor1_tmp(jj-1,:)=rhor1_efield(iq2grad,ii,:)
          end do
-       else if (timrev==0) then
+       else if (timrev==1) then
          rhor1_tmp(:,:)=rhor1_efield(iq2grad,:,:)
        end if
 
