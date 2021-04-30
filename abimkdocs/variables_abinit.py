@@ -428,32 +428,32 @@ Control the size of the block in the LOBPCG algorithm.
 !!! important
 
     This keyword works only with [[paral_kgb]] = 1 and has to be either 1 or a multiple of 2.
-    Moreover [[nband]] / ([[npband]]  $\times$ n) has to be integer.
+    Moreover [[nband]] / ([[npband]]  $\times$ [[bandpp]]) has to be integer.
 
 With [[npband]] = 1:
 
-* 1 --> band-per-band algorithm
-* n --> The minimization is performed using [[nband]] blocks of n bands.
+* [[bandpp]]=1 --> band-per-band algorithm
+* [[bandpp]]/=1 --> The minimization is performed using [[nband]]/[[bandpp]] blocks of [[bandpp]] bands.
 
 With [[npband]] > 1:
 
-* 1 --> The minimization is performed using [[nband]] / [[npband]] blocks of [[npband]] bands.
-* n --> The minimization is performed using [[nband]] / ([[npband]] $\times$ n) blocks of [[npband]]  $\times$ n bands.
+* [[bandpp]]=1 --> The minimization is performed using [[nband]] / [[npband]] blocks of [[npband]] bands.
+* [[bandpp]]/=1 --> The minimization is performed using [[nband]] / ([[npband]] $\times$ [[bandpp]]) blocks of [[npband]]  $\times$ [[bandpp]]  bands.
 
 By minimizing a larger number of bands together in LOBPCG, we increase the
 convergence of the residuals. The better minimization procedure (as concerns
 the convergence, but not as concerns the speed) is generally performed by
-using *bandpp*  $\times$ [[npband]] = [[nband]].
+using [[bandpp]] $\times$ [[npband]] = [[nband]].
 
-When performing Gamma-only calculations ([[istwfk]] = 2), it is recommended to set *bandpp* = 2
+When performing Gamma-only calculations ([[istwfk]] = 2), it is recommended to set [[bandpp]] = 2
 (or a multiple of 2) as the time spent in FFTs is divided by two.
 Also, the time required to apply the non-local part of the KS Hamiltonian can be significantly
 reduced if [[bandpp]] > 1 is used in conjunction with [[use_gemm_nonlop]] = 1.
 
-Note that increasing the value of [[bandpp] can have a significant impact on the computing time
+Note that increasing the value of [[bandpp]] can have a significant impact (reduction) on the computing time
 (especially if [[use_gemm_nonlop]] is used)
 but keep in mind that the size of the workspace arrays will also increase so the calculation may go out-of-memory
-if a too large [[bandpp] is used in systems if many atoms.
+if a too large [[bandpp]] is used in systems if many atoms.
 """,
 ),
 
@@ -3500,7 +3500,7 @@ Variable(
     abivarname="ecutsigx",
     varset="gw",
     vartype="real",
-    topics=['SelfEnergy_compulsory'],
+    topics=['SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Energy CUT-off for SIGma eXchange",
@@ -3514,6 +3514,8 @@ calculations, it is pointless to have [[ecutsigx]] bigger than 4*[[ecut]],
 while for PAW calculations, the maximal useful value is [[pawecutdg]]. Thus,
 if you do not care about CPU time, please use these values. If you want to
 spare some CPU time, you might try to use a value between [[ecut]] and these upper limits.
+
+[[ecutsigx]] is actually used to initialize the internal variable [[npwsigx]].
 """,
 ),
 
@@ -3560,7 +3562,7 @@ Variable(
     abivarname="ecutwfn",
     varset="gw",
     vartype="real",
-    topics=['Susceptibility_compulsory', 'SelfEnergy_compulsory'],
+    topics=['Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[optdriver]] in [3, 4]': '[[ecut]]', 'defaultval': 0.0}),
     mnemonics="Energy CUT-off for WaveFunctioNs",
@@ -4423,7 +4425,7 @@ In reciprocal space, this expression is evaluated by a convolution in which
 the number of reciprocal lattice vectors employed to describe the
 wavefunctions is given by [[ecutwfn]]. In the case of screening calculations,
 the number of **G** vectors in the above expression is defined by [[ecuteps]],
-while [[ecutsigx]] defined the number of **G** used in sigma calculations. To
+while [[ecutsigx]] defines the number of **G** used in sigma calculations. To
 improve the efficiency of the code, the oscillator matrix elements are
 evaluated in real space through FFT techniques, and the [[fftgw]] input
 variable is used to select the FFT mesh to be used.
@@ -6215,7 +6217,7 @@ Variable(
     abivarname="gwaclowrank",
     varset="gw",
     vartype="integer",
-    topics=['GW_basic', 'SelfEnergy_basic'],
+    topics=['GW_useful', 'SelfEnergy_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="GW Analytic Continuation LOW RANK approximation",
@@ -8714,7 +8716,7 @@ See [[cite:Sun2011]] for the formulas.
   * 207 -->  XC_MGGA_X_BJ06  Becke & Johnson correction to Becke-Roussel 89 [[cite:Becke2006]]
 
 !!! warning
-    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]].
+    This Vxc-only mGGA can only be used with a LDA correlation, typically Perdew-Wang 92 [[cite:Perdew1992a]], hence [[ixc]]=-12208 ..
 
   * 208 -->  XC_MGGA_X_TB09  Tran-blaha - correction to Becke & Johnson correction to Becke-Roussel 89 [[cite:Tran2009]]
 
@@ -11905,7 +11907,7 @@ Variable(
     text=r"""
 [[npwsigx]] determines the cut-off energy of the planewave set used to
 generate the exchange part of the self-energy operator.
-It is an internal variable, determined from [[ecutsigx]].
+It is an internal variable, determined from the largest of [[ecutsigx]] or [[ecutwfn]].
 """,
 ),
 
@@ -20794,7 +20796,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 The modified Becke-Johnson exchange-correlation functional by
-[[cite:Tran2009 | Tran and Blaha]] reads:
+[[cite:Tran2009 | Tran and Blaha]] (acronym TB09, used when [[ixc]]=-12208, which needs [[usekden]]=1) reads:
 
 $$ V_x(r) =
 c V_x^{BR}(r) +
@@ -20803,7 +20805,7 @@ c V_x^{BR}(r) +
 
 where $\rho(r)$ is the electron density,
 $t(r)$ is the kinetic-energy density, and
-$ V_x^{BR}(r)$ is the Becke-Roussel potential.
+$V_x^{BR}(r)$ is the Becke-Roussel potential.
 
 In this equation the parameter $c$ can be evaluated at each SCF step according
 to the following equation:
