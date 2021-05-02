@@ -192,7 +192,7 @@ if(icutcoul.eq.1) then
 
                summr = 0.0_dp
                summi = 0.0_dp
- 
+
 
 !              XG 20180531  : the two do-loops on ia should be merged, in order to spare
 !              the waste of computing twice the sin and cos.
@@ -344,7 +344,7 @@ if(icutcoul.eq.1) then
 !
  sumr=0.5_dp*sumr
  fac=pi*ch**2.0_dp/(2.0_dp*eta*ucvol)
- 
+
 !Finally assemble Ewald energy, eew
  if(icutcoul.ne.3) then
    eew=sumg+sumr-chsq*reta/sqrt(pi)
@@ -352,7 +352,7 @@ if(icutcoul.eq.1) then
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
 
- ABI_FREE(gcutoff) 
+ ABI_FREE(gcutoff)
 
 !DEBUG
 write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
@@ -772,7 +772,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
 
  ! Compute a material-dependent width for the Gaussians that hopefully
- ! will make the Ewald real-space summation innecessary.
+ ! will make the Ewald real-space summation unnecessary.
  if (ewald_option == 1) then
 
    wdielt(:,:)=dielt(:,:)

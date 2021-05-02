@@ -75,14 +75,13 @@ module m_gstate
  use m_paw_occupancies,  only : initrhoij
  use m_paw_init,         only : pawinit,paw_gencond
  use m_paw_correlations, only : pawpuxinit
- use m_orbmag,           only : initorbmag,destroy_orbmag,orbmag_type
  use m_paw_uj,           only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
  use m_jellium,          only : jellium
- use m_iowf,             only : outwf
+ use m_iowf,             only : outwf, outresid
  use m_outqmc,           only : outqmc
  use m_ioarr,            only : ioarr,read_rhor
  use m_inwffil,          only : inwffil
@@ -290,7 +289,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(macro_uj_type) :: dtpawuj(0)
- type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(recursion_type) ::rec_set
@@ -321,8 +319,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  DBG_ENTER("COLL")
 
- call timab(1222,1,tsec)
- call timab(1213,3,tsec)
+ call timab(1232,1,tsec)
+ call timab(1211,3,tsec)
 
 !###########################################################
 !### 01. Initializations XML, MPI, WVL, etc
@@ -445,7 +443,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
      if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
-     if ((dtset%orbmag.NE.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
+!     if ((dtset%orbmag.NE.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
@@ -464,8 +462,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
  has_to_init=(initialized==0.or.scf_history%history_size<0)
 
- call timab(1213,2,tsec)
- call timab(1211,3,tsec)
+ call timab(1211,2,tsec)
+ call timab(1212,3,tsec)
 
 !###########################################################
 !### 03. Calls pspini
@@ -474,8 +472,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
- call timab(1211,2,tsec)
- call timab(1213,3,tsec)
+ call timab(1212,2,tsec)
+ call timab(1211,3,tsec)
 
 !In case of isolated computations, ecore must set to zero
 !because its contribution is counted in the ewald energy as the ion-ion interaction.
@@ -847,8 +845,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Timing for initialisation period
- call timab(1213,2,tsec)
- call timab(1214,3,tsec)
+ call timab(1211,2,tsec)
+ call timab(1213,3,tsec)
 
 !###########################################################
 !### 08. Compute new occupation numbers
@@ -1044,6 +1042,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
  end if
 
+!Timing for initialisation period
+ call timab(1213,2,tsec)
+ call timab(1214,3,tsec)
 
 !###########################################################
 !### 12. Operations dependent of iscf value
@@ -1209,6 +1210,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if ! has_to_init
 
+!Timing for initialisation period
+ call timab(1214,2,tsec)
+ call timab(1215,3,tsec)
+
 !###########################################################
 !### 13. If needed, initialize SCF history variables
 
@@ -1244,15 +1249,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
 & pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
- !! orbital magnetization initialization
- dtorbmag%orbmag = dtset%orbmag
- if (dtorbmag%orbmag .NE. 0) then
-    call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
-&                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
-&                   rprimd,symrec,xred)
- end if
-
-
  fatvshift=one
 
 !Check whether exiting was required by the user. If found then do not start minimization steps
@@ -1273,7 +1269,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call timab(1214,2,tsec)
+ call timab(1215,2,tsec)
 
  conv_retcode = 0
 
@@ -1282,10 +1278,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  ###########################################################
 !  ### 14. Move atoms and acell according to ionmov value
 
-   call timab(1215,3,tsec)
+   call timab(1225,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1337,14 +1333,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call scfcv_destroy(scfcv_args)
 
-   call timab(1215,2,tsec)
+   call timab(1225,2,tsec)
 
 !  ###########################################################
 !  ### 15. Final operations and output for gstate
 
  end if !  End of the check of hasty exit
 
- call timab(1216,3,tsec)
+ call timab(1226,3,tsec)
 
  write(msg, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
@@ -1375,8 +1371,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Compute and print the gaps.
  call ebands_report_gap(ebands,header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
 
- call timab(1216,2,tsec)
- call timab(1217,3,tsec)
+ call timab(1226,2,tsec)
+ call timab(1227,3,tsec)
 
  if(dtset%nqpt==0)filnam=dtfil%fnameabo_wfk
  if(dtset%nqpt==1)filnam=dtfil%fnameabo_wfq
@@ -1395,10 +1391,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  hdr%rprimd=rprimd_for_kg
 
  if (write_wfk) then
+   call outresid(dtset,dtset%kptns,dtset%mband,&
+&                dtset%nband,dtset%nkpt,&
+&                dtset%nsppol,resid)
+
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
     dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
-    occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+    occ,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
    if (dtset%getkerange_filepath /= ABI_NOFILE) then
@@ -1422,8 +1422,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call cryst%free()
  end if
 
- call timab(1217,2,tsec)
- call timab(1218,3,tsec)
+ call timab(1227,2,tsec)
+ call timab(1228,3,tsec)
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
 & dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%gred,&
@@ -1434,8 +1434,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
  end if
 
- call timab(1218,2,tsec)
- call timab(1219,3,tsec)
+ call timab(1228,2,tsec)
+ call timab(1229,3,tsec)
 
 !write final electric field components HONG
 
@@ -1474,8 +1474,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wrtout([std_out, ab_out], msg)
  end if
 
- call timab(1219,2,tsec)
- call timab(1220,3,tsec)
+ call timab(1229,2,tsec)
+ call timab(1230,3,tsec)
 
 !Open the formatted derivative database file, and write the preliminary information
 !In the // case, only one processor writes the energy and the gradients to the DDB
@@ -1557,8 +1557,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    close(dtfil%unddb)
  end if
 
- call timab(1220,2,tsec)
- call timab(1221,3,tsec)
+ call timab(1230,2,tsec)
+ call timab(1231,3,tsec)
 
 
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
@@ -1681,9 +1681,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! deallocate efield
  call destroy_efield(dtefield)
 
- ! deallocate orbmag
- call destroy_orbmag(dtorbmag)
-
 !deallocate Recursion
  if (dtset%userec == 1) then
    call CleanRec(rec_set)
@@ -1726,8 +1723,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call timab(1221,2,tsec)
- call timab(1222,2,tsec)
+ call timab(1231,2,tsec)
+ call timab(1232,2,tsec)
 
  DBG_EXIT("COLL")
 

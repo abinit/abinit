@@ -37,7 +37,7 @@ MODULE m_cut3d
 
  use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
- use m_numeric_tools,    only : interpol3d
+ use m_numeric_tools,    only : interpol3d_0d
  use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
@@ -367,15 +367,15 @@ end subroutine cut3d_hirsh
    rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
    rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
 
-   denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+   denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
    if(nspden==1)then
      write(unt, '(i13,es22.12)' ) k2,denvaltt
      write(std_out,'(i13,es22.12)' ) k2,denvaltt
 
    else if(nspden==2 .or. nspden==4)then
-     denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-     denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-     denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+     denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+     denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+     denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
      write(unt, '(i13,4(es22.12))' ) k2,denvaltt,denvalux,denvaldy,denvalmz
      write(std_out,'(i13,4es22.12)' ) k2,denvaltt,denvalux,denvaldy,denvalmz
    end if
@@ -787,11 +787,11 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      rr(1)=mod(mod(rr(1),1._dp)+1._dp,1._dp)
      rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
      rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
-     denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+     denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
      if(nspden==2 .or. nspden==4)then
-       denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-       denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-       denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+       denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+       denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+       denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
      end if
      if(nspden==1)then
        write(unt, '(3e16.8)' ) xcoord,ycoord,denvaltt
@@ -902,11 +902,11 @@ subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
 !devalu = spin-up density value
 !devald = spin-down density value
 !devalm = magnetization density value
- denvaltt = interpol3d(rr,nr1,nr2,nr3,gridt)
+ denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridt)
  if(nspden==2 .or. nspden==4)then
-   denvalux = interpol3d(rr,nr1,nr2,nr3,gridu)
-   denvaldy = interpol3d(rr,nr1,nr2,nr3,gridd)
-   denvalmz = interpol3d(rr,nr1,nr2,nr3,gridm)
+   denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridu)
+   denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,gridd)
+   denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridm)
  end if
  write(std_out,*)
  write(std_out,*)'---------------------------------------------'
@@ -1625,11 +1625,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
        rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
 
-       denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+       denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
        if(nspden==2 .or. nspden==4)then
-         denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-         denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-         denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+         denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+         denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+         denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
        end if
 
        if (fileformattype==1) then
