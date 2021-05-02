@@ -72,8 +72,8 @@ This step may be needed if the version of mkdocs and MkDocs are updated upstream
     Python >= 3.6 is required.
     The entire documentation supports Unicode so feel free to use unicode symbols in the docs.
 
-MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it.
-First issue ~abinit/config/scripts/makemake). Then start *our customized* server
+MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. 
+First issue \*/\*/makemake (actually config/scripts/makemake) in the top ABINIT directory. Then start *our customized* server 
 by running the `./mksite.py serve` command:
 
 ```sh
