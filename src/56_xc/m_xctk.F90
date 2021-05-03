@@ -707,7 +707,6 @@ end subroutine xcpot
 !!
 !! INPUTS
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
-!!  depsxc(2*nfft,nspgrad)=First term of vxc1dq, already precalculated
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  ishift : if ==0, do not shift the xc grid (usual case);
 !!           if ==1, shift the xc grid (not implemented) 
@@ -722,7 +721,8 @@ end subroutine xcpot
 !!      calculated
 !!
 !! OUTPUT
-!!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential 
+!!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
+!!      At input already incorporate the first term. 
 !!
 !! PARENTS
 !!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
@@ -732,7 +732,7 @@ end subroutine xcpot
 !!
 !! SOURCE
 
-subroutine xcpotdq (cplex,depsxc,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
 &                 nspgrad,qdir,&
 &                 sndtdq,vxc) ! optional argument
 
@@ -742,8 +742,8 @@ subroutine xcpotdq (cplex,depsxc,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: sndtdq(cplex*nfft,nspden,ngrad*ngrad)
- real(dp),intent(in) :: depsxc(2*nfft,nspgrad),gprimd(3,3)
+ real(dp),intent(in) :: sndtdq(cplex*nfft,nspgrad)
+ real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(inout) :: vxc(2*nfft,nspden)
 
 !Local variables-------------------------------
@@ -764,7 +764,98 @@ subroutine xcpotdq (cplex,depsxc,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden
 
 ! *************************************************************************
 
+ if (ishift/=0) then
+   write(message, '(a,i0)' )' ishift must be 0 ; input was',ishift
+   ABI_BUG(message)
+ end if
+
+ if (ngrad/=2) then
+   write(message, '(a,i0)' )' ngrad must be 2 ; input was',ngrad
+   ABI_BUG(message)
+ end if
+
+!Keep local copy of fft dimensions
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+
+!Initialize computation of G in cartesian coordinates
+ id1=n1/2+2  ; id2=n2/2+2  ; id3=n3/2+2
+
+ !Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ !Compute the real-space gradient of de second term
+ ABI_MALLOC(work,(cplex*nfft))
+ ABI_MALLOC(wkcmpx,(2,nfft))
+ ABI_MALLOC(workgr,(2,nfft))
+
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(nfft,wkcmpx)
+ do ifft=1,nfft
+   wkcmpx(:,ifft)=zero
+ end do
+
+! Obtain sndtdq(G)*phase in wkcmpx from input sndtdq(r)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,sndtdq,ispden,nfft,work)
+ ispden=1
+ do ifft=1,cplex*nfft
+   work(ifft)=sndtdq(ifft,ispden)
+ end do
+ call timab(82,1,tsec)
+ call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
+ call timab(82,2,tsec)
+
+ ABI_MALLOC(gcart1,(n1))
+ ABI_MALLOC(gcart2,(n2))
+ ABI_MALLOC(gcart3,(n3))
+ do i1=1,n1
+   ig1=i1-(i1/id1)*n1-1
+   gcart1(i1)=gprimd(qdir,1)*two_pi*dble(ig1)
+ end do
+!Note that the G <-> -G symmetry must be maintained
+ if(mod(n1,2)==0) gcart1(n1/2+1)=zero
+ do i2=1,n2
+   ig2=i2-(i2/id2)*n2-1
+   gcart2(i2)=gprimd(qdir,2)*two_pi*dble(ig2)
+ end do
+ if(mod(n2,2)==0) gcart2(n2/2+1)=zero
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+   gcart3(i3)=gprimd(qdir,3)*two_pi*dble(ig3)
+ end do
+ if(mod(n3,2)==0) gcart3(n3/2+1)=zero
+
+! !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gc23_idir,gcart_idir) &
+! !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
+ ifft = 0
+ do i3=1,n3
+   do i2=1,n2
+     gc23_idir=gcart2(i2)+gcart3(i3)
+     if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+       do i1=1,n1
+         ifft=ifft+1
+         gcart_idir=gc23_idir+gcart1(i1)
+!        Multiply by - i 2pi G(qdir) and accumulate in wkcmpx
+         wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
+         wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
+       end do
+     end if
+   end do
+ end do
+
+ ABI_FREE(workgr)
+
+ call timab(82,1,tsec)
+ call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
+ call timab(82,2,tsec)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
+ do ifft=1,nfft
+   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
+ end do
+ ABI_FREE(wkcmpx)
+ ABI_FREE(work)
+
+
 end subroutine xcpotdq
 !!***
+
 end module m_xctk
 !!***

@@ -1034,6 +1034,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  nspgrad=1
  ABI_MALLOC(dnexcdndq,(2*nfft,nspgrad))
  ABI_MALLOC(sndtdq,(cplex*nfft,nspgrad))
+ dnexcdndq=zero
  do ir=1,nfft
    r0=kxc(ir,4+qdir); r1=rho1now(ir,1,1+qdir)
    dnexcdndq(2*ir,1)=r0*r1*kxc(ir,3)
@@ -1042,11 +1043,11 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_FREE(rho1now)
 
 !Now the term whose real-space gradient has to be computed
- vxc1(:,:)=zero
- call xcpotdq(cplex,dnexcdndq,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+ vxc1(:,:)=dnexcdndq(:,:)
+ ABI_FREE(dnexcdndq)
+ call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
 & nspgrad,qdir,sndtdq,vxc1)
 
- ABI_FREE(dnexcdndq)
  ABI_FREE(sndtdq)
 end subroutine dfpt_mkvxcggadq
 !!***
