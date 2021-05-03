@@ -2185,24 +2185,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%cellcharge(1)*SUM(vpotzero(:)),conv_retcode)
 
-
-!blanchet write eigocc output file
- if(dtset%extfpmd_prt_eig==1) then
-   if(associated(extfpmd)) then
-     call extfpmd_prt_eig(extfpmd%e_kinetic,extfpmd%shiftfactor,eigen,&
-     & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
-     & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
-     & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-     & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
-   else
-     call extfpmd_prt_eig(zero,zero,eigen,&
-     & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
-     & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
-     & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-     & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
-   end if
- end if
-
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)
 

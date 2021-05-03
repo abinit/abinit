@@ -1209,26 +1209,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kin(energies%e_fermie,nfftf,dtset%nspden,&
+       call extfpmd%compute_e_kinetic(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
-     end if
-
-!    Blanchet write eigocc output file
-     if(dtset%extfpmd_prt_eig==1) then
-       if(associated(extfpmd)) then
-         call extfpmd_prt_eig(extfpmd%e_kinetic,extfpmd%shiftfactor,eigen,&
-         & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
-         & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
-         & extfpmd%nelect,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-         & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
-       else
-         call extfpmd_prt_eig(zero,zero,eigen,&
-         & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
-         & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
-         & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-         & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
-       end if
      end if
 
 !    !=========  DMFT call begin ============================================

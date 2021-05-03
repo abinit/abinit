@@ -180,7 +180,6 @@ type, public :: dataset_type
  integer :: eph_use_ftinterp = 0
  integer :: exchn2n3d
  integer :: extfpmd_nbcut = 25
- integer :: extfpmd_prt_eig = 0
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -1489,7 +1488,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%exchn2n3d          = dtin%exchn2n3d
  dtout%expert_user        = dtin%expert_user
  dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
- dtout%extfpmd_prt_eig    = dtin%extfpmd_prt_eig
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -3197,7 +3195,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta'
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
- list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_prt_eig extrapwf'
+ list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'

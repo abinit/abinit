@@ -3,9 +3,9 @@
 !! m_extfpmd
 !!
 !! FUNCTION
-!! This module provides routines to run computations at very high temperatures
-!! with limited number of bands. High energy orbitals are represented as
-!! pure planewaves.
+!! This module provides routines to run computations at very high temperature
+!! with reduced number of bands. High energy orbitals are represented as
+!! pure plane waves.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2021 ABINIT group (A. Blanchet)
@@ -46,10 +46,7 @@ module m_extfpmd
   use m_spacepar,       only : meanvalue_g
 
   implicit none
-  public :: dip12,djp12,dip32,djp32,extfpmd_e_fg
-  public :: extfpmd_dos
-  public :: extfpmd_prt_eig
-  public :: extfpmd_prt_cg
+  public :: dip12,djp12,dip32,djp32,extfpmd_dos,extfpmd_e_fg
   !!***
 
   !----------------------------------------------------------------------
@@ -68,7 +65,7 @@ module m_extfpmd
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
   contains
-    procedure :: compute_e_kin
+    procedure :: compute_e_kinetic
     procedure :: compute_entropy
     procedure :: compute_nelect
     procedure :: compute_shiftfactor
@@ -373,9 +370,9 @@ contains
   end subroutine compute_nelect
   !!***
 
-  !!****f* ABINIT/m_extfpmd/compute_e_kin
+  !!****f* ABINIT/m_extfpmd/compute_e_kinetic
   !! NAME
-  !!  compute_e_kin
+  !!  compute_e_kinetic
   !!
   !! FUNCTION
   !!  Compute the value of the integral corresponding to the missing
@@ -399,7 +396,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_kin(this,fermie,nfftf,nspden,tsmear,vtrial)
+  subroutine compute_e_kinetic(this,fermie,nfftf,nspden,tsmear,vtrial)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
@@ -459,7 +456,7 @@ contains
       end do
     end do
     this%edc_kinetic=this%edc_kinetic*this%nelect/nspden/nfftf/nspden
-  end subroutine compute_e_kin
+  end subroutine compute_e_kinetic
   !!***
 
   !!****f* ABINIT/m_extfpmd/compute_entropy
@@ -1092,293 +1089,5 @@ contains
   end function extfpmd_e_fg
   !!***
 
-  !!****f* ABINIT/m_extfpmd/extfpmd_prt_eig
-  !! NAME
-  !!  extfpmd_prt_eig
-  !!
-  !! FUNCTION
-  !!  Printing in a _EIGOCC file many informations like Fermi energy, Unit cell volume,
-  !!  electronic temperature (tsmear when occopt=3), eigenvalues and occupation for each k-point,
-  !!  weight of the k-point, number of bands, number of k-points and more...
-  !!  This file is intended to be used for custom DOS computation with external tools for example.
-  !!
-  !! INPUTS
-  !!  e_extfpmd=kinetic energy contribution of free electrons after band cut
-  !!  shiftfactor=energy shift factor
-  !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !!  etotal=total energy
-  !!  energies=object containing all energies
-  !!  fnameabo=filename for printing of the planewaves coefficients
-  !!  iout=out file number
-  !!  iter=MD iteration step
-  !!  kptns(3,nkpt),kptns0(3,nkpt0)=k point sets (reduced coordinates)
-  !!  mband=maximum number of bands
-  !!  nband(nkpt*nsppol)=desired number of bands at each k point
-  !!  nelect_extfpmd=number free electrons
-  !!  nkpt=number of k points
-  !!  nsppol=1 for unpolarized, 2 for spin-polarized
-  !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
-  !!  rprimd(3,3)=dimensional primitive translation vectors (bohr)
-  !!  tsmear=temperature (Hartree)
-  !!  usepaw=1 if PAW, 0 otherwise
-  !!  wtk(nkpt)=k point weights
-  !!  strten(6)=components of the stress tensor (hartree/bohr^3)
-  !!  istep=SCF electronic iteration number
-  !!
-  !! OUTPUT
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine extfpmd_prt_eig(e_extfpmd,shiftfactor,eigen,etotal,energies,fnameabo,&
-  & iout,iter,kptns,mband,nband,nelect_extfpmd,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
-  & strten,istep) ! Optional arguments
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
-    real(dp),intent(in) :: e_extfpmd,shiftfactor,etotal,nelect_extfpmd,tsmear
-    character(len=*),intent(in) :: fnameabo
-    type(energies_type),intent(in) :: energies
-    integer,intent(in),optional :: istep
-    ! Arrays
-    integer,intent(in) :: nband(nkpt*nsppol)
-    real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
-    real(dp),intent(in) :: rprimd(3,3)
-    real(dp),intent(in) :: occ(mband*nkpt*nsppol)
-    real(dp),intent(in) :: wtk(nkpt)
-    real(dp),intent(in),optional :: strten(6)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: band_index,iband,ii,ikpt,isppol,nband_k,temp_unit
-    real(dp) :: ucvol,pressure
-    character(len=200) :: fnameabo_eigocc
-    character(len=500) :: msg
-    ! Arrays
-    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
-
-    ! *********************************************************************
-
-    band_index=0
-    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-    fnameabo_eigocc=trim(fnameabo) // trim('_EIGOCC')
-    write(msg,'(a,a)') ' prt_eig : about to open file ',trim(fnameabo_eigocc)
-    call wrtout(iout,msg,'COLL')
-    if (open_file(fnameabo_eigocc,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
-      ABI_ERROR(msg)
-    end if
-    rewind(temp_unit)
-
-    ! write(msg, '(a,f12.6,a,f12.6,a,ES16.8,a)') &
-    !   & ' Fermi (or HOMO) energy (hartree)= ',fermie,'   Average Vxc (hartree)=',vxcavg,&
-    !   & ', Total energy= ',etotal, ' Ha'
-    ! call wrtout(temp_unit,msg,'COLL')
-    ! write(msg, '(a,e16.8,a,f16.8,a,a,ES12.4,a)') &
-    !   & ' Unit cell volume ucvol= ',ucvol,' bohr^3, Electronic temperature= ',tsmear,' Ha',&
-    !   & ', Pressure= ',-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa'
-    ! call wrtout(temp_unit,msg,'COLL')
-
-    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-      & ' Chemical potential = ',energies%e_fermie,' Ha         XC energy          = ',energies%e_xc,&
-      & ' Ha         Total free energy  = ',etotal, ' Ha'
-    call wrtout(temp_unit,msg,'COLL')
-
-    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',e_extfpmd,&
-    & ' Ha         Total kin. energy  = ',energies%e_kinetic+e_extfpmd, ' Ha'
-    call wrtout(temp_unit,msg,'COLL')
-
-    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-    & ' Hartree energy     = ',energies%e_hartree,' Ha         Ewald energy       = ',energies%e_ewald,&
-    & ' Ha         E. Shift factor U0 = ',shiftfactor, ' Ha'
-    call wrtout(temp_unit,msg,'COLL')
-
-    if (usepaw==0) then
-      write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-        & ' PsPCore energy     = ',energies%e_corepsp,' Ha         Loc. Psp. energy   = ',energies%e_localpsp,&
-        & ' Ha         NL PsP energy      = ',energies%e_nlpsp_vfock, ' Ha'
-    else if (usepaw==1) then
-      write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-        & ' PsPCore energy     = ',energies%e_corepsp,' Ha         Loc. Psp. energy   = ',energies%e_localpsp,&
-        & ' Ha         PAW PsP energy     = ',energies%e_paw, ' Ha'
-    end if
-    call wrtout(temp_unit,msg,'COLL')
-
-    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-      & ' Entropy energy     = ',energies%e_entropy,' Ha         Band energy        = ',energies%e_eigenvalues,&
-      & ' Ha         Internal energy    = ',etotal-energies%e_entropy, ' Ha'
-    call wrtout(temp_unit,msg,'COLL')
-    if(present(strten)) then
-      pressure=-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp
-    else
-      pressure=zero
-    end if
-    write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-    & ' Unit cell vol      = ',ucvol,' Bohr^3     Elec. temperature  = ',tsmear,&
-    & ' Ha         Pressure           = ',pressure,' GPa'
-    call wrtout(temp_unit,msg,'COLL')
-
-    write(msg, '(a,i12,a,i12,a,ES15.8)') &
-    & ' N. elec. iter      = ',istep,'            MD iteration       = ',iter,&
-    & '            N. free electrons  = ',nelect_extfpmd
-    call wrtout(temp_unit,msg,'COLL')
-
-    ! Loop over spins
-    do isppol=1,nsppol
-      ! write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
-      write(msg, '(a,i12,a,i12)') ' Number of kpts     = ',nkpt,'            Number of bands    = ',&
-      & mband
-      call wrtout(temp_unit,msg,'COLL')
-
-      ! Loop over k-points
-      do ikpt=1,nkpt
-        nband_k=nband(ikpt+(isppol-1)*nkpt)
-        write(msg, '(a,i6,a,i6,a,ES12.5,a,3f8.4,a)') &
-          & ' ------- ikpt = ',ikpt,'      nband = ',nband_k,'     ikpt weight = ',wtk(ikpt)+tol10,&
-          & '   Reduced coordinates : ',kptns(1:3,ikpt)+tol10,' -------'
-        call wrtout(temp_unit,msg,'COLL')
-
-        ! Loop over bands
-        do ii=0,(nband_k-1)/4
-          write(msg, '(4(i6,ES12.4,ES13.5,a,1x))') &
-            & (iband,eigen(iband+band_index),occ(iband+band_index),',',iband=1+ii*4,min(nband_k,4+ii*4))
-          call wrtout(temp_unit,msg,'COLL')
-        end do
-
-        band_index=band_index+nband_k
-      end do ! do ikpt=1,nkpt
-    end do ! do isppol=1,nsppol
-
-    close(temp_unit)
-  end subroutine extfpmd_prt_eig
-  !!***
-
-  !!****f* ABINIT/m_extfpmd/extfpmd_prt_cg
-  !! NAME
-  !!  extfpmd_prt_cg
-  !!
-  !! FUNCTION
-  !!  Printing plane wave coefficients in PW files.
-  !!
-  !! INPUTS
-  !!
-  !! OUTPUT
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine extfpmd_prt_cg(cg_k,ckpt,cspinor,ecut,exchn2n3d,gmet,gprimd,istwfk,kpt,&
-  & mcg,mpi_enreg,mpw,nband,nkpt,npwarr,nspinor,nsppol,wfk_fname)
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: ckpt,cspinor,exchn2n3d,mcg,mpw,nkpt,nspinor,nsppol
-    real(dp),intent(in) :: ecut
-    type(MPI_type),intent(inout) :: mpi_enreg
-    character(len=*),intent(in) :: wfk_fname
-    ! Arrays
-    integer,intent(in) :: istwfk(nkpt),nband(nkpt),npwarr(nkpt)
-    real(dp) :: cg_k(2,mcg),gmet(3,3),gprimd(3,3),kpt(3,nkpt)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: cgshift,iband,ikpt,index,ioffkg,ipw,mkmem,npw_k,unit
-    real(dp) :: ar,kpg1,kpg2,kpg3
-    character(len=4) :: mode_paral
-    character(len=50) :: filenameoutpw
-    character(len=50) :: fnameabo
-    ! Arrays
-    integer,allocatable :: kg(:,:),kg_k(:,:),npwarr1(:),npwtot1(:)
-    real(dp),allocatable :: ek_k(:),kpgnorm(:),cgnk(:,:),cgnk2(:),kinpw(:)
-
-    ! *********************************************************************
-
-    unit=96
-    mode_paral='PERS'
-    mkmem=nkpt
-    ABI_MALLOC(npwarr1,(nkpt))
-    ABI_MALLOC(kg,(3,mpw*mkmem))
-    ABI_MALLOC(npwtot1,(nkpt))
-    ABI_MALLOC(ek_k,(nband(ckpt)))
-
-    ! Create positions index for pw
-    call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
-    & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
-    ioffkg=0
-    do ikpt=1,ckpt-1
-      ioffkg=ioffkg+npwarr1(ikpt)
-    end do
-    npw_k=npwarr(ckpt)
-    ABI_MALLOC(kinpw,(npw_k))
-    ABI_MALLOC(kg_k,(3,npw_k))
-    kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
-
-    ! Compute the norms of the k+G vectors
-    ABI_MALLOC(kpgnorm,(npw_k))
-    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
-    kinpw(:)=half*(two_pi*kpgnorm(:))**2
-
-    ! Get fnameabo
-    index=SCAN(wfk_fname,'_',.true.)
-    fnameabo=wfk_fname(1:index-1)
-
-    ! Print MESH file
-    write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
-    open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-    do ipw=1,npw_k
-      kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
-      kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
-      kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
-      write(unit,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
-      & ipw,&
-      & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
-      & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
-      & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
-      & kinpw(ipw)
-    end do
-    close(unit)
-
-    ! Print planewave coefficients
-    ABI_MALLOC(cgnk,(2,npw_k*nspinor))
-    ABI_MALLOC(cgnk2,(npw_k*nspinor))
-    do iband=1,nband(ckpt)
-      cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
-      cgnk(:,:)=cg_k(:,cgshift+1:cgshift+npw_k)
-      cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
-
-      call meanvalue_g(ar,kinpw,0,istwfk(ckpt),mpi_enreg,npw_k,nspinor,&
-      & cgnk(:,:),cgnk(:,:),0)
-      ek_k(iband)=ar
-
-      write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',iband
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-      do ipw=1,npw_k
-        write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,&
-        & half*(two_pi*kpgnorm(ipw))**2,sqrt(cgnk2(ipw))
-      end do
-      close(unit)
-    end do
-
-    write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ckpt
-    open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-    write(unit,'(ES12.5)') ek_k
-    close(unit)
-
-    ! Free arrays
-    ABI_FREE(cgnk2)
-    ABI_FREE(cgnk)
-    ABI_FREE(kpgnorm)
-    ABI_FREE(kg_k)
-    ABI_FREE(kinpw)
-    ABI_FREE(ek_k)
-    ABI_FREE(npwtot1)
-    ABI_FREE(kg)
-    ABI_FREE(npwarr1)
-  end subroutine extfpmd_prt_cg
-  !!***
 end module m_extfpmd
 !!***
