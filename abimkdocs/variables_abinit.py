@@ -22305,7 +22305,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE EXTended FPMD model",
-    added_in_version="9.5.1",
+    added_in_version="9.5.2",
     text=r"""
 Enables the calculation of contributions to the energy, entropy, stresses and
 number of electrons using the extended first principle molecular dynamics model
@@ -22335,7 +22335,7 @@ Variable(
     dimensions="scalar",
     defaultval=25,
     mnemonics="EXTended FPMD: Number of Bands at CUT",
-    added_in_version="9.5.1",
+    added_in_version="9.5.2",
     text=r"""
 Specify the number of bands to use when averaging over last bands to get the
 energy shift factor when [[useextfpmd]] = 2 or 3.
