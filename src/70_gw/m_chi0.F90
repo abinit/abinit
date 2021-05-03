@@ -1484,7 +1484,7 @@ call timab(334,1,tsec) ! first loop
    ABI_MALLOC(usr1_kmq,(nfft*nspinor))
    ABI_MALLOC(ur2_k,   (nfft*nspinor))
    ABI_MALLOC(igfftepsG0,(Ep%npwepG0))
-
+call timab(336,1,tsec)!cchi0(ik_bz)
    ! Loop over k-points in the BZ.
    do ik_bz=1,Kmesh%nbz
 
@@ -1833,7 +1833,7 @@ call timab(334,1,tsec) ! first loop
        ABI_FREE(gboundf)
      end if
    end do !ik_bz
-
+call timab(336,2,tsec)!cchi0(ik_bz)
    ! Deallocation of arrays private to the spin loop.
    ABI_FREE(igfftepsG0)
    ABI_FREE(ur1_kmq_ibz)
@@ -1880,10 +1880,12 @@ call timab(335,2,tsec) ! second loop
    ! Adler-Wiser
    ! Collective sum of the contributions of each node.
    ! Looping on frequencies to avoid problems with the size of the MPI packet
+   
+   call timab(337,1,tsec)!cchi0(xmpi_sum_1) 
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
-
+   call timab(337,2,tsec)!cchi0(xmpi_sum_1) 
  CASE (1, 2)
    ! Spectral method.
    call hilbert_transform(Ep%npwe,Ep%nomega,Ep%nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,Ep%spmeth)
@@ -1892,13 +1894,13 @@ call timab(335,2,tsec) ! second loop
    if (allocated(sf_chi0)) then
      ABI_FREE(sf_chi0)
    end if
-
+call timab(338,1,tsec)!cchi0(xmpi_sum_2)
    ! Collective sum of the contributions.
    ! Looping over frequencies to avoid problems with the size of the MPI packet
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)
    end do
-
+call timab(338,2,tsec)!cchi0(xmpi_sum_2)
  CASE DEFAULT
    ABI_BUG("Wrong spmeth")
  END SELECT
@@ -1910,18 +1912,20 @@ call timab(335,2,tsec) ! second loop
 
  ! === Collect the sum rule ===
  ! * The pi factor comes from Im[1/(x-ieta)] = pi delta(x)
+ call timab(400,1,tsec)!call_xmpi
  call xmpi_sum(chi0_sumrule,comm,ierr)
  chi0_sumrule=chi0_sumrule*pi*weight/Cryst%ucvol
  !
  ! *************************************************
  ! **** Now each node has chi0(q,G,Gp,Ep%omega) ****
  ! *************************************************
-
+ call timab(400,2,tsec)!call_xmpi
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
  ! FB because of the intraband term, chi0 is never hermitian in case of metals
  ! FIXME: as of today, hermitianity is also enforced for metallic systems
  !if (.not. is_metallic) then
+call timab(339,1,tsec)!cchi0(io)
  do io=1,Ep%nomega
    if (ABS(REAL(Ep%omega(io))) <0.00001) then
      do ig2=1,Ep%npwe
@@ -1932,7 +1936,7 @@ call timab(335,2,tsec) ! second loop
    end if
  end do
  !endif
-
+call timab(339,2,tsec)!cchi0(io)
  ! === Symmetrize chi0 in case of AFM system ===
  ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
  ! Works only in case of magnetic group Shubnikov type IV.
