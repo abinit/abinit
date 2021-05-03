@@ -902,7 +902,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,extfpmd%nelect,&
 &     dtset%tsmear)
-     call extfpmd%compute_e_kin(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
+     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
 &     dtset%tsmear,extfpmd%vtrial)
    end if
 
