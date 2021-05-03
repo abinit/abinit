@@ -764,16 +764,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  do iline=1,nline
 
 
-! if all bands are skippable, we can exit the iline loop for good.
-!   otherwise, all procs are needed for the projbd and other operations,
-!   even if the present band will not be updated
-#ifdef DEV_MJV
-print *, 'bands_skipped_now ', bands_skipped_now, ' bands_treated_now ', bands_treated_now
-#endif
-   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
-     exit
-   end if
-
    ! ======================================================================
    ! ================= COMPUTE THE RESIDUAL ===============================
    ! ======================================================================
@@ -830,7 +820,7 @@ print *, 'bands_skipped_now ', bands_skipped_now, ' bands_treated_now ', bands_t
          dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
   
-       call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+     call xmpi_sum(work,mpi_enreg%comm_band,ierr)
     
 ! save this for me_band only
      if (iband == band) then 
@@ -1173,6 +1163,16 @@ print *, 'bands_skipped_now ', bands_skipped_now, ' bands_treated_now ', bands_t
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
 !   bands_skipped_now = bands_skipped_now - bands_treated_now
+
+! if all bands are skippable, we can exit the iline loop for good.
+!   otherwise, all procs are needed for the projbd and other operations,
+!   even if the present band will not be updated
+#ifdef DEV_MJV
+print *, 'bands_skipped_now ', bands_skipped_now, ' bands_treated_now ', bands_treated_now
+#endif
+   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
+     exit
+   end if
 
 
    ! ======================================================================
