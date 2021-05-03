@@ -22378,9 +22378,9 @@ Variable(
     mnemonics="USE EXTended FPMD model",
     added_in_version="9.5.2",
     text=r"""
-Enables the calculation of contributions to the energy, entropy, stresses and
-number of electrons using the extended first principle molecular dynamics model
-for high temperature simulations.
+Enables the calculation of contributions to the energy, entropy, stresses,
+number of electrons and chemical potential using the extended first principle
+molecular dynamics model for high temperature simulations.
 
   * **useextfpmd** = 1 *(Recommanded)*, the energy shift factor will be evaluated
 by making an integration of the trial potential over the real space and the
