@@ -75,7 +75,6 @@ module m_dtset
 
 type, public :: dataset_type
 
-! Integer
 !A
  integer :: accuracy
  integer :: adpimd
@@ -173,6 +172,7 @@ type, public :: dataset_type
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
+
  integer :: eph_restart = 0
  integer :: eph_stern = 0
  integer :: eph_task = 1
@@ -267,6 +267,11 @@ type, public :: dataset_type
  integer :: hmcsst
  integer :: hmctt
 !I
+ real(dp) :: ibte_abs_tol = tol4
+ real(dp) :: ibte_alpha_mix = 0.7_dp
+ integer :: ibte_niter = 100
+ integer :: ibte_prep = 0
+
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
@@ -1446,6 +1451,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -1581,6 +1587,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hyb_range_fock  = dtin%hyb_range_fock
  dtout%hmcsst             = dtin%hmcsst
  dtout%hmctt              = dtin%hmctt
+ dtout%ibte_abs_tol       = dtin%ibte_abs_tol
+ dtout%ibte_alpha_mix     = dtin%ibte_alpha_mix
+ dtout%ibte_niter         = dtin%ibte_niter
+ dtout%ibte_prep          = dtin%ibte_prep
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -3185,7 +3195,7 @@ subroutine chkvars(string)
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
+ list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta'
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_prt_eig extrapwf'
 !F
@@ -3226,6 +3236,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
+ list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'

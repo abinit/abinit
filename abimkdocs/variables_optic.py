@@ -192,7 +192,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the LINear COMPonent of the dielectric tensor's MATRIX ELEMENTS",
-    added_in_version="v9",
+    added_in_version="v9.5",
     text=r"""
 If set to 1, the matrix elements, the renormalized (but unshifted) Kohn-Sham eigenvalues,
 the occupations and the kpts weights are all printed out in the ‘_OPTIC.nc’ file
