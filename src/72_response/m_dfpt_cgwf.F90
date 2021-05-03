@@ -767,7 +767,12 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 ! if all bands are skippable, we can exit the iline loop for good.
 !   otherwise, all procs are needed for the projbd and other operations,
 !   even if the present band will not be updated
-   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) exit
+#ifdef DEV_MJV
+print *, 'bands_skipped_now ', bands_skipped_now, ' bands_treated_now ', bands_treated_now
+#endif
+   if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
+     exit
+   end if
 
    ! ======================================================================
    ! ================= COMPUTE THE RESIDUAL ===============================
@@ -811,7 +816,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72)
    do iband = 1, nband
      work = zero
-     if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+     if (bands_treated_now(iband) == 0) cycle
      if (iband == band) then
        work = gresid
      end if
@@ -964,7 +969,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    ! Projecting again out all bands:
    ! -For the simple eigenPb, gscq is used as dummy argument
    do iband = 1, nband
-     if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+     if (bands_treated_now(iband) == 0) cycle
      if (iband == band) then
        work = direc
      end if
