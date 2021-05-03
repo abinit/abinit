@@ -937,7 +937,7 @@ end subroutine dfpt_mkvxc_noncoll
 !! FUNCTION
 !! Compute the first-order change of exchange-correlation potential
 !! in case of GGA functionals
-!! Use the q-gradient of the exchange-correlation kernel.
+!! Use the q-gradient (Cartesian) of the exchange-correlation kernel.
 !!
 !! INPUTS
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
@@ -951,7 +951,7 @@ end subroutine dfpt_mkvxc_noncoll
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nkxc=second dimension of the kxc array
 !!  nspden=number of spin-density components
-!!  qdir= indicates the direction of the q-gradient (1,2 or 3)
+!!  qdirc= indicates the Cartesian direction of the q-gradient (1,2 or 3)
 !!  rhor1tmp(cplex*nfft,2)=array for first-order electron spin-density
 !!   in electrons/bohr**3 (second index corresponds to spin-up and spin-down)
 !!
@@ -981,11 +981,11 @@ end subroutine dfpt_mkvxc_noncoll
 !! SOURCE
 
 subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
-&                    nkxc,nspden,qdir,rhor1,vxc1)
+&                    nkxc,nspden,qdirc,rhor1,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nkxc,nspden,qdir
+ integer,intent(in) :: cplex,nfft,nkxc,nspden,qdirc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1036,7 +1036,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_MALLOC(sndtdq,(cplex*nfft,nspgrad))
  dnexcdndq=zero
  do ir=1,nfft
-   r0=kxc(ir,4+qdir); r1=rho1now(ir,1,1+qdir)
+   r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
    dnexcdndq(2*ir,1)=r0*r1*kxc(ir,3)
    sndtdq(ir,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
  end do
@@ -1046,7 +1046,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  vxc1(:,:)=dnexcdndq(:,:)
  ABI_FREE(dnexcdndq)
  call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,qdir,sndtdq,vxc1)
+& nspgrad,qdirc,sndtdq,vxc1)
 
  ABI_FREE(sndtdq)
 end subroutine dfpt_mkvxcggadq

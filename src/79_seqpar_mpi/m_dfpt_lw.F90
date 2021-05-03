@@ -180,7 +180,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !scalars
  integer :: ask_accurate,bdtot_index,bdtot1_index,bantot_rbz
  integer :: cplex,formeig,forunit,gscase,iatpert,iatpert_cnt,iatpol
- integer :: iatdir,icg,ierr,ii,ikg,ikpt,ikpt1,ilm,iq1dir,iq1grad,iq1grad_cnt
+ integer :: iatdir,icg,ierr,ii,ikg,ikpt,ikpt1,ilm,qcar,iq1dir,iq1grad,iq1grad_cnt
  integer :: iq1q2grad,iq1q2grad_var,iq2dir,iq2grad,iq2grad_cnt,ireadwf0,isppol,istwf_k
  integer :: jj,master,matom,matpert,mcg,me,mgfft
  integer :: mkmem_rbz,mpw,my_nkpt_rbz
@@ -232,7 +232,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  real(dp),allocatable :: tnons1(:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:)
  real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
- real(dp),allocatable :: dum_vxc(:,:),vxc1dq(:,:)
+ real(dp),allocatable :: dum_vxc(:,:),vxc1dq(:,:),vxc1dqc(:,:,:,:)
  real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
  real(dp),allocatable,target :: vtrial1(:,:)
  real(dp),allocatable :: xccc3d1(:)
@@ -491,8 +491,22 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  ABI_FREE(nhat1)
 
 !Calculate the electrostatic contribution from the q-gradient of the Hxc kernel
+
+!If GGA xc first calculate the Cartesian q-gradient of the xc kernel
+ if (nkxc == 7) then
+   ABI_MALLOC(vxc1dq,(2*nfft,nspden))
+   ABI_MALLOC(vxc1dqc,(2*nfft,nspden,natpert,3))
+   do qcar=1,3
+     do iatpert=1,natpert
+       rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
+       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
+       vxc1dqc(:,:,iatpert,qcar)=vxc1dq
+     end do
+   end do 
+ end if
+ rhor1_tmp=zero
+
  ABI_MALLOC(vqgradhart,(2*nfft))
- ABI_MALLOC(vxc1dq,(2*nfft,nspden))
  ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
  ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_MALLOC(qdrflg,(matom,3,3,3))
@@ -510,12 +524,13 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
      ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
 
-     !Calculate the gradient of the XC potential if GGA and incorporate it to
-     !the Hartree.  
+     !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
      if (nkxc == 7) then
-       rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
-       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qdir,rhor1_tmp,vxc1dq)
-       rhor1_tmp=zero
+       vxc1dq=zero
+       do qcar=1,3
+         vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
+       & vxc1dqc(:,:,iatpert,qcar)
+       end do 
        vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
      end if
 
@@ -551,6 +566,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  ABI_FREE(rhor1_efield)
  ABI_FREE(vqgradhart)
  ABI_FREE(vxc1dq)
+ ABI_FREE(vxc1dqc)
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 

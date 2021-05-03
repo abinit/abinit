@@ -703,7 +703,7 @@ end subroutine xcpot
 !!
 !! FUNCTION
 !! Equivalent to xcpot for the q-derivative of the GGA xc kernel.
-!! Only one r-derivative along the qdir direction is calculated.
+!! Only one r-derivative along the qdirc (Cartesian) direction is calculated.
 !!
 !! INPUTS
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
@@ -716,7 +716,7 @@ end subroutine xcpot
 !!          =2, also take into account derivative wrt the gradient of the density.
 !!  nspden=number of spin-density components
 !!  nspgrad=number of spin-density and spin-density-gradient components
-!!  qdir= indicates the direction of the q-gradient (1, 2 or 3)
+!!  qdirc= indicates the Cartesian direction of the q-gradient (1, 2 or 3)
 !!  sndtdq(cplex*nfft,nspgrad)=Second term of vxc1dq whose gradient is
 !!      calculated
 !!
@@ -733,12 +733,12 @@ end subroutine xcpot
 !! SOURCE
 
 subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-&                 nspgrad,qdir,&
+&                 nspgrad,qdirc,&
 &                 sndtdq,vxc) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad,qdir
+ integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad,qdirc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -808,18 +808,18 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  ABI_MALLOC(gcart3,(n3))
  do i1=1,n1
    ig1=i1-(i1/id1)*n1-1
-   gcart1(i1)=gprimd(qdir,1)*two_pi*dble(ig1)
+   gcart1(i1)=gprimd(qdirc,1)*two_pi*dble(ig1)
  end do
 !Note that the G <-> -G symmetry must be maintained
  if(mod(n1,2)==0) gcart1(n1/2+1)=zero
  do i2=1,n2
    ig2=i2-(i2/id2)*n2-1
-   gcart2(i2)=gprimd(qdir,2)*two_pi*dble(ig2)
+   gcart2(i2)=gprimd(qdirc,2)*two_pi*dble(ig2)
  end do
  if(mod(n2,2)==0) gcart2(n2/2+1)=zero
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
-   gcart3(i3)=gprimd(qdir,3)*two_pi*dble(ig3)
+   gcart3(i3)=gprimd(qdirc,3)*two_pi*dble(ig3)
  end do
  if(mod(n3,2)==0) gcart3(n3/2+1)=zero
 
@@ -833,7 +833,7 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
        do i1=1,n1
          ifft=ifft+1
          gcart_idir=gc23_idir+gcart1(i1)
-!        Multiply by - i 2pi G(qdir) and accumulate in wkcmpx
+!        Multiply by - i 2pi G(qdirc) and accumulate in wkcmpx
          wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
          wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
        end do
@@ -852,7 +852,6 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  end do
  ABI_FREE(wkcmpx)
  ABI_FREE(work)
-
 
 end subroutine xcpotdq
 !!***
