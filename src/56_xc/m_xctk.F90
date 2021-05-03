@@ -42,6 +42,7 @@ module m_xctk
 
  public :: xcden
  public :: xcpot
+ public :: xcpotdq
 !!***
 
 contains
@@ -696,5 +697,74 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
 end subroutine xcpot
 !!***
 
+!!****f* ABINIT/xcpotdq
+!! NAME
+!! xcpotdq
+!!
+!! FUNCTION
+!! Equivalent to xcpot for the q-derivative of the GGA xc kernel.
+!! Only one r-derivative along the qdir direction is calculated.
+!!
+!! INPUTS
+!!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
+!!  depsxc(2*nfft,nspgrad)=First term of vxc1dq, already precalculated
+!!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
+!!  ishift : if ==0, do not shift the xc grid (usual case);
+!!           if ==1, shift the xc grid (not implemented) 
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngrad : =1, only take into account derivative wrt the density ;
+!!          =2, also take into account derivative wrt the gradient of the density.
+!!  nspden=number of spin-density components
+!!  nspgrad=number of spin-density and spin-density-gradient components
+!!  qdir= indicates the direction of the q-gradient (1, 2 or 3)
+!!  sndtdq(cplex*nfft,nspgrad)=Second term of vxc1dq whose gradient is
+!!      calculated
+!!
+!! OUTPUT
+!!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential 
+!!
+!! PARENTS
+!!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
+!!
+!! CHILDREN
+!!      fourdp,phase,ptabs_fourdp,timab
+!!
+!! SOURCE
+
+subroutine xcpotdq (cplex,depsxc,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+&                 nspgrad,qdir,&
+&                 sndtdq,vxc) ! optional argument
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad,qdir
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: sndtdq(cplex*nfft,nspden,ngrad*ngrad)
+ real(dp),intent(in) :: depsxc(2*nfft,nspgrad),gprimd(3,3)
+ real(dp),intent(inout) :: vxc(2*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,id1,id2,id3,idir,ifft,ig1,ig2,ig3,ispden,n1,n2,n3,qeq0
+ real(dp),parameter :: lowden=1.d-14,precis=1.d-15
+ real(dp) :: gc23_idir,gcart_idir,ph123i,ph123r,ph1i,ph1r,ph23i,ph23r,ph2i,ph2r
+ real(dp) :: ph3i,ph3r,work_im,work_re
+ character(len=500) :: message
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ logical :: with_vxc,with_vxctau
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
+ real(dp),allocatable :: wkcmpx(:,:),wkcmpxtau(:,:)
+ real(dp),allocatable :: work(:),workgr(:,:),worklp(:,:),worktau(:,:)
+
+! *************************************************************************
+
+end subroutine xcpotdq
+!!***
 end module m_xctk
 !!***

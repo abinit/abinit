@@ -33,7 +33,7 @@ module m_dfpt_mkvxc
  use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
  use m_symtk,    only : matr3inv
- use m_xctk,     only : xcden, xcpot
+ use m_xctk,     only : xcden, xcpot, xcpotdq
 
  implicit none
 
@@ -996,7 +996,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Local variables-------------------------------
 !scalars
- integer :: id1,id2,id3,ii,ir,ishift,n1,n2,n3,ngrad,nspgrad
+ integer :: ii,ir,ishift,ngrad,nspgrad
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: gradrho_gradrho1,gradrho_gradrho1_dn,gradrho_gradrho1_up
@@ -1008,6 +1008,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: r0_dn(3),r0_up(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
  real(dp),allocatable :: dnexcdndq(:,:),rho1now(:,:,:)
+ real(dp),allocatable :: sndtdq(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
 
 ! *************************************************************************
@@ -1018,17 +1019,6 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    msg='Wrong nkxc value for GGA in the longwave driver (optdriver=10)!'
    ABI_BUG(msg)
  end if
-
-!Keep local copy of fft dimensions
- n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
-
-!Initialize computation of G in cartesian coordinates
- id1=n1/2+2  ; id2=n2/2+2  ; id3=n3/2+2
-
-
-!MR: this needs to be solved
- !Get the distrib associated with this fft_grid
- !call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Compute the gradients of the first-order density
 !rho1now(:,:,1) contains the first-order density, and
@@ -1043,15 +1033,21 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !first the term with the real-space gradient of rho1
  nspgrad=1
  ABI_MALLOC(dnexcdndq,(2*nfft,nspgrad))
- dnexcdndq=zero
+ ABI_MALLOC(sndtdq,(cplex*nfft,nspgrad))
  do ir=1,nfft
    r0=kxc(ir,4+qdir); r1=rho1now(ir,1,1+qdir)
    dnexcdndq(2*ir,1)=r0*r1*kxc(ir,3)
+   sndtdq(ir,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
  end do
- vxc1(:,:)=dnexcdndq(:,:)
+ ABI_FREE(rho1now)
 
 !Now the term whose real-space gradient has to be computed
+ vxc1(:,:)=zero
+ call xcpotdq(cplex,dnexcdndq,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,qdir,sndtdq,vxc1)
 
+ ABI_FREE(dnexcdndq)
+ ABI_FREE(sndtdq)
 end subroutine dfpt_mkvxcggadq
 !!***
 
