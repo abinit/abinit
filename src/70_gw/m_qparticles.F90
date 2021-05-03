@@ -39,7 +39,7 @@ MODULE m_qparticles
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
- use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi
+ use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d_0d, rhophi
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t
@@ -453,7 +453,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
                do ir1=0,ngfftf(1)-1
                  rr(1)=DBLE(ir1)/n1
                  ifft = 1 +ir1 +ir2*ngfftf(1) +ir3*ngfftf(1)*ngfftf(2)
-                 rhor_out(ifft,ispden) = interpol3d(rr,n1,n2,n3,rhor_tmp(:,ispden))
+                 rhor_out(ifft,ispden) = interpol3d_0d(rr,n1,n2,n3,rhor_tmp(:,ispden))
                end do
              end do
            end do
