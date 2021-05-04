@@ -496,6 +496,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  if (nkxc == 7) then
    ABI_MALLOC(vxc1dq,(2*nfft,nspden))
    ABI_MALLOC(vxc1dqc,(2*nfft,nspden,natpert,3))
+   ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
    do qcar=1,3
      do iatpert=1,natpert
        rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
@@ -507,7 +508,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  rhor1_tmp=zero
 
  ABI_MALLOC(vqgradhart,(2*nfft))
- ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
  ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_MALLOC(qdrflg,(matom,3,3,3))
  qdrflg=0
