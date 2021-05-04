@@ -1037,9 +1037,19 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  dnexcdndq=zero
  do ir=1,nfft
    r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
-   dnexcdndq(2*ir,1)=r0*r1*kxc(ir,3)
-   sndtdq(ir,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
+   dnexcdndq(2*ir-1,1)=r0*r1*kxc(ir,3)
  end do
+ if (cplex == 1) then
+   do ir=1,nfft
+     r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
+     sndtdq(ir,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
+   end do
+ else if (cplex == 2) then
+   do ir=1,nfft
+     r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
+     sndtdq(2*ir-1,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
+   end do
+ end if
  ABI_FREE(rho1now)
 
 !Now the term whose real-space gradient has to be computed
