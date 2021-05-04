@@ -702,14 +702,9 @@ subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred,
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-<<<<<<< HEAD
    call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
     this%dtorbmag,this%dtpawuj,&
-    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
-=======
-   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtpawuj,&
     this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%extfpmd,this%indsym,&
->>>>>>> remotes/blanchet/hightemp
     this%initialized,this%irrzon,itimes,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
     this%nfftf,this%npwarr,&
     this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
