@@ -46,7 +46,7 @@ inp_files = [
 # GW/BSE
 "t31.abi", # HF exchange checking q->0 terms
 "t32.abi", # AC GW
-"t33.abi", # GW 1RDM and related quantities 
+"t33.abi", # GW 1RDM and related quantities
 "t34.abi", # Same as t33.in but reading checkpoints
 "t35.abi", # GW 1RDM and related quantities (using only Sigma_x)
 "t36.abi", # GW 1RDM and related quantities but using Silicon
@@ -86,6 +86,7 @@ inp_files = [
 # GS Coulomb cut-off
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
 "t91.abi", # occopt 9 tests on Si
+"t92.abi", # check extended fpmd routines with low number of bands
 "t95.abi", # test treatment of inaccurate POSCAR file
 "t96.abi", # test treatment of inaccurate POSCAR file
 "t97.abi", # test treatment of inaccurate POSCAR file
