@@ -1419,7 +1419,7 @@ function bose_einstein(energy, temperature)
      write(message,'(a)') 'No Bose Einstein for negative energies'
      ABI_WARNING(message)
    end if
- else if (arg < tol12) then
+ else 
    write(message,'(a)') 'No Bose Einstein for negative or 0 T'
    ABI_WARNING(message)
  end if
