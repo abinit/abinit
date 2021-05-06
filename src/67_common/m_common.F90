@@ -1262,7 +1262,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
           write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
           ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
           convrt*fermie,', ',convrt*fermih,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
-       else 
+       else
           write(msg, '(3a,f10.5,3a,f10.5)' ) &
           ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        end if
@@ -1525,6 +1525,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
+     if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
+       call edoc%add_real('kinetic_extfpmd',energies%e_extfpmd)
+       call edoc%add_real('total_kinetic',energies%e_extfpmd+energies%e_kinetic)
+     end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
        ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1616,7 +1620,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
    dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
-
+   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
+     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%edc_extfpmd)
+   end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
      !  '    '//eneName//'  =',enevalue,ch10,&
@@ -1675,6 +1681,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
      end if
      call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
+
+
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    !call wrtout(iout,msg,'COLL')
    call dc_edoc%add_real('total_energy_dc', etotaldc)
