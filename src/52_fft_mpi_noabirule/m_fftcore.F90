@@ -4566,7 +4566,6 @@ end subroutine get_kg
 
 subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k

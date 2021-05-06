@@ -777,7 +777,12 @@ The full bibtex file is available [here](../abiref.bib).
             #if os.path.relpath(path, self.root) in ignored: continue
             #if f == "README.md": continue
             if f.endswith(".md"):
-                self.md_pages.append(MarkdownPage(path, self))
+                try:
+                    self.md_pages.append(MarkdownPage(path, self))
+                except Exception as exc:
+                    cprint("Exception while parsing markdown page: %s" % path, color="red")
+                    raise exc
+
             elif f.endswith(".html"):
                 self.html_pages.append(HtmlPage(path, self))
 

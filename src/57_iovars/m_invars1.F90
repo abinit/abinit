@@ -2260,7 +2260,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  E
    dtsets(idtset)%ecut=-one
    dtsets(idtset)%ecuteps=zero
-   dtsets(idtset)%ecutsigx=zero ! The true default value is ecut . This is defined in invars2.F90
+   dtsets(idtset)%ecutsigx=zero ! If ecutsigx is not defined explicitly, npwsigx will be initialized from ecutwfn.
    dtsets(idtset)%ecutsm=zero
    dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
    dtsets(idtset)%effmass_free=one
