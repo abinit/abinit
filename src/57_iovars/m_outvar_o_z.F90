@@ -1181,6 +1181,9 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%useextfpmd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useextfpmd','INT',0)
+
  intarr(1,:)=dtsets(:)%use_yaml
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
 
