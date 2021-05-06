@@ -327,7 +327,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      end do
    end do
    write(ab_out,'(a)')"..."
-   ABI_ERROR_NODUMP("Aborting now")
+   ABI_STOP("Stopping now!")
  end if
 
  call cwtime(cpu, wall, gflops, "start")
