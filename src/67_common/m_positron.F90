@@ -981,6 +981,9 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
    end if
  end if
 
+ ! This to avoid using unitialized variables.
+ lambda_core = zero; lambda_paw = zero; lambda_core_paw = zero
+
 !Constants
  fact=0.0
  cplex=1;nspden_ep=1
