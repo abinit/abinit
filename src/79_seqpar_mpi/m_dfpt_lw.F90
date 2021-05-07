@@ -228,7 +228,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  real(dp),allocatable :: rhog1_atdis(:,:,:)
  real(dp),allocatable :: rhog1_tmp(:,:)
  real(dp),allocatable :: rhor1_atdis(:,:,:),rhor1_efield(:,:,:) 
- real(dp),allocatable :: rhor1_tmp(:,:),rhor1_real(:,:)
+ real(dp),allocatable :: rhor1_cplx(:,:),rhor1_tmp(:,:),rhor1_real(:,:)
  real(dp),allocatable :: tnons1(:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:)
  real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
@@ -504,14 +504,13 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
        vxc1dqc(:,:,iatpert,qcar)=vxc1dq
      end do
    end do 
+   ABI_FREE(rhor1_tmp)
  end if
- ABI_FREE(rhor1_tmp)
 
- ABI_MALLOC(rhor1_tmp,(2*nfft,nspden))
+ ABI_MALLOC(rhor1_cplx,(2*nfft,nspden))
  ABI_MALLOC(vqgradhart,(2*nfft))
  ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_MALLOC(qdrflg,(matom,3,3,3))
- rhor1_tmp=zero
  qdrflg=0
  do iq1grad=1,nq1grad
    qdir=q1grad(2,iq1grad)
@@ -543,10 +542,10 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
        !I need a cplex density for the dotprod_vn
        do ii=1,nfft
          jj=ii*2
-         rhor1_tmp(jj-1,:)=rhor1_efield(iq2grad,ii,:)
+         rhor1_cplx(jj-1,:)=rhor1_efield(iq2grad,ii,:)
        end do
 
-       call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+       call dotprod_vn(2,rhor1_cplx,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
        eqgradhart(re,iatpert,iq2grad,iq1grad)=dotr*half
        eqgradhart(im,iatpert,iq2grad,iq1grad)=doti*half
 
@@ -558,7 +557,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      end do
    end do
  end do
- ABI_FREE(rhor1_tmp)
+ ABI_FREE(rhor1_cplx)
  ABI_FREE(rhog1_tmp)
  ABI_FREE(rhog1_atdis)
  ABI_FREE(rhor1_atdis)
@@ -1677,7 +1676,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
  integer :: nylmgr,optene,option,optorth,optres
- integer :: pawread,pertcase,qdir,spaceworld
+ integer :: pawread,pertcase,qcar,qdir,spaceworld
  integer :: usexcnhat,useylmgr
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
@@ -1735,10 +1734,12 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
  real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:)
  real(dp),allocatable :: rhog1_tmp(:,:),rhog1_atdis(:,:,:)
- real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_atdis(:,:,:),rhor1_tmp(:,:),rhor1_real(:,:)
+ real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_atdis(:,:,:)
+ real(dp),allocatable :: rhor1_cplx(:,:),rhor1_tmp(:,:),rhor1_real(:,:)
  real(dp),allocatable :: rhor1_strain(:,:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:),vhxc1_strain(:,:)
- real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
+ real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:)
+ real(dp),allocatable :: vxc1(:,:),vxc1dq(:,:),vxc1dqc(:,:,:,:)
  real(dp),allocatable :: dum_vxc(:,:)
  real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
  real(dp),allocatable,target :: vtrial1(:,:)
@@ -2105,16 +2106,31 @@ end if
  ABI_FREE(nhat)
  ABI_FREE(nhat1)
 
-!!Calculate the electrostatic term from the q-gradient of the Hartree potential
+!!Calculate the electrostatic term from the q-gradient of the Hxc kernel
  ABI_MALLOC(vqgradhart,(2*nfft))
- ABI_MALLOC(rhor1_tmp,(2*nfft,nspden))
+ ABI_MALLOC(rhor1_cplx,(2*nfft,nspden))
+ if (nkxc == 7) then
+   ABI_MALLOC(vxc1dq,(2*nfft,nspden))
+   ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
+ end if
 
 !Electronic contribution
  if (lw_flexo==1.or.lw_flexo==2) then
+   !If GGA xc first calculate the Cartesian q-gradient of the xc kernel
+   if (nkxc == 7) then
+     ABI_MALLOC(vxc1dqc,(2*nfft,nspden,nefipert,3))
+     do qcar=1,3
+       do iefipert=1,nefipert
+         rhor1_tmp(:,:)=rhog1_efield(iefipert,:,:) 
+         call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
+         vxc1dqc(:,:,iefipert,qcar)=vxc1dq
+       end do
+     end do
+   end if
+
    ABI_MALLOC(elqgradhart,(2,3,3,3,3))
    ABI_MALLOC(elflexoflg,(3,3,3,3))
    elflexoflg=0
-   rhor1_tmp=zero
    do iq1grad=1,nq1grad
      qdir=q1grad(2,iq1grad)
      do iefipert=1,nefipert
@@ -2128,19 +2144,27 @@ end if
        !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
        ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
 
+       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+       if (nkxc == 7) then
+         vxc1dq=zero
+         do qcar=1,3
+           vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
+         & vxc1dqc(:,:,iefipert,qcar)
+         end do 
+         vxc1dq=vxc1dqc(:,:,iefipert,qdir)
+         vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+       end if
+
        do istrpert=1,nstrpert
 
          !Calculate the electrostatic energy term with the first order strain density
-         if (timrev==1) then
-           do ii=1,nfft
-             jj=ii*2
-             rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
-           end do
-         else if (timrev==0) then
-           rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
-         end if
+         !I need a cplex density for the dotprod_vn
+         do ii=1,nfft
+           jj=ii*2
+           rhor1_cplx(jj-1,:)=rhor1_strain(istrpert,ii,:)
+         end do
 
-         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+         call dotprod_vn(2,rhor1_cplx,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
          elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
          elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
          elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
@@ -2152,6 +2176,21 @@ end if
        end do
      end do
    end do
+   if (nkxc == 7) ABI_FREE(vxc1dqc)
+ end if
+
+!Calculate here the Cartesian q-gradient of the GGA xc kernel which is the same
+!for the other two spatial-dispersion properties
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
+   ABI_MALLOC(vxc1dqc,(2*nfft,nspden,natpert,3))
+   do qcar=1,3
+     do iatpert=1,natpert
+       rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
+       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
+       vxc1dqc(:,:,iatpert,qcar)=vxc1dq
+     end do
+   end do 
+   ABI_FREE(rhor1_tmp)
  end if
 
 !1st q-gradient of DM contribution
@@ -2159,7 +2198,6 @@ end if
    ABI_MALLOC(ddmdq_qgradhart,(2,natpert,natpert,nq1grad))
    ABI_MALLOC(ddmdq_flg,(matom,3,matom,3,3))
    ddmdq_flg=0
-   rhor1_tmp=zero
    do iq1grad=1,nq1grad
      qdir=q1grad(2,iq1grad)
      do iatpert=1,natpert
@@ -2167,20 +2205,28 @@ end if
        rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
        call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog1_tmp,vqgradhart)
 
+       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+       if (nkxc == 7) then
+         vxc1dq=zero
+         do qcar=1,3
+           vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
+         & vxc1dqc(:,:,iatpert,qcar)
+         end do 
+         vxc1dq=vxc1dqc(:,:,iatpert,qdir)
+         vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+       end if
+
        !TODO:Maybe it is only necessary to compute half of these elements by symmetry
        do jatpert=1,natpert
 
          !Calculate the electrostatic energy term with the first order electric field density
-         if (timrev==1) then
-           do ii=1,nfft
-             jj=ii*2
-             rhor1_tmp(jj-1,:)=rhor1_atdis(jatpert,ii,:)
-           end do
-         else if (timrev==0) then
-           rhor1_tmp(:,:)=rhor1_atdis(jatpert,:,:)
-         end if
+         !I need a cplex density for the dotprod_vn
+         do ii=1,nfft
+           jj=ii*2
+           rhor1_cplx(jj-1,:)=rhor1_atdis(jatpert,ii,:)
+         end do
 
-         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+         call dotprod_vn(2,rhor1_cplx,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
          ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)=dotr*half
          ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)=doti*half
          ddmdq_flg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),&
@@ -2200,7 +2246,6 @@ end if
    ABI_MALLOC(isdq_qgradhart,(2,matom,3,3,3,3))
    ABI_MALLOC(isdq_flg,(matom,3,3,3,3))
    isdq_flg=0
-   rhor1_tmp=zero
    do iq1grad=1,nq1grad
      qdir=q1grad(2,iq1grad)
      do iatpert=1,natpert
@@ -2208,19 +2253,27 @@ end if
        rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
        call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog1_tmp,vqgradhart)
 
+       !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
+       if (nkxc == 7) then
+         vxc1dq=zero
+         do qcar=1,3
+           vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
+         & vxc1dqc(:,:,iatpert,qcar)
+         end do 
+         vxc1dq=vxc1dqc(:,:,iatpert,qdir)
+         vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+       end if
+
        do istrpert=1,nstrpert
 
          !Calculate the electrostatic energy term with the first order strain density
-         if (timrev==1) then
-           do ii=1,nfft
-             jj=ii*2
-             rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
-           end do
-         else if (timrev==0) then
-           rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
-         end if
+         !I need a cplex density for the dotprod_vn
+         do ii=1,nfft
+           jj=ii*2
+           rhor1_cplx(jj-1,:)=rhor1_strain(istrpert,ii,:)
+         end do
 
-         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+         call dotprod_vn(2,rhor1_cplx,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
 
          isdq_qgradhart(re,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad), &
        & pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
@@ -2238,9 +2291,14 @@ end if
    end do
  end if
 
- ABI_FREE(rhor1_tmp)
+ ABI_FREE(rhor1_cplx)
  ABI_FREE(rhog1_tmp)
  ABI_FREE(vqgradhart)
+ if (nkxc == 7) then
+   ABI_FREE(vxc1dq)
+   if (allocated(vxc1dqc)) ABI_FREE(vxc1dqc)
+   ABI_FREE(rhor1_tmp)
+ end if
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
    ABI_FREE(rhog1_atdis)
    ABI_FREE(rhor1_atdis)
