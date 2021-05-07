@@ -520,9 +520,9 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog1_tmp,vqgradhart)
 
      !To ckeck
-     !call appdig(q2grad(3,iq2grad)+q1grad(3,iq1grad),"Gradient_Hartree_potential",fi1o)
-     !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
-     ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
+!     call appdig(pert_atdis(3,iatpert)+q1grad(3,iq1grad),"Hartree_",fi1o)
+!     call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
+!     & ngfft,2,nfft,nspden,vqgradhart,mpi_enreg)
 
      !If GGA convert the gradient of xc kernel to reduced coordinates and incorporate it to the Hartree part  
      if (nkxc == 7) then
@@ -531,6 +531,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
          vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
        & vxc1dqc(:,:,iatpert,qcar)
        end do 
+       vxc1dq=vxc1dqc(:,:,iatpert,qdir)
        vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
      end if
 
@@ -558,7 +559,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      end do
    end do
  end do
-
  ABI_FREE(rhor1_tmp)
  ABI_FREE(rhog1_tmp)
  ABI_FREE(rhog1_atdis)

@@ -1001,14 +1001,14 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: gradrho_gradrho1,gradrho_gradrho1_dn,gradrho_gradrho1_up
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
- real(dp) :: r0,r1
  character(len=500) :: msg
 !arrays
  real(dp) :: qphon(3)
- real(dp) :: r0_dn(3),r0_up(3),r1_dn(3),r1_up(3)
+ real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
- real(dp),allocatable :: dnexcdndq(:,:),rho1now(:,:,:)
- real(dp),allocatable :: sndtdq(:,:)
+ real(dp),allocatable :: ar1(:,:),a_gradi_r1(:,:)
+ real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:,:)
+ real(dp),allocatable :: rho1now(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
 
 ! *************************************************************************
@@ -1032,33 +1032,32 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !Apply the XC kernel
 !first the term with the real-space gradient of rho1
  nspgrad=1
- ABI_MALLOC(dnexcdndq,(2*nfft,nspgrad))
- ABI_MALLOC(sndtdq,(cplex*nfft,nspgrad))
- dnexcdndq=zero
+ ABI_MALLOC(ar1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(a_gradi_r1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgradn_t1,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad,3))
  do ir=1,nfft
-   r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
-   dnexcdndq(2*ir-1,1)=r0*r1*kxc(ir,3)
+   r0=kxc(ir,5:7); r1=rho1now(ir,1,2:4)
+   ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
+   a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
+   dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
+   dadgradn_t2(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*r1(:)
  end do
- if (cplex == 1) then
-   do ir=1,nfft
-     r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
-     sndtdq(ir,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
-   end do
- else if (cplex == 2) then
-   do ir=1,nfft
-     r0=kxc(ir,4+qdirc); r1=rho1now(ir,1,1+qdirc)
-     sndtdq(2*ir-1,1)=r0*rho1now(ir,1,1)*kxc(ir,3)
-   end do
- end if
  ABI_FREE(rho1now)
 
-!Now the term whose real-space gradient has to be computed
- vxc1(:,:)=dnexcdndq(:,:)
- ABI_FREE(dnexcdndq)
- call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,qdirc,sndtdq,vxc1)
+!Incorporate the terms that do not need further treatment 
+!(a -i factor is applied here)
+ do ir=1,nfft
+   ii=2*ir
+   vxc1(ii,1)=-a_gradi_r1(ir,1)!-sum(dadgradn_t2(ir,1,:))
+ end do
+ ABI_FREE(a_gradi_r1)
+ ABI_FREE(dadgradn_t2)
 
- ABI_FREE(sndtdq)
+!Now the term whose real-space gradient has to be computed
+! call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+!& nspgrad,qdirc,sndtdq,vxc1)
+
 end subroutine dfpt_mkvxcggadq
 !!***
 

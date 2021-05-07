@@ -846,8 +846,8 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
  call timab(82,2,tsec)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
- do ifft=1,2*nfft
-   vxc(ifft,ispden)=vxc(ifft,ispden)+work(ifft)
+ do ifft=1,nfft
+   vxc(2*ifft-1,ispden)=vxc(2*ifft-1,ispden)+work(ifft)
  end do
  ABI_FREE(wkcmpx)
  ABI_FREE(work)
