@@ -1734,7 +1734,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
  real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:)
  real(dp),allocatable :: rhog1_tmp(:,:),rhog1_atdis(:,:,:)
- real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_atdis(:,:,:)
+ real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_atdis(:,:,:),rhor1_efield(:,:,:)
  real(dp),allocatable :: rhor1_cplx(:,:),rhor1_tmp(:,:),rhor1_real(:,:)
  real(dp),allocatable :: rhor1_strain(:,:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:),vhxc1_strain(:,:)
@@ -2007,6 +2007,7 @@ end if
 !Electric field
  if (lw_flexo==1.or.lw_flexo==2) then
    ABI_MALLOC(rhog1_efield,(nefipert,2,nfft))
+   ABI_MALLOC(rhor1_efield,(nefipert,cplex*nfft,nspden))
    ABI_MALLOC(vhxc1_efield,(nefipert,cplex*nfft))
    vtrial1=zero
    do iefipert=1,nefipert
@@ -2031,6 +2032,7 @@ end if
        rhor1_tmp(:,:)=rhor1_real(:,:)
      end if
      rhog1_efield(iefipert,:,:)=rhog1_tmp(:,:)
+     rhor1_efield(iefipert,:,:)=rhor1_tmp(:,:)
 
      !Calculate first order Hartree and xc potentials
      call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
@@ -2121,7 +2123,7 @@ end if
      ABI_MALLOC(vxc1dqc,(2*nfft,nspden,nefipert,3))
      do qcar=1,3
        do iefipert=1,nefipert
-         rhor1_tmp(:,:)=rhog1_efield(iefipert,:,:) 
+         rhor1_tmp(:,:)=rhor1_efield(iefipert,:,:) 
          call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
          vxc1dqc(:,:,iefipert,qcar)=vxc1dq
        end do
@@ -2297,13 +2299,16 @@ end if
  if (nkxc == 7) then
    ABI_FREE(vxc1dq)
    if (allocated(vxc1dqc)) ABI_FREE(vxc1dqc)
-   ABI_FREE(rhor1_tmp)
+   if (allocated(rhor1_tmp)) ABI_FREE(rhor1_tmp)
  end if
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
    ABI_FREE(rhog1_atdis)
    ABI_FREE(rhor1_atdis)
  end if
- if (lw_flexo==1.or.lw_flexo==2) ABI_FREE(rhog1_efield)
+ if (lw_flexo==1.or.lw_flexo==2) then 
+   ABI_FREE(rhog1_efield)
+   ABI_FREE(rhor1_efield)
+ end if
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) ABI_FREE(rhor1_strain)
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
