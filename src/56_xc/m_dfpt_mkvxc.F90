@@ -1030,7 +1030,6 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
 
 !Apply the XC kernel
-!first the term with the real-space gradient of rho1
  nspgrad=1
  ABI_MALLOC(ar1,(cplex*nfft,nspgrad))
  ABI_MALLOC(a_gradi_r1,(cplex*nfft,nspgrad))
@@ -1043,14 +1042,18 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
    dadgradn_t2(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*r1(:)
  end do
- ABI_FREE(rho1now)
+
+!Use xcden to compute the real space gradient of A*rho^(1). 
+!Reuse rho1now storage.
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
 
 !Incorporate the terms that do not need further treatment 
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii,1)=-a_gradi_r1(ir,1)-sum(dadgradn_t2(ir,1,:))
+   vxc1(ii,1)=-a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc)-sum(dadgradn_t2(ir,1,:))
  end do
+ ABI_FREE(rho1now)
  ABI_FREE(a_gradi_r1)
  ABI_FREE(dadgradn_t2)
 
