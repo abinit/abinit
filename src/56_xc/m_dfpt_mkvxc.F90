@@ -1057,9 +1057,9 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_FREE(a_gradi_r1)
  ABI_FREE(dadgradn_t2)
 
-!Now the term whose real-space gradient has to be computed
-! call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-!& nspgrad,qdirc,sndtdq,vxc1)
+!Now the term whose sum over real-space derivatives has to be computed
+ call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,dadgradn_t1,vxc1)
 
 end subroutine dfpt_mkvxcggadq
 !!***

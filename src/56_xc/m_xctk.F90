@@ -703,7 +703,6 @@ end subroutine xcpot
 !!
 !! FUNCTION
 !! Equivalent to xcpot for the q-derivative of the GGA xc kernel.
-!! Only one r-derivative along the qdirc (Cartesian) direction is calculated.
 !!
 !! INPUTS
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
@@ -716,13 +715,11 @@ end subroutine xcpot
 !!          =2, also take into account derivative wrt the gradient of the density.
 !!  nspden=number of spin-density components
 !!  nspgrad=number of spin-density and spin-density-gradient components
-!!  qdirc= indicates the Cartesian direction of the q-gradient (1, 2 or 3)
-!!  sndtdq(cplex*nfft,nspgrad)=Second term of vxc1dq whose gradient is
-!!      calculated
+!!  agradn(cplex*nfft,nspgrad,3)=kxc(:,4)*gradrho(:,:)*gradrho(:,qdir)*rho1(*)
 !!
 !! OUTPUT
 !!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
-!!      At input already incorporate the first term. 
+!!      At input already includes three terms. 
 !!
 !! PARENTS
 !!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
@@ -733,15 +730,15 @@ end subroutine xcpot
 !! SOURCE
 
 subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-&                 nspgrad,qdirc,sndtdq,vxc) 
+&                 nspgrad,agradn,vxc) 
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad,qdirc
+ integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: sndtdq(cplex*nfft,nspgrad)
+ real(dp),intent(in) :: agradn(cplex*nfft,nspgrad,3)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(inout) :: vxc(2*nfft,nspden)
 
@@ -792,52 +789,56 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
    wkcmpx(:,ifft)=zero
  end do
 
-! Obtain sndtdq(G)*phase in wkcmpx from input sndtdq(r)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,sndtdq,ispden,nfft,work)
+! Obtain agradn(G)*phase in wkcmpx from input agradn(r)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,agradn,ispden,nfft,work)
  ispden=1
- do ifft=1,cplex*nfft
-   work(ifft)=sndtdq(ifft,ispden)
- end do
- call timab(82,1,tsec)
- call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
- call timab(82,2,tsec)
-
  ABI_MALLOC(gcart1,(n1))
  ABI_MALLOC(gcart2,(n2))
  ABI_MALLOC(gcart3,(n3))
- do i1=1,n1
-   ig1=i1-(i1/id1)*n1-1
-   gcart1(i1)=gprimd(qdirc,1)*two_pi*dble(ig1)
- end do
-!Note that the G <-> -G symmetry must be maintained
- if(mod(n1,2)==0) gcart1(n1/2+1)=zero
- do i2=1,n2
-   ig2=i2-(i2/id2)*n2-1
-   gcart2(i2)=gprimd(qdirc,2)*two_pi*dble(ig2)
- end do
- if(mod(n2,2)==0) gcart2(n2/2+1)=zero
- do i3=1,n3
-   ig3=i3-(i3/id3)*n3-1
-   gcart3(i3)=gprimd(qdirc,3)*two_pi*dble(ig3)
- end do
- if(mod(n3,2)==0) gcart3(n3/2+1)=zero
+ do idir=1, 3
 
-! !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gc23_idir,gcart_idir) &
-! !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
- ifft = 0
- do i3=1,n3
-   do i2=1,n2
-     gc23_idir=gcart2(i2)+gcart3(i3)
-     if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
-       do i1=1,n1
-         ifft=ifft+1
-         gcart_idir=gc23_idir+gcart1(i1)
-!        Multiply by - i 2pi G(qdirc) and accumulate in wkcmpx
-         wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
-         wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
-       end do
-     end if
+   do ifft=1,cplex*nfft
+     work(ifft)=agradn(ifft,ispden,idir)
    end do
+   call timab(82,1,tsec)
+   call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
+   call timab(82,2,tsec)
+  
+   do i1=1,n1
+     ig1=i1-(i1/id1)*n1-1
+     gcart1(i1)=gprimd(idir,1)*two_pi*dble(ig1)
+   end do
+  !Note that the G <-> -G symmetry must be maintained
+   if(mod(n1,2)==0) gcart1(n1/2+1)=zero
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+     gcart2(i2)=gprimd(idir,2)*two_pi*dble(ig2)
+   end do
+   if(mod(n2,2)==0) gcart2(n2/2+1)=zero
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gcart3(i3)=gprimd(idir,3)*two_pi*dble(ig3)
+   end do
+   if(mod(n3,2)==0) gcart3(n3/2+1)=zero
+  
+  ! !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gc23_idir,gcart_idir) &
+  ! !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
+   ifft = 0
+   do i3=1,n3
+     do i2=1,n2
+       gc23_idir=gcart2(i2)+gcart3(i3)
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         do i1=1,n1
+           ifft=ifft+1
+           gcart_idir=gc23_idir+gcart1(i1)
+  !        Multiply by  -i 2pi G(idir) and accumulate in wkcmpx
+           wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
+           wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
+         end do
+       end if
+     end do
+   end do
+
  end do
 
  ABI_FREE(workgr)
@@ -847,7 +848,7 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  call timab(82,2,tsec)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
  do ifft=1,nfft
-   vxc(2*ifft-1,ispden)=vxc(2*ifft-1,ispden)+work(ifft)
+   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
  end do
  ABI_FREE(wkcmpx)
  ABI_FREE(work)
