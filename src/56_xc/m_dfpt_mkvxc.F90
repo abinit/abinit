@@ -1049,7 +1049,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii,1)=-a_gradi_r1(ir,1)!-sum(dadgradn_t2(ir,1,:))
+   vxc1(ii,1)=-a_gradi_r1(ir,1)-sum(dadgradn_t2(ir,1,:))
  end do
  ABI_FREE(a_gradi_r1)
  ABI_FREE(dadgradn_t2)

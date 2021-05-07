@@ -505,11 +505,13 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      end do
    end do 
  end if
- rhor1_tmp=zero
+ ABI_FREE(rhor1_tmp)
 
+ ABI_MALLOC(rhor1_tmp,(2*nfft,nspden))
  ABI_MALLOC(vqgradhart,(2*nfft))
  ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_MALLOC(qdrflg,(matom,3,3,3))
+ rhor1_tmp=zero
  qdrflg=0
  do iq1grad=1,nq1grad
    qdir=q1grad(2,iq1grad)
@@ -538,14 +540,11 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      do iq2grad=1,nq2grad
 
        !Calculate the electrostatic energy term with the first order electric field density
-       if (timrev==0) then
-         do ii=1,nfft
-           jj=ii*2
-           rhor1_tmp(jj-1,:)=rhor1_efield(iq2grad,ii,:)
-         end do
-       else if (timrev==1) then
-         rhor1_tmp(:,:)=rhor1_efield(iq2grad,:,:)
-       end if
+       !I need a cplex density for the dotprod_vn
+       do ii=1,nfft
+         jj=ii*2
+         rhor1_tmp(jj-1,:)=rhor1_efield(iq2grad,ii,:)
+       end do
 
        call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
        eqgradhart(re,iatpert,iq2grad,iq1grad)=dotr*half
