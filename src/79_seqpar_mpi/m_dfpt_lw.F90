@@ -512,6 +512,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  ABI_MALLOC(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_MALLOC(qdrflg,(matom,3,3,3))
  qdrflg=0
+ rhor1_cplx=zero
  do iq1grad=1,nq1grad
    qdir=q1grad(2,iq1grad)
    do iatpert=1,natpert
@@ -2111,6 +2112,7 @@ end if
 !!Calculate the electrostatic term from the q-gradient of the Hxc kernel
  ABI_MALLOC(vqgradhart,(2*nfft))
  ABI_MALLOC(rhor1_cplx,(2*nfft,nspden))
+ rhor1_cplx=zero
  if (nkxc == 7) then
    ABI_MALLOC(vxc1dq,(2*nfft,nspden))
    ABI_MALLOC(rhor1_tmp,(cplex*nfft,nspden))
