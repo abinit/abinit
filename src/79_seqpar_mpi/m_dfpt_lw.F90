@@ -533,7 +533,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
          vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
        & vxc1dqc(:,:,iatpert,qcar)
        end do 
-       vxc1dq=vxc1dqc(:,:,iatpert,qdir)
        vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
      end if
 
@@ -2155,7 +2154,6 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iefipert,qcar)
          end do 
-         vxc1dq=vxc1dqc(:,:,iefipert,qdir)
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
@@ -2216,7 +2214,6 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iatpert,qcar)
          end do 
-         vxc1dq=vxc1dqc(:,:,iatpert,qdir)
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
@@ -2264,7 +2261,6 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iatpert,qcar)
          end do 
-         vxc1dq=vxc1dqc(:,:,iatpert,qdir)
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
