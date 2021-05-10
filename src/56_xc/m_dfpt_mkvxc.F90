@@ -1007,7 +1007,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
  real(dp),allocatable :: ar1(:,:),a_gradi_r1(:,:)
- real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:,:)
+ real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
  real(dp),allocatable :: rho1now(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
 
@@ -1034,13 +1034,14 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_MALLOC(ar1,(cplex*nfft,nspgrad))
  ABI_MALLOC(a_gradi_r1,(cplex*nfft,nspgrad))
  ABI_MALLOC(dadgradn_t1,(cplex*nfft,nspgrad,3))
- ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad))
  do ir=1,nfft
    r0=kxc(ir,5:7); r1=rho1now(ir,1,2:4)
+   gradrho_gradrho1=dot_product(r0,r1)
    ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
    a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
    dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
-   dadgradn_t2(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*r1(:)
+   dadgradn_t2(ir,1)=kxc(ir,4)*gradrho_gradrho1*r0(qdirc)
  end do
 
 !Use xcden to compute the real space gradient of A*rho^(1). 
@@ -1051,7 +1052,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii,1)=-a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc)-sum(dadgradn_t2(ir,1,:))
+   vxc1(ii,1)=-a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc)-dadgradn_t2(ir,1)
  end do
  ABI_FREE(rho1now)
  ABI_FREE(a_gradi_r1)
