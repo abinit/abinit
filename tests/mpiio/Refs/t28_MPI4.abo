@@ -103,8 +103,8 @@ P           mkmem2          4
           ngfftdg          24      24      24
              nkpt           4
 -           npfft           2
--           npkpt1          2
--           npkpt2          1
+-        np_spkpt1          2
+-        np_spkpt2          1
 -        npspinor1          1
 -        npspinor2          2
            nspden           4
@@ -1582,8 +1582,8 @@ P           mkmem2          4
           ngfftdg          24      24      24
              nkpt           4
 -           npfft           2
--           npkpt1          2
--           npkpt2          1
+-        np_spkpt1          2
+-        np_spkpt2          1
 -        npspinor1          1
 -        npspinor2          2
            nspden           4

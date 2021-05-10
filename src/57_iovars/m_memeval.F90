@@ -1697,9 +1697,8 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      write(msg,'(a,f11.3,a)')' memana : allocated an array of',mbbigarr+tol10,' Mbytes, for testing purposes. '
      call wrtout(std_out,msg,'COLL')
    end if
-   if(allocated(bigarray)) then
-     ABI_FREE(bigarray)
-   end if
+
+   ABI_SFREE(bigarray)
 
 !  Test the ability to allocate the needed total memory : use 8 segments,
 !  hoping that the maximal segment size is not so much smaller than the
@@ -1734,30 +1733,14 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     ' The job will continue.'
      call wrtout(std_out,msg,'COLL')
    end if
-   if(allocated(bigarray1)) then
-     ABI_FREE(bigarray1)
-   end if
-   if(allocated(bigarray2)) then
-     ABI_FREE(bigarray2)
-   end if
-   if(allocated(bigarray3)) then
-     ABI_FREE(bigarray3)
-   end if
-   if(allocated(bigarray4)) then
-     ABI_FREE(bigarray4)
-   end if
-   if(allocated(bigarray5)) then
-     ABI_FREE(bigarray5)
-   end if
-   if(allocated(bigarray6)) then
-     ABI_FREE(bigarray6)
-   end if
-   if(allocated(bigarray7)) then
-     ABI_FREE(bigarray7)
-   end if
-   if(allocated(bigarray8)) then
-     ABI_FREE(bigarray8)
-   end if
+   ABI_SFREE(bigarray1)
+   ABI_SFREE(bigarray2)
+   ABI_SFREE(bigarray3)
+   ABI_SFREE(bigarray4)
+   ABI_SFREE(bigarray5)
+   ABI_SFREE(bigarray6)
+   ABI_SFREE(bigarray7)
+   ABI_SFREE(bigarray8)
 
  end if
 
@@ -1801,9 +1784,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      nquarter_mbytes=dble(nquarter_mbytes)*1.25_dp
      nmbytes=nquarter_mbytes/4.0_dp
    end do
-   if(allocated(bigarray)) then
-     ABI_FREE(bigarray)
-   end if
+   ABI_SFREE(bigarray)
 
    ABI_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
  end if !  End the test of the available memory

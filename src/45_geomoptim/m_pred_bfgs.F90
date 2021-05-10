@@ -32,7 +32,7 @@ module m_pred_bfgs
  use m_lbfgs
  use m_errors
 
- use m_geometry,    only : mkrdim, fcart2fred, metric
+ use m_geometry,    only : mkrdim, fcart2gred, metric
  use m_bfgs,        only : hessinit, hessupdt, brdene
 
  implicit none
@@ -92,7 +92,7 @@ contains
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
+!!      fcart2gred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
@@ -248,9 +248,9 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)=forstr%fred(:,:)
+   residual(:,:)=forstr%gred(:,:)
  end if
 
  if(zDEBUG)then
@@ -562,7 +562,7 @@ end subroutine pred_bfgs
 !! (reduced nuclei coordinates), and unit cell parameters
 !! (acell and rprim) the L-Broyden-Fletcher-Goldfarb-Shanno
 !! minimization is performed on the total energy function, using
-!! its gradient (atomic forces and stress : fred or fcart and
+!! its gradient (atomic forces and stress : gred or fcart and
 !! stress) as calculated by the routine scfcv. Some atoms can be
 !! kept fixed, while the optimization of unit cell parameters is
 !! only performed if optcell/=0. The convergence requirement on
@@ -587,7 +587,7 @@ end subroutine pred_bfgs
 !!      m_precpred_1geo
 !!
 !! CHILDREN
-!!      fcart2fred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
+!!      fcart2gred,hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin
 !!
 !! SOURCE
@@ -746,9 +746,9 @@ real(dp) :: strten(6)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2gred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)= forstr%fred(:,:)
+   residual(:,:)= forstr%gred(:,:)
  end if
 
  if(zDEBUG)then

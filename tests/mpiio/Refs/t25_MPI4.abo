@@ -72,7 +72,7 @@ P           mkmem           1
           ngfftdg          36      36      36
              nkpt           1
 -          npband           2
--           npkpt           2
+-        np_spkpt           2
            nspden           2
            nsppol           2
             nstep           5
@@ -491,7 +491,7 @@ P           mkmem           1
           ngfftdg          36      36      36
              nkpt           1
 -          npband           2
--           npkpt           2
+-        np_spkpt           2
            nspden           2
            nsppol           2
             nstep           5

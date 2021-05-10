@@ -221,7 +221,8 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 !Local variables-------------------------------
 !scalars
  integer :: cplex,iatom,iatom_tot,ictr,ierr,imesh_size,ispden,itypat
- integer :: lm,lm_size,lnspden,mesh_size,my_comm_atom,nzlmopt,nspden
+ integer :: lm,lm_size,local_paw_print_vol
+ integer :: mesh_size,my_comm_atom,nzlmopt,nspden
  integer :: opt_compch,opt_dens,opt_l,opt_print
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: c1,c2,c3,compch_sph,intg
@@ -277,61 +278,53 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    opt_dens = 0 ! compute all densities
    opt_l = -1 ! all moments contribute
    opt_print = 0 ! do not print out moments
+   local_paw_print_vol = 0 ! standard amount of printing in pawdensities
 
-   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,nspden*(1-((opt_dens+1)/2))))
    ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,nspden))
-   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,nspden))
+   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,nspden*(1-((opt_dens+1)/2))))
 
-!  loop over spin components
-!  nspden = 1: just a single component
-!  nspden = 2: two components, loop over them
-!  nspden = 4: total is in component 1, only one of interest
-   if ( nspden == 2 ) then
-     lnspden = 2
-   else
-     lnspden = 1
-   end if
-   do ispden=1,lnspden
+!  construct multipole expansion of on-site charge densities for this atom
+   call pawdensities(compch_sph,cplex,iatom_tot,lmselectin,lmselectout,lm_size,&
+&   nhat1,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,&
+&   pawang,local_paw_print_vol,pawrad(itypat),pawrhoij(iatom),pawtab(itypat),&
+&   rho1,trho1)
 
-!    construct multipole expansion of on-site charge densities for this atom
-     call pawdensities(compch_sph,cplex,iatom_tot,lmselectin,lmselectout,lm_size,&
-&     nhat1,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,&
-&     pawang,0,pawrad(itypat),pawrhoij(iatom),pawtab(itypat),&
-&     rho1,trho1)
+!  spin components:
+!  nspden(1) contains total in all cases
+   ispden = 1
 
-     do lm = 5, 9 ! loop on L=2 components of multipole expansion
+   do lm = 5, 9 ! loop on L=2 components of multipole expansion
 
-       if(.not. lmselectout(lm)) cycle ! skip moments that contributes zero
+     if(.not. lmselectout(lm)) cycle ! skip moments that contributes zero
 
-!      the following is r^2*(n1-tn1-nhat)/r^3 for this multipole moment
-!      use only the real part of the density in case of cplex==2
-       do imesh_size = 2, mesh_size
-         ictr = cplex*(imesh_size - 1) + 1
-         ff(imesh_size)=(rho1(ictr,lm,ispden)-trho1(ictr,lm,ispden)-&
-&         nhat1(ictr,lm,ispden))/&
-&         pawrad(itypat)%rad(imesh_size)
-       end do
-       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-       call simp_gen(intg,ff,pawrad(itypat))
-       select case (lm)
-       case (5) ! S_{2,-2}
-         efg(1,2,iatom_tot) = efg(1,2,iatom_tot) - c3*intg ! xy case
-       case (6) ! S_{2,-1}
-         efg(2,3,iatom_tot) = efg(2,3,iatom_tot) - c3*intg ! yz case
-       case (7) ! S_{2, 0}
-         efg(1,1,iatom_tot) = efg(1,1,iatom_tot) + c2*intg ! xx case
-         efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c2*intg ! yy case
-         efg(3,3,iatom_tot) = efg(3,3,iatom_tot) - c1*intg ! zz case
-       case (8) ! S_{2,+1}
-         efg(1,3,iatom_tot) = efg(1,3,iatom_tot) - c3*intg ! xz case
-       case (9) ! S_{2,+2}
-         efg(1,1,iatom_tot) = efg(1,1,iatom_tot) - c3*intg ! xx case
-         efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c3*intg ! yy case
-       end select
+!    the following is r^2*(n1-tn1-nhat)/r^3 for this multipole moment
+!    use only the real part of the density in case of cplex==2
+     do imesh_size = 2, mesh_size
+       ictr = cplex*(imesh_size - 1) + 1
+       ff(imesh_size)=rho1(ictr,lm,ispden)-trho1(ictr,lm,ispden)-nhat1(ictr,lm,ispden)
+       ff(imesh_size)=ff(imesh_size)/pawrad(itypat)%rad(imesh_size)
+     end do
+     call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+     call simp_gen(intg,ff,pawrad(itypat))
+     select case (lm)
+     case (5) ! S_{2,-2}
+       efg(1,2,iatom_tot) = efg(1,2,iatom_tot) - c3*intg ! xy case
+     case (6) ! S_{2,-1}
+       efg(2,3,iatom_tot) = efg(2,3,iatom_tot) - c3*intg ! yz case
+     case (7) ! S_{2, 0}
+       efg(1,1,iatom_tot) = efg(1,1,iatom_tot) + c2*intg ! xx case
+       efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c2*intg ! yy case
+       efg(3,3,iatom_tot) = efg(3,3,iatom_tot) - c1*intg ! zz case
+     case (8) ! S_{2,+1}
+       efg(1,3,iatom_tot) = efg(1,3,iatom_tot) - c3*intg ! xz case
+     case (9) ! S_{2,+2}
+       efg(1,1,iatom_tot) = efg(1,1,iatom_tot) - c3*intg ! xx case
+       efg(2,2,iatom_tot) = efg(2,2,iatom_tot) + c3*intg ! yy case
+     end select
 
-     end do  ! end loop over LM components with L=2
+   end do  ! end loop over LM components with L=2
 
-   end do    ! Loop on spin components
 
 !  Symmetrization of EFG
    efg(2,1,iatom_tot) = efg(1,2,iatom_tot)

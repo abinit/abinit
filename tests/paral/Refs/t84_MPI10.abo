@@ -130,8 +130,8 @@ P           mkmem2          2
            nnsclo2          5
 -          npband1          1
 -          npband2          2
--           npkpt1          1
--           npkpt2          5
+-        np_spkpt1          1
+-        np_spkpt2          5
            nspden           4
           nspinor           2
             nstep1         30
@@ -1844,8 +1844,8 @@ P           mkmem2          2
            nnsclo2          5
 -          npband1          1
 -          npband2          2
--           npkpt1          1
--           npkpt2          5
+-        np_spkpt1          1
+-        np_spkpt2          5
            nspden           4
           nspinor           2
             nstep1         30

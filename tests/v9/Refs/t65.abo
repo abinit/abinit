@@ -84,6 +84,14 @@ _ WF disk file :     15.932 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           getdvdb2         20
            getwfk1         20
            getwfk2          1
+     ibte_abs_tol1     1.0000000000E-04
+     ibte_abs_tol2     1.0000000000E-03
+   ibte_alpha_mix1     7.0000000000E-01
+   ibte_alpha_mix2     6.0000000000E-01
+       ibte_niter1        100
+       ibte_niter2         50
+        ibte_prep1          0
+        ibte_prep2          1
              iscf1         -2
              iscf2          7
            istwfk2       2    0    0    0    0    0    0    0    3    0
@@ -847,8 +855,8 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
    1  -4.048    0.000 999999.0    0.000
 ============================================================================================
 
- Entering transport RTA computation driver.
-- Reading carrier lifetimes from: t65o_DS2_SIGEPH.nc
+ Entering IBTE driver.
+- Reading SERTA lifetimes and e-ph scattering operator from: t65o_DS2_SIGEPH.nc
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -863,20 +871,46 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
 
  Transport (RTA) calculation results:
 
- Conductivity(V^-1 s^-1 cm^-1) using SERTA approximation
+ Conductivity [Siemens cm^-1] using SERTA approximation
  Temperature (K)              xx              yy              zz
-            0.00       -0.00E+00       -0.00E+00       -0.00E+00
-          300.00        0.46E+06        0.46E+06        0.46E+06
+            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+          300.00    0.458203E+06    0.458203E+06    0.458203E+06
 
 
- Conductivity(V^-1 s^-1 cm^-1) using MRTA approximation
+ Resistivity [micro-Ohm cm] using SERTA approximation
  Temperature (K)              xx              yy              zz
-            0.00       -0.00E+00       -0.00E+00       -0.00E+00
-          300.00        0.37E+06        0.37E+06        0.37E+06
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00
+          300.00    0.218244E+01    0.218244E+01    0.218244E+01
+
+
+ Conductivity [Siemens cm^-1] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+          300.00    0.372678E+06    0.372678E+06    0.372678E+06
+
+
+ Resistivity [micro-Ohm cm] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00
+          300.00    0.268328E+01    0.268328E+01    0.268328E+01
 
 
 
 - Writing RTA transport results to: t65o_DS2_RTA.nc
+ Conductivity [Siemens cm^-1] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
+          300.00    0.119153E+05    0.119153E+05    0.119153E+05             yes
+
+
+ Resistivity [micro-Ohm cm] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
+          300.00    0.839254E+02    0.839254E+02    0.839254E+02             yes
+
+
+
+- Writing IBTE transport results to: t65o_DS2_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -901,6 +935,14 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
           getdvdb2         20
            getwfk1         20
            getwfk2          1
+     ibte_abs_tol1     1.0000000000E-04
+     ibte_abs_tol2     1.0000000000E-03
+   ibte_alpha_mix1     7.0000000000E-01
+   ibte_alpha_mix2     6.0000000000E-01
+       ibte_niter1        100
+       ibte_niter2         50
+        ibte_prep1          0
+        ibte_prep2          1
              iscf1         -2
              iscf2          7
            jdtset        1    2
