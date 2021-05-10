@@ -2660,9 +2660,10 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
    else ! numerical integration over the coupling constant
 
-      if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
+     !if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
 
      do ilambda=1,gwrpacorr
+       if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
        lambda=zl(ilambda)
        do ig1=1,Ep%npwe
          chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
