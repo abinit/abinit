@@ -37,7 +37,7 @@ MODULE m_mep
  use m_xmpi
 
  use defs_abitypes, only : MPI_type
- use m_geometry,    only : fred2fcart, fcart2fred, xcart2xred, xred2xcart, metric
+ use m_geometry,    only : gred2fcart, fcart2gred, xcart2xred, xred2xcart, metric
  use m_bfgs,        only : hessupdt
  use m_results_img, only : results_img_type, gather_array_img
 
@@ -483,7 +483,7 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
  character(len=500) :: msg
 !arrays
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
- real(dp),allocatable :: fred(:,:),xstep(:,:)
+ real(dp),allocatable :: gred(:,:),xstep(:,:)
 
 !************************************************************************
 
@@ -506,22 +506,22 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
  end if
 
 !Temporary storage
- ABI_MALLOC(fred,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
  ABI_MALLOC(xstep,(3,natom))
 
 !Loop over images
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
    call metric(gmet,gprimd,-1,rmet,rprimd(:,:,iimage),ucvol)
-   call fcart2fred(fcart(:,:,iimage),fred,rprimd(:,:,iimage),natom)
+   call fcart2gred(fcart(:,:,iimage),gred,rprimd(:,:,iimage),natom)
 
 !  Test if a reset is needed
    reset=.false.
    if (itime>1) then
-     dot1=mep_img_dotp(mep_param%bfgs_fprev(:,:,idynimage),fred)
+     dot1=mep_img_dotp(mep_param%bfgs_fprev(:,:,idynimage),gred)
      dot2=mep_img_dotp(mep_param%bfgs_fprev(:,:,idynimage), &
 &                      mep_param%bfgs_fprev(:,:,idynimage))
-!     dot1=mep_img_dotp_red(rmet,mep_param%bfgs_fprev(:,:,idynimage),fred)
+!     dot1=mep_img_dotp_red(rmet,mep_param%bfgs_fprev(:,:,idynimage),gred)
 !     dot2=mep_img_dotp_red(rmet,mep_param%bfgs_fprev(:,:,idynimage), &
 !&                               mep_param%bfgs_fprev(:,:,idynimage))
      reset=((dot2<two*abs(dot1)).or.abs(dot2)<tol8)
@@ -552,12 +552,12 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
      call hessupdt(mep_param%lbfgs_hess(:,:,idynimage),&
 &                  mep_param%iatfix,natom,3*natom, &
                    xred(:,:,iimage),mep_param%bfgs_xprev(:,:,idynimage),&
-                   fred(:,:),mep_param%bfgs_fprev(:,:,idynimage))
+                   gred(:,:),mep_param%bfgs_fprev(:,:,idynimage))
    end if
 
 !  Update history
    mep_param%bfgs_xprev(:,:,idynimage)=xred(:,:,iimage)
-   mep_param%bfgs_fprev(:,:,idynimage)=fred(:,:)
+   mep_param%bfgs_fprev(:,:,idynimage)=gred(:,:)
 
 !  Compute image step
    xstep=zero
@@ -568,7 +568,7 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
          indj=3*(jatom-1)
          do jj=1,3
            xstep(ii,iatom)=xstep(ii,iatom) &
-&             -mep_param%lbfgs_hess(indi+ii,indj+jj,idynimage)*fred(jj,jatom)
+&             -mep_param%lbfgs_hess(indi+ii,indj+jj,idynimage)*gred(jj,jatom)
          end do
        end do
      end do
@@ -596,7 +596,7 @@ subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 !End loop over images
  end do
 
- ABI_FREE(fred)
+ ABI_FREE(gred)
  ABI_FREE(xstep)
 
 end subroutine mep_lbfgs
@@ -670,7 +670,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
  integer,allocatable :: dynimage_tot(:),iatfix_fake(:,:),ind_dynimage_tot(:)
  integer,allocatable :: list_dynimage_tot(:)
  real(dp) :: favg(3),gprimd(3,3),gmet(3,3),rmet(3,3)
- real(dp),allocatable :: buffer(:,:),buffer_all(:,:),fred(:,:)
+ real(dp),allocatable :: buffer(:,:),buffer_all(:,:),gred(:,:)
  real(dp),allocatable :: fcart_all(:,:,:),fcartp_all(:,:,:)
  real(dp),allocatable :: gmet_all(:,:,:),gprimd_all(:,:,:),rprimd_all(:,:,:)
  real(dp),allocatable :: xcart_all(:,:,:),xcartp_all(:,:,:),xred_old(:,:),xstep_all(:,:,:)
@@ -825,20 +825,20 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
  else
 
 !  Impose here f-fprev=0 (cannot be done inside hessupdt in cartesian coordinates)
-   ABI_MALLOC(fred,(3,natom))
+   ABI_MALLOC(gred,(3,natom))
    do idynimage=1,ndynimage_tot
      fcartp_all(:,:,idynimage)=fcartp_all(:,:,idynimage)-fcart_all(:,:,idynimage)
-     call fcart2fred(fcartp_all(:,:,idynimage),fred,rprimd_all(:,:,idynimage),natom)
+     call fcart2gred(fcartp_all(:,:,idynimage),gred,rprimd_all(:,:,idynimage),natom)
      where (mep_param%iatfix(:,:)==1) ! iatfix is defined in reduced coordinates
-       fred(:,:)=zero
+       gred(:,:)=zero
      end where
-     call fred2fcart(favg,.TRUE.,fcartp_all(:,:,idynimage),fred,gprimd_all(:,:,idynimage),natom)
+     call gred2fcart(favg,.TRUE.,fcartp_all(:,:,idynimage),gred,gprimd_all(:,:,idynimage),natom)
      do iatom=1,natom
        fcartp_all(:,iatom,idynimage)=fcartp_all(:,iatom,idynimage) &
 &                                   +fcart_all(:,iatom,idynimage)+favg(:)
      end do
    end do
-   ABI_FREE(fred)
+   ABI_FREE(gred)
 
 !  f-fprev=0 has already been imposed for fixed atoms:
 !  we call hessupdt with no fixed atom

@@ -742,7 +742,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rpri
   integer :: id(3)
   integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
   integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-  real(dp) :: gprimd(3,3),gred(3),gvec(3),ratom(3)
+  real(dp) :: gprimd(3,3),gqred(3),gvec(3),ratom(3)
   real(dp),allocatable :: fofg(:,:),fofr(:),gq(:,:),xcart(:,:)
 
   ! ************************************************************************
@@ -795,13 +795,13 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rpri
   ! Triple loop on each dimension
   do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
-     gred(3) = gq(3,i3)
+     gqred(3) = gq(3,i3)
 
      do i2=1,n2
         ig2=i2-(i2/id2)*n2-1
         if (fftn2_distrib(i2) == me_fft) then
 
-           gred(2) = gq(2,i2)
+           gqred(2) = gq(2,i2)
            i2_local = ffti2_local(i2)
            i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
            ! Do the test that eliminates the Gamma point outside of the inner loop
@@ -811,8 +811,8 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nhat,nspden,nsym,rhor,rpri
            ! Final inner loop on the first dimension (note the lower limit)
            do i1=ii1,n1
               !         gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-              gred(1) = gq(1,i1)
-              gvec(1:3) = MATMUL(gprimd,gred)
+              gqred(1) = gq(1,i1)
+              gvec(1:3) = MATMUL(gprimd,gqred)
               fofg_index=i1+i23
               trace = dot_product(gvec,gvec)
               do ii = 1, 3 ! sum over components of efg tensor

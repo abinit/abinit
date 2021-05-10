@@ -15,10 +15,10 @@ prtvxc   1
 nband 50
 
 # === Dataset 1
-npkpt1 2 npfft1 2 npspinor1 1 # npband 2
+np_spkpt1 2 npfft1 2 npspinor1 1 # npband 2
 
 # === Dataset 2
-npkpt2 1 npfft2 2 npspinor2 2 # npband 2
+np_spkpt2 1 npfft2 2 npspinor2 2 # npband 2
 getwfk2 -1
 
 # === Structure and cell

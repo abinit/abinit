@@ -17,8 +17,8 @@ this topic, he/she will read different help files of the ABINIT package,
 related to the [[help:abinit|main ABINIT executable]], to the
 [[help:respfn|DFPT features of ABINIT]], and to the [[help:mrgddb|DDB merge tool]].
 
-It will be easier to discover the present file with the help of the [tutorials](../tutorial),
-especially the tutorials on [DFPT1](../tutorial/rf1) and [DFPT2](../tutorial/rf2).  
+It will be easier to discover the present file with the help of the [tutorials](/tutorial),
+especially the tutorials on [DFPT1](/tutorial/rf1) and [DFPT2](/tutorial/rf2).  
 
 ## 1 Introduction
   
@@ -92,7 +92,7 @@ e.g. [[dieflag@anaddb]], [[thmflag@anaddb]], [[elphflag@anaddb]]
 
 The list of input variables for the anaddb input file are presented in the
 [[varset:anaddb]] variable set. In order to discover them, it is easier to use
-the different tutorials: start with the [second DFPT tutorial](../tutorial/rf2), then follow 
+the different tutorials: start with the [second DFPT tutorial](/tutorial/rf2), then follow 
 the [tutorial on elasticity and
-piezoelectricity](../tutorial/elastic), the [tutorial on electron-phonon
-interaction](../tutorial/eph), and the [tutorial on non-linear properties](../tutorial/nlo). 
+piezoelectricity](/tutorial/elastic), the [tutorial on electron-phonon
+interaction](/tutorial/eph), and the [tutorial on non-linear properties](/tutorial/nlo). 

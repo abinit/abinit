@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !! Single geometry: apply force and stress preconditioner followed by geometry predictor.
-!! Choose among the whole set of geometry predictors defined by iomov.
+!! Choose among the whole set of geometry predictors defined by iommov.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2018-2021 ABINIT group (DCA, XG, GMR, SE)
@@ -79,38 +79,19 @@ contains
 !!
 !! FUNCTION
 !! Single geometry: apply force and stress preconditioner followed by geometry predictor.
-!! Choose among the whole set of geometry predictors defined by iomov.
+!! Choose among the whole set of geometry predictors defined by ionmov.
 !!
 !! INPUTS
-!!  dtfil <type(datafiles_type)>=variables related to files
-!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!   | mband=maximum number of bands
-!!   | mgfft=maximum size of 1D FFTs
-!!   | mkmem =number of k points treated by this node
-!!   |  angular momentum for nonlocal pseudopotential
-!!   | mpw=maximum dimensioned size of npw.
-!!   | natom=number of atoms in unit cell
-!!   |  except on first call (hartree/bohr); updated on output
-!!   | nfft=(effective) number of FFT grid points (for this processor)
-!!   |      for the "coarse" grid (see NOTES below)
-!!   | nkpt=number of k points.
-!!   | nspden=number of spin-density components
-!!   | nsppol=1 for unpolarized, 2 for spin-polarized
-!!   | nsym=number of symmetry elements in space group
-!!  mpi_enreg=information about MPI parallelization
-!!  rprimd(3,3)=dimensional primitive translations (bohr)
+!!  (TO BE DESCRIBED)
 !!
 !! OUTPUT
+!!  (TO BE DESCRIBED)
 !!
 !! SIDE EFFECTS
-!! Rest of i/o is related to DFT
-!!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
-!!  write_HIST = optional, default is true, flag to disble the write of the HIST file
+!!  hist is the main quantity updated, contains xred, rprimd and acell.
+!!  (TO BE DESCRIBED)
 !!
 !! NOTES
-!! This subroutine uses the arguments natom, xred,
-!! vis, and dtion (the last two contained in dtset) to make
-!! molecular dynamics updates.
 !!
 !! PARENTS
 !!
@@ -123,36 +104,47 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
 
 !Arguments ------------------------------------
 !scalars
-integer, intent(in) :: comm_cell,dt_chkdilatmx,hmctt,icycle,itime,nctime,npsp,ntime
-integer, intent(inout) :: iexit,ncycle,nerr_dilatmx
-integer, intent(in) :: usewvl
-real(dp), intent(in) :: dilatmx
-logical, intent(inout) :: skipcycle
-character(len=fnlen), intent(in) :: filnam_ds4
-type(ab_xfh_type),intent(inout) :: ab_xfh
-type(abihist), intent(inout) :: hist
-type(abimover), intent(in) :: ab_mover
-type(delocint), intent(inout) :: deloc
-type(mttk_type), intent(inout) :: mttk_vars
+ integer, intent(in) :: comm_cell,dt_chkdilatmx,hmctt,icycle,itime,nctime,npsp,ntime
+ integer, intent(inout) :: iexit,ncycle,nerr_dilatmx
+ integer, intent(in) :: usewvl
+ real(dp), intent(in) :: dilatmx
+ logical, intent(inout) :: skipcycle
+ character(len=fnlen), intent(in) :: filnam_ds4
+ type(ab_xfh_type),intent(inout) :: ab_xfh
+ type(abihist), intent(inout) :: hist
+ type(abimover), intent(in) :: ab_mover
+ type(delocint), intent(inout) :: deloc
+ type(mttk_type), intent(inout) :: mttk_vars
 !arrays
-real(dp), intent(in) :: amu_curr(ab_mover%ntypat)
-real(dp), intent(in) :: rprimd_orig(3,3)
+ real(dp), intent(in) :: amu_curr(ab_mover%ntypat)
+ real(dp), intent(in) :: rprimd_orig(3,3)
 
 !Local variables-------------------------------
 !scalars
-integer,parameter :: master=0
-integer :: ii,me,nloop
-logical,parameter :: DEBUG=.FALSE.
+ integer,parameter :: master=0
+ integer :: ii,me,nloop
+!integer :: iatom
+ logical,parameter :: DEBUG=.FALSE.
 !character(len=500) :: message
-character(len=500) :: dilatmx_errmsg
-character(len=fnlen) :: filename
-type(abiforstr) :: preconforstr ! Preconditioned forces and stress
-type(crystal_t) :: crystal
+ character(len=500) :: dilatmx_errmsg
+ character(len=fnlen) :: filename
+ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
+ type(crystal_t) :: crystal
 !arrays
-real(dp) :: acell(3),rprimd(3,3)
-real(dp), allocatable :: xred(:,:)
+ real(dp) :: acell(3),rprimd(3,3)
+ real(dp), allocatable :: xred(:,:)
 
 ! ***************************************************************
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_precpred_1geo, enter : ab_mover%ionmov=',ab_mover%ionmov
+!ABI_MALLOC(xred,(3,ab_mover%natom))
+!call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
+!do iatom=1,ab_mover%natom
+!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
+!enddo
+!ABI_FREE(xred)
+!ENDDEBUG
 
  me=xmpi_comm_rank(comm_cell)
 
@@ -267,6 +259,13 @@ real(dp), allocatable :: xred(:,:)
      nerr_dilatmx=0
    end if
  end if
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_precpred_1geo, exit '
+!do iatom=1,ab_mover%natom
+!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
+!enddo
+!ENDDEBUG
 
  call abiforstr_fin(preconforstr)
  ABI_FREE(xred)

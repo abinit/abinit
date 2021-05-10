@@ -330,8 +330,19 @@ subroutine outvar_i_n (dtsets,iout,&
  if (ndtset_alloc==1.and.sum(narrm(1:ndtset_alloc))==1) multi_atsph=0
 
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'iatsph','INT',multi_atsph) ! Emulating the case of multiple narr
+              narrm,ncid,ndtset_alloc,'iatsph','INT',multi_atsph) ! Emulating the case of multiple narr
 
+ dprarr(1,:)=dtsets(:)%ibte_abs_tol
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_abs_tol','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%ibte_alpha_mix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_alpha_mix','DPR',0)
+
+ intarr(1,:)=dtsets(:)%ibte_niter
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_niter','INT',0)
+
+ intarr(1,:)=dtsets(:)%ibte_prep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_prep','INT',0)
 
  intarr(1,:)=dtsets(:)%iboxcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'iboxcut','INT',0)
@@ -1007,8 +1018,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%npimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npimage','INT',0,firstchar="-")
 
- intarr(1,:)=dtsets(:)%npkpt
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npkpt','INT',0,firstchar='-')
+ intarr(1,:)=dtsets(:)%np_spkpt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_spkpt','INT',0,firstchar='-')
 
  intarr(1,:)=dtsets(:)%nppert
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nppert','INT',0,firstchar="-")

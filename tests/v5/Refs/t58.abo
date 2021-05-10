@@ -314,7 +314,7 @@ force_length_stats: {min:   1.68407154E-05, max:   1.68407154E-05, mean:   1.684
   0.00000000000000E+00  0.00000000000000E+00  1.79458558558559E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.68407E-05 9.72299E-06 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -1.68407153942751E-05
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00  0.00000000000000E+00  3.73863881752908E-04
  Total energy (etotal) [Ha]= -6.80232045624431E+00
 

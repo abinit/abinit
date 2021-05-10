@@ -103,7 +103,6 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !arrays
  real(dp) :: acell(3)
  real(dp) :: rprimd(3,3)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom)
  real(dp) :: strten(6)
@@ -252,18 +251,6 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    call xred2xcart(ab_mover%natom,rprimd,xcart_hist(:,:,ii),hist%xred(:,:,ii+shift))
  end do
  fcart_hist => hist%fcart(:,:,1+shift:diisSize+shift)
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'diisrelax 06'
 !##########################################################

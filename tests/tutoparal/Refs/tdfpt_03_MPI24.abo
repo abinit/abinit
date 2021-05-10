@@ -75,7 +75,7 @@ P           mkmem           1
              nkpt           4
 -          npband           2
 -           npfft           3
--           npkpt           4
+-        np_spkpt           4
              nsym           8
            ntypat           3
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -714,7 +714,7 @@ P           mkmem           1
              nkpt           4
 -          npband           2
 -           npfft           3
--           npkpt           4
+-        np_spkpt           4
              nsym           8
            ntypat           3
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000

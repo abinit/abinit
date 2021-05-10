@@ -9,11 +9,11 @@ authors: MT
 This tutorial aims at showing how to create your own atomic datasets for the Projector Augmented-Wave (PAW) method.
 
 You will learn how to generate these atomic datasets and how to control their softness and transferability.
-You already should know how to use ABINIT in the PAW case (see the tutorial [PAW1](paw1) ).
+You already should know how to use ABINIT in the PAW case (see the tutorial [PAW1](/tutorial/paw1) ).
 
 This tutorial should take about 2h00.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1. The PAW atomic dataset - introduction
 

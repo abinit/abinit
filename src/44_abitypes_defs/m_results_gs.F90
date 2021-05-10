@@ -93,6 +93,9 @@ MODULE m_results_gs
   real(dp) :: diffor
    ! maximal absolute value of changes in the components of force
 
+  real(dp) :: nelect_extfpmd
+   ! Contribution of the Extended FPMD model to the number of electrons for high temperature simulations
+
 ! All the energies are in Hartree, obtained "per unit cell".
   type(energies_type) :: energies
 !!!  real(dp) :: eei      ! local pseudopotential energy (Hartree)
@@ -130,12 +133,12 @@ MODULE m_results_gs
   real(dp), allocatable :: fcart(:,:)
    ! fcart(3,natom)
    ! Cartesian forces (Hartree/Bohr)
-   ! Note: unlike fred, this array has been corrected by enforcing
+   ! Note: unlike gred, this array has been corrected by enforcing
    ! the translational symmetry, namely that the sum of force
    ! on all atoms is zero.
 
-  real(dp), allocatable :: fred(:,:)
-   ! fred(3,natom)
+  real(dp), allocatable :: gred(:,:)
+   ! gred(3,natom)
    ! Forces in reduced coordinates (Hartree)
    ! Actually, gradient of the total energy with respect
    ! to change of reduced coordinates
@@ -192,6 +195,9 @@ MODULE m_results_gs
   real(dp) :: pion(3)
    ! ucvol times the ionic polarization in reduced coordinates
 
+  real(dp) :: shiftfactor_extfpmd
+   ! Energy shift factor of the Extended FPMD model for high temperature simulations
+
   real(dp) :: strten(6)
    ! Stress tensor in cartesian coordinates (Hartree/Bohr^3)
    ! 6 unique components of this symmetric 3x3 tensor:
@@ -237,7 +243,7 @@ CONTAINS
 !!  nsppol=number of spin channels for this dataset
 !!  only_part= --optional, default=false--
 !!            if this flag is activated only the following parts of results_gs
-!!            are initalized: all scalars, fcart,fred,strten
+!!            are initalized: all scalars, fcart,gred,strten
 !!
 !! OUTPUT
 !!
@@ -281,8 +287,10 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%etotal =zero
  results_gs%fermie =zero
  results_gs%fermih =zero ! CP added for case occopt 9
+ results_gs%nelect_extfpmd=zero
  results_gs%residm =zero
  results_gs%res2   =zero
+ results_gs%shiftfactor_extfpmd=zero
  results_gs%vxcavg =zero
 
  call energies_init(results_gs%energies)
@@ -290,8 +298,8 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%strten=zero
  ABI_MALLOC(results_gs%fcart,(3,natom))
  results_gs%fcart=zero
- ABI_MALLOC(results_gs%fred,(3,natom))
- results_gs%fred =zero
+ ABI_MALLOC(results_gs%gred,(3,natom))
+ results_gs%gred =zero
  ABI_MALLOC(results_gs%gaps,(3,nsppol))
  results_gs%gaps =zero
  ABI_MALLOC(results_gs%intgres,(nspden,natom))
@@ -334,7 +342,7 @@ end subroutine init_results_gs
 !!  nsppol=number of spin channels for this dataset
 !!  only_part= --optional, default=false--
 !!            if this flag is activated only the following parts of results_gs
-!!            are initalized: all scalars, fcart,fred,strten
+!!            are initalized: all scalars, fcart,gred,strten
 !!
 !! OUTPUT
 !!
@@ -386,8 +394,10 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
        results_gs(jj,ii)%fermih =zero ! CP added for occopt 9 cases
+       results_gs(jj,ii)%nelect_extfpmd=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
+       results_gs(jj,ii)%shiftfactor_extfpmd=zero
        results_gs(jj,ii)%vxcavg =zero
 
        call energies_init(results_gs(jj,ii)%energies)
@@ -395,8 +405,8 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%strten=zero
        ABI_MALLOC(results_gs(jj,ii)%fcart,(3,natom))
        results_gs(jj,ii)%fcart=zero
-       ABI_MALLOC(results_gs(jj,ii)%fred,(3,natom))
-       results_gs(jj,ii)%fred =zero
+       ABI_MALLOC(results_gs(jj,ii)%gred,(3,natom))
+       results_gs(jj,ii)%gred =zero
        ABI_MALLOC(results_gs(jj,ii)%gaps,(3,nsppol))
        results_gs(jj,ii)%gaps =zero
        ABI_MALLOC(results_gs(jj,ii)%intgres,(nspden,natom))
@@ -468,7 +478,7 @@ subroutine destroy_results_gs(results_gs)
  results_gs%berryopt=0
 
  ABI_SFREE(results_gs%fcart)
- ABI_SFREE(results_gs%fred)
+ ABI_SFREE(results_gs%gred)
  ABI_SFREE(results_gs%gaps)
  ABI_SFREE(results_gs%grcondft)
  ABI_SFREE(results_gs%gresid)
@@ -530,7 +540,7 @@ subroutine destroy_results_gs_array(results_gs)
        results_gs(jj,ii)%berryopt=0
 
        ABI_SFREE(results_gs(jj,ii)%fcart)
-       ABI_SFREE(results_gs(jj,ii)%fred)
+       ABI_SFREE(results_gs(jj,ii)%gred)
        ABI_SFREE(results_gs(jj,ii)%gaps)
        ABI_SFREE(results_gs(jj,ii)%grchempottn)
        ABI_SFREE(results_gs(jj,ii)%grcondft)
@@ -594,7 +604,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
 
  if (natom_in>natom_out) then
    ABI_SFREE(results_gs_out%fcart)
-   ABI_SFREE(results_gs_out%fred)
+   ABI_SFREE(results_gs_out%gred)
    ABI_SFREE(results_gs_out%grchempottn)
    ABI_SFREE(results_gs_out%grcondft)
    ABI_SFREE(results_gs_out%gresid)
@@ -607,8 +617,8 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
    if (allocated(results_gs_in%fcart))   then
      ABI_MALLOC(results_gs_out%fcart,(3,natom_in))
    end if
-   if (allocated(results_gs_in%fred))    then
-     ABI_MALLOC(results_gs_out%fred,(3,natom_in))
+   if (allocated(results_gs_in%gred))    then
+     ABI_MALLOC(results_gs_out%gred,(3,natom_in))
    end if
    if (allocated(results_gs_in%gresid))  then
      ABI_MALLOC(results_gs_out%gresid,(3,natom_in))
@@ -659,8 +669,10 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
  results_gs_out%fermih =results_gs_in%fermih ! CP added for occopt 9
+ results_gs_out%nelect_extfpmd=results_gs_in%nelect_extfpmd
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
+ results_gs_out%shiftfactor_extfpmd=results_gs_in%shiftfactor_extfpmd
  results_gs_out%vxcavg =results_gs_in%vxcavg
 
  call energies_copy(results_gs_in%energies,results_gs_out%energies)
@@ -670,7 +682,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%strten(:)=results_gs_in%strten(:)
 
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
- if (allocated(results_gs_in%fred))   results_gs_out%fred(:,1:natom_in)  =results_gs_in%fred(:,1:natom_in)
+ if (allocated(results_gs_in%gred))   results_gs_out%gred(:,1:natom_in)  =results_gs_in%gred(:,1:natom_in)
  if (allocated(results_gs_in%gaps))   results_gs_out%gaps(:,1:nsppol_in) =results_gs_in%gaps(:,1:nsppol_in)
  if (allocated(results_gs_in%grchempottn))&
 &  results_gs_out%grchempottn(:,1:natom_in)=results_gs_in%grchempottn(:,1:natom_in)
@@ -737,13 +749,14 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
 !  "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih", "residm", "res2"]) ! CP added fermih
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih",&
+&  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"]) ! CP added fermih
  ! End CP modified
  NCF_CHECK(ncerr)
 
  ! arrays
  !
- ! Note: unlike fred, this array has been corrected by enforcing
+ ! Note: unlike gred, this array has been corrected by enforcing
  ! the translational symmetry, namely that the sum of force on all atoms is zero.
 
  ncerr = nctk_def_arrays(ncid, [&
@@ -767,8 +780,10 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
 !&  datamode=.True.)
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih', 'residm', 'res2'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih, res%residm, res%res2],&
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih',&
+&  'nelect_extfpmd', 'residm', 'res2', 'shiftfactor_extfpmd'],&
+&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih,&
+&  res%nelect_extfpmd, res%residm, res%res2, res%shiftfactor_extfpmd],&
 &  datamode=.True.)
  ! End CP modified
  NCF_CHECK(ncerr)

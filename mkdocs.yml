@@ -1,3 +1,5 @@
+# Mkdocs configuration file. See https://www.mkdocs.org/user-guide/configuration/
+
 site_name: abinit
 site_url: https://docs.abinit.org
 site_description: Abinit documentation
@@ -12,11 +14,9 @@ edit_uri: edit/master/doc/
 # the directory. If `False`, use `<page_name>.html style file with hyperlinks to the file.
 # True generates nicer URLs, but False is useful if browsing the output on a filesystem.
 use_directory_urls: True
-#use_directory_urls: False
 
-pages:
-#- Quick Start:
-#- Home: index.md
+#pages:  # TODO Should be replaced by nav but then the search plugin does not work (bug?)
+nav:
 - User Guide:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
@@ -39,7 +39,6 @@ pages:
         - CentOS: INSTALL_CentOS.md
         - EasyBuild: INSTALL_EasyBuild.md
         - GPUs: INSTALL_gpu.md
-
 - Topics:
     - Features: topics/features.md
     - Topic List: topics/index.md
@@ -75,6 +74,7 @@ pages:
     - topics/ElPhonTransport.md
     - topics/ElecDOS.md
     - topics/ElecBandStructure.md
+    - topics/ExtFPMD.md
     - topics/FileFormats.md
     - topics/FitProcess.md
     - topics/ForcesStresses.md
@@ -191,7 +191,7 @@ pages:
         - tutorial/eph_intro.md
         - tutorial/eph4mob.md
         - tutorial/eph4zpr.md
-          #- tutorial/eph4isotc.md
+        #- tutorial/eph4isotc.md
     - EPH-legacy:
         - tutorial/eph.md
         - tutorial/tdepes.md
@@ -258,12 +258,13 @@ pages:
     - History: about/history.md
     - License: about/license.md
 
+# The section below activates markdown/theme extensions and other parameters related to
+# the HTML/JS website. Play with it only if you know what you're doing!
+
 markdown_extensions:
   - markdown.extensions.meta
   - markdown.extensions.toc:
         permalink: true  # For ¶
-        #permalink: "#"
-        #separator: "_"
   - markdown.extensions.admonition
   - markdown.extensions.fenced_code
   - markdown.extensions.codehilite
@@ -272,8 +273,6 @@ markdown_extensions:
   - markdown.extensions.def_list
   - markdown.extensions.sane_lists
   - markdown.extensions.attr_list
-  #- mdx_math:
-  #      enable_dollar_delimiter: True
   - pymdownx.arithmatex:
         #inline_syntax: ['dollar']
         #block_syntax:  ['dollar', 'begin']
@@ -290,7 +289,7 @@ markdown_extensions:
         care_of: false
   - pymdownx.superfences
   - pymdownx.tilde
-  # Abinit extensions.
+  # Abinit extensions (important!)
   - abimkdocs.wikilinks
   - abimkdocs.preprocessor
   - abimkdocs.mdx_figcaption
@@ -306,12 +305,18 @@ theme:
     palette:
         primary: deep orange
         accent: deep orange
-    feature:
-        tabs: true
+    features:
+      - navigation.tabs
+      #- navigation.tabs.sticky  # Nice but for insiders only
+      #- toc.integrate
+      - header.autohide
 
 plugins:
     - abimkdocs
-    #- search    # Deactivated
+    - search:
+          separator: '[\s\-\.]+'
+          min_search_length: 2
+          #prebuild_index: true  # Should test whether this makes search faster.
 
 extra_css:
     - css/extra.css
@@ -319,33 +324,31 @@ extra_css:
     - css/my_codehilite.css
 
 extra_javascript:
-    - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
 
 copyright: Copyright &copy; 2020-2021 The Abinit Group
 
-# Google Analytics
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.5.0
+    version: 9.5.2
     previous_published_versions: [] #8.2.0
     social:
-        - type: github-alt
+        - icon: fontawesome/brands/github
           link: https://github.com/abinit/abinit
-        - type: twitter
-          link: https://twitter.com/hashtag/abinit
-        - type: facebook
-          link: http://www.facebook.com/abinit.org
-        - type: youtube
+        - icon: fontawesome/brands/youtube
           link: https://www.youtube.com/watch?v=gcbfb_Mteo4
+        - icon: fontawesome/brands/facebook
+          link: http://www.facebook.com/abinit.org
+        - icon: fontawesome/brands/twitter
+          link: https://twitter.com/hashtag/abinit
     # Dictionary with aliases mapping token --> value
     # |token| will be replaced by value by the Markdown preprocessor
-    # NB: white spaces in token are not allowed, `token` is ignored
+    # NB: white spaces inside token are not allowed, `token` is ignored
     abimkdocs_aliases:
-        # Special macros:
+        # Special |macros|:
         today:  'Expands to datetime.date.today().strftime("%B %d, %Y")'
-        # Links to doc pages (AbiPy script)
+        # Links to doc pages (AbiPy scripts)
         AbiPy: "[AbiPy](https://github.com/abinit/abipy)"
         abistruct: "[abistruct](http://abinit.github.io/abipy/scripts/abistruct.html)"
         abiopen: "[abiopen](http://abinit.github.io/abipy/scripts/abiopen.html)"
@@ -400,6 +403,6 @@ extra:
         pyprocar: "[pyprocar](https://romerogroup.github.io/pyprocar/)"
         fermisurfer: "[fermisurfer](http://fermisurfer.osdn.jp/)"
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
-        #YAML: https://en.wikipedia.org/wiki/YAML
-        #JSON: https://en.wikipedia.org/wiki/JSON
+        YAML: "[Yaml](https://en.wikipedia.org/wiki/YAML)"
+        JSON: "[JSON](https://en.wikipedia.org/wiki/JSON)"
         aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'

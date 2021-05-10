@@ -37,6 +37,7 @@ module m_positron
  use m_bandfft_kpt
  use m_dtset
  use m_dtfil
+ use m_extfpmd
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -105,7 +106,7 @@ contains
 !!  etotal=current value of total energy
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  forces_needed=if >0 forces are needed
-!!  fred(3,natom)=forces in reduced coordinates
+!!  gred(3,natom)=gradients wrt nuclear positions in reduced coordinates
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space
 !!  gmet(3,3)=reciprocal space metric
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
@@ -187,8 +188,8 @@ contains
 !! SOURCE
 
 subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,etotal,electronpositron,&
-&          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,&
-&          grcondft,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
+&          energies,fock,forces_needed,gred,gmet,gprimd,grchempottn,&
+&          grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
@@ -206,11 +207,12 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
-type(fock_type),pointer, intent(inout) :: fock
+ type(fock_type),pointer, intent(inout) :: fock
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%natom),ngfft(18)
@@ -225,7 +227,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*dtset%usepaw)
  real(dp),intent(inout) :: nvresid(nfft,dtset%nspden)
- real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),fred(3,dtset%natom)
+ real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),gred(3,dtset%natom)
  real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
@@ -255,7 +257,7 @@ type(fock_type),pointer, intent(inout) :: fock
  integer,allocatable :: nlmn(:)
  real(dp) :: cgtmp(2)
  real(dp),parameter :: qphon(3)=(/zero,zero,zero/)
- real(dp),allocatable :: favg_dum(:),fcart_dum(:,:),forold_dum(:,:),fred_tmp(:,:)
+ real(dp),allocatable :: favg_dum(:),fcart_dum(:,:),forold_dum(:,:),gred_tmp(:,:)
  real(dp),allocatable :: gresid_dum(:,:),grhf_dum(:,:),grxc_dum(:,:)
  real(dp),allocatable :: rhog_ep(:,:),scocc(:),str_tmp(:),synlgr_dum(:,:)
  real(dp) :: nhatgr(0,0,0)
@@ -365,13 +367,13 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !  -----------------------------------------------------------------------------------------
 !  Update forces and stresses
-!  If electronpositron%calctype==1: fred_ep/stress_ep are the electronic fred/stress
-!  If electronpositron%calctype==2: fred_ep/stress_ep are the positronic fred/stress
+!  If electronpositron%calctype==1: gred_ep/stress_ep are the electronic gred/stress
+!  If electronpositron%calctype==2: gred_ep/stress_ep are the positronic gred/stress
 !  -----------------------------------------------------------------------------------------
    if (history_level==2.or.history_level==3) then
      optstr=0;optfor=0
      if (allocated(electronpositron%stress_ep)) optstr=stress_needed
-     if (allocated(electronpositron%fred_ep).and.forces_needed==2) optfor=1
+     if (allocated(electronpositron%gred_ep).and.forces_needed==2) optfor=1
      if (optfor>0.or.optstr>0) then
        ABI_MALLOC(favg_dum,(3))
        ABI_MALLOC(fcart_dum,(3,dtset%natom))
@@ -380,20 +382,20 @@ type(fock_type),pointer, intent(inout) :: fock
        ABI_MALLOC(grhf_dum,(3,dtset%natom))
        ABI_MALLOC(grxc_dum,(3,dtset%natom))
        ABI_MALLOC(synlgr_dum,(3,dtset%natom))
-       ABI_MALLOC(fred_tmp,(3,dtset%natom))
+       ABI_MALLOC(gred_tmp,(3,dtset%natom))
        ABI_MALLOC(str_tmp,(6))
        forold_dum=zero;n3xccc0=n3xccc
        icalctype=electronpositron%calctype;electronpositron%calctype=-icalctype0
        if (electronpositron%calctype==0) electronpositron%calctype=-100
        if (electronpositron%calctype==-1) n3xccc0=0  ! Note: if calctype=-1, previous calculation was positron
        call forstr(atindx1,cg,cprj,diffor_dum,dtefield,dtset,eigen,electronpositron,energies,&
-&       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,grchempottn,grcondft,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
-&       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
+&       favg_dum,fcart_dum,fock,forold_dum,gred_tmp,grchempottn,grcondft,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
+&       extfpmd,indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
 &       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
        electronpositron%calctype=icalctype
-       if (optfor>0) electronpositron%fred_ep(:,:)=fred_tmp(:,:)
+       if (optfor>0) electronpositron%gred_ep(:,:)=gred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
        ABI_FREE(favg_dum)
        ABI_FREE(fcart_dum)
@@ -402,11 +404,11 @@ type(fock_type),pointer, intent(inout) :: fock
        ABI_FREE(grhf_dum)
        ABI_FREE(grxc_dum)
        ABI_FREE(synlgr_dum)
-       ABI_FREE(fred_tmp)
+       ABI_FREE(gred_tmp)
        ABI_FREE(str_tmp)
      end if
-     if (optfor==0.and.forces_needed>0.and.allocated(electronpositron%fred_ep)) then
-       electronpositron%fred_ep(:,:)=fred(:,:)-electronpositron%fred_ep(:,:)
+     if (optfor==0.and.forces_needed>0.and.allocated(electronpositron%gred_ep)) then
+       electronpositron%gred_ep(:,:)=gred(:,:)-electronpositron%gred_ep(:,:)
      end if
    end if
 
@@ -978,6 +980,9 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
      ABI_BUG(msg)
    end if
  end if
+
+ ! This to avoid using unitialized variables.
+ lambda_core = zero; lambda_paw = zero; lambda_core_paw = zero
 
 !Constants
  fact=0.0
@@ -1884,7 +1889,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: nband_cprj_eff_pos,nband_cprj_k,nband_cprj_k_pos
  integer :: nband_eff_pos,nband_k,nband_k_pos
  integer :: nblock_band,nblock_band_eff_pos,nkpt
- integer :: nproc_band,nproc_fft,nproc_kpt,nproc_kptband,npw_k,npw_k_pos
+ integer :: nproc_band,nproc_fft,nproc_spkpt,nproc_kptband,npw_k,npw_k_pos
  integer :: nspden_rhoij,option,tag,unit_doppler
  integer :: tim_fourdp=0,tim_fourwf=-36
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
@@ -2000,7 +2005,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !Parallel settings
  if (mpi_enreg%paral_kgb/=0) then
-   nproc_kpt=mpi_enreg%nproc_kpt
+   nproc_spkpt=mpi_enreg%nproc_spkpt
    nproc_band=mpi_enreg%nproc_band
    nproc_fft=mpi_enreg%nproc_fft
    nproc_kptband=xmpi_comm_size(mpi_enreg%comm_kptband)
@@ -2012,9 +2017,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    my_n2=n2/nproc_fft
    accessfil=IO_MODE_FORTRAN;if(nproc_fft>1)accessfil=IO_MODE_MPI
  else
-   nproc_kpt=mpi_enreg%nproc_kpt
+   nproc_spkpt=mpi_enreg%nproc_spkpt
    nproc_band=1;nproc_fft=1
-   nproc_kptband=nproc_kpt
+   nproc_kptband=nproc_spkpt
    me_band=0;me_fft=0
    me_kpt=mpi_enreg%me_kpt
    me_kptband=me_kpt
@@ -2446,11 +2451,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        jj=mpi_enreg%my_kpttab(ikpt_pos)
        bandfft_kpt_pos => bandfft_kpt(jj)
      end if
-     do ii=0,mpi_enreg%nproc_kpt-1
+     do ii=0,mpi_enreg%nproc_spkpt-1
        if (ii/=mpi_enreg%me_kpt) then
          tag=ikpt_pos+(isppol_pos-1)*nkpt+2*nkpt*ii
          call xmpi_send(cg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
-         tag=tag+nkpt*(1+2*mpi_enreg%nproc_kpt)
+         tag=tag+nkpt*(1+2*mpi_enreg%nproc_spkpt)
          if (mpi_enreg%paral_kgb==0) then
            call xmpi_send(kg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
          else
@@ -2465,7 +2470,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      ii=0;if (allocated(mpi_enreg%proc_distrb)) ii=mpi_enreg%proc_distrb(ikpt_pos,1,isppol_pos)
      tag=ikpt_pos+(isppol_pos-1)*nkpt+2*nkpt*mpi_enreg%me_kpt
      call xmpi_recv(cg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
-     tag=tag+nkpt*(1+2*mpi_enreg%nproc_kpt)
+     tag=tag+nkpt*(1+2*mpi_enreg%nproc_spkpt)
      if (mpi_enreg%paral_kgb==0) then
        call xmpi_recv(kg_k_pos,ii,tag,mpi_enreg%comm_kpt,ierr)
      else
@@ -3118,7 +3123,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
    jkpt=0
    do ikpt=1,nkpt
-     if (nproc_kpt==1) then
+     if (nproc_spkpt==1) then
        rho_moment_k(1:nfft)=rho_moment_v2(1:nfft,ikpt)
      else
        if (my_gridtab(ikpt)/=0) jkpt=jkpt+1
@@ -3150,7 +3155,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
            call xmpi_send(rho_moment_v2(1:nfft,jkpt),0,tag,mpi_enreg%comm_kpt,ierr)
          end if
        end if
-     end if ! nproc_kpt>1
+     end if ! nproc_spkpt>1
      if (me_kpt==0) then
        indx=0
        do i3=1,n3

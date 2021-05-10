@@ -26,7 +26,8 @@ There are three ways to compute the temperature dependence with Abinit:
   * **Using post-processing python scripts**: This way provides more options and is more efficient (less disk space, less memory demanding). 
     This option **requires Netcdf** (both in Abinit and python). In this tutorial, we only focus on this approach.
 
-  * **Using an interpolation of the perturbed potential**: This new way is covered in the [ZPR and T-dependent band structures](eph4zpr) tutorial.  
+  * **Using an interpolation of the perturbed potential**: This new way is covered 
+   in the [ZPR and T-dependent band structures](/tutorial/eph4zpr) tutorial.  
 
 !!! important
 
@@ -64,7 +65,7 @@ There are three ways to compute the temperature dependence with Abinit:
           LibXC          : yes
           Wannier90      : no
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,

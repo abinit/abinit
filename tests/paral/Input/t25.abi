@@ -1,15 +1,15 @@
 #Test the triple parallelisation. 
-#We cannot check the distribution npband*npfft*npkpt=2*2*2=8 processors, 
+#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors, 
 #this number being not allowed in the test procedure.
 #Here, we only test the parallelisation over bands and spins:
-#npband*npfft*npkpt=2*1*2=4 processors.
+#npband*npfft*np_spkpt=2*1*2=4 processors.
 #In addition, we also test here various features of bandfft-kpt parallelisation
 #In particular, the bandpp, istwfk=2 and wfoptalg=14 variables.
 
  use_slk 1
  bandpp 2
  istwfk 2
- npband 2 npkpt 2 npfft 1
+ npband 2 np_spkpt 2 npfft 1
  
  ngfft 18 18 18
  ngfftdg 36 36 36
@@ -57,10 +57,10 @@
 #%% description = 
 #%%    C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Test the triple parallelisation.
-#%%    We cannot check the distribution npband*npfft*npkpt=2*2*2=8 processors,
+#%%    We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,
 #%%    this number being not allowed in the test procedure.
 #%%    Here, we only test the parallelisation over bands and spins:
-#%%    npband*npfft*npkpt=2*1*2=4 processors.
+#%%    npband*npfft*np_spkpt=2*1*2=4 processors.
 #%%    In addition, we also test here various features of bandfft-kpt parallelisation
 #%%    In particular, the bandpp, istwfk=2 and wfoptalg=14 variables.
 #%% topics = parallelism

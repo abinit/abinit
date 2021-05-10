@@ -1,13 +1,9 @@
 html2text
-# Pinned versions
-#-mkdocs==0.16.3
-#-mkdocs-material==1.12.2
-#mkdocs==0.17.2 
-mkdocs==0.17.5 # required by py3.7 
-mkdocs-material==2.6.6
-# This to move to new mkdocs version (requires core refactoring)
-#mkdocs==1.0.4
-#mkdocs-material==3.3.0
+
+# Pinned versions for website deployment
+mkdocs==1.1.2
+mkdocs-material==7.0.6
+
 pymdown-extensions
 python-markdown-math
 pyyaml
@@ -15,10 +11,10 @@ pygments
 pybtex
 
 #graphviz or python-graphviz if conda
-py_w3c
+#py_w3c
+
 # Unit tests
 pytest
 #pytest-cov
-#pytest-xdist
 
 abimkdocs_plugin/.

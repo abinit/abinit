@@ -97,7 +97,7 @@ module m_tdep_readwrite
 !FB    real(dp), allocatable :: histS(:,:)
 !FB    ! Vector of (x,y,z)X(natom)X(mxhist) values of velocity
 !FB    real(dp), allocatable :: histV(:,:,:)
-!FB    ! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,fred)X(mxhist)
+!FB    ! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,gred)X(mxhist)
 !FB    real(dp), allocatable :: histXF(:,:,:,:)
 !FB
 !FB  end type Hist_type

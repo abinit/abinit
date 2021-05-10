@@ -51,7 +51,7 @@
  nband  20
  npband  2
  npfft 2
- npkpt 1
+ np_spkpt 1
   
 #molecular dynamic
  ionmov 12

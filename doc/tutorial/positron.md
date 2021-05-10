@@ -16,11 +16,11 @@ physical properties:
 
 For the description of the implementation of TCDFT in `ABINIT` see [[cite:Wiktor2015]].
 
-The user should be familiar with the four basic tutorials of `ABINIT` and the [first PAW tutorial](paw1).
+The user should be familiar with the four basic tutorials of `ABINIT` and the [first PAW tutorial](/tutorial/paw1).
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the positron lifetime in Si lattice
 
@@ -279,7 +279,7 @@ file (one per atom type), which needs to be provided. This _core WF file_ should
 be named <span style="color:green">&#60;psp_file_name&#62;.corewf.xml</span>
 (where `<psp_file_name>` is the name of the PAW atomic dataset file, without `.xml` suffix).
 _Core WF files_ can be obtained with the `atompaw` tool
-(see [the tutorial on generating PAW datasets (PAW2)](paw2) ) by the use of the
+(see [the tutorial on generating PAW datasets (PAW2)](/tutorial/paw2) ) by the use of the
 `prtcorewf` keyword. You will find the core wavefunction file used in this calculation in
 `$ABI_PSPDIR/Si.LDA-PW-paw.abinit.corewf`.
 
@@ -368,4 +368,4 @@ unphysically high probability at high momenta in the spectrum.
 Further explanation of the influence of the PAW dataset on the _Doppler spectra_
 can be found in [[cite:Wiktor2015]]. In case you need to generate
 your own dataset for momentum distribution calculations,
-you can follow the [tutorial on generating PAW datasets (PAW2)](paw2).
+you can follow the [tutorial on generating PAW datasets (PAW2)](/tutorial/paw2).

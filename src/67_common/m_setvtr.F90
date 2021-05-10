@@ -314,12 +314,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    end if
    if (dtset%vdw_xc==5.and.ngrvdw==dtset%natom) then
      call vdw_dftd2(energies%e_vdw_dftd,dtset%ixc,dtset%natom,ntypat,1,dtset%typat,rprimd,&
-&     dtset%vdw_tol,xred,psps%znucltypat,fred_vdw_dftd2=grvdw)
+&     dtset%vdw_tol,xred,psps%znucltypat,gred_vdw_dftd2=grvdw)
    end if
    if ((dtset%vdw_xc==6.or.dtset%vdw_xc==7).and.ngrvdw==dtset%natom) then
      call vdw_dftd3(energies%e_vdw_dftd,dtset%ixc,dtset%natom,&
 &     ntypat,1,dtset%typat,rprimd,dtset%vdw_xc,dtset%vdw_tol,dtset%vdw_tol_3bt,&
-&     xred,psps%znucltypat,fred_vdw_dftd3=grvdw)
+&     xred,psps%znucltypat,gred_vdw_dftd3=grvdw)
    end if
  else
    energies%e_ewald=zero

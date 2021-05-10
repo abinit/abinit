@@ -14,14 +14,14 @@ type of calculation.
 
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
-ABINIT, [PAW1](paw1) and [PAW2](paw2).
-Also the [DFT+U tutorial](dftu) in ABINIT might be useful to know some basic
+ABINIT, [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2).
+Also the [DFT+U tutorial](/tutorial/dftu) in ABINIT might be useful to know some basic
 variables common to DFT+_U_ and DFT+DMFT.
 
 This tutorial should take about one hour to complete
 (less if you have access to several processors).
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The DFT+DMFT method: summary and key parameters
 
