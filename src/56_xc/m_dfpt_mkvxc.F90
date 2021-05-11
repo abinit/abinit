@@ -999,16 +999,19 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  integer :: ii,ir,ishift,ngrad,nspgrad
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
- real(dp) :: gradrho_gradrho1,gradrho_gradrho1_dn,gradrho_gradrho1_up
+ real(dp) :: gradrho_gradrho1,gradrho_grr0qr1
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ real(dp) :: msqgradrho
  character(len=500) :: msg
 !arrays
  real(dp) :: qphon(3)
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
+ real(dp),allocatable :: abarsqgr_t1(:,:),abarsqgr_t2(:,:)
  real(dp),allocatable :: ar1(:,:),a_gradi_r1(:,:)
  real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
- real(dp),allocatable :: rho1now(:,:,:)
+ real(dp),allocatable :: dadn_t1(:,:,:),dadn_t2(:,:),rho1now(:,:,:)
+ real(dp),allocatable :: gr_r0qdir_r1(:,:,:),r0qdir_r1(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
 
 ! *************************************************************************
@@ -1035,32 +1038,63 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_MALLOC(a_gradi_r1,(cplex*nfft,nspgrad))
  ABI_MALLOC(dadgradn_t1,(cplex*nfft,nspgrad,3))
  ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadn_t2,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadn_t1,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(r0qdir_r1,(cplex*nfft,nspgrad))
  do ir=1,nfft
    r0=kxc(ir,5:7); r1=rho1now(ir,1,2:4)
+   msqgradrho=sum(r0**2)
    gradrho_gradrho1=dot_product(r0,r1)
    ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
    a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
    dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
    dadgradn_t2(ir,1)=kxc(ir,4)*gradrho_gradrho1*r0(qdirc)
+   dadn_t1(ir,1,:)=r0(:)/msqgradrho*kxc(ir,2)*r0(qdirc)*rho1now(ir,1,1)
+   dadn_t2(ir,1)=kxc(ir,2)/msqgradrho*r0(qdirc)*gradrho_gradrho1
+   r0qdir_r1(ir,1)=r0(qdirc)*rho1now(ir,1,1)
  end do
 
 !Use xcden to compute the real space gradient of A*rho^(1). 
 !Reuse rho1now storage.
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
 
+!Use xcden to compute the real space gradient of r0(qdir)*rho^(1). 
+!Reuse rho1now storage.
+ ABI_MALLOC(gr_r0qdir_r1,(cplex*nfft,nspgrad,ngrad*ngrad))
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,r0qdir_r1,gr_r0qdir_r1)
+ ABI_MALLOC(abarsqgr_t1,(cplex*nfft,nspgrad))
+ do ir=1,nfft
+   r0=kxc(ir,5:7)
+   msqgradrho=sum(r0**2)
+   gradrho_grr0qr1=dot_product(r0,gr_r0qdir_r1(ir,1,2:4))  
+   abarsqgr_t1(ir,1)=kxc(ir,2)/msqgradrho*gradrho_grr0qr1
+ end do
+ ABI_FREE(r0qdir_r1)
+ ABI_FREE(gr_r0qdir_r1)
+
 !Incorporate the terms that do not need further treatment 
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii,1)=-a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc)-dadgradn_t2(ir,1)
+!   vxc1(ii,1)= -abarsqgr_t1(ir,1)  &
+! & -a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc) &
+! &            -dadgradn_t2(ir,1)!+dadn_t2(ir,1)
+   vxc1(ii,1)= -a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc) &
+ &            -dadgradn_t2(ir,1)!+dadn_t2(ir,1)
  end do
+ ABI_FREE(abarsqgr_t1)
  ABI_FREE(rho1now)
  ABI_FREE(a_gradi_r1)
  ABI_FREE(dadgradn_t2)
+ ABI_FREE(dadn_t2)
 
-!Now the term whose sum over real-space derivatives has to be computed
- call xcpotdq(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,dadgradn_t1,vxc1)
+!Now the two terms whose sums over real-space derivatives have to be computed
+!The negative sign here is canceled by a -1 factor inside xcpotdq
+ call xcpotdq(dadn_t1,dadgradn_t1,cplex,gprimd,ishift,mpi_enreg,nfft, &
+& ngfft,ngrad,nspden,nspgrad,vxc1)
+
+ ABI_FREE(dadgradn_t1)
+ ABI_FREE(dadn_t1)
 
 end subroutine dfpt_mkvxcggadq
 !!***

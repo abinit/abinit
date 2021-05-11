@@ -705,6 +705,8 @@ end subroutine xcpot
 !! Equivalent to xcpot for the q-derivative of the GGA xc kernel.
 !!
 !! INPUTS
+!!  adn(cplex*nfft,nspgrad,3)=r0(:)/msqgradrho*kxc(ir,2)*r0(qdirc)*rho1now(ir,1,1)
+!!  agradn(cplex*nfft,nspgrad,3)=kxc(:,4)*gradrho(:,:)*gradrho(:,qdir)*rho1(*)
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  ishift : if ==0, do not shift the xc grid (usual case);
@@ -715,7 +717,6 @@ end subroutine xcpot
 !!          =2, also take into account derivative wrt the gradient of the density.
 !!  nspden=number of spin-density components
 !!  nspgrad=number of spin-density and spin-density-gradient components
-!!  agradn(cplex*nfft,nspgrad,3)=kxc(:,4)*gradrho(:,:)*gradrho(:,qdir)*rho1(*)
 !!
 !! OUTPUT
 !!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
@@ -729,8 +730,8 @@ end subroutine xcpot
 !!
 !! SOURCE
 
-subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-&                 nspgrad,agradn,vxc) 
+subroutine xcpotdq (adn,agradn,cplex,gprimd,ishift,mpi_enreg, & 
+&    nfft,ngfft,ngrad,nspden,nspgrad,vxc) 
 
 !Arguments ------------------------------------
 !scalars
@@ -738,6 +739,7 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: adn(cplex*nfft,nspgrad,3)
  real(dp),intent(in) :: agradn(cplex*nfft,nspgrad,3)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(inout) :: vxc(2*nfft,nspden)
@@ -755,8 +757,9 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  logical :: with_vxc,with_vxctau
  real(dp) :: tsec(2)
  real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
- real(dp),allocatable :: wkcmpx(:,:),wkcmpxtau(:,:)
+ real(dp),allocatable :: wkcmpx(:,:),wkcmpx2(:,:)
  real(dp),allocatable :: work(:),workgr(:,:),worklp(:,:),worktau(:,:)
+ real(dp),allocatable :: work2(:),workgr2(:,:)
 
 ! *************************************************************************
 
@@ -780,13 +783,14 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
  !Compute the real-space gradient of de second term
- ABI_MALLOC(work,(cplex*nfft))
- ABI_MALLOC(wkcmpx,(2,nfft))
- ABI_MALLOC(workgr,(2,nfft))
+ ABI_MALLOC(work,(cplex*nfft)); ABI_MALLOC(work2,(cplex*nfft))
+ ABI_MALLOC(wkcmpx,(2,nfft)); ABI_MALLOC(wkcmpx2,(2,nfft))
+ ABI_MALLOC(workgr,(2,nfft)); ABI_MALLOC(workgr2,(2,nfft))
 
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(nfft,wkcmpx)
  do ifft=1,nfft
    wkcmpx(:,ifft)=zero
+   wkcmpx2(:,ifft)=zero
  end do
 
 ! Obtain agradn(G)*phase in wkcmpx from input agradn(r)
@@ -799,9 +803,11 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
 
    do ifft=1,cplex*nfft
      work(ifft)=agradn(ifft,ispden,idir)
+     work2(ifft)=adn(ifft,ispden,idir)
    end do
    call timab(82,1,tsec)
    call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
+   call fourdp(cplex,workgr2,work2,-1,mpi_enreg,nfft,1,ngfft,0)
    call timab(82,2,tsec)
   
    do i1=1,n1
@@ -834,6 +840,9 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
   !        Multiply by  -i 2pi G(idir) and accumulate in wkcmpx
            wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
            wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
+  !        Multiply by  i 2pi G(idir) and accumulate in wkcmpx
+           wkcmpx2(1,ifft)=wkcmpx2(1,ifft)-gcart_idir*workgr2(2,ifft)
+           wkcmpx2(2,ifft)=wkcmpx2(2,ifft)+gcart_idir*workgr2(1,ifft)
          end do
        end if
      end do
@@ -842,16 +851,20 @@ subroutine xcpotdq (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,&
  end do
 
  ABI_FREE(workgr)
+ ABI_FREE(workgr2)
 
  call timab(82,1,tsec)
  call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
+ call fourdp(cplex,wkcmpx2,work2,1,mpi_enreg,nfft,1,ngfft,0)
  call timab(82,2,tsec)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
  do ifft=1,nfft
-   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
+   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)+work2(ifft)
  end do
  ABI_FREE(wkcmpx)
+ ABI_FREE(wkcmpx2)
  ABI_FREE(work)
+ ABI_FREE(work2)
 
 end subroutine xcpotdq
 !!***
