@@ -533,7 +533,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
          vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
        & vxc1dqc(:,:,iatpert,qcar)
        end do 
-       vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+       vqgradhart(:)=vqgradhart(:)-vxc1dq(:,1)
      end if
 
      do iq2grad=1,nq2grad
@@ -2154,7 +2154,7 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iefipert,qcar)
          end do 
-         vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+         vqgradhart(:)=vqgradhart(:)-vxc1dq(:,1)
        end if
 
        do istrpert=1,nstrpert
@@ -2214,7 +2214,7 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iatpert,qcar)
          end do 
-         vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+         vqgradhart(:)=vqgradhart(:)-vxc1dq(:,1)
        end if
 
        !TODO:Maybe it is only necessary to compute half of these elements by symmetry
@@ -2261,7 +2261,7 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iatpert,qcar)
          end do 
-         vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
+         vqgradhart(:)=vqgradhart(:)-vxc1dq(:,1)
        end if
 
        do istrpert=1,nstrpert
