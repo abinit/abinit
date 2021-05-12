@@ -228,6 +228,8 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 !### 03. Decide based on kind of preconditioner if
 !###     a new matrix should be computed
 
+ new_order_forces = one  ! This to avoid using unitialized variables.
+
  if (ab_mover%goprecon==2)then
 
    val_rms=0.0

@@ -42,8 +42,8 @@ configurations:
       efficiency:  0.661381768
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 4,
             npband: 16,
             bandpp: 10,
@@ -54,8 +54,8 @@ configurations:
       efficiency:  0.653809390
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 8,
             npband: 8,
             bandpp: 20,
@@ -66,8 +66,8 @@ configurations:
       efficiency:  0.652034578
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 16,
             npband: 4,
             bandpp: 40,
@@ -78,8 +78,8 @@ configurations:
       efficiency:  0.668215873
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 6,
             npband: 10,
             bandpp: 16,
@@ -90,8 +90,8 @@ configurations:
       efficiency:  0.650905287
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 15,
             npband: 4,
             bandpp: 40,

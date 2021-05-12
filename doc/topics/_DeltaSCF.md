@@ -1,10 +1,10 @@
 ---
-description: How to to perform a Δ-SCF calculation of neutral excitations
+description: How to perform a Δ-SCF calculation of neutral excitations
 authors: FJ
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
-This page gives hints on how to to perform a Δ-SCF calculation of neutral excitations with the ABINIT package.
+This page gives hints on how to perform a Δ-SCF calculation of neutral excitations with the ABINIT package.
 
 ## Introduction
 
@@ -33,4 +33,3 @@ according to the linear combination of forces, see [[imgmov]]=6 and [[mixesimgf]
 ## Selected Input Files
 
 {{ selected_input_files }}
-

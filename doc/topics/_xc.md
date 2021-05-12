@@ -31,8 +31,11 @@ also available.
 In the LibXC 2.0 library, as interfaced with ABINIT, there are 24 functional
 forms of the 3D LDA type, and over 80 functional forms of the GGA type. They
 can be used with norm-conserving pseudopotentials as well as PAW atomic data.
-Also, some metaGGA can be used with ABINIT (norm-conserving case only). For
-response-function type calculations, the native ABINIT LDA and GGA kernels can
+Also, some metaGGA can be used with ABINIT (norm-conserving case only). 
+They need [[usekden]]=1.
+In particular, the TB09 (not delivering reliable total energies) 
+allows one to get cheap corrected band structures (use [[ixc]]=-12208, with HGH pseudopotentials).
+For response-function type calculations, the native ABINIT LDA and GGA kernels can
 be used as well as the LibXC ones.  
 
 #### **Hybrid functionals:**

@@ -2379,4 +2379,21 @@ instead of the legacy mode based on the files file. Example:
 """,
 ),
 
+Variable(
+    abivarname="dos_maxmode@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['PhononBands_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Phonon DOS MAX MODE included",
+    added_in_version="9.5",
+    text=r"""
+This variable specifies the maximum phonon mode index (up to 3*natom)
+included in the computation of the phonon DOS
+
+Default is 0 i.e. all modes are included in the DOS.
+""",
+),
+
 ]
