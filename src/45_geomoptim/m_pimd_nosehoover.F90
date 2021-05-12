@@ -335,12 +335,13 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 
 !Fill in the local variables
  ndof=3*natom*trotter
+ pitransform=pimd_param%pitransform
  quantummass(1:natom)=pimd_param%amu   (pimd_param%typat(1:natom))*amu_emass
  inertmass  (1:natom)=pimd_param%pimass(pimd_param%typat(1:natom))*amu_emass
  if(pitransform==1) inertmass=quantummass !compulsory for good definition of normal mode masses
  if(pitransform==2) inertmass=quantummass !compulsory for good definition of staging masses
  initemp=pimd_param%mdtemp(1);thermtemp=pimd_param%mdtemp(2)
- dtion=pimd_param%dtion;pitransform=pimd_param%pitransform
+ dtion=pimd_param%dtion
  kt=thermtemp*kb_HaK
  forces_orig=forces
 

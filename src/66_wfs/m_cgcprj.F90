@@ -697,7 +697,7 @@ end subroutine dotprodm_sumdiag_cgcprj
  real(dp), intent(in) :: alpha_mn(2,nband_in,nband_out)
  real(dp), intent(out),optional :: cgout(:,:)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj)
- type(pawcprj_type),intent(out),optional :: cprjout(:,:)
+ type(pawcprj_type),intent(inout),optional :: cprjout(:,:) ! ifort and others are buggy for optional intent(out) structured types
 
 !Local variables-------------------------------
 !scalars
