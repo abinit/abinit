@@ -1080,7 +1080,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 ! & -a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc) &
 ! &            -dadgradn_t2(ir,1)!+dadn_t2(ir,1)
    vxc1(ii,1)= -a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc) &
- &            -dadgradn_t2(ir,1)+dadn_t2(ir,1)
+ &            -dadgradn_t2(ir,1)!+dadn_t2(ir,1)
  end do
  ABI_FREE(abarsqgr_t1)
  ABI_FREE(rho1now)
