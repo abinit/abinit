@@ -1167,9 +1167,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 ! if all bands are skippable, we can exit the iline loop for good.
 !   otherwise, all procs are needed for the projbd and other operations,
 !   even if the present band will not be updated
-#ifdef DEV_MJV
-print *, 'bands_skipped_now ', bands_skipped_now, ' bands_treated_now ', bands_treated_now
-#endif
    if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
      exit
    end if

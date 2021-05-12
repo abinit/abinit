@@ -1001,9 +1001,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 ! given number of reduced kpt, store distribution of bands across procs
    ABI_MALLOC(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
    distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
-#ifdef DEV_MJV
-print *, 'loopert : distrb_flags ', distrb_flags
-#endif
 
    _IBM6("IBM6 before kpgio")
 

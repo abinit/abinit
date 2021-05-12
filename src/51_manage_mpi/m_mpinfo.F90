@@ -2248,9 +2248,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            if ((me>=iproc_min).and.(me<=iproc_max)) then
-#ifdef DEV_MJV
-print *, 'initmpi_bands ikpt ', ikpt, ' mpi_enreg%proc_distrb  ', mpi_enreg%proc_distrb(ikpt,:,isppol)
-#endif
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
@@ -2269,9 +2266,6 @@ print *, 'initmpi_bands ikpt ', ikpt, ' mpi_enreg%proc_distrb  ', mpi_enreg%proc
        nrank = 0
        ABI_MALLOC(ranks,(0))
      end if
-#ifdef DEV_MJV
-print *, 'initmpi_bands ranks ', ranks
-#endif
 
 !     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
