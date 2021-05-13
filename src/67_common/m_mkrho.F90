@@ -31,6 +31,7 @@ module m_mkrho
  use m_xmpi
  use m_errors
  use m_dtset
+ use m_extfpmd
 
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
@@ -137,13 +138,14 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option) !optional
+&                extfpmd,option) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option
  real(dp),intent(in) :: ucvol
+ type(extfpmd_type),intent(in),pointer,optional :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(paw_dmft_type), intent(in)  :: paw_dmft
@@ -728,6 +730,14 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  end if
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
+
+!Blanchet Add free electrons contribution to density
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
+   end if
+ end if
 
  select case (ioption)
  case(0, 1)

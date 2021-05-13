@@ -13,9 +13,9 @@ integrals of the charge density and magnetization (real-space functions) inside 
 values. This is described in e.g. [[cite:Kaduk2012]] or [[cite:Ma2015]].
 
 The algorithm implemented in ABINIT (to be published in 2020) is a clear improvement of the algorithm reported in both papers.
-The algorithm in [[cite:Kaduk2012]], 
+The algorithm in [[cite:Kaduk2012]],
 initially reported in [[cite:Wu2005]], implements a double-loop cycle, which is avoided in the present implementation.
-It is also an improvement on the algorithm presented in [[cite:Ma2015]], based on a penalty function (it is NOT a Lagrage multiplier approach, unlike claimed by these authors) also implemented in ABINIT,
+It is also an improvement on the algorithm presented in [[cite:Ma2015]], based on a penalty function (it is NOT a Lagrange multiplier approach, unlike claimed by these authors) also implemented in ABINIT,
 see [[topic:MagMom]], in that it imposes to arbitrary numerical precision the constraint, instead of an approximate one with a tunable accuracy under the control of
 [[magcon_lambda]].
 The present algorithm is also not subject to instabilities that have been observed when [[magcon_lambda]] becomes larger and larger
@@ -28,4 +28,3 @@ in the [[cite:Wu2005]] algorithm.
 ## Selected Input Files
 
 {{ selected_input_files }}
-
