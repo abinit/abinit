@@ -834,10 +834,7 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
 
 ! *************************************************************************
 
- if (allocated(cycle_bands)) then
-   ABI_FREE (cycle_bands)
- end if
- ABI_MALLOC (cycle_bands, (size(distrb, 2)))
+ ABI_REMALLOC (cycle_bands, (size(distrb, 2)))
  cycle_bands=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
@@ -880,10 +877,7 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
 
 ! *************************************************************************
 
- if (allocated(kpt_band_procs)) then
-    ABI_FREE (kpt_band_procs)
- end if
- ABI_MALLOC (kpt_band_procs, (size(distrb, 2)))
+ ABI_REMALLOC(kpt_band_procs, (size(distrb, 2)))
  kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
@@ -929,7 +923,7 @@ subroutine proc_distrb_band(band_procs,distrib,ikpt,isppol,nband,me_band,me_kpt,
 ! *************************************************************************
 
  band_procs = 0
- 
+
  if (allocated(distrib)) then
    do iband=1, nband
 ! is this band k spin on current proc?
@@ -1981,12 +1975,8 @@ subroutine clnmpi_img(mpi_enreg)
    mpi_enreg%comm_img=xmpi_comm_null
  end if
 
- if (allocated(mpi_enreg%my_imgtab))  then
-   ABI_FREE(mpi_enreg%my_imgtab)
- end if
- if (allocated(mpi_enreg%distrb_img))  then
-   ABI_FREE(mpi_enreg%distrb_img)
- end if
+ ABI_SFREE(mpi_enreg%my_imgtab)
+ ABI_SFREE(mpi_enreg%distrb_img)
 
  mpi_enreg%paral_img=0
  mpi_enreg%my_nimage=1
@@ -2148,9 +2138,7 @@ subroutine clnmpi_pert(mpi_enreg)
      mpi_enreg%comm_pert=xmpi_comm_null
    end if
 
-   if (allocated(mpi_enreg%distrb_pert))  then
-     ABI_FREE(mpi_enreg%distrb_pert)
-   end if
+   ABI_SFREE(mpi_enreg%distrb_pert)
 
    mpi_enreg%me_pert=0
    mpi_enreg%me_cell=0
@@ -2220,7 +2208,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  spacecomm=mpi_enreg%comm_kpt
  nproc=mpi_enreg%nproc_spkpt
 
-! make sure we have saturated kpt parallelization 
+! make sure we have saturated kpt parallelization
  if (mpi_enreg%paralbd==1 .and. xmpi_paral==1 .and. nproc >= 2*nkpt*nsppol) then
 
 ! number of procs per kpt/spin, on which we can distribute bands
@@ -2231,10 +2219,10 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
    nstates=sum(nband(1:nkpt*nsppol))
 ! number of bands per proc in the band pool
 !   nb_per_proc=nstates/maxproc_bandpool
-   
+
    do nb_per_proc = mband / maxproc_bandpool, mband
      if (mod(mband,nb_per_proc)==0) exit
-   end do 
+   end do
 
    nrank=0
 
@@ -2687,7 +2675,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
        ind=ind0/nb_per_proc
        do iiband=1,nband_k
          mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-         if (nsppol==2) then 
+         if (nsppol==2) then
 !TODO: why are these bands ordered in the opposite direction wrt spin 1??
            mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc_spkpt-ind-1
          end if
@@ -2736,7 +2724,7 @@ end subroutine distrb2
 !!  distrb2_hf
 !!
 !! FUNCTION
-!!  Ceate the tabs of repartition of processors for sharing the jobs
+!!  Create the tabs of repartition of processors for sharing the jobs
 !!  on occupied states (labeled by k-points, bands and spin indices) for Hartree-Fock calculation.
 !!
 !! INPUTS

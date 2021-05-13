@@ -473,6 +473,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    do ii=1,tmp_nkpt
      ! Index of k-point in ebands.
      ik = sigmak2ebands(ii)
+     ! Will use this initial values to understand if k-point is in energy window.
      ib_work(1, ii, spin) = huge(1)
      ib_work(2, ii, spin) = -huge(1)
      do band=1,ebands%nband(ik + (spin-1) * ebands%nkpt)
