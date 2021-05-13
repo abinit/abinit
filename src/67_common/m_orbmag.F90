@@ -1357,7 +1357,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
  !Local
  !scalars
- integer :: adir,bdir,buff_size,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt
+ integer :: adir,bdir,buff_size,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt,epsabg
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
  integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
@@ -1365,7 +1365,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
  integer :: nproc,nterms,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm,with_vectornd
  integer,parameter :: cci=1,vvii=2,vvia=3,vvib=4,rho0h1=5,rho0s1=6,lrb=7,a0an=8,berrycurve=9
- real(dp) :: arg,dbi,dbr,dgi,dgr,doti,dub_dsg_i,dug_dsb_i
+ real(dp) :: arg,dbi,dbr,dgi,dgr,doti,dotr,dub_dsg_i,dug_dsb_i
  real(dp) :: ecut_eff,Enk,lambda,local_fermie,trnrm,ucvol
  complex(dpc) :: dbc,dgc,onsite_bm_k_n,onsite_l_k_n,rhorij1,S1trace
  logical :: has_nucdip
@@ -1375,12 +1375,11 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  integer,allocatable :: dimlmn(:),kg_k(:,:),nattyp_dum(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
- real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwavefp(:,:),cwaveg1(:,:)
- real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:)
- real(dp),allocatable :: dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
- real(dp),allocatable :: kinpw(:),kpg_k(:,:),orbmag_terms(:,:,:),orbmag_trace(:,:)
- real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),scg_k(:,:),scg1_k(:,:,:),scprod(:,:)
- real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
+ real(dp),allocatable :: bra(:,:),cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwaveb1(:,:),cwavef(:,:),cwavefp(:,:),cwaveg1(:,:)
+ real(dp),allocatable :: cwavedsdb(:,:),cwavedsdg(:,:),dscg_k(:,:,:),ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: ket(:,:),kinpw(:),kpg_k(:,:),orbmag_terms(:,:,:),orbmag_trace(:,:)
+ real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
+ real(dp),allocatable :: scg_k(:,:),scg1_k(:,:,:),scprod(:,:),vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cwaveprj(:,:)
 
@@ -1607,37 +1606,20 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_MALLOC(dscg_k,(2,mcgk,3))
    ! input parameters for calls to nonlop
    nonlop_choice =  5! apply dS/dk
-   do adir = 1, 3
-     do nn = 1, nband_k
-       cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
+   do nn = 1, nband_k
+     cwavef = cg_k(:,(nn-1)*npw_k+1:nn*npw_k)
+     do adir = 1, 3
        call nonlop(nonlop_choice,nonlop_cpopt,cwaveprj,nonlop_enlout,gs_hamk,adir,&
          & lambda_ndat,mpi_enreg,ndat,nonlop_nnlout,nonlop_pawopt,nonlop_signs,gsc,&
          & nonlop_tim,cwavef,gvnlc)
        dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = gsc(1:2,1:npw_k)
-     end do ! end loop over nn
-   end do
+     end do
+   end do ! end loop over nn
 
-   ! compute projection of cg1_k on conduction space
-   ABI_MALLOC(pcg1_k,(2,nband_k*npw_k,3))
    ABI_MALLOC(scprod,(2,nband_k))
-   do adir = 1, 3
-     do nn = 1, nband_k
-
-       cwavef = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir)
-       call projbd(cg_k,cwavef,-1,0,0,istwf_k,mcgk,mcgk,nband_k,npw_k,dtset%nspinor,&
-         & scg_k,scprod,projbd_scprod_io,projbd_tim,projbd_useoverlap,&
-         & mpi_enreg%me_g0,mpi_enreg%comm_fft)
-       pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,adir) = cwavef
-
-     end do ! end loop over nn
-   end do ! end loop over adir
-
    ABI_MALLOC(ghc,(2,npw_k))
-   ABI_MALLOC(cwaveb1,(2,npw_k))
-   ABI_MALLOC(cwaveg1,(2,npw_k))
-   ABI_MALLOC(cwavedsdb,(2,npw_k))
-   ABI_MALLOC(cwavedsdg,(2,npw_k))
-   ABI_MALLOC(cwavefp,(2,npw_k))
+   ABI_MALLOC(ket,(2,npw_k))
+   ABI_MALLOC(bra,(2,npw_k))
    do nn = 1, nband_k
 
      ! compute H^0|u_nk> and <u_nk|H^0|u_nk>
@@ -1649,63 +1631,101 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
      if (Enk .GT. local_fermie) local_fermie = Enk
 
-     do adir =1, 3
-       bdir = modulo(adir,3)+1
-       gdir = modulo(adir+1,3)+1
+     do adir = 1, 3        
+       do epsabg = 1, -1, -2
+         if (epsabg .EQ. 1) then
+            bdir = modulo(adir,3)+1
+            gdir = modulo(adir+1,3)+1
+         else
+            bdir = modulo(adir+1,3)+1
+            gdir = modulo(adir,3)+1
+         end if
 
-       ! 1 orbmag CC
-       ! -i/2 eps_abg <du/dg|P_c H0 P_c|du/db> =
-       ! -i/2 (<du/dg|P_c H0 P_c|du/db> - <du/db|P_c H0 P_c|du/dg>) =
-       ! -i/2 (2 i Im<du/dg|P_c H0 P_c|du/db>) =
-       ! Im<du/dg|P_c H0 P_c|du/db>
+         ! 1 orbmag CC
+         ! -i/2 eps_abg <du/dg|P_c^\dagger H0 P_c|du/db> =
+         ! -i/2 (<du/dg|P_c^\dagger H0 P_c|du/db> - <du/db|P_c^\dagger H0 P_c|du/dg>) 
 
-       cwaveb1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+         ! 2 orbmag vvii
+         ! i/2 eps_abg <du/db|P_c^\dagger S0 P_c|du/dg> =
+         ! -i/2 (<du/dg|P_c^\dagger S0 P_c|du/db> - <du/db|P_c^\dagger S0 P_c|du/dg>) 
 
-       call getghc(getghc_cpopt,cwaveb1,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
-         & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
+         ket = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+         bra = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
 
-       cwaveg1(1:2,1:npw_k) = pcg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
-       doti=-DOT_PRODUCT(cwaveg1(2,:),ghc(1,:))+DOT_PRODUCT(cwaveg1(1,:),ghc(2,:))
+         ! form |ket> -> Pc|ket>
+         call projbd(cg_k,ket,-1,0,0,istwf_k,mcgk,mcgk,nband_k,npw_k,dtset%nspinor,&
+           & scg_k,scprod,projbd_scprod_io,projbd_tim,projbd_useoverlap,&
+           & mpi_enreg%me_g0,mpi_enreg%comm_fft)
 
-       orbmag_terms(adir,cci,nn) = orbmag_terms(adir,cci,nn) + doti*trnrm
-       
-       ! 2 orbmag VV II
-       ! vv needs (+i/2)*eps_abg*<du/db|P_c S P_c|du/dg>Enk =
-       ! +i/2 (<du/db|P_c S P_c|du/dg> - <du/dg|P_c S P_c|du/db>)Enk =
-       ! -i/2 (<du/dg|P_c S P_c|du/db> - <du/db|P_c S P_c|du/dg>)Enk =
-       ! Im<du/dg|P_c S P_c|du/db>Enk
+         ! form ghc = H0 P_c |ket>, gsc = S0 P_c|ket>
+         call getghc(getghc_cpopt,ket,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+           & getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc)
 
-       doti=-DOT_PRODUCT(cwaveg1(2,:),gsc(1,:))+DOT_PRODUCT(cwaveg1(1,:),gsc(2,:))
-       orbmag_terms(adir,vvii,nn) = orbmag_terms(adir,vvii,nn) + doti*Enk*trnrm
+         ! form ghc ->  P_c^dagger ghc = P_c^dagger H0 P_c |ket>
+         call projbd(scg_k,ghc,-1,0,0,istwf_k,mcgk,mcgk,nband_k,npw_k,dtset%nspinor,&
+           & cg_k,scprod,projbd_scprod_io,projbd_tim,projbd_useoverlap,&
+           & mpi_enreg%me_g0,mpi_enreg%comm_fft)
+         doti = -DOT_PRODUCT(bra(2,:),ghc(1,:)) + DOT_PRODUCT(bra(1,:),ghc(2,:))
+         orbmag_terms(adir,cci,nn) = orbmag_terms(adir,cci,nn) + half*epsabg*doti*trnrm
 
-       !VV Ib term gives (i/2)eps_abg <du/db|P_c dS/dg|u>Enk
-       !VV IIIb term gives (i/2)eps_abg <du|dS/db P_c|du/dg>Enk
-       ! combined with eps_abg contraction they contribute
-       ! -Im(VVI)*Enk
-       ! 4 orbmag VV I+III part b
-       cwavedsdb(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
-       cwavedsdg(1:2,1:npw_k) = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+         ! form gsc ->  P_c^dagger gsc = P_c^dagger S0 P_c |ket>
+         call projbd(scg_k,gsc,-1,0,0,istwf_k,mcgk,mcgk,nband_k,npw_k,dtset%nspinor,&
+           & cg_k,scprod,projbd_scprod_io,projbd_tim,projbd_useoverlap,&
+           & mpi_enreg%me_g0,mpi_enreg%comm_fft)
+         doti = -DOT_PRODUCT(bra(2,:),gsc(1,:)) + DOT_PRODUCT(bra(1,:),gsc(2,:))
+         orbmag_terms(adir,vvii,nn) = orbmag_terms(adir,vvii,nn) + half*epsabg*Enk*doti*trnrm
+ 
+         !VV Ib term gives (i/2)eps_abg <du/db|P_c^dagger dS/dg|u>Enk
+         bra = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+         ket = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+         ! form ket = dS/dg|u_nk> -> P_c^dagger dS/dg|u_nk>
+         call projbd(scg_k,ket,-1,0,0,istwf_k,mcgk,mcgk,nband_k,npw_k,dtset%nspinor,&
+           & cg_k,scprod,projbd_scprod_io,projbd_tim,projbd_useoverlap,&
+           & mpi_enreg%me_g0,mpi_enreg%comm_fft)
+         doti = -DOT_PRODUCT(bra(2,:),ket(1,:)) + DOT_PRODUCT(bra(1,:),ket(2,:))
+         orbmag_terms(adir,vvib,nn) = orbmag_terms(adir,vvib,nn) - half*epsabg*Enk*doti*trnrm
+ 
+         !VV IIIb term gives (i/2)eps_abg <du|dS/db P_c|du/dg>Enk
+         bra = dscg_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir)
+         ket = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+         ! form ket = P_c|du_nk/dg> -> P_c |du_nk/dg>
+         call projbd(cg_k,ket,-1,0,0,istwf_k,mcgk,mcgk,nband_k,npw_k,dtset%nspinor,&
+           & scg_k,scprod,projbd_scprod_io,projbd_tim,projbd_useoverlap,&
+           & mpi_enreg%me_g0,mpi_enreg%comm_fft)
+         doti = -DOT_PRODUCT(bra(2,:),ket(1,:)) + DOT_PRODUCT(bra(1,:),ket(2,:))
+         orbmag_terms(adir,vvib,nn) = orbmag_terms(adir,vvib,nn) - half*epsabg*Enk*doti*trnrm
+ 
+         ! VVIa term gives (i/2)eps_abg sum_n' (-)<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk =
+         ! VVIIIa is identical. VVIIa is the negative of VVIa. The total contribution of all
+         ! three terms is thus the same as VVIa itself.
+         ! term 3 
+         do nnp=1,nband_k
 
-       dug_dsb_i = -DOT_PRODUCT(cwaveg1(2,:),cwavedsdb(1,:)) + DOT_PRODUCT(cwaveg1(1,:),cwavedsdb(2,:))
-       dub_dsg_i = -DOT_PRODUCT(cwaveb1(2,:),cwavedsdg(1,:)) + DOT_PRODUCT(cwaveb1(1,:),cwavedsdg(2,:))
-       orbmag_terms(adir,vvib,nn)= orbmag_terms(adir,vvib,nn) - (dub_dsg_i-dug_dsb_i)*Enk*trnrm
+           bra = cg_k(:,(nn-1)*npw_k+1:nn*npw_k); ket = dscg_k(:,(nnp-1)*npw_k+1:nnp*npw_k,bdir)
+           dotr=  DOT_PRODUCT(bra(1,:),ket(1,:)) + DOT_PRODUCT(bra(2,:),ket(2,:))
+           doti= -DOT_PRODUCT(bra(2,:),ket(1,:)) + DOT_PRODUCT(bra(1,:),ket(2,:))
+           dbc=cmplx(dotr,doti,KIND=dpc)
+           
+           bra = cg_k(:,(nnp-1)*npw_k+1:nnp*npw_k); ket = dscg_k(:,(nn-1)*npw_k+1:nn*npw_k,gdir)
+           dotr=  DOT_PRODUCT(bra(1,:),ket(1,:)) + DOT_PRODUCT(bra(2,:),ket(2,:))
+           doti= -DOT_PRODUCT(bra(2,:),ket(1,:)) + DOT_PRODUCT(bra(1,:),ket(2,:))
+           dgc=cmplx(dotr,doti,KIND=dpc)
 
-       ! VVIa term gives (i/2)eps_abg sum_n' (-)<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk
-       ! = + sum_n' Im{<u_n|dS/db|u_n'><u_n'|dS/dg|u_n>Enk}
-       ! VVIIIa is identical. VVIIa is the negative of VVIa. The total contribution of all
-       ! three terms is thus the same as VVIa itself.
-       ! term 3 
-       do nnp=1,nband_k
-         cwavefp(1:2,1:npw_k) = cg_k(1:2,(nnp-1)*npw_k+1:nnp*npw_k)
-         dbr= DOT_PRODUCT(cwavefp(1,:),cwavedsdb(1,:))+DOT_PRODUCT(cwavefp(2,:),cwavedsdb(2,:))
-         dbi=-DOT_PRODUCT(cwavefp(2,:),cwavedsdb(1,:))+DOT_PRODUCT(cwavefp(1,:),cwavedsdb(2,:))
-         dbc=cmplx(dbr,dbi,kind=dpc)
-         dgr= DOT_PRODUCT(cwavefp(1,:),cwavedsdg(1,:))+DOT_PRODUCT(cwavefp(2,:),cwavedsdg(2,:))
-         dgi=-DOT_PRODUCT(cwavefp(2,:),cwavedsdg(1,:))+DOT_PRODUCT(cwavefp(1,:),cwavedsdg(2,:))
-         dgc=cmplx(dgr,dgi,kind=dpc)
-         orbmag_terms(adir,vvia,nn) = orbmag_terms(adir,vvia,nn) + AIMAG(CONJG(dbc)*dgc*Enk)*trnrm
-       end do
-      
+           orbmag_terms(adir,vvia,nn) = orbmag_terms(adir,vvia,nn) + half*epsabg*Enk*AIMAG(dbc*dgc)*trnrm
+
+         end do
+ 
+         ! berrycurve needs i*eps_abg*<du/db|S|du/dg> 
+         ! N.B. the Berry curvature does not involve H0 so no projection onto conduction
+         ! and valence bands, the "S" here is really I+S from PAW
+         ! i eps_abg <du/db|S|du/dg> = -2*Im<du/db|S|du/dg> 
+         ! 9 berrycurve
+         bra = cg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,bdir); ket = scg1_k(1:2,(nn-1)*npw_k+1:nn*npw_k,gdir)
+         doti = -DOT_PRODUCT(bra(2,:),ket(1,:)) + DOT_PRODUCT(bra(1,:),ket(2,:))
+         orbmag_terms(adir,berrycurve,nn) = orbmag_terms(adir,berrycurve,nn) - epsabg*doti*trnrm
+
+       end do ! end loop over epsabg
+     
        ! 5 Tr[-\rho^0 S^1 \rho^0 H^0] contribution 
        call make_S1trace_k_n(adir,cprj_k,dtset,Enk,nn,nband_k,pawtab,S1trace)
        orbmag_terms(adir,rho0s1,nn) = orbmag_terms(adir,rho0s1,nn) - real(S1trace)*trnrm
@@ -1724,25 +1744,13 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
          & pawang,pawrad,pawtab)
        orbmag_terms(adir,a0an,nn) = orbmag_terms(adir,a0an,nn) + real(onsite_bm_k_n)*trnrm
 
-       ! berrycurve needs i*eps_abg*<du/db|S|du/dg> 
-       ! N.B. the Berry curvature does not involve H0 so no projection onto conduction
-       ! and valence bands, the "S" here is really I+S from PAW
-       ! i eps_abg <du/db|S|du/dg> = -2*Im<du/db|S|du/dg> 
-       ! 9 berrycurve
-       doti = -DOT_PRODUCT(cg1_k(2,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(1,(nn-1)*npw_k+1:nn*npw_k,gdir)) + &
-             & DOT_PRODUCT(cg1_k(1,(nn-1)*npw_k+1:nn*npw_k,bdir),scg1_k(2,(nn-1)*npw_k+1:nn*npw_k,gdir))
-       orbmag_terms(adir,berrycurve,nn) = orbmag_terms(adir,berrycurve,nn) - two*doti*trnrm
-
      end do
 
    end do
 
    ABI_FREE(cwavef)
-   ABI_FREE(cwavefp)
-   ABI_FREE(cwaveb1)
-   ABI_FREE(cwaveg1)
-   ABI_FREE(cwavedsdb)
-   ABI_FREE(cwavedsdg)
+   ABI_FREE(ket)
+   ABI_FREE(bra)
    ABI_FREE(ghc)
    ABI_FREE(gsc)
    ABI_FREE(gvnlc)
@@ -1751,7 +1759,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_FREE(scg1_k)
    ABI_FREE(dscg_k)
    ABI_FREE(cg1_k)
-   ABI_FREE(pcg1_k)
    ABI_FREE(scprod)
 
    icg = icg + npw_k*nband_k
