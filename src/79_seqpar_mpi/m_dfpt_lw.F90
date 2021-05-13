@@ -563,8 +563,10 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  ABI_FREE(rhor1_atdis)
  ABI_FREE(rhor1_efield)
  ABI_FREE(vqgradhart)
- ABI_FREE(vxc1dq)
- ABI_FREE(vxc1dqc)
+ if (nkxc == 7) then
+   ABI_FREE(vxc1dq)
+   ABI_FREE(vxc1dqc)
+ end if
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 
@@ -2154,7 +2156,6 @@ end if
            vxc1dq(:,:)=vxc1dq(:,:) + gprimd(qcar,qdir) * &
          & vxc1dqc(:,:,iefipert,qcar)
          end do 
-         vxc1dq=vxc1dqc(:,:,iefipert,qcar)
          vqgradhart(:)=vqgradhart(:)+vxc1dq(:,1)
        end if
 
@@ -2185,15 +2186,17 @@ end if
 !Calculate here the Cartesian q-gradient of the GGA xc kernel which is the same
 !for the other two spatial-dispersion properties
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
-   ABI_MALLOC(vxc1dqc,(2*nfft,nspden,natpert,3))
-   do qcar=1,3
-     do iatpert=1,natpert
-       rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
-       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
-       vxc1dqc(:,:,iatpert,qcar)=vxc1dq
-     end do
-   end do 
-   ABI_FREE(rhor1_tmp)
+   if (nkxc == 7) then
+     ABI_MALLOC(vxc1dqc,(2*nfft,nspden,natpert,3))
+     do qcar=1,3
+       do iatpert=1,natpert
+         rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
+         call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
+         vxc1dqc(:,:,iatpert,qcar)=vxc1dq
+       end do
+     end do 
+     ABI_FREE(rhor1_tmp)
+   end if
  end if
 
 !1st q-gradient of DM contribution
