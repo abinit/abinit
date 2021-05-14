@@ -959,7 +959,6 @@ end subroutine print_efmas
             ABI_WARNING(TRIM(msg))
             ABI_WARNING(msg)
             ABI_WARNING_UNIT(msg, ab_out)
->>>>>>> 3e682e2a1153851de719aae2e391e0d52775f8b9
           end if
         end do !adir=1,3
       end if !degenerate(1)
