@@ -16,7 +16,7 @@ module m_tdep_readwrite
 
  implicit none
 
-  type Input_Variables_type
+  type Input_type
 
     integer :: natom
     integer :: natom_unitcell
@@ -76,7 +76,7 @@ module m_tdep_readwrite
     character (len=200) :: input_prefix
     character (len=200) :: foo
     
-  end type Input_Variables_type
+  end type Input_type
 
   type MPI_enreg_type
 
@@ -113,7 +113,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_print_Aknowledgments(Invar)
 
-  type(Input_Variables_type) :: Invar
+  type(Input_type) :: Invar
   integer :: stdout
   stdout = Invar%stdout
 
@@ -158,7 +158,7 @@ contains
  use netcdf
 #endif
 
-  type(Input_Variables_type),intent(out) :: Invar
+  type(Input_type),intent(out) :: Invar
   type(abihist), intent(out) :: Hist
 
   integer :: values(8)  
@@ -698,7 +698,7 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type), intent(inout) :: Invar
+  type(Input_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(abihist), intent(in) :: Hist
 
@@ -799,7 +799,7 @@ contains
 !FB
 !FB  implicit none 
 !FB
-!FB  type(Input_Variables_type), intent(in) :: Invar
+!FB  type(Input_type), intent(in) :: Invar
 !FB  type(MPI_enreg_type), intent(in) :: MPIdata
 !FB
 !FB end subroutine tdep_init_MPIshell
@@ -809,7 +809,7 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type), intent(in) :: Invar
+  type(Input_type), intent(in) :: Invar
   type(MPI_enreg_type), intent(out) :: MPIdata
   integer :: ii,remain,ierr,iproc,istep
   integer, allocatable :: tab_step(:)
@@ -968,7 +968,7 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type), intent(inout) :: Invar
+  type(Input_type), intent(inout) :: Invar
 
   ABI_FREE(Invar%amu)
   ABI_FREE(Invar%typat)

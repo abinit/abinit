@@ -13,12 +13,12 @@ module m_tdep_sym
  use m_xmpi
  use m_symtk,            only : mati3inv, symatm
  use m_symfind,          only : symfind, symanal, symlatt
- use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
- use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
+ use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
+ use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
 
  implicit none
 
- type,public :: Symetries_Variables_type
+ type,public :: Symetries_type
 
    integer :: msym
    integer :: nsym
@@ -33,7 +33,7 @@ module m_tdep_sym
    double precision, allocatable :: tnons(:,:)
    double precision, allocatable :: xred_zero(:,:)
 
- end type Symetries_Variables_type
+ end type Symetries_type
 
  public :: tdep_make_sym
  public :: tdep_SearchS_1at
@@ -52,9 +52,9 @@ contains
 
   integer :: isym,ii,jj
   double precision, allocatable :: tmp1(:,:)
-  type(Symetries_Variables_type),intent(out) :: Sym
-  type(Input_Variables_type),intent(inout) :: Invar
-  type(Lattice_Variables_type),intent(in) :: Lattice
+  type(Symetries_type),intent(out) :: Sym
+  type(Input_type),intent(inout) :: Invar
+  type(Lattice_type),intent(in) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
 
 ! Compute all the symetries coming from the bravais lattice
@@ -127,9 +127,9 @@ contains
 
   implicit none
 
-  type(Input_Variables_type), intent(in) :: Invar
-  type(Lattice_Variables_type), intent(in) :: Lattice
-  type(Symetries_Variables_type), intent(inout) :: Sym
+  type(Input_type), intent(in) :: Invar
+  type(Lattice_type), intent(in) :: Lattice
+  type(Symetries_type), intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -355,8 +355,8 @@ contains
   implicit none
 
   integer, intent(in) :: iatom,jatom,eatom,fatom
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
   integer, intent(inout) :: Isym2at(Invar%natom,Invar%natom,2)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -429,8 +429,8 @@ contains
   implicit none
 
   integer, intent(in) :: iatom,jatom,katom,eatom,fatom,gatom
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
   integer, intent(inout) :: Isym3at(2)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -537,8 +537,8 @@ contains
   implicit none
 
   integer, intent(in) :: iatom,jatom,katom,latom,eatom,fatom,gatom,hatom
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
   integer, intent(inout) :: Isym4at(2)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -680,8 +680,8 @@ contains
   implicit none
 
   integer, intent(in) :: iatom,jatom
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
   integer, intent(out) :: indsym2(8)
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
@@ -735,7 +735,7 @@ contains
  subroutine tdep_destroy_sym(Sym)
 
   implicit none
-  type(Symetries_Variables_type),intent(inout) :: Sym
+  type(Symetries_type),intent(inout) :: Sym
 
   ABI_FREE(Sym%ptsymrel)
   ABI_FREE(Sym%S_ref)

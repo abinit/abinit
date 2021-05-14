@@ -11,9 +11,9 @@ module m_tdep_shell
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
-  use m_tdep_latt,        only : Lattice_Variables_type
-  use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_2at, tdep_SearchS_3at, tdep_SearchS_4at
+  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_latt,        only : Lattice_type
+  use m_tdep_sym,         only : Symetries_type, tdep_SearchS_2at, tdep_SearchS_3at, tdep_SearchS_4at
   use m_tdep_utils,       only : tdep_calc_nbcoeff
   use m_io_tools
 
@@ -28,7 +28,7 @@ module m_tdep_shell
     integer, allocatable :: transpose_in_shell(:)
   end type List_of_neighbours
 
-  type Shell_Variables_type
+  type Shell_type
     integer :: nshell
     integer, allocatable :: ncoeff(:)
     integer, allocatable :: ncoeff_prev(:)
@@ -38,7 +38,7 @@ module m_tdep_shell
     integer, allocatable :: katref(:)
     integer, allocatable :: latref(:)
     type(List_of_neighbours),allocatable :: neighbours(:,:)
-  end type Shell_Variables_type
+  end type Shell_type
 
   public :: tdep_init_shell1at
   public :: tdep_init_shell2at
@@ -51,9 +51,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell1at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell1at,Sym)
 
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Shell_Variables_type),intent(out) :: Shell1at
-  type(Symetries_Variables_type),intent(inout) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Shell_type),intent(out) :: Shell1at
+  type(Symetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer,intent(in) :: norder,order,nshell_max
   integer,intent(out) :: ntotcoeff
@@ -176,9 +176,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell2at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
 
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Shell_Variables_type),intent(out) :: Shell2at
-  type(Symetries_Variables_type),intent(inout) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Shell_type),intent(out) :: Shell2at
+  type(Symetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer,intent(in) :: norder,order,nshell_max
   integer,intent(out) :: ntotcoeff
@@ -336,9 +336,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell3at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell3at,Sym)
 
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Shell_Variables_type),intent(out) :: Shell3at
-  type(Symetries_Variables_type),intent(inout) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Shell_type),intent(out) :: Shell3at
+  type(Symetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer, intent(in) :: norder,order,nshell_max
   integer, intent(out) :: ntotcoeff
@@ -701,9 +701,9 @@ contains
  subroutine tdep_init_shell4at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell4at,Sym)
 
   implicit none
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Shell_Variables_type),intent(out) :: Shell4at
-  type(Symetries_Variables_type),intent(inout) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Shell_type),intent(out) :: Shell4at
+  type(Symetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer, intent(in) :: norder,order,nshell_max
   integer, intent(out) :: ntotcoeff
@@ -1199,7 +1199,7 @@ contains
  subroutine tdep_destroy_shell(natom,order,Shell)
 
   integer, intent(in) :: natom,order
-  type(Shell_Variables_type),intent(inout) :: Shell
+  type(Shell_type),intent(inout) :: Shell
 
   integer :: iatom,ishell,natref
 

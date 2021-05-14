@@ -66,20 +66,21 @@ program atdep
   use m_crystal,          only : crystal_t, crystal_free
   use m_ddb,              only : ddb_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
-&                                tdep_destroy_qbz, tdep_destroy_ddb          
+&                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2          
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
 &                                tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phi2,        only : tdep_calc_phi2fcoeff, tdep_calc_phi1fcoeff, tdep_calc_phi2, tdep_write_phi2, tdep_calc_ftot2, &
-&                                Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, tdep_write_phi1
-  use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
-  use m_tdep_sym,         only : tdep_make_sym, Symetries_Variables_type, tdep_destroy_sym
+&                                Eigen_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, &
+&                                tdep_write_phi1, tdep_init_phi2, tdep_destroy_phi2, Phi2_type
+  use m_tdep_latt,        only : tdep_make_latt, Lattice_type
+  use m_tdep_sym,         only : tdep_make_sym, Symetries_type, tdep_destroy_sym
   use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, &
-&                                tdep_destroy_mpidata, Input_Variables_type, MPI_enreg_type, tdep_destroy_invar
+&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
   use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type, tdep_destroy_qpt
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
-  use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell4at, &
+  use m_tdep_shell,       only : Shell_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell4at, &
 &                                tdep_init_shell1at, tdep_destroy_shell
   use m_tdep_constraints, only : tdep_calc_constraints, tdep_check_constraints
 
@@ -92,7 +93,7 @@ program atdep
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
   double precision, allocatable :: Phi1(:)  ,Phi1_coeff(:,:)
-  double precision, allocatable :: Phi2(:,:),Phi2_coeff(:,:)
+  double precision, allocatable :: Phi2_coeff(:,:)
   double precision, allocatable :: Phi3_ref(:,:,:,:)  ,Phi3_coeff(:,:)
   double precision, allocatable :: Phi4_ref(:,:,:,:,:),Phi4_coeff(:,:)
   double precision, allocatable :: Forces_MD(:),MP_coeff(:,:)
@@ -100,18 +101,19 @@ program atdep
   double precision, allocatable :: Phi1Ui(:),Phi2UiUj(:),Phi3UiUjUk(:),Phi4UiUjUkUl(:)
   type(args_t) :: args
   type(phonon_dos_type) :: PHdos
-  type(Input_Variables_type) :: Invar
-  type(Lattice_Variables_type) :: Lattice
-  type(Symetries_Variables_type) :: Sym
+  type(Phi2_type) :: Phi2
+  type(Input_type) :: Invar
+  type(Lattice_type) :: Lattice
+  type(Symetries_type) :: Sym
   type(Qpoints_type) :: Qpt
   type(Qbz_type) :: Qbz
   type(ifc_type) :: Ifc
   type(ddb_type) :: DDB
   type(crystal_t) :: Crystal
-  type(Shell_Variables_type) :: Shell1at,Shell2at,Shell3at,Shell4at
+  type(Shell_type) :: Shell1at,Shell2at,Shell3at,Shell4at
   type(Coeff_Moore_type) :: CoeffMoore
-  type(Eigen_Variables_type) :: Eigen2nd_MP
-  type(Eigen_Variables_type) :: Eigen2nd_path
+  type(Eigen_type) :: Eigen2nd_MP
+  type(Eigen_type) :: Eigen2nd_path
   type(MPI_enreg_type) :: MPIdata
   type(abihist) :: Hist
 
@@ -339,8 +341,8 @@ program atdep
 !==========================================================================================
 !============== Initialize the IFC Abinit datatype ========================================
 !==========================================================================================
- ABI_MALLOC(Phi1,(3*natom))         ; Phi1(:)  =0.d0
- ABI_MALLOC(Phi2,(3*natom,3*natom)) ; Phi2(:,:)=0.d0
+ ABI_MALLOC(Phi1,(3*natom)); Phi1(:)  =0.d0
+ call tdep_init_phi2(Phi2,Invar%loto,natom)
  call tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt4Abi,Shell2at,Sym)
 
 !==========================================================================================
@@ -405,6 +407,25 @@ program atdep
  CoeffMoore%ntotcoeff=ntotcoeff
  CoeffMoore%ntotconst=ntotconst
 
+!LOTO 
+!Remove the supercell contribution (the "LR part") included in total forces
+!before computing the "SR part". The full "LR part" will be added later.
+ if (Invar%loto) then
+   call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
+   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%Tot,Phi2UiUj,ucart) 
+   Fresid(:)=Fresid(:)-Forces_TDEP(:)
+   Phi1       (:)=0.d0
+   Phi1Ui     (:)=0.d0 
+   Phi2%SR  (:,:)=0.d0
+   if (Invar%loto) then
+     Phi2%LR  (:,:)=0.d0
+     Phi2%Tot (:,:)=0.d0
+   end if  
+   Phi2UiUj   (:)=0.d0 
+   Forces_TDEP(:)=0.d0 
+ end if
+!LOTO 
+
  do istep=1,Invar%my_nstep
     do iatom=1,Invar%natom
        do ii=1,3
@@ -456,14 +477,14 @@ program atdep
    ABI_MALLOC(Phi1_coeff,(ncoeff1st,1)); Phi1_coeff(:,:)=MP_coeff(1:ncoeff1st,:)
    ABI_MALLOC(Phi2_coeff,(ncoeff2nd,1)); Phi2_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
    if (Invar%readifc.ne.1) then
-     call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1,Shell1at,Sym)
-     call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2,Shell2at,Sym)
+     call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1   ,Shell1at,Sym)
+     call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2%SR,Shell2at,Sym)
    end if
    ABI_FREE(proj1st)
    ABI_FREE(proj2nd)
    ABI_FREE(Phi1_coeff)
    ABI_FREE(Phi2_coeff)
-   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2,Phi2UiUj,ucart) 
+   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart) 
    if (Invar%order.ge.3) then 
      ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
      Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
@@ -496,14 +517,14 @@ program atdep
        ABI_MALLOC(Phi1_coeff,(ncoeff1st,1)); Phi1_coeff(:,:)=MP_coeff(1:ncoeff1st,:)
        ABI_MALLOC(Phi2_coeff,(ncoeff2nd,1)); Phi2_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
        if (Invar%readifc.ne.1) then
-         call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1,Shell1at,Sym)
-         call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2,Shell2at,Sym)
+         call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1   ,Shell1at,Sym)
+         call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2%SR,Shell2at,Sym)
        end if
        ABI_FREE(proj1st)
        ABI_FREE(proj2nd)
        ABI_FREE(Phi1_coeff)
        ABI_FREE(Phi2_coeff)
-       call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2,Phi2UiUj,ucart) 
+       call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart) 
      else if (ii.eq.2) then 
        ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
        Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
@@ -537,11 +558,17 @@ program atdep
  ABI_FREE(ucart)
  call tdep_destroy_shell(natom,1,Shell1at)
 
+!LOTO 
+ if (Invar%loto) then
+   Phi2%Tot=Phi2%LR+Phi2%SR
+ end if
+!LOTO 
+
 !==========================================================================================
 !=================== Write the IFC and check the constraints ==============================
 !==========================================================================================
  call tdep_write_phi1(Invar,Phi1)
- call tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
+ call tdep_write_phi2(distance,Invar,MPIdata,Phi2%SR,Shell2at)
  if (Invar%order.ge.3) then 
    call tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
  end if  
@@ -550,12 +577,12 @@ program atdep
  end if  
 
  if (Invar%order.eq.2) then
-   call tdep_check_constraints(distance,Invar,Phi2,Phi1,Shell3at%nshell,Shell4at%nshell,Sym)
+   call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym)
  else if (Invar%order.eq.3) then
-   call tdep_check_constraints(distance,Invar,Phi2,Phi1,Shell3at%nshell,Shell4at%nshell,Sym,&
+   call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym,&
 &                              Phi3_ref,Shell3at)
  else if (Invar%order.eq.4) then
-   call tdep_check_constraints(distance,Invar,Phi2,Phi1,Shell3at%nshell,Shell4at%nshell,Sym,&
+   call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym,&
 &                              Phi3_ref,Shell3at,Phi4_ref,Shell4at)
  end if
  ABI_FREE(Phi1)
@@ -582,8 +609,8 @@ program atdep
 !==========================================================================================
 !===================== Compute the elastic constants ======================================
 !==========================================================================================
- call tdep_calc_elastic(Phi2,distance,Invar,Lattice)
- ABI_FREE(Phi2)
+ call tdep_calc_elastic(Phi2%SR,distance,Invar,Lattice)
+ call tdep_destroy_phi2(Phi2,Invar%loto)
 
 !==========================================================================================
 !=========== Compute U_0, the "free energy" and the forces (from the model) ===============

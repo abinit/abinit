@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 13 Dec 2020.
+.Starting date : 14 May 2021.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -3776,7 +3776,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2              U_3            Delta_U          Delta_U2          Delta_F2          Sigma
- -1082.22729      -1082.50528          0.00000          0.31312         -0.03513         -0.00000          0.06819          0.00799          0.15933
+ -1082.22729      -1082.50528          0.00000          0.31312         -0.03513          0.00000          0.06819          0.00799          0.15933
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.25852
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
@@ -3791,34 +3791,34 @@
  #############################################################################
  See the gruneisen.dat, alpha_gamma.dat and thermo3.dat files
  
- Gruneisen parameter :                 Gamma=           0.961
-                The Gruneisen matrix is  |    0.961    0.000    0.000|
-                                         |    0.000    0.961    0.000|
-                                         |    0.000    0.000    0.961|
- Thermal expansion (K^{-1}*10^6) :   alpha_v=           7.880
-        The thermal expansion matrix is  |    2.627    0.000    0.000|
-                                         |    0.000    2.627    0.000|
-                                         |    0.000    0.000    2.627|
+ Gruneisen parameter :                 Gamma=           0.971
+                The Gruneisen matrix is  |    0.971    0.000    0.000|
+                                         |    0.000    0.971    0.000|
+                                         |    0.000    0.000    0.971|
+ Thermal expansion (K^{-1}*10^6) :   alpha_v=           7.920
+        The thermal expansion matrix is  |    2.640    0.000    0.000|
+                                         |    0.000    2.640    0.000|
+                                         |    0.000    0.000    2.640|
  Thermal pressure (in GPa) : 
     ------- w   intrinsic effects and w   ZPE --------
-                 P_th=sum_i Gamma_i*E_i/V   =          15.884
-           The thermal pressure matrix is|   15.884    0.000    0.000|
-                                         |    0.000   15.884    0.000|
-                                         |    0.000    0.000   15.884|
+                 P_th=sum_i Gamma_i*E_i/V   =          15.957
+           The thermal pressure matrix is|   15.957    0.000    0.000|
+                                         |    0.000   15.957    0.000|
+                                         |    0.000    0.000   15.957|
     ------- w   intrinsic effects and w/o ZPE --------
-                 P_th=integ{Gamma*C_v/V dT} =          11.821
+                 P_th=integ{Gamma*C_v/V dT} =          11.914
     ------- w/o intrinsic effects and w/o ZPE --------
-                 P_th=Gamma*E_th/V          =          15.850
-           The thermal pressure matrix is|   15.850    0.000    0.000|
-                                         |    0.000   15.850    0.000|
-                                         |    0.000    0.000   15.850|
+                 P_th=Gamma*E_th/V          =          15.934
+           The thermal pressure matrix is|   15.934    0.000    0.000|
+                                         |    0.000   15.934    0.000|
+                                         |    0.000    0.000   15.934|
  Volume (bohr^3 per unit cell):            V=          69.486
- Thermal energy (eV) :                  E_th=           1.060
- Heat capacity at constant V (k_B/f.u.): C_v=           5.854
- Heat capacity at constant P (k_B/f.u.): C_p=           5.943
+ Thermal energy (eV) :                  E_th=           1.055
+ Heat capacity at constant V (k_B/f.u.): C_v=           5.826
+ Heat capacity at constant P (k_B/f.u.): C_p=           5.915
  Isothermal Bulk Modulus (GPa):          B_T=         957.530
- Isentropic Bulk Modulus (GPa):          B_S=         972.037
- Longitudinal sound velocity (m.s-1):     Vp=       15039.715
+ Isentropic Bulk Modulus (GPa):          B_S=         972.254
+ Longitudinal sound velocity (m.s-1):     Vp=       15040.824
  Transverse sound velocity (m.s-1):       Vs=        7581.987
   
  #############################################################################

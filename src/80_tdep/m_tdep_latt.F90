@@ -13,11 +13,11 @@ module m_tdep_latt
 
  use m_symtk,            only : matr3inv
  use m_geometry,         only : metric
- use m_tdep_readwrite,   only : Input_Variables_type
+ use m_tdep_readwrite,   only : Input_type
 
  implicit none
 
-  type Lattice_Variables_type
+  type Lattice_type
 
     double precision :: acell_unitcell(3)
     double precision :: angle_alpha
@@ -50,7 +50,7 @@ module m_tdep_latt
     double precision :: Shear
     double precision :: Density
 
-  end type Lattice_Variables_type
+  end type Lattice_type
 
   public :: tdep_make_inbox
   public :: tdep_make_latt
@@ -96,8 +96,8 @@ end subroutine tdep_make_inbox
   double precision :: rprim(3,3),temp(3,3),rprimm1(3,3),rprimt(3,3),rprimdtm1(3,3)
   double precision :: xi,hh
   double precision, allocatable :: WORK(:)
-  type(Input_Variables_type) :: Invar
-  type(Lattice_Variables_type),intent(out) :: Lattice
+  type(Input_type) :: Invar
+  type(Lattice_type),intent(out) :: Lattice
 
 ! For bravais(1):
 ! The holohedral groups are numbered as follows

@@ -17,12 +17,13 @@ module m_tdep_phdos
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-  use m_tdep_phi2,        only : Eigen_Variables_type, tdep_write_yaml, tdep_write_dij, tdep_calc_dij
+  use m_tdep_phi2,        only : Eigen_type, tdep_write_yaml, tdep_write_dij, tdep_calc_dij,&
+&                                tdep_init_phi2, tdep_destroy_phi2, Phi2_type          
   use m_tdep_qpt,         only : Qpoints_type
-  use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
-  use m_tdep_latt,        only : Lattice_Variables_type
-  use m_tdep_sym,         only : Symetries_Variables_type
-  use m_tdep_shell,       only : Shell_Variables_type
+  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_latt,        only : Lattice_type
+  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_shell,       only : Shell_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_ifc2phi2, tdep_read_ifc, tdep_write_ifc, &
 &                                tdep_write_ddb,tdep_init_ifc  
 
@@ -37,27 +38,25 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Lattice,MPIdata,natom,&
 &                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
-!FB&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Rlatt_cart,Shell2at,Sym)
 
   implicit none
 
   integer, intent(in) :: natom,natom_unitcell
-  double precision, intent(in) :: Phi2(3*natom,3*natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,natom)
-!FB  double precision, intent(in) :: Rlatt_cart(3,natom_unitcell,natom)
-  type(Input_Variables_type),intent(in) :: Invar
+  type(Input_type),intent(in) :: Invar
   type(phonon_dos_type),intent(out) :: PHdos
+  type(Phi2_type),intent(in) :: Phi2
   type(ifc_type),intent(inout) :: Ifc
-  type(Lattice_Variables_type),intent(in) :: Lattice
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Lattice_type),intent(in) :: Lattice
+  type(Symetries_type),intent(in) :: Sym
   type(crystal_t),intent(in) :: Crystal
   type(Qbz_type),intent(in) :: Qbz
   type(Qpoints_type),intent(in) :: Qpt
   type(ddb_type),intent(inout) :: DDB
   type(MPI_enreg_type), intent(in) :: MPIdata
-  type(Shell_Variables_type),intent(in) :: Shell2at
-  type(Eigen_Variables_type),intent(inout) :: Eigen2nd_path
-  type(Eigen_Variables_type),intent(inout) :: Eigen2nd_MP
+  type(Shell_type),intent(in) :: Shell2at
+  type(Eigen_type),intent(inout) :: Eigen2nd_path
+  type(Eigen_type),intent(inout) :: Eigen2nd_MP
 
   integer :: prtdos,iqpt,iq_ibz,iomega,iatom
   integer :: dos_ngqpt(3)
@@ -65,12 +64,13 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   character (len=25):: phdos_fname
   double precision :: dossmear,integ,domega
   double precision :: dos_qshift(3)
-  double precision, allocatable :: Phi2_new(:,:),displ(:,:)
+  double precision, allocatable :: displ(:,:)
   character(len=500) :: message
   real(dp) :: wminmax(2)
   type(ifc_type) :: Ifc_tmp
+  type(Phi2_type) :: Phi2_tmp
 
-!FB  integer :: iatom,jatom,ii,jj
+!FB  integer :: jatom,ii,jj
 !FB  double precision, allocatable :: omega (:)
 !FB  double complex  , allocatable :: dij   (:,:)
 !FB  double complex  , allocatable :: eigenV(:,:)
@@ -80,43 +80,48 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   write(Invar%stdout,'(a)') ' ################### vibrational Density OF States (vDOS) ####################'
   write(Invar%stdout,'(a)') ' #############################################################################'
   write(Invar%stdout,'(a)') ' See the vdos.dat and TDEP_PHDOS* files'
-  ABI_MALLOC(Phi2_new,(3*natom,3*natom)); Phi2_new=Phi2
 
-! Copy Phi2_new to Ifc%atmfrc
+! Copy Phi2_tmp to Ifc%atmfrc
 ! ===========================
-  call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,natom_unitcell,0,Phi2_new,Rlatt4abi,Shell2at,Sym)
+  call tdep_init_phi2(Phi2_tmp,Invar%loto,natom)
+  Phi2_tmp%SR =Phi2%SR
+  if (Invar%loto) then
+    Phi2_tmp%Tot=Phi2%Tot
+    Phi2_tmp%LR =Phi2%LR
+  end if
+  call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,natom_unitcell,0,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
 
 ! Write Ifc%atmfrc in the ifc_out.dat file
-! =====================================
+! ========================================
   if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,0)
 
-! Read the previous IFC from ifc_out.dat input file and copy to Phi2
-! ===============================================================
+! For test purpose : read the previous IFC from ifc_out.dat and write it in ifc_check.dat
+! =======================================================================================
   if (Invar%readifc.eq.2) then
-    call tdep_init_ifc(Crystal,DDB,Ifc_tmp,Invar,Lattice,MPIdata,Phi2_new,Rlatt4Abi,Shell2at,Sym)
-  end if  
-  if (Invar%readifc.eq.2.and.MPIdata%iam_master) then
-!   Read IFC from ifc_out.dat (readifc=2)
-    call tdep_read_ifc(Ifc_tmp,Invar,natom_unitcell)
-!   Copy Ifc_tmp%atmfrc to Phi2_new
-    call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,1,Phi2_new,Rlatt4abi,Shell2at,Sym)
-!   Copy Phi2_new to Ifc_tmp%atmfrc
-    call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_new,Rlatt4abi,Shell2at,Sym)
-!   Write IFC in ifc_check.dat (for check)
-    call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
-    call Ifc_tmp%free()
-
-!   Write the Phi2-new.dat file
-    if (Invar%debug) then
-      write(Invar%stdout,'(a)') ' See the Phi2-new.dat file corresponding to the ifc_out.dat/Phi2 file'
-      open(unit=55,file=trim(Invar%output_prefix)//'Phi2-new.dat')
-      do iatom=1,3*natom
-        write(55,'(10000(f10.6,1x))') Phi2_new(iatom,:)
-      end do
-      close(55)
+    call tdep_init_ifc(Crystal,DDB,Ifc_tmp,Invar,Lattice,MPIdata,Phi2_tmp,Rlatt4Abi,Shell2at,Sym)
+    if (MPIdata%iam_master) then
+!     Read IFC from ifc_out.dat (readifc=2)
+      call tdep_read_ifc(Ifc_tmp,Invar,natom_unitcell)
+!     Copy Ifc_tmp%atmfrc to Phi2_tmp
+      call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,1,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+!     Copy Phi2_tmp to Ifc_tmp%atmfrc
+      call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+!     Write IFC in ifc_check.dat (for check)
+      call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
+  
+!     Write the Phi2-tmp.dat file
+      if (Invar%debug) then
+        write(Invar%stdout,'(a)') ' See the Phi2-tmp.dat file corresponding to the ifc_out.dat/Phi2 file'
+        open(unit=55,file=trim(Invar%output_prefix)//'Phi2-tmp.dat')
+        do iatom=1,3*natom
+          write(55,'(10000(f10.6,1x))') Phi2_tmp%SR(iatom,:)
+        end do
+        close(55)
+      end if
     end if
+    call Ifc_tmp%free()
   end if
-  ABI_FREE(Phi2_new)
+  call tdep_destroy_phi2(Phi2_tmp,Invar%loto)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ON THE FINE GRID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -171,15 +176,15 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Compute the spectrum and the dynamical matrix
 ! =============================================
-!FB! Compute the frequencies (1)
-!FB! =======================
+! Compute the frequencies (1)
+! =======================
 !FB  Eigen2nd_path%eigenval=zero ; Eigen2nd_path%eigenvec=zero ; Eigen2nd_path%dynmat=zero
 !FB  ABI_MALLOC(dij   ,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)) 
 !FB  ABI_MALLOC(eigenV,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)) 
 !FB  ABI_MALLOC(omega,(3*Invar%natom_unitcell))
 !FB  do iqpt=1,Qpt%nqpt
 !FB    omega=zero ; eigenV=zero ; dij=zero
-!FB    call tdep_calc_dij(dij,eigenV,iqpt,Invar,omega,Phi2,Qpt%qpt_cart(:,iqpt),Rlatt_cart)
+!FB    call tdep_calc_dij(dij,eigenV,iqpt,Invar,omega,Phi2%Tot,Qpt%qpt_cart(:,iqpt),Rlatt_cart)
 !FB    Eigen2nd_path%eigenval(:,iqpt)= omega(:)
 !FB    do iatom=1,Invar%natom_unitcell
 !FB      do ii=1,3
@@ -337,8 +342,8 @@ subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
   implicit none
 
   double precision, intent(in) :: U0
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Lattice_Variables_type), intent(inout) :: Lattice
+  type(Input_type),intent(in) :: Invar
+  type(Lattice_type), intent(inout) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(phonon_dos_type),intent(in) :: PHdos
 
@@ -462,8 +467,8 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
   double precision, allocatable :: eigenvalues(:)
   double precision, allocatable :: WORK(:)
   double precision, allocatable :: Sij(:,:),Cij(:,:),aijkl(:,:,:,:),cijkl(:,:,:,:)
-  type(Input_Variables_type), intent(in) :: Invar
-  type(Lattice_Variables_type), intent(inout) :: Lattice
+  type(Input_type), intent(in) :: Invar
+  type(Lattice_type), intent(inout) :: Lattice
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)
 

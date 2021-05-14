@@ -11,8 +11,8 @@ module m_tdep_qpt
  use m_errors
  use m_abicore
  use m_xmpi
- use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
- use m_tdep_latt,        only : Lattice_Variables_type
+ use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+ use m_tdep_latt,        only : Lattice_type
 
  implicit none
 
@@ -46,9 +46,9 @@ contains
   implicit none
   integer :: qpt_tot,qptbound_tot
   double precision :: zeta,eta,nu,angle_alpha
-  type(Input_Variables_type),intent(in) :: Invar
+  type(Input_type),intent(in) :: Invar
   type(QptBound_type), allocatable,intent(out) :: QptBound(:)
-  type(Lattice_Variables_type),intent(in) :: Lattice
+  type(Lattice_type),intent(in) :: Lattice
   type(Qpoints_type),intent(out) :: Qpt
   type(MPI_enreg_type), intent(in) :: MPIdata
 
@@ -378,8 +378,8 @@ contains
   implicit none
   integer :: ii,jj,kk,nqpt,iqpt,qpt_tot,tmp_int
   logical :: IsThisAllowed
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Lattice_Variables_type),intent(in) :: Lattice
+  type(Input_type),intent(in) :: Invar
+  type(Lattice_type),intent(in) :: Lattice
   type(Qpoints_type),intent(out) :: Qpt
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(QptBound_type), allocatable :: QptBound(:)

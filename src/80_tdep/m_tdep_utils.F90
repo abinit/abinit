@@ -13,9 +13,9 @@ module m_tdep_utils
   use m_xmpi
   use m_wffile
   use m_numeric_tools,    only : uniformrandom
-  use m_tdep_latt,        only : Lattice_Variables_type, tdep_make_inbox
-  use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
-  use m_tdep_sym,         only : Symetries_Variables_type, tdep_SearchS_1at
+  use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
+  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_sym,         only : Symetries_type, tdep_SearchS_1at
   use m_io_tools
 
   implicit none
@@ -54,11 +54,11 @@ module m_tdep_utils
     double precision, allocatable :: ABGDE(:,:,:,:,:)
   end type Asr_Rot
 
-  type,public :: Constraints_Variables_type
+  type,public :: Constraints_type
     type(S_product),allocatable :: Sprod(:,:)
     type(Asr_Rot),allocatable :: AsrRot3(:,:,:)
     type(Asr_Rot),allocatable :: AsrRot4(:,:,:,:)
-  end type Constraints_Variables_type
+  end type Constraints_type
 
 
  public :: tdep_calc_MoorePenrose
@@ -73,7 +73,7 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type),intent(in) :: Invar
+  type(Input_type),intent(in) :: Invar
   type(Coeff_Moore_type), intent(in) :: CoeffMoore
   double precision, intent(in)  :: Forces(3*Invar%natom*Invar%my_nstep)
   double precision, intent(out)  :: IFC_coeff(CoeffMoore%ntotcoeff,1)
@@ -169,8 +169,19 @@ contains
   ABI_MALLOC(WORK,(nconcoef)); WORK(:)=0.d0
   A_inv(:,:)=A_tot(:,:)
   call DGETRF(nconcoef,nconcoef,A_inv,nconcoef,IPIV,INFO)
+  if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetrf)=',INFO
+!FB  write(Invar%stdout,*) ' '
+!FB  write(Invar%stdout,*) ' The inverse matrix is (after dgetrf):'
+!FB  do icoeff=1,nconcoef
+!FB    write(Invar%stdout,*) (A_inv(icoeff,iconst),iconst=1,nconcoef)
+!FB  end do
   call DGETRI(nconcoef,A_inv,nconcoef,IPIV,WORK,nconcoef,INFO)
   if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetri)=',INFO
+!FB  write(Invar%stdout,*) ' '
+!FB  write(Invar%stdout,*) ' The inverse matrix is (after dgetri):'
+!FB  do icoeff=1,nconcoef
+!FB    write(Invar%stdout,*) (A_inv(icoeff,iconst),iconst=1,nconcoef)
+!FB  end do
   ABI_FREE(IPIV)
   ABI_FREE(WORK)
 
@@ -178,8 +189,8 @@ contains
   write(Invar%stdout,*) ' The problem is solved'
   write(Invar%stdout,*) ' '
 !FB  write(Invar%stdout,*) ' The solutions are:'
-!FB  do ii=1,nconcoef
-!FB    write(Invar%stdout,'(1x,i4,1x,f15.10)') ii,x_tot(ii)
+!FB  do icoeff=1,nconcoef
+!FB    write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
 !FB  end do
 !FB  write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
 
@@ -197,9 +208,9 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type),intent(inout) :: Invar
-  type(Lattice_Variables_type),intent(in) :: Lattice
-  type(Symetries_Variables_type),intent(inout) :: Sym
+  type(Input_type),intent(inout) :: Invar
+  type(Lattice_type),intent(in) :: Lattice
+  type(Symetries_type),intent(inout) :: Sym
   type(MPI_enreg_type),intent(in) :: MPIdata
   double precision, intent(out)  :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(out)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
@@ -661,7 +672,7 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type),intent(in) :: Invar
+  type(Input_type),intent(in) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
   double precision, intent(in)  :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
@@ -826,8 +837,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 
   integer,intent(in) :: iatcell,ishell,jatom,katom,latom,nshell,order,norder
   integer,intent(inout) :: ncoeff
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision,intent(out) :: proj(norder,norder,nshell)

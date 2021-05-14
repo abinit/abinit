@@ -14,11 +14,11 @@ module m_tdep_phi4
   use m_linalg_interfaces
   use m_io_tools
   use m_crystal,          only : crystal_t
-  use m_tdep_readwrite,   only : Input_Variables_type, MPI_enreg_type
-  use m_tdep_latt,        only : Lattice_Variables_type
-  use m_tdep_shell,       only : Shell_Variables_type
-  use m_tdep_sym,         only : Symetries_Variables_type
-  use m_tdep_utils,       only : Coeff_Moore_type, Constraints_Variables_type
+  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_latt,        only : Lattice_type
+  use m_tdep_shell,       only : Shell_type
+  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_utils,       only : Coeff_Moore_type, Constraints_type
 
   implicit none
 
@@ -35,9 +35,9 @@ contains
 
   implicit none 
 
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Shell_Variables_type),intent(in) :: Shell4at
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Input_type),intent(in) :: Invar
+  type(Shell_type),intent(in) :: Shell4at
+  type(Symetries_type),intent(in) :: Sym
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in)  :: Phi4_ref(3,3,3,3,Shell4at%nshell)
   double precision, intent(out) :: Phi4UiUjUkUl(Invar%my_nstep)
@@ -104,9 +104,9 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
-  type(Shell_Variables_type),intent(in) :: Shell4at
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
+  type(Shell_type),intent(in) :: Shell4at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in) :: proj(81,81,Shell4at%nshell)
@@ -117,7 +117,7 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
   integer :: ncoeff_prev_l,ncoeff_prev_h
   double precision :: temp
   double precision, allocatable :: SSSS_proj(:,:,:,:,:)
-  type(Constraints_Variables_type) :: Const
+  type(Constraints_type) :: Const
 
   ABI_MALLOC(Const%Sprod,(Sym%nsym,24))
   do isym=1,Sym%nsym
@@ -240,7 +240,7 @@ subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
 
   implicit none
 
-  type(Shell_Variables_type),intent(in) :: Shell4at
+  type(Shell_type),intent(in) :: Shell4at
   integer,intent(in) :: ntotcoeff
   double precision, intent(in) :: proj(81,81,Shell4at%nshell)
   double precision, intent(in) :: Phi4_coeff(ntotcoeff,1)
@@ -283,9 +283,9 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
 
   implicit none
 
-  type(Input_Variables_type),intent(in) :: Invar
-  type(Symetries_Variables_type),intent(in) :: Sym
-  type(Shell_Variables_type),intent(in) :: Shell4at
+  type(Input_type),intent(in) :: Invar
+  type(Symetries_type),intent(in) :: Sym
+  type(Shell_type),intent(in) :: Shell4at
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,Shell4at%nshell)
 
@@ -362,7 +362,7 @@ subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
 
   implicit none
 
-  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Symetries_type),intent(in) :: Sym
   double precision, intent(in) :: Phi4_ref(3,3,3,3)
   double precision, intent(out) :: Phi4_3333(3,3,3,3)
   integer,intent(in) :: isym,itrans
