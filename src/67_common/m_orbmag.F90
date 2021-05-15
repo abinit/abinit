@@ -1713,7 +1713,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
 
            orbmag_terms(adir,vvia,nn) = orbmag_terms(adir,vvia,nn) + half*epsabg*Enk*AIMAG(dbc*dgc)*trnrm
 
-         end do
+         end do ! end loop over bands n'
  
          ! berrycurve needs i*eps_abg*<du/db|S|du/dg> 
          ! N.B. the Berry curvature does not involve H0 so no projection onto conduction
@@ -1744,9 +1744,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
          & pawang,pawrad,pawtab)
        orbmag_terms(adir,a0an,nn) = orbmag_terms(adir,a0an,nn) + real(onsite_bm_k_n)*trnrm
 
-     end do
+     end do ! end loop over directions adir
 
-   end do
+   end do ! end loop over bands n
+
+   icg = icg + npw_k*nband_k
+   ikg = ikg + npw_k
 
    ABI_FREE(cwavef)
    ABI_FREE(ket)
@@ -1760,10 +1763,6 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    ABI_FREE(dscg_k)
    ABI_FREE(cg1_k)
    ABI_FREE(scprod)
-
-   icg = icg + npw_k*nband_k
-   ikg = ikg + npw_k
-
    ABI_FREE(ylm_k)
    ABI_FREE(ylmgr_k)
    ABI_FREE(kpg_k)
