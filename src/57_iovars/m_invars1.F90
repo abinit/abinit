@@ -1044,6 +1044,7 @@ subroutine indefo1(dtset)
  dtset%usepawu=0
  dtset%usepotzero=0
  dtset%use_slk=0
+ dtset%use_oldchi=1
 !V
  dtset%vel_orig(:,:,:)=zero
  dtset%vel_cell_orig(:,:,:)=zero
