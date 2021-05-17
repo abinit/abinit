@@ -465,6 +465,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(337)='cchi0(xmpi_sum_1)               '
  names(338)='cchi0(xmpi_sum_2)               '
  names(339)='cchi0(io)                       ' 
+ names(340)='call_1386                       ' 
+ names(341)='call_1397                       ' 
+ names(342)='call_1402                       ' 
+ names(343)='call_1406                       ' 
+ names(344)='ABI_MALLOC                      ' 
+ names(345)='call_1417                       ' 
+ names(346)='memreq                          ' 
+ names(347)='call_1428                       ' 
+ names(348)='ABI_MALLOC_OR_DIE               ' 
+ names(349)='nkpt_summed                     ' 
  names(400)='cchi0(call_xmpi)                ' 
  
  names(401)='sigma                           '
@@ -1773,8 +1783,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if !ncount
      end if !xmpi_paral
 
-     nlist=32
-     list(:32)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,334,335,336,337,338,339,400/)
+     nlist=42
+     list(:42)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,334,335,336,337,338,339,340,341,342,343,344,345,346,347,348,349,400/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)

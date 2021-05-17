@@ -1382,8 +1382,9 @@ call timab(334,1,tsec) ! first loop
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbbpks," (b,b',k,s) states in chi0."
+ call timab(340,1,tsec) ! call 1386
  call wrtout(std_out,msg,'PERS')
-
+ call timab(340,2,tsec) ! call 1386
  if (Psps%usepaw==1) then
    ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,qpoint,Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
@@ -1392,42 +1393,53 @@ call timab(334,1,tsec) ! first loop
 
  SELECT CASE (Ep%spmeth)
  CASE (0)
+ call timab(341,1,tsec) ! call 1397
    call wrtout(std_out,' Calculating chi0(q,omega,G,G")','COLL')
    ! Allocation of green_w moved inside openmp loop
-
+ call timab(341,2,tsec) ! call 1397
  CASE (1, 2)
+  call timab(342,1,tsec) ! call 1402
    call wrtout(std_out,' Calculating Im chi0(q,omega,G,G")','COLL')
-
+  call timab(342,2,tsec) ! call 1402
    ! Find Max and min resonant transitions for this q, report also treated by this proc.
+     call timab(343,1,tsec) ! call 1406
    call make_transitions(Wfd,1,Ep%nbnds,nbvw,nsppol,Ep%symchi,Cryst%timrev,GW_TOL_DOCC,&
 &    max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,qp_energy,qp_occ,qpoint,bbp_ks_distrb)
    !
+        call timab(343,2,tsec) ! call 1406
    ! Calculate frequency dependent weights for Hilbert transform.
+   call timab(344,1,tsec) ! ABI_MALLOC
    ABI_MALLOC(omegasf,(Ep%nomegasf))
    ABI_MALLOC(kkweight,(Ep%nomegasf,Ep%nomega))
+   call timab(344,2,tsec) ! ABI_MALLOC
    !my_wl=1; my_wr=Ep%nomegasf
+   call timab(345,1,tsec) ! call 1417
    call setup_spectral(Ep%nomega,Ep%omega,Ep%nomegasf,omegasf,max_rest,min_rest,my_max_rest,my_min_rest,&
 &    0,Ep%zcut,zero,my_wl,my_wr,kkweight)
-
+   call timab(345,2,tsec) ! call 1417
    if (.not.use_tr) then
      ABI_BUG('spectral method requires time-reversal')
    end if
-
+   call timab(346,1,tsec) ! memreq
    memreq = two*gwpc*Ep%npwe**2*(my_wr-my_wl+1)*b2Gb
+    call timab(346,2,tsec) ! memreq
+   call timab(347,1,tsec) ! call 1428
    write(msg,'(a,f10.4,a)')' memory required per spectral point: ',two*gwpc*Ep%npwe**2*b2Mb,' [Mb]'
    call wrtout(std_out,msg,'PERS')
    write(msg,'(a,f10.4,a)')' memory required by sf_chi0: ',memreq,' [Gb]'
    call wrtout(std_out,msg,'PERS')
+   call timab(347,2,tsec) ! call 1428
    if (memreq > two) then
      ABI_WARNING(' Memory required for sf_chi0 is larger than 2.0 Gb!')
    end if
+      call timab(348,1,tsec) ! ABI_MALLOC_OR_DIE
    ABI_MALLOC_OR_DIE(sf_chi0,(Ep%npwe,Ep%npwe,my_wl:my_wr), ierr)
    sf_chi0=czero_gw
-
+      call timab(348,2,tsec) ! ABI_MALLOC_OR_DIE
  CASE DEFAULT
    ABI_BUG("Wrong spmeth")
  END SELECT
-
+      call timab(349,1,tsec) ! nkpt_summed
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi==1) then
    nkpt_summed=Ltg_q%nibz_ltg
@@ -1436,7 +1448,7 @@ call timab(334,1,tsec) ! first loop
 
  write(msg,'(a,i6,a)')' Calculation status : ',nkpt_summed,' to be completed '
  call wrtout(std_out,msg,'COLL')
-
+      call timab(349,2,tsec) ! nkpt_summed
  ! ============================================
  ! === Begin big fat loop over transitions ===
  ! ============================================
