@@ -6326,7 +6326,11 @@ but with only the head of the kernel. As such, the self-consistent iteration in 
 can be disregarded [[cite:Chen2016]].
 
 [[gwgamma]] = -8 activates the RPA bootstrap-like kernel (one-shot) (see [[cite:Berger2015]]
-and [[cite:Rigamonti2015]]).
+and [[cite:Rigamonti2015]].
+
+[[gwgamma]] = -11 activates the Ward-identity compliant vertex kernel (see [[cite:Tal2021]]).
+At present, the renormalization factor Z is fixed at 0.78, which is sufficiently accurate for most
+semiconductors and insulators.
 """,
 ),
 
