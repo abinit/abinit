@@ -1006,7 +1006,8 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: qphon(3)
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
- real(dp),allocatable :: ar1(:,:),a_gradi_r1(:,:)
+ real(dp),allocatable,target :: ar1(:,:)
+ real(dp),allocatable :: a_gradi_r1(:,:)
  real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
  real(dp),allocatable :: rho1now(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
@@ -1036,7 +1037,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_MALLOC(dadgradn_t1,(cplex*nfft,nspgrad,3))
  ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad))
  do ir=1,nfft
-   r0=kxc(ir,5:7); r1=rho1now(ir,1,2:4)
+   r0(:)=kxc(ir,5:7); r1(:)=rho1now(ir,1,2:4)
    gradrho_gradrho1=dot_product(r0,r1)
    ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
    a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
@@ -1046,7 +1047,10 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Use xcden to compute the real space gradient of A*rho^(1). 
 !Reuse rho1now storage.
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
+ nullify(rhor1_ptr)
+ rhor1_ptr => ar1
+ rho1now=zero
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
 
 !Incorporate the terms that do not need further treatment 
 !(a -i factor is applied here)

@@ -841,6 +841,9 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
 
  end do
 
+ ABI_FREE(gcart1)
+ ABI_FREE(gcart2)
+ ABI_FREE(gcart3)
  ABI_FREE(workgr)
 
  call timab(82,1,tsec)
@@ -849,6 +852,8 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
  do ifft=1,nfft
    vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
+   !Apply here the two pi factor
+   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)*two_pi
  end do
  ABI_FREE(wkcmpx)
  ABI_FREE(work)
