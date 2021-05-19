@@ -745,6 +745,7 @@ end subroutine dfpt_mkvxcgga
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!         if 2, COMPLEX
 !!  ixc= choice of exchange-correlation scheme
+!!  ixcrot= option for rotation of collinear spin potential to non collinear full matrix
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhotoxc.F90)
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
