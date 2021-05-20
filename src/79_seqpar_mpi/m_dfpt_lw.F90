@@ -2192,7 +2192,7 @@ end if
        do iatpert=1,natpert
          rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
          call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1_tmp,vxc1dq)
-         vxc1dqc(:,:,iatpert,qcar)=vxc1dqi(:,:)
+         vxc1dqc(:,:,iatpert,qcar)=vxc1dq(:,:)
        end do
      end do 
      ABI_FREE(rhor1_tmp)
