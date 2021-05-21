@@ -2783,10 +2783,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        call dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
        &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
        &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
-       &  kg_k,kpoint,mkmem_rbz, &
-       &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
+       &  kg_k,kpoint,kxc,mkmem_rbz, &
+       &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz,nkxc, &
        &  npw_k,nq1grad,nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
-       &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
+       &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rhor,rmet,ucvol,useylmgr, &
        &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
        &  wfk_t_dkdk,wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
 
@@ -2830,9 +2830,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !      Now comute the 1st order wf contributions
        call dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, &
        &  isdqwf_t1_k,isdqwf_t2_k,isdqwf_t3_k,isdqwf_t4_k,isdqwf_t5_k,isppol,istwf_k, &
-       &  kg_k,kpoint,matom,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+       &  kg_k,kpoint,kxc,matom,mkmem_rbz,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz,nkxc, &
        &  npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
-       &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+       &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rhor,rmet,ucvol,useylmgr, &
        &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
        &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
 
