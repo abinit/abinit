@@ -1653,7 +1653,6 @@ c0_VefielddQ_c1strain_bks=zero
  ABI_MALLOC(gh1dqdqc,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(gvnl1dqdqc,(2,npw_k*dtset%nspinor))
- if (nkxc /= 7) vxc1dqdq(:)=zero
 
 !Specific definitions
  useylmgr1=1;optlocal=1;optnl=1;opthartdqdq=1;
@@ -1667,15 +1666,15 @@ c0_VefielddQ_c1strain_bks=zero
    do iq1grad=1,nq1grad
 
      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-     !contribution from ground state density
-     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
+     !(and XC if GGA) contribution from ground state density
+     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,kxc,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom, &
-     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),nkxc,nspden,opthartdqdq, &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,rhog,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq)
+     &  dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
 
-     !Merge both local contributions
-     vpsp1dqdq=vpsp1dqdq+vhart1dqdq
+     !Merge the local contributions
+     vpsp1dqdq=vpsp1dqdq+vhart1dqdq+vxc1dqdq
 
      !Set up q-gradient of strain potential vlocal1dqdq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -1750,6 +1749,7 @@ c0_VefielddQ_c1strain_bks=zero
  ABI_FREE(cwave0i)
  ABI_FREE(cg1_efield)
  ABI_FREE(vhart1dqdq)
+ ABI_FREE(vxc1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the flexoelectric tensor
@@ -2642,7 +2642,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  real(dp),allocatable :: vhart1dqdq(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:)
  real(dp),allocatable :: vlocal1dq(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dq(:),vpsp1dqdq(:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dq(:),vpsp1dqdq(:),vxc1dqdq(:)
  real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
@@ -3145,6 +3145,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 !Specific allocations
  ABI_MALLOC(vhart1dqdq,(2*nfft))
  ABI_MALLOC(vpsp1dqdq,(2*nfft))
+ ABI_MALLOC(vxc1dqdq,(2*nfft))
  ABI_MALLOC(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(gh1dqdqc,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
@@ -3162,15 +3163,15 @@ c0_HatdisdagdQ_c1strain_bks=zero
    do iq1grad=1,nq1grad
 
      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-     !contribution from ground state density
-     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
+     !(and XC if GGA) contribution from ground state density
+     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,kxc,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom, &
-     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),nkxc,nspden,opthartdqdq, &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,rhog,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq)
+     &  dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
 
-     !Merge both local contributions
-     vpsp1dqdq=vpsp1dqdq+vhart1dqdq
+     !Merge the local contributions
+     vpsp1dqdq=vpsp1dqdq+vhart1dqdq+vxc1dqdq
 
      !Set up q-gradient of strain potential vlocal1dqdq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -3241,6 +3242,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
  ABI_FREE(gvnl1dqdqc)
  ABI_FREE(vpsp1dqdq)
  ABI_FREE(vlocal1dqdq)
+ ABI_FREE(vxc1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! q1-gradient of atomic displacement 1st-order Hamiltonian:

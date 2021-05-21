@@ -1847,7 +1847,7 @@ end subroutine dfpt_vlocaldqdq
 !! Compute second q-gradient (at q=0) of the local part of 1st-order 
 !! metric potential from the appropriate atomic pseudopotential 
 !! with structure and derivative factor. Additionaly, compute the 
-!! second q-gradient (at q=0) of the Hartree potential of the metric 
+!! second q-gradient (at q=0) of the Hartree and XC (if GGA) potentials of the metric 
 !! perturbation.
 !! Cartesian coordinates are employed to define the direction of the 
 !! metric perturbation and the two q-gradients.
@@ -1860,12 +1860,15 @@ end subroutine dfpt_vlocaldqdq
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  idir= strain perturbation direction
 !!  ipert=number of the atom being displaced in the frozen-phonon
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimension of q grid for pseudopotentials
 !!  natom=number of atoms in cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential 
@@ -1874,14 +1877,15 @@ end subroutine dfpt_vlocaldqdq
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!
 !! OUTPUT
 !!  vhart1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density Hartree potential from the metric perturbation
-!!
 !!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order metric local 
 !!  crystal pseudopotential in real space
+!!  vxc1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density XC potential from the metric perturbation (only finite if GGA)
 !!
 !! NOTES
 !! ** IMPORTANT: the formalism followed in this routine
@@ -1913,24 +1917,26 @@ end subroutine dfpt_vlocaldqdq
 !! SOURCE
 
 subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
-& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,&
-& ucvol,vlspl,vhart1dqdq,vpsp1dqdq)
+& kxc,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+& ntypat,n1,n2,n3,nkxc,nspden,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,rhor,&
+& ucvol,vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
 
  implicit none
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: opthartdqdq,qdir
+ integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,nkxc,ntypat
+ integer,intent(in) :: nspden,opthartdqdq,qdir
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18)
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3), rhog(2,nfft)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3), kxc(nfft,nkxc)
+ real(dp),intent(in) :: ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rhor(nfft,nspden)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat)
  real(dp),intent(out) :: vhart1dqdq(cplex*nfft),vpsp1dqdq(cplex*nfft)
+ real(dp),intent(out) :: vxc1dqdq(cplex*nfft)
 
 !Local variables -------------------------
 !scalars
