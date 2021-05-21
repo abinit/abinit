@@ -43,6 +43,7 @@ module m_mklocl
  use m_gtermcutoff,only : termcutoff
 
  use m_splines,  only : splfit
+ use m_dfpt_mkvxc, only : dfpt_mkvxcggadq
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -1933,7 +1934,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer,intent(in) :: nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3), kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rhor(nfft,nspden)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rhor(cplex*nfft,nspden)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat)
  real(dp),intent(out) :: vhart1dqdq(cplex*nfft),vpsp1dqdq(cplex*nfft)
  real(dp),intent(out) :: vxc1dqdq(cplex*nfft)
@@ -1954,7 +1955,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3),gqc(3),vion1(1),vion1dq(1),vion1dqdq(1)
- real(dp),allocatable :: work1(:,:)
+ real(dp),allocatable :: work1(:,:),vxc1part(:)
 
 ! *********************************************************************
 
@@ -2150,6 +2151,24 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    end if
 
    ABI_FREE(work1)
+
+!  Calculate the GS density XC contribution (if GGA)
+   vxc1dqdq(:)=zero
+   if (nkxc == 7) then
+     ABI_MALLOC(vxc1part,(cplex*nfft))
+     if (beta==gamma) then
+       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
+     & nspden,delta,rhor,vxc1part)
+       vxc1dqdq(:)=vxc1part(:)
+     end if
+     if (beta==delta) then
+       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
+     & nspden,gamma,rhor,vxc1part)
+       vxc1dqdq(:)=vxc1dqdq(:) + vxc1part(:)
+     end if
+     vxc1dqdq(:)=vxc1dqdq(:)/two_pi 
+     ABI_FREE(vxc1part)
+   end if
 
 !End the condition of non-electric-field
  end if
