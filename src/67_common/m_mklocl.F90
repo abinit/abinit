@@ -2157,12 +2157,12 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (nkxc == 7) then
      ABI_MALLOC(vxc1part,(cplex*nfft))
      if (beta==gamma) then
-       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
+       call dfpt_mkvxcggadq(1,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
      & nspden,delta,rhor,vxc1part)
        vxc1dqdq(:)=vxc1part(:)
      end if
      if (beta==delta) then
-       call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
+       call dfpt_mkvxcggadq(1,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
      & nspden,gamma,rhor,vxc1part)
        vxc1dqdq(:)=vxc1dqdq(:) + vxc1part(:)
      end if

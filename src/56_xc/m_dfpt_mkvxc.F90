@@ -1026,9 +1026,10 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
  qphon(:)=zero 
- rhor1_ptr => rhor1
+! rhor1_ptr => rhor1
  ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1,rho1now)
 
 !Apply the XC kernel
  nspgrad=1
@@ -1047,10 +1048,11 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Use xcden to compute the real space gradient of A*rho^(1). 
 !Reuse rho1now storage.
- nullify(rhor1_ptr)
- rhor1_ptr => ar1
+! nullify(rhor1_ptr)
+! rhor1_ptr => ar1
  rho1now=zero
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
 
 !Incorporate the terms that do not need further treatment 
 !(a -i factor is applied here)
