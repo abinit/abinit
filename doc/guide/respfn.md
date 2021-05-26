@@ -138,7 +138,7 @@ Limitations of the present implementation (as of v5.7):
   * Symmetry is presently used to skip redundant k points in the BZ sum, 
     but not to skip redundant strain perturbations.
 
-We also define the index of the perturbation, called *pertcase*, equal to idir + 3*ipert. 
+We also define the index of the perturbation, called *pertcase*, equal to idir + 3*(ipert-1). 
 Accordingly, pertcase runs from 1 to 3 * (natom + 4), and will be
 needed to identify output and input files, see section 6.
 
