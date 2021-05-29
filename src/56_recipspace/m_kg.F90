@@ -580,7 +580,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  if (npw1<nband(ikpt)) then
 !  write(msg, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
 !  &   ' kpgio : ERROR -',ch10,&
-!  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
+!  &   '  At k point number',ikpt,' k=',(kptns(ierr,ikpt),ierr=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
 !  &   '  Action: change either ecut or nband in input file.'
@@ -592,6 +592,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
    ikg=ikg+npw1
  end do !  End of the loop over k points
 
+! TODO: this fails on some platforms if nproc > nkpt
  if(mode_paral == 'PERS') then
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if

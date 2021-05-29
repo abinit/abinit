@@ -74,7 +74,7 @@ MODULE m_nctk
 #else
  ! replacements
  integer,public,parameter :: nctk_max_dims = 7
- integer,public,parameter :: nctk_slen=256
+ integer,public,parameter :: nctk_slen = 256
 #endif
 
 #ifdef HAVE_NETCDF
