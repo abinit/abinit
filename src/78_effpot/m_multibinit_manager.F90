@@ -371,8 +371,10 @@ contains
        self%params%lwf_temperature = self%params%lwf_temperature/Ha_K
        self%params%lwf_temperature_start=self%params%lwf_temperature_start/Ha_K
        self%params%lwf_temperature_end=self%params%lwf_temperature_end/Ha_K
-
     end if
+
+    if(self%params%ncellmat /= [0,0,0,0,0,0,0,0,0]) then
+       self%params 
 
   end subroutine prepare_params
 
@@ -510,10 +512,9 @@ contains
   subroutine set_spin_mover(self)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen) :: fname
-    select case(self%params%spin_dynamics)
-        case (1)
-          ABI_MALLOC_TYPE_SCALAR(spin_mover_t, self%spin_mover)
-    end select
+    if (self%params%spin_dynamics>0) then
+       ABI_MALLOC_TYPE_SCALAR(spin_mover_t, self%spin_mover)
+    end if
     fname=trim(self%filenames(2))//"_spinhist_input.nc"
     call self%spin_mover%initialize(params=self%params,&
             & supercell=self%supercell, rng=self%rng, &
@@ -572,7 +573,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -584,7 +586,8 @@ contains
   subroutine run_spin_varT(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
@@ -599,7 +602,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -615,7 +619,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
@@ -631,7 +636,9 @@ contains
     type(lattice_lwf_mover_t) :: mover
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -663,7 +670,8 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
 
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%fill_supercell()
 
     ! calculate various quantities for reference spin structure
@@ -724,7 +732,9 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
+    
     call self%fill_supercell()
     call self%set_movers()
     call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -739,7 +749,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncell33)
     call self%fill_supercell()
     call self%set_movers()
     !call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))

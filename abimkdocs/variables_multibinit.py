@@ -919,6 +919,23 @@ Give the size of the supercell for the dynamics
 ),
 
 Variable(
+    abivarname="ncellmat@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3, 3],
+    defaultval=[[1,0,0],[0,1,0], [0,0,1]],
+    mnemonics="Number of superCELL MATtrix",
+    added_in_version="9.5.0",
+    text=r"""
+Give the size of the supercell for the dynamics in the format of a matrix. 
+Currently allowed in spin dynamics and spin and LWF dynamics. 
+It will override the [[multibinit:ncell]] if specified.
+""",
+),
+
+
+Variable(
     abivarname="strfact@multibinit",
     varset="multibinit",
     vartype="real",

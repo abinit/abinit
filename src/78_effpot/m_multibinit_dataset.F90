@@ -126,6 +126,7 @@ module m_multibinit_dataset
   integer :: bound_rangePower(2)
   integer :: bound_cell(3)
   integer :: ncell(3)
+  integer :: ncellmat(3,3)
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: ng2qpt(3)
   integer :: kptrlatt(3,3)
@@ -507,6 +508,7 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%bound_rangePower(:)= (/6,6/)
  multibinit_dtset%bound_cell(:)= (/6,6,6/)
  multibinit_dtset%ncell(:)= 0
+ multibinit_dtset%ncellmat(:,:)= 0
  multibinit_dtset%ngqpt(:) = 0
  multibinit_dtset%ng2qpt(:)= 0
  multibinit_dtset%strtarget(1:6) = zero
@@ -1368,13 +1370,32 @@ multibinit_dtset%lwf_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ncell',tread,'INT')
  if(tread==1) multibinit_dtset%ncell(1:3)=intarr(1:3)
  do ii=1,3
-   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>100)then
+   if(multibinit_dtset%ncell(ii)<0.or.multibinit_dtset%ncell(ii)>100000)then
      write(message, '(a,i0,a,i0,3a,i0,a)' )&
-&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 50.',&
+&     'ncell(',ii,') is ',multibinit_dtset%ncell(ii),', which is lower than 0 of superior than 100000.',&
 &     ch10,'Action: correct ncell(',ii,') in your input file.'
      ABI_ERROR(message)
    end if
  end do
+
+
+ ! Set to diagonal ncell. Then if it is specified, overwrite.
+ multibinit_dtset%ncellmat(:,:)= reshape([ncell(1), 0, 0,     0, ncell(2), 0,    0,0, ncell(3) ], [3,3])
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'ncellmat',tread,'INT')
+ if(tread==1) then
+    multibinit_dtset%ncellmat=transpose(reshape(intarr(1:9), [3,3]))
+ end if
+ do ii=1,3
+    do jj =1 ,3
+       if(multibinit_dtset%ncellmat(ii, jj)<0.or.multibinit_dtset%ncellmat(ii, jj)>100000)then
+          write(message, '(a,i0,a,i0, a, i0,3a,i0,a, i0,a)' )&
+               &     'ncellmat(',ii,',', jj,') is ',multibinit_dtset%ncellmat(ii),', which is lower than 0 of superior than 100000.',&
+               &     ch10,'Action: correct ncellmat(',ii, ',', jj,') in your input file.'
+          ABI_ERROR(message)
+       end if
+    end do
+ end do
+
 
  multibinit_dtset%ngqpt(:)= 1
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngqpt',tread,'INT')
