@@ -2005,6 +2005,7 @@ function empty_cache(kbsize) result(fake)
 
 ! *********************************************************************
 
+ fake = 0
  if (kbsize <= 0) RETURN
 
  sz = int((100._dp * kbsize) / dp)

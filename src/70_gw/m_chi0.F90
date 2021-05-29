@@ -1310,7 +1310,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
  end if
 
- ! Setup weights (2 for spin unpolarized sistem, 1 for polarized).
+ ! Setup weights (2 for spin unpolarized system, 1 for polarized).
  ! spin_fact is used to normalize the occupation factors to one. Consider also the AFM case.
  SELECT CASE (nsppol)
  CASE (1)
