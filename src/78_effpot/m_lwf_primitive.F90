@@ -41,7 +41,7 @@ module m_lwf_primitive_potential
   use m_xmpi
   use m_mathfuncs, only: eigensh
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential, only: primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
@@ -175,7 +175,7 @@ contains
     real(dp), allocatable ::  twobody_val(:)
     integer, allocatable ::   twobody_iR(:), twobody_i(:), twobody_j(:), twobody_orderi(:), twobody_orderj(:)
     integer :: varid, i, j
-    !#if defined HAVE_NETCDF
+#if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "Open netcdf file")
 
@@ -189,6 +189,9 @@ contains
 
     ierr=nctk_get_dim(ncid, "wann_nwann", nlwf)
     NCF_CHECK_MSG(ierr, "getting wann_nwann in lwf potential file")
+
+    ! TODO : add lattice
+    !call self%primcell%set_lattice()
 
     call self%primcell%set_lwf(nlwf)
     self%nlwf=nlwf
@@ -229,21 +232,22 @@ contains
 
     self%natom=natom
 
-    ABI_UNUSED(cell)
 
-    !ierr =nf90_inq_varid(ncid, "ref_cell", varid)
-    !NCF_CHECK_MSG(ierr, "ref_cell")
-    !ierr = nf90_get_var(ncid, varid, cell)
-    !NCF_CHECK_MSG(ierr, "ref_cell")
-    !cell(:,:)=cell(:,:)/ Bohr_Ang
+    ierr =nf90_inq_varid(ncid, "wann_cell", varid)
+    NCF_CHECK_MSG(ierr, "wann_cell")
+    ierr = nf90_get_var(ncid, varid, cell)
+    NCF_CHECK_MSG(ierr, "wann_cell")
+    cell(:,:)=cell(:,:)/ Bohr_Ang
 
 
-    !ierr =nf90_inq_varid(ncid, "ref_xcart", varid)
-    !NCF_CHECK_MSG(ierr, "ref_xcart")
-    !ierr = nf90_get_var(ncid, varid, xcart)
-    !NCF_CHECK_MSG(ierr, "ref_xcart")
+    ierr =nf90_inq_varid(ncid, "wann_atomic_xcart", varid)
+    NCF_CHECK_MSG(ierr, "wann_atomic_xcart")
+    ierr = nf90_get_var(ncid, varid, xcart)
+    NCF_CHECK_MSG(ierr, "wann_atomic_xcart")
+    xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
-    !xcart(:,:)=xcart(:,:)/ Bohr_Ang
+    !TODO: add zion and masses
+
 
     ABI_MALLOC(self%lattice_coeffs, (nlwf, natom*3, nR))
 
@@ -364,9 +368,9 @@ contains
        ABI_SFREE(twobody_orderj)
        ABI_SFREE(twobody_val)
     endif
-    !#else
-    !NETCDF_NOTENABLED_ERROR()
-    !#endif
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
 
   end subroutine load_from_netcdf
 
@@ -381,13 +385,14 @@ contains
   !         the type of the supercell potential.
   !
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, params, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     use m_spmat_convert, only: COO_to_dense
 
     class(lwf_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),                        intent(inout) :: scmaker
     type(multibinit_dtset_type),                    intent(inout) :: params
     class(abstract_potential_t), pointer,           intent(inout) :: scpot
+    type(mbsupercell_t), target :: supercell
 
     integer :: nlwf, sc_nlwf
     integer :: inz, iR, R(3), i, j, icell
@@ -395,6 +400,7 @@ contains
     real(dp):: val
 
     ABI_UNUSED_A(params)
+
 
     nlwf=self%nlwf
     sc_nlwf= nlwf* scmaker%ncells
@@ -407,6 +413,7 @@ contains
     select type(scpot)
     type is (lwf_potential_t)
        call scpot%initialize(sc_nlwf)
+       call scpot%set_supercell(supercell)
        ! IFC is an COO_mat_t, which has the index of R1, R2, R3, i, j and the value of val
        ! list of index R: coeff%ind%data(1, 1:coeff%nnz)
        ! list of i: coeff%ind%data(2, 1:coeff%nnz)
@@ -442,11 +449,10 @@ contains
           end if
 
        ! coefficients of atomic displacements in supercell
+       call scpot%supercell%lwf%lwf_latt_coeffs%initialize(self%nlwf*scmaker%ncells, self%natom*3*scmaker%ncells )
        do i=1, self%nlwf
           call scmaker%trans_i(nbasis=nlwf, i=i, i_sc=ilist_sc)
-          do icell =1, scmaker%ncells
-              call scpot%lwf_latt_coeffs(ilist_sc(icell))%initialize(scmaker%ncells*self%natom*3)
-          end do
+
           do iR=1, self%nR
              R(:) = self%Rlist(:, iR)
              do j =1, self%natom*3
@@ -454,7 +460,8 @@ contains
                 if (abs(val) > 1e-4) then
                    call scmaker%trans_j_and_Rj(nbasis=self%natom*3, j=j, Rj=R, j_sc=jlist_sc, Rj_sc=Rlist_sc)
                    do icell =1, scmaker%ncells
-                      call scpot%lwf_latt_coeffs(ilist_sc(icell))%push(jlist_sc(icell), val)
+                      !call scpot%supercell%lwf%lwf_latt_coeffs(ilist_sc(icell))%push(jlist_sc(icell), val)
+                      call scpot%supercell%lwf%lwf_latt_coeffs%coeffs%add_entry([jlist_sc(icell),ilist_sc(icell)], val)
                    end do
                    ABI_SFREE(jlist_sc)
                    ABI_SFREE(Rlist_sc)

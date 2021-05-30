@@ -47,6 +47,7 @@ module m_spmat_COO
    contains
      procedure :: initialize
      procedure :: mv
+     procedure :: mv_left
      procedure :: diag
   end type COO_mat_t
 
@@ -100,6 +101,9 @@ contains
    !$OMP END PARALLEL DO
   end subroutine  mv
 
+  
+
+
   !-----------------------------------------------------------------------
   !> @brief COO sparse matrix-vector multiplication. naive implementation.
   !> @param [in] x    Mx=b
@@ -121,6 +125,30 @@ contains
     !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
     call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
+
+
+  !-----------------------------------------------------------------------
+  !> @brief COO sparse matrix-vector left multiplication. naive implementation.
+  !> @param [in] x    xM=b
+  !> @param [out] b   xM=b
+  !-----------------------------------------------------------------------
+  subroutine mv_left(self, x, b)
+    class(COO_mat_t), intent(in) :: self
+    real(dp), intent(in) :: x(self%mshape(2))
+    real(dp), intent(out) :: b(self%mshape(1))
+    integer:: ind, ind_i, ind_j
+    b(:)=0.0D0
+    !$OMP PARALLEL DO private(ind, ind_i, ind_j)
+    do ind = 1, self%nnz
+       ind_i=self%ind%data(1, ind)
+       ind_j=self%ind%data(2, ind)
+       b(ind_j)=b(ind_j)+self%val%data(ind)*x(ind_i)
+    end do
+    !$OMP END PARALLEL DO
+  end subroutine  mv_left
+
+
+
 
   subroutine test_COO_mv()
     type(coo_mat_t) :: mat

@@ -42,7 +42,7 @@ module m_lwf_potential
   use m_hashtable_strval, only: hash_table_t
   use m_twobody_interaction, only: get_twobody_dEdx, get_twobody_delta_E
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_lattice_lwf_map, only: lwf_force_to_lattice, lattice_to_lwf_projection
+  use m_lattice_lwf_map, only: lwf_latt_coeff_t
   implicit none
 !!***
 
@@ -56,7 +56,6 @@ module m_lwf_potential
      type(CSR_mat_t) :: coeff
      type(NDCOO_mat_t) :: onebody_coeff ! onebody anharmonic
      type(NDCOO_mat_t) :: coeff2 ! twobody anharmonic
-     type(sp_real_vec), allocatable :: lwf_latt_coeffs(:) ! ( nlwf)
 
      logical :: use_harmonic = .True.
      logical :: has_self_bound_term = .False.
@@ -104,7 +103,6 @@ contains
     call self%coeff2%initialize(mshape= [self%nlwf, self%nlwf])
     self%csr_mat_ready=.False.
     ABI_MALLOC(self%coeff_diag, (self%nlwf))
-    ABI_MALLOC(self%lwf_latt_coeffs, (self%nlwf))
 
     ABI_MALLOC(self%lwf_force, (self%nlwf))
     ABI_MALLOC(self%lwf_amp, (self%nlwf))
@@ -128,10 +126,6 @@ contains
        call self%coeff%finalize()
     end if
     ABI_SFREE(self%coeff_diag)
-    do ilwf=1, self%nlwf
-       call self%lwf_latt_coeffs(ilwf)%finalize()
-    end do
-    ABI_SFREE(self%lwf_latt_coeffs)
     self%nlwf=0
     self%is_null=.True.
     self%as_lattice_anharmonic=.False.
@@ -160,7 +154,8 @@ contains
     class(lwf_potential_t), intent(inout) :: self
     integer , intent(in) :: ilwf, ilatt
     real(dp) , intent(in) :: val
-    call self%lwf_latt_coeffs(ilwf)%push(ilatt, val)
+    !call self%lwf_latt_coeffs(ilwf)%push(ilatt, val)
+    call self%supercell%lwf%lwf_latt_coeffs%coeffs%add_entry( [ilatt, ilwf], val)
   end subroutine add_lattice_coeffs
 
   !-------------------------------------------------------------------!
@@ -259,7 +254,7 @@ contains
 
 
     if(self%as_lattice_anharmonic) then
-       call lattice_to_lwf_projection(self%lwf_latt_coeffs, displacement, lwf)
+       call self%supercell%lwf%lwf_latt_coeffs%lattice_to_lwf_projection( displacement, lwf)
     end if
 
 
@@ -295,7 +290,7 @@ contains
     !etmp = etmp+ self%beta*sum(lwf(::2)**2 * lwf(1::2)**2)
 
     if(self%as_lattice_anharmonic) then
-       call lwf_force_to_lattice(self%lwf_latt_coeffs, self%lwf_force, force)
+       call self%supercell%lwf%lwf_latt_coeffs%lwf_force_to_lattice(self%lwf_force, force)
     else
        lwf_force=lwf_force+self%lwf_force
     end if

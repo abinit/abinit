@@ -107,7 +107,7 @@ contains
   subroutine write_cell(self, supercell)
     class(lwf_ncfile_t), intent(inout) :: self
     type(mbsupercell_t), intent(in) :: supercell
-    integer :: ncerr
+    integer :: ncerr, natom3, nnz, id_nnz,  id_natom3, id_map_ilwf, id_map_idisp, id_map_val
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in lwf history file.")
@@ -116,6 +116,14 @@ contains
     NCF_CHECK_MSG(ncerr, "Error when defining dimension three in history file.")
 
     ncerr=nf90_def_dim(self%ncid, "nlwf", supercell%lwf%nlwf, self%nlwf)
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension nlwf in history file.")
+
+    natom3=supercell%lwf%lwf_latt_coeffs%coeffs%mshape(1)
+    ncerr=nf90_def_dim(self%ncid, "natom3", natom3, id_natom3)
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension natom3 in history file.")
+
+    nnz=supercell%lwf%lwf_latt_coeffs%coeffs%nnz
+    ncerr=nf90_def_dim(self%ncid, "lwf_latt_map_nnz",nnz, id_nnz)
     NCF_CHECK_MSG(ncerr, "Error when defining dimension nlwf in history file.")
 
     !ncerr=nf90_def_dim(self%ncid, "nR", 3, self%nlwf)
@@ -131,6 +139,20 @@ contains
     call ab_define_var(self%ncid, [self%nlwf], &
          &         self%lwf_masses_id, NF90_DOUBLE, "lwf_masses", "LWF MASSES", "dimensionless")
 
+    ! define vars for lwf lattice displacement mapping in the format of a COO matrix.
+    call ab_define_var(self%ncid, [id_nnz], id_map_idisp, & 
+         & NF90_INT, "lwf_latt_map_id_displacement", &
+         & "LWF lattice mapping coefficient COO matrix displacement id",  "dimensionless")
+
+    call ab_define_var(self%ncid, [id_nnz], id_map_ilwf,&
+         & NF90_INT, "lwf_latt_map_id_lwf", &
+         & "LWF lattice mapping coefficient COO matrix LWF id","dimensionless")
+
+    call ab_define_var(self%ncid, [id_nnz], id_map_val, &
+         & NF90_DOUBLE, "lwf_latt_map_values", &
+         & "LWF lattice mapping coefficient COO matrix values","dimensionless")
+
+
     ncerr=nf90_enddef(self%ncid)
 
     ncerr=nf90_put_var(self%ncid, self%ilwf_prim_id, [supercell%lwf%ilwf_prim], &
@@ -144,6 +166,26 @@ contains
     ncerr=nf90_put_var(self%ncid, self%lwf_masses_id, [supercell%lwf%lwf_masses], &
          &      start=[1], count=[supercell%lwf%nlwf])
     NCF_CHECK_MSG(ncerr, "Error when writting lwf_masses in lwf history file.")
+
+    ncerr=nf90_put_var(self%ncid, id_map_idisp,  &
+         &         supercell%lwf%lwf_latt_coeffs%coeffs%ind%data(1, 1:nnz), &
+         &      start=[1], count=[nnz])
+    NCF_CHECK_MSG(ncerr, "Error when writting id_map_idisp in lwf history file.")
+
+
+    ncerr=nf90_put_var(self%ncid, id_map_ilwf,  &
+         &         supercell%lwf%lwf_latt_coeffs%coeffs%ind%data(2, 1:nnz), &
+         &      start=[1], count=[nnz])
+    NCF_CHECK_MSG(ncerr, "Error when writting id_map_ilwf in lwf history file.")
+
+    ncerr=nf90_put_var(self%ncid, id_map_val,  &
+         &         supercell%lwf%lwf_latt_coeffs%coeffs%val%data(1:nnz), &
+         &      start=[1], count=[nnz])
+    NCF_CHECK_MSG(ncerr, "Error when writting id_map_ilwf in lwf history file.")
+
+
+   
+
 
 #endif
 

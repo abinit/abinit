@@ -180,7 +180,6 @@ contains
     logical :: iam_master
     integer :: i
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
@@ -373,8 +372,6 @@ contains
        self%params%lwf_temperature_end=self%params%lwf_temperature_end/Ha_K
     end if
 
-    if(self%params%ncellmat /= [0,0,0,0,0,0,0,0,0]) then
-       self%params 
 
   end subroutine prepare_params
 
@@ -469,7 +466,7 @@ contains
     ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
-    call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
+    call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots, self%supercell)
     ! why do this twice, because each pot in the supercell is not yet linked to the supercell.
     call self%pots%set_supercell(self%supercell)
     call self%pots%set_params(self%params)
@@ -574,7 +571,7 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -587,7 +584,7 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
@@ -603,7 +600,7 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -620,7 +617,7 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
@@ -638,7 +635,7 @@ contains
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
 
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
     call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -671,7 +668,7 @@ contains
     call self%read_potentials()
 
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
 
     ! calculate various quantities for reference spin structure
@@ -733,7 +730,7 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     
     call self%fill_supercell()
     call self%set_movers()
@@ -750,7 +747,7 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
     !call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%sc_maker%initialize(self%params%ncell33)
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
     !call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))

@@ -42,7 +42,7 @@ module m_slc_primitive_potential
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
   use m_mpi_scheduler, only: init_mpi_info
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_primitive_potential, only: primitive_potential_t
 
@@ -620,11 +620,12 @@ contains
   ! transfer parameter information from primitive cell to supercell
   ! TODO: test
   !-----------------------------------------------------------------
-  subroutine fill_supercell(self, scmaker, params, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     class(slc_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),           intent(inout) :: scmaker
     type(multibinit_dtset_type),       intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
+    type(mbsupercell_t), target :: supercell
 
     integer :: nspin, sc_nspin, natom, sc_natom
     integer :: master, my_rank, comm, nproc, ierr
@@ -644,6 +645,7 @@ contains
     select type(scpot) ! use select type because properties only defined for slc_potential are used
     type is (slc_potential_t) 
       call scpot%initialize(sc_nspin, sc_natom)
+      call scpot%set_supercell(supercell)
       call scpot%set_params(params)
       ! fill different coupling terms
       if (iam_master) then

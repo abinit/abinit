@@ -509,6 +509,63 @@ contains
     end do
   end subroutine trans_jlist_and_Rj
 
+  !-----------------------------------------------------------------------
+  !> @brief same as trans_j_and_Rj, but it loop over a list of j with the
+  !>    same Rj 
+  !-----------------------------------------------------------------------
+  subroutine trans_jlist_and_Rj_noalloc(self, nbasis, jlist, Rj, ind_sc, R_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, optional, intent(in) :: jlist(:)
+    integer, intent(in) :: Rj(3), nbasis
+    integer, intent(inout) :: ind_sc(:), R_sc(:,:)
+    integer :: i,jj, counter, indj, n
+    counter=0
+    if (present(jlist)) then
+       n=size(jlist)
+    else
+       n=nbasis
+    end if
+    do i =1, self%ncells
+       call self%R_to_sc(Rj + self%rvecs(:,i), R_sc(:,i), jj)
+       do indj=1, n
+          counter=counter+1
+          ind_sc(counter)=nbasis*(jj-1)+jlist(indj)
+       end do
+    end do
+  end subroutine trans_jlist_and_Rj_noalloc
+
+
+
+  !-----------------------------------------------------------------------
+  !> @brief same as trans_j_and_Rj, but it loop over a list of j with the
+  !>    same Rj 
+  !-----------------------------------------------------------------------
+  subroutine trans_ijR(self, nbasis_i, nbasis_j, ilist, jlist, Rj, i_sc, j_sc, R_sc)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, intent(in) ::ilist(:), jlist(:), Rj(3), nbasis_i, nbasis_j
+    integer, allocatable, intent(inout) :: i_sc(:), j_sc(:), R_sc(:,:)
+    integer :: icell,jj, counter, indj
+    if (.not. allocated(i_sc)) then
+       ABI_MALLOC(i_sc, (self%ncells*size(jlist)) )
+    endif
+    if (.not. allocated(j_sc)) then
+       ABI_MALLOC(j_sc, (self%ncells*size(jlist)) )
+    endif
+    if (.not. allocated(R_sc)) then
+       ABI_MALLOC(R_sc, (3, self%ncells))
+    endif
+    counter=0
+    do icell =1, self%ncells
+       call self%R_to_sc(Rj + self%rvecs(:,icell), R_sc(:,icell), jj)
+       do indj=1, size(jlist)
+          counter=counter+1
+          i_sc(counter)=nbasis_i*(icell-1)+ilist(indj)
+          j_sc(counter)=nbasis_j*(jj-1)+jlist(indj)
+       end do
+    end do
+  end subroutine trans_ijR
+
+
 
   !-----------------------------------------------------------------------
   !> @brief repeat a quantity (which is a scalar for each index)
