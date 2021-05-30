@@ -141,7 +141,7 @@ contains
          & "ZION", "dimensionless")
 
     call ab_define_var(self%ncid, [self%natom], &
-         &         self%masses_id, NF90_INT, "masses", &
+         &         self%masses_id, NF90_DOUBLE, "masses", &
          & "MASSES", "dimensionless")
 
 
@@ -155,7 +155,7 @@ contains
     !      &      start=[1,1], count=[3, supercell%lattice%natom])
     ! NCF_CHECK_MSG(ncerr, "Error when writting ilatt_prim in lattice history file.")
 
-    
+
      ncerr=nf90_put_var(self%ncid, self%zion_id, [supercell%lattice%zion], &
           &      start=[1], count=[supercell%lattice%natom])
      NCF_CHECK_MSG(ncerr, "Error when writting zion in lattice history file.")

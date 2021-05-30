@@ -56,7 +56,7 @@ module m_lwf_ncfile
      integer :: ncerr, ncid
      ! variable id
      integer :: lwf_id, time_id, itime_id, etotal_id, entropy_id, displacement_id
-     integer :: ilwf_prim_id, rvec_id, lwf_masses_id
+     integer :: ilwf_prim_id, rvec_id, lwf_masses_id, natom_id
      integer :: itime, ntime,ncell
      ! itime: time index
      integer :: write_traj=1
@@ -108,6 +108,7 @@ contains
     class(lwf_ncfile_t), intent(inout) :: self
     type(mbsupercell_t), intent(in) :: supercell
     integer :: ncerr, natom3, nnz, id_nnz,  id_natom3, id_map_ilwf, id_map_idisp, id_map_val
+    integer :: latt_rvec_id,  ilatt_prim_id, ref_cell_id, ref_xcart_id, zion_id, masses_id
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in lwf history file.")
@@ -117,6 +118,11 @@ contains
 
     ncerr=nf90_def_dim(self%ncid, "nlwf", supercell%lwf%nlwf, self%nlwf)
     NCF_CHECK_MSG(ncerr, "Error when defining dimension nlwf in history file.")
+
+
+    ncerr=nf90_def_dim(self%ncid, "natom", supercell%lattice%natom, self%natom_id)
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension natom in history file.")
+
 
     natom3=supercell%lwf%lwf_latt_coeffs%coeffs%mshape(1)
     ncerr=nf90_def_dim(self%ncid, "natom3", natom3, id_natom3)
@@ -139,6 +145,34 @@ contains
     call ab_define_var(self%ncid, [self%nlwf], &
          &         self%lwf_masses_id, NF90_DOUBLE, "lwf_masses", "LWF MASSES", "dimensionless")
 
+
+    ! Lattice 
+    call ab_define_var(self%ncid, [self%three, self%natom_id], &
+         &         latt_rvec_id, NF90_INT, "lattice_rvec", "R-vectors for LATTICE ", "dimensionless")
+
+    call ab_define_var(self%ncid, [self%natom_id], &
+         &         ilatt_prim_id, NF90_INT, "ilatt_prim", &
+         & "index of lattice in primitive cell", "dimensionless")
+
+
+    call ab_define_var(self%ncid, [self%three,self%three], &
+         &         ref_cell_id, NF90_DOUBLE, "ref_cell", &
+         & "REFerence CELL", "bohr")
+
+    call ab_define_var(self%ncid, [self%three,self%natom_id], &
+         &         ref_xcart_id, NF90_DOUBLE, "ref_xcart", &
+         & "REFerence XCART", "bohr")
+
+    call ab_define_var(self%ncid, [self%natom_id], &
+         &         zion_id, NF90_INT, "zion", &
+         & "ZION", "dimensionless")
+
+    call ab_define_var(self%ncid, [self%natom_id], &
+         &         masses_id, NF90_DOUBLE, "masses", &
+         & "MASSES", "dimensionless")
+
+
+
     ! define vars for lwf lattice displacement mapping in the format of a COO matrix.
     call ab_define_var(self%ncid, [id_nnz], id_map_idisp, & 
          & NF90_INT, "lwf_latt_map_id_displacement", &
@@ -154,6 +188,26 @@ contains
 
 
     ncerr=nf90_enddef(self%ncid)
+
+
+    
+    ncerr=nf90_put_var(self%ncid, zion_id, [supercell%lattice%zion], &
+         &      start=[1], count=[supercell%lattice%natom])
+    NCF_CHECK_MSG(ncerr, "Error when writting zion in lattice history file.")
+
+    ncerr=nf90_put_var(self%ncid, masses_id, [supercell%lattice%masses], &
+         &      start=[1], count=[supercell%lattice%natom])
+    NCF_CHECK_MSG(ncerr, "Error when writting masses in lattice history file.")
+
+    ncerr=nf90_put_var(self%ncid, ref_xcart_id, [supercell%lattice%xcart], &
+         &      start=[1,1], count=[3,supercell%lattice%natom])
+    NCF_CHECK_MSG(ncerr, "Error when writting ref_xcart in lattice history file.")
+
+    ncerr=nf90_put_var(self%ncid, ref_cell_id, [supercell%lattice%cell], &
+         &      start=[1,1], count=[3,3])
+    NCF_CHECK_MSG(ncerr, "Error when writting ref_cell in lattice history file.")
+
+
 
     ncerr=nf90_put_var(self%ncid, self%ilwf_prim_id, [supercell%lwf%ilwf_prim], &
          &      start=[1], count=[supercell%lwf%nlwf])
@@ -182,9 +236,6 @@ contains
          &         supercell%lwf%lwf_latt_coeffs%coeffs%val%data(1:nnz), &
          &      start=[1], count=[nnz])
     NCF_CHECK_MSG(ncerr, "Error when writting id_map_ilwf in lwf history file.")
-
-
-   
 
 
 #endif
