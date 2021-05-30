@@ -40,7 +40,7 @@ module m_lattice_harmonic_primitive_potential
   use m_xmpi
   use m_mathfuncs, only: eigensh
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential, only: primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
@@ -243,13 +243,14 @@ contains
   !         the type of the supercell potential.
   !
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, params, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     use m_spmat_convert, only: COO_to_dense
 
     class(lattice_harmonic_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),                        intent(inout) :: scmaker
     type(multibinit_dtset_type),                    intent(inout) :: params
     class(abstract_potential_t), pointer,           intent(inout) :: scpot
+    type(mbsupercell_t), target :: supercell
 
     integer :: natom, sc_natom
     integer :: inz, iR, R(3), i, j, icell
@@ -257,6 +258,7 @@ contains
     real(dp):: val
 
     ABI_UNUSED_A(params)
+
 
     natom=self%natom
     sc_natom= natom* scmaker%ncells
@@ -270,6 +272,7 @@ contains
     select type(scpot)
     type is (lattice_harmonic_potential_t)
        call scpot%initialize(sc_natom)
+       call scpot%set_supercell(supercell)
        ! IFC is an COO_mat_t, which has the index of R1, R2, R3, i, j and the value of val
        ! list of index R: coeff%ind%data(1, 1:coeff%nnz)
        ! list of i: coeff%ind%data(2, 1:coeff%nnz)

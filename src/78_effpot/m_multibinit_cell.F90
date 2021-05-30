@@ -34,6 +34,9 @@ module m_multibinit_cell
   use m_supercell_maker , only: supercell_maker_t
   use m_multibinit_dataset, only : multibinit_dtset_type
   use m_crystal, only : crystal_t
+
+  use m_spmat_spvec, only: sp_real_vec
+  use m_lattice_lwf_map, only: lwf_latt_coeff_t
   implicit none
 
 !!***
@@ -90,6 +93,7 @@ module m_multibinit_cell
      integer, allocatable ::  ilwf_prim(:) ! index of primitive cell
      integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
      real(dp), allocatable :: lwf_masses(:)
+     type(lwf_latt_coeff_t) :: lwf_latt_coeffs  
    contains
      Procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
@@ -157,9 +161,11 @@ contains
     class(mbcell_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
     real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
-    self%has_lattice=.True.
-    call self%lattice%initialize(natom=natom, cell=cell, &
-         &xcart=xcart, masses=masses, zion=zion)
+    if .not. (self%has_lattice) then
+        self%has_lattice=.True.
+        call self%lattice%initialize(natom=natom, cell=cell, &
+            &xcart=xcart, masses=masses, zion=zion)
+    endif
   end subroutine set_lattice
 
 
@@ -552,6 +558,9 @@ contains
     ABI_MALLOC(self%ilwf_prim, (nlwf))
     ABI_MALLOC(self%rvec, (3, nlwf))
     ABI_MALLOC(self%lwf_masses, (nlwf))
+    !ABI_MALLOC(self%lwf_latt_coeffs, (self%nlwf))
+    !call self%lwf_latt_coeffs%initialize(self%nlwf, wlf)
+    ! lwf_latt_coeffs is only initialized in primitive potential
   end subroutine lwf_initialize
 
   subroutine lwf_finalize(self)
@@ -560,6 +569,7 @@ contains
     ABI_SFREE(self%ilwf_prim)
     ABI_SFREE(self%rvec)
     ABI_SFREE(self%lwf_masses)
+    call self%lwf_latt_coeffs%finalize()
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)

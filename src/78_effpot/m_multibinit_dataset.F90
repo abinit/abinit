@@ -1380,22 +1380,13 @@ multibinit_dtset%lwf_temperature_start=0.0
 
 
  ! Set to diagonal ncell. Then if it is specified, overwrite.
- multibinit_dtset%ncellmat(:,:)= reshape([ncell(1), 0, 0,     0, ncell(2), 0,    0,0, ncell(3) ], [3,3])
+ multibinit_dtset%ncellmat(:,:)= reshape([multibinit_dtset%ncell(1), 0, 0,&
+        & 0, multibinit_dtset%ncell(2), 0, &
+        & 0, 0, multibinit_dtset%ncell(3) ], [3,3])
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'ncellmat',tread,'INT')
  if(tread==1) then
     multibinit_dtset%ncellmat=transpose(reshape(intarr(1:9), [3,3]))
  end if
- do ii=1,3
-    do jj =1 ,3
-       if(multibinit_dtset%ncellmat(ii, jj)<0.or.multibinit_dtset%ncellmat(ii, jj)>100000)then
-          write(message, '(a,i0,a,i0, a, i0,3a,i0,a, i0,a)' )&
-               &     'ncellmat(',ii,',', jj,') is ',multibinit_dtset%ncellmat(ii),', which is lower than 0 of superior than 100000.',&
-               &     ch10,'Action: correct ncellmat(',ii, ',', jj,') in your input file.'
-          ABI_ERROR(message)
-       end if
-    end do
- end do
-
 
  multibinit_dtset%ngqpt(:)= 1
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngqpt',tread,'INT')

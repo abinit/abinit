@@ -35,7 +35,7 @@ module m_primitive_potential
   use m_errors
   use m_supercell
   use m_multibinit_dataset , only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_supercell_maker, only: supercell_maker_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
@@ -89,11 +89,12 @@ end subroutine finalize
 !> @param[in]  input
 !> @param[out] output
 !----------------------------------------------------------------------
-subroutine fill_supercell(self, scmaker, params, scpot)
+subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     class(primitive_potential_t), intent(inout) :: self
     type(supercell_maker_t),      intent(inout) :: scmaker
     type(multibinit_dtset_type),  intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot 
+    type(mbsupercell_t), target :: supercell
 
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
@@ -105,7 +106,7 @@ subroutine fill_supercell(self, scmaker, params, scpot)
     ABI_UNUSED_A(params)
     ABI_UNUSED_A(scpot)
     ABI_UNUSED_A(params)
-
+    ABI_UNUSED_A(supercell)
   end subroutine fill_supercell
 
   !----------------------------------------------------------------------
