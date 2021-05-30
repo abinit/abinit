@@ -161,7 +161,7 @@ contains
     class(mbcell_t), intent(inout) :: self
     integer, intent(in) :: natom, zion(:)
     real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
-    if .not. (self%has_lattice) then
+    if (.not. self%has_lattice) then
         self%has_lattice=.True.
         call self%lattice%initialize(natom=natom, cell=cell, &
             &xcart=xcart, masses=masses, zion=zion)

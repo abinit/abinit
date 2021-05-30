@@ -171,9 +171,9 @@ contains
     integer :: ncid, ierr
     integer :: iR,  nR, nlwf, natom, twobody_nterm, onebody_nterm
     real(dp) :: cell(3,3)
-    real(dp), allocatable :: ifc(:, :, :), xcart(:,:), masses(:), zion(:)
+    real(dp), allocatable :: ifc(:, :, :), xcart(:,:), masses(:)
     real(dp), allocatable ::  twobody_val(:)
-    integer, allocatable ::   twobody_iR(:), twobody_i(:), twobody_j(:), twobody_orderi(:), twobody_orderj(:)
+    integer, allocatable ::   zion(:), twobody_iR(:), twobody_i(:), twobody_j(:), twobody_orderi(:), twobody_orderj(:)
     integer :: varid, i, j
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
@@ -246,7 +246,17 @@ contains
     NCF_CHECK_MSG(ierr, "wann_atomic_xcart")
     xcart(:,:)=xcart(:,:)/ Bohr_Ang
 
-    !TODO: add zion and masses
+    ierr =nf90_inq_varid(ncid, "wann_atomic_numbers", varid)
+    NCF_CHECK_MSG(ierr, "wann_atomic_numbers")
+    ierr = nf90_get_var(ncid, varid, zion)
+    NCF_CHECK_MSG(ierr, "wann_atomic_numbers")
+
+    ierr =nf90_inq_varid(ncid, "wann_atomic_masses", varid)
+    NCF_CHECK_MSG(ierr, "wann_atomic_masses")
+    ierr = nf90_get_var(ncid, varid, masses)
+    NCF_CHECK_MSG(ierr, "wann_atomic_masses")
+
+    call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
 
 
     ABI_MALLOC(self%lattice_coeffs, (nlwf, natom*3, nR))
