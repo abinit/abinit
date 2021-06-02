@@ -109,8 +109,4 @@ inp_files = [
 "t97.abi",
 "t98.abi",
 "t99.abi", 
-"-t101.abi", # Transferred to seq
-"-t102.abi", # Presently can't be done (so why not removing it?)
-"-t112.abi", # Transferred to seq.
-"-t113.abi", # Transferred to seq.
 ]

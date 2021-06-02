@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,7 +61,7 @@ contains
   subroutine initialize(self, mshape)
     class(lco_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
-    if (size(mshape)/=2) MSG_ERROR("LCO_mat should be of dimension 2.")
+    if (size(mshape)/=2) ABI_ERROR("LCO_mat should be of dimension 2.")
     call self%base_mat2d_t%initialize(mshape)
     ABI_MALLOC(self%icol, (self%nrow))
     ABI_MALLOC(self%val, (self%nrow))
@@ -78,8 +78,8 @@ contains
        call self%icol(i)%finalize()
        call self%val(i)%finalize()
     end do
-    if(allocated(self%icol)) ABI_DEALLOCATE(self%icol)
-    if(allocated(self%val)) ABI_DEALLOCATE(self%val)
+    if(allocated(self%icol)) ABI_FREE(self%icol)
+    if(allocated(self%val)) ABI_FREE(self%val)
     self%nnz=0
     call self%base_mat2d_t%finalize()
   end subroutine finalize
@@ -141,10 +141,10 @@ contains
     do irow=1, self%nrow
        associate(indcol=>self%icol(irow))
          associate(val=>self%val(irow))
-           ABI_ALLOCATE(order, (indcol%size))
+           ABI_MALLOC(order, (indcol%size))
            call indcol%sort(order=order)
            val%data(1:val%size) =val%data(order)
-           ABI_DEALLOCATE(order)
+           ABI_FREE(order)
          end associate
        end associate
     end do

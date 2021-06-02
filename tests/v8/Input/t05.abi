@@ -39,7 +39,8 @@ xcart  # Initial positions
    Angstrom
 nband 3 occopt 1
 nsym 1 # No symmetry (molecular dynamics)
-pawovlp 15. # Allow for PAW overlap (testing)
+#pawovlp 15. # Allow for PAW overlap (testing)
+ pawovlp 9.5 # Allow for PAW overlap (testing)
 
 # Plane-wave cut-off
 ecut 10.0

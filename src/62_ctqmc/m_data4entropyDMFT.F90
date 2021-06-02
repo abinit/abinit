@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@ module m_data4entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,7 +84,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -129,14 +129,14 @@ subroutine data4entropyDMFT_init(this,natom,typat,lpawu,uset2g,upawu,jpawu)
   if ( size(typat) .ne. natom ) then
     write(message,'(a,i5,a,a,i5,a)') "Disagreement between number of atoms (",natom,")", &
      " and the number of atom types (",size(typat),")."
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
   this%ntypat = maxval(typat) !!! Carefull This should always work but can we have
   ! one type that is not use (ntypat = 5; typat = 1 2 3 4)?
   if ( this%ntypat .ne. size(upawu) .or. this%ntypat .ne. size(jpawu) ) then
     write(message,'(a)') "Disagreement between size of ntypat,upawu and jpawu"
-    MSG_ERROR(message)
+    ABI_ERROR(message)
   end if
 
   maxlpawu = -1
@@ -145,7 +145,7 @@ subroutine data4entropyDMFT_init(this,natom,typat,lpawu,uset2g,upawu,jpawu)
     ityp=typat(iatom)
     if (ityp.le.0 .or. ityp.gt.nlpawu) then
       write(message,'(a)') "Try to access the lpawu value of an atom type that has not a lpawu value."
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
     ilpawu=lpawu(ityp)
     if(uset2g.and.ilpawu==2) ilpawu=1
@@ -153,16 +153,16 @@ subroutine data4entropyDMFT_init(this,natom,typat,lpawu,uset2g,upawu,jpawu)
   enddo
   this%maxlpawu = maxlpawu
 
-  ABI_ALLOCATE(this%docc,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:natom))
+  ABI_MALLOC(this%docc,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:natom))
   this%docc(:,:,:) = zero
 
-  ABI_ALLOCATE(this%hu_dens,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:this%ntypat))
+  ABI_MALLOC(this%hu_dens,(1:2*(2*maxlpawu+1),1:2*(2*maxlpawu+1),1:this%ntypat))
   this%hu_dens(:,:,:) = zero
 
-  ABI_ALLOCATE(this%e_dc,(1:natom))
+  ABI_MALLOC(this%e_dc,(1:natom))
   this%e_dc(:) = zero
 
-  ABI_ALLOCATE(this%J_over_U,(1:natom))
+  ABI_MALLOC(this%J_over_U,(1:natom))
   this%J_over_U(:) = zero
   do iatom=1,natom
     ityp=typat(iatom) ! no need to check since already done once before
@@ -183,7 +183,7 @@ end subroutine data4entropyDMFT_init
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,25 +219,25 @@ subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
     character(len=500) :: message
 
     if ( .not. this%isset ) then
-      MSG_ERROR("data4entropyDMFT type not initialized")
+      ABI_ERROR("data4entropyDMFT type not initialized")
     end if
 
     if ( iatom .gt. this%natom ) then
       write(message,'(a,i4,a,i4,a)') "Value of iatom (",iatom, &
         ") is greater than the number of atom natom(",this%natom,")."
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     if ( .not. present(Docc) .and. .not. present(Nocc) ) then
       write(message,'(2a)') "Neither Docc nor Nocc is present to set double", &
       "occupancy. Should have one and only one of those."
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     if ( present(Docc) .and. present(Nocc) ) then
       write(message,'(2a)') "Both Docc and Nocc are present to set double", &
       "occupancy. Should have one and only one of those."
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     maxnflavor=2*(2*this%maxlpawu+1)
@@ -246,14 +246,14 @@ subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
           .or. size(Docc,1) .ne. size(Docc,2) ) then
         write(message,'(a,i2,a,i2,a,i2)') "Problem with Docc shape/size : dim1=",size(Docc,1), &
                               " dim2=",size(Docc,2), " max=", maxnflavor
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       end if
       this%docc(1:size(Docc,1),1:size(Docc,1),iatom) = Docc(:,:)
     else if ( present(Nocc) ) then ! Need to compute n_i*n_j (only used for DFT+U)
       if ( size(Nocc,1) .gt. maxnflavor) then
         write(message,'(a,i2,a,i2)') "Problem with Nocc size : dim1=",size(Nocc,1), &
                               " maxnflavor=", maxnflavor
-        MSG_ERROR(message)
+        ABI_ERROR(message)
       end if
 
       do iflavor1 = 1, (2*size(Nocc,1)+1)
@@ -274,7 +274,7 @@ end subroutine data4entropyDMFT_setDocc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -307,20 +307,20 @@ subroutine data4entropyDMFT_setHu(this,itypat,hu)
     character(len=500) :: message
 
     if ( .not. this%isset ) then
-      MSG_ERROR("data4entropyDMFT type not initialized")
+      ABI_ERROR("data4entropyDMFT type not initialized")
     end if
 
     if ( itypat .gt. this%ntypat ) then
       write(message,'(a,i4,a,i4,a)') "Value of itypat (",itypat, &
         ") is greater than the number of types of atoms (",this%ntypat,")."
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     maxnflavor=2*(2*this%maxlpawu+1)
     if ( size(hu,1) .gt. maxnflavor .or. size(hu,1) .ne. size(hu,2) ) then
       write(message,'(a,i2,a,i2,a,i2,a,i2)') "Problem with hu size : dim1=",size(hu,1), &
                             " dim2=", size(hu,2), " max=", maxnflavor
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
     this%hu_dens(1:size(hu,1),1:size(hu,1),itypat) = hu(:,:)
 
@@ -335,7 +335,7 @@ end subroutine data4entropyDMFT_setHu
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -367,13 +367,13 @@ subroutine data4entropyDMFT_setDc(this,dc)
     character(len=500) :: message
 
     if ( .not. this%isset ) then
-      MSG_ERROR("data4entropyDMFT type not initialized")
+      ABI_ERROR("data4entropyDMFT type not initialized")
     end if
 
     if ( size(dc,1) .gt. this%natom ) then
       write(message,'(a,i4,a,i4,a)') "Size of dc (",size(dc,1), &
         ") is greater than the number of atom natom(",this%natom,")."
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     end if
 
     this%e_dc(:) = dc(:)
@@ -389,7 +389,7 @@ end subroutine data4entropyDMFT_setDc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -418,16 +418,16 @@ subroutine data4entropyDMFT_destroy(this)
 
   if ( .not. this%isset ) return
   if (allocated(this%docc))  then
-    ABI_DEALLOCATE(this%docc)
+    ABI_FREE(this%docc)
   endif
   if (allocated(this%J_over_U))  then
-    ABI_DEALLOCATE(this%J_over_U)
+    ABI_FREE(this%J_over_U)
   endif
   if (allocated(this%e_dc))  then
-    ABI_DEALLOCATE(this%e_dc)
+    ABI_FREE(this%e_dc)
   endif
   if (allocated(this%hu_dens))  then
-    ABI_DEALLOCATE(this%hu_dens)
+    ABI_FREE(this%hu_dens)
   endif
   this%maxlpawu = 0
   this%natom = 0

@@ -6,7 +6,7 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,20 +174,20 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'The only allowed values are between 1 and 4.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. .not.psps%vlspl_recipSpace) then
    write(message,'(a,i0,a,a,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but the local part of the pseudo-potential is in real space.',ch10,&
 &   'Action: set icoulomb = 0 to turn-off real space computations.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (option > 2 .and. dtset%usewvl == 1) then
    write(message,'(a,i0,a,a)')&
 &   'From the calling routine, option=',option,ch10,&
 &   'but this is not implemented yet from wavelets.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  if (dtset%usewvl == 0) then
@@ -204,7 +204,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    end if
  else
 !  Store xcart for each atom
-   ABI_ALLOCATE(xcart,(3, dtset%natom))
+   ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
 !  Eventually retrieve density
 #if defined HAVE_BIGDFT
@@ -217,7 +217,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    call mklocl_wavelets(dtset%efield, grtn, mpi_enreg, dtset%natom, &
 &   nfft, nspden, option, rprimd, vpsp, &
 &   wvl_den, wvl, xcart)
-   ABI_DEALLOCATE(xcart)
+   ABI_FREE(xcart)
  end if
 
 end subroutine mklocl
@@ -356,7 +356,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
 !Zero out array to permit accumulation over atom types below:
  if(option==1)then
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(:,:)=zero
  end if
 
@@ -525,7 +525,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
              else
                write(message, '(a,i0,a)' )' mklocl: Option=',option,' not allowed.'
-               MSG_BUG(message)
+               ABI_BUG(message)
              end if ! End option choice
 
 !            End skip G**2 outside cutoff:
@@ -593,11 +593,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
    xnorm=1.0_dp/ucvol
    vpsp(:)=vpsp(:)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
  end if
 
- ABI_DEALLOCATE(gcutoff) 
+ ABI_FREE(gcutoff) 
 
  if(option==2)then
 !  Init mpi_comm
@@ -791,7 +791,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -889,7 +889,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1080,7 +1080,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
    write(message, '(a,i10,a,a,a)' )&
 &   ' Input istr=',istr,' not allowed.',ch10,&
 &   ' Possible values are 1,2,3,4,5,6 only.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  ka=idx(2*istr-1);kb=idx(2*istr)
@@ -1096,7 +1096,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Zero out array to permit accumulation over atom types below:
- ABI_ALLOCATE(work1,(2,nfft))
+ ABI_MALLOC(work1,(2,nfft))
  work1(:,:)=0.0_dp
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
@@ -1221,7 +1221,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  xnorm=1.0_dp/ucvol
  vpsp1(:)=vpsp1(:)*xnorm
 
- ABI_DEALLOCATE(work1)
+ ABI_FREE(work1)
 
  contains
 
@@ -1308,13 +1308,6 @@ end subroutine vlocalstr
 !! Compute q-gradient (at q=0) of the local part of 1st-order 
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1411,7 +1404,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  else
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1428,7 +1421,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Determination of the atom type
@@ -1500,7 +1493,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1dq(1:cplex*nfft)=vpsp1dq(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1575,13 +1568,6 @@ end subroutine dfpt_vlocaldq
 !! Compute 2nd q-gradient (at q=0) of the local part of 1st-order 
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1689,7 +1675,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    if (alpha==gamma) delag=1.0_dp
 
 !  (In case of a phonon perturbation)
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -1706,7 +1692,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 !  Determination of the atom type
@@ -1785,7 +1771,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    xnorm=1.0_dp/ucvol
    vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !  End the condition of non-electric-field
  end if
@@ -1865,13 +1851,6 @@ end subroutine dfpt_vlocaldqdq
 !! perturbation.
 !! Cartesian coordinates are employed to define the direction of the 
 !! metric perturbation and the two q-gradients.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2017 ABINIT group (MR,MS)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cplex: if 1, real space 1-order functions on FFT grid
@@ -1988,7 +1967,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (beta==gamma) delbg=1.0_dp
    if (delta==gamma) deldg=1.0_dp
 
-   ABI_ALLOCATE(work1,(2,nfft))
+   ABI_MALLOC(work1,(2,nfft))
    work1(1:2,1:nfft)=0.0_dp
 
    cutoff=gsqcut*tolfix
@@ -2005,7 +1984,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    ia1=1
@@ -2164,7 +2143,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  End the calculation of the Hartree contribution 
    end if
 
-   ABI_DEALLOCATE(work1)
+   ABI_FREE(work1)
 
 !End the condition of non-electric-field
  end if

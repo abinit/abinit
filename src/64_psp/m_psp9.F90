@@ -6,7 +6,7 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (JJ, MVer, YP)
+!!  Copyright (C) 1999-2021 ABINIT group (JJ, MVer, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -186,13 +186,13 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !   if ( useylm /= 0 ) then
 !     write(message,'(3a)') "ONCVPSP pseudos use Legendre polynomials but we use spherical harmonics", &
 !&      ch10, "ACTION: set useylm to 0 in your input file"
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   endif
 ! else
 !   if ( useylm == 0 ) then
 !     write(message,'(3a)') "ATOM pseudos use spherical harmonics but we use Legendre polynomials", &
 !&      ch10, "ACTION: set useylm to 1 in your input file"
-!     MSG_ERROR(message)
+!     ABI_ERROR(message)
 !   endif
 ! endif
 
@@ -224,7 +224,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! rr1   = .0005d0/z
 ! mmax  = dlog(45.0d0 /rr1)/al
 !
-! ABI_ALLOCATE( rad,(mmax) )
+! ABI_MALLOC( rad,(mmax) )
 !
 ! do ir = 1, mmax
 !   rad(ir) = rr1 * dexp(al*(ir-1))
@@ -293,13 +293,13 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call ps_NonlocalProjectors_Filter(psxml, set=SET_UP, number=np_up)
  if (np_lj > 0) then
    message = 'For the moment LJ format projectors are not supported; SREL + SO is the internal abinit format'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (np_up > 0 .or. np_dn > 0) then
    write (message,'(3a)') 'For the moment separate spin up and down format projectors are not supported;',ch10,&
 &   ' spin average is the internal abinit format'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !--------------------------------------------------------------------
@@ -327,7 +327,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
        nproj(il+1) = nproj(il+1) + 1
      end do
    else ! this should not happen
-     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+     ABI_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
    end if
  end if
 
@@ -377,9 +377,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !ENDDEBUG
 
 !Can now allocate grids, potentials and projectors
- ABI_ALLOCATE(rad,(mmax))
- ABI_ALLOCATE(vloc,(mmax))
- ABI_ALLOCATE(vpspll,(mmax,lnmax))
+ ABI_MALLOC(rad,(mmax))
+ ABI_MALLOC(vloc,(mmax))
+ ABI_MALLOC(vpspll,(mmax,lnmax))
 
 !Feb 2015: shifted to Hamann grid for convenience - libpsml interpolates anyway
  do ir=1,mmax
@@ -406,7 +406,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &   'Pseudopotential input file requires linear radial mesh',ch10,&
 &   'starting at zero.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Take care of the non-linear core corrections
@@ -487,10 +487,10 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
 
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_ALLOCATE(work_spl,(mqgrid))
+ ABI_MALLOC(work_spl,(mqgrid))
  call spline (qgrid,vlspl(:,1),mqgrid,yp1,ypn,work_spl)
  vlspl(:,2)=work_spl(:)
- ABI_DEALLOCATE(work_spl)
+ ABI_FREE(work_spl)
 
 !!  DEBUG
 ! write(std_out,*)'# Vlocal = '
@@ -620,7 +620,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &     'Pseudopotential input file requires linear radial mesh',ch10,&
 &     'starting at zero.',ch10,&
 &     'Action: check your pseudopotential input file.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    !  Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
@@ -629,9 +629,9 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    call pawrad_free(mesh)
  end if
 
- ABI_DEALLOCATE(vpspll)
- ABI_DEALLOCATE(vloc)
- ABI_DEALLOCATE(rad)
+ ABI_FREE(vpspll)
+ ABI_FREE(vloc)
+ ABI_FREE(rad)
  if (allocated(idx_sr)) then
    ABI_FREE_NOCOUNT(idx_sr)
  end if
@@ -734,10 +734,10 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 &   'Pseudopotential input file requires linear radial mesh',ch10,&
 &   'starting at zero.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
- ABI_ALLOCATE(ff,(mmax,5))
+ ABI_MALLOC(ff,(mmax,5))
 
  dri = one / amesh
  pi4i = quarter / pi
@@ -828,7 +828,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 &   'Pseudopotential input file core charge mesh',ch10,&
 &   'is inconsistent with rchrg in header.',ch10,&
 &   'Action: check your pseudopotential input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Factors for unit range scaling
@@ -873,7 +873,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
 !5th derivative is apparently not in use, so set to zero
  xccc1d(:,6)=zero
 
- ABI_DEALLOCATE(ff)
+ ABI_FREE(ff)
 
 end subroutine psp9cc
 !!***

@@ -31,7 +31,7 @@ blue 0 0
 #%% [files]
 ### the tests have been disabled
 ##%% files_to_test = 
-##%%   trf2_6.out.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+##%%   trf2_6.abo.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

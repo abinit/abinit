@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon
+## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
 
 #
 # Massively Parallel FFT library (PFFT)

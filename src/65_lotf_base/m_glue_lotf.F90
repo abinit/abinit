@@ -6,7 +6,7 @@
 !!  Contains the GLUE procedure and parameters for Lotf
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2020 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2021 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -583,7 +583,7 @@ contains !===========================================================
       &    'ERROR: negative coordination!!! ',ch10,&
       &    'coord = ', coordatom_i,ch10,&
       &    'The coordination cannot be negative!'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
 
   elseif (coordatom_i < nsU) then
 
@@ -656,7 +656,7 @@ contains !===========================================================
       &    'ERROR: negative coordination!!! ',ch10,&
       &    'coord = ', coordatom_i,ch10,&
       &    'The coordination cannot be negative!'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
 
   elseif (coordatom_i < nsU) then
 

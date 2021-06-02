@@ -18,7 +18,7 @@
 !! than the irredubile zone defined by the point group of the crystal. The two zones coincide when q=0
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG)
+!!  Copyright (C) 2008-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ module m_lgroup
  use m_sort
  use m_xmpi
 
- use m_fstrings,      only : ftoa, ktoa, sjoin
+ use m_fstrings,      only : ftoa, ktoa, sjoin, ltoa
  use m_numeric_tools, only : wrap2_pmhalf
  use m_geometry,      only : normv
  use m_kpts,          only : listkk
@@ -105,16 +105,17 @@ module m_lgroup
    ! Anti-ferromagnetic character associated to symrec_lg
 
    integer,allocatable :: bz2ibz_smap(:,:)
-   ! bz2ibz_smap(6, nbz) Mapping BZ --> IBZ(q)
+   ! bz2ibz_smap(6, nbz)
+   ! Mapping BZ --> IBZ(q)
    ! Note that here we used the symmetries of the little group.
 
    integer, allocatable :: lgsym2glob(:, :)
    ! lgsym2glob(2, nsym_lg)
    ! Mapping isym_lg --> [isym, itime]
-   ! where isym is the index of the operaion in the global array crystal%symrec
-   ! and itim is 2 if time-reversal T must be included else 1.
+   ! where isym is the index of the operation in the global array crystal%symrec
+   ! and itime is 2 if time-reversal T must be included else 1.
 
-  real(dp) :: gmet(3,3)
+   real(dp) :: gmet(3,3)
    ! Reciprocal space metric in bohr^{-2}
 
    real(dp),allocatable :: ibz(:,:)
@@ -447,7 +448,7 @@ subroutine lgroup_print(self, title, unit, prtvol)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_prtvol,my_unt,ik
+ integer :: my_prtvol, my_unt, ik, ii
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -465,6 +466,9 @@ subroutine lgroup_print(self, title, unit, prtvol)
  call wrtout(my_unt, msg)
 
  if (my_prtvol /= 0) then
+   do ii=1,self%nsym_lg
+     call wrtout(std_out, sjoin("lgsym2glob:", ltoa(self%lgsym2glob(:, ii))))
+   end do
    do ik=1,self%nibz
       call wrtout(my_unt, sjoin(ktoa(self%ibz(:,ik)), ftoa(self%weights(ik))))
    end do

@@ -69,11 +69,11 @@ subroutine xmpi_lor_log1d(xval,comm)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
 !  Accumulate xval on all proc. in comm
    n1 = size(xval)
-   ABI_STAT_ALLOCATE(xsum,(n1), ierr)
+   ABI_STAT_MALLOC(xsum,(n1), ierr)
    if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_lor_log1d')
    call MPI_ALLREDUCE(xval,xsum,n1,MPI_LOGICAL,MPI_LOR,comm,ierr)
    xval (:) = xsum(:)
-   ABI_DEALLOCATE(xsum)
+   ABI_FREE(xsum)
  end if
 #endif
 
@@ -120,7 +120,7 @@ subroutine xmpi_lor_log2d(xval,comm)
    n1 = size(xval,1)
    n2 = size(xval,2)
 
-   ABI_STAT_ALLOCATE(xsum,(n1,n2), ierr)
+   ABI_STAT_MALLOC(xsum,(n1,n2), ierr)
    if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_lor_log2d')
 
    !This product of dimensions can be greater than a 32bit integer
@@ -137,7 +137,7 @@ subroutine xmpi_lor_log2d(xval,comm)
    end if
 
    xval (:,:) = xsum(:,:)
-   ABI_DEALLOCATE(xsum)
+   ABI_FREE(xsum)
  end if
 #endif
 
@@ -188,7 +188,7 @@ subroutine xmpi_lor_log3d(xval,comm)
 !  #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
 !  call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
 !  #else
-   ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ierr)
+   ABI_STAT_MALLOC(xsum,(n1,n2,n3), ierr)
    if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_lor_log3d')
 
    !This product of dimensions can be greater than a 32bit integer
@@ -205,7 +205,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    end if
 
    xval (:,:,:) = xsum(:,:,:)
-   ABI_DEALLOCATE(xsum)
+   ABI_FREE(xsum)
 !  #endif
  end if
 #endif

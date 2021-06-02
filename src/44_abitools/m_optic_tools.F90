@@ -6,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2020 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
+!! Copyright (C) 2002-2021 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -390,14 +390,20 @@ end subroutine pmat_renorm
 !!  brod=broadening in Ha(real)
 !!  fnam=root for filename that will contain the output filename will be trim(fnam)//'-linopt.out'
 !!  ncid=Netcdf id to save output data.
+!!  prtlincompmatrixelements=if set to 1, the matrix elements are dumped in the _OPTIC.nc file for post processing.
 !!
 !! SIDE EFFECTS
 !!  Dielectric function for semiconductors, on a desired energy mesh and for a desired
 !!  direction of polarisation is written to file.
 !!  The output is in a file named trim(fnam)//'-linopt.out' and contains
 !!  Im(\epsilon_{v1v2}(\omega), Re(\epsilon_{v1v2}(\omega) and abs(\epsilon_{v1v2}(\omega).
+!!
+!!  If 'prtlincompmatrixelements' is set to 1, the matrix elements and other quantities used to build
+!!  the chi tensor are stored in the _OPTIC.nc file as well. This includes the matrix elements,
+!!  the occupations, the renormalized but unshifted eigenvalues and the kpts weights.
+!!
 !!  Comment:
-!!  Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
+!!    Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
 !!
 !! PARENTS
 !!      optic
@@ -408,7 +414,7 @@ end subroutine pmat_renorm
 !! SOURCE
 
 subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
-  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm)
+  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm,prtlincompmatrixelements)
 
 !Arguments ------------------------------------
 integer, intent(in) :: icomp,itemp,nspin,ncid
@@ -429,6 +435,7 @@ real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
+integer, intent(in) :: prtlincompmatrixelements
 
 !Local variables -------------------------
 !no_abirules
@@ -459,6 +466,8 @@ character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
 complex(dpc), allocatable :: chi(:,:)
+complex(dpc), allocatable :: matrix_elements(:,:,:,:)  ! nbands x nbands x nkpts x nsppol
+complex(dpc), allocatable :: renorm_eigs(:,:,:)        ! nbands x nkpts x nsppol
  real(dp), allocatable :: im_refract(:),re_refract(:)
 complex(dpc), allocatable :: eps(:)
 
@@ -474,7 +483,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    the polarisation directions incorrect    '
      write(std_out,*) '    1=x and 2=y and 3=z                      '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !number of energy mesh points
    if (nmesh.le.0) then
@@ -484,7 +493,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    number has to integer greater than 0     '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !step in energy
    if (de.le.0._dp) then
@@ -494,7 +503,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    number has to real greater than 0.0      '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !broadening
    if (brod.gt.0.009) then
@@ -522,7 +531,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    scissors shift is incorrect              '
      write(std_out,*) '    number has to be greater than 0.0      '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
 !fool proof end
  end if
@@ -532,15 +541,15 @@ complex(dpc), allocatable :: eps(:)
  do_linewidth = allocated(EPBSt%linewidth)
 ! TODO: activate this, and remove do_linewidth - always add it in even if 0.
 ! if (.not. allocated(EPBSt%linewidth)) then
-!   ABI_ALLOCATE(EPBSt%linewidth, (1, nstval, my_k2-my_k1+1, nspin))
+!   ABI_MALLOC(EPBSt%linewidth, (1, nstval, my_k2-my_k1+1, nspin))
 !   EPBSt%linewidth = zero
 ! end if
 
 !allocate local arrays
- ABI_ALLOCATE(chi,(nmesh,nspin))
- ABI_ALLOCATE(eps,(nmesh))
- ABI_ALLOCATE(im_refract,(nmesh))
- ABI_ALLOCATE(re_refract,(nmesh))
+ ABI_MALLOC(chi,(nmesh,nspin))
+ ABI_MALLOC(eps,(nmesh))
+ ABI_MALLOC(im_refract,(nmesh))
+ ABI_MALLOC(re_refract,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
  ha2ev=13.60569172*2._dp
@@ -571,8 +580,17 @@ complex(dpc), allocatable :: eps(:)
 
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
+ ! if we print matrix elements, allocate full arrays for each process
+ ! this is not optimized memory-wise since we could just allocate what is needed
+ ! however we would need to write all data using mpi-io.
+ if (prtlincompmatrixelements == 1) then
+   ABI_MALLOC(matrix_elements,(nstval,nstval,nkpt,nspin))
+   ABI_MALLOC(renorm_eigs,(nstval,nkpt,nspin))
+   matrix_elements(:,:,:,:) = czero
+   renorm_eigs(:,:,:) = czero
+ endif
 
-!start calculating linear optical response
+ ! start calculating linear optical response
  chi(:,:)=0._dp
  do isp=1,nspin
    do ik=my_k1,my_k2
@@ -613,34 +631,44 @@ complex(dpc), allocatable :: eps(:)
              end do
            end do
            b12=b11*renorm_factor*(1._dp/(e12**2))
+           ! store data for printing if necessary
+           if (prtlincompmatrixelements == 1) then
+             matrix_elements(ist1,ist2,ik,isp) = b12
+             renorm_eigs(ist1,ik,isp) = e1_ep
+             renorm_eigs(ist2,ik,isp) = e2_ep
+           endif
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
              chi(iw,isp)=chi(iw,isp)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
              (b12/(-e12_ep-w)))
-           end do
+           end do ! frequencies
          end if
-       end do ! states
+       end do  ! states 2
 !      end if
-     end do
+     end do  ! states 1
    end do ! k points
  end do ! spin
 
  call xmpi_sum(chi,comm,ierr)
+ if (prtlincompmatrixelements == 1) then
+   ! gather all data to main process in order to write them using a single process
+   ! in the netcdf file. This could be avoided by doing mpiio.
+   call xmpi_sum(matrix_elements,comm,ierr)
+   call xmpi_sum(renorm_eigs,comm,ierr)
+ endif
 
  ! calculate epsilon
  eps(1) = zero
  deltav1v2=zero; if (v1 == v2) deltav1v2=one
  do iw=2,nmesh
-   ene=(iw-1)*de
-   ene=ene*ha2ev
    eps(iw)=deltav1v2+4._dp*pi*sum(chi(iw,:))
  end do
 
  if (my_rank == master) then
    !  open the output files
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write the output
    write(fout1, '(a,2i3,a)' )' #calculated the component:',v1,v2,'  of dielectric function'
@@ -655,8 +683,7 @@ complex(dpc), allocatable :: eps(:)
    if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))         Spin up       Spin down '
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      if(nspin==1)write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
      if(nspin==2)write(fout1, '(4es16.6)' ) ene,aimag(eps(iw)),4._dp*pi*aimag(chi(iw,1)),4._dp*pi*aimag(chi(iw,2))
    end do
@@ -665,8 +692,7 @@ complex(dpc), allocatable :: eps(:)
    if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
    if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag) '
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      if(nspin==1)write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
      if(nspin==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),deltav1v2
    end do
@@ -674,8 +700,7 @@ complex(dpc), allocatable :: eps(:)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         abs(eps(w))'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      abs_eps=abs(eps(iw))
      re_eps=dble(eps(iw))
      write(fout1, '(2es16.6)' ) ene,abs_eps
@@ -686,24 +711,21 @@ complex(dpc), allocatable :: eps(:)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Im(refractive index(w)) aka kappa'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      write(fout1, '(2es16.6)' ) ene,im_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Re(refractive index(w)) aka n'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      write(fout1, '(2es16.6)' ) ene,re_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Reflectivity(w) from vacuum, at normal incidence'
    do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=(iw-1)*de*ha2ev
      write(fout1, '(2es16.6)' ) ene, ((re_refract(iw)-one)**2+im_refract(iw)**2)/((re_refract(iw)+one)**2+im_refract(iw)**2)
    end do
    write(fout1,*)
@@ -726,8 +748,26 @@ complex(dpc), allocatable :: eps(:)
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_epsilon"), c2r(eps), start=[1, 1, icomp, itemp])
      NCF_CHECK(ncerr)
    end if
+   if (prtlincompmatrixelements == 1) then
+     ! write matrix elements and other quantities used to build the chi tensor.
+     write(std_out, '(a)') 'Writing linopt matrix elements in _OPTIC.nc file.'
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_matrix_elements"), c2r(matrix_elements),&
+                          start=[1, 1, 1, 1, 1, icomp, itemp])
+     NCF_CHECK(ncerr)
+     ABI_FREE(matrix_elements)
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_renorm_eigs"), c2r(renorm_eigs), start=[1, 1, 1, 1])
+     NCF_CHECK(ncerr)
+     ABI_FREE(renorm_eigs)
+     ! also write occupations and kpt weights
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_occupations"), KSBSt%occ, start=[1, 1, 1])
+     NCF_CHECK(ncerr)
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_wkpts"), wkpt, start=[1])
+     NCF_CHECK(ncerr)
+     write(std_out, '(a)') 'Writing linopt matrix elements done.'
+   endif
+
 #endif
- end if
+ end if  ! if main rank
 
  ABI_FREE(chi)
  ABI_FREE(eps)
@@ -903,7 +943,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
          write(std_out,*) '    The SHG susceptibility is zero         '
          write(std_out,*) '    Action : set num_nonlin_comp to zero   '
          write(std_out,*) '-------------------------------------------'
-         MSG_ERROR("Aborting now")
+         ABI_ERROR("Aborting now")
        end if
      end if
    end do
@@ -916,7 +956,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    Action : check your input file,          ' 
      write(std_out,*) '    use only 1, 2 or 3 to define directions  '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !number of energy mesh points
    if (nmesh.le.0) then
@@ -926,7 +966,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    number has to be integer greater than 0  '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !step in energy
    if (de.le.0._dp) then
@@ -936,7 +976,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    number has to real greater than 0.0      '
      write(std_out,*) '    nmesh*de = max energy for calculation    '
      write(std_out,*) '---------------------------------------------'
-     MSG_ERROR("Aborting now")
+     ABI_ERROR("Aborting now")
    end if
   !broadening
    if (brod.gt.0.009) then
@@ -960,15 +1000,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  end if
 
  !allocate local arrays
- ABI_ALLOCATE(px,(nstval,nstval,3,3,3))
- ABI_ALLOCATE(py,(nstval,nstval,3,3,3))
- ABI_ALLOCATE(pz,(nstval,nstval,3,3,3))
- ABI_ALLOCATE(inter2w,(nmesh))
- ABI_ALLOCATE(inter1w,(nmesh))
- ABI_ALLOCATE(intra2w,(nmesh))
- ABI_ALLOCATE(intra1w,(nmesh))
- ABI_ALLOCATE(intra1wS,(nmesh))
- ABI_ALLOCATE(delta,(nstval,nstval,3))
+ ABI_MALLOC(px,(nstval,nstval,3,3,3))
+ ABI_MALLOC(py,(nstval,nstval,3,3,3))
+ ABI_MALLOC(pz,(nstval,nstval,3,3,3))
+ ABI_MALLOC(inter2w,(nmesh))
+ ABI_MALLOC(inter1w,(nmesh))
+ ABI_MALLOC(intra2w,(nmesh))
+ ABI_MALLOC(intra1w,(nmesh))
+ ABI_MALLOC(intra1wS,(nmesh))
+ ABI_MALLOC(delta,(nstval,nstval,3))
 
 !generate the symmetrizing tensor
  sym(:,:,:)=0._dp
@@ -1355,25 +1395,25 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    end if
 
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam6,msg,newunit=fout6,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 !  write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
@@ -1500,15 +1540,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  end if
 
  ! deallocate local arrays
- ABI_DEALLOCATE(px)
- ABI_DEALLOCATE(py)
- ABI_DEALLOCATE(pz)
- ABI_DEALLOCATE(inter2w)
- ABI_DEALLOCATE(inter1w)
- ABI_DEALLOCATE(intra2w)
- ABI_DEALLOCATE(intra1w)
- ABI_DEALLOCATE(intra1wS)
- ABI_DEALLOCATE(delta)
+ ABI_FREE(px)
+ ABI_FREE(py)
+ ABI_FREE(pz)
+ ABI_FREE(inter2w)
+ ABI_FREE(inter1w)
+ ABI_FREE(intra2w)
+ ABI_FREE(intra1w)
+ ABI_FREE(intra1wS)
+ ABI_FREE(delta)
 
 end subroutine nlinopt
 !!***
@@ -1692,7 +1732,7 @@ integer :: start4(4),count4(4)
        write(std_out,*) '    the crystal has inversion symmetry   '
        write(std_out,*) '    the LEO susceptibility is zero       '
        write(std_out,*) '-----------------------------------------'
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
    end if
  end do
@@ -1703,7 +1743,7 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    the polarisation directions incorrect    '
    write(std_out,*) '    1=x,  2=y  and 3=z                       '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 !number of energy mesh points
  if (nmesh.le.0) then
@@ -1713,7 +1753,7 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    number has to be integer greater than 0  '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 !step in energy
  if (de.le.0._dp) then
@@ -1723,7 +1763,7 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 !broadening
  if (brod.gt.0.009) then
@@ -1961,19 +2001,19 @@ integer :: start4(4),count4(4)
 
   ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    ! write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
@@ -2265,7 +2305,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
        write(std_out,*) '    the nl electro-optical susceptibility'
        write(std_out,*) '    is zero                              '
        write(std_out,*) '-----------------------------------------'
-       MSG_ERROR("Aborting now")
+       ABI_ERROR("Aborting now")
      end if
    end if
  end do
@@ -2277,7 +2317,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    the polarisation directions incorrect    '
    write(std_out,*) '    1=x,  2=y  and 3=z                       '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !number of energy mesh points
@@ -2288,7 +2328,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    number has to be integer greater than 0  '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !step in energy
@@ -2299,7 +2339,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
    write(std_out,*) '---------------------------------------------'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
 !broadening
@@ -2564,25 +2604,25 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
    ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam2,msg,newunit=fout2,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam3,msg,newunit=fout3,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam4,msg,newunit=fout4,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam5,msg,newunit=fout5,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam6,msg,newunit=fout6,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
   !!write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3

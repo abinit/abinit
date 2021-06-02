@@ -53,11 +53,10 @@ inp_files = [
 "teph4mob_7.abi",
 #
 "teph4isotc_1.abi",
-#"teph4isotc_2.abi",
-#"teph4isotc_3.abi",
-#"teph4isotc_4.abi",
-#"teph4isotc_5.abi",
-#"teph4isotc_6.abi",
+"teph4isotc_2.abi",
+"teph4isotc_3.abi",
+"teph4isotc_4.abi",
+"teph4isotc_5.abi",
 #
 "teph4zpr_1.abi",
 "teph4zpr_2.abi",
@@ -88,6 +87,7 @@ inp_files = [
 "tnlo_3.abi",
 "tnlo_4.abi",
 "tnlo_5.abi",
+"tnlo_6.abi",
 #
 "toptic_1.abi",
 "toptic_2.abi",

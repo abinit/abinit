@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,7 +65,7 @@ contains
     class(base_mat_t), intent(inout) :: self
     integer, intent(in) :: mshape(:)
     self%ndim=size(mshape)
-    ABI_ALLOCATE(self%mshape, (self%ndim))
+    ABI_MALLOC(self%mshape, (self%ndim))
     self%mshape=mshape
   end subroutine initialize
 
@@ -76,7 +76,7 @@ contains
     class(base_mat_t), intent(inout) :: self
     self%ndim=0
     if (allocated(self%mshape)) then
-       ABI_DEALLOCATE(self%mshape)
+       ABI_FREE(self%mshape)
     endif
   end subroutine finalize
 

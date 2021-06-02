@@ -6,7 +6,7 @@
 !! This module contains definitions for a number of named constants used in the GW part of abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2021 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -583,7 +583,7 @@ function sigma_type_from_key(key) result(sigma_type)
 
  if (sigma_type == "None") then
    write(msg,'(a,i0)')" Unknown value for key= ",key
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end function sigma_type_from_key
@@ -749,7 +749,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 
    else
      write(msg,'(a,i0)')" Wrong value for opt_poles: ",opt_poles
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if ! opt_poles
 
  else ! delta_ene**2<tol14

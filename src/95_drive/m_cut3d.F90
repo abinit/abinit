@@ -6,7 +6,7 @@
 !!  This module the predures used by cut3d
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
+!! Copyright (C) 2008-2021 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ MODULE m_cut3d
 
  use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
- use m_numeric_tools,    only : interpol3d
+ use m_numeric_tools,    only : interpol3d_0d
  use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
@@ -133,19 +133,19 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
 
  minimal_den=tol6
  mpoint=4000
- ABI_ALLOCATE(npoint,(ntypat))
- ABI_ALLOCATE(radii,(4000,ntypat))
- ABI_ALLOCATE(aeden,(4000,ntypat))
+ ABI_MALLOC(npoint,(ntypat))
+ ABI_MALLOC(radii,(4000,ntypat))
+ ABI_MALLOC(aeden,(4000,ntypat))
  do itypat=1,ntypat
    write(std_out,'(a)' )' Please, give the filename of the all-electron density file'
    write(std_out,'(a,es16.6)' )' for the first type of atom, with atomic number=',znucl(itypat)
    if (read_string(file_allelectron, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    write(std_out,*)' The name you entered is : ',trim(file_allelectron),ch10
    ierr = open_file(file_allelectron,msg,newunit=temp_unit,form='formatted',status='old')
    if (ierr/=0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    else
      read(temp_unit, *) param1, param2
      do ipoint=1,mpoint
@@ -333,12 +333,12 @@ end subroutine cut3d_hirsh
 
  write(std_out,*) ch10,'  Enter the name of an output file:'
  if (read_string(filnam, unit=std_in) /= 0) then
-   MSG_ERROR("Fatal error!")
+   ABI_ERROR("Fatal error!")
  end if
  write(std_out,*) '  The name of your file is : ',trim(filnam),ch10
 
  if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  dx=(r2(1)-r1(1))/nresol
@@ -367,15 +367,15 @@ end subroutine cut3d_hirsh
    rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
    rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
 
-   denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+   denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
    if(nspden==1)then
      write(unt, '(i13,es22.12)' ) k2,denvaltt
      write(std_out,'(i13,es22.12)' ) k2,denvaltt
 
    else if(nspden==2 .or. nspden==4)then
-     denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-     denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-     denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+     denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+     denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+     denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
      write(unt, '(i13,4(es22.12))' ) k2,denvaltt,denvalux,denvaldy,denvalmz
      write(std_out,'(i13,4es22.12)' ) k2,denvaltt,denvalux,denvaldy,denvalmz
    end if
@@ -759,7 +759,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    read(std_in,*) nresoll
    write(std_out,*) ch10,'  Enter the name of an output file:'
    if (read_string(filnam, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
    write(std_out,*)
@@ -773,7 +773,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
  end do
 
  if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  do k2=-nresoll/2,nresoll/2
@@ -787,11 +787,11 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      rr(1)=mod(mod(rr(1),1._dp)+1._dp,1._dp)
      rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
      rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
-     denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+     denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
      if(nspden==2 .or. nspden==4)then
-       denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-       denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-       denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+       denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+       denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+       denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
      end if
      if(nspden==1)then
        write(unt, '(3e16.8)' ) xcoord,ycoord,denvaltt
@@ -902,11 +902,11 @@ subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
 !devalu = spin-up density value
 !devald = spin-down density value
 !devalm = magnetization density value
- denvaltt = interpol3d(rr,nr1,nr2,nr3,gridt)
+ denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridt)
  if(nspden==2 .or. nspden==4)then
-   denvalux = interpol3d(rr,nr1,nr2,nr3,gridu)
-   denvaldy = interpol3d(rr,nr1,nr2,nr3,gridd)
-   denvalmz = interpol3d(rr,nr1,nr2,nr3,gridm)
+   denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridu)
+   denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,gridd)
+   denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridm)
  end if
  write(std_out,*)
  write(std_out,*)'---------------------------------------------'
@@ -1031,7 +1031,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
  case (IO_MODE_FORTRAN)
    !Unformatted, on one record
    if (open_file(path, msg, newunit=unt, form='unformatted', status='old', action="read") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    call hdr_fort_read(hdr, unt, fform)
    ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
@@ -1053,11 +1053,11 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
    NCF_CHECK(nf90_get_var(unt, varid, grid_full, start=[1,1,1,1,1], count=[1, nr1,nr2,nr3,nspden]))
    NCF_CHECK(nf90_close(unt))
 #else
-   MSG_ERROR('netcdf support is not compiled. Reconfigure with --enable-netcdf.')
+   ABI_ERROR('netcdf support is not compiled. Reconfigure with --enable-netcdf.')
 #endif
 
  case default
-   MSG_BUG(sjoin("invalid iomode:", itoa(iomode)))
+   ABI_BUG(sjoin("invalid iomode:", itoa(iomode)))
  end select
 
 end subroutine cut3d_rrho
@@ -1501,7 +1501,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*)
    write(std_out,*) ch10,'  Enter the name of an output file:'
    if (read_string(filnam, unit=std_in) /= 0) then
-     MSG_ERROR("Fatal error!")
+     ABI_ERROR("Fatal error!")
    end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
 
@@ -1544,11 +1544,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 
  if (fileformattype==1 .or. fileformattype==2) then
    if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  else if (fileformattype==3) then
    if (open_file(filnam,msg,newunit=unt,form='unformatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    xm=0
@@ -1572,10 +1572,10 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
  end if
 
 !Allocate rhomacu in case of molekel output format
- ABI_ALLOCATE(rhomacutt,(nresoll+1,nresolw+1))
- ABI_ALLOCATE(rhomacuux,(nresoll+1,nresolw+1))
- ABI_ALLOCATE(rhomacudy,(nresoll+1,nresolw+1))
- ABI_ALLOCATE(rhomacumz,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacutt,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacuux,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacudy,(nresoll+1,nresolw+1))
+ ABI_MALLOC(rhomacumz,(nresoll+1,nresolw+1))
 
  do k1=0,nresolh
 
@@ -1625,11 +1625,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
        rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
 
-       denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+       denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
        if(nspden==2 .or. nspden==4)then
-         denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-         denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-         denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+         denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+         denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+         denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
        end if
 
        if (fileformattype==1) then
@@ -1672,10 +1672,10 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
 
  close(unt)
 
- ABI_DEALLOCATE(rhomacutt)
- ABI_DEALLOCATE(rhomacuux)
- ABI_DEALLOCATE(rhomacudy)
- ABI_DEALLOCATE(rhomacumz)
+ ABI_FREE(rhomacutt)
+ ABI_FREE(rhomacuux)
+ ABI_FREE(rhomacudy)
+ ABI_FREE(rhomacumz)
 
 end subroutine cut3d_volumeint
 !!***
@@ -1787,7 +1787,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
  call initmpi_seq(mpi_enreg)
  mband=maxval(nband)
- ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
+ ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
  mpi_enreg%proc_distrb=0
  mpi_enreg%me_g0 = 1
  oldckpt=0
@@ -1813,9 +1813,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !max ang mom + 1
  mlang = 5
 
- ABI_ALLOCATE(kg_dum,(3,0))
+ ABI_MALLOC(kg_dum,(3,0))
 
- ABI_ALLOCATE(ph1d,(2,(2*nr1+1+2*nr2+1+2*nr3+1)*natom))
+ ABI_MALLOC(ph1d,(2,(2*nr1+1+2*nr2+1+2*nr3+1)*natom))
  call getph(atindx,natom,nr1,nr2,nr3,ph1d,xred)
 
  do
@@ -1827,7 +1827,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Check if kpt exist
      if(ckpt<1 .or. ckpt>nkpt) then
        write(msg,'(a,i0)') 'Invalid k-point ',ckpt
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      ckpt=nkpt
@@ -1843,7 +1843,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      if(cband<1 .or. cband>nband(ckpt)) then
        write(msg,'(a,i0)')'Invalid band number',cband
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      cband=nband(ckpt)
@@ -1858,7 +1858,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Check if spin polarisation exist
      if(csppol<1 .or. csppol>nsppol) then
        write(msg,'(a,i0)')'Invalid spin polarisation ',csppol
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    else
      csppol=1
@@ -1875,7 +1875,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Check if spin polarisation exist
      if(cspinor<1 .or. cspinor>nspinor) then
        write(msg,'(a,i0)')'Invalid spinor index ',cspinor
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      write(std_out,*) ' => Your spinor component is : ',(cspinor)
      write(std_out,*)
@@ -1891,13 +1891,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      mpw=maxval(npwarr)
      mcg=mpw*nspinor*mband
      if (allocated (cg_k))   then
-       ABI_DEALLOCATE(cg_k)
-       ABI_DEALLOCATE(eig_k)
-       ABI_DEALLOCATE(occ_k)
+       ABI_FREE(cg_k)
+       ABI_FREE(eig_k)
+       ABI_FREE(occ_k)
      end if
-     ABI_ALLOCATE(cg_k,(2,mcg))
-     ABI_ALLOCATE(eig_k,((2*mband)**formeig0*mband))
-     ABI_ALLOCATE(occ_k,(mband))
+     ABI_MALLOC(cg_k,(2,mcg))
+     ABI_MALLOC(eig_k,((2*mband)**formeig0*mband))
+     ABI_MALLOC(occ_k,(mband))
 
 !    FIXME
 !    nband depends on (kpt,spin)
@@ -1939,9 +1939,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      mode_paral='PERS'
      mkmem=nkpt
      mgfft=maxval(ngfft(1:3))
-     ABI_ALLOCATE(npwarr1,(nkpt))
-     ABI_ALLOCATE(kg,(3,mpw*mkmem))
-     ABI_ALLOCATE(npwtot1,(nkpt))
+     ABI_MALLOC(npwarr1,(nkpt))
+     ABI_MALLOC(kg,(3,mpw*mkmem))
+     ABI_MALLOC(npwtot1,(nkpt))
      call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfft(2),ngfft(3),'all')
 
 !    Create positions index for pw
@@ -1953,26 +1953,26 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ioffkg=ioffkg+npwarr1(ikpt)
      end do
      npw_k=npwarr(ckpt)
-     ABI_ALLOCATE(gbound,(2*mgfft+8,2))
-     ABI_ALLOCATE(kg_k,(3,npw_k))
+     ABI_MALLOC(gbound,(2*mgfft+8,2))
+     ABI_MALLOC(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
-     ABI_ALLOCATE(ylm_k,(npw_k,mlang*mlang))
-     ABI_ALLOCATE(ylmgr_dum,(npw_k,3,mlang*mlang))
+     ABI_MALLOC(ylm_k,(npw_k,mlang*mlang))
+     ABI_MALLOC(ylmgr_dum,(npw_k,3,mlang*mlang))
 
 !    call for only the kpoint we are interested in !
-     ABI_ALLOCATE(k1,(3,1))
+     ABI_MALLOC(k1,(3,1))
      k1(:,1)=kpt(:,ckpt)
-     ABI_ALLOCATE(npwarrk1,(1))
+     ABI_MALLOC(npwarrk1,(1))
      npwarrk1 = (/npw_k/)
      call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,npw_k,nband,1,&
 &     npwarrk1,nsppol,0,rprimd,ylm_k,ylmgr_dum)
-     ABI_DEALLOCATE(ylmgr_dum)
-     ABI_DEALLOCATE(k1)
-     ABI_DEALLOCATE(npwarrk1)
+     ABI_FREE(ylmgr_dum)
+     ABI_FREE(k1)
+     ABI_FREE(npwarrk1)
 
 !    Compute the norms of the k+G vectors
-     ABI_ALLOCATE(kpgnorm,(npw_k))
+     ABI_MALLOC(kpgnorm,(npw_k))
      call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
 
      call sphereboundary(gbound,istwfk(ckpt),kg_k,mgfft,npw_k)
@@ -1993,15 +1993,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      if(ii1==1) then
        write(std_out,*) 'What is the name of the QPS file?'
        if (read_string(fileqps, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
 !      Checking the existence of data file
        if (.not. file_exists(fileqps)) then
-         MSG_ERROR(sjoin('Missing data file:', fileqps))
+         ABI_ERROR(sjoin('Missing data file:', fileqps))
        end if
 
        if (open_file(fileqps, msg, newunit=iunt, status='old',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        read(iunt,*) iscf_qps
@@ -2009,7 +2009,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        read(iunt,*) nband_qps
        read(iunt,*) ikpt_qps
 
-       ABI_ALLOCATE(ccoeff,(nband_qps,nband_qps))
+       ABI_MALLOC(ccoeff,(nband_qps,nband_qps))
        do ikpt=1,ckpt ! nkpt_qps
          read(iunt,*) kpt_qps(:)
          do iband=1,nband_qps
@@ -2019,8 +2019,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
        close(iunt)
 
-       ABI_ALLOCATE(wfg,(npw_k,nband_qps))
-       ABI_ALLOCATE(wfg_qps,(npw_k))
+       ABI_MALLOC(wfg,(npw_k,nband_qps))
+       ABI_MALLOC(wfg_qps,(npw_k))
        do iband=1,nband_qps
          cgshift=(iband-1)*npw_k*nspinor + (cspinor-1)*npw_k
          wfg(:,iband) = dcmplx( cg_k(1,cgshift+1:cgshift+npw_k),cg_k(2,cgshift+1:cgshift+npw_k) )
@@ -2030,19 +2030,19 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
 !      write(std_out,*) 'norm',SUM( abs(wfg(:,cband))**2 )
 !      write(std_out,*) 'norm',SUM( abs(wfg_qps(:))**2 )
-       ABI_DEALLOCATE(ccoeff)
-       ABI_DEALLOCATE(wfg)
-       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       ABI_FREE(ccoeff)
+       ABI_FREE(wfg)
+       ABI_MALLOC(cgcband,(2,npw_k*nspinor))
        cgcband = zero
        cgcband(1,:)= real(wfg_qps(:))
        cgcband(2,:)= aimag(wfg_qps(:))
-       ABI_DEALLOCATE(wfg_qps)
+       ABI_FREE(wfg_qps)
 
      else ! not a GW wavefunction
 
 ! get spin vector for present state
        cgshift=(cband-1)*npw_k*nspinor
-       ABI_ALLOCATE(cgcband,(2,npw_k*nspinor))
+       ABI_MALLOC(cgcband,(2,npw_k*nspinor))
        cgcband(:,1:npw_k*nspinor)=cg_k(:,cgshift+1:cgshift+nspinor*npw_k)
      end if ! test QPS wavefunction from GW
 
@@ -2054,9 +2054,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    Fix the phase of cgcband, for portability reasons
 !    call fxphas(cgcband,cgcband,0,npw_k,1,npw_k,0)
 
-     ABI_ALLOCATE(denpot,(cplex*n4,n5,n6))
-     ABI_ALLOCATE(fofgout,(2,npw_k))
-     ABI_ALLOCATE(fofr,(2,n4,n5,n6))
+     ABI_MALLOC(denpot,(cplex*n4,n5,n6))
+     ABI_MALLOC(fofgout,(2,npw_k))
+     ABI_MALLOC(fofr,(2,n4,n5,n6))
 
      call fourwf(cplex,denpot,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),fofgout,fofr,gbound,gbound,&
 &     istwfk(ckpt),kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,&
@@ -2093,14 +2093,14 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,'(a,2es16.6,i6)')' wffile : kpgmax, bessargmax, nradint = ', kpgmax, bessargmax,nradintmax
 
 !      Initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-       ABI_ALLOCATE(rint,(nradintmax))
+       ABI_MALLOC(rint,(nradintmax))
 
        jlspl = jlspline_new(mbess, bessint_delta, mlang)
 
-       ABI_ALLOCATE(bess_fit,(mpw,nradintmax,mlang))
-       ABI_ALLOCATE(xfit,(npw_k))
-       ABI_ALLOCATE(yfit,(npw_k))
-       ABI_ALLOCATE(iindex,(npw_k))
+       ABI_MALLOC(bess_fit,(mpw,nradintmax,mlang))
+       ABI_MALLOC(xfit,(npw_k))
+       ABI_MALLOC(yfit,(npw_k))
+       ABI_MALLOC(iindex,(npw_k))
        nfit = npw_k
 
        do ixint=1,nradintmax
@@ -2128,13 +2128,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          phkxred(2,iatom)=sin(arg)
        end do
 
-       ABI_ALLOCATE(ph3d,(2,npw_k,natom))
+       ABI_MALLOC(ph3d,(2,npw_k,natom))
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-       ABI_ALLOCATE(sum_1ll_1atom,(nspinor**2,mlang,natom))
-       ABI_ALLOCATE(sum_1lm_1atom,(nspinor**2,mlang**2,natom))
-       ABI_ALLOCATE(cplx_1lm_1atom,(2,nspinor,mlang**2,natom))
+       ABI_MALLOC(sum_1ll_1atom,(nspinor**2,mlang,natom))
+       ABI_MALLOC(sum_1lm_1atom,(nspinor**2,mlang**2,natom))
+       ABI_MALLOC(cplx_1lm_1atom,(2,nspinor,mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
 
@@ -2153,28 +2153,28 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          write(std_out,'(a,i4,a,f14.8)' ) ' Atom number ',iatom,' :  charge =',cmax(iatom)
        end do
 
-       ABI_DEALLOCATE(sum_1ll_1atom)
-       ABI_DEALLOCATE(sum_1lm_1atom)
-       ABI_DEALLOCATE(cplx_1lm_1atom)
-       ABI_DEALLOCATE(ph3d)
-       ABI_DEALLOCATE(iindex)
-       ABI_DEALLOCATE(yfit)
-       ABI_DEALLOCATE(xfit)
-       ABI_DEALLOCATE(bess_fit)
+       ABI_FREE(sum_1ll_1atom)
+       ABI_FREE(sum_1lm_1atom)
+       ABI_FREE(cplx_1lm_1atom)
+       ABI_FREE(ph3d)
+       ABI_FREE(iindex)
+       ABI_FREE(yfit)
+       ABI_FREE(xfit)
+       ABI_FREE(bess_fit)
        call jlspline_free(jlspl)
-       ABI_DEALLOCATE(rint)
+       ABI_FREE(rint)
      end if ! ratsph < 0     = end if for atomic sphere analysis
 
-     ABI_DEALLOCATE(cgcband)
-     ABI_DEALLOCATE(fofgout)
-     ABI_DEALLOCATE(denpot)
-     ABI_DEALLOCATE(gbound)
-     ABI_DEALLOCATE(kg_k)
-     ABI_DEALLOCATE(npwarr1)
-     ABI_DEALLOCATE(kg)
-     ABI_DEALLOCATE(npwtot1)
-     ABI_DEALLOCATE(kpgnorm)
-     ABI_DEALLOCATE(ylm_k)
+     ABI_FREE(cgcband)
+     ABI_FREE(fofgout)
+     ABI_FREE(denpot)
+     ABI_FREE(gbound)
+     ABI_FREE(kg_k)
+     ABI_FREE(npwarr1)
+     ABI_FREE(kg)
+     ABI_FREE(npwtot1)
+     ABI_FREE(kpgnorm)
+     ABI_FREE(ylm_k)
      call destroy_distribfft(mpi_enreg%distribfft)
    end if
 
@@ -2223,7 +2223,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      if (ichoice>0 .and. ichoice<15)then
        write(std_out,*) ch10,'  Enter the root of an output file:'
        if (read_string(output1, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
        write(std_out,*) '  The root of your file is : ',trim(output1)
        output=trim(output1)
@@ -2252,7 +2252,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The second column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_ri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
@@ -2264,7 +2264,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The only column is the real data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_ri("R",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
@@ -2276,7 +2276,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The only column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_ri("I",nr1,nr2,nr3,n4,n5,n6,fofr,unit=unout)
        close(unout)
@@ -2290,7 +2290,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The fifth column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_xyzri("RI",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
@@ -2303,7 +2303,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The fourth column is the real data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_xyzri("R",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
@@ -2316,7 +2316,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The fourth column is the imaginary data'
        write(std_out,*)
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_xyzri("I",nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,conv_fact=Bohr_Ang,unit=unout)
        close(unout)
@@ -2328,7 +2328,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The file is ready to be use with OpenDX'
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(2))
+       ABI_MALLOC(filename,(2))
        filename(1)=trim(output)//'Real.dx'
        filename(2)=trim(output)//'Imag.dx'
        write(std_out,*) '  The name of your files is : '
@@ -2338,7 +2338,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          rewind(unout)
          write(unout,*)'# band,  eig_kvalues   and   occupations'
@@ -2374,7 +2374,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
          close(unit=unout)
        end do
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
        exit
 
      case(8) ! OpenDX format, data R and data I
@@ -2383,14 +2383,14 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The file is ready to be use with OpenDX'
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)//'Real.dx'
        write(std_out,*) '  The name of your file is : '
        write(std_out,*) trim(filename(1)),'  for the real part,'
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
@@ -2425,7 +2425,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)')'component "data"        value "donnees"'
 
        close(unit=unout)
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
        exit
 
      case(9) !OpenDX format, data R and data I
@@ -2434,14 +2434,14 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The file is ready to be use with OpenDX'
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)//'Imag.dx'
        write(std_out,*) '  The name of your file is : '
        write(std_out,*) trim(filename(1)),'  for the imaginary part.'
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
        write(unout,*)'# band,  eig_kvalues   and   occupations'
@@ -2476,7 +2476,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)')'component "data"        value "donnees"'
 
        close(unit=unout)
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
        exit
 
      case(10)           !OpenDX format, data R and data I, atoms positions, lattice and cell
@@ -2486,7 +2486,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'The eig_kvalues and occupations numbers are in comments'
        write(std_out,*) 'of the two data files'
        write(std_out,*)
-       ABI_ALLOCATE(filename,(2))
+       ABI_MALLOC(filename,(2))
        filename(1)=trim(output)//'Real.dx'
        filename(2)=trim(output)//'Imag.dx'
        write(std_out,*) '  The name of your data files is : '
@@ -2496,7 +2496,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        do ifile=1,2
          if (open_file(filename(ifile), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
          rewind(unout)
          do iband=1,nband(ckpt)
@@ -2531,18 +2531,18 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
          close(unit=unout)
        end do
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 !
 !        write LATTICE_VEC.dx file
 !
-       ABI_ALLOCATE(filename,(3))
+       ABI_MALLOC(filename,(3))
        filename(1)=trim(output1)//'_LATTICE_VEC.dx'
        filename(2)=trim(output1)//'_ATOM_POS.dx'
        filename(3)=trim(output1)//'_UCELL_FRAME.dx'
        write(std_out,*)
        write(std_out,*)'Give the lattice file, ', trim(filename(1))
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        write(unout,'("#",/,"#",/,"#    LATTICE VECTOR INFO:",/,"#",/,"#")')
@@ -2564,7 +2564,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)'Give the atoms positions file, ', trim(filename(2))
 
        if (open_file(filename(2), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        write(unout,'("#",/,"#",/,"#    BALL AND STICK INFO:",/,"#",/,"#")')
@@ -2587,7 +2587,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !
        write(std_out,*)'Give the enveloppe of the cell file, ',trim(filename(3))
        if (open_file(filename(3), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
        write(unout,'("#",/,"#",/,"#    UNIT CELL FRAME INFO:",/,"#",/,"#")')
@@ -2614,7 +2614,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(a)') 'component "positions" value 4'
        write(unout,'(a)') 'component "connections" value 3'
        close(unout)
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 
        write(std_out,*)
        exit
@@ -2631,24 +2631,24 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        shift_tau(:) = 0.0
        if (read_string(outputchar, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
-         MSG_ERROR("Shift is buggy, don't use it")
+         ABI_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
          write(std_out,*)
          read (std_in,*) gridshift1, gridshift2, gridshift3
          shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
        end if
 
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)
        write(std_out,*) '  The name of your data files is : '
        write(std_out,*) trim(filename(1)),'  for the density (norm of the wfk),'
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
        do iband=1,nband(ckpt)
@@ -2773,7 +2773,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(1X,A)') 'END_BLOCK_DATAGRID3D'
        close(unout)
 
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 
        write(std_out,*)
        exit
@@ -2797,24 +2797,24 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
        shift_tau(:) = 0.0
        if (read_string(outputchar, unit=std_in) /= 0) then
-         MSG_ERROR("Fatal error!")
+         ABI_ERROR("Fatal error!")
        end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
-         MSG_ERROR("Shift is buggy, don't use it")
+         ABI_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
          write(std_out,*)
          read (std_in,*) gridshift1, gridshift2, gridshift3
          shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
        end if
 
-       ABI_ALLOCATE(filename,(1))
+       ABI_MALLOC(filename,(1))
        filename(1)=trim(output)
        write(std_out,*) '  The name of your data files is : '
        write(std_out,*) trim(filename(1)),'  for the density (norm of the wfk),'
        write(std_out,*)
 
        if (open_file(filename(1), msg, newunit=unout, status='unknown',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        rewind(unout)
 
@@ -2880,7 +2880,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(unout,'(1X,A)') 'END_BLOCK_DATAGRID3D'
        close(unout)
 
-       ABI_DEALLOCATE(filename)
+       ABI_FREE(filename)
 
        write(std_out,*)
        exit
@@ -2892,7 +2892,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*)
 
        if (open_file(output, msg, newunit=unout, status='replace',form='formatted') /= 0) then
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
        call print_fofr_cube(nr1,nr2,nr3,n4,n5,n6,fofr,rprimd,natom,znucl_atom_int,xcart,unit=unout)
        close(unout)
@@ -2916,7 +2916,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
    csppol=oldcsppol
    cspinor=oldcspinor
 !  deallocate the datas
-   ABI_DEALLOCATE(fofr)
+   ABI_FREE(fofr)
 
    write(std_out,*) ' Task ',ichoice,' has been done !'
    write(std_out,*)
@@ -2930,11 +2930,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  end do
 
 !Deallocate the datas
- ABI_DEALLOCATE(cg_k)
- ABI_DEALLOCATE(eig_k)
- ABI_DEALLOCATE(kg_dum)
- ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(occ_k)
+ ABI_FREE(cg_k)
+ ABI_FREE(eig_k)
+ ABI_FREE(kg_dum)
+ ABI_FREE(ph1d)
+ ABI_FREE(occ_k)
 
  call destroy_mpi_enreg(mpi_enreg)
 

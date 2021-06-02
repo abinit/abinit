@@ -5,7 +5,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2021 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,6 +149,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: g0_k(3),symq(4,2,cryst%nsym)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
+ real(dp) :: dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -167,7 +168,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call wrtout([std_out, ab_out], msg, do_flush=.True.)
 
  if (psps%usepaw == 1) then
-   MSG_ERROR("PAW not implemented")
+   ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
@@ -310,7 +311,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  interpolated = 0
  if (dtset%eph_use_ftinterp /= 0) then
-   MSG_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
+   ABI_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    cplex = 2
@@ -326,7 +327,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
      call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
-     MSG_WARNING(sjoin("Cannot find q-point:", ktoa(qpt), "in DVDB file"))
+     ABI_WARNING(sjoin("Cannot find q-point:", ktoa(qpt), "in DVDB file"))
    end if
  end if
 
@@ -383,7 +384,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"], &
        [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr, interpolated])
      NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+     dvdb_qdamp = dvdb%qdamp
+     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], dvdb_qdamp))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoint"), qpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart"), dvdb%dielt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "becs_cart"), dvdb%zeff))
@@ -407,7 +409,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 #endif
    end if
  else
-   MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
+   ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
 
  ! Loop over all 3*natom perturbations.
@@ -742,7 +744,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
     call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
  else
-   MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
+   ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
 
  with_lr_model = .True.
@@ -795,7 +797,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
      ! This call allocates v1scf(cplex, nfft, nspden, 3*natom))
      call dvdb%readsym_allv1(db_iqpt, cplex, nfft, ngfft, v1scf, comm)
    else
-     MSG_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in DVDB file"))
+     ABI_ERROR(sjoin("Cannot find q-point:", ktoa(qpt), "in DVDB file"))
    end if
  else
 

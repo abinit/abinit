@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2020 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2021 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- use m_rta,             only : rta_driver, rta_estimate_sigma_erange
+ use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -69,7 +69,7 @@ module m_eph_driver
  use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph, test_phrotation
+ use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
 
@@ -217,7 +217,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  DBG_ENTER('COLL')
 
  if (psps%usepaw == 1) then
-   MSG_ERROR("PAW not implemented")
+   ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
@@ -228,7 +228,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 #ifndef HAVE_MPI_IBCAST
  do ii=1,5
-   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations parallelized over perturbations will be slow")
+   ABI_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations parallelized over perturbations will be slow")
  end do
 #endif
 
@@ -244,32 +244,32 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
- use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
+ use_wfq = ((dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .or. dtset%getwfq_filepath /= ABI_NOFILE) .and. dtset%eph_frohlichm /= 1)
 
  ! If eph_task is needed and ird/get variables are not provided, assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
    wfq_path = wfk0_path
    use_wfq = .True.
    write(msg, "(4a)")&
-     "eph_task requires WFQ but neither irdwfq nor getwfq are specified in the input.", ch10, &
+     "eph_task requires WFQ but none among (irdwfq, getwfq, getwfk_filepath) is specified in input.", ch10, &
      "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
  end if
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
 
  if (my_rank == master) then
-   if (.not. file_exists(ddb_filepath)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
-   if (use_dvdb .and. .not. file_exists(dvdb_filepath)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
+   if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
+   if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
    if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
-     MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, msg))
+     ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, ". Error:", msg))
    end if
    ! WFQ file
    if (use_wfq) then
      if (nctk_try_fort_or_ncfile(wfq_path, msg) /= 0) then
-       MSG_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, msg))
+       ABI_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, ". Error:", msg))
      end if
    end if
  end if ! master
@@ -327,7 +327,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      end do
    end do
    write(ab_out,'(a)')"..."
-   MSG_ERROR_NODUMP("Aborting now")
+   ABI_ERROR_NODUMP("Aborting now")
  end if
 
  call cwtime(cpu, wall, gflops, "start")
@@ -368,7 +368,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call wrtout(ab_out, sjoin("- Writing Fermi surface to file:", path))
      if (ebands_write_bxsf(ebands, cryst, path) /= 0) then
        msg = "Cannot produce file for Fermi surface, check log file for more info"
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        call wrtout(ab_out, msg)
      end if
    end if
@@ -379,7 +379,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
      if (ebands_write_nesting(ebands, cryst, path, dtset%prtnest, &
          dtset%tsmear, dtset%fermie_nest, dtset%ph_qpath(:,1:dtset%ph_nqpath), msg) /= 0) then
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
        call wrtout(ab_out,msg)
      end if
    end if
@@ -399,8 +399,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! DDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    cryst_ddb%timrev = cryst%timrev
-   if (cryst%compare(cryst_ddb, header="Comparing WFK crystal with DDB crystal") /= 0) then
-     MSG_ERROR("Crystal structure from WFK and DDB do not agree! Check messages above!")
+   if (cryst%compare(cryst_ddb, header=" Comparing WFK crystal with DDB crystal") /= 0) then
+     ABI_ERROR("Crystal structure from WFK and DDB do not agree! Check messages above!")
    end if
    call cryst_ddb%free()
  else
@@ -512,8 +512,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    dvdb%cryst%timrev = cryst%timrev
-   if (cryst%compare(dvdb%cryst, header="Comparing WFK crystal with DVDB crystal") /= 0) then
-     MSG_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
+   if (cryst%compare(dvdb%cryst, header=" Comparing WFK crystal with DVDB crystal") /= 0) then
+     ABI_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
    end if
    if (dtset%prtvol > 10) dvdb%debug = .True.
 
@@ -547,7 +547,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      if (dvdb%add_lr /= 0) then
        dvdb%add_lr = 0
-       MSG_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
+       ABI_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
 
@@ -576,7 +576,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call efmas_ncread(efmasdeg, efmasval, kpt_efmas, ncid)
    NCF_CHECK(nf90_close(ncid))
 #else
-   MSG_ERROR("netcdf support not enabled")
+   ABI_ERROR("netcdf support not enabled")
 #endif
  end if
 
@@ -621,9 +621,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   ! Compute transport properties only if sigma_erange has been used
+   ! Compute transport properties in the RTA/IBTE only if sigma_erange has been used
    if (dtset%eph_task == -4 .and. any(abs(dtset%sigma_erange) > zero)) then
-     call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+     if (dtset%ibte_prep > 0) then
+       call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm) ! Solve IBTE
+     else
+       call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)  ! Compute RTA
+     end if
    end if
 
  case (5, -5)
@@ -638,14 +642,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Compute phonon-limited RTA from SIGEPH file.
    call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
- case (-7)
-   ! Estimate sigma_erange
-   call rta_estimate_sigma_erange(dtset, ebands, comm)
+ case (8)
+   ! Solve IBTE from SIGEPH file.
+   call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
    if (nprocs > 1) then
-     MSG_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
+     ABI_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
    end if
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
@@ -657,7 +661,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (-16, 16)
    if (nprocs > 1) then
-     MSG_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
+     ABI_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
    end if
 
    call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
@@ -671,7 +675,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case default
-   MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
+   ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
  end select
 
  !=====================

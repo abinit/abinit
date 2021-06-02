@@ -117,6 +117,10 @@ diemac 12.0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "31-Ga.LDA.fhi, 15-P.LDA.fhi"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -124,7 +128,7 @@ diemac 12.0
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_4.abo, tolnlines= 11, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
+#%%   tlw_4.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
@@ -133,4 +137,3 @@ diemac 12.0
 #%% description = Dynamic Quadrupoles Calculation for GaP
 #%% topics = longwave
 #%%<END TEST_INFO>
-

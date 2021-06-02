@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -284,8 +284,8 @@ contains
     call dense_to_csr(mat, csr)
     call coo%group_by_1dim(ngroup, i1list, ise)
     call coo%sum_duplicates()
-    if(allocated(i1list)) ABI_DEALLOCATE(i1list)
-    if(allocated(ise)) ABI_DEALLOCATE(ise)
+    if(allocated(i1list)) ABI_FREE(i1list)
+    if(allocated(ise)) ABI_FREE(ise)
     call coo_to_csr(coo, csr2)
 
     x=[1,2,3,4]

@@ -7,7 +7,7 @@ rmm_diis -1  # 2 LOBPCG iterations then activate RMM-DIIS
 nspinor 2 nspden 1 # spin-orbit, non-magnetic.
 nband 16
 
-npkpt 1 npfft 1 npspinor 2 npband 2 bandpp 4
+np_spkpt 1 npfft 1 npspinor 2 npband 2 bandpp 4
 iomode 1  # enforce MPI-IO for the time being because netcdf with MPI-IO
           # does not support npspinor = 2.
 
@@ -39,6 +39,7 @@ pseudos "Ga-low_r.psp8, As_r.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_nag_7.0_.*
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

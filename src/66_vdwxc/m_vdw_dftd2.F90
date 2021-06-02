@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MT)
+!!  Copyright (C) 2008-2021 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ contains
 !!  === optional outputs ===
 !!  [dyn_vdw_dftd2(2,3,natom,3,natom)]=contribution to dynamical matrix from DFT-D2 dispersion potential
 !!  [elt_vdw_dftd2(6+3*natom,6)]=contribution to elastic tensor and internal strains from DFT-D2 disp. pot.
-!!  [fred_vdw_dftd2(3,natom)]=contribution to forces from DFT-D2 dispersion potential
+!!  [gred_vdw_dftd2(3,natom)]=contribution to gradients wrt nuclear positions from DFT-D2 dispersion potential
 !!  [str_vdw_dftd2(6)]=contribution to stress tensor from DFT-D2 dispersion potential
 !!
 !! NOTES
@@ -91,7 +91,7 @@ contains
 !! SOURCE
 
 subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xred,znucl,&
-&          dyn_vdw_dftd2,elt_vdw_dftd2,fred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
+&          dyn_vdw_dftd2,elt_vdw_dftd2,gred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
 
  implicit none
 
@@ -106,7 +106,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  real(dp),intent(in),optional :: qphon(3)
  real(dp),intent(out),optional :: dyn_vdw_dftd2(2,3,natom,3,natom)
  real(dp),intent(out),optional :: elt_vdw_dftd2(6+3*natom,6)
- real(dp),intent(out),optional :: fred_vdw_dftd2(3,natom)
+ real(dp),intent(out),optional :: gred_vdw_dftd2(3,natom)
  real(dp),intent(out),optional :: str_vdw_dftd2(6)
 
 !Local variables-------------------------------
@@ -155,7 +155,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  DBG_ENTER("COLL")
 
 !Extract options
- need_forces=present(fred_vdw_dftd2)
+ need_forces=present(gred_vdw_dftd2)
  need_stress=present(str_vdw_dftd2)
  need_dynmat=present(dyn_vdw_dftd2)
  need_elast=present(elt_vdw_dftd2)
@@ -165,13 +165,13 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  if (need_dynmat) then
    if (.not.present(qphon)) then
      msg='Dynamical matrix required without a q-vector'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
  end if
 
 !Identify type(s) of atoms
- ABI_ALLOCATE(ivdw,(ntypat))
+ ABI_MALLOC(ivdw,(ntypat))
  do itypat=1,ntypat
    ivdw(itypat)=-1;jtypat=0
    call atomdata_from_znucl(atom,znucl(itypat))
@@ -181,7 +181,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    if (ivdw(itypat)<0) then
      write(msg,'(3a)') &
 &     'Van der Waals DFT-D2 correction not available for atom type: ',atom%symbol,' !'
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end do
 
@@ -197,10 +197,10 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    vdw_s=vdw_s*vdw_s_tpss
  else
    write(msg,'(a,i8,a)')'  Van der Waals DFT-D2 correction not compatible with ixc=',ixc,' !'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
- ABI_ALLOCATE(vdw_c6,(ntypat,ntypat))
- ABI_ALLOCATE(vdw_r0,(ntypat,ntypat))
+ ABI_MALLOC(vdw_c6,(ntypat,ntypat))
+ ABI_MALLOC(vdw_r0,(ntypat,ntypat))
  do itypat=1,ntypat
    do jtypat=1,ntypat
      vdw_c6(itypat,jtypat)=sqrt(vdw_c6_dftd2(ivdw(itypat))*vdw_c6_dftd2(ivdw(jtypat)))
@@ -222,7 +222,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Map reduced coordinates into [0,1]
- ABI_ALLOCATE(xred01,(3,natom))
+ ABI_MALLOC(xred01,(3,natom))
  do ia=1,natom
    xred01(1,ia)=xred(1,ia)-aint(xred(1,ia))+half-sign(half,xred(1,ia))
    xred01(2,ia)=xred(2,ia)-aint(xred(2,ia))+half-sign(half,xred(2,ia))
@@ -232,7 +232,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !Set accumulated quantities to zero
  npairs=0
  e_vdw_dftd2=zero
- if (need_forces) fred_vdw_dftd2=zero
+ if (need_forces) gred_vdw_dftd2=zero
  if (need_stress) str_vdw_dftd2=zero
  if (need_dynmat) dyn_vdw_dftd2=zero
  if (need_elast)  elt_vdw_dftd2(1:6,1:6)=zero
@@ -298,11 +298,11 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
                    rcart(2)=rprimd(2,1)*r1+rprimd(2,2)*r2+rprimd(2,3)*r3
                    rcart(3)=rprimd(3,1)*r1+rprimd(3,2)*r2+rprimd(3,3)*r3
 
-!                  Contribution to forces
+!                  Contribution to gradients wrt nuclear positions
                    if (need_forces.and.ia/=ja) then
                      vec(1:3)=grad*rcart(1:3)
-                     fred_vdw_dftd2(1:3,ia)=fred_vdw_dftd2(1:3,ia)+vec(1:3)
-                     fred_vdw_dftd2(1:3,ja)=fred_vdw_dftd2(1:3,ja)-vec(1:3)
+                     gred_vdw_dftd2(1:3,ia)=gred_vdw_dftd2(1:3,ia)+vec(1:3)
+                     gred_vdw_dftd2(1:3,ja)=gred_vdw_dftd2(1:3,ja)-vec(1:3)
                    end if
 
 !                  Contribution to stress tensor
@@ -387,7 +387,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !Gradients: convert them from cartesian to reduced coordinates
  if (need_forces) then
    do ia=1,natom
-     call grad_cart2red(fred_vdw_dftd2(:,ia))
+     call grad_cart2red(gred_vdw_dftd2(:,ia))
    end do
  end if
  if (need_dynmat) then
@@ -423,7 +423,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !write(77,*) "E=",e_vdw_dftd2
 !if (need_forces) then
 ! do ia=1,natom
-!  write(77,*) "F=",ia,fred_vdw_dftd2(:,ia)
+!  write(77,*) "F=",ia,gred_vdw_dftd2(:,ia)
 ! end do
 !end if
 !if (need_stress) write(77,*) "S=",str_vdw_dftd2(:)
@@ -480,10 +480,10 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
    call wrtout(std_out,msg,'COLL')
  end if
 
- ABI_DEALLOCATE(ivdw)
- ABI_DEALLOCATE(vdw_c6)
- ABI_DEALLOCATE(vdw_r0)
- ABI_DEALLOCATE(xred01)
+ ABI_FREE(ivdw)
+ ABI_FREE(vdw_c6)
+ ABI_FREE(vdw_r0)
+ ABI_FREE(xred01)
 
  DBG_EXIT("COLL")
 

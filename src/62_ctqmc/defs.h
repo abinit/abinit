@@ -3,17 +3,17 @@
 
 #include "abi_common.h"
 
-#define MALLOC(ARR,SIZE)     ABI_ALLOCATE(ARR,SIZE)
-#define FREE(ARR)            ABI_DEALLOCATE(ARR) 
-#define FREEIF(ARR)          IF(ALLOCATED(ARR)) THEN NEWLINE ABI_DEALLOCATE(ARR) NEWLINE END IF
+#define MALLOC(ARR,SIZE)     ABI_MALLOC(ARR,SIZE)
+#define FREE(ARR)            ABI_FREE(ARR) 
+#define FREEIF(ARR)          IF(ALLOCATED(ARR)) THEN NEWLINE ABI_FREE(ARR) NEWLINE END IF
 
-#define DT_MALLOC(ARR,SIZE)  ABI_DATATYPE_ALLOCATE(ARR,SIZE)
-#define DT_FREE(ARR)         ABI_DATATYPE_DEALLOCATE(ARR) 
-#define DT_FREEIF(ARR)       IF(ALLOCATED(ARR)) THEN NEWLINE ABI_DATATYPE_DEALLOCATE(ARR) NEWLINE END IF
+#define DT_MALLOC(ARR,SIZE)  ABI_MALLOC(ARR,SIZE)
+#define DT_FREE(ARR)         ABI_FREE(ARR) 
+#define DT_FREEIF(ARR)       IF(ALLOCATED(ARR)) THEN NEWLINE ABI_FREE(ARR) NEWLINE END IF
 
-#define myWARNALL(msg)       MSG_WARNING(msg)
+#define myWARNALL(msg)       ABI_WARNING(msg)
 #define myWARN(msg)          call msg_hndl(msg,"WARNING","PERS")
-#define myERROR(msg)         MSG_ERROR(msg) 
+#define myERROR(msg)         ABI_ERROR(msg) 
 #define MY_WORLD             xmpi_world
 
 #define _PRIVATE              ABI_PRIVATE

@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -104,7 +104,7 @@ P           mkmem          15
           ngfftdg          36      36      36
              nkpt          30
 -           npfft           2
--           npkpt           2
+-        np_spkpt           2
             nstep           5
              nsym          12
             ntime           3
@@ -427,7 +427,7 @@ force_length_stats: {min:   1.44362830E-01, max:   1.44362830E-01, mean:   1.443
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 8.33479E-02 8.33479E-02 (free atoms)
  -8.33479188144940E-02 -8.33479188144940E-02 -8.33479188144940E-02
   8.33479188144940E-02  8.33479188144940E-02  8.33479188144940E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   5.83435431701458E-01  5.83435431701458E-01  5.83435431701458E-01
  -5.83435431701458E-01 -5.83435431701458E-01 -5.83435431701458E-01
  Scale of Primitive Cell (acell) [bohr]
@@ -591,7 +591,7 @@ force_length_stats: {min:   2.93271670E-02, max:   2.93271670E-02, mean:   2.932
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.69320E-02 1.69320E-02 (free atoms)
  -1.69320477492149E-02 -1.69320477492149E-02 -1.69320477492149E-02
   1.69320477492149E-02  1.69320477492149E-02  1.69320477492149E-02
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.14232980495040E-01  1.14232980495040E-01  1.14232980495040E-01
  -1.14232980495040E-01 -1.14232980495040E-01 -1.14232980495040E-01
  Scale of Primitive Cell (acell) [bohr]
@@ -759,7 +759,7 @@ force_length_stats: {min:   3.44975706E-03, max:   3.44975706E-03, mean:   3.449
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.99172E-03 1.99172E-03 (free atoms)
  -1.99171816775302E-03 -1.99171816775302E-03 -1.99171816775302E-03
   1.99171816775302E-03  1.99171816775302E-03  1.99171816775302E-03
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.33240396071629E-02  1.33240396071629E-02  1.33240396071629E-02
  -1.33240396071629E-02 -1.33240396071629E-02 -1.33240396071629E-02
  Scale of Primitive Cell (acell) [bohr]
@@ -936,7 +936,7 @@ P           mkmem          15
           ngfftdg          36      36      36
              nkpt          30
 -           npfft           2
--           npkpt           2
+-        np_spkpt           2
             nstep           5
              nsym          12
             ntime           3

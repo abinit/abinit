@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2020 ABINIT group (RC, XG)
+!!  Copyright (C) 2000-2021 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,7 +131,7 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 &     'The magnetic translation generator,',ch10,&
 &     'genafmconv(:)=',genafmconv(:),&
 &     'could not be identified.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -2470,10 +2470,10 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
  identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
  n_axes(:)=0
 
- ABI_ALLOCATE(determinant,(nsym))
- ABI_ALLOCATE(order,(nsym))
- ABI_ALLOCATE(ptsym,(nsym))
- ABI_ALLOCATE(root_invers,(nsym))
+ ABI_MALLOC(determinant,(nsym))
+ ABI_MALLOC(order,(nsym))
+ ABI_MALLOC(ptsym,(nsym))
+ ABI_MALLOC(root_invers,(nsym))
 
 !Get the determinant
  call symdet(determinant,nsym,symrel)
@@ -2501,7 +2501,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
    end do
    if(order(isym)==0)then
      write(message, '(a,i0,a)' )' The symmetry operation number',isym,' is not a root of unity'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  determinant, order and root_invers are enough to determine the
@@ -2542,7 +2542,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 &     'order(isym)      =',order(isym),ch10,&
 &     'determinant(isym)=',determinant(isym),ch10,&
 &     'root_invers(isym)=',root_invers(isym)
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
  end do
@@ -2622,7 +2622,7 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
  end if
 
  if(iholohedry==0)then
-   MSG_ERROR_CLASS('Could not find the point group', "TolSymError")
+   ABI_ERROR_CLASS('Could not find the point group', "TolSymError")
  end if
 
 !DEBUG
@@ -2635,10 +2635,10 @@ subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
 !write(std_out,*)' iholohedry, ptgroup=',iholohedry,',',ptgroup
 !ENDDEBUG
 
- ABI_DEALLOCATE(determinant)
- ABI_DEALLOCATE(order)
- ABI_DEALLOCATE(ptsym)
- ABI_DEALLOCATE(root_invers)
+ ABI_FREE(determinant)
+ ABI_FREE(order)
+ ABI_FREE(ptsym)
+ ABI_FREE(root_invers)
 
 end subroutine symptgroup
 !!***

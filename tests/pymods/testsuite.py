@@ -2059,7 +2059,7 @@ pp_dirpath $ABI_PSPDIR
                     if self.exclude_builders: cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
-                    cprint("\tTest %s failed. Note, however, that this requires external files in %s" % (
+                    cprint("\tTest %s failed. Note, however, that this test requires external files in %s" % (
                           self.full_id, self.use_git_submodule), color="yellow")
                     cprint("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.",
                            color="yellow")
@@ -2485,10 +2485,11 @@ pp_dirpath $ABI_PSPDIR
                 </tr>
                 <py-open>for idx, f in enumerate(self.files_to_test):</py-open>
                  <tr valign="top" align="left">
+                  <py-line code = "out_link = html_link(basename(f.name))"/>
                   <py-line code = "fld_link = html_link(basename(f.fldiff_fname))"/>
                   <py-line code = "txt_diff_link = html_link(basename(f.diff_fname))"/>
                   <py-line code = "html_diff_link = html_link(basename(f.hdiff_fname))"/>
-                  <py-line code = "tab_row = args2htmltr(f.name, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
+                  <py-line code = "tab_row = args2htmltr(out_link, status2html(f.fld_status), fld_link, f.fld_options, txt_diff_link, html_diff_link)"/>
                   ${tab_row}
                  </tr>
                 <py-close/>
@@ -3660,11 +3661,9 @@ class AbinitTestSuite(object):
                 msg = (
                     "Timeout occured while trying to acquire lock in:\n\t{}\n"
                     "Perhaps a previous run did not exit cleanly or another "
-                    "process is running in the same directory.\n If you are"
-                    "sure no other process is in execution, remove the "
-                    "directory with `rm -rf` and rerun.\n"
+                    "process is running in the same directory.\n If you are "
+                    "sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n"
                 ).format(self.workdir)
-
                 cprint(msg, "red")
                 return
 

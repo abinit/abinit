@@ -6,7 +6,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -179,13 +179,13 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 
  if(usecprj==0) then
    write(message,*) "  usecprj=0 : BUG in datafordmft",usecprj
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if(my_nspinor/=dtset%nspinor) then
    write(message,*) "  my_nspinor=/dtset%nspinor, datafordmft not working in this case",&
 &   my_nspinor,dtset%nspinor
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 
@@ -242,7 +242,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  end if
  if(dtset%nstep==0.and.dtset%nbandkss==0) then
    message = 'nstep should be greater than 1'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
 !********************* Max Values for U terms.
@@ -255,7 +255,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !*****************   in forlb.eig
  if(me.eq.0.and.abs(dtset%pawprtvol)>=3) then
    if (open_file('forlb.eig',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    rewind(unt)
    write(unt,*) "Number of bands,   spins, and  k-point; and spin-orbit flag"
@@ -311,7 +311,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !write(std_out,*) "size(cprj,dim=1)",size(cprj,dim=1),size(cprj,dim=2),dtset%mband,dtset%mkmem,dtset%nkpt
 
 !Allocate temporary cwaveprj storage
- ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor))
+ ABI_MALLOC(cwaveprj,(natom,my_nspinor))
 !write(std_out,*) "before alloc cprj"
 !write(std_out,*) size(cwaveprj,dim=1),size(cwaveprj,dim=2),size(dimcprj,dim=1)
 
@@ -366,7 +366,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
 &                 '  Wrong use of dmftqmc_t2g',paw_dmft%dmftqmc_t2g,lpawu,ch10,&
 &                 ' Action: desactivate qmftqmc_t2g or use lpawu=2'
-                 MSG_ERROR(message)
+                 ABI_ERROR(message)
                end if
              end if
 !            ----------   t2g case
@@ -381,7 +381,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
                  write(message,'(a,a,i4,i4,2a)')  ch10,&
 &                 '  Wrong use of dmftqmc_x2my2d',paw_dmft%dmftqmc_x2my2d,lpawu,ch10,&
 &                 ' Action: desactivate dmftqmc_x2my2d or use lpawu=2'
-                 MSG_ERROR(message)
+                 ABI_ERROR(message)
                end if
              end if
 !            ----------   x2my2d case
@@ -418,7 +418,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
                        write(message,'(a,a,a,a)')  ch10,&
 &                       ' jj1 is not correct in datafordmft',ch10,&
 &                       ' Action: CONTACT Abinit group'
-                       MSG_BUG(message)
+                       ABI_BUG(message)
                      end if ! jj1
                      icount_proj_ilmn=psps%indlmn(3,ilmn,itypat)  ! n: nb of projector
 !                    write(std_out,*) "icount_proj_ilmn",icount_proj_ilmn
@@ -505,14 +505,14 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 
 !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ ABI_FREE(cwaveprj)
 
 !==========================================================================
 !********************* Gather information for MPI before printing
 !==========================================================================
 
  dimpsichi=2*nsppol*nkpt*mband*my_nspinor*natom*(2*paw_dmft%maxlpawu+1)
- ABI_ALLOCATE(buffer1,(dimpsichi))
+ ABI_MALLOC(buffer1,(dimpsichi))
  buffer1 = zero
  nnn=0
 !write(176,*) "beg",psichi
@@ -559,7 +559,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
      end do
    end do
  end do
- ABI_DEALLOCATE(buffer1)
+ ABI_FREE(buffer1)
 !write(177,*) "end",psichi
 
 !do isppol=1,nsppol
@@ -592,8 +592,8 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 ! Only if the complete BZ is sampled (ie paw_dmft%kspectralfunc=0)
 !==========================================================================
  if(paw_dmft%dmft_kspectralfunc==0) then
-   ABI_DATATYPE_ALLOCATE(xocc_check,(natom))
-   ABI_DATATYPE_ALLOCATE(xnorm_check,(natom))
+   ABI_MALLOC(xocc_check,(natom))
+   ABI_MALLOC(xnorm_check,(natom))
    call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu,xocc_check)
    call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu,xnorm_check)
    call psichi_check(dtset,cryst_struc%nattyp,nkpt,my_nspinor,&
@@ -606,8 +606,8 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
      call wrtout(std_out,  message,'COLL')
    end if
 
-   ABI_DATATYPE_ALLOCATE(loc_occ_check,(natom))
-   ABI_DATATYPE_ALLOCATE(loc_norm_check,(natom))
+   ABI_MALLOC(loc_occ_check,(natom))
+   ABI_MALLOC(loc_norm_check,(natom))
    call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu,loc_occ_check)
    call init_matlu(natom,my_nspinor,nsppol,paw_dmft%lpawu,loc_norm_check)
    call copy_matlu(xocc_check,loc_occ_check,natom)
@@ -653,7 +653,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 
 !  Tests density matrix DFT+U and density matrix computed here.
    if(paw_dmft%dmftcheck==2.or.(paw_dmft%dmftbandi==1)) then
-     ABI_DATATYPE_ALLOCATE(matlu_temp,(natom))
+     ABI_MALLOC(matlu_temp,(natom))
      call init_matlu(natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu_temp)
      do iatom=1,natom
        if(paw_dmft%lpawu(iatom).ne.-1) then
@@ -708,7 +708,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !    call wrtout(std_out,message,'COLL')
 
      call destroy_matlu(matlu_temp,natom)
-     ABI_DATATYPE_DEALLOCATE(matlu_temp)
+     ABI_FREE(matlu_temp)
    else
      write(message,'(2a)') ch10,&
 &     '  Warning: Consistency of density matrices computed from projection has not been checked: use dmftcheck>=2 '
@@ -716,14 +716,14 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
    end if
 
    call destroy_matlu(loc_norm_check,natom)
-   ABI_DATATYPE_DEALLOCATE(loc_norm_check)
+   ABI_FREE(loc_norm_check)
    call destroy_matlu(loc_occ_check,natom)
-   ABI_DATATYPE_DEALLOCATE(loc_occ_check)
+   ABI_FREE(loc_occ_check)
 
    call destroy_matlu(xocc_check,natom)
    call destroy_matlu(xnorm_check,natom)
-   ABI_DATATYPE_DEALLOCATE(xocc_check)
-   ABI_DATATYPE_DEALLOCATE(xnorm_check)
+   ABI_FREE(xocc_check)
+   ABI_FREE(xnorm_check)
  endif
 
  if(present(nbandkss)) then
@@ -796,7 +796,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
    ll=1
 
    if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(unt)
 
@@ -856,7 +856,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
                        if(jj1>(2*pawtab(itypat)%lpawu+1)) then
                          write(message,'(a,a,i4,i5,i4)') ch10," Error 2 in datafordmft",jj1,pawtab(itypat)%lpawu
                          call wrtout(std_out,  message,'COLL')
-                         MSG_ERROR("Aborting now")
+                         ABI_ERROR("Aborting now")
                        end if ! jj1
 !                      if(jj1>pawtab(dtset%typat(iatom))%nproju*(2*lpawu+1)) then
 !                      write(message,'(a,a,a,a)')  ch10,&
@@ -1228,7 +1228,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !  ====================================
 !  == renormalize k-point after k-point
 !  ====================================
-   ABI_ALLOCATE(temp_wtk,(1))
+   ABI_MALLOC(temp_wtk,(1))
 
    write(message,'(2a,i5)') ch10,' Nb of K-point',nkpt
    call wrtout(std_out,message,'COLL')
@@ -1239,7 +1239,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
      call normalizepsichi(cryst_struc,1,paw_dmft,pawang,temp_wtk,jkpt)
    end do ! jkpt
-   ABI_DEALLOCATE(temp_wtk)
+   ABI_FREE(temp_wtk)
 
  else if(option==3)  then  ! option==3
 !  ====================================
@@ -1390,7 +1390,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
    if(nkpt/=1.and.present(jkpt)) then
      message = 'BUG in psichi_normalization'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    iortho=1
@@ -1423,12 +1423,12 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
      end if
 !    ==-------------------------------------
 !    == Start loop on atoms
-     ABI_DATATYPE_ALLOCATE(overlap,(natom))
+     ABI_MALLOC(overlap,(natom))
      do iatom=1,natom
        if(paw_dmft%lpawu(iatom).ne.-1) then
          ndim=2*paw_dmft%lpawu(iatom)+1
          tndim=nsppol*nspinor*ndim
-         ABI_ALLOCATE(overlap(iatom)%value,(tndim,tndim))
+         ABI_MALLOC(overlap(iatom)%value,(tndim,tndim))
          overlap(iatom)%value=czero
        end if
      end do
@@ -1446,7 +1446,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
        if(paw_dmft%lpawu(iatom).ne.-1) then
          ndim=2*paw_dmft%lpawu(iatom)+1
          tndim=nsppol*nspinor*ndim
-         ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
+         ABI_MALLOC(sqrtmatinv,(tndim,tndim))
 
 !        == Compute Inverse Square root of overlap : O^{-0.5}
          !do im=1,tndim
@@ -1469,7 +1469,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
          end if
 
 !        == Apply O^{-0.5} on psichi
-         ABI_ALLOCATE(wan,(nsppol,nspinor,ndim))
+         ABI_MALLOC(wan,(nsppol,nspinor,ndim))
 !        write(std_out,*) mbandc,nsppol,nspinor,ndim
 !        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
          do ikpt=1,nkpt
@@ -1509,8 +1509,8 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
              end do ! im
            end do ! ib
          end do ! ikpt
-         ABI_DEALLOCATE(wan)
-         ABI_DEALLOCATE(sqrtmatinv)
+         ABI_FREE(wan)
+         ABI_FREE(sqrtmatinv)
 !        write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
 
 !        ==-------------------------------------
@@ -1520,10 +1520,10 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 !    ==-------------------------------------
      do iatom=1,natom
        if(paw_dmft%lpawu(iatom).ne.-1) then
-         ABI_DEALLOCATE(overlap(iatom)%value)
+         ABI_FREE(overlap(iatom)%value)
        end if
      end do
-     ABI_DATATYPE_DEALLOCATE(overlap)
+     ABI_FREE(overlap)
 
 !    ======================================================================
 !    == Check norm with new psichi.
@@ -1567,17 +1567,17 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
      call destroy_oper(norm1)
 !    call flush(std_out)           ! debug debug  debug   debug
-!    MSG_ERROR("Stop for debugging")
+!    ABI_ERROR("Stop for debugging")
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  New implementation, several atoms, general case.
    else if(present(jkpt).or.iortho==2) then
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     ABI_ALLOCATE(largeoverlap,(dimoverlap,dimoverlap))
-     ABI_ALLOCATE(psichivect,(mbandc,dimoverlap))
-     ABI_ALLOCATE(sqrtmatinv,(dimoverlap,dimoverlap))
-     ABI_ALLOCATE(wanall,(dimoverlap))
+     ABI_MALLOC(largeoverlap,(dimoverlap,dimoverlap))
+     ABI_MALLOC(psichivect,(mbandc,dimoverlap))
+     ABI_MALLOC(sqrtmatinv,(dimoverlap,dimoverlap))
+     ABI_MALLOC(wanall,(dimoverlap))
 
 
 !    Big loop over isppol
@@ -1693,10 +1693,10 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 !   End big loop over isppol
      enddo !ispppol
 
-     ABI_DEALLOCATE(psichivect)
-     ABI_DEALLOCATE(sqrtmatinv)
-     ABI_DEALLOCATE(wanall)
-     ABI_DEALLOCATE(largeoverlap)
+     ABI_FREE(psichivect)
+     ABI_FREE(sqrtmatinv)
+     ABI_FREE(wanall)
+     ABI_FREE(largeoverlap)
 
    endif
 

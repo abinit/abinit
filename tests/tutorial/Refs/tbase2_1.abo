@@ -2,7 +2,7 @@
 .Version 9.3.3 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -326,7 +326,7 @@ force_length_stats: {min:   2.69014153E-02, max:   2.69014153E-02, mean:   2.690
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.69014E-02 1.55315E-02 (free atoms)
  -2.69014153092448E-02 -0.00000000000000E+00 -0.00000000000000E+00
   2.69014153092448E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   2.69014153092448E-01  0.00000000000000E+00  0.00000000000000E+00
  -2.69014153092448E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11718434635148E+00
@@ -403,7 +403,7 @@ force_length_stats: {min:   9.21468148E-03, max:   9.21468148E-03, mean:   9.214
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.21468E-03 5.32010E-03 (free atoms)
  -9.21468147889055E-03 -0.00000000000000E+00 -0.00000000000000E+00
   9.21468147889055E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   9.21468147889055E-02  0.00000000000000E+00  0.00000000000000E+00
  -9.21468147889055E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11814096109354E+00
@@ -484,7 +484,7 @@ force_length_stats: {min:   1.22792030E-03, max:   1.22792030E-03, mean:   1.227
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.22792E-03 7.08940E-04 (free atoms)
  -1.22792029692469E-03 -0.00000000000000E+00 -0.00000000000000E+00
   1.22792029692469E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   1.22792029692469E-02  0.00000000000000E+00  0.00000000000000E+00
  -1.22792029692469E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11828553130606E+00
@@ -563,7 +563,7 @@ force_length_stats: {min:   6.88974574E-05, max:   6.88974574E-05, mean:   6.889
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.88975E-05 3.97780E-05 (free atoms)
  -6.88974573554092E-05 -0.00000000000000E+00 -0.00000000000000E+00
   6.88974573554092E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   6.88974573554092E-04  0.00000000000000E+00  0.00000000000000E+00
  -6.88974573554092E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11828831366336E+00

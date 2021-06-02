@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2020 ABINIT group (MT,JLJ)
+!!  Copyright (C) 2015-2021 ABINIT group (MT,JLJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -160,29 +160,29 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !Compatibility tests
  if(ipert/=natom+10.and.ipert/=natom+11.and.ipert>2*natom+11)then
    msg='only ipert==natom+10/+11 and natom+11<=ipert<=2*natom+11 implemented!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  pert_phon_elfd = .false.
  if (ipert>natom+11.and.ipert<=2*natom+11) pert_phon_elfd = .true.
  if (mpi_enreg%paral_spinor==1) then
    msg='Not compatible with parallelization over spinorial components!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (gs_hamkq%nvloc>1) then
    msg='Not compatible with nvloc=4 (non-coll. magnetism)!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if((ipert==natom+11.or.pert_phon_elfd).and.gs_hamkq%usepaw==1.and.optnl>=1) then
    if (gs_hamkq%nvloc>1) then
      msg='Not compatible with nvloc=4 (non-coll. magnetism)!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (present(enl)) then
      enl_ptr => enl
    else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
      ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: qphase>1!')
      ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: qphase>1!')
-     ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
+     ABI_MALLOC(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
      enl_temp(:,:,:,:) = rf_hamkq%e1kbfr(:,:,:,:) + rf_hamkq%e1kbsc(:,:,:,:)
      enl_ptr => enl_temp
    else if (associated(rf_hamkq%e1kbfr)) then
@@ -190,15 +190,15 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      enl_ptr => rf_hamkq%e1kbfr
    else
      msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if (usevnl==0) then
      msg='gvnl2 must be allocated for ipert=natom+11/pert_phon_elfd !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    if(opt_gvnl2==0) then
      msg='opt_gvnl2=0 not compatible with ipert=natom+11/pert_phon_elfd !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -206,22 +206,22 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwavef)<2*npw*my_nspinor) then
    msg='wrong size for cwavef!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (size(gh2c)<2*npw1*my_nspinor) then
    msg='wrong size for gh2c!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (usevnl/=0) then
    if (size(gvnl2)<2*npw1*my_nspinor) then
      msg='wrong size for gvnl2!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
  if (sij_opt==1) then
    if (size(gs2c)<2*npw1*my_nspinor) then
      msg='wrong size for gs2c!'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -234,13 +234,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
        msg='wrong size for cwaveprj!'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end if
  else
    if(usecprj==1)then
      msg='usecprj==1 not allowed for NC psps !'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -262,7 +262,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
  if (ipert/=natom+10.and.ipert/=natom+11.and.optlocal>0) then
    msg='local part not implemented'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  else
 !  In the case of ddk operator, no local contribution (also because no self-consistency)
 !$OMP PARALLEL DO
@@ -282,7 +282,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (usevnl==1) then
    gvnl2_ => gvnl2
  else
-   ABI_ALLOCATE(gvnl2_,(2,npw1*my_nspinor))
+   ABI_MALLOC(gvnl2_,(2,npw1*my_nspinor))
  end if
 
  if (has_vnl.and.(optnl>0.or.sij_opt/=0)) then
@@ -296,7 +296,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        if (usecprj==1) then
          cwaveprj_ptr => cwaveprj
        else
-         ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+         ABI_MALLOC(cwaveprj_tmp,(natom,my_nspinor))
          call pawcprj_alloc(cwaveprj_tmp,0,gs_hamkq%dimcprj)
          cwaveprj_ptr => cwaveprj_tmp
        end if
@@ -306,7 +306,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 &       paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
        if (usecprj==0) then
          call pawcprj_free(cwaveprj_tmp)
-         ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+         ABI_FREE(cwaveprj_tmp)
        end if
        nullify(cwaveprj_ptr)
      else
@@ -319,12 +319,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !  -------------------------------------------
    else if (ipert==natom+11.and.gs_hamkq%usepaw==1) then
 
-     ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+     ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor))
 
      if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
-       ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+       ABI_MALLOC(cwaveprj_tmp,(natom,my_nspinor))
        call pawcprj_alloc(cwaveprj_tmp,2,gs_hamkq%dimcprj)
        cwaveprj_ptr => cwaveprj_tmp
      end if
@@ -382,11 +382,11 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        end do
      end if
 
-     ABI_DEALLOCATE(nonlop_out)
+     ABI_FREE(nonlop_out)
      if (sij_opt==1) gs2c=zero
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
-       ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+       ABI_FREE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
 
@@ -396,15 +396,15 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
      iatm = ipert-(natom+11)
      if (iatm<1.or.iatm>natom) then
-       MSG_BUG(" iatm must be between 1 and natom")
+       ABI_BUG(" iatm must be between 1 and natom")
      end if
 
-     ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
+     ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor))
 
      if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
-       ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
+       ABI_MALLOC(cwaveprj_tmp,(natom,my_nspinor))
        call pawcprj_alloc(cwaveprj_tmp,2,gs_hamkq%dimcprj)
        cwaveprj_ptr => cwaveprj_tmp
      end if
@@ -462,11 +462,11 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        end do
      end if
 
-     ABI_DEALLOCATE(nonlop_out)
+     ABI_FREE(nonlop_out)
      if (sij_opt==1) gs2c=zero
      if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
-       ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
+       ABI_FREE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
 
@@ -495,7 +495,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    nullify(enl_ptr)
  end if
  if (allocated(enl_temp)) then
-   ABI_DEALLOCATE(enl_temp)
+   ABI_FREE(enl_temp)
  end if
 
 !======================================================================
@@ -514,13 +514,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    kinpw1 => gs_hamkq%kinpw_kp
  else if (optnl>=1.or.has_kin) then
    msg='need kinpw1 allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
  if (associated(rf_hamkq%ddkinpw_k)) then
    ddkinpw => rf_hamkq%ddkinpw_k
  else if (has_kin) then
    msg='need ddkinpw allocated!'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (has_kin) then
@@ -564,7 +564,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
  if (usevnl==1) then
    nullify(gvnl2_)
  else
-   ABI_DEALLOCATE(gvnl2_)
+   ABI_FREE(gvnl2_)
  end if
 
 !call timab(196+tim_getgh2c,2,tsec)

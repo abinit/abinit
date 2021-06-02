@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -292,39 +292,39 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
 !Compatibility tests
  if(nfftmix>nfft) then
-   MSG_BUG('  nfftmix>nfft not allowed !')
+   ABI_BUG('  nfftmix>nfft not allowed !')
  end if
 
  if(ispmix/=2.and.nfftmix/=nfft) then
    message = '  nfftmix/=nfft allowed only when ispmix=2 !'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (dtset%usekden==1) then
    if ((.not.present(vtauresid)).or.(.not.present(vtau)).or.(.not.present(mix_mgga))) then
       message='Several arrays are mising!'
-      MSG_BUG(message)
+      ABI_BUG(message)
    end if
    if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
 &      mix_mgga%iscf==AB7_MIXING_EIG) then
      message='kinetic energy potential cannot be mixed with the selected mixing algorithm!'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
  if(dtset%usewvl==1) then
    if(dtset%wvl_bigdft_comp==1) then
      message = 'newvtr: usewvl == 1 and wvl_bigdft_comp==1 not allowed (use wvl_newtr() instead)!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if(ispmix/=1 .or. nfftmix/=nfft) then
-     MSG_BUG('newvtr: nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
+     ABI_BUG('newvtr: nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
    end if
  end if
 
  if(usepaw==1.and.dtset%nspden==4.and.dtset%pawoptmix==1) then
    message = ' pawoptmix=1 is not compatible with nspden=4 !'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  dielng=dielar(2)
@@ -386,10 +386,10 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  call timab(902,1,tsec)
 
 !Select components of potential to be mixed
- ABI_ALLOCATE(vtrial0,(ispmix*nfftmix,dtset%nspden))
- ABI_ALLOCATE(vresid0,(ispmix*nfftmix,dtset%nspden))
- ABI_ALLOCATE(vtau0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
- ABI_ALLOCATE(vtauresid0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_MALLOC(vtrial0,(ispmix*nfftmix,dtset%nspden))
+ ABI_MALLOC(vresid0,(ispmix*nfftmix,dtset%nspden))
+ ABI_MALLOC(vtau0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_MALLOC(vtauresid0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
  if (ispmix==1.and.nfft==nfftmix) then
    vtrial0=vtrial;vresid0=vresid
    if (dtset%usekden==1) then
@@ -407,8 +407,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      end do
    end if
  else
-   ABI_ALLOCATE(vtrialg,(2,nfft,dtset%nspden))
-   ABI_ALLOCATE(vreswk,(2,nfft))
+   ABI_MALLOC(vtrialg,(2,nfft,dtset%nspden))
+   ABI_MALLOC(vreswk,(2,nfft))
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=dielar(7)
      call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
@@ -426,7 +426,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      end do
    end do
    if (dtset%usekden==1) then
-     ABI_ALLOCATE(vtaug,(2,nfft,dtset%nspden))
+     ABI_MALLOC(vtaug,(2,nfft,dtset%nspden))
      do ispden=1,dtset%nspden
        fact=dielar(4);if (ispden>1) fact=dielar(7)
        call fourdp(1,vtaug(:,:,ispden),vtau(:,ispden,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
@@ -444,7 +444,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
        end do
      end do
    end if
-   ABI_DEALLOCATE(vreswk)
+   ABI_FREE(vreswk)
  end if
 
 !Retrieve "input" Vtau from "output" one and potential residual
@@ -453,13 +453,13 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  end if
 
 !Choice of preconditioner governed by iprcel, densfor_pred and iprcfc
- ABI_ALLOCATE(vrespc,(ispmix*nfftmix,dtset%nspden))
- ABI_ALLOCATE(vtaurespc,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
- ABI_ALLOCATE(vpaw,(npawmix*usepaw))
+ ABI_MALLOC(vrespc,(ispmix*nfftmix,dtset%nspden))
+ ABI_MALLOC(vtaurespc,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_MALLOC(vpaw,(npawmix*usepaw))
  if (usepaw==1)  then
-   ABI_ALLOCATE(rhoijrespc,(npawmix))
+   ABI_MALLOC(rhoijrespc,(npawmix))
  else
-   ABI_ALLOCATE(rhoijrespc,(0))
+   ABI_MALLOC(rhoijrespc,(0))
  end if
 
  call timab(902,2,tsec)
@@ -509,26 +509,26 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 &   arr_respc = vrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (dtset%usekden==1) then
    call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
 &        arr_respc = vtaurespc)
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
- ABI_DEALLOCATE(vresid0)
- ABI_DEALLOCATE(vrespc)
- ABI_DEALLOCATE(vtauresid0)
- ABI_DEALLOCATE(vtaurespc)
+ ABI_FREE(vresid0)
+ ABI_FREE(vrespc)
+ ABI_FREE(vtauresid0)
+ ABI_FREE(vtaurespc)
 
 !PAW: either use the array f_paw or the array f_paw_disk
  if (usepaw==1) then
    indx=-dplex
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,1))
+     ABI_MALLOC(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,1))
      do iq=1,qphase
        iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
        do ispden=1,pawrhoij(iatom)%nspden
@@ -546,7 +546,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
          end do
        end do
      end do
-     ABI_DEALLOCATE(rhoijtmp)
+     ABI_FREE(rhoijtmp)
    end do
  end if
 
@@ -571,13 +571,13 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
  else if (errid /= AB7_NO_ERROR) then
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if (dtset%usekden==1) then
    call ab7_mixing_eval(mix_mgga, vtau0, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
  end if
 
@@ -586,7 +586,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    if (usepaw==1) then
      indx=-dplex
      do iatom=1,my_natom
-       ABI_ALLOCATE(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+       ABI_MALLOC(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
        rhoijtmp=zero
        do iq=1,qphase
          iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
@@ -612,18 +612,18 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
        call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,&
 &           pawrhoij(iatom)%nrhoijsel,pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,&
 &           pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
-       ABI_DEALLOCATE(rhoijtmp)
+       ABI_FREE(rhoijtmp)
      end do
    end if
  end if
 
- ABI_DEALLOCATE(rhoijrespc)
+ ABI_FREE(rhoijrespc)
 
 !PAW: restore rhoij from compact storage
  if (usepaw==1.and.dtset%iscf/=5.and.dtset%iscf/=6) then
    indx=-dplex
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+     ABI_MALLOC(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
      rhoijtmp=zero
      do iq=1,qphase
        iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
@@ -647,10 +647,10 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,&
 &         pawrhoij(iatom)%nrhoijsel,pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,&
 &         pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
-     ABI_DEALLOCATE(rhoijtmp)
+     ABI_FREE(rhoijtmp)
    end do
  end if
- ABI_DEALLOCATE(vpaw)
+ ABI_FREE(vpaw)
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
  call ab7_mixing_eval_deallocate(mix)
@@ -680,7 +680,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      end do
      call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
-   ABI_DEALLOCATE(vtrialg)
+   ABI_FREE(vtrialg)
    if (dtset%usekden==1) then
      do ispden=1,dtset%nspden
        do ifft=1,nfftmix
@@ -690,11 +690,11 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
        end do
        call fourdp(1,vtaug(:,:,ispden),vtau(:,ispden,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      end do
-     ABI_DEALLOCATE(vtaug)
+     ABI_FREE(vtaug)
    end if
  end if
- ABI_DEALLOCATE(vtrial0)
- ABI_DEALLOCATE(vtau0)
+ ABI_FREE(vtrial0)
+ ABI_FREE(vtau0)
 
 !In case of metaGGA, re-compute vtau gradient
  if (dtset%usekden==1.and.mix_mgga%iscf/=AB7_MIXING_NONE) then

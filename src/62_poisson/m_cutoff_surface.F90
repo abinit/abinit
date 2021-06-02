@@ -128,7 +128,7 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
 &      'Found q-points with non-zero component along non-periodic direction ',ch10,&
 &      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
 &      'ACTION : Modify the q-point sampling '
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    !
    ! === Calculate truncated Coulomb interaction for a infinite surface ===
@@ -147,7 +147,7 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
    end do
 
  CASE (2) ! Rozzi"s method
-   MSG_ERROR("Work in progress")
+   ABI_ERROR("Work in progress")
    ABI_UNUSED(alpha) ! just to keep alpha as an argument
    !alpha=?? ; ap1sqrt=SQRT(one+alpha**2)
    do iq=1,nq
@@ -172,7 +172,7 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
 
  CASE DEFAULT
    write(msg,'(a,i3)')' Wrong value of method: ',method
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  END SELECT
 
  ABI_FREE(qcart)

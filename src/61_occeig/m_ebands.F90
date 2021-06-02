@@ -1,4 +1,4 @@
-! CP modified for occopt 9 
+! CP modified for occopt 9
 !!****m* ABINIT/m_ebands
 !! NAME
 !!  m_ebands
@@ -7,7 +7,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2021 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,7 @@ MODULE m_ebands
  use m_kpts
  use m_sort
  use m_dtset
+ use m_yaml
 
  use defs_datatypes,   only : ebands_t
  use m_copy,           only : alloc_copy
@@ -53,7 +54,7 @@ MODULE m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
-                              isdiagmat, get_diag, interpol3d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -165,6 +166,9 @@ MODULE m_ebands
    real(dp) :: step = -one
    ! Step of the mesh
 
+   real(dp) :: nelect = zero
+    ! Number of electrons taken from ebands.
+
    real(dp),allocatable :: mesh(:)
    ! mesh(nw)
 
@@ -196,6 +200,8 @@ MODULE m_ebands
    ! Write eDOS to netcdf file.
 
    procedure :: get_carriers => edos_get_carriers
+   ! Compute number of holes (nh) and electrons (ne) per unit cell from a given
+   ! list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
 
  end type edos_t
 !!***
@@ -464,7 +470,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    !  1) highly degenerate doped semiconductor with the Fermi level in the bands.
    !  2) Small gap semiconductor at relatively high T.
    !
-   ! Here I try to compute the gaps of an instrinc semiconductor at low T with Fermi-Dirac.
+   ! Here I try to compute the gaps of an intrinsic semiconductor at low T with Fermi-Dirac.
    ! This might still fail though and the caller should handle that.
    call gaps%free()
    call ebands_copy(ebands, tmp_ebands)
@@ -472,7 +478,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    call ebands_set_scheme(tmp_ebands, occopt3, tsmear, spinmagntarget_, prtvol0, update_occ=.False.)
    ! Remove extrael to go back to intrinsic system
    if (ebands%extrael /= zero) tmp_ebands%nelect = ebands%nelect - ebands%extrael
-   !if (ebands%charge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%charge
+   !if (ebands%cellcharge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%cellcharge
    call ebands_update_occ(tmp_ebands, spinmagntarget_, stmbias0)
 
    ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
@@ -799,7 +805,7 @@ end subroutine gaps_print
 !! tphysel=Physical temperature (input variable)
 !! tsmear=Temperature of smearing.
 !! wtk(nkpt)=weight assigned to each k point
-!! charge=Additional charge added to the unit cell (input variable).
+!! cellcharge=Additional charge added to the unit cell (input variable).
 !! kptopt=Option for k-point generation (see input variable)
 !! kptrlatt_orig=Original value of kptrlatt given in input
 !! nshiftk_orig=Original number of shifts given in input
@@ -822,7 +828,7 @@ end subroutine gaps_print
 
 subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde, eig, istwfk, kptns, &
   nband, nkpt, npwarr, nsppol, nspinor, tphysel, tsmear, occopt, occ, wtk, &
-  charge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+  cellcharge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 ! CP modified input list: added ne_qFD, nh_qFD, ivalence.
 !Arguments ------------------------------------
 !scalars
@@ -834,7 +840,7 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
  real(dp),intent(in) :: doccde(bantot),eig(bantot),kptns(3,nkpt),occ(bantot)
  real(dp),intent(in) :: wtk(nkpt)
  integer,intent(in) :: kptopt, nshiftk_orig, nshiftk
- real(dp),intent(in) :: charge
+ real(dp),intent(in) :: cellcharge
  integer,intent(in) :: kptrlatt_orig(3,3),kptrlatt(3,3)
  real(dp),intent(in) :: shiftk_orig(3,nshiftk_orig),shiftk(3,nshiftk)
 
@@ -891,7 +897,7 @@ subroutine ebands_init(bantot, ebands, nelect, ne_qFD, nh_qFD, ivalence, doccde,
  ebands%kptopt = kptopt
  ebands%nshiftk_orig = nshiftk_orig
  ebands%nshiftk = nshiftk
- ebands%charge = charge
+ ebands%cellcharge = cellcharge
  ebands%kptrlatt_orig = kptrlatt_orig
  ebands%kptrlatt = kptrlatt
 
@@ -959,11 +965,11 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
 ! CP modify
 ! call ebands_init(hdr%bantot, ebands, my_nelect, ugly_doccde, ugly_ene, hdr%istwfk, hdr%kptns, hdr%nband, hdr%nkpt, &
 !   hdr%npwarr, hdr%nsppol, hdr%nspinor, hdr%tphysel, hdr%tsmear, hdr%occopt, hdr%occ, hdr%wtk, &
-!   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+!   hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(hdr%bantot, ebands, my_nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence, &
    ugly_doccde, ugly_ene, hdr%istwfk, hdr%kptns, hdr%nband, hdr%nkpt, &
    hdr%npwarr, hdr%nsppol, hdr%nspinor, hdr%tphysel, hdr%tsmear, hdr%occopt, hdr%occ, hdr%wtk, &
-   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+   hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  ! End CP modify
 
  ! Copy the fermi level reported in the header
@@ -1023,12 +1029,12 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
  ! CP modified
  !call ebands_init(bantot, new, dtset%nelect, ugly_doccde, ugly_ene, dtset%istwfk, dtset%kptns, dtset%nband, dtset%nkpt, &
  ! npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
- ! dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+ ! dtset%cellcharge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
  ! dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  call ebands_init(bantot, new, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, ugly_doccde, ugly_ene, &
   dtset%istwfk, dtset%kptns, dtset%nband, dtset%nkpt, &
   npwarr, dtset%nsppol, dtset%nspinor, dtset%tphysel, dtset%tsmear, dtset%occopt, ugly_occ, dtset%wtk,&
-  dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
  ! End CP modified
 
@@ -1136,7 +1142,7 @@ subroutine ebands_copy(ibands, obands)
  obands%nshiftk_orig = ibands%nshiftk_orig
  obands%nshiftk      = ibands%nshiftk
 
- obands%charge  = ibands%charge
+ obands%cellcharge   = ibands%cellcharge
  obands%extrael = ibands%extrael
  obands%entropy = ibands%entropy
  obands%fermie  = ibands%fermie
@@ -1265,7 +1271,7 @@ subroutine ebands_print(ebands, header, unit, prtvol)
 
  write(msg,'(3(a,f14.2,a),4(a,f14.6,a))')&
    '  Number of valence electrons ......... ',ebands%nelect,ch10,&
-   '  Extra charge (from GS run)........... ',ebands%charge,ch10,&
+   '  Extra cell charge (from GS run)...... ',ebands%cellcharge,ch10,&
    '  Extra electrons (after GS run)....... ',ebands%extrael,ch10,&
    '  Fermi level  ........................ ',ebands%fermie,ch10,&
    '  Entropy ............................. ',ebands%entropy,ch10,&
@@ -1478,7 +1484,7 @@ subroutine get_eneocc_vect(ebands,arr_name,vect)
  case ('doccde')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%doccde,vect)
  case default
-   MSG_BUG(sjoin('Wrong arr_name:', arr_name))
+   ABI_BUG(sjoin('Wrong arr_name:', arr_name))
  end select
 
 end subroutine get_eneocc_vect
@@ -1543,7 +1549,7 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  case ('doccde')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
  case default
-   MSG_BUG(sjoin('Wrong arr_name= ', arr_name))
+   ABI_BUG(sjoin('Wrong arr_name= ', arr_name))
  end select
 
 end subroutine put_eneocc_vect
@@ -1865,7 +1871,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
      write(msg,'(a,i0,a)')&
       'Trying to apply a scissor operator on a metallic band structure for spin: ',spin,&
       'Assuming you know what you are doing, continuing anyway! '
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
      !Likely newocc will stop, unless the system is semimetallic ?
    end if
  end do
@@ -1882,7 +1888,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
        write(msg,'(2a,4(a,i0))')&
         'Not enough bands to apply the scissor operator. ',ch10,&
         'spin: ',spin,' ikpt: ',ikpt,' nband_k: ',nband_k,' but valence index: ',ival
-       MSG_COMMENT(msg)
+       ABI_COMMENT(msg)
      end if
 
    end do
@@ -2113,7 +2119,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
    do ik=1,nkpts
      ikpt = krank%get_index(kpoints(:,ik))
      if (ikpt == -1) then
-       MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
+       ABI_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
        cycle
      end if
      if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
@@ -2127,7 +2133,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
  ! This can happen if wrong input.
  if (cnt == 0) then
-    MSG_WARNING("None of the k-points/bands provided was found in ebands%")
+    ABI_WARNING("None of the k-points/bands provided was found in ebands%")
     emin = minval(ebands%eig); emax = maxval(ebands%eig)
  end if
 
@@ -2234,7 +2240,7 @@ function ebands_get_minmax(ebands, arr_name) result(minmax)
  case ('doccde')
    rdata => ebands%doccde
  case default
-   MSG_BUG(sjoin('Wrong arr_name:', arr_name))
+   ABI_BUG(sjoin('Wrong arr_name:', arr_name))
  end select
 
  minmax(1,:)=greatest_real
@@ -2462,7 +2468,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
      mband = nint((ebands%nelect * ebands%nspinor) / 2)
      ebands%occ = zero
      ebands%occ(1:mband,:,:) = maxocc
-     !MSG_ERROR("Occupation factors are not initialized, likely due to scf = -2")
+     !ABI_ERROR("Occupation factors are not initialized, likely due to scf = -2")
    end if
 
 
@@ -2528,7 +2534,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    write(msg,'(2a,2(a,es12.4))')&
     'Too large difference in number of electrons:,',ch10,&
     'Expected = ',ebands%nelect,' Calculated = ',sum(nelect_spin)
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 end subroutine ebands_update_occ
@@ -2647,11 +2653,11 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
  ! CP added
  if (ebands%occopt==9) then
-   MSG_ERROR("set_fermie unavailable when occopt 9")
+   ABI_ERROR("set_fermie unavailable when occopt 9")
  end if
  ! End CP added
  if (.not. ebands_has_metal_scheme(ebands)) then
-   MSG_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
+   ABI_ERROR("set_fermie assumes a metallic occupation scheme. Use ebands_set_scheme before calling ebands_set_fermie!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2746,7 +2752,7 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  if (.not. ebands_has_metal_scheme(ebands)) then
-   MSG_ERROR("set_extrael assumes a metallic occupation scheme. Use ebands_set_scheme!")
+   ABI_ERROR("set_extrael assumes a metallic occupation scheme. Use ebands_set_scheme!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2861,9 +2867,9 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
        ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for kT: ', kTmesh(it)
 
      if (kTmesh(it) == zero) then
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      else
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
    end if
  end do ! it
@@ -3206,7 +3212,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("occopt"), ebands%occopt))
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), ebands%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("kptopt"), ebands%kptopt))
- NCF_CHECK(nf90_put_var(ncid, vid("charge"), ebands%charge))
+ NCF_CHECK(nf90_put_var(ncid, vid("charge"), ebands%cellcharge))
  NCF_CHECK(nf90_put_var(ncid, vid("extrael"), ebands%extrael))
  NCF_CHECK(nf90_put_var(ncid, vid("nelect"), ebands%nelect))
  NCF_CHECK(nf90_put_var(ncid, vid('kptrlatt_orig'), ebands%kptrlatt_orig))
@@ -3233,7 +3239,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  ! End CP added
 
 #else
- MSG_ERROR("netcdf support is not activated. ")
+ ABI_ERROR("netcdf support is not activated. ")
 #endif
 
 contains
@@ -3354,9 +3360,10 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
+ edos%nelect = ebands%nelect
 
  if (ebands%nkpt == 1) then
-   MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
+   ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
  end if
 
@@ -3401,7 +3408,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  case (2, -2)
    !call wrtout(std_out, " Computing electron-DOS with tetrahedron method")
    ! Consistency test
-   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedra, nband(:) must be constant')
+   if (any(ebands%nband /= ebands%nband(1)) ) ABI_ERROR('for tetrahedra, nband(:) must be constant')
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
@@ -3445,10 +3452,10 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    end where
 
  case default
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
- ! Compute total DOS and IDOS
+ ! Compute total DOS and IDOS by summing the two spin channels.
  max_occ = two / (ebands%nspinor * ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 
@@ -3478,14 +3485,14 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of electrons"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  ! CP added
  else if (ihf == 0 .or. ihf == nw) then
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the holes Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of holes"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  ! End CP added
  end if
@@ -3570,49 +3577,66 @@ subroutine edos_write(edos, path)
 
 !Local variables-------------------------------
  integer :: iw,spin,unt
- real(dp) :: cfact,efermi
+ real(dp) :: efermi, gef_tot, gef_up, gef_down
  character(len=500) :: msg
+ type(yamldoc_t) :: ydoc
 
 ! *************************************************************************
 
- ! Convert everything into eV
- ! I know that Abinit should use Ha but Hartrees are not readable.
- ! Please don't change this code, in case add an optional argument to specify different units.
- cfact = Ha_eV
-
  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
- ! Write header.
+ ! Write header (human-readable format)
  write(unt,'(a)')'# Electron density of states: Energy in eV, DOS in states/eV per unit cell.'
  write(unt,"(a)")"# The zero of energies corresponds to the Fermi level."
 
+ ! Add Yaml section with parameters.
+ ydoc = yamldoc_open("EDOS_PARAMS")
+ call ydoc%add_ints("nkibz, nsppol, nspinor, intmeth, edos_npts", &
+                    [edos%nkibz, edos%nsppol, edos%nspinor, edos%intmeth, edos%nw])
+ call ydoc%add_reals("nelect, edos_mesh_step_eV", &
+                    [edos%nelect, edos%step * Ha_eV])
+
  select case (edos%intmeth)
  case (1)
-   write(unt,'(a,es16.8,a,i0)')&
-     '# Gaussian method with smearing= ',edos%broad*cfact,' [eV], nkibz= ',edos%nkibz
+   call ydoc%add_string("method", "Gaussian")
+   call ydoc%add_real("gaussian_broadening_eV", edos%broad * Ha_eV)
  case (2)
-   write(unt,'(a,i0)')'# Tetrahedron method, nkibz= ',edos%nkibz
+   call ydoc%add_string("method", "Linear tetrahedron")
+ case (-2)
+   call ydoc%add_string("method", "Linear tetrahedron method with Blochl corrections")
  case default
-   MSG_ERROR(sjoin("Wrong method:", itoa(edos%intmeth)))
+   ABI_ERROR(sjoin("Wrong method:", itoa(edos%intmeth)))
  end select
 
  if (edos%ief == 0) then
-   write(unt,'(a)')'# Fermi level: None'
+   call ydoc%set_keys_to_string("Fermi_level_eV, gef, gef_up, gef_down", "null")
    efermi = zero
  else
-   write(unt,'(a,es16.8,a)')'# Fermi level: ',edos%mesh(edos%ief)*cfact," [eV]"
    efermi = edos%mesh(edos%ief)
-   !efermi = zero
+   call ydoc%add_real("Fermi_level_eV", efermi * Ha_eV)
+   gef_tot = edos%gef(0) / Ha_eV
+   gef_up = gef_tot / two; gef_down = gef_tot / two
+   if (edos%nsppol == 2) then
+     gef_up = edos%gef(1) / Ha_eV; gef_down = edos%gef(2) / Ha_eV
+   end if
+   if (edos%nspinor == 1) then
+     call ydoc%add_reals("gef, gef_up, gef_down", [gef_tot, gef_up, gef_down])
+   else
+     call ydoc%add_reals("gef", [gef_tot])
+   end if
  end if
+
+ ! Write header in Yaml format but prepend # so that one can still use tools such as gnuplot or xmgrace.
+ call ydoc%write_and_free(unt, firstchar="#")
 
  ! Write data.
  write(unt,"(a)")"# Energy           DOS_TOT          IDOS_TOT         DOS[spin=UP]     IDOS[spin=UP] ..."
  do iw=1,edos%nw
-   write(unt,'(es17.8)',advance='no')(edos%mesh(iw) - efermi) * cfact
+   write(unt,'(es17.8)',advance='no')(edos%mesh(iw) - efermi) * Ha_eV
    do spin=0,edos%nsppol
-     write(unt,'(2es17.8)',advance='no')max(edos%dos(iw,spin) / cfact, tol30), max(edos%idos(iw,spin), tol30)
+     write(unt,'(2es17.8)',advance='no')max(edos%dos(iw,spin) / Ha_eV, tol30), max(edos%idos(iw,spin), tol30)
    end do
    write(unt,*)
  end do
@@ -3635,7 +3659,7 @@ end subroutine edos_write
 !!  edos<edos_t>=DOS container
 !!  ncid=NC file handle.
 !!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
-!!   Empty string if not specified.
+!!    Empty string if not specified.
 !!
 !! OUTPUT
 !!  ncerr= netcdf exit status.
@@ -3697,7 +3721,7 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ghf")), edos%ghf)) ! CP added
 
 #else
- MSG_ERROR("netcdf library not available")
+ ABI_ERROR("netcdf library not available")
 #endif
 
 contains
@@ -3760,7 +3784,7 @@ subroutine edos_print(edos, unit, header)
  case (-2)
    write(unt, "(a)")" Linear tetrahedron method with Blochl corrections."
  case default
-   MSG_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
+   ABI_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
  end select
 
  write(unt, "(a,f5.1,a, i0)")" Mesh step: ", edos%step * Ha_meV, " (meV) with npts: ", edos%nw
@@ -3779,9 +3803,10 @@ subroutine edos_print(edos, unit, header)
    write(unt,"(a,es16.8)")"   g(eF) for spin down:", edos%gef(2) / Ha_eV
  end if
  write(unt,"(a,f6.1)")" Total number of electrons at eF: ", edos%idos(edos%ief, 0)
+ !write(unt,"(a,f6.1)")" Total number of electrons from ebands: ", edos%nelect
  if (edos%nsppol == 2) then
-   write(unt,"(a,es16.8)")"   N(eF) for spin up:  ", edos%idos(edos%ief, 1)
-   write(unt,"(a,es16.8)")"   N(eF) for spin down:", edos%idos(edos%ief, 2)
+   write(unt,"(a,es16.8)")"   IDOS(eF) for spin up:  ", edos%idos(edos%ief, 1)
+   write(unt,"(a,es16.8)")"   IDOS(eF) for spin down:", edos%idos(edos%ief, 2)
  end if
  ! CP added for occopt 9
  if (edos%ihf /= edos%ief) then
@@ -3809,68 +3834,66 @@ end subroutine edos_print
 !! edos_get_carriers
 !!
 !! FUNCTION
-!!  Compute carrier concentration for holes (nh) and electrons (ne) for a given list of `ntemp`
-!!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Compute number of holes (nh) and electrons (ne) per unit cell from a given
+!!  list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
+!!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.!!
+!!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
 !!
 !! INPUTS
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, nh, ne)
+subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, n_ehst)
 
 !Arguments ------------------------------------
  class(edos_t),intent(in) :: edos
  integer,intent(in) :: ntemp
 !arrays
  real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
- real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+ real(dp),intent(out) :: n_ehst(2, edos%nsppol, ntemp)
 
 !Local variables-------------------------------
- integer :: itemp, iw
- !real(dp) :: max_occ
+ integer :: itemp, iw, spin
  real(dp),allocatable :: values(:)
 
 ! *************************************************************************
 
  ! Copy important dimensions
- !max_occ = two / (edos%nspinor * edos%nsppol)
- ne = zero; nh = zero
-
+ n_ehst = zero
  ABI_MALLOC(values, (edos%nw))
-
- ! TODO: May spline the DOS to improve accuracy of the results.
- !new_edos = edos%spline()
 
  do itemp=1,ntemp
 
+   ! For electrons (assuming ef inside the gap if semiconductor)
+   do spin=1,edos%nsppol
+     do iw=1,edos%nw
+       if (edos%mesh(iw) >= mu_e(itemp)) then
+         values(iw) = edos%dos(iw, spin) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
+       else
+         values(iw) = zero
+       end if
+     end do
+     n_ehst(1, spin, itemp) = simpson(edos%step, values)
+   end do ! spin
+
    ! For holes
-   do iw=1,edos%nw
-     if (edos%mesh(iw) < mu_e(itemp)) then
-       values(iw) = edos%dos(iw, 0) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
-     else
-       values(iw) = zero
-     end if
-   end do
-   nh(itemp) = simpson(edos%step, values)
+   do spin=1,edos%nsppol
+     do iw=1,edos%nw
+       if (edos%mesh(iw) < mu_e(itemp)) then
+         values(iw) = edos%dos(iw, spin) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
+       else
+         values(iw) = zero
+       end if
+     end do
+     n_ehst(2, spin, itemp) = simpson(edos%step, values)
+   end do ! spin
 
-   ! For electrons
-   do iw=1,edos%nw
-     if (edos%mesh(iw) >= mu_e(itemp)) then
-       values(iw) = edos%dos(iw, 0) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
-     else
-       values(iw) = zero
-     end if
-   end do
-   ne(itemp) = simpson(edos%step, values)
+ end do ! itemp
 
- end do
-
+ if (edos%nsppol == 1 .and. edos%nspinor == 1) n_ehst = two * n_ehst
  ABI_FREE(values)
 
 end subroutine edos_get_carriers
@@ -3890,6 +3913,7 @@ end subroutine edos_get_carriers
 !!  cryst<crystal_t>=Info on unit cell and symmetries.
 !!  filepath=File name for output data.
 !!  prtnest = flags governing the format of the output file. see mknesting.
+!!  1 for X-Y format, 2 for XCrysden format (XSF)
 !!  tsmear=Broadening used to approximation the delta function.
 !!  fermie_nest
 !!  qpath_vertices = vertices of the reciprocal space trajectory
@@ -3948,7 +3972,7 @@ integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermi
  invgauwidth = one / (0.1_dp * eV_Ha); if (tsmear > tol10) invgauwidth = one / tsmear
  prefact = one / sqrt(pi) * invgauwidth
 
- ABI_MALLOC(fs_weights,(ebands%nband(1),ebands%nkpt,ebands%nsppol))
+ ABI_MALLOC(fs_weights, (ebands%nband(1), ebands%nkpt, ebands%nsppol))
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
@@ -4070,7 +4094,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ABI_MALLOC(npwarr, (nkfull))
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
-   MSG_ERROR('The first symmetry is not the identity operator!')
+   ABI_ERROR('The first symmetry is not the identity operator!')
  end if
 
  do ikf=1,nkfull
@@ -4135,10 +4159,10 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  ! CP modified
  !call ebands_init(bantot, outb, inb%nelect, doccde, eig, istwfk, kfull, &
  !  nband, nkfull, npwarr, nsppol, inb%nspinor, inb%tphysel, inb%tsmear, inb%occopt, occ, wtk, &
- !  inb%charge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
+ !  inb%cellcharge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
  call ebands_init(bantot, outb, inb%nelect, inb%ne_qFD, inb%nh_qFD, inb%ivalence, doccde, eig, istwfk, kfull, &
    nband, nkfull, npwarr, nsppol, inb%nspinor, inb%tphysel, inb%tsmear, inb%occopt, occ, wtk, &
-   inb%charge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
+   inb%cellcharge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
  ! End CP modified
 
  ABI_FREE(istwfk)
@@ -4219,7 +4243,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
     "At least one of the k-points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
     "kptrlatt of input ebands: ",trim(ltoa(pack(self%kptrlatt, mask=.True.))),ch10, &
     "downsampled K-mesh: ",trim(ltoa(pack(in_kptrlatt, mask=.True.)))
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_MALLOC(istwfk, (new_nkibz))
@@ -4267,10 +4291,10 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
  ! CP modified: added self%ne_qFD, self%nh_qFD, self%ivalence in the list of arguments
  !call ebands_init(bantot, new, self%nelect, doccde, eig, istwfk, new_kibz, &
  !  nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
- !  self%charge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
+ !  self%cellcharge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
  call ebands_init(bantot, new, self%nelect, self%ne_qFD, self%nh_qFD, self%ivalence, doccde, eig, istwfk, new_kibz, &
    nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
-   self%charge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
+   self%cellcharge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
  ! End CP modified
 
  new%fermie = self%fermie
@@ -4505,12 +4529,12 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  !call ebands_init(new_bantot, new, ebands%nelect, new_doccde, new_eig, new_istwfk, new_kibz,&
  !  new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
  !  ebands%occopt, new_occ, new_wtk, &
- !  ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ !  ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence,&
    new_doccde, new_eig, new_istwfk, new_kibz,&
    new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
    ebands%occopt, new_occ, new_wtk, &
-   ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  ! End CP modify
 
  ! Get fermi level from input ebands.
@@ -4536,7 +4560,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    !  ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
    !end if
  else
-   MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
+   ABI_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end if
 
  ! Interpolate eigenvalues and velocities.
@@ -4553,7 +4577,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
        !case (2)
        !  call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
        case default
-         MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
+         ABI_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
      end do
    end do
@@ -4656,7 +4680,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  nb = my_bblock(2) - my_bblock(1) + 1
 
  if (ebands%nkpt == 1) then
-   MSG_WARNING("Cannot interpolate band energies when nkpt = 1. Returning")
+   ABI_WARNING("Cannot interpolate band energies when nkpt = 1. Returning")
    return
  end if
 
@@ -4681,12 +4705,12 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  !call ebands_init(new_bantot, new, ebands%nelect, new_doccde, new_eig, new_istwfk, kpath%points, &
  !  new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear, &
  !  ebands%occopt, new_occ, new_wtk,&
- !  ebands%charge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ !  ebands%cellcharge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence, &
    new_doccde, new_eig, new_istwfk, kpath%points, &
    new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear, &
    ebands%occopt, new_occ, new_wtk,&
-   ebands%charge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%cellcharge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
  ! End CP modified
 
  new%fermie = ebands%fermie
@@ -4708,7 +4732,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
                  my_bblock, comm)
 
  case default
-   MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
+   ABI_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end select
 
  ! Interpolate eigenvalues.
@@ -4723,7 +4747,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case default
-         MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
+         ABI_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
        end select
      end do
    end do
@@ -4809,7 +4833,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
 !Local variables-------------------------------
 !scalars
- integer :: nproc, my_rank, nw, spin, band, ib, ik_ibz, cnt, idat, ierr, bcorr
+ integer :: nproc, my_rank, nw, spin, band, ib, ik_ibz, cnt, idat, ierr, bcorr, time_opt
  integer :: ii, jj, ief, ihf, bmin_, bmax_ ! CP added ihf
  real(dp),parameter :: max_occ1 = one
  real(dp) :: emax, emin, wtk, max_occ
@@ -4829,8 +4853,9 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
+ edos%nelect = ebands%nelect
  if (ebands%nkpt == 1) then
-   MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
+   ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
  end if
 
@@ -4881,6 +4906,8 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    ABI_CALLOC(out_tensdos, (nw, 2, 3, 3, ntens, ebands%nsppol))
  end if
 
+ time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
+
  !call wrtout(std_out, " Computing DOS weighted by matrix elements.")
  select case (intmeth)
  case (1)
@@ -4913,7 +4940,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
          ! vectors
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wme0(:) * vsum(ii)
              call simpson_int(nw, step, out_vecsdos(:,1,ii,idat,spin), out_vecsdos(:,2,ii,idat,spin))
@@ -4923,7 +4950,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
          ! tensor
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              do jj=1,3
                out_tensdos(:,1,jj,ii,idat,spin) = out_tensdos(:,1,jj,ii,idat,spin) + wme0(:) * tsum(jj,ii)
@@ -4991,7 +5018,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 !$OMP PARALLEL DO PRIVATE(vsum)
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              out_vecsdos(:, :, ii, idat, spin) = out_vecsdos(:, :, ii, idat, spin) + weights(:, :) * vsum(ii)
            end do
@@ -5001,7 +5028,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 !$OMP PARALLEL DO PRIVATE(tsum)
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              do jj=1,3
                out_tensdos(:, :, jj, ii, idat, spin) = out_tensdos(:, :, jj, ii, idat, spin) + weights(:, :) * tsum(jj,ii)
@@ -5025,7 +5052,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
 
  case default
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
  ! Compute total DOS and IDOS
@@ -5058,7 +5085,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
     "Bisection could not find an initial guess for the Fermi level with nelect:",ebands%nelect, ch10, &
     "Possible reasons: not enough bands in DOS or wrong number of electrons.", ch10, &
     "Returning from ebands_get_edos_matrix_elements without setting edos%ief !"
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    return
  end if
  ! CP added
@@ -5066,7 +5093,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the holes Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of holes"
-   !MSG_WARNING(msg)
+   !ABI_WARNING(msg)
    return
  end if
  ! End CP added
@@ -5149,7 +5176,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
      write(msg,'(a,i0,a)')&
      'Trying to compute JDOS with a metallic band structure for spin: ',spin,&
      'Assuming you know what you are doing, continuing anyway! '
-     MSG_COMMENT(msg)
+     ABI_COMMENT(msg)
    end if
  end do
 
@@ -5166,7 +5193,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  jdos%broad = broad
 
  !if (ebands%nkpt == 1) then
- !  MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
+ !  ABI_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
  !  jdos%intmeth = 1
  !end if
 
@@ -5201,7 +5228,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  case (2, -2)
    ! Tetrahedron method
    if (any(ebands%nband /= ebands%nband(1)) ) then
-     MSG_WARNING('For tetrahedra, nband(:) must be constant')
+     ABI_WARNING('For tetrahedra, nband(:) must be constant')
      ierr = ierr + 1
    end if
    if (ierr/=0) return
@@ -5244,7 +5271,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    call tetra%free()
 
  case default
-   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+   ABI_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
  if (ebands%nsppol == 1) then
@@ -5257,7 +5284,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  !if (my_rank == 0) then
  !  path = "jdos_gauss.data"; if (intmeth == 2) path = "jdos_tetra.data"
  !  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
- !    MSG_ERROR(msg)
+ !    ABI_ERROR(msg)
  !  end if
  !  do iw=1,nw
  !    write(unt,*)jdos%mesh(iw),(jdos(iw,spin), spin=1,ebands%nsppol)
@@ -5328,7 +5355,7 @@ integer function jdos_ncwrite(jdos, ncid, prefix) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_values")), jdos%values))
 
 #else
- MSG_ERROR("netcdf library not available")
+ ABI_ERROR("netcdf library not available")
 #endif
 
 contains
@@ -5429,7 +5456,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 ! CP test to prevent use in case occopt = 9
  if (ebands%occopt==9) then
     write(msg,'(a)') "Boltztrap outputting not possible with occopt = 9 at the moment"
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  nelec = ebands_nelect_per_spin(ebands)
@@ -5450,7 +5477,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
    !input file for boltztrap: general info, Ef, Nelec, etc...
    filename= trim(fname_radix)//"_"//trim(spinsuffix(isppol))//"BLZTRP.intrans"
    if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    ewindow = 1.1_dp * (ebands%fermie-minval(ebands%eig(1, :, isppol)))
@@ -5474,7 +5501,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 !files file, with association of all units for Boltztrap
    filename= trim(fname_radix)//"_"//trim(spinsuffix(isppol))//"BLZTRP.def"
    if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iout, '(3a)') "5, '", trim(fname_radix)//"_"//trim(spinsuffix(isppol))//"BLZTRP.intrans',      'old',    'formatted',0"
@@ -5511,7 +5538,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 !file is for geometry symmetries etc
  filename= trim(fname_radix)//"_BLZTRP.struct"
  if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write (iout, '(a)') "BoltzTraP geometry file generated by ABINIT."
@@ -5538,7 +5565,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
    filename=trim(fname_radix)//"_BLZTRP."//spinsuffix(isppol)//"energy"//trim(so_suffix)
 
    if (open_file (filename, msg, newunit=iout, form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iout, '(a,I5)') "BoltzTraP eigen-energies file generated by ABINIT. ispin = ", isppol
@@ -5563,7 +5590,7 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
    do isppol = 1, nsppol
      filename= trim(fname_radix)//"_"//spinsuffix(isppol)//"BLZTRP.tau_k"
      if (open_file(filename, msg, newunit=iout, form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      write (iout, '(a)') "BoltzTraP tau_k file generated by ANADDB."
@@ -5654,7 +5681,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
    write(appendix,"(i0)") itemp
    filename= trim(fname_radix)//"_BLZTRP.intrans_"//trim(appendix)
    if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
 
    write (iout, '(a)') "GENE                      # Format of input: generic format, with Symmetries"
@@ -5679,7 +5706,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 !files file, with association of all units for Boltztrap
  filename= trim(fname_radix)//"_BLZTRP.def"
  if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write (iout, '(3a)') "5, '", trim(fname_radix)//"_BLZTRP", ".intrans',      'old',    'formatted',0"
  write (iout, '(3a)') "6, '", trim(fname_radix)//"_BLZTRP", ".outputtrans',      'unknown',    'formatted',0"
@@ -5715,7 +5742,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 !file is for geometry symmetries etc
  filename= trim(fname_radix)//"_BLZTRP.struct"
  if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write (iout, '(a)') "BoltzTraP geometry file generated by ABINIT."
 
@@ -5739,7 +5766,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
  end if
 
  if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  write (iout, '(a)') "BoltzTraP eigen-energies file generated by ABINIT."
  write (iout, '(I7, I7, E20.10, a)') nkpt, nsppol, ha2ryd*fermie(1), '     ! nk, nspin, Fermi level(Ry) : energies below in Ry'
@@ -5762,7 +5789,7 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
    write(appendix,"(i0)") itemp
    filename= trim(fname_radix)//"_BLZTRP.tau_k_"//trim(appendix)
    if (open_file(filename, msg, newunit=iout, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    write (iout, '(a,f12.6)') "BoltzTraP tau_k file generated by ANADDB for T= ", Temp
    write (iout, '(I7, I7, E20.10, a)') nkpt, nsppol, ha2ryd*fermie(itemp), &
@@ -5842,7 +5869,7 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
      call ebands_write_gnuplot(ebands, prefix)
    end if
  case default
-   MSG_WARNING(sjoin("Unsupported value for prtebands:", itoa(prtebands)))
+   ABI_WARNING(sjoin("Unsupported value for prtebands:", itoa(prtebands)))
  end select
 
 end subroutine ebands_write
@@ -5909,7 +5936,7 @@ subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
  end if
 
  if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(unt,'(a)') "# Grace project file"
@@ -6042,10 +6069,10 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 
  datafile = strcat(prefix, "_EBANDS.data")
  if (open_file(datafile, msg, newunit=unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  if (open_file(strcat(prefix, "_EBANDS.gnuplot"), msg, newunit=gpl_unt, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  basefile = basename(datafile)
 
@@ -6171,12 +6198,12 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  ! Generate k-path
  ndivsm = dtset%ndivsm
  if (ndivsm <= 0) then
-   MSG_COMMENT("Setting ndivsm to 20 because variable is not given in input file")
+   ABI_COMMENT("Setting ndivsm to 20 because variable is not given in input file")
    ndivsm = 20
  end if
  nbounds = dtset%nkpath
  if (nbounds <= 0) then
-   MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   ABI_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
    nbounds = 5
    ABI_MALLOC(bounds, (3, 5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
@@ -6247,20 +6274,20 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  ! Check input parameters
  ierr = 0
  if (nkibz == 1) then
-   MSG_ERROR_NOSTOP("Cannot interpolate with a single k-point", ierr)
+   ABI_ERROR_NOSTOP("Cannot interpolate with a single k-point", ierr)
  end if
  if (.not. isdiagmat(kptrlatt)) then
-   MSG_ERROR_NOSTOP('kptrlatt is not diagonal. Multiple shifts are not allowed', ierr)
+   ABI_ERROR_NOSTOP('kptrlatt is not diagonal. Multiple shifts are not allowed', ierr)
  end if
  if (nshiftk /= 1) then
-   MSG_ERROR_NOSTOP('Multiple shifts not allowed', ierr)
+   ABI_ERROR_NOSTOP('Multiple shifts not allowed', ierr)
  end if
  if (any(abs(shiftk(:, 1)) > tol8)) then
-   MSG_ERROR_NOSTOP("shifted k-mesh not implented", ierr)
+   ABI_ERROR_NOSTOP("shifted k-mesh not implented", ierr)
  end if
 
  if (ierr /= 0) then
-   MSG_ERROR("Linear interpolation cannot be performed. See messages above.")
+   ABI_ERROR("Linear interpolation cannot be performed. See messages above.")
  end if
 
  nkx = kptrlatt(1, 1)
@@ -6302,12 +6329,12 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    'dksqmax: ',dksqmax,ch10,&
    'Action: check k-point input variables',ch10,&
    '        e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, bsize, nsppol, ndat))
 
- ! Build array in the full BZ to prepare call to interpol3d.
+ ! Build array in the full BZ to prepare call to interpol3d_0d.
  ikf = 0
  do iz=1,nkz
    do iy=1,nky
@@ -6402,7 +6429,7 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%bsize
-        val = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
+        val = interpol3d_0d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
 
         !if (val <= zero) then
         !  vv(1) = self%data_uk_bsd(ir1, ir2, ir3, band, spin, idat)
@@ -6429,12 +6456,15 @@ end subroutine klinterp_eval_bsd
 !! ebands_get_carriers
 !!
 !! FUNCTION
-!!  Compute carrier concentration for holes (nh) and electrons (ne) for a given list of `ntemp`
+!!  Compute number of electrons (e) and holes (h) per unit cell from a given list of `ntemp`
 !!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
+!!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
+!!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
 !!
 !! SOURCE
 
-subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
+subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
 
 !Arguments ------------------------------------
 !scalars
@@ -6442,7 +6472,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
  integer,intent(in) :: ntemp
 !arrays
  real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
- real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+ real(dp),intent(out) :: n_ehst(2, self%nsppol, ntemp)
 
 !Local variables-------------------------------
  integer :: spin, ik_ibz, ib, itemp
@@ -6450,9 +6480,8 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 
 ! *********************************************************************
 
- ! Copy important dimensions
  max_occ = two / (self%nspinor * self%nsppol)
- ne = zero; nh = zero
+ n_ehst = zero
 
  do spin=1,self%nsppol
    do ik_ibz=1,self%nkpt
@@ -6462,9 +6491,13 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 
        do itemp=1,ntemp
          if (eig_nk >= mu_e(itemp)) then
-           ne(itemp) = ne(itemp) + wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
+           ! electron (assuming ef inside the gap if semiconductor)
+           n_ehst(1, spin, itemp) = n_ehst(1, spin, itemp) + &
+                                    wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
          else
-           nh(itemp) = nh(itemp) + wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
+           ! electron
+           n_ehst(2, spin, itemp) = n_ehst(2, spin, itemp) + &
+                                    wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
          end if
        end do
 

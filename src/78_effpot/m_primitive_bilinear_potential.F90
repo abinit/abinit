@@ -15,7 +15,7 @@
 !! TODO: add this when F2003 doc style is determined.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,18 +61,18 @@ contains
     integer, intent(in) :: nR, ni, nj, nature(2)
     self%nR=nR
     self%nature(:)=nature(:)
-    ABI_ALLOCATE(self%Rlist, (3, self%nR))
-    ABI_ALLOCATE(self%mat, (ni, nj, nR))
+    ABI_MALLOC(self%Rlist, (3, self%nR))
+    ABI_MALLOC(self%mat, (ni, nj, nR))
   end subroutine initialize
 
   subroutine finalize(self)
     class(primitive_bilinear_potential_t) :: self
     self%nR=0
     if ( allocated(self%Rlist)) then
-       ABI_DEALLOCATE(self%Rlist)
+       ABI_FREE(self%Rlist)
     end if
     if (allocated(self%mat)) then
-       ABI_DEALLOCATE(self%mat)
+       ABI_FREE(self%mat)
     end if
   end subroutine finalize
 

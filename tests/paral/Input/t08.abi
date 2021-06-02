@@ -24,13 +24,13 @@ dynimage  0 5*1 0  # Will do relaxation only for the 5 internal images
 #**************************
 #npimage 2  # Not set: let the code determine automatically
             #          the distribution of processors
-            # With 1  proc,  should be: npkpt 1, npimage 1
-            # With 2  procs, should be: npkpt 1, npimage 2
-            # With 4  procs, should be: npkpt 1, npimage 4
-            # With 10 procs, should be: npkpt 2, npimage 5
+            # With 1  proc,  should be: np_spkpt 1, npimage 1
+            # With 2  procs, should be: np_spkpt 1, npimage 2
+            # With 4  procs, should be: np_spkpt 1, npimage 4
+            # With 10 procs, should be: np_spkpt 2, npimage 5
 
 
-#Test prtolimg with 3 datasets
+#Test prtvolimg with 3 datasets
 #*****************************
 ndtset 3
 prtvolimg1 0
@@ -95,9 +95,9 @@ autoparal 1
 #%%   7 images, exploring the transition path.
 #%%   Three datasets, testing each value of prtvolimg.
 #%%   Processors distribution automatically determined:
-#%%      # With 1  proc,  should be: npkpt 1, npimage 1
-#%%      # With 2  procs, should be: npkpt 2, npimage 1
-#%%      # With 4  procs, should be: npkpt 4, npimage 1
-#%%      # With 10 procs, should be: npkpt 2, npimage 5
+#%%      # With 1  proc,  should be: np_spkpt 1, npimage 1
+#%%      # With 2  procs, should be: np_spkpt 2, npimage 1
+#%%      # With 4  procs, should be: np_spkpt 4, npimage 1
+#%%      # With 10 procs, should be: np_spkpt 2, npimage 5
 #%% topics = parallelism, TransPath
 #%%<END TEST_INFO>

@@ -195,7 +195,7 @@ program macroave
 
 !Reading input data from a file ---------------------------------------
  if (open_file('macroave.in', msg, newunit=UNIT1, STATUS='OLD') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  READ(UNIT1,'(A)')CODE
@@ -219,7 +219,7 @@ program macroave
    SIESTA = .FALSE.
    ABINIT = .TRUE.
  else
-   MSG_ERROR(sjoin('macroave: Unknown code: ', CODE))
+   ABI_ERROR(sjoin('macroave: Unknown code: ', CODE))
  end if
 
 !Are we going to compute the band offset from the charge density or
@@ -242,7 +242,7 @@ program macroave
    CHARGE      = .FALSE.
    TOTALCHARGE = .TRUE.
  else
-   MSG_ERROR(sjoin('macroave: Unknown input data  ', INPDATA))
+   ABI_ERROR(sjoin('macroave: Unknown input data  ', INPDATA))
  end if
 
 !What kind of interpolation will we use to get the charge density/
@@ -277,8 +277,8 @@ program macroave
    CALL IORHO( 'READ', trim(FNAMERHO), DCELL, MESH, NSM, NPT, NSPIN,&
 &   RHOS, FOUND )
    if (FOUND) then
-     ABI_ALLOCATE( RHOS,(NPT,NSPIN))
-     ABI_ALLOCATE( RHO,(NPT,NSPIN))
+     ABI_MALLOC( RHOS,(NPT,NSPIN))
+     ABI_MALLOC( RHO,(NPT,NSPIN))
      CALL IORHO( 'READ', trim(FNAMERHO), DCELL, MESH, NSM, NPT, NSPIN,&
 &     RHOS, FOUND )
      do I = 1, 3
@@ -295,19 +295,19 @@ program macroave
      end do
 
    else
-     MSG_ERROR(sjoin('macroave: file not found: ', FNAMERHO))
+     ABI_ERROR(sjoin('macroave: file not found: ', FNAMERHO))
    end if
 
  else if (ABINIT) then
 
    if (nctk_try_fort_or_ncfile(FNAMERHO, msg) /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    iomode = IO_MODE_FORTRAN; if (endswith(FNAMERHO, ".nc")) iomode = IO_MODE_ETSF
 
    if (iomode == IO_MODE_FORTRAN) then
      if (open_file(FNAMERHO, msg, newunit=unit2, form="unformatted", status="old") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call hdr_fort_read(hdr, unit2, fform)
      ABI_CHECK(FFORM /= 0, "fform == 0")
@@ -316,7 +316,7 @@ program macroave
      NCF_CHECK(nctk_open_read(unit2, fnamerho, xmpi_comm_self))
      call hdr_ncread(hdr, unit2, fform)
 #else
-     MSG_ERROR("Netcdf support is missing!")
+     ABI_ERROR("Netcdf support is missing!")
 #endif
    end if
 
@@ -335,7 +335,7 @@ program macroave
    call hdr%free()
 
    NPT = MESH(1) * MESH(2) * MESH(3)
-   ABI_ALLOCATE( RHO,(NPT,NSPIN))
+   ABI_MALLOC( RHO,(NPT,NSPIN))
 
    if (iomode == IO_MODE_FORTRAN) then
      do IS = 1, NSPIN
@@ -374,10 +374,10 @@ program macroave
  LENGTH = L/DBLE(N)
  NPOINTS = MESH(3)
 
- ABI_ALLOCATE(Z,(NPOINTS+1))
- ABI_ALLOCATE(RHOZ,(NPOINTS+1))
- ABI_ALLOCATE(D2RHOZ,(NPOINTS+1))
- ABI_ALLOCATE(DRHODZ,(N))
+ ABI_MALLOC(Z,(NPOINTS+1))
+ ABI_MALLOC(RHOZ,(NPOINTS+1))
+ ABI_MALLOC(D2RHOZ,(NPOINTS+1))
+ ABI_MALLOC(DRHODZ,(N))
 
  RHOZ(1:NPOINTS+1)   = 0.D0
  D2RHOZ(1:NPOINTS+1) = 0.D0
@@ -478,7 +478,7 @@ program macroave
 !the electronic charge density ----------------------------------------
  FNAMEPLAVE = strcat(SNAME,'.PAV')
  if (open_file(FNAMEPLAVE,msg,newunit=UNIT3,STATUS='UNKNOWN') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  I = 0
  do II = 1, 2*N-1, 2
@@ -618,7 +618,7 @@ program macroave
 !Print averaged electronic charge density and potential ---------------
  FNAMEDELV = strcat( trim(SNAME),'.MAV')
  if (open_file(FNAMEDELV, msg, newunit=UNIT4, STATUS='UNKNOWN') /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
  do I = 1, N
    X=(I-1)*L/DBLE(N)
@@ -634,7 +634,7 @@ program macroave
 !if (POISON) then
 !FNAMEVEC = strcat( SNAME,'.VEC')
 !if (open_file(FNAMEVEC, msg newunit=UNIT5, STATUS='UNKNOWN') /= 0) then
-!  MSG_ERROR(msg)
+!  ABI_ERROR(msg)
 !end if
 !do I = 1, N
 !X=(I-1)*L/DBLE(N)
@@ -644,10 +644,10 @@ program macroave
 !endif
 !...
 
- ABI_DEALLOCATE(Z)
- ABI_DEALLOCATE(RHOZ)
- ABI_DEALLOCATE(DRHODZ)
- ABI_DEALLOCATE(D2RHOZ)
+ ABI_FREE(Z)
+ ABI_FREE(RHOZ)
+ ABI_FREE(DRHODZ)
+ ABI_FREE(D2RHOZ)
  if (allocated(rho)) then
    ABI_FREE(rho)
  end if

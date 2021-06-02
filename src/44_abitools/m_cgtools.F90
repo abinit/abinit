@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2020 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2021 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,6 +54,7 @@ module m_cgtools
  real(dp),public,parameter :: cg_cone(2)  = (/1._dp,0._dp/)
 
  ! Helper functions.
+ !public :: cg_prod
  public :: cg_tocplx
  public :: cg_fromcplx
  public :: cg_kfilter
@@ -1108,6 +1109,10 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
 
 ! *************************************************************************
 
+ ! Init results indipendently of option.
+ dotr = zero
+ doti = zero
+
  if (istwf_k==1) then
    ! General k-point
 
@@ -1203,7 +1208,7 @@ subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g
    write(msg,'(a,a,a,i6,a,i6)')&
    'When istwf_k/=1, nspinor must be 1,',ch10,&
    'however, nspinor=',nspinor,', and istwf_k=',istwf_k
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 #if 0
@@ -1981,7 +1986,7 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
 #if defined __INTEL_COMPILER && defined HAVE_OPENMP
        if (ifft==0) then
-         MSG_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
+         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
        end if
 #endif
        oarrbox(1,ifft+pad_box) = iarrsph(1,ipw+pad_sph)
@@ -2024,7 +2029,7 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
    !
  else
    write(msg,'(a,i0)')"Wrong istwfk ",istwf_k
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  if (istwf_k>=2) then
@@ -2325,7 +2330,7 @@ subroutine cg_vlocpsi(nx,ny,nz,ldx,ldy,ldz,ndat,cplex,vloc,ur)
    !
  else
    ur = huge(one)
-   !MSG_BUG("Wrong cplex")
+   !ABI_BUG("Wrong cplex")
  end if
 
 end subroutine cg_vlocpsi
@@ -2703,7 +2708,7 @@ subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
  end do
 
  if (ierr /= 0) then
-   MSG_ERROR(sjoin("Found ", itoa(ierr)," vectors with norm <= zero!"))
+   ABI_ERROR(sjoin("Found ", itoa(ierr)," vectors with norm <= zero!"))
  end if
 
 !$OMP PARALLEL DO PRIVATE(ptr,alpha) IF (nband > 1)
@@ -2935,7 +2940,7 @@ subroutine cgpaw_normalize(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw)
 
  if (ierr/=0) then
    write(msg,'(a,i0,a)')" Found ",ierr," vectors with norm <= zero!"
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Scale |C> and S|C>.
@@ -3119,7 +3124,7 @@ end subroutine cgpaw_gramschmidt
 !!  iband0=which particular band we are interested in ("i" in the above formula)
 !!         Can be set to -1 to sum over all bands...
 !!  icg=shift to be given to the location of the data in cg
-!!  iscg=shift to be given to the location of the data in cg
+!!  iscg=shift to be given to the location of the data in scg
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  mcg=maximum size of second dimension of cg
 !!  mscg=maximum size of second dimension of scg
@@ -3423,7 +3428,7 @@ subroutine cg_normev(cg, npw, nband)
      'Starting xnorm should be close to one (tol is tol6).',ch10,&
      'However, for state number',ii,', xnorm=',xnorm,ch10,&
      'It might be that your LAPACK library has not been correctly installed.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
    xnorm=1.0d0/sqrt(xnorm)
@@ -3543,7 +3548,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
 
  if(ek0<1.0d-10)then
    write(msg,'(3a)')'The mean kinetic energy of a wavefunction vanishes.',ch10,'It is reset to 0.1 Ha.'
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ek0=0.1_dp
  end if
 
@@ -3771,7 +3776,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
          write(msg, '(4a)' )ch10,&
          'cg_precon_block: the mean kinetic energy of a wavefunction vanishes.',ch10,&
          'it is reset to 0.1ha.'
-         MSG_WARNING(msg)
+         ABI_WARNING(msg)
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -3990,7 +3995,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 
      do iblocksize=1,blocksize
        if(ek0(iblocksize)<1.0d-10)then
-         MSG_WARNING('the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.')
+         ABI_WARNING('the mean kinetic energy of a wavefunction vanishes. it is reset to 0.1ha.')
          ek0(iblocksize)=0.1_dp
        end if
      end do
@@ -4167,7 +4172,7 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
        'The eigenvector with band ',iband,' has zero norm.',ch10,&
        'This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)',ch10,&
        'Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut'
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      xx=cos(theta)
@@ -4324,7 +4329,7 @@ subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
 !Check if vect1(:,0) = 0 and vect2(:,0) = 0
  if ((abs(vect1(1,0)) > tol12).or.(abs(vect1(2,0)) > tol12).or. &
 & (abs(vect2(1,0)) > tol12).or.(abs(vect2(2,0)) > tol12)) then
-   MSG_BUG('vect1(:,0) and/or vect2(:,0) are not equal to zero')
+   ABI_BUG('vect1(:,0) and/or vect2(:,0) are not equal to zero')
  end if
 
 !Compute the scalar product
@@ -4405,7 +4410,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 ! *********************************************************************
 
  if (paral_kgb<0) then
-   MSG_BUG('paral_kgb should be positive ')
+   ABI_BUG('paral_kgb should be positive ')
  end if
 
  ! 1 if Scalapack version is used.
@@ -4466,7 +4471,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
          write(msg,'(3a,2i0,2es16.6,a,a)')ch10,&
          ' For istwf_k=2, observed the following element of evec:',ch10,&
          iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,' with a non-negligible imaginary part.'
-         MSG_BUG(msg)
+         ABI_BUG(msg)
        end if
      end do
    end do
@@ -4551,7 +4556,7 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 
    ! MG: Do not remove this initialization.
    ! telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
-   work=zero
+   !work=zero
 
    call abi_xgemm('N','N',npw_k*my_nspinor,nband_k,nband_k,cone, &
      cg(:,icg+1:npw_k*my_nspinor*nband_k+icg),npw_k*my_nspinor, &
@@ -4673,7 +4678,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
        write(msg,'(2a,3i0,2es16.6,a,a)')&
        ' For istwf_k = 2, observed the following element of vecnm :',ch10,&
        nelem,ivec,icg,vecnm(1:2,1+nelem*(ivec-1)+icg), ch10,' with a non-negligible imaginary part.'
-       MSG_BUG(msg)
+       ABI_BUG(msg)
      end if
    end do
  end if
@@ -5115,7 +5120,7 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
    end do ! end loop over vectors (or bands) with index ivec :
 
  else
-   MSG_ERROR(sjoin("Wrong value for ortalgo:", itoa(ortalgo)))
+   ABI_ERROR(sjoin("Wrong value for ortalgo:", itoa(ortalgo)))
  end if
 
  !call cwtime_report(sjoin(" pw_orthon with ortalgo: ", itoa(ortalgo)), cpu, wall, gflops)

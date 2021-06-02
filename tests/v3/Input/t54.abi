@@ -24,7 +24,7 @@
 
  acell 12 2*10
  boxcenter 3*0.0d0
- charge 1.0d0
+ cellcharge 1.0d0
  diemac 1.0d0   diemix 0.5d0
  ecut 9
 

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -184,7 +184,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
    else
      oper%wtk=>wtk
    endif
-   ABI_ALLOCATE(oper%ks,(paw_dmft%nsppol,oper%nkpt,paw_dmft%mbandc,paw_dmft%mbandc))
+   ABI_MALLOC(oper%ks,(paw_dmft%nsppol,oper%nkpt,paw_dmft%mbandc,paw_dmft%mbandc))
    oper%has_operks=1
    oper%ks=czero
  endif
@@ -194,7 +194,7 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
 ! ===================
  if(optksloc==2.or.optksloc==3) then
    oper%has_opermatlu=0
-   ABI_DATATYPE_ALLOCATE(oper%matlu,(oper%natom))
+   ABI_MALLOC(oper%matlu,(oper%natom))
    oper%has_opermatlu=1
    call init_matlu(oper%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,oper%matlu)
    do iatom=1,oper%natom
@@ -247,14 +247,14 @@ subroutine destroy_oper(oper)
    call destroy_matlu(oper%matlu,oper%natom)
  else
    message = " Operator is not defined to be used in destroy_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if ( allocated(oper%matlu))  then
-   ABI_DATATYPE_DEALLOCATE(oper%matlu)
+   ABI_FREE(oper%matlu)
    oper%has_opermatlu=0
  endif
  if ( allocated(oper%ks)) then
-   ABI_DEALLOCATE(oper%ks)
+   ABI_FREE(oper%ks)
    oper%has_operks=0
  endif
  oper%wtk => null()
@@ -450,7 +450,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
    if(ximag) then
      write(message, '(3a,e12.4,a)')"Occupations are imaginary !",ch10, &
 &    "  Maximal value is ", maximag(1), ch10
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    endif
  else if(abs(prtopt)>=3.and.((option<5).or.(option>8))) then
    write(message, '(2a)') ch10," Prb with options and has_operks in print_oper"
@@ -513,7 +513,7 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
 ! *********************************************************************
  DBG_ENTER("COLL")
  if(option==2.or.option==3) then
-   ABI_ALLOCATE(procb2,(oper%nkpt))
+   ABI_MALLOC(procb2,(oper%nkpt))
  endif
 !  if option=1 do inversion in local space
 !  if option=2 do inversion in KS band space
@@ -528,13 +528,13 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  if(((option==1.or.option==3).and.(oper%has_opermatlu==0)).or.&
 &   ((option==2.or.option==3).and.(oper%has_operks==0))) then
    message = " Options are not coherent with definitions of this operator"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
  if(option==1.or.option==3) then
    call inverse_matlu(oper%matlu,oper%natom,prtopt)
  else if(option==2.or.option==3) then
-   ABI_ALLOCATE(matrix,(oper%mbandc,oper%mbandc))
+   ABI_MALLOC(matrix,(oper%mbandc,oper%mbandc))
      do isppol=1,oper%nsppol
        do ikpt=1,oper%nkpt
         if ((paral==1.and.(procb2(ikpt)==iproc)).or.(paral==0)) then
@@ -547,11 +547,11 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
         endif
        enddo ! ikpt
      enddo ! isppol
-   ABI_DEALLOCATE(matrix)
+   ABI_FREE(matrix)
  endif
 
  if(option==2.or.option==3) then
-   ABI_DEALLOCATE(procb2)
+   ABI_FREE(procb2)
  endif
  DBG_EXIT("COLL")
 end subroutine inverse_oper
@@ -597,10 +597,10 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  logical lvz  !vz_d
 ! *********************************************************************
  DBG_ENTER("COLL")
- ABI_ALLOCATE(procb2,(oper%nkpt))
+ ABI_MALLOC(procb2,(oper%nkpt))
  if((oper%has_opermatlu==0).or.(oper%has_operks==0)) then
    message = " Operator is not defined to be used in loc_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if(present(procb).and.present(iproc)) then
    paral=1
@@ -661,7 +661,7 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
    endif
   enddo ! ikpt
  enddo ! isppol
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
 
 
@@ -711,7 +711,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
 ! *********************************************************************
 
  ABI_UNUSED(prt)
- ABI_ALLOCATE(procb2,(oper%nkpt))
+ ABI_MALLOC(procb2,(oper%nkpt))
  if(present(procb).and.present(iproc)) then
    paral=1
    procb2=procb
@@ -729,7 +729,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
  DBG_ENTER("COLL")
  if((oper%has_opermatlu==0).or.(oper%has_operks==0)) then
    message = " Operator is not defined to be used in upfold_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  if(option<0) then
  endif
@@ -780,7 +780,7 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
     endif
    enddo ! ikpt
  enddo ! isppol
- ABI_DEALLOCATE(procb2)
+ ABI_FREE(procb2)
 
  DBG_EXIT("COLL")
 end subroutine upfold_oper
@@ -826,7 +826,7 @@ subroutine identity_oper(oper,option)
  if(((option==1.or.option==3).and.(oper%has_opermatlu==0)).or.&
 &   ((option==2.or.option==3).and.(oper%has_operks==0))) then
    message = " Options in identity_oper are not coherent with definitions of this operator"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  nkpt=oper%nkpt
  nsppol=oper%nsppol
@@ -912,13 +912,13 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  DBG_ENTER("COLL")
  if(occup1%has_opermatlu==0.or.occup2%has_opermatlu==0) then
    message = " Operators are not defined to be used in diff_oper"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
  mbandc   = occup1%mbandc
  nkpt    = occup1%nkpt
  if(occup1%nkpt/=occup2%nkpt) then
   write(message,'(a,2x,2i9)')' Operators are not equals',occup1%nkpt,occup2%nkpt
-  MSG_ERROR(message)
+  ABI_ERROR(message)
  endif
 
  call diff_matlu(char1,char2,occup1%matlu,&
@@ -985,7 +985,7 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  if(((opt_ksloc==1.or.opt_ksloc==3).and.(oper%has_opermatlu==0)).or.&
 &   ((opt_ksloc==2.or.opt_ksloc==3).and.(oper%has_operks==0))) then
    message = " Options in trace_oper are not coherent with definitions of this operator"
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  endif
 
  if(opt_ksloc==1.or.opt_ksloc==3) then

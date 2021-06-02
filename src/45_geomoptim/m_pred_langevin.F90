@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -114,7 +114,6 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  real(dp) :: rprim(3,3),rprimd(3,3),rprimd_next(3,3),rprim_next(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -126,25 +125,25 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  if(iexit/=0)then
    if (allocated(pot_perm))    then
-     ABI_DEALLOCATE(pot_perm)
+     ABI_FREE(pot_perm)
    end if
    if (allocated(max_perm))    then
-     ABI_DEALLOCATE(max_perm)
+     ABI_FREE(max_perm)
    end if
    if (allocated(imax_perm))   then
-     ABI_DEALLOCATE(imax_perm)
+     ABI_FREE(imax_perm)
    end if
    if (allocated(ran_force))   then
-     ABI_DEALLOCATE(ran_force)
+     ABI_FREE(ran_force)
    end if
    if (allocated(lang_force))  then
-     ABI_DEALLOCATE(lang_force)
+     ABI_FREE(lang_force)
    end if
    if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
+     ABI_FREE(fcart_mold)
    end if
    if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
    return
  end if
@@ -159,48 +158,48 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  if(itime==1)then
    if (allocated(pot_perm))    then
-     ABI_DEALLOCATE(pot_perm)
+     ABI_FREE(pot_perm)
    end if
    if (allocated(max_perm))    then
-     ABI_DEALLOCATE(max_perm)
+     ABI_FREE(max_perm)
    end if
    if (allocated(imax_perm))   then
-     ABI_DEALLOCATE(imax_perm)
+     ABI_FREE(imax_perm)
    end if
    if (allocated(ran_force))   then
-     ABI_DEALLOCATE(ran_force)
+     ABI_FREE(ran_force)
    end if
    if (allocated(lang_force))  then
-     ABI_DEALLOCATE(lang_force)
+     ABI_FREE(lang_force)
    end if
    if (allocated(fcart_mold))  then
-     ABI_DEALLOCATE(fcart_mold)
+     ABI_FREE(fcart_mold)
    end if
    if (allocated(fcart_m))     then
-     ABI_DEALLOCATE(fcart_m)
+     ABI_FREE(fcart_m)
    end if
  end if
 
  if (.not.allocated(pot_perm))    then
-   ABI_ALLOCATE(pot_perm,(ab_mover%natom))
+   ABI_MALLOC(pot_perm,(ab_mover%natom))
  end if
  if (.not.allocated(max_perm))    then
-   ABI_ALLOCATE(max_perm,(ab_mover%ntypat))
+   ABI_MALLOC(max_perm,(ab_mover%ntypat))
  end if
  if (.not.allocated(imax_perm))   then
-   ABI_ALLOCATE(imax_perm,(ab_mover%ntypat))
+   ABI_MALLOC(imax_perm,(ab_mover%ntypat))
  end if
  if (.not.allocated(ran_force))   then
-   ABI_ALLOCATE(ran_force,(3,ab_mover%natom))
+   ABI_MALLOC(ran_force,(3,ab_mover%natom))
  end if
  if (.not.allocated(lang_force))  then
-   ABI_ALLOCATE(lang_force,(3,ab_mover%natom))
+   ABI_MALLOC(lang_force,(3,ab_mover%natom))
  end if
  if (.not.allocated(fcart_mold))  then
-   ABI_ALLOCATE(fcart_mold,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_mold,(3,ab_mover%natom))
  end if
  if (.not.allocated(fcart_m))     then
-   ABI_ALLOCATE(fcart_m,(3,ab_mover%natom))
+   ABI_MALLOC(fcart_m,(3,ab_mover%natom))
  end if
 
 !write(std_out,*) 'langevin 03',jump_end_of_cycle
@@ -219,19 +218,6 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
    rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3)
  end do
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'langevin 04',jump_end_of_cycle
 !##########################################################
@@ -464,7 +450,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  end if ! if (icycle==1)
 
  if (allocated(imax_perm))   then
-   ABI_DEALLOCATE(imax_perm)
+   ABI_FREE(imax_perm)
  end if
 
 !write(std_out,*) 'langevin 05',jump_end_of_cycle
@@ -519,19 +505,6 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
      write(message, '(a)')' Commutation successful ! Going on'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
-
-!    Get rid of mean force on whole unit cell, but only if no generalized
-!    constraints are in effect
-!    call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
-!    if(ab_mover%nconeq==0)then
-!      amass_tot=sum(ab_mover%amass(:))
-!      do ii=1,3
-!        if (ii/=3.or.ab_mover%jellslab==0) then
-!          favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!          fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!        end if
-!      end do
-!    end if
 
 !    In thisc case we do not need to compute again SCFCV
 !    We avoid the second iteration on ii

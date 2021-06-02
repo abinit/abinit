@@ -8,7 +8,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group ()
+!!  Copyright (C) 2008-2021 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -142,7 +142,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
  if ( .not. DEBUG ) then
     CALL RANDOM_SEED(size = n)
-    ABI_ALLOCATE(seed,(n))
+    ABI_MALLOC(seed,(n))
     seed =  iseed + (/ (i - 1, i = 1, n) /)
 
     CALL RANDOM_SEED(PUT = seed+xmpi_comm_rank(xmpi_world))
@@ -164,7 +164,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  ABI_DATATYPE_ALLOCATE(thm_scells,(nconfig))
+  ABI_MALLOC(thm_scells,(nconfig))
 
   call thermal_supercell_make(amplitudes,crystal, Ifc,namplitude, nconfig, option,int(rlatt),&
 &                             temperature_K, thm_scells)
@@ -203,9 +203,9 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call ifc%free()
   call crystal%free()
   call thermal_supercell_free(nconfig,thm_scells)
-  ABI_DATATYPE_DEALLOCATE(thm_scells)
-  ABI_DEALLOCATE(zeff)
-  ABI_DEALLOCATE(qdrp_cart)
+  ABI_FREE(thm_scells)
+  ABI_FREE(zeff)
+  ABI_FREE(qdrp_cart)
 
 end subroutine generate_training_set
 !!***

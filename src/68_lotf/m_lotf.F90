@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (MMancini)
+!! Copyright (C) 2005-2021 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,14 +115,14 @@ contains
   !--initialize potential energy :
    epotlotf = zero
 
-   ABI_ALLOCATE(fcartfit,(3,natom))
-   ABI_ALLOCATE(xcartfit,(3,natom))
-   ABI_ALLOCATE(velfit,(3,natom))
+   ABI_MALLOC(fcartfit,(3,natom))
+   ABI_MALLOC(xcartfit,(3,natom))
+   ABI_MALLOC(velfit,(3,natom))
 
-   ABI_ALLOCATE(neighl,(lotfvar%nneigx,natom))
-   ABI_ALLOCATE(nneig,(lotfvar%nneigx))
-   ABI_ALLOCATE(neighl_old,(lotfvar%nneigx,natom))
-   ABI_ALLOCATE(nneig_old,(lotfvar%nneigx))
+   ABI_MALLOC(neighl,(lotfvar%nneigx,natom))
+   ABI_MALLOC(nneig,(lotfvar%nneigx))
+   ABI_MALLOC(neighl_old,(lotfvar%nneigx,natom))
+   ABI_MALLOC(nneig_old,(lotfvar%nneigx))
    neighl = 0
    nneig = 0
    neighl_old = 0
@@ -137,7 +137,7 @@ contains
 &     'LOTF: INIT_LIST: wrong value for lotfvar%classic = ',&
 &     lotfvar%classic,ch10,&
 &     'change lotfvar%classic 5 or 6 '
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
   !--Init cell and pbc_lotf
@@ -177,9 +177,9 @@ contains
    call bond_matrix_set(nneig,neighl)
 
   !--initialize bond parms alpha
-   ABI_ALLOCATE(alpha,(3,nbondex))
-   ABI_ALLOCATE(alpha_in,(3,nbondex))
-   ABI_ALLOCATE(alpha_end,(3,nbondex))
+   ABI_MALLOC(alpha,(3,nbondex))
+   ABI_MALLOC(alpha_in,(3,nbondex))
+   ABI_MALLOC(alpha_end,(3,nbondex))
    alpha = zero
    alpha_in = zero
    alpha_end = zero
@@ -216,14 +216,14 @@ contains
 
   !--init_lotf
 ! *************************************************************************
-   ABI_DEALLOCATE(alpha)
-   ABI_DEALLOCATE(alpha_in)
-   ABI_DEALLOCATE(alpha_end)
-   ABI_DEALLOCATE(nneig)
-   ABI_DEALLOCATE(neighl)
-   ABI_DEALLOCATE(fcartfit)
-   ABI_DEALLOCATE(xcartfit)
-   ABI_DEALLOCATE(velfit)
+   ABI_FREE(alpha)
+   ABI_FREE(alpha_in)
+   ABI_FREE(alpha_end)
+   ABI_FREE(nneig)
+   ABI_FREE(neighl)
+   ABI_FREE(fcartfit)
+   ABI_FREE(xcartfit)
+   ABI_FREE(velfit)
 
   !--deallocate LOTF internal variables
    call work_var_dealloc()
@@ -321,8 +321,8 @@ contains
 
    iwrdri = 0
 
-   ABI_ALLOCATE(fspare,(3,nbondex))
-   ABI_ALLOCATE(alpha_fce,(3,2,nbondex,1))
+   ABI_MALLOC(fspare,(3,nbondex))
+   ABI_MALLOC(alpha_fce,(3,2,nbondex,1))
 
   !--(0,-2) initialises a few parameters
    rcut_fit_int = rcut
@@ -363,7 +363,7 @@ contains
        ffit(:,i) = forc_in(:,iat)
      end do
    else
-     MSG_ERROR('LOTF : HERE WE SHOULD HAVE THE FORCES ALREADY !! ')
+     ABI_ERROR('LOTF : HERE WE SHOULD HAVE THE FORCES ALREADY !! ')
    end if ! TFOR
 
   !--THE REST OF THE ROUTINE IS THE FIT
@@ -372,8 +372,8 @@ contains
    call wrtout(std_out,message,'COLL')
 
 
-   ABI_ALLOCATE(alpha_dum,(3,nbondex))
-   ABI_ALLOCATE(alpha_old,(3,nbondex))
+   ABI_MALLOC(alpha_dum,(3,nbondex))
+   ABI_MALLOC(alpha_old,(3,nbondex))
    alpha_dum = zero
    alpha_old = zero
 
@@ -705,7 +705,7 @@ contains
                  alpha_dum(1,ibn_count) = 6.1d0
                elseif(alpha_dum(1,ibn_count)  <  two ) then
                  alpha_dum(1,ibn_count) = two
-                !MSG_ERROR('LOTF: Alpha1 reaches 2 au... Too small value!')
+                !ABI_ERROR('LOTF: Alpha1 reaches 2 au... Too small value!')
                end if
 
              end if   ! tfit(n)
@@ -732,7 +732,7 @@ contains
    end do main_minimization
 
    if(dcost_rms >  prec_lotf) then
-     MSG_ERROR('LOTF: ACHTUNG: REQD.TOLERANCE NOT ACHIEVED IN THE FIT')
+     ABI_ERROR('LOTF: ACHTUNG: REQD.TOLERANCE NOT ACHIEVED IN THE FIT')
    end if
 
    iwrdri = iwrdri + 1
@@ -793,9 +793,9 @@ contains
   !--prepares "true" updated parameters
    alpha_tr(:,:ibn_tots) = alpha_dum(:,:ibn_tots)
 
-   ABI_DEALLOCATE(alpha_fce)
-   ABI_DEALLOCATE(alpha_dum)
-   ABI_DEALLOCATE(alpha_old)
+   ABI_FREE(alpha_fce)
+   ABI_FREE(alpha_dum)
+   ABI_FREE(alpha_old)
   !-----------------------------------------------------------
 
  end subroutine fitclus
@@ -873,7 +873,7 @@ contains
      jat = ibnd_mat(2,ibn_count)
 
      ifo = imat(iat)    !--imat finds the old atomic 'fitted number'
-     if(iat > jat) MSG_ERROR('UPDLIS 177')
+     if(iat > jat) ABI_ERROR('UPDLIS 177')
 
     !--Set to 0, finds to which old bond (if any) these two correspond
      jb_old = 0               !--atom jat is a new neighbour of atom iat
@@ -914,7 +914,7 @@ contains
    if (ibn_tots > nbondex) then
      write(message,'(2a,2(a,i8))') 'LOTF: ibn_tots > nbondex  ! ',ch10,&
 &     'UPDLIS  stop : IBNTOTS = ',ibn_tots,' NBONDEX = ',nbondex
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
 

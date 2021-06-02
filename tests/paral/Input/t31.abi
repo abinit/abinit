@@ -2,7 +2,7 @@
 paral_kgb 1
 npband 10
 npfft 1
-npkpt 1
+np_spkpt 1
 use_gemm_nonlop 1
 useylm 1
 

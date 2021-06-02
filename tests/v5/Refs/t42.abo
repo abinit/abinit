@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -104,10 +104,10 @@ _ WF disk file :      0.310 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
             acell      1.5000000000E+01  1.5000000000E+01  1.5000000000E+01 Bohr
               amu      1.40067400E+01  1.40067400E+01  1.20110000E+01
                        1.00794000E+00
-           charge11    0.00000000E+00
-           charge12    1.00000000E+00
-           charge21    0.00000000E+00
-           charge22    1.00000000E+00
+       cellcharge11    0.00000000E+00
+       cellcharge12    1.00000000E+00
+       cellcharge21    0.00000000E+00
+       cellcharge22    1.00000000E+00
            diemac      2.00000000E+00
              ecut      1.00000000E+01 Hartree
 -          fftalg         312
@@ -1019,10 +1019,10 @@ monopole_correction_eV:  2.57355969463858E+00
             acell      1.5000000000E+01  1.5000000000E+01  1.5000000000E+01 Bohr
               amu      1.40067400E+01  1.40067400E+01  1.20110000E+01
                        1.00794000E+00
-           charge11    0.00000000E+00
-           charge12    1.00000000E+00
-           charge21    0.00000000E+00
-           charge22    1.00000000E+00
+       cellcharge11    0.00000000E+00
+       cellcharge12    1.00000000E+00
+       cellcharge21    0.00000000E+00
+       cellcharge22    1.00000000E+00
            diemac      2.00000000E+00
              ecut      1.00000000E+01 Hartree
            etotal11   -1.1756858509E+01

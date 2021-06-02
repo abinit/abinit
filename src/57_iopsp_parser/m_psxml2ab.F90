@@ -7,7 +7,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (MJV).
+!! Copyright (C) 2005-2021 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,8 +131,8 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    call wrtout(std_out,  message,'COLL')
  end if
 
- ABI_ALLOCATE(zeld, (nvshells))
- ABI_ALLOCATE(zelu, (nvshells))
+ ABI_MALLOC(zeld, (nvshells))
+ ABI_MALLOC(zelu, (nvshells))
  zeld = zero
  zelu = zero
  frmt_str="(a"
@@ -195,7 +195,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
        psphead%nproj(il) = psphead%nproj(il) + 1
      end do
    else
-     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+     ABI_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
    end if
  end if
 
@@ -359,8 +359,8 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    end select
  end if
 
- ABI_DEALLOCATE(zeld)
- ABI_DEALLOCATE(zelu)
+ ABI_FREE(zeld)
+ ABI_FREE(zelu)
 
  if (allocated(idx_sr)) then
    ABI_FREE_NOCOUNT(idx_sr)
@@ -388,7 +388,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2020 ABINIT group (MJV).
+!! Copyright (C) 2005-2021 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -412,7 +412,7 @@ subroutine psml_die(str)
 
   character(len=*), intent(in) :: str
 
-  MSG_BUG(str)
+  ABI_BUG(str)
 
 end subroutine psml_die
 !!***

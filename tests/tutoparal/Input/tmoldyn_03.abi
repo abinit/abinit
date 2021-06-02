@@ -2,7 +2,7 @@
 paral_kgb 1
 npband 2
 npfft 1
-npkpt 14
+np_spkpt 14
 bandpp 40
 
 prtden 0 prtwf 0 prteig 0
@@ -66,6 +66,9 @@ nband 80
 pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
 pseudos "Al.psp8"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

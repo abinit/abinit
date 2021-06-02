@@ -18,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -81,7 +81,7 @@
       real(dp), intent(in) :: angle, temperature
       self%nspin=nspin
       self%nstep=self%nspin
-      ABI_ALLOCATE(self%S, (3, self%nspin))
+      ABI_MALLOC(self%S, (3, self%nspin))
       self%angle=angle
       self%temperature=temperature
       self%beta=1.0/temperature ! Kb in a.u. is 1.
@@ -95,7 +95,7 @@
     subroutine finalize(self)
       class(spin_mc_t), intent(inout) :: self
       if (allocated(self%S)) then
-         ABI_DEALLOCATE(self%S)
+         ABI_FREE(self%S)
       end if
       self%Sold=zero
       self%Snew=zero

@@ -42,7 +42,7 @@ boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
               # requirements. Check that it does not affect
               # your results by increasing this (up to 2 max).
 
-#eph_intmeth 2 # Use of the tetrahedron method
+#eph_intmeth 2 # Use of the tetrahedron method (default)
 
 #######################################################################
 #Common input variables
@@ -76,6 +76,9 @@ nband 8
  pp_dirpath "$ABI_PSPDIR"
  pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

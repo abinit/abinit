@@ -7,7 +7,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -372,7 +372,7 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
  CASE (4)
    rfname='Symmetrical Inverse Dielectric Matrix'
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong Er%ID:',itoa(Er%ID)))
+   ABI_BUG(sjoin('Wrong Er%ID:',itoa(Er%ID)))
  END SELECT
 
  ! For chi, \espilon or \epsilon^{-1}, define the approximation.
@@ -398,7 +398,7 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
 !   write(msg,'(4a,i3)')ch10,&
 !&   ' em1results_print : BUG - ',ch10,&
 !&   ' Wrong value of Er%test_type = ',Er%test_type
-!   MSG_ERROR(msg)
+!   ABI_ERROR(msg)
 !  end if
 ! end if
 
@@ -411,13 +411,13 @@ subroutine em1results_print(Er,unit,prtvol,mode_paral)
  else if (Er%Tordering==3) then
    rforder='Retarded'
  else
-   MSG_BUG(sjoin('Wrong er%tordering= ',itoa(Er%Tordering)))
+   ABI_BUG(sjoin('Wrong er%tordering= ',itoa(Er%Tordering)))
  end if
 
  kxcname='None'
  if (Er%ikxc/=0) then
    !TODO Add function to retrieve kxc name
-   MSG_ERROR('Add function to retrieve kxc name')
+   ABI_ERROR('Add function to retrieve kxc name')
    kxcname='XXXXX'
  end if
 
@@ -601,7 +601,7 @@ end subroutine Epsm1_symmetrizer
 !!  Epsm1_symmetrizer_inplace
 !!
 !! FUNCTION
-!!  Same function as Epsm1_symmetrizer, ecept now the array Ep%epsm1 is modified inplace
+!!  Same function as Epsm1_symmetrizer, ecxept now the array Ep%epsm1 is modified inplace
 !!  thorugh an auxiliary work array of dimension (npwc,npwc)
 !!
 !! INPUTS
@@ -824,7 +824,7 @@ subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
      write(msg,'(3a,i6)')&
 &      'Some complex frequencies are too small to qualify as real or imaginary.',ch10,&
 &      'Number of unidentified frequencies = ', unclassified
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end if
 
@@ -835,7 +835,7 @@ subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
      write(msg,'(a,i8,2a,i8)')&
 &     'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
 &     'Calculation will proceed with Max available npwe = ',Er%Hscr%npwe
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    else  ! Redefine the no. of G"s for W.
      Er%npwe=npwe_asked
    end if
@@ -941,14 +941,14 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      if (iomode == IO_MODE_MPI) then
        !call wrtout(std_out, "read_screening with MPI_IO")
-       MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+       ABI_WARNING("SUSC files is buggy. Using Fortran IO")
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      else
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
      end if
    else
      ! Out-of-core solution ===
-     MSG_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
+     ABI_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
      continue
    end if
 
@@ -972,7 +972,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 #endif
        else
          if (open_file(ofname,msg,newunit=unt_dump,form="unformatted",status="unknown",action="write") /= 0) then
-           MSG_ERROR(msg)
+           ABI_ERROR(msg)
          end if
        end if
        call wrtout(std_out,sjoin('mkdump_Er: calculating and writing epsilon^-1 matrix on file: ',ofname),'COLL')
@@ -999,7 +999,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          if (normv(Er%qibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
          ! FIXME there's a problem with SUSC files and MPI-IO
          !if (iomode == IO_MODE_MPI) then
-         !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+         !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
          !  call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,IO_MODE_FORTRAN,comm_self,iqiA=iqibz)
          !else
          call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,iomode,comm_self,iqiA=iqibz)
@@ -1010,13 +1010,13 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_MALLOC(dummy_uwing,(npwe*Er%nJ,Er%nomega,dim_wing))
          ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
-         if (approx_type<2 .or. approx_type>3) then ! bootstrap
-           MSG_WARNING('Entering out-of core RPA or Kxc branch')
+         if (approx_type<2 .or. approx_type>3) then 
+           ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self)
          else
-           MSG_WARNING('Entering out-of core fxc_ADA branch')
+           ABI_WARNING('Entering out-of core fxc_ADA branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self,fxc_ADA(:,:,iqibz))
@@ -1071,7 +1071,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
      !  !call wrtout(std_out, "read_screening with MPI_IO")
-     !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+     !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
      !  call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      !else
      call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
@@ -1086,12 +1086,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
 
        if (approx_type<2 .or. approx_type>3) then
-         MSG_WARNING('Entering in-core RPA and Kxc branch')
+         ABI_WARNING('Entering in-core RPA and Kxc branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm)
        else
-         MSG_WARNING('Entering in-core fxc_ADA branch')
+         ABI_WARNING('Entering in-core fxc_ADA branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
 &                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
 &                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
@@ -1189,7 +1189,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
    ! FIXME there's a problem with SUSC files and MPI-IO
    !if (iomode == IO_MODE_MPI) then
    !  !write(std_out,*)"read_screening with iomode",iomode,"file: ",trim(er%fname)
-   !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
+   !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
    !  call read_screening(em1_ncname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm,iqiA=iqibzA)
    !else
    call read_screening(em1_ncname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm,iqiA=iqibzA)
@@ -1200,12 +1200,12 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
      !call em1results_print(Er)
      return
    else
-     MSG_ERROR(sjoin('Wrong Er%ID', itoa(er%id)))
+     ABI_ERROR(sjoin('Wrong Er%ID', itoa(er%id)))
    end if
 
  case default
    ! In-core solution.
-   MSG_ERROR("you should not be here")
+   ABI_ERROR("you should not be here")
  end select
 
  DBG_EXIT("COLL")
@@ -1275,7 +1275,7 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      !for the moment no sort, maybe here I should sort using the real part?
      call ZGEES('V','N',sortcplx,npwe,Afull,npwe,sdim,wwc,vs,npwe,work,lwork,rwork,bwork,info)
      if (info/=0) then
-       MSG_ERROR(sjoin("ZGEES returned info:",itoa(info)))
+       ABI_ERROR(sjoin("ZGEES returned info:",itoa(info)))
      end if
 
      eigs(:,iw)=wwc(:)
@@ -1307,14 +1307,14 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      ! For the moment we require also the eigenvectors.
      call ZHPEV('V','U',npwe,Adpp,ww,eigvec,npwe,work,rwork,info)
      if (info/=0) then
-       MSG_ERROR(sjoin('ZHPEV returned info=', itoa(info)))
+       ABI_ERROR(sjoin('ZHPEV returned info=', itoa(info)))
      end if
 
      negw=(COUNT((REAL(ww)<tol6)))
      if (negw/=0) then
        write(msg,'(a,i5,a,i3,a,f8.4)')&
         'Found negative eigenvalues. No. ',negw,' at iqibz= ',iqibz,' minval= ',MINVAL(REAL(ww))
-       MSG_WARNING(msg)
+       ABI_WARNING(msg)
      end if
 
      eigs(:,iw)=ww(:)
@@ -1401,11 +1401,12 @@ end subroutine decompose_epsm1
 subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,chi0_head,&
   chi0_lwing,chi0_uwing,chi0,spectra,comm,&
-  fxc_ADA) ! optional argument
+  fxc_ADA,rhor) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,nomega,dim_wing,approx_type,option_test,nkxc,nfftot,comm
+ real(dp),intent(in),optional :: rhor
  type(vcoul_t),target,intent(in) :: Vcp
  type(spectra_t),intent(out) :: Spectra
 !arrays
@@ -1435,12 +1436,11 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  complex(dpc),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
  complex(gwpc),allocatable :: kxcg_mat(:,:)
 
-!bootstrap
+!bootstrap and LR
  integer :: istep,nstep
- logical :: converged
- real(dp) :: conv_err, alpha
+ real(dp) :: conv_err, alpha, Zr, qpg2(3), qpg2_nrm
  real(gwpc) :: chi00_head, fxc_head
- complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
+ complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), vfxc_lr(:,:), vfxc_tmp(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 
 ! *************************************************************************
@@ -1448,7 +1448,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  DBG_ENTER("COLL")
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1554,7 +1554,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      write(msg,'(a,i4,3a)')&
 &     'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &     'Enlarge the FFT mesh to get rid of this problem. '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
 
    !FIXME "recheck TDDFT code and parallel"
@@ -1580,10 +1580,10 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
  CASE (2)
    ! ADA nonlocal vertex correction contained in fxc_ADA
-   MSG_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
+   ABI_WARNING('Entered fxc_ADA branch: EXPERIMENTAL!')
    ! Test that argument was passed
    if (.not.present(fxc_ADA)) then
-     MSG_ERROR('make_epsm1_driver was not called with optional argument fxc_ADA')
+     ABI_ERROR('make_epsm1_driver was not called with optional argument fxc_ADA')
    end if
    ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
 
@@ -1606,7 +1606,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE (4)
-   ! Bootstrap vertex corrections, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
+   ! Bootstrap vertex kernel by Sharma [[cite:Sharma2011]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(vfxc_boot0,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
@@ -1626,70 +1626,55 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
    call wrtout(std_out,msg,'COLL')
-
-   do istep=1,nstep
+   ! loop
+   conv_err = 0.1
+   do istep=1, nstep
      chi0 = chi0_save
-     io=1 ! static
+     io=1 ! for now only at omega=0
      call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
-&     chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-
+&      chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
      conv_err = smallest_real
      do ig2=1,npwe*nJ
        do ig1=1,npwe*nI
          conv_err= MAX(conv_err, ABS(chi0(ig1,ig2,1) - chi0_tmp(ig1,ig2)))
        end do
      end do
-     converged = (conv_err <= tol4)
      write(msg,'(a,i4,a,f10.6)') ' => bootstrap itr# ', istep, ', eps^-1 max error: ', conv_err
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a,2f10.6)')  '    eps^-1(head):   ', chi0(1,1,1)
      call wrtout(std_out,msg,'COLL')
      write(msg,'(a,2f10.6)')  '    v^-1*fxc(head): ', fxc_head
      call wrtout(std_out,msg,'COLL')
-
-     if (converged) then
-       write(msg,'(a,i4,a)') ' => bootstrap fxc converged after ', istep, ' iterations'
-       call wrtout(std_out,msg,'COLL')
-       chi0 = chi0_save
-       do io=1,nomega
-         if (omega_distrb(io) == my_rank) then
-           call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
-&           chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-           epsm_lf(io,:) = tmp_lf
-           epsm_nlf(io,:) = tmp_nlf
-           eelf(io,:) = tmp_eelf
-         end if
-       end do
-       write(msg, '(a,2f10.6)') ' ->   eps^-1(head): ', chi0(1,1,1)
-       call wrtout(std_out,msg,'COLL')
-       write(msg,'(a,2f10.6)')  ' -> v^-1*fxc(head): ', fxc_head
-       call wrtout(std_out,msg,'COLL')
-       exit
-     else if (istep < nstep) then
-       chi0_tmp = chi0(:,:,1)
-       vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
-       if (istep > 1) then
-         vfxc_boot = alpha*vfxc_boot0 + (one-alpha)*vfxc_boot
-       end if
-       vfxc_boot0 = vfxc_boot
-       fxc_head = vfxc_boot(1,1)
-       do ig1=1,npwe
-         vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
-       end do
-     else
-       write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
-       MSG_WARNING(msg)
-       ! proceed to calculate the dielectric function even if fxc is not converged
-       chi0 = chi0_save
-       do io=1,nomega
-         if (omega_distrb(io) == my_rank) then
-           call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
-&            chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-           epsm_lf(io,:) = tmp_lf
-           epsm_nlf(io,:) = tmp_nlf
-           eelf(io,:) = tmp_eelf
-         end if
-       end do
+     if (conv_err <= tol4) exit
+     !
+     chi0_tmp = chi0(:,:,1)
+     vfxc_boot = chi0(:,:,1)/chi00_head
+     if (istep > 1) then
+       vfxc_boot = alpha*vfxc_boot0 + (one-alpha)*vfxc_boot
+     end if
+     vfxc_boot0 = vfxc_boot
+     fxc_head = vfxc_boot(1,1)
+     do ig1=1,npwe
+       vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
+     end do
+   end do
+   ! end loop
+   if (istep <= nstep) then
+     write(msg,'(a,i4,a)') ' => bootstrap fxc converged after ', istep, ' iterations'
+     call wrtout(std_out,msg,'COLL')
+   else 
+     write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
+     ABI_WARNING(msg)
+   end if
+   ! 
+   chi0 = chi0_save
+   do io=1,nomega
+     if (omega_distrb(io) == my_rank) then
+       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
+&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+       epsm_lf(io,:) = tmp_lf
+       epsm_nlf(io,:) = tmp_nlf
+       eelf(io,:) = tmp_eelf
      end if
    end do
 
@@ -1705,7 +1690,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE(5)
-   !@WC: one-shot scalar bootstrap approximation
+   ! One-shot scalar bootstrap approximation
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
@@ -1751,8 +1736,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
 CASE(6)
-   !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) [[cite:Rigamonti2015]]
-   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]]
+   ! RPA bootstrap by Rigamonti [[cite:Rigamonti2015]] and Berger [[cite:Berger2015]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
    ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
@@ -1829,8 +1813,95 @@ CASE(6)
      call print_arr(chi0(:,:,io),mode_paral='PERS')
    end do
 
+ CASE (7)
+   ! LR+ALDA hybrid vertex kernel by Tal
+   ! First ALDA
+   ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
+   ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
+   ! Make kxcg_mat(G1,G2) = kxcg(G1-G2) from kxcg defined on the FFT mesh.
+   ABI_MALLOC_OR_DIE(kxcg_mat,(npwe,npwe), ierr)
+   ierr=0
+   do ig2=1,npwe
+     do ig1=1,npwe
+       g1mg2_idx = g2ifft(gvec(:,ig1)-gvec(:,ig2),ngfft)
+       if (g1mg2_idx>0) then
+         kxcg_mat(ig1,ig2) = kxcg(g1mg2_idx,1)
+       else
+         ierr=ierr+1
+         kxcg_mat(ig1,ig2) = czero
+       end if
+     end do
+   end do
+   if (ierr/=0) then
+     write(msg,'(a,i4,3a)')&
+&     'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
+&     'Enlarge the FFT mesh to get rid of this problem. '
+     ABI_WARNING(msg)
+   end if
+   !FIXME "recheck TDDFT code and parallel"
+   ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
+
+   ! Now LR: (1-Z)*chi0^-1
+   ABI_MALLOC_OR_DIE(vfxc_lr,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(vfxc_tmp,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
+
+   if (iqibz==1) then
+     vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
+   else
+     vc_sqrt => Vcp%vc_sqrt(:,iqibz)
+   end if
+
+   Zr = 0.78 
+   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   fxc_head = czero; vfxc_lr = czero; vfxc_tmp = czero
+   epsm_lf = czero; epsm_nlf = czero; eelf = zero
+   write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ', chi00_head
+   call wrtout(std_out,msg,'COLL')
+   ! 
+   chi0_tmp = chi0(:,:,1)
+   call xginv(chi0_tmp,npwe,comm=comm)
+   vfxc_lr = (one-Zr)*chi0_tmp(:,:)
+   write(msg,'(a)') ' Constructing LR+ALDA fxc kernel'
+   call wrtout(std_out,msg,'COLL')
+   !
+   do ig1=1,npwe
+      do ig2=1,npwe
+       qpg2 = Vcp%qibz(:,iqibz) + gvec(:,ig1)
+       qpg2_nrm = normv(qpg2,gmet,"G")
+       qpg2 =  Vcp%qibz(:,iqibz) + gvec(:,ig2)
+       qpg2_nrm = SQRT(qpg2_nrm * normv(qpg2,gmet,"G"))
+       vfxc_tmp(ig1,ig2) = vfxc_lr(ig1,ig2)*exp(-(qpg2_nrm/k_thfermi(rhor))**2) + & 
+&        kxcg_mat(ig1,ig2)*(one - exp(-(qpg2_nrm/k_thfermi(rhor))**2))
+       !write(std_out,*) ig1, qpg2_nrm, k_thfermi(rhor), vfxc_lr(ig1,ig1), kxcg_mat(ig1,ig1), vfxc_tmp(ig1,ig1)
+      end do
+   end do
+   !
+   vfxc_lr = vfxc_tmp
+   
+   do io=1,nomega
+     if (omega_distrb(io) == my_rank) then
+       call atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_lr,kxcg_mat,option_test,my_nqlwl,dim_wing,omega(io),&
+&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+       epsm_lf(io,:) = tmp_lf
+       epsm_nlf(io,:) = tmp_nlf
+       eelf(io,:) = tmp_eelf
+     end if
+   end do
+
+   ABI_FREE(kxcg_mat)
+   ABI_FREE(chi0_tmp)
+   ABI_FREE(vfxc_lr)
+   ABI_FREE(vfxc_tmp)
+
+   do io=1,nomega
+     write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
+     call wrtout(std_out,msg,'COLL')
+     call print_arr(chi0(:,:,io),mode_paral='PERS')
+   end do
+
  CASE DEFAULT
-   MSG_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
+   ABI_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
  END SELECT
 
  if (use_MPI) then
@@ -1961,7 +2032,7 @@ subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,ch
  ABI_UNUSED(chi0_head(1,1))
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2121,7 +2192,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  ABI_UNUSED(chi0_uwing(1,1))
 
  if (nI/=1.or.nJ/=1) then
-   MSG_ERROR("nI or nJ=/1 not yet implemented")
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
  end if
 
  ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
@@ -2201,7 +2272,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
    end do
 
  case default
-   MSG_BUG(sjoin('Wrong option_test:',itoa(option_test)))
+   ABI_BUG(sjoin('Wrong option_test:',itoa(option_test)))
  end select
 
  ABI_FREE(chitmp)
@@ -2218,6 +2289,187 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  end if
 
 end subroutine atddft_symepsm1
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_screening/atddft_hyb_symepsm1
+!! NAME
+!! atddft_hyb_symepsm1
+!!
+!! FUNCTION
+!!  Calculate $\tilde\epsilon^{-1}$ using ALDA within TDDFT
+!!
+!!  Based on atddft_symepsm1, modified for the LR+ALDA hybrid kernel
+!!
+!!  Output the electron energy loss function and the macroscopic dielectric function with and
+!!  without local field effects (only if non-zero real frequencies are available)
+!!
+!! INPUTS
+!!  iqibz=index of the q-point in the array Vcp%qibz where epsilon^-1 has to be calculated
+!!  npwe=Number of G-vectors in chi0.
+!!  nI,nJ=Number of rows/columns in chi0_ij (1,1 in collinear case)
+!!  dim_wing=Dimension of the wings (0 or 3 if q-->0)
+!!  kxcg_mat_sr=Short-range fxc kernel used in the TE epsilon^-1
+!!  option_test=Only for TDDFT:
+!!   == 0 for TESTPARTICLE ==
+!!   == 1 for TESTELECTRON ==
+!!  Vcp<vcoul_t>=Structure gathering data on the Coulombian interaction
+!!   %nqibz=Number of q-points.
+!!   %qibz(3,nqibz)=q-points in the IBZ.
+!!  comm=MPI communicator.
+!!  chi0_lwing(npwe*nI,dim_wing)=Lower wings of chi0 (only for q-->0)
+!!  chi0_uwing(npwe*nJ,dim_wing)=Upper wings of chi0 (only for q-->0)
+!!  chi0_head(dim_wing,dim_wing)=Head of of chi0 (only for q-->0)
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  chi0(npwe*nI,npwe*nJ): in input the irreducible polarizability, in output
+!!   the symmetrized inverse dielectric matrix.
+!!
+!! PARENTS
+!!      m_screening
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,kxcg_mat_sr,option_test,my_nqlwl,dim_wing,omega,&
+& chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqibz,nI,nJ,npwe,dim_wing,my_nqlwl
+ integer,intent(in) :: option_test,comm
+ type(vcoul_t),target,intent(in) :: Vcp
+!arrays
+ complex(gwpc),intent(in) :: kxcg_mat(npwe,npwe), kxcg_mat_sr(npwe,npwe)
+ complex(dpc),intent(in) :: omega
+ complex(dpc),intent(inout) :: chi0_lwing(npwe*nI,dim_wing)
+ complex(dpc),intent(inout) :: chi0_uwing(npwe*nJ,dim_wing)
+ complex(dpc),intent(inout) :: chi0_head(dim_wing,dim_wing)
+ complex(gwpc),intent(inout) :: chi0(npwe*nI,npwe*nJ)
+ real(dp),intent(out) :: eelf(my_nqlwl)
+ complex(dpc),intent(out) :: epsm_lf(my_nqlwl),epsm_nlf(my_nqlwl)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0,prtvol=0
+ integer :: ig1,ig2,my_rank,nprocs,ierr
+ real(dp) :: ucvol, Zr
+ logical :: is_qeq0
+ character(len=500) :: msg
+!arrays
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ complex(gwpc),allocatable :: chitmp(:,:)
+ complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
+
+! *************************************************************************
+
+ ABI_UNUSED(chi0_head(1,1))
+ ABI_UNUSED(chi0_lwing(1,1))
+ ABI_UNUSED(chi0_uwing(1,1))
+
+ if (nI/=1.or.nJ/=1) then
+   ABI_ERROR("nI or nJ=/1 not yet implemented")
+ end if
+
+ ABI_CHECK(Vcp%nqlwl==1,"nqlwl/=1 not coded")
+ ABI_CHECK(my_nqlwl==1,"my_nqlwl/=1 not coded")
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ call metric(gmet,gprimd,-1,rmet,Vcp%rprimd,ucvol)
+
+ is_qeq0 = (normv(Vcp%qibz(:,iqibz),gmet,'G')<GW_TOLQ0)
+
+ if (iqibz==1) then
+   !%vc_sqrt => Vcp%vcqlwl_sqrt(:,iqlwl)  ! Use Coulomb term for q-->0
+   vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! TODO add treatment of non-Analytic behavior
+ else
+   vc_sqrt => Vcp%vc_sqrt(:,iqibz)
+ end if
+
+ write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwpc*b2Mb," Mb"
+ ABI_MALLOC_OR_DIE(chitmp,(npwe,npwe), ierr)
+ !
+ ! * Calculate chi0*fxc.
+ chitmp = MATMUL(chi0,kxcg_mat)
+ ! * First calculate the NLF contribution
+ do ig1=1,npwe
+   do ig2=1,npwe
+     chitmp(ig1,ig2)=-chitmp(ig1,ig2)
+   end do
+   chitmp(ig1,ig1)=chitmp(ig1,ig1)+one
+ end do
+
+ call xginv(chitmp,npwe,comm=comm)
+
+ chitmp = MATMUL(chitmp,chi0)
+ !if (.not. ABS(REAL(omega))> tol3) call hermitianize(chitmp,"All")
+ chitmp(1,1)=-vc_sqrt(1)*chitmp(1,1)*vc_sqrt(1)
+ chitmp(1,1)=chitmp(1,1)+one
+
+ epsm_nlf(1)=chitmp(1,1)
+
+ chitmp = MATMUL(chi0,kxcg_mat)
+ ! * Calculate (1-chi0*Vc-chi0*Kxc) and put it in chitmp.
+ do ig1=1,npwe
+   do ig2=1,npwe
+     chitmp(ig1,ig2)=-chitmp(ig1,ig2)-chi0(ig1,ig2)*vc_sqrt(ig2)**2
+   end do
+   chitmp(ig1,ig1)=chitmp(ig1,ig1)+one
+ end do
+
+ ! * Invert (1-chi0*Vc-chi0*Kxc) and Multiply by chi0.
+ call xginv(chitmp,npwe,comm=comm)
+ chitmp=MATMUL(chitmp,chi0)
+
+ ! * Save result, now chi0 contains chi.
+ chi0=chitmp
+
+ select case (option_test)
+ case (0)
+   ! Symmetrized TESTPARTICLE epsilon^-1
+   call wrtout(std_out,' Calculating TESTPARTICLE epsilon^-1(G,G") = 1 + Vc*chi','COLL')
+   do ig1=1,npwe
+     chi0(ig1,:)=(vc_sqrt(ig1)*vc_sqrt(:))*chi0(ig1,:)
+     chi0(ig1,ig1)=one+chi0(ig1,ig1)
+   end do
+
+ case (1)
+   ! Symmetrized TESTELECTRON epsilon^-1
+   call wrtout(std_out,' Calculating TESTELECTRON epsilon^-1(G,G") = 1 + Vc*chi + Zr*Kxc_sr*chi',"COLL")
+   chitmp=MATMUL(kxcg_mat_sr,chi0)
+   Zr = 0.78
+
+   ! Perform hermitianization, only valid along the imaginary axis.
+   if (.not. ABS(REAL(omega))> tol3) call hermitianize(chitmp,"All")
+
+   do ig1=1,npwe
+     chi0(ig1,:)=(vc_sqrt(ig1)*vc_sqrt(:))*chi0(ig1,:)+chitmp(ig1,:)*Zr
+     chi0(ig1,ig1)=one+chi0(ig1,ig1)
+   end do
+
+ case default
+   ABI_BUG(sjoin('Wrong option_test:',itoa(option_test)))
+ end select
+
+ ABI_FREE(chitmp)
+ !
+ ! === chi0 now contains symmetrical epsm1 ===
+ ! * Calculate macroscopic dielectric constant epsm_lf(w)=1/epsm1(G=0,Gp=0,w).
+ epsm_lf(1) =  one/chi0(1,1)
+ eelf   (1) = -AIMAG(chi0(1,1))
+
+ if (prtvol > 0) then
+   write(msg,'(a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at omega',omega*Ha_eV,' [eV]'
+   call wrtout(std_out,msg,'COLL')
+   call print_arr(chi0,unit=std_out)
+ end if
+
+end subroutine atddft_hyb_symepsm1
 !!***
 
 !----------------------------------------------------------------------
@@ -2440,7 +2692,7 @@ subroutine lebedev_laikov_int()
 
 ! *************************************************************************
 
- MSG_ERROR("lebedev_laikov_int is still under development")
+ ABI_ERROR("lebedev_laikov_int is still under development")
 
  !tensor=RESHAPE((/4.0,2.0,4.0,0.5,2.1,0.0,5.4,2.1,5.0/),(/3,3/))
  tensor=RESHAPE((/4.0,0.0,0.0,0.0,4.0,0.0,0.0,0.0,5.0/),(/3,3/))
@@ -2511,7 +2763,7 @@ subroutine lebedev_laikov_int()
  ABI_FREE(expd_func)
  ABI_FREE(ref_func)
 
- MSG_ERROR("Exiting from lebedev_laikov_int")
+ ABI_ERROR("Exiting from lebedev_laikov_int")
 
 end subroutine lebedev_laikov_int
 !!***
@@ -2621,7 +2873,7 @@ function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
 ! *************************************************************************
 
- MSG_ERROR("Work in progress")
+ ABI_ERROR("Work in progress")
  ! box_len has to be tested
 
  gprimd = RESHAPE(real_pars(1:9),(/3,3/))
@@ -2762,7 +3014,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 
  !if (itim_q/=1.or.isym_q/=1.or.ANY(umklp/=0) ) then
- !  MSG_ERROR("Bug in mdielf_bechstedt")
+ !  ABI_ERROR("Bug in mdielf_bechstedt")
  !end if
  !
  ! Symmetrize Vc in the full BZ.
@@ -2809,7 +3061,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
          em1_qpg2r(ifft) = one / mdielf_bechstedt(eps_inf,qpg2_nrm,rhor(ifft,1))
        end do
      case default
-       MSG_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
+       ABI_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
      end select
 
      call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,1,ngfft,tim_fourdp0)
@@ -3030,7 +3282,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
  if (my_rank == master) then
    if (iomode == IO_MODE_FORTRAN) then
      if (open_file(path,msg,newunit=unt,form="unformatted", action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      !call hscr_io(er%hscr,fform,rdwr,unt,comm,master,iomode)
      do iw=1,nomega
@@ -3044,7 +3296,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
      !end do
 
    else
-     MSG_ERROR(sjoin("iomode", itoa(iomode), "is not supported"))
+     ABI_ERROR(sjoin("iomode", itoa(iomode), "is not supported"))
    end if
  end if
 
@@ -3063,7 +3315,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
      !  write(unt)chi0_uwing(:,iw,:)
      !end do
    else
-     MSG_ERROR(sjoin("iomode:", itoa(iomode), "is not supported"))
+     ABI_ERROR(sjoin("iomode:", itoa(iomode), "is not supported"))
    end if
  end if
 
@@ -3167,13 +3419,13 @@ subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
    select case (iomode)
    case (IO_MODE_FORTRAN)
      if (open_file(path, msg, newunit=unt, action="read", form="unformatted", status="old") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
 
      close(unt)
 
    case default
-     MSG_ERROR(sjoin("iomode:", itoa(iomode), "is not coded"))
+     ABI_ERROR(sjoin("iomode:", itoa(iomode), "is not coded"))
    end select
  end if
 

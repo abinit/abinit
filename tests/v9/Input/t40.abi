@@ -6,7 +6,7 @@
 ndtset      2
 gwpara      2
 
-ecut      12.0
+ecut       12.0
 ecutwfn    12.0
 ecutsigx   3.0
 ecuteps    3.0

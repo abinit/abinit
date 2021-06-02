@@ -73,10 +73,13 @@ nband 8
  pp_dirpath "$ABI_PSPDIR"
  pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
+#%% test_chain = teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_5.abo, tolnlines= 80, tolabs=  600, tolrel=  6.000e-03

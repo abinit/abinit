@@ -51,6 +51,7 @@ dmftcheck 0
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
 
+
 # == CTQMC
 dmft_solv 5 # CTQMC
 dmftqmc_l 50 

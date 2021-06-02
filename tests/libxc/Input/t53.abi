@@ -59,9 +59,9 @@ nstep3 1
 
 
 #Parameters for parallelization with Hartree-Fock
-#npkpt2 2           # Number of processors for k-point parallelization
+#np_spkpt2 2           # Number of processors for k-point parallelization
 #nphf2  2           # Number of processors for occupied states parallelization
-                   # The calculation thus requires npkpt*nphf processors.
+                   # The calculation thus requires np_spkpt*nphf processors.
 pawecutdg 12.0
 paral_atom 0
 prtvol 10

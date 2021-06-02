@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -168,14 +168,14 @@ subroutine alloc_self(self,paw_dmft,opt_oper,wtype)
  self%iself_cv=0
 
  call init_oper(paw_dmft,self%hdc,opt_ksloc=optoper)
- ABI_DATATYPE_ALLOCATE(self%oper,(self%nw))
+ ABI_MALLOC(self%oper,(self%nw))
  do ifreq=1,self%nw
   call init_oper(paw_dmft,self%oper(ifreq),opt_ksloc=optoper)
  enddo
 
  if(paw_dmft%dmft_solv==4) then
-   ABI_ALLOCATE(self%qmc_shift,(paw_dmft%natom))
-   ABI_ALLOCATE(self%qmc_xmu,(paw_dmft%natom))
+   ABI_MALLOC(self%qmc_shift,(paw_dmft%natom))
+   ABI_MALLOC(self%qmc_xmu,(paw_dmft%natom))
    self%qmc_shift(:)=zero
    self%qmc_xmu(:)=zero
  endif
@@ -279,15 +279,15 @@ subroutine destroy_self(self)
    do ifreq=1,self%nw
     call destroy_oper(self%oper(ifreq))
    enddo
-   ABI_DATATYPE_DEALLOCATE(self%oper)
+   ABI_FREE(self%oper)
  end if
 
  call destroy_oper(self%hdc)
  if (allocated(self%qmc_shift)) then
-   ABI_DEALLOCATE(self%qmc_shift)
+   ABI_FREE(self%qmc_shift)
  end if
  if (allocated(self%qmc_xmu))  then
-   ABI_DEALLOCATE(self%qmc_xmu)
+   ABI_FREE(self%qmc_xmu)
  end if
  self%omega => null()
 
@@ -424,13 +424,13 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
            else if(dmft_dc==2) then  ! AMF
              if(nspinor==2) then
                !write(message,'(a,i4,i4,2x,e20.10)') " AMF Double counting not implemented for SO"
-               !MSG_ERROR(message)
+               !ABI_ERROR(message)
                self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)= &
                hu(cryst_struc%typat(iatom))%upawu * ntot/two &
                + ( hu(cryst_struc%typat(iatom))%upawu - hu(cryst_struc%typat(iatom))%jpawu )&
                *ntot/two*(float(2*lpawu))/(float(2*lpawu+1))
                write(message,'(a,i4,i4,2x,e20.10)') " AMF Double counting is under test for SOC"
-               MSG_WARNING(message)
+               ABI_WARNING(message)
              else
                if(nsppol==2) then
                  self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)=  &
@@ -450,7 +450,7 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
 !                 write(std_out,*) "AMF", self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)
              endif
            else
-             MSG_ERROR("not implemented")
+             ABI_ERROR("not implemented")
            endif
          enddo  ! m1
        enddo  ! ispinor
@@ -582,7 +582,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
 !   - For the Tentative rotation of the self-energy file (begin init)
  if(present(pawang)) then
-   ABI_ALLOCATE(unitselfrot,(natom,nsppol,nspinor,7)) ! 7 is the max ndim possible
+   ABI_MALLOC(unitselfrot,(natom,nsppol,nspinor,7)) ! 7 is the max ndim possible
    if(optrw==2) then
      write(message,'(a,2x,a,f13.5)') ch10,&
 &     " == About to print self-energy for MAXENT code "
@@ -592,17 +592,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    endif
    call wrtout(std_out,message,'COLL')
 
-   ABI_DATATYPE_ALLOCATE(eigvectmatlu,(natom,nsppol))
+   ABI_MALLOC(eigvectmatlu,(natom,nsppol))
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom)/=-1) then
        tndim=nspinor*(2*paw_dmft%lpawu(iatom)+1)
        do isppol=1,nsppol
-         ABI_ALLOCATE(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
+         ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
        end do
      end if
    end do
-   ABI_DATATYPE_ALLOCATE(level_diag,(natom))
-   ABI_DATATYPE_ALLOCATE(selfrotmatlu,(natom))
+   ABI_MALLOC(level_diag,(natom))
+   ABI_MALLOC(selfrotmatlu,(natom))
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
    call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,selfrotmatlu)
    call init_oper(paw_dmft,energy_level,opt_ksloc=3)
@@ -679,13 +679,13 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (end diag)
 
  if((optrw==2.or.optrw==1).and.myproc==master)then
-   ABI_ALLOCATE(unitselffunc_arr,(natom*nsppol*nspinor))
+   ABI_MALLOC(unitselffunc_arr,(natom*nsppol*nspinor))
    iall=0
    do iatom=1,natom
      if(self%oper(1)%matlu(iatom)%lpawu.ne.-1) then
        ndim=2*self%oper(1)%matlu(iatom)%lpawu+1
-       ABI_ALLOCATE(s_r,(ndim,ndim,nspinor,nspinor))
-       ABI_ALLOCATE(s_i,(ndim,ndim,nspinor,nspinor))
+       ABI_MALLOC(s_r,(ndim,ndim,nspinor,nspinor))
+       ABI_MALLOC(s_i,(ndim,ndim,nspinor,nspinor))
 !       write(std_out,*) "print_self",ndim
        call int2char4(iatom,tag_at)
        ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
@@ -815,14 +815,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  call wrtout(std_out,message,'COLL')
                  message = "Dimensions in self are not correct"
                  if(readimagonly==1.or.present(opt_stop)) then
-                   MSG_ERROR(message)
+                   ABI_ERROR(message)
                  else
-                   MSG_WARNING(message)
+                   ABI_WARNING(message)
                  endif
                  iexist2=2
                endif
              else
-               MSG_WARNING("Self file is empty")
+               ABI_WARNING("Self file is empty")
              endif
            endif
            !write(std_out,*) "7"
@@ -1043,11 +1043,11 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
            close(unitselffunc_arr(iall))
 !         enddo ! ispinor
        enddo ! isppol
-       ABI_DEALLOCATE(s_r)
-       ABI_DEALLOCATE(s_i)
+       ABI_FREE(s_r)
+       ABI_FREE(s_i)
      endif ! lpawu=/-1
    enddo ! iatom
-   ABI_DEALLOCATE(unitselffunc_arr)
+   ABI_FREE(unitselffunc_arr)
  endif ! optrw==2.or.myproc==master
 ! call xmpi_barrier(spacecomm)
            !write(std_out,*) "9"
@@ -1056,17 +1056,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    call destroy_oper(energy_level)
    call destroy_matlu(level_diag,natom)
    call destroy_matlu(selfrotmatlu,natom)
-   ABI_DATATYPE_DEALLOCATE(level_diag)
-   ABI_DATATYPE_DEALLOCATE(selfrotmatlu)
+   ABI_FREE(level_diag)
+   ABI_FREE(selfrotmatlu)
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom)/=-1) then
        do isppol=1,nsppol
-         ABI_DEALLOCATE(eigvectmatlu(iatom,isppol)%value)
+         ABI_FREE(eigvectmatlu(iatom,isppol)%value)
        end do
      end if
    end do
-   ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
-   ABI_DEALLOCATE(unitselfrot) ! 7 is the max ndim possible
+   ABI_FREE(eigvectmatlu)
+   ABI_FREE(unitselfrot) ! 7 is the max ndim possible
  endif
 !   - For the Tentative rotation of the self-energy file (end destroy)
 
@@ -1085,9 +1085,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
       if(readimagonly==1) then
         message = "Self file does not exist or is incomplete: check the number of self data in file"
       endif
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      else
-       MSG_WARNING(message)
+       ABI_WARNING(message)
      endif
      if(iexist2==0) then
        write(message,'(4x,2a)') "File does not exist"
@@ -1107,7 +1107,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        write(message,'(4x,a,a,5i5,2x,e14.7)') "-> Put Self-Energy Equal to dc term - shift"
        call wrtout(std_out,message,'COLL')
        write(message,'(4x,a,a,5i5,2x,e14.7)') " No self energy is given, change dmft_rslf"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
      call wrtout(std_out,message,'COLL')
      do ifreq=1,self%nw
@@ -1127,17 +1127,17 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   call xmpi_barrier(spacecomm)
 !! lignes 924-928 semblent inutiles puisque la valeur de paw_dmft%fermie creee
 !! en ligne 927 est ecrasee en ligne 992. BA+jmb
-!!     ABI_ALLOCATE(fermie_read2,(1))
+!!     ABI_MALLOC(fermie_read2,(1))
 !!     fermie_read2(1)=fermie_read
 !!     call xmpi_sum(fermie_read2,spacecomm ,ier)
 !!     paw_dmft%fermie=fermie_read2(1)
-!!     ABI_DEALLOCATE(fermie_read2)
+!!     ABI_FREE(fermie_read2)
 
 !  ===========================
 !   bcast to other proc
 !  ===========================
-     ABI_ALLOCATE(buffer,(ncount))
-     ABI_ALLOCATE(fermie_read2,(1))
+     ABI_MALLOC(buffer,(ncount))
+     ABI_MALLOC(fermie_read2,(1))
      buffer(:)=czero
 !! BA+jmb
      fermie_read2=zero
@@ -1161,7 +1161,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                        if(icount.gt.ncount) then
                          write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
                          iexit=1
-                         MSG_ERROR(message)
+                         ABI_ERROR(message)
                        endif
                        buffer(icount)=self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
                      enddo
@@ -1174,7 +1174,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  if(icount.gt.ncount) then
                    write(message,'(2a,2i5)') ch10,"Error buffer",icount,ncount
                    iexit=1
-                   MSG_ERROR(message)
+                   ABI_ERROR(message)
                  endif
                  buffer(icount)=self%hdc%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)
                enddo
@@ -1194,7 +1194,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 
      if(ier/=0) then
        message =  "error in xmpi_sum in rw_self"
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif
      paw_dmft%fermie=fermie_read2(1)
 !     write(std_out,*) "Fermi level",paw_dmft%fermie
@@ -1225,12 +1225,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          enddo ! isppol
        endif ! lpawu=/-1
      enddo ! iatom
-     ABI_DEALLOCATE(fermie_read2)
-     ABI_DEALLOCATE(buffer)
+     ABI_FREE(fermie_read2)
+     ABI_FREE(buffer)
    endif  ! test read successful
  endif  ! optrw==1
 !   call flush_unit(std_out)
-!   MSG_ERROR("Aboring now")
+!   ABI_ERROR("Aboring now")
  if(optrw==0) then
    if(paw_dmft%dmft_rslf==0) then
      if(paw_dmft%dmft_solv/=4) then
@@ -1290,7 +1290,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
                  self%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)= paw_dmft%fixed_self(im,im,ispinor,iatu)
 !                 write(message,'(a,i4,i4,2x,e20.10)') " Fixed self not implemented for nspinor==2"
 !                 call wrtout(std_out,  message,'COLL')
-!                 MSG_ERROR("Aboring now")
+!                 ABI_ERROR("Aboring now")
                endif
              enddo
            enddo
@@ -1469,7 +1469,7 @@ subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
      if(abs(self%qmc_shift(iatom)-hu_shift2)>tol6) then
        write(message,'(2a,2f16.7)')  "  Shift for QMC is not correctly"&
 &      ," computed",self%qmc_shift(iatom),hu_shift2
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      endif ! shifts not equals
 
      write(message,'(4x,a,f16.7)')  &
@@ -1481,7 +1481,7 @@ subroutine make_qmcshift_self(cryst_struc,hu,self,apply)
      self%qmc_xmu(iatom)=zero
      write(message,'(4x,a,f16.7)')  &
 &     "Artificial Shift used in QMC AND to compute G is (in Ha) :",self%qmc_xmu(iatom)
-     MSG_WARNING(message)
+     ABI_WARNING(message)
 
    endif ! lpawu/=1
  enddo ! natom
@@ -1539,8 +1539,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  character(len=500) :: message
 ! *********************************************************************
  delta=0.0000000
- ABI_ALLOCATE(selftemp_re,(self%nw))
- ABI_ALLOCATE(selftemp_imag,(self%nw))
+ ABI_MALLOC(selftemp_re,(self%nw))
+ ABI_MALLOC(selftemp_imag,(self%nw))
  natom=self%hdc%natom
  nsppol  = self%hdc%nsppol
  nspinor=self%hdc%nspinor
@@ -1647,8 +1647,8 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  close(67)
      !write(6,*) "self1",aimag(self%oper(489)%matlu(1)%mat(1,1,1,1,1))
 
- ABI_DEALLOCATE(selftemp_re)
- ABI_DEALLOCATE(selftemp_imag)
+ ABI_FREE(selftemp_re)
+ ABI_FREE(selftemp_imag)
 
 
 end subroutine kramerskronig_self
@@ -1689,7 +1689,7 @@ subroutine selfreal2imag_self(selfr,self,filapp)
  real(dp) :: delta
 ! *********************************************************************
  delta=0.0000000
- ABI_ALLOCATE(selftempmatsub,(self%nw))
+ ABI_MALLOC(selftempmatsub,(self%nw))
  natom=self%hdc%natom
  nsppol  = self%hdc%nsppol
  nspinor=self%hdc%nspinor
@@ -1731,7 +1731,7 @@ subroutine selfreal2imag_self(selfr,self,filapp)
  enddo ! iatom
  close(672)
 
- ABI_DEALLOCATE(selftempmatsub)
+ ABI_FREE(selftempmatsub)
 
 
 end subroutine selfreal2imag_self

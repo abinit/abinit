@@ -7,7 +7,6 @@ For the different between Absolute, Relative, and Root-relative URLs see:
 
     <http://ifyoucodeittheywill.com/2009/03/absolute-relative-and-root-relative-urls/>
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
 import os
@@ -152,12 +151,19 @@ class MyEntry(Entry):
             #s += 'DOI: <{doi}>  \n'.format(doi=doi)
             s += 'DOI: <a href="{doi}" target="_blank">{doi}</a><br>'.format(doi=doi)
 
-        # Add modal window with bibtex button/link.
         if bibtex_ui is not None:
-            assert bibtex_ui in ("link", "button")
-            btn, modal = self.get_bibtex_btn_modal(link=bibtex_ui=="link")
-            s += btn + modal
-
+            # Add modal window with bibtex button/link.
+            # Use https://github.com/kylefox/jquery-modal
+            bibtex = highlight(self.to_bibtex(), BibTeXLexer(), HtmlFormatter(cssclass="codehilite"))
+            modal_id = "modal-id-%s" % self.key
+            s = f"""
+{s}
+<a href="#{modal_id}" rel="modal:open">bibtex</a> <!-- Link to open the modal -->
+<div id="{modal_id}" class="modal" style="height: initial; max-height: 90%; max-width: 90%; width: initial;">
+{bibtex}
+<a href="#" rel="modal:close">Close</a>
+</div>
+"""
         return s
 
     def to_html(self):
@@ -168,46 +174,8 @@ class MyEntry(Entry):
         """Return the data as a unicode string in the given format."""
         return BibliographyData({self.key: self}).to_string("bibtex")
 
-    def get_bibtex_btn_modal(self, link=False):
-        """
-        Build HTML string with bootstrap modal and link to open the modal.
-
-        Args:
-            link: True if a link instead of a button is wanted.
-
-        Return: (link, modal)
-        """
-        # https://v4-alpha.getbootstrap.com/components/modal/#examples
-        #text = escape(self.to_bibtex(), tag="pre")
-        text = highlight(self.to_bibtex(), BibTeXLexer(), HtmlFormatter(cssclass="codehilite"))
-        # Construct ids from self.key as they are unique.
-        modal_id, modal_label_id = "modal-id-%s" % self.key, "modal-label-id-%s" % self.key
-
-        if link:
-            btn = """<a data-toggle="modal" href="#{modal_id}">bibtex</a>""".format(**locals())
-        else:
-            btn = """\
-<button type="button" class="btn btn-primary btn-xsm btn-labeled small-text" data-toggle="modal" data-target="#{modal_id}">
-  <span class="btn-label"><i class="fa fa-id-card" aria-hidden="true"></i></span>bibtex
-</button>""".format(**locals())
-
-        modal = """\
-<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="{modal_label_id}">bibtex</h4>
-      </div>
-      <div class="modal-body">{text}</div>
-    </div>
-  </div>
-</div>""".format(**locals())
-
-        return btn, modal
-
-
 _WEBSITE = None
+
 
 class Website(object):
     """
@@ -239,7 +207,7 @@ class Website(object):
         """Return Website instance. Assume object already initialized with build_website."""
         global _WEBSITE
         if _WEBSITE is None:
-            raise RuntimeError("website must be constructuted by calling `Website.build`")
+            raise RuntimeError("website must be constructed by calling `Website.build`")
         return _WEBSITE
 
     def __init__(self, root, deploy, verbose=0):
@@ -400,10 +368,15 @@ Change the input yaml files or the python code
         self.markdown.reset()
         return my_unicode(self.markdown.convert(source))
 
-    def new_mdfile(self, dirname, mdname, meta=None, with_comment=True):
+    def new_mdfile(self, dirname, mdname, meta=None, with_comment=True, hide_navigation=False, hide_toc=False):
         """
         Create new markdown file with name `mdname` in directory `dirname`.
         `meta` is an optional dictionary with meta-variables added to the front matter.
+
+        Args:
+            with_comment: Add "DO_NOT_EDIT comment to md file.
+            hide_navigation: hide navigation sidebar.
+            hide_toc: hide TOC sidebar.
 
         Return: File object.
 
@@ -419,6 +392,18 @@ Change the input yaml files or the python code
         if self.verbose: print("Generating markdown file: `%s`" % path)
 
         mdf = io.open(path, "wt", encoding="utf-8")
+
+        if hide_navigation or hide_toc:
+            # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#hide-the-sidebars
+            # hide:
+            #   - navigation # Hide navigation
+            #   - toc        # Hide table of contents
+            if meta is None: meta = {}
+            assert "hide" not in meta
+            meta["hide"] = []
+            if hide_navigation: meta["hide"].append("navigation")
+            if hide_toc: meta["hide"].append("top")
+
         if meta is not None:
             # Must convert to ASCII to avoid !!python/unicode tags in YAML doc
             # (mkdocs does not use yaml to parse the front matter).
@@ -427,8 +412,8 @@ Change the input yaml files or the python code
             s = yaml.dump(meta, indent=4, default_flow_style=False).strip().replace(" !!python/unicode", "")
             mdf.write("---\n%s\n---\n" % s)
 
-        if with_comment:
-            mdf.write(self.do_not_edit_comment)
+        if with_comment: mdf.write(self.do_not_edit_comment)
+
         mdf.rpath = "/" + os.path.relpath(path, self.root)
 
         return mdf
@@ -519,13 +504,8 @@ and [builder matrix](https://wiki.abinit.org/doku.php?id=bb:builder).
 
         # Write index.md with the description of the input variables.
         meta = {"description": "Complete list of Abinit input variables"}
-        with self.new_mdfile("variables", "index.md", meta=meta) as mdf:
+        with self.new_mdfile("variables", "index.md", meta=meta, hide_toc=True) as mdf:
             mdf.write("\n\n# Input variables \n\n")
-            for code, vd in self.codevars.items():
-                mdf.write("## %s variables   \n\n" % code)
-                mdf.write(vd.get_vartabs_html(self, mdf.rpath))
-
-            # This for the table of variables implemented by Jordan
             mdf.write(self.build_varsearch_html(mdf.rpath))
 
         # Build markdown page with external parameters.
@@ -547,13 +527,13 @@ You can change these parameters at compile or run time usually.
                 var_list = [v for v in vd.values() if v.varset == varset]
                 meta = {"description": "%s input variables" % varset}
                 with self.new_mdfile("variables", varset + ".md", meta=meta) as mdf:
-                    mdf.write("""\
+                    mdf.write(f"""\
 # {varset} input variables
 
 This document lists and provides the description of the name (keywords) of the
-{varset} input variables to be used in the input file for the {executable} executable.
+{varset} input variables to be used in the input file for the {vd.executable} executable.
 
-""".format(varset=varset, executable=vd.executable))
+""")  #.format(varset=varset, executable=vd.executable))
 
                     for i, var in enumerate(var_list):
                         mdf.write(var.to_abimarkdown(with_hr=False))
@@ -738,7 +718,7 @@ in order of number of occurrence in the input files provided with the package.
 
 This document lists all the bibliographical references mentioned in the ABINIT documentation,
 with link(s) to the Web pages where such references are mentioned, as well as to the bibtex formatted reference.
-The bibtex file is available [here](../abiref.bib).
+The full bibtex file is available [here](../abiref.bib).
 
 """)
             for name in sorted(self.bib_data.entries.keys()):
@@ -797,7 +777,12 @@ The bibtex file is available [here](../abiref.bib).
             #if os.path.relpath(path, self.root) in ignored: continue
             #if f == "README.md": continue
             if f.endswith(".md"):
-                self.md_pages.append(MarkdownPage(path, self))
+                try:
+                    self.md_pages.append(MarkdownPage(path, self))
+                except Exception as exc:
+                    cprint("Exception while parsing markdown page: %s" % path, color="red")
+                    raise exc
+
             elif f.endswith(".html"):
                 self.html_pages.append(HtmlPage(path, self))
 
@@ -828,7 +813,10 @@ The bibtex file is available [here](../abiref.bib).
             return md_files
 
         pages_in_toolbar = []
-        for entry in self.mkdocs_config["pages"]:
+        entries = self.mkdocs_config.get("nav")
+        #entries = self.mkdocs_config.get("pages")
+        #if entries is None: entries = self.mkdocs_config.get("nav") # Old mkdocs syntax
+        for entry in entries:
             pages_in_toolbar.extend(find_mds(entry))
         #for p in pages_in_toolbar: print(p)
 
@@ -863,54 +851,29 @@ The bibtex file is available [here](../abiref.bib).
 
 !!! note
 
-    Supposing you made your own install of ABINIT, the input files to run the examples
-    are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
-    If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
+    Supposing you made your own installation of ABINIT, the input files to run the examples
+    are in the *~abinit/tests/* directory where *~abinit* is the **absolute path** of the abinit top-level directory.
+    If you have NOT made your own install, ask your system administrator where to find the package,
+    especially the executable and test files.
 
-    To execute the tutorials, create a working directory (`Work*`) and
-    copy there the input files and the *files* file of the lesson. This will be explicitly mentioned in the first lessons,
-    that will tell you more about the *files* file (see also [[help:abinit#intro|section 1.1]]).
-    The *files* file ending with *_x* (e.g. *tbase1_x.files*) **must be edited** every time you start to use a new input file.
-
-    Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
-    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
-
-    In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
-    executing the following lines in the terminal:
-
-    ```bash
-    export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir
-    export PATH=$ABI_HOME/src/98_main/:$PATH
-    export ABI_TESTS=$ABI_HOME/tests/
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
-    ```
-
-    Examples in this tutorial use these shell variables: copy and paste
-    the code snippets into the terminal (**remember to set ABI_HOME first!**).
-    The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
-    so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
-
-"""
-        tutorial_readmev9 = """
-
-!!! note
-
-    Supposing you made your own install of ABINIT, the input files to run the examples
-    are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
-    If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
-
-    In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
-    executing the following lines in the terminal:
+    In case you work on your own PC or workstation, to make things easier, we suggest you define
+    some handy environment variables by executing the following lines in the terminal:
 
     ```bash
     export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir # Change this line
-    export PATH=$ABI_HOME/src/98_main/:$PATH     # Do not change this line : path to executable
-    export ABI_TESTS=$ABI_HOME/tests/            # Do not change this line : path to tests dir
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/ # Do not change this line : path to pseudos dir
+    export PATH=$ABI_HOME/src/98_main/:$PATH      # Do not change this line: path to executable
+    export ABI_TESTS=$ABI_HOME/tests/             # Do not change this line: path to tests dir
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Do not change this line: path to pseudos dir
     ```
 
     Examples in this tutorial use these shell variables: copy and paste
-    the code snippets into the terminal (**remember to set ABI_HOME first!**).
+    the code snippets into the terminal (**remember to set ABI_HOME first!**) or, alternatively,
+    source the `set_abienv.sh` script located in the *~abinit* directory:
+
+    ```sh
+    source ~abinit/set_abienv.sh
+    ```
+
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
@@ -918,14 +881,14 @@ The bibtex file is available [here](../abiref.bib).
     copy there the input files of the lesson.
 
     Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
-    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
+    However you can run most of the tutorial examples in parallel with MPI, see the [[topic:parallelism|topic on parallelism]].
 """
         new_lines = []
         for line in lines:
             if "[TUTORIAL_README]" in line:
                 new_lines.extend(tutorial_readme.splitlines())
             elif "[TUTORIAL_READMEV9]" in line:
-                new_lines.extend(tutorial_readmev9.splitlines())
+                raise RuntimeError("Replace TUTORIAL_README9 with TUTORIAL_README")
             else:
                 new_lines.append(line)
 
@@ -970,12 +933,7 @@ The bibtex file is available [here](../abiref.bib).
                 if self.verbose: print("Triggering action:", action, "with args:", str(args))
 
                 # Dispatch according to action.
-                if action == "modal":
-                    if len(args) > 1:
-                        new_lines.extend(self.modal_with_tabs(args).splitlines())
-                    else:
-                        new_lines.extend(self.modal_from_filename(args[0]).splitlines())
-                elif action == "dialog":
+                if action == "dialog":
                     if len(args) > 1:
                         new_lines.extend(self.dialogs_from_filenames(args).splitlines())
                     else:
@@ -1132,7 +1090,7 @@ The bibtex file is available [here](../abiref.bib).
                                "You can change these parameters at compile or runtime usually.\n")
                     url = "/variables/external_parameters#%s" % self.slugify(name)
                     if a.text is None: a.text = name
-                    add_popover(a, title=self.codevars.all_external_params[name], content=content)
+                    add_popover(a, content=content, title=self.codevars.all_external_params[name])
 
                 else:
                     self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
@@ -1324,16 +1282,20 @@ The bibtex file is available [here](../abiref.bib).
         else:
             if not page_rpath.startswith("/"): page_rpath = "/" + page_rpath
             page_rpath = os.path.dirname(page_rpath.replace(".md", ""))
-            url = os.path.relpath(url, page_rpath)
+            # Hacking previous implementation to make it work with new mkdocs (?)
+            #url = os.path.relpath(url, page_rpath)
             if end: url = "%s#%s" % (url, end)
+            #print("url", url)
 
         if self.verbose: print("token", token, "page_rpath", page_rpath, "url", url)
+
         a.set('href', url.strip())
         if target: a.set('target', target)
         return a
 
     def build_varsearch_html(self, page_rpath):
-        """Build single dictionary mapping varname --> var. Add @code if not abinit."""
+        """"Return HTML string with table of variables plus search bar implemented by Jordan."""
+        # Build single dictionary mapping varname --> var. Add @code if not abinit.
         allvars = {}
         for code, vd in self.codevars.items():
             allvars.update({v.abivarname: v for v in vd.values()})
@@ -1346,21 +1308,9 @@ The bibtex file is available [here](../abiref.bib).
             lis = "\n".join("<li>{link}</li>".format(
                 link=var.internal_link(self, page_rpath, label=var.abivarname, cls="small-grey-link")) for _, var in sorted(group))
 
-        #for char, group in sort_and_groupby(allvars, key=lambda t: t[0][0].upper()):
-        #    group = list(group)
-        #    lis = []
-        #    for i, (abivarname, var) in enumerate(group):
-        #        if (i % 4) == 0 and i != 0: lis.append('</div>')
-        #        if (i % 4) == 0 and i != len(group) - 1 : lis.append('<div class="row">')
-        #        lis.append("""<li class="{col_cls}">{link}</li>""".format(
-        #            col_cls="col-md-3",
-        #            link=var.internal_link(self, page_rpath, label=abivarname, cls="")))
-        #    if lis[-1] != '</div>': lis.append('</div>')
-        #    lis = "\n".join(lis)
-
-            html_vars += """
+            html_vars += f"""
 <li><ul id="{char}" class="TabContentLetter">
-<li class="HeaderLetter">{char}</li> {lis} </ul></li>""".format(char=char, lis=lis)
+<li class="HeaderLetter">{char}</li> {lis} </ul></li>""" #.format(char=char, lis=lis)
 
         # NB: <form> is needed in order not to trigger the f/s keydown event registered by mkdocs-material.
         search_form = """
@@ -1380,26 +1330,23 @@ The bibtex file is available [here](../abiref.bib).
 
 <script> $(function() {defaultClick(true);}); </script>
 """
-        return """
+        return f"""
 
-## All variables
-
-See aim, anaddb, atdep, multibinit or optic for the subset of input variables for the executables
-AIM(Bader), ANADDB, ATDEP, MULTIBINIT and OPTIC.
-Such input variables are specifically labelled @aim, @anaddb, @atdep, @multibinit or @optic in the input variable database.
-Enter any string to search in the database. Clicking without any request will give all variables.
+Enter any string to search in the database.
+Enter empty string to show all variables for all executables.
+Variables specific to `executable` are denoted with the syntax `varname@executable` e.g. `a2fsmear@anaddb`.
+Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
 
 {search_form}
 
-<div class="TabsLetter">
-{tabs}
-</div>
+<div class="TabsLetter"> {tabs} </div>
 
 <ul id="Letters">
 {html_vars}
-</ul>""".format(**locals())
+</ul>"""
 
     def dialogs_from_filenames(self, paths):
+        """Build customized jquery dialog to show the content of a list of filepaths."""
         buttons, dialogs = [], []
         for path in paths:
             btn, dialog = self.dialog_from_filename(path, ret_btn_dialog=True)
@@ -1413,23 +1360,9 @@ Enter any string to search in the database. Clicking without any request will gi
         """Build customized jquery dialog to show the content of filepath `path`."""
         abs_path = os.path.join(self.root, path)
 
-        # FIXME: This to faciliate migration to new scheme for file extensions
-        # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(abs_path):
-            print("Using old convention for file extension: `.in` instead of `.abi`.\n",
-                  "Please change the md tutorial to use the .abi convention for", path)
-            root, _ = os.path.splitext(path)
-            path = root + ".abi"
-
-        if path.endswith(".out") and not os.path.exists(abs_path):
-           print("Using old convention for file extension: `.out` instead of `.abo`.\n",
-                 "Please change the md tutorial to use the .abo convention for", path)
-           root, _ = os.path.splitext(path)
-           path = root + ".abo"
-
         title = path if title is None else title
         with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
-            if path.endswith(".in"):
+            if path.endswith(".abi") or path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             elif path.endswith(".py"):
                 text = highlight(fh.read(), PythonLexer(), HtmlFormatter(cssclass="codehilite small-text"))
@@ -1437,123 +1370,20 @@ Enter any string to search in the database. Clicking without any request will gi
                 text = escape(fh.read(), tag="pre", cls="small-text")
 
         btn_id, dialog_id = gen_id(n=2)
-        button = """\
-<button type="button" id="{btn_id}" class="btn btn-default btn-labeled">
-  <span class="btn-label"><i class="fa fa-window-restore" aria-hidden="true"></i></span>View {path}
-</button>""".format(**locals())
 
-        dialog = """
+        dialog = f"""\
 <div id="{dialog_id}" class="my_dialog" title="{title}" hidden><div>{text}</div></div>
 
 <script> $(function() {{ abidocs_jqueryui_dialog("#{dialog_id}", "#{btn_id}") }}); </script>
-""".format(**locals())
+"""
+
+        button = f'<button id="{btn_id}" class="md-button md-button--secondary"> View {path} </button>'
 
         if not ret_btn_dialog:
             button = '<div class="text-center">%s</div>' % button
             return button + dialog
         else:
             return button, dialog
-
-    def modal_from_filename(self, path, title=None):
-        """Return HTML string with bootstrap modal and content taken from file `path`."""
-        abs_path = os.path.join(self.root, path)
-
-        # FIXME: This to faciliate migration to new scheme for file extensions
-        # It will be removed when the beautification is completed.
-        if path.endswith(".in") and not os.path.exists(abs_path):
-            print("Using old convention for file extension: `.in` instead of `.abi`.\n",
-                  "Please change the md tutorial to use the .abi convention for:", path)
-            root, _ = os.path.splitext(path)
-            path = root + ".abi"
-
-        if path.endswith(".out") and not os.path.exists(abs_path):
-           print("Using old convention for file extension: `.out` instead of `.abo`.\n",
-                 "Please change the md tutorial to use the .abo convention for:", path)
-           root, _ = os.path.splitext(path)
-           path = root + ".abo"
-
-
-
-
-
-        # Based on https://v4-alpha.getbootstrap.com/components/modal/#examples
-        # See also https://stackoverflow.com/questions/14971766/load-content-with-ajax-in-bootstrap-modal
-
-        title = path if title is None else title
-        with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
-            text = escape(fh.read(), tag="pre", cls="small-text")
-
-        return """\
-<div class="text-center"> <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary btn-labeled" data-toggle="modal" data-target="#{modal_id}">
-    <span class="btn-label"><i class="glyphicon glyphicon-modal-window" aria-hidden="true"></i></span>View {path}
-  </button>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="{modal_label_id}">{title}</h4>
-      </div>
-      <div class="modal-body">{text}</div>
-    </div>
-  </div>
-</div>""".format(modal_id=gen_id(), modal_label_id=gen_id(), **locals())
-
-    def modal_with_tabs(self, paths, title=None):
-        # Based on http://jsfiddle.net/n__o/19rhfnqm/
-        title = title if title else ""
-        apaths = [os.path.join(self.root, p) for p in paths]
-        button_label = "View " + ", ".join(paths)
-
-        text_list = []
-        for p in apaths:
-            with io.open(p, "rt", encoding="utf-8") as fh:
-                text_list.append(escape(fh.read(), tag="pre", cls="small-text"))
-        tab_ids = gen_id(n=len(apaths))
-        #print("paths", paths, "\ntab_ids", tab_ids)
-
-        s = """\
-<div class="text-center"> <!-- Button trigger modal -->
-  <button type="button" class="btn btn-primary btn-labeled" data-toggle="modal" data-target="#{modal_id}">
-    <span class="btn-label"><i class="glyphicon glyphicon-modal-window" aria-hidden="true"></i></span>{button_label}
-  </button>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="{modal_id}" tabindex="-1" role="dialog" aria-labelledby="{modal_label_id}" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="{modal_label_id}">{title}</h4>
-      </div>
-      <div class="modal-body">
-        <div role="tabpanel">
-          <!-- Nav tabs -->
-          <ul class="nav nav-tabs" role="tablist">""".format(modal_id=gen_id(), modal_label_id=gen_id(), **locals())
-
-        for i, (path, tid) in enumerate(zip(paths, tab_ids)):
-            s += """\
-          <li role="presentation" class="{li_class}">
-          <a href="{href}" aria-controls="uploadTab" role="tab" data-toggle="tab">{path}</a>
-          </li> """.format(li_class="active" if i == 0 else " ", href="#%s" % tid, path=path)
-
-        s +=  """\
-          </ul>
-          <!-- Tab panes -->
-          <div class="tab-content">"""
-
-        for i, (text, tid) in enumerate(zip(text_list, tab_ids)):
-            s += """<div role="tabpanel" class="tab-pane {active}" id="{tid}">{text}</div>""".format(
-                    active="active" if i == 0 else " ", tid=tid, text=text)
-
-        s += 6 * "</div>"
-
-        return s
 
 
 class Page(object):
@@ -1581,19 +1411,19 @@ class Page(object):
         return ("/" + self.relpath).replace(".md", "")
 
 
-def add_popover(element, title=None, content=None, html=False):
+def add_popover(element, content=None, title=None, html=False):
     """
     Helper function to add popover to an anchor element.
+    using https://atomiks.github.io/tippyjs. See also abidocs.js.
     """
     # NB: Unfortunately, cannot subclass etree.Element in py2.7.
     def tos(s):
         return s if html else escape(s)
+
     element.set("data-toggle", "popover")
     if title: element.set("title", tos(title))
-    element.set("data-placement", "auto right")
-    element.set("data-trigger", "hover focus")
-    if content: element.set("data-content", tos(content))
-    if html: element.set("data-html", "true")
+    if content:
+        element.set("data-tippy-content", tos(content))
 
 
 def a2s(element, cls=None):
@@ -1609,7 +1439,8 @@ class MarkdownPage(Page):
         self.meta = {}
         with io.open(self.path, "rt", encoding="utf-8") as fh:
            string = fh.read()
-        lines = string.split("\n")
+
+        #lines = string.split("\n")
         #""" Parse Meta-Data and store in Markdown.Meta. """
         # https://github.com/Python-Markdown/markdown/blob/master/markdown/extensions/meta.py
         #self.meta = self._get_meta(string.split("\n"))

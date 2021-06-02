@@ -33,7 +33,7 @@ pseudos "8o_hard.paw, 7n.paw, 1h.paw"
 # ========================
 nband         10       # Number of bands to compute
 kptopt        0        # No autogeneration of kpts so only use Gamma (0,0,0)
-charge        1.0      # Charge of the simulation cell
+cellcharge    1.0      # Charge of the simulation cell
 
 # Convergence parameters
 # ======================

@@ -1,7 +1,7 @@
 #Test chebfi
 
  istwfk 1
- npband 2 npkpt 1 npfft 2
+ npband 2 np_spkpt 1 npfft 2
  wfoptalg 1
  np_slk 2
  

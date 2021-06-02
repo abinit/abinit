@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, DRH)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -249,11 +249,11 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP SHARED(ntypat,ph3d,sign,vect) &
 !!$OMP SHARED(mblkpw,nffkg,nffkgd,nffkge,nffkgs,ntens,mmproj)
 
- ABI_ALLOCATE(ffkg,(mblkpw,nffkg))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(mblkpw,nffkg))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 !!$OMP DO
  do ipw1=1,npw,mblkpw
 
@@ -605,17 +605,17 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
      write(message,'(a,2i10,a,a)')&
 &     ' Input sign, choice=',sign,choice,ch10,&
 &     ' Are not compatible or allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
  end do
 !!$OMP END DO
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 
@@ -865,11 +865,11 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP SHARED(ndgxdt,nffkg,nffkgd,nffkge,nffkgs,nincat,nkpg,nlang) &
 !!$OMP SHARED(nloalg,ph3d,npw,ntens,ntypat,sign,vect)
 
- ABI_ALLOCATE(ffkg,(nffkg,mblkpw))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(nffkg,mblkpw))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 !!$OMP DO
  do ipw1=1,npw,mblkpw
 
@@ -1216,17 +1216,17 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
      write(message, '(a,2i10,a,a)' )&
 &     '  Input sign, choice=',sign,choice,ch10,&
 &     '  Are not compatible or allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
  end do
 !!$OMP END DO
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 
@@ -1469,11 +1469,11 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 !!$OMP SHARED (ntypat,ph3d,vect) &
 !!$OMP SHARED (mblkpw,jump,nffkgd,nffkg,nffkge,nffkgs,ntens)
 
- ABI_ALLOCATE(ffkg,(nffkg,mblkpw))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(nffkg,mblkpw))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 
 !!$OMP DO
  do ipw1=1,npw,mblkpw
@@ -2260,11 +2260,11 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
  end do
 !!$OMP END DO
 
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 !DEBUG
@@ -2431,11 +2431,11 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 !!$OMP SHARED(ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,ntypat,ph3d,vect) &
 !!$OMP SHARED(jump,nffkgd,nffkgk,nffkgs,mblkpw,nffkg,nffkge,ntens)
 
- ABI_ALLOCATE(ffkg,(nffkg,mblkpw))
- ABI_ALLOCATE(parity,(nffkg))
- ABI_ALLOCATE(kpgx,(mblkpw,ntens))
- ABI_ALLOCATE(scalars,(2,nffkg))
- ABI_ALLOCATE(teffv,(2,mblkpw))
+ ABI_MALLOC(ffkg,(nffkg,mblkpw))
+ ABI_MALLOC(parity,(nffkg))
+ ABI_MALLOC(kpgx,(mblkpw,ntens))
+ ABI_MALLOC(scalars,(2,nffkg))
+ ABI_MALLOC(teffv,(2,mblkpw))
 
 !Loop on subsets of plane waves (blocking)
 !!$OMP DO
@@ -3000,18 +3000,18 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
    else
 !    Problem: choice does not make sense
      write(message,'(a,i0,a)' )' Input choice=',choice,' not allowed. '
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
 
 !  End loop on blocks of planewaves
  end do
 !!$OMP END DO
 
- ABI_DEALLOCATE(ffkg)
- ABI_DEALLOCATE(kpgx)
- ABI_DEALLOCATE(parity)
- ABI_DEALLOCATE(scalars)
- ABI_DEALLOCATE(teffv)
+ ABI_FREE(ffkg)
+ ABI_FREE(kpgx)
+ ABI_FREE(parity)
+ ABI_FREE(scalars)
+ ABI_FREE(teffv)
 !!$OMP END PARALLEL
 
 end subroutine opernl4b

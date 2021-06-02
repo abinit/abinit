@@ -6,7 +6,7 @@
 !!  Helper functions used for post-processing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2020 ABINIT group (MG, ZL, MJV, BXu)
+!! Copyright (C) 2002-2021 ABINIT group (MG, ZL, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,7 +177,7 @@ subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znuc
  DBG_ENTER("COLL")
 
  if (all(realrecip/= [0,1])) then
-   MSG_BUG(sjoin('The argument realrecip should be 0 or 1, received:', itoa(realrecip)))
+   ABI_BUG(sjoin('The argument realrecip should be 0 or 1, received:', itoa(realrecip)))
  end if
 
 !conversion between ABINIT default units and XCrysden units
@@ -332,7 +332,7 @@ subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
    end do
 
  CASE DEFAULT
-   MSG_ERROR("Wrong ri_mode")
+   ABI_ERROR("Wrong ri_mode")
  END SELECT
 
 end subroutine print_fofr_ri
@@ -431,7 +431,7 @@ subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,u
    end do
 
  CASE DEFAULT
-   MSG_ERROR("Wrong ri_mode")
+   ABI_ERROR("Wrong ri_mode")
  END SELECT
 
 end subroutine print_fofr_xyzri
@@ -609,7 +609,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    write(msg,'(3a)')&
     'kptrlatt should be diagonal, for the FS calculation ',ch10,&
     'Action: use an orthogonal k-grid for the GS calculation '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    ierr = ierr + 1
  end if
 
@@ -619,7 +619,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    write(msg,'(3a)')&
     'You need at least 2 points in each direction in k space to output BXSF files ',ch10,&
     'Action: use an augmented k-grid for the GS calculation (at least 2x2x2) '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    ierr = ierr + 1
  end if
 
@@ -627,7 +627,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
    write(msg,'(3a)')&
     'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
     'Action: use a non-shifted k-grid for the GS calculation. Returning '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    ierr = ierr + 1
  end if
 
@@ -684,7 +684,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
            write(msg,'(a,3es16.8,2a,i0,2a)')&
             'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
             'has no symmetric among the k-points used in the GS calculation '
-           MSG_WARNING(msg)
+           ABI_WARNING(msg)
          end if
          ierr = ierr + 1
        end if
@@ -719,7 +719,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  ! Dump results to file
  if (open_file(fname,msg, newunit=ubxsf, status='unknown', action="write", form='formatted') /= 0 ) then
-   MSG_WARNING(msg)
+   ABI_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
 
@@ -850,7 +850,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
    write(msg,'(3a)')&
     'kptrlatt should be diagonal, for the FS calculation ',ch10,&
     'action: use an orthogonal k-grid for the GS calculation '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    ierr=ierr+1
  end if
 
@@ -858,7 +858,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
    write(msg,'(3a)')&
     'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
     'Action: use a non-shifted k-grid for the GS calculation. Returning '
-   MSG_COMMENT(msg)
+   ABI_COMMENT(msg)
    ierr=ierr+1
  end if
 
@@ -870,7 +870,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  nk3 = kptrlatt(3,3)
  nkptfull=(nk1+1)*(nk2+1)*(nk3+1)
 
- ABI_ALLOCATE(fulltoirred,(nkptfull))
+ ABI_MALLOC(fulltoirred,(nkptfull))
  timrev=0; if (use_tr) timrev=1
 
  !Xcrysden employs C-ordering for the Fermi Surface.
@@ -918,7 +918,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
          write(msg,'(a,3es16.8,2a)')&
           ' kpt = ',kpt,ch10,' has no symmetric among the irred k-points used in the GS calculation '
          ierr=ierr+1
-         MSG_ERROR(msg)
+         ABI_ERROR(msg)
        end if
 
      end do !ik1
@@ -927,7 +927,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 
 
  if (ierr/=0) then
-   ABI_DEALLOCATE(fulltoirred)
+   ABI_FREE(fulltoirred)
    RETURN
  end if
 
@@ -957,8 +957,8 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 
  ! Dump the results on file ===
  if (open_file(fname,msg,newunit=uvtk,status='unknown',form='formatted') /= 0) then
-   ABI_DEALLOCATE(fulltoirred)
-   MSG_WARNING(msg)
+   ABI_FREE(fulltoirred)
+   ABI_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
 
@@ -1104,7 +1104,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  end do
 
  close (uvtk)
- ABI_DEALLOCATE(fulltoirred)
+ ABI_FREE(fulltoirred)
 
 end subroutine printvtk
 !!***

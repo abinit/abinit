@@ -10,7 +10,7 @@ especially in charged cells, with the ABINIT package.
 ## Introduction
 
 ABINIT can treat charged systems (e.g. either for molecules, or for dopants in
-a supercell), using the [[charge]] input variable. A careful convergence study
+a supercell), using the [[cellcharge]] input variable. A careful convergence study
 with respect to the cell size must however be done.
 
 Depending on the dimension, different treatment of the Coulomb interaction can

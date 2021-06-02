@@ -6,7 +6,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2007 Stefan Goedecker, CEA Grenoble
-!!  Copyright (C) 2014-2020 ABINIT group (XG)
+!!  Copyright (C) 2014-2021 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,12 +158,12 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
  ! Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -179,23 +179,23 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(trig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(trig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(trig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,n1zt))
- ABI_ALLOCATE(zmpi2,(2,n1,nd2proc,nnd3))
+ ABI_MALLOC(trig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(trig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(trig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,n1zt))
+ ABI_MALLOC(zmpi2,(2,n1,nd2proc,nnd3))
  if (nproc_fft>1)  then
-   ABI_ALLOCATE(zmpi1,(2,n1,nd2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,n1,nd2proc,nnd3))
  end if
 
  call ctrig(n3,trig3,after3,before3,now3,1,ic3)
@@ -327,23 +327,23 @@ subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
    end do
  end do ! idat
 
- ABI_DEALLOCATE(trig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(trig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(trig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(trig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(trig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(trig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft>1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 end subroutine sg2002_back
@@ -443,12 +443,12 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 &     'ncache has to be enlarged to be able to hold at',ch10, &
 &     'least one 1-d FFT of each size even though this will',ch10,&
 &     'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! check input
  if (nd1<n1 .or. nd2<n2 .or. nd3<n3) then
-   MSG_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
+   ABI_ERROR("nd1<n1 .or. nd2<n2 .or. nd3<n3")
  end if
 
 !Effective n1 and n2 (complex-to-complex or real-to-complex)
@@ -464,23 +464,23 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(trig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(trig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(trig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,n1zt))
- ABI_ALLOCATE(zmpi2,(2,n1,nd2proc,nnd3))
+ ABI_MALLOC(trig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(trig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(trig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,n1zt))
+ ABI_MALLOC(zmpi2,(2,n1,nd2proc,nnd3))
  if (nproc_fft>1)  then
-   ABI_ALLOCATE(zmpi1,(2,n1,nd2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,n1,nd2proc,nnd3))
  end if
 
  call ctrig(n2,trig2,after2,before2,now2,-1,ic2)
@@ -594,23 +594,23 @@ subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,op
 
  end do ! idat
 
- ABI_DEALLOCATE(trig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(trig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(trig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(trig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(trig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(trig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft>1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 end subroutine sg2002_forw
@@ -724,7 +724,7 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -740,25 +740,25 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(trig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(trig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(trig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
+ ABI_MALLOC(trig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(trig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(trig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
 
  ! Allocate cache work array and work arrays for MPI transpositions.
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3,ndat))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3,ndat))
  if (nproc_fft>1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3,ndat))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3,ndat))
  end if
 
  ! Compute twiddle coefficients.
@@ -930,23 +930,23 @@ subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
    end do ! j3
  end do ! idat
 
- ABI_DEALLOCATE(trig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(trig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(trig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(trig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(trig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(trig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft>1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
  !call timab(541,2,tsec)
@@ -1066,7 +1066,7 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at',ch10, &
 &    'least one 1-d FFT of each size even though this will',ch10,&
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -1082,23 +1082,23 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(trig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(trig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(trig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3,ndat))
+ ABI_MALLOC(trig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(trig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(trig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3,ndat))
  if (nproc_fft>1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3,ndat))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3,ndat))
  end if
 
  call ctrig(n2,trig2,after2,before2,now2,-1,ic2)
@@ -1267,23 +1267,23 @@ subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
  end do ! idat
 
- ABI_DEALLOCATE(trig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(trig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(trig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(trig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(trig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(trig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft>1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
  !call timab(542,2,tsec)
@@ -1361,8 +1361,8 @@ subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 
  nd2proc=((n2-1)/nproc_fft) +1
  nd3proc=((n6-1)/nproc_fft) +1
- ABI_ALLOCATE(workr,(2,n4,n5,nd3proc,ndat))
- ABI_ALLOCATE(workf,(2,n4,n6,nd2proc,ndat))
+ ABI_MALLOC(workr,(2,n4,n5,nd3proc,ndat))
+ ABI_MALLOC(workf,(2,n4,n6,nd2proc,ndat))
 
  ! Complex to Complex
  select case (isign)
@@ -1384,11 +1384,11 @@ subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
    call mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
  case default
-   MSG_BUG("Wrong isign")
+   ABI_BUG("Wrong isign")
  end select
 
- ABI_DEALLOCATE(workr)
- ABI_DEALLOCATE(workf)
+ ABI_FREE(workr)
+ ABI_FREE(workf)
 
 end subroutine sg2002_mpifourdp
 !!***
@@ -1491,7 +1491,7 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &    'ncache has to be enlarged to be able to hold at', &
 &    'least one 1-d FFT of each size even though this will', &
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -1508,27 +1508,27 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(btrig1,(2,n1))
- ABI_ALLOCATE(ftrig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(btrig2,(2,n2))
- ABI_ALLOCATE(ftrig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(btrig3,(2,n3))
- ABI_ALLOCATE(ftrig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
+ ABI_MALLOC(btrig1,(2,n1))
+ ABI_MALLOC(ftrig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(btrig2,(2,n2))
+ ABI_MALLOC(ftrig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(btrig3,(2,n3))
+ ABI_MALLOC(ftrig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
 
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3))
  end if
 
  call ctrig(n3,btrig3,after3,before3,now3,1,ic3)
@@ -1786,27 +1786,27 @@ subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
  end do ! idat
 
- ABI_DEALLOCATE(btrig1)
- ABI_DEALLOCATE(ftrig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(btrig2)
- ABI_DEALLOCATE(ftrig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(btrig3)
- ABI_DEALLOCATE(ftrig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
+ ABI_FREE(btrig1)
+ ABI_FREE(ftrig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(btrig2)
+ ABI_FREE(ftrig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(btrig3)
+ ABI_FREE(ftrig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 end subroutine sg2002_applypot
@@ -1912,7 +1912,7 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
 &    'ncache has to be enlarged to be able to hold at', &
 &    'least one 1-d FFT of each size even though this will', &
 &    'reduce the performance for shorter transform lengths'
-   MSG_ERROR("Aborting now")
+   ABI_ERROR("Aborting now")
  end if
 
  ! Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -1929,27 +1929,27 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(btrig1,(2,n1))
- ABI_ALLOCATE(ftrig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(btrig2,(2,n2))
- ABI_ALLOCATE(ftrig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(btrig3,(2,n3))
- ABI_ALLOCATE(ftrig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
+ ABI_MALLOC(btrig1,(2,n1))
+ ABI_MALLOC(ftrig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(btrig2,(2,n2))
+ ABI_MALLOC(ftrig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(btrig3,(2,n3))
+ ABI_MALLOC(ftrig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
 
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3,ndat))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3,ndat))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3,ndat))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3,ndat))
  end if
 
  call ctrig(n3,btrig3,after3,before3,now3,1,ic3)
@@ -2220,27 +2220,27 @@ subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
 
  end do ! idat
 
- ABI_DEALLOCATE(btrig1)
- ABI_DEALLOCATE(ftrig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(btrig2)
- ABI_DEALLOCATE(ftrig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(btrig3)
- ABI_DEALLOCATE(ftrig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
+ ABI_FREE(btrig1)
+ ABI_FREE(ftrig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(btrig2)
+ ABI_FREE(ftrig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(btrig3)
+ ABI_FREE(ftrig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 end subroutine sg2002_applypot_many
@@ -2346,7 +2346,7 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &     'ncache has to be enlarged to be able to hold at', &
 &     'least one 1-d FFT of each size even though this will', &
 &     'reduce the performance for shorter transform lengths'
-    MSG_ERROR("Aborting now")
+    ABI_ERROR("Aborting now")
  end if
 
 !Effective m1 and m2 (complex-to-complex or real-to-complex)
@@ -2362,24 +2362,24 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  ! maximal number of big box 3rd dim slices for all procs
  nnd3=nd3proc*nproc_fft
 
- ABI_ALLOCATE(trig1,(2,n1))
- ABI_ALLOCATE(after1,(mdata))
- ABI_ALLOCATE(now1,(mdata))
- ABI_ALLOCATE(before1,(mdata))
- ABI_ALLOCATE(trig2,(2,n2))
- ABI_ALLOCATE(after2,(mdata))
- ABI_ALLOCATE(now2,(mdata))
- ABI_ALLOCATE(before2,(mdata))
- ABI_ALLOCATE(trig3,(2,n3))
- ABI_ALLOCATE(after3,(mdata))
- ABI_ALLOCATE(now3,(mdata))
- ABI_ALLOCATE(before3,(mdata))
+ ABI_MALLOC(trig1,(2,n1))
+ ABI_MALLOC(after1,(mdata))
+ ABI_MALLOC(now1,(mdata))
+ ABI_MALLOC(before1,(mdata))
+ ABI_MALLOC(trig2,(2,n2))
+ ABI_MALLOC(after2,(mdata))
+ ABI_MALLOC(now2,(mdata))
+ ABI_MALLOC(before2,(mdata))
+ ABI_MALLOC(trig3,(2,n3))
+ ABI_MALLOC(after3,(mdata))
+ ABI_MALLOC(now3,(mdata))
+ ABI_MALLOC(before3,(mdata))
 
- ABI_ALLOCATE(zw,(2,ncache/4,2))
- ABI_ALLOCATE(zt,(2,lzt,m1zt))
- ABI_ALLOCATE(zmpi2,(2,md1,md2proc,nnd3))
+ ABI_MALLOC(zw,(2,ncache/4,2))
+ ABI_MALLOC(zt,(2,lzt,m1zt))
+ ABI_MALLOC(zmpi2,(2,md1,md2proc,nnd3))
  if (nproc_fft > 1)  then
-   ABI_ALLOCATE(zmpi1,(2,md1,md2proc,nnd3))
+   ABI_MALLOC(zmpi1,(2,md1,md2proc,nnd3))
  end if
 
  call ctrig(n3,trig3,after3,before3,now3,1,ic3)
@@ -2519,24 +2519,24 @@ subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
     end do ! j3
  end do ! idat
 
- ABI_DEALLOCATE(trig1)
- ABI_DEALLOCATE(after1)
- ABI_DEALLOCATE(now1)
- ABI_DEALLOCATE(before1)
- ABI_DEALLOCATE(trig2)
- ABI_DEALLOCATE(after2)
- ABI_DEALLOCATE(now2)
- ABI_DEALLOCATE(before2)
- ABI_DEALLOCATE(trig3)
- ABI_DEALLOCATE(after3)
- ABI_DEALLOCATE(now3)
- ABI_DEALLOCATE(before3)
+ ABI_FREE(trig1)
+ ABI_FREE(after1)
+ ABI_FREE(now1)
+ ABI_FREE(before1)
+ ABI_FREE(trig2)
+ ABI_FREE(after2)
+ ABI_FREE(now2)
+ ABI_FREE(before2)
+ ABI_FREE(trig3)
+ ABI_FREE(after3)
+ ABI_FREE(now3)
+ ABI_FREE(before3)
 
- ABI_DEALLOCATE(zmpi2)
- ABI_DEALLOCATE(zw)
- ABI_DEALLOCATE(zt)
+ ABI_FREE(zmpi2)
+ ABI_FREE(zw)
+ ABI_FREE(zt)
  if (nproc_fft > 1)  then
-   ABI_DEALLOCATE(zmpi1)
+   ABI_FREE(zmpi1)
  end if
 
 end subroutine sg2002_accrho
@@ -2595,7 +2595,7 @@ subroutine ctrig(n,trig,after,before,now,isign,ic)
  write(std_out,*) 'VALUE OF',n,'NOT ALLOWED FOR FFT, ALLOWED VALUES ARE:'
 37 format(15(i5))
  write(std_out,37) (ifftdata(1,i),i=1,ndata)
- MSG_ERROR("Aborting now")
+ ABI_ERROR("Aborting now")
 
 1000 continue
  after(1)=1
@@ -4141,7 +4141,7 @@ subroutine fftstp(mm,n1dfft,m,nn,n,zin,zout,trig,after,now,before,isign)
         enddo
 
         else
-          MSG_ERROR('error fftstp')
+          ABI_ERROR('error fftstp')
         end if
 
 end subroutine fftstp

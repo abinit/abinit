@@ -38,6 +38,9 @@ nband  7
 nstep   10
 tolvrs  1.0d-10
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

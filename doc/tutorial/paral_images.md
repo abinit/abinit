@@ -12,16 +12,16 @@ path (MEP) using the string method.
 You will learn how to run the string method on a parallel architecture and
 what are the main input variables that govern convergence and numerical
 efficiency of the parallelism on *images*. Other algorithms use images, 
-e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[ionmov]].
+e.g. path-integral molecular dynamics, hyperdynamics, linear combination of images, ... with different values of [[imgmov]].
 The parallelism on images can be used for all these algorithms.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-[A first introduction to ABINIT in parallel](basepar), and  [ground state with plane waves](paral_gspw).
+[A first introduction to ABINIT in parallel](/tutorial/basepar), and  [ground state with plane waves](/tutorial/paral_gspw).
 
 This tutorial should take about 1.5 hour and requires to have at least a 10 CPU
 core parallel computer.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Summary of the String Method
 
@@ -97,7 +97,7 @@ Open the `timages_01.abi` file and look at it carefully. The unit cell is define
 at the begining. Note that the keywords [[natfix]] and [[iatfix]] are used to keep
 fixed the positions of the O and N atoms. The cell is tetragonal and its size
 is larger along x so that the periodic images of the system are separated by
-4.0 Å (7.5589 bohr) of vacuum in the three directions. The keyword [[charge]] is used to
+4.0 Å (7.5589 bohr) of vacuum in the three directions. The keyword [[cellcharge]] is used to
 remove an electron of the system and thus obtain a protonated molecule
 (neutrality is recovered by adding a uniform compensating charge background).
 
@@ -152,7 +152,9 @@ Let us first have a look at the related keywords.
         For the string method, choose 2.
 
 [[nimage]]
-:       gives the number of replicas of the unit cell including the initial and final ones.
+:       gives the number of replicas of the unit cell including the initial and final ones. Note that when [[nimage]]>1, 
+        the default value of several print input variables changes from one to zero. You might want to explicitly set [[prtgsr]] to 1
+        to print the _GSR file, and get some visualization possibilities using Abipy.
 
 [[dynimage]]([[nimage]])
 :       arrays of flags specifying if the image evolves or not (0: does not evolve; 1: evolves).

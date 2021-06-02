@@ -36,9 +36,6 @@
  occopt 7    tsmear 0.02
  nstep 30    getwfk 1
 
- pawovlp 10 ! Allowed overlap of PAW augmentation regions
-            !   This not recommended ; here for testing purpose
-
  pp_dirpath "$ABI_PSPDIR"
  pseudos "8o_hard.paw"
 

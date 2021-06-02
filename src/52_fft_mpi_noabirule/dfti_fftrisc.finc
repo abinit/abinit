@@ -27,12 +27,12 @@
 
  if (istwf_k>2 .and. option==0) then
    write(msg,'(a,i0)')' option=0 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (istwf_k>=2 .and. option==3) then
    write(msg,'(a,i0)')' option=3 is not allowed with istwf_k=',istwf_k
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !For all other tests of validity of inputs, assume that they
@@ -319,7 +319,7 @@ if (istwf_k==1) then
      else if (MYKIND==spc) then
        call CCOPY(ldxy,slice_a,1,fofr(1,xyplane),1)
      else
-       MSG_ERROR("Wrong FFT precision")
+       ABI_ERROR("Wrong FFT precision")
      end if
 #else
      do ix=0,ldxy-1
@@ -379,7 +379,7 @@ end if
      else if (MYKIND==spc) then
        call CCOPY(ldxy,fofr(1,xyplane),1,slice_a,1)
      else
-       MSG_ERROR("Wrong FFT precision")
+       ABI_ERROR("Wrong FFT precision")
      end if
 #else
      do ix=1,ldxy

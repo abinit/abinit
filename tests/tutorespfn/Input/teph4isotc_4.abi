@@ -1,0 +1,54 @@
+#
+ndtset  1
+
+getkerange_filepath "teph4isotc_3o_DS1_KERANGE.nc"
+
+# Read DEN file to initialize the NSCF run.
+getden_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
+# Init GS wavefunctions from this file (optional).
+getwfk_filepath "MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_WFK.nc"
+
+iscf  -2
+tolwfr 1e-18
+kptopt 0                        # Important!
+
+# These variables must be consistent with the values of
+# sigma_ngkpt, sigma_shiftk used in the previous step
+ngkpt   18 18 18
+#ngkpt    24 24 24
+#ngkpt    32 32 32
+nshiftk  1
+shiftk   0.0 0.0 0.0
+
+
+#COMMON INPUT DATA
+ecut 38
+nband   8
+occopt  4              # Marzari smearing
+tsmear 0.02
+
+# MgB2 structure
+structure "abifile:MgB2_eph4isotc/flow_mgb2_phonons/w0/t0/outdata/out_DEN.nc"
+
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/"
+pseudos "Mg-low.psp8, B.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+###############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = teph4isotc_1.abi, teph4isotc_2.abi, teph4isotc_3.abi, teph4isotc_4.abi, teph4isotc_5.abi, 
+#%% [files]
+#%% use_git_submodule = MgB2_eph4isotc
+#%% files_to_test =
+#%%   teph4isotc_4.abo, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Computation of isotropic Migdal-Eliashberg Tc
+#%%<END TEST_INFO>

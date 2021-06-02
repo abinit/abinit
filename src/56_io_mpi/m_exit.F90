@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (MG, DCA, XG, GMR)
+!!  Copyright (C) 2008-2021 ABINIT group (MG, DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,8 +128,8 @@ subroutine disable_timelimit()
 
  if (TIMELIMIT_INABIFUNC /= "__None__") then
    msg = "Timelimit is already activated in function: "//trim(TIMELIMIT_INABIFUNC)
-   MSG_WARNING(msg)
-   !MSG_ERROR(msg)
+   ABI_WARNING(msg)
+   !ABI_ERROR(msg)
  end if
 
 end subroutine disable_timelimit
@@ -347,7 +347,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
        tcpu_last=tsec(1)
        ! Open file and read first line as character string
        if (open_file(filename,message,newunit=temp_unit,form='formatted',status='old') /= 0) then
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        rewind (unit=temp_unit)
        read (unit=temp_unit,fmt='(a)',iostat=ierr) line
@@ -355,7 +355,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
          write(message, '(a,a,a,i5,a,a)' )&
 &         'Problem when reading file=',TRIM(filename),'iostat =',ierr,ch10,&
 &         'Action: check whether this file is OK.'
-         MSG_ERROR(message)
+         ABI_ERROR(message)
        end if
        ! Make a local copy of matching string of length equal to nonblank length of input string
        ! Map to upper case

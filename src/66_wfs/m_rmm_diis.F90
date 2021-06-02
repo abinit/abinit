@@ -6,7 +6,7 @@
 !!  This module contains routines for the RMM-DIIS eigenvalue solver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2020-2020 ABINIT group (MG)
+!!  Copyright (C) 2020-2021 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -265,7 +265,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (prev_accuracy_level == 2 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 3
  if (prev_accuracy_level == 3 .and. ncalls_with_prev_accuracy >= 25) raise_acc = 4
  if (raise_acc > 0) then
-   MSG_COMMENT("Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
+   ABI_COMMENT("Accuracy_level is automatically increased as we reached the max number of NSCF iterations.")
  end if
  raise_acc = max(raise_acc, prev_accuracy_level)
 
@@ -318,10 +318,10 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  if (dtset%tolwfr > zero) then
    lock_tolwfr = tol2 * dtset%tolwfr
  else
-   lock_tolwfr = tol10
-   if (accuracy_level >= 2) lock_tolwfr = tol12
-   if (accuracy_level >= 3) lock_tolwfr = tol16
-   if (accuracy_level >= 4) lock_tolwfr = tol20
+   lock_tolwfr = tol14
+   if (accuracy_level >= 2) lock_tolwfr = tol16
+   if (accuracy_level >= 3) lock_tolwfr = tol18
+   if (accuracy_level >= 4) lock_tolwfr = tol20 * tol2
  end if
 
  ! Use mixed precisions if requested by the user but only for low accuracy_level
@@ -395,6 +395,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  ! - Convergence behaviour may depend on bsize as branches are taken according to
  !   the status of all bands in the block.
  ! TODO: Transpose only once per block and then work with already_transposed = .True.
+ if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  do iblock=1,nblocks
    igs = 1 + (iblock - 1) * npwsp * bsize; ige = min(iblock * npwsp * bsize, npwsp * nband)
@@ -644,7 +645,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
                             eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, &
                             normalize=usepaw == 1)
      case default
-       MSG_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
+       ABI_BUG(sjoin("Wrong after_ortho:", itoa(after_ortho)))
      end select
    end do ! iblock
 
@@ -689,8 +690,8 @@ contains
 function resids2str(level) result(str)
   character(len=*),intent(in) :: level
   character(len=500) :: str
-  !res_stats = stats_eval(resid(1:nb_pocc))
-  res_stats = stats_eval(resid(1:nband))
+  res_stats = stats_eval(resid(1:nb_pocc))
+  !res_stats = stats_eval(resid(1:nband))
   write(str, "(1x, a12, 4(es10.3))") trim(level), res_stats%mean, res_stats%min, res_stats%max, res_stats%stdev
 end function resids2str
 
@@ -1378,7 +1379,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
    ABI_MALLOC(ghc_bk, (2, npwsp*bsize))
    ABI_MALLOC(gvnlxc_bk, (2, npwsp*bsize))
  else
-   MSG_ERROR(sjoin("Invalid savemem:", itoa(savemem)))
+   ABI_ERROR(sjoin("Invalid savemem:", itoa(savemem)))
  end if
 
  do iblock=1,nblocks

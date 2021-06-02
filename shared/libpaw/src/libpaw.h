@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2014-2020 ABINIT Group (MT)
+ * Copyright (C) 2014-2021 ABINIT Group (MT)
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
  * distribution.
@@ -38,20 +38,25 @@
 #  define USE_MSG_HANDLING use m_errors, only : msg_hndl, netcdf_check; use m_abicore
 #  undef  HAVE_YAML
 
+#  define LIBPAW_COMMENT(msg) ABI_COMMENT(msg)
+#  define LIBPAW_WARNING(msg) ABI_WARNING(msg)
+#  define LIBPAW_ERROR(msg)   ABI_ERROR(msg)
+#  define LIBPAW_BUG(msg)     ABI_BUG(msg)
+
 /* Allocation/deallocation with memory profiling */
 #  define USE_MEMORY_PROFILING use m_profiling_abi
 /* Use this to allocate/deallocate basic-type arrays with sizes */
-#  define LIBPAW_ALLOCATE(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
-#  define LIBPAW_DEALLOCATE(ARR) ABI_DEALLOCATE(ARR)
+#  define LIBPAW_ALLOCATE(ARR,SIZE) ABI_MALLOC(ARR,SIZE)
+#  define LIBPAW_DEALLOCATE(ARR) ABI_FREE(ARR)
 /* Use this to allocate/deallocate basic-type pointers with sizes */
-#  define LIBPAW_POINTER_ALLOCATE(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
-#  define LIBPAW_POINTER_DEALLOCATE(ARR) ABI_DEALLOCATE(ARR)
+#  define LIBPAW_POINTER_ALLOCATE(ARR,SIZE) ABI_MALLOC(ARR,SIZE)
+#  define LIBPAW_POINTER_DEALLOCATE(ARR) ABI_FREE(ARR)
 /* Use this to allocate/deallocate user-defined-type arrays with sizes */
-#  define LIBPAW_DATATYPE_ALLOCATE(ARR,SIZE) ABI_DATATYPE_ALLOCATE(ARR,SIZE)
-#  define LIBPAW_DATATYPE_DEALLOCATE(ARR) ABI_DATATYPE_DEALLOCATE(ARR)
+#  define LIBPAW_DATATYPE_ALLOCATE(ARR,SIZE) ABI_MALLOC(ARR,SIZE)
+#  define LIBPAW_DATATYPE_DEALLOCATE(ARR) ABI_FREE(ARR)
 /* Use this to allocate basic-type arrays with explicit bounds */
-#  define LIBPAW_BOUND1_ALLOCATE(ARR,BND1) ABI_ALLOCATE(ARR,(BND1))
-#  define LIBPAW_BOUND2_ALLOCATE(ARR,BND1,BND2) ABI_ALLOCATE(ARR,(BND1,BND2))
+#  define LIBPAW_BOUND1_ALLOCATE(ARR,BND1) ABI_MALLOC(ARR,(BND1))
+#  define LIBPAW_BOUND2_ALLOCATE(ARR,BND1,BND2) ABI_MALLOC(ARR,(BND1,BND2))
 #  define BOUNDS(LBND,UBND) LBND : UBND
 
 /* libXC support */
@@ -88,12 +93,12 @@
 
 /* Messages, errors */
 #  define USE_MSG_HANDLING use m_libpaw_tools, only : wrtout => libpaw_wrtout, libpaw_msg_hndl
-#  define MSG_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
-#  define MSG_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
-#  define MSG_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
-#  define MSG_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
+#  define LIBPAW_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
+#  define LIBPAW_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
+#  define LIBPAW_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
+#  define LIBPAW_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
 /*BigDFT should accept long lines...*/
-/*#define MSG_ERROR(msg) call libpaw_msg_hndl(msg,"ERROR","PERS",__FILE__,__LINE__)*/
+/*#define ABI_ERROR(msg) call libpaw_msg_hndl(msg,"ERROR","PERS",__FILE__,__LINE__)*/
 #  define HAVE_YAML
 
 /* Allocation/deallocation with memory profiling */
@@ -142,10 +147,10 @@
 
 /* Messages, errors */
 #  define USE_MSG_HANDLING use m_libpaw_tools, only : wrtout => libpaw_wrtout, libpaw_msg_hndl
-#  define MSG_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
-#  define MSG_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
-#  define MSG_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
-#  define MSG_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
+#  define LIBPAW_COMMENT(msg) call libpaw_msg_hndl(msg,"COMMENT","PERS")
+#  define LIBPAW_WARNING(msg) call libpaw_msg_hndl(msg,"WARNING","PERS")
+#  define LIBPAW_ERROR(msg)   call libpaw_msg_hndl(msg,"ERROR"  ,"PERS")
+#  define LIBPAW_BUG(msg)     call libpaw_msg_hndl(msg,"BUG"    ,"PERS")
 #  undef  HAVE_YAML
 
 /* Allocation/deallocation */

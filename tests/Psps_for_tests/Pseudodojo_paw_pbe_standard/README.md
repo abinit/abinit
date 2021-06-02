@@ -11,7 +11,10 @@ These JTH v1.0 pseudopotentials have the same characteristics:
 * Standard accuracy
 
 They have been downloaded on July 21, 2020 from the page http://www.pseudo-dojo.org/, with the settings
-PAW (JTH v1.0), LDA, standard, xml
+PAW, PBE, standard, xml . 
+Most are JTH v1.0, except JTH v1.1 for Fe.xml, Ni.xml, Sn-sp.xml and Sn.xml .
+
+Na.xml and I.xml have been downloaded on February 11, 2021, from the same page with the same settings. They are JTH v1.0 .
 
 
 

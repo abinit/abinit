@@ -2,7 +2,7 @@
 .Version 8.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -114,7 +114,7 @@ P           mkmem           3
           ngfftdg          24      24      48
              nkpt           3
 -          npband           2
--           npkpt           2
+-        np_spkpt           2
            nspden           2
            nsppol           2
             nstep1        100
@@ -1706,7 +1706,7 @@ P           mkmem           3
           ngfftdg          24      24      48
              nkpt           3
 -          npband           2
--           npkpt           2
+-        np_spkpt           2
            nspden           2
            nsppol           2
             nstep1        100

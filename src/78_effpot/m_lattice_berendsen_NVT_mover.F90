@@ -23,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,7 +108,7 @@ contains
     old_temperature=self%T_ob
     tmp=1.0 +(self%temperature / old_temperature - 1.0) *    tautscl
     if(tmp< 0.0) then
-       MSG_ERROR("The time scale for the Berendsen algorithm should be at least larger than dtion")
+       ABI_ERROR("The time scale for the Berendsen algorithm should be at least larger than dtion")
     else
        scale_temperature=sqrt(tmp)
     end if

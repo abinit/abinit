@@ -63,7 +63,9 @@ toldfe 1.0d-6
 occopt 4
 tsmear 0.04
 
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

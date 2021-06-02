@@ -10,7 +10,7 @@
 !!
 !! Subroutines:
 !!
-!! COPYRIGHT !! Copyright (C) 2001-2020 ABINIT group (hexu) !! This file is distributed under the terms of the
+!! COPYRIGHT !! Copyright (C) 2001-2021 ABINIT group (hexu) !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
@@ -298,9 +298,9 @@ contains
     integer, intent(in) :: natom, zion(:)
     real(dp), intent(in) :: cell(3,3), xcart(:,:), masses(:)
     self%natom=natom
-    ABI_ALLOCATE(self%zion, (natom))
-    ABI_ALLOCATE(self%xcart, (3, natom))
-    ABI_ALLOCATE(self%masses, (natom))
+    ABI_MALLOC(self%zion, (natom))
+    ABI_MALLOC(self%xcart, (3, natom))
+    ABI_MALLOC(self%masses, (natom))
 
     self%zion(:) = zion(:)
     self%cell(:,:) =cell(:,:)
@@ -316,13 +316,13 @@ contains
     class(mbcell_lattice_t) :: self
     self%natom=0
     if (allocated(self%xcart)) then
-       ABI_DEALLOCATE(self%xcart)
+       ABI_FREE(self%xcart)
     endif
     if (allocated(self%masses)) then
-       ABI_DEALLOCATE(self%masses)
+       ABI_FREE(self%masses)
     endif
     if (allocated(self%zion)) then
-       ABI_DEALLOCATE(self%zion)
+       ABI_FREE(self%zion)
     endif
   end subroutine latt_finalize
 
@@ -384,13 +384,13 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%nspin=nspin
     call xmpi_bcast(self%nspin, master, comm, ierr)
-    ABI_ALLOCATE(self%spin_positions, (3, self%nspin))
-    ABI_ALLOCATE(self%ms, (self%nspin))
-    ABI_ALLOCATE(self%Sref, (3, self%nspin))
-    ABI_ALLOCATE(self%gyro_ratio, (self%nspin))
-    ABI_ALLOCATE(self%gilbert_damping, (self%nspin))
-    ABI_ALLOCATE(self%rvec,(3, self%nspin) )
-    ABI_ALLOCATE(self%ispin_prim,(self%nspin) )
+    ABI_MALLOC(self%spin_positions, (3, self%nspin))
+    ABI_MALLOC(self%ms, (self%nspin))
+    ABI_MALLOC(self%Sref, (3, self%nspin))
+    ABI_MALLOC(self%gyro_ratio, (self%nspin))
+    ABI_MALLOC(self%gilbert_damping, (self%nspin))
+    ABI_MALLOC(self%rvec,(3, self%nspin) )
+    ABI_MALLOC(self%ispin_prim,(self%nspin) )
   end subroutine spin_initialize
 
 
@@ -442,7 +442,7 @@ contains
        if (present(Sref)) then
           self%Sref(:,:) = Sref
        else
-          MSG_WARNING("No reference spin structure specified, using ferromagnetic along z-axis")
+          ABI_WARNING("No reference spin structure specified, using ferromagnetic along z-axis")
 
           self%Sref(1,:) = 0.0_dp
           self%Sref(2,:) = 0.0_dp

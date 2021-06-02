@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2021 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,10 +30,10 @@ MODULE m_xmpi
 
  use defs_basis
  use m_profiling_abi
-! use m_errors
+ !use m_errors
  use iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
- use ISO_FORTRAN_ENV, only : int16,int32,int64
+ use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
 #ifdef HAVE_MPI2
  use mpi
@@ -41,6 +41,7 @@ MODULE m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
+ use m_clib, only : clib_ulimit_stack !, clib_usleep
 
  implicit none
 
@@ -138,6 +139,9 @@ MODULE m_xmpi
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
 
+ logical,save, private :: xmpi_use_inplace_operations = .False.
+ ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
+
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
@@ -176,6 +180,7 @@ MODULE m_xmpi
 
 ! Public procedures.
  public :: xmpi_init                  ! Initialize the MPI environment.
+ public :: xmpi_set_inplace_operations! Set internal flag to use MPI_IN_PLACE whenever possible.
  public :: xmpi_end                   ! Terminate the MPI environment.
  public :: xmpi_abort                 ! Hides MPI_ABORT from MPI library.
  public :: xmpi_show_info             ! Printout of the basic variables stored in this module (useful for debugging).
@@ -511,6 +516,7 @@ interface xmpi_recv
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
+  module procedure xmpi_recv_dp4d
 end interface xmpi_recv
 
 !----------------------------------------------------------------------
@@ -553,6 +559,7 @@ interface xmpi_send
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
+  module procedure xmpi_send_dp4d
 end interface xmpi_send
 
 !----------------------------------------------------------------------
@@ -690,7 +697,8 @@ CONTAINS  !===========================================================
 subroutine xmpi_init()
 
 !Local variables-------------------
- integer :: mpierr,ierr,unt
+ integer :: mpierr, ierr, unt
+ integer(c_long) :: rlim_cur, rlim_max
  logical :: exists
 #ifdef HAVE_MPI
  integer :: attribute_val
@@ -701,6 +709,13 @@ subroutine xmpi_init()
 #endif
 
 ! *************************************************************************
+
+ ! Increase stack size.
+ call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
+ if (ierr /= 0) then
+   write(std_out,*)" WARNING: cannot increase stack size limit. "
+   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
+ end if
 
  mpierr=0
 #ifdef HAVE_MPI
@@ -755,6 +770,33 @@ subroutine xmpi_init()
  end if
 
 end subroutine xmpi_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_set_inplace_operations
+!! NAME
+!!  xmpi_set_inplace_operations
+!!
+!! FUNCTION
+!!  Set internal flag to use MPI_IN_PLACE whenever possible.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_set_inplace_operations(bool)
+
+!Local variables-------------------
+ logical :: bool
+
+! *************************************************************************
+
+ xmpi_use_inplace_operations = bool
+
+end subroutine xmpi_set_inplace_operations
 !!***
 
 !----------------------------------------------------------------------
@@ -854,7 +896,7 @@ end subroutine xmpi_end
 !!
 !! SOURCE
 
-subroutine xmpi_abort(comm,mpierr,msg,exit_status)
+subroutine xmpi_abort(comm, mpierr, msg, exit_status)
 
 !Arguments-------------------------
  integer,optional,intent(in) :: comm,mpierr,exit_status
@@ -909,6 +951,7 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
+ !ierr = clib_usleep(300000_c_int32_t)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
@@ -2818,7 +2861,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
@@ -2841,7 +2884,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
@@ -2864,7 +2907,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
@@ -2887,7 +2930,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
@@ -2910,7 +2953,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk)+invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
@@ -2933,7 +2976,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).or.invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
@@ -2956,7 +2999,7 @@ end subroutine xmpi_largetype_create
       inoutvec(kk)=inoutvec(kk).and.invec(kk)
     end do
   end do
-  ! this macro is being used befor m_errors is compiled, so work around it 
+  ! this macro is being used befor m_errors is compiled, so work around it
   ! ABI_UNUSED(datatype)
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_land_log
@@ -4053,11 +4096,11 @@ subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
      ierr=2
    end if
    if (ANY(bufdelim4/=delim_record)) ierr=1
-   !if (ierr==1) then
-   !  do irec=1,2*nfrec
-   !    write(std_out,*)"irec, bufdelim4, delim_record: ",irec,bufdelim4(irec),delim_record(irec)
-   !  end do
-   !end if
+   if (ierr==1) then
+     do irec=1,2*nfrec
+       write(std_out,*)"irec, bufdelim4, delim_record: ",irec,bufdelim4(irec),delim_record(irec)
+     end do
+   end if
    ABI_FREE(bufdelim4)
 
  CASE (8)

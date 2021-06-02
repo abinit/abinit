@@ -8,7 +8,7 @@ ndtset 3
 
 # Dataset 1 GS with paral_kgb == 1 and MPI-FFT.
 paral_kgb1 1
-npband1 2 npkpt1 1 npfft1 2
+npband1 2 np_spkpt1 1 npfft1 2
 tolwfr1 1e-12
 nqpt1   0          # Cancel default
 

@@ -17,7 +17,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,13 +138,13 @@ contains
        call self%list(i)%ptr%finalize()
        ! Intel compiler complains
        if(associated(self%list(i)%ptr)) then
-          ABI_DATATYPE_DEALLOCATE_SCALAR(self%list(i)%ptr)
+          ABI_FREE(self%list(i)%ptr)
        endif 
        
        nullify(self%list(i)%ptr)
     end do
     if (allocated(self%list)) then
-       ABI_DEALLOCATE(self%list)
+       ABI_FREE(self%list)
     end if
     self%size=0
     self%capacity=0

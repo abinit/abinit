@@ -8,7 +8,7 @@
 !!  It is implemented in C as a simple linked pair list (associative list).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -551,7 +551,7 @@ subroutine pair_list_increment(pl, key, cnt)
  case (TC_INT)
    call pair_list_set(pl, key, i=cnt + i)
  case default
-   MSG_ERROR(sjoin("Expecting value in dict of integer type. got:", itoa(type_code)))
+   ABI_ERROR(sjoin("Expecting value in dict of integer type. got:", itoa(type_code)))
  end select
 
 end subroutine pair_list_increment

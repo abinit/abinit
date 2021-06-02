@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt.
@@ -78,7 +78,7 @@ subroutine outxml_open(filename)
 !ABINIT has been compiled with XML output support, then we open the
 !channel of the XML output file.
  if (open_file(trim(filename)//"_LOG.xml", msg, unit=ab_xml_out, form="formatted", action="write") /= 0) then
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  write(ab_xml_out, "(A)") '<?xml version="1.0" encoding="utf-8"?>'
@@ -303,7 +303,7 @@ subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
  write(spacer, "(A,I0)") "A", 2 * level
  write(ab_xml_out, "("//trim(spacer)//",A)") " ", '<geometry>'
 !Compute the cartesian coordinates of atoms
- ABI_ALLOCATE(xcart,(3, natom))
+ ABI_MALLOC(xcart,(3, natom))
  call xred2xcart(natom, rprimd, xcart, xred)
 !Ouput the rprimd matrix
  write(ab_xml_out, "("//trim(spacer)//",A)", advance = "NO") " ", '  <rprimd'
@@ -324,7 +324,7 @@ subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
    end do
    write(ab_xml_out, "(A)") ' />'
  end do
- ABI_DEALLOCATE(xcart)
+ ABI_FREE(xcart)
  write(ab_xml_out, "("//trim(spacer)//",A)") " ", '</geometry>'
 
 end subroutine out_geometry_XML

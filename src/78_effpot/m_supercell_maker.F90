@@ -18,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,7 +110,7 @@ contains
     call xmpi_bcast(self%scmat, master, comm, ierr)
     self%ncells=abs(mat33det(self%scmat))
     ! call xmpi_bcast(self%ncells, master, comm, ierr)
-    ABI_ALLOCATE(self%rvecs, (3, self%ncells))
+    ABI_MALLOC(self%rvecs, (3, self%ncells))
     ! Why transpose?
     tmp(:,:)=transpose(self%scmat)
 
@@ -130,7 +130,7 @@ contains
     self%scmat=0
     self%ncells=0
     if (allocated(self%rvecs)) then
-       ABI_DEALLOCATE(self%rvecs)
+       ABI_FREE(self%rvecs)
     end if
   end subroutine finalize
 
@@ -177,7 +177,7 @@ contains
        end do
     end do
     if (counter /= self%ncells ) then
-       MSG_ERROR("Bug found. supercell_maker: Wrong number of supercell found in build_rvec. ")
+       ABI_ERROR("Bug found. supercell_maker: Wrong number of supercell found in build_rvec. ")
     end if
   end subroutine build_rvec
 
@@ -207,7 +207,7 @@ contains
     integer :: npos, icell, ipos, counter=0
     npos=size(xred, dim=2)
     if (.not. allocated(scxred)) then
-       ABI_ALLOCATE(scxred, (3,size(xred, dim=2)*self%ncells))
+       ABI_MALLOC(scxred, (3,size(xred, dim=2)*self%ncells))
     end if
     do icell = 1, self%ncells
        do ipos=1 , npos
@@ -233,7 +233,7 @@ contains
     counter =0
     npos=size(xcart, dim=2)
     if (.not. allocated(scxcart)) then
-       ABI_ALLOCATE(scxcart, (3,npos*self%ncells))
+       ABI_MALLOC(scxcart, (3,npos*self%ncells))
     end if
     do icell = 1, self%ncells
        do ipos=1 , npos
@@ -262,7 +262,7 @@ contains
     rprim(:)= R-matmul(R_sc, self%scmat)
     ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
     if (ind_sc==0) then
-            MSG_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
+            ABI_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
     end if
   end subroutine R_to_sc
 
@@ -282,7 +282,7 @@ contains
     real(dp), allocatable, intent(inout) :: A_sc(:)
     integer :: i
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (self%ncells))
+       ABI_MALLOC(A_sc, (self%ncells))
     end if
     do i=1, self%ncells
        A_sc(i) = real(A*exp(cmplx(0.0,two_pi, kind=dp) * &
@@ -305,7 +305,7 @@ contains
     integer :: icell, iA, nA, counter
     nA=size(A)
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (nA*self%ncells))
+       ABI_MALLOC(A_sc, (nA*self%ncells))
     end if
     counter=0
     do icell = 1, self%ncells
@@ -336,7 +336,7 @@ contains
     ndim=size(A, 1)
     nA=size(A,2)
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+       ABI_MALLOC(A_sc, (ndim, nA*self%ncells))
     end if
     counter=0
     do icell = 1, self%ncells
@@ -369,7 +369,7 @@ contains
     ndim=size(A, 1)
     nA=size(A,2)
     if(.not. allocated(A_sc)) then
-       ABI_ALLOCATE(A_sc, (ndim, nA*self%ncells))
+       ABI_MALLOC(A_sc, (ndim, nA*self%ncells))
     end if
     counter=0
     do icell = 1, self%ncells
@@ -396,7 +396,7 @@ contains
     integer, intent(in) :: i, nbasis
     integer, allocatable, intent(inout) :: i_sc(:)
     if(.not. allocated(i_sc)) then
-       ABI_ALLOCATE(i_sc, (self%ncells))
+       ABI_MALLOC(i_sc, (self%ncells))
     end if
     call self%trans_i_noalloc(nbasis, i, i_sc)
   end subroutine trans_i
@@ -436,7 +436,7 @@ contains
     integer, allocatable,  intent(inout) :: ilist_sc(:)
     integer :: i
     if(.not. allocated(ilist_sc)) then
-       ABI_ALLOCATE(ilist_sc, (size(ilist)*self%ncells))
+       ABI_MALLOC(ilist_sc, (size(ilist)*self%ncells))
     end if
     do i =1, size(ilist)
        call trans_i_noalloc(self,nbasis, ilist(i), ilist_sc(self%ncells*(i-1)+1:self%ncells*i ))
@@ -462,10 +462,10 @@ contains
     integer, intent(in) :: j, Rj(3), nbasis
     integer, allocatable , intent(inout) :: j_sc(:), Rj_sc(:, :)
     if(.not. allocated(j_sc)) then
-       ABI_ALLOCATE(j_sc, (self%ncells))
+       ABI_MALLOC(j_sc, (self%ncells))
     endif
     if(.not. allocated(Rj_sc)) then
-       ABI_ALLOCATE(Rj_sc, (3, self%ncells))
+       ABI_MALLOC(Rj_sc, (3, self%ncells))
     endif
     call self%trans_j_and_Rj_noalloc(nbasis, j, Rj, j_sc, Rj_sc)
   end subroutine trans_j_and_Rj
@@ -494,10 +494,10 @@ contains
     integer, allocatable, intent(inout) :: ind_sc(:), R_sc(:,:)
     integer :: i,jj, counter, indj
     if (.not. allocated(ind_sc)) then
-       ABI_ALLOCATE(ind_sc, (self%ncells*size(jlist)) )
+       ABI_MALLOC(ind_sc, (self%ncells*size(jlist)) )
     endif
     if (.not. allocated(R_sc)) then
-       ABI_ALLOCATE(R_sc, (3, self%ncells))
+       ABI_MALLOC(R_sc, (3, self%ncells))
     endif
     counter=0
     do i =1, self%ncells
@@ -523,7 +523,7 @@ contains
     integer :: n, i
     n=size(a)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (n*self%ncells))
+       ABI_MALLOC(ret, (n*self%ncells))
     end if
     do i =1, self%ncells
        ret((i-1)*n+1: i*n) = a(:)
@@ -560,7 +560,7 @@ contains
     integer :: n, i
     n=size(a)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (n*self%ncells))
+       ABI_MALLOC(ret, (n*self%ncells))
     end if
     do i =1, self%ncells
        ret((i-1)*n+1: i*n) = a(:)
@@ -581,7 +581,7 @@ contains
     n1=size(a, dim=1)
     n2=size(a,dim=2)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (n1, n2*self%ncells))
+       ABI_MALLOC(ret, (n1, n2*self%ncells))
     end if
     do i =1, self%ncells
        ret(:,(i-1)*n2+1: i*n2) = a(:,:)
@@ -601,7 +601,7 @@ contains
     integer :: n,  i
     n=size(a, 3)
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (size(a, dim=1), size(a, dim=2), n*self%ncells))
+       ABI_MALLOC(ret, (size(a, dim=1), size(a, dim=2), n*self%ncells))
     end if
     do i=1, self%ncells
        ret(:,:,(i-1)*n+1: i*n)=a(:, :, :)
@@ -620,7 +620,7 @@ contains
     integer, allocatable, intent(inout) :: ret(:,:)
     integer :: icell, ibasis
     if (.not. allocated(ret)) then
-       ABI_ALLOCATE(ret, (3, nbasis*self%ncells))
+       ABI_MALLOC(ret, (3, nbasis*self%ncells))
     end if
     do icell=1, self%ncells
        do ibasis=1, nbasis
@@ -645,7 +645,7 @@ contains
     R=[0,0,0]
     call maker%R_to_sc(R, R_sc, ind_sc2)
     if (.not.( (all(R_sc==[0,0,0])) .and. (ind_sc2==1 )))  then
-       MSG_ERROR("R_to_sc is wrong")
+       ABI_ERROR("R_to_sc is wrong")
     end if
 
     R=[0,0,3]
@@ -653,12 +653,12 @@ contains
     if (.not. (  all(j_sc(1:3)==[4,1,10]) &
          .and. all(R_sc3(:,1)==[0,0,1]) &
          .and. all(R_sc3(:,3)==[0,0,1]) ) ) then
-       MSG_ERROR("Wrong trans_j_and_Rj")
+       ABI_ERROR("Wrong trans_j_and_Rj")
        err=1
     end if
-    ABI_DEALLOCATE(ind_sc)
-    ABI_DEALLOCATE(j_sc)
-    ABI_DEALLOCATE(R_sc3)
+    ABI_FREE(ind_sc)
+    ABI_FREE(j_sc)
+    ABI_FREE(R_sc3)
   end function test1
 
   function test2() result(err)
@@ -679,14 +679,14 @@ contains
     if (.not. all(maker%rvecs==reshape([0,  0,  0,  2,  3,  4,  3,  4,  4, &
          3,  4,  5,  4,  5,  5,  5,  6, 5, &
          5,  6,  6,  6,  7, 6,  8, 10, 10], [3, 8]))) then
-       MSG_ERROR("Wrong Rvecs found !")
+       ABI_ERROR("Wrong Rvecs found !")
        err=1
     end if
 
     ! test sc_cell
     sccell(:,:)=maker%sc_cell(transpose(reshape([1.d0,2.d0,3.d0,4.d0,5.d0,6.d0,3.d0,2.d0,3.d0], [3,3])))
     if (.not. all(abs(sccell-transpose(reshape([18,18, 24, 42, 45, 60, 57, 66, 87], [3,3])))<1e-4)) then
-       MSG_ERROR("Wrong cell paramter found !")
+       ABI_ERROR("Wrong cell paramter found !")
        err=1
     end if
 
@@ -694,7 +694,7 @@ contains
     ! test trans_xred
     call maker%trans_xred(reshape([0.1d0, 0.2d0, 0.3d0, 0.1d0, 0.4d0, 0.6d0], [3, 2]), scxred)
     if (.not. all(abs(scxred(:,18)-[1.0666666666666684,0.53333333333333277,0.70000000000000040])<1e-4)) then
-       MSG_ERROR("Wrong sc_xred !")
+       ABI_ERROR("Wrong sc_xred !")
        err=1
     end if
 
@@ -706,8 +706,8 @@ contains
   end function test2
 
   subroutine scmaker_unittest()
-    if (test1()/=0) MSG_ERROR("Supercell maker: Test1 Failed")
-    if (test2()/=0) MSG_ERROR("Supercell maker: Test2 Failed")
+    if (test1()/=0) ABI_ERROR("Supercell maker: Test1 Failed")
+    if (test2()/=0) ABI_ERROR("Supercell maker: Test2 Failed")
   end subroutine scmaker_unittest
 
 
@@ -728,7 +728,7 @@ contains
 !     R_sc_d(:)=R(:)
 !     call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
 !     if ( info/=0 ) then
-!        MSG_ERROR("Failed to find R_sc")
+!        ABI_ERROR("Failed to find R_sc")
 !     end if
 
 !     ! if only diagonal of rlatt works.
@@ -760,7 +760,7 @@ contains
 !           return
 !        end if
 !     end do
-!     MSG_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
+!     ABI_ERROR("BUG found. supercell_maker%find_supercell_index cannot find iatom_prim, rvec pair in supercell")
 !   end function find_supercell_index
 
 !   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic

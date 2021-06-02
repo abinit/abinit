@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2020 ABINIT group (SPr)
+!!  Copyright (C) 2017-2021 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,7 +108,7 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
  real(dp) :: xcart(3,ab_mover%natom)                                            ! Cartesian coordinates of all ions
  real(dp) :: xred(3,ab_mover%natom)                                             ! reduced coordinates of all ions
  real(dp) :: vel(3,ab_mover%natom)                                              ! ionic velocities in Cartesian coordinates
- real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
+ real(dp) :: fcart(3,ab_mover%natom),gred(3,ab_mover%natom)                     ! cartesian forces, and gradient in reduced coordinates
  !real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
  integer :: hmcflag_
  integer :: icycle_
@@ -144,16 +144,16 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
 
  if(iexit/=0)then
    if (allocated(vel_prev))  then
-     ABI_DEALLOCATE(vel_prev)
+     ABI_FREE(vel_prev)
    end if
    return
  end if
 
  if((hmcflag_==0.and.itime==1).or.(hmcflag_==1.and.icycle_==1))then
    if (allocated(vel_prev))  then
-     ABI_DEALLOCATE(vel_prev)
+     ABI_FREE(vel_prev)
    end if
-   ABI_ALLOCATE(vel_prev,(3,ab_mover%natom))
+   ABI_MALLOC(vel_prev,(3,ab_mover%natom))
  end if
 
 
@@ -174,9 +174,9 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,
    do ii=1,3
      write (std_out,*) fcart(ii,:)
    end do
-   write (std_out,*) 'fred:'
+   write (std_out,*) 'gred:'
    do ii=1,3
-     write (std_out,*) fred(ii,:)
+     write (std_out,*) gred(ii,:)
    end do
    write (std_out,*) 'xcart:'
    do ii=1,3

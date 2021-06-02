@@ -6,7 +6,7 @@
 ndtset 2
 
 #Definition of the unit cell
-acell 3*10.195         # This is equivalent to   10.216 10.216 10.216
+acell 3*10.195         # This is equivalent to   10.195 10.195 10.195
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0
@@ -66,6 +66,9 @@ kptbounds2  0.5  0.0  0.0 # L point
 tolwfr2  1.0d-12
 enunit2  1             # Will output the eigenenergies in eV
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

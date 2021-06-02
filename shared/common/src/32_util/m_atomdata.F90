@@ -6,7 +6,7 @@
 !!   Atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2020 ABINIT group (XG, MJV, MT, MG)
+!!  Copyright (C) 2000-2021 ABINIT group (XG, MJV, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -591,7 +591,7 @@ subroutine atomdata_from_symbol(atom,symbol)
  case('Xx')
    amu=     260.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=104
  case default
-   MSG_ERROR(sjoin("Unknown element symbol: `",trim(symbol), "`"))
+   ABI_ERROR(sjoin("Unknown element symbol: `",trim(symbol), "`"))
  end select
 
  atom%znucl = znucl

@@ -6,7 +6,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2020 ABINIT group (AM)
+!! Copyright (C) 1999-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -153,7 +153,7 @@ program multibinit
      call isfile(tmpfilename,'new')
      if (open_file(tmpfilename,message,unit=ab_out,form="formatted",status="new",&
           &   action="write") /= 0) then
-        MSG_ERROR(message)
+        ABI_ERROR(message)
      end if
      !  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
      rewind (unit=ab_out)

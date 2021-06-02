@@ -62,13 +62,15 @@ ntime  10
 dilatmx 1.05
 ecutsm  0.5
 
-
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tbase4_2.abo, tolnlines=  0, tolabs=  1.051e-07, tolrel=  1.158e-03, fld_options = -easy
+#%%   tbase4_2.abo, tolnlines=  0, tolabs=  1.1e-07, tolrel=  1.2e-03, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

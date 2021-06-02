@@ -423,7 +423,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
            IF(ANY(w1(1:4) < 0d0)) THEN
               WRITE(std_out,'(100e15.5)') e(1:4)
               WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-              MSG_ERROR("weighting 4=3=2")
+              ABI_ERROR("weighting 4=3=2")
            END IF
            !
         END IF
@@ -439,7 +439,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         IF(ANY(w1(1:4) < 0d0)) THEN
            WRITE(std_out,'(100e15.5)') e(1:4)
            WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-           MSG_ERROR("weighting 4=3 2=1")
+           ABI_ERROR("weighting 4=3 2=1")
         END IF
         !
      ELSE
@@ -454,7 +454,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         IF(ANY(w1(1:4) < 0d0)) THEN
            WRITE(std_out,'(100e15.5)') e(1:4)
            WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-           MSG_ERROR("weighting 4=3")
+           ABI_ERROR("weighting 4=3")
         END IF
         !
      END IF
@@ -471,7 +471,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         IF(ANY(w1(1:4) < 0d0)) THEN
            WRITE(std_out,'(100e15.5)') e(1:4)
            WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-           MSG_ERROR("weighting 3=2=1")
+           ABI_ERROR("weighting 3=2=1")
         END IF
         !
      ELSE
@@ -486,7 +486,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
         IF(ANY(w1(1:4) < 0d0)) THEN
            WRITE(std_out,'(100e15.5)') e(1:4)
            WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-           MSG_ERROR("weighting 3=2")
+           ABI_ERROR("weighting 3=2")
         END IF
         !
      END IF
@@ -502,7 +502,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
      IF(ANY(w1(1:4) < 0d0)) THEN
         WRITE(std_out,'(100e15.5)') e(1:4)
         WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-        MSG_ERROR("weighting 2=1")
+        ABI_ERROR("weighting 2=1")
      END IF
      !
   ELSE
@@ -517,7 +517,7 @@ SUBROUTINE libtetrabz_polstat3(de,w1)
      IF(ANY(w1(1:4) < 0d0)) THEN
         WRITE(std_out,'(100e15.5)') e(1:4)
         WRITE(std_out,'(100e15.5)') w1(indx(1:4))
-        MSG_ERROR("weighting")
+        ABI_ERROR("weighting")
      END IF
      !
   END IF

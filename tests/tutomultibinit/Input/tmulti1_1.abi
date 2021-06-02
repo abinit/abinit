@@ -13,6 +13,9 @@ ngqpt =  2  2  2    # Mesh of Q-points in the DDB
 #---------------------------------------------------------------
 dipdip  = 0
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit

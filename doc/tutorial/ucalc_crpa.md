@@ -12,17 +12,17 @@ and _J_ as they can be used in DFT+DMFT. The implementation is described in [[ci
 
 It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
-ABINIT ([PAW1](paw1), [PAW2](paw2))).
-The DFT+_U_ tutorial in ABINIT ([DFT+U](dftu)) might be useful to know some
+ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).
+The DFT+_U_ tutorial in ABINIT ([DFT+U](/tutorial/dftu)) might be useful to know some
 basic variables about correlated orbitals.
 
-The first GW tutorial in ABINIT ([GW](gw1)) is useful to learn how
+The first GW tutorial in ABINIT ([GW](/tutorial/gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
 (energy cutoffs and number of bands for the polarizability).
 
 This tutorial should take two hours to complete (you should have access to more than 8 processors).
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 The cRPA method to compute effective interaction: summary and key parameters
 
@@ -548,17 +548,17 @@ of bare and effective interactions.
 
 <center>
 
-model                | _d - d_ |   _t<sub>2g</sub>-t<sub>2g</sub>_  |_dp-dp_  |  _d -dp_ (a) |  _d -dp_ (b)
----------------------|---------|--------------|---------|--------------|---------------
-[[ucrpa]]                |    1    |     1        |    1    |     1        |     2
-[[dmftbandi]]/[[dmftbandf]]  |   21/25 |    21/25     |    12/25|    12/25     |    12/25
-[[ucrpa_bands]]          |   21 25 |    21 25     |    12 25|    21 25     |    12 25
-_U_<sub>bare</sub> (eV)       |   15.4  |    15.3      |    19.4 |    19.4      |    19.4
-_U_<sub>bare diag</sub> (eV) |   16.3  |    16.0      |    20.6 |    20.6      |    20.6
-_J_<sub>bare</sub> (eV)     |   0.66  |    0.54      |   0.96  |    0.96      |    0.96
-_U_ (eV)                 |   2.8   |    2.8       |    10.8 |    3.4       |    1.6
-_U_<sub>diag</sub> (eV)      |   3.5   |    3.4       |    12.0 |    4.4       |    2.6
-_J_ (eV)                 |   0.60  |    0.47      |     0.91|    0.87      |    0.86
+model                        | _d - d_ |   _t<sub>2g</sub>-t<sub>2g</sub>_  |_dp-dp_  |  _d -dp_ (a) |  _d -dp_ (b)
+-----------------------------|---------|------------------------------------|---------|--------------|---------------
+[[ucrpa]]                    |    1    |     1                              |    1    |     1        |     2
+[[dmftbandi]]/[[dmftbandf]]  |   21/25 |    23/25                           |    12/25|    12/25     |    12/25
+[[ucrpa_bands]]              |   21 25 |    23 25                           |    12 25|    21 25     |    12 25
+_U_<sub>bare</sub> (eV)      |   15.4  |    15.3                            |    19.4 |    19.4      |    19.4
+_U_<sub>bare diag</sub> (eV) |   16.3  |    16.0                            |    20.6 |    20.6      |    20.6
+_J_<sub>bare</sub> (eV)      |   0.66  |    0.86                            |   0.96  |    0.96      |    0.96
+_U_ (eV)                     |   2.8   |    2.8                             |    10.8 |    3.4       |    1.6
+_U_<sub>diag</sub> (eV)      |   3.5   |    3.4                             |    12.0 |    4.4       |    2.6
+_J_ (eV)                     |   0.60  |    0.76                            |     0.91|    0.87      |    0.86
 
 
 </center>

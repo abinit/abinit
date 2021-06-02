@@ -41,6 +41,9 @@
  # ------- end input for ujdet: end-MARK  -------- 
 
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = ujdet

@@ -9,7 +9,7 @@
 !!  regions and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MT, FJ, BA)
+!! Copyright (C) 2013-2021 ABINIT group (MT, FJ, BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -443,7 +443,7 @@ subroutine pawang_lsylm(pawang)
 
  if (pawang%use_ls_ylm==0) then
    msg='  ls_ylm pointer is not allocated !'
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 !Initialization
@@ -663,7 +663,7 @@ subroutine pawang_lsylm(pawang)
    write(msg, '(a,i4,a,a,i4)' ) &
 &   '  anginit%npoints =',npoints,ch10,&
 &   '        angl_size =',pawang%angl_size
-   MSG_BUG(msg)
+   LIBPAW_BUG(msg)
  end if
 
 end subroutine initang

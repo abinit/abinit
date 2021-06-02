@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon <devops@materialsevolution.es>
+## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # Multi-flavor Fast Fourier Transform support

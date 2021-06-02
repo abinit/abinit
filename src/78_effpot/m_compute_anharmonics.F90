@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group ()
+!!  Copyright (C) 2008-2021 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,9 +165,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !   - store the reference effective potential
  !   - Also get the strain
  !   - perform some checks
-  ABI_DATATYPE_ALLOCATE(eff_pots,(nfile))
-  ABI_DATATYPE_ALLOCATE(effpot_strain,(nfile))
-  ABI_ALLOCATE(file_usable,(nfile))
+  ABI_MALLOC(eff_pots,(nfile))
+  ABI_MALLOC(effpot_strain,(nfile))
+  ABI_MALLOC(file_usable,(nfile))
 
   ref_eff_pot => eff_pot
   file_usable(:) = .True.
@@ -208,7 +208,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &      'the number of cell in reference  (',ref_eff_pot%harmonics_terms%ifcs%nrpt,&
 &       ') is not equal to the  ',ch10,'the number of cell  in ',trim(filenames(ii+5)),&
 &      ' (',eff_pots(ii)%harmonics_terms%ifcs%nrpt,')',ch10,'this files cannot be used',ch10
-        MSG_WARNING(message)
+        ABI_WARNING(message)
         file_usable(ii) = .False.
       end if
       if (eff_pots(ii)%crystal%natom/=ref_eff_pot%crystal%natom) then
@@ -216,7 +216,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &      'the number of atoms in reference  (',ref_eff_pot%crystal%natom,') is not equal to the  ',ch10,&
 &      'the number of atoms  in ',trim(filenames(ii+5)),' (',eff_pots(ii)%crystal%natom,')',ch10,&
 &      'this files cannot be used',ch10
-        MSG_WARNING(message)
+        ABI_WARNING(message)
         file_usable(ii) = .False.
       end if
       if (eff_pots(ii)%crystal%ntypat/=ref_eff_pot%crystal%ntypat) then
@@ -226,7 +226,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &       ch10,'the number of type of atoms  in ',trim(filenames(ii+5)),&
 &       ' (',eff_pots(ii)%crystal%ntypat,')',&
 &       ch10,'this files can not be used',ch10
-        MSG_WARNING(message)
+        ABI_WARNING(message)
         file_usable(ii) = .False.
       end if
     end do
@@ -240,7 +240,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   if (count((effpot_strain%name=="reference"))>1) then
     write(message, '(2a)' )&
 &    ' There is several file corresponding to the reference ',ch10
-    MSG_BUG(message)
+    ABI_BUG(message)
   end if
 
   have_strain = 0
@@ -280,7 +280,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     if(jj>2) then
       write(message, '(a,I1,a)' )&
  &    ' There is several file corresponding to strain uniaxial in direction ',ii,ch10
-      MSG_ERROR(message)
+      ABI_ERROR(message)
     else
       name = 'uniaxial'
       if(ii>=4) name = 'shear'
@@ -364,7 +364,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           write(message, '(a,I1,a,a)' )&
 &             ' The deformations for strain ',ii,&
 &             ' are not the opposite',ch10
-          MSG_ERROR(message)
+          ABI_ERROR(message)
         end if
       end if
     end if
@@ -441,7 +441,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 !   Allocation of array and set some values
     nrpt  = ref_eff_pot%harmonics_terms%ifcs%nrpt
     natom = ref_eff_pot%crystal%natom
-    ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
+    ABI_MALLOC(elastic_displacement,(6,6,3,natom))
 
     elastics3rd = zero
     elastics4th = zero
@@ -470,8 +470,8 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           end if
 !         Compute strain phonon-coupling
           phonon_strain(ii)%nrpt =  nrpt
-          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
-          ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
+          ABI_MALLOC(phonon_strain(ii)%atmfrc,(3,natom,3,natom,nrpt))
+          ABI_MALLOC(phonon_strain(ii)%cell,(3,nrpt))
           phonon_strain(ii)%atmfrc = zero
           phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
 
@@ -519,7 +519,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     do ii = 1,6
       call phonon_strain(ii)%free()
     end do
-    ABI_DEALLOCATE(elastic_displacement)
+    ABI_FREE(elastic_displacement)
 
     write(message,'(4a)') ch10, ' The computation of the 3rd order elastics constants, ',ch10,&
 &    ' the phonon-strain coupling and the elastic-displacement coupling is done'
@@ -537,9 +537,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     call effective_potential_free(eff_pots(jj))
   end do
 
-  ABI_DATATYPE_DEALLOCATE(effpot_strain)
-  ABI_DATATYPE_DEALLOCATE(eff_pots)
-  ABI_DEALLOCATE(file_usable)
+  ABI_FREE(effpot_strain)
+  ABI_FREE(eff_pots)
+  ABI_FREE(file_usable)
 
 
   write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

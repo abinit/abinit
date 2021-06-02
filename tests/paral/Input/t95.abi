@@ -107,7 +107,7 @@ ndtset 3 jdtset 1 2 3
 #%%   t95_MPI4o_DS3_DDB, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t95_MPI10.abo, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t95_MPI10.abo, tolnlines = 3, tolabs = 5.e-2, tolrel = 0.2, fld_options = -easy;
 #%%   t95_MPI10o_DS3_DDB, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN

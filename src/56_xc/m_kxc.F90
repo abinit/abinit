@@ -8,7 +8,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -225,7 +225,7 @@ subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
 
  if (nspden > 2) then
    message =' kxc_local does not work yet for nspden > 2.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  isp1 = 1
@@ -257,7 +257,7 @@ subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
 
  if (.not.ok) then
    write (message,'(2(a,i0))')'  The input ispxc = ',ispxc,' is not compatible with nspden = ',nspden
-   MSG_BUG(message)
+   ABI_BUG(message)
  end if
 
  if (option == 0) then
@@ -440,7 +440,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
  if (nspden > 2) then
    message = ' kxc_alda does not work yet for nspden > 2.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Allocate memory.
@@ -489,7 +489,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 &     'rhocut = ',rhocut,'.',ch10,&
 &     'For isp = ',isp,' the density was cut-off at ',ncut,' (',100._dp*float(ncut)/float(ifft),'%) grid points.',ch10,&
 &     'These points account for ',100._dp*rhocuttot/sum(rhor(:,isp)),'% of the total density.'
-     MSG_WARNING(message)
+     ABI_WARNING(message)
    end if
 
  end do
@@ -575,7 +575,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
  else
    write (message,'(4a,i0)')'  Invalid option = ',option
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !DEBUG
@@ -664,7 +664,7 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
  integer :: i1,i2,i3,ig,ii,ikg11,ikg12,ikg13,ikg21,ikg22,ikg23,ipw1,ipw2
  integer :: j1,j2,j3,jg,jj
  real(dp),parameter :: diffgsq=1.d-2
- real(dp) :: gred1,gred2,gred3,gsquar,tpisq
+ real(dp) :: kg_red1,kg_red2,kg_red3,gsquar,tpisq
 !arrays
  integer :: kgmax(3)
  integer,allocatable :: index_g_inv(:,:,:),jgarr(:)
@@ -709,12 +709,12 @@ subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
 !  write(std_out,'(i5,2x,3i3,2x,i4)') ipw1,kg(1,ipw1),kg(2,ipw1),kg(3,ipw1)
 !  ENDDEBUG
 
-   gred1=dble(kg(1,ipw1))
-   gred2=dble(kg(2,ipw1))
-   gred3=dble(kg(3,ipw1))
-   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
-&   +2.0_dp*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
-&   gmet(2,3)*gred2*gred3) )
+   kg_red1=dble(kg(1,ipw1))
+   kg_red2=dble(kg(2,ipw1))
+   kg_red3=dble(kg(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*kg_red1**2+gmet(2,2)*kg_red2**2+gmet(3,3)*kg_red3**2 &
+&   +2.0_dp*( (gmet(1,2)*kg_red2+gmet(1,3)*kg_red3)* kg_red1 +      &
+&   gmet(2,3)*kg_red2*kg_red3) )
 !  Distinguish G=0 from other elements
    if(gsquar > 1.0d-12)then
      vcoul(ipw1)=four_pi/gsquar*(1._dp-cos(sqrt(gsquar)*rcut_coulomb))
@@ -896,7 +896,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
 
  if (nspden > 1) then
    message = ' kxc_eok does not work yet for nspden > 1.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !Values of a2, a3 and a4 for case 1
@@ -915,7 +915,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
      a4 = -3.3660d-05
    case default
      message =  ' kxc_eok: ixceok /= 1 (linear EOK) or 2 (non-linear EOK).'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
  end select
 
 !Allocate memory.
@@ -959,13 +959,13 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
 &   'rhocut = ',rhocut,'.',ch10,&
 &   'For isp = ',1,' the density was cut-off at ',ncut,' (',100._dp*float(ncut)/float(ifft),'%) grid points.',ch10,&
 &   'These points account for ',100._dp*rhocuttot/sum(rhor(:,1)),'% of the total density.'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
  if (nlop > 0) then
    write (message,'(a,f6.2,a,i6,a,f6.3,a)') &
 &   'rs still exceeds ',rslim,' Bohr at ',nlop,' (',100._dp*float(nlop)/float(ifft),'%) grid points (after cut-off).'
-   MSG_WARNING(message)
+   ABI_WARNING(message)
  end if
 
 !Calculate the Fourier transform of the energy optimized kernel.
@@ -1074,7 +1074,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ngfft1=ngfft(1)
@@ -1088,7 +1088,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  else                        ! GGA case
    nkxc=12*min(nspden,2)-5   ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
-   MSG_ERROR("GGA functional not tested")
+   ABI_ERROR("GGA functional not tested")
  end if
 
  ABI_MALLOC(kxcr,(nfft_tot,nkxc))
@@ -1135,7 +1135,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    if (dbg_mode .and. my_rank==master) then
      fname = 'xc_Kxc.xsf'
      if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call printxsf(ngfft1,ngfft2,ngfft3,kxcr(:,1),Cryst%rprimd,(/zero,zero,zero/),&
 &     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
@@ -1163,7 +1163,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
 !MG this part is never executed, but one should use dfpt_mkvxc for the GGA kernel.
  if (xcdata%xclevel==2) then
-   MSG_ERROR("check GGA implementation")
+   ABI_ERROR("check GGA implementation")
    cplex=2
    ABI_MALLOC(phas,(cplex*nfft_tot,npw,nspden))
    ABI_MALLOC(kxcpw_r,(cplex*nfft_tot,nspden))
@@ -1351,7 +1351,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  if (ALL(xcdata%xclevel/=(/1,2/))) then
    write(msg,'(a,i0)')"Unsupported xclevel = ",xcdata%xclevel
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  ngfft1=ngfft(1)
@@ -1365,7 +1365,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  else                             ! GGA case
    nkxc=12*min(Dtset%nspden,2)-5  ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
-   MSG_ERROR("GGA functional not implemented for ADA vertex")
+   ABI_ERROR("GGA functional not implemented for ADA vertex")
  end if
 
  ABI_MALLOC(kxcr,(nfft,nkxc))
@@ -1396,7 +1396,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    if (dbg_mode.and.my_rank==master) then
      fname = 'xc_ADA_den.xsf'
      if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call printxsf(ngfft1,ngfft2,ngfft3,rhor(:,1),Cryst%rprimd,(/zero,zero,zero/),&
 &     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
@@ -1421,7 +1421,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    if (dbg_mode.and.my_rank==master) then
      fname = 'xc_ADA_smeared_den.xsf'
      if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call printxsf(ngfft1,ngfft2,ngfft3,my_rhor(:,1),Cryst%rprimd,(/zero,zero,zero/),&
 &     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
@@ -1482,7 +1482,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    if (dbg_mode.and.my_rank==master) then
      fname = 'xc_ADA_Kxc.xsf'
      if (open_file(fname,msg,newunit=unt_dmp,status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      call printxsf(ngfft1,ngfft2,ngfft3,kxcr(:,1),Cryst%rprimd,(/zero,zero,zero/),&
 &     Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xcart,Cryst%znucl,unt_dmp,0)
@@ -1535,7 +1535,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
      write(msg,'(a,i4,3a)')&
 &     ' Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
 &     ' Enlarge the FFT mesh to get rid of this problem. '
-     MSG_WARNING(msg)
+     ABI_WARNING(msg)
    end if
  end do
 
@@ -1556,7 +1556,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 !  write(std_out,*) 'Elements:'
 !  write(std_out,*) 'fxc_ADA(ig,igp,iqbz):',ig,igp,iqbz,fxc_ADA(ig,igp,iqbz)
 !  write(std_out,*) 'fxc_ADA(igp,ig,iqbz):',igp,ig,iqbz,fxc_ADA(igp,ig,iqbz)
-!  MSG_ERROR('fxc_ADA not symmetric')
+!  ABI_ERROR('fxc_ADA not symmetric')
 !  end if
 !  end do
 !  end do
@@ -1597,7 +1597,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
      end do
    end do
    if (igrid/=nfft) then
-     MSG_ERROR('kxc_ADA: igrid not equal to nfft')
+     ABI_ERROR('kxc_ADA: igrid not equal to nfft')
    end if
 
 !  Construct kernel in real space
@@ -1668,14 +1668,14 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
    end do ! iqbz
 
-   MSG_ERROR('Stopping in kxc_ADA for debugging')
+   ABI_ERROR('Stopping in kxc_ADA for debugging')
 
    ABI_FREE(rvec)
    ABI_FREE(my_fxc_ADA_rrp)
    ABI_FREE(FT_fxc_ADA_ggpq)
 
    if (xcdata%xclevel==2) then
-     MSG_ERROR(" GGA not implemented for kxc_ADA")
+     ABI_ERROR(" GGA not implemented for kxc_ADA")
    end if !xclevel==2
 
  end if ! Debugging section

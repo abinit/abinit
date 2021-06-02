@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group
+!! Copyright (C) 2008-2021 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,7 +86,7 @@ subroutine appdig(integ,string,strinn)
  !if (integ<0) then
  !  write(msg,'(a,i0,a)') &
  !  'Input integer =',integ,' must not be <0. Argument integ was input as negative.'
- !  MSG_BUG(msg)
+ !  ABI_BUG(msg)
  !end if
 
  ! Fill output string initially with blanks to end of dimensioned length

@@ -7,7 +7,7 @@
 !! Module to output atomic projections of phonon modes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2020 ABINIT group (MJV)
+!! Copyright (C) 2011-2021 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,11 +103,11 @@ subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
  t_atprj%natprj_bs = natprj_bs
  t_atprj%natom = natom
 
- ABI_ALLOCATE(t_atprj%iatprj_bs,(natprj_bs))
+ ABI_MALLOC(t_atprj%iatprj_bs,(natprj_bs))
  t_atprj%iatprj_bs = iatprj_bs
 
 ! for each phonon mode and atom for projection, open a file
- ABI_ALLOCATE(t_atprj%filename ,(3*natom,natprj_bs))
+ ABI_MALLOC(t_atprj%filename ,(3*natom,natprj_bs))
  iunit = get_unit()
  do imode = 1, 3*natom
    call int2char4(imode, imodestring)
@@ -117,7 +117,7 @@ subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
      ABI_CHECK((iatomstring(1:1)/='#'),'Bug: string length too short!')
      t_atprj%filename(imode,iatom) = trim(outfile_radix)//"_mod"//trim(imodestring)//"_iat"//trim(iatomstring)
      if (open_file(t_atprj%filename(imode,iatom), msg, newunit=iunit, form="formatted", action="write") /= 0) then
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      ! print header
      write (unit=iunit, fmt='(a)') '##'
@@ -219,11 +219,11 @@ subroutine atprj_destroy(t_atprj)
  type(atprj_type), intent(inout) :: t_atprj
 
  if (allocated(t_atprj%iatprj_bs)) then
-   ABI_DEALLOCATE(t_atprj%iatprj_bs)
+   ABI_FREE(t_atprj%iatprj_bs)
  end if
 
  if (allocated(t_atprj%filename)) then
-   ABI_DEALLOCATE(t_atprj%filename)
+   ABI_FREE(t_atprj%filename)
  end if
 
 end subroutine atprj_destroy

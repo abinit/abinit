@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,7 +109,6 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
  real(dp) :: rprimd(3,3),rprimd_next(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom),fcart_m(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -159,19 +158,6 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
  do ii=1,3
    write(std_out,*) rmet(ii,:)
  end do
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'srkna14 04',jump_end_of_cycle
 !##########################################################

@@ -8,14 +8,14 @@
 !!  Memory is automatically allocated on writing and freed on reading.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
 !! Provide tools to manipulate variable size strings in an incremental FIFO way
-!! Use `stream%push` to incrementaly fill the string. The required memory space will be allocated
+!! Use `stream%push` to incrementally fill the string. The required memory space will be allocated
 !! automatically when needed.
 !! To avoid memory leaks you have to use stream_free on the stream to free the memory space unless
 !! you already flushed it using stream%flush, stream%transfer, stream%to_string or stream%to_file.
@@ -35,6 +35,8 @@ module m_stream_string
 
   use defs_basis
   use m_profiling_abi
+
+  use m_fstrings, only : prep_char !, replace
 
   implicit none
 
@@ -67,13 +69,15 @@ module m_stream_string
 contains
 !!***
 
-subroutine stream_flush_unit(stream, unit, newline)
+subroutine stream_flush_unit(stream, unit, newline, firstchar)
 
   class(stream_string),intent(inout) :: stream
   integer,intent(in) :: unit
   logical,optional,intent(in) :: newline
+  character(len=*),optional,intent(in) :: firstchar
 
   character(len=stream%length) :: s
+  character(len=2 * stream%length) :: new_s
 
   if (unit == dev_null) then
     call stream%free()
@@ -81,7 +85,14 @@ subroutine stream_flush_unit(stream, unit, newline)
   end if
 
   call stream%to_string(s)
-  write(unit, "(a)")trim(s)
+
+  if (present(firstchar)) then
+    !new_s = trim(firstchar) // trim(replace(trim(s), ch10, ch10//trim(firstchar)))
+    new_s = prep_char(s, firstchar)
+    write(unit, "(a)")trim(new_s)
+  else
+    write(unit, "(a)")trim(s)
+  end if
 
   if (present(newline)) then
     if (newline) write(unit, "(a)")""
@@ -274,7 +285,7 @@ end subroutine stream_pop_chunk
 !! stream_to_string
 !!
 !! FUNCTION
-!!  Copy the content of stream to string, freeing stream string must be large enough
+!!  Copy the content of stream to string, freeing stream. String must be large enough
 !!
 !! PARENTS
 !!

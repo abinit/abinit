@@ -1,0 +1,80 @@
+# test orbmag with discretization with nuclear dipole moment
+# please note that the discretization method is not fully
+# implemented and should not be used in production; it is kept
+# here because parts of it are useful in maintaining the orbmag DDK
+# version, see test v9[44]
+#
+tolvrs 1.0D-16
+orbmag -2
+
+nucdipmom
+3*0.0
+1.0 0.0 0.0
+
+# this ecut is severly underconverged
+ecut 5
+pawecutdg 6
+
+istwfk *1
+
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+symmorphi 0
+
+# this kpt grid is severly undercoverged
+ngkpt 3*2
+nshiftk 4
+shiftk 3*1/2
+1/2 0 0
+0 1/2 0
+0 0 1/2
+
+nstep 30
+
+prtwf 0
+prteig 0
+prtden 0
+
+optforces 0
+optstress 0
+pawcpxocc 2
+usexcnhat 0
+
+paral_atom 0
+paral_kgb 0
+
+nband 4
+
+acell    3*10.3008969711  
+
+rprim    0.000000000000000   0.500000000000000   0.500000000000000 
+         0.500000000000000   0.000000000000000   0.500000000000000 
+         0.500000000000000   0.500000000000000   0.000000000000000 
+       
+natom    2  
+ntypat   2  
+typat    1 2  
+znucl    15 13  
+xred     0.250000000000000   0.250000000000000   0.250000000000000 
+         0.000000000000000   0.000000000000000   0.000000000000000 
+
+pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pseudos="P.xml, Al.xml"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t45.abo, tolnlines=  5, tolabs=  4e-09, tolrel= 1.0
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%%<END TEST_INFO>

@@ -67,6 +67,9 @@ tolwfr3 1.0d-20
  pp_dirpath "$ABI_PSPDIR"
  pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

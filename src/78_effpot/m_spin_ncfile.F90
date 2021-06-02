@@ -22,7 +22,7 @@
 !! TODO hexu: should consider carefully what to write.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -460,8 +460,6 @@ end subroutine def_observable_var
          & time step", "second")
     call ab_define_var(self%ncid, (/self%three/), mfield_id, NF90_DOUBLE,&
          & "spin_mag_field", "magnetic field for spin dynamics", "Tesla")
-    !ncerr=nf90_def_var(self%ncid, "spin_qpoint", NF90_DOUBLE, [self%three],
-    !qpoint_id)
     !ncerr=nf90_def_var(self%ncid, "ncell", NF90_INT, [self%three], ncell_id)
     !ncerr=nf90_def_var(self%ncid, "spin_temperature", NF90_DOUBLE,
     !temperature_id)

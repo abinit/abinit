@@ -2,6 +2,9 @@
 
 flexoflag  1  
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb

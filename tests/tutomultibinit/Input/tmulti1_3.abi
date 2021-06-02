@@ -9,6 +9,9 @@ temperature = 50  # Temperature of the simulation (default = 325K).
 
 optcell =  2  # Relaxation of the cell
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit

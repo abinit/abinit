@@ -15,7 +15,7 @@
 !!  * save_to_file: save to file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,7 +121,7 @@ subroutine fill_supercell(self, scmaker, params, scpot)
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(params)
     ABI_UNUSED_A(fnames)
-    MSG_ERROR("load_from_files for abstract primitive potential is not implemented.")
+    ABI_ERROR("load_from_files for abstract primitive potential is not implemented.")
   end subroutine load_from_files
 
 

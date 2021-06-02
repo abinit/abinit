@@ -4,6 +4,9 @@
 piezoflag  3  !the flag for the piezoelectric constant
 instrflag  1  !the flag for the internal strain tensor
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
@@ -11,7 +14,7 @@ instrflag  1  !the flag for the internal strain tensor
 #%% input_ddb = telast_2o_DS3_DDB
 #%% [files]
 #%% files_to_test = 
-#%%   telast_3.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%%   telast_3.abo, tolnlines=  1, tolabs=  9.0e-5, tolrel=  1.1, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

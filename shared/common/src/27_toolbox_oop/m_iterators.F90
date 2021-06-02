@@ -7,7 +7,7 @@
 !!  iteration over the elements of an ensemble e.g. set of transitions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (MG)
+!! Copyright (C) 2009-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -308,7 +308,7 @@ subroutine iter2_push(Iter2,i1,i2,list)
  leng = SIZE(list)
 
  if (allocated( Iter2%slice(i1,i2)%indx) ) then
-   MSG_ERROR("Iter2%slice already allocated")
+   ABI_ERROR("Iter2%slice already allocated")
  end if
 
  Iter2%slice(i1,i2)%leng = leng

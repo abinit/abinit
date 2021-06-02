@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Yann Pouillon <devops@materialsevolution.es>
+# Copyright (C) 2017-2021 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # Process this file with autoconf to produce a configure script.
@@ -45,7 +45,7 @@ AH_BOTTOM([
  */
 
 /*
- * Copyright (C) 2014-2019 Marc Torrent
+ * Copyright (C) 2014-2021 Marc Torrent
  *
  * This file is part of the LibPAW software package. For license information,
  * please see the COPYING file in the top-level directory of the LibPAW source

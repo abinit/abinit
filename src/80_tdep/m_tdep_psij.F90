@@ -378,7 +378,7 @@ subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans)
 ! Take into account the 6 allowed permutations
   Psij_tmp(:,:,:)=Psij_333(:,:,:)
   if ((trans.lt.1).or.(trans.gt.6)) then
-    MSG_BUG('This value of the symmetry index is not permitted')
+    ABI_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
     do jj=1,3
@@ -426,10 +426,10 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
   qbz(:,:)=DDB%qpt(1:3,:)
 
 ! Reduce the number of such points by symmetrization.
-  ABI_ALLOCATE(ibz2bz,(nqbz))
-  ABI_ALLOCATE(wtq,(nqbz))
-  ABI_ALLOCATE(bz2ibz_smap, (6, nqbz))
-  ABI_ALLOCATE(wtq_folded,(nqbz))
+  ABI_MALLOC(ibz2bz,(nqbz))
+  ABI_MALLOC(wtq,(nqbz))
+  ABI_MALLOC(bz2ibz_smap, (6, nqbz))
+  ABI_MALLOC(wtq_folded,(nqbz))
   wtq(:)=one/nqbz         ! Weights sum up to one
 
 !FB  write(InVar%stdlog,*) 'nqbz = ', nqbz
@@ -437,16 +437,16 @@ subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref
     bz2ibz_smap, xmpi_comm_self)
 !FB  write(InVar%stdlog,*) 'nqibz = ', nqibz
 
-  ABI_DEALLOCATE(bz2ibz_smap)
+  ABI_FREE(bz2ibz_smap)
 
-  ABI_ALLOCATE(wtqibz   ,(nqibz))
-  ABI_ALLOCATE(qibz     ,(3,nqibz))
-  ABI_ALLOCATE(qibz_cart,(3,nqibz))
+  ABI_MALLOC(wtqibz   ,(nqibz))
+  ABI_MALLOC(qibz     ,(3,nqibz))
+  ABI_MALLOC(qibz_cart,(3,nqibz))
   do iq_ibz=1,nqibz
     wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
     qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
   end do
-  ABI_DEALLOCATE(wtq_folded)
+  ABI_FREE(wtq_folded)
 
 ! Loop over irreducible q-points
 ! =======================
@@ -619,7 +619,7 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rla
 !   Write the Gruneisen
     if (sum(abs(dimag(Gruneisen(:)))).gt.tol8) then
       write(53,'(i5,1x,100(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),(dimag(Gruneisen(ii)),ii=1,nmode)
-      MSG_BUG('The imaginary part of the Gruneisen is not equal to zero')
+      ABI_BUG('The imaginary part of the Gruneisen is not equal to zero')
     else
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode),((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
       write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Gruneisen(ii)),ii=1,nmode)

@@ -75,9 +75,7 @@ inp_files = [
 "t75.abi",
 "t76.abi",
 "t77.abi",
-"-t78.abi", # transferred in seq
 "t79.abi",
-"-t80.abi", # transferred in seq
 "t81.abi",
 "t82.abi",
 "t83.abi",
@@ -87,7 +85,6 @@ inp_files = [
 "t87.abi",
 "t88.abi",
 "t89.abi",
-"-t90.abi", # transferred in seq
 "t91.abi",
 "t92.abi",
 "t93.abi",

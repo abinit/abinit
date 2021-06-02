@@ -7,7 +7,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2020 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2021 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -430,7 +430,7 @@ function abi_wtime() result(wall)
    end if
    if(month_now<=month_init)then
      msg = 'Problem with month and year numbers.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
    do months=month_init,month_now-1
      wall=wall+86400.0d0*nday(months)
@@ -542,7 +542,7 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
  end if
 
  CASE DEFAULT
-   MSG_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
+   ABI_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
  END SELECT
 
 end subroutine cwtime
@@ -702,7 +702,7 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 !Check that nn lies in sensible bounds
  if (nn<0.or.nn>TIMER_SIZE) then
    write(msg,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !return accumulated time for nn
@@ -784,13 +784,14 @@ end function time_get_papiopt
 !!  Timing subroutine. Calls machine-dependent "timein" which returns elapsed cpu and wall clock times in sec.
 !!  Depending on value of "option" routine will:
 !!
-!!  (0) zero all accumulators
-!!  (1) start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
-!!  (2) stop time slice; add time to accumulator n also increase by one the counter for this accumulator
-!!  (3) start with new incremental time slice for accumulator n
+!!  (0) Zero all accumulators
+!!  (1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  (2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  (3) Start with new incremental time slice for accumulator n
 !!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
-!!  (4) report time slice for accumlator n (not full time accumlated)
-!!  (5) option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!        Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
+!!  (4) Report time slice for accumlator n (not full time accumlated)
+!!  (5) Option to suppress timing (nn should be 0) or reenable it (nn /=0)
 !!
 !!  If, on first entry, subroutine is not being initialized, it
 !!  will automatically initialize as well as rezero accumulator n.
@@ -872,7 +873,7 @@ subroutine timab(nn, option, tottim)
    ! Check that nn lies in sensible bounds
    if (nn<1.or.nn>TIMER_SIZE) then
      write(msg,'(2(a,i0))')'  TIMER_SIZE = ',TIMER_SIZE,' but input nn = ',nn
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end if
 
 #ifdef HAVE_PAPI
@@ -885,7 +886,7 @@ subroutine timab(nn, option, tottim)
        write(std_out,*) 'Error code', papi_errstr
      end if
      if (flops1 < 0) then
-       MSG_WARNING("Number of floating point instruction Overflow")
+       ABI_WARNING("Number of floating point instruction Overflow")
        papi_flops(:)=-1
      end if
    end if
@@ -928,6 +929,7 @@ subroutine timab(nn, option, tottim)
 
    case (3)
      ! Use previously obtained values to initialize timab for nn
+     ! Typically used immediately after a call to timab for another counter with option=2 . This saves one call to timein.
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
 #ifdef HAVE_PAPI
@@ -950,7 +952,7 @@ subroutine timab(nn, option, tottim)
 
    case default
      write(msg,'(a,i10,a)')'  Input option not valid, =',option,'.'
-     MSG_BUG(msg)
+     ABI_BUG(msg)
    end select
  end if
 

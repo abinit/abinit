@@ -3,7 +3,7 @@
 !! m_multibinit_manager
 !!
 !! FUNCTION
-!! This module contains the manager type, which is a thin layer above ALL 
+!! This module contains the manager type, which is a thin layer above ALL
 !! TODO: the structure of this is yet to be discussed
 !!
 !!
@@ -16,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (hexu)
+!! Copyright (C) 2001-2021 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@ module m_multibinit_manager
   use m_primitive_potential_list, only: primitive_potential_list_t
   use m_primitive_potential, only: primitive_potential_t
 
-  ! 
+  !
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
   use m_abstract_mover, only: abstract_mover_t
@@ -95,7 +95,7 @@ module m_multibinit_manager
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
      ! pointer to parameters. it is a pointer because it is initialized outside manager
-     type(multibinit_dtset_type), pointer :: params=>null() 
+     type(multibinit_dtset_type), pointer :: params=>null()
      type(supercell_maker_t) :: sc_maker  ! supercell maker
      type(mbcell_t) :: unitcell         ! unitcell
      type(mbsupercell_t) :: supercell   ! supercell
@@ -104,7 +104,7 @@ module m_multibinit_manager
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
-     type(spin_mover_t) :: spin_mover  
+     type(spin_mover_t) :: spin_mover
      ! type(lwf_mover_t) :: lwf_mover
 
      type(slc_mover_t) :: slc_mover
@@ -116,10 +116,10 @@ module m_multibinit_manager
      ! DOC: The energy table contains
      ! The elements are updated by:
      !  - The movers: kinetic energy
-     !  - The potentials: potential energy. 
-     !   Note that for potential_list, do not update the 
-     !   TODO: should we add a tag in the potential list to make it aware of 
-     !       whether to save itself as a whole in the energy table or ask its components 
+     !  - The potentials: potential energy.
+     !   Note that for potential_list, do not update the
+     !   TODO: should we add a tag in the potential list to make it aware of
+     !       whether to save itself as a whole in the energy table or ask its components
      !       to save the energy terms?
      !   FIXME: the extra white spaces are also saved to the keys of the table.
      !   usage:call energy_table%put("Name", value): update/insert energy term.
@@ -162,7 +162,7 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     integer :: i
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
@@ -258,10 +258,10 @@ contains
     integer :: lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
-    character(len=strlen) :: string
+    character(len=strlen) :: string, raw_string
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    
+
     natom=0
     nph1l=0
     nrpt=0
@@ -293,7 +293,7 @@ contains
     !strlen from defs_basis module
     option=1
     if (iam_master) then
-       call instrng (self%filenames(1),lenstr,option,strlen,string)
+       call instrng (self%filenames(1),lenstr,option,strlen,string, raw_string)
        !To make case-insensitive, map characters to upper case:
        call inupper(string(1:lenstr))
 
@@ -345,13 +345,13 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     call self%unitcell%initialize()
 
     ! latt : TODO (replace this with full lattice)
-    ! only toy harmonic part 
+    ! only toy harmonic part
     if(self%params%dynamics>100) then
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
+       ABI_MALLOC_TYPE_SCALAR(lattice_harmonic_primitive_potential_t, lat_ham_pot)
        select type(lat_ham_pot)
        type is (lattice_harmonic_primitive_potential_t)
           call lat_ham_pot%initialize(self%unitcell)
@@ -365,7 +365,7 @@ contains
     if(self%params%spin_dynamics>0) then
        ! The pointer will be allocated and added to the list
        ! and eventually deallocated by the list%finalize
-       ABI_DATATYPE_ALLOCATE_SCALAR(spin_primitive_potential_t, spin_pot)
+       ABI_MALLOC_TYPE_SCALAR(spin_primitive_potential_t, spin_pot)
 
        ! One may wonder why unitcell does not read data from files
        ! That is because the spin_pot (which has an pointer to unitcell)
@@ -383,13 +383,13 @@ contains
 
     ! spin-lattice coupling
     if(self%params%slc_coupling>0) then
-       ABI_DATATYPE_ALLOCATE_SCALAR(slc_primitive_potential_t, slc_pot)
+       ABI_MALLOC_TYPE_SCALAR(slc_primitive_potential_t, slc_pot)
        select type(slc_pot)
        type is (slc_primitive_potential_t)
           call slc_pot%initialize(self%unitcell)
           call slc_pot%load_from_files(self%params, self%filenames)
           call self%prim_pots%append(slc_pot)
-       end select 
+       end select
     endif
   end subroutine read_potentials
 
@@ -451,15 +451,15 @@ contains
     class(mb_manager_t), intent(inout) :: self
     select case(self%params%dynamics)
     case (101)  ! Velocity Verlet (NVE)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_verlet_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_verlet_mover_t, self%lattice_mover)
     case(102)   ! Langevin (NVT)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_langevin_mover_t, self%lattice_mover)
     case(103)   ! Berendsen NVT
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
     case(104)   ! Berendsen NPT (not yet avaliable)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
     case(120)   ! Dummy mover (Do not move atoms, For test only.)
-       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
+       ABI_MALLOC_TYPE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
     ! FIXME: should be able to set to different mode using input.
@@ -526,21 +526,21 @@ contains
 
     call self%prim_pots%initialize()
     call self%read_potentials()
-    
+
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
 
     ! calculate various quantities for reference spin structure
     do i =1, self%pots%size
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for spin_potential are used
-      type is (spin_potential_t) 
-        ABI_ALLOCATE(Htmp, (3,scpot%nspin))
+      type is (spin_potential_t)
+        ABI_MALLOC(Htmp, (3,scpot%nspin))
         call scpot%get_Heff(scpot%supercell%spin%Sref, Htmp, scpot%eref)
-        ABI_DEALLOCATE(Htmp)
+        ABI_FREE(Htmp)
       end select
 
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used
-      type is (slc_potential_t) 
+      type is (slc_potential_t)
         call scpot%calculate_ref()
       end select
     enddo

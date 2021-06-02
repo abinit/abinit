@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,12 +149,12 @@ subroutine outvar_i_n (dtsets,iout,&
 
  DBG_ENTER("COLL")
 
- ABI_ALLOCATE(dprarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
- ABI_ALLOCATE(intarr,(marr,0:ndtset_alloc))
- ABI_ALLOCATE(narrm,(0:ndtset_alloc))
- ABI_ALLOCATE(nimagem,(0:ndtset_alloc))
- ABI_ALLOCATE(prtimg,(mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
+ ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(narrm,(0:ndtset_alloc))
+ ABI_MALLOC(nimagem,(0:ndtset_alloc))
+ ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
 
  do idtset=0,ndtset_alloc
    nimagem(idtset)=dtsets(idtset)%nimage
@@ -176,14 +176,14 @@ subroutine outvar_i_n (dtsets,iout,&
 
 !Must treat separately the translation of iatfix from the internal
 !representation to the input/output representation
- ABI_ALLOCATE(natfix_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixio_,(mxvals%natom,0:ndtset_alloc))
- ABI_ALLOCATE(natfixx_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixx_,(mxvals%natom,0:ndtset_alloc))
- ABI_ALLOCATE(natfixy_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixy_,(mxvals%natom,0:ndtset_alloc))
- ABI_ALLOCATE(natfixz_,(0:ndtset_alloc))
- ABI_ALLOCATE(iatfixz_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfix_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixio_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfixx_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixx_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfixy_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixy_,(mxvals%natom,0:ndtset_alloc))
+ ABI_MALLOC(natfixz_,(0:ndtset_alloc))
+ ABI_MALLOC(iatfixz_,(mxvals%natom,0:ndtset_alloc))
  natfix_(0:ndtset_alloc)=0 ; iatfixio_(:,0:ndtset_alloc)=0
  natfixx_(0:ndtset_alloc)=0 ; iatfixx_(:,0:ndtset_alloc)=0
  natfixy_(0:ndtset_alloc)=0 ; iatfixy_(:,0:ndtset_alloc)=0
@@ -330,8 +330,19 @@ subroutine outvar_i_n (dtsets,iout,&
  if (ndtset_alloc==1.and.sum(narrm(1:ndtset_alloc))==1) multi_atsph=0
 
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-& narrm,ncid,ndtset_alloc,'iatsph','INT',multi_atsph) ! Emulating the case of multiple narr
+              narrm,ncid,ndtset_alloc,'iatsph','INT',multi_atsph) ! Emulating the case of multiple narr
 
+ dprarr(1,:)=dtsets(:)%ibte_abs_tol
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_abs_tol','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%ibte_alpha_mix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_alpha_mix','DPR',0)
+
+ intarr(1,:)=dtsets(:)%ibte_niter
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_niter','INT',0)
+
+ intarr(1,:)=dtsets(:)%ibte_prep
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ibte_prep','INT',0)
 
  intarr(1,:)=dtsets(:)%iboxcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'iboxcut','INT',0)
@@ -443,7 +454,7 @@ subroutine outvar_i_n (dtsets,iout,&
 
  if (allocated(dtsets(0)%istwfk)) then
    ! istwfk (must first restore the default istwf=0 for non-allowed k points)
-   ABI_ALLOCATE(istwfk_2,(mxvals%nkpt,0:ndtset_alloc))
+   ABI_MALLOC(istwfk_2,(mxvals%nkpt,0:ndtset_alloc))
    istwfk_2=0;allowed_sum=0
    do idtset=1,ndtset_alloc
      nqpt=dtsets(idtset)%nqpt
@@ -477,8 +488,12 @@ subroutine outvar_i_n (dtsets,iout,&
 
    if(tnkpt==1 .and. sum(istwfk_2(1:nkpt_eff,1:ndtset_alloc))/=0 ) &
      write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
-   ABI_DEALLOCATE(istwfk_2)
+   ABI_FREE(istwfk_2)
  end if
+
+!ivalence
+ intarr(1,:)=dtsets(:)%ivalence
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ivalence','INT',0)
 
 !ixc
  intarr(1,:)=dtsets(:)%ixc
@@ -628,7 +643,7 @@ subroutine outvar_i_n (dtsets,iout,&
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
    ndtset_kptopt=0
    intarr(1:9,0)=reshape( dtsets(0)%kptrlatt, [9] )
-   ABI_ALLOCATE(jdtset_kptopt,(0:ndtset_alloc))
+   ABI_MALLOC(jdtset_kptopt,(0:ndtset_alloc))
 !  Define the set of datasets for which kptopt>0
    do idtset=1,ndtset_alloc
      kptopt=dtsets(idtset)%kptopt
@@ -641,7 +656,7 @@ subroutine outvar_i_n (dtsets,iout,&
    if(ndtset_kptopt>0)then
      call prttagm(dprarr,intarr,iout,jdtset_kptopt,6,marr,9,narrm,ncid,ndtset_kptopt,'kptrlatt','INT',0)
    end if
-   ABI_DEALLOCATE(jdtset_kptopt)
+   ABI_FREE(jdtset_kptopt)
  end if
 
  dprarr(1,:)=dtsets(:)%kptrlen
@@ -1003,8 +1018,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%npimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npimage','INT',0,firstchar="-")
 
- intarr(1,:)=dtsets(:)%npkpt
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'npkpt','INT',0,firstchar='-')
+ intarr(1,:)=dtsets(:)%np_spkpt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_spkpt','INT',0,firstchar='-')
 
  intarr(1,:)=dtsets(:)%nppert
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nppert','INT',0,firstchar="-")
@@ -1035,6 +1050,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%np_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'np_slk','INT',0,firstchar="-")
 
+ dprarr(1,:)=dtsets(:)%nqfd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nqfd','DPR',0)
+
  intarr(1,:)=dtsets(:)%nqpt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nqpt','INT',0)
 
@@ -1051,7 +1069,7 @@ subroutine outvar_i_n (dtsets,iout,&
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
    ndtset_kptopt=0
    intarr(1:1,0)=dtsets(0)%nshiftk
-   ABI_ALLOCATE(jdtset_kptopt,(0:ndtset_alloc))
+   ABI_MALLOC(jdtset_kptopt,(0:ndtset_alloc))
 !  Define the set of datasets for which kptopt>0
    do idtset=1,ndtset_alloc
      kptopt=dtsets(idtset)%kptopt
@@ -1064,7 +1082,7 @@ subroutine outvar_i_n (dtsets,iout,&
    if(ndtset_kptopt>0)then
      call prttagm(dprarr,intarr,iout,jdtset_kptopt,2,marr,1,narrm,ncid,ndtset_kptopt,'nshiftk','INT',0)
    end if
-   ABI_DEALLOCATE(jdtset_kptopt)
+   ABI_FREE(jdtset_kptopt)
  end if
 
  intarr(1,:)=dtsets(:)%nspden
@@ -1116,21 +1134,21 @@ subroutine outvar_i_n (dtsets,iout,&
 !###########################################################
 !## Deallocation for generic arrays, and for i-n variables
 
- ABI_DEALLOCATE(dprarr)
- ABI_DEALLOCATE(intarr)
- ABI_DEALLOCATE(narrm)
- ABI_DEALLOCATE(nimagem)
- ABI_DEALLOCATE(dprarr_images)
- ABI_DEALLOCATE(prtimg)
+ ABI_FREE(dprarr)
+ ABI_FREE(intarr)
+ ABI_FREE(narrm)
+ ABI_FREE(nimagem)
+ ABI_FREE(dprarr_images)
+ ABI_FREE(prtimg)
 
- ABI_DEALLOCATE(natfix_)
- ABI_DEALLOCATE(iatfixio_)
- ABI_DEALLOCATE(natfixx_)
- ABI_DEALLOCATE(iatfixx_)
- ABI_DEALLOCATE(natfixy_)
- ABI_DEALLOCATE(iatfixy_)
- ABI_DEALLOCATE(natfixz_)
- ABI_DEALLOCATE(iatfixz_)
+ ABI_FREE(natfix_)
+ ABI_FREE(iatfixio_)
+ ABI_FREE(natfixx_)
+ ABI_FREE(iatfixx_)
+ ABI_FREE(natfixy_)
+ ABI_FREE(iatfixy_)
+ ABI_FREE(natfixz_)
+ ABI_FREE(iatfixz_)
 
  DBG_EXIT("COLL")
 

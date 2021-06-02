@@ -20,7 +20,7 @@
 #
 # COPYLEFT
 #
-#   Copyright (C) 2011 Yann Pouillon <yann.pouillon@gmail.com>
+#   Copyright (C) 2011-2021 ABINIT group (Yann Pouillon <yann.pouillon@gmail.com>)
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice

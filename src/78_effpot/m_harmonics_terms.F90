@@ -7,7 +7,7 @@
 !! Module with datatype and tools for the harmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2020 ABINIT group (AM)
+!! Copyright (C) 2010-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,21 +157,21 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
 &   'The number of atom is  ',natom,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (nrpt < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one rpt point.',ch10,&
 &   'The number of rpt points is  ',nrpt,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if (nrpt /= ifcs%nrpt) then
    write(msg, '(3a,i5,a,i5,a)' )&
 &   'nrpt must have the same dimension as ifcs.',ch10,&
 &   'The number of cell is  ',nrpt,' instead of ',ifcs%nrpt,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(present(nqpt).and.(.not.present(dynmat).or.&
@@ -179,7 +179,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                      .not.present(phfrq)))then
    write(msg, '(a)' )&
 &   'nqpt is specified but dynamt,qpoints or phfrq are not.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
  if(.not.present(nqpt).and.(present(dynmat).or.&
@@ -187,26 +187,26 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                      present(phfrq)))then
    write(msg, '(a)' )&
 &   ' dynamt,qpoints or phfrq are specified but nqpt is not.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Set number of cell
  harmonics_terms%ifcs%nrpt = nrpt
 
 !Allocation of total ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
  harmonics_terms%ifcs%atmfrc(:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:)
 
 !Allocation of ewald part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
  harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:)
 
 !Allocation of short range part of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%short_atmfrc,(3,natom,3,natom,nrpt))
  harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:)
 
 !Allocation of cell of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%cell,(3,nrpt))
+ ABI_MALLOC(harmonics_terms%ifcs%cell,(3,nrpt))
  harmonics_terms%ifcs%cell(:,:) = ifcs%cell(:,:)
 
 !Allocation of the dynamical matrix
@@ -229,7 +229,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  end if
 
 !Allocation of Effective charges array
- ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
+ ABI_MALLOC(harmonics_terms%zeff,(3,3,natom))
  harmonics_terms%zeff = zero
  if (present(zeff)) then
    call harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
@@ -237,7 +237,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  end if
 
 !Allocation of internal strain tensor
- ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
+ ABI_MALLOC(harmonics_terms%strain_coupling,(6,3,natom))
  harmonics_terms%strain_coupling = zero
  if (present(strain_coupling)) then
    call harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
@@ -289,27 +289,27 @@ subroutine harmonics_terms_free(harmonics_terms)
 
   if(allocated(harmonics_terms%zeff))then
     harmonics_terms%zeff=zero
-    ABI_DEALLOCATE(harmonics_terms%zeff)
+    ABI_FREE(harmonics_terms%zeff)
   end if
 
   if(allocated(harmonics_terms%strain_coupling)) then
     harmonics_terms%strain_coupling=zero
-    ABI_DEALLOCATE(harmonics_terms%strain_coupling)
+    ABI_FREE(harmonics_terms%strain_coupling)
   end if
 
   if(allocated(harmonics_terms%dynmat))then
     harmonics_terms%dynmat=zero
-    ABI_DEALLOCATE(harmonics_terms%dynmat)
+    ABI_FREE(harmonics_terms%dynmat)
   end if
 
   if(allocated(harmonics_terms%phfrq))then
     harmonics_terms%phfrq=zero
-    ABI_DEALLOCATE(harmonics_terms%phfrq)
+    ABI_FREE(harmonics_terms%phfrq)
   end if
 
   if(allocated(harmonics_terms%qpoints))then
     harmonics_terms%qpoints=zero
-    ABI_DEALLOCATE(harmonics_terms%qpoints)
+    ABI_FREE(harmonics_terms%qpoints)
   end if
 
   call harmonics_terms%ifcs%free()
@@ -361,16 +361,16 @@ subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupli
   if(natom /= size(strain_coupling,3)) then
     write(msg, '(a)' )&
 &        ' natom has not the same size strain_coupling array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocate old array
   if(allocated(harmonics_terms%strain_coupling))then
-    ABI_DEALLOCATE(harmonics_terms%strain_coupling)
+    ABI_FREE(harmonics_terms%strain_coupling)
   end if
 
 ! 2-allocate and copy the new array
-  ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
+  ABI_MALLOC(harmonics_terms%strain_coupling,(6,3,natom))
   harmonics_terms%strain_coupling(:,:,:) = strain_coupling(:,:,:)
 
 end subroutine harmonics_terms_setInternalStrain
@@ -420,16 +420,16 @@ subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
     if(natom /= size(zeff,3)) then
     write(msg, '(a)' )&
 &        ' natom has not the same size zeff array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocate old array
   if(allocated(harmonics_terms%zeff))then
-    ABI_DEALLOCATE(harmonics_terms%zeff)
+    ABI_FREE(harmonics_terms%zeff)
   end if
 
 ! 2-allocate and copy the new array
-  ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
+  ABI_MALLOC(harmonics_terms%zeff,(3,3,natom))
   harmonics_terms%zeff(:,:,:) = zeff(:,:,:)
 
 
@@ -484,50 +484,50 @@ subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpo
     if((natom /= size(dynmat,3)).or.(natom /= size(dynmat,5))) then
     write(msg, '(a)' )&
 &        ' natom has not the same size dynmat array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
   if (nqpt /= size(dynmat,6))then
     write(msg, '(a)' )&
 &        ' nqpt has not the same size dynmat array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
   if (nqpt /= size(qpoints,2))then
     write(msg, '(a)' )&
 &        ' nqpt has not the same size qpoints array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
   if (nqpt /= size(phfrq,2))then
     write(msg, '(a)' )&
 &        ' nqpt has not the same size phfrq array. '
-    MSG_BUG(msg)
+    ABI_BUG(msg)
   end if
 
 ! 1-deallocate old array
   if(allocated(harmonics_terms%dynmat))then
-    ABI_DEALLOCATE(harmonics_terms%dynmat)
+    ABI_FREE(harmonics_terms%dynmat)
   end if
 
   if(allocated(harmonics_terms%phfrq))then
-    ABI_DEALLOCATE(harmonics_terms%phfrq)
+    ABI_FREE(harmonics_terms%phfrq)
   end if
 
   if(allocated(harmonics_terms%qpoints))then
-    ABI_DEALLOCATE(harmonics_terms%qpoints)
+    ABI_FREE(harmonics_terms%qpoints)
   end if
 
 ! 2-allocate and copy the new array
   harmonics_terms%nqpt = nqpt
 
-  ABI_ALLOCATE(harmonics_terms%dynmat,(2,3,natom,3,natom,nqpt))
+  ABI_MALLOC(harmonics_terms%dynmat,(2,3,natom,3,natom,nqpt))
   harmonics_terms%dynmat(:,:,:,:,:,:) = dynmat(:,:,:,:,:,:)
 
-  ABI_ALLOCATE(harmonics_terms%phfrq,(3*natom,nqpt))
+  ABI_MALLOC(harmonics_terms%phfrq,(3*natom,nqpt))
   harmonics_terms%phfrq(:,:) = phfrq(:,:)
 
-  ABI_ALLOCATE(harmonics_terms%qpoints,(3,nqpt))
+  ABI_MALLOC(harmonics_terms%qpoints,(3,nqpt))
   harmonics_terms%qpoints(:,:) = qpoints(:,:)
 
 end subroutine harmonics_terms_setDynmat
@@ -601,7 +601,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
 
   if (any(sc_size <= 0)) then
     write(msg,'(a,a)')' sc_size can not be inferior or equal to zero'
-    MSG_ERROR(msg)
+    ABI_ERROR(msg)
   end if
 
 ! Initialisation of variables
@@ -794,7 +794,7 @@ subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
 
  if (irpt_ref<=0) then
    write(msg,'(a,a)')' Unable to find the cell of reference in IFC'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
  atmfrc => ifc%atmfrc

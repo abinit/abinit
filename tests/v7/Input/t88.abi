@@ -87,7 +87,7 @@ eph_ngqpt_fine4 8 8 8
 ###############
 ## DATASET 5 ##
 ###############
-eph_intmeth5  1       # FS integration with Adaptive Gaussians
+eph_intmeth5  1       # FS integration with Adaptive Gaussian
 eph_fsmear5  -1 eV    # Adaptive Gaussian broadening (negative value)
 
 # Geometry
@@ -128,6 +128,9 @@ znucl  13
 #%%   t88o_DS1_PHGAMMA, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHGAMMA, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NOINTP_A2FW, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_NOINTP_A2FW_tr, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#####%% The decomposition in phonon modes is not portable: 
+#####%% t88o_DS2_NOINTP_PH_A2FW_tr, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_A2FW, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_EBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_EBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;

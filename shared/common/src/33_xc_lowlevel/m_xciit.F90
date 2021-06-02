@@ -7,7 +7,7 @@
 !! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2020 ABINIT group (JFD,LK)
+!!  Copyright (C) 2002-2021 ABINIT group (JFD,LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,7 +93,7 @@ subroutine xciit(exc,fxc,npt,order,rspts,temp,vxc, &
    write(msg, '(4a,i3,a)' ) ch10,&
 &   'With Ishimaru-Iyetomi-Tanka xc functional, the only',ch10,&
 &   'allowed values for order are 0, 1 or 2, while it is found to be ',order,'.'
-   MSG_BUG(msg)
+   ABI_BUG(msg)
  end if
 
 !Loop over grid points

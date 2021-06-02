@@ -30,6 +30,9 @@ teph4mob_1o_DS10_POT2
 teph4mob_1o_DS10_POT4
 teph4mob_1o_DS10_POT5
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv

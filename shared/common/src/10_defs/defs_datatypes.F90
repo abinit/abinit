@@ -26,7 +26,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2020 ABINIT group (XG)
+!! Copyright (C) 2001-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,6 +82,7 @@ module defs_datatypes
   real(dp) :: nh_qFD               ! CP added: Number of holes     excited in the bands <=ivalence (occopt = 9 only)
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
+  !real(dp) :: max_occ             ! Spin degeneracy factor: max_occ = two / (self%nspinor * self%nsppol)
 
   !real(dp) :: spinmagntarget
   ! TODO This should be set via dtset%spinmagntarget to simplify the API.
@@ -138,8 +139,8 @@ module defs_datatypes
   integer :: nshiftk_orig, nshiftk
   ! original number of shifts given in input and the actual value (changed in inkpts)
 
-  real(dp) :: charge
-  ! nelect = zion - charge
+  real(dp) :: cellcharge
+  ! nelect = zion - cellcharge
   ! Extra charge added to the unit cell when performing GS calculations
   ! To treat a system missing one electron per unit cell, charge is set to +1.
   ! When reading the band structure from an external file,
@@ -187,7 +188,7 @@ module defs_datatypes
 
  type pseudopotential_gth_type
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
+! WARNING: if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
 
   real(dp), allocatable :: psppar(:, :, :)
@@ -287,9 +288,8 @@ module defs_datatypes
 
  type pseudopotential_type
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
+! WARNING: if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
-
 
 ! Integer scalars
   integer :: dimekb
@@ -534,10 +534,10 @@ module defs_datatypes
 
  type pspheader_paw_type
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
+! WARNING: if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
 
-! WARNING : Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
+! WARNING: Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
 
   integer :: basis_size    ! Number of elements of the wf basis ((l,n) quantum numbers)
   integer :: l_size        ! Maximum value of l+1 leading to a non zero Gaunt coefficient
@@ -565,9 +565,9 @@ module defs_datatypes
 
  type pspheader_type
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
+! WARNING: if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
-! WARNING : Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
+! WARNING: Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
 
   integer :: nproj(0:3) ! number of scalar projectors for each angular momentum
 

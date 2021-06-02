@@ -10,7 +10,7 @@
 !!  inside the spheres around each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2021 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -239,7 +239,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
      call wrap2_zero_one(rsph_red(3,ifgd),red(3),shift(3))
      Paw_onsite(iatom1)%r0shift(:,ifgd) = NINT(shift)
      !if (ANY( ABS(shift) > tol12)) then
-       !MSG_WARNING("rmR_red is outside the first unit cell.")
+       !ABI_WARNING("rmR_red is outside the first unit cell.")
        !write(ab_out,*)rsph_red(:,ifgd),shift
      !end if
    end do
@@ -414,7 +414,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
  !
  !* Free 2nd derivates used for spline.
  call paw_pwaves_lmn_free(Paw_lmn_spline)
- ABI_DATATYPE_DEALLOCATE(Paw_lmn_spline)
+ ABI_FREE(Paw_lmn_spline)
 
  ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)

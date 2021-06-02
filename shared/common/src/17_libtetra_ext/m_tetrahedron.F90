@@ -7,7 +7,7 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2020 ABINIT group (MJV)
+!!  Copyright (C) 2010-2021 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

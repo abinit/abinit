@@ -8,7 +8,7 @@
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2020 ABINIT group (AM)
+!! Copyright (C) 2010-2021 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,7 +134,7 @@ subroutine polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_str
 !Checks
  if (ndisp <= 0) then
    write(msg,'(a,a)')' ndisp can not be inferior or equal to zero'
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
  end if
 
 !First free the type
@@ -147,7 +147,7 @@ subroutine polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_str
  polynomial_conf%need_confinement = .FALSE.
 
  polynomial_conf%ndisp   = ndisp
- ABI_ALLOCATE(polynomial_conf%cutoff_disp,(polynomial_conf%ndisp))
+ ABI_MALLOC(polynomial_conf%cutoff_disp,(polynomial_conf%ndisp))
  polynomial_conf%cutoff_disp(:) = cutoff_disp(:)
 
  polynomial_conf%cutoff_strain = cutoff_strain(:)
@@ -194,7 +194,7 @@ subroutine polynomial_conf_free(polynomial_conf)
 ! *************************************************************************
 
  if(allocated(polynomial_conf%cutoff_disp))then
-   ABI_DEALLOCATE(polynomial_conf%cutoff_disp)
+   ABI_FREE(polynomial_conf%cutoff_disp)
  end if
 
  polynomial_conf%power_disp    = 0
