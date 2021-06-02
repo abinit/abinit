@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon
+## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
 
 #
 # HDF5 I/O support

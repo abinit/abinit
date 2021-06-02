@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -505,12 +505,12 @@ P          mk1mem6         26
              nkpt4        128
              nkpt5        256
              nkpt6        256
--           npkpt1         10
--           npkpt2          1
--           npkpt3          1
--           npkpt4          1
--           npkpt5          1
--           npkpt6          1
+-        np_spkpt1         10
+-        np_spkpt2          1
+-        np_spkpt3          1
+-        np_spkpt4          1
+-        np_spkpt5          1
+-        np_spkpt6          1
 -          nppert1          1
 -          nppert2          1
 -          nppert3          1
@@ -3085,12 +3085,12 @@ P          mk1mem6         26
              nkpt4        128
              nkpt5        256
              nkpt6        256
--           npkpt1         10
--           npkpt2          1
--           npkpt3          1
--           npkpt4          1
--           npkpt5          1
--           npkpt6          1
+-        np_spkpt1         10
+-        np_spkpt2          1
+-        np_spkpt3          1
+-        np_spkpt4          1
+-        np_spkpt5          1
+-        np_spkpt6          1
 -          nppert1          1
 -          nppert2          1
 -          nppert3          1

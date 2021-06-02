@@ -7,7 +7,7 @@
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2020 ABINIT group (MG)
+!! Copyright (C) 2013-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,6 +57,7 @@ program abitk
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
+ use m_phgamma,        only : find_ewin
 
  implicit none
 
@@ -64,13 +65,13 @@ program abitk
 !Local variables-----------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
+ integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands, spin
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
- integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries
- real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
+ integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries, ltetra
+ real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb, fs_ewin !, tolsym, tsmear
  logical :: is_metal
  character(len=500) :: command, arg, msg, ptgroup
- character(len=fnlen) :: path, other_path !, prefix
+ character(len=fnlen) :: path, other_path, out_path !, prefix
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
@@ -84,7 +85,7 @@ program abitk
  real(dp) :: skw_params(4), tmesh(3)
  real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
- real(dp),allocatable :: nh(:), ne(:)
+ real(dp),allocatable :: n_ehst(:,:,:)
 
 !*******************************************************
 
@@ -106,7 +107,7 @@ program abitk
  else
    close(std_out)
    if (open_file(NULL_FILE, msg, unit=std_out, action="write") /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -230,7 +231,9 @@ program abitk
    if (command == "ebands_edos") then
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      call edos%print(std_out, header="Electron DOS")
-     call edos%write(strcat(basename(path), "_EDOS"))
+     out_path = strcat(basename(path), "_EDOS")
+     call wrtout(std_out, sjoin("Writing electron DOS to file:", out_path))
+     call edos%write(out_path)
 
    else if (command == "ebands_jdos") then
      NOT_IMPLEMENTED_ERROR()
@@ -241,13 +244,13 @@ program abitk
  case ("ebands_bxsf")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    if (ebands_write_bxsf(ebands, cryst, strcat(basename(path), "_BXSF")) /= 0)  then
-     MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
+     ABI_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
    end if
 
  !case ("ebands_nesting")
    !call get_path_ebands_cryst(path, ebands, cryst, comm)
    !if (ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg) /= 0) then
-   !  MSG_ERROR("Cannot produce file for nesting factor. Check log file for info.")
+   !  ABI_ERROR("Cannot produce file for nesting factor. Check log file for info.")
    !end if
 
  case ("skw_kpath")
@@ -256,7 +259,7 @@ program abitk
 
    ! Generate k-path
    ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
-   !MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   !ABI_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
    !nbounds = 5
    ABI_MALLOC(bounds, (3, 5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
@@ -281,7 +284,7 @@ program abitk
    !call ebands_free(ebands_kmesh)
 
  case ("skw_compare")
-   ! Get energies on the IBZ from filepath
+   ! Get energies on the IBZ from path
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
    ! Get ab-initio energies for the second file (assume k-path!)
@@ -346,37 +349,40 @@ program abitk
    call gaps%print(unit=std_out, header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
    !stop
 
-   ABI_MALLOC(ne, (ntemp))
-   ABI_MALLOC(nh, (ntemp))
-   call ebands_get_carriers(ebands, ntemp, kTmesh, mu_e, nh, ne)
+   ABI_MALLOC(n_ehst, (2, ebands%nsppol, ntemp))
+   call ebands_get_carriers(ebands, ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-   do itemp=1,ntemp
-     write(std_out, "(a, 2f16.2, 2e16.2)")&
-      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
-      nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-      ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3
+   do spin=1,ebands%nsppol
+     do itemp=1,ntemp
+       write(std_out, "(a, 2f16.2, 2e16.2)")&
+        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+        n_ehst(2,spin,itemp) / cryst%ucvol / Bohr_cm**3, &
+        n_ehst(1,spin,itemp) / cryst%ucvol / Bohr_cm**3
+     end do
    end do
 
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
+
    edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    call edos%print(std_out, header="Electron DOS")
-   call edos%get_carriers(ntemp, kTmesh, mu_e, nh, ne)
+   call edos%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-   do itemp=1,ntemp
-     write(std_out, "(a, 2f16.2, 2e16.2)")&
-      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
-      nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-      ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3
+   do spin=1,ebands%nsppol
+     do itemp=1,ntemp
+       write(std_out, "(a, 2f16.2, 2e16.2)")&
+        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+        n_ehst(2, itemp, spin) / cryst%ucvol / Bohr_cm**3, &
+        n_ehst(1, itemp, spin) / cryst%ucvol / Bohr_cm**3
+     end do
    end do
 
    ABI_FREE(kTmesh)
    ABI_FREE(mu_e)
-   ABI_FREE(nh)
-   ABI_FREE(ne)
+   ABI_FREE(n_ehst)
 
  !case ("ebands_dope")
 
@@ -391,7 +397,7 @@ program abitk
    ! Get important dimensions from the first header and rewind the file.
    !call hdr_fort_read(new%hdr_ref, unt, fform)
    !if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
-   !  MSG_ERROR(sjoin("While reading:", path, ch10, msg))
+   !  ABI_ERROR(sjoin("While reading:", path, ch10, msg))
    !end if
    !! Fortran IO
    !do ispden=1,hdr1%nspden
@@ -408,6 +414,13 @@ program abitk
    !! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
    !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    !ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+
+ case ("find_ewin")
+   ltetra = 2
+   ABI_CHECK(get_arg("ltetra", ltetra, msg, default=2) == 0, msg)
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   ! Use Q-mesh == K-mesh for double delta.
+   call find_ewin(ebands%nkpt, ebands%kptns, cryst, ebands, ltetra, fs_ewin, comm)
 
  ! ===========
  ! Unit tests
@@ -433,7 +446,7 @@ program abitk
 
  case default
    call abitk_show_help()
-   MSG_ERROR(sjoin("Invalid command:", command))
+   ABI_ERROR(sjoin("Invalid command:", command))
  end select
 
  ! Deallocate memory to make memcheck happy.

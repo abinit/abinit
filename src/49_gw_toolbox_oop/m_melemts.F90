@@ -9,7 +9,7 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -414,7 +414,7 @@ subroutine my_select_melements(Mels,aname,flag_p,arr_p)
    flag_p => Mels%flags%has_vxcval_hybrid
    arr_p  => Mels%vxcval_hybrid
  CASE DEFAULT
-   MSG_ERROR(sjoin("Wrong aname: ", aname))
+   ABI_ERROR(sjoin("Wrong aname: ", aname))
  END SELECT
 
 end subroutine my_select_melements
@@ -496,7 +496,7 @@ subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_
  end do
 
  if (bmin==HUGE(1).or.bmax==-HUGE(1)) then
-   MSG_BUG("Wrong bands_idx")
+   ABI_BUG("Wrong bands_idx")
  end if
 
  Mels%bmin = bmin
@@ -696,7 +696,7 @@ subroutine melements_mpisum(Mels,comm,aname)
      call xmpi_sum(arr_p,comm,ierr)
      if (ierr/=0) then
        write(msg,'(a,i4,2a)')" xmpi_sum reported ierr= ",ierr," for key= ",TRIM(key)
-       MSG_ERROR(msg)
+       ABI_ERROR(msg)
      end if
      flag_p=2 ! Tag this array as calculated
    end if
@@ -767,7 +767,7 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
- if (Mels%nspinor == 2) MSG_WARNING("nspinor=2 not coded")
+ if (Mels%nspinor == 2) ABI_WARNING("nspinor=2 not coded")
 
  if (PRESENT(names_list)) then
    my_nkeys=SIZE(names_list)

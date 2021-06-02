@@ -6,6 +6,9 @@ teph_1o_DS3_DDB
 teph_1o_DS4_DDB
 
 
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb

@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,7 +122,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
- use m_driver,       only : driver
+ use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -166,7 +166,7 @@ program abinit
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
- real(dp),allocatable :: fred(:,:),xred(:,:)
+ real(dp),allocatable :: gred(:,:),xred(:,:)
  character(len=24) :: codename
  character(len=24) :: start_datetime
  character(len=5000) :: msg
@@ -245,7 +245,7 @@ program abinit
    open(unit=ab_out,file=filnam(2),form='formatted',status='new', action="write", iomsg=msg, iostat=ios)
 #endif
    ABI_CHECK(ios == 0, msg)
-   rewind (unit=ab_out)
+!  rewind (unit=ab_out)
    codename='ABINIT'//repeat(' ',18)
    call herald(codename,abinit_version,ab_out)
    call herald(codename,abinit_version,std_out)
@@ -445,11 +445,11 @@ program abinit
 
  ABI_MALLOC(nband,(nkpt*nsppol))
  ABI_MALLOC(npwtot,(nkpt))
- ABI_MALLOC(fred,(3,natom))
+ ABI_MALLOC(gred,(3,natom))
  ABI_MALLOC(xred,(3,natom))
 
  etotal=results_out(1)%etotal(1)
- fred(:,:)  =results_out(1)%fred(:,1:natom,1)
+ gred(:,:)  =results_out(1)%gred(:,1:natom,1)
  nband(:)   =dtsets(1)%nband(1:nkpt*nsppol)
  npwtot(:)  =results_out(1)%npwtot(1:nkpt,1)
  strten(:)  =results_out(1)%strten(:,1)
@@ -490,13 +490,13 @@ program abinit
 
  ! 19) Delete the status file, and, for build-in tests, analyse the correctness of results.
  if (ndtset == 0) then
-   call testfi(dtsets(1)%builtintest,etotal,filstat,fred,natom,strten,xred)
+   call testfi(dtsets(1)%builtintest,etotal,filstat,gred,natom,strten,xred)
  end if
 
  ! One should have here the explicit deallocation of all arrays
  call destroy_results_out(results_out)
 
- ABI_FREE(fred)
+ ABI_FREE(gred)
  ABI_FREE(nband)
  ABI_FREE(npwtot)
  ABI_FREE(results_out)

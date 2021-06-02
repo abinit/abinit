@@ -8,7 +8,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -281,12 +281,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
       'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
       'positive, while it is ',tolwfr,ch10,&
       'Action: change tolwfr in your input file and resubmit the job.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
    ! toldff only allowed when prtfor==1
    ! FIXME: this test should be done on input, not during calculation
    if((ttoldff == 1 .or. ttolrff == 1) .and. prtfor==0 )then
-     MSG_ERROR('toldff only allowed when prtfor=1!')
+     ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
    if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
@@ -296,7 +296,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &     'tolwfr=',tolwfr,', toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
 &     'and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 
    if (dtset%usewvl == 1) then
@@ -602,7 +602,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          if (diffor < tol12) then
            write (message,'(3a)') ' toldff criterion is satisfied, but your forces are suspiciously low.', ch10,&
 &           ' Check if the forces are 0 by symmetry: in that case you can not use the toldff convergence criterion!'
-           MSG_WARNING(message)
+           ABI_WARNING(message)
            if (maxfor < tol16 .and. res2 > tol9) tolrff_ok=0
          end if
        else
@@ -680,6 +680,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
              quit=1
            endif
          endif
+!TODO: separate messages: if HF is imposing a continuation of the loop, then abs(deltae) is actually not > toldfe
          if(istep_mix==nnsclohf .and. quit==0)then
            write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
@@ -757,7 +758,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          "message: |",ch10,&
          '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
          "..."
-           !MSG_WARNING_CLASS(message, "ScfConvergenceWarning")
+           !ABI_WARNING_CLASS(message, "ScfConvergenceWarning")
        else
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
          ' scprqt:  WARNING -',ch10,&
@@ -767,7 +768,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          "--- !NscfConvergenceWarning",ch10,&
          "message: |",ch10,TRIM(indent(message)),ch10,&
          "..."
-           !MSG_WARNING_CLASS(message, "NScfConvergenceWarning")
+           !ABI_WARNING_CLASS(message, "NScfConvergenceWarning")
        end if
        call wrtout([std_out, ab_out], message)
 
@@ -848,7 +849,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
  case default
    write(message, '(a,i0,a)' )' choice = ',choice,' is not an allowed value.'
-   MSG_BUG(message)
+   ABI_BUG(message)
  end select
 
  ! Additional stuff for the Fock+SCF cycle
@@ -873,7 +874,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(abs(dtset%postoldff)>tiny(0.0_dp))ttoldff=1
        if(abs(dtset%postoldfe)>tiny(0.0_dp))ttoldfe=1
        if (dtset%positron<0.and.ttoldff+ttoldfe/=1.and.iscf>0) then
-         MSG_ERROR('one and only one of toldff or toldfe must differ from zero !')
+         ABI_ERROR('one and only one of toldff or toldfe must differ from zero !')
        end if
      end if
      if (choice==2) then
@@ -1047,7 +1048,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
    'nqpt =',dtset%nqpt,' is not allowed',ch10,&
    '(only 0 or 1 are allowed).',ch10,&
    'Action: correct your input file.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
  ! Compute dimensional primitive translations rprimd
@@ -1085,7 +1086,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
    'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
    'Need larger ngfft to use intxc=1.',ch10,&
    'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 end subroutine setup1
@@ -1183,13 +1184,13 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
 ! *************************************************************************
 
  if (enunit<0.or.enunit>2) then
-   MSG_BUG(sjoin('enunit must be 0, 1 or 2. Argument was:', itoa(enunit)))
+   ABI_BUG(sjoin('enunit must be 0, 1 or 2. Argument was:', itoa(enunit)))
  end if
 
  if (prteig > 0) then
    call wrtout(iout, sjoin(' prteigrs : about to open file ', fname_eig))
    if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
-     MSG_ERROR(msg)
+     ABI_ERROR(msg)
    end if
    rewind(temp_unit) ! always rewind disk file and print latest eigenvalues
  end if
@@ -1261,7 +1262,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
           write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
           ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
           convrt*fermie,', ',convrt*fermih,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
-       else 
+       else
           write(msg, '(3a,f10.5,3a,f10.5)' ) &
           ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        end if
@@ -1417,7 +1418,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
    call wrtout(iout," ")
 
  else
-   MSG_BUG(sjoin('option:', itoa(option),', is not allowed.'))
+   ABI_BUG(sjoin('option:', itoa(option),', is not allowed.'))
  end if
 
  if (prteig > 0) close (temp_unit)
@@ -1524,6 +1525,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
+     if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
+       call edoc%add_real('kinetic_extfpmd',energies%e_extfpmd)
+       call edoc%add_real('total_kinetic',energies%e_extfpmd+energies%e_kinetic)
+     end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
        ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1615,7 +1620,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
    dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
-
+   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
+     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%edc_extfpmd)
+   end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
      !  '    '//eneName//'  =',enevalue,ch10,&
@@ -1674,6 +1681,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
      end if
      call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
+
+
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    !call wrtout(iout,msg,'COLL')
    call dc_edoc%add_real('total_energy_dc', etotaldc)
@@ -1704,7 +1713,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
  end if
 
- if( dtset%icoulomb/=1.and.abs(dtset%charge)>tol8) then
+ if( dtset%icoulomb/=1.and.abs(dtset%cellcharge(1))>tol8) then
    write(msg, '(6a)' ) &
      ch10,' Calculation was performed for a charged system with PBC',&
      ch10,' You may consider including the monopole correction to the total energy',&
@@ -1815,7 +1824,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  usepaw = 0
  ABI_MALLOC(pspheads, (npsp))
  if (npsp > 10) then
-   MSG_BUG('ecut_tmp is not well defined.')
+   ABI_BUG('ecut_tmp is not well defined.')
  end if
  ecut_tmp = -one
 
@@ -1830,7 +1839,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
       ! Catch possible mistake done by user (input without pseudos and `abinit t01.in` syntax)
       ! else the code starts to prompt for pseudos and execution gets stuck
       if (len_trim(input_path) /= 0) then
-        MSG_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
+        ABI_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
       end if
 
       ! Finish to read the "file" file completely, as npsp is known,
@@ -1843,7 +1852,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
           'There are not enough names of pseudopotentials provided in the files file.',ch10,&
           'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
           'if they are correct, complete your files file.'
-          MSG_ERROR(msg)
+          ABI_ERROR(msg)
         end if
         pspfilnam_(ipsp) = trim(filpsp)
         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
@@ -1982,7 +1991,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
    NCF_CHECK(nf90_close(ncid))
 #endif
  else
-   MSG_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
+   ABI_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
  end if
 
  ABI_FREE(gs_eigen)

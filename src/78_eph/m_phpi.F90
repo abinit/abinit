@@ -2,10 +2,10 @@
 !! NAME
 !!
 !! FUNCTION
-!!  Tools for the computation of phonon self-energy.
+!!  Ccomputation of phonon-electron self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (GKA)
+!!  Copyright (C) 2008-2021 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ contains  !=====================================================================
 !!  eph_phpi
 !!
 !! FUNCTION
-!!  Compute phonon self-energy.
+!!  Compute phonon-electron self-energy.
 !!
 !! INPUTS
 !! wk0_path=String with the path to the GS unperturbed WFK file.
@@ -95,8 +95,6 @@ contains  !=====================================================================
 !!
 !! PARENTS
 !!      m_eph_driver
-!!
-!! NOTES
 !!
 !! CHILDREN
 !!
@@ -126,13 +124,10 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c=1,berryopt0=0
- integer,parameter :: useylmgr1=0,master=0
+ integer,parameter :: tim_getgh1c = 1,berryopt0 = 0, useylmgr1 = 0, master = 0
  integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,onpw,imode
- integer :: ib1,ib2
- integer :: ik,ikq
- integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
+ integer :: ib1,ib2,ik,ikq,spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw,my_mpw,ierr,my_kstart,my_kstop,cnt
  integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
@@ -169,7 +164,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
  if (psps%usepaw == 1) then
-   MSG_ERROR("PAW not implemented")
+   ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
@@ -258,7 +253,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_FREE(bks_mask_kq)
  ABI_FREE(keep_ur_kq)
 
- ! Read wafefunctions on the k-points grid and q-shifted k-points grid.
+ ! Read wavefunctions on the k-points grid and q-shifted k-points grid.
  iomode = iomode_from_fname(wfk0_path)
  call wfd_k%read_wfk(wfk0_path,iomode)
  if (.False.) call wfd_k%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
@@ -347,7 +342,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
    call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
  else
-   MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
+   ABI_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
  end if
 
  ! Allocate vlocal1 with correct cplex. Note nvloc
@@ -570,8 +565,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  write(msg, '(3a)') "Computation of the real part of the phonon self-energy completed", ch10, &
 &                   "--------------------------------------------------------------------------------"
- call wrtout(ab_out, msg, "COLL", do_flush=.True.)
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ call wrtout([ab_out, std_out], msg, "COLL", do_flush=.True.)
 
  ! Free memory
  ABI_FREE(gkk)
@@ -736,7 +730,7 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  NCF_CHECK(nf90_close(ncid))
 
 #else
- MSG_ERROR("NETCDF support required to write Pi.nc file.")
+ ABI_ERROR("NETCDF support required to write Pi.nc file.")
 #endif
 
 end subroutine out_phpi_nc

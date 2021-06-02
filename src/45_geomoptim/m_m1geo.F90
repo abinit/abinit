@@ -7,7 +7,7 @@
 !! and its related init and destroy routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (XG)
+!! Copyright (C) 2018-2021 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,7 +155,7 @@ contains  !=============================================================
 
 !1) ab_mover
  call abimover_ini(m1geo_param%ab_mover,amu_curr,dtfil,dtset,m1geo_param%specs)
- ABI_DEALLOCATE(amu_curr)
+ ABI_FREE(amu_curr)
 
 !2) deloc
  if(ionmov==10 .or. ionmov==11)then

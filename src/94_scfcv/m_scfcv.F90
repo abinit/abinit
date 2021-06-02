@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (JB)
+!!  Copyright (C) 2014-2021 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,7 @@ module m_scfcv
  use m_efield
  use m_entropyDMFT
  use m_hdr
+ use m_extfpmd
  use m_dtfil
 
  use defs_datatypes,     only : pseudopotential_type
@@ -75,7 +76,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2020 ABINIT group (JB)
+!!  Copyright (C) 2014-2021 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +104,7 @@ module m_scfcv
    type(orbmag_type),pointer :: dtorbmag => null()
    type(electronpositron_type),pointer :: electronpositron => null()
    type(hdr_type),pointer :: hdr => null()
+   type(extfpmd_type),pointer :: extfpmd => null()
    type(pawfgr_type),pointer :: pawfgr => null()
    type(recursion_type),pointer :: rec_set => null()
    type(results_gs_type),pointer :: results_gs => null()
@@ -180,7 +182,7 @@ contains
 !! SOURCE
 
 subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
-&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
+&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
 &  indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -202,6 +204,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(orbmag_type),intent(in),target :: dtorbmag
 ! type(electronpositron_type),pointer :: electronpositron
  type(hdr_type),intent(in),target :: hdr
+ type(extfpmd_type),intent(in),pointer :: extfpmd
  type(pawang_type),intent(in),target :: pawang
  type(pawfgr_type),intent(in),target :: pawfgr
  type(pseudopotential_type),intent(in),target :: psps
@@ -304,6 +307,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
  this%hdr=>hdr
+ this%extfpmd=>extfpmd
  this%initialized=>initialized
  this%irrzon=>irrzon
  this%mpi_enreg=>mpi_enreg
@@ -408,6 +412,7 @@ type(scfcv_t), intent(inout) :: this
  this%dtorbmag => null()
  this%electronpositron => null()
  this%hdr => null()
+ this%extfpmd => null()
  this%pawfgr => null()
  this%rec_set => null()
  this%results_gs => null()
@@ -467,7 +472,7 @@ end subroutine scfcv_destroy
 !!  FIXME: add description.
 !!
 !! INPUTS
-!!  itime=Relaxation iteration.
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  scfcv=structure of scfcv
 !!
 !! OUTPUT
@@ -480,11 +485,11 @@ end subroutine scfcv_destroy
 !!
 !! SOURCE
 
-subroutine scfcv_run(this, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
+subroutine scfcv_run(this, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
 
 !Arguments ------------------------------------
  type(scfcv_t), intent(inout) :: this
- integer,intent(in) :: itime
+ integer,intent(in) :: itimes(2)
  type(electronpositron_type),pointer:: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), intent(inout) :: xred(3,this%dtset%natom)
@@ -509,9 +514,9 @@ subroutine scfcv_run(this, itime, electronpositron, rhog, rhor, rprimd, xred, xr
  !debug purpose
  !this%electronpositron => electronpositron
  if ( this%dtset%dmft_entropy == 0 ) then
-   call scfcv_scfcv(this, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
+   call scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
  elseif ( this%dtset%dmft_entropy >=1 ) then
-   call scfcv_runWEntropyDMFT(this, itime, electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_runWEntropyDMFT(this, electronpositron,itimes, rhog,rhor,rprimd,xred,xred_old,conv_retcode)
  end if
 
  DBG_EXIT("COLL")
@@ -560,15 +565,15 @@ end subroutine scfcv_run
 !!!  we need to reformat the wavefunctions, taking into acount the new
 !!!  coordinates.
 !!!  We prepare to change rhog (to be removed) and rhor.
-!!   ABI_DEALLOCATE(rhog)
-!!   ABI_DEALLOCATE(rhor)
+!!   ABI_FREE(rhog)
+!!   ABI_FREE(rhor)
 !!
 !!   call wvl_wfsinp_reformat(this%dtset, this%mpi_enreg,&
 !!&   this%psps, rprimd, this%wvl, xred, xred_old)
 !!   this%nfftf = this%dtset%nfft
 !!
-!!   ABI_ALLOCATE(rhog,(2, this%dtset%nfft))
-!!   ABI_ALLOCATE(rhor,(2, this%dtset%nfft))
+!!   ABI_MALLOC(rhog,(2, this%dtset%nfft))
+!!   ABI_MALLOC(rhor,(2, this%dtset%nfft))
 !!   call wvl_mkrho(this%dtset, this%irrzon, this%mpi_enreg,&
 !!&   this%phnons, rhor,this%wvl%wfs,this%wvl%den)
 !! end if
@@ -584,6 +589,7 @@ end subroutine scfcv_run
 !!  FIXME: add description.
 !!
 !! INPUTS
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!  scfcv=structure of scfcv
 !!  argin(sizein)=description
 !!
@@ -602,12 +608,12 @@ end subroutine scfcv_run
 !!
 !! SOURCE
 
-subroutine scfcv_runWEntropyDMFT(this,itime,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+subroutine scfcv_runWEntropyDMFT(this,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 
 !Arguments ------------------------------------
  type(scfcv_t), intent(inout) :: this
- integer,intent(in) :: itime
+ integer,intent(in) :: itimes(2)
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), intent(inout) :: xred(3,this%dtset%natom)
@@ -640,7 +646,7 @@ subroutine scfcv_runWEntropyDMFT(this,itime,electronpositron,rhog,rhor,rprimd,xr
  do while (entropyDMFT_nextLambda(this%entropyDMFT,this%dtset,this%pawtab,this%pawang,this%pawrad))
 
  !-----------------------------------------------------
-   call scfcv_scfcv(this, itime, electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+   call scfcv_scfcv(this, electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
  !-----------------------------------------------------
    call entropyDMFT_addIntegrand(this%entropyDMFT,this%dtset, this%results_gs%energies,this%paw_dmft%forentropyDMFT)
 
@@ -669,7 +675,7 @@ end subroutine scfcv_runWEntropyDMFT
 !!
 !! INPUTS
 !!  scfcv=structure of scfcv
-!!  itime: Relaxation step
+!!  itimes(2)=itime array, contain itime=itimes(1) and itimimage_gstate=itimes(2) from outer loops
 !!
 !! OUTPUT
 !!
@@ -684,10 +690,10 @@ end subroutine scfcv_runWEntropyDMFT
 !!
 !! SOURCE
 
-subroutine scfcv_scfcv(this, itime, electronpositron, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
+subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
 
  type(scfcv_t), intent(inout) :: this
- integer,intent(in) :: itime
+ integer,intent(in) :: itimes(2)
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
  real(dp), intent(inout) :: xred(3,this%dtset%natom)
@@ -696,10 +702,10 @@ subroutine scfcv_scfcv(this, itime, electronpositron, rhog, rhor, rprimd, xred, 
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv_core(itime, this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
+   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
     this%dtorbmag,this%dtpawuj,&
-    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
-    this%initialized,this%irrzon,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
+    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%extfpmd,this%indsym,&
+    this%initialized,this%irrzon,itimes,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
     this%nfftf,this%npwarr,&
     this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
     this%pwind_alloc,this%pwnsfac,this%rec_set,this%resid,this%results_gs,rhog,rhor,rprimd,&

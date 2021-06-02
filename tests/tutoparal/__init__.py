@@ -14,19 +14,18 @@ is_multi_parallel = True
 
 subsuites = [
 "dfpt",
+"dmft",
 "gspw",
 "gswvl",
-"mbt",
-"dmft",
-"moldyn",
 "images",
+"mbt",
+"moldyn",
+"psic",
 "ucrpa",
 ]
 
 #: List of input files
 inp_files = [
-"tgswvl_1.abi",
-"tgswvl_2.abi",
 "tdfpt_01.abi",
 "tdfpt_02.abi",
 "tdfpt_03.abi",
@@ -40,6 +39,12 @@ inp_files = [
 "tgspw_03.abi",    # OK
 "tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
 #"tgspw_05.abi",
+"tgswvl_1.abi",
+"tgswvl_2.abi",
+"timages_01.abi",
+"timages_02.abi",
+"timages_03.abi",
+"timages_04.abi",
 "tmbt_1.abi",   # OK     
 "tmbt_2.abi",   # OK
 "tmbt_3.abi",   # OK
@@ -52,10 +57,9 @@ inp_files = [
 #"tmoldyn_05.abi",    # Run is too long : more than 20 minutes on 64 procs
 #"tmoldyn_06.abi",
 #"tmoldyn_07.abi",    # Run is too long : more than 20 minutes on 2 procs.
-"timages_01.abi",  
-"timages_02.abi",
-"timages_03.abi",
-"timages_04.abi", 
+"tpsic_01.abi", 
+"tpsic_02.abi",   
+"tpsic_03.abi", 
 "tucrpa_1.abi",
 "tucrpa_2.abi",
 #"tucrpa_3.abi",

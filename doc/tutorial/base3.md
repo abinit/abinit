@@ -21,7 +21,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the total energy of silicon at a fixed number of k-points
 
@@ -174,7 +174,7 @@ at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
 ## Determination of the lattice parameters
 
 The input variable [[optcell]] governs the automatic optimisation of cell shape and volume.
-For the automatic optimisation of cell volume, use:
+For the automatic optimisation of cell volume in this cubic crystal, use:
 
     optcell 1
     ionmov 2
@@ -182,7 +182,10 @@ For the automatic optimisation of cell volume, use:
     dilatmx 1.05
     ecutsm 0.5
 
-You should read the indications about [[dilatmx]] and [[ecutsm]].
+You should read the indications about [[optcell]], [[dilatmx]] and [[ecutsm]].
+In particular, while [[optcell]] is adequate for cubic crystals, for the majority of materials,
+the optimal geometry must include deformations of the cell shape, not simply global rescaling,
+so the most usual value of [[optcell]] to be used is 2.
 Do not test all the k-point grids, only those with **nkpt** 2 and 10.
 
 The input file *$ABI_TESTS/tutorial/Input/tbase3_4.abi* is an example,
@@ -318,7 +321,7 @@ with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the exper
 The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21.
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
-Theory: use the GW approximation. This is described in [the first tutorial on GW](gw1).
+Theory: use the GW approximation. This is described in [the first GW tutorial](/tutorial/gw1).
 
 For experimental data and band structure representation, see the book by M.L. Cohen and J.R. Chelikowski [[cite:Cohen1988]].
 

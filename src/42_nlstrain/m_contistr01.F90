@@ -11,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2020 ABINIT group (DRH)
+!! Copyright (C) 1998-2021 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,7 +78,7 @@ subroutine contistr01(istr,rank,gm,gprimd,eisnl,aa,bb)
 
 ! *************************************************************************
 
- ABI_ALLOCATE(cm,(3,((rank+1)*(rank+2))/2,((rank+2)*(rank+3))/2))
+ ABI_MALLOC(cm,(3,((rank+1)*(rank+2))/2,((rank+2)*(rank+3))/2))
 
  ka=idx(2*istr-1);kb=idx(2*istr)
 
@@ -1738,7 +1738,7 @@ subroutine contistr01(istr,rank,gm,gprimd,eisnl,aa,bb)
 !factor of 2 multiplied in to drop call to conjugate contraction
 !eisnl(:)=0.5d0*eisnl(:)
 
- ABI_DEALLOCATE(cm)
+ ABI_FREE(cm)
 
 end subroutine contistr01
 !!***

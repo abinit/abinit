@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
+!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -375,10 +375,10 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    write(message, '(3a,i0)' )&
 &   'Third-order xc kernel can only be computed for ixc = 0, 3, 7 or 8,',ch10,&
 &   'while it is found to be ',ixc
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
  if(nspden==4.and.xcdata%xclevel==2.and.(abs(option)==2))then
-   MSG_BUG('When nspden==4 and GGA, the absolute value of option cannot be 2 !')
+   ABI_BUG('When nspden==4 and GGA, the absolute value of option cannot be 2 !')
  end if
  if(ixc<0) then
    if (present(xc_funcs)) then
@@ -392,7 +392,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &     'The value of ixc specified in input, ixc = ',ixc,ch10,&
 &     'differs from the one used to initialize the functional ',ixc_from_lib,ch10,&
 &     'Action: reinitialize the global structure funcs, see NOTES in m_libxc_functionals'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
  end if
 
@@ -403,29 +403,29 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    if (.not.present(taur)) then
      message=' For mGGA functionals, kinetic energy density is needed. Set input variable usekden to 1.' 
      message=trim(message)//' Also use NC pseudopotentials without non-linear XC core correction.'
-     MSG_BUG(message)
+     ABI_BUG(message)
    else if (size(taur)/=nfft*nspden) then
      message=' Invalid size for taur!'
-     MSG_BUG(message)
+     ABI_BUG(message)
    end if
    if (present(xcctau3d)) then
      n3xctau=size(xcctau3d)
      if (n3xctau/=0.and.n3xctau/=nfft) then
        message=' Invalid size for xccctau3d!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
    if (with_vxctau) then
      if (size(vxctau)/=nfft*nspden*4) then
        message=' Invalid size for vxctau!'
-       MSG_BUG(message)
+       ABI_BUG(message)
      end if
    end if
  end if
  if((usekden==1.or.uselaplacian==1).and.nspden==4)then
    !mGGA en NC-magnetism: how do we rotate tau kinetic energy density?
    message=' At present, meta-GGA (usekden=1 or uselaplacian=1)  is not comptatible with non-collinear magnetism (nspden=4).'
-   MSG_ERROR(message)
+   ABI_ERROR(message)
  end if
 
 !MPI FFT communicator
@@ -470,7 +470,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
  if ((xcdata%xclevel==0.or.ixc==0).and.(.not.my_add_tfw)) then
 !  No xc at all is applied (usually for testing)
-   MSG_WARNING('Note that no xc is applied (ixc=0).')
+   ABI_WARNING('Note that no xc is applied (ixc=0).')
 
  else if (ixc/=20) then
 
@@ -498,7 +498,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  Note: if nspden=4, rho_up=(rho+|m|)/2, rho_down=(rho-|m|)/2
    nspgrad=nspden_updn*ngrad;if(nspden_updn==2.and.ngrad==2)nspgrad=5
    if(uselaplacian==1) nspgrad=nspgrad+nspden_updn
-   ABI_ALLOCATE(depsxc,(nfft,nspgrad))
+   ABI_MALLOC(depsxc,(nfft,nspgrad))
    depsxc(:,:)=zero
 
 !  PAW: select the valence density (and magnetization) to use:
@@ -506,7 +506,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    if ((.not.need_nhat).and.(.not.non_magnetic_xc)) then
      rhor_ => rhor
    else
-     ABI_ALLOCATE(rhor_,(nfft,nspden))
+     ABI_MALLOC(rhor_,(nfft,nspden))
      if (need_nhat) then
        do ispden=1,nspden
          do ifft=1,nfft
@@ -527,7 +527,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    end if
    if (usekden==1) then
      if(non_magnetic_xc) then
-       ABI_ALLOCATE(taur_,(nfft,nspden))
+       ABI_MALLOC(taur_,(nfft,nspden))
        if(nspden==2) taur_(:,2)=taur_(:,1)*half
        if(nspden==4) taur_(:,2:4)=zero
      else
@@ -541,20 +541,20 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if (electronpositron%ixcpositron==3.or.electronpositron%ixcpositron==31) ngrad_apn=2
      if (ngrad_apn==2.and.xcdata%xclevel<2) then
        message = 'GGA for the positron can only be performed with GGA pseudopotentials for the electron !'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
      if (ngrad_apn>1.and.option/=0.and.option/=1.and.option/=10.and.option/=12) then
        message = 'You cannot compute full GGA XC kernel for electrons-positron systems !'
-       MSG_ERROR(message)
+       ABI_ERROR(message)
      end if
-     ABI_ALLOCATE(depsxc_apn,(nfft,ngrad_apn))
+     ABI_MALLOC(depsxc_apn,(nfft,ngrad_apn))
    end if
 
 !  Non-collinear magnetism: store norm of magnetization
 !   m_norm_min= EPSILON(0.0_dp)**2 ! EB: TOO SMALL!!!
    m_norm_min=tol8  ! EB: tol14 is still too small, tests are underway
    if (nspden==4) then
-     ABI_ALLOCATE(m_norm,(nfft))
+     ABI_MALLOC(m_norm,(nfft))
      m_norm(:)=sqrt(rhor_(:,2)**2+rhor_(:,3)**2+rhor_(:,4)**2)
    end if
 
@@ -564,7 +564,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  - in (up+dn,up) or (n,mx,my,mz) format according to collinearity
 !  of polarization and use of gradients (GGA)
    if (n3xccc>0.or.test_nhat.or.nspden_eff/=nspden) then
-     ABI_ALLOCATE(rhocorval,(nfft,nspden_eff))
+     ABI_MALLOC(rhocorval,(nfft,nspden_eff))
      if (nspden==nspden_eff) then
        rhocorval(:,1:nspden)=rhor_(:,1:nspden)
      else if (nspden==4) then
@@ -577,7 +577,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      rhocorval => rhor_
    end if
    if (usekden==1.and.(n3xctau>0.or.nspden_eff/=nspden)) then
-     ABI_ALLOCATE(taucorval,(nfft,nspden_eff))
+     ABI_MALLOC(taucorval,(nfft,nspden_eff))
      if (nspden==nspden_eff) then
        taucorval(:,1:nspden)=taur_(:,1:nspden)
      else
@@ -607,7 +607,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      if (nspden==nspden_eff) then
        rhocorval(:,1:nspden)=rhocorval(:,1:nspden)-nhat(:,1:nspden)
      else if (nspden==4) then
-       ABI_ALLOCATE(nhat_up,(nfft))
+       ABI_MALLOC(nhat_up,(nfft))
        do ifft=1,nfft
          if (m_norm(ifft)>m_norm_min) then
            nhat_up(ifft)=half*(nhat(ifft,1) &
@@ -627,9 +627,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !  rhonow will contain effective density (and gradients if GGA)
 !  taunow will contain effective kinetic energy density (if MetaGGA)
 !  lrhonow will contain the laplacian if we have a MGGA
-   ABI_ALLOCATE(rhonow,(nfft,nspden_eff,ngrad*ngrad))
-   ABI_ALLOCATE(lrhonow,(nfft,nspden_eff*uselaplacian))
-   ABI_ALLOCATE(taunow,(nfft,nspden_eff,usekden))
+   ABI_MALLOC(rhonow,(nfft,nspden_eff,ngrad*ngrad))
+   ABI_MALLOC(lrhonow,(nfft,nspden_eff*uselaplacian))
+   ABI_MALLOC(taunow,(nfft,nspden_eff,usekden))
 
 !  ====================================================================
 !  ====================================================================
@@ -675,13 +675,13 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    Deallocate temporary arrays
      if (ishift==xcdata%intxc) then
        if (n3xccc>0.or.test_nhat.or.nspden_eff/=nspden)  then
-         ABI_DEALLOCATE(rhocorval)
+         ABI_FREE(rhocorval)
        end if
        if (usekden==1.and.(n3xccc>0.or.nspden_eff/=nspden))  then
-         ABI_DEALLOCATE(taucorval)
+         ABI_FREE(taucorval)
        end if
        if (test_nhat.and.nspden/=nspden_eff.and.usexcnhat==1)  then
-         ABI_DEALLOCATE(nhat_up)
+         ABI_FREE(nhat_up)
        end if
      end if
 
@@ -727,22 +727,22 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        npts=min(nfft-ifft+1,mpts)
 
 !      Allocation of mandatory arguments of drivexc
-       ABI_ALLOCATE(exc_b,(npts))
-       ABI_ALLOCATE(rho_b,(npts))
-       ABI_ALLOCATE(rho_b_updn,(npts,nspden_updn))
-       ABI_ALLOCATE(vxcrho_b_updn,(npts,nspden_updn))
+       ABI_MALLOC(exc_b,(npts))
+       ABI_MALLOC(rho_b,(npts))
+       ABI_MALLOC(rho_b_updn,(npts,nspden_updn))
+       ABI_MALLOC(vxcrho_b_updn,(npts,nspden_updn))
        vxcrho_b_updn(:,:)=zero
 
 !      Allocation of optional arguments of drivexc
-       ABI_ALLOCATE(grho2_b_updn,(npts,(2*nspden_updn-1)*usegradient))
-       ABI_ALLOCATE(lrho_b_updn,(npts,nspden_updn*uselaplacian))
-       ABI_ALLOCATE(tau_b_updn,(npts,nspden_updn*usekden))
-       ABI_ALLOCATE(vxcgrho_b_updn,(npts,nvxcgrho))
-       ABI_ALLOCATE(vxclrho_b_updn,(npts,nvxclrho))
-       ABI_ALLOCATE(vxctau_b_updn,(npts,nvxctau))
-       ABI_ALLOCATE(dvxc_b,(npts,ndvxc))
-       ABI_ALLOCATE(d2vxc_b,(npts,nd2vxc))
-       ABI_ALLOCATE(fxc_b,(npts*usefxc))
+       ABI_MALLOC(grho2_b_updn,(npts,(2*nspden_updn-1)*usegradient))
+       ABI_MALLOC(lrho_b_updn,(npts,nspden_updn*uselaplacian))
+       ABI_MALLOC(tau_b_updn,(npts,nspden_updn*usekden))
+       ABI_MALLOC(vxcgrho_b_updn,(npts,nvxcgrho))
+       ABI_MALLOC(vxclrho_b_updn,(npts,nvxclrho))
+       ABI_MALLOC(vxctau_b_updn,(npts,nvxctau))
+       ABI_MALLOC(dvxc_b,(npts,ndvxc))
+       ABI_MALLOC(d2vxc_b,(npts,nd2vxc))
+       ABI_MALLOC(fxc_b,(npts*usefxc))
        if (nvxcgrho>0) vxcgrho_b_updn(:,:)=zero
        if (nvxclrho>0) vxclrho_b_updn(:,:)=zero
        if (nvxctau>0) vxctau_b_updn(:,:)=zero
@@ -857,7 +857,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            end if
          else
            message = 'MetaGGA ixc=34 is not yet allowed with a core kinetic energy density!'
-           MSG_ERROR(message)
+           ABI_ERROR(message)
          end if
        end if
 
@@ -981,12 +981,12 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        if (ipositron==2) then
 !        Compute electron-positron XC energy per unit volume, potentials and derivatives
          ngr=0;if (ngrad_apn==2) ngr=npts
-         ABI_ALLOCATE(fxc_apn,(npts))
-         ABI_ALLOCATE(vxc_b_apn,(npts))
-         ABI_ALLOCATE(vxcgr_apn,(ngr))
-         ABI_ALLOCATE(vxc_ep,(npts))
-         ABI_ALLOCATE(rhonow_apn,(npts,nspden_apn,1))
-         ABI_ALLOCATE(grho2_apn,(ngr))
+         ABI_MALLOC(fxc_apn,(npts))
+         ABI_MALLOC(vxc_b_apn,(npts))
+         ABI_MALLOC(vxcgr_apn,(ngr))
+         ABI_MALLOC(vxc_ep,(npts))
+         ABI_MALLOC(rhonow_apn,(npts,nspden_apn,1))
+         ABI_MALLOC(grho2_apn,(ngr))
          rhonow_apn(1:npts,1,1)=electronpositron%rhor_ep(ifft:ifft+npts-1,1)
          if (usexcnhat==0) rhonow_apn(1:npts,1,1)=rhonow_apn(1:npts,1,1)-electronpositron%nhat_ep(ifft:ifft+npts-1,1)
          if (.not.electronpositron%posdensity0_limit) then
@@ -1001,14 +1001,14 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 &           electronpositron%posdensity0_limit,rho_b,&
 &           rhonow_apn(:,1,1),vxc_b_apn,vxcgr_apn,vxc_ep)
          else
-           ABI_ALLOCATE(dvxc_apn,(npts))
+           ABI_MALLOC(dvxc_apn,(npts))
            call xcpositron(fxc_apn,grho2_apn,electronpositron%ixcpositron,ngr,npts,&
 &           electronpositron%posdensity0_limit,rho_b,&
 &           rhonow_apn(:,1,1),vxc_b_apn,vxcgr_apn,vxc_ep,dvxce=dvxc_apn)
          end if
-         ABI_DEALLOCATE(vxc_ep)
-         ABI_DEALLOCATE(rhonow_apn)
-         ABI_DEALLOCATE(grho2_apn)
+         ABI_FREE(vxc_ep)
+         ABI_FREE(rhonow_apn)
+         ABI_FREE(grho2_apn)
 !        Accumulate electron-positron XC energies
          s1=zero
          do ipts=1,npts
@@ -1047,11 +1047,11 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            end if ! GGA
          end do ! ipts
 !        Deallocations
-         ABI_DEALLOCATE(fxc_apn)
-         ABI_DEALLOCATE(vxc_b_apn)
-         ABI_DEALLOCATE(vxcgr_apn)
+         ABI_FREE(fxc_apn)
+         ABI_FREE(vxc_b_apn)
+         ABI_FREE(vxcgr_apn)
          if (ndvxc>0) then
-           ABI_DEALLOCATE(dvxc_apn)
+           ABI_FREE(dvxc_apn)
          end if
        end if
 
@@ -1115,19 +1115,19 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        strsxc2_tot=strsxc2_tot+dstrsxc
        strsxc3_tot=strsxc3_tot+dstrsxc
 
-       ABI_DEALLOCATE(exc_b)
-       ABI_DEALLOCATE(rho_b)
-       ABI_DEALLOCATE(rho_b_updn)
-       ABI_DEALLOCATE(grho2_b_updn)
-       ABI_DEALLOCATE(vxcrho_b_updn)
-       ABI_DEALLOCATE(dvxc_b)
-       ABI_DEALLOCATE(d2vxc_b)
-       ABI_DEALLOCATE(vxcgrho_b_updn)
-       ABI_DEALLOCATE(fxc_b)
-       ABI_DEALLOCATE(vxclrho_b_updn)
-       ABI_DEALLOCATE(lrho_b_updn)
-       ABI_DEALLOCATE(tau_b_updn)
-       ABI_DEALLOCATE(vxctau_b_updn)
+       ABI_FREE(exc_b)
+       ABI_FREE(rho_b)
+       ABI_FREE(rho_b_updn)
+       ABI_FREE(grho2_b_updn)
+       ABI_FREE(vxcrho_b_updn)
+       ABI_FREE(dvxc_b)
+       ABI_FREE(d2vxc_b)
+       ABI_FREE(vxcgrho_b_updn)
+       ABI_FREE(fxc_b)
+       ABI_FREE(vxclrho_b_updn)
+       ABI_FREE(lrho_b_updn)
+       ABI_FREE(tau_b_updn)
+       ABI_FREE(vxctau_b_updn)
 
 !      End of the loop on blocks of data
      end do
@@ -1143,7 +1143,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !    local partial derivatives of the XC functional
      rhonow_ptr => rhonow
      if (ipositron==2) then
-       ABI_ALLOCATE(rhonow_ptr,(nfft,nspden_eff,ngrad*ngrad))
+       ABI_MALLOC(rhonow_ptr,(nfft,nspden_eff,ngrad*ngrad))
        rhonow_ptr=rhonow
      end if
      if(ngrad==2 .and. ixc/=13)then
@@ -1163,7 +1163,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      else
 
 !      If non-collinear magnetism, restore potential in proper axis before adding it
-       ABI_ALLOCATE(vxcrho_b_updn,(nfft,4))
+       ABI_MALLOC(vxcrho_b_updn,(nfft,4))
        vxcrho_b_updn=zero
        call xcpot(cplex,gprimd,ishift,uselaplacian,mpi_enreg,nfft,ngfft,ngrad,nspden_eff,nspgrad,&
 &       qphon,depsxc=depsxc,rhonow=rhonow_ptr,vxc=vxcrho_b_updn)
@@ -1180,22 +1180,22 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
            vxc(ifft,1:2)=vxc(ifft,1:2)+dvdn
          end if
        end do
-       ABI_DEALLOCATE(vxcrho_b_updn)
+       ABI_FREE(vxcrho_b_updn)
      end if
      if (ipositron==2)  then
-       ABI_DEALLOCATE(rhonow_ptr)
+       ABI_FREE(rhonow_ptr)
      end if
      nullify(rhonow_ptr)
 
 !    Add electron-positron XC potential to electron-electron one
 !    Eventually compute GGA contribution
      if (ipositron==2) then
-       ABI_ALLOCATE(rhonow_apn,(nfft,nspden_apn,ngrad_apn**2))
+       ABI_MALLOC(rhonow_apn,(nfft,nspden_apn,ngrad_apn**2))
        rhonow_apn(1:nfft,1,1:ngrad_apn**2)=rhonow(1:nfft,1,1:ngrad_apn**2)
        if (ngrad_apn==2) then
          call xcmult(depsxc_apn,nfft,ngrad_apn,nspden_apn,ngrad_apn,rhonow_apn)
        end if
-       ABI_ALLOCATE(vxc_apn,(nfft,nspden_apn))
+       ABI_MALLOC(vxc_apn,(nfft,nspden_apn))
        vxc_apn=zero
        call xcpot(cplex,gprimd,ishift,0,mpi_enreg,nfft,ngfft,ngrad_apn,&
 &       nspden_apn,ngrad_apn,qphon,depsxc=depsxc_apn,rhonow=rhonow_apn,vxc=vxc_apn)
@@ -1206,9 +1206,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          s1=s1+vxc_apn(ipts,1)*rhonow(ipts,1,1)
        end do
        electronpositron%e_xcdc=electronpositron%e_xcdc+s1*ucvol/dble(nfftot)
-       ABI_DEALLOCATE(rhonow_apn)
-       ABI_DEALLOCATE(vxc_apn)
-       ABI_DEALLOCATE(depsxc_apn)
+       ABI_FREE(rhonow_apn)
+       ABI_FREE(vxc_apn)
+       ABI_FREE(depsxc_apn)
      end if
 
 !    End loop on unshifted or shifted grids
@@ -1226,7 +1226,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      write(message,'(3a)')&
 &     'vdW-DF functionals are not fully operational yet.',ch10,&
 &     'Action : modify vdw_xc'
-     MSG_ERROR(message)
+     ABI_ERROR(message)
    end if
 #endif
 !  Normalize enxc, strsxc and vxc
@@ -1258,18 +1258,18 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      vxcavg=half*(vxcmean(1)+vxcmean(2))
    end if
 
-   ABI_DEALLOCATE(depsxc)
-   ABI_DEALLOCATE(rhonow)
-   ABI_DEALLOCATE(lrhonow)
-   ABI_DEALLOCATE(taunow)
+   ABI_FREE(depsxc)
+   ABI_FREE(rhonow)
+   ABI_FREE(lrhonow)
+   ABI_FREE(taunow)
    if (need_nhat.or.non_magnetic_xc) then
-     ABI_DEALLOCATE(rhor_)
+     ABI_FREE(rhor_)
    end if
    if ((usekden==1).and.(non_magnetic_xc)) then
-     ABI_DEALLOCATE(taur_)
+     ABI_FREE(taur_)
    end if
    if (allocated(m_norm))  then
-     ABI_DEALLOCATE(m_norm)
+     ABI_FREE(m_norm)
    end if
 
  end if
@@ -1301,7 +1301,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
    else
 
-     MSG_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
+     ABI_BUG('When ixc=20,21 or 22, vhartr needs to be present in the call to rhotoxc !')
 
    end if
 

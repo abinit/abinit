@@ -7,7 +7,7 @@
 !!  on the sphere using lebedev-laikov angular grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2020 ABINIT group (MG)
+!! Copyright (C) 2008-2021 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -224,7 +224,7 @@ subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
 ! *********************************************************************
 
  if (seq_idx < 1 .or. seq_idx > lebedev_ngrids) then
-   MSG_ERROR(sjoin("seq_idx ",itoa(seq_idx), "out of range"))
+   ABI_ERROR(sjoin("seq_idx ",itoa(seq_idx), "out of range"))
  end if
 
  npts = lebedev_npts(seq_idx)
@@ -299,7 +299,7 @@ subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
  CASE (32)
    call LD5810(xx,yy,zz,ww,npts)
  CASE DEFAULT
-   MSG_ERROR(sjoin("seq_idx ", itoa(seq_idx), "out of range"))
+   ABI_ERROR(sjoin("seq_idx ", itoa(seq_idx), "out of range"))
  END SELECT
 
 end subroutine build_lebedev_grid
@@ -904,7 +904,7 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        w(48) =  v
        num=num+48
        case default
-       MSG_ERROR('Gen_Oh: Invalid Code')
+       ABI_ERROR('Gen_Oh: Invalid Code')
        stop
        end select
  end subroutine gen_oh

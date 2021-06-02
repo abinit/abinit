@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h40 )
+.Starting date : Tue  6 Apr 2021.
+- ( at 23h36 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t60.in
-- output file    -> t60.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
+- output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
 
@@ -487,11 +487,11 @@ meta: {optdriver: 7, eph_task: 4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -511,8 +511,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -526,8 +526,8 @@ meta: {optdriver: 7, eph_task: 4, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -770,11 +770,11 @@ meta: {optdriver: 7, eph_task: 5, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -866,11 +866,11 @@ meta: {optdriver: 7, eph_task: 4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1117,11 +1117,11 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1250,7 +1250,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 ============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.234    1.882      0.2    0.000
+   1 -19.234    1.883      0.2    0.000
    2  -2.697    0.097      3.4   16.537
    3  -0.415    0.187      1.8    2.282
    4  -0.415    0.187      1.8    0.000
@@ -1268,7 +1268,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    2  -3.149    0.000   4359.5   15.833
    3  -1.171    0.117      2.8    1.978
    4  -1.171    0.117      2.8    0.000
-   5  13.987    0.005     67.5   15.158
+   5  13.987    0.005     67.9   15.158
    6  15.747    0.190      1.7    1.760
    7  16.382    0.102      3.2    0.635
    8  19.258    0.183      1.8    2.876
@@ -1283,7 +1283,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    2  -3.149    0.000   4130.8   15.833
    3  -1.171    0.147      2.2    1.978
    4  -1.171    0.147      2.2    0.000
-   5  13.987    0.007     47.3   15.158
+   5  13.987    0.007     47.5   15.158
    6  15.747    0.273      1.2    1.760
    7  16.382    0.146      2.3    0.635
    8  19.258    0.280      1.2    2.876
@@ -1356,11 +1356,11 @@ meta: {optdriver: 7, eph_task: -5, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1452,11 +1452,11 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1613,8 +1613,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-
-
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
@@ -1631,8 +1629,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
 
 
 
@@ -1702,11 +1698,11 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -1863,8 +1859,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
           300.00        0.21E-64        0.00E+00            0.00            0.00
 
 
-
-
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
@@ -1881,8 +1875,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
 
 
 
@@ -1952,11 +1944,11 @@ meta: {optdriver: 7, eph_task: 4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -2202,11 +2194,11 @@ meta: {optdriver: 7, eph_task: 15, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -2297,11 +2289,11 @@ meta: {optdriver: 7, eph_task: -15, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.294030E-16
-         1         2   -1.294974E-16    1.040868E+00    1.295919E-16
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
          1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.294030E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.295919E-16
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
          2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
@@ -2661,10 +2653,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.4
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  23 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.0  wall=          8.4
+.Delivered  13 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.0  wall=          7.6
