@@ -281,7 +281,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
        sij_opt = -1
        call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
-         &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
+         &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc,cwavef_r=cwavef_r)
 
        ! Compute residual (squared) norm
        call timab(1305,1,tsec)

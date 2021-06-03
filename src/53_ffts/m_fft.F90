@@ -2320,7 +2320,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 
  if (fourwf_counter>=0) then
    fourwf_counter = fourwf_counter + ndat
-   if (option>=2) fourwf_counter = fourwf_counter + ndat
+   if (option==2) fourwf_counter = fourwf_counter + ndat
  end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3); nfftot=n1*n2*n3
