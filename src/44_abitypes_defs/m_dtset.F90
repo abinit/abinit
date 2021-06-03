@@ -186,6 +186,7 @@ type, public :: dataset_type
  integer :: expert_user
 !F
  integer :: fftgw = 21
+ integer :: fft_count = 0
  integer :: fockoptmix
  integer :: fock_icutcoul
  integer :: frzfermi
@@ -1489,6 +1490,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
@@ -3192,7 +3194,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
- list_vars=trim(list_vars)//' fftalg fftcache fftgw'
+ list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_fixcoeff'
  list_vars=trim(list_vars)//' fit_EFS'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'

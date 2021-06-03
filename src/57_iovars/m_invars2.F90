@@ -1092,6 +1092,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftgw',tread,'INT')
  if(tread==1) dtset%fftgw=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fft_count',tread,'INT')
+ if(tread==1) dtset%fft_count=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsuscep',tread,'INT')
  if(tread==1) dtset%getsuscep=intarr(1)
 

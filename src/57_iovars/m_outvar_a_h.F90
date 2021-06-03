@@ -952,6 +952,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%fftgw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftgw','INT',0)
 
+ intarr(1,:)=dtsets(:)%fft_count
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fft_count','INT',0)
+
  intarr(1,:)=dtsets(:)%fockoptmix
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fockoptmix','INT',0)
 

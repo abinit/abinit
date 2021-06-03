@@ -103,6 +103,7 @@ module m_gstate
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
  use m_cgprj,            only : ctocprj
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
+ use m_fft,              only : fft_init_counters,fft_output_counters
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -776,6 +777,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Now that wavefunctions are initialized, calls of nonlocal operations are possible, so we start the counting (if enabled)
  if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
    call nonlop_ylm_init_counters()
+ end if
+ ! Same for fft counters
+ if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
+   call fft_init_counters()
  end if
 
 !###########################################################
@@ -1599,6 +1604,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Write nonlop_ylm_counters (if enabled) in outputs
  if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
    call nonlop_ylm_output_counters(dtset%natom,nbandtot,dtset%ntypat,dtset%typat,mpi_enreg)
+ end if
+ ! Write fft_counters (if enabled) in output
+ if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
+   call fft_output_counters(nbandtot,mpi_enreg)
  end if
 
  if(dtset%imgwfstor==1)then

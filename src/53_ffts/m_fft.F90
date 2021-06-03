@@ -82,6 +82,11 @@ MODULE m_fft
 ! Main entry points.
  public :: fourdp
  public :: fourwf
+ integer,public,save :: fourdp_counter = -1
+ integer,public,save :: fourwf_counter = -1
+ public :: fft_init_counters
+ public :: fft_stop_counters
+ public :: fft_output_counters
 
 ! Driver routines for MPI version.
  public :: fourdp_mpi           ! MPI FFT of densities/potentials on the full box.
@@ -2313,6 +2318,11 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  ! Accumulate timing
  call timab(840+tim_fourwf,1,tsec)
 
+ if (fourwf_counter>=0) then
+   fourwf_counter = fourwf_counter + ndat
+   if (option>=2) fourwf_counter = fourwf_counter + ndat
+ end if
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3); nfftot=n1*n2*n3
  fftcache=ngfft(8)
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=mod(fftalg,10)
@@ -2961,6 +2971,10 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
 
  ! Keep track of timing
  call timab(260+tim_fourdp,1,tsec)
+
+ if (fourdp_counter>=0) then
+   fourdp_counter = fourdp_counter + ndat
+ end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
@@ -4673,6 +4687,99 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
  ABI_FREE(ffti2r_global)
 
 end subroutine indirect_parallel_Fourier
+!!***
+
+!!****f* ABINIT/fft_init_counters
+!! NAME
+!! fft_init_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fft_init_counters()
+
+   fourdp_counter = 0
+   fourwf_counter = 0
+
+end subroutine fft_init_counters
+!!***
+
+!!****f* ABINIT/fft_stop_counters
+!! NAME
+!! fft_stop_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fft_stop_counters()
+
+   fourdp_counter = -1
+   fourwf_counter = -1
+
+end subroutine fft_stop_counters
+!!***
+
+!!****f* ABINIT/fft_output_counters
+!! NAME
+!! fft_output_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fft_output_counters(nbandtot,mpi_enreg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nbandtot
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ integer :: cnt,ierr
+!arrays
+
+ call wrtout([std_out,ab_out],'','COLL')
+ write(msg,'(a)')                ' --- FFT COUNTERS ------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                '                      | total count (TC) |            TC/NB'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ call xmpi_sum(fourdp_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(fourwf_counter,mpi_enreg%comm_kpt,ierr)
+ cnt=fourdp_counter
+ if (cnt>0) then
+   write(msg,'(a,i16,a)')       ' fourdp               | ',cnt,' |'
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=fourwf_counter
+ if (cnt>0) then
+   write(msg,'(a,i16,a,f16.1)') ' fourwf               | ',cnt,' | ',dble(cnt)/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+
+end subroutine fft_output_counters
 !!***
 
 END MODULE m_fft
