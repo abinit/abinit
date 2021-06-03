@@ -151,7 +151,7 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 !scalars
  logical :: use_dgemv
  integer :: ia,iaph3d
- integer :: il,ilmn,ipw,jpw,ipwshft,ispinor,nthreads
+ integer :: il,ilmn,ipw,jpw,ipwshft,ispinor
  real(dp) :: wt
 !arrays
 ! real(dp) :: tsec(2)
@@ -165,13 +165,13 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  DBG_ENTER("COLL")
 
 !Some checks
- nthreads=1
-#if defined HAVE_OPENMP
- nthreads=OMP_GET_NUM_THREADS()
-#endif
- if (nthreads>1) then
-   ABI_ERROR('Only nthreads=1 is available for now.')
- end if
+! nthreads=1
+!#if defined HAVE_OPENMP
+! nthreads=OMP_GET_NUM_THREADS()
+!#endif
+! if (nthreads>1) then
+!   ABI_ERROR('Only nthreads=1 is available for now.')
+! end if
 
  if (abs(choice)>1) then
    ABI_ERROR('Only abs(choice)<=1 is available for now.')

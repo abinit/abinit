@@ -133,10 +133,10 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
 !Local variables-------------------------------
 !scalars
  logical :: use_dgemv
- integer :: ia,iaph3d,ierr,il,ilmn,ipw,ipw0,ipwshft,ispinor,jpw,nthreads
+ integer :: ia,iaph3d,ierr,il,ilmn,ipw,ipw0,ipwshft,ispinor,jpw
  real(dp) :: wt
 !arrays
- real(dp) :: tsec(2)
+ real(dp) :: buffer_r,buffer_i,tsec(2)
  real(dp),pointer :: ffnl_loc(:,:)
  real(dp),allocatable :: scali(:),scalr(:)
  real(dp),allocatable :: scalr_lmn(:),scali_lmn(:)
@@ -152,13 +152,13 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  if (nloalg(1)<2.or.nloalg(1)>10) then
    ABI_ERROR('nloalg(1) should be between 2 and 10.')
  end if
- nthreads=1
-#if defined HAVE_OPENMP
- nthreads=OMP_GET_NUM_THREADS()
-#endif
- if (nthreads>1) then
-   ABI_ERROR('Only nthreads=1 is available for now.')
- end if
+! nthreads=1
+!#if defined HAVE_OPENMP
+! nthreads=OMP_GET_NUM_THREADS()
+!#endif
+! if (nthreads>1) then
+!   ABI_ERROR('Only nthreads=1 is available for now.')
+! end if
 
  use_dgemv = nloalg(1)==2.or.nloalg(1)==5.or.nloalg(1)==7
  if (choice>=0.or.abs(choice)>1) then
@@ -187,6 +187,9 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  cil(3) = (-1.0_DP, 0.0_DP) * wt
  cil(4) = ( 0.0_DP,-1.0_DP) * wt
 
+!$OMP PARALLEL PRIVATE(il,ilmn,ipw,jpw), &
+!$OMP PRIVATE(ispinor,ipwshft,ia,iaph3d)
+
 !Loop on spinorial components
  do ispinor =1,nspinor
    ipwshft=(ispinor-1)*npw
@@ -195,16 +198,20 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
    do ia=1,nincat
      iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 !    Step (1) : Compute scal(g) = c(g).exp(2pi.i.g.R)
+!$OMP DO
      do ipw=ipw0,npw
        jpw=ipw+ipwshft
        scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
        scali(ipw)=(vect(2,jpw)*ph3d(1,ipw,iaph3d)+vect(1,jpw)*ph3d(2,ipw,iaph3d))
      end do
+!$OMP END DO
 
+!$OMP SINGLE
      if (ipw0==2) then
        scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
        scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
      end if
+!$OMP END SINGLE
 
 !    --------------------------------------------------------------------
 !    ALL CHOICES:
@@ -218,16 +225,29 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
          call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scalr,1,0.0_DP,scalr_lmn,1)
          call DGEMV('T',npw,nlmn,1.0_DP,ffnl_loc,npw,scali,1,0.0_DP,scali_lmn,1)
        else
-         scalr_lmn(:)=0.0_DP
-         scali_lmn(:)=0.0_DP
          do ilmn=1,nlmn
+!           do ipw=1,npw
+!             scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl_loc(ipw,ilmn)
+!             scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl_loc(ipw,ilmn)
+!           end do
+!$OMP SINGLE
+           buffer_r = 0.0_DP
+           buffer_i = 0.0_DP
+!$OMP END SINGLE
+!$OMP DO REDUCTION(+:buffer_r,buffer_i)
            do ipw=1,npw
-             scalr_lmn(ilmn) = scalr_lmn(ilmn) + scalr(ipw) * ffnl_loc(ipw,ilmn)
-             scali_lmn(ilmn) = scali_lmn(ilmn) + scali(ipw) * ffnl_loc(ipw,ilmn)
+             buffer_r = buffer_r + scalr(ipw) * ffnl_loc(ipw,ilmn)
+             buffer_i = buffer_i + scali(ipw) * ffnl_loc(ipw,ilmn)
            end do
+!$OMP END DO
+!$OMP SINGLE
+           scalr_lmn(ilmn) = buffer_r
+           scali_lmn(ilmn) = buffer_i
+!$OMP END SINGLE
          end do
        end if
 !      Step (3) : Compute gx(lmn) = 4pi/sqrt(vol) (i)^l scal(lmn)
+!$OMP SINGLE
        if (cplex==2) then
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4)+1
@@ -242,12 +262,14 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
            gx(1,ilmn,ia,ispinor) = real(ctmp)
          end do
        end if
+!$OMP END SINGLE
 
      end if
 
    end do ! End loop on atoms
 
  end do !  End loop on spinorial components
+!$OMP END PARALLEL
 
 !Deallocate temporary space
  ABI_FREE(scalr)
