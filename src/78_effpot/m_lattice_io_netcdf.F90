@@ -157,7 +157,7 @@ contains
 
     ierr =nf90_inq_varid(ncid, "ref_energy", varid)
     NCF_CHECK_MSG(ierr, "ref_energy")
-    ierr = nf90_get_var(ncid, varid, masses)
+    ierr = nf90_get_var(ncid, varid, ref_energy)
     NCF_CHECK_MSG(ierr, "ref_energy")
 
 
