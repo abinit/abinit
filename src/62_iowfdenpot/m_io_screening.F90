@@ -1419,6 +1419,8 @@ subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
  case (IO_MODE_ETSF)
    ! netcdf does not support complex datatypes. Here I use some C-magic to  associate the memory
    ! to a Fortran real pointer with the correct type and shape. Note that the data on file is always in double precision.
+   ! but this is ok since: if the type of data differs from the netCDF variable type, type conversion will occur
+   ! inside nf90_put_var
    varid = nctk_idname(unt, varname)
    call c_f_pointer(c_loc(epsm1(1,1,1)), real_epsm1, [2,npwe,npwe,1,1,nomega,1])
    ! [cplex, npwe, npwe, nspin, nspin, nomega, nqpt]

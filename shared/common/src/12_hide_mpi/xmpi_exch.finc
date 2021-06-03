@@ -152,7 +152,7 @@ subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,comm,ier)
  real(dp), DEV_CONTARRD intent(in) :: vsend(:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:)
  integer,intent(in) :: sender,recever,comm
- integer,intent(out)   :: ier
+ integer,intent(out) :: ier
 
 !Local variables--------------
 #if defined HAVE_MPI
@@ -210,7 +210,7 @@ subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,comm,ier)
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:)
  real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:)
  integer,intent(in) :: sender,recever,comm
- integer,intent(out)   :: ier
+ integer,intent(out) :: ier
 
 !Local variables--------------
 #if defined HAVE_MPI

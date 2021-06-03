@@ -249,7 +249,7 @@ subroutine delete_file(fname,ierr)
 
  if (.not.exists) then
    ierr = 111
-   write(std_out,*)" Asked to delete not existent file: ",TRIM(fname)
+   write(std_out,*)" Asked to delete non existent file: ",TRIM(fname)
    return
  end if
 
