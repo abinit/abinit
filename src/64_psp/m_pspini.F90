@@ -159,7 +159,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
- real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero
+ real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: msg
  type(pawrad_type) :: pawrad_dum
@@ -284,6 +284,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 & .or. usepaw_old /= psps%usepaw           &
 & .or. useylm_old /= psps%useylm           &
 & .or. pawxcdev_old /= dtset%pawxcdev      &
+& .or. (psps%usepaw == 0 .and. spnorbscl_old /= dtset%spnorbscl) &
 & .or. positron_old /= dtset%positron      &
 & .or. usewvl_old /= dtset%usewvl          &
 & .or. paw_size_old /= paw_size            &
@@ -600,6 +601,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  mqgridff_old=psps%mqgrid_ff
  mqgridvl_old=psps%mqgrid_vl
  mpssoang_old=psps%mpssoang
+ spnorbscl_old = dtset%spnorbscl
  ixc_old=dtset%ixc
  gsqcut_old=gsqcut;if (psps%usepaw==1) gsqcutdg_old=gsqcutdg
  lmnmax_old=psps%lmnmax
@@ -1215,23 +1217,22 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
          il=indlmn(1,ilmn)
          if (indlmn(6,ilmn)==1) then
            iln0=iln0+nproj(il+1)
-           !if (dtset%optdriver == RUNL_SIGMA) then
-           !  do ii=0,nproj(il+1)-1
-           !    ekb(iln+ii) = zero
-           !  end do
-           !end if
            write(msg, '(13x,i1,4f12.6)' ) il,(ekb(iln+ii),ii=0,nproj(il+1)-1)
          else
            iln0=iln0+nproj(il+psps%mpsang)
+           if (dtset%spnorbscl /= one) then
+             call wrtout([std_out, ab_out], "Rescaling spin-orbit KB energies using spnorbscl.")
+             ekb(iln:iln + nproj(il + psps%mpsang) - 1) = ekb(iln:iln + nproj(il + psps%mpsang) - 1) * dtset%spnorbscl
+           end if
            write(msg, '(2x,a,i1,4f12.6)' ) 'spin-orbit ',il,(ekb(iln+ii),ii=0,nproj(il+psps%mpsang)-1)
          end if
-         call wrtout([std_out, ab_out],msg)
+         call wrtout([std_out, ab_out], msg)
        end if
      end do
    end if
 
    ! NC: Evalute spline-fit of the model core charge in reciprocal space.
-   ! TODO: Be careful, because we will be using the PAW part in which tcore is always avaiable!
+   ! TODO: Be careful, because we will be using the PAW part in which tcore is always available!
    ! Should add a test with 2 NC pseudos: one with NLCC and the other without!
    if (psps%usepaw == 0) then
      call nctab_eval_tcorespl(nctab, psps%n1xccc, xcccrc, xccc1d, psps%mqgrid_vl, psps%qgrid_vl)
