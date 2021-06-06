@@ -219,6 +219,14 @@ nav:
     - tutorial/positron.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
+- FAQ:
+    - Configuration and compilation: faq/configuration_and_compilation.md
+    - General questions: faq/general_questions.md
+    - Pre/Post processing: faq/pre_and_post_processing.md
+    - Ground state: faq/ground_state.md
+    - DFPT: faq/dfpt.md
+    #- GW and BSE faq/gw_and_bse.md
+    #- EPH: faq/eph.md
 - Theory:
     - Geometry: theory/geometry.md
     - Spherical Harmonics: theory/spherical_harmonics.md

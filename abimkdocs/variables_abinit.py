@@ -3653,11 +3653,12 @@ dataset. It must therefore be used with [[rfelfd]] = 2 (or 1).
   * 1 --> effective mass tensor calculation
 
 !!! note
+
     At the present time, both norm-conserving (NC) and PAW calculations are
     supported. Also, for PAW calculations only, [[nspinor]] == 2 and
-    [[pawspnorb]] == 1 (i.e. spin-orbit (SO) calculations) is supported. NC SO
-    calculations are NOT currently supported. Also, for both NC and PAW,
-    [[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
+    [[pawspnorb]] == 1 (i.e. spin-orbit (SO) calculations) is supported.
+    NC SO calculations are NOT currently supported. Also, for both NC and PAW,
+    [[nspden]] /= 1 and [[nsppol]] /= 1 are NOT supported.
 """,
 ),
 
@@ -5103,7 +5104,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
 The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
@@ -5153,7 +5154,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
 The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
@@ -5203,7 +5204,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
 The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
@@ -13741,8 +13742,7 @@ use [[kptopt]] = 3 (no symmetry used to generate k-points) or [[kptopt]] = 4 (on
 spatial symmetries used to generate k-points).
 Be careful if you choose to use [[kptopt]] = 0 (k-points given by hand); Time-
 reversal symmetry has to be avoided.
-An artificial scaling of the spin-orbit can be introduced thanks to the
-[[spnorbscl]] input variable.
+An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
 """,
 ),
 
@@ -17942,13 +17942,16 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="SPin-ORBit SCaLing",
-    requires="[[usepaw]] == 1 and [[pawspnorb]] >= 1",
+    requires="( [[usepaw]] == 1 and [[pawspnorb]] >= 1) .or NC pseudos with SOC terms.",
     added_in_version="before_v9",
     text=r"""
-Scaling of the spin-orbit interaction. The default values gives the first-
-principles value, while other values are used for the analysis of the effect
+Scaling of the spin-orbit interaction. The default values (one) gives
+the first-principles value, while other values are used for the analysis of the effect
 of the spin-orbit interaction, but are not expected to correspond to any
 physical situation.
+
+Note that, starting with version 9.5.2, this option is also compatible with NC pseudos provided
+the pseudopotential files include the SOC term.
 """,
 ),
 
