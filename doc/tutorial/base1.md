@@ -30,7 +30,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 2 hours.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the (pseudo) total energy and some associated quantities
 
@@ -350,7 +350,7 @@ You have read completely an output file! Could you answer the following question
 
     Side note: in most of the tutorial examples, [[nstep]] will be enough to reach
     the target tolerance, defined by one of the **tolXXX** input variables. However,
-    this is not always the case (e.g. the test case 1 of the [tutorial DFPT1](rf1)
+    this is not always the case (e.g. the test case 1 of the [tutorial DFPT1](/tutorial/rf1)
     because of some portability problems, that could only be
     solved by stopping the SCF cycles before the required tolerance.
 
@@ -636,7 +636,7 @@ There are some subtleties in the calculation of an isolated atom.
 * In many cases, the ground state of an isolated atom is spin-polarized, see the variables [[nsppol]] and [[spinat]];
 
 * The highest occupied level might be degenerate with the lowest unoccupied level of the same spin,
-  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](base4))
+  in which case the techniques usually appropriate for metals are to be used (see [tutorial 4](/tutorial/base4))
 
 * also often, the symmetry of the ground-state charge density **will not be spherical**, so that the automatic
   determination of symmetries by the code, based on the atomic coordinates, should be disabled,
@@ -761,5 +761,5 @@ Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the 
 copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
 the file $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/README.md to learn more about pseudopotentials.
 
-We will see in the [next tutorial](base2) how to address the choice
+We will see in the [next tutorial](/tutorial/base2) how to address the choice
 of these parameters (except the pseudopotential).

@@ -649,6 +649,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !write(std_out,*)' invars0 : nimage, mxnimage = ',dtsets(:)%nimage, mxnimage
 !write(std_out,*)' invars0 : natom = ',dtsets(:)%natom
 !write(std_out,*)' invars0 : mxnatom = ',mxnatom
+!write(std_out,*)' m_invars1%invars0 : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine invars0
@@ -716,6 +718,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 
 !******************************************************************
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1m : enter '
+!call flush(std_out)
+!ENDDEBUG
+
  ! Here, allocation of the arrays that depend on msym.
  ABI_MALLOC(symrel_,(3,3,msym,0:ndtset_alloc))
  ABI_MALLOC(symafm_,(msym,0:ndtset_alloc))
@@ -736,7 +743,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 !Initialization for parallelization data has changed
 !these lines aim to keep old original default values
  dtsets(0)%npimage=1
- dtsets(0)%npkpt=1
+ dtsets(0)%np_spkpt=1
  dtsets(0)%npspinor=1
  dtsets(0)%npfft=1
  dtsets(0)%npband=1
@@ -875,6 +882,11 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_FREE(symrel)
  ABI_FREE(tnons)
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1m : exit '
+!call flush(std_out)
+!ENDDEBUG
+
 end subroutine invars1m
 !!***
 
@@ -985,7 +997,7 @@ subroutine indefo1(dtset)
  dtset%npfft=1
  dtset%nphf=1
  dtset%npimage=1
- dtset%npkpt=1
+ dtset%np_spkpt=1
  dtset%nppert=1
  dtset%npspalch=0
  dtset%npspinor=1
@@ -1032,6 +1044,7 @@ subroutine indefo1(dtset)
  dtset%usepawu=0
  dtset%usepotzero=0
  dtset%use_slk=0
+ dtset%use_oldchi=1
 !V
  dtset%vel_orig(:,:,:)=zero
  dtset%vel_cell_orig(:,:,:)=zero
@@ -1153,6 +1166,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(geo_t) :: geo
 
 !************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : enter '
+!call flush(std_out)
+!ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -2008,6 +2026,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : exit '
+!call flush(std_out)
+!ENDDEBUG
+
 end subroutine invars1
 !!***
 
@@ -2017,7 +2040,8 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine)
+!! (some are initialized earlier, see indefo1 routine, or even 
+!!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
@@ -2071,6 +2095,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
 !Set up default values. All variables to be output in outvars.f
 !should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
+!Some default values are also set at the definition of the input variables (m_dtset.F90).
 
 !These variables have already been initialized, for idtset/=0
  dtsets(0)%istatr=0
@@ -2235,7 +2260,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  E
    dtsets(idtset)%ecut=-one
    dtsets(idtset)%ecuteps=zero
-   dtsets(idtset)%ecutsigx=zero ! The true default value is ecut . This is defined in invars2.F90
+   dtsets(idtset)%ecutsigx=zero ! If ecutsigx is not defined explicitly, npwsigx will be initialized from ecutwfn.
    dtsets(idtset)%ecutsm=zero
    dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
    dtsets(idtset)%effmass_free=one
@@ -2519,11 +2544,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%postoldff=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
-   dtsets(idtset)%prtden=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
-   dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
-   dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtden=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
+   dtsets(idtset)%prtebands=1 ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
+   dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
-   dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
+   dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii

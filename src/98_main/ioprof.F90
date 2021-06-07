@@ -3,7 +3,7 @@
 !! ioprof
 !!
 !! FUNCTION
-!! Tool for frofiling and and testing the IO routines used in abinit
+!! Tool for profiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
 !! Copyright (C) 2004-2021 ABINIT group (MG)

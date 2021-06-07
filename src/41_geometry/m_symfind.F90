@@ -30,8 +30,8 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk, &
-& only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, smallprim, print_symmetries, sg_multable
+ use m_symtk,     only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, &
+                          smallprim, print_symmetries, sg_multable
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
@@ -133,7 +133,7 @@ contains
  integer :: noncoll_orthorhombic=0
  logical :: test_sameabsspin,test_samechrg
  logical :: test_samenucdipmom
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
  real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
@@ -148,7 +148,7 @@ contains
 !**************************************************************************
 
 !DEBUG
- if (prtvol>1) message="remove me later"
+! if (prtvol>1) msg="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
 ! write(std_out,*)' symfind : nzchempot= ',nzchempot
@@ -166,6 +166,8 @@ contains
 ! write(std_out,*)' '
 ! call flush(6)
 !ENDDEBUG
+
+ ABI_UNUSED(prtvol)
 
 !Find the number of classes of atoms (type, chrg and spinat must be identical,
 !spinat might differ by a sign, if aligned with the z direction, or,
@@ -443,10 +445,10 @@ contains
      endif
 
      if(sum(abs(local_nucdipmom(:,1,iatom1)-local_nucdipmom(:,1,iatom0)))>tolsym)then
-       write(message,'(3a,3i5)')&
-&       'Problem with matching the nuclear dipole moment within a class.',ch10,&
-&       'isym,iatom0,iatom1=',isym,iatom0,iatom1
-       ABI_ERROR_CLASS(message, "TolSymError")
+       write(msg,'(3a,3i5)')&
+       'Problem with matching the nuclear dipole moment within a class.',ch10,&
+       'isym,iatom0,iatom1=',isym,iatom0,iatom1
+       ABI_ERROR(msg)
      end if
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
@@ -536,12 +538,12 @@ contains
      if(trialok==1)then
        nsym=nsym+1
        if(nsym>msym)then
-         write(message,'(a,i0,2a,i0,4a)')&
+         write(msg,'(a,i0,2a,i0,4a)')&
          'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
          'is larger than maxnsym: ',msym,ch10,&
          'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
          'or at least smaller than the present one.'
-        ABI_ERROR(message)
+        ABI_ERROR(msg)
        end if
        ntrial=ntrial+1
        symrel(:,:,nsym)=ptsymrel(:,:,isym)
@@ -578,13 +580,13 @@ contains
  endif
 
 !DEBUG
-!  write(message,'(a,I0,es16.6,a)')' symfind : exit, nsym, tolsym=',nsym,tolsym,ch10
-!  write(message,'(2a)') trim(message),'   symrel matrices, symafm and tnons are :'
-!  call wrtout(std_out,message,'COLL')
+!  write(msg,'(a,I0,es16.6,a)')' symfind : exit, nsym, tolsym=',nsym,tolsym,ch10
+!  write(msg,'(2a)') trim(msg),'   symrel matrices, symafm and tnons are :'
+!  call wrtout(std_out,msg)
 !  do isym=1,nsym
-!    write(message,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
+!    write(msg,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
 ! &   symafm(isym),tnons(:,isym)
-!    call wrtout(std_out,message,'COLL')
+!    call wrtout(std_out,msg)
 !  end do
 !stop
 !ENDDEBUG
@@ -654,7 +656,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  integer :: nptsym,nsym_nomagn,shubnikov
  logical :: verbose_
  character(len=5) :: ptgroup,ptgroupha
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: identity(3,3)
  integer,allocatable :: ptsymrel(:,:,:),symrel_nomagn(:,:,:)
@@ -711,9 +713,9 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
    end do
 
    if(shubnikov/=1)then
-     if(shubnikov==3)write(message, '(a)' )' Shubnikov space group type III'
-     if(shubnikov==4)write(message, '(a)' )' Shubnikov space group type IV'
-     call wrtout(std_out,message,'COLL')
+     if(shubnikov==3)write(msg, '(a)' )' Shubnikov space group type III'
+     if(shubnikov==4)write(msg, '(a)' )' Shubnikov space group type IV'
+     call wrtout(std_out,msg)
    end if
 
    if(shubnikov==1 .or. shubnikov==3)then
@@ -726,8 +728,8 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
      if(verbose_)then
        do isym=1,nsym
-         write(message,'(a,i3,2a)')' symanal : the symmetry operation no. ',isym,' is ',trim(labels(isym))
-         call wrtout(std_out,message,'COLL')
+         write(msg,'(a,i3,2a)')' symanal : the symmetry operation no. ',isym,' is ',trim(labels(isym))
+         call wrtout(std_out,msg)
        enddo
      endif
 
@@ -774,14 +776,14 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
        if(verbose_)then
 
-         write(message, '(a)' )' Select only the non-magnetic symmetry operations '
-         call wrtout(std_out,message,'COLL')
+         write(msg, '(a)' )' Select only the non-magnetic symmetry operations '
+         call wrtout(std_out,msg)
 
          do isym=1,nsym
            if(symafm(isym)==1)then
              isym_nomagn=isym_nomagn+1
-             write(message,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(labels(isym_nomagn))
-             call wrtout(std_out,message,'COLL')
+             write(msg,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(labels(isym_nomagn))
+             call wrtout(std_out,msg)
            endif
          enddo
        endif
@@ -853,10 +855,11 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !scalars
  integer :: iaxis,ii,bravais1now,ideform,iholohedry,invariant,isym
  integer :: jaxis,next_stage,nptsym,problem,maxsym
+ integer, parameter :: naxes_ortho=22, naxes_hexa=7
  real(dp) :: norm,scprod
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
- integer :: identity(3,3),axis_trial(3),hexa_axes(3,7),ortho_axes(3,13)
+ integer :: identity(3,3),axis_trial(3),hexa_axes(3,naxes_hexa),ortho_axes(3,naxes_ortho)
  integer,allocatable :: ptsymrel(:,:,:),symrelconv(:,:,:)
  real(dp) :: axes(3,3),axis_cart(3),axis_red(3)
  real(dp) :: rprimdconv(3,3),rprimdtry(3,3),rprimdnow(3,3)
@@ -882,10 +885,19 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  ortho_axes(:,7)=(/0,1,-1/)
  ortho_axes(:,8)=(/-1,0,1/)
  ortho_axes(:,9)=(/1,-1,0/)
- ortho_axes(:,10)=(/1,1,1/)
- ortho_axes(:,11)=(/-1,1,1/)
- ortho_axes(:,12)=(/1,-1,1/)
- ortho_axes(:,13)=(/1,1,-1/)
+ ortho_axes(:,10)=(/0,1,2/)
+ ortho_axes(:,11)=(/2,0,1/)
+ ortho_axes(:,12)=(/1,2,0/)
+ ortho_axes(:,13)=(/1,1,1/)
+ ortho_axes(:,14)=(/-1,1,1/)
+ ortho_axes(:,15)=(/1,-1,1/)
+ ortho_axes(:,16)=(/1,1,-1/)
+ ortho_axes(:,17)=(/2,1,1/)
+ ortho_axes(:,18)=(/1,2,1/)
+ ortho_axes(:,19)=(/1,1,2/)
+ ortho_axes(:,20)=(/2,1,-1/)
+ ortho_axes(:,21)=(/-1,2,1/)
+ ortho_axes(:,22)=(/1,-1,2/)
 
  hexa_axes(:,:)=0
  hexa_axes(1,1)=1
@@ -922,19 +934,28 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  rprimdtry(:,:)=rprimd(:,:)
  ABI_MALLOC(symrelconv,(3,3,nsym))
 
-!At most will have to try 65 deformations (13 axes, five stages)
- do ideform=1,65
-
-!DEBUG
-!write(std_out,*)' symbrav: inside loop with ideform=',ideform
-!call flush(std_out)
-!write(std_out,'(a,9f10.4)')' rprimdtry=',rprimdtry(:,:)
-!ENDDEBUG
+!At most will have to try naxes_ortho*5 deformations (naxes_ortho axes, five stages)
+!First, test whether the current recognition of Bravais lattice is problematic (iholohedry differs from bravais(1)).
+!Then, if there is a problem, test different deformations of rprimd, one after the other.
+!For each try, there is a new rprimdtry from the different set of deformation, that is generated later in the loop
+!Also bravais1now and rprimdnow might changed (and progressively lowered).
+!The latter change induces at most 5 stages for the computation (cubic->tetragonal->orthorhombic->monoclinic->triclinic).
+!After an upgrade of bravais1now and rprimdnow, one has to restart the full set of deformations.
+!Not sure that this procedure resolves all cases, but seems to work on >40000 inaccurate POSCAR files.
+ do ideform=1,naxes_ortho*5
 
    maxsym=max(192,msym)
    ABI_MALLOC(ptsymrel,(3,3,maxsym))
    call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
    ABI_FREE(ptsymrel)
+
+!DEBUG
+!write(std_out,*)' symbrav: inside loop with ideform,iaxis=',ideform,iaxis
+!write(std_out,'(a,9f12.6)')' rprimdtry=',rprimdtry(:,:)
+!write(std_out,'(a,2i4)')' bravais(1:2)=',bravais(1:2)
+!call flush(std_out)
+!ENDDEBUG
+
 
 !  Examine the agreement with bravais(1)
 !  Warning : might change Bravais lattice hR to hP, if hexagonal axes
@@ -970,53 +991,60 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
    if(problem==2)then
      if(iaxis==0)then
-       write(message, '(3a,i3,3a,i3,7a)' )&
-&       'The Bravais lattice determined only from the primitive',ch10,&
-&       'vectors (rprim or angdeg), bravais(1)=',bravais(1),', is not compatible',ch10,&
-&       'with the real one, iholohedry=',iholohedry,', obtained by taking into',ch10,&
-&       'account the symmetry operations. This might be due to an insufficient',ch10,&
-&       'number of digits in the specification of rprim (at least 10),',ch10,&
-&       'or to an erroneous rprim or angdeg. If this is not the case, then ...'
-       ABI_BUG(message)
+       write(msg, '(3a,i3,3a,i3,7a)' )&
+        'The Bravais lattice determined only from the primitive',ch10,&
+        'vectors (rprim or angdeg), bravais(1)=',bravais(1),', is not compatible',ch10,&
+        'with the real one, iholohedry=',iholohedry,', obtained by taking into',ch10,&
+        'account the symmetry operations. This might be due to an insufficient',ch10,&
+        'number of digits in the specification of rprim (at least 10),',ch10,&
+        'or to an erroneous rprim or angdeg. If this is not the case, then ...'
+       ABI_BUG(msg)
      end if
      if(iaxis==1)then
-       write(message, '(3a,3i3,2a,i3,2a,i3)' )&
-&       'Could not succeed to determine the bravais lattice',ch10,&
-&       'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
-&       'bravais(1)=',bravais(1),ch10,&
-&       'iholohedry=',iholohedry
-       ABI_BUG(message)
+       write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+       'Could not succeed to determine the bravais lattice',ch10,&
+       'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
+       'bravais(1)=',bravais(1),ch10,&
+       'iholohedry=',iholohedry
+       ABI_BUG(msg)
      end if
    end if
 
    if(problem==1)then  ! One is left with the problem=1 case, basically iholohedry is lower than bravais(1)
      if(iaxis==0)then
-       write(message, '(a,a,a,i3,a,a,a,i3,a,a,a)' )&
-&       'The Bravais lattice determined only from the primitive',ch10,&
-&       'vectors, bravais(1)=',bravais(1),', is more symmetric',ch10,&
-&       'than the real one, iholohedry=',iholohedry,', obtained by taking into',ch10,&
-&       'account the atomic positions. Start deforming the primitive vector set.'
-       ABI_COMMENT(message)
+       write(msg, '(a,a,a,i3,a,a,a,i3,a,a,a)' )&
+       'The Bravais lattice determined only from the primitive',ch10,&
+       'vectors, bravais(1)=',bravais(1),', is more symmetric',ch10,&
+       'than the real one, iholohedry=',iholohedry,', obtained by taking into',ch10,&
+       'account the atomic positions. Start deforming the primitive vector set.'
+       ABI_COMMENT(msg)
        next_stage=1
      else if(iaxis/=0)then
        if(bravais(1)<bravais1now)then
-         write(message, '(3a,i3,3a,i3,2a)' )&
-&         'The Bravais lattice determined from modified primitive',ch10,&
-&         'vectors, bravais(1)=',bravais(1),', has a lower symmetry than before,',ch10,&
-&         'but is still more symmetric than the real one, iholohedry=',iholohedry,ch10,&
-&         'obtained by taking into account the atomic positions.'
-         ABI_COMMENT(message)
+         write(msg, '(3a,i3,3a,i3,2a)' )&
+         'The Bravais lattice determined from modified primitive',ch10,&
+         'vectors, bravais(1)=',bravais(1),', has a lower symmetry than before,',ch10,&
+         'but is still more symmetric than the real one, iholohedry=',iholohedry,ch10,&
+         'obtained by taking into account the atomic positions.'
+         ABI_COMMENT(msg)
          next_stage=1
        else if(iaxis==1)then
-         write(message, '(3a,3i3,2a,i3,2a,i3)' )&
-&         'Could not succeed to determine the bravais lattice',ch10,&
-&         'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
-&         'bravais(1)=',bravais(1),ch10,&
-&         'iholohedry=',iholohedry
-         ABI_BUG(message)
+         write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+         'Could not succeed to determine the bravais lattice',ch10,&
+         'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
+         'bravais(1)=',bravais(1),ch10,&
+         'iholohedry=',iholohedry
+         ABI_BUG(msg)
        end if
      end if
    end if ! problem==1
+
+!  One is here when problem=1 (iholohedry < bravais(1)) and either
+!  - iaxis=0 (no deformation has been tried yet),
+!  - some deformation iaxis has been tried giving bravais(1), but iholohedry < bravais(1) < bravais1now
+!  - some deformation iaxis has been tried giving bravais(1), but iholohedry < bravais(1) = bravais1now and iaxis/=1 .
+!  Also, note that next_stage is still 0 when bravais(1)=bravais1now .
+!  The loop has been ended (so, the search failed) when bravais(1)=bravais1now and iaxis==1.
 
    if(next_stage==1)then
      bravais1now=bravais(1)
@@ -1030,13 +1058,23 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      symrelconv(:,:,1:nsym)=symrel(:,:,1:nsym)
      call symrelrot(nsym,rprimdconv,axes,symrelconv,tolsym)
      if(bravais(1)/=6)then
-       iaxis=14
+       iaxis=naxes_ortho+1
      else
-       iaxis=8
+       iaxis=naxes_hexa+1
      end if
      next_stage=0
+!DEBUG
+!    write(std_out,*)' symbrav: next stage, bravais(1), bravais(2) and symrelconv'
+!    write(std_out,'(a,2i4)')' bravais(1:2)=',bravais(1:2)
+!    write(std_out,'(a,9f12.6)')' rprimdconv=',rprimdconv(:,:)
+!    do isym=1,nsym
+!      write(std_out,'(9i4)')symrelconv(:,:,isym)
+!    enddo
+!    call flush(std_out)
+!ENDDEBUG
    end if
 
+!  Go to the next iaxis that will be left invariant
    iaxis=iaxis-1
    do jaxis=iaxis,1,-1
      if(bravais(1)/=6)then
@@ -1052,12 +1090,12 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !    Examine whether all symmetry operations leave the axis invariant (might be reversed, though)
      do isym=1,nsym
        if(sum(abs(matmul(symrelconv(:,:,isym),axis_trial)+(-axis_trial(:))))/=0 .and. &
-&       sum(abs(matmul(symrelconv(:,:,isym),axis_trial)+axis_trial(:)))/=0 )invariant=0
+       sum(abs(matmul(symrelconv(:,:,isym),axis_trial)+axis_trial(:)))/=0 )invariant=0
      end do
      if(invariant==1)then
        iaxis=jaxis
-!      write(message, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',iaxis
-!      call wrtout(std_out,message,'COLL')
+!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',iaxis
+!      call wrtout(std_out,msg)
        exit
      end if
    end do
@@ -1065,12 +1103,12 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
    if(invariant==0)then
 !    Not a single axis was invariant with respect to all operations ?!
 !    do isym=1,nsym; write(std_out, '(a,10i4)' )' isym,symrelconv=',isym,symrelconv(:,:,isym); enddo
-     write(message, '(3a,3i3,2a,i3,2a,i3)' )&
-&     'Could not succeed to determine the bravais lattice (not a single invariant)',ch10,&
-&     'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
-&     'bravais(1)=',bravais(1),ch10,&
-&     'iholohedry=',iholohedry
-     ABI_BUG(message)
+     write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+     'Could not succeed to determine the bravais lattice (not a single invariant)',ch10,&
+     'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
+     'bravais(1)=',bravais(1),ch10,&
+     'iholohedry=',iholohedry
+     ABI_BUG(msg)
    end if
 
    call matr3inv(rprimdconv,rprimdconv_invt)
@@ -1096,11 +1134,11 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  end do ! ideform
 
  if(bravais(1)/=iholohedry)then
-   write(message, '(3a,3i3,2a,i3,2a,i3)' )&
-&   'Despite efforts, Could not succeed to determine the bravais lattice :',ch10,&
-&   'bravais(1)=',bravais(1),ch10,&
-&   'iholohedry=',iholohedry
-   ABI_BUG(message)
+   write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+   'Despite efforts, Could not succeed to determine the bravais lattice :',ch10,&
+   'bravais(1)=',bravais(1),ch10,&
+   'iholohedry=',iholohedry
+   ABI_BUG(msg)
  end if
 
  ABI_FREE(symrelconv)
@@ -1200,7 +1238,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  character(len=1) :: brvsb
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: ivec1(3), ivec2(3)
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
@@ -1302,20 +1340,20 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
    call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
-     write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
-&     ' symspgr: problem with isym=',isym,ch10,&
-&     '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
-&     '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
-&     '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
-&     '  tnonsconv(:,isym)=',tnonsconv(:,isym),ch10,&
-&     '  trialt(:)=',trialt(:)
-     call wrtout(std_out,message,'COLL')
-     write(message, '(a,i4,2a)' )&
-&     'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
-     ABI_BUG(message)
+     write(msg, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
+     ' symspgr: problem with isym=',isym,ch10,&
+     '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
+     '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
+     '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
+     '  tnonsconv(:,isym)=',tnonsconv(:,isym),ch10,&
+     '  trialt(:)=',trialt(:)
+     call wrtout(std_out,msg)
+     write(msg, '(a,i4,2a)' )&
+       'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
+     ABI_BUG(msg)
    else if (t_axes(isym) == -2) then
-     write(message, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
-     ABI_BUG(message)
+     write(msg, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
+     ABI_BUG(msg)
    end if
 
    n_axes(t_axes(isym))=n_axes(t_axes(isym))+1
@@ -1323,12 +1361,12 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  end do ! isym=1,nsymconv
 
  if (sum(n_axes)-nsymconv/=0) then
-   write(message, '(7a)' )&
+   write(msg, '(7a)' )&
 &   'Not all the symmetries have been recognized. ',ch10,&
 &   'This might be due either to an error in the input file',ch10,&
 &   'or to a BUG in ABINIT',ch10,&
 &   'Please contact the ABINIT group.'
-   ABI_WARNING(message)
+   ABI_WARNING(msg)
  end if
 
 !DEBUG
@@ -1443,16 +1481,15 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
        end if ! if binary axis
      end do ! isym
      if(test_direction(1)/=1 .or. test_direction(2)/=1 .and. test_direction(3)/=1)then
-       write(message, '(5a,3i4)' )&
-&       'For space groups 23, 24, 197 or 197, the three binary axes',ch10,&
-&       'are not equally partitioned along the x, y and z directions',ch10,&
-&       'test_direction(1:3)=',test_direction(:)
-       ABI_BUG(message)
+       write(msg, '(5a,3i4)' )&
+       'For space groups 23, 24, 197 or 197, the three binary axes',ch10,&
+       'are not equally partitioned along the x, y and z directions',ch10,&
+       'test_direction(1:3)=',test_direction(:)
+       ABI_BUG(msg)
      end if
      additional_info=1
-     if(abs(vect(1,2)-vect(1,3))>tol8 .or. &
-&     abs(vect(2,1)-vect(2,3))>tol8 .or. &
-&     abs(vect(3,1)-vect(3,2))>tol8) additional_info=2
+     if(abs(vect(1,2)-vect(1,3))>tol8 .or. abs(vect(2,1)-vect(2,3))>tol8 .or. &
+        abs(vect(3,1)-vect(3,2))>tol8) additional_info=2
    end if ! additional information are needed
  end if ! brvltt==1
 
@@ -1467,27 +1504,27 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  end if
 
  if(spgroup==0) then
-   write(message, '(a,a,a,a,a)' )&
-&   'Could not find the space group.',ch10,&
-&   'This often happens when the user selects a restricted set of symmetries ',ch10,&
-&   'in the input file, instead of letting the code automatically find symmetries.'
-   ABI_WARNING(message)
+   write(msg, '(a,a,a,a,a)' )&
+   'Could not find the space group.',ch10,&
+   'This often happens when the user selects a restricted set of symmetries ',ch10,&
+   'in the input file, instead of letting the code automatically find symmetries.'
+   ABI_WARNING(msg)
  end if
 
  spgorig=1 ; spgaxor=1
  call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
  if(spgroup/=0)then
-   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr: spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr: spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
+   call wrtout(std_out,msg)
  end if
 
  if(bravais(1)==7)then
-   write(message, '(a)' ) ' symspgr: optical characteristics = isotropic '
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a)' ) ' symspgr: optical characteristics = isotropic '
+   call wrtout(std_out,msg)
  else if(bravais(1)==4 .or. bravais(1)==5 .or. bravais(1)==6)then
-   write(message, '(a)' ) ' symspgr: optical characteristics = uniaxial '
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a)' ) ' symspgr: optical characteristics = uniaxial '
+   call wrtout(std_out,msg)
 !  Identify the first symmetry operation that is order 3, 4 or 6
    found=0
    do isym=1,nsym
@@ -1530,13 +1567,13 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
            ii=ii+1
          end if
        end do
-       write(message, '(a,3i4)' ) ' Optical axis (in reduced coordinates, real space ) :',uniaxis
+       write(msg, '(a,3i4)' ) ' Optical axis (in reduced coordinates, real space ) :',uniaxis
      end if
    end if
    if(found==0)then
-     write(message, '(a)' ) ' However, the axis has not been found. Sorry for this.'
+     write(msg, '(a)' ) ' However, the axis has not been found. Sorry for this.'
    end if
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,msg)
  end if
 
  ABI_FREE(determinant)
@@ -1624,23 +1661,26 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mgen=4
- integer :: center,fact,found,foundc,ia,ib,icase,igen,iholohedry,ii,index,isym
+ integer :: center,fact,found,foundc,ia,iaxis1,iaxis2
+ integer :: isign1,isign2,ib,icase,igen,iholohedry,ii,index,isym
  integer :: itrial,jj,jsym,ngen=0,orthogonal,sign12,sign13,sign23,sumsign
  real(dp) :: determinant,norm2a,norm2b,norm2c,norm2trial,reduceda,reducedb,sca
- real(dp) :: scalarprod,scb,trace,val
- character(len=500) :: message
+ real(dp) :: scalarprod,scb,trace,trace_best,val
+ character(len=500) :: msg
 !arrays
  integer,parameter :: list_holo(7)=(/7,6,4,3,5,2,1/)
  integer :: ang90(3),equal(3),gen(3,3,mgen),gen2xy(3,3),gen2y(3,3),gen2z(3,3)
  integer :: gen3(3,3),gen6(3,3),icoord(3,3),identity(3,3),nvecta(3),nvectb(3)
  integer :: order(mgen)
- real(dp) :: axes(3,3),axesinvt(3,3),cell_base(3,3),coord(3,3),metmin(3,3)
+ real(dp) :: axes(3,3),axesinvt(3,3),axes_best(3,3),axes_try(3,3)
+ real(dp) :: cell_base(3,3),coord(3,3),metmin(3,3)
  real(dp) :: minim(3,3),scprods(3,3),vecta(3),vectb(3),vectc(3),vin1(3),vin2(3),vext(3)
 
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)') ' symlatt : enter '
+!write(std_out,'(a)') ' m_symfind%symlatt : enter '
+!call flush(std_out)
 !ENDDEBUG
 
  identity(:,:)=0 ; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
@@ -1656,6 +1696,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !write(std_out,*)' symlatt : minim(:,1)=',minim(:,1)
 !write(std_out,*)' symlatt : minim(:,2)=',minim(:,2)
 !write(std_out,*)' symlatt : minim(:,3)=',minim(:,3)
+!call flush(std_out)
 !ENDDEBUG
 
 !--------------------------------------------------------------------------
@@ -1672,6 +1713,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !DEBUG
 !write(std_out,*)' ang90=',ang90(:)
 !write(std_out,*)' equal=',equal(:)
+!call flush(std_out)
 !ENDDEBUG
 
 !-----------------------------------------------------------------------
@@ -2271,6 +2313,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !write(std_out,*)' symlatt : done with centering tests, foundc=',foundc
 !write(std_out,*)'  center=',center
 !write(std_out,*)'  iholohedry=',iholohedry
+!call flush(std_out)
 !ENDDEBUG
 
 !--------------------------------------------------------------------------
@@ -2299,6 +2342,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !write(std_out,*)' symlatt : recompute the  metric tensor '
 !write(std_out,*)'  ang90=',ang90
 !write(std_out,*)'  equal=',equal
+!call flush(std_out)
 !ENDDEBUG
 
 !The axes will be aligned with the previously determined
@@ -2315,11 +2359,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      if(center==0 .or. center==-1 .or. center==-3)then
        iholohedry=7 ; found=1
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cP (primitive cubic)'
+         write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is cP (primitive cubic)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cI (body-centered cubic)'
+         write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is cI (body-centered cubic)'
        else if(center==-3)then
-         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cF (face-centered cubic)'
+         write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is cF (face-centered cubic)'
        end if
      end if
    end if
@@ -2338,9 +2382,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          axes(:,:)=cell_base(:,:)
        end if
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tP (primitive tetragonal)'
+         write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is tP (primitive tetragonal)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tI (body-centered tetragonal)'
+         write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is tI (body-centered tetragonal)'
        end if
      end if
    end if
@@ -2350,13 +2394,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      iholohedry=3 ; found=1
      axes(:,:)=cell_base(:,:)
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oP (primitive orthorhombic)'
+       write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is oP (primitive orthorhombic)'
      else if(center==-1)then
-       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oI (body-centered orthorhombic)'
+       write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is oI (body-centered orthorhombic)'
      else if(center==1 .or. center==2 .or. center==3)then
-       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oC (one-face-centered orthorhombic)'
+       write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is oC (one-face-centered orthorhombic)'
      else if(center==-3)then
-       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oF (face-centered orthorhombic)'
+       write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is oF (face-centered orthorhombic)'
      end if
    end if
 
@@ -2365,7 +2409,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !  Hexagonal system
    if(found==0 .and. ang90(1)==1 .and. ang90(2)==1 .and. equal(3)==1 .and. (2*metmin(2,1)+metmin(1,1))<tolsym*metmin(1,1))then
      iholohedry=6 ; found=1
-     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hP (primitive hexagonal)'
+     write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is hP (primitive hexagonal)'
    end if
 
 !  Rhombohedral system
@@ -2373,28 +2417,33 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 &   abs(metmin(2,1)-metmin(3,2))<tolsym*metmin(2,2)             .and.       &
 &   abs(metmin(2,1)-metmin(3,1))<tolsym*metmin(1,1) )then
      iholohedry=5 ; found=1
-     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hR (rhombohedral)'
+     write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is hR (rhombohedral)'
    end if
 
 !  Monoclinic system
    if(found==0 .and. ang90(1)+ang90(2)+ang90(3)==2 )then
      iholohedry=2 ; found=1
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mP (primitive monoclinic)'
+       write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is mP (primitive monoclinic)'
      else if(center==3)then
-       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mC (one-face-centered monoclinic)'
+       write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is mC (one-face-centered monoclinic)'
      end if
    end if
 
 !  Triclinic system
    if(found==0)then
      iholohedry=1 ; found=1
-     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is aP (primitive triclinic)'
+     write(msg,'(a,a)')ch10,' symlatt: the Bravais lattice is aP (primitive triclinic)'
    end if
 
  end if
 
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,msg)
+
+!DEBUG
+!write(std_out,*)' symlatt : after checking conventional orthogonal cell '
+!call flush(std_out)
+!ENDDEBUG
 
 !--------------------------------------------------------------------------
 !Make sure that axes form a right-handed coordinate system
@@ -2407,14 +2456,30 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 & -axes(1,1)*axes(3,2)*axes(2,3) &
 & -axes(1,3)*axes(2,2)*axes(3,1) &
 & -axes(1,2)*axes(2,1)*axes(3,3)
- if(determinant<0.0d0)then
+ if(determinant<zero)then
    axes(:,:)=-axes(:,:)
  end if
+
+!DEBUG
+!write(std_out,'(a,i4)')' symlatt : before itrial do loop, iholohedry= ',iholohedry
+!write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',&
+!&  rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
+!call flush(std_out)
+!ENDDEBUG
 
 !--------------------------------------------------------------------------
 !Prefer symmetry axes on the same side as the primitive axes,
 !when the changes are allowed
- do
+ do itrial=1,100
+
+!  DEBUG
+!  write(std_out,'(a)')' '
+!  write(std_out,'(a,i5)')' symlatt : itrial do loop, itrial= ',itrial
+!  write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' axes  =',&
+!  &  axes(:,1),ch10,axes(:,2),ch10,axes(:,3)
+!  call flush(std_out)
+!  ENDDEBUG
+
    do ia=1,3
      scprods(ia,:)=axes(1,ia)*rprimd(1,:)+&
 &     axes(2,ia)*rprimd(2,:)+&
@@ -2426,6 +2491,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      norm2trial=sum(rprimd(:,ia)**2)
      scprods(:,ia)=scprods(:,ia)/sqrt(norm2trial)
    end do
+
+!DEBUG
+!  write(std_out,'(a,3f12.6)')' diagonal scalar products ',scprods(1,1),scprods(2,2),scprods(3,3)
+!  call flush(std_out)
+!ENDDEBUG
 
 !  One should now try all the generators of the
 !  proper rotations of each Bravais lattice, coupled with change of
@@ -2463,9 +2533,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      end if
 !    This case is observed when the three new vectors
 !    are pointing opposite to the three original vectors
-!    One takes their opposite, then switch to of them, then process
+!    One takes their opposite, then switch two of them, then process
 !    them again in the loop
-     if(sum(scprods(:,:))<tolsym)then
+     if(sum(scprods(:,:))<-tolsym)then
        axes(:,1)=-axes(:,1)
        vecta(:)=-axes(:,2)
        axes(:,2)=-axes(:,3)
@@ -2473,17 +2543,78 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
        cycle
      end if
    end if
+
+!  Actually, for iholohedry==7, can test specifically all possibilities
+!  and take the best one.
+!  Not activated, because changing the order of symmetries in many tests !
+   if(iholohedry==7 .and. .false.)then
+!  if(iholohedry==7)then
+
+!DEBUG
+!write(std_out,'(a,a)')ch10,' enter search of all possibilities for iholohedry==7 '
+!write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' axes  =',&
+!&  axes(:,1),ch10,axes(:,2),ch10,axes(:,3)
+!call flush(std_out)
+!ENDDEBUG
+
+     do iaxis1=1,3
+       axes_try(:,1)=axes(:,iaxis1)
+       do iaxis2=1,2
+         if(iaxis1==1)axes_try(:,2)=axes(:,1+iaxis2)
+         if(iaxis1==2)axes_try(:,2)=axes(:,2*iaxis2-1)
+         if(iaxis1==3)axes_try(:,2)=axes(:,iaxis2)
+         if(iaxis2==1)axes_try(:,3)=axes(:,3)
+         if(iaxis2==2)axes_try(:,3)=axes(:,1)
+         if(iaxis1==1.and.iaxis2==2)axes_try(:,3)=axes(:,2)
+         if(iaxis1==3.and.iaxis2==1)axes_try(:,3)=axes(:,2)
+         do isign1=1,-1,-2
+           axes_try(:,1)=-axes_try(:,1)
+           do isign2=1,-1,-2
+             axes_try(:,2)=-axes_try(:,2)
+             determinant=axes_try(1,1)*axes_try(2,2)*axes_try(3,3) &
+&                       +axes_try(1,2)*axes_try(2,3)*axes_try(3,1) &
+&                       +axes_try(1,3)*axes_try(3,2)*axes_try(2,1) &
+&                       -axes_try(1,1)*axes_try(3,2)*axes_try(2,3) &
+&                       -axes_try(1,3)*axes_try(2,2)*axes_try(3,1) &
+&                       -axes_try(1,2)*axes_try(2,1)*axes_try(3,3)
+             if(determinant<zero)axes_try(:,3)=-axes_try(:,3)
+             do ia=1,3
+               scprods(ia,:)=axes_try(1,ia)*rprimd(1,:)+&
+&                            axes_try(2,ia)*rprimd(2,:)+&
+&                            axes_try(3,ia)*rprimd(3,:)
+               norm2trial=sum(axes_try(:,ia)**2)
+               scprods(ia,:)=scprods(ia,:)/sqrt(norm2trial)
+             end do
+             do ia=1,3
+               norm2trial=sum(rprimd(:,ia)**2)
+               scprods(:,ia)=scprods(:,ia)/sqrt(norm2trial)
+             end do
+             trace=scprods(1,1)+scprods(2,2)+scprods(3,3)
+             if(iaxis1==1.and.iaxis2==1.and.isign1==1.and.isign2==1)then
+               trace_best=trace
+               axes_best=axes_try
+             else if (trace>trace_best+tolsym)then
+               trace_best=trace
+               axes_best=axes_try
+             endif
+           enddo ! isign2
+         enddo ! isign1
+       enddo ! iaxes2
+     enddo ! iaxes1
+     axes=axes_best
+   endif ! iholohedry=7
    exit
-!  Other cases might be coded ...
  end do
 
 !--------------------------------------------------------------------------
 
 !DEBUG
+!write(std_out,'(a,a)')ch10,' after order/sign optimization do-loop '
 !write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',&
 !&  rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
 !write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' axes  =',&
 !&  axes(:,1),ch10,axes(:,2),ch10,axes(:,3)
+!call flush(std_out)
 !ENDDEBUG
 
 !Compute the coordinates of rprimd in the system defined by axes(:,:)
@@ -2500,14 +2631,14 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    do jj=1,3
      val=coord(ii,jj)*fact
      if(abs(val-nint(val))>fact*two*tolsym)then
-       write(message,'(4a,a,3es18.10,a,a,3es18.10,a,a,3es18.10,a,a,i4)')&
-&       'One of the coordinates of rprimd in axes is non-integer,',ch10,&
-&       'or non-half-integer (if centering), within 2*tolsym.',ch10,&
-&       'coord=',coord(:,1),ch10,&
-&       '      ',coord(:,2),ch10,&
-&       '      ',coord(:,3),ch10,&
-&       'fact=',fact
-       ABI_BUG(message)
+       write(msg,'(4a,a,3es18.10,a,a,3es18.10,a,a,3es18.10,a,a,i4)')&
+       'One of the coordinates of rprimd in axes is non-integer,',ch10,&
+       'or non-half-integer (if centering), within 2*tolsym.',ch10,&
+       'coord=',coord(:,1),ch10,&
+       '      ',coord(:,2),ch10,&
+       '      ',coord(:,3),ch10,&
+       'fact=',fact
+       ABI_BUG(msg)
      end if
      icoord(ii,jj)=nint(val)
    end do
@@ -2530,10 +2661,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !Keep this for IFCv70 compiler
  if(nptsym/=2)then
-   write(message,'(a,a,a,a)')ch10,&
-&   ' symlatt : BUG -',ch10,&
-&   '  Crazy error, compiler bug '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,a,a,a)')ch10,&
+   ' symlatt : BUG -',ch10,&
+   '  Crazy error, compiler bug '
+   call wrtout(std_out,msg)
  end if
 
 !--------------------------------------------------------------------------
@@ -2589,6 +2720,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !DEBUG
 !write(std_out,'(a)') ' symlatt : exit '
+!call flush(std_out)
 !stop
 !ENDDEBUG
 

@@ -18,7 +18,7 @@ from contextlib import contextmanager
 try:
     from invoke import task
 except ImportError:
-    raise ImportError("Cannot import invoke package. Use `pip install invoke`")
+    raise ImportError("Cannot import invoke package. Use `pip install invoke --user`")
 
 from tests.pymods.testsuite import find_top_build_tree
 from tests.pymods.devtools import number_of_cpus

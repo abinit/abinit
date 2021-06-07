@@ -37,6 +37,15 @@ wavefunctions with their real part, instead of both their real and complex parts
 This allows halving the memory needs, as well as the CPU time. 
 See [[istwfk]].
 
+GW calculations can be made less memory and CPU time consuming,
+at the expense of numerical precision,
+by compiling ABINIT with the option enable_gw_dpc=“no" in the *.ac9 file.
+
+Aside of using input variables, sometimes, to solve memory problems, the user has to increase the stack size limit.
+using Linux/Osx, one can get the stack size using "ulimit -s", and set it to a larger limit using e.g. "ulimit -s 16384" for 16MB cache size,
+or "ulimit -s unlimited" if the OS allows you to do so.
+Note that in version 9.4.1, this operation is automatically performed by Abinit at the beginning of the run.
+
 Other input variables related to tuning the speed or the memory usage are for expert users only.
 
 ## Related Input Variables

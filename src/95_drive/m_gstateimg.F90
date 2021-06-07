@@ -49,7 +49,7 @@ module m_gstateimg
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
- use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
+ use m_geometry,     only : mkradim, mkrdim, fcart2gred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
  use m_libpaw_tools, only : libpaw_spmsg_mpisum
  use m_pawang,       only : pawang_type
@@ -96,7 +96,7 @@ contains
 !! OUTPUT
 !!  etotal_img=total energy, for each image
 !!  fcart_img(3,natom,nimage)=forces, in cartesian coordinates, for each image
-!!  fred_img(3,natom,nimage)=forces, in reduced coordinates, for each image
+!!  gred_img(3,natom,nimage)=gradient of E wrt nuclear positions, in reduced coordinates, for each image
 !!  intgres_img(nspden,natom,nimage)=gradient wrt constraints, for each image
 !!  npwtot(nkpt) = total number of plane waves at each k point
 !!  strten_img(6,nimage)=stress tensor, for each image
@@ -182,7 +182,7 @@ contains
 !! SOURCE
 
 subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&                    fred_img,iexit,intgres_img,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
+&                    gred_img,iexit,intgres_img,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 &                    pawang,pawrad,pawtab,psps,&
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
@@ -206,7 +206,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,intent(out) :: npwtot(dtset%nkpt)
  character(len=fnlen),optional,intent(in) :: filnam(:)
  real(dp), intent(out) :: etotal_img(nimage),fcart_img(3,dtset%natom,nimage)
- real(dp), intent(out) :: fred_img(3,dtset%natom,nimage)
+ real(dp), intent(out) :: gred_img(3,dtset%natom,nimage)
  real(dp), intent(out) :: intgres_img(dtset%nspden,dtset%natom,nimage)
  real(dp), intent(out) :: strten_img(6,nimage)
  real(dp),intent(inout) :: acell_img(3,nimage),amu_img(dtset%ntypat,nimage)
@@ -227,7 +227,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !scalars
  integer,parameter :: formeig=0,level=100,ndtpawuj=0,response=0
  integer :: history_size,idelta,idynimage,ierr,ifirst
- integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_prev,ndynimage,nocc
+ integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_gstate,itimimage_prev,ndynimage,nocc
  integer :: ntimimage,ntimimage_stored,ntimimage_max
  logical :: check_conv,compute_all_images,compute_static_images
  logical :: isVused,isARused,is_master,is_mep,is_pimd
@@ -281,8 +281,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
  DBG_ENTER("COLL")
 
- call timab(700,1,tsec)
- call timab(703,3,tsec)
+ call timab(1200,1,tsec)
+ call timab(1203,3,tsec)
 
 !Arguments check
  if (dtset%nimage>1) then
@@ -425,11 +425,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
- call timab(703,2,tsec)
+ call timab(1203,2,tsec)
 
 !-----------------------------------------------------------------------------------------
 !Big loop on the propagation of all images
- itimimage_eff=1
+ itimimage_eff=1 ; itimimage_gstate=1
  do itimimage=1,ntimimage
 
    res_img => results_img(:,itimimage_eff)
@@ -451,7 +451,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          res_img(iimage)%results_gs%strten(:)=hist_prev(iimage)%strten(:,ih)
          res_img(iimage)%results_gs%etotal=hist_prev(iimage)%etot(ih)
          res_img(iimage)%results_gs%energies%entropy=hist_prev(iimage)%entropy(ih)
-         call fcart2fred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%fred,&
+         call fcart2gred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%gred,&
 &         hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
        end do
@@ -462,7 +462,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
    end if
 
-   call timab(704,1,tsec)
+   call timab(1204,1,tsec)
    call localfilnam(mpi_enreg%comm_img,mpi_enreg%comm_cell,mpi_enreg%comm_world,filnam,'_IMG',dtset%nimage)
    compute_all_images=(compute_static_images.and.itimimage==1)
 
@@ -502,19 +502,19 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
    if (dtset%use_yaml == 1) call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
-   call timab(704,2,tsec)
+   call timab(1204,2,tsec)
 
 !  Loop on the dynamical images
    idynimage=0
    do iimage=1,nimage
-
-     call timab(705,1,tsec)
 
      ii=mpi_enreg%my_imgtab(iimage)
      if (dtset%dynimage(ii)==1) idynimage=idynimage+1
 
 !    Compute static image only at first time step
      if (dtset%dynimage(ii)==1.or.compute_all_images) then
+
+       call timab(1205,1,tsec)
 
 !      Change file names according to image index (if nimage>1)
        if (dtset%nimage>1) then
@@ -555,14 +555,15 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii),&
 &       dtset%rprimd_orig(:,:,ii))
 
-       call timab(705,2,tsec)
+       call timab(1205,2,tsec)
 
-       call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),&
+       call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),itimimage_gstate,&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
 &       res_img(iimage)%results_gs,&
 &       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
+       itimimage_gstate=itimimage_gstate+1
 
-       call timab(706,1,tsec)
+       call timab(1206,1,tsec)
 
        call args_gs_free(args_gs)
 
@@ -580,7 +581,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !      Close output units ; restore defaults
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
-       call timab(706,2,tsec)
+       call timab(1206,2,tsec)
 
      else if (itimimage>1) then ! For static images, simply copy one time step to the other
        itimimage_prev=itimimage_eff-1
@@ -607,12 +608,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end do ! iimage
 
    if(mpi_enreg%paral_img==1)then
-     call timab(702,1,tsec)
+     call timab(1208,1,tsec)
      call xmpi_barrier(mpi_enreg%comm_img)
-     call timab(702,2,tsec)
+     call timab(1208,2,tsec)
    end if
 
-   call timab(707,1,tsec)
+   call timab(1209,1,tsec)
 
 !  Output when images are used
    if (dtset%nimage>1) then
@@ -675,7 +676,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &         ' with Average[Abs(Etotal(t)-Etotal(t-dt))]=',delta_energy,'<tolimg=',dtset%tolimg
        end if
        call wrtout([std_out, ab_out] ,msg,'COLL')
-       call timab(707,2,tsec)
+       call timab(1209,2,tsec)  ! This is the first place where counter 1209 is stopped.
        exit   ! exit itimimage
      end if
    end if
@@ -702,12 +703,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end do
    end if
 
-   call timab(707,2,tsec)
+   call timab(1209,2,tsec)  ! This is the second place where counter 1209 is stopped.
 
  end do ! itimimage
 !-----------------------------------------------------------------------------------------
 
- call timab(708,1,tsec)
+ call timab(1210,1,tsec)
 
 !Copy the results of the computation in the appropriate arguments of the routine
  do iimage=1,nimage
@@ -722,13 +723,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      xred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%xred(:,:)
      etotal_img(iimage)      =results_img(iimage,itimimage_eff)%results_gs%etotal
      fcart_img(:,:,iimage)   =results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)
-     fred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%fred(:,:)
+     gred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%gred(:,:)
      intgres_img(:,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(:,:)
      strten_img(:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%strten(:)
    else if (compute_static_images) then
      etotal_img(iimage)    =results_img(iimage,1)%results_gs%etotal
      fcart_img(:,:,iimage) =results_img(iimage,1)%results_gs%fcart(:,:)
-     fred_img(:,:,iimage)  =results_img(iimage,1)%results_gs%fred(:,:)
+     gred_img(:,:,iimage)  =results_img(iimage,1)%results_gs%gred(:,:)
      intgres_img(:,:,iimage)=results_img(iimage,1)%results_gs%intgres(:,:)
      strten_img(:,iimage)  =results_img(iimage,1)%results_gs%strten(:)
    end if
@@ -784,8 +785,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call m1geo_destroy(m1geo_param)
  call pimd_destroy(pimd_param)
 
- call timab(708,2,tsec)
- call timab(700,2,tsec)
+ call timab(1210,2,tsec)
+ call timab(1200,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -915,7 +916,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
        ABI_MALLOC(xcart_img,(3,resimg_all(ii)%natom))
        iatfix_img=0
        call xred2xcart(resimg_all(ii)%natom,resimg_all(ii)%rprim,xcart_img,resimg_all(ii)%xred)
-       call prtxvf(resimg_all(ii)%results_gs%fcart,resimg_all(ii)%results_gs%fred,&
+       call prtxvf(resimg_all(ii)%results_gs%fcart,resimg_all(ii)%results_gs%gred,&
 &       iatfix_img,iout,resimg_all(ii)%natom,prtvel,&
 &       resimg_all(ii)%vel,xcart_img,resimg_all(ii)%xred)
        ABI_FREE(iatfix_img)
@@ -1058,6 +1059,11 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
 ! *************************************************************************
 
+!DEBUG
+!  write(std_out,'(a)')' m_gstate_img : enter '
+!  call flush(std_out)
+!ENDDEBUG
+
  is_pimd=(imgmov==9.or.imgmov==10.or.imgmov==13)
 
 !Write convergence info
@@ -1118,7 +1124,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(6)
-   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
@@ -1260,27 +1266,36 @@ end subroutine predict_copy
 !!
 !! SOURCE
 
-subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
+subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: itimimage_eff,nimage,ntimimage_stored
+ integer,intent(in) :: itimimage_eff,nimage,nimage_tot,ntimimage_stored
  type(MPI_type),intent(in) :: mpi_enreg
  type(m1geo_type),intent(inout) :: m1geo_param
 !arrays
- type(results_img_type),intent(inout) :: results_img(nimage,ntimimage_stored)
+ type(results_img_type),target,intent(inout) :: results_img(nimage,ntimimage_stored)
 
 !Local variables-------------------------------
 !scalars
  integer :: ihist,iimage,natom,next_itimimage,nspden,nsppol
+!integer :: iatom
  real(dp) :: deltae,diffor,etotal,entropy,fermie,res2,residm
+ logical :: test_img
  type(results_gs_type) :: results_gs_lincomb
 !arrays
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),strten(6),vel_cell(3,3)
  real(dp),allocatable :: fcart(:,:),vel(:,:),xred(:,:)
  logical :: DEBUG=.FALSE.
+ type(results_img_type),pointer :: resimg_all(:)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,'(a)')' m_gstateimg, move_1geo : enter'
+!write(std_out,'(a,i4)')' itimimage_eff=',itimimage_eff
+!call flush(std_out)
+!ENDDEBUG
 
  natom=m1geo_param%ab_mover%natom
  ihist=m1geo_param%hist_1geo%ihist
@@ -1296,6 +1311,14 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  vel(:,:)     =results_img(1,itimimage_eff)%vel(:,:)
  vel_cell(:,:)=results_img(1,itimimage_eff)%vel_cell(:,:)
 
+!DEBUG
+!write(std_out,'(a,i4)')' m_gstateimg, move_1geo, init : ionmov=',m1geo_param%ab_mover%ionmov
+!do iatom=1,natom
+!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
+!enddo
+!ENDDEBUG
+
+
  call mkrdim(acell,rprim,rprimd)
 
 !Fill history with the values of xred, acell and rprimd
@@ -1304,6 +1327,16 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 !Fill history with velocities and ionic kinetic energy
  call vel2hist(m1geo_param%ab_mover%amass,m1geo_param%hist_1geo,vel,vel_cell)
  m1geo_param%hist_1geo%time(ihist)=zero
+
+!In case of image parallelism, collect results accross processors
+ test_img=(nimage_tot/=1.and.mpi_enreg%paral_img==1)
+ if (test_img) then
+   ABI_MALLOC(resimg_all,(nimage_tot))
+   call gather_results_img(mpi_enreg,results_img(1:nimage,itimimage_eff),resimg_all,&
+&   allgather=.true.,only_one_per_img=.false.)
+ else
+   resimg_all => results_img(:,itimimage_eff)
+ end if
 
 !Compute energy, entropy, fermie, forces and stresses for the 1geo : take the weighted average.
 !Compute maximum of deltae,diffor,res2,residm
@@ -1316,23 +1349,24 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  diffor=zero
  res2=zero
  residm=zero
- do iimage=1,nimage
-   etotal=etotal+results_img(iimage,itimimage_eff)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
-   entropy=entropy+results_img(iimage,itimimage_eff)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
-   fermie=fermie+results_img(iimage,itimimage_eff)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
-   fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
-   strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
-   if( deltae<results_img(iimage,itimimage_eff)%results_gs%deltae ) deltae=results_img(iimage,itimimage_eff)%results_gs%deltae
-   if( diffor<results_img(iimage,itimimage_eff)%results_gs%diffor ) diffor=results_img(iimage,itimimage_eff)%results_gs%diffor
-   if( res2<results_img(iimage,itimimage_eff)%results_gs%res2 ) res2=results_img(iimage,itimimage_eff)%results_gs%res2
-   if( residm<results_img(iimage,itimimage_eff)%results_gs%residm ) residm=results_img(iimage,itimimage_eff)%results_gs%residm
+
+ do iimage=1,nimage_tot
+   etotal=etotal+resimg_all(iimage)%results_gs%etotal*m1geo_param%mixesimgf(iimage)
+   entropy=entropy+resimg_all(iimage)%results_gs%entropy*m1geo_param%mixesimgf(iimage)
+   fermie=fermie+resimg_all(iimage)%results_gs%fermie*m1geo_param%mixesimgf(iimage)
+   fcart(:,:)=fcart(:,:)+resimg_all(iimage)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
+   strten(:) =strten(:) +resimg_all(iimage)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
+   if( deltae<resimg_all(iimage)%results_gs%deltae ) deltae=resimg_all(iimage)%results_gs%deltae
+   if( diffor<resimg_all(iimage)%results_gs%diffor ) diffor=resimg_all(iimage)%results_gs%diffor
+   if( res2<resimg_all(iimage)%results_gs%res2 ) res2=resimg_all(iimage)%results_gs%res2
+   if( residm<resimg_all(iimage)%results_gs%residm ) residm=resimg_all(iimage)%results_gs%residm
  enddo
 
 !Set up a results_gs datastructure with the linear combination of images
- nspden=results_img(1,itimimage_eff)%results_gs%nspden
- nsppol=results_img(1,itimimage_eff)%results_gs%nsppol
+ nspden=resimg_all(1)%results_gs%nspden
+ nsppol=resimg_all(1)%results_gs%nsppol
  call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
- call copy_results_gs(results_img(1,itimimage_eff)%results_gs,results_gs_lincomb) 
+ call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb) 
  results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
@@ -1342,6 +1376,14 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  results_gs_lincomb%diffor=diffor
  results_gs_lincomb%res2=res2
  results_gs_lincomb%residm=residm
+
+!From now on, all procs contain the same information about the geometry, etotal, forces, stress, etc.
+!Nothing more needs to be transmitted, and resimg_all is not needed anymore.
+ if (test_img) then
+   call destroy_results_img(resimg_all)
+   ABI_FREE(resimg_all)
+ end if
+ nullify(resimg_all)
 
 !Echo result_gs_lincomb
  call results_gs_lincomb%yaml_write(ab_out, info="Linear combination of ground state results")
@@ -1369,8 +1411,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 & m1geo_param%hmctt,&
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
-!& m1geo_param%itime,&
-  itimimage_eff,&       ! m1geo_param%itime should be eliminated, no need for it
+& itimimage_eff,&     
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&
@@ -1400,9 +1441,21 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
    end do
  endif
 
+!DEBUG
+!write(std_out,'(a,i4)')' m_gstateimg, move_1geo, moved : ionmov=',m1geo_param%ab_mover%ionmov
+!do iatom=1,natom
+!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
+!enddo
+!ENDDEBUG
+
  ABI_FREE(fcart)
  ABI_FREE(vel)
  ABI_FREE(xred)
+
+!DEBUG
+!write(std_out,'(a)')' m_gstateimg, move_1geo : exit'
+!call flush(std_out)
+!ENDDEBUG
 
 end subroutine move_1geo
 !!***

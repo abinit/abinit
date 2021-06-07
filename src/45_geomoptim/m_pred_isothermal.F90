@@ -128,7 +128,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
-!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -218,19 +217,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  acell0(:)=acell(:)
  rprimd0(:,:)=rprimd(:,:)
  ucvol0=ucvol
-
-!Get rid of mean force on whole unit cell, but only if no
-!generalized constraints are in effect
-!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
-!  if(ab_mover%nconeq==0)then
-!    amass_tot=sum(ab_mover%amass(:))
-!    do ii=1,3
-!      if (ii/=3.or.ab_mover%jellslab==0) then
-!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
-!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
-!      end if
-!    end do
-!  end if
 
 !write(std_out,*) 'isothermal 03'
 !##########################################################

@@ -995,7 +995,7 @@ class AbinitProject(NotebookWriter):
             for fort_file in fort_files:
                 outside_dir.extend(m.dirname for m in fort_file.all_used_mods)
 
-	    # Write abinit.dir
+	        # Write abinit.dir
             s = template.format(kind="outside the directory", directory=os.path.basename(dirpath))
             s += "include_dirs = \\\n" + pformat(sorted(set(outside_dir)))
             abinitdir_path = os.path.join(dirpath, "abinit.dir")

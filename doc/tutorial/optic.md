@@ -19,7 +19,7 @@ We strongly suggest that you first read the first two sections of the [[help:opt
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Computing the momentum matrix elements
 

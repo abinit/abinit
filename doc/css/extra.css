@@ -8,11 +8,15 @@ body {
     border-bottom: .1rem solid rgba(0,0,0,.26);
 } 
 
-/* Increase logo width because mkdocs material enforces 48 x 48 */
-.md-logo img {
+/* Increase logo width because mkdocs material enforces 48 x 48 
     width: 48px;
+*/
+.md-logo img {
+    width: 48px  ! Important;
     height: auto;
 }
+
+
 
 /* Add vertical rhythm
  * Based on example 5 of https://tympanus.net/codrops/2012/11/02/heading-set-styling-with-css/ 
@@ -209,7 +213,7 @@ tr:hover {
     background-color: rgba(144, 144, 144, 0.10);
 }
 
-/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels */
+/* This for bootstrap buttons with labels. See https://bootsnipp.com/snippets/featured/buttons-with-labels 
 .btn-label {
     position: relative;
     left: -12px;
@@ -224,7 +228,7 @@ tr:hover {
     padding-top: 0;
     padding-bottom: 0;
 }
-/* .btn { margin-bottom:10px; } */
+*/
 
 /* Decrease font-size e.g in <pre class="small-text"> elements */
 .small-text {
@@ -325,10 +329,10 @@ http://tech.deepumohan.com/2013/09/javascript-ace-editor-positioning-bootstrap.h
 
 #inbox .btn-io {
     border-radius: 50%;
-    height: 54px;
-    width: 54px;
+    height: 60px;
+    width: 60px;
     padding: 0 !important;
-    box-shadow: 0px 3px 7px 0px rgba(202, 124, 124, 0.72);
+    background: #3C80F6;
 }
 
 #inbox .dropup .dropdown-menu, 

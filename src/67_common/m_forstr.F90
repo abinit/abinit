@@ -35,6 +35,7 @@ module m_forstr
  use m_cgtools
  use m_xcdata
  use m_dtset
+ use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -208,11 +209,11 @@ contains
 !!   fcart(3,natom)=forces in cartesian coordinates (Ha/Bohr)
 !!     at input, previous value of forces,
 !!     at output, new value.
-!!     Note : unlike fred, this array has been corrected by enforcing
+!!     Note : unlike gred, this array has been corrected by enforcing
 !!     the translational symmetry, namely that the sum of force
 !!     on all atoms is zero.
 !!   forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
-!!   fred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
+!!   gred(3,natom)=symmetrized grtn = d(etotal)/d(xred)
 !!   gresid(3,natom)=forces due to the residual of the density/potential
 !!   grhf(3,natom)=Hellman-Feynman derivatives of the total energy
 !!   grxc(9+3*natom)=d(Exc)/d(xred) if core charges are used
@@ -249,7 +250,7 @@ contains
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
+&                 forold,gred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
@@ -268,6 +269,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(in) :: energies
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -293,7 +295,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout),target :: nvresid(nfftf,dtset%nspden)
  real(dp),intent(out) :: favg(3)
- real(dp),intent(inout) :: fcart(3,dtset%natom),fred(3,dtset%natom)
+ real(dp),intent(inout) :: fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),strten(6),synlgr(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
@@ -471,7 +473,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      resid => nvresid
    end if
 
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,grcondft,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,gred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
 &   nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
@@ -504,7 +506,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
-&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,dtset%ixc,kinstr,mgfftf,&
+&   energies%e_hartree,energies%e_corepsp,fock,gsqcut,extfpmd,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&

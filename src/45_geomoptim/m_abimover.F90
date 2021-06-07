@@ -291,7 +291,7 @@ type, public :: abiforstr
   ! arrays
   real(dp),allocatable :: fcart(:,:)
    ! Cartesian forces
-  real(dp),allocatable :: fred(:,:)
+  real(dp),allocatable :: gred(:,:)
    ! Reduced forces
   real(dp) :: strten(6)
     ! Stress tensor (Symmetrical 3x3 matrix)
@@ -1030,7 +1030,7 @@ subroutine abiforstr_ini(forstr,natom)
  type(abiforstr), intent(out) :: forstr
 
  ABI_MALLOC(forstr%fcart,(3,natom))
- ABI_MALLOC(forstr%fred,(3,natom))
+ ABI_MALLOC(forstr%gred,(3,natom))
 
 end subroutine abiforstr_ini
 !!***
@@ -1063,7 +1063,7 @@ subroutine abiforstr_fin(forstr)
  type(abiforstr), intent(inout) :: forstr
 
  ABI_SFREE(forstr%fcart)
- ABI_SFREE(forstr%fred)
+ ABI_SFREE(forstr%gred)
 
 end subroutine abiforstr_fin
 !!***
