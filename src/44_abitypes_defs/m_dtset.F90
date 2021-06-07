@@ -3205,7 +3205,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_EFS fit_factors'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_ncoeff_per_iatom' 
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS'
- list_vars=trim(list_vars)//' fit_tolMSDS fit_tolGF'
+ list_vars=trim(list_vars)//' fit_nimposecoeff fit_imposecoeff fit_tolMSDS fit_tolGF'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
