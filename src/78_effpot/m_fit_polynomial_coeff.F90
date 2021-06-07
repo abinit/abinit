@@ -122,8 +122,8 @@ CONTAINS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,power_disps,&
-&                                   nbancoeff,ncycle_in,nfixcoeff,option,comm,cutoff_in,&
-&                                   max_power_strain,initialize_data,&
+&                                   nbancoeff,ncycle_in,nfixcoeff,nimposecoeff,imposecoeff,&
+&                                   option,comm,cutoff_in,max_power_strain,initialize_data,&
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,fit_tolGF,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,& 
@@ -133,10 +133,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncycle_in,nfixcoeff,comm
+ integer,intent(in) :: ncycle_in,nfixcoeff,nimposecoeff,comm
  integer,intent(in) :: generateterm,nbancoeff,option
 !arrays
- integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff)
+ integer,intent(in) :: fixcoeff(nfixcoeff), bancoeff(nbancoeff),imposecoeff(nimposecoeff)
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
@@ -1679,7 +1679,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
    if(counter==0)ncoeff_model = ncoeff_model + ncoeff_bound
 !   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
    call fit_polynomial_coeff_fit(eff_pot,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&             -1,1,comm,verbose=.true.,positive=.false.)
+&             -1,0,(/0/),1,comm,verbose=.true.,positive=.false.)
 
    coeffs_in => eff_pot%anharmonics_terms%coefficients
 

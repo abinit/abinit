@@ -425,7 +425,8 @@ elec_eval = .FALSE.
                call fit_polynomial_coeff_fit(reference_effective_potential,&
                     &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                     &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
-                    &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                    &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,& 
+                    &         option,comm,cutoff_in=inp%fit_cutoff,&
                     &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                     &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
                     &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
@@ -485,7 +486,8 @@ elec_eval = .FALSE.
                        call fit_polynomial_coeff_fit(reference_effective_potential,&
                           &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                           &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff_per_iatom,&
-                          &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                          &         inp%fit_nfixcoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,& 
+                          &         option,comm,cutoff_in=inp%fit_cutoff,&
                           &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
                           &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
                           &         fit_tolMSDFS=inp%fit_tolMSDFS,fit_tolGF=inp%fit_tolGF,&
