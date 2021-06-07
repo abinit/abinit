@@ -87,6 +87,7 @@ module m_multibinit_dataset
   integer :: fit_ncoeff_per_iatom
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
+  integer :: fit_nimposecoeff
   integer :: fit_EFS(3)
   integer :: sel_EFS(3) 
   integer :: opt_EFS(3) 
@@ -219,6 +220,9 @@ module m_multibinit_dataset
   ! atifc(natom)
   integer, allocatable :: fit_fixcoeff(:)
   ! fit_fixcoeffs(fit_nfixcoeff)
+  
+  integer, allocatable :: fit_imposecoeff(:)
+  ! fit_fixcoeffs(fit_nimposecoeff)
 
   integer, allocatable :: fit_bancoeff(:)
   ! fit_bancoeffs(fit_nbancoeff)
@@ -362,6 +366,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_iatom=0
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
+ multibinit_dtset%fit_nimposecoeff=0
  multibinit_dtset%fit_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%sel_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%opt_EFS = (/ 0, 1, 1 /)
@@ -527,6 +532,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  end if
  if (allocated(multibinit_dtset%fit_fixcoeff))  then
    ABI_FREE(multibinit_dtset%fit_fixcoeff)
+ end if
+ if (allocated(multibinit_dtset%fit_imposecoeff))  then
+   ABI_FREE(multibinit_dtset%fit_imposecoeff)
  end if
  if (allocated(multibinit_dtset%fit_bancoeff))  then
    ABI_FREE(multibinit_dtset%fit_bancoeff)
@@ -897,6 +905,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_nfixcoeff is',multibinit_dtset%fit_nfixcoeff,', but the only allowed values',ch10,&
 &   'are -1 or positives for multibinit.',ch10,&
 &   'Action: correct fit_nfixcoeff in your input file.'
+   ABI_ERROR(message)
+ end if
+ 
+ multibinit_dtset%fit_nimposecoeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_nimposecoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_nimposecoeff=intarr(1)
+ if(multibinit_dtset%fit_nimposecoeff<-2)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_nimposecoeff is',multibinit_dtset%fit_nimposecoeff,', but the only allowed values',ch10,&
+&   'are -1 or positives for multibinit.',ch10,&
+&   'Action: correct fit_nimposecoeff in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -2323,6 +2342,23 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      end do
    end if
  end if
+ 
+ ABI_MALLOC(multibinit_dtset%fit_imposecoeff,(multibinit_dtset%fit_nimposecoeff))
+ if (multibinit_dtset%fit_nimposecoeff >0)then
+   if(multibinit_dtset%fit_nimposecoeff>marr)then
+     marr=multibinit_dtset%fit_nimposecoeff
+     ABI_FREE(intarr)
+     ABI_MALLOC(intarr,(marr))
+   end if
+   multibinit_dtset%fit_imposecoeff(:)=0
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nimposecoeff,&
+&              string(1:lenstr),'fit_imposecoeff',tread,'INT')
+   if(tread==1)then
+     do ii=1,multibinit_dtset%fit_nimposecoeff
+       multibinit_dtset%fit_imposecoeff(ii)=intarr(ii)
+     end do
+   end if
+ end if
 
 !O
 
@@ -2623,7 +2659,7 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
  end if
 
 
-!check the fit_bancoeff and fit_fixcoeff and opt_coeff
+!check the fit_bancoeff and fit_fixcoeff and opt_coeff, fit_imposecoeff
  do ii=1,multibinit_dtset%fit_nbancoeff
    do jj=ii+1,multibinit_dtset%fit_nbancoeff
      if (multibinit_dtset%fit_bancoeff(ii) == multibinit_dtset%fit_bancoeff(jj))then
@@ -2656,6 +2692,18 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
 &           ' There is two similar numbers for opt_coeff: ',multibinit_dtset%opt_coeff(ii),&
 &           ' and ', multibinit_dtset%opt_coeff(jj),ch10,&
 &            'Action: change opt_coeff'
+       ABI_BUG(message)
+     end if
+   end do
+ end do
+
+ do ii=1,multibinit_dtset%fit_nimposecoeff
+   do jj=ii+1,multibinit_dtset%fit_nimposecoeff
+     if (multibinit_dtset%fit_imposecoeff(ii) == multibinit_dtset%fit_imposecoeff(jj))then
+       write(message, '(a,I0,a,I0,2a)' )&
+&           ' There is two similar numbers for fit_imposecoeff: ',multibinit_dtset%fit_imposecoeff(ii),&
+&           ' and ', multibinit_dtset%fit_imposecoeff(jj),ch10,&
+&            'Action: change fit_imposecoeff'
        ABI_BUG(message)
      end if
    end do
@@ -2934,6 +2982,11 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(1x,a17,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
      write(nunit,'(1x,a17)',advance='no')'   fit_fixcoeff'
      write(nunit,'(4x,9i7)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
+   end if
+   if(multibinit_dtset%fit_nimposecoeff /= 0) then    
+     write(nunit,'(1x,a17,I3)')  '   fit_nimposecoeff',multibinit_dtset%fit_nimposecoeff
+     write(nunit,'(1x,a17)',advance='no')'   fit_imposecoeff'
+     write(nunit,'(4x,9i7)') (multibinit_dtset%fit_imposecoeff(ii),ii=1,multibinit_dtset%fit_nimposecoeff)
    end if
  end if
 
