@@ -3982,7 +3982,7 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
 
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: coeff_list1(:),coeff_list2(:)
-  type(polynomial_coeff_type),pointer :: coeff_list_out(:)
+  type(polynomial_coeff_type) :: coeff_list_out(size(coeff_list1)+size(coeff_list2))
 !local
 !variable
   integer :: ncoeff1,ncoeff2,ncoeff_out,i,j
@@ -3994,7 +3994,7 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
  ncoeff2 = size(coeff_list2)
  ncoeff_out = ncoeff1 + ncoeff2
 
- ABI_MALLOC(coeff_list_out,(ncoeff_out))
+! ABI_MALLOC(coeff_list_out,(ncoeff_out))
  do i=1,ncoeff_out
     if(i<=ncoeff1)then
        call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
