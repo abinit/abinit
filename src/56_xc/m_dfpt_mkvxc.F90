@@ -1042,23 +1042,26 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    gradrho_gradrho1=dot_product(r0,r1)
    ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
    a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
-   dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
    dadgradn_t2(ir,1)=kxc(ir,4)*gradrho_gradrho1*r0(qdirc)
+   dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
+ end do
+ do ii=1,3
+   if (ii==qdirc) dadgradn_t1(:,1,ii)=dadgradn_t1(:,1,ii)+ar1(:,1)
  end do
 
 !Use xcden to compute the real space gradient of A*rho^(1). 
 !Reuse rho1now storage.
 ! nullify(rhor1_ptr)
 ! rhor1_ptr => ar1
- rho1now=zero
+! rho1now=zero
 ! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
+! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
 
 !Incorporate the terms that do not need further treatment 
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii,1)= -a_gradi_r1(ir,1)-rho1now(ir,1,1+qdirc) &
+   vxc1(ii,1)= -a_gradi_r1(ir,1)& !-rho1now(ir,1,1+qdirc) &
  &            -dadgradn_t2(ir,1)
  end do
  ABI_FREE(rho1now)
