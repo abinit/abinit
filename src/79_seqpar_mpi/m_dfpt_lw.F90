@@ -409,6 +409,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
      do ii=1,nfft
        jj=ii*2
        rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+       rhor1_tmp(jj,:)=zero
      end do
    else if (timrev==1) then
      rhor1_tmp(:,:)=rhor1_real(:,:)
@@ -1985,6 +1986,7 @@ end if
        do ii=1,nfft
          jj=ii*2
          rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+         rhor1_tmp(jj,:)=zero
        end do
      else if (timrev==1) then
        rhor1_tmp(:,:)=rhor1_real(:,:)
@@ -2029,6 +2031,7 @@ end if
        do ii=1,nfft
          jj=ii*2
          rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+         rhor1_tmp(jj,:)=zero
        end do
      else if (timrev==1) then
        rhor1_tmp(:,:)=rhor1_real(:,:)
@@ -2074,6 +2077,7 @@ endif
        do ii=1,nfft
          jj=ii*2
          rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+         rhor1_tmp(jj,:)=zero
        end do
      else if (timrev==1) then
        rhor1_tmp(:,:)=rhor1_real(:,:)

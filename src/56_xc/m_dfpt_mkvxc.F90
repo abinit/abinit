@@ -1061,6 +1061,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
+   vxc1(ii-1,1)=zero
    vxc1(ii,1)= -a_gradi_r1(ir,1)& !-rho1now(ir,1,1+qdirc) &
  &            -dadgradn_t2(ir,1)
  end do
