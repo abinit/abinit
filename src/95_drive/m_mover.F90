@@ -196,7 +196,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset,sc_size)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size)
 
 !Arguments ------------------------------------
 !scalars
