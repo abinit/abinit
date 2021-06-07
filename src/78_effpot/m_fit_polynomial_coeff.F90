@@ -38,6 +38,7 @@ module m_fit_polynomial_coeff
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
  use m_effective_potential,only : effective_potential_getDisp, effective_potential_writeAnhHead
+ use m_effective_potential,only : effective_potential_copy,effective_potential_free
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
  use m_io_tools,   only : open_file,get_unit
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
@@ -150,12 +151,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),optional,intent(in) :: fit_factors(3)
 !Local variables-------------------------------
 !scalar
- integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
+ integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff,ia
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix
- integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out
+ integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+ type(effective_potential_type) :: eff_pot_fixed
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
  logical :: need_only_odd_power,need_only_even_power,need_initialize_data
@@ -163,7 +165,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3)
  integer :: sc_size(3)
- integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:)
+ logical :: fix_and_impose(nfixcoeff)
+ integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:),fixcoeff_corr(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
  integer,allocatable  :: my_coeffindexes(:),singular_coeffs(:)
  integer,allocatable  :: my_coefflist(:) ,stat_coeff(:)
@@ -174,6 +177,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),allocatable :: fcart_coeffs_tmp(:,:,:,:),strten_coeffs_tmp(:,:,:)
  real(dp),allocatable :: strten_coeffs(:,:,:)
  type(polynomial_coeff_type),allocatable :: my_coeffs(:)
+ type(polynomial_coeff_type),allocatable :: coeffs_out(:)
  type(polynomial_coeff_type),target,allocatable :: coeffs_tmp(:)
  type(polynomial_coeff_type),pointer :: coeffs_in(:)
  type(fit_data_type) :: fit_data
@@ -246,6 +250,75 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
  if(present(fit_tolGF))      tolGF = fit_tolGF
 
+!Copy the input effective potential eff_pot to eff_pot fixed
+!If nimposecoeff=0 the fixed potential is the harmonic potential
+ncoeff_model = eff_pot%anharmonics_terms%ncoeff
+if (nimposecoeff > ncoeff_model)then 
+    write(message,'(2a)') "fit_nimposecoeff is greater then the number of anharmonic terms& 
+&                          provided by input effective potential."& 
+&                         ,"Action -> Change fit_nimposecoeff, and fit_imposecoeff in the input"
+    ABI_ERROR(message)
+endif
+!Impose some coefficients of the input potential
+if (nimposecoeff > 0)then 
+    if (any(imposecoeff > ncoeff_model))then 
+        write(message,'(2a)') "At least one value in fit_imposeccoeff is greater then the number of anharmonic terms& 
+&                              provided by input effective potential."& 
+&                            ,"Action -> Change fit_imposecoeff in the input"
+        ABI_ERROR(message)
+    endif
+    ABI_MALLOC(coeffs_tmp,(nimposecoeff)) 
+    do ii = 1,nimposecoeff 
+        call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,& 
+&                             eff_pot%anharmonics_terms%coefficients(ii)%nterm,coeffs_tmp(ii),& 
+&                             eff_pot%anharmonics_terms%coefficients(ii)%terms,& 
+&                             eff_pot%anharmonics_terms%coefficients(ii)%name,&
+&                             check = .TRUE.)
+    enddo
+    !Copy the input eff pot, free the coeffs and set the ones who shall be imposed to fixed
+    call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
+    call effective_potential_freeCoeffs(eff_pot_fixed) 
+    call effective_potential_setCoeffs(coeffs_tmp,eff_pot_fixed,nimposecoeff) 
+    !Deallocate coeffs tmp 
+    do ii = 1,nimposecoeff 
+        call polynomial_coeff_free(coeffs_tmp(ii))
+    enddo 
+    ABI_FREE(coeffs_tmp)
+!Fix the whole input potential
+elseif (nimposecoeff == -1)then 
+    call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
+!Fix only the harmonic potential 
+else 
+    call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
+    call effective_potential_freeCoeffs(eff_pot_fixed) 
+endif
+
+fix_and_impose = .FALSE.
+!Set consistency between fixcoeff and imposecoeff.
+if (nfixcoeff > 0 .and. nimposecoeff >0)then 
+    do ii = 1,nimposecoeff 
+        if (any(fixcoeff == imposecoeff))then 
+           fix_and_impose(ii) = .TRUE. 
+        endif
+    enddo 
+    nfix_and_impose = count(fix_and_impose)
+    ABI_MALLOC(fixcoeff_corr,(nfixcoeff-nfix_and_impose))
+    ia = 1
+    do ii = 1,nfixcoeff
+        if (.not. fix_and_impose(ii))then 
+            fixcoeff_corr(ia) = fixcoeff(ii)
+            ia = ia + 1            
+        endif
+    enddo 
+    nfixcoeff_corr = nfixcoeff - nfix_and_impose
+elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
+    nfixcoeff_corr = 0 
+    write(message,'(2a)') "nfixcoeff and nimposecoeff are equal to -1",& 
+&                         "This does not make sense. nfixcoeff will be set to 0."
+    ABI_WARNING(message)
+endif 
+
+
  if(need_verbose) then
    write(message,'(a,(80a))') ch10,('-',ii=1,80)
    call wrtout(ab_out,message,'COLL')
@@ -298,7 +371,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !regenerate the list
  my_ncoeff = 0
  ncoeff_tot = 0
- ncoeff_model = eff_pot%anharmonics_terms%ncoeff
 
 !Reset ncoeff_tot
  if(ncoeff_model > 0)then
@@ -347,11 +419,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 !Get number of fixed coeff
  ncoeff_fix = 0  
- if(nfixcoeff /=0) then 
-   if(nfixcoeff == -1)then 
+ if(nfixcoeff_corr /=0) then 
+   if(nfixcoeff_corr == -1)then 
       ncoeff_fix = ncoeff_model 
    else 
-      ncoeff_fix = nfixcoeff 
+      ncoeff_fix = nfixcoeff_corr
    endif 
  endif 
 
@@ -412,7 +484,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 
 !Check if ncycle_in is not zero or superior to ncoeff_tot
- if(need_verbose.and.(ncycle_in > ncoeff_tot).or.(ncycle_in<0.and.nfixcoeff /= -1)) then
+ if(need_verbose.and.(ncycle_in > ncoeff_tot).or.(ncycle_in<0.and.nfixcoeff_corr /= -1)) then
    write(message, '(6a,I0,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The number of cycle requested in the input is not correct.',ch10,&
@@ -425,20 +497,20 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !ncycle_tot store the curent number of coefficient in the model
 !Do not reset this variable...
  ncycle_tot = 0
- if (nfixcoeff == -1)then
+ if (nfixcoeff_corr == -1)then
    write(message, '(3a)')' nfixcoeff is set to -1, the coefficients present in the model',&
 &                        ' are imposed.',ch10
    ncycle_tot = ncycle_tot + ncoeff_model
  else
-   if (nfixcoeff > 0)then
-     if(maxval(fixcoeff(:)) > ncoeff_tot) then
+   if (nfixcoeff_corr > 0)then
+     if(maxval(fixcoeff_corr(:)) > ncoeff_tot) then
        write(message, '(4a,I0,6a)' )ch10,&
 &        ' --- !WARNING',ch10,&
-&        '     The value ',maxval(fixcoeff(:)),' is not in the list.',ch10,&
+&        '     The value ',maxval(fixcoeff_corr(:)),' is not in the list.',ch10,&
 &        '     Start from scratch...',ch10,&
 &        ' ---',ch10
      else
-       ncycle_tot = ncycle_tot + nfixcoeff
+       ncycle_tot = ncycle_tot + nfixcoeff_corr
        write(message, '(2a)')' Some coefficients are imposed from the input.',ch10
      end if
    else
@@ -487,12 +559,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !if ncycle_tot > 0 fill list_coeffs with the fixed coefficients
  if(ncycle_tot > 0)then
    do ii = 1,ncycle_tot
-     if(nfixcoeff == -1)then
+     if(nfixcoeff_corr == -1)then
        if(ii <= ncoeff_model)then
          list_coeffs(ii) = ii
        end if
      else
-       list_coeffs(ii) = fixcoeff(ii)
+       list_coeffs(ii) = fixcoeff_corr(ii)
      end if
    end do
  end if
@@ -509,7 +581,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Compute the variation of the displacement due to strain of each configuration.
 !Compute fixed forces and stresse and get the standard deviation.
 !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
- call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
+ call fit_data_compute(fit_data,eff_pot_fixed,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  
@@ -1085,7 +1157,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    close(100)
 !TEST_AM
 
-!  Transfert final model
+!  Transfer final model
    if(nproc>1)then
      call xmpi_bcast(ncycle_tot,rank_to_send,comm,ierr)
      call xmpi_bcast(list_coeffs(1:ncycle_tot),rank_to_send,comm,ierr)
@@ -1156,10 +1228,30 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
-    
+   
+   !Allocate output coeffs -> selected plus fixed ones
+   ncoeff_out = ncycle_tot+eff_pot_fixed%anharmonics_terms%ncoeff
+   ABI_MALLOC(coeffs_out,(ncoeff_out))
+   do ii = 1,ncoeff_out
+        if(ii < ncycle_tot)then 
+            call polynomial_coeff_init(coeffs_tmp(ii)%coefficient,coeffs_tmp(ii)%nterm,&
+&                                      coeffs_out(ii),coeffs_tmp(ii)%terms,&
+&                                      coeffs_tmp(ii)%name,&
+&                                      check=.true.)
+        else
+            ia = ii - ncycle_tot 
+            call polynomial_coeff_init(eff_pot_fixed%anharmonics_terms%coefficients(ia)%coefficient,& 
+&                             eff_pot_fixed%anharmonics_terms%coefficients(ia)%nterm,coeffs_out(ii),& 
+&                             eff_pot_fixed%anharmonics_terms%coefficients(ia)%terms,& 
+&                             eff_pot_fixed%anharmonics_terms%coefficients(ia)%name,&
+&                             check = .TRUE.)
+            
+        endif
+   enddo 
+
 
 !  Set the final set of coefficients into the eff_pot type
-   call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
+   call effective_potential_setCoeffs(coeffs_out(1:ncycle_tot),eff_pot,ncycle_tot)
 
    ! If Wanted open the anharmonic_terms_file and write header
    filename = "TRS_fit_diff"
@@ -1225,8 +1317,18 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  do ii=1,my_ncoeff
    call polynomial_coeff_free(my_coeffs(ii))
  end do
-
  ABI_FREE(my_coeffs)
+ do ii=1,ncoeff_out
+   call polynomial_coeff_free(coeffs_out(ii))
+ end do
+ ABI_FREE(coeffs_out)
+
+ 
+!Deallocate fixed eff_pot
+call effective_potential_free(eff_pot_fixed)
+
+
+!Other deallocations
  ABI_FREE(gf_values_iter)
  ABI_FREE(buffsize)
  ABI_FREE(buffdisp)
@@ -1247,6 +1349,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  ABI_FREE(strten_coeffs)
  ABI_FREE(strten_coeffs_tmp)
  ABI_FREE(stat_coeff)
+ ABI_FREE(fixcoeff_corr)
 
 end subroutine fit_polynomial_coeff_fit
 !!***
