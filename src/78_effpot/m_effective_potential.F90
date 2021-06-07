@@ -69,6 +69,7 @@ module m_effective_potential
  public :: effective_potential_getDisp
  public :: effective_potential_init
  public :: effective_potential_initmpi
+ public :: effective_potential_copy
  public :: effective_potential_print
  public :: effective_potential_printSupercell
  public :: effective_potential_setCoeffs
@@ -430,6 +431,53 @@ subroutine effective_potential_initmpi(eff_pot,comm)
 end subroutine effective_potential_initmpi
 !!***
 
+!!****f* m_effective_potential/effective_potential_copy
+!!
+!! NAME
+!! effective_potential_init
+!!
+!! FUNCTION
+!! Copy one effective potential to another i.e. initialize the output effective potentiale 
+!! eff_pot_out with the values the input effective potential eff_pot_in
+!!
+!! INPUTS
+!!
+!! eff_pot_in<type(effective_potential_type)> = effective_potential datatype to be initialized
+!!
+!! OUTPUT
+!! eff_pot_out<type(effective_potential_type)> = effective_potential datatype to be initialized
+!!
+!! PARENTS
+!!      m_effective_potential_file
+!!
+!! CHILDREN
+!!      ab_define_var,isfile,wrtout
+!!
+!! SOURCE
+
+subroutine effective_potential_copy(eff_pot_out,eff_pot_in,comm) 
+
+!Arguments ------------------------------------
+!scalars
+ type(effective_potential_type),intent(inout)  :: eff_pot_out
+ type(effective_potential_type),intent(in)  :: eff_pot_in
+ integer,intent(in)     :: comm
+! ***********************************************************************
+
+
+call effective_potential_init(eff_pot_in%crystal,eff_pot_out,eff_pot_in%energy,eff_pot_in%harmonics_terms%ifcs,& 
+&                             eff_pot_in%anharmonics_terms%ncoeff,eff_pot_in%harmonics_terms%nqpt,comm,& 
+&                             eff_pot_in%anharmonics_terms%coefficients,eff_pot_in%harmonics_terms%dynmat,& 
+&                             eff_pot_in%harmonics_terms%elastic_constants,eff_pot_in%anharmonics_terms%elastic3rd,& 
+&                             eff_pot_in%anharmonics_terms%elastic_displacement,eff_pot_in%harmonics_terms%epsilon_inf,& 
+&                             eff_pot_in%fcart,eff_pot_in%harmonics_terms%strain_coupling,eff_pot_in%strten,eff_pot_in%name,& 
+&                             eff_pot_in%anharmonics_terms%phonon_strain,eff_pot_in%confinement,eff_pot_in%harmonics_terms%phfrq,& 
+&                             eff_pot_in%harmonics_terms%qpoints,eff_pot_in%has_anharmonicsTerms,eff_pot_in%supercell,& 
+&                             eff_pot_in%harmonics_terms%zeff)
+
+
+end subroutine effective_potential_copy
+!!***
 
 !****f* m_effective_potential/effective_potential_free
 !!
