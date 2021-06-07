@@ -92,6 +92,7 @@ hard_chklibs = [
   "12_hide_mpi",
   "11_memory_mpi",
   "10_defs",
+  "02_clib",
   ]
 
 # Prepare recognition of extensions

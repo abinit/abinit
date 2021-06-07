@@ -105,7 +105,7 @@ contains
 !!      m_common
 !!
 !! CHILDREN
-!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
 !!      libxc_functionals_end,libxc_functionals_get_hybridparams
 !!      libxc_functionals_init,sort_int,timab,wrtout
 !!
@@ -228,7 +228,7 @@ end subroutine invars2m
 !!      m_invars2
 !!
 !! CHILDREN
-!!      dtset%chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
 !!      libxc_functionals_end,libxc_functionals_get_hybridparams
 !!      libxc_functionals_init,sort_int,timab,wrtout
 !!
@@ -252,8 +252,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
- integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
- integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
+ integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
+ integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
@@ -468,6 +468,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbcut',tread,'INT')
+ if(tread==1) dtset%extfpmd_nbcut=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
@@ -748,8 +751,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nonscf_gkk',tread,'INT')
  if(tread==1) dtset%use_nonscf_gkk=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
+ if(tread==1) dtset%useextfpmd=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
  if(tread==1) dtset%use_yaml=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_oldchi',tread,'INT')
+ if(tread==1) dtset%use_oldchi=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
  if(tread==1) dtset%brav=intarr(1)
@@ -1265,7 +1274,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nband(ikpt)=nband1
    end do
 
-   ! CP added 
+   ! CP added
    if (occopt==9)then
 ! Read the valence band index
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
@@ -1415,8 +1424,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
  if(tread==1) dtset%asr=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
- if(tread==1) dtset%dipdip=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread_dipdip,'INT')
+ if(tread_dipdip==1) dtset%dipdip=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
  if(tread==1) dtset%chneut=intarr(1)
@@ -1452,7 +1461,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%eph_task == -4 .and. dtset%symsigma == 0) dtset%eph_intmeth = 1
  end if
 
- ! Allow use to dope the system or shift artificially the Fermi level
+ ! Allow use to dope the system or to shift artificially the Fermi level
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_extrael',tread_extrael,'DPR')
  if (tread_extrael == 1) dtset%eph_extrael = dprarr(1)
 
@@ -1567,6 +1576,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extrapwf',tread,'INT')
  if(tread==1) dtset%extrapwf=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_abs_tol',tread,'DPR')
+ if(tread==1) dtset%ibte_abs_tol=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_alpha_mix',tread,'DPR')
+ if(tread==1) dtset%ibte_alpha_mix=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_niter',tread,'INT')
+ if(tread==1) dtset%ibte_niter=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_prep',tread,'INT')
+ ! ibte_prep is only available when we compute the imaginary part.
+ if(tread==1 .and. dtset%eph_task == -4) dtset%ibte_prep=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iboxcut',tread,'INT')
  if(tread==1) dtset%iboxcut=intarr(1)
 
@@ -1661,7 +1683,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%ionmov=12
    write(msg, '(4a)' )&
      'LOTF is disabled, ionmov can not be 23.',ch10,&
-    'Set ionmov to 12.',ch10
+     'Set ionmov to 12.',ch10
    ABI_COMMENT(msg)
 #endif
  end if
@@ -1909,7 +1931,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%efmas>0) then
    call intagm(dprarr,intarr,jdtset,marr,2*nkpt,string(1:lenstr),'efmas_bands',tread,'INT')
    if(tread==1) then
-     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt),(/2,nkpt/))
+     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt), [2,nkpt])
    else
      dtset%efmas_bands(1,:)=1
      dtset%efmas_bands(2,:)=dtset%nband(:)
@@ -3322,7 +3344,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        ! (make a separate copy for each k point and spin)
        if(nkpt>1)then
          do isppol=nsppol,1,-1
-           do ikpt=2,nkpt
+           do ikpt=1,nkpt
              dtset%occ_orig(1+(ikpt-1)*nband1+nkpt*nband1*(isppol-1):ikpt*nband1+nkpt*nband1*(isppol-1),iimage)=&
 &             dtset%occ_orig(1+nband1*(isppol-1):nband1*isppol,iimage)
            end do
@@ -3417,7 +3439,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call dtset%chkneu(nelectjell,occopt_tmp)
+ call dtset%initocc_chkneu(nelectjell,occopt_tmp)
 
  ! Now that the occupation numbers have been initialized, can meaningfully define nbandhf.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandhf',tread,'INT')
@@ -3552,7 +3574,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! band range for self-energy corrections.
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
- if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+ if (tread == 1) then
+   dtset%sigma_erange = dprarr(1:2)
+   !if (all(dtset%sigma_erange < zero) .and. .not. tread_dipdip == 1) dtset%dipdip = 0
+ end if
 
  ! IBZ k-points for transport calculation in terms of transport_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'transport_ngkpt', tread, 'INT')

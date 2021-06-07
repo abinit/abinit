@@ -208,6 +208,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
             prtwf           0
           spgroup           1
            toldff      1.00000000E-08
@@ -36140,6 +36141,7 @@ P           mkmem           1
            prtden           0
         prtebands           0
            prteig           0
+           prtgsr           0
             prtwf           0
           spgroup           1
            strten1     1.0758856363E-03  2.2279211368E-03  2.2278318170E-03

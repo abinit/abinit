@@ -106,8 +106,8 @@ MODULE m_results_out
    ! fcart(3,natom,nimage) Cartesian forces (Hartree/Bohr)
    ! Forces in cartesian coordinates (Hartree)
 
-  real(dp), pointer :: fred(:,:,:)
-   ! fred(3,natom,nimage)
+  real(dp), pointer :: gred(:,:,:)
+   ! gred(3,natom,nimage)
    ! Forces in reduced coordinates (Hartree)
    ! Actually, gradient of the total energy with respect
    ! to change of reduced coordinates
@@ -265,7 +265,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
      ABI_MALLOC(results_out(ii)%amu,(mxntypat,mxnimage_))
      ABI_MALLOC(results_out(ii)%etotal,(mxnimage_))
      ABI_MALLOC(results_out(ii)%fcart,(3,mxnatom,mxnimage_))
-     ABI_MALLOC(results_out(ii)%fred,(3,mxnatom,mxnimage_))
+     ABI_MALLOC(results_out(ii)%gred,(3,mxnatom,mxnimage_))
      ABI_MALLOC(results_out(ii)%intgres,(4,mxnatom,mxnimage_))
      ABI_MALLOC(results_out(ii)%mixalch,(mxnpsp,mxntypat,mxnimage_))
      ABI_MALLOC(results_out(ii)%npwtot,(mxnkpt,mxnimage_))
@@ -294,7 +294,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
        results_out(ii)%amu=zero
        results_out(ii)%etotal(:)=zero
        results_out(ii)%fcart(:,:,:)=zero
-       results_out(ii)%fred(:,:,:)=zero
+       results_out(ii)%gred(:,:,:)=zero
        results_out(ii)%intgres(:,:,:)=zero
        results_out(ii)%mixalch(:,:,:)=zero
        results_out(ii)%occ=zero
@@ -393,8 +393,8 @@ subroutine destroy_results_out(results_out)
      if (associated(results_out(ii)%fcart))   then
        ABI_FREE(results_out(ii)%fcart)
      end if
-     if (associated(results_out(ii)%fred))    then
-       ABI_FREE(results_out(ii)%fred)
+     if (associated(results_out(ii)%gred))    then
+       ABI_FREE(results_out(ii)%gred)
      end if
      if (associated(results_out(ii)%intgres))    then
        ABI_FREE(results_out(ii)%intgres)
@@ -507,8 +507,8 @@ subroutine copy_results_out(results_out_in,results_out_out)
    if (associated(results_out_out%fcart))   then
      ABI_FREE(results_out_out%fcart)
    end if
-   if (associated(results_out_out%fred))    then
-     ABI_FREE(results_out_out%fred)
+   if (associated(results_out_out%gred))    then
+     ABI_FREE(results_out_out%gred)
    end if
    if (associated(results_out_out%intgres))    then
      ABI_FREE(results_out_out%intgres)
@@ -520,7 +520,7 @@ subroutine copy_results_out(results_out_in,results_out_out)
      ABI_FREE(results_out_out%xred)
    end if
    ABI_MALLOC(results_out_out%fcart,(3,natom_,nimage_))
-   ABI_MALLOC(results_out_out%fred,(3,natom_,nimage_))
+   ABI_MALLOC(results_out_out%gred,(3,natom_,nimage_))
    ABI_MALLOC(results_out_out%intgres,(4,natom_,nimage_))
    ABI_MALLOC(results_out_out%vel,(3,natom_,nimage_))
    ABI_MALLOC(results_out_out%xred,(3,natom_,nimage_))
@@ -559,7 +559,7 @@ subroutine copy_results_out(results_out_in,results_out_out)
  results_out_out%amu(1:ntypat_,1:nimage_)      =results_out_in%amu(1:ntypat_,1:nimage_)
  results_out_out%etotal(1:nimage_)            =results_out_in%etotal(1:nimage_)
  results_out_out%fcart(1:3,1:natom_,1:nimage_)=results_out_in%fcart(1:3,1:natom_,1:nimage_)
- results_out_out%fred(1:3,1:natom_,1:nimage_) =results_out_in%fred(1:3,1:natom_,1:nimage_)
+ results_out_out%gred(1:3,1:natom_,1:nimage_) =results_out_in%gred(1:3,1:natom_,1:nimage_)
  results_out_out%intgres(1:4,1:natom_,1:nimage_) =results_out_in%intgres(1:4,1:natom_,1:nimage_)
  results_out_out%mixalch(1:npsp_,1:ntypat_,1:nimage_)=results_out_in%mixalch(1:npsp_,1:ntypat_,1:nimage_)
  results_out_out%npwtot(1:nkpt_,1:nimage_)    =results_out_in%npwtot(1:nkpt_,1:nimage_)
@@ -766,7 +766,7 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
            ibufr=ibufr+1
            rbuffer(ibufr+1:ibufr+3*natom_)=reshape(results_out(ii)%fcart(1:3,1:natom_,jj),(/3*natom_/))
            ibufr=ibufr+3*natom_
-           rbuffer(ibufr+1:ibufr+3*natom_)=reshape(results_out(ii)%fred(1:3,1:natom_,jj),(/3*natom_/))
+           rbuffer(ibufr+1:ibufr+3*natom_)=reshape(results_out(ii)%gred(1:3,1:natom_,jj),(/3*natom_/))
            ibufr=ibufr+3*natom_
            rbuffer(ibufr+1:ibufr+4*natom_)=reshape(results_out(ii)%intgres(1:4,1:natom_,jj),(/4*natom_/))
            ibufr=ibufr+4*natom_
@@ -841,7 +841,7 @@ subroutine gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_
              results_out_all(ii)%fcart(1:3,1:natom_,jj)= &
 &                   reshape(rbuffer_all(ibufr+1:ibufr+3*natom_),(/3,natom_/))
              ibufr=ibufr+3*natom_
-             results_out_all(ii)%fred(1:3,1:natom_,jj)= &
+             results_out_all(ii)%gred(1:3,1:natom_,jj)= &
 &                   reshape(rbuffer_all(ibufr+1:ibufr+3*natom_),(/3,natom_/))
              ibufr=ibufr+3*natom_
              results_out_all(ii)%intgres(1:4,1:natom_,jj)= &

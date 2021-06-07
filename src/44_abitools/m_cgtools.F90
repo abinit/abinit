@@ -1109,6 +1109,10 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
 
 ! *************************************************************************
 
+ ! Init results indipendently of option.
+ dotr = zero
+ doti = zero
+
  if (istwf_k==1) then
    ! General k-point
 
@@ -3120,7 +3124,7 @@ end subroutine cgpaw_gramschmidt
 !!  iband0=which particular band we are interested in ("i" in the above formula)
 !!         Can be set to -1 to sum over all bands...
 !!  icg=shift to be given to the location of the data in cg
-!!  iscg=shift to be given to the location of the data in cg
+!!  iscg=shift to be given to the location of the data in scg
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  mcg=maximum size of second dimension of cg
 !!  mscg=maximum size of second dimension of scg

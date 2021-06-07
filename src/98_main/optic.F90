@@ -128,6 +128,7 @@ program optic
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
+ integer :: prtlincompmatrixelements=0
  real(dp) :: domega,ecut,fermie, eff
  real(dp) :: broadening,ucvol,maxomega,scissor,tolerance,tphysel
  real(dp) :: tcpu,tcpui,twall,twalli,nelect
@@ -166,7 +167,7 @@ program optic
  ! Input file
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
-                       autoparal, max_ncpus
+                       autoparal, max_ncpus, prtlincompmatrixelements
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
 &        num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
@@ -243,6 +244,7 @@ program optic
    maxomega = 1.0_dp ! Ha
    scissor = 0.0_dp ! no scissor by default
    tolerance = 1e-3_dp ! Ha
+   prtlincompmatrixelements = 0 ! print the sum elements for external analysis
    do_antiresonant = .TRUE. ! do use antiresonant approximation (only resonant transitions in the calculation)
    do_temperature = .FALSE.
 
@@ -404,6 +406,7 @@ program optic
  call xmpi_bcast(scissor,master,comm,ierr)
  call xmpi_bcast(tolerance,master,comm,ierr)
  call xmpi_bcast(num_lin_comp,master,comm,ierr)
+ call xmpi_bcast(prtlincompmatrixelements,master,comm,ierr)
  call xmpi_bcast(lin_comp,master,comm,ierr)
  call xmpi_bcast(num_nonlin_comp,master,comm,ierr)
  call xmpi_bcast(nonlin_comp,master,comm,ierr)
@@ -601,6 +604,7 @@ program optic
    write(std_out,'(27i4)') linel_comp(1:num_linel_comp)
    write(std_out,'(a)') ' non-linear coeffs (V2) to be calculated :'
    write(std_out,'(27i4)') nonlin2_comp(1:num_nonlin2_comp)
+   write(std_out,'(a,i1)') ' linear optic matrix elements will be printed :',prtlincompmatrixelements
 
 #ifdef HAVE_NETCDF
    ! Open netcdf file that will contain output results (only master is supposed to write)
@@ -633,6 +637,23 @@ program optic
       nctkarr_t('linopt_epsilon', "dp", "two, nomega, linopt_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
+     if (prtlincompmatrixelements == 1) then
+       ! Linear optic matrix elements
+       ncerr = nctk_def_dims(optic_ncid, [ &
+        nctkdim_t("nkpt", nkpt), &
+        nctkdim_t("nband", mband), &
+        nctkdim_t("nsppol", nsppol)], &
+        defmode=.True.)
+       NCF_CHECK(ncerr)
+       ncerr = nctk_def_arrays(optic_ncid, [ &
+        !nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
+        nctkarr_t('linopt_matrix_elements', "dp", "two, nband, nband, nkpt, nsppol, linopt_ncomp, ntemp"), &
+        nctkarr_t('linopt_renorm_eigs', "dp", "two, nband, nkpt, nsppol"), &
+        nctkarr_t('linopt_occupations', "dp", "nband, nkpt, nsppol"), &
+        nctkarr_t('linopt_wkpts', "dp", "nkpt") &
+       ])
+       NCF_CHECK(ncerr)
+     endif
    end if
 
    if (num_nonlin_comp > 0) then
@@ -767,7 +788,7 @@ program optic
      tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)
      if (do_ep_renorm) tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
      call linopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,ks_ebands,eph_ebands,fermie,pmat, &
-     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,optic_ncid,comm)
+     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,optic_ncid,comm,prtlincompmatrixelements)
    end do
    call ebands_free(eph_ebands)
  end do

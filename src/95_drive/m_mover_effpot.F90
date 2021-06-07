@@ -167,7 +167,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),pointer :: rhog(:,:),rhor(:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
- real(dp),allocatable :: fred(:,:),fcart(:,:)
+ real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
@@ -546,7 +546,7 @@ ABI_FREE(xcart)
    ABI_MALLOC(xred,(3,dtset%natom))
    ABI_MALLOC(xred_old,(3,dtset%natom))
    ABI_MALLOC(vel,(3,dtset%natom))
-   ABI_MALLOC(fred,(3,dtset%natom))
+   ABI_MALLOC(gred,(3,dtset%natom))
    ABI_MALLOC(fcart,(3,dtset%natom))
 
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd,&
@@ -682,7 +682,7 @@ ABI_FREE(xcart)
            xred_old = xred
            vel_cell(:,:) = zero
            vel(:,:)      = zero
-           fred(:,:)     = zero
+           gred(:,:)     = zero
            fcart(:,:)    = zero
 
 !          Run mover to check if the model is bound
@@ -867,7 +867,7 @@ ABI_FREE(xcart)
                  xred_old = xred
                  vel_cell(:,:) = zero
                  vel(:,:)      = zero
-                 fred(:,:)     = zero
+                 gred(:,:)     = zero
                  fcart(:,:)    = zero
 
 !              Run mover
@@ -990,7 +990,7 @@ ABI_FREE(xcart)
 ! 5   Deallocation of array
 !***************************************************************
 
-   ABI_FREE(fred)
+   ABI_FREE(gred)
    ABI_FREE(fcart)
    ABI_FREE(indsym)
    ABI_FREE(rhog)

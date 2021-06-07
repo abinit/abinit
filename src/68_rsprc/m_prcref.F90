@@ -1599,7 +1599,7 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
 !Local variables-------------------------------
 !scalars
  integer :: ieig,ier,ii,index,ipw,ipw1,ipw2,isp,jj,npwsp
- real(dp) :: ai1,ai2,ar1,ar2,eiginv,gfact,gfactinv,gred1,gred2,gred3,gsquar
+ real(dp) :: ai1,ai2,ar1,ar2,eiginv,gfact,gfactinv,kg_red1,kg_red2,kg_red3,gsquar
  real(dp) :: tpisq
  character(len=500) :: message
 !arrays
@@ -1669,12 +1669,12 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
  end if
 !Compute 1/G factors and include them in the dielectric matrix
  do ipw1=1,npwdiel
-   gred1=dble(kg_diel(1,ipw1))
-   gred2=dble(kg_diel(2,ipw1))
-   gred3=dble(kg_diel(3,ipw1))
-   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
-&   +two*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
-&   gmet(2,3)*gred2*gred3)                        )
+   kg_red1=dble(kg_diel(1,ipw1))
+   kg_red2=dble(kg_diel(2,ipw1))
+   kg_red3=dble(kg_diel(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*kg_red1**2+gmet(2,2)*kg_red2**2+gmet(3,3)*kg_red3**2 &
+&   +two*( (gmet(1,2)*kg_red2+gmet(1,3)*kg_red3)* kg_red1 +      &
+&   gmet(2,3)*kg_red2*kg_red3)                        )
 !  Distinguish G=0 from other elements
    if(gsquar>tol12)then
 !    !$ gfact=\sqrt (4.0_dp \pi/gsquar/dble(nspden))$
@@ -1871,12 +1871,12 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
 !(4pi/G^2)^(1/2) dielinv_before(G,Gp) (4pi/Gp^2)^(-1/2)
 !In RPA, can focus on the spin-averaged quantities
  do ipw1=1,npwdiel
-   gred1=dble(kg_diel(1,ipw1))
-   gred2=dble(kg_diel(2,ipw1))
-   gred3=dble(kg_diel(3,ipw1))
-   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
-&   +two*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
-&   gmet(2,3)*gred2*gred3)                        )
+   kg_red1=dble(kg_diel(1,ipw1))
+   kg_red2=dble(kg_diel(2,ipw1))
+   kg_red3=dble(kg_diel(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*kg_red1**2+gmet(2,2)*kg_red2**2+gmet(3,3)*kg_red3**2 &
+&   +two*( (gmet(1,2)*kg_red2+gmet(1,3)*kg_red3)* kg_red1 +      &
+&   gmet(2,3)*kg_red2*kg_red3)                        )
 !  Distinguish G=0 from other elements
    if(gsquar>tol12)then
      gfact=sqrt(four_pi/gsquar)
@@ -1962,7 +1962,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !scalars
  integer :: i1,i2,i3,ieig,ier,ifft,ii,index,ipw0,ipw1,ipw2,ispden,j1
  integer :: j2,j3,jj,k1,k2,k3,n1,n2,n3
- real(dp) :: ai,ai2,ar,ar2,eiginv,gred1,gred2,gred3,gsquar,si
+ real(dp) :: ai,ai2,ar,ar2,eiginv,kg_red1,kg_red2,kg_red3,gsquar,si
  real(dp) :: sr,tpisq
  character(len=500) :: message
  type(MPI_type) :: mpi_enreg_seq
@@ -2134,12 +2134,12 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 
 !Compute Hartree kernel
  do ipw1=1,npwdiel
-   gred1=dble(kg_diel(1,ipw1))
-   gred2=dble(kg_diel(2,ipw1))
-   gred3=dble(kg_diel(3,ipw1))
-   gsquar=tpisq*(gmet(1,1)*gred1**2+gmet(2,2)*gred2**2+gmet(3,3)*gred3**2 &
-&   +2.0_dp*( (gmet(1,2)*gred2+gmet(1,3)*gred3)* gred1 +      &
-&   gmet(2,3)*gred2*gred3)                        )
+   kg_red1=dble(kg_diel(1,ipw1))
+   kg_red2=dble(kg_diel(2,ipw1))
+   kg_red3=dble(kg_diel(3,ipw1))
+   gsquar=tpisq*(gmet(1,1)*kg_red1**2+gmet(2,2)*kg_red2**2+gmet(3,3)*kg_red3**2 &
+&   +2.0_dp*( (gmet(1,2)*kg_red2+gmet(1,3)*kg_red3)* kg_red1 +      &
+&   gmet(2,3)*kg_red2*kg_red3)                        )
 !  Distinguish G=0 from other elements
    if(gsquar>1.0d-12)then
      khxc(1,ipw1,1,ipw1,1)= 4.0_dp*pi/gsquar

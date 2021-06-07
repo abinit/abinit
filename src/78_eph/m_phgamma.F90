@@ -3610,7 +3610,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! that will be used to symmetrize the wavefunctions in G-space.
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, "Computing mpw. This may take some time for dense k/q meshes.")
+ call wrtout(std_out, " Computing mpw. This may take some time for dense k/q meshes.")
  !call fstab_get_mpw_gmax(nsppol, fstab, mpw, gmax, comm)
  mpw = 0; gmax = 0; cnt = 0
 

@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_longwave
 !! NAME
 !!  m_longwave
@@ -29,7 +28,6 @@
 module m_longwave
 
  use defs_basis
-! use m_profiling_abi
  use m_errors
  use m_xmpi
  use defs_datatypes
@@ -493,7 +491,7 @@ ecore=zero
    ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
-!#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
+!#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
 !Calculate the nonvariational terms
 !1st q-gradient of Ewald contribution to the dynamical matrix

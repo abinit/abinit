@@ -32,7 +32,7 @@ module m_nesting
  use m_krank
  use m_sort
 
- use m_numeric_tools,  only : wrap2_zero_one, interpol3d
+ use m_numeric_tools,  only : wrap2_zero_one, interpol3d_0d
  use m_io_tools,       only : open_file
  use m_bz_mesh,        only : make_path
  use m_pptools,        only : printxsf
@@ -282,7 +282,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 
 !fill the datagrid for the nesting factor using the Fortran convention and the conventional unit cell
 !NOTE: the Fortran convention is a must if we want to plot the data
-!in the BXSF format, useful for the linear interpolation since we use interpol3d.F90
+!in the BXSF format, useful for the linear interpolation since we use interpol3d_0d.F90
  ABI_MALLOC(nestordered,(nqptfull))
  nestordered(:)=zero
  do jkpt=1,nqptfull
@@ -397,7 +397,7 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
  do ipoint=1, npt_tot
    qpt(:) = finepath(:,ipoint)
    call wrap2_zero_one(qpt, tmpkpt, res)
-   kval = interpol3d(tmpkpt, nkx, nky, nkz, nestordered)
+   kval = interpol3d_0d(tmpkpt, nkx, nky, nkz, nestordered)
    write(unit_nest,'(i5,e16.5,1x,3(es11.4,1x))')indx,kval,tmpkpt
    indx = indx + 1
  end do

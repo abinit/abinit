@@ -618,7 +618,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
      ibufr=ibufr+n_energies
      rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%fcart(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
-     rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%fred(1:3,1:natom),(/3*natom/))
+     rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%gred(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
      rbuffer(ibufr+1:ibufr+3*nsppol)=reshape(results_img(jj)%results_gs%gaps(1:3,1:nsppol),(/3*nsppol/))
      ibufr=ibufr+3*nsppol
@@ -704,7 +704,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
        results_img_all(jj)%results_gs%fcart(1:3,1:natom)= &
 &             reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
        ibufr=ibufr+3*natom
-       results_img_all(jj)%results_gs%fred(1:3,1:natom)= &
+       results_img_all(jj)%results_gs%gred(1:3,1:natom)= &
 &             reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
        ibufr=ibufr+3*natom
        results_img_all(jj)%results_gs%gaps(1:3,1:nsppol)= &

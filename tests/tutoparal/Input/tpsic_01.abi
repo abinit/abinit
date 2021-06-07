@@ -1,0 +1,105 @@
+# NaI pSIC-PBE - 8 atom cell. Too small number of atoms, still a polaron forms with an expanded lattice parameter.
+#
+
+#Parameters for the image dynamics
+ imgmov 6
+ nimage 3
+ ntimimage 1  # No need to optimize
+ tolimg   5.0d-6   # Note that for the time being, this is the only stopping criterion for the itimimage loop, except for ntimimage.
+                  # It would be better to implement another stopping criterion ...
+prtvol 1
+imgwfstor 0
+mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
+
+# Bands and Occupations
+ nsppol 2
+ nband 32 
+ occopt 0
+
+ occ_1img  32*1          32*1  
+ cellcharge_1img 0.0
+
+ occ_2img  31*1 0.975     32*1  
+ cellcharge_2img 0.025
+
+ occ_3img  31*1 0.950     32*1  
+ cellcharge_3img 0.050
+
+# Define the parallelism distribution explicitly, on order to make the user conscious that this is 
+# a medium-grained parallelism. 
+# autoparal 1
+ paral_kgb 1
+ npimage 3
+ np_spkpt 4
+ npband 2
+
+###########################################################################
+#Common to all images
+###########################################################################
+#
+# Optimization parameters (useless since ntimimage 1)
+ ionmov 2
+ tolmxf 1.0d-5  # This criterion is irrelevant in the present status of the code.
+
+
+# SCF procedure
+ nstep 20 
+ ecut 17  
+ pawecutdg 40
+ toldfe 1.0d-8   # Fixed geometry calculation. Just need the energy.
+ diemac 2.0d0
+
+# k-point grid   # Not for production. Simply, to yield one k point thanks to symmetries.
+ kptopt 1
+ ngkpt 2 2 2
+
+#Definition of the unit cell
+#acell 3*12.227544   # This is the optimized PAW PBE lattice parameter 
+ acell 3*13   # Enlarged to stabilize the polaron in the pSICn but not stabilized with cellcharge  1.0
+
+#Definition of the atom types and unit cell
+ ntypat 2
+ znucl 11 53
+ pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard"
+ pseudos "Na.xml, I.xml"
+
+#Definition of atoms and positions
+ natom 8
+ typat 4*1 4*2
+
+ chkprim 0
+
+ xred  0.0  0.0  0.0
+       0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+       0.5  0.0  0.0
+       0.0  0.5  0.0
+       0.0  0.0  0.5
+       0.5  0.5  0.5
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% [paral_info]
+#%% max_nprocs = 24
+#%% nprocs_to_test = 24
+#%% [NCPU_24]
+#%% files_to_test =
+#%%   tpsic_01_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [extra_info]
+#%% authors = X. Gonze, C. Tantardini
+#%% keywords = pSIC
+#%% description =
+#%%   NaI with a sligthly expanded lattice, to allow self-localisation of a hole polaron, using pSIC technique.
+#%%   Realistic ecut and reasonable k point sampling, but small cell of only 8 atoms for testing.
+#%%   The present test at the fixed, symmetric geometry, for reference. Of course, the cell is not primitive. 
+#%%
+#%%   Parallelism until 12 procs is quite efficient. However, setting npband 2 does not bring noticeable improvement.
+#%%   Although this is still subject for further investigation, the hypothesis is that the density/xc/potential part
+#%%   is not improved with npband 2, while it is actually a major contribution, even with 32 bands.
+#%%   Timing analysis is to be performed.
+#%% topics = CrossingBarriers
+#%%<END TEST_INFO>

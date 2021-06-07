@@ -15,7 +15,7 @@ basic variables to govern the numerical efficiency.
 This tutorial should take about 1 hour and it is important to note that the examples in this tutorial
 are not converged, they are just examples to show how to use the code.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Summary of Wannier90 in ABINIT
 
@@ -222,7 +222,7 @@ to invoke vesta directly from the terminal:
 
 ## The PAW case
 
-Before starting it is assumed that you have already completed the tutorials [PAW1](paw1) and [PAW2](paw2).
+Before starting it is assumed that you have already completed the tutorials [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2).
 
 For silicon, we just have to add the variable [[pawecutdg]] and the PAW Atomic Data is included in the pseudopotential file.
 An example has already been prepared.

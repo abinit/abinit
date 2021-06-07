@@ -26,7 +26,7 @@ or the use of a specific submission file.
 This tutorial should take about 1.5 hour and requires a modern 
 computer cluster of 20 CPU cores or more.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## 1 Generating the WFK file in parallel
 
@@ -45,7 +45,7 @@ We will do most of the actions of this tutorial in this working directory.
 Note that the pseudopotentials needed for running the tutorial (Si.psp8 and O.psp8)
 are located in the directory *\$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8*.
 
-In the [first GW tutorial](gw1), we have learned how to
+In the [first GW tutorial](/tutorial/gw1), we have learned how to
 generate the WFK file with the sequential version of the code.
 Now we will perform a similar calculation taking advantage of the k-point parallelism
 implemented in the ground-state part.
@@ -71,7 +71,7 @@ the Kohn-Sham band structure including many empty states:
     nband2      160    # Number of (occ and empty) bands computed in the NSCF cycle.
     nbdbuf2     10     # A large buffer helps to reduce the number of NSCF steps.
 
-We have already encountered these variables in the [first GW tutorial](gw1)
+We have already encountered these variables in the [first GW tutorial](/tutorial/gw1)
 so their meaning should be familiar to you.
 The only thing worth stressing is that this calculation solves the NSCF cycle
 with the conjugate-gradient method ([[paral_kgb]] == 0)
@@ -82,15 +82,15 @@ distributed among the nodes. This test uses an unshifted 4x4x3 grid (48 k
 points in the full Brillouin Zone, folding to 9 k-points in the irreducible
 wedge) hence the theoretical maximum speedup is 9.
 
-Now run ABINIT over nn CPU cores using
+Now run ABINIT over nn CPU cores using (here, nn=9)
 
     mpirun -n 9 abinit tmbt_1.abi > tmbt_1.log 2> err &
 
-but keep in mind that, to avoid idle processors, the number of CPUs should
+but keep in mind that, to avoid idle processors, the number of CPUs (nn) should
 divide 9. At the end of the run, the code will produce the file *tmbt_1o_DS2_WFK*
 needed for the subsequent GW calculations.
 
-With three nodes, the wall clock time is around 1.5 minutes.
+With three cores, the wall clock time is around 1.5 minutes.
 
     >>> tail tmbt_1.out
 
@@ -138,7 +138,7 @@ The set of parameters controlling the screening computation is summarized below:
     inclvkb     2   # Correct treatment of the optical limit.
 
 Most of the variables have been already discussed in the
-[first GW tutorial](gw1). The only variables that
+[first GW tutorial](/tutorial/gw1). The only variables that
 deserve some additional explanation are [[gwpara]] and [[awtr]].
 
 [[gwpara]] selects the parallel algorithm used to compute the screening. Two
@@ -151,12 +151,15 @@ Each method presents advantages and drawbacks that are discussed in the
 documentation of the variable. In this tutorial, we will be focusing on
 **gwpara** =2 since this is the algorithm with the best MPI-scalability and,
 mostly important, it is the only one that allows for a significant reduction
-of the memory requirement.
+of the memory requirement. By the way, this is the default value, so you do not
+need to mention it explicitly in your input file.
 
 The option [[awtr]] = 1 specifies that the system presents time reversal
 symmetry so that it is possible to halve the number of transitions that have
 to be calculated explicitly (only resonant transitions are needed). Note that
-[[awtr]] = 1 is MANDATORY when [[gwpara]] = 2 is used.
+[[awtr]] = 1 is MANDATORY when [[gwpara]] = 2 is used. By the way, [[awtr]] = 1 
+is also the default value,  so you do not
+need to mention it explicitly in your input file.
 
 Before running the calculation in parallel, it is worth discussing some
 important technical details of the implementation. For our purposes, it
@@ -166,13 +169,13 @@ FULL set of occupied bands while the empty states are distributed among the
 nodes. The parallel computation of the inverse dielectric matrix is done in
 three different steps that can be schematically described as follows:
 
-1. Each node computes the partial contribution to the RPA polarizability:
+**Step 1.** Each node computes the partial contribution to the RPA polarizability:
 
 $$ \sum_{c,\nu} = \sum^\text{occ}_\nu \sum^\text{mystop}_\text{c=mystart} $$
 
-2. The partial results are collected on each node.
+**Step 2.** The partial results are collected on each node.
 
-3. The master node performs the matrix inversion to obtain the inverse dielectric matrix and writes the final result on file.
+**Step 3.** The master node performs the matrix inversion to obtain the inverse dielectric matrix and writes the final result on file.
 
 Both the first and second step of the algorithm are expected to scale well
 with the number of processors. Step 3, on the contrary, is performed in
@@ -219,7 +222,7 @@ focuses on how to run efficient MPI computations, we will not perform any
 converge study for SiO<sub>2</sub>. Most of the parameters used in the input files are
 already close to converge, only the k-point sampling and the number of empty
 states should be increased. You might modify the input files to perform the
-standard converge tests following the procedure described in the [first GW tutorial](gw1).
+standard converge tests following the procedure described in the [first GW tutorial](/tutorial/gw1).
 
 In the main output file, there is a section reporting how the bands are
 distributed among the nodes. For a sequential calculation, we have
@@ -382,7 +385,7 @@ nband       50           # Number of bands for the correlation part.
 
 For our purposes, it suffices to say that this input file defines a standard
 one-shot calculation with the plasmon-pole model approximation. We refer to
-the documentation and to the [first GW tutorial](gw1)
+the documentation and to the [first GW tutorial](/tutorial/gw1)
 for a more complete description of the meaning of these variables.
 
 Also in this case, we use [[gwpara]] = 2 to perform the calculation in parallel.

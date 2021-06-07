@@ -14,7 +14,7 @@ interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:
 
 This tutorial should take about 1 hour.
 
-[TUTORIAL_READMEV9]
+[TUTORIAL_README]
 
 ## Electric field gradient
 
@@ -40,7 +40,7 @@ $$ V({\mathbf r})=\int \frac{n({\mathbf r'})}{ |\mathbf{r}-\mathbf{r'}| } d{\mat
 and the electric field gradient is
 $$ V_{ij} = -\frac{\partial^2}{\partial x_i\partial x_j}V({\mathbf r}). $$
 The gradient is computed at each nuclear site, for each source of charge arising
-from the PAW decomposition (see [the tutorial PAW1](paw1) ).
+from the PAW decomposition (see [the tutorial PAW1](/tutorial/paw1) ).
 This is done in the code as follows [[cite:Profeta2003]],[[cite:Zwanziger2008]]:
 
   * Valence space described by planewaves: expression for gradient is Fourier-transformed at each nuclear site.

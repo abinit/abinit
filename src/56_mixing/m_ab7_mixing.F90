@@ -1005,7 +1005,7 @@ subroutine scfcge(cplex,dbl_nnsclo,dtn_pc,etotal,f_atm,&
  integer :: choice,iatom,idir,ifft,iline_cge_input,ilinmin_input,isp
  integer :: testcg,tmp,errid_
  real(dp),save :: d2edv2_old2,d_lambda_old2,dedv_old2,etotal_old
- real(dp),save :: etotal_previous,lambda_adapt,lambda_new,lambda_old,resid_old
+ real(dp),save :: etotal_previous=MAGIC_UNDEF,lambda_adapt,lambda_new,lambda_old,resid_old
  real(dp) :: d2e11,d2e12,d2e22,d2edv2_new,d2edv2_old
  real(dp) :: d2edv2_predict,d_lambda,de1,de2,dedv_mix
  real(dp) :: dedv_new,dedv_old,dedv_predict,determ,etotal_input

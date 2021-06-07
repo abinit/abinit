@@ -3641,6 +3641,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
    narr=narrm(1)
    ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
    ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
+   dprarr=zero
    do idtset=0,ndtset_alloc
      dprarr(1:narrm(idtset),idtset)=dprarr_images(1:narrm(idtset),1,idtset)
    end do

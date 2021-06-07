@@ -9,9 +9,10 @@ the package, and the main ABINIT applications.
 
 ## Foreword
   
-The ABINIT project is a group effort of dozens of people worldwide, whose
-central outcome is the main ABINIT application, delivered with many other
-files in the ABINIT package. The ABINIT project includes also resources
+The ABINIT project is a group effort of dozens of people worldwide, 
+who develop the main ABINIT application 
+which is delivered with many other files (post-processors, tests, documentation, ...) in the ABINIT package. 
+The ABINIT project includes also resources
 provided on the [ABINIT Web site](https://www.abinit.org) and 
 the [github organization](https://github.com/abinit).
 
@@ -49,7 +50,7 @@ We suppose that you have downloaded the ABINIT package from the Web site,
 unpacked it and installed it. If not, you might nevertheless continue reading
 the present Web page, just to get an overview, but it might prove more
 fruitful to have first downloaded the ABINIT package and at least unpacked it,
-see the [installation notes](../installation).
+see the [installation notes](/installation).
 
 !!! note
 
@@ -339,7 +340,7 @@ the speed of ABINIT (e.g. PAW), and its parallelisation. These historical
 developments explain why the tests are gathered in directories "v1", "v2",
 "v3", etc. Every 4 to 8 months, we release a "production version" of ABINIT in
 which the second digit, an even number, is incremented, which usually goes
-with additional features. A [release notes document](about/release-notes) is issued, with the list of
+with additional features. A [release notes document](/about/release-notes) is issued, with the list of
 additional capabilities, and other information with respect to modifications
 with the previous release. The odd second digits are used for internal
 management only, so-called "development versions" of ABINIT (for example

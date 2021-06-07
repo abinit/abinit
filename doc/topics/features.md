@@ -81,7 +81,7 @@ that apply, generally speaking, to all types of calculations are explained later
   1. [[topic:SCFAlgorithms|SCF algorithms]]
   2. [[topic:SCFControl|SCF control, tolerances and stopping criteria]]
   3. [[topic:ForcesStresses|Forces and stresses]]
-  4. [[topic:TuningSpeed|Tuning the speed of the calculation]]
+  4. [[topic:TuningSpeedMem|Tuning speed and memory usage]]
   5. [[topic:Recursion|Recursion methods and orbital free calculations]] (not in production)
 
 ### 2.5 Added electric/magnetic field, other artificial constraints/modifications, and related properties ...

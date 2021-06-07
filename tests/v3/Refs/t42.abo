@@ -401,7 +401,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -493,7 +493,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -590,7 +590,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -686,7 +686,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -780,7 +780,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -982,7 +982,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1074,7 +1074,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1171,7 +1171,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1267,7 +1267,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1362,7 +1362,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1457,7 +1457,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1552,7 +1552,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1646,7 +1646,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1740,7 +1740,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -1942,7 +1942,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2034,7 +2034,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2130,7 +2130,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2224,7 +2224,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2426,7 +2426,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2518,7 +2518,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2615,7 +2615,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2711,7 +2711,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -2805,7 +2805,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3007,7 +3007,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3099,7 +3099,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3196,7 +3196,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3291,7 +3291,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3385,7 +3385,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3607,7 +3607,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3699,7 +3699,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3796,7 +3796,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3892,7 +3892,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -3987,7 +3987,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4082,7 +4082,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4177,7 +4177,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4271,7 +4271,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4365,7 +4365,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4567,7 +4567,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4659,7 +4659,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4756,7 +4756,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
@@ -4852,7 +4852,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
  -0.00000000000000E+00 -0.00000000000000E+00 -0.00000000000000E+00
- Reduced forces (fred)
+ Gradient of E wrt nuclear positions in reduced coordinates (gred)
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]

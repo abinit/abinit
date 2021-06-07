@@ -9,9 +9,10 @@ the package, and the main ABINIT applications.
 
 ## Foreword
   
-The ABINIT project is a group effort of dozens of people worldwide, whose
-central outcome is the main ABINIT application, delivered with many other
-files in the ABINIT package. The ABINIT project includes also resources
+The ABINIT project is a group effort of dozens of people worldwide, 
+who develop the main ABINIT application 
+which is delivered with many other files (post-processors, tests, documentation, ...) in the ABINIT package. 
+The ABINIT project includes also resources
 provided on the [ABINIT Web site](https://www.abinit.org) and 
 the [github organization](https://github.com/abinit).
 
@@ -23,8 +24,7 @@ If you have never used another electronic structure code or a Quantum
 Chemistry package, you should complete such reading by going (at your own
 pace) through the Chaps. 1 to 13 , and appendices L and M of R.M. Martin's book [[cite:Martin2004]].
 
-After having gone through the present New User's Guide, you should follow the
-[[tutorial:index|ABINIT tutorial]].
+After having gone through the present New User's Guide, you should follow the [ABINIT tutorial](/tutorial/).
 
 ## Introduction
   

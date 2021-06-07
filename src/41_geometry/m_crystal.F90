@@ -1744,7 +1744,12 @@ end subroutine prtposcar
 !!  crystal_symmetrize_cart_vec3
 !!
 !! FUNCTION
-!!  Symmetrize a cartesian vector.
+!!  Use spatial and time-reversal symmetry (TR) to symmetrize a Cartesian vector of real elements.
+!!
+!! INPUTS
+!!  v(3)=Vector in Cartesian coordinates.
+!!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
+!!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
 !!
 !! PARENTS
 !!
@@ -1752,24 +1757,33 @@ end subroutine prtposcar
 !!
 !! SOURCE
 
-function crystal_symmetrize_cart_vec3(cryst, v) result(vsum)
+function crystal_symmetrize_cart_vec3(cryst, v, time_opt) result(vsum)
 
 !Arguments ------------------------------------
  class(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: v(3)
+ integer,intent(in) :: time_opt
  real(dp) :: vsum(3)
 
 !Local variables-------------------------------
- integer :: isym
- real(dp) :: vsym(3)
+ integer :: isym, itime, nsym_sum
+ real(dp) :: vsym(3), tsign
+! *************************************************************************
 
- !symmetrize
- vsum = zero
- do isym=1, cryst%nsym
-   vsym = matmul(cryst%symrel_cart(:,:,isym), v)
-   vsum = vsum + vsym
+ vsum = zero; nsym_sum = 0
+ do itime=1,cryst%timrev
+   tsign = 1
+   if (itime == cryst%timrev) then
+     if (time_opt == 0) cycle
+     tsign = time_opt
+   end if
+   do isym=1, cryst%nsym
+     nsym_sum = nsym_sum + 1
+     vsym = matmul(cryst%symrel_cart(:,:,isym), v) * tsign
+     vsum = vsum + vsym
+   end do
  end do
- vsum = vsum / cryst%nsym
+ vsum = vsum / nsym_sum
 
 end function crystal_symmetrize_cart_vec3
 !!***
@@ -1782,6 +1796,12 @@ end function crystal_symmetrize_cart_vec3
 !!
 !! FUNCTION
 !!  Symmetrize a cartesian 3x3 tensor
+!!  Use spatial and time-reversal symmetry (TR) to symmetrize a Cartesian 3x3 tensor of real elements.
+!!
+!! INPUTS
+!!  v(3)=Vector in Cartesian coordinates.
+!!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
+!!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
 !!
 !! PARENTS
 !!
@@ -1789,24 +1809,35 @@ end function crystal_symmetrize_cart_vec3
 !!
 !! SOURCE
 
-function crystal_symmetrize_cart_tens33(cryst, t) result(tsum)
+function crystal_symmetrize_cart_tens33(cryst, t, time_opt) result(tsum)
 
 !Arguments ------------------------------------
  class(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: t(3,3)
+ integer,intent(in) :: time_opt
  real(dp) :: tsum(3,3)
 
 !Local variables-------------------------------
- integer :: isym
- real(dp) :: tsym(3,3)
+ integer :: isym, itime, nsym_sum
+ real(dp) :: tsym(3,3), tsign
+! *************************************************************************
 
- !symmetrize
- tsum = zero
- do isym=1, cryst%nsym
-   tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
-   tsum = tsum + tsym
+ tsum = zero; nsym_sum = 0
+
+ do itime=1,cryst%timrev
+   tsign = 1
+   if (itime == cryst%timrev) then
+     if (time_opt == 0) cycle
+     tsign = time_opt
+   end if
+   do isym=1, cryst%nsym
+     nsym_sum = nsym_sum + 1
+     tsym = tsign * matmul((cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))))
+     tsum = tsum + tsym
+   end do
  end do
- tsum = tsum / cryst%nsym
+
+ tsum = tsum / nsym_sum
 
 end function crystal_symmetrize_cart_tens33
 !!***
