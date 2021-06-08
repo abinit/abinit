@@ -7,6 +7,10 @@ authors: MG
 This page collects FAQs related to pre-processing, post-processing tools as well
 as tricks to be more productive.
 
+## Can I use a xyx file to specify the unit cell?
+
+Yes, see [[xyzfile]]
+
 ## Can I use a cif file to specify the unit cell?
 
 ABINIT does not accept cif files in input but it is possible to convert cif
@@ -37,10 +41,29 @@ Yes, see the documentaion of the [[structure]] variable.
 
 ## How can I visualize a structure?
 
+With abitk, one can read a DEN/WFK file and produce an xsf file 
+
+
+```
+abistruct.py visualize FILE -a vesta
+```
+
+```
+abistruct.py visualize --help
+
+  ...
+
+  -a APPNAME, --appname APPNAME
+                        Application name. Possible options: avogadro, ovito, v_sim, vesta, xcrysden, mpl
+                        (matplotlib), mayavi, vtk
+```
+
+
 ## Can I include external files in the input?
 
 Sure you can. 
-Abinit supports the `include` statement that can be used to
+Abinit supports the `include` statement that can be used to include external files with the
+syntax:
 
 ```
 include
@@ -53,12 +76,14 @@ include
 
 ## Is there an easy way to print the warnings/comments in the log file?
 
+Warnings, Comments and Errors are written in Yaml format.
+
 ```
-abiopen.py LOG_FILE -p
+abiopen.py LOG_FILE --print   # or -p 
 ```
 
 ## Is there an easy way to plot the band structure?
 
 ```
-abiopen.py GSR_FILE -e
+abiopen.py GSR_FILE --expose  # or -e
 ```

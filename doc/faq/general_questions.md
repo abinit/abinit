@@ -21,6 +21,30 @@ See ``abinit --help`` for additional command line options.
 abinit --dry-run run.abi
 ```
 
+## ABINIT runs but I get unphysical results
+
+Many mistakes done by beginners are related to **incorrect starting geometry**.
+Here is a check list:
+
+- Check that the units are correct for your cell parameters and atomic positions. 
+  Remember that ABINIT uses **atomic unit by default**, but can use several other units if specified by the user, 
+  see ABINIT input parameters.
+- Check that the [[typat]] atom types are correct with respect to [[xred]] or [[xcart]]
+- Check that the number of atoms [[natom]] is coherent with your list of coordinates, xred or xcart. 
+  ABINIT reads only the coordinates of natom nuclei and ignore others.
+- Try to visualize your primitive cell. There are numerous possibilities, using Abipy, VESTA, XCrysDen (to be documented).
+
+- ABINIT can read VASP POSCAR or Netcdf external files containing unit cell parameters and atomic positions. 
+  See the input variable structure. This might help in setting the geometry correctly.
+
+- Relax first the atomic positions at fixed primitive vectors before optimizing the cell. 
+  Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero optcell, 
+  in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]]. 
+  In this second dataset, do not forget to use [[dilatmx]] bigger than 1 if you expect the volume 
+  of the cell to increase during the optimization. 
+  Possibly after the atomic position relaxation, make a run with [[chkdilatmx]] = 0, then a third run with [[dilatmx]] = 1. 
+  See the additional suggestions in the documentation of [[optcell]].
+
 ## What if ABINIT stops without finishing its tasks?
 
 Make sure you get and read the error messages.
@@ -76,6 +100,8 @@ as NSCF band structure calculations).
 Variables such as [[npkpt]], [[npband]], [[npfft]], [[npspinor]] are relevant only if [[paral_kgb]] = 1.
 All the other Abinit drivers (e.g. DFPT, GW, BSE, EPH) use a completely different approach to parallelize
 the calculation and distribute memory.
+
+## Can I enforce a time limit?
 
 ## Where can I find "old pseudos"?
 

@@ -43,17 +43,6 @@ You need to continue the calculations and use mrgddb to merge the DDB files, and
 to do the reconstruction of the dynamical matrix. 
 Follow out the whole of the rf tutorials and you will see the phonon frequencies will come out when anaddb is run.
 
-
-
-
-
-
-
-
-
-
-
-
 ## Why some perturbations are faster to compute than others?
 
 Each perturbation breaks the initial symmetry of the crystal thus only a subset of the
@@ -79,9 +68,19 @@ Note also that ...
 
 ## Is there an easy way to compute the phonon band structure from the DDB?
 
+|abiview|
+
+```
+abiview.py ddb DDB_FILE
+```
+
 ## How can I reduce the breaking of the ASR?
 
 ## Is there an easy way to visualize the breaking of the ASR?
+
+```
+abiview.py ddb_asr DDB_FILE
+```
 
 ## Can I convert the DDB into phonopy format?
 
