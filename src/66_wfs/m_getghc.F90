@@ -153,7 +153,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer,parameter :: level=114,re=1,im=2,tim_fourwf=1
  integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr
  integer :: ig,igspinor,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
- integer :: n4,n5,n6,nnlout,npw_fft,npw_k1,npw_k2,nspinortot
+ integer :: n4,n5,n6,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical :: k1_eq_k2,have_to_reequilibrate,has_fock
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r
@@ -347,12 +347,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
    end if
 
+!  Apply the local potential to the wavefunction
+!  Start from wavefunction in reciprocal space cwavef
+!  End with function ghc in reciprocal space also.
    ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
    weight=one
    if (.not.use_cwavef_r) then
-!    Apply the local potential to the wavefunction
-!    Start from wavefunction in reciprocal space cwavef
-!    End with function ghc in reciprocal space also.
+     option_fft=2
      if (nspinortot==2) then
        ABI_MALLOC(cwavef1,(2,npw_k1*ndat))
        ABI_MALLOC(cwavef2,(2,npw_k1*ndat))
@@ -365,102 +366,190 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !      call cg_zcopy(npw_k1*ndat,cwavef(1,1),cwavef1)
 !      call cg_zcopy(npw_k1*ndat,cwavef(1,1+shift1),cwavef2)
      end if
+   else
+     option_fft=3
+     if (nspinortot==2) then
+       ABI_MALLOC(cwavef1,(0,0))
+       ABI_MALLOC(cwavef2,(0,0))
+     end if
+   end if
 
-     if (gs_ham%nvloc==1) then
-!    Treat scalar local potentials
+   if (gs_ham%nvloc==1) then
+!  Treat scalar local potentials
 
-       if (nspinortot==1) then
+     if (nspinortot==1) then
 
-         if (have_to_reequilibrate) then
-           call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
-&           gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&           npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
-&           weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-         else
-           call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-&           gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
-&           weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-         end if
-
-       else
-         ! nspinortot==2
-
-         if (nspinor1TreatedByThisProc) then
-           ABI_MALLOC(ghc1,(2,npw_k2*ndat))
-           call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-&           gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
-&           weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-           do idat=1,ndat
-             do ipw =1, npw_k2
-               ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
+       if (use_cwavef_r) then
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               work(1,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)
+               work(2,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(2,i1,i2,i3,1)
              end do
-           end do
-           ABI_FREE(ghc1)
-         end if ! spin 1 treated by this proc
-
-         if (nspinor2TreatedByThisProc) then
-           ABI_MALLOC(ghc2,(2,npw_k2*ndat))
-           call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-&           gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-&           use_gpu_cuda=gs_ham%use_gpu_cuda)
-           do idat=1,ndat
-             do ipw=1,npw_k2
-               ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
-             end do
-           end do
-           ABI_FREE(ghc2)
-         end if ! spin 2 treated by this proc
-
-       end if ! nspinortot
-
-     else if (gs_ham%nvloc==4) then
-!      Treat non-collinear local potentials
-
-       ABI_MALLOC(ghc1,(2,npw_k2*ndat))
-       ABI_MALLOC(ghc2,(2,npw_k2*ndat))
-       ABI_MALLOC(ghc3,(2,npw_k2*ndat))
-       ABI_MALLOC(ghc4,(2,npw_k2*ndat))
-       ghc1(:,:)=zero; ghc2(:,:)=zero; ghc3(:,:)=zero ;  ghc4(:,:)=zero
-       ABI_MALLOC(vlocal_tmp,(gs_ham%n4,gs_ham%n5,gs_ham%n6))
-!      ghc1=v11*phi1
-       vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,1)
-       if (nspinor1TreatedByThisProc) then
-         call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-&         use_gpu_cuda=gs_ham%use_gpu_cuda)
-       end if
-!      ghc2=v22*phi2
-       vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,2)
-       if (nspinor2TreatedByThisProc) then
-         call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-&         use_gpu_cuda=gs_ham%use_gpu_cuda)
-       end if
-       ABI_FREE(vlocal_tmp)
-       cplex=2
-       ABI_MALLOC(vlocal_tmp,(cplex*gs_ham%n4,gs_ham%n5,gs_ham%n6))
-!      ghc3=(re(v12)-im(v12))*phi1
-       do i3=1,gs_ham%n6
-         do i2=1,gs_ham%n5
-           do i1=1,gs_ham%n4
-             vlocal_tmp(2*i1-1,i2,i3)= gs_ham%vlocal(i1,i2,i3,3)
-             vlocal_tmp(2*i1  ,i2,i3)=-gs_ham%vlocal(i1,i2,i3,4)
            end do
          end do
-       end do
-       if (nspinor1TreatedByThisProc) then
-         call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
-&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-&         use_gpu_cuda=gs_ham%use_gpu_cuda)
        end if
-!      ghc4=(re(v12)+im(v12))*phi2
+       if (have_to_reequilibrate) then
+         call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
+&         gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
+       else
+         call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
+&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
+       end if
+
+     else
+       ! nspinortot==2
+
+       if (nspinor1TreatedByThisProc) then
+         if (use_cwavef_r) then
+           do i3=1,n6
+             do i2=1,n5
+               do i1=1,n4
+                 work(1,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)
+                 work(2,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(2,i1,i2,i3,1)
+               end do
+             end do
+           end do
+         end if
+         ABI_MALLOC(ghc1,(2,npw_k2*ndat))
+         call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
+&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
+         do idat=1,ndat
+           do ipw =1, npw_k2
+             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
+           end do
+         end do
+         ABI_FREE(ghc1)
+       end if ! spin 1 treated by this proc
+
        if (nspinor2TreatedByThisProc) then
+         if (use_cwavef_r) then
+           do i3=1,n6
+             do i2=1,n5
+               do i1=1,n4
+                 work(1,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,2)
+                 work(2,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(2,i1,i2,i3,2)
+               end do
+             end do
+           end do
+         end if
+         ABI_MALLOC(ghc2,(2,npw_k2*ndat))
+         call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
+&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+&         use_gpu_cuda=gs_ham%use_gpu_cuda)
+         do idat=1,ndat
+           do ipw=1,npw_k2
+             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
+           end do
+         end do
+         ABI_FREE(ghc2)
+       end if ! spin 2 treated by this proc
+
+     end if ! nspinortot
+
+   else if (gs_ham%nvloc==4) then
+!    Treat non-collinear local potentials
+
+     ABI_MALLOC(ghc1,(2,npw_k2*ndat))
+     ABI_MALLOC(ghc2,(2,npw_k2*ndat))
+     ABI_MALLOC(ghc3,(2,npw_k2*ndat))
+     ABI_MALLOC(ghc4,(2,npw_k2*ndat))
+     ghc1(:,:)=zero; ghc2(:,:)=zero; ghc3(:,:)=zero ;  ghc4(:,:)=zero
+     if (use_cwavef_r) then
+       ABI_MALLOC(vlocal_tmp,(0,0,0))
+     else
+       ABI_MALLOC(vlocal_tmp,(gs_ham%n4,gs_ham%n5,gs_ham%n6))
+     end if
+!    ghc1=v11*phi1
+     if (nspinor1TreatedByThisProc) then
+       if (use_cwavef_r) then
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               work(1,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)
+               work(2,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(2,i1,i2,i3,1)
+             end do
+           end do
+         end do
+       else
+         vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,1)
+       end if
+       call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
+&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+     end if
+!    ghc2=v22*phi2
+     if (nspinor2TreatedByThisProc) then
+       if (use_cwavef_r) then
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               work(1,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,2)*cwavef_r(1,i1,i2,i3,2)
+               work(2,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,2)*cwavef_r(2,i1,i2,i3,2)
+             end do
+           end do
+         end do
+       else
+         vlocal_tmp(:,:,:)=gs_ham%vlocal(:,:,:,2)
+       end if
+       call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
+&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+     end if
+     ABI_FREE(vlocal_tmp)
+     cplex=2
+     if (use_cwavef_r) then
+       ABI_MALLOC(vlocal_tmp,(0,0,0))
+     else
+       ABI_MALLOC(vlocal_tmp,(cplex*gs_ham%n4,gs_ham%n5,gs_ham%n6))
+     end if
+!    ghc3=(re(v12)-im(v12))*phi1
+     if (nspinor1TreatedByThisProc) then
+       if (use_cwavef_r) then
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               work(1,i1,i2,i3)= gs_ham%vlocal(i1,i2,i3,3)*cwavef_r(1,i1,i2,i3,1)+gs_ham%vlocal(i1,i2,i3,4)*cwavef_r(2,i1,i2,i3,1)
+               work(2,i1,i2,i3)=-gs_ham%vlocal(i1,i2,i3,4)*cwavef_r(1,i1,i2,i3,1)+gs_ham%vlocal(i1,i2,i3,3)*cwavef_r(2,i1,i2,i3,1)
+             end do
+           end do
+         end do
+       else
+         do i3=1,gs_ham%n6
+           do i2=1,gs_ham%n5
+             do i1=1,gs_ham%n4
+               vlocal_tmp(2*i1-1,i2,i3)= gs_ham%vlocal(i1,i2,i3,3)
+               vlocal_tmp(2*i1  ,i2,i3)=-gs_ham%vlocal(i1,i2,i3,4)
+             end do
+           end do
+         end do
+       end if
+       call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
+&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+     end if
+!    ghc4=(re(v12)+im(v12))*phi2
+     if (nspinor2TreatedByThisProc) then
+       if (use_cwavef_r) then
+         do i3=1,n6
+           do i2=1,n5
+             do i1=1,n4
+               work(1,i1,i2,i3)= gs_ham%vlocal(i1,i2,i3,3)*cwavef_r(1,i1,i2,i3,2)-gs_ham%vlocal(i1,i2,i3,4)*cwavef_r(2,i1,i2,i3,2)
+               work(2,i1,i2,i3)= gs_ham%vlocal(i1,i2,i3,4)*cwavef_r(1,i1,i2,i3,2)+gs_ham%vlocal(i1,i2,i3,3)*cwavef_r(2,i1,i2,i3,2)
+             end do
+           end do
+         end do
+       else
          do i3=1,gs_ham%n6
            do i2=1,gs_ham%n5
              do i1=1,gs_ham%n4
@@ -468,78 +557,50 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
              end do
            end do
          end do
-         call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
-&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
-&         use_gpu_cuda=gs_ham%use_gpu_cuda)
        end if
-       ABI_FREE(vlocal_tmp)
-!      Build ghc from pieces
-!      (v11,v22,Re(v12)+iIm(v12);Re(v12)-iIm(v12))(psi1;psi2): matrix product
-       if (mpi_enreg%paral_spinor==0) then
+       call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
+&       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+&       use_gpu_cuda=gs_ham%use_gpu_cuda)
+     end if
+     ABI_FREE(vlocal_tmp)
+!    Build ghc from pieces
+!    (v11,v22,Re(v12)+iIm(v12);Re(v12)-iIm(v12))(psi1;psi2): matrix product
+     if (mpi_enreg%paral_spinor==0) then
+       do idat=1,ndat
+         do ipw=1,npw_k2
+           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
+           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+         end do
+       end do
+     else
+       call xmpi_sum(ghc4,mpi_enreg%comm_spinor,ierr)
+       call xmpi_sum(ghc3,mpi_enreg%comm_spinor,ierr)
+       if (nspinor1TreatedByThisProc) then
          do idat=1,ndat
            do ipw=1,npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
+             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
+           end do
+         end do
+       else if (nspinor2TreatedByThisProc) then
+         do idat=1,ndat
+           do ipw=1,npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
            end do
          end do
-       else
-         call xmpi_sum(ghc4,mpi_enreg%comm_spinor,ierr)
-         call xmpi_sum(ghc3,mpi_enreg%comm_spinor,ierr)
-         if (nspinor1TreatedByThisProc) then
-           do idat=1,ndat
-             do ipw=1,npw_k2
-               ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
-             end do
-           end do
-         else if (nspinor2TreatedByThisProc) then
-           do idat=1,ndat
-             do ipw=1,npw_k2
-               ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
-             end do
-           end do
-         end if
        end if
-       ABI_FREE(ghc1)
-       ABI_FREE(ghc2)
-       ABI_FREE(ghc3)
-       ABI_FREE(ghc4)
-     end if ! nvloc
-
-     if (nspinortot==2)  then
-       ABI_FREE(cwavef1)
-       ABI_FREE(cwavef2)
      end if
+     ABI_FREE(ghc1)
+     ABI_FREE(ghc2)
+     ABI_FREE(ghc3)
+     ABI_FREE(ghc4)
+   end if ! nvloc
 
-   else ! use_cwavef_r version
-
-     if (gs_ham%nvloc==1) then
-!    Treat scalar local potentials
-
-       do i3=1,n6
-         do i2=1,n5
-           do i1=1,n4
-             work(1,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(1,i1,i2,i3,1)
-             work(2,i1,i2,i3) = gs_ham%vlocal(i1,i2,i3,1)*cwavef_r(2,i1,i2,i3,1)
-           end do
-         end do
-       end do
-
-       if (have_to_reequilibrate) then
-         call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
-&         gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,3,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-       else
-         call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-&         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,3,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-       end if
-
-     end if ! nvloc = 1 or 4
-
+   if (nspinortot==2)  then
+     ABI_FREE(cwavef1)
+     ABI_FREE(cwavef2)
    end if
+
    ABI_FREE(work)
 
 !  Retrieve eventually original FFT distrib
