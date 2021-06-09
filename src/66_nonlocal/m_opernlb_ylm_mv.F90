@@ -152,10 +152,10 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  logical :: use_dgemv
  integer :: ia,iaph3d
  integer :: il,ilmn,ipw,jpw,ipwshft,ispinor
- real(dp) :: wt
+ real(dp) :: buffer_r,buffer_i,wt
 !arrays
 ! real(dp) :: tsec(2)
- real(dp),allocatable :: gxfac_(:,:),gxfacs_(:,:)
+ real(dp) :: gxfac_(nlmn,2),gxfacs_(nlmn,2)
  real(dp),allocatable :: scalr(:),scali(:)
  real(dp),pointer :: ffnl_loc(:,:)
  complex(dp) :: ctmp, cil(4)
@@ -198,15 +198,12 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 
  ffnl_loc => ffnl(:,1,:)
 
- if (paw_opt/=3) then
-   ABI_MALLOC(gxfac_,(nlmn,2))
- end if
- if (paw_opt>=3) then
-   ABI_MALLOC(gxfacs_,(nlmn,2))
- end if
 
  ABI_MALLOC(scalr,(npw))
  ABI_MALLOC(scali,(npw))
+
+!$OMP PARALLEL PRIVATE(buffer_r,buffer_i,cil,il,ilmn,ipw,jpw,ctmp), &
+!$OMP PRIVATE(ispinor,ipwshft,ia,iaph3d,gxfac_,gxfacs_)
 
 ! (-i)^l
  cil(1) = ( 1.0_DP, 0.0_DP) * wt
@@ -214,9 +211,12 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
  cil(3) = (-1.0_DP, 0.0_DP) * wt
  cil(4) = ( 0.0_DP, 1.0_DP) * wt
 
-!==========================================================================
-!========== STANDARD VERSION ==============================================
-!==========================================================================
+! if (paw_opt/=3) then
+!   ABI_MALLOC(gxfac_,(nlmn,2))
+! end if
+! if (paw_opt>=3) then
+!   ABI_MALLOC(gxfacs_,(nlmn,2))
+! end if
 
 !Loop on spinorial components
  do ispinor=1,nspinor
@@ -275,22 +275,38 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfac_(:,2),1,0.0_DP,scali,1)
        else
-         scalr(:) = zero
-         scali(:) = zero
-         do ilmn=1,nlmn
-           do ipw=1,npw
-             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
-             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
+!         scalr(:) = zero
+!         scali(:) = zero
+!         do ilmn=1,nlmn
+!           do ipw=1,npw
+!             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
+!             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
+!           end do
+!         end do
+!$OMP DO
+         do ipw=1,npw
+           buffer_r = zero
+           buffer_i = zero
+           do ilmn=1,nlmn
+             buffer_r = buffer_r + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
+             buffer_i = buffer_i + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
+!             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,1)
+!             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfac_(ilmn,2)
            end do
+           scalr(ipw) = buffer_r
+           scali(ipw) = buffer_i
          end do
+!$OMP END DO
        end if
 
 !      Step (3) : vect(g) = exp(-2pi.i.g.R).scal(g)
+!$OMP DO
        do ipw=1,npw
          jpw=ipw+ipwshft
          vect(1,jpw)=vect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          vect(2,jpw)=vect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
+!$OMP END DO
 
      end if
 
@@ -299,41 +315,58 @@ subroutine opernlb_ylm_mv(choice,cplex,cplex_fac,&
 
 !      Step (2) (bis) scal(g) = Sum_lmn f_nl(g).Y_lm(g).gxfacs_(lmn)
        if (nloalg(1)==3) then
-         scalr(:) = zero
-         scali(:) = zero
-         do ilmn=1,nlmn
-           do ipw=1,npw
-             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
-             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
+!         scalr(:) = zero
+!         scali(:) = zero
+!         do ilmn=1,nlmn
+!           do ipw=1,npw
+!             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
+!             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
+!           end do
+!         end do
+!$OMP DO
+         do ipw=1,npw
+           buffer_r = zero
+           buffer_i = zero
+           do ilmn=1,nlmn
+             buffer_r = buffer_r + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
+             buffer_i = buffer_i + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
+!             scalr(ipw) = scalr(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,1)
+!             scali(ipw) = scali(ipw) + ffnl_loc(ipw,ilmn) * gxfacs_(ilmn,2)
            end do
+           scalr(ipw) = buffer_r
+           scali(ipw) = buffer_i
          end do
+!$OMP END DO
        else if (nloalg(1)==2) then
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,1),1,0.0_DP,scalr,1)
          call DGEMV('N',npw,nlmn,1.0_DP,ffnl_loc,npw,gxfacs_(:,2),1,0.0_DP,scali,1)
        end if
 
 !      Step (3) (bis) : svect(g) = exp(-2pi.i.g.R).scal(g)
+!$OMP DO
        do ipw=1,npw
          jpw=ipw+ipwshft
          svect(1,jpw)=svect(1,jpw)+scalr(ipw)*ph3d(1,ipw,iaph3d)+scali(ipw)*ph3d(2,ipw,iaph3d)
          svect(2,jpw)=svect(2,jpw)-scalr(ipw)*ph3d(2,ipw,iaph3d)+scali(ipw)*ph3d(1,ipw,iaph3d)
        end do
+!$OMP END DO
 
      end if
 
 !    End loop on atoms
    end do
  end do !  End loop on spinors
+! if (paw_opt/=3) then
+!   ABI_FREE(gxfac_)
+! end if
+! if (paw_opt>=3) then
+!   ABI_FREE(gxfacs_)
+! end if
+!$OMP END PARALLEL
 
  ABI_FREE(scalr)
  ABI_FREE(scali)
 
- if (paw_opt/=3) then
-   ABI_FREE(gxfac_)
- end if
- if (paw_opt>=3) then
-   ABI_FREE(gxfacs_)
- end if
 
  DBG_EXIT("COLL")
 
