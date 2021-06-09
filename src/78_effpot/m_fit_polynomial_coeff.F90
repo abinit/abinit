@@ -153,7 +153,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff,ia
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out,ncoeff_impose
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
@@ -165,7 +165,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3)
  integer :: sc_size(3)
- logical :: fix_and_impose(nfixcoeff)
+ logical,allocatable  :: fix_and_impose(:)
  integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:),fixcoeff_corr(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
  integer,allocatable  :: my_coeffindexes(:),singular_coeffs(:)
@@ -268,9 +268,10 @@ if (nimposecoeff > 0)then
         ABI_ERROR(message)
     endif
     ABI_MALLOC(coeffs_tmp,(nimposecoeff)) 
-    do ii = 1,nimposecoeff 
+    do ia = 1,nimposecoeff
+        ii = imposecoeff(ia)
         call polynomial_coeff_init(eff_pot%anharmonics_terms%coefficients(ii)%coefficient,& 
-&                             eff_pot%anharmonics_terms%coefficients(ii)%nterm,coeffs_tmp(ii),& 
+&                             eff_pot%anharmonics_terms%coefficients(ii)%nterm,coeffs_tmp(ia),& 
 &                             eff_pot%anharmonics_terms%coefficients(ii)%terms,& 
 &                             eff_pot%anharmonics_terms%coefficients(ii)%name,&
 &                             check = .TRUE.)
@@ -293,11 +294,12 @@ else
     call effective_potential_freeCoeffs(eff_pot_fixed) 
 endif
 
-fix_and_impose = .FALSE.
 !Set consistency between fixcoeff and imposecoeff.
-if (nfixcoeff > 0 .and. nimposecoeff >0)then 
-    do ii = 1,nimposecoeff 
-        if (any(fixcoeff == imposecoeff))then 
+if ( nfixcoeff > 0 .and. nimposecoeff >0)then 
+    ABI_MALLOC(fix_and_impose,(nfixcoeff))
+    fix_and_impose = .FALSE.
+    do ii = 1,nfixcoeff 
+        if (any(imposecoeff == fixcoeff(ii)))then 
            fix_and_impose(ii) = .TRUE. 
         endif
     enddo 
@@ -309,13 +311,31 @@ if (nfixcoeff > 0 .and. nimposecoeff >0)then
             fixcoeff_corr(ia) = fixcoeff(ii)
             ia = ia + 1            
         endif
-    enddo 
+    enddo
     nfixcoeff_corr = nfixcoeff - nfix_and_impose
 elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
     nfixcoeff_corr = 0 
-    write(message,'(2a)') "nfixcoeff and nimposecoeff are equal to -1",& 
+    write(message,'(3a)') "nfixcoeff and nimposecoeff are equal to -1.",ch10,& 
 &                         "This does not make sense. nfixcoeff will be set to 0."
     ABI_WARNING(message)
+elseif (nfixcoeff == -1 .and. nimposecoeff > 0)then
+    ABI_MALLOC(fix_and_impose,(ncoeff_model))
+    fix_and_impose = .FALSE.
+    do ii = 1,ncoeff_model
+        if (any( imposecoeff == ii))then 
+           fix_and_impose(ii) = .TRUE. 
+        endif
+    enddo 
+    nfix_and_impose = count(fix_and_impose)
+    ABI_MALLOC(fixcoeff_corr,(ncoeff_model-nfix_and_impose))
+    ia = 1
+    do ii = 1,ncoeff_model
+        if (.not. fix_and_impose(ii))then 
+            fixcoeff_corr(ia) = ii
+            ia = ia + 1            
+        endif
+    enddo 
+    nfixcoeff_corr = ncoeff_model- nfix_and_impose
 else 
     nfixcoeff_corr = nfixcoeff
     ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
@@ -1239,18 +1259,18 @@ endif
 !   write(*,*) ncoeff_out,ncycle_tot
    ABI_MALLOC(coeffs_out,(ncoeff_out))
    do ii = 1,ncoeff_out
-        if(ii <= ncycle_tot)then 
-            call polynomial_coeff_init(coeffs_tmp(ii)%coefficient,coeffs_tmp(ii)%nterm,&
-&                                      coeffs_out(ii),coeffs_tmp(ii)%terms,&
-&                                      coeffs_tmp(ii)%name,&
-&                                      check=.true.)
-        else
-            ia = ii - ncycle_tot 
-            call polynomial_coeff_init(eff_pot_fixed%anharmonics_terms%coefficients(ia)%coefficient,& 
-&                             eff_pot_fixed%anharmonics_terms%coefficients(ia)%nterm,coeffs_out(ii),& 
-&                             eff_pot_fixed%anharmonics_terms%coefficients(ia)%terms,& 
-&                             eff_pot_fixed%anharmonics_terms%coefficients(ia)%name,&
+        if(ii <= eff_pot_fixed%anharmonics_terms%ncoeff)then 
+            call polynomial_coeff_init(eff_pot_fixed%anharmonics_terms%coefficients(ii)%coefficient,& 
+&                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%nterm,coeffs_out(ii),& 
+&                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%terms,& 
+&                             eff_pot_fixed%anharmonics_terms%coefficients(ii)%name,&
 &                             check = .TRUE.)
+        else
+            ia = ii - eff_pot_fixed%anharmonics_terms%ncoeff 
+            call polynomial_coeff_init(coeffs_tmp(ia)%coefficient,coeffs_tmp(ia)%nterm,&
+&                                      coeffs_out(ii),coeffs_tmp(ia)%terms,&
+&                                      coeffs_tmp(ia)%name,&
+&                                      check=.true.)
             
         endif
 !   DEBUG MS
@@ -1359,6 +1379,7 @@ call effective_potential_free(eff_pot_fixed)
  ABI_FREE(strten_coeffs_tmp)
  ABI_FREE(stat_coeff)
  if(allocated(fixcoeff_corr)) ABI_FREE(fixcoeff_corr)
+ if(allocated(fix_and_impose)) ABI_FREE(fix_and_impose)
 
 end subroutine fit_polynomial_coeff_fit
 !!***
