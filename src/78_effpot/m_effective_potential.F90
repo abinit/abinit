@@ -464,16 +464,21 @@ subroutine effective_potential_copy(eff_pot_out,eff_pot_in,comm)
  integer,intent(in)     :: comm
 ! ***********************************************************************
 
+write(*,*) "I'm copying shit"
 
 call effective_potential_init(eff_pot_in%crystal,eff_pot_out,eff_pot_in%energy,eff_pot_in%harmonics_terms%ifcs,& 
 &                             eff_pot_in%anharmonics_terms%ncoeff,eff_pot_in%harmonics_terms%nqpt,comm,& 
-&                             eff_pot_in%anharmonics_terms%coefficients,eff_pot_in%harmonics_terms%dynmat,& 
-&                             eff_pot_in%harmonics_terms%elastic_constants,eff_pot_in%anharmonics_terms%elastic3rd,& 
-&                             eff_pot_in%anharmonics_terms%elastic_displacement,eff_pot_in%harmonics_terms%epsilon_inf,& 
-&                             eff_pot_in%fcart,eff_pot_in%harmonics_terms%strain_coupling,eff_pot_in%strten,eff_pot_in%name,& 
-&                             eff_pot_in%anharmonics_terms%phonon_strain,eff_pot_in%confinement,eff_pot_in%harmonics_terms%phfrq,& 
-&                             eff_pot_in%harmonics_terms%qpoints,eff_pot_in%has_anharmonicsTerms,eff_pot_in%supercell,& 
-&                             eff_pot_in%harmonics_terms%zeff)
+&                             coeffs=eff_pot_in%anharmonics_terms%coefficients,dynmat=eff_pot_in%harmonics_terms%dynmat,& 
+&                             elastic_constants=eff_pot_in%harmonics_terms%elastic_constants,&
+&                             elastic3rd=eff_pot_in%anharmonics_terms%elastic3rd,& 
+&                             elastic_displacement=eff_pot_in%anharmonics_terms%elastic_displacement,&
+&                             epsilon_inf=eff_pot_in%harmonics_terms%epsilon_inf,& 
+&                             fcart=eff_pot_in%fcart,strain_coupling=eff_pot_in%harmonics_terms%strain_coupling,&
+&                             strten=eff_pot_in%strten,name=eff_pot_in%name,& 
+&                             phonon_strain=eff_pot_in%anharmonics_terms%phonon_strain,phfrq=eff_pot_in%harmonics_terms%phfrq,& 
+&                             qpoints=eff_pot_in%harmonics_terms%qpoints,has_anharmonicsTerms=eff_pot_in%has_anharmonicsTerms,&
+&                             supercell=eff_pot_in%supercell,& 
+&                             zeff=eff_pot_in%harmonics_terms%zeff)
 
 
 end subroutine effective_potential_copy
