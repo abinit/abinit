@@ -128,7 +128,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,fit_tolGF,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,& 
-&                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv)
+&                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,& 
+&                                   dispterms)
 
  implicit none
 
@@ -147,7 +148,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
  logical,optional,intent(in) :: initialize_data,prt_files,prt_GF_csv
- logical,optional,intent(in) :: fit_on(3), sel_on(3)
+ logical,optional,intent(in) :: fit_on(3), sel_on(3),dispterms
  real(dp),optional,intent(in) :: fit_factors(3)
 !Local variables-------------------------------
 !scalar
@@ -161,7 +162,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
  logical :: need_only_odd_power,need_only_even_power,need_initialize_data
- logical :: need_prt_files,need_prt_GF_csv
+ logical :: need_prt_files,need_prt_GF_csv,need_disp
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3)
  integer :: sc_size(3)
@@ -202,6 +203,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(positive)) need_positive = positive
  need_anharmstr = .FALSE.
  if(present(anharmstr)) need_anharmstr = anharmstr
+ need_disp = .TRUE.
+ if(present(dispterms)) need_disp = dispterms
  need_spcoupling = .TRUE.
  if(present(spcoupling)) need_spcoupling = spcoupling
  need_only_odd_power = .FALSE.
@@ -432,7 +435,7 @@ endif
 &                                  spcoupling=need_spcoupling,distributed=.true.,&
 &                                  only_odd_power=need_only_odd_power,&
 &                                  only_even_power=need_only_even_power,& 
-&                                  fit_iatom=fit_iatom_in)
+&                                  fit_iatom=fit_iatom_in,dispterms=need_disp)
  end if
 
  ABI_FREE(symbols)

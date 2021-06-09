@@ -1976,7 +1976,7 @@ end subroutine polynomial_coeff_getList
 subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_tot,power_disps,&
 &                                     max_power_strain,option,sc_size,comm,anharmstr,spcoupling,&
 &                                     distributed,only_odd_power,only_even_power,fit_iatom,&
-&                                     compute_symmetric,verbose)
+&                                     compute_symmetric,dispterms,verbose)
 
  implicit none
 
@@ -1986,7 +1986,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer,intent(out):: ncoeff,ncoeff_tot
  integer,optional,intent(in) :: fit_iatom
  real(dp),intent(in):: cutoff
- logical,optional,intent(in) :: anharmstr,spcoupling,distributed,verbose
+ logical,optional,intent(in) :: anharmstr,spcoupling,distributed,verbose,dispterms
  logical,optional,intent(in) :: only_odd_power,only_even_power,compute_symmetric
 !arrays
  integer,intent(in) :: power_disps(2),sc_size(3)
@@ -2004,6 +2004,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  real(dp):: norm
  logical :: iam_master,need_anharmstr,need_spcoupling,need_distributed,need_verbose
  logical :: need_only_odd_power,need_only_even_power,compute_sym,irreducible,need_compute_symmetric
+ logical :: need_dispterms
 !arrays
  integer :: ncell(3),shape_listsymcoeff(3),shape_listsymstr(3)
  integer,allocatable :: buffsize(:),buffdispl(:),dummylist(:),index_irred(:)
@@ -2063,7 +2064,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  if(present(only_even_power)) need_only_even_power = only_even_power
  need_compute_symmetric = .TRUE.
  if(present(compute_symmetric)) need_compute_symmetric = compute_symmetric
-
+ need_dispterms = .TRUE.
+ if(present(dispterms)) need_dispterms = dispterms
 
  if(need_only_odd_power.and.need_only_even_power)then
       write(message, '(3a)' )&
@@ -2206,11 +2208,13 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 !      Otherwise cycle (we keep the term)
 !       if(icoeff>ncoeff_sym.and.icoeff2<=ncoeff_sym)cycle
 !       if(icoeff<=ncoeff_sym.and.icoeff2>ncoeff_sym)cycle
+       !Forbid anharmonic strain terms if not wanted
        if((icoeff>ncoeff_symsym .and. icoeff2>ncoeff_symsym).and.&
 &       .not.need_anharmstr) then
          compatibleCoeffs(icoeff,icoeff2) = 0
          compatibleCoeffs(icoeff2,icoeff) = 0
        end if
+       !Forbid strain phonon terms if not wanted
        if((icoeff>ncoeff_symsym.or.icoeff2>ncoeff_symsym).and.&
 &       .not.need_spcoupling) then
          compatibleCoeffs(icoeff,icoeff2) = 0
@@ -2257,7 +2261,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 &                   list_coeff,list_combination,icoeff,max_power_strain,natom,ncoeff_sym,&
 &                   ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,icoeff,nrpt,nsym,1,power_disps(1),power_disps(2),symbols,comm,&
 &                   nbody=option,compute=.false.,anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
-&                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
+&                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power,disp=need_dispterms)
    ABI_FREE(list_coeff)
    ABI_FREE(list_combination)
 
@@ -2284,7 +2288,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 &                   ncoeff_sym,ncoeff_symsym,iirred_comb,nirred_comb,nstr_sym,ncombination,nrpt,nsym,1,power_disps(1),&
 &                   power_disps(2),symbols,comm,nbody=option,compute=.true.,&
 &                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
-&                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
+&                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power,disp=need_dispterms)
    ABI_FREE(list_coeff)
    nirred_comb = size(list_combination_tmp,2)
 
@@ -2727,13 +2731,14 @@ endif
    end if
  end do
 
-!do i=0,nproc
-!  if(my_rank == i)then
-!    write (filename, "(A9,I2,A4)") "terms_set", i+1,".xml"
-!    call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
-!  end if
-!enddo
-
+!Debug write xml 
+ do i=0,nproc
+   if(my_rank == i)then
+     write (filename, "(A9,I2,A4)") "terms_set", i+1,".xml"
+     call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
+   end if
+ enddo
+ 
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
    call wrtout(ab_out,message,'COLL')
@@ -3063,7 +3068,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 &                                  index_coeff_in,list_combination,icoeff,max_power_strain,&
 &                                  natom,ncoeff,ncoeff_sym,iirred_comb,nirred_comb,nstr,nmodel,nrpt,nsym,power_disp,power_disp_min,&
 &                                  power_disp_max,symbols,comm,nbody,only_odd_power,only_even_power,&
-&                                  compute,anharmstr,spcoupling)
+&                                  compute,anharmstr,spcoupling,disp)
 
  implicit none
 
@@ -3072,7 +3077,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  integer,intent(in) :: natom,ncoeff,ncoeff_sym,power_disp,power_disp_min,power_disp_max
  integer,intent(in) :: max_power_strain,nmodel,nsym,nrpt,nstr,comm,icoeff
  integer,intent(inout) :: nirred_comb,iirred_comb
- logical,optional,intent(in) :: compute,anharmstr,spcoupling
+ logical,optional,intent(in) :: compute,anharmstr,spcoupling,disp
  integer,optional,intent(in) :: nbody
  logical,optional,intent(in) :: only_odd_power,only_even_power
 !arrays
@@ -3086,7 +3091,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  integer :: icoeff1,icoeff2,nbody_in,ii,jj,nbody_count
  integer :: ndisp_out,nstrain
  logical :: need_compute,compatible,possible,need_anharmstr,need_spcoupling
- logical :: need_only_odd_power,need_only_even_power,compute_sym
+ logical :: need_only_odd_power,need_only_even_power,compute_sym,need_disp
 !arrays
  integer :: powers(power_disp)
  integer,allocatable :: index_coeff(:)
@@ -3096,6 +3101,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  need_compute = .TRUE.
  need_anharmstr = .TRUE.
  need_spcoupling = .TRUE.
+ need_disp = .TRUE.
  need_only_odd_power = .FALSE.
  need_only_even_power = .FALSE.
  compute_sym = .FALSE. !Never compute the symmetric combinations here
@@ -3104,6 +3110,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  if(present(nbody)) nbody_in = nbody
  if(present(anharmstr)) need_anharmstr = anharmstr
  if(present(spcoupling)) need_spcoupling = spcoupling
+ if(present(disp)) need_disp = disp
  if(present(only_odd_power)) need_only_odd_power = only_odd_power
  if(present(only_even_power)) need_only_even_power = only_even_power
 
@@ -3158,7 +3165,13 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
          compatible = .false.
        end if
      end if
-!    3-Count number of Strain and number of displacements for compute symmetric terms
+!    3-Check if the coefficient is only disp and if we need to compute it
+     if(all(index_coeff <= ncoeff))then
+!       write(std_out,*) "index_coeff", index_coeff,"need_dis",need_disp
+       compatible = (need_disp .or. need_spcoupling)
+       possible = need_disp
+     end if
+!    4-Count number of Strain and number of displacements for compute symmetric terms
      nstrain = 0
      ndisp_out = 0
      do ii=1,power_disp
@@ -3251,7 +3264,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 &                                     power_disp_min,power_disp_max,symbols,comm,nbody=nbody_in,&
 &                                     compute=need_compute,anharmstr=need_anharmstr,&
 &                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
-&                                     only_even_power=need_only_even_power)
+&                                     only_even_power=need_only_even_power,disp=need_disp)
      end if
    end do
    ABI_FREE(index_coeff)

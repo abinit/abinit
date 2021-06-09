@@ -76,6 +76,7 @@ module m_multibinit_dataset
   integer :: bound_AnhaStrain
   integer :: bound_step
   integer :: fit_anhaStrain
+  integer :: fit_dispterms
   integer :: fit_SPCoupling
   integer :: fit_SPC_maxS
   integer :: fit_generateCoeff
@@ -373,6 +374,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%bound_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
+ multibinit_dtset%fit_dispterms=1
  multibinit_dtset%fit_SPC_maxS=1
  multibinit_dtset%fit_generateCoeff=1
  multibinit_dtset%fit_initializeData=1
@@ -2080,6 +2082,18 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      &   ', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
 &   'Action: correct bound_SPCoupling in your input file.'
+   ABI_ERROR(message)
+ end if
+ 
+ multibinit_dtset%fit_dispterms=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_dispterms',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_dispterms=intarr(1)
+ if(multibinit_dtset%fit_dispterms<0.and.multibinit_dtset%fit_dispterms>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+     &   'fit_dispterms is',multibinit_dtset%fit_dispterms,&
+     &   ', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_dispterms in your input file.'
    ABI_ERROR(message)
  end if
 

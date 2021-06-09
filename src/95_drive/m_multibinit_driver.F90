@@ -434,7 +434,7 @@ elec_eval = .FALSE.
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv)
+                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
              else
                 if (inp%fit_ncoeff_per_iatom/=0)then 
                    if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then 
@@ -496,7 +496,7 @@ elec_eval = .FALSE.
                           &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
                           &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
                           &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,& 
-                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv)
+                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
                   enddo
                 enddo
              endif
