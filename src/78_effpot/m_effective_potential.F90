@@ -464,8 +464,6 @@ subroutine effective_potential_copy(eff_pot_out,eff_pot_in,comm)
  integer,intent(in)     :: comm
 ! ***********************************************************************
 
-write(*,*) "I'm copying shit"
-
 call effective_potential_init(eff_pot_in%crystal,eff_pot_out,eff_pot_in%energy,eff_pot_in%harmonics_terms%ifcs,& 
 &                             eff_pot_in%anharmonics_terms%ncoeff,eff_pot_in%harmonics_terms%nqpt,comm,& 
 &                             coeffs=eff_pot_in%anharmonics_terms%coefficients,dynmat=eff_pot_in%harmonics_terms%dynmat,& 
