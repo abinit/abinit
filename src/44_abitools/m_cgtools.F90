@@ -1114,6 +1114,10 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
 
 ! *************************************************************************
 
+ ! Init results indipendently of option.
+ dotr = zero
+ doti = zero
+
  if (istwf_k==1) then
    ! General k-point
 

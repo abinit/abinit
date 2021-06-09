@@ -83,7 +83,8 @@ MODULE m_numeric_tools
  public :: isordered             ! Check the ordering of a sequence.
  public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ where 1 is not included (tol12)
  public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] where -1/2 is not included (tol12)
- public :: interpol3d            ! Linear interpolation in 3D
+ public :: interpol3d_0d         ! Linear interpolation in 3D
+ public :: interpol3d_1d         ! Linear interpolation in 3D for an array
  public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
@@ -230,6 +231,7 @@ MODULE m_numeric_tools
  interface isordered
    module procedure isordered_rdp
  end interface isordered
+
 !!***
 
 !----------------------------------------------------------------------
@@ -250,7 +252,7 @@ MODULE m_numeric_tools
    real(dp) :: max
  end type stats_t
 
- public :: stats_eval  ! Calculate the statistical parameters of a data distribution.
+ public :: stats_eval  ! Calculate statistical parameters of a data distribution.
 !!***
 
 !----------------------------------------------------------------------
@@ -4979,9 +4981,9 @@ end subroutine wrap2_pmhalf
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/interpol3d
+!!****f* m_numeric_tools/interpol3d_0d
 !! NAME
-!! interpol3d
+!! interpol3d_0d
 !!
 !! FUNCTION
 !! Computes the value at any point r by linear interpolation
@@ -5006,7 +5008,7 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
+pure function interpol3d_0d(r, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5018,6 +5020,7 @@ pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 !Local variables--------------------------------------------------------
 !scalars
  integer :: ir1,ir2,ir3,pr1,pr2,pr3
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
  real(dp) :: x1,x2,x3
 
 ! *************************************************************************
@@ -5030,17 +5033,86 @@ pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
  x3=one+r(3)*nr3-real(ir3)
 
 !calculation of the density value
- res=zero
- res=res + grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
- res=res + grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
- res=res + grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
- res=res + grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
- res=res + grid(pr1, pr2, ir3) * x1*x2*(one-x3)
- res=res + grid(ir1, pr2, pr3) * (one-x1)*x2*x3
- res=res + grid(pr1, ir2, pr3) * x1*(one-x2)*x3
- res=res + grid(pr1, pr2, pr3) * x1*x2*x3
+ res1=grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res2=grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res3=grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res4=grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res5=grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res6=grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res7=grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res8=grid(pr1, pr2, pr3) * x1*x2*x3
+ res=res1+res2+res3+res4+res5+res6+res7+res8
 
-end function interpol3d
+end function interpol3d_0d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/interpol3d_1d
+!! NAME
+!! interpol3d_1d
+!!
+!! FUNCTION
+!! Computes the value at any point r by linear interpolation
+!! inside the eight vertices of the surrounding cube
+!! r is presumed to be normalized, in a unit cube for the full grid
+!!
+!! INPUTS
+!! r(3)=point coordinate
+!! nr1=grid size along x
+!! nr2=grid size along y
+!! nr3=grid size along z
+!! grid(nd,nr1,nr2,nr3)=grid matrix
+!!
+!! OUTPUT
+!! res(nd)=Interpolated value
+!!
+!! PARENTS
+!!      integrate_gamma_alt,lin_interpq_gam,lineint,m_nesting,m_qparticles
+!!      planeint,pointint,volumeint
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function interpol3d_1d(r, nr1, nr2, nr3, grid, nd) result(res)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: nr1, nr2, nr3, nd
+ real(dp) :: res(nd)
+!arrays
+ real(dp),intent(in) :: grid(nd,nr1,nr2,nr3),r(3)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer :: id,ir1,ir2,ir3,pr1,pr2,pr3
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
+ real(dp) :: x1,x2,x3
+
+! *************************************************************************
+
+ call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
+
+!weight
+ x1=one+r(1)*nr1-real(ir1)
+ x2=one+r(2)*nr2-real(ir2)
+ x3=one+r(3)*nr3-real(ir3)
+
+!calculation of the density value
+ do id=1,nd
+   res1=grid(id,ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+   res2=grid(id,pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+   res3=grid(id,ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+   res4=grid(id,ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+   res5=grid(id,pr1, pr2, ir3) * x1*x2*(one-x3)
+   res6=grid(id,ir1, pr2, pr3) * (one-x1)*x2*x3
+   res7=grid(id,pr1, ir2, pr3) * x1*(one-x2)*x3
+   res8=grid(id,pr1, pr2, pr3) * x1*x2*x3
+   res(id)=res1+res2+res3+res4+res5+res6+res7+res8
+ enddo
+
+end function interpol3d_1d
 !!***
 
 !----------------------------------------------------------------------
@@ -5156,17 +5228,8 @@ subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_r
 !scalars
  integer :: ispden, ir1, ir2, ir3, ifft
  real(dp) :: rr(3)
- real(dp),allocatable :: re(:,:),im(:,:)
 
 ! *************************************************************************
-
- if (cplex == 2) then
-   ! copy slices for efficiency reasons (the best would be to have stride option in interpol3d)
-   ABI_MALLOC(re, (product(in_ngfft), nspden))
-   ABI_MALLOC(im, (product(in_ngfft), nspden))
-   re = in_rhor(1, :, :)
-   im = in_rhor(2, :, :)
- end if
 
  ! Linear interpolation.
  do ispden=1,nspden
@@ -5177,21 +5240,11 @@ subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_r
        do ir1=0,out_ngfft(1)-1
          rr(1) = DBLE(ir1)/out_ngfft(1)
          ifft = 1 + ir1 + ir2*out_ngfft(1) + ir3*out_ngfft(1)*out_ngfft(2)
-         if (cplex == 1) then
-           out_rhor(1, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(1, :, ispden))
-         else
-           out_rhor(1, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), re(:, ispden))
-           out_rhor(2, ifft, ispden) = interpol3d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), im(:, ispden))
-         end if
+         out_rhor(1:cplex, ifft, ispden) = interpol3d_1d(rr, in_ngfft(1), in_ngfft(2), in_ngfft(3), in_rhor(:, :, ispden),cplex)
        end do
      end do
    end do
  end do
-
- if (cplex == 2) then
-   ABI_FREE(re)
-   ABI_FREE(im)
- end if
 
 end subroutine interpolate_denpot
 !!***
