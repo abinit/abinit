@@ -316,6 +316,10 @@ elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
     write(message,'(2a)') "nfixcoeff and nimposecoeff are equal to -1",& 
 &                         "This does not make sense. nfixcoeff will be set to 0."
     ABI_WARNING(message)
+else 
+    nfixcoeff_corr = nfixcoeff
+    ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
+    fixcoeff_corr = fixcoeff
 endif 
 
 
@@ -1231,9 +1235,11 @@ endif
    
    !Allocate output coeffs -> selected plus fixed ones
    ncoeff_out = ncycle_tot+eff_pot_fixed%anharmonics_terms%ncoeff
+!   DEBUG MS
+!   write(*,*) ncoeff_out,ncycle_tot
    ABI_MALLOC(coeffs_out,(ncoeff_out))
    do ii = 1,ncoeff_out
-        if(ii < ncycle_tot)then 
+        if(ii <= ncycle_tot)then 
             call polynomial_coeff_init(coeffs_tmp(ii)%coefficient,coeffs_tmp(ii)%nterm,&
 &                                      coeffs_out(ii),coeffs_tmp(ii)%terms,&
 &                                      coeffs_tmp(ii)%name,&
@@ -1247,11 +1253,13 @@ endif
 &                             check = .TRUE.)
             
         endif
+!   DEBUG MS
+!        write(*,*) "coeffs_out(", ii,")%name:",coeffs_out(ii)%name
    enddo 
 
 
 !  Set the final set of coefficients into the eff_pot type
-   call effective_potential_setCoeffs(coeffs_out(1:ncycle_tot),eff_pot,ncycle_tot)
+   call effective_potential_setCoeffs(coeffs_out(:),eff_pot,ncoeff_out)
 
    ! If Wanted open the anharmonic_terms_file and write header
    filename = "TRS_fit_diff"
@@ -1296,6 +1304,7 @@ endif
 !    end if
 
  else
+   ncoeff_out = 0
    if(need_verbose) then
      write(message, '(9a)' )ch10,&
 &          ' --- !WARNING',ch10,&
@@ -1321,7 +1330,7 @@ endif
  do ii=1,ncoeff_out
    call polynomial_coeff_free(coeffs_out(ii))
  end do
- ABI_FREE(coeffs_out)
+ if(allocated(coeffs_out))ABI_FREE(coeffs_out)
 
  
 !Deallocate fixed eff_pot
@@ -1349,7 +1358,7 @@ call effective_potential_free(eff_pot_fixed)
  ABI_FREE(strten_coeffs)
  ABI_FREE(strten_coeffs_tmp)
  ABI_FREE(stat_coeff)
- ABI_FREE(fixcoeff_corr)
+ if(allocated(fixcoeff_corr)) ABI_FREE(fixcoeff_corr)
 
 end subroutine fit_polynomial_coeff_fit
 !!***
