@@ -30,10 +30,10 @@ MODULE m_xmpi
 
  use defs_basis
  use m_profiling_abi
-! use m_errors
+ !use m_errors
  use iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
- use ISO_FORTRAN_ENV, only : int16,int32,int64
+ use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
 #ifdef HAVE_MPI2
  use mpi
@@ -516,6 +516,7 @@ interface xmpi_recv
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
+  module procedure xmpi_recv_dp4d
 end interface xmpi_recv
 
 !----------------------------------------------------------------------
@@ -558,6 +559,7 @@ interface xmpi_send
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
+  module procedure xmpi_send_dp4d
 end interface xmpi_send
 
 !----------------------------------------------------------------------
@@ -894,7 +896,7 @@ end subroutine xmpi_end
 !!
 !! SOURCE
 
-subroutine xmpi_abort(comm,mpierr,msg,exit_status)
+subroutine xmpi_abort(comm, mpierr, msg, exit_status)
 
 !Arguments-------------------------
  integer,optional,intent(in) :: comm,mpierr,exit_status
@@ -949,6 +951,7 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
+ !ierr = clib_usleep(300000_c_int32_t)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 

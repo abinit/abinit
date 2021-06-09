@@ -87,7 +87,7 @@ eph_ngqpt_fine4 8 8 8
 ###############
 ## DATASET 5 ##
 ###############
-eph_intmeth5  1       # FS integration with Adaptive Gaussians
+eph_intmeth5  1       # FS integration with Adaptive Gaussian
 eph_fsmear5  -1 eV    # Adaptive Gaussian broadening (negative value)
 
 # Geometry

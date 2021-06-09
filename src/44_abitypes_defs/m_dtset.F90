@@ -75,7 +75,6 @@ module m_dtset
 
 type, public :: dataset_type
 
-! Integer
 !A
  integer :: accuracy
  integer :: adpimd
@@ -176,12 +175,14 @@ type, public :: dataset_type
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
+
  integer :: eph_restart = 0
  integer :: eph_stern = 0
  integer :: eph_task = 1
  integer :: eph_transport = 0
  integer :: eph_use_ftinterp = 0
  integer :: exchn2n3d
+ integer :: extfpmd_nbcut = 25
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -269,6 +270,11 @@ type, public :: dataset_type
  integer :: hmcsst
  integer :: hmctt
 !I
+ real(dp) :: ibte_abs_tol = tol4
+ real(dp) :: ibte_alpha_mix = 0.7_dp
+ integer :: ibte_niter = 100
+ integer :: ibte_prep = 0
+
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
@@ -590,8 +596,10 @@ type, public :: dataset_type
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
+ integer :: useextfpmd = 0
  integer :: use_yaml = 0
  integer :: use_slk
+ integer :: use_oldchi = 1
 !V
  integer :: vacnum
  integer :: vdw_nfrag
@@ -757,7 +765,7 @@ type, public :: dataset_type
  real(dp) :: ne_qFD = zero ! CP added
  real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
- real(dp) :: nqfd = zero 
+ real(dp) :: nqfd = zero
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
  real(dp) :: pawecutdg
@@ -980,7 +988,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | cellcharge(nimage)=number of electrons missing (+) or added (-) to system (usually 0)
-!!   |  might depend on the image, but only with occopt=2 
+!!   |  might depend on the image, but only with occopt=2
 !!   | iscf= if>0, SCF calculation ; if<=0, non SCF calculation (wtk might
 !!   |  not be defined)
 !!   | natom=number of atoms in unit cell
@@ -1098,7 +1106,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
             ABI_ERROR(msg)
           end if
-       
+
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
        ! now do it for excited electrons in the conduction bands > ivalence
        nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
@@ -1450,6 +1458,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -1486,6 +1495,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%exchn2n3d          = dtin%exchn2n3d
  dtout%expert_user        = dtin%expert_user
+ dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -1584,6 +1594,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hyb_range_fock  = dtin%hyb_range_fock
  dtout%hmcsst             = dtin%hmcsst
  dtout%hmctt              = dtin%hmctt
+ dtout%ibte_abs_tol       = dtin%ibte_abs_tol
+ dtout%ibte_alpha_mix     = dtin%ibte_alpha_mix
+ dtout%ibte_niter         = dtin%ibte_niter
+ dtout%ibte_prep          = dtin%ibte_prep
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -1871,9 +1885,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
+ dtout%useextfpmd       = dtin%useextfpmd
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
+ dtout%use_oldchi         = dtin%use_oldchi
  dtout%usedmatpu          = dtin%usedmatpu
  dtout%usedmft            = dtin%usedmft
  dtout%useexexch          = dtin%useexexch
@@ -3189,9 +3205,9 @@ subroutine chkvars(string)
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
+ list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta'
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
- list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extrapwf'
+ list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
@@ -3230,6 +3246,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
+ list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
@@ -3356,7 +3373,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk useextfpmd use_yaml'
+ list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

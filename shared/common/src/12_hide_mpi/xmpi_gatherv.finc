@@ -46,7 +46,7 @@ subroutine xmpi_gatherv_int(xval,nelem,recvbuf,recvcounts,displs,root,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
- integer, DEV_CONTARRD intent(inout)   :: recvbuf(:)
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,root,comm
  integer,intent(out) :: ier
@@ -370,7 +370,7 @@ subroutine xmpi_gatherv_dp(xval,nelem,recvbuf,recvcounts,displs,root,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
- real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
+ real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,root,comm
  integer,intent(out) :: ier
