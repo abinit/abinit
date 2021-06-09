@@ -4515,6 +4515,43 @@ Internal representation as [[ngfft]](8).
 ),
 
 Variable(
+    abivarname="fft_count",
+    varset="dev",
+    vartype="integer",
+    topics=['TuningSpeedMem_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Fast Fourier Transform COUNTer",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="",
+    text=r"""
+This variable is similar than [[nonlop_ylm_count]], but for FFT operations instead of non-local ones.
+
+FFT operations are one of the most time-consumming operations, especially for systems with few atoms.
+It is then interesting to count the number of FFT operations in a dataset, which is done with [[fft_count]] = 1 (or any non-zero value).
+For now, this feature is available only in the following context:
+
+* [[optdriver]] = 0 : ground-state computation
+
+* [[paral_kgb]] = 0 : simple parallelization over k-points
+
+If the counting is activated, a little report is written in abinit output.
+Here an example:
+
+    --- FFT COUNTERS ------------------------------------------------------------
+    total Number of Bands         : NB =     64
+                         | total count (TC) |            TC/NB
+    -----------------------------------------------------------------------------
+    fourdp               |               45 |
+    fourwf               |             4918 |             76.8
+    -----------------------------------------------------------------------------
+
+The total count (TC) corresponds to the number of calls of the routine.
+NB is the total number of bands, including the empty ones, summed over the k-points.
+""",
+),
+
+Variable(
     abivarname="fftgw",
     varset="gw",
     vartype="integer",
@@ -11524,6 +11561,8 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="",
     text=r"""
+This variable is similar than [[fft_count]], but for non-local operations instead of FFT ones.
+
 The non-local contribution of the wave-function $\psi$ to the energy writes:
 
 $$ E_{non-local} = \sum_a\sum_{i,j} <\psi|p_{a,i}> e_{a,ij} <p_{a,j}|\psi> $$
