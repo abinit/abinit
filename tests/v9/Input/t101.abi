@@ -4,6 +4,17 @@
   fft_count 1        # enable fft counting
 
   ndtset 12
+
+  cprj_update_lvl1  3
+  cprj_update_lvl2  3
+  cprj_update_lvl3  3
+  cprj_update_lvl4  3
+  cprj_update_lvl5  3
+  cprj_update_lvl6  3
+  cprj_update_lvl7  3
+  cprj_update_lvl8  3
+  cprj_update_lvl9  3
+
   nloc_alg1  2
   nloc_alg2  3
   nloc_alg3  4
@@ -14,13 +25,13 @@
   nloc_alg8  9
   nloc_alg9  10
 
-  nloc_alg10  2
-  nloc_alg11  3
-  nloc_alg12  4
-
   cprj_update_lvl10 0
   cprj_update_lvl11 0
   cprj_update_lvl12 0
+
+  nloc_alg10  2
+  nloc_alg11  3
+  nloc_alg12  4
 
 # Elementary cell
 #*********************************
