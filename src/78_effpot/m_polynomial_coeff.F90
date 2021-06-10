@@ -2732,12 +2732,8 @@ endif
  end do
 
 !Debug write xml 
- do i=0,nproc
-   if(my_rank == i)then
-     write (filename, "(A9,I2,A4)") "terms_set", i+1,".xml"
-     call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
-   end if
- enddo
+!     write (filename, "(A9,I2,A4)") "terms_set", my_rank+1,".xml"
+!     call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
  
  if(need_verbose)then
    write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
