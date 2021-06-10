@@ -4764,7 +4764,6 @@ subroutine fft_output_counters(nbandtot,mpi_enreg)
  call wrtout([std_out,ab_out],msg,'COLL')
  write(msg,'(a)')                ' -----------------------------------------------------------------------------'
  call wrtout([std_out,ab_out],msg,'COLL')
- call xmpi_sum(fourdp_counter,mpi_enreg%comm_kpt,ierr)
  call xmpi_sum(fourwf_counter,mpi_enreg%comm_kpt,ierr)
  cnt=fourdp_counter
  if (cnt>0) then
