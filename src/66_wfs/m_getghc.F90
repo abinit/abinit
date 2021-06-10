@@ -553,7 +553,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          do i3=1,gs_ham%n6
            do i2=1,gs_ham%n5
              do i1=1,gs_ham%n4
-               vlocal_tmp(2*i1,i2,i3)=-vlocal_tmp(2*i1,i2,i3)
+               vlocal_tmp(2*i1-1,i2,i3)= gs_ham%vlocal(i1,i2,i3,3)
+               vlocal_tmp(2*i1  ,i2,i3)= gs_ham%vlocal(i1,i2,i3,4)
              end do
            end do
          end do
