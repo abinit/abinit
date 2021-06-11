@@ -1,5 +1,5 @@
 
-.Version 9.5.1 of ABINIT 
+.Version 9.5.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 30 Apr 2021.
-- ( at 15h22 )
+.Starting date : Fri 11 Jun 2021.
+- ( at 11h28 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -700,79 +700,79 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
- -8.50279572E-04  2.06901579E-13  8.72982578E-15
+ -8.50279572E-04  2.07021286E-13  8.68494130E-15
  
  
  Integral of Berry curvature, Cartesian directions :
- -2.38914256E-03  7.59443302E-13 -6.77102835E-14
+ -2.43726285E-03  6.63473688E-13 -6.46825409E-14
  Fermie energy :   1.86491421E-01
  
  
  Orbital magnetic moment, Term-by-term breakdown :
-           Conduction space :  -7.37926597E-04  1.82347609E-13  8.80327292E-15
-          Valence space IIb :  -2.54414715E-04  5.25983866E-14 -3.05090686E-15
-  Valence space Ia+IIa+IIIa :   2.48703132E-09  2.19721035E-17 -5.42956037E-19
-          Valence space Ib  :  -3.55678940E-06 -1.56554400E-15  1.87695605E-15
+           Conduction space :  -7.37926597E-04  1.82329957E-13  8.91843607E-15
+          Valence space IIb :  -2.54414715E-04  5.27304880E-14 -3.20722005E-15
+  Valence space Ia+IIa+IIIa :   2.48703132E-09  2.19766702E-17 -5.40032505E-19
+          Valence space Ib  :  -3.55678940E-06 -1.56029019E-15  1.87321869E-15
            S(1) PAW overlap :  -8.60186703E-07 -6.75842602E-17  8.98381471E-17
                   H(1) cprj :   1.36777864E-04 -3.37474629E-14  1.96755852E-16
     H(1) on-site 1/2 L_R.B  :   7.26613294E-06  7.40280619E-15  8.38495194E-16
          H(1) on-site A0.An :   2.43223203E-06 -8.86038072E-17 -2.40425703E-17
-            Berry curvature :  -2.38914256E-03  7.59443302E-13 -6.77102835E-14
+            Berry curvature :  -2.43726285E-03  6.63473688E-13 -6.46825409E-14
  
  
  Orbital magnetic moment, Term-by-term breakdown for each band :
  
  
  band  1 of  4
-        Total orbital moment :   3.31654819E-05 -2.83984125E-14 -5.75215575E-16
-            Conduction space :  -9.69745508E-06 -3.40097510E-14  9.14946224E-16
-           Valence space IIb :  -9.50582000E-07  1.53573971E-14 -7.62662247E-16
-  Valence space Ia+IIa+IIIa  :   1.80288090E-08  1.35488731E-17 -3.75840661E-18
-           Valence space Ib  :   1.81778773E-06  4.88630824E-16  2.34022977E-16
+        Total orbital moment :   3.31654819E-05 -2.83984606E-14 -5.75124173E-16
+            Conduction space :  -9.69745508E-06 -3.40097627E-14  9.14957949E-16
+           Valence space IIb :  -9.50582000E-07  1.53573589E-14 -7.62585756E-16
+  Valence space Ia+IIa+IIIa  :   1.80288090E-08  1.35509013E-17 -3.76383285E-18
+           Valence space Ib  :   1.81778773E-06  4.88630641E-16  2.34031588E-16
             S(1) PAW overlap :   3.79688274E-08  1.22387589E-16  6.71771071E-18
                    H(1) cprj :   4.14076749E-05 -1.16982962E-14 -1.04727347E-15
       H(1) on-site 1/2 L_R.B :   2.27451844E-07  1.28840020E-15  8.01644372E-17
           H(1) on-site A0.An :   3.04606829E-07  3.92701305E-17  2.62720540E-18
-             Berry curvature :   9.40651507E-06 -1.93247876E-13  8.44675408E-15
+             Berry curvature :   1.51957019E-05 -1.94633786E-13  1.00418139E-14
  
  
  band  2 of  4
-        Total orbital moment :   1.29715190E-04  5.58778309E-14 -3.04468063E-14
-            Conduction space :  -5.12506749E-05  4.38163146E-14 -2.71001637E-14
-           Valence space IIb :   1.07526063E-05  1.75014294E-14 -3.22479309E-15
-  Valence space Ia+IIa+IIIa  :   1.17156529E-08  7.54380919E-18  5.36147106E-19
-           Valence space Ib  :  -9.64077097E-07 -6.36340985E-17  5.91305456E-17
+        Total orbital moment :   1.29715190E-04  5.58842666E-14 -3.04520177E-14
+            Conduction space :  -5.12506749E-05  4.38226875E-14 -2.71050826E-14
+           Valence space IIb :   1.07526063E-05  1.75014916E-14 -3.22509136E-15
+  Valence space Ia+IIa+IIIa  :   1.17156529E-08  7.54341628E-18  5.35702672E-19
+           Valence space Ib  :  -9.64077097E-07 -6.36331825E-17  5.91367748E-17
             S(1) PAW overlap :   1.02714620E-07  1.26937132E-17  8.02958567E-18
                    H(1) cprj :   1.73823178E-04 -5.52298835E-15 -1.56290748E-16
       H(1) on-site 1/2 L_R.B :  -3.43543980E-06  1.27875280E-16 -2.94505415E-17
           H(1) on-site A0.An :   6.75167062E-07 -1.40342523E-18 -3.80445924E-18
-             Berry curvature :   5.54833299E-04  3.81348581E-13 -1.62607666E-13
+             Berry curvature :   5.74623601E-04  3.77826205E-13 -1.59253858E-13
  
  
  band  3 of  4
-        Total orbital moment :   4.74676301E-01  4.36968118E-11  1.01814490E-10
-            Conduction space :   2.89488933E-01  2.43464661E-11  6.08040409E-11
-           Valence space IIb :   2.14460872E-01  2.82717689E-11  4.66877219E-11
-  Valence space Ia+IIa+IIIa  :  -3.21527582E-05 -9.41753476E-15 -4.76102259E-15
-           Valence space Ib  :  -6.51537091E-03 -1.69550207E-12 -1.21238939E-12
+        Total orbital moment :   4.74676301E-01  4.36965491E-11  1.01814586E-10
+            Conduction space :   2.89488933E-01  2.43461539E-11  6.08042090E-11
+           Valence space IIb :   2.14460872E-01  2.82718169E-11  4.66876499E-11
+  Valence space Ia+IIa+IIIa  :  -3.21527582E-05 -9.41754062E-15 -4.76101086E-15
+           Valence space Ib  :  -6.51537091E-03 -1.69550057E-12 -1.21238939E-12
             S(1) PAW overlap :  -7.59148738E-04 -2.63380010E-13 -1.27205167E-13
                    H(1) cprj :  -2.68429081E-02 -8.52902989E-12 -5.16220116E-12
       H(1) on-site 1/2 L_R.B :   4.87538237E-03  1.56404631E-12  8.22350217E-13
           H(1) on-site A0.An :   6.93570706E-07  1.18599672E-14  6.93377805E-15
-             Berry curvature :   2.29976621E+00  2.04208295E-10  4.81801263E-10
+             Berry curvature :   2.18634916E+00  1.79102649E-10  4.63859107E-10
  
  
  band  4 of  4
-        Total orbital moment :  -4.75689461E-01 -4.35173896E-11 -1.01774738E-10
-            Conduction space :  -2.90165912E-01 -2.41739251E-11 -6.07690524E-11
-           Valence space IIb :  -2.14725089E-01 -2.82520293E-11 -4.66867854E-11
-  Valence space Ia+IIa+IIIa  :   3.21255008E-05  9.41841418E-15  4.76370189E-15
-           Valence space Ib  :   6.51096041E-03  1.69351153E-12  1.21397319E-12
+        Total orbital moment :  -4.75689461E-01 -4.35170136E-11 -1.01774874E-10
+            Conduction space :  -2.90165912E-01 -2.41736369E-11 -6.07691004E-11
+           Valence space IIb :  -2.14725089E-01 -2.82519453E-11 -4.66868694E-11
+  Valence space Ia+IIa+IIIa  :   3.21255008E-05  9.41842297E-15  4.76369896E-15
+           Valence space Ib  :   6.51096041E-03  1.69351528E-12  1.21396944E-12
             S(1) PAW overlap :   7.58147868E-04  2.63177344E-13  1.27280258E-13
                    H(1) cprj :   2.67644551E-02  8.51250371E-12  5.16360148E-12
       H(1) on-site 1/2 L_R.B :  -4.86490825E-03 -1.55805978E-12 -8.21562436E-13
           H(1) on-site A0.An :   7.58887431E-07 -1.19864377E-14 -6.95664337E-15
-             Berry curvature :  -2.30271960E+00 -2.03636953E-10 -4.81714812E-10
+             Berry curvature :  -2.18937624E+00 -1.78622367E-10 -4.63774578E-10
  
 ====================================================
  
@@ -996,10 +996,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.0
  
 ================================================================================
  
  Calculation completed.
 .Delivered   5 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.6  wall=          6.8
++Overall time at end (sec) : cpu=          6.8  wall=          7.0
