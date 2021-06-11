@@ -1850,7 +1850,7 @@ Variable(
     vartype="integer",
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
-    defaultval=3,
+    defaultval=0,
     mnemonics="C-PRoJectors UPDATE LeVeL",
     characteristics=['[[DEVELOP]]'],
     added_in_version="",
@@ -1881,7 +1881,7 @@ The update is done depending on the [[cprj_update_lvl]] value according to the f
 cprj_update_lvl |   A |   B |   C |   D |   E
 ---             | --- | --- | --- | --- | ---
               4 |   X |     |     |     |
-    3 (default) |   X |   X |     |     |
+              3 |   X |   X |     |     |
               2 |   X |     |   X |     |
               1 |   X |   X |   X |     |
              -1 |   X |   X |   X |   X |
