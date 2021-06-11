@@ -1756,7 +1756,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
          doti = -DOT_PRODUCT(bra(2,:),ket(1,:)) + DOT_PRODUCT(bra(1,:),ket(2,:))
 !!         orbmag_terms(adir,berrycurve,nn) = orbmag_terms(adir,berrycurve,nn) - epsabg*doti*trnrm
 
-         call berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,nn,&
+         call berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,gprimd,nn,&
            & mcgk,dtset%natom,nband_k,npw_k,dtset%ntypat,pawtab,dtset%typat)
          orbmag_terms(adir,berrycurve,nn) = orbmag_terms(adir,berrycurve,nn) - epsabg*AIMAG(bckn)*trnrm
 
@@ -1903,7 +1903,7 @@ end subroutine orbmag_ddk
 !!
 !! SOURCE
 
-subroutine berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,iband,&
+subroutine berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,gprimd,iband,&
     & mcgk,natom,nband_k,npw_k,ntypat,pawtab,typat)
 
  !Arguments ------------------------------------
@@ -1913,23 +1913,35 @@ subroutine berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,iband,&
 
  !arrays
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
+ real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),gprimd(3,3)
  type(pawcprj_type),intent(in) :: cprj_k(natom,nband_k),cprj1_k(natom,nband_k,3)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
 
  !Local variables -------------------------
  !scalars
- integer :: iatom,ilmn,itypat,jlmn,klmn
+ integer :: iatom,idir,ilmn,itypat,jlmn,klmn
  real(dp) :: doti,dotr
- complex(dpc) :: cg1wfn,cpb,cpk,eq1q,eq2q,eq3q,eq4q
+ complex(dpc) :: c1,cg1wfn,cpb,cpk,eq1q,eq2q,eq3q,eq4q
+ complex(dpc) :: eq2dg,eq3db,eq4db,eq4dg
 
  !arrays
+ integer,dimension(3) :: idirindx = (/4,2,3/)
+ real(dp) :: qijl_cart(3),qijl_red(3)
  real(dp),allocatable :: cg1b(:,:),cg1g(:,:)
 
  !-----------------------------------------------------------------------
 
  ABI_MALLOC(cg1b,(2,npw_k))
  ABI_MALLOC(cg1g,(2,npw_k))
+
+ ! comment copied from pawpolev routine, where also onsite r-R is needed.
+ !note that when vector r is expanded in real spherical harmonics, the factor
+ !sqrt(four_pi/three) appears, as in the following
+ !x = sqrt(four_pi/three)*r*S_{1,1}  , element 4 in pawtab%qijl
+ !y = sqrt(four_pi/three)*r*S_{1,-1} , element 2 in pawtab%qijl
+ !z = sqrt(four_pi/three)*r*S_{1,0}  , element 3 in pawtab%qijl
+ !note also that x,y,z here are cartesian. 
+ c1=sqrt(four_pi/three)
 
  cg1b = cg1_k(:,(iband-1)*npw_k+1:iband*npw_k,bdir)
  cg1g = cg1_k(:,(iband-1)*npw_k+1:iband*npw_k,gdir)
@@ -1938,15 +1950,16 @@ subroutine berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,iband,&
  doti = -DOT_PRODUCT(cg1b(2,:),cg1g(1,:)) + DOT_PRODUCT(cg1b(1,:),cg1g(2,:))
  cg1wfn = cmplx(dotr,doti,KIND=dpc)
 
- eq1q = czero
- eq2q = czero
- eq3q = czero
- eq4q = czero
+ eq1q = czero; eq2q = czero; eq3q = czero; eq4q = czero
+ eq2dg = czero; eq3db = czero; eq4db = czero; eq4dg = czero
  do iatom=1,natom
    itypat=typat(iatom)
    do ilmn=1,pawtab(itypat)%lmn_size
      do jlmn=1,pawtab(itypat)%lmn_size
        klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+
+       qijl_cart(1:3) = c1*pawtab(itypat)%qijl(idirindx(1:3),klmn)
+       qijl_red(1:3) = MATMUL(TRANSPOSE(gprimd),qijl_cart(1:3))
 
        ! <du_b|p>Qij<p|du_g>
        cpb=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
@@ -1958,21 +1971,45 @@ subroutine berrycurve_k_n(bckn,bdir,cg_k,cg1_k,cprj_k,cprj1_k,gdir,iband,&
        cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
        eq2q = eq2q + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
 
+       ! <du_b|p>(-i d_g)<p|u>
+       cpb=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
+       cpk=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc)
+       !eq2dg = eq2dg - conjg(cpb)*j_dpc*c1*pawtab(itypat)%qijl(idirindx(gdir),klmn)*cpk
+       eq2dg = eq2dg - conjg(cpb)*j_dpc*qijl_red(gdir)*cpk
+
        ! <u|dp_b>Qij<p|du_g>
        cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
        cpk=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
        eq3q = eq3q + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+
+       ! <u|p>(i d_b)<p|du_g>
+       cpb=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)
+       cpk=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
+       !eq3db = eq3db + conjg(cpb)*j_dpc*c1*pawtab(itypat)%qijl(idirindx(bdir),klmn)*cpk
+       eq3db = eq3db + conjg(cpb)*j_dpc*qijl_red(bdir)*cpk
 
        ! <u|dp_b>Qij<dp_g|du>
        cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
        cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
        eq4q = eq4q + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
 
+       ! <u|p>(i d_b)<dp_g|u>
+       cpb=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)
+       cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
+       !eq4db = eq4db + conjg(cpb)*j_dpc*c1*pawtab(itypat)%qijl(idirindx(bdir),klmn)*cpk
+       eq4db = eq4db + conjg(cpb)*j_dpc*qijl_red(bdir)*cpk
+
+       ! <u|dp_b>(-i d_g)<p|u>
+       cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
+       cpk=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc)
+       !eq4dg = eq4dg - conjg(cpb)*j_dpc*c1*pawtab(itypat)%qijl(idirindx(gdir),klmn)*cpk
+       eq4dg = eq4dg - conjg(cpb)*j_dpc*qijl_red(gdir)*cpk
+
      end do ! end loop over jlmn
    end do ! end loop over ilmn
  end do ! end loop over atoms
  
- bckn = cg1wfn + eq1q + eq2q + eq3q + eq4q
+ bckn = cg1wfn + eq1q + eq2q + eq3q + eq4q + eq2dg + eq3db + eq4db + eq4dg
 
  ABI_FREE(cg1b)
  ABI_FREE(cg1g)
