@@ -1361,7 +1361,8 @@ subroutine printrdm_k(ib1,ib2,rdm_k) ! Only used for debug on this file, do not 
  DBG_ENTER("COLL")
 
  do ib1dm=ib1,ib2
-   write(*,*) 'MAT ',rdm_k(ib1dm,ib1:ib2)
+   write(msg,'(*(f12.5))') real(rdm_k(ib1dm,ib1:ib2))
+   call wrtout(std_out,msg,'COLL')
  end do
 
  DBG_EXIT("COLL")
