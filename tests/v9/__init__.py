@@ -50,6 +50,7 @@ inp_files = [
 "t34.abi", # Same as t33.in but reading checkpoints
 "t35.abi", # GW 1RDM and related quantities (using only Sigma_x)
 "t36.abi", # GW 1RDM and related quantities but using Silicon
+"t37.abi", # GW 1RDM and related quantities but using Silicon with diff. bdgw values
 "t40.abi", # chi0 with inclvkb=2
 # DFPT
 "t41.abi",
