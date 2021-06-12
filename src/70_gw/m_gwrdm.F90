@@ -617,7 +617,7 @@ subroutine print_tot_occ(sigma,kmesh,BSt)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
- integer :: ik,ib,spin
+ integer :: ik,spin
  real(dp) :: wtk,occ_bks,tot_occ
 ! arrays
 ! *************************************************************************
@@ -629,12 +629,10 @@ subroutine print_tot_occ(sigma,kmesh,BSt)
  do spin=1,sigma%nsppol
    do ik=1,sigma%nkibz
      wtk = kmesh%wt(ik)
-     do ib=sigma%b1gw,sigma%b2gw
-       occ_bks = BSt%occ(ib,ik,spin)
-       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
-         tot_occ=tot_occ+occ_bks*wtk
-       end if
-     end do
+     occ_bks = sum(BSt%occ(:,ik,spin))
+     if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+       tot_occ=tot_occ+occ_bks*wtk
+     end if
    end do
  end do
 

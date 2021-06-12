@@ -39,11 +39,11 @@ kptgw3                 # k-points in reduced coordinates, read from output
      0.00000000E+00  0.00000000E+00  0.00000000E+00 
 
 bdgw3      
-     3  6
+     4  6
      3  5
      3  6
      3  5
-     3  6
+     2  6
      2  8
 # Data common to the three different datasets
 
