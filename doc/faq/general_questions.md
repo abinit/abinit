@@ -26,23 +26,23 @@ abinit --dry-run run.abi
 Many mistakes done by beginners are related to **incorrect starting geometry**.
 Here is a check list:
 
-- Check that the units are correct for your cell parameters and atomic positions. 
-  Remember that ABINIT uses **atomic unit by default**, but can use several other units if specified by the user, 
+- Check that the units are correct for your cell parameters and atomic positions.
+  Remember that ABINIT uses **atomic unit by default**, but can use several other units if specified by the user,
   see ABINIT input parameters.
 - Check that the [[typat]] atom types are correct with respect to [[xred]] or [[xcart]]
-- Check that the number of atoms [[natom]] is coherent with your list of coordinates, xred or xcart. 
+- Check that the number of atoms [[natom]] is coherent with your list of coordinates, xred or xcart.
   ABINIT reads only the coordinates of natom nuclei and ignore others.
 - Try to visualize your primitive cell. There are numerous possibilities, using Abipy, VESTA, XCrysDen (to be documented).
 
-- ABINIT can read VASP POSCAR or Netcdf external files containing unit cell parameters and atomic positions. 
+- ABINIT can read VASP POSCAR or Netcdf external files containing unit cell parameters and atomic positions.
   See the input variable structure. This might help in setting the geometry correctly.
 
-- Relax first the atomic positions at fixed primitive vectors before optimizing the cell. 
-  Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero optcell, 
-  in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]]. 
-  In this second dataset, do not forget to use [[dilatmx]] bigger than 1 if you expect the volume 
-  of the cell to increase during the optimization. 
-  Possibly after the atomic position relaxation, make a run with [[chkdilatmx]] = 0, then a third run with [[dilatmx]] = 1. 
+- Relax first the atomic positions at fixed primitive vectors before optimizing the cell.
+  Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero optcell,
+  in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]].
+  In this second dataset, do not forget to use [[dilatmx]] bigger than 1 if you expect the volume
+  of the cell to increase during the optimization.
+  Possibly after the atomic position relaxation, make a run with [[chkdilatmx]] = 0, then a third run with [[dilatmx]] = 1.
   See the additional suggestions in the documentation of [[optcell]].
 
 ## What if ABINIT stops without finishing its tasks?
@@ -132,7 +132,7 @@ abiopen.py PSEUDO_FILE -p
 
 ## chkprim and unit cell multiplicity
 
-In highly symmetric crystals you may end up with the following error message from abinit:
+In highly symmetric crystals you may end up with the following error message:
 
 ```
 chkprimit : ERROR -
@@ -146,7 +146,7 @@ or set chkprim to 0.
 leave_new : decision taken to exit ...
 ```
 
-By default abinit checks that the unit cell is primitive and contains the smallest possible number of atoms. 
+By default abinit checks that the unit cell is primitive i.e. that it contains the smallest possible number of atoms.
 For example, instead of the conventional cubic FCC unit cell with 4 atoms
 
 ```
@@ -184,39 +184,77 @@ xred
 0 0 0
 ```
 
-Using the primitive cell ensures the fastest calculation and the best use of symmetry operations, 
+Using the primitive cell ensures the **fastest calculation** and the **best use of symmetry operations**,
 so in general you should listen to abinit and reduce your unit cell.
-
-If you have a good reason to do so, you can override abinit and force it to use a non-primitive unit cell, 
-by setting [[chkprim]] 1 in the input file. 
+If you have a good reason to do so, you can override abinit and force it to use a non-primitive unit cell,
+by setting [[chkprim]] 1 in the input file.
 This will, however, disable symmetry operations in certain places.
 
-One possible reason to do this is, for example, making a large supercell of a crystal (say 3x3x3 primitive unit cells) 
-in which you want to introduce a defect. Doing the pristine crystal calculation in the 3x3x3 supercell is possible, 
-but not useful (you will just get 27 times the energy). Once you have introduced the defect, of course, 
-you will lower the supercell's symmetry and abinit will no longer complain that the cell is not primitive. 
-chkprim 1 is no longer to be used for the defected cell, in which you want all possible symmetries to be exploited once again.
+One possible reason to do this is, for example, making a large supercell of a crystal (say 3x3x3 primitive unit cells)
+in which you want to introduce a defect. 
+Doing the pristine crystal calculation in the 3x3x3 supercell is possible, but not useful 
+(you will just get 27 times the energy). 
+Once you have introduced the defect, of course,
+you will lower the supercell's symmetry and abinit will no longer complain that the cell is not primitive.
+[[chkprim]] 1 is no longer to be used for the defected cell in which you want all possible symmetries 
+to be exploited once again.
 
 ## pspxc from pseudopotential not equal to ixc
 
-Abinit complains if the exchange correlation functional (variable [[ixc]]) 
+Abinit complains if the exchange correlation functional (variable [[ixc]])
 used in the input is not the same as that specified in the pseudopotential / atomic data files used.
 
 ```
  pspatm: WARNING -
   Pseudopotential file pspxc=       7,
   not equal to input ixc=       1.
-  These parameters must agree to get the same xc 
+  These parameters must agree to get the same xc
   in ABINIT code as in psp construction.
   Action : check psp design or input file.
   Assume experienced user. Execution will continue.
 ```
 
-This is usually dangerous, as you are making uncontrollable errors in compensating for the Vxc of the core 
+This is usually dangerous, as you are making uncontrollable errors in compensating for the Vxc of the core
 in the pseudopotential with a different functional.
 
-However, there is an important exception: all the LDA functionals (ixc 1-7) are basically identical, 
-but with different functional forms to fit the same data. 
-As a result, mixing these ixc is mostly harmless (as above). 
-The warning appears often, as the many pseudopotentials on the web site are created with a variety of ixc, 
+However, there is an important exception: all the LDA functionals (ixc 1-7) are basically identical,
+but with different functional forms to fit the same data.
+As a result, mixing these ixc is mostly harmless (as above).
+The warning appears often, as the many pseudopotentials on the web site are created with a variety of ixc,
 not necessarily the default value 1.
+
+## ABINIT does not find the spacegroup I would expect
+
+Firt of all, make sure that the atomic positions are given with enough digits (let's say more than six digits).
+Prefer [[xred]] over [[xcart]] and remember that one can use fractions in the input file using the syntax:
+
+```
+natom 3
+xred
+0   0   0
+1/2 2/3 1/2
+2/3 1/3 1/2
+```
+
+Note that whitespaces between tokens are not allowed i.e. ` 1 / 2` is not accepted by the parser.
+
+Also, the lattice can be specified in terms of [[angles]] and [[acell]] rather than [[rprim]].
+This may help solve possible problems with **hexagonal** or **rhombohedral** lattices that
+seem to be more sensitive to truncation errors.
+
+If this does not solve your problem, you may try to gradually increase the value of [[tolsym]].
+
+The |abistruct| script provides a simplied command line interface that allows you
+to invoke Abinit compute the space group:
+
+```
+abistruct.py abispg FILE --tolsym=1e-8
+```
+
+It is also possible to use the |spglib| library with the command:
+
+```
+abistruct.py spglib FILE
+```
+
+although spglib does not take into account the [[symafm]] magnetic symmetries.

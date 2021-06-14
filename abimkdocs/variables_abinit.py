@@ -7607,12 +7607,10 @@ No meaning for RF calculations.
    algorithm implemented by ABINIT.
    For instance, a server that wants to performs calculations with varying unit cells
    should set [[optcell]] > 0 in the initial input.
-
    Note that, at present, this feature is mainly used to interface ABINIT
    with the ASE optimization routines. Moreover the user is responsible for creating an input
    file with tuned tolerances to prevent Abinit from exiting when internal convergence is reached.
    See examples available in the [ASE documentation](https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html)
-
    **Purpose:** Structural optimization driver by the server (MD runs are not yet supported)
    **Cell optimization:** Yes (provide [[optcell]] > 0 in the initial input)
 """,
