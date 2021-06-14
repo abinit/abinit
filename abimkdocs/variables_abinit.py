@@ -4533,6 +4533,14 @@ This variable is similar than [[nonlop_ylm_count]], but for FFT operations inste
 
 FFT operations are one of the most time-consumming operations, especially for systems with few atoms.
 It is then interesting to count the number of FFT operations in a dataset, which is done with [[fft_count]] = 1 (or any non-zero value).
+More precisely, it counts the number of FFTs done in "fourdp" and "fourwf" routines.
+
+This feature is not equivalent to what other profiling tools would give (as the one included in Abinit, see [[timopt]]), because the number of FFTs done per call 
+depends on input options which vary during the computation.
+Indeed, one or two FFTs could be done in one call.
+The counting activated by [[fft_count]] takes into account this effect.
+Also, one can count several datasets separately in one run.
+
 For now, this feature is available only in the following context:
 
 * [[optdriver]] = 0 : ground-state computation
@@ -11592,6 +11600,13 @@ With the use of spherical harmonics ([[useylm]] = 1), the first operation is don
 Both operations scale like $O\left(N_{at}N_{proj}N_{pw}\right)$ where $N_{at}$ is the number of atoms ([[natom]]), $N_{proj}$ the number of projectors $|p_{a,i}>$ per atom, and $N_{pw}$ the number of plane waves.
 For systems with many atoms these two operations are the most time consuming, and can take a huge portion of the total computational time.
 For that reason, it is interesting to count the number of non-local operations in a dataset, which is done with [[nonlop_ylm_count]] = 1 (or any non-zero value).
+
+This feature is not equivalent to what other profiling tools would give (as the one included in Abinit, see [[timopt]]), because the amount of work done inside the routines
+depends on input options which vary during the computation.
+For example, one can compute the application of both the Hamiltonian and the overlap operator in one call.
+The counting activated by [[nonlop_ylm_count]] takes into account these effects.
+Also, one can count several datasets separately in one run.
+
 For now, this feature is available only in the following context:
 
 * [[useylm]] = 1 : use of spherical harmonics
