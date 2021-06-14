@@ -8,7 +8,7 @@ This page collects FAQs related to
 
 ## I'm new to configure. Can you explain how to use it?
 
-Please consult https://wiki.abinit.org/doku.php?id=build:configure
+Please consult <https://wiki.abinit.org/doku.php?id=build:configure>
 
 To obtain the full list of available options and their documentation, use
 
@@ -37,14 +37,15 @@ Well, there are many reasons why configure can fail.
 First of all, make sure that your LD_LIBRARY_PATH (DYLD_LIBRARY_PATH), PATH environment variables
 are properly set **before** running configure.
 By the same token, one should load all the modules before configuring.
-If your environment is propertly set and configure keeps on failing, ...
+If your environment is propertly set and configure keeps on failing, you will need to search 
+for inside *config.log*.
 
 ## Compilation stops with "internal compiler error"
 
 This usually indicates a bug in the compiler that should be reported to the compiler vendor.
 To bypass the problem, reduce the optimization level from e.g. -O2 (default) to -O1 or even -O0.
 If you don't like the idea of compiling all the source file with suboptimal options, you may try
-to disable optimation only for problematic modules using this quick and dirty recipe:
+to disable optimation only for the problematic source files using this quick and dirty recipe:
 
 - Run *make* till you trigger the internal compiler error
 - Copy the compilation command that triggers the internal error
@@ -54,7 +55,6 @@ to disable optimation only for problematic modules using this quick and dirty re
 
 This means that your Abinit executable is **dynamically linked** with external libraries
 but the OS cannot find these libraries at runtime.
-
 Please make sure that LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on MacOs) is properly set that is you have
 the same value as the one used when configuring/compiling ABINIT.
 The same error message may show up if you forgot to load modules before trying to run the executable.
@@ -81,7 +81,10 @@ Yes but, at present, only Abinit8 is supported.
 
 ## Is there any conda package for Abinit?
 
-Yes
+Yes. conda install abinit --channel conda-forge
+
+Note, however, we do not reccomend using precompiled version on HPC clusters.
+The version provided by Spack/EasyBuild pa
 
 ## Why do we provide fallbacks?
 
@@ -118,4 +121,12 @@ FCFLAGS_OPENMP="-fopenmp"    # for the GFORTRAN compiler
 #FCFLAGS_OPENMP="-qopenmp"   # for the INTEL FORTRAN compiler
 ```
 
+Finally, remember to set 
 
+```
+export OMP_NUM_THREADS=1
+```
+
+!!! important
+
+    Do not mix MKL with FFTW3, especially when activating OpenMP.
