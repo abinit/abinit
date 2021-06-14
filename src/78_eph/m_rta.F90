@@ -1820,14 +1820,24 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  abs_tol = dtset%ibte_abs_tol
 
- ! max_adiff = np.array([9e-12, 5.6e-6, 2.7e-6, 8.2e-60, 2.9e-46, 6.9e-6, 2.9e-8, 9.5E+00, 7.3E-04, 9.2E-04, 8.4E-04])
- ! e_density = np.array([0.97e8, 0.86e13, 0.26e14, 0.1e-40, 0.89e-26, 0.45e14, 0.28e12, 0.10E+19, 0.12E+16, 0.10E+15, 0.90E+14])
- !if (abs_tol == zero) then
- !  rtmp = minval(self%n_ehst, mask=self%n_ehst > zero)
- !  self%n_ehst(1, spin, itemp) / cryst%ucvol / Bohr_cm**3, &
+ ! If the fermi level is inside the gap, F_k is gonna be very small
+ ! hence once should use a much smaller tolerance to converge.
+ ! According to numerical tests, a reasonable value of abs_tol can be estimated from the free carrier density using:
+ !
  !  1e-20 * e_density (in cm**-3)
- !  abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
- !end if
+ !
+ ! These are the numerical values used to derive the fit:
+
+ !  max_adiff = np.array([9e-12, 5.6e-6, 2.7e-6, 8.2e-60, 2.9e-46, 6.9e-6, 2.9e-8, 9.5E+00, 7.3E-04, 9.2E-04, 8.4E-04])
+ !  e_density = np.array([0.97e8, 0.86e13, 0.26e14, 0.1e-40, 0.89e-26, 0.45e14, 0.28e12, 0.10E+19, 0.12E+16, 0.10E+15, 0.90E+14])
+
+ if (abs_tol <= zero) then
+   rtmp = minval(ibte%n_ehst, mask=ibte%n_ehst > zero) * ibte%nsppol
+   abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
+   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from carrier density")
+   call wrtout(std_out, " using: abs_tol = 1e-20 * e_density (in cm**-3)")
+   call wrtout(std_out, sjoin(" abs_tol:", ftoa(abs_tol), " from carrier_density:", ftoa(rtmp / cryst%ucvol / Bohr_cm**3)))
+ end if
 
  cnt = 0
  btype = 1
