@@ -194,8 +194,8 @@ program anaddb
 
  call ddb_hdr%free()
 
- mpert=natom+MPERT_MAX
- msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+ mpert = natom + MPERT_MAX
+ msize = 3*mpert*3*mpert; if (mtyp==3) msize = msize*3*mpert
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module

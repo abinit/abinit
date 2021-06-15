@@ -120,6 +120,7 @@ type, public :: dataset_type
  integer :: densfor_pred
  integer :: diismemory
  integer :: dipdip = 1
+ integer :: dipquad = 0
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -527,6 +528,7 @@ type, public :: dataset_type
  integer :: ptgroupma
 !Q
  integer :: qptopt
+ integer :: quadquad = 0
 !R
  integer :: random_atpos
  integer :: recgratio
@@ -1381,6 +1383,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cineb_start        = dtin%cineb_start
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
+ dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
  dtout%dmft_dc            = dtin%dmft_dc
@@ -1834,6 +1837,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
  dtout%qptopt             = dtin%qptopt
+ dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
@@ -3164,7 +3168,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipquad'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
@@ -3308,7 +3312,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
- list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
+ list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
