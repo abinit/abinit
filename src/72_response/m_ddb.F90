@@ -2530,7 +2530,7 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok)
+integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblok)
 
 !Arguments -------------------------------
 !scalars
@@ -4438,40 +4438,39 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !Local variables -------------------------
 !scalars
  integer :: ii,nblok,nsize
-!arrays
 
 ! *********************************************************************
 
-   call ddb_copy(ddb, ddb_lw)
-   call ddb%free()
-   nsize=3*mpert*3*mpert
-   nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
-   call ddb%malloc(nsize, nblok, natom, ntypat)
+ call ddb_copy(ddb, ddb_lw)
+ call ddb%free()
+ nsize=3*mpert*3*mpert
+ nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
+ call ddb%malloc(nsize, nblok, natom, ntypat)
 
  ! Copy dimensions and static variables.
-   ddb%msize = nsize
-   ddb%mpert = ddb_lw%mpert
-   ddb%nblok = nblok
-   ddb%natom = ddb_lw%natom
-   ddb%ntypat = ddb_lw%ntypat
-   ddb%occopt = ddb_lw%occopt
-   ddb%prtvol = ddb_lw%prtvol
+ ddb%msize = nsize
+ ddb%mpert = ddb_lw%mpert
+ ddb%nblok = nblok
+ ddb%natom = ddb_lw%natom
+ ddb%ntypat = ddb_lw%ntypat
+ ddb%occopt = ddb_lw%occopt
+ ddb%prtvol = ddb_lw%prtvol
 
-   ddb%rprim = ddb_lw%rprim
-   ddb%gprim = ddb_lw%gprim
-   ddb%acell = ddb_lw%acell
+ ddb%rprim = ddb_lw%rprim
+ ddb%gprim = ddb_lw%gprim
+ ddb%acell = ddb_lw%acell
 
  ! Copy the allocatable arrays.
-   ddb%amu(:) = ddb_lw%amu(:)
-   do ii=1,ddb_lw%nblok
-     if (ddb_lw%typ(ii)/=33) then
-       ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
-       ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
-       ddb%typ(ii)     = ddb_lw%typ(ii)
-       ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
-       ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
-     end if
-   end do
+ ddb%amu(:) = ddb_lw%amu(:)
+ do ii=1,ddb_lw%nblok
+   if (ddb_lw%typ(ii)/=33) then
+     ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
+     ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
+     ddb%typ(ii)     = ddb_lw%typ(ii)
+     ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
+     ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
+   end if
+ end do
 
  end subroutine ddb_lw_copy
 !!***

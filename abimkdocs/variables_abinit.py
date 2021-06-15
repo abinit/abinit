@@ -22420,4 +22420,36 @@ energy shift factor when [[useextfpmd]] = 2 or 3.
 """,
 ),
 
+Variable(
+    abivarname="dipquad",
+    varset="eph",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="DIPole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9.5.2",
+    text=r"""
+
+Same meaning as [[dipquad@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="quadquad",
+    varset="eph",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="QUADdrupole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9.5.2",
+    text=r"""
+
+Same meaning as [[quadquad@anaddb]]
+""",
+),
+
 ]

@@ -164,7 +164,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc
+ integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, iblock, lwsym !msize,
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -177,7 +177,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
- type(ddb_type) :: ddb
+ type(ddb_type) :: ddb, ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb
  type(ifc_type) :: ifc
@@ -409,13 +409,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
                       prtvol=dtset%prtvol)
  end if
- call ddb_hdr%free()
+
  ABI_FREE(dummy_atifc)
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
  ddb_nqshift = 1
  ABI_CALLOC(ddb_qshifts, (3, ddb_nqshift))
  ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
+
 
  ! Get Dielectric Tensor
  iblock_dielt = ddb%get_dielt(dtset%rfmeth, dielt)
@@ -432,8 +433,36 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
+#if 1
  ! Read the quadrupoles
  iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+
+#else
+ ! Section Copied from Anaddb.
+ mtyp = ddb_hdr%mblktyp
+ mpert = dtset%natom + MPERT_MAX
+ !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+
+ ! Get Quadrupole tensor
+ qdrp_cart=zero
+ if (mtyp==33) then
+   lwsym=1
+   call ddb_lw_copy(ddb,ddb_lw,mpert,dtset%natom,dtset%ntypat)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+   call ddb_lw%free()
+   if ((dtset%dipquad==1.or.dtset%quadquad==1).and.iblock_quadrupoles == 0) then
+     call wrtout(std_out, "--- !WARNING")
+     call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", ddb_filepath))
+     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding longwave 3rd derivatives")
+   end if
+ end if
+#endif
+
+ call ddb_hdr%free()
+
  if (my_rank == master) then
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_filepath))
@@ -443,11 +472,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- ! TODO: Add support for dipquad and quadquad in abinit
  call ifc_init(ifc, cryst, ddb, &
    dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm)
+   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
+   dipquad=dtset%dipquad, quadquad=dtset%quadquad)
 
  ABI_FREE(ddb_qshifts)
  call ifc%print(unit=std_out)

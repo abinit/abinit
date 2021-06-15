@@ -1645,6 +1645,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'istatimg',tread,'INT')
  if(tread==1) dtset%istatimg=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
+ if(tread==1) dtset%quadquad=intarr(1)
+
  ! variables for random positions in unit cell
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',tread,'INT')
  if(tread==1) dtset%random_atpos=intarr(1)
@@ -2084,6 +2087,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diismemory',tread,'INT')
  if(tread==1) dtset%diismemory=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
+ if(tread==1) dtset%dipquad=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'goprecon',tread,'INT')
  if(tread==1) dtset%goprecon=intarr(1)
