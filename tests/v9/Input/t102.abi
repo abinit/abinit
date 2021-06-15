@@ -81,7 +81,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_FFT_FFTW3
+#%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
 #%% files_to_test = t102.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
 #%% [paral_info]
