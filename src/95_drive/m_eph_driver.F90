@@ -165,6 +165,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, iblock, lwsym !msize,
+ integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -433,12 +434,43 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
-#if 1
  ! Read the quadrupoles
- iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+ !iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
 
-#else
+ iblock_quadrupoles = 0
+ qdrp_cart = zero
+
+ if (my_rank == master) then
+   ! MG: Temporary hack to read the quadrupole tensor from a text file
+   ! Will be removed when the EPH code will be able to read Q* from the DDB.
+
+   if (file_exists("quadrupoles_cart.out")) then
+     call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
+     quad_unt = 71
+     open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+     do ii=1,2
+       read(quad_unt,*) msg
+       write(std_out, *)" msg: ", trim(msg)
+     end do
+
+     do ii=1,3
+       do jj=1,3*3*ddb%natom
+         read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
+         write(std_out, *) iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
+       end do
+       read(quad_unt,'(a)') msg
+     end do
+     close(quad_unt)
+     iblock_quadrupoles = 1
+   end if
+ end if
+ call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
+ call xmpi_bcast(qdrp_cart, comm, master, ierr)
+
+ ! Here we get the quadrupoles from the DDB file (this should become the official API).
  ! Section Copied from Anaddb.
+
+if (iblock_quadrupoles == 0) then
  mtyp = ddb_hdr%mblktyp
  mpert = dtset%natom + MPERT_MAX
  !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
@@ -459,7 +491,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding longwave 3rd derivatives")
    end if
  end if
-#endif
+endif
 
  call ddb_hdr%free()
 
