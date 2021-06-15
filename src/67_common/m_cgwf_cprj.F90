@@ -206,6 +206,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  if (cprj_update_lvl==-2)  call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
 
+ isubh=1
+ isubh0=1
+
  ! Big iband loop
  do iband=1,nband
 
@@ -254,7 +257,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
        ! === COMPUTE THE RESIDUAL ===
        ! Compute lambda = <C|H|C>
-       sij_opt = 0
+       sij_opt=0
        call getchc(z_tmp,cpopt,cwavef,cwavef,cprj_cwavef,cprj_cwavef,cwavef_r,cwavef_r,&
          &          gs_hamk,zero,mpi_enreg,1,sij_opt,type_calc)
        chc=z_tmp(1)
@@ -279,7 +282,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
        ! =========== COMPUTE THE STEEPEST DESCENT DIRECTION ===================
        ! ======================================================================
 
-       sij_opt = -1
+       sij_opt=-1
        call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
          &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc,cwavef_r=cwavef_r)
 
@@ -655,24 +658,16 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
      call wrtout(std_out,message,'PERS')
    end if
 
- end do !  End big iband loop.
+   !  ======================================================================
+   !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
+   !  ======================================================================
 
- !  ======================================================================
- !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
- !  ======================================================================
+   if (cprj_update_lvl<=2) call cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
 
- if (cprj_update_lvl<=2) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
-
- sij_opt=0
-
- isubh=1
- isubh0=1
- do iband=1,nband
-   cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
-   cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
    ! Compute local+kinetic part
+   sij_opt=0
    call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
-     &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
+     &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3,cwavef_r=cwavef_r)
    isubh=isubh0
    call timab(1304,1,tsec)
    do jband=1,iband
@@ -687,7 +682,40 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
      &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
      &          gs_hamk,zero,mpi_enreg,iband,sij_opt,4)
    isubh0=isubh
- end do
+
+ end do !  End big iband loop.
+
+ !  ======================================================================
+ !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
+ !  ======================================================================
+
+! if (cprj_update_lvl<=2) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+!
+! sij_opt=0
+!
+! isubh=1
+! isubh0=1
+! do iband=1,nband
+!   cwavef => cwavef_bands(:,1+(iband-1)*npw*nspinor:iband*npw*nspinor)
+!   cprj_cwavef => cprj_cwavef_bands(:,nspinor*(iband-1)+1:nspinor*iband)
+!   ! Compute local+kinetic part
+!   call getghc(cpopt,cwavef,cprj_cwavef,direc,scwavef_dum,gs_hamk,gvnlxc,&
+!     &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,3)
+!   isubh=isubh0
+!   call timab(1304,1,tsec)
+!   do jband=1,iband
+!     cwavef_left => cwavef_bands(:,1+(jband-1)*npw*nspinor:jband*npw*nspinor)
+!     call dotprod_g(subham(isubh),subham(isubh+1),istwf_k,npw*nspinor,2,cwavef_left,direc,me_g0,mpi_enreg%comm_spinorfft)
+!     isubh=isubh+2
+!   end do
+!   call timab(1304,2,tsec)
+!   cprj_cwavef_left => cprj_cwavef_bands(:,1:nspinor*iband)
+!   ! Add the nonlocal part
+!   call getchc(subham(isubh0:isubh0+2*iband-1),cpopt,cwavef,cwavef,&
+!     &          cprj_cwavef,cprj_cwavef_left,cwavef_r,cwavef_r,&
+!     &          gs_hamk,zero,mpi_enreg,iband,sij_opt,4)
+!   isubh0=isubh
+! end do
 
  ! Debugging ouputs
  if(prtvol==-level)then
