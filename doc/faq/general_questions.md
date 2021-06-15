@@ -238,7 +238,7 @@ xred
 
 Note that whitespaces between tokens are not allowed i.e. ` 1 / 2` is not accepted by the parser.
 
-Also, the lattice can be specified in terms of [[angles]] and [[acell]] rather than [[rprim]].
+Also, the lattice can be specified in terms of [[angdeg]] and [[acell]] rather than [[rprim]].
 This may help solve possible problems with **hexagonal** or **rhombohedral** lattices that
 seem to be more sensitive to truncation errors.
 

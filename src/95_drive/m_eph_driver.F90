@@ -164,7 +164,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, iblock, lwsym !msize,
+ integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
  integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -465,7 +465,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
  call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
- call xmpi_bcast(qdrp_cart, comm, master, ierr)
+ call xmpi_bcast(qdrp_cart, master, comm, ierr)
 
  ! Here we get the quadrupoles from the DDB file (this should become the official API).
  ! Section Copied from Anaddb.
