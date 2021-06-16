@@ -474,6 +474,7 @@ if (iblock_quadrupoles == 0) then
  mtyp = ddb_hdr%mblktyp
  mpert = dtset%natom + MPERT_MAX
  !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+ !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
 
  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
@@ -485,6 +486,7 @@ if (iblock_quadrupoles == 0) then
    call ddb_lw_copy(ddb,ddb_lw,mpert,dtset%natom,dtset%ntypat)
    iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
    call ddb_lw%free()
+   !call wrtout(std_out, " iblock_quadrupoles:", itoa(iblock_quadrupoles))
    if ((dtset%dipquad==1.or.dtset%quadquad==1).and.iblock_quadrupoles == 0) then
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", ddb_filepath))
