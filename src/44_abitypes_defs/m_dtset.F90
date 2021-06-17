@@ -594,6 +594,7 @@ type, public :: dataset_type
  integer :: useextfpmd = 0
  integer :: use_yaml = 0
  integer :: use_slk
+ integer :: use_oldchi = 1
 !V
  integer :: vacnum
  integer :: vdw_nfrag
@@ -1879,6 +1880,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
+ dtout%use_oldchi         = dtin%use_oldchi
  dtout%usedmatpu          = dtin%usedmatpu
  dtout%usedmft            = dtin%usedmft
  dtout%useexexch          = dtin%useexexch
@@ -3362,6 +3364,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk useextfpmd use_yaml'
+ list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

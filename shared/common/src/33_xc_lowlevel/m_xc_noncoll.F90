@@ -398,20 +398,29 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
 
 !      Define the U^(0) transformation matrix
        rho_updn=(mag(ipt,1)+(zero,one)*mag(ipt,2))
-       d1=sqrt(( m_norm+mag(ipt,3))**2+rho_updn**2)
-       d2=sqrt((-m_norm+mag(ipt,3))**2+rho_updn**2)
-       d3=sqrt(( m_norm-mag(ipt,3))**2+rho_updn**2)
-       d4=sqrt(( m_norm+mag(ipt,3))**2-rho_updn**2)
+       d1=sqrt(( m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
+       d2=sqrt((-m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
+       d3=sqrt(( m_norm-mag(ipt,3))**2+abs(rho_updn)**2)
+       d4=sqrt(( m_norm+mag(ipt,3))**2-abs(rho_updn)**2)
        u0(1,1)=( m_norm+mag(ipt,3))/d1  ! ( m  + mz)/d1
        u0(2,2)=rho_updn/d2              ! ( mx +imy)/d2
        u0(1,2)=(-m_norm+mag(ipt,3))/d2  ! (-m  + mz)/d2
        u0(2,1)=rho_updn/d1              ! ( mx +imy)/d1
 
 !      Define the inverse of U^(0): U^(0)^-1
-       u0_1(1,1)= half*d1/m_norm
-       u0_1(2,2)= half*d2*(m_norm+mag(ipt,3))/(m_norm*rho_updn)
-       u0_1(1,2)= half*d1*(m_norm-mag(ipt,3))/(m_norm*rho_updn)
-       u0_1(2,1)=-half*d2/m_norm
+       if (abs(rho_updn) > m_norm_min) then
+         u0_1(1,1)= half*d1/m_norm
+         u0_1(2,2)= half*d2*(m_norm+mag(ipt,3))/(m_norm*rho_updn)
+         u0_1(1,2)= half*d1*(m_norm-mag(ipt,3))/(m_norm*rho_updn)
+         u0_1(2,1)=-half*d2/m_norm
+       else
+         u0 = zero
+         u0(1,1) = one
+         u0(2,2) = one
+         u0_1 = zero
+         u0_1(1,1) = one
+         u0_1(2,2) = one
+       end if
 
 !      Diagonalize the GS Vxc^(0): U^(0)^-1 Vxc^(0) U^(0)
 !        (Remember the abinit notation for vxc!)
