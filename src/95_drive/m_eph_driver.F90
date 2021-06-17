@@ -501,6 +501,8 @@ endif
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_filepath))
      call wrtout(ab_out, " Values initialized with zeros.")
+     !dtset%dipquad = 0
+     !dtset%quadquad = 0
    else
      call wrtout(ab_out, sjoin("- Found quadrupole tensor in DDB file:", ddb_filepath))
    end if
@@ -513,7 +515,10 @@ endif
    dipquad=dtset%dipquad, quadquad=dtset%quadquad)
 
  ABI_FREE(ddb_qshifts)
- call ifc%print(unit=std_out)
+ if (my_rank == master) then
+   call ifc%print(unit=std_out)
+   !call ifc%print(unit=ab_out)
+ end if
 
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
