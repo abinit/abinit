@@ -93,7 +93,7 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: comm,iatom,iblok,iblok_stress,iblok_epsinf,idir,ii,index
+ integer :: comm,iatom,iblok,iblok_stress,iblok_epsinf,iblock_quadrupoles, idir,ii,index
  integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
@@ -318,12 +318,14 @@ program anaddb
    write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
    call wrtout([ab_out,std_out],msg,'COLL')
    lwsym=1
-   iblok = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
-   if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+   if ((inp%dipquad==1.or.inp%quadquad==1).and.iblock_quadrupoles == 0) then
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
      call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding longwave 3rd derivatives")
    end if
+   !inp%dipquad = 0
+   !inp%quadquad = 0
  end if
 
  ! Get the electronic dielectric tensor (epsinf) and Born effective charges (zeff)
