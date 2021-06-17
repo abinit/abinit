@@ -486,14 +486,14 @@ if (iblock_quadrupoles == 0) then
    call ddb_lw_copy(ddb,ddb_lw,mpert,dtset%natom,dtset%ntypat)
    iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
    call ddb_lw%free()
-   !call wrtout(std_out, " iblock_quadrupoles:", itoa(iblock_quadrupoles))
-   if ((dtset%dipquad==1.or.dtset%quadquad==1).and.iblock_quadrupoles == 0) then
-     call wrtout(std_out, "--- !WARNING")
-     call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", ddb_filepath))
-     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding longwave 3rd derivatives")
-   end if
  end if
 endif
+
+ ! The default value is 1. Here we set the flags to zero if Q* is not available.
+ if (iblock_quadrupoles == 0) then
+   dtset%dipquad = 0
+   dtset%quadquad = 0
+ end if
 
  call ddb_hdr%free()
 
@@ -501,8 +501,6 @@ endif
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_filepath))
      call wrtout(ab_out, " Values initialized with zeros.")
-     !dtset%dipquad = 0
-     !dtset%quadquad = 0
    else
      call wrtout(ab_out, sjoin("- Found quadrupole tensor in DDB file:", ddb_filepath))
    end if

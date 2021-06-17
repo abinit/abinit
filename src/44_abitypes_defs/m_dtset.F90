@@ -120,7 +120,7 @@ type, public :: dataset_type
  integer :: densfor_pred
  integer :: diismemory
  integer :: dipdip = 1
- integer :: dipquad = 0
+ integer :: dipquad = 1
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -528,7 +528,7 @@ type, public :: dataset_type
  integer :: ptgroupma
 !Q
  integer :: qptopt
- integer :: quadquad = 0
+ integer :: quadquad = 1
 !R
  integer :: random_atpos
  integer :: recgratio
@@ -3168,7 +3168,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipquad'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
