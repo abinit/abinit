@@ -2513,7 +2513,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Desactivate perturbation symmetries for a longwave calculation (TODO)
+!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
  if (dtset%prepalw==1) then
    do ipert=1,dtset%natom+6
      do idir=1,3
@@ -2560,8 +2560,8 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
  rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
 
-!Determine existence of pertubations and of pertubation symmetries
-!Create array with pertubations which have to be calculated
+!Determine existence of perturbations and of perturbation symmetries
+!Create array with perturbations which have to be calculated
  ABI_MALLOC(pert_tmp,(2,3*(dtset%natom+6)+18))
 
  do ipert=1,mpert
@@ -2622,17 +2622,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  write(std_out,'(a)')'irred_perts:'
 
  do icase=1,npert
-!   pert = pert_tmp(icase)
-
-!   if (pert <= dtset%natom*3) then
-!     idir = mod(pert, 3)
-!     if (idir==0) idir=3
-!     ipert=((pert-idir) / 3 + 1)
-!   else
-!     idir = mod(pert, 3)
-!     if (idir==0) idir=3
-!     ipert = dtset%natom + ((pert - 3*dtset%natom - 1) / 3) + 1
-!   end if
    ipert = pert_calc(1,icase)
    idir = pert_calc(2,icase)
 
