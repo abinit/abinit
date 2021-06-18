@@ -48,7 +48,7 @@ whereas the parallelism over bands and $\GG$-vectors is more network intensive.
     The conjugate gradient solver (default algorithm for GS calculations)
     **cannot use** more than [[nkpt]] * [[nsppol]] MPI processes.
     To take advantage of the band + $\GG$ parallelim use [[paral_kgb]] == 1 in the input file,
-    possibly with [[autopara]] = 1
+    possibly with [[autoparal]] = 1
 
 ## Is it a good idea to set the number of bands to the highest occupied state to accelerate a GS calculation?
 
