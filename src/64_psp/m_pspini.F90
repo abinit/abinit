@@ -35,7 +35,7 @@ module m_pspini
  !use m_psps
 
  use defs_datatypes, only : pseudopotential_type, nctab_t, pspheader_type
- use m_fstrings,  only : ftoa
+ use m_fstrings,  only : ftoa, sjoin
  use m_time,      only : timab
  use m_io_tools,  only : open_file
  use m_pawrad,    only : pawrad_type
@@ -1222,7 +1222,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
          else
            iln0=iln0+nproj(il+psps%mpsang)
            if (dtset%spnorbscl /= one) then
-             call wrtout([std_out, ab_out], " Rescaling spin-orbit KB energies using spnorbscl.", ftoa(dtset%spnorbscl))
+             call wrtout([std_out, ab_out], &
+                         sjoin(" Rescaling spin-orbit KB energies using spnorbscl.", ftoa(dtset%spnorbscl)))
              ekb(iln:iln + nproj(il + psps%mpsang) - 1) = ekb(iln:iln + nproj(il + psps%mpsang) - 1) * dtset%spnorbscl
            end if
            write(msg, '(2x,a,i1,4f12.6)' ) 'spin-orbit ',il,(ekb(iln+ii),ii=0,nproj(il+psps%mpsang)-1)
