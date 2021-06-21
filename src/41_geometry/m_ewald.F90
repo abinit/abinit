@@ -127,10 +127,11 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
 if(icutcoul.eq.1) then
-   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
-! else if (icutcoul.eq.2) then
-!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
-!   eta=SQRT(8.0_dp/zcut)
+   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3))))
+ else if (icutcoul.eq.2) then
+   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=217.6_dp/zcut**2.0_dp
+   eta=1.0_dp/zcut**2.0_dp
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
@@ -183,7 +184,7 @@ if(icutcoul.eq.1) then
                  &(abs(ig3).lt.ngfft(3))) then
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
-                  term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
+                  term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
                else if (icutcoul.ne.3) then
                   term=zero !exp(-arg)/gsq
                else
@@ -347,7 +348,7 @@ if(icutcoul.eq.1) then
 
 !Finally assemble Ewald energy, eew
  if(icutcoul.ne.3) then
-   eew=sumg+sumr-chsq*reta/sqrt(pi)
+   eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  else
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
