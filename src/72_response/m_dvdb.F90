@@ -313,12 +313,14 @@ module m_dvdb
 
   integer :: add_lr = 1
    ! Flag defining the treatment of the long range component in the interpolation of the DFPT potentials.
+   !
    ! 0 --> No treatment
    ! 1 --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
    !       This is the standard approach for polar materials.
    ! -1 --> Remove LR model when building W(R,r). DO NOT reintroduce it after Fourier interpolation.
    !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
    !       in order to remove the long range component from the DFPT potentials.
+   ! 4,5,6 --> Use LR part only.
 
   integer :: symv1 = 0
    ! Flag for the symmetrization of v1 potentials.
@@ -3029,8 +3031,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ! with all procs inside comm_rpt to avoid MPI deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
- if (db%add_lr == 4) then
-   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr = 4")
+ if (db%add_lr >= 4) then
+   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr >= 4. Wll use LR part only!")
    return
  end if
 
@@ -3056,7 +3058,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
 
  ! Select my_rpoints.
- ! Use REMALLOC so that we can call this routine multiple times i.e. for chaning add_lr
+ ! Use REMALLOC so that we can call this routine multiple times i.e. for changing add_lr
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
 
@@ -3569,8 +3571,21 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  !qcart = two_pi * matmul(db%cryst%gprimd, qpt)
  !qmod = sqrt(dot_product(qcart, qcart))
 
- if (my_add_lr == 4) then
+ if (my_add_lr >= 4) then
    ! Use LR part only and return immediately.
+
+   !if (my_add_lr > 4) then
+   !  !prev_has_zeff = db%has_zeff
+   !  !prev_has_quadrupoles = db%has_quadrupoles
+   !  !prev_has_efield = db%has_efield
+   !  !db%has_zeff = .False.
+   !  !db%has_quadrupoles = .False.
+   !  !db%has_efield = .False.
+   !  !if (my_add_lr == 5)
+   !  !if (my_add_lr == 6)
+   !  !if (my_add_lr == 7)
+   !end if
+
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3579,6 +3594,12 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, 1, imyp))
      if (db%nspden /= 1) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
    end do
+
+   !if (my_add_lr > 4) then
+     !db%has_quadrupoles = prev_has_quadrupoles
+     !db%has_zeff = prev_has_zeff
+     !db%has_efield = prev_has_efield
+   !end if
    return
  end if
 
@@ -3604,58 +3625,33 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (db%nprocs_rpt > 1) ov1r = zero
  ABI_MALLOC(ov1r_sp, (2, nfft))
 
-#define DEV_USE_SGEMV
-
-#ifdef DEV_USE_SGEMV
  ABI_MALLOC(weiqr_sp, (db%my_nrpt, 2))
  ABI_MALLOC(eiqr_sp, (db%my_nrpt, 2))
  eiqr_sp = transpose(eiqr)
-#else
- ABI_MALLOC(weiqr_sp, (2, db%my_nrpt))
-#endif
 
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
 
-#ifdef DEV_USE_SGEMV
    weiqr_sp(:, 1) = db%my_wratm(:, ipert) * eiqr_sp(:, 1)
    weiqr_sp(:, 2) = db%my_wratm(:, ipert) * eiqr_sp(:, 2)
-#else
-   weiqr_sp(1, :) = db%my_wratm(:, ipert) * eiqr(1, :)
-   weiqr_sp(2, :) = db%my_wratm(:, ipert) * eiqr(2, :)
-#endif
 
    do ispden=1,db%nspden
 
-#ifdef DEV_USE_SGEMV
      ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
      ! Use BLAS2 to compute ov1r = W (x + iy) but need to handle kind conversion as ov1r is double-precision
+     ! NB: Can use MKL BLAS-like extensions to perform 2 matrix-vector operations:
+     !   call dgem2vu(m, n, alpha, a, lda, x1, incx1, x2, incx2, beta, y1, incy1, y2, incy2)
+     ! unfortunately the API does not support transa so one has to transport db%wsr.
 
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
                 zero_sp, ov1r_sp(1,1), 2)
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
                 zero_sp, ov1r_sp(2,1), 2)
 
+
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
      ! Add the long-range part of the potential
      if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
-
-#else
-     ! Slow FT with do loops
-     do ifft=1,nfft
-       do ir=1,db%my_nrpt
-         wr = db%wsr(1, ir, ifft, ispden, imyp)
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr_sp(:, ir)
-         !wi = db%wsr(2, ir, ifft, ispden, imyp)
-         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr_sp(1, ir) ! - wi * weiqr_sp(2, ir)
-         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr_sp(2, ir) ! + wi * weiqr_sp(1, ir)
-       end do
-       ! Add the long-range part of the potential
-       if (my_add_lr > 0) then
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + v1r_lr(:, ifft, imyp)
-       end if
-     end do ! ifft
-#endif
 
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))

@@ -147,11 +147,14 @@ contains
 !!       0 -> no file abimem.mocc is created, only memory allocation counters running
 !!       1 -> light version. Only memory peaks are written.
 !!       2 -> file abimem.mocc is created with full information inside.
-!!       3 -> Write info only if allocation/deallocation is larger that limit_mb
+!!       3 -> Write info only if allocation/deallocation is larger or smaller than limit_mb
+!!                depending on of the sign of limit_mb
 !!    NOTE: By default, only master node writes, use negative values to make all MPI procs write info to disk.
 !!  [delta_time]=Interval in second for snapshots. Will write report to std_out evety delta_time seconds.
 !!  [filename] = If present, activate memory logging only inside filename (basename).
 !!  [limit_mb]= Set memory limit in Mb if level == 3. Print allocation/deallocation only above this limit.
+!!    Positive value to print above the threshold
+!!    Negative value to print beloc the threshold
 
 subroutine abimem_init(level, delta_time, filename, limit_mb)
 
@@ -219,7 +222,11 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
      if (minfo%level == 1) call write_header("# Write memory allocations larger than previous peak")
      if (minfo%level == 2) call write_header("# To be used for inspecting a variable which is not deallocated")
      if (minfo%level == 3) then
-       write(msg, "(a,f9.1,a)")"# Write memory allocations/deallocations larger than ", minfo%limit_mb, "(MB)"
+       if (minfo%limit_mb > zero) then
+         write(msg, "(a,f9.1,a)")"# Write memory allocations/deallocations larger than ", minfo%limit_mb, "(MB)"
+       else
+         write(msg, "(a,f9.1,a)")"# Write memory allocations/deallocations below than ", abs(minfo%limit_mb), "(MB)"
+       end if
        call write_header(msg)
      end if
   end if
@@ -303,14 +310,14 @@ end subroutine abimem_shutdown
 !!
 !! FUNCTION
 !!  Print info about memory usage to unit `unt`.
-!!  Add mallinfo values if `with_mallinfo` (default: False)
+!!  Add mallinfo values if `with_mallinfo` (default: True)
 !!
 !! INPUT
-!!
 
-subroutine abimem_report(unt, with_mallinfo)
+subroutine abimem_report(tag, unt, with_mallinfo)
 
 !Arguments ------------------------------------
+ character(len=*),intent(in) :: tag
  integer,intent(in) :: unt
  logical,optional,intent(in) :: with_mallinfo
 
@@ -318,12 +325,20 @@ subroutine abimem_report(unt, with_mallinfo)
  integer,save :: icall = 0
  integer(i8b),save :: prev_memory
  real(dp) :: diff_mb
+ logical :: with_minfo
 
 ! *************************************************************************
 
+ with_minfo = .True.
+ if (present(with_mallinfo)) with_minfo = with_mallinfo
+ if (with_minfo) call clib_print_mallinfo(unit=unt)
+ !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
+
  if (minfo%level == huge(one)) return
+
  icall = icall + 1
  write(unt,"(a)")"------------------------- MEMORY CONSUMPTION REPORT -----------------------------"
+ write(unt,"(a)")"tag: ", trim(tag)
  write(unt,"(3(a,i0))")" Malloc: ",minfo%num_alloc,", Free: ", minfo%num_free, ", M-F: ", minfo%num_alloc - minfo%num_free
  write(unt,"(a,f8.1,a)")" Memory allocated so far: ", minfo%memory * b2Mb, " (Mb)"
  write(unt,"(a,f8.1,5a,i0)")" Peak: ", minfo%peak * b2Mb," (MB) for variable: ", trim(minfo%peak_vname), &
@@ -331,10 +346,6 @@ subroutine abimem_report(unt, with_mallinfo)
  diff_mb = zero; if (icall > 1) diff_mb = (minfo%memory - prev_memory) * b2Mb
  write(unt,"(a,f8.1,a)")" Memory allocated wrt previous call: ", diff_mb, " (Mb)"
  prev_memory = minfo%memory
-
- if (present(with_mallinfo)) then
-   !if (with_mallinfo) call clib_print_mallinfo(unit=unt)
- end if
 
 end subroutine abimem_report
 !!***
@@ -447,7 +458,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  !if (do_log .and. minfo%last_snapshot >= zero) then
  !  now = abimem_wtime()
  !  if (now - minfo%last_snapshot >= minfo%dt_snapshot) then
- !    call abimem_report(std_out)
+ !    call abimem_report("", std_out)
  !    minfo%last_snapshot = now
  !  end if
  !end if
@@ -473,7 +484,8 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
 
    case (3)
      ! Write memory allocations larger than limit_mb
-     if (abs(isize * b2Mb) > minfo%limit_mb) then
+     if ((abs(isize * b2Mb) > minfo%limit_mb .and. minfo%limit_mb > zero) .or. &
+         (abs(isize * b2Mb) < minfo%limit_mb .and. minfo%limit_mb < zero)) then
        write(minfo%logunt,'(a,t60,a,1x,2(i0,1x),a,1x,2(i0,1x))') &
          trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, minfo%memory
      end if

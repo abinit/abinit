@@ -1179,7 +1179,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Check if this (kpoint, spin) was already calculated
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
-   !call abimem_report(std_out, with_mallinfo=.False.); write(std_out, *)"xmpi_count_requests", xmpi_count_requests
+
+   call abimem_report("begin kcalc loop", std_out)
+   call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
@@ -1583,7 +1585,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              nband_me = nband_kq
 
 !TODO: to distribute cgq and kets memory, use mband_mem per core in band comm, but coordinate everyone with
-! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls 
+! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls
              ABI_MALLOC(bands_treated_now, (nband_kq))
              bands_treated_now = 0
              bands_treated_now(band_ks) = 1
@@ -2375,6 +2377,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylmgr_kq)
    ABI_FREE(kpg_k)
    ABI_FREE(ffnlk)
+
+   call abimem_report("end kcalc loop", std_out)
+   !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
