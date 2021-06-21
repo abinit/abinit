@@ -153,19 +153,21 @@ contains
   subroutine build_rvec(self)
     class(supercell_maker_t), intent(inout) :: self
     real(dp):: scorners_newcell(8,3), corners(8,3), x(3), tmp(3)
-    integer :: rep(3), ix, iy, iz, counter
-    real(dp) :: eps=1d-8
+    integer :: minr(3), maxr(3), ix, iy, iz, counter
+    real(dp) :: eps=1d-9
     counter=0
     ! cornors
     scorners_newcell=transpose(reshape([0., 0., 0., 0., 0., 1., 0., 1., 0., &
          0., 1., 1., 1., 0., 0., 1., 0., 1.,  &
          1., 1., 0., 1., 1., 1.],[3,8]))
     corners = matmul(scorners_newcell, self%scmat)
-    rep=ceiling(maxval(corners, dim=1) - minval(corners, dim=1))
+    !rep=ceiling(maxval(corners, dim=1) - minval(corners, dim=1))
+    minr=floor(minval(corners, dim=1))
+    maxr=ceiling(maxval(corners, dim=1))
     ! NOTE: DO NOT CHANGE THE ORDER. It is used in the binary search. 
-    do ix = 0, rep(1)
-       do iy = 0, rep(2)
-          do iz = 0, rep(3)
+    do ix = minr(1), maxr(1)
+       do iy = minr(2), maxr(2)
+          do iz = minr(3), maxr(3)
              x(:)=[ix, iy, iz]
              tmp=self%to_red_sc(x)
              if ( (.not. any(tmp<=-1.0*eps)) &
@@ -258,11 +260,15 @@ contains
     integer, intent(in) :: R(3)
     integer, intent(inout) :: ind_sc, R_sc(3)
     integer :: rprim(3) 
-    R_sc=floor(self%to_red_sc(R*1.0d0))
+    R_sc=floor(self%to_red_sc(R*1.0d0)+1.0d-8)
     rprim(:)= R-matmul(R_sc, self%scmat)
     ind_sc=binsearch_left_integerlist(self%rvecs, rprim)
     if (ind_sc==0) then
-            ABI_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
+       !print *, "R: " , R
+       !print *, "Rredsc:", self%to_red_sc(R*1.0d0)
+       !print *, "R_sc: " , R_sc
+       !print *, "rprim", rprim
+       ABI_ERROR("Bug found. supercell_maker%R_to_sc: Cannot find rprim")
     end if
   end subroutine R_to_sc
 
