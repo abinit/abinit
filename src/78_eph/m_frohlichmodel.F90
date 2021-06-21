@@ -459,5 +459,297 @@ subroutine frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
  end subroutine frohlichmodel
 
+
+subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
+ type(ifc_type),intent(in) :: ifc
+!arrays
+ type(efmasdeg_type), intent(in) :: efmasdeg(:)
+ type(efmasval_type), intent(in) :: efmasval(:,:)
+
+!Local variables ------------------------------
+!scalars
+ integer  :: deg_dim  
+ integer  :: i, iband, jband, ideg, idir, iqdir, ieig
+ integer  :: ikpt, ixi, ipar, iphi, iphon, itheta, ik
+ integer  :: qsampling, nqdir, ntheta, nphi, nqpt, nxi, nphonons, nkgrid
+ integer  :: info, lwork
+ real(dp) :: costheta, phi, qpt, krange, kpoint, nq_factor, half_pi, detinv
+ !character(len=500) :: msg
+!arrays
+!Electronic
+ real(dp), allocatable :: eigenval(:),  rwork(:), unit_qdir(:,:)
+ complex(dpc), allocatable :: eigenvec(:,:), work(:)
+ complex(dpc), allocatable :: eig2_diag_cart(:,:,:,:)
+!Luttinger
+ logical  :: lutt_found(3), lutt_warn(3)
+ real(dp) :: lutt_params(3), lutt_unit_kdir(3,3)
+ real(dp), allocatable :: lutt_dij(:,:), lutt_eigenval(:,:)
+!Dielectric
+ real(dp), allocatable :: dielt_qdir(:)
+!Phonons
+ real(dp), allocatable :: polarity_qdir(:,:,:)
+ real(dp), allocatable :: phfrq_qdir(:,:)
+!Self-energy and polaron mass
+ real(dp) :: theta, xi
+ real(dp) :: temporary1(3,3), temporary2(3,3), temporary3(3,3)
+ real(dp) :: unitary_33(3,3), hamiltonian(3,3)
+ real(dp) :: evec_eham(3,3), eval_eham(3,3)
+ real(dp) :: intsum(3,3), d2sigmadk2(3,3), omega_zero(3)
+ real(dp) :: kpt(3), k_vector(3), q_vector(3), k_plus_q(3)
+ real(dp), allocatable :: sigma(:,:), invpolmass(:,:)
+
+
+!Define self-energy integration parameters
+!Based solely solely one value - ntheta
+ntheta   = dtset%efmas_ntheta
+nphi     = ntheta
+nqpt     = ntheta
+!Set nkgrid and krange
+!For the time being we need 2 points for the finite difference
+!krange = 1E-4 - will be improved
+nkgrid = 2
+krange = 1E-4 !Remove the absolute value with a material dep. one
+
+!Define constants
+! 3x3 Unitary matrix
+unitary_33  = 0.0_dp
+do i=1,3
+ unitary_33(i,i) = 1.0_dp
+enddo
+
+!test
+write(ab_out,'(1a)') 'print this'
+
+!Retrieve Luttinger parameters
+!Compute the Luttinger parameters for the cubic case (deg_dim=3)
+!Only triply degenerate CB or VB
+deg_dim=3
+if(deg_dim==3) then
+
+  ABI_MALLOC(eig2_diag_cart,(3,3,deg_dim,deg_dim))
+
+  !Convert eig2_diag to cartesian coordinates
+  do iband=1,deg_dim
+     do jband=1,deg_dim
+        eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
+        eig2_diag_cart(:,:,iband,jband)=&
+&        matmul(matmul(cryst%rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(cryst%rprimd))/two_pi**2
+     enddo
+  enddo
+
+  ABI_MALLOC(lutt_eigenval, (3,deg_dim))
+  ABI_MALLOC(lutt_dij, (deg_dim, deg_dim))
+
+  !Define unit_kdir for Luttinger parameters
+  lutt_unit_kdir(:,1) = (/1,0,0/)
+  lutt_unit_kdir(:,2) = 1/sqrt(2.0)*(/1,1,0/)
+  lutt_unit_kdir(:,3) = 1/sqrt(3.0)*(/1,1,1/)
+
+  !Degeneracy problems warning
+  lutt_warn=(/.false.,.false.,.false./)
+
+  !Inverse effective mass tensor eigenvalues in lutt_unit_kdir directions
+  do idir=1,3
+    do iband=1,deg_dim
+      do jband=1,deg_dim
+        lutt_dij(iband,jband)=&
+&             DOT_PRODUCT(lutt_unit_kdir(:,idir),MATMUL(eig2_diag_cart(:,:,iband,jband),lutt_unit_kdir(:,idir)))
+      enddo
+    enddo
+
+    eigenvec=lutt_dij ; lutt_eigenval(idir,:)=zero
+    work=zero     ; rwork=zero
+    call zheev('V','U',deg_dim,eigenvec,deg_dim,lutt_eigenval(idir,:),work,lwork,rwork,info)
+    ABI_CHECK(info == 0, sjoin("zheev returned info:", itoa(info)))
+  enddo
+
+  !Check degeneracies in (100) direction, and evaluate A and B.
+  !Eigenvalues are 2*A (d=1), 2*B (d=2)
+  if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
+    lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)
+    lutt_params(1)=0.5*lutt_eigenval(1,1)
+  else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol5) then
+    lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,1))/2)
+    lutt_params(1)=0.5*lutt_eigenval(1,3)
+  else
+    lutt_warn(1)=.true.
+  endif
+
+  !Check degeneracies in (111) direction and evaluate C
+  !Eigenvalues are 2/3*(A+2B-C) (d=2), 2/3*(A+2B+2C) (d=1)
+  if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol5) then
+    lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,3)))
+  else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol5) then
+    lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,1)))
+  else
+    lutt_warn(2)=.true.
+  endif
+
+  !Verify that the (110) direction eigenvalues are coherent with Luttinger parameters
+  !Eigenvalues are 2B, A+B-C, A+B+C
+  lutt_found=(/.false.,.false.,.false./)
+  do ipar=1,deg_dim
+    if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol4) then
+      lutt_found(1)=.true.
+    else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol4) then
+      lutt_found(2)=.true.
+    else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol4) then
+      lutt_found(3)=.true.
+    endif
+  enddo
+
+  if(.not. (all(lutt_found))) then
+    lutt_warn(3)=.true.
+  endif
+
+  ABI_FREE(lutt_eigenval)
+  ABI_FREE(lutt_dij)
+
+endif !Luttinger parameters
+
+!Retrieve IR active phonon frequencies
+!Compute phonon frequencies and mode-polarity for each qdir
+call ifc%calcnwrite_nana_terms(cryst, nqdir, unit_qdir, phfrq2l=phfrq_qdir, polarity2l=polarity_qdir)
+
+!Compute dielectric tensor for each qdir
+!Retrieve epsilon*
+do iqdir=1,nqdir
+  dielt_qdir(iqdir)=DOT_PRODUCT(unit_qdir(:,iqdir),MATMUL(ifc%dielt(:,:),unit_qdir(:,iqdir)))
+enddo
+
+!Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
+
+do ik = 1, nkgrid
+  kpoint = (ik -1.0_dp)/krange*lutt_unit_kdir(1,1)
+  call zheev('V','U',3,evec_eham,hamiltonian(lutt_params, kpoint),3,eval_eham,work,lwork,rwork,info)
+enddo
+
+ABI_MALLOC(sigma,(nkgrid,ieig))
+
+!main loop
+!Summation over phonon eigenmodes - to be added
+nphonons = 1
+do iphon = 1, nphonons
+ !Summation over electronic eigenvalues 
+  do ieig=1,3
+    !Summation over k-range 
+    !Here consider a small BZ region around Gamma
+    !A convergene study might be performed around this value
+    do ik = 1,nkgrid
+      !Define k-point vector around which one integrates
+      !Needs at least 2 considering TRS and finite difference employed later
+      kpoint = ( ik - 1.0_dp) / krange
+      !Perform hyperbolic tangent integration for the semi-infinite q domain
+      !Use a mapping to a tangent function - faster convergence wrt qpt sampling
+      !Enforce one sampling parameter nxi = ntheta = nphi
+      do ixi = 1,nxi + 1
+        xi = ( ixi - 1.0_dp )*pi/2.0_dp
+        do itheta = 1,ntheta + 1
+          theta = (itheta - 1.0_dp)/ntheta
+          do iphi = 1,nphi + 1
+            phi = (iphi - 1.0_dp)*pi/nphi
+            !Remap theta points on the sphere instead of a linear f(x) = x mapping
+            !Use f(x) = 2x - 1 mapping 
+            costheta = 2.0_dp * itheta/ntheta - 1.0_dp
+            qpt = ( omega_zero(iphon)/lutt_params(1) )**2.0_dp*tan(xi)
+            !build q vector
+            q_vector(1) = qpt*(1.0_dp - theta**2.0_dp)**0.5_dp*cos(phi)
+            q_vector(2) = qpt*(1.0_dp - theta**2.0_dp)**0.5_dp*sin(phi)
+            q_vector(3) = qpt*theta
+            !build k vector
+            k_vector(:) = 1.0_dp
+            !build k+q vector
+            k_plus_q = k_vector + q_vector
+            intsum(:, :) = matmul(eval_eham(:,:),unitary_33) - ( hamiltonian(lutt_params, k_plus_q ) + omega_zero(iphon)*unitary_33 )
+            temporary1 = invmat3( intsum(ieig, ieig) )
+            temporary2 = matmul( evec_eham(:, :),  temporary1 )
+            temporary3 = matmul( temporary2, temporary1 )
+            if( ( phi .EQ. zero ) .OR. ( phi .EQ. two_pi ) )then
+			  temporary3 = temporary3/2.0_dp
+            endif
+            if( ( theta .EQ. zero ) .OR. ( theta .EQ. ntheta ) )then
+			  temporary3 = temporary3/2.0_dp
+            endif
+            if( ( xi .EQ. zero ) .OR. ( theta .EQ. half_pi ) )then
+			  temporary3 = temporary3/2.0_dp
+            endif
+!            sigma(ikp,ieig) = sigma(ikp,ieig) + piinv*inv_epsilon*omega_zero(iphon)*temporary3*(omega_zero/lutt_params(1))^half/(cos(xi))**2.0
+          enddo
+        enddo
+     enddo
+  enddo
+ enddo
+enddo
+
+!Normalization factor for the integral
+nq_factor = ntheta*nphi*qsampling*2.0_dp/pi
+
+sigma = sigma / nq_factor
+
+do ieig=1,3
+  !Summation over k-range 
+  !Here consider a small BZ region around Gamma
+  !A convergene study might be performed around this value
+  do ik = 1,nkgrid
+    !Finite difference for the 2nd derivative of the self energy
+    kpoint = ( ik - 1.0_dp) / krange
+!    d2sigmadk2(ik,ieig) = 2.0/kpoint^2.0_dp * ( sigma( ik,ieig) - sigma(1, ieig) )
+  enddo
+enddo
+
+do ieig=1,3
+  !Calculate the inverse polaron mass
+  invpolmass(1,:) = 1.0_dp/eval_eham(nkgrid,:) - d2sigmadk2(nkgrid, :)    
+enddo
+
+
+end subroutine polaronmass
+
+function invmat3(A) result(B)
+    !Invert a 3x3 matrix  directly - Faster than calling LAPACK 
+    real(dp), intent(in) :: A(3,3)   !! Matrix
+    real(dp)             :: B(3,3)   !! Inverse matrix
+    real(dp)             :: detinv
+
+    ! Calculate the inverse determinant of the matrix
+    detinv = 1/(A(1,1)*A(2,2)*A(3,3) - A(1,1)*A(2,3)*A(3,2)&
+              - A(1,2)*A(2,1)*A(3,3) + A(1,2)*A(2,3)*A(3,1)&
+              + A(1,3)*A(2,1)*A(3,2) - A(1,3)*A(2,2)*A(3,1))
+
+    ! Calculate the inverse of the matrix
+    B(1,1) = +detinv * (A(2,2)*A(3,3) - A(2,3)*A(3,2))
+    B(2,1) = -detinv * (A(2,1)*A(3,3) - A(2,3)*A(3,1))
+    B(3,1) = +detinv * (A(2,1)*A(3,2) - A(2,2)*A(3,1))
+    B(1,2) = -detinv * (A(1,2)*A(3,3) - A(1,3)*A(3,2))
+    B(2,2) = +detinv * (A(1,1)*A(3,3) - A(1,3)*A(3,1))
+    B(3,2) = -detinv * (A(1,1)*A(3,2) - A(1,2)*A(3,1))
+    B(1,3) = +detinv * (A(1,2)*A(2,3) - A(1,3)*A(2,2))
+    B(2,3) = -detinv * (A(1,1)*A(2,3) - A(1,3)*A(2,1))
+    B(3,3) = +detinv * (A(1,1)*A(2,2) - A(1,2)*A(2,1))
+end function
+
+function hamiltonian(luttin, V) result(H)
+    !Build the Hamiltonian that enters the self-energy integral
+    real(dp), intent(in) :: luttin(3)   !! Luttinger parameters
+    real(dp), intent(in) :: V(3)   !! wave-vector
+    real(dp)             :: H(3,3)
+
+    H(1,1) = luttin(1)*V(1)**2.0_dp + luttin(2)*( V(2)**2.0_dp + V(3)**2.0_dp )
+    H(1,2) = luttin(3)*V(1)*V(2)
+    H(1,3) = luttin(3)*V(1)*V(3)
+    H(2,1) = H(1,2)
+    H(2,2) = luttin(1)*V(2)**2.0_dp + luttin(2)*( V(1)**2.0_dp + V(3)**2.0_dp ) 
+    H(2,3) = luttin(3)*V(2)*V(3)
+    H(3,1) = H(1,3) 
+    H(3,2) = H(2,3) 
+    H(3,3) = luttin(1)*V(3)**2.0_dp + luttin(2)*( V(1)**2.0_dp + V(2)**2.0_dp ) 
+    
+end function
+
 end module m_frohlichmodel
 !!***
