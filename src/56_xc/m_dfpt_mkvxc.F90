@@ -43,6 +43,7 @@ module m_dfpt_mkvxc
  public :: dfpt_mkvxc
  public :: dfpt_mkvxc_noncoll
  public :: dfpt_mkvxcggadq
+ public :: dfpt_mkvxcgga_n0met
 !!***
 
 contains
@@ -1077,6 +1078,156 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_FREE(dadgradn_t1)
 
 end subroutine dfpt_mkvxcggadq
+!!***
+
+!!****f* ABINIT/dfpt_mkvxcgga_n0met
+!! NAME
+!! dfpt_mkvxcgga_n0met
+!!
+!! FUNCTION
+!! Compute the contribution to the second q-gradient of the metric 
+!! perturbation that comes from gga XC potentials and depends only
+!! on ground state rho
+!! 
+!! INPUTS
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!    if 2, COMPLEX
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!  kxc(nfft,nkxc)=exchange and correlation kernel (see below)
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the kxc array
+!!  nspden=number of spin-density components
+!!  qdirc= indicates the Cartesian direction of the q-gradient (1,2 or 3)
+!!  rhor1tmp(cplex*nfft,2)=array for first-order electron spin-density
+!!   in electrons/bohr**3 (second index corresponds to spin-up and spin-down)
+!!
+!! OUTPUT
+!!  vxc1(2*nfft,nspden)=change in exchange-correlation potential
+!!
+!! NOTES
+!!  For the time being, a rather crude coding, to be optimized ...
+!!  Content of Kxc array:
+!!  Only works with nspden=1
+!!   ===== if GGA
+!!    if nspden==1:
+!!       kxc(:,1)= d2Exc/drho2
+!!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!       kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!       kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)|
+!dExc/d|grad(rho)| )
+!!       kxc(:,5)= gradx(rho)
+!!       kxc(:,6)= grady(rho)
+!!       kxc(:,7)= gradz(rho)
+!!
+!! PARENTS
+!!      m_mklocl
+!!
+!! CHILDREN
+!!      dfpt_mkvxc,timab
+!!
+!! SOURCE
+
+subroutine dfpt_mkvxcgga_n0met(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
+&                    nkxc,nspden,qdirc,rhor1,vxc1)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nfft,nkxc,nspden,qdirc
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in),target :: rhor1(cplex*nfft,nspden)
+ real(dp),intent(out) :: vxc1(2*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,ir,ishift,ngrad,nspgrad
+ real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
+ real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
+ real(dp) :: gradrho_gradrho1,gradrho_grr0qr1
+ real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ character(len=500) :: msg
+!arrays
+ real(dp) :: qphon(3)
+ real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
+ real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
+ real(dp),allocatable,target :: ar1(:,:)
+ real(dp),allocatable :: a_gradi_r1(:,:)
+ real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
+ real(dp),allocatable :: rho1now(:,:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
+
+! *************************************************************************
+
+ DBG_EXIT("COLL")
+
+ if (nkxc/=7) then
+   msg='Wrong nkxc value for GGA in the longwave driver (optdriver=10)!'
+   ABI_BUG(msg)
+ end if
+
+!Compute the gradients of the first-order density
+!rho1now(:,:,1) contains the first-order density, and
+!rho1now(:,:,2:4) contains the gradients of the first-order density
+ ishift=0 ; ngrad=2
+ qphon(:)=zero 
+! rhor1_ptr => rhor1
+ ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
+! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1,rho1now)
+
+!Apply the XC kernel
+ nspgrad=1
+ ABI_MALLOC(ar1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(a_gradi_r1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgradn_t1,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(dadgradn_t2,(cplex*nfft,nspgrad))
+ do ir=1,nfft
+   r0(:)=kxc(ir,5:7); r1(:)=rho1now(ir,1,2:4)
+   gradrho_gradrho1=dot_product(r0,r1)
+   ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
+   a_gradi_r1(ir,1)=kxc(ir,2)*r1(qdirc)
+   dadgradn_t2(ir,1)=kxc(ir,4)*gradrho_gradrho1*r0(qdirc)
+   dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
+ end do
+ do ii=1,3
+   if (ii==qdirc) dadgradn_t1(:,1,ii)=dadgradn_t1(:,1,ii)+ar1(:,1)
+ end do
+
+!Use xcden to compute the real space gradient of A*rho^(1). 
+!Reuse rho1now storage.
+! nullify(rhor1_ptr)
+! rhor1_ptr => ar1
+! rho1now=zero
+! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
+! call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,ar1,rho1now)
+
+!Incorporate the terms that do not need further treatment 
+!(a -i factor is applied here)
+ do ir=1,nfft
+   ii=2*ir
+   vxc1(ii-1,1)=zero
+   vxc1(ii,1)= -a_gradi_r1(ir,1)& !-rho1now(ir,1,1+qdirc) &
+ &            -dadgradn_t2(ir,1)
+ end do
+ ABI_FREE(rho1now)
+ ABI_FREE(a_gradi_r1)
+ ABI_FREE(dadgradn_t2)
+
+!Now the two terms whose sums over real-space derivatives have to be computed
+!The negative sign here is canceled by a -1 factor inside xcpotdq
+ call xcpotdq(dadgradn_t1,cplex,gprimd,ishift,mpi_enreg,nfft, &
+& ngfft,ngrad,nspden,nspgrad,vxc1)
+
+ ABI_FREE(dadgradn_t1)
+
+end subroutine dfpt_mkvxcgga_n0met
 !!***
 
 end module m_dfpt_mkvxc

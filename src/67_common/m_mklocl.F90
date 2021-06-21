@@ -43,7 +43,7 @@ module m_mklocl
  use m_gtermcutoff,only : termcutoff
 
  use m_splines,  only : splfit
- use m_dfpt_mkvxc, only : dfpt_mkvxcggadq
+ use m_dfpt_mkvxc, only : dfpt_mkvxcgga_n0met
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -1942,12 +1942,13 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !Local variables -------------------------
 !scalars
  integer :: beta, delta, gamma
- integer :: ia,i1,i2,i3,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
- integer :: itypat,re=1
+ integer :: ia,i1,i2,i3,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ii1
+ integer :: itypat,jj
+ integer, parameter :: im=2, re=1
  real(dp),parameter :: tolfix=1.000000001_dp
  real(dp) :: cutoff,delbd,delbg,deldg,gfact,gmag,gq1
  real(dp) :: gq2,gq3,gsquar,pisqrinv
- real(dp) :: sfi,sfr,term1,term2,uogsquar,work1re,xnorm
+ real(dp) :: sfi,sfr,term1,term2,tmpre,tmpim,uogsquar,work1re,xnorm
  logical :: qeq0
  character(len=500) :: msg
 !arrays
@@ -1955,7 +1956,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3),gqc(3),vion1(1),vion1dq(1),vion1dqdq(1)
- real(dp),allocatable :: work1(:,:),vxc1part(:)
+ real(dp),allocatable :: work1(:,:)
 
 ! *********************************************************************
 
@@ -2155,19 +2156,15 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  Calculate the GS density XC contribution (if GGA)
    vxc1dqdq(:)=zero
    if (nkxc == 7) then
-     ABI_MALLOC(vxc1part,(cplex*nfft))
-     if (beta==gamma) then
-       call dfpt_mkvxcggadq(1,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
-     & nspden,delta,rhor,vxc1part)
-       vxc1dqdq(:)=vxc1part(:)
-     end if
-     if (beta==delta) then
-       call dfpt_mkvxcggadq(1,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
-     & nspden,gamma,rhor,vxc1part)
-       vxc1dqdq(:)=vxc1dqdq(:) + vxc1part(:)
-     end if
-     vxc1dqdq(:)=vxc1dqdq(:)/two_pi 
-     ABI_FREE(vxc1part)
+     call dfpt_mkvxcgga_n0met(1,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
+   & nspden,delta,rhor,vxc1dqdq)
+     !Fictitious i factor temporarily applied. 
+     !It is later canceled by the (-i) factor of the total matrix element
+     do ii=1,nfft
+       jj=ii*2
+       vxc1dqdq(jj-1)=tmpre; vxc1dqdq(jj)=tmpim
+       vxc1dqdq(jj-1)=-tmpim; vxc1dqdq(jj)=tmpre
+     end do
    end if
 
 !End the condition of non-electric-field
