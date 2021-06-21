@@ -2156,8 +2156,8 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !  Calculate the GS density XC contribution (if GGA)
    vxc1dqdq(:)=zero
    if (nkxc == 7) then
-     call dfpt_mkvxcgga_n0met(1,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc, &
-   & nspden,delta,rhor,vxc1dqdq)
+     call dfpt_mkvxcgga_n0met(beta,1,delta,gamma,gprimd,kxc,mpi_enreg, &
+   & nfft,ngfft,nkxc,nspden,rhor,vxc1dqdq)
      !Fictitious i factor temporarily applied. 
      !It is later canceled by the (-i) factor of the total matrix element
      do ii=1,nfft
