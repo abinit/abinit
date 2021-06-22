@@ -1061,8 +1061,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  ABI_FREE(dadgradn_t2)
  ABI_FREE(ar1)
 
-!Now the two terms whose sums over real-space derivatives have to be computed
-!The negative sign here is canceled by a -1 factor inside xcpotdq
+!Now the term whose sum over real-space derivatives has to be computed
  call xcpotdq(dadgradn_t1,cplex,gprimd,ishift,mpi_enreg,nfft, &
 & ngfft,ngrad,nspden,nspgrad,vxc1)
 
@@ -1139,19 +1138,18 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ishift,ngrad,nspgrad
+ integer :: alpha,ii,ir,ishift,ngrad,nspgrad
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
- real(dp) :: delad,delag,delbd,delbg
+ real(dp) :: delag,delad,delbd,delbg
  real(dp) :: gradrho_gradrho1,gradrho_grr0qr1
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
- real(dp) :: l1_t1,l1_t2,l2_t1,l2_t2,l2_t3,l3_t1,l3_t2,l3_t3
- real(dp) :: l4_t1,l4_t2,l4_t3
  character(len=500) :: msg
 !arrays
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
- real(dp),allocatable :: line1(:,:),line2(:,:),line3(:,:),line4(:,:,:)
+ real(dp),allocatable :: dadgtgn(:,:),gna(:,:),dadgngn_1(:,:),dadgngn_2(:,:)
+ real(dp),allocatable :: dadgngn(:,:,:),kro_an(:,:,:),sumgrad(:,:,:)
 
 ! *************************************************************************
 
@@ -1169,40 +1167,63 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 
 !Apply the XC kernel
  nspgrad=1
- ABI_MALLOC(line1,(cplex*nfft,nspgrad))
- ABI_MALLOC(line2,(cplex*nfft,nspgrad))
- ABI_MALLOC(line3,(cplex*nfft,nspgrad))
- ABI_MALLOC(line4,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(dadgtgn,(cplex*nfft,nspgrad))
+ ABI_MALLOC(gna,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgngn_1,(cplex*nfft,nspgrad))
+ ABI_MALLOC(dadgngn_2,(cplex*nfft,nspgrad))
  do ir=1,nfft
    r0(:)=kxc(ir,5:7)
-   ar1(ir,1)=kxc(ir,2)*rho1now(ir,1,1)
-   line2(ir,1)=kxc(ir,2)*r1(qdirc)
-   dadgradn_t2(ir,1)=kxc(ir,4)*gradrho_gradrho1*r0(qdirc)
-   dadgradn_t1(ir,1,:)=kxc(ir,4)*r0(:)*r0(qdirc)*rho1now(ir,1,1)
- end do
- do ii=1,3
-   if (ii==qdirc) dadgradn_t1(:,1,ii)=dadgradn_t1(:,1,ii)+ar1(:,1)
+   dadgtgn(ir,1)=two*kxc(ir,4)*r0(beta)*r0(delta)*r0(gamma)
+   gna(ir,1)=(delbg*r0(delta)+delbd*r0(gamma))*kxc(ir,2)
+   dadgngn_1(ir,1)=delbd*kxc(ir,4)*rhor(ir,1)*r0(gamma)
+   dadgngn_2(ir,1)=delbg*kxc(ir,4)*rhor(ir,1)*r0(delta)
  end do
 
 !Incorporate the terms that do not need further treatment 
-!(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii-1,1)=zero
-   vxc1(ii,1)= -line2(ir,1)& !-rho1now(ir,1,1+qdirc) &
- &            -dadgradn_t2(ir,1)
+   vxc1(ii-1,1)= -dadgtgn(ir,1)-gna(ir,1)
+   vxc1(ii,1)= zero
  end do
- ABI_FREE(line1)
- ABI_FREE(line2)
- ABI_FREE(line3)
+ ABI_FREE(dadgtgn)
+ ABI_FREE(gna)
 
-!Now the two terms whose sums over real-space derivatives have to be computed
-!The negative sign here is canceled by a -1 factor inside xcpotdq
+!Build the last term whose gradient needs to be computed
+ ABI_MALLOC(dadgngn,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(kro_an,(cplex*nfft,nspgrad,3))
+ ABI_MALLOC(sumgrad,(cplex*nfft,nspgrad,3))
+ do alpha=1,3
+   delad=0.0_dp; delag=0.0_dp
+   if (alpha==delta) delad=1.0_dp
+   if (alpha==gamma) delag=1.0_dp
+   do ir=1,nfft
+     r0(:)=kxc(ir,5:7)
+     dadgngn(ir,1,alpha)=(dadgngn_1(ir,1)+dadgngn_2(ir,1))*r0(alpha)
+     kro_an(ir,1,alpha)=(delbd*delag+delbg*delad)*rhor(ir,1)*kxc(ir,2)
+     sumgrad(ir,1,alpha)=dadgngn(ir,1,alpha)+kro_an(ir,1,alpha)
+   end do
+ end do
+
+ ABI_FREE(dadgngn_1)
+ ABI_FREE(dadgngn_2)
+ ABI_FREE(dadgngn)
+ ABI_FREE(kro_an)
+
+!Now the term whose sum over real-space derivatives has to be computed.
+!(Use the same routine as in the q-gradient of the XC kernel. It saves
+! the gradient sum in the imaginary part of vxc1 and includes an additional
+! two_pi factor. Need to fix this after the call.) 
  ishift=0 ; ngrad=2
- call xcpotdq(dadgradn_t1,cplex,gprimd,ishift,mpi_enreg,nfft, &
+ call xcpotdq(sumgrad,cplex,gprimd,ishift,mpi_enreg,nfft, &
 & ngfft,ngrad,nspden,nspgrad,vxc1)
 
- ABI_FREE(line4)
+ do ir=1,nfft
+   ii=2*ir
+   vxc1(ii-1,1)=vxc1(ii-1,1)+vxc1(ii,1)/two_pi
+   vxc1(ii,1)=zero
+ end do 
+
+ ABI_FREE(sumgrad)
 
 end subroutine dfpt_mkvxcgga_n0met
 !!***
