@@ -32,7 +32,7 @@ MODULE m_clib
  public :: clib_mtrace
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack   ! Set stack size limit to maximum allowed value.
- !public :: clib_usleep        ! Suspend calling thread for microseconds of clock time
+ !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint

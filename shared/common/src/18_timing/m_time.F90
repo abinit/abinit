@@ -784,13 +784,14 @@ end function time_get_papiopt
 !!  Timing subroutine. Calls machine-dependent "timein" which returns elapsed cpu and wall clock times in sec.
 !!  Depending on value of "option" routine will:
 !!
-!!  (0) zero all accumulators
-!!  (1) start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
-!!  (2) stop time slice; add time to accumulator n also increase by one the counter for this accumulator
-!!  (3) start with new incremental time slice for accumulator n
+!!  (0) Zero all accumulators
+!!  (1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  (2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  (3) Start with new incremental time slice for accumulator n
 !!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
-!!  (4) report time slice for accumlator n (not full time accumlated)
-!!  (5) option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!        Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
+!!  (4) Report time slice for accumlator n (not full time accumlated)
+!!  (5) Option to suppress timing (nn should be 0) or reenable it (nn /=0)
 !!
 !!  If, on first entry, subroutine is not being initialized, it
 !!  will automatically initialize as well as rezero accumulator n.
@@ -928,6 +929,7 @@ subroutine timab(nn, option, tottim)
 
    case (3)
      ! Use previously obtained values to initialize timab for nn
+     ! Typically used immediately after a call to timab for another counter with option=2 . This saves one call to timein.
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
 #ifdef HAVE_PAPI

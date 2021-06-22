@@ -344,7 +344,7 @@ contains
      ibnd_mat(:,ii) = ibnd_dum(:,ii-ibn_tot)
    end do
 
-   ABI_DEALLOCATE (ibnd_dum)
+   ABI_FREE (ibnd_dum)
  end subroutine bond_compute
  !!***
 

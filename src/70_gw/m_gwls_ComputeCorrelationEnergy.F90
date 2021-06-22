@@ -1405,6 +1405,7 @@ call cleanup_Lanczos_basis()
 call cleanup_projected_Sternheimer_epsilon()
 
 call cpu_time(total_time2)
+total_time1 = zero
 total_time = total_time2-total_time1
 write(timing_string,'(A)')  "               TOTAL TIME                           :   "
 call write_timing_log(timing_string,total_time)

@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.4.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Tue 27 Apr 2021.
+- ( at 14h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t13/t13.in
-- output file    -> t13.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/TestBot_MPI1/libxc_t13/t13.abi
+- output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
 
@@ -192,8 +192,8 @@ P           mkmem           1
         xc_tb09_c1     9.99900000E+01
         xc_tb09_c2     9.99900000E+01
         xc_tb09_c3     9.99900000E+01
-        xc_tb09_c4     1.58000000E+00
-        xc_tb09_c5     9.99900000E+01
+        xc_tb09_c4     9.99900000E+01
+        xc_tb09_c5     1.58000000E+00
             znucl        6.00000
 
 ================================================================================
@@ -232,8 +232,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -390,8 +390,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -555,8 +555,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -722,8 +722,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -887,8 +887,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -913,35 +913,35 @@ tolerances: {tolvrs: 1.00E-16, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -4.1657926120518    -4.166E+00 1.451E-07 8.979E+01
- ETOT  2  -4.1362388365374     2.955E-02 1.565E-09 3.909E+01
- ETOT  3  -4.1123319542951     2.391E-02 3.651E-06 7.863E+00
- ETOT  4  -4.0977329264921     1.460E-02 1.547E-06 3.251E-01
- ETOT  5  -4.0957451384984     1.988E-03 4.206E-08 8.709E-02
- ETOT  6  -4.0954652217006     2.799E-04 4.372E-10 3.449E-03
- ETOT  7  -4.0954935165319    -2.829E-05 3.241E-11 1.134E-03
- ETOT  8  -4.0954614782459     3.204E-05 5.805E-12 5.498E-06
- ETOT  9  -4.0954572125359     4.266E-06 2.098E-13 7.553E-07
- ETOT 10  -4.0954589803159    -1.768E-06 1.009E-14 5.881E-08
+ ETOT  1  -4.1268519185279    -4.127E+00 5.840E-08 1.422E+02
+ ETOT  2  -4.0979655374881     2.889E-02 1.688E-09 4.253E+01
+ ETOT  3  -4.0794890631705     1.848E-02 1.364E-06 3.281E+00
+ ETOT  4  -4.0773227899639     2.166E-03 1.446E-08 2.033E-01
+ ETOT  5  -4.0771728905538     1.499E-04 1.022E-09 2.859E-02
+ ETOT  6  -4.0771498314515     2.306E-05 3.684E-11 7.165E-04
+ ETOT  7  -4.0771506756721    -8.442E-07 3.068E-12 2.426E-05
+ ETOT  8  -4.0771506409688     3.470E-08 1.709E-13 5.613E-07
+ ETOT  9  -4.0771510534146    -4.124E-07 5.522E-15 3.637E-08
+ ETOT 10  -4.0771508711867     1.822E-07 6.559E-16 9.944E-10
 
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    1.3020E+00  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=    1.8532E-06  at reduced coord.    0.5000    0.5000    0.5000
-   Integrated=    3.4424E+00
+      Maximum=    1.3042E+00  at reduced coord.    0.0000    0.0000    0.0000
+      Minimum=    1.1497E-06  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    3.4907E+00
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.37651077E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.37651077E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.37651077E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.27678794E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.27678794E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.27678794E-03  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  potential residual=  5.881E-08 exceeds tolvrs=  1.000E-16
+  potential residual=  9.944E-10 exceeds tolvrs=  1.000E-16
 
 
 --- !ResultsGS
@@ -954,15 +954,15 @@ lattice_vectors:
 lattice_lengths: [   8.48528,    8.48528,    8.48528, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   4.3200000E+02
-convergence: {deltae: -1.768E-06, res2:  5.881E-08, residm:  1.009E-14, diffor: null, }
-etotal    :  -4.09545898E+00
+convergence: {deltae:  1.822E-07, res2:  9.944E-10, residm:  6.559E-16, diffor: null, }
+etotal    :  -4.07715087E+00
 entropy   :   0.00000000E+00
-fermie    :  -1.02482993E-03
+fermie    :   1.70563918E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.37651077E-03,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.37651077E-03,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.37651077E-03, ]
-pressure_GPa:  -6.9919E+01
+- [  2.27678794E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.27678794E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.27678794E-03, ]
+pressure_GPa:  -6.6985E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 cartesian_forces: # hartree/bohr
@@ -973,12 +973,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          3.05536970
+    1        2.00000          3.08575795
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   74.352E-16; max=  10.094E-15
+ Mean square residual over all n,k,spin=   31.303E-17; max=  65.593E-17
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -997,36 +997,36 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  length scales= 12.000000000000 12.000000000000 12.000000000000 bohr
               =  6.350126503080  6.350126503080  6.350126503080 angstroms
  prteigrs : about to open file t13o_DS5_EIG
- Fermi (or HOMO) energy (hartree) =  -0.00102   Average Vxc (hartree)=   0.14845
+ Fermi (or HOMO) energy (hartree) =   0.01706   Average Vxc (hartree)=   0.20341
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.34394   -0.00102   -0.00102   -0.00102
+  -0.32773    0.01706    0.01706    0.01706
 
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.44242874357053E+00
-hartree             :  1.80710547395493E+00
-xc                  : -1.99964324554686E-01
+kinetic             :  3.49067121741045E+00
+hartree             :  1.84051598691927E+00
+xc                  : -2.00780491282641E-01
 Ewald energy        : -3.05657471607587E+00
 psp_core            :  1.24347554578084E-03
-local_psp           : -6.93267931235989E+00
-non_local_psp       :  8.42981679603288E-01
-total_energy        : -4.09545898031593E+00
-total_energy_eV     : -1.11443106396261E+02
-band_energy         : -6.89939299161737E-01
+local_psp           : -6.99485526931924E+00
+non_local_psp       :  8.42628925615520E-01
+total_energy        : -4.07715087118672E+00
+total_energy_eV     : -1.10944917410995E+02
+band_energy         : -6.21353953268649E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.37651077E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.37651077E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.37651077E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.27678794E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.27678794E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.27678794E-03  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -6.9919E+01 GPa]
-- sigma(1 1)=  6.99193490E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.99193490E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.99193490E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -6.6985E+01 GPa]
+- sigma(1 1)=  6.69854027E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.69854027E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.69854027E+01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1041,7 +1041,7 @@ band_energy         : -6.89939299161737E-01
            etotal2    -4.1846644355E+00
            etotal3    -4.0954589803E+00
            etotal4    -4.2079287235E+00
-           etotal5    -4.0954589803E+00
+           etotal5    -4.0771508712E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1089,7 +1089,7 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     3.9180757231E-03  3.9180757231E-03  3.9180757231E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5     2.3765107699E-03  2.3765107699E-03  2.3765107699E-03
+           strten5     2.2767879446E-03  2.2767879446E-03  2.2767879446E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1126,8 +1126,8 @@ P           mkmem           1
         xc_tb09_c1     9.99900000E+01
         xc_tb09_c2     9.99900000E+01
         xc_tb09_c3     9.99900000E+01
-        xc_tb09_c4     1.58000000E+00
-        xc_tb09_c5     9.99900000E+01
+        xc_tb09_c4     9.99900000E+01
+        xc_tb09_c5     1.58000000E+00
             znucl        6.00000
 
 ================================================================================
@@ -1177,7 +1177,7 @@ P           mkmem           1
 -
 - [3] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -1216,10 +1216,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          9.8
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          9.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  22 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.9  wall=          9.8
+.Delivered  21 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.1  wall=          9.0

@@ -109,6 +109,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo, prtvol
  integer :: isppol,jdtset,marr,mband_lower,mband_upper
  integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
+ integer :: mband_mem
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
  integer :: fftalg,fftalga,fftalgc
@@ -121,6 +122,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !arrays
  integer :: ngfft(18),ngfftdg(18),ngfftc(3),tread(12)
  integer,allocatable :: intarr(:),istwfk(:),symrel(:,:,:)
+ integer,allocatable :: mybands(:)
  integer,pointer :: nkpt_rbz(:)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: gmet(3,3),gprimd(3,3),kpt(3),qphon(3),rmet(3,3),rprimd(3,3)
@@ -197,7 +199,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'np_spkpt',tread(4),'INT')
    if(tread(4)==1)then
      dtsets(idtset)%np_spkpt=intarr(1)
-   else 
+   else
 !    npkpt is obsolete, but still read
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npkpt',tread(4),'INT')
      if(tread(4)==1)then
@@ -270,6 +272,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
    !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
+
+   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
+   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
@@ -571,11 +576,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    Also, the reduction of k points due to symmetry in RF calculations
 !    is NOT taken into account. This should be changed later ...
      nkpt_me=nkpt
+     mband_mem=0
      if(xmpi_paral==1 .and. dtsets(idtset)%usewvl == 0) then
        nkpt_me=0
        if(response==0 .or. (response==1 .and. dtsets(idtset)%efmas==1))then
          mpi_enregs(idtset)%paralbd=0
-         call distrb2(mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
+         call distrb2(mband_upper,mband_mem,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
          do iikpt=1,nkpt
            if(.not.(proc_distrb_cycle(mpi_enregs(idtset)%proc_distrb,iikpt,1,1,-1,mpi_enregs(idtset)%me_kpt)))&
 &           nkpt_me=nkpt_me+1
@@ -585,14 +591,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
            call distrb2_hf(dtsets(idtset)%nbandhf,dtsets(idtset)%nkpthf,nproc,nsppol,mpi_enregs(idtset))
          end if
        else ! response==1
+!  TODO: check or remove the following comment which seems outdated
 !        Wrongly assumes that the number of elements of the
 !        k-point sets of the two spin polarizations is the maximal
 !        value of one of these k-point sets ...
 !        This is to be corrected when RF is implemented
 !        for spin-polarized case.
+!  ENDTODO
          mpi_enregs(idtset)%paralbd=1
 !        nproc=mpi_enregs(idtset)%nproc_cell*mpi_enregs(idtset)%nproc_pert
-         call distrb2(mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
+         call distrb2(mband_upper,mband_mem,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
          do isppol=1,nsppol
            nspink=0
            do iikpt=1,nkpt
@@ -615,9 +623,27 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
          if(tnband==0)nkpt_me=nkpt_me+1
 !        In any case, the maximal number of k points is nkpt
          if(nkpt_me>nkpt)nkpt_me=nkpt
-       end if
+
+!        mband_mem
+         ABI_MALLOC (mybands, (mband_upper))
+         mband_mem = 0
+         do isppol=1,nsppol
+           do iikpt=1,nkpt
+             mybands = 0
+             do iband=1,dtsets(idtset)%nband(iikpt+(isppol-1)*nkpt)
+               if(mpi_enregs(idtset)%proc_distrb(iikpt,iband,isppol)==mpi_enregs(idtset)%me_band)then
+                 mybands(iband)=1
+               end if
+             end do ! iband
+             mband_mem = max(mband_mem, sum(mybands))
+           end do ! iikpt
+         end do ! isppol
+         ABI_FREE (mybands)
+       end if ! response case
      end if
    end if
+   if (mband_mem == 0) mband_mem = mband_upper
+   dtsets(idtset)%mband_mem = mband_mem
 
 !  Take care of mkmems. Use the generic name -mkmem- for mkmem as well as mkqmem
 !  and mk1mem.
@@ -636,6 +662,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      else if(ii==3)then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mk1mem',tread0,'INT')
      end if
+
 
 !    Note that mkmem is used as a dummy variable, representing mkmem as well
 !    as mkqmem, and mk1mem.
@@ -702,7 +729,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
           dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=msg)) then
        write(msg,'(5a)') trim(msg),ch10,&
-         'YOU ARE STRONGLY ADVICED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
+         'YOU ARE STRONGLY ADVISED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
          'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
        ABI_WARNING(msg)
      end if
@@ -1586,8 +1613,10 @@ end subroutine mpi_setup
        !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
        write(ount,'(a)'   )'      vars: {'
        write(ount,'(a,i0,a)')'            npimage: ',my_distp(1,ii),','
-       write(ount,'(a,i0,a)')'            np_spkpt:',my_distp(2,ii),','
-       write(ount,'(a,i0,a)')'            npspinor:',my_distp(3,ii),','
+       ! Keep on using legacy npkpt instead of np_spkpt to maintain compatibility with AbiPy
+       write(ount,'(a,i0,a)')'            npkpt: ',my_distp(2,ii),','
+       !write(ount,'(a,i0,a)')'            np_spkpt: ',my_distp(2,ii),','
+       write(ount,'(a,i0,a)')'            npspinor: ',my_distp(3,ii),','
        write(ount,'(a,i0,a)')'            npfft: ', my_distp(4,ii),','
        write(ount,'(a,i0,a)')'            npband: ',my_distp(5,ii),','
        write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
@@ -1605,7 +1634,9 @@ end subroutine mpi_setup
        !write(ount,'(a,f12.2)')'      mem_per_cpu: ',mempercpu_mb
        write(ount,'(a)'   )'      vars: {'
        write(ount,'(a,i0,a)')'             nppert: ', my_distp(1,ii),','
-       write(ount,'(a,i0,a)')'             np_spkpt: ', my_distp(2,ii),','
+       ! Keep on using legacy npkpt instead of np_spkpt to maintain compatibility with AbiPy
+       write(ount,'(a,i0,a)')'             npkpt: ', my_distp(2,ii),','
+       !write(ount,'(a,i0,a)')'             np_spkpt: ', my_distp(2,ii),','
        write(ount,'(a)')   '            }'
       end do
    end if

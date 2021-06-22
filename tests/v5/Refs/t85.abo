@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Tue  6 Apr 2021.
+- ( at 23h27 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t85-t86-t87-t88-t89-t90-t91-t92-t93-t94-t95/t85.in
-- output file    -> t85.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v5_t85-t86-t87-t88-t89-t90-t91-t92-t93-t94-t95/t85.abi
+- output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
 
@@ -1722,8 +1722,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1890,7 +1890,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1908,7 +1907,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1923,10 +1921,10 @@ tolerances: {tolvrs: 1.00E-05, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.62405391916343E-03 -5.952E+00 4.769E-02 3.903E+00
- ETOT  2  2.09680877608420E-04 -5.414E-03 3.445E-05 7.323E-02
- ETOT  3  7.26025820370069E-05 -1.371E-04 6.152E-07 8.762E-05
- ETOT  4  7.22593583457609E-05 -3.432E-07 1.067E-09 1.760E-07
+-ETOT  1  5.62405391916165E-03 -5.952E+00 4.769E-02 3.903E+00
+ ETOT  2  2.09680877604868E-04 -5.414E-03 3.445E-05 7.323E-02
+ ETOT  3  7.26025820405596E-05 -1.371E-04 6.152E-07 8.762E-05
+ ETOT  4  7.22593583439846E-05 -3.432E-07 1.067E-09 1.760E-07
 
  At SCF step    4       vres2   =  1.76E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1950,7 +1948,7 @@ tolerances: {tolvrs: 1.00E-05, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7225935835E-04 Ha. Also 2DEtotal=    0.196627713742E-02 eV
+ 2DEtotal=    0.7225935834E-04 Ha. Also 2DEtotal=    0.196627713738E-02 eV
     (2DErelax=   -5.9572910793E+00 Ha. 2DEnonrelax=    5.9573633386E+00 Ha)
     (  non-var. 2DEtotal :    9.2285488702E-05 Ha)
 
@@ -1964,7 +1962,6 @@ tolerances: {tolvrs: 1.00E-05, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1980,9 +1977,9 @@ tolerances: {tolvrs: 1.00E-05, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  5.62405367213437E-03 -5.952E+00 6.457E-02 3.903E+00
- ETOT  2  2.09680629952302E-04 -5.414E-03 7.279E-05 7.323E-02
- ETOT  3  7.26022603938503E-05 -1.371E-04 8.251E-07 8.760E-05
- ETOT  4  7.22591079718171E-05 -3.432E-07 1.492E-09 1.754E-07
+ ETOT  2  2.09680629954079E-04 -5.414E-03 7.279E-05 7.323E-02
+ ETOT  3  7.26022603902976E-05 -1.371E-04 8.251E-07 8.760E-05
+ ETOT  4  7.22591079753698E-05 -3.432E-07 1.492E-09 1.754E-07
 
  At SCF step    4       vres2   =  1.75E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -2020,7 +2017,6 @@ tolerances: {tolvrs: 1.00E-05, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2035,10 +2031,10 @@ tolerances: {tolvrs: 1.00E-05, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.62405363878327E-03 -5.952E+00 4.768E-02 3.903E+00
- ETOT  2  2.09680597034634E-04 -5.414E-03 7.279E-05 7.323E-02
- ETOT  3  7.26022275046034E-05 -1.371E-04 6.152E-07 8.760E-05
- ETOT  4  7.22590750861229E-05 -3.432E-07 1.492E-09 1.754E-07
+-ETOT  1  5.62405363878682E-03 -5.952E+00 4.768E-02 3.903E+00
+ ETOT  2  2.09680597031081E-04 -5.414E-03 7.279E-05 7.323E-02
+ ETOT  3  7.26022275028271E-05 -1.371E-04 6.152E-07 8.760E-05
+ ETOT  4  7.22590750896757E-05 -3.432E-07 1.492E-09 1.754E-07
 
  At SCF step    4       vres2   =  1.75E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -2062,9 +2058,9 @@ tolerances: {tolvrs: 1.00E-05, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7225907509E-04 Ha. Also 2DEtotal=    0.196626942954E-02 eV
+ 2DEtotal=    0.7225907509E-04 Ha. Also 2DEtotal=    0.196626942963E-02 eV
     (2DErelax=   -5.9572910796E+00 Ha. 2DEnonrelax=    5.9573633386E+00 Ha)
-    (  non-var. 2DEtotal :    9.2242595326E-05 Ha)
+    (  non-var. 2DEtotal :    9.2242595329E-05 Ha)
 
 ================================================================================
 
@@ -2161,8 +2157,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2176,7 +2172,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2195,10 +2190,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2215,7 +2208,7 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  2   3.5449691660603     -6.081E+01 6.822E-02 6.794E+02
  ETOT  3  0.81418175060109     -2.731E+00 2.272E-03 7.245E-01
  ETOT  4  0.80971343364910     -4.468E-03 1.327E-05 1.235E-02
- ETOT  5  0.80953009685039     -1.833E-04 5.894E-08 7.134E-04
+ ETOT  5  0.80953009685040     -1.833E-04 5.894E-08 7.134E-04
  ETOT  6  0.80951736035656     -1.274E-05 2.442E-09 7.520E-07
 
  At SCF step    6       vres2   =  7.52E-07 < tolvrs=  1.00E-05 =>converged.
@@ -2253,10 +2246,8 @@ tolerances: {tolvrs: 1.00E-05, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2310,10 +2301,8 @@ tolerances: {tolvrs: 1.00E-05, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2438,8 +2427,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2453,7 +2442,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2471,10 +2459,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2489,9 +2475,9 @@ tolerances: {tolvrs: 1.00E-05, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   38.093462918617      1.948E+01 7.212E-02 4.145E+03
  ETOT  2   72.213051577806      3.412E+01 1.006E-02 4.597E+03
- ETOT  3   3.2724243791526     -6.894E+01 3.207E-03 1.043E+02
+ ETOT  3   3.2724243791525     -6.894E+01 3.207E-03 1.043E+02
  ETOT  4   1.6934797689950     -1.579E+00 5.132E-05 2.520E-03
- ETOT  5   1.6934710718952     -8.697E-06 9.808E-08 4.423E-06
+ ETOT  5   1.6934710718951     -8.697E-06 9.808E-08 4.423E-06
 
  At SCF step    5       vres2   =  4.42E-06 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -2529,10 +2515,8 @@ tolerances: {tolvrs: 1.00E-05, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2587,10 +2571,8 @@ tolerances: {tolvrs: 1.00E-05, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2666,15 +2648,15 @@ tolerances: {tolvrs: 1.00E-05, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1        -0.0443987094         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   2    1        -0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
    2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1        -0.0443987094         0.0000000000
-   2    1   3    1         0.0000000000        -0.0000000000
+   2    1   3    1        -0.0000000000        -0.0000000000
   
    3    1   1    1         0.0000000000        -0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.1648225987        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
@@ -2715,8 +2697,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2730,7 +2712,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2749,7 +2730,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2808,7 +2788,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2867,7 +2846,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3103,7 +3081,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3122,7 +3099,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3168,7 +3144,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3214,7 +3189,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3333,8 +3307,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3348,7 +3322,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3367,10 +3340,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3414,10 +3385,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3461,10 +3430,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3581,8 +3548,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3596,7 +3563,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3615,10 +3581,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3662,10 +3626,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3709,10 +3671,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3829,8 +3789,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3844,7 +3804,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3863,7 +3822,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3921,7 +3879,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3979,7 +3936,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -4043,7 +3999,7 @@ tolerances: {tolwfr: 1.00E-14, }
               amu      2.69815390E+01
              ecut      4.00000000E+00 Hartree
            etotal1    -2.0828579336E+00
-           etotal2     7.2259075086E-05
+           etotal2     7.2259075090E-05
            etotal3    -1.7651111222E+00
            etotal4    -1.2484965416E+00
            etotal5    -1.4994491402E+02
@@ -5573,7 +5529,7 @@ P          mk1mem10        64
 -
 - [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -5612,10 +5568,10 @@ P          mk1mem10        64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.8  wall=         11.0
+- Proc.   0 individual time (sec): cpu=          9.3  wall=          9.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered 648 WARNINGs and 281 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.8  wall=         11.0
+.Delivered 598 WARNINGs and  18 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.3  wall=          9.8
