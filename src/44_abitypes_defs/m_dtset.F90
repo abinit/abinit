@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_dtset
 !! NAME
 !!  m_dtset
@@ -34,6 +32,7 @@ module m_dtset
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
+ use m_crystal,      only : crystal_t, crystal_init
 
  implicit none
 
@@ -966,6 +965,9 @@ type, public :: dataset_type
 
  procedure :: testsusmat => dtset_testsusmat
    ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+
+ procedure :: get_crystal => dtset_get_crystal
+   !  Build crystal_t object from dtset and image index.
 
  end type dataset_type
 !!***
@@ -2786,6 +2788,60 @@ logical function dtset_testsusmat(dtset, dielop, dielstrt, istep) result(compute
  if (istep==dielstrt .and. dielop>=1) compute=.TRUE.
 
 end function dtset_testsusmat
+!!***
+
+!!****f* m_dtset/dtset_get_crystal
+!! NAME
+!! dtset_get_crystal
+!!
+!! FUNCTION
+!!  Build crystal_t object from dtset and image index.
+!!  Note that acell_orig, rprim_orig and xred_orig are used by default
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),target,intent(in) :: dtset
+ integer,intent(in) :: img
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii, gw_timrev
+ logical,parameter :: remove_inv = .False.
+!arrays
+ real(dp) :: my_rprimd(3,3)
+ real(dp),pointer :: my_xred(:,:)
+ character(len=500) :: my_title(dtset%ntypat)
+
+! *********************************************************************
+
+ call mkrdim(dtset%acell_orig(:, img), dtset%rprim_orig(:, :, img), my_rprimd)
+ my_xred => dtset%xred_orig(:, :, img)
+
+ do ii=1,dtset%ntypat
+    my_title(ii) = "No info on pseudo available"
+ end do
+
+ gw_timrev = 1; if (any(dtset%kptopt == [3, 4])) gw_timrev = 0
+ gw_timrev = gw_timrev + 1
+
+ call crystal_init(dtset%amu_orig(:, img), cryst, dtset%spgroup, dtset%natom, dtset%npsp, &
+   dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
+   dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
+   symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
+
+end function dtset_get_crystal
 !!***
 
 !!****f* m_dtset/macroin
