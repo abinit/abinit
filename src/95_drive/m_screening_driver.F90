@@ -1336,7 +1336,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    case (-11)
    ! LR+ALDA hybrid vertex kernel
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     ikxc=7; dim_kxcg=1 
+     ikxc=7; dim_kxcg=1
      ABI_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
      approx_type=7
      option_test=1  ! TESTELECTRON
@@ -1792,17 +1792,18 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    end if
  end do
 
+ ! This section is now performed in invars2
  ! Write the list of qpoints for the screening in netcdf format and exit.
  ! This file is used by abipy to generate multiple input files.
- if (Dtset%nqptdm == -1) then
-   if (my_rank==master) then
-#ifdef HAVE_NETCDF
-      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
-      NCF_CHECK(ncerr)
-#endif
-   end if
-   ABI_ERROR_NODUMP("Aborting now")
- end if
+! if (Dtset%nqptdm == -1) then
+!   if (my_rank==master) then
+!#ifdef HAVE_NETCDF
+!      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
+!      NCF_CHECK(ncerr)
+!#endif
+!   end if
+!   ABI_ERROR_NODUMP("Aborting now")
+! end if
 
  if (Dtset%gw_nqlwl==0) then
    Ep%nqlwl=1
