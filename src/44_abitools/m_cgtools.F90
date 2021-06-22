@@ -45,6 +45,7 @@ module m_cgtools
  use m_time,          only : timab, cwtime, cwtime_report
  use m_numeric_tools, only : hermit
  use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
+ use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
 
  implicit none
 
@@ -112,8 +113,12 @@ module m_cgtools
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
  public :: subdiago                 ! Diagonalizes the Hamiltonian in the eigenfunction subspace
+ public :: subdiago_low_memory      ! Diagonalizes the Hamiltonian in the eigenfunction subspace
+                                    ! G components are updated block by block to save memory.
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
+ public :: pw_orthon_cprj           ! Normalize nvec complex vectors each of length nelem and then
+                                    ! orthogonalize by modified Gram-Schmidt. Also update cprj coeffs.
  public :: cg_hprotate_and_get_diag
  public :: cg_hrotate_and_get_diag
  public :: cg_get_eigens            ! Compute <i|H|i> / <i|S|i> for ndat states.
@@ -944,7 +949,7 @@ end subroutine cg_zgemm
 !!   9 => use time-reversal symmetry for k=(1/2,1/2,1/2)
 !!
 !!  Useful relations:
-!!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(-G) = u_k(G)^*
 !!  and therefore:
 !!   u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
 !!
@@ -1108,6 +1113,10 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
  real(dp) :: dotarr(2)
 
 ! *************************************************************************
+
+ ! Init results indipendently of option.
+ dotr = zero
+ doti = zero
 
  if (istwf_k==1) then
    ! General k-point
@@ -1927,7 +1936,7 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
 !In the case of special k-points, invariant under time-reversal,
 !but not Gamma, initialize the inverse coordinates
 !Remember indeed that
-!u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!u_k(G) = u_{k+G0}(G-G0); u_{-k}(-G) = u_k(G)^*
 !and therefore:
 !u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
  if (istwf_k>=2) then
@@ -3120,7 +3129,7 @@ end subroutine cgpaw_gramschmidt
 !!  iband0=which particular band we are interested in ("i" in the above formula)
 !!         Can be set to -1 to sum over all bands...
 !!  icg=shift to be given to the location of the data in cg
-!!  iscg=shift to be given to the location of the data in cg
+!!  iscg=shift to be given to the location of the data in scg
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  mcg=maximum size of second dimension of cg
 !!  mscg=maximum size of second dimension of scg
@@ -4587,6 +4596,218 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 end subroutine subdiago
 !!***
 
+!!****f* ABINIT/subdiago_low_memory
+!! NAME
+!! subdiago_low_memory
+!!
+!! FUNCTION
+!! This routine diagonalizes the Hamiltonian in the eigenfunction subspace
+!! Separate the computation in blocks of plane waves to save memory
+!!
+!! INPUTS
+!!  icg=shift to be applied on the location of data in the array cg
+!!  istwf_k=input parameter that describes the storage of wfs
+!!  mcg=second dimension of the cg array
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  npw_k=number of plane waves at this k point
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
+!!
+!! OUTPUT
+!!  eig_k(nband_k)=array for holding eigenvalues (hartree)
+!!  evec(2*nband_k,nband_k)=array for holding eigenvectors
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)=wavefunctions
+!!
+!! PARENTS
+!!      rayleigh_ritz,vtowfk
+!!
+!! CHILDREN
+!!      abi_xcopy,abi_xgemm,abi_xhpev,abi_xhpgv,cg_normev,hermit
+!!
+!! SOURCE
+
+subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
+&                   mcg,nband_k,npw_k,nspinor,paral_kgb,&
+&                   subham)
+
+ use m_linalg_interfaces
+ use m_abi_linalg
+
+!Arguments ------------------------------------
+ integer,intent(in) :: icg,istwf_k,mcg,nband_k,npw_k
+ integer,intent(in) :: nspinor,paral_kgb
+ real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
+ real(dp),intent(out) :: eig_k(nband_k),evec(2*nband_k,nband_k)
+ real(dp),intent(inout),target :: cg(2,mcg)
+
+!Local variables-------------------------------
+ integer :: ig,igfirst,block_size,iblock,nblock,block_size_tmp,wfsize
+ integer :: iband,ii,ierr,vectsize,use_slk
+ character(len=500) :: message
+ ! real(dp) :: tsec(2)
+ real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:)
+ real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
+ real(dp),pointer :: cg_block(:,:)
+
+! *********************************************************************
+
+ if (paral_kgb<0) then
+   ABI_BUG('paral_kgb should be positive ')
+ end if
+
+ ! 1 if Scalapack version is used.
+ use_slk = paral_kgb
+
+!Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
+! MG FIXME: In these two calls we are aliasing the args
+ call hermit(subham,subham,ierr,nband_k)
+
+!Diagonalize the Hamitonian matrix
+ if(istwf_k==2) then
+   ABI_MALLOC(evec_tmp,(nband_k,nband_k))
+   ABI_MALLOC(subham_tmp,(nband_k*(nband_k+1)/2))
+   subham_tmp=subham(1:nband_k*(nband_k+1):2)
+   evec_tmp=zero
+   call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+   evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
+   ABI_FREE(evec_tmp)
+   ABI_FREE(subham_tmp)
+ else
+   call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+ end if
+
+!Normalize each eigenvector and set phase:
+!The problem with minus/plus signs might be present also if .not. use_subovl
+!if(use_subovl == 0) then
+ call cg_normev(evec,nband_k,nband_k)
+!end if
+
+ if(istwf_k==2)then
+   do iband=1,nband_k
+     do ii=1,nband_k
+       if(abs(evec(2*ii,iband))>1.0d-10)then
+         write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
+&         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
+&         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         ABI_BUG(message)
+       end if
+     end do
+   end do
+ end if
+
+!=====================================================
+!Carry out rotation of bands C(G,n) according to evecs
+! ZGEMM if istwfk==1, DGEMM if istwfk==2
+!=====================================================
+ wfsize=npw_k*nspinor
+
+ block_size=100
+
+ if (wfsize<block_size) block_size=wfsize
+
+ nblock=wfsize/block_size
+ if (mod(wfsize,block_size)/=0) nblock=nblock+1
+
+ if (istwf_k>1) then ! evec is real
+
+   vectsize=2*block_size
+
+   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
+
+   do iband=1,nband_k
+     call abi_xcopy(nband_k,evec(2*iband-1,1),2*nband_k,blockvectorb(iband,1),nband_k)
+   end do
+
+   do iblock=1,nblock
+
+     igfirst=(iblock-1)*block_size
+     block_size_tmp=block_size
+     if (igfirst+block_size>wfsize) then
+       block_size_tmp=wfsize-igfirst
+     end if
+
+     do iband=1,nband_k
+       call abi_xcopy(block_size_tmp,cg(1,1+cgindex_subd(iblock,iband)),2,blockvectora(1,iband),1)
+       call abi_xcopy(block_size_tmp,cg(2,1+cgindex_subd(iblock,iband)),2,blockvectora(block_size+1,iband),1)
+       if (block_size_tmp<block_size) then
+         blockvectora(block_size_tmp+1:block_size,iband) = zero
+         blockvectora(block_size+block_size_tmp+1:2*block_size,iband) = zero
+       end if
+     end do
+
+     call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
+&     cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+
+     do iband=1,nband_k
+       call abi_xcopy(block_size_tmp,blockvectorc(1,iband),1,cg(1,1+cgindex_subd(iblock,iband)),2)
+       call abi_xcopy(block_size_tmp,blockvectorc(block_size+1,iband),1,cg(2,1+cgindex_subd(iblock,iband)),2)
+     end do
+
+   end do
+
+   ABI_FREE(blockvectora)
+   ABI_FREE(blockvectorb)
+   ABI_FREE(blockvectorc)
+
+ else ! evec is complex
+
+   ABI_MALLOC_OR_DIE(work,(2,block_size*nband_k), ierr)
+   if (nblock==1) then
+     cg_block => cg(:,icg+1:icg+nband_k*wfsize)
+   else
+     ABI_MALLOC_OR_DIE(cg_block,(2,block_size*nband_k), ierr)
+   end if
+
+   do iblock=1,nblock
+     igfirst=(iblock-1)*block_size
+     block_size_tmp=block_size
+     if (igfirst+block_size>wfsize) then
+       block_size_tmp=wfsize-igfirst
+     end if
+     if (nblock/=1) then
+       do iband=1,nband_k
+         do ig=1,block_size_tmp
+           cg_block(:,ig+(iband-1)*block_size) = cg(:,ig+cgindex_subd(iblock,iband))
+         end do
+         if (block_size_tmp<block_size) then
+           do ig=block_size_tmp+1,block_size
+             cg_block(:,ig+(iband-1)*block_size) = zero
+           end do
+         end if
+       end do
+     end if
+     call abi_xgemm('N','N',block_size,nband_k,nband_k,cone,cg_block,block_size,evec,nband_k,czero,work,&
+       &     block_size,x_cplx=2)
+     do iband=1,nband_k
+       do ig=1,block_size_tmp
+         cg(:,ig+cgindex_subd(iblock,iband)) = work(:,ig+(iband-1)*block_size)
+       end do
+     end do
+   end do
+
+   ABI_FREE(work)
+   if (nblock/=1) then
+     ABI_FREE(cg_block)
+   end if
+
+ end if
+
+ contains
+
+   function cgindex_subd(iblock,iband)
+
+   integer :: iband,iblock,cgindex_subd
+   cgindex_subd=(iblock-1)*block_size+(iband-1)*wfsize+icg
+ end function cgindex_subd
+
+end subroutine subdiago_low_memory
+!!***
+
 !!****f* m_cgtools/pw_orthon
 !! NAME
 !! pw_orthon
@@ -5122,6 +5343,207 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
  !call cwtime_report(sjoin(" pw_orthon with ortalgo: ", itoa(ortalgo)), cpu, wall, gflops)
 
 end subroutine pw_orthon
+!!***
+
+!!****f* m_cgtools/pw_orthon_paw
+!! NAME
+!! pw_orthon_paw
+!!
+!! FUNCTION
+!! Normalize nvec complex vectors each of length nelem and then orthogonalize by modified Gram-Schmidt.
+!! The overlap matrix <c_m|S|c_n> (S can be identity) has to be provided as input, and is overwritten.
+!!
+!! INPUTS
+!!  icg=shift to be given to the location of the data in cg(=vecnm)
+!!  mcg=maximum size of second dimension of cg(=vecnm)
+!!  nelem=number of complex elements in each vector
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  nvec=number of vectors to be orthonormalized
+!!  ortalgo= option for the choice of the algorithm
+!!         -1: no orthogonalization (direct return)
+!!          0: do orthogonalization
+!!  comm=MPI communicator
+!!
+!! SIDE EFFECTS
+!!  cprj(optional)=<p_i|c_n> coefficients, updated to keep them consistent with the WF at output
+!!  ovl_mat=overlap matrix <c_m|S|c_n> for m<=n
+!!  vecnm= input: vectors to be orthonormalized; array of nvec column
+!!                vectors,each of length nelem,shifted by icg
+!!                This array is complex or else real(dp) of twice length
+!!         output: orthonormalized set of vectors
+!!
+!! NOTES
+!! Note that each vector has an arbitrary phase which is not fixed in this routine.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
+
+ use m_abi_linalg
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo
+!arrays
+ real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)),vecnm(2,mcg)
+ type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
+
+!Local variables-------------------------------
+!scalars
+ logical :: do_cprj
+ integer :: ii,ii1,ii2,ivec,ivec2,ivec3,iv1l,iv2l,iv3l,iv1r,iv2r,iv3r,ncprj
+ real(dp) :: doti,dotr,summ,xnorm
+!arrays
+ real(dp) :: ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
+ real(dp) :: re,im
+
+! *************************************************************************
+
+!Nothing to do if ortalgo=-1
+ if(ortalgo==-1) return
+
+ do_cprj=.false.
+ if (present(cprj)) then
+   do_cprj=.true.
+   ncprj = size(cprj,2)
+   if (ncprj/=nspinor*nvec) then
+     ABI_ERROR('bad size for cprj')
+   end if
+ end if
+
+ ! The overlap matrix is : ovl(i,j) = <psi_i|S|psi_j> = (<psi_j|S|psi_i>)^*
+ ! The row index stands for the "left"  band index
+ ! The column index stands for the "right" band index
+ ! Only the upper triangular part of the (complex) overlap matrix is stored, so only elements with i<=j.
+ ! They are stored in the following order: ovl(1,1),ovl(1,2),ovl(2,2),ovl(1,3),ovl(2,3),...
+ ! so:
+ ! -- shift for the ith row    : 2.(i.(i-1)/2) = i.(i-1)
+ ! -- shift for the ith column : 2.(i-1)+1 = 2.i-1
+ ! => index of real part of elem in the jth column and ith row (=ovl(i,j)) : 2.i-1+j.(j-1) (for i<=j)
+ ! => index of imaginary part = index of real part + 1
+ ! After orthogonalizing the first n vectors, we have:
+ ! for i<=n, i<=j : ovl(i,j) = delta_ij
+
+ do ivec=1,nvec
+
+   ! First we normalize the current vector
+   iv1r = ivec*(ivec-1) ! ith row
+   iv1l = 2*ivec-1      ! ith column
+   ! ovl(i1,i1) = <psi_i1|S|psi_i1>
+   summ = ovl_mat(iv1r+iv1l)
+   xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
+   do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
+     vecnm(1,ii)=vecnm(1,ii)*summ
+     vecnm(2,ii)=vecnm(2,ii)*summ
+   end do
+!  Apply the normalization to cprj coeffs
+   if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec))
+
+   ! As the norm of |psi_i1> changed, we update the overlap matrix accordingly.
+   ! From previous iterations, we already have:
+   ! ovl(i2,i1) = <psi_i2|S|psi_i1> = 0 for i2<i1
+   ! so we need to change only:
+   ! ovl(i1,i2) = <psi_i1|S|psi_i2> for i1<=i2
+   do ivec2=ivec,nvec
+     iv2r=ivec2*(ivec2-1)
+     if (ivec<ivec2) then
+       ovl_mat(iv2r+iv1l  ) = ovl_mat(iv2r+iv1l  )*summ
+       ovl_mat(iv2r+iv1l+1) = ovl_mat(iv2r+iv1l+1)*summ
+     else if (ivec==ivec2) then
+       ovl_mat(iv2r+iv1l  ) = ovl_mat(iv2r+iv1l  )*summ*summ
+       ovl_mat(iv2r+iv1l+1) = ovl_mat(iv2r+iv1l+1)*summ*summ
+       re = ovl_mat(iv2r+iv1l  )
+       im = ovl_mat(iv2r+iv1l+1)
+       if (abs(re-1)>tol10.or.abs(im)>tol10) then
+         write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
+         write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
+         ABI_WARNING('In pw_orthon_cprj : the result should be equal to one!')
+       end if
+     end if
+   end do
+
+!  Remove projection in all higher states.
+   if (ivec<nvec) then
+
+     do ivec2=ivec+1,nvec
+
+       iv2r = ivec2*(ivec2-1)
+       iv2l = 2*ivec2-1
+       ! (dotr,doti) = <psi_i1|S|psi_i2>
+       dotr = ovl_mat(iv2r+iv1l  )
+       doti = ovl_mat(iv2r+iv1l+1)
+
+!      Then subtract the appropriate amount of the lower state
+       ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+       ! |psi'_i2> = |psi_i2> - <psi_i1|S|psi_i2> |psi_i1>
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
+       do ii=1,nelem
+         vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
+         vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
+       end do
+       if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
+&                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
+       ! As |psi_i2> changed, we update the overlap matrix accordingly.
+       ! We have: <psi'_i3|S|psi'_i2> = <psi'_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i3|S|psi_i1>
+       ! Remember that i2>i1.
+       ! For i3<=i2, we compute the new column i2.
+       ! For i3<i1:
+       ! (1) <psi'_i3|S|psi'_i2> = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i3|S|psi_i1>
+       !                         = <psi_i3|S|psi_i2>
+       ! as for i3<i1 we have <psi_i3|S|psi_i1> = 0
+       ! For i1<=i3<i2:
+       ! (2) <psi'_i3|S|psi'_i2> = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i3|S|psi_i1>
+       !                         = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> (<psi_i1|S|psi_i3>)^*
+       ! For i3=i2:
+       ! (3) <psi'_i3|S|psi'_i2> =  <psi'_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1>
+       !                           - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1> + <psi_i1|S|psi_i2> <psi_1|S|psi_1> <psi_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> (<psi_i1|S|psi_i2>)^*
+       ! so the case i3=i2 (3) is equivalent to the case i1<=i3<i2 (2) with i3=i2.
+       ! Here we compute (2) and (3) in a temporary array:
+       do ivec3=ivec,ivec2
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_col_tmp(iv3l  ) = ovl_mat(iv2r+iv3l  ) - dotr*ovl_mat(iv3r+iv1l) - doti*ovl_mat(iv3r+iv1l+1)
+         ovl_col_tmp(iv3l+1) = ovl_mat(iv2r+iv3l+1) - doti*ovl_mat(iv3r+iv1l) + dotr*ovl_mat(iv3r+iv1l+1)
+       end do
+       ! For i2<i3, we compute the new row i2.
+       ! (4) <psi'_i2|S|psi_i3> = <psi_i2|S|psi_i3> - <psi_i2|S|psi_i1> <psi_i1|S|psi_i3>
+       !                        = <psi_i2|S|psi_i3> - (<psi_i1|S|psi_i2>)^* <psi_i1|S|psi_i3>
+       ! Here we compute (4) in a temporary array:
+       do ivec3=ivec2+1,nvec
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_row_tmp(iv3l  ) = ovl_mat(iv3r+iv2l  ) - dotr*ovl_mat(iv3r+iv1l) - doti*ovl_mat(iv3r+iv1l+1)
+         ovl_row_tmp(iv3l+1) = ovl_mat(iv3r+iv2l+1) + doti*ovl_mat(iv3r+iv1l) - dotr*ovl_mat(iv3r+iv1l+1)
+       end do
+       ! We update the column i2 (starting from ivec and not 1, thanks to (1))
+       do ivec3=ivec,ivec2
+         iv3l=2*ivec3-1
+         ovl_mat(iv2r+iv3l  ) = ovl_col_tmp(iv3l  )
+         ovl_mat(iv2r+iv3l+1) = ovl_col_tmp(iv3l+1)
+       end do
+       ! We update the row i2
+       do ivec3=ivec2+1,nvec
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_mat(iv3r+iv2l  ) = ovl_row_tmp(iv3l  )
+         ovl_mat(iv3r+iv2l+1) = ovl_row_tmp(iv3l+1)
+       end do
+     end do
+
+   end if  ! Test on "ivec"
+
+!end loop over vectors (or bands) with index ivec :
+ end do
+
+end subroutine pw_orthon_cprj
 !!***
 
 !!****f* m_cgtools/cg_hprotate_and_get_diag

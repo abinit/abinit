@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Tue  6 Apr 2021.
+- ( at 23h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
-- output file    -> t56.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
+- output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
 
@@ -358,8 +358,8 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -737,9 +737,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.101      3.2    5.626
-   6  18.426   -0.101      3.2    0.000
-   7  18.426   -0.101      3.2    0.000
+   5  18.426   -0.102      3.2    5.626
+   6  18.426   -0.102      3.2    0.000
+   7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -751,9 +751,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   15.729
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.101      3.2    5.626
-   6  18.426   -0.101      3.2    0.000
-   7  18.426   -0.101      3.2    0.000
+   5  18.426   -0.102      3.2    5.626
+   6  18.426   -0.102      3.2    0.000
+   7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -765,9 +765,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   15.719
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.101      3.2    5.626
-   6  18.426   -0.101      3.2    0.000
-   7  18.426   -0.101      3.2    0.000
+   5  18.426   -0.102      3.2    5.626
+   6  18.426   -0.102      3.2    0.000
+   7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -779,9 +779,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   15.710
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.101      3.2    5.626
-   6  18.426   -0.101      3.2    0.000
-   7  18.426   -0.101      3.2    0.000
+   5  18.426   -0.102      3.2    5.626
+   6  18.426   -0.102      3.2    0.000
+   7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -793,9 +793,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   15.700
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.101      3.2    5.626
-   6  18.426   -0.101      3.2    0.000
-   7  18.426   -0.101      3.2    0.000
+   5  18.426   -0.102      3.2    5.626
+   6  18.426   -0.102      3.2    0.000
+   7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -807,9 +807,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   15.690
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.101      3.2    5.626
-   6  18.426   -0.101      3.2    0.000
-   7  18.426   -0.101      3.2    0.000
+   5  18.426   -0.102      3.2    5.626
+   6  18.426   -0.102      3.2    0.000
+   7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -880,7 +880,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.642
    5  18.426   -0.103      3.2    5.626
    6  18.426   -0.103      3.2    0.000
    7  18.426   -0.103      3.2    0.000
-   8  26.686   -0.054      6.0    8.260
+   8  26.686   -0.055      6.0    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
@@ -1314,9 +1314,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   18.045
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.076      4.3    5.626
-   6  18.426   -0.076      4.3    0.000
-   7  18.426   -0.076      4.3    0.000
+   5  18.426   -0.076      4.4    5.626
+   6  18.426   -0.076      4.4    0.000
+   7  18.426   -0.076      4.4    0.000
    8  26.686   -0.054      6.1    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -1457,7 +1457,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   18.022
    5  18.426   -0.084      3.9    5.626
    6  18.426   -0.084      3.9    0.000
    7  18.426   -0.084      3.9    0.000
-   8  26.686   -0.054      6.0    8.260
+   8  26.686   -0.055      6.0    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
@@ -1872,10 +1872,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.5
+.Delivered   7 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.2

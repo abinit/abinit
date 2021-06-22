@@ -1,4 +1,4 @@
-! CP modified 
+! CP modified
 !!****m* ABINIT/m_chkinp
 !! NAME
 !!  m_chkinp
@@ -877,34 +877,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-!  efmas_calc_dirs
-   if(dt%efmas==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_calc_dirs',dt%efmas_calc_dirs,7,(/-3,-2,-1,0,1,2,3/),iout)
-   end if
+   if (dt%efmas==1) then
+     ! Consistency check for efmas calculations.
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_calc_dirs',dt%efmas_calc_dirs,7,[-3,-2,-1,0,1,2,3],iout)
 
-!  efmas_deg
-   if(dt%efmas==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_deg',dt%efmas_deg,2,(/0,1/),iout)
-   end if
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_deg',dt%efmas_deg,2,[0,1],iout)
 
-!  efmas_deg_tol
-   if(dt%efmas==1) then
      call chkdpr(0,0,cond_string,cond_values,ierr,'efmas_deg_tol',dt%efmas_deg_tol,1,0.0_dp,iout)
-   end if
 
-!  efmas_dim
-   if(dt%efmas==1) then
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_dim',dt%efmas_dim,3,(/1,2,3/),iout)
-   end if
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_dim',dt%efmas_dim,3,[1,2,3],iout)
 
-!  efmas_n_dirs
-   if(dt%efmas==1) then
      call chkint_ge(0,0,cond_string,cond_values,ierr,'efmas_n_dirs',dt%efmas_n_dirs,0,iout)
-   end if
 
-!  efmas_ntheta
-   if(dt%efmas==1) then
      call chkint_ge(0,0,cond_string,cond_values,ierr,'efmas_ntheta',dt%efmas_ntheta,1,iout)
+
+     ABI_CHECK_NOSTOP(all_nprocs == 1, "efmas 1 is not compabitle with MPI. Use 1 processor", ierr)
    end if
 
 !  enable_mpi_io
@@ -917,7 +904,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       15, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 15, -15, 16], iout)
+       16, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 15, -15, 16], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -932,7 +919,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
        ABI_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
-
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
        ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
@@ -954,7 +940,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
      if (dt%eph_stern /= 0) then
        ! Check requirements for Sternheimer.
-       MSG_ERROR_NOSTOP_IF(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
+       if (dt%tolwfr == zero) then
+         ABI_ERROR_NOSTOP("tolwfr must be specified when eph_stern /= 0", ierr)
+       end if
        if (dt%getpot_filepath == ABI_NOFILE) then
          ABI_ERROR_NOSTOP(" getpot_filepath is required when eph_stern /= 0", ierr)
        end if
@@ -962,7 +950,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          ABI_ERROR_NOSTOP("sigma_bsum_range cannot be used when eph_stern /= 0", ierr)
        end if
      end if
-   end if
+
+     if (dt%ibte_prep /= 0 .and. any(dt%sigma_ngkpt /= 0)) then
+       ABI_ERROR_NOSTOP("sigma_ngkpt cannot be used to downsample the k-mesh when ibte_prep is used.", ierr)
+     end if
+
+   end if ! RUNL_EPH
 
    if (any(dt%eph_np_pqbks /= 0)) then
      ! Perform basic consistency check for MPI grid.
@@ -978,7 +971,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 
      ! Check spin
-     if (dt%eph_np_pqbks(5) /= 0) then
+     if (all(dt%eph_np_pqbks(5) /= [0, 1])) then
        if (dt%nspinor == 2) then
          ABI_ERROR_NOSTOP("Spin parallelism cannot be used when nspinor == 2", ierr)
        else if (dt%nspinor == 1 .and. dt%eph_np_pqbks(5) > dt%nsppol) then
@@ -1073,14 +1066,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    ! gw_invalid_freq
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,[0,1,2],iout)
 
    ! gw_icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,[0,1,2,3,4,5,6,7,14,15,16],iout)
 
    ! gw_sctype
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sctype',dt%gw_sctype,&
-     4,(/GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W/),iout)
+     4,[GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W],iout)
 
    ! gw_sigxcore
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,[0,1],iout)
@@ -1900,8 +1893,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nloalg(1)= nloc_alg
-!  Must be 2, 3, 4
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   if(dt%useylm==0) then
+!    Must be 2, 3, 4
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   else
+!    Must be between 2 and 10
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),9,(/2,3,4,5,6,7,8,9,10/),iout)
+   end if
 
 !  nloc_mem= nloalg(2)*(nloalg(3)+1)
 !  nloalg(2) must be -1 or 1 ; nloalg(3) is 0 or 1.
@@ -2257,7 +2255,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         'in which the occupation numbers are to be determined automatically.     ... occopt=',dt%occopt,ch10,&
         'However, in this case, the target total spin magnetization',ch10,&
         'must be specified, while the default value is observed.                 ... spinmagntarget=',dt%spinmagntarget,ch10,&
-        'Action: if you are doing an antiferromagnetic calculation, please use nsppol=1 with nspden=2 ;',ch10,&
+        'Action: if you are doing an antiferromagnetic calculation, please use nsppol=1 with nspden=2;',ch10,&
         'on the other hand, if you are doing a ferromagnetic calculation, either specify your own spinmagntarget,',ch10,&
         'or let the code determine the total spin-polarization, by using a metallic value for occopt (e.g. 7 or 4 ...).'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -2482,8 +2480,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
+  ! only values of -3..+3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -3576,6 +3574,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
    end if
+
+! use_oldchi
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_oldchi',dt%use_oldchi,2,(/0,1/),iout)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)

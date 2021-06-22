@@ -86,11 +86,12 @@ This output file is not very long, so you can quickly read it entirely.
 Note that one obtains the following value for the energy, in the final echo section:
 
      etotal   -9.7626837450E+00
+     etotal   -9.7658722915E+00
 
 However, we will rely later, for the purpose of doing finite differences, on a more accurate (more digits) value of this
 total energy, that can be found about a dozen of lines before this final echo:
 
-    >>>>>>>>> Etotal= -9.76268374500280E+00
+    total_energy        : -9.76587229147669E+00
 
 The output file also mentions that the forces on both atoms vanish.
 
@@ -117,7 +118,7 @@ This is your input file. You should open it and briefly look at the two
 changes with respect to *trf1_1.abi*:
 the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
 !!! warning
-    You need to copy trf1_1.o_WFK to trf1_2.i_WFK so Abinit can find the wavefunction during the calculation.
+    You need to copy trf1_1o_WFK to trf1_2i_WFK so Abinit can find the wavefunction during the calculation.
 
 Then, you can make the run, following the same command as before, with a different files file, referring to *trf1_2.abi*.
 The symmetry is lowered with respect to the ground-state geometry, so that the number of k-points
@@ -128,11 +129,11 @@ increases a lot, and of course, the CPU time.
 From this run, it is possible to get the values of the total energy, and the
 value of the gradient of the total energy (dE) with respect to change of reduced coordinate (dt):
 
-        rms dE/dt=  3.5517E-03; max dE/dt=  5.0079E-03; dE/dt below (all hartree)
-            1       0.005007937776      0.002526310510      0.002526310510
-            2      -0.005007879256     -0.002526283046     -0.002526283046
+	 rms dE/dt=  3.5517E-03; max dE/dt=  5.0080E-03; dE/dt below (all hartree)
+	    1       0.005007986445      0.002526333145      0.002526333145
+	    2      -0.005007927934     -0.002526305645     -0.002526305645
             ...
-        total_energy        : -9.76268124105730E+00
+	total_energy        : -9.76586978750721E+00
 
 The change of reduced coordinate ([[xred]]) of the Al atom along the first axis was
 rather small (1/1000 = 0.001), and we can make an estimate of the second derivative of
@@ -140,17 +141,17 @@ the total energy with respect to the reduced coordinate thanks to finite-differe
 
 We start first from the total-energy difference.
 The total energy is symmetric with respect to that perturbation, so that it has no linear term.
-The difference between the ground-state value (-9.76268374500280E+00 Hartree) of
-the previous run, and the perturbed value (-9.76268124105767E+00 Hartree) of
+The difference between the ground-state value (-9.76587229147669E+00 Hartree) of
+the previous run, and the perturbed value (-9.76586978750721E+00 Hartree) of
 the present one, is thus one half of the square of the coordinate change
 (0.001) times the second derivative of total energy (2DTE).
-From these number, the 2DTE is 5.0078902589 Hartree.
+From these number, the 2DTE is 5.00793896 Hartree.
 
 Alternatively, we can start from the reduced gradients. The value of the
 reduced gradient with respect to a displacement of the Al atom along the first
-reduced axis is 0.005007937776 Ha. At first order, this quantity is the
+reduced axis is 0.005007986445 Ha. At first order, this quantity is the
 product of the 2DTE by the reduced coordinate difference. The estimate of the
-2DTE is thus 5.007937776 Ha. The agreement with the other estimate is rather good (4.10^-5 Hartree).
+2DTE is thus 5.007986445 Ha. The agreement with the other estimate is rather good (4.10^-5 Hartree).
 
 However, it is possible to do much better, thanks to the use of a higher-order finite-difference formula.
 For this purpose, one can perform another calculation, in which the change of
@@ -160,23 +161,24 @@ simple higher-order estimation, as we will see later.
 The results of this calculation are as follows:
 
      rms dE/dt=  7.1249E-03; max dE/dt=  1.0016E-02; dE/dt below (all hartree)
-        1       0.010016307568      0.005097516146      0.005097516146
-        2      -0.010016187598     -0.005097463261     -0.005097463261
-     ...
+	1       0.010016404892      0.005097557910      0.005097557910
+    	2      -0.010016285027     -0.005097505086     -0.005097505086
+        ...
+     total_energy        : -9.76586227537498E+00
 
 From these data, taking into account that the perturbation was twice stronger,
-the same procedure as above leads to the values 5.00800219 Hartree (from
-finite difference of energy) and 5.008153784 Hartree (from finite difference
-of forces, the value 0.010016307568 has to be multiplied by 1000/2).
+the same procedure as above leads to the values 5.008050855 Hartree (from
+finite difference of energy) and 5.008202446 Hartree (from finite difference
+of forces, the value 0.010016404892 has to be multiplied by 1000/2).
 
 The combination of these data with the previous estimate can be done thanks to an
 higher-order finite-difference formula, in which the difference of estimations
 (the largest perturbation minus the smallest one) is divided by three, and
 then subtracted from the smallest estimation.
 
-As far as the total-energy estimation is concerned, the difference is 0.00011194 Ha, which divided by
-three and subtracted from 5.00789025 Hartree, gives 5.00785294 Hartree.
-The same higher-order procedure for force estimates gives 5.0078657 Hartree. So,
+As far as the total-energy estimation is concerned, the difference is 0.000111895 Ha, which divided by
+three and subtracted from 5.00793896 Hartree, gives 5.007901661 Hartree.
+The same higher-order procedure for force estimates gives 5.00791444 Hartree. So,
 the agreement between total-energy estimate and force estimate of the 2DTE can
 be observed up to the 6th digit, inclusive.
 
@@ -187,7 +189,7 @@ force created on the second atom, should be exactly equal in magnitude to the
 force on the first atom. The values of dE/dt, mentioned above show a small,
 but non-negligible difference between the two atoms. As an example, for the
 doubled perturbation, there is a difference in the absolute values of the
-first component of the reduced force, 0.010016307568 and -0.010016187598.
+first component of the reduced force, 0.010016404892 and -0.010016285027.
 
 Actually, the forces should cancel each other exactly if the translation
 symmetry is perfect. This is not the case, but the breaking of this symmetry
@@ -201,8 +203,9 @@ into forces, and specified in cartesian coordinates, as can be seen in the
 output file for the small displacement:
 
      cartesian forces (hartree/bohr) at end:
-        1     -0.00001684560079    -0.00094403841497    -0.00094403841497
-        2      0.00001684560079     0.00094403841497     0.00094403841497
+	1     -0.00001684430130    -0.00094404759278    -0.00094404759278
+    	2      0.00001684430130     0.00094404759278     0.00094404759278
+
 
 This effect will be seen also at the level of 2DTE. The so-called *acoustic sum rule*,
 which imposes that the frequency of three modes (called acoustic modes)
@@ -229,7 +232,7 @@ Accordingly, you should get familiarized with the new input variables:
 the [[kptopt]] input variable. It will be explained in more detail later.
 
 !!! warning
-    You need to copy trf1_2.o_WFK to trf1_3.i_WFK so Abinit can find the wavefunction during the calculation.
+    You need to copy trf1_1o_WFK to trf1_3i_WFK so Abinit can find the wavefunction during the calculation.
 
 
 {% dialog tests/tutorespfn/Input/trf1_3.abi %}
@@ -259,18 +262,18 @@ You should be able to find the place where the iterations
 for the minimisation (with respect to the unique perturbation) take place:
 
           iter   2DEtotal(Ha)       deltaE(Ha) residm    vres2
-    -ETOT  1   6.5156050845578     -1.464E+01 1.146E-02 1.947E+02
-     ETOT  2   5.0216332567384     -1.494E+00 9.267E-04 2.027E+00
-     ETOT  3   5.0081675390166     -1.347E-02 5.325E-06 5.660E-02
-     ETOT  4   5.0078655420156     -3.020E-04 1.601E-07 2.087E-03
-     ETOT  5   5.0078558671678     -9.675E-06 5.588E-09 3.089E-05
-     ETOT  6   5.0078557436628     -1.235E-07 9.879E-11 2.297E-07
-     ETOT  7   5.0078557427888     -8.741E-10 8.545E-13 2.728E-09
+    -ETOT  1   6.5139692863477     -1.464E+01 1.148E-02 1.945E+02
+     ETOT  2   5.0217046300208     -1.492E+00 9.268E-04 2.029E+00
+     ETOT  3   5.0082169144442     -1.349E-02 5.342E-06 5.671E-02
+     ETOT  4   5.0079142425429     -3.027E-04 1.607E-07 2.092E-03
+     ETOT  5   5.0079045457133     -9.697E-06 5.596E-09 3.120E-05
+     ETOT  6   5.0079044210095     -1.247E-07 9.980E-11 2.323E-07
+     ETOT  7   5.0079044201247     -8.848E-10 8.647E-13 2.761E-09
 
 From these data, you can see that the 2DTE determined by the DFPT technique is
 in excellent agreement with the higher-order finite-difference values for the
-2DTE, determined in the previous section: 5.007855 Hartree from the energy
-differences, and 5.007852 Hartree from the force differences.
+2DTE, determined in the previous section: 5.007939 Hartree from the energy
+differences, and 5.007914 Hartree from the force differences.
 
 Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn help file.
 Then, you should also open the *trf1_3o_DDB* file, and read the
@@ -301,7 +304,7 @@ respect to *trf1_3.abi* concern only the input variables [[rfatpol]], and [[rfdi
 Namely, all the atoms will be displaced, in all the directions.
 
 !!! warning
-    You need to copy trf1_2.o_WFK to trf1_4.i_WFK so Abinit can find the wavefunction during the calculation.
+    You need to copy trf1_1o_WFK to trf1_4i_WFK so Abinit can find the wavefunction during the calculation.
 
 {% dialog tests/tutorespfn/Input/trf1_4.abi%}
 
@@ -326,11 +329,12 @@ the atomic masses have been taken into account, see [[amu]]), are given as follo
 
       Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
      Phonon energies in Hartree :
-       2.558878E-06  2.558879E-06  2.558880E-06  1.568559E-03  1.568559E-03
-       1.568559E-03
+       2.559712E-06  2.559712E-06  2.559713E-06  1.568567E-03  1.568567E-03
+       1.568567E-03
      Phonon frequencies in cm-1    :
-    -  5.616089E-01  5.616089E-01  5.616092E-01  3.442590E+02  3.442590E+02
-    -  3.442590E+02
+    -  5.617917E-01  5.617918E-01  5.617921E-01  3.442606E+02  3.442606E+02
+    -  3.442606E+02
+
 
 !!! tip
 
@@ -417,7 +421,7 @@ The analysis of the output for this particular perturbation is not
 particularly interesting, except for the f-sum rule ratio
 
      dfpt_looppert : ek2=    1.6833336546E+01
-              f-sum rule ratio=    1.0028582975E+00
+              f-sum rule ratio=    1.0028274804E+00
 
 that should be close to 1, and becomes closer to it when [[ecut]] is
 increased, and the sampling of k points is improved. (In the present status of
@@ -438,20 +442,20 @@ Much later, the dielectric tensor is given:
          j1       j2             matrix element
       dir pert dir pert     real part    imaginary part
 
-       1    4   1    4    9.7606052146    -0.0000000000
-       1    4   2    4    0.0000000000    -0.0000000000
-       1    4   3    4    0.0000000000    -0.0000000000
+       1    4   1    4         9.7501435881        -0.0000000000
+       1    4   2    4         0.0000000000        -0.0000000000
+       1    4   3    4         0.0000000000        -0.0000000000
+    
+       2    4   1    4         0.0000000000        -0.0000000000
+       2    4   2    4         9.7501435881        -0.0000000000
+       2    4   3    4         0.0000000000        -0.0000000000
+    
+       3    4   1    4         0.0000000000        -0.0000000000
+       3    4   2    4         0.0000000000        -0.0000000000
+       3    4   3    4         9.7501435881        -0.0000000000
 
-       2    4   1    4    0.0000000000    -0.0000000000
-       2    4   2    4    9.7606052146    -0.0000000000
-       2    4   3    4    0.0000000000    -0.0000000000
 
-       3    4   1    4    0.0000000000    -0.0000000000
-       3    4   2    4    0.0000000000    -0.0000000000
-       3    4   3    4    9.7606052146    -0.0000000000
-
-
-It is diagonal and isotropic, and corresponds to a dielectric constant of 9.7606052146.
+It is diagonal and isotropic, and corresponds to a dielectric constant of 9.7501435881.
 
 Then, the Born effective charges are given, either computed from the
 derivative of the wavefunctions with respect to the electric field, or
@@ -469,7 +473,7 @@ and
       (from phonon response)
       ...
 
-Namely, the Born effective charge of the Al atom is 2.104, and the one of the
+Namely, the Born effective charge of the Al atom is 2.105, and the one of the
 As atom is -2.127. The charge neutrality sum rule is not fulfilled exactly.
 When [[ecut]] is increased, and the sampling of k points is improved, the sum
 of the two charges goes closer to zero.
@@ -478,38 +482,38 @@ Finally, the phonon frequencies are computed:
 
       Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
      Phonon energies in Hartree :
-       2.558878E-06  2.558879E-06  2.558880E-06  1.568559E-03  1.568559E-03
-       1.568559E-03
+       2.559710E-06  2.559710E-06  2.559711E-06  1.568567E-03  1.568567E-03
+       1.568567E-03
      Phonon frequencies in cm-1    :
-    -  5.616089E-01  5.616089E-01  5.616092E-01  3.442590E+02  3.442590E+02
-    -  3.442590E+02
-
+    -  5.617914E-01  5.617914E-01  5.617917E-01  3.442606E+02  3.442606E+02
+    -  3.442606E+02
+    
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  1.00000  0.00000  0.00000
      Phonon energies in Hartree :
-       2.558878E-06  2.558879E-06  4.068910E-06  1.568559E-03  1.568559E-03
-       1.729575E-03
+       2.559710E-06  2.559710E-06  4.044009E-06  1.568567E-03  1.568567E-03
+       1.729799E-03
      Phonon frequencies in cm-1    :
-    -  5.616089E-01  5.616089E-01  8.930225E-01  3.442590E+02  3.442590E+02
-    -  3.795979E+02
-
+    -  5.617914E-01  5.617914E-01  8.875575E-01  3.442606E+02  3.442606E+02
+    -  3.796470E+02
+    
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  0.00000  1.00000  0.00000
      Phonon energies in Hartree :
-       2.558878E-06  2.558880E-06  4.068909E-06  1.568559E-03  1.568559E-03
-       1.729575E-03
+       2.559710E-06  2.559711E-06  4.044009E-06  1.568567E-03  1.568567E-03
+       1.729799E-03
      Phonon frequencies in cm-1    :
-    -  5.616089E-01  5.616092E-01  8.930223E-01  3.442590E+02  3.442590E+02
-    -  3.795979E+02
-
+    -  5.617914E-01  5.617917E-01  8.875573E-01  3.442606E+02  3.442606E+02
+    -  3.796470E+02
+    
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  0.00000  0.00000  1.00000
      Phonon energies in Hartree :
-       2.558879E-06  2.558880E-06  4.068909E-06  1.568559E-03  1.568559E-03
-       1.729575E-03
+       2.559710E-06  2.559711E-06  4.044008E-06  1.568567E-03  1.568567E-03
+       1.729799E-03
      Phonon frequencies in cm-1    :
-    -  5.616089E-01  5.616092E-01  8.930223E-01  3.442590E+02  3.442590E+02
-    -  3.795979E+02
+    -  5.617914E-01  5.617917E-01  8.875573E-01  3.442606E+02  3.442606E+02
+    -  3.796470E+02
 
 
 There are four sections. In the first one, any effect of the homogeneous electric field is simply discarded,
@@ -536,7 +540,7 @@ For the dielectric tensor, it is more delicate. The value from Gianozzi et al
 is 9.2, while the experimental value is 8.2 . The agreement is not very good,
 a fact that can be attributed to the DFT lack of polarization-dependence [[cite:Gonze1995a]].
 Still, the agreement of our calculation with the theoretical result is not very good. With
-[[ecut]] = 3 Hartree, we have 9.76. Changing it to 6 Hartree gives 10.40 . A
+[[ecut]] = 3 Hartree, we have 9.75. Changing it to 6 Hartree gives 10.40 . A
 better k point sampling (8x8x8), with [[ecut]] = 6 Hartree, reduces the value to 9.89.
 Changing pseudopotentials finally improves the agreement: with the
 much harder *al.psp8* and *as.psp8* pseudopotentials with adequate
@@ -571,14 +575,14 @@ The results of this simulation can be compared to those provided in [[cite:Giann
 The agreement is rather good, despite the low cut-off energy, and different pseudopotentials.
 
 At X, they get 95 cm$^{-1}$, 216 cm$^{-1}$, 337 cm$^{-1}$ and 393 cm$^{-1}$, while we get
-92.5 cm$^{-1}$, 204.6 cm$^{-1}$, 313.9 cm$^{-1}$ and 375.9 cm$^{-1}$.
+92.8 cm$^{-1}$, 204.6 cm$^{-1}$, 313.8 cm$^{-1}$ and 375.9 cm$^{-1}$.
 With [[ecut]]=6 Hartree, we get 89.7 cm$^{-1}$, 212.3 cm$^{-1}$, 328.5 cm$^{-1}$ and 385.8 cm$^{-1}$.
 
 At L, they get 71 cm$^{-1}$, 212 cm$^{-1}$, 352 cm$^{-1}$ and 372 cm$^{-1}$, while we get
-69.0 cm$^{-1}$, 202.5 cm$^{-1}$, 332.6 cm$^{-1}$ and 352.3 cm$^{-1}$. With [[ecut]]=6 Hartree, we
+69.2 cm$^{-1}$, 202.5 cm$^{-1}$, 332.6 cm$^{-1}$ and 352.3 cm$^{-1}$. With [[ecut]]=6 Hartree, we
 get 68.1 cm$^{-1}$, 208.5 cm$^{-1}$, 346.7 cm$^{-1}$ and 362.6 cm$^{-1}$.
 
-At q=(0.1 0 0), we get 31.6 cm$^{-1}$, 63.6 cm$^{-1}$, 342.0 cm$^{-1}$ and 379.7 cm$^{-1}$. The
+At q=(0.1 0 0), we get 31.7 cm$^{-1}$, 63.6 cm$^{-1}$, 342.0 cm$^{-1}$ and 379.7 cm$^{-1}$. The
 acoustic modes tends (nearly-)linearly to zero, while the optic modes are
 close to their values at $\Gamma$ : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 

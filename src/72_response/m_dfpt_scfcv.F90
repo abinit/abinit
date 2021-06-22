@@ -50,7 +50,7 @@ module m_dfpt_scfcv
  use m_time,     only : abi_wtime, sec2str, timab
  use m_io_tools, only : open_file, file_exists, get_unit, iomode_from_fname
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
- use m_mpinfo,   only : iwrite_fftdatar, proc_distrb_cycle
+ use m_mpinfo
  use m_kg,       only : getcut, mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac, fourdp
  use m_symtk,     only : mati3inv
@@ -155,6 +155,7 @@ contains
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhotoxc.f)
+!!  mband_mem_rbz=maximum number of bands per processor in memory for cg
 !!  mgfftf=maximum size of 1D FFTs for the "fine" grid (see NOTES in respfn.F90)
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mkqmem =number of k+q points which can fit in memory (GS data); 0 if use disk
@@ -283,7 +284,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
 &  end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,indkpt1,&
 &  indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&  kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
+&  kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem,mkqmem,mk1mem,&
 &  mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,nattyp,nband_rbz,ncpgr,&
 &  nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &  nsym1,n3xccc,occkq,occ_rbz,&
@@ -302,6 +303,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  type(pseudopotential_type),intent(in) :: psps
  integer,intent(in) :: cplex,dim_eig2rf,idir,ipert,mgfftf,mk1mem,mkmem,mkqmem
  integer,intent(in) :: mpert,mpw,mpw1,my_natom,n3xccc,ncpgr,nfftf
+ integer,intent(in) :: mband_mem_rbz
  integer,intent(in) :: mpw1_mq !-q duplicate
  integer,intent(in) :: nkpt,nkpt_rbz,nkxc,nspden
  integer,intent(in) :: nsym1,pertcase,prtbbb,usecprj,useylmgr,useylmgr1
@@ -328,17 +330,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: qphon(3)
 ! nfft**(1-1/nsym1) is 1 if nsym1==1, and nfft otherwise
  integer,intent(in) :: ngfftf(18)
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*dtset%nsppol)
- real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol)
- real(dp),intent(out) :: cg1_active(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)
- real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)
- real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)
- real(dp),intent(in)  :: cgq(2,mpw1*dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol)
- real(dp),optional,intent(inout) :: cg1_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol)                  !start -q duplicates
- real(dp),optional,intent(out)   :: cg1_active_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)!
- real(dp),optional,intent(out)   :: gh1c_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf)  !
- real(dp),optional,intent(out)   :: gh0c1_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*dim_eig2rf) !
- real(dp),optional,intent(in)    :: cg_mq(2,mpw1_mq*dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol)                   !
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband_mem_rbz*mkmem*dtset%nsppol)
+ real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol)
+ real(dp),intent(out) :: cg1_active(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)
+ real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)
+ real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)
+ real(dp),intent(in)  :: cgq(2,mpw1*dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol)
+ real(dp),optional,intent(inout) :: cg1_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol)                  !start -q duplicates
+ real(dp),optional,intent(out)   :: cg1_active_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)!
+ real(dp),optional,intent(out)   :: gh1c_set_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)  !
+ real(dp),optional,intent(out)   :: gh0c1_set_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf) !
+ real(dp),optional,intent(in)    :: cg_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol)                   !
  real(dp),optional,intent(in)    :: eigen_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                      !
  real(dp),optional,intent(in)    :: docckde_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                    !
  real(dp),optional,intent(out)   :: eigen1_mq(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol)                       !
@@ -373,8 +375,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: ylmgr(mpw*mkmem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: zeff(3,3,dtset%natom)
- type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*dtset%mband*mkmem*dtset%nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*mband_mem_rbz*mkmem*dtset%nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol*usecprj)
  type(datafiles_type),intent(in) :: dtfil
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang,pawang1
@@ -553,7 +555,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_MALLOC(nhat1,(cplex*nfftf,dtset%nspden))
    nhat1=zero
 !  Projections of 1-st order WF on nl projectors
-   ABI_MALLOC(cprj1,(dtset%natom,dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*usecprj))
+   ABI_MALLOC(cprj1,(dtset%natom,dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*usecprj))
    if (usecprj==1.and.mk1mem/=0) then
      !cprj ordered by atom-type
      ABI_MALLOC(dimcprj,(dtset%natom))
@@ -689,7 +691,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,occ_rbz,pwindall,rprimd)
 !  calculate inverse of the overlap matrix
    ABI_MALLOC(qmat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3))
-   call qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,dtset%mband,npwarr,nkpt,dtset%nspinor,dtset%nsppol,pwindall)
+   call qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,dtset%mband,mband_mem_rbz,&
+&    npwarr,nkpt,dtset%nspinor,dtset%nsppol,pwindall)
  else
    ABI_MALLOC(pwindall,(0,0,0))
    ABI_MALLOC(qmat,(0,0,0,0,0,0))
@@ -851,7 +854,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
-&       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
+&       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mband_mem_rbz,mkmem,mkqmem,mk1mem,mpi_enreg,&
 &       mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,&
 &       nspden,dtset%nsppol,nsym1,occkq,occ_rbz,&
 &       paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
@@ -860,7 +863,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        if (.not.kramers_deg) then
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
 &         doccde_rbz,docckde_mq,dtfil,dtset,eigen_mq,eigen0,eigen1_mq,fe1fixed_mq,gmet,gprimd,idir,&
-&         indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
+&         indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,mband_mem_rbz,mkmem,mkqmem,mk1mem,mpi_enreg,&
 &         mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1_mq,&
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
@@ -953,7 +956,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &   dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,dtset%qptn,edocc,&
 &   eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,end0,end1,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
-&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,&
+&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mband_mem_rbz,&
 &   mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &   nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
@@ -964,11 +967,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
      rhog1_pq=rhog1 !same for rhog1_pq
      !get the second term related to 1st order wf at -q
+
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
 &     dbl_nnsclo_mq,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
 &     eeig0_mq,eigen_mq,eigen0,eigen1_mq,ek0_mq,ek1_mq,eloc0_mq,end0_mq,end1_mq,&
 &     enl0_mq,enl1_mq,fermie1_mq,gh0c1_set_mq,gh1c_set_mq,&
-&     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,&
+&     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,mband_mem_rbz,&
 &     mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &     nhat1,nkpt_rbz,npwarr,npwar1_mq,res2_mq,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1_mq,&
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
@@ -993,12 +997,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    calculate \Omega E \cdot P term
      if (ipert<=dtset%natom) then
 !      phonon perturbation
-       call  dfptff_ebp(cg,cg1,dtefield,eberry,dtset%mband,mkmem,&
-&       mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat)
+       call  dfptff_ebp(cg,cg1,dtefield,eberry,dtset%mband,mband_mem_rbz,mkmem,&
+&       mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat)
      else if (ipert==dtset%natom+2) then
 !      electric field perturbation
-       call  dfptff_edie(cg,cg1,dtefield,eberry,idir,dtset%mband,mkmem,&
-&       mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
+       call  dfptff_edie(cg,cg1,dtefield,eberry,idir,dtset%mband,mband_mem_rbz,mkmem,&
+&       mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
      end if
    end if
 
@@ -1222,7 +1226,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &   dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,dtset%qptn,edocc,&
 &   eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,end0,end1,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
-&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,&
+&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mband_mem_rbz,&
 &   mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &   nhat1,nkpt_rbz,npwarr,npwar1,res3,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid2,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
@@ -1360,7 +1364,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
-&   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,mgfftf,&
+&   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,mband_mem_rbz,mgfftf,&
 &   mkmem,mk1mem,mpert,mpi_enreg,psps%mpsang,mpw,mpw1,&
 &   dtset%natom,nband_rbz,nfftf,ngfftf,&
 &   nkpt_rbz,nkxc,dtset%nloalg,&
@@ -1378,7 +1382,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (psps%usepaw==1.or.dtset%userie==919) then
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
-&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,&
+&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,mband_mem_rbz,ncpgr,&
 &     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
@@ -1387,13 +1391,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    else
      if (dtset%nspden==4) then
        call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
-&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,mpert,mpi_enreg,&
+&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &       mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &       dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
 &       wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
      else
        call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
-&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,mpert,mpi_enreg,&
+&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &       mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &       dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
 &       wtk_rbz,xred,ylm,ylm1)
@@ -1408,8 +1412,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
 & ipert<=dtset%natom) then
-   call dfptff_bec(cg,cg1,dtefield,dtset%natom,d2lo,idir,ipert,dtset%mband,mkmem,&
-&   mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
+   call dfptff_bec(cg,cg1,dtefield,dtset%natom,d2lo,idir,ipert,dtset%mband,mband_mem_rbz,mkmem,&
+&   mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
    blkflg(:,dtset%natom+2,:,1:dtset%natom)=1
  end if
 
@@ -1417,8 +1421,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
 & ipert==dtset%natom+2) then
-   call dfptff_die(cg,cg1,dtefield,d2lo,idir,ipert,dtset%mband,mkmem,&
-&   mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
+   call dfptff_die(cg,cg1,dtefield,d2lo,idir,ipert,dtset%mband,mband_mem_rbz,mkmem,&
+&   mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
    blkflg(:,dtset%natom+2,:,dtset%natom+2)=1
  end if
 
@@ -1690,25 +1694,25 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    Atomic displ. perturbation
      if ( ipert>=1 .and. ipert<=natom  ) then
-       evar=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1
 
      else if (ipert==natom+1) then
        evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+end0+end1
 
      else if (ipert==natom+10 .or. ipert==natom+11) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ek1 ! here ek1 contains a lot of contributions
+       evar=ek0+edocc+eeig0+eloc0+enl0                 +ek1 ! here ek1 contains a lot of contributions
 
-!      For ipert==natom+2, some contributions vanishes, noticeably ek1
+!      For ipert==natom+2, some contributions vanish, noticeably ek1
      else if (ipert==natom+2) then
-       evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1
 
 !      All terms enter for strain perturbation
      else if ( ipert==natom+3 .or. ipert==natom+4 ) then
-       evar=ek0+ek1+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1+elpsp1
 
 !    terms for Zeeman perturbation, SPr 2deb
      else if ( ipert==natom+5 ) then
-       evar=ek0+edocc+eeig0+eloc0+ehart1+exc1+enl0+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1
      end if
    end if
 
@@ -2325,8 +2329,8 @@ end subroutine dfpt_newvtr
 !! mixed strain derivatives.
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions
-!!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions
+!!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL,
 !!    if 2, COMPLEX
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
@@ -2344,6 +2348,7 @@ end subroutine dfpt_newvtr
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points in the reduced BZ
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands on this cpu
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem =number of k points treated by this node.
 !!  mk1mem =number of k points treated by this node  (RF data).
@@ -2411,7 +2416,7 @@ end subroutine dfpt_newvtr
 subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & d2bbb,d2lo,d2nl,ecut,ecutsm,effmass_free,&
 & gmet,gprimd,gsqcut,idir,&
-& ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband,mgfft,&
+& ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband,mband_mem,mgfft,&
 & mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,mpw1,&
 & natom,nband_rbz,nfft,ngfft,&
 & nkpt_rbz,nkxc,nloalg,npwarr,npwar1,nspden,nspinor,nsppol,&
@@ -2425,6 +2430,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mband,mgfft,mk1mem
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: mkmem,mpert,mpsang,mpw,mpw1,natom,nfft,nkpt_rbz
  integer,intent(in) :: nkxc,nspden,nspinor,nsppol,nsym1,ntypat
  integer,intent(in) :: prtbbb
@@ -2439,8 +2445,8 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer,intent(in) :: nloalg(3),npwar1(nkpt_rbz),npwarr(nkpt_rbz)
  integer,intent(in) :: symrc1(3,3,nsym1),typat(natom)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: gmet(3,3)
  real(dp),intent(in) :: gprimd(3,3),kpt_rbz(3,nkpt_rbz),kxc(nfft,nkxc)
  real(dp),intent(in) :: occ_rbz(mband*nkpt_rbz*nsppol)
@@ -2477,6 +2483,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  real(dp),allocatable :: vhartr01(:),vpsp1(:),vxc1(:,:),xccc3d1(:),ylm1_k(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:),ylmgr_k(:,:,:)
  type(pawtab_type) :: pawtab_dum(0)
+
 
 ! *********************************************************************
 
@@ -2547,6 +2554,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
      bantot = bantot + nband_k
      ban2tot = ban2tot + 2*nband_k**2
 
+! asserts at least 1 band of the current k and spin is on present processor
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k
        bd2tot_index=bd2tot_index+2*nband_k**2
@@ -2606,7 +2614,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !    Note that dfpt_nsteltwf is called with kpoint, while kpt is used inside dfpt_vtowfk
      call dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1,ikpt,isppol,&
-&     istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
+&     istwf_k,kg_k,kg1_k,kpoint,mband,mband_mem,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &     npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm_k,ylmgr_k)
      d2nl(:,:,:,idir,ipert)=d2nl(:,:,:,idir,ipert)+d2nl_k(:,:,:)
      if(prtbbb==1)then
@@ -2623,11 +2631,11 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !    Shift array memory
      if (mkmem/=0) then
-       icg=icg+npw_k*nspinor*nband_k
+       icg=icg+npw_k*nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg=ikg+npw_k
      end if
      if (mk1mem/=0) then
-       icg1=icg1+npw1_k*nspinor*nband_k
+       icg1=icg1+npw1_k*nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg1=ikg1+npw1_k
      end if
      ABI_FREE(ylm_k)
@@ -2770,8 +2778,8 @@ end subroutine dfpt_nselt
 !! 2DTE matrix elements, in the non-stationary formulation
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions
-!!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions
+!!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF
 !!    wavefunctions at k,q.
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha)  (NOT NEEDED !)
@@ -2786,6 +2794,7 @@ end subroutine dfpt_nselt
 !!  kg1_k(3,npw1_k)=reduced planewave coordinates at k+q, with RF k points
 !!  kpoint(3)=k-point in reduced coordinates
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands on this cpu
 !!  mkmem =number of k points treated by this node.
 !!  mk1mem =number of k points treated by this node (RF data).
 !!  mpert =maximum number of ipert
@@ -2820,7 +2829,7 @@ end subroutine dfpt_nselt
 !! SOURCE
 
 subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1,ikpt,isppol,&
-&  istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
+&  istwf_k,kg_k,kg1_k,kpoint,mband,mband_mem,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
 
@@ -2828,6 +2837,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,icg1,ikpt,isppol,istwf_k,mband,mk1mem,mkmem,mpert,mpw,mpw1,natom
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: nspinor,nsppol,ntypat
  integer,intent(inout) :: nband_k,npw1_k,npw_k
  real(dp),intent(in) :: ecut,ecutsm,effmass_free,wtk_k
@@ -2836,8 +2846,8 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 !arrays
  integer,intent(in) :: kg1_k(3,npw1_k),kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: occ_k(nband_k),rmet(3,3)
  real(dp),intent(in) :: ylm(npw_k,psps%mpsang*psps%mpsang)
  real(dp),intent(in) :: ylmgr(npw_k,3,psps%mpsang*psps%mpsang)
@@ -2846,6 +2856,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 !Local variables-------------------------------
 !scalars
  integer :: choice,cpopt,dimffnl,dimffnl2,iband
+ integer :: iband_me
  integer :: ider,idir0,idir1,ilmn,ipert1,ipw,ipws,ispinor,istr1,itypat
  integer :: nkpg,nnlout,paw_opt,signs,tim_nonlop
  real(dp) :: doti,dotr
@@ -2902,16 +2913,18 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  ABI_MALLOC(cwavef,(2,npw1_k*nspinor))
 
 !Loop over bands
+ iband_me = 0
  do iband=1,nband_k
 
    if(mpi_enreg%proc_distrb(ikpt, iband, isppol) /= mpi_enreg%me_kpt) then
 !    Skip the eigenvalue and the gvnl records of this band
      cycle
    end if
+   iband_me = iband_me + 1
 
 !  Get ground-state and first-order wavefunctions
-   cwave0(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
-   cwavef(:,:)=cg1(:,1+(iband-1)*npw1_k*nspinor+icg1:iband*npw1_k*nspinor+icg1)
+   cwave0(:,:)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
+   cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*nspinor+icg1:iband*npw1_k*nspinor+icg1)
 
 !  Double loop over strain perturbations
    do ipert1=natom+3,natom+4
@@ -2960,7 +2973,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 !      imaginary term should be zero for strain-strain 2nd derivatives,
 !      but keep it as a test for now
        call dotprod_g(dotr,doti,gs_hamk%istwf_k,npw1_k*nspinor,2,cwavef,gvnlx1,&
-&       mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+&         mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
        d2nl_k(1,idir1,ipert1)= d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*2.0_dp*dotr
        d2nl_k(2,idir1,ipert1)= d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*2.0_dp*doti
@@ -3006,8 +3019,8 @@ end subroutine dfpt_nsteltwf
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
-!!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions at k
+!!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -3076,7 +3089,7 @@ end subroutine dfpt_nsteltwf
 !! SOURCE
 
 subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,&
-&          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,&
+&          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,&
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,&
 &          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
@@ -3084,6 +3097,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mk1mem,mkmem,mpert,mpw,mpw1,nfft,nkpt,nkpt_rbz,nkxc,nspden,nsppol,nsym1
+ integer,intent(in) :: mband_mem_rbz
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -3095,8 +3109,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  integer,intent(in) :: nattyp(dtset%ntypat),nband_rbz(nkpt_rbz*nsppol),ngfft(18)
  integer,intent(in) :: npwar1(nkpt_rbz),npwarr(nkpt_rbz),symrc1(3,3,nsym1)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert) !vz_i
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*dtset%nspinor*dtset%mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband_mem_rbz*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*nsppol)
  real(dp),intent(in) :: eigen0(dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: eigen1(2*dtset%mband*dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: gmet(3,3),kpt_rbz(3,nkpt_rbz)
@@ -3134,6 +3148,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),allocatable :: vpsp1(:),vxc1(:,:),work1(:,:,:),xccc3d1(:),ylm1_k(:,:),ylm_k(:,:)
  type(pawtab_type) :: pawtab(dtset%ntypat*psps%usepaw)
  type(wfk_t) :: ddks(3)
+
 
 ! *********************************************************************
 
@@ -3254,6 +3269,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      bantot = bantot + nband_k
      ban2tot = ban2tot + 2*nband_k**2
 
+
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k
 !      The wavefunction blocks for ddk file is skipped elsewhere in the loop
@@ -3304,7 +3320,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !    and update of rhor1 to this k-point and this spin polarization.
 !    Note that dfpt_nstwf is called with kpoint, while kpt is used inside dfpt_vtowfk
      call dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
-&     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mkmem,mk1mem,mpert,&
+&     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mband_mem_rbz,mkmem,mk1mem,mpert,&
 &     mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
 &     occ_k,psps,rmet,ddks,wtk_k,ylm_k,ylm1_k)
 
@@ -3316,11 +3332,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !    Shift arrays memory
      if (mkmem/=0) then
-       icg=icg+npw_k*dtset%nspinor*nband_k
+       icg=icg+npw_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg=ikg+npw_k
      end if
      if (mk1mem/=0) then
-       icg1=icg1+npw1_k*dtset%nspinor*nband_k
+       icg1=icg1+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg1=ikg1+npw1_k
      end if
 
@@ -3350,6 +3366,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    d2nl(:,:,:,idir,ipert)=reshape(buffer2(:),(/2,3,mpert/))
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
+
    if(dtset%prtbbb==1)then
      ABI_MALLOC(buffer1,(2*3*dtset%mband*dtset%mband))
      ABI_MALLOC(buffer2,(2*3*dtset%mband*dtset%mband))
@@ -3546,12 +3563,12 @@ end subroutine dfpt_nstdy
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions.
-!!  cgq(2,mpw1*nspinor*mband*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions.
+!!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL; if 2, COMPLEX
-!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
+!!  cprj(natom,nspinor*mband_mem*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
-!!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q
+!!  cprjq(natom,nspinor*mband_mem*mkqmem*nsppol*usecprj)= wave functions at k+q
 !!              projected with non-local projectors: cprjq=<p_i|Cnk+q>
 !!  doccde_rbz(mband*nkpt_rbz*nsppol)=derivative of occ_rbz wrt the energy
 !!  docckqde(mband*nkpt_rbz*nsppol)=derivative of occkq wrt the energy
@@ -3570,6 +3587,7 @@ end subroutine dfpt_nstdy
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands on this cpu
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mkqmem =number of k+q points treatede by this node (GS data)
 !!  mk1mem =number of k points treated by this node.
@@ -3647,7 +3665,7 @@ end subroutine dfpt_nstdy
 
 subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
-& indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
+& indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,mkmem,mkqmem,mk1mem,mpi_enreg,&
 & mpw,mpw1,my_natom,natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,nspden,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 & phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
@@ -3656,6 +3674,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mband,mk1mem,mkmem,mkqmem
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden,nsppol,nsym1
  integer,intent(in) :: prtvol,usecprj,useylmgr1
  real(dp),intent(in) :: ucvol
@@ -3673,8 +3692,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer,intent(in) :: nband_rbz(nkpt_rbz*nsppol),ngfftf(18)
  integer,intent(in) :: npwar1(nkpt_rbz),npwarr(nkpt_rbz),symaf1(nsym1)
  integer,intent(in) :: symrc1(3,3,nsym1),symrl1(3,3,nsym1)
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband*mkmem*nsppol)
- real(dp),intent(in) :: cgq(2,mpw1*dtset%nspinor*mband*mkqmem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cgq(2,mpw1*dtset%nspinor*mband_mem*mkqmem*nsppol)
  real(dp),intent(in) :: doccde_rbz(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: docckqde(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: eigen0(mband*nkpt_rbz*nsppol)
@@ -3691,8 +3710,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),intent(out) :: eigen1(2*mband*mband*nkpt_rbz*nsppol)
  real(dp),intent(out) :: nhatfermi(:,:)
  real(dp),intent(out) :: rhorfermi(cplex*nfftf,nspden)
- type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband*mkmem *nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband*mkqmem*nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband_mem*mkmem *nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
@@ -3709,6 +3728,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,npw1_k,npw_k,nspden_rhoij
  integer :: optfr,qphase_rhoij,spaceworld
+ integer :: nband_me
  logical :: paral_atom,qne0
  real(dp) :: arg,fe1norm,invfe1norm,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -3730,7 +3750,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  type(pawrhoij_type),pointer :: pawrhoijfermi_unsym(:)
 ! real(dp),allocatable :: vlocal1(:,:,:,:),vlocal_tmp(:,:,:,:)
 ! real(dp),allocatable :: v1zeeman(:,:),vtrial_tmp(:,:)
-
 
 ! *********************************************************************
 
@@ -3776,11 +3795,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    rhowfr(:,:)=zero
  end if
 
- mcgq=mpw1*dtset%nspinor*mband*mkqmem*nsppol;mcgq_disk=0
+ mcgq=mpw1*dtset%nspinor*mband_mem*mkqmem*nsppol;mcgq_disk=0
 
 !Prepare RF PAW files for reading and writing if mkmem, mkqmem or mk1mem==0
  if (psps%usepaw==1) then
-   mcprjq=dtset%nspinor*mband*mkqmem*nsppol*usecprj;mcprjq_disk=0
+   mcprjq=dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj;mcprjq_disk=0
  else
    mcprjq=0;mcprjq_disk=0
  end if
@@ -4012,12 +4031,12 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !    Note that dfpt_wfkfermi is called with kpoint, while kpt is used inside dfpt_wfkfermi
      if (nspden/=4) then
        call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
-&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,&
+&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband_mem,&
 &       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
 &       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug,rocceig,wtk_k)
      else
        call dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,dtfil,eig0_k,eig1_k,fe1fixed_k,&
-&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband,&
+&       fe1norm_k,gs_hamkq,ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,dtset%kptopt,mband_mem,&
 &       mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,npw_k,npw1_k,dtset%nspinor,nsppol,occ_k,&
 &       pawrhoijfermi_unsym,prtvol,rf_hamkq,rhoaug4,rocceig,wtk_k)
      end if
@@ -4061,15 +4080,16 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      bdtot_index=bdtot_index+nband_k
      bd2tot_index=bd2tot_index+2*nband_k**2
 
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 !    Shift array memory
      if (mkmem/=0) then
-       ibg=ibg+nband_k
-       icg=icg+npw_k*dtset%nspinor*nband_k
+       ibg=ibg+nband_me
+       icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k
      end if
      if (mkqmem/=0) then
-       ibgq=ibgq+dtset%nspinor*nband_k
-       icgq=icgq+npw1_k*dtset%nspinor*nband_k
+       ibgq=ibgq+dtset%nspinor*nband_me
+       icgq=icgq+npw1_k*dtset%nspinor*nband_me
      end if
      if (mk1mem/=0) then
        ikg1=ikg1+npw1_k
@@ -4259,12 +4279,12 @@ end subroutine dfpt_rhofermi
 !! and the fixed contribution to the 1st-order Fermi energy (nonlocal and kinetic)
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions
 !!  cgq(2,mcgq)=array for planewave coefficients of wavefunctions.
 !!  cplex=1 if rhoaug is real, 2 if rhoaug is complex
-!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
+!!  cprj(natom,nspinor*mband_mem*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
-!!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q
+!!  cprjq(natom,nspinor*mband_mem*mkqmem*nsppol*usecprj)= wave functions at k+q
 !!              projected with non-local projectors: cprjq=<p_i|Cnk+q>
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  eig0_k(nband_k)=GS eigenvalues at k (hartree)
@@ -4278,7 +4298,7 @@ end subroutine dfpt_rhofermi
 !!  ipert=type of the perturbation
 !!  isppol=1 for unpolarized, 2 for spin-polarized
 !!  kptopt=option for the generation of k points
-!!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands on this cpu
 !!  mcgq=second dimension of the cgq array
 !!  mcprjq=second dimension of the cprjq array
 !!  mkmem =number of k points treated by this node.
@@ -4322,14 +4342,15 @@ end subroutine dfpt_rhofermi
 subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 &          dtfil,eig0_k,eig1_k,fe1fixed_k,fe1norm_k,gs_hamkq,&
 &          ibg,ibgq,icg,icgq,idir,ikpt,ipert,isppol,&
-&          kptopt,mband,mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,&
+&          kptopt,mband_mem,mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,&
 &          npw_k,npw1_k,nspinor,nsppol,occ_k,pawrhoijfermi,prtvol,&
 &          rf_hamkq,rhoaug,rocceig,wtk_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ibg,ibgq,icg,icgq,idir,ikpt
- integer,intent(in) :: ipert,isppol,kptopt,mband,mcgq,mcprjq,mkmem,mpw,ncpgr
+ integer,intent(in) :: ipert,isppol,kptopt,mcgq,mcprjq,mkmem,mpw,ncpgr
+ integer,intent(in) :: mband_mem
  integer,intent(in) :: npw1_k,nspinor,nsppol,prtvol
  integer,intent(inout) :: nband_k,npw_k
  real(dp),intent(in) :: wtk_k
@@ -4338,13 +4359,14 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
 !arrays
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),cgq(2,mcgq)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol),cgq(2,mcgq)
  real(dp),intent(in) :: eig0_k(nband_k),occ_k(nband_k),rocceig(nband_k,nband_k)
  real(dp),intent(inout) :: rhoaug(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc)
  real(dp),intent(inout) :: eig1_k(2*nband_k**2)
  real(dp),intent(out) :: fe1fixed_k(nband_k)
  real(dp),intent(out) :: fe1norm_k(nband_k)
- type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
+!TODO distribute cprj over bands
+ type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband_mem*mkmem*nsppol*gs_hamkq%usecprj)
  type(pawcprj_type),intent(in) :: cprjq(gs_hamkq%natom,mcprjq)
  type(pawrhoij_type),intent(inout) :: pawrhoijfermi(gs_hamkq%natom*gs_hamkq%usepaw)
 
@@ -4352,6 +4374,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !scalars
  integer,parameter :: level=18
  integer :: berryopt,iband,ii,indx,iorder_cprj
+ integer :: iband_me, nband_me
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
  real(dp) :: dotr,lambda,wtband
@@ -4418,10 +4441,13 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  call timab(139,1,tsec)
 
 !Loop over bands
+ iband_me = 0
+ nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
  do iband=1,nband_k
 
 !  Skip bands not treated by current proc
    if(mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me) cycle
+   iband_me = iband_me + 1
 
 !  Select occupied bands
    if(abs(occ_k(iband))>tol8.and.abs(rocceig(iband,iband))>tol8)then
@@ -4429,24 +4455,27 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      wtband=rocceig(iband,iband)/occ_k(iband)
 !    Get ground-state wavefunctions at k
      do ipw=1,npw_k*nspinor
-       cwave0(1,ipw)=cg(1,ipw+(iband-1)*npw_k*nspinor+icg)
-       cwave0(2,ipw)=cg(2,ipw+(iband-1)*npw_k*nspinor+icg)
+       cwave0(1,ipw)=cg(1,ipw+(iband_me-1)*npw_k*nspinor+icg)
+       cwave0(2,ipw)=cg(2,ipw+(iband_me-1)*npw_k*nspinor+icg)
      end do
 
      if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
 !      Read PAW ground state projected WF (cprj)
-       call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,gs_hamkq%natom,iband,ibg,ikpt,iorder_cprj,&
-&       isppol,mband,mkmem,gs_hamkq%natom,1,nband_k,nspinor,nsppol,dtfil%unpaw,&
-&       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,&
+!   cprj is already distributed in band and k, just get the corresponding cprj in cwaveprj0
+       call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,gs_hamkq%natom,iband_me,ibg,ikpt,iorder_cprj,&
+&       isppol,mband_mem,mkmem,gs_hamkq%natom,1,nband_me,nspinor,nsppol,dtfil%unpaw,&
+!&       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,&
 &       icpgr=idir,ncpgr=ncpgr)
      end if
 
 !    Read ground-state wavefunctions at k+q
-     indx=npw1_k*nspinor*(iband-1)+icgq
+     indx=npw1_k*nspinor*(iband_me-1)+icgq
      cwaveq(:,1:npw_k*nspinor)=wtband*cgq(:,1+indx:npw_k*nspinor+indx)
      if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
 !      Read PAW ground state projected WF (cprj)
-       indx=nspinor*(iband-1)+ibgq
+       indx=nspinor*(iband_me-1)+ibgq
+! TODO: cprj distributed -> iband_me
+       !indx=nspinor*(iband-1)+ibgq
        call pawcprj_copy(cprjq(:,1+indx:nspinor+indx),cwaveprjq)
        call pawcprj_axpby(zero,wtband,cwaveprj_tmp,cwaveprjq)
      end if
