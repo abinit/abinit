@@ -4536,7 +4536,7 @@ FFT operations are one of the most time-consumming operations, especially for sy
 It is then interesting to count the number of FFT operations in a dataset, which is done with [[fft_count]] = 1 (or any non-zero value).
 More precisely, it counts the number of FFTs done in "fourdp" and "fourwf" routines.
 
-This feature is not equivalent to what other profiling tools would give (as the one included in Abinit, see [[timopt]]), because the number of FFTs done per call 
+This feature is not equivalent to what other profiling tools would give (as the one included in Abinit, see [[timopt]]), because the number of FFTs done per call
 depends on input options which vary during the computation.
 Indeed, one or two FFTs could be done in one call.
 The counting activated by [[fft_count]] takes into account this effect.
@@ -21758,24 +21758,38 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This flag is used in the Fourier interpolation in q-space of the DFPT potentials.
+This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
+
 In polar materials there is a long range (LR) component in the first-order variation
 of the KS potential that can be modeled in terms of the Born effective charges and
-the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
-Possible values are [0, -1, 1].
-
-Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
+the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]] (dipolar part)
+and two additional terms of quadrupolar character related to the dynamical quadrupoles and
+the response to the electric field ([[cite:Brunin2020a]], [[cite:Brunin2020b]].
 
 If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
 of the DFPT potentials so that the potential in real space is short-ranged and amenable to Fourier interpolation.
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
+This is the default behaviour that relies on a DDB file with all the entries required to build the LR mode.
+
+Setting this flag to 0 deactivates the treatment of the LR contribution.
+This is just for testing purposes and it is not recommended in polar materials.
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
 but the LR term is **not** reintroduced during the interpolation in $\qq$-space.
 This option is mainly used for debugging purposes.
 
-By default, the code will always treat the LR term if the DDB file contains the Born effective charges
-and the macroscopic dielectric tensor.
-This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
+Other options (again for testing purposes):
+
+    0: --> No treatment
+    1: --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
+           This is the standard approach for polar materials.
+    -1:  --> Remove LR model when building W(R,r). DO NOT reintroduce it after the Fourier interpolation.
+    4, 5, 6: --> Use model for the LR part only:
+
+           4: --> Use dipole + quadrupole part
+           5: --> Use dipole part only.
+           6: --> Use quadrupole part only.
+
 """,
 ),
 

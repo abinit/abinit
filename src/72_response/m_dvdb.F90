@@ -320,7 +320,11 @@ module m_dvdb
    ! -1 --> Remove LR model when building W(R,r). DO NOT reintroduce it after Fourier interpolation.
    !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
    !       in order to remove the long range component from the DFPT potentials.
-   ! 4,5,6 --> Use LR part only.
+   ! 4,5,6,7 --> Use model for the LR part only.
+   !        4: Use dipole + quadrupole part (if available)
+   !        5: Use dipole part only.
+   !        6: Use quadrupole part only.
+   !        7: Use electric field only.
 
   integer :: symv1 = 0
    ! Flag for the symmetrization of v1 potentials.
@@ -3545,7 +3549,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !scalars
  integer,intent(in) :: nfft, comm_rpt
  integer,optional,intent(in) :: add_lr
- class(dvdb_t),intent(in) :: db
+ class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
@@ -3557,6 +3561,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !, ifft, ir
  !real(dp) :: qmod
  !real(sp) :: beta_sp !, wr !,wi
+ logical :: prev_has_zeff, prev_has_quadrupoles, prev_has_efield
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
@@ -3574,17 +3579,17 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (my_add_lr >= 4) then
    ! Use LR part only and return immediately.
 
-   !if (my_add_lr > 4) then
-   !  !prev_has_zeff = db%has_zeff
-   !  !prev_has_quadrupoles = db%has_quadrupoles
-   !  !prev_has_efield = db%has_efield
-   !  !db%has_zeff = .False.
-   !  !db%has_quadrupoles = .False.
-   !  !db%has_efield = .False.
-   !  !if (my_add_lr == 5)
-   !  !if (my_add_lr == 6)
-   !  !if (my_add_lr == 7)
-   !end if
+   if (my_add_lr > 4) then
+     prev_has_zeff = db%has_zeff
+     prev_has_quadrupoles = db%has_quadrupoles
+     prev_has_efield = db%has_efield
+     db%has_zeff = .False.
+     db%has_quadrupoles = .False.
+     db%has_efield = .False.
+     if (my_add_lr == 5 .and. prev_has_zeff)  db%has_zeff = .True.
+     if (my_add_lr == 6 .and. prev_has_quadrupoles) db%has_quadrupoles = .True.
+     if (my_add_lr == 7 .and. prev_has_efield) db%has_efield = .True.
+   end if
 
    ov1r = zero
    do imyp=1,db%my_npert
@@ -3595,11 +3600,13 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      if (db%nspden /= 1) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
    end do
 
-   !if (my_add_lr > 4) then
-     !db%has_quadrupoles = prev_has_quadrupoles
-     !db%has_zeff = prev_has_zeff
-     !db%has_efield = prev_has_efield
-   !end if
+   if (my_add_lr > 4) then
+     ! Restore input flags.
+     db%has_zeff = prev_has_zeff
+     db%has_quadrupoles = prev_has_quadrupoles
+     db%has_efield = prev_has_efield
+   end if
+
    return
  end if
 
@@ -6575,43 +6582,45 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! TODO: May use zero-padded FFT with small G-sphere
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
- !if (db%has_zeff .or. db%has_quadrupoles) then
  ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero
- do ig=1,nfft
-   ! (q + G)
-   qG_red = qpt + gfft(:,ig)
-   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   ! (q + G) . Zeff(:,idir,iatom)
-   qGZ = dot_product(qG_red, Zstar)
-   ! (q + G) . dielt . (q + G)
-   denom = dot_product(qG_red, matmul(dielt_red, qG_red))
-   ! Avoid (q + G) = 0
-   if (denom < tol_denom) cycle
-   denom_inv = one / denom
-   ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
-   !if (half*qG_mod**2 > 1) cycle
-   if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
-   qGS = zero
-   if (db%has_quadrupoles) then
-     do ii=1,3
-       do jj=1,3
-         qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
+ if (db%has_zeff .or. db%has_quadrupoles) then
+
+   do ig=1,nfft
+     ! (q + G)
+     qG_red = qpt + gfft(:,ig)
+     qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+     qG_mod = sqrt(sum(qG_cart ** 2))
+     ! (q + G) . Zeff(:,idir,iatom)
+     qGZ = dot_product(qG_red, Zstar)
+     ! (q + G) . dielt . (q + G)
+     denom = dot_product(qG_red, matmul(dielt_red, qG_red))
+     ! Avoid (q + G) = 0
+     if (denom < tol_denom) cycle
+     denom_inv = one / denom
+     ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
+     !if (half*qG_mod**2 > 1) cycle
+     if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
+     qGS = zero
+     if (db%has_quadrupoles) then
+       do ii=1,3
+         do jj=1,3
+           qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
+         end do
        end do
-     end do
-   end if
+     end if
 
-   ! Phase factor exp(-i (q+G) . tau)
-   qtau = - two_pi * dot_product(qG_red, tau_red)
-   phre = cos(qtau); phim = sin(qtau)
-   !phre = one; phim = zero
+     ! Phase factor exp(-i (q+G) . tau)
+     qtau = - two_pi * dot_product(qG_red, tau_red)
+     phre = cos(qtau); phim = sin(qtau)
+     !phre = one; phim = zero
 
-   re = +fac * qGS * denom_inv !re = zero
-   im = fac * qGZ * denom_inv
-   v1G_lr(1,ig) = phre * re - phim * im
-   v1G_lr(2,ig) = phim * re + phre * im
- end do
+     re = +fac * qGS * denom_inv !re = zero
+     im = fac * qGZ * denom_inv
+     v1G_lr(1,ig) = phre * re - phim * im
+     v1G_lr(2,ig) = phim * re + phre * im
+   end do
+ end if
 
  ! FFT to get the long-range potential in r-space
  call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)
