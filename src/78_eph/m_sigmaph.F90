@@ -1180,8 +1180,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
 
-   call abimem_report("begin kcalc loop", std_out)
-   call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
+   !call abimem_report("begin kcalc_loop", std_out)
+   !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
@@ -2378,7 +2378,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(kpg_k)
    ABI_FREE(ffnlk)
 
-   call abimem_report("end kcalc loop", std_out)
+   !call abimem_report("end kcalc_loop", std_out)
    !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
