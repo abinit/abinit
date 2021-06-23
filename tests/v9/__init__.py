@@ -50,6 +50,7 @@ inp_files = [
 "t34.abi", # Same as t33.in but reading checkpoints
 "t35.abi", # GW 1RDM and related quantities (using only Sigma_x)
 "t36.abi", # GW 1RDM and related quantities but using Silicon
+"t37.abi", # GW 1RDM and related quantities but using Silicon with diff. bdgw values
 "t40.abi", # chi0 with inclvkb=2
 # DFPT
 "t41.abi",
@@ -93,4 +94,8 @@ inp_files = [
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
 "t100.abi",  # optic (same as t14 but prtlincompmatrixelements = 1)
+"t101.abi", # test nloc_alg options, istwfk=1
+"t102.abi", # test nloc_alg options, istwfk>=2
+"t103.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
+"t104.abi", # test cprj_update_lvl options, forces computed during SCF iterations
 ]

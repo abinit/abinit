@@ -657,6 +657,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
  if(tread==1) dtset%nonlinear_info=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlop_ylm_count',tread,'INT')
+ if(tread==1) dtset%nonlop_ylm_count=intarr(1)
+
  ! NONLINEAR integer input variables (same definition as for rfarr)
  ! Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
  ! --Keep the old input variables for backward compatibility
@@ -1097,6 +1100,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftgw',tread,'INT')
  if(tread==1) dtset%fftgw=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fft_count',tread,'INT')
+ if(tread==1) dtset%fft_count=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsuscep',tread,'INT')
  if(tread==1) dtset%getsuscep=intarr(1)
@@ -2511,6 +2517,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nloalg(3)=abs(intarr(1))-1
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
+ if(tread==1) dtset%cprj_update_lvl=intarr(1)
+
  ! LOOP variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nline',tread,'INT')
  if(tread==1) dtset%nline=intarr(1)
@@ -3618,6 +3627,28 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
+
+ !Now all inputs are read, we can determine if "cprj_in_memory" implementation can be used or not
+ dtset%cprj_in_memory=0
+ if (dtset%cprj_update_lvl/=0) then
+   dtset%cprj_in_memory=1
+   ! Must be ground state computation...
+   if (dtset%optdriver/=0) dtset%cprj_in_memory = 0
+   ! ...with PAW...
+   if (dtset%usepaw/=1) dtset%cprj_in_memory = 0
+   ! ... and Conjugate Gradient...
+   if (dtset%wfoptalg/=10) dtset%cprj_in_memory = 0
+   ! ...without kgb parallelization...
+   if (dtset%paral_kgb/=0) dtset%cprj_in_memory = 0
+   ! ...without RMM-DIIS...
+   if (dtset%rmm_diis/=0) dtset%cprj_in_memory = 0
+   ! ...without electric field...
+   if (dtset%berryopt/=0) dtset%cprj_in_memory = 0
+   ! ...without Fock exchange...
+   if (dtset%usefock/=0) dtset%cprj_in_memory = 0
+   ! ...without nuclear dipolar moments...
+   if (sum(abs(dtset%nucdipmom))>tol16) dtset%cprj_in_memory = 0
+ end if
 
  call timab(191,2,tsec)
 
