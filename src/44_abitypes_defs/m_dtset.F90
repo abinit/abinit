@@ -115,6 +115,9 @@ type, public :: dataset_type
  integer :: chksymbreak
  integer :: chksymtnons
  integer :: cineb_start
+ integer :: cprj_in_memory
+ integer :: cprj_update_lvl
+
 !D
  integer :: delayperm
  integer :: densfor_pred
@@ -184,6 +187,7 @@ type, public :: dataset_type
  integer :: expert_user
 !F
  integer :: fftgw = 21
+ integer :: fft_count = 0
  integer :: fockoptmix
  integer :: fock_icutcoul
  integer :: frzfermi
@@ -383,6 +387,7 @@ type, public :: dataset_type
  integer :: nomegasi = 12
  integer :: nomegasrd = 9
  integer :: nonlinear_info
+ integer :: nonlop_ylm_count = 0
  integer :: npband
  integer :: npfft
  integer :: nphf
@@ -1379,6 +1384,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
+ dtout%cprj_in_memory     = dtin%cprj_in_memory
+ dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -1493,6 +1500,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
@@ -1691,6 +1699,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nkpthf             = dtin%nkpthf
  dtout%nkptgw             = dtin%nkptgw
  dtout%nonlinear_info     = dtin%nonlinear_info
+ dtout%nonlop_ylm_count   = dtin%nonlop_ylm_count
  dtout%nline              = dtin%nline
  dtout%nnsclo             = dtin%nnsclo
  dtout%nnsclohf           = dtin%nnsclohf
@@ -3159,7 +3168,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
+ list_vars=trim(list_vars)//' cprj_update_lvl cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3200,7 +3210,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
- list_vars=trim(list_vars)//' fftalg fftcache fftgw'
+ list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_fixcoeff'
  list_vars=trim(list_vars)//' fit_EFS'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
@@ -3271,7 +3281,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
- list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
+ list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info nonlop_ylm_count noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
