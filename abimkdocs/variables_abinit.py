@@ -21764,7 +21764,7 @@ In polar materials there is a long range (LR) component in the first-order varia
 of the KS potential that can be modeled in terms of the Born effective charges and
 the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]] (dipolar part)
 and two additional terms of quadrupolar character related to the dynamical quadrupoles and
-the response to the electric field ([[cite:Brunin2020a]], [[cite:Brunin2020b]].
+the response to the electric field ([[cite:Brunin2020]], [[cite:Brunin2020b]].
 
 If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
 of the DFPT potentials so that the potential in real space is short-ranged and amenable to Fourier interpolation.
