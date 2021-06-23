@@ -1633,7 +1633,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  integer,parameter :: NOMEGAGAUSS=30,NOMEGAREAL=201,pertcase0=0,master=0
  integer :: bantot,ib,ibtot,ikibz,iq,iqp,isppol,ig,ng,ierr
  integer :: jj,mod10,mband,ng_kss,iqbz,isym,iq_ibz,itim
- integer :: timrev,use_umklp,ncerr
+ integer :: timrev,use_umklp !,ncerr
  integer :: npwepG0,nshepspG0,method,enforce_sym,nfftgw_tot !,spin,band,ik_ibz,
  integer :: istart,iend,test_npwkss,my_rank,nprocs !ii
  real(dp),parameter :: OMEGAERMAX=100.0/Ha_eV
