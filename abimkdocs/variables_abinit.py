@@ -12028,8 +12028,7 @@ Variable(
 This parameter is used in connection to the parallelization over
 perturbations (see [[paral_rf]] ), for a linear response calculation.
 [[nppert]] gives the number of processors among which the work load over the
-perturbation level is shared. It can even be specified separately for each
-dataset.
+perturbation level is shared. It can even be specified separately for each dataset.
 """,
 ),
 

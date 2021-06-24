@@ -2616,33 +2616,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_FREE(pertsy)
  ABI_FREE(rfpert)
 
-! Write YAML doc with the list of irreducible perturbations. Example.
-!
-!--- !IrredPerts
-!# List of irreducible perturbations
-!irred_perts:
-!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
-!    ipert : 1
-!    idir  : 1
-!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
-!    ipert : 2
-!    idir  : 1
-!..
- write(std_out,'(a)')"--- !IrredPerts"
- write(std_out,'(a)')'# List of irreducible perturbations'
- write(std_out,'(a)')'irred_perts:'
-
- do icase=1,npert
-   ipert = pert_calc(1,icase)
-   idir = pert_calc(2,icase)
-
-   write(std_out,'(a,3(f20.16,a))')"   - qpt: [ ",dtset%qptn(1),", ", dtset%qptn(2),", ", dtset%qptn(3),"]"
-   write(std_out,'(a,i0)')"     ipert: ",ipert
-   write(std_out,'(a,i0)')"     idir: ",idir
- end do
-
- write(std_out,'(a)')"..."
-
 ! ABI_MALLOC(pert_calc,(npert))
 ! do icase=1,npert
 !   pert_calc(icase) = pert_tmp(icase)
@@ -2729,6 +2702,35 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    end do
 
  end do
+
+
+! Write YAML doc with the list of irreducible perturbations. Example.
+!
+!--- !IrredPerts
+!# List of irreducible perturbations
+!irred_perts:
+!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
+!    ipert: 1
+!    idir: 1
+!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
+!    ipert: 2
+!    idir: 1
+!..
+ write(std_out,'(a)')"--- !IrredPerts"
+ write(std_out,'(a)')'# List of irreducible perturbations'
+ write(std_out,'(a)')'irred_perts:'
+
+ do icase=1,npert
+   ipert = pert_calc(1,icase)
+   idir = pert_calc(2,icase)
+
+   write(std_out,'(a,3(f20.16,a))')"   - qpt: [ ",dtset%qptn(1),", ", dtset%qptn(2),", ", dtset%qptn(3),"]"
+   write(std_out,'(a,i0)')"     ipert: ",ipert
+   write(std_out,'(a,i0)')"     idir: ",idir
+   write(std_out,'(a,i0)')"     nkpt_rbz: ",nkpt_rbz(icase)
+ end do
+
+ write(std_out,'(a)')"..."
 
  ABI_FREE(indkpt1)
  ABI_FREE(symq)
