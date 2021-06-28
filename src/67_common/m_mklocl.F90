@@ -2162,7 +2162,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
      !It is later canceled by the (-i) factor of the total matrix element
      do ii=1,nfft
        jj=ii*2
-       vxc1dqdq(jj-1)=tmpre; vxc1dqdq(jj)=tmpim
+       tmpre=vxc1dqdq(jj-1); tmpim=vxc1dqdq(jj)
        vxc1dqdq(jj-1)=-tmpim; vxc1dqdq(jj)=tmpre
      end do
    end if

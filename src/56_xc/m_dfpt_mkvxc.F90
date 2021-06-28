@@ -1142,7 +1142,7 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
  integer :: alpha,ii,ir,ishift,ngrad,nspgrad
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
- real(dp) :: delag,delad,delbd,delbg
+ real(dp) :: delag,delad,delbd,delbg,deldg
  real(dp) :: gradrho_gradrho1,gradrho_grr0qr1
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
  character(len=500) :: msg
@@ -1162,9 +1162,10 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
  end if
 
 !Kronecker deltas
- delbd=0.0_dp; delbg=0.0_dp
+ delbd=0.0_dp; delbg=0.0_dp; deldg=0.0_dp
  if (beta==delta) delbd=1.0_dp
  if (beta==gamma) delbg=1.0_dp
+ if (delta==gamma) deldg=1.0_dp
 
 !Apply the XC kernel
  nspgrad=1
@@ -1175,7 +1176,7 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
  do ir=1,nfft
    r0(:)=kxc(ir,5:7)
    dadgtgn(ir,1)=two*kxc(ir,4)*r0(beta)*r0(delta)*r0(gamma)
-   gna(ir,1)=(delbg*r0(delta)+delbd*r0(gamma))*kxc(ir,2)
+   gna(ir,1)=(delbg*r0(delta)+delbd*r0(gamma)+two*deldg*r0(beta))*kxc(ir,2)
    dadgngn_1(ir,1)=delbd*kxc(ir,4)*rhor(ir,1)*r0(gamma)
    dadgngn_2(ir,1)=delbg*kxc(ir,4)*rhor(ir,1)*r0(delta)
  end do
@@ -1224,6 +1225,7 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
    vxc1(ii,1)=zero
  end do 
 
+ 
  ABI_FREE(sumgrad)
 
 end subroutine dfpt_mkvxcgga_n0met
