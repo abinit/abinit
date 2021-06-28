@@ -58,7 +58,7 @@ module m_orbmag
   use m_pawfgr,           only : pawfgr_type
   use m_paw_ij,           only : paw_ij_type
   use m_paw_overlap,      only : overlap_k1k2_paw
-  use m_pawrad,           only : pawrad_type,pawrad_deducer0,simp_gen
+  use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen
   use m_paw_sphharm,      only : setsym_ylm,slxyzs
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,&
@@ -175,6 +175,9 @@ module m_orbmag
   private :: orbmag_pw_k_n
   private :: orbmag_duppy_k_n
   private :: orbmag_dqij_k_n
+  private :: orbmag_ddij_k_n
+  private :: make_dldij
+  private :: make_dldij_kinetic
   private :: make_onsite_l_k_n
   private :: make_onsite_bm_k_n
   private :: make_rhorij1_k_n
@@ -1366,12 +1369,12 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  !scalars
  integer :: adir,bdir,buff_size,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt,epsabg
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
- integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k
+ integer :: gdir,iatom,icg,ider,idir,ierr,ikg,ikg1,ikpt,ilm,isppol,istwf_k,itypat,lmn_size_max
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ncpgr1,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nnp,nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
  integer :: nproc,nterms,projbd_scprod_io,projbd_tim,projbd_useoverlap,spaceComm,with_vectornd
- integer,parameter :: om1=1,om2=2,om3=3,om4=4,berrycurve_pw=5,berrycurve_qij=6,berrycurve_dij=7
+ integer,parameter :: om1=1,om2=2,om3=3,om4=4,om5=5,berrycurve_pw=6,berrycurve_qij=7,berrycurve_dij=8
  real(dp) :: arg,dbi,dbr,dgi,dgr,doti,dotr,dub_dsg_i,dug_dsb_i
  real(dp) :: ecut_eff,Enk,lambda,local_fermie,trnrm,ucvol
  complex(dpc) :: dbc,dgc,onsite_bm_k_n,onsite_l_k_n,rhorij1,S1trace
@@ -1388,7 +1391,8 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- complex(dpc) :: bckn(3,3),dqijkn(3),olkn(3),omdp(3),ompw(3)
+ complex(dpc) :: bckn(3,3),ddijkn(3),dqijkn(3),olkn(3),omdp(3),ompw(3)
+ complex(dpc),allocatable :: dldij(:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
  !----------------------------------------------
@@ -1466,16 +1470,25 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
  call getph(atindx1,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
 
+ ! compute first order Dij terms d/dk(left) Dij
+ lmn_size_max = 0
+ do itypat=1,dtset%ntypat
+   if (pawtab(itypat)%lmn_size .GT. lmn_size_max) lmn_size_max = pawtab(itypat)%lmn_size
+ end do
+ ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
+ call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+
  icg = 0
  ikg = 0
- nterms = 7 ! various contributing terms in orbmag and berrycurve
+ nterms = 8 ! various contributing terms in orbmag and berrycurve
  ! 1 om1 planewave part
  ! 2 om2 d_b(<p|u>) D^0 d_g(<p|u>)
  ! 3 om3 <p|u> (d_b D d_g D) <p|u>
- ! 4 om4 d_b p d_g Q
- ! 5 berrycurve_pw
- ! 6 berrycurve_qij
- ! 7 berrycurve_dij
+ ! 4 om4 d_b p d_g Q p
+ ! 5 om5 d_b p d_g D p
+ ! 6 berrycurve_pw
+ ! 7 berrycurve_qij
+ ! 8 berrycurve_dij
  ABI_MALLOC(orbmag_terms,(3,nterms,nband_k))
  orbmag_terms = zero
  local_fermie = -1.0D10
@@ -1619,6 +1632,10 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
      call orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,nn,nband_k,pawtab)
      orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
 
+     call orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
+       & lmn_size_max,nband_k,pawang,pawrad,pawtab)
+     orbmag_terms(1:3,om5,nn) = orbmag_terms(1:3,om5,nn) + REAL(ddijkn(1:3))*trnrm
+
    end do ! end loop over bands n
 
    icg = icg + npw_k*nband_k
@@ -1653,6 +1670,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
    orbmag_terms(1:3,om1,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,om1,nn))
    orbmag_terms(1:3,om2,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,om2,nn))
    orbmag_terms(1:3,om4,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,om4,nn))
+   orbmag_terms(1:3,om5,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,om5,nn))
    orbmag_terms(1:3,berrycurve_pw,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,berrycurve_pw,nn))
    orbmag_terms(1:3,berrycurve_qij,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,berrycurve_qij,nn))
    orbmag_terms(1:3,berrycurve_dij,nn) =  ucvol*MATMUL(gprimd,orbmag_terms(1:3,berrycurve_dij,nn))
@@ -1680,6 +1698,7 @@ subroutine orbmag_ddk(atindx1,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
  ABI_FREE(kg_k)
  ABI_FREE(kinpw)
  ABI_FREE(ph1d)
+ ABI_FREE(dldij)
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
 
@@ -1716,7 +1735,6 @@ end subroutine orbmag_ddk
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! eeig
 !!
 !! TODO
 !!
@@ -1975,6 +1993,308 @@ subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
 end subroutine orbmag_duppy_k_n
 !!***
 
+!!****f* ABINIT/make_dldij
+!! NAME
+!! make_dldij
+!!
+!! FUNCTION
+!! Compute Dij term arising from d/dk (left) (Dij)
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: lmn_size_max
+ type(dataset_type),intent(in) :: dtset
+ type(pawang_type),intent(in) :: pawang
+
+ !arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ complex(dpc),intent(out) :: dldij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+
+ !arrays
+ complex(dpc),allocatable :: dldij_kinetic(:,:,:,:)
+
+ !-----------------------------------------------------------------------
+
+ ABI_MALLOC(dldij_kinetic,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
+
+ call make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+
+ ! assemble terms
+
+ dldij(:,:,:,:) = dldij_kinetic(:,:,:,:)
+
+ ABI_FREE(dldij_kinetic)
+
+end subroutine make_dldij
+!!***
+
+
+!!****f* ABINIT/make_dldij_kinetic
+!! NAME
+!! make_dldij_kinetic
+!!
+!! FUNCTION
+!! Compute Dij term arising from <d\phi_i/dk|-1/2\nabla^2|\phi_j>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: lmn_size_max
+ type(dataset_type),intent(in) :: dtset
+ type(pawang_type),intent(in) :: pawang
+
+ !arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ complex(dpc),intent(out) :: dldij_kinetic(dtset%ntypat,lmn_size_max,lmn_size_max,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,ignt,ijlm,il,ilm,ilmn,iln,imesh,itypat,jl,jlm,jlmn,jln,klmn,lkmk,mesh_size
+ real(dp) :: c1,intg,rr,rr2,the_gnt,tintg
+
+ !arrays
+ integer,dimension(3) :: idirindx = (/4,2,3/)
+ complex(dpc) :: dkij_cart(3),dkij_red(3)
+ real(dp),allocatable :: ff(:),tujp(:),tujpp(:),ujp(:),ujpp(:)
+
+ !-----------------------------------------------------------------------
+
+ c1 = four_pi/sqrt3
+
+ do itypat=1,dtset%ntypat
+
+   mesh_size = pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ujp,(mesh_size))
+   ABI_MALLOC(ujpp,(mesh_size))
+   ABI_MALLOC(tujp,(mesh_size))
+   ABI_MALLOC(tujpp,(mesh_size))
+
+   do jlmn=1,pawtab(itypat)%lmn_size
+     jl = pawtab(itypat)%indlmn(1,jlmn)
+     jln = pawtab(itypat)%indlmn(5,jlmn)
+     jlm = pawtab(itypat)%indlmn(4,jlmn)
+
+     call nderiv_gen(ujp,pawtab(itypat)%phi(:,jln),pawrad(itypat),ujpp)
+     call nderiv_gen(tujp,pawtab(itypat)%tphi(:,jln),pawrad(itypat),tujpp)
+
+     do ilmn=1,pawtab(itypat)%lmn_size
+       il = pawtab(itypat)%indlmn(1,ilmn)
+       iln = pawtab(itypat)%indlmn(5,ilmn)
+       ilm = pawtab(itypat)%indlmn(4,ilmn)
+
+       klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+       ijlm=max(jlm,ilm)*(max(jlm,ilm)-1)/2 + min(jlm,ilm)
+       dkij_cart = czero
+       do adir = 1, 3
+
+         lkmk = idirindx(adir)
+         ignt = pawang%gntselect(lkmk,ijlm)
+         if (ignt .EQ. 0) cycle
+         the_gnt = pawang%realgnt(ignt)
+
+         do imesh = 2, mesh_size
+           rr = pawrad(itypat)%rad(imesh)
+           rr2 = rr*rr
+           ff(imesh) = pawtab(itypat)%phi(imesh,iln)*ujpp(imesh) 
+           ff(imesh) = ff(imesh) - pawtab(itypat)%tphi(imesh,iln)*tujpp(imesh)
+           ff(imesh) = ff(imesh) - jl*(jl+one)*(&
+             & pawtab(itypat)%phi(imesh,iln)*pawtab(itypat)%phi(imesh,jln) - &
+             & pawtab(itypat)%tphi(imesh,iln)*pawtab(itypat)%tphi(imesh,jln))/rr2
+           ff(imesh) = ff(imesh)*rr
+         end do
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(intg,ff,pawrad(itypat))
+
+         dkij_cart(adir) = -half*j_dpc*c1*the_gnt*intg 
+
+       end do ! end loop over adir
+
+       ! convert from cartesian axes to reduced coords
+       dkij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dkij_cart(1:3))
+       dldij_kinetic(itypat,ilmn,jlmn,1:3) = dkij_red(1:3)
+       
+     end do ! end loop over ilmn
+   end do ! end loop over jlmn
+
+   ABI_FREE(ff)
+   ABI_FREE(ujp)
+   ABI_FREE(ujpp)
+   ABI_FREE(tujp)
+   ABI_FREE(tujpp)
+
+ end do ! end loop over ntypat
+
+end subroutine make_dldij_kinetic
+!!***
+
+!!****f* ABINIT/orbmag_ddij_k_n
+!! NAME
+!! orbmag_ddij_k_n
+!!
+!! FUNCTION
+!! Compute the orbmag contribution due to d Dij /dk terms at single kpt and band
+!! Uses the DDK wavefunctions
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
+    & iband,lmn_size_max,nband_k,pawang,pawrad,pawtab)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: iband,lmn_size_max,nband_k
+ type(dataset_type),intent(in) :: dtset
+ type(pawang_type),intent(in) :: pawang
+
+ !arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ complex(dpc),intent(in) :: dldij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
+ complex(dpc),intent(out) :: ddijkn(3)
+ type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k),cprj1_k(dtset%natom,nband_k,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
+ real(dp) :: c2
+ complex(dpc) :: cpi,cpj,ddijterm,dup_b,dup_g,udp_b,udp_g
+
+ !arrays
+
+ !-----------------------------------------------------------------------
+
+ ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
+ ! term arises to properly normalize the derivatives (there are two in this expression
+ ! one for each wavefunction derivative) 
+ c2=1.0d0/(two_pi*two_pi)
+
+ do adir = 1, 3
+
+   ddijterm = czero
+
+   do epsabg = 1, -1, -2
+
+     if (epsabg .EQ. 1) then
+       bdir = modulo(adir,3)+1
+       gdir = modulo(adir+1,3)+1
+     else
+       bdir = modulo(adir+1,3)+1
+       gdir = modulo(adir,3)+1
+     end if
+
+     do iatom=1,dtset%natom
+       itypat=dtset%typat(iatom)
+       do ilmn=1,pawtab(itypat)%lmn_size
+         do jlmn=1,pawtab(itypat)%lmn_size
+           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+
+           dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
+           udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
+           
+           dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
+           udp_g=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
+
+           cpi = cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc) 
+           cpj = cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc) 
+
+           ddijterm = ddijterm + half*j_dpc*epsabg*( &
+             & conjg(cpi)*dldij(itypat,ilmn,jlmn,bdir)*(dup_g+udp_g) + &
+             & conjg(dup_b+udp_b)*conjg(dldij(itypat,jlmn,ilmn,gdir))*cpj)
+
+         end do ! end loop over jlmn
+       end do ! end loop over ilmn
+     end do ! end loop over atoms
+   end do ! end loop over epsabg
+ 
+   ddijkn(adir) = c2*ddijterm
+ 
+ end do ! end loop over adir
+
+end subroutine orbmag_ddij_k_n
+!!***
+
 !!****f* ABINIT/orbmag_dqij_k_n
 !! NAME
 !! orbmag_dqij_k_n
@@ -1995,7 +2315,6 @@ end subroutine orbmag_duppy_k_n
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! eeig
 !!
 !! TODO
 !!
@@ -2102,7 +2421,6 @@ subroutine orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,
 end subroutine orbmag_dqij_k_n
 !!***
 
-
 !!****f* ABINIT/berrycurve_k_n
 !! NAME
 !! berrycurve_k_n
@@ -2123,7 +2441,6 @@ end subroutine orbmag_dqij_k_n
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! eeig
 !!
 !! TODO
 !!
@@ -2337,7 +2654,7 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,iterms
- integer,parameter :: om1=1,om2=2,om3=3,om4=4,berrycurve_pw=5,berrycurve_qij=6,berrycurve_dij=7
+ integer,parameter :: om1=1,om2=2,om3=3,om4=4,om5=5,berrycurve_pw=6,berrycurve_qij=7,berrycurve_dij=8
  character(len=500) :: message
 
  !arrays
@@ -2346,14 +2663,14 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- do iterms = 1, 4
+ do iterms = 1, 5
    orbmag_total(1:3)=orbmag_total(1:3) + orbmag_trace(1:3,iterms)
    do iband=1, nband_k
      orbmag_bb(1:3,iband) = orbmag_bb(1:3,iband) + orbmag_terms(1:3,iterms,iband)
    end do
  end do
  berry_bb=zero;berry_total=zero
- do iterms = 5, 7
+ do iterms = 6, 8
    berry_total(1:3)=berry_total(1:3) + orbmag_trace(1:3,iterms)
    do iband=1, nband_k
      berry_bb(1:3,iband) = berry_bb(1:3,iband) + orbmag_terms(1:3,iterms,iband)
@@ -2394,6 +2711,8 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' d<u|p>/dk dQ/dk <u|p> : ',(orbmag_trace(adir,om4),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') ' d<u|p>/dk dD/dk <u|p> : ',(orbmag_trace(adir,om5),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    Berry curvature pw : ',(orbmag_trace(adir,berrycurve_pw),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '   Berry curvature Qij : ',(orbmag_trace(adir,berrycurve_qij),adir=1,3)
@@ -2421,6 +2740,8 @@ subroutine orbmag_ddk_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_tra
      write(message,'(a,3es16.8)') ' <u|p> d_b d_g D <u|p> : ',(orbmag_terms(adir,om3,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' d<u|p>/dk dQ/dk <u|p> : ',(orbmag_terms(adir,om4,iband),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' d<u|p>/dk dD/dk <u|p> : ',(orbmag_terms(adir,om5,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Total Berry curvature : ',(berry_bb(adir,iband),adir=1,3)
      call wrtout(ab_out,message,'COLL')
