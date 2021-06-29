@@ -1634,7 +1634,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid, grp_ncid, ncerr
 #endif
- real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, btype_fact
+ real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, btype_fact, abs_tol, rtmp
  logical :: send_data
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -1818,6 +1818,27 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ABI_MALLOC(ibte_mob, (3, 3, 2, nsppol, ntemp))
  ABI_MALLOC(converged, (ntemp))
 
+ abs_tol = dtset%ibte_abs_tol
+
+ ! If the fermi level is inside the gap, F_k is gonna be very small
+ ! hence once should use a much smaller tolerance to converge.
+ ! According to numerical tests, a reasonable value of abs_tol can be estimated from the free carrier density using:
+ !
+ !  1e-20 * e_density (in cm**-3)
+ !
+ ! These are the numerical values used to derive the fit:
+
+ !  max_adiff = np.array([9e-12, 5.6e-6, 2.7e-6, 8.2e-60, 2.9e-46, 6.9e-6, 2.9e-8, 9.5E+00, 7.3E-04, 9.2E-04, 8.4E-04])
+ !  e_density = np.array([0.97e8, 0.86e13, 0.26e14, 0.1e-40, 0.89e-26, 0.45e14, 0.28e12, 0.10E+19, 0.12E+16, 0.10E+15, 0.90E+14])
+
+ if (abs_tol <= zero) then
+   rtmp = minval(ibte%n_ehst, mask=ibte%n_ehst > zero) * ibte%nsppol
+   abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
+   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from carrier density")
+   call wrtout(std_out, " using: abs_tol = 1e-20 * e_density (in cm**-3)")
+   call wrtout(std_out, sjoin(" abs_tol:", ftoa(abs_tol), " from carrier_density:", ftoa(rtmp / cryst%ucvol / Bohr_cm**3)))
+ end if
+
  cnt = 0
  btype = 1
  do itemp=1,ntemp
@@ -1956,10 +1977,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      call wrtout(std_out, msg)
 
      ! Check for convergence by testing max_k |F_k^i - F_k^{i-1}|.
-     converged(itemp) = max_adiff < dtset%ibte_abs_tol
+     converged(itemp) = max_adiff < abs_tol
      if (converged(itemp)) then
        call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
-                   "iterations within ibte_abs_tol:", ftoa(dtset%ibte_abs_tol)), pre_newlines=1)
+                   "iterations within ibte_abs_tol:", ftoa(abs_tol)), pre_newlines=1)
        exit iter_loop
      else
        ! Linear mixing of fkn_in and fkn_out.

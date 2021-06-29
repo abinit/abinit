@@ -710,13 +710,6 @@ subroutine xmpi_init()
 
 ! *************************************************************************
 
- ! Increase stack size.
- call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
- if (ierr /= 0) then
-   write(std_out,*)" WARNING: cannot increase stack size limit. "
-   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
- end if
-
  mpierr=0
 #ifdef HAVE_MPI
 
@@ -756,8 +749,17 @@ subroutine xmpi_init()
  end if
 #endif
 
+ ! Increase stack size.
+ call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
+
  ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment
  if (xmpi_comm_rank(xmpi_world) == 0) then
+
+    if (ierr /= 0) then
+      write(std_out,*)" WARNING: cannot increase stack size limit. "
+      !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
+    end if
+
     inquire(file=ABI_MPIABORTFILE, exist=exists)
     if (exists) then
        ! Get free unit (emulate F2008 newunit for portability reasons)
