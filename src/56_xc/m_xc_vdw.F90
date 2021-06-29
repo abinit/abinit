@@ -2200,17 +2200,21 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
       ! Obtain kernel in reciprocal space
        call radsintr(phir(:,iq1,iq2),phig(:,iq1,iq2),ngpts,nrpts,gmesh,rmesh,yq1,yqn,rfftt)
+       if (rfftt == 2) then
+         phig(:,iq1,iq2) = phig(:,iq1,iq2) * (2*pi)**1.5_dp
+       end if
 
       ! Filter in reciprocal space
-       do ig=1,ngpts
+       phig(ng:ngpts,iq1,iq2) = zero 
+       do ig=1,ng
          phig(ig,iq1,iq2) = phig(ig,iq1,iq2) * &
-&          (one - ((ig - 1) / ngpts)**8)**4
+&          (one - ( gmesh(ig) / gmesh(ng))**8)**4
        end do
-       phig(ngpts+1:nrpts,iq1,iq2) = zero
 
       ! Go back to real space
-       call radsintr(phig(:,iq1,iq2),phir(:,iq1,iq2),nrpts,ngpts,rmesh,gmesh,yr1,yrn)
-
+       call radsintr(phig(:,iq1,iq2),phir(:,iq1,iq2),nrpts,ngpts,rmesh,gmesh,yr1,yrn,rfftt)
+       phir(:,iq1,iq2) = phir(:,iq1,iq2) / (2*pi)**1.5_dp
+       
       ! Calculate second derivative in real space
        d2phidr2(1,iq1,iq2) = zero
        d2phidr2(nrpts,iq1,iq2) = zero
