@@ -1143,13 +1143,13 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: delag,delad,delbd,delbg,deldg
- real(dp) :: gradrho_gradrho1,gradrho_grr0qr1
+ real(dp) :: gmodsq,gradrho_gradrho1,gradrho_grr0qr1
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
  character(len=500) :: msg
 !arrays
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
- real(dp),allocatable :: dadgtgn(:,:),gna(:,:),dadgngn_1(:,:),dadgngn_2(:,:)
+ real(dp),allocatable :: dadgg(:,:),dadgtgn(:,:),gna(:,:),dadgngn_1(:,:),dadgngn_2(:,:)
  real(dp),allocatable :: dadgngn(:,:,:),kro_an(:,:,:),sumgrad(:,:,:)
 
 ! *************************************************************************
@@ -1169,12 +1169,15 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 
 !Apply the XC kernel
  nspgrad=1
+ ABI_MALLOC(dadgg,(cplex*nfft,nspgrad))
  ABI_MALLOC(dadgtgn,(cplex*nfft,nspgrad))
  ABI_MALLOC(gna,(cplex*nfft,nspgrad))
  ABI_MALLOC(dadgngn_1,(cplex*nfft,nspgrad))
  ABI_MALLOC(dadgngn_2,(cplex*nfft,nspgrad))
  do ir=1,nfft
    r0(:)=kxc(ir,5:7)
+   gmodsq=r0(1)**2+r0(2)**2+r0(3)**2
+   dadgg(ir,1)=kxc(ir,4)*gmodsq*(delbd*r0(gamma)+delbg*r0(delta))
    dadgtgn(ir,1)=two*kxc(ir,4)*r0(beta)*r0(delta)*r0(gamma)
    gna(ir,1)=(delbg*r0(delta)+delbd*r0(gamma)+two*deldg*r0(beta))*kxc(ir,2)
    dadgngn_1(ir,1)=delbd*kxc(ir,4)*rhor(ir,1)*r0(gamma)
@@ -1184,9 +1187,10 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 !Incorporate the terms that do not need further treatment 
  do ir=1,nfft
    ii=2*ir
-   vxc1(ii-1,1)= -dadgtgn(ir,1)-gna(ir,1)
+   vxc1(ii-1,1)= -dadgg(ir,1)-dadgtgn(ir,1)-gna(ir,1)
    vxc1(ii,1)= zero
  end do
+ ABI_FREE(dadgg)
  ABI_FREE(dadgtgn)
  ABI_FREE(gna)
 
