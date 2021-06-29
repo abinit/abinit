@@ -2216,33 +2216,37 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        phir(:,iq1,iq2) = phir(:,iq1,iq2) / (2*pi)**1.5_dp
        
       ! Calculate second derivative in real space
-       d2phidr2(1,iq1,iq2) = zero
-       d2phidr2(nrpts,iq1,iq2) = zero
-       utmp(1) = zero
-       do ir=2,nrpts-1
+       d2phidr2(0,iq1,iq2) = -half
+       utmp(0) = (three / dr) * (phir(1,iq1,iq2)-phir(0,iq1,iq2)) / dr
+       do ir=1,nrpts-1
          ptmp = half * d2phidr2(ir-1,iq1,iq2) + two
          d2phidr2(ir,iq1,iq2) = (half - one) / ptmp
          utmp(ir) = (three * (phir(ir+1,iq1,iq2) + phir(ir-1,iq1,iq2) - &
 &          two*phir(ir,iq1,iq2)) / (dr**2) - half * utmp(ir-1)) / ptmp
        end do
-       do ir=nrpts-1,1,-1
+       un = (three / dr) * (phir(nrpts-1,iq1,iq2)-phir(nrpts,iq1,iq2)) / dr
+       d2phidr2(nrpts,iq1,iq2) = (un - half * utmp(nrpts-1)) /  &
+         (half * d2phidr2(nrpts-1,iq1,iq2) + one) 
+       do ir=nrpts-1,0,-1
          d2phidr2(ir,iq1,iq2) = d2phidr2(ir,iq1,iq2) * &
 &          d2phidr2(ir+1,iq1,iq2) + utmp(ir)
        end do
 
       ! Calculate second derivative in reciprocal space
-       d2phidg2(1,iq1,iq2) = zero
-       d2phidg2(ngpts,iq1,iq2) = zero
-       utmp(1) = zero
-       do ig=2,ngpts-1
+       d2phidg2(0,iq1,iq2) = -half 
+       utmp(0) = (three / dg) * (phig(1,iq1,iq2)-phig(0,iq1,iq2)) / dg
+       do ig=1,ngpts-1
          ptmp = half * d2phidg2(ig-1,iq1,iq2) + two
          d2phidg2(ig,iq1,iq2) = (half - one) / ptmp
          utmp(ig) = (three * (phig(ig+1,iq1,iq2) + phig(ig-1,iq1,iq2) - &
-&          two*phig(ig,iq1,iq2)) / (dr**2) - half * utmp(ig-1)) / ptmp
+&          two*phig(ig,iq1,iq2)) / (dg**2) - half * utmp(ig-1)) / ptmp
        end do
-       do ig=ngpts-1,1,-1
-         d2phidg2(ig,iq1,iq2) = d2phidg2(ig,iq1,iq2) * d2phidg2(ig+1,iq1,iq2) + &
-&          utmp(ig)
+       un = (three / dg) * (phig(ngpts-1,iq1,iq2)-phig(ngpts,iq1,iq2)) / dg
+       d2phidg2(ngpts,iq1,iq2) = (un - half * utmp(ngpts-1)) /  &
+         (half * d2phidg2(ngpts-1,iq1,iq2) + one)
+       do ig=ngpts-1,0,-1
+         d2phidg2(ig,iq1,iq2) = d2phidg2(ig,iq1,iq2) * &                          
+&         d2phidg2(ig+1,iq1,iq2) + utmp(ig)
        end do
 
       ! Symmetrize kernels & derivatives
@@ -2250,25 +2254,27 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        phig(:,iq2,iq1) = phig(:,iq1,iq2)
        d2phidr2(:,iq2,iq1) = d2phidr2(:,iq1,iq2)
        d2phidg2(:,iq2,iq1) = d2phidg2(:,iq1,iq2)
-      end if ! sofswt == 1
+      else! sofswt == 1
 
-      if ( sofswt == 0) then
       ! Build unsoftened kernel in real space
       ! Note: smoothly going to zero when approaching rcut
       ! radial mesh is indeed a mesh of |\vec{r1}-\vec{r2}| values.
-       do ir=1,nrpts
+       do ir=0,nrpts
          xr=rmesh(ir)
          phir_u(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
-&          (one - ((ir - 1) / nrpts)**8)**4
+&          (one - ( xr / rmesh(nrpts))**8)**4
        end do
+
       ! Symmetrize unsoftened kernel
        phir_u(:,iq2,iq1) = phir_u(:,iq1,iq2)
-      end if ! sofswt == 0
+      end if ! sofswt == 1
 
-     end do
-   end do
+    end do !loop on iq2
+  end do !loop on iq1
 
   ABI_FREE(utmp)
+  ABI_FREE(q1sat)
+  ABI_FREE(q2sat)
 
   DBG_EXIT("COLL")
 
