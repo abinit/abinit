@@ -168,8 +168,6 @@ CONTAINS  !====================================================================
 !!      fftprof,m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -258,8 +256,6 @@ end subroutine fft_test_init
 !!      fftprof,m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -294,8 +290,6 @@ end subroutine fft_test_nullify
 !!      m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -359,8 +353,6 @@ end subroutine fft_test_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -400,8 +392,6 @@ end subroutine fft_test_free_1D
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -495,8 +485,6 @@ end function name_of
 !!      m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -550,8 +538,6 @@ end subroutine fftprof_init
 !!      m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -593,8 +579,6 @@ end subroutine fftprof_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -634,8 +618,6 @@ end subroutine fftprof_free_1D
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -747,8 +729,6 @@ end subroutine fftprof_print
 !!      fftprof,m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -884,8 +864,6 @@ end subroutine time_fourdp
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1019,8 +997,6 @@ end subroutine time_fftbox
 !!      fftprof,m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1310,8 +1286,6 @@ end subroutine time_fourwf
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1345,8 +1319,6 @@ end subroutine fftprof_ncalls_per_test
 !!      fftprof,m_fft_prof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1497,8 +1469,6 @@ end subroutine time_rhotwg
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1665,8 +1635,6 @@ end subroutine time_fftu
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1770,8 +1738,6 @@ end subroutine prof_fourdp
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
@@ -1875,8 +1841,6 @@ end subroutine prof_fourwf
 !!      fftprof
 !!
 !! CHILDREN
-!!      fft_test_free,fft_test_init,fft_test_nullify,fftprof_free,get_kg
-!!      random_number,time_rhotwg
 !!
 !! SOURCE
 
