@@ -744,18 +744,17 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,i3,id1,id2,id3,idir,ifft,ig1,ig2,ig3,ispden,n1,n2,n3,qeq0
+ integer :: i1,i2,i3,id1,id2,id3,idir,ifft,ig1,ig2,ig3,ispden,n1,n2,n3
  real(dp),parameter :: lowden=1.d-14,precis=1.d-15
- real(dp) :: gc23_idir,gcart_idir,ph123i,ph123r,ph1i,ph1r,ph23i,ph23r,ph2i,ph2r
- real(dp) :: ph3i,ph3r,work_im,work_re
+ real(dp) :: gc23_idir,gcart_idir
  character(len=500) :: message
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
+ real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:)
  real(dp),allocatable :: wkcmpx(:,:)
- real(dp),allocatable :: work(:),workgr(:,:),worklp(:,:),worktau(:,:)
+ real(dp),allocatable :: work(:),workgr(:,:)
 
 ! *************************************************************************
 
