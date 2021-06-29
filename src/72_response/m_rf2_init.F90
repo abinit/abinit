@@ -161,6 +161,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 ! *********************************************************************
 
+! AZ change
+ 
  DBG_ENTER("COLL")
 
  call timab(514,1,tsec)
