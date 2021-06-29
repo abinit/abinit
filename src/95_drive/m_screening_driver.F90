@@ -328,9 +328,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !=============================================
  call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
-!=== Initialize dimensions and basic objects ===
- call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
-& ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
+ ! === Initialize dimensions and basic objects ===
+ call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
+   ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
  call timab(302,2,tsec) ! screening(init)
  call print_ngfft(ngfft_gw,'FFT mesh used for oscillator strengths')
@@ -1336,7 +1336,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    case (-11)
    ! LR+ALDA hybrid vertex kernel
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     ikxc=7; dim_kxcg=1 
+     ikxc=7; dim_kxcg=1
      ABI_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
      approx_type=7
      option_test=1  ! TESTELECTRON
@@ -1603,7 +1603,7 @@ end subroutine screening
 !!
 !! SOURCE
 
-subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
+subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
 & ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
 !Arguments ------------------------------------
@@ -1612,7 +1612,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: wfk_fname
  type(Dataset_type),intent(inout) :: Dtset !INOUT is due to setshells
- type(datafiles_type),intent(in) :: dtfil
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Dtset%usepaw)
  type(em1params_t),intent(out) :: Ep
@@ -1633,7 +1632,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  integer,parameter :: NOMEGAGAUSS=30,NOMEGAREAL=201,pertcase0=0,master=0
  integer :: bantot,ib,ibtot,ikibz,iq,iqp,isppol,ig,ng,ierr
  integer :: jj,mod10,mband,ng_kss,iqbz,isym,iq_ibz,itim
- integer :: timrev,use_umklp,ncerr
+ integer :: timrev,use_umklp !,ncerr
  integer :: npwepG0,nshepspG0,method,enforce_sym,nfftgw_tot !,spin,band,ik_ibz,
  integer :: istart,iend,test_npwkss,my_rank,nprocs !ii
  real(dp),parameter :: OMEGAERMAX=100.0/Ha_eV
@@ -1792,17 +1791,18 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    end if
  end do
 
+ ! This section is now performed in invars2
  ! Write the list of qpoints for the screening in netcdf format and exit.
  ! This file is used by abipy to generate multiple input files.
- if (Dtset%nqptdm == -1) then
-   if (my_rank==master) then
-#ifdef HAVE_NETCDF
-      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
-      NCF_CHECK(ncerr)
-#endif
-   end if
-   ABI_ERROR_NODUMP("Aborting now")
- end if
+! if (Dtset%nqptdm == -1) then
+!   if (my_rank==master) then
+!#ifdef HAVE_NETCDF
+!      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
+!      NCF_CHECK(ncerr)
+!#endif
+!   end if
+!   ABI_ERROR_NODUMP("Aborting now")
+! end if
 
  if (Dtset%gw_nqlwl==0) then
    Ep%nqlwl=1
