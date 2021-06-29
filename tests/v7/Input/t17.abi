@@ -3,6 +3,9 @@
   ndtset  2
 
  nspinor1   2
+ spnorbscl1 0.99999999   # This is just to test this variable with NC pseudos
+                       # This is almost equivalent to the default behaviour. 
+
  nspinor2   1
  nsppol2    2
 

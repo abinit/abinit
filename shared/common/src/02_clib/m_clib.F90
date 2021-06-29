@@ -187,13 +187,15 @@ subroutine clib_print_mallinfo(unit)
 
   call clib_mallinfo(arena, hblkhd, usmblks, fsmblks, uordblks, fordblks)
 
-  write(unit, *)""
-  write(unit,*)' Total space in arena            : ',arena
-  write(unit,*)' Space in holding block headers  : ',hblkhd
-  write(unit,*)' Space in small blocks in use    : ',usmblks
-  write(unit,*)' Space in free small blocks      : ',fsmblks
-  write(unit,*)' Space in ordinary blocks in use : ',uordblks
-  write(unit,*)' Space in free ordinary blocks   : ',fordblks
+  write(unit,*)""
+  write(unit,*)"--- !Mallinfo"
+  write(unit,*)' Total space in arena: ',arena
+  write(unit,*)' Space in holding block headers: ',hblkhd
+  write(unit,*)' Space in small blocks in use: ',usmblks
+  write(unit,*)' Space in free small blocks: ',fsmblks
+  write(unit,*)' Space in ordinary blocks in use: ',uordblks
+  write(unit,*)' Space in free ordinary blocks: ',fordblks
+  write(unit,*)"..."
   write(unit,*)""
 
 end subroutine clib_print_mallinfo
