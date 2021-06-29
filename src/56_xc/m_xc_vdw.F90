@@ -2113,13 +2113,14 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 !Arguments ------------------------------------
   integer,intent(in) :: nqpts,nrpts,sofswt
   integer,intent(out) :: ngpts
-  real(dp),intent(in) :: rcut,gcut
-
+  real(dp),intent(in) :: rcut
+  real(dp),intent(inout) :: gcut
 !Local variables ------------------------------
-  integer :: ig,iq1,iq2,ir
-  real(dp) :: dg,dr,lstep,ptmp,q1,q2,xr,yq1,yqn,yr1,yrn
+  integer :: ig,iq1,iq2,ir,rfftt,id1,ndpts,ng
+  real(dp) :: dg,dr,lstep,ptmp,q1,q2,qcut,qtol,un,xr
+  real(dp) :: x1,x2,yq1,yqn,yr1,yrn,gmax
   real(dp),allocatable :: gmesh(:),rmesh(:),utmp(:)
-
+  real(dp),allocatable :: q1sat(:),q2sat(:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -2128,27 +2129,64 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
 
   dr = rcut / nrpts
+  ngpts = nrpts
   dg = pi / rcut
-  ngpts = 1 + int(gcut/dg)
+  gcut =  pi / dr  !kmax in siesta
+  gmax = 10.639734883681651 !kcut in siesta for a particular 
+! system (Ar). This should be computed each time in terms of 
+! the FFT and BZ parameters, not hard wired like now. 
+  ng = 1 + int(gmax/dg) ! nk in siesta
+  rfftt = 2 !Type of radial sin transform
 
-  ABI_MALLOC(utmp,(nrpts))
+  ABI_MALLOC(utmp,(0:nrpts))
 
-  ! Create radial mesh for radial FT: src/32_util/radsintr.F90
-  ABI_MALLOC(rmesh,(nrpts))
-  forall(ir=1:nrpts) rmesh(ir) = dr * dble(ir-1)
+  ! Create radial mesh for radial FT: 
+  ! shared/common/src/32_util/radsintr.F90
+  ABI_MALLOC(rmesh,(0:nrpts))
+  forall(ir=1:nrpts) rmesh(ir) = dr * dble(ir)
 
   if ( sofswt == 1 ) then
   ! Create reciprocal radial mesh
-   ABI_MALLOC(gmesh,(ngpts))
-   forall(ig=1:ngpts) gmesh(ig) = dg * dble(ig-1)
+   ABI_MALLOC(gmesh,(0:ngpts))
+   forall(ig=0:ngpts) gmesh(ig) = dg * dble(ig)
   end if
 
+  ABI_MALLOC(q1sat,(2))
+  ABI_MALLOC(q2sat,(2))
 
   ! Build filtered kernel for each (q1,q2) pair
   do iq1=1,nqpts
-    do iq2=1,iq1
-      q1 = qmesh(iq1)
-      q2 = qmesh(iq2)
+    !Inverse saturation of q1-mesh value 
+    x1 = 0
+    x2 = 1.5_dp * qcut
+    do
+      q1 = (x1+x2)/2
+      call vdw_df_saturation( q1, qcut, q1sat )
+      if (abs(qmesh(iq1)-q1sat(1))<qtol) then
+        exit
+      else if (q1sat(1) < qmesh(iq1)) then
+        x1 = q1
+      else
+        x2 = q1
+      end if
+    end do ! end calculation of unsaturated qmesh(iq1)
+
+    do iq2=1,iq1      
+    !Rather than this q2 = qmesh(iq2), the values of q-mesh
+    !are unsaturated. 
+      x1 = 0
+      x2 = 1.5_dp * qcut
+      do
+        q2 = (x1+x2)/2
+        call vdw_df_saturation( q2, qcut, q2sat )
+        if (abs(qmesh(iq2)-q2sat(1))<qtol) then
+          exit
+        else if (q2sat(1) < qmesh(iq2)) then
+          x1 = q2
+        else
+          x2 = q2
+        end if                           
+      end do ! end calculation of unsaturated qmesh(iq2)
 
       if ( sofswt == 1 ) then
       ! Build kernel in real space
@@ -2157,11 +2195,11 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        do ir=1,nrpts
          xr=rmesh(ir)
          phir(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
-&          (one - ((ir - 1) / nrpts)**8)**4
+&          (one - ( xr / rmesh(nrpts))**8)**4
        end do
 
       ! Obtain kernel in reciprocal space
-       call radsintr(phir(:,iq1,iq2),phig(:,iq1,iq2),ngpts,nrpts,gmesh,rmesh,yq1,yqn)
+       call radsintr(phir(:,iq1,iq2),phig(:,iq1,iq2),ngpts,nrpts,gmesh,rmesh,yq1,yqn,rfftt)
 
       ! Filter in reciprocal space
        do ig=1,ngpts
