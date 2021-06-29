@@ -2107,7 +2107,7 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,paw
 
  !Local variables -------------------------
  !scalars
- integer :: adir,ignt,ijlm,il,ilm,ilmn,iln,imesh,itypat,jl,jlm,jlmn,jln,klmn,lkmk,mesh_size
+ integer :: adir,ignt,ijlm,il,im,ilm,ilmn,iln,imesh,itypat,jl,jm,jlm,jlmn,jln,klmn,lkmk,mesh_size
  real(dp) :: c1,intg,rr,rr2,the_gnt,tintg
 
  !arrays
@@ -2117,7 +2117,20 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,paw
 
  !-----------------------------------------------------------------------
 
- c1 = four_pi/sqrt3
+ ! ilm = 1: S_{00}
+ ! ilm = 2: S_{1,-1}
+ ! ilm = 3: S_{1,0}
+ ! ilm = 4: S_{1,1}
+
+ ! for the real spherical harmonics, 
+ ! S_{1,-1} \propto y 
+ ! S_{1,0} \propto z
+ ! S_{1,1} \propto  x
+ ! so adir 1 (x) gets mapped to ilm 4
+ ! so adir 2 (y) gets mapped to ilm 2
+ ! so adir 3 (z) gets mapped to ilm 3
+
+ c1 = sqrt(four_pi/three)
 
  do itypat=1,dtset%ntypat
 
@@ -2130,6 +2143,7 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,paw
 
    do jlmn=1,pawtab(itypat)%lmn_size
      jl = pawtab(itypat)%indlmn(1,jlmn)
+     jm = pawtab(itypat)%indlmn(2,ilmn)
      jln = pawtab(itypat)%indlmn(5,jlmn)
      jlm = pawtab(itypat)%indlmn(4,jlmn)
 
@@ -2138,6 +2152,7 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,paw
 
      do ilmn=1,pawtab(itypat)%lmn_size
        il = pawtab(itypat)%indlmn(1,ilmn)
+       im = pawtab(itypat)%indlmn(2,ilmn)
        iln = pawtab(itypat)%indlmn(5,ilmn)
        ilm = pawtab(itypat)%indlmn(4,ilmn)
 
