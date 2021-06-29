@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_dtset
 !! NAME
 !!  m_dtset
@@ -34,6 +32,7 @@ module m_dtset
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
+ use m_crystal,      only : crystal_t, crystal_init
 
  implicit none
 
@@ -123,6 +122,7 @@ type, public :: dataset_type
  integer :: densfor_pred
  integer :: diismemory
  integer :: dipdip = 1
+ integer :: dipquad = 1
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -532,6 +532,7 @@ type, public :: dataset_type
  integer :: ptgroupma
 !Q
  integer :: qptopt
+ integer :: quadquad = 1
 !R
  integer :: random_atpos
  integer :: recgratio
@@ -965,6 +966,9 @@ type, public :: dataset_type
  procedure :: testsusmat => dtset_testsusmat
    ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
+ procedure :: get_crystal => dtset_get_crystal
+   !  Build crystal_t object from dtset and image index.
+
  end type dataset_type
 !!***
 
@@ -1388,6 +1392,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
+ dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
  dtout%dmft_dc            = dtin%dmft_dc
@@ -1843,6 +1848,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
  dtout%qptopt             = dtin%qptopt
+ dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
@@ -2518,7 +2524,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Desactivate perturbation symmetries for a longwave calculation (TODO)
+!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
  if (dtset%prepalw==1) then
    do ipert=1,dtset%natom+6
      do idir=1,3
@@ -2565,8 +2571,8 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
  rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
 
-!Determine existence of pertubations and of pertubation symmetries
-!Create array with pertubations which have to be calculated
+!Determine existence of perturbations and of perturbation symmetries
+!Create array with perturbations which have to be calculated
  ABI_MALLOC(pert_tmp,(2,3*(dtset%natom+6)+18))
 
  do ipert=1,mpert
@@ -2627,17 +2633,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  write(std_out,'(a)')'irred_perts:'
 
  do icase=1,npert
-!   pert = pert_tmp(icase)
-
-!   if (pert <= dtset%natom*3) then
-!     idir = mod(pert, 3)
-!     if (idir==0) idir=3
-!     ipert=((pert-idir) / 3 + 1)
-!   else
-!     idir = mod(pert, 3)
-!     if (idir==0) idir=3
-!     ipert = dtset%natom + ((pert - 3*dtset%natom - 1) / 3) + 1
-!   end if
    ipert = pert_calc(1,icase)
    idir = pert_calc(2,icase)
 
@@ -2793,6 +2788,60 @@ logical function dtset_testsusmat(dtset, dielop, dielstrt, istep) result(compute
  if (istep==dielstrt .and. dielop>=1) compute=.TRUE.
 
 end function dtset_testsusmat
+!!***
+
+!!****f* m_dtset/dtset_get_crystal
+!! NAME
+!! dtset_get_crystal
+!!
+!! FUNCTION
+!!  Build crystal_t object from dtset and image index.
+!!  Note that acell_orig, rprim_orig and xred_orig are used by default
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),target,intent(in) :: dtset
+ integer,intent(in) :: img
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii, gw_timrev
+ logical,parameter :: remove_inv = .False.
+!arrays
+ real(dp) :: my_rprimd(3,3)
+ real(dp),pointer :: my_xred(:,:)
+ character(len=500) :: my_title(dtset%ntypat)
+
+! *********************************************************************
+
+ call mkrdim(dtset%acell_orig(:, img), dtset%rprim_orig(:, :, img), my_rprimd)
+ my_xred => dtset%xred_orig(:, :, img)
+
+ do ii=1,dtset%ntypat
+    my_title(ii) = "No info on pseudo available"
+ end do
+
+ gw_timrev = 1; if (any(dtset%kptopt == [3, 4])) gw_timrev = 0
+ gw_timrev = gw_timrev + 1
+
+ call crystal_init(dtset%amu_orig(:, img), cryst, dtset%spgroup, dtset%natom, dtset%npsp, &
+   dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
+   dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
+   symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
+
+end function dtset_get_crystal
 !!***
 
 !!****f* m_dtset/macroin
@@ -3174,7 +3223,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
@@ -3318,7 +3367,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
- list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
+ list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
