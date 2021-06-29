@@ -752,7 +752,6 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- logical :: with_vxc,with_vxctau
  real(dp) :: tsec(2)
  real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:),ph1(:),ph2(:),ph3(:)
  real(dp),allocatable :: wkcmpx(:,:)

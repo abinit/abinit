@@ -1141,7 +1141,7 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 !scalars
  integer :: alpha,ii,ir,ishift,ngrad,nspgrad
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
- real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
+ real(dp) :: coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: delag,delad,delbd,delbg,deldg
  real(dp) :: gmodsq,gradrho_gradrho1,gradrho_grr0qr1
  real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up

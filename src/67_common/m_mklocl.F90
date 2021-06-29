@@ -2158,6 +2158,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (nkxc == 7) then
      call dfpt_mkvxcgga_n0met(beta,1,delta,gamma,gprimd,kxc,mpi_enreg, &
    & nfft,ngfft,nkxc,nspden,rhor,vxc1dqdq)
+
      !Fictitious i factor temporarily applied. 
      !It is later canceled by the (-i) factor of the total matrix element
      do ii=1,nfft
