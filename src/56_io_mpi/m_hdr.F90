@@ -1154,7 +1154,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  Hdr_cp%headform = Hdr_in%headform
  hdr_cp%icoulomb = hdr_in%icoulomb
  Hdr_cp%intxc    = Hdr_in%intxc
- Hdr_cp%ivalence = Hdr_in%ivalence ! CP added for occopt 9 calls 
+ Hdr_cp%ivalence = Hdr_in%ivalence ! CP added for occopt 9 calls
  Hdr_cp%ixc      = Hdr_in%ixc
  Hdr_cp%natom    = Hdr_in%natom
  Hdr_cp%nkpt     = Hdr_in%nkpt
@@ -3379,7 +3379,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  class(hdr_type),intent(inout) :: hdr
 
 !Local variables-------------------------------
- integer :: headform,ipsp
+ integer :: headform,ipsp,major,ii
  character(len=500) :: errmsg
  real(dp),allocatable :: occ3d(:,:,:)
 
@@ -3395,12 +3395,23 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
  call check_fform(fform)
 
+ ii = index(hdr%codvsn, ".")
+ if (ii == 0 .or. ii == 1) then
+   ABI_WARNING(sjoin("Cannot find major.minor pattern in codvsn:", hdr%codvsn))
+   ierr = 1; return
+ end if
+
+ major = atoi(hdr%codvsn(:ii-1))
+
 !Writing always use last format version
  headform = HDR_LATEST_HEADFORM
- ! CP debug
  !write(std_out,*) 'CP debug = ', headform
- ! End CP debug
- write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
+
+ if (major > 8) then
+   write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
+ else
+   write(unit, err=10, iomsg=errmsg) hdr%codvsn(1:6), headform, fform
+ end if
 
  write(unit, err=10, iomsg=errmsg) &
     hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
@@ -3416,7 +3427,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
    hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_FREE(occ3d)
 
- write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:) 
+ write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
  write(unit,err=10, iomsg=errmsg) &
     hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%cellcharge, hdr%icoulomb,&
    hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)
