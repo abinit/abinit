@@ -999,15 +999,11 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !Local variables-------------------------------
 !scalars
  integer :: ii,ir,ishift,ngrad,nspgrad
- real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
- real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
- real(dp) :: gradrho_gradrho1,gradrho_grr0qr1
- real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ real(dp) :: gradrho_gradrho1
  character(len=500) :: msg
 !arrays
  real(dp) :: qphon(3)
- real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
- real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
+ real(dp) :: r0(3),r1(3)
  real(dp),allocatable :: ar1(:,:)
  real(dp),allocatable :: a_gradi_r1(:,:)
  real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
@@ -1140,15 +1136,11 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 !Local variables-------------------------------
 !scalars
  integer :: alpha,ii,ir,ishift,ngrad,nspgrad
- real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
- real(dp) :: coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
  real(dp) :: delag,delad,delbd,delbg,deldg
- real(dp) :: gmodsq,gradrho_gradrho1,gradrho_grr0qr1
- real(dp) :: gradrho_gradrho1im,gradrho_gradrho1im_dn,gradrho_gradrho1im_up
+ real(dp) :: gmodsq
  character(len=500) :: msg
 !arrays
- real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
- real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
+ real(dp) :: r0(3)
  real(dp),allocatable :: dadgg(:,:),dadgtgn(:,:),gna(:,:),dadgngn_1(:,:),dadgngn_2(:,:)
  real(dp),allocatable :: dadgngn(:,:,:),kro_an(:,:,:),sumgrad(:,:,:)
 
