@@ -34,8 +34,8 @@ module m_integrals
 
  implicit none
 
- private
-!!***
+! private
+
 
  public :: radsintr
 !!***
@@ -373,7 +373,6 @@ character(len=512) :: msg
  end select
 
 end subroutine radsintr
-!!***
 
 end module m_integrals
 !!***
