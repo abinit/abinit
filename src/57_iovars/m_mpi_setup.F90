@@ -37,7 +37,6 @@ module m_mpi_setup
  use defs_abitypes,  only : MPI_type
  use m_fstrings,     only : sjoin, itoa
  use m_time,         only : abi_wtime
- use m_io_tools,     only : flush_unit
  use m_parser,       only : intagm
  use m_geometry,     only : mkrdim, metric
  use m_fftcore,      only : fftalg_for_npfft, getng,  kpgcount
@@ -264,14 +263,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      iexit = iexit + 1
    end if
 
-!  From total number of procs, compute all possible distributions
-!  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
+   ! From total number of procs, compute all possible distributions
+   ! Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
    if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
        iexit = 0
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
-   !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
    ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
    if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
@@ -1057,7 +1055,7 @@ end subroutine mpi_setup
  integer,parameter :: ALGO_NOT_SET=-1, ALGO_DEFAULT_PAR=2
  integer,parameter :: ALGO_CG=0, ALGO_LOBPCG_OLD=1, ALGO_LOBPCG_NEW=2, ALGO_CHEBFI=3
  integer,parameter :: NPFMAX=128,BLOCKSIZE_MAX=3000,MAXBAND_PRINT=10
- integer,parameter :: MAXCOUNT=250,MAXPRINT=10,MAXBENCH=25,MAXABIPY=5,NPF_CUTOFF=20
+ integer,parameter :: MAXCOUNT=250,MAXPRINT=10,MAXBENCH=25,MAXABIPY=25,NPF_CUTOFF=20
  real(dp),parameter :: relative_nband_range=0.025
  integer :: wf_algo,wf_algo_global,bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
@@ -1108,6 +1106,12 @@ end subroutine mpi_setup
  ! Unit number used for outputting the autoparal sections
  ount = ab_out
 
+ ! From the documentation:
+ !
+ !   If autoparal > 1 and max_ncpus is greater than 0, ABINIT analyzes the
+ !   efficiency of the process distribution for each possible number of processors
+ !   from 2 to max_ncpus. After having printed out the efficiency, the code stops.
+
  ! Handy local variables
  iam_master = (mpi_enreg%me==0)
  optdriver = dtset%optdriver
@@ -1128,6 +1132,7 @@ end subroutine mpi_setup
  if (dtset%wfoptalg==1) wf_algo_global=ALGO_CHEBFI
 
  ! Some peculiar cases (with direct exit)
+ ! MG: What is the meaning of max_ncpus < 0. This is not documented!
  if (max_ncpus<=0) then
    if (nproc==1.and.max_ncpus<=0) then
      if (tread(1)==0.or.xmpi_paral==0) dtset%paral_kgb= 0
@@ -1142,8 +1147,8 @@ end subroutine mpi_setup
      if (tread(10)==0.or.xmpi_paral==0) dtset%np_slk  = 1000000
      return
    end if
-   if ((dtset%optdriver/=RUNL_GSTATE.and.dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_GWLS).or. &
-       (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
+   if ((optdriver/=RUNL_GSTATE.and. optdriver/=RUNL_RESPFN.and. optdriver/=RUNL_GWLS).or. &
+       (optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
      dtset%paral_kgb= 0
      dtset%npimage  = max(1,dtset%npimage)
      dtset%nppert   = max(1,dtset%nppert)
@@ -1194,7 +1199,7 @@ end subroutine mpi_setup
 
 !Parallelization over perturbations, k-points and spin components (DFPT)
  npp_min=1;npp_max=1;npert_eff=1
- if (optdriver==RUNL_RESPFN) then
+ if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
    if (dtset%paral_rf==1) then
      call dtset%get_npert_rbz(nband_rbz, nkpt_rbz, npert_eff)
      do jj=1,npert_eff
@@ -1207,8 +1212,7 @@ end subroutine mpi_setup
        npp_max=dtset%nppert
        if (npp_max>npert_eff) then
          npp_min=npert_eff;npp_max=npert_eff
-         msg='nppert is bigger than npert; we set nppert=npert'
-         ABI_WARNING(msg)
+         ABI_WARNING('nppert is bigger than npert; we set nppert=npert')
        end if
      end if
      np_sk_min=1
@@ -1236,7 +1240,7 @@ end subroutine mpi_setup
  npb_min=1;npb_max=1
  bpp_min=1;bpp_max=1
  n2=0;n3=0
- if (dtset%optdriver==RUNL_GSTATE) then
+ if (optdriver==RUNL_GSTATE) then
 
 !  >> FFT level
    npf_min=max(1,dtset%npfft)
@@ -1362,7 +1366,7 @@ end subroutine mpi_setup
  if (optdriver==RUNL_GSTATE) then
    ncell_eff=nimage_eff;npc_min=npi_min;npc_max=npi_max
  end if
- if (optdriver==RUNL_RESPFN) then
+ if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
    ncell_eff=npert_eff;npc_min=npp_min;npc_max=npp_max
  end if
 
@@ -1375,7 +1379,7 @@ end subroutine mpi_setup
  if (optdriver==RUNL_GSTATE) then
    ncell_eff=nimage_eff;npc_min=npi_min;npc_max=npi_max
  end if
- if (optdriver==RUNL_RESPFN) then
+ if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
    ncell_eff=npert_eff;npc_min=npp_min;npc_max=npp_max
  end if
 
@@ -1385,8 +1389,8 @@ end subroutine mpi_setup
 
 !  >>>>> K-POINTS
    do np_sk=np_sk_min,np_sk_max
-!    -> for DFPT runs, impose that nsppol divide np_sk
-     if (optdriver==RUNL_RESPFN.and.modulo(np_sk,dtset%nsppol)>0.and.np_sk>1) cycle
+!    -> for DFPT runs, impose that nsppol divides np_sk
+     if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE]) .and. modulo(np_sk,dtset%nsppol)>0.and.np_sk>1) cycle
      acc_k=one;if (np_sk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,np_sk)
 
 !    >>>>> SPINORS
@@ -1412,8 +1416,7 @@ end subroutine mpi_setup
 
 !        Change algo if npfft>1
          wf_algo=wf_algo_global
-         if (optdriver==RUNL_GSTATE.and.npf>1.and. &
-&            wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
+         if (optdriver==RUNL_GSTATE.and.npf>1.and. wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
 
 !        FFT parallelism not compatible with multithreading
          if (wf_algo==ALGO_LOBPCG_NEW.or.wf_algo==ALGO_CHEBFI) then
@@ -1428,8 +1431,7 @@ end subroutine mpi_setup
            if (modulo(mband,npb)>0) cycle
 
 !          Change algo if npband>1
-           if (optdriver==RUNL_GSTATE.and.npb>1.and. &
-&              wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
+           if (optdriver==RUNL_GSTATE.and.npb>1.and. wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
 
 !          Base speedup
            acc_kgb_0=one;if (npb*npf*nthreads>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf*nthreads))
@@ -1543,10 +1545,7 @@ end subroutine mpi_setup
 &  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
 &  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
    ABI_WARNING(msg)
-   if (max_ncpus>0) then
-     call wrtout(ab_out,msg)
-     call flush_unit(ab_out)
-   end if
+   if (max_ncpus>0) call wrtout(ab_out,msg, do_flush=.True.)
    iexit=iexit+1
  end if
 
@@ -1564,15 +1563,22 @@ end subroutine mpi_setup
    if (any(my_algo(:)/=ALGO_CG)) paral_kgb=1
  end if
 
- ! Print output for abipy
+ ! ======================================
+ ! Print output for abipy in Yaml format
+ ! ======================================
+
+ ! Please DO NOT CHANGE this part without contacting gmatteo first
+ ! since ANY CHANGE can easily break the interface with AbiPy.
  if (iam_master .and. max_ncpus > 0.and. (mcount>0 .or. wf_algo_global == ALGO_CG)) then
    write(ount,'(2a)')ch10,"--- !Autoparal"
    if (optdriver==RUNL_GSTATE .and. paral_kgb == 0) then
      write(ount,"(a)")"# Autoparal section for GS run (band-by-band CG method)"
    else if (optdriver==RUNL_GSTATE) then
-     write(ount,'(a)')'#Autoparal section for GS calculations with paral_kgb'
+     write(ount,'(a)')'# Autoparal section for GS calculations with paral_kgb 1'
    else if (optdriver==RUNL_RESPFN) then
-     write(ount,'(a)')'#Autoparal section for DFPT calculations'
+     write(ount,'(a)')'# Autoparal section for DFPT calculations'
+   else if (optdriver==RUNL_LONGWAVE) then
+     write(ount,'(a)')'# Autoparal section for LONGWAVE calculations'
    else
      ABI_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
    end if
@@ -1585,6 +1591,7 @@ end subroutine mpi_setup
    write(ount,"(a,i0)")"    nkpt: ",dtset%nkpt
    write(ount,"(a,i0)")"    mband: ",mband
    write(ount,"(a)")"configurations:"
+
    if (optdriver==RUNL_GSTATE.and.paral_kgb==0) then
      work_size = dtset%nkpt * dtset%nsppol
      do ii=1,max_ncpus
@@ -1600,6 +1607,7 @@ end subroutine mpi_setup
          !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
        end do
      end do
+
    else if (optdriver==RUNL_GSTATE) then
      omp_ncpus=nthreads
      do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
@@ -1622,7 +1630,8 @@ end subroutine mpi_setup
        write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
        write(ount,'(a)')   '            }'
      end do
-   else if (optdriver==RUNL_RESPFN) then
+
+   else if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
      do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
        ii=isort(jj)
        tot_ncpus = my_distp(7,ii)

@@ -3764,11 +3764,12 @@ dataset. It must therefore be used with [[rfelfd]] = 2 (or 1).
   * 1 --> effective mass tensor calculation
 
 !!! note
+
     At the present time, both norm-conserving (NC) and PAW calculations are
     supported. Also, for PAW calculations only, [[nspinor]] == 2 and
-    [[pawspnorb]] == 1 (i.e. spin-orbit (SO) calculations) is supported. NC SO
-    calculations are NOT currently supported. Also, for both NC and PAW,
-    [[nspden]]/=1 and [[nsppol]]/=1 are NOT supported.
+    [[pawspnorb]] == 1 (i.e. spin-orbit (SO) calculations) is supported.
+    NC SO calculations are NOT currently supported. Also, for both NC and PAW,
+    [[nspden]] /= 1 and [[nsppol]] /= 1 are NOT supported.
 """,
 ),
 
@@ -4535,7 +4536,7 @@ FFT operations are one of the most time-consumming operations, especially for sy
 It is then interesting to count the number of FFT operations in a dataset, which is done with [[fft_count]] = 1 (or any non-zero value).
 More precisely, it counts the number of FFTs done in "fourdp" and "fourwf" routines.
 
-This feature is not equivalent to what other profiling tools would give (as the one included in Abinit, see [[timopt]]), because the number of FFTs done per call 
+This feature is not equivalent to what other profiling tools would give (as the one included in Abinit, see [[timopt]]), because the number of FFTs done per call
 depends on input options which vary during the computation.
 Indeed, one or two FFTs could be done in one call.
 The counting activated by [[fft_count]] takes into account this effect.
@@ -5259,7 +5260,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
 The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
@@ -5309,7 +5310,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
 The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
@@ -5359,7 +5360,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
+[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
 The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
@@ -7762,12 +7763,10 @@ No meaning for RF calculations.
    algorithm implemented by ABINIT.
    For instance, a server that wants to performs calculations with varying unit cells
    should set [[optcell]] > 0 in the initial input.
-
    Note that, at present, this feature is mainly used to interface ABINIT
    with the ASE optimization routines. Moreover the user is responsible for creating an input
    file with tuned tolerances to prevent Abinit from exiting when internal convergence is reached.
    See examples available in the [ASE documentation](https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html)
-
    **Purpose:** Structural optimization driver by the server (MD runs are not yet supported)
    **Cell optimization:** Yes (provide [[optcell]] > 0 in the initial input)
 """,
@@ -14026,8 +14025,7 @@ use [[kptopt]] = 3 (no symmetry used to generate k-points) or [[kptopt]] = 4 (on
 spatial symmetries used to generate k-points).
 Be careful if you choose to use [[kptopt]] = 0 (k-points given by hand); Time-
 reversal symmetry has to be avoided.
-An artificial scaling of the spin-orbit can be introduced thanks to the
-[[spnorbscl]] input variable.
+An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
 """,
 ),
 
@@ -18227,13 +18225,16 @@ Variable(
     dimensions="scalar",
     defaultval=1.0,
     mnemonics="SPin-ORBit SCaLing",
-    requires="[[usepaw]] == 1 and [[pawspnorb]] >= 1",
+    requires="( [[usepaw]] == 1 and [[pawspnorb]] >= 1) .or NC pseudos with SOC terms.",
     added_in_version="before_v9",
     text=r"""
-Scaling of the spin-orbit interaction. The default values gives the first-
-principles value, while other values are used for the analysis of the effect
+Scaling of the spin-orbit interaction. The default values (one) gives
+the first-principles value, while other values are used for the analysis of the effect
 of the spin-orbit interaction, but are not expected to correspond to any
 physical situation.
+
+Note that, starting with version 9.5.2, this option is also compatible with NC pseudos provided
+the pseudopotential files include the SOC term.
 """,
 ),
 
@@ -21757,24 +21758,38 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This flag is used in the Fourier interpolation in q-space of the DFPT potentials.
+This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
+
 In polar materials there is a long range (LR) component in the first-order variation
 of the KS potential that can be modeled in terms of the Born effective charges and
-the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]].
-Possible values are [0, -1, 1].
-
-Setting this flag to 0 deactivates the treatment of the LR contribution (not recommended in polar materials).
+the macroscopic dielectric tensor [[cite:Verdi2015]], [[cite:Giustino2017]] (dipolar part)
+and two additional terms of quadrupolar character related to the dynamical quadrupoles and
+the response to the electric field ([[cite:Brunin2020]], [[cite:Brunin2020b]].
 
 If *dvdb_add_lr* is set to 1, the LR part is removed when computing the real-space representation
 of the DFPT potentials so that the potential in real space is short-ranged and amenable to Fourier interpolation.
 The long-range contribution is then added back when interpolating the DFPT potentials at arbitrary q-points
+This is the default behaviour that relies on a DDB file with all the entries required to build the LR mode.
+
+Setting this flag to 0 deactivates the treatment of the LR contribution.
+This is just for testing purposes and it is not recommended in polar materials.
 
 If *dvdb_add_lr* is set to -1, the LR part is removed before computing the real-space representation
 but the LR term is **not** reintroduced during the interpolation in $\qq$-space.
 This option is mainly used for debugging purposes.
 
-By default, the code will always treat the LR term if the DDB file contains the Born effective charges
-and the macroscopic dielectric tensor.
-This option is similar to [[dipdip]] but it acts on the DFPT potentials instead of the dynamical matrix.
+Other options (again for testing purposes):
+
+    0: --> No treatment
+    1: --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
+           This is the standard approach for polar materials.
+    -1:  --> Remove LR model when building W(R,r). DO NOT reintroduce it after the Fourier interpolation.
+    4, 5, 6: --> Use model for the LR part only:
+
+           4: --> Use dipole + quadrupole part
+           5: --> Use dipole part only.
+           6: --> Use quadrupole part only.
+
 """,
 ),
 
@@ -22701,6 +22716,38 @@ Specify the number of bands to use when averaging over last bands to get the
 energy shift factor when [[useextfpmd]] = 2 or 3.
 
 **extfpmd_nbcut** must be less than [[nband]].
+""",
+),
+
+Variable(
+    abivarname="dipquad",
+    varset="eph",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="DIPole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9.5.2",
+    text=r"""
+
+Same meaning as [[dipquad@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="quadquad",
+    varset="eph",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="QUADdrupole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9.5.2",
+    text=r"""
+
+Same meaning as [[quadquad@anaddb]]
 """,
 ),
 
