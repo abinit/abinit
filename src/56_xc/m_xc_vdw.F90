@@ -3134,6 +3134,63 @@ subroutine vdw_df_internal_checks(test_mode)
 end subroutine vdw_df_internal_checks
 !!***
 
+!!****f* m_xc_vdw/vdw_df_saturation
+!! NAME
+!!  vdw_df_saturation
+!!
+!! FUNCTION
+!!  Obtain a saturated value of q0 which is always inside
+!!  the interpolation range (eq. 5 RS09.)
+!!  * q0s = q0c * (1 - exp(-Sum_i=1,ns 1/i (q0/q0c)**i))
+!!  * dq0sdq0 = dq0s / dq |q=q0
+!!
+!! INPUTS 
+!!  q0 = q0 value to be saturated  
+!!  q0c = Saturation value, max q0 value  
+!!
+!! OUTPUTS 
+!!  q0s(1) = saturated q0 value
+!!  q0s(2) = derivative of q0s(1) wrt q at q0 
+!!
+!! NOTES
+!!  This routine is usually interfaced with the macros defined in abi_common.h
+!!  and uses this information to define a line offset.
+!!
+!! PARENTS
+!!      xc_vdw_energy,vdw_df_filter
+!! CHILDREN
+!!      
+!!
+!! SOURCE
+
+subroutine vdw_df_saturation(q0,q0c,q0s)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: q0, q0c
+ real(dp),intent(out) :: q0s(2)  
+!integer,intent(in) :: ncerr
+!character(len=*),optional,intent(in) :: file_name
+!integer,optional,intent(in) :: file_line
+
+!Local variables-------------------------------
+ integer  :: is,ns
+ real(dp) :: ptm, dptmdq
+! *************************************************************************
+
+ ns = my_vdw_params%nsmooth
+
+ ptm = (q0 / q0c) / ns
+ dptmdq = 1._dp / q0c
+ do is=ns-1,1,-1
+   ptm = (ptm + 1._dp / is) * q0 / q0c
+   dptmdq = (dptmdq * q0 + 1) / q0c ! (dptmdq * q0 + one) / q0c
+ end do 
+ q0s(1) = q0c * (1 - exp(-ptm)) !q0c * (one - exp(-ptm))
+ q0s(2) = q0c * dptmdq * exp(-ptm)
+
+end subroutine vdw_df_saturation
+!!***
+
 !!****f* m_xc_vdw/vdw_df_netcdf_ioerr
 !! NAME
 !!  vdw_df_netcdf_ioerr

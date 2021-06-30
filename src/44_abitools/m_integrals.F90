@@ -111,9 +111,9 @@ character(len=512) :: msg
      return
    end if
   
-   ABI_ALLOCATE(ff,(mrgrid))
-   ABI_ALLOCATE(intg,(mrgrid))
-   ABI_ALLOCATE(rzf,(mrgrid))
+   ABI_MALLOC(ff,(mrgrid))
+   ABI_MALLOC(intg,(mrgrid))
+   ABI_MALLOC(rzf,(mrgrid))
    ff=zero;rzf=zero
   
   !Is mesh beginning with r=0 ?
@@ -217,9 +217,9 @@ character(len=512) :: msg
   !Sum of the three parts
    yqn=(four*pi/qgrid(mqgrid))*(r0tor1+r1torm+rmtoin)
   
-   ABI_DEALLOCATE(ff)
-   ABI_DEALLOCATE(intg)
-   ABI_DEALLOCATE(rzf)
+   ABI_FREE(ff)
+   ABI_FREE(intg)
+   ABI_FREE(rzf)
 
  case(2)  
 
@@ -368,7 +368,7 @@ character(len=512) :: msg
  case default 
    
    write(msg,'(2x,a,1x,i2)') " Unknown radial sine FFT type", rfttype
-   MSG_ERROR(msg)
+   ABI_ERROR(msg)
 
  end select
 
