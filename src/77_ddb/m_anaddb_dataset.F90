@@ -399,7 +399,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    ABI_ERROR(message)
  end if
 
- anaddb_dtset%dipquad=0
+ anaddb_dtset%dipquad=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
  if(tread==1) anaddb_dtset%dipquad=intarr(1)
  if(anaddb_dtset%dipquad<-1.or.anaddb_dtset%dipquad>1)then
@@ -1178,7 +1178,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    end if
  end do
 
- anaddb_dtset%quadquad=0
+ anaddb_dtset%quadquad=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
  if(tread==1) anaddb_dtset%quadquad=intarr(1)
  if(anaddb_dtset%quadquad<-1.or.anaddb_dtset%quadquad>1)then
