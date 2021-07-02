@@ -357,7 +357,10 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction
    q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction
    iq1q2grad_var=iq1q2grad
-   if (iq1q2grad>6) iq1q2grad_var=iq1q2grad-3                !Lower=Upper diagonal triangle matrix
+   if (dtset%rf2_dkdk/=2 .and. dtset%rf2_dkdk/=3) then
+     if (iq1q2grad>6) iq1q2grad_var=iq1q2grad-3                !Lower=Upper diagonal triangle matrix diagonal triangle matrix
+   endif
+
    q1q2grad(4,iq1q2grad)=iq1q2grad_var+(dtset%natom+6)*3     !like pertcase in dfpt_loopert.f90
  end do
 
@@ -849,13 +852,20 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
      end if
    end if
-   if (iq1q2grad <= 6) then
+   if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
      write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
    else
-     wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+     if (iq1q2grad <= 6) then
+       write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+     else
+       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+     end if
    end if
 
  end do
@@ -977,7 +987,11 @@ call gs_hamkq%free()
    call wfk_t_efield(iq2grad)%close()
  end do
  do iq1q2grad=1,nq1q2grad
-   if (iq1q2grad <= 6) call wfk_t_dkdk(iq1q2grad)%close()
+   if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
+     call wfk_t_dkdk(iq1q2grad)%close()
+   else
+     if (iq1q2grad <= 6) call wfk_t_dkdk(iq1q2grad)%close()
+   endif
  end do
 
 !=== MPI communications ==================
@@ -1220,31 +1234,26 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
              qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
              qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
 
+             ! do not symmetrize individual contributions
              if (prtvol>=10) then
-               !Write individual contributions
-               write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
-             & -(qdrpwf_t1(re,iatpert,iq2grad,iq1grad)+qdrpwf_t1(re,iatpert,iiq2grad,iiq1grad))
+               !Write individual contributions 
+               write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir, &
+             & qdrpwf_t1(im,iatpert,iq2grad,iq1grad), -qdrpwf_t1(re,iatpert,iq2grad,iq1grad)
 
-               write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
-             & -(qdrpwf_t2(re,iatpert,iq2grad,iq1grad)+qdrpwf_t2(re,iatpert,iiq2grad,iiq1grad))
+               write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir, &
+             & qdrpwf_t2(im,iatpert,iq2grad,iq1grad), -qdrpwf_t2(re,iatpert,iq2grad,iq1grad)
 
-               write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
-             & -(qdrpwf_t3(re,iatpert,iq2grad,iq1grad)+qdrpwf_t3(re,iatpert,iiq2grad,iiq1grad))
+               write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir, &
+             & qdrpwf_t3(im,iatpert,iq2grad,iq1grad), -qdrpwf_t3(re,iatpert,iq2grad,iq1grad)
 
-               write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
-             & -(qdrpwf_t4(re,iatpert,iq2grad,iq1grad)+qdrpwf_t4(re,iatpert,iiq2grad,iiq1grad))
+               write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir, &
+             & qdrpwf_t4(im,iatpert,iq2grad,iq1grad), -qdrpwf_t4(re,iatpert,iq2grad,iq1grad)
 
-               write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
-             & -(qdrpwf_t5(re,iatpert,iq2grad,iq1grad)+qdrpwf_t5(re,iatpert,iiq2grad,iiq1grad))
+               write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir, &
+             & qdrpwf_t5(im,iatpert,iq2grad,iq1grad), -qdrpwf_t5(re,iatpert,iq2grad,iq1grad)
 
-               write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
-             & -(eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad))
+               write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir, &
+             & eqgradhart(im,iatpert,iq2grad,iq1grad), -eqgradhart(re,iatpert,iq2grad,iq1grad)
              end if
 
            end if
@@ -1302,31 +1311,20 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
              qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
              qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
+             ! do not symmetrize individual contributions
              if (prtvol>=10) then
-               !Write individual contributions
-               write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
-             & 0.0_dp
+               !Write individual contributions 
+               write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,qdrpwf_t1(im,iatpert,iq2grad,iq1grad), 0.0_dp
 
-               write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
-             & 0.0_dp
+               write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,qdrpwf_t2(im,iatpert,iq2grad,iq1grad), 0.0_dp
 
-               write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
-             & 0.0_dp
+               write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,qdrpwf_t3(im,iatpert,iq2grad,iq1grad), 0.0_dp
 
-               write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
-             & 0.0_dp
+               write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,qdrpwf_t4(im,iatpert,iq2grad,iq1grad), 0.0_dp
 
-               write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
-             & 0.0_dp
+               write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,qdrpwf_t5(im,iatpert,iq2grad,iq1grad), 0.0_dp
 
-               write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-             & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
-             & 0.0_dp
+               write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,eqgradhart(im,iatpert,iq2grad,iq1grad), 0.0_dp
              end if
 
            end if
@@ -2566,13 +2564,20 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
          ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
        end if
      end if
-     if (iq1q2grad <= 6) then
+     if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
        write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
      else
-       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+       if (iq1q2grad <= 6) then
+         write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+         call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+       else
+         wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+       end if
      end if
    end do
  end if
@@ -2797,7 +2802,11 @@ call gs_hamkq%free()
      call wfk_t_efield(iefipert)%close()
    end do
    do iq1q2grad=1,nq1q2grad
-     if (iq1q2grad <= 6) call wfk_t_dkdk(iq1q2grad)%close()
+     if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
+       call wfk_t_dkdk(iq1q2grad)%close()
+     else
+       if (iq1q2grad <= 6) call wfk_t_dkdk(iq1q2grad)%close()
+     endif
    end do
  end if
 
