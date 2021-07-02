@@ -536,11 +536,23 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if ! Test of existence of symmetry of perturbation
      else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        to_compute_this_pert = 1
-     else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1 .and. idir <= 6) then
-       if (idir<=3) then
-         if (rfdir(idir) == 1) to_compute_this_pert = 1
+     else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1) then
+       if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
+         if (idir <= 3 .and. rfdir(idir) == 1) then
+           to_compute_this_pert = 1
+         else if (idir>=4.and.idir<=6) then
+           if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+         else if (idir>=7.and.idir<=9) then
+           if (rfdir(idir) == 1 .or. rfdir(idir-3) == 1) to_compute_this_pert = 1
+         end if
        else
-         if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+         if (idir<=6) then
+           if (idir<=3) then
+             if (rfdir(idir) == 1) to_compute_this_pert = 1
+           else
+             if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+           end if
+         end if
        end if
      else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1) then
        if (idir <= 3 .and. rfdir(idir) == 1) then

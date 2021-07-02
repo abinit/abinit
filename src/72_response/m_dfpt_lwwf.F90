@@ -663,12 +663,17 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      do iq1q2grad=1,nq1q2grad
 
        !Read dkdk wf1
-       if (iq1q2grad<=6) then
+       if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
+         call wfk_t_dkdk(iq1q2grad)%read_bks( iband, indkpt1(ikpt), &
+       & isppol, xmpio_single, cg_bks=cg1_dkdk)
+       else
+         if (iq1q2grad<=6) then
          call wfk_t_dkdk(iq1q2grad)%read_bks( iband, indkpt1(ikpt), &
        & isppol, xmpio_single, cg_bks=cg1_dkdk)
          cg1_dkdk_ar(iq1q2grad,:,:)=cg1_dkdk
-       else
-         cg1_dkdk=cg1_dkdk_ar(iq1q2grad-3,:,:)
+         else
+           cg1_dkdk=cg1_dkdk_ar(iq1q2grad-3,:,:)
+         end if
        end if
 
        !Calculate: i/2 < u_{i,k}^{\tau_{\kappa\beta}} | u_{i,k}^{k_{\gamma},k_{\delta}} >
