@@ -318,7 +318,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer, pointer :: old_atmtab(:)
  logical, allocatable :: distrb_flags(:,:,:)
  real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
- real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_orbmag(:,:,:),cg0_pert(:,:)
+ real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_3(:,:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
  real(dp),allocatable :: doccde_rbz(:),docckqde(:)
  real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_mean(:)
@@ -338,7 +338,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
  real(dp),allocatable :: phasecg(:,:),gauss(:,:)
  real(dp),allocatable :: gkk(:,:,:,:,:)
- logical :: has_cg1_orbmag(3)
+ logical :: has_cg1_3(3)
  type(pawcprj_type),allocatable :: cprj(:,:),cprjq(:,:)
  type(paw_ij_type),pointer :: paw_ij_pert(:)
  type(paw_an_type),pointer :: paw_an_pert(:)
@@ -1474,9 +1474,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
-     ABI_MALLOC(cg1_orbmag,(2,mcg1,3))
-     has_cg1_orbmag(:) = .FALSE.
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_3)) ) then
+     ABI_MALLOC(cg1_3,(2,mcg1,3))
+     has_cg1_3(:) = .FALSE.
    end if
    if (.not.kramers_deg) then
      mcg1mq=mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol
@@ -2096,8 +2096,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! store DDK wavefunctions in memory for later call to orbmag-ddk
    ! only relevant for DDK pert with orbmag calculation
    if( (dtset%orbmag .NE. 0) .AND. (ipert .EQ. dtset%natom+1) ) then
-     cg1_orbmag(:,:,idir) = cg1(:,:)
-     has_cg1_orbmag(idir) = .TRUE.
+     cg1_3(:,:,idir) = cg1(:,:)
+     has_cg1_3(idir) = .TRUE.
    end if
 
    if (write_1wfk) then
@@ -2188,22 +2188,22 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ! call orbmag if needed
    if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
-     & (COUNT(has_cg1_orbmag) .EQ. 3) ) then
+     & (COUNT(has_cg1_3) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag_ddk(atindx,cg,cg1_orbmag,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
-       & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
+     call orbmag_ddk(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+       & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
        & vtrial_local,xred,ylm,ylmgr)
 
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if
-     if( ALLOCATED(cg1_orbmag) ) then
-       ABI_FREE(cg1_orbmag)
-       has_cg1_orbmag(:) = .FALSE.
+     if( ALLOCATED(cg1_3) ) then
+       ABI_FREE(cg1_3)
+       has_cg1_3(:) = .FALSE.
      end if
 
    end if
