@@ -54,7 +54,7 @@ module m_eph_driver
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
- use m_frohlichmodel,   only : frohlichmodel
+ use m_frohlichmodel,   only : frohlichmodel,polaronmass
  use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -645,6 +645,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (8)
    ! Solve IBTE from SIGEPH file.
    call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+
+ case (9)
+   ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
+   call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
