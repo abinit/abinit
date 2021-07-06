@@ -1629,7 +1629,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
    do nn = 1, nband_k
 
-     call berrycurve_k_n(bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,nn,mcgk,nband_k,nattyp,npw_k,pawtab)
+     call berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,nn,mcgk,nband_k,nattyp,npw_k,pawtab)
      orbmag_terms(1:3,berrycurve_pw,nn) = orbmag_terms(1:3,berrycurve_pw,nn) + REAL(bckn(1:3,1))*trnrm
      orbmag_terms(1:3,berrycurve_qij,nn) = orbmag_terms(1:3,berrycurve_qij,nn) + REAL(bckn(1:3,2))*trnrm
      orbmag_terms(1:3,berrycurve_dij,nn) = orbmag_terms(1:3,berrycurve_dij,nn) + REAL(bckn(1:3,3))*trnrm
@@ -2694,7 +2694,7 @@ end subroutine orbmag_dqij_k_n
 !!
 !! SOURCE
 
-subroutine berrycurve_k_n(bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iband,&
+subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iband,&
     & mcgk,nband_k,nattyp,npw_k,pawtab)
 
  !Arguments ------------------------------------
@@ -2703,7 +2703,7 @@ subroutine berrycurve_k_n(bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iband,&
  type(dataset_type),intent(in) :: dtset
 
  !arrays
- integer,intent(in) :: nattyp(dtset%ntypat)
+ integer,intent(in) :: atindx(dtset%natom),nattyp(dtset%ntypat)
  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),gprimd(3,3)
  complex(dpc),intent(out) :: bckn(3,3)
  type(pawcprj_type),intent(inout) :: cprj_k(dtset%natom,nband_k)
@@ -2714,7 +2714,7 @@ subroutine berrycurve_k_n(bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iband,&
  !scalars
  integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
  real(dp) :: c1,c2,dltij,doti,dotr
- complex(dpc) :: cg1wfn,cpi,cpj,dijterm,dup_b,dup_g,qijterm,udp_b,udp_g
+ complex(dpc) :: cg1wfn,cpi,cpj,dijterm,cdup_b,dup_g,qijterm,cudp_b,udp_g
 
  !arrays
  integer,dimension(3) :: idirindx = (/4,2,3/)
@@ -2761,37 +2761,45 @@ subroutine berrycurve_k_n(bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iband,&
      doti = -DOT_PRODUCT(cwaveb(2,:),cwaveg(1,:)) + DOT_PRODUCT(cwaveb(1,:),cwaveg(2,:))
      cg1wfn = cg1wfn + j_dpc*epsabg*cmplx(dotr,doti,KIND=dpc)
 
-     iatom = 0
-     do itypat = 1, dtset%ntypat
-       do iat = 1, nattyp(itypat)
-         iatom = iatom + 1
-         do ilmn=1,pawtab(itypat)%lmn_size
-           do jlmn=1,pawtab(itypat)%lmn_size
-             dltij=one
-             if(ilmn .EQ. jlmn) dltij = half
-             row=max(jlmn,ilmn); col=min(jlmn,ilmn)
-             klmn=(row-1)*row/2 + col
+     do iat = 1, dtset%natom
+       iatom = atindx(iat)
+       itypat = dtset%typat(iat)
+       do ilmn=1,pawtab(itypat)%lmn_size
+         do jlmn=1,pawtab(itypat)%lmn_size
+           dltij=one
+           if(ilmn .EQ. jlmn) dltij = half
+           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
+           klmn=(row-1)*row/2 + col
 
-             dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
-             dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
+           cdup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),-cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
+           dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
 
-             udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
-             udp_g=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
+           cudp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),-cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
+           udp_g=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
 
-             qijterm = qijterm + j_dpc*epsabg*&
-               & pawtab(itypat)%sij(klmn)*dltij*conjg(dup_b+udp_b)*(dup_g+udp_g)
+           cpi=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),-cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)     
+           cpj=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc)     
 
-           end do ! end loop over jlmn
-         end do ! end loop over ilmn
-       end do ! end loop over iat
-     end do ! end loop over itypat
+           qijterm = qijterm + j_dpc*epsabg*&
+             & (cdup_b+cudp_b)*pawtab(itypat)%sij(klmn)*dltij*(dup_g+udp_g)
+
+           dijterm =dijterm + j_dpc*epsabg*&
+             & (cdup_b+cudp_b)*(-j_dpc)*c1*pawtab(itypat)%qijl(idirindx(gdir),klmn)*dltij*cpj 
+           dijterm =dijterm + j_dpc*epsabg*&
+             & cpi*(j_dpc)*c1*pawtab(itypat)%qijl(idirindx(bdir),klmn)*dltij*(dup_g+udp_g)
+
+         end do ! end loop over jlmn
+       end do ! end loop over ilmn
+     end do ! end loop over iat
    end do ! end loop over epsabg
  
    bckn(adir,1) = c2*cg1wfn
    bckn(adir,2) = c2*qijterm 
-   bckn(adir,3) = c2*dijterm
- 
+   dijl_cart(adir) = c2*dijterm
+    
  end do ! end loop over adir
+
+ bckn(1:3,3) = MATMUL(TRANSPOSE(gprimd),dijl_cart)
 
  ABI_FREE(cwaveb)
  ABI_FREE(cwaveg)
