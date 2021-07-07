@@ -1515,7 +1515,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  call make_pawrhoij(dtset,mpi_enreg,occ)
 
  ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
- call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+! call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  icg = 0
  ikg = 0
@@ -1645,9 +1645,9 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
      if (Enk .GT. local_fermie) local_fermie = Enk
 
-     !call orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,nn,dtset%natom,nband_k,dtset%ntypat,&
-     !  & omdp,paw_ij,pawtab,dtset%typat)
-     !orbmag_terms(1:3,om2,nn) = orbmag_terms(1:3,om2,nn) + REAL(omdp(1:3))*trnrm
+     call orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,nn,dtset%natom,nband_k,dtset%ntypat,&
+       & omdp,paw_ij,pawtab,dtset%typat)
+     orbmag_terms(1:3,om2,nn) = orbmag_terms(1:3,om2,nn) + REAL(omdp(1:3))*trnrm
 
      call make_onsite_l_k_n(atindx,cprj_k,dtset,nn,nband_k,olkn,pawrad,pawtab)
      orbmag_terms(1:3,om3,nn) = orbmag_terms(1:3,om3,nn) + REAL(olkn(1:3))*trnrm
@@ -1936,7 +1936,7 @@ end subroutine orbmag_pw_k_n
 !!
 !! SOURCE
 
-subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
+subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
     & natom,nband_k,ntypat,omdp,paw_ij,pawtab,typat,&
     & fermi_input)
 
@@ -1947,7 +1947,7 @@ subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
  real(dp),intent(in),optional :: fermi_input
 
  !arrays
- integer,intent(in) :: typat(natom)
+ integer,intent(in) :: atindx(natom),typat(natom)
  complex(dpc),intent(out) :: omdp(3)
  type(pawcprj_type),intent(in) :: cprj_k(natom,nband_k),cprj1_k(natom,nband_k,3)
  type(paw_ij_type),intent(inout) :: paw_ij(natom)
@@ -1955,8 +1955,8 @@ subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
- real(dp) :: c2,fermi
+ integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ real(dp) :: c2,dltij,fermi,qij
  complex(dpc) :: dij,dup_b,dup_g,udp_b,udp_g
 
  !arrays
@@ -1965,6 +1965,10 @@ subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
 
  fermi=zero
  if(present(fermi_input)) fermi = fermi_input
+
+ if (paw_ij(1)%cplex_dij .NE. 2) then
+   ABI_BUG("duppy_k_n called with real paw_ij but complex paw_ij required")
+ end if
 
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in the Chern number,
@@ -1984,11 +1988,19 @@ subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
        gdir = modulo(adir,3)+1
      end if
 
-     do iatom=1,natom
-       itypat=typat(iatom)
+     do iat=1,natom
+       iatom=atindx(iat)
+       itypat=typat(iat)
+       ! paw_ij(iatom) seems be sorted in input atom order, not type order
+       if (paw_ij(iat)%lmn2_size .NE. pawtab(itypat)%lmn2_size ) then
+         ABI_BUG('lmn2_size mismatch in duppy_k_n')
+       end if
        do ilmn=1,pawtab(itypat)%lmn_size
          do jlmn=1,pawtab(itypat)%lmn_size
-           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+           dltij=one
+           if(ilmn .EQ. jlmn) dltij = half
+           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
+           klmn=(row-1)*row/2 + col
 
            dup_b = cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            udp_b = cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
@@ -1996,15 +2008,12 @@ subroutine orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,iband,&
            dup_g = cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
            udp_g = cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
 
-           if (paw_ij(iatom)%cplex_dij .EQ. 2) then
-             dij = cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
-             if (jlmn .GT. ilmn) dij=conjg(dij)
-           else
-             dij = cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
-           end if
-           dij = dij + cmplx((Enk-two*fermi)*pawtab(itypat)%sij(klmn),zero,KIND=dpc)
+           dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+           if (jlmn .GT. ilmn) dij=conjg(dij)
 
-           omdp(adir) = omdp(adir) + half*j_dpc*epsabg*dij*&
+           qij = (Enk-two*fermi)*pawtab(itypat)%sij(klmn)
+
+           omdp(adir) = omdp(adir) + half*j_dpc*epsabg*dltij*(dij+qij)*&
              & (conjg(udp_b)*dup_g + conjg(dup_b)*udp_g + conjg(udp_b)*udp_g)
 
          end do ! end loop over jlmn
