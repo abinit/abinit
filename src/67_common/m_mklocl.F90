@@ -133,7 +133,7 @@ contains
 !!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -282,7 +282,7 @@ end subroutine mklocl
 !!      m_mklocl,m_respfn_driver,m_stress
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -745,7 +745,7 @@ end subroutine mklocl_recipspace
 !!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1009,7 +1009,7 @@ end subroutine dfpt_vlocal
 !!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1355,7 +1355,7 @@ end subroutine vlocalstr
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1618,7 +1618,7 @@ end subroutine dfpt_vlocaldq
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1913,7 +1913,7 @@ end subroutine dfpt_vlocaldqdq
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 

@@ -68,7 +68,7 @@
 !!      hdr_copy,hdr_ddk,hdr_ncread,herald,int2char4,linelop,linopt,mati3inv
 !!      matr3inv,metric,nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart
 !!      pmat_renorm,renorm_bst,sym2cart,timein,wfk0%close,wfk0%read_eigk
-!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 

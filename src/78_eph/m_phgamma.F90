@@ -487,6 +487,8 @@ contains  !=====================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -541,6 +543,8 @@ end subroutine phgamma_free
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -642,6 +646,8 @@ end subroutine phgamma_init
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -734,6 +740,8 @@ end subroutine phgamma_ncwrite
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -818,6 +826,8 @@ end subroutine tgamma_symm
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -918,6 +928,8 @@ end subroutine phgamma_eval_qibz
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1026,6 +1038,8 @@ end subroutine phgamma_interp
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1153,6 +1167,8 @@ end subroutine phgamma_interp_setup
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1375,6 +1391,8 @@ end subroutine phgamma_vv_interp
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1500,6 +1518,8 @@ end subroutine phgamma_vv_interp_setup
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1688,6 +1708,8 @@ end subroutine phgamma_linwid
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1745,6 +1767,8 @@ end subroutine a2fw_free
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2371,6 +2395,8 @@ end function a2fw_logmoment
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2519,6 +2545,8 @@ end subroutine a2fw_write
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2620,6 +2648,8 @@ end subroutine a2fw_ee_write
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2681,6 +2711,8 @@ end subroutine a2fw_tr_free
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3018,6 +3050,8 @@ end subroutine a2fw_tr_init
 !! PARENTS
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3204,6 +3238,8 @@ end subroutine a2fw_tr_write
 !!      m_eph_driver
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4398,6 +4434,8 @@ end subroutine eph_phgamma
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4658,8 +4696,11 @@ end subroutine phgamma_setup_qpoint
 !!  Use bisection to find the optimal energy window around the Fermi level
 !!
 !! PARENTS
+!!      abitk
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4787,6 +4828,8 @@ end subroutine find_ewin
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      destroy_tetra,get_dbl_tetra_weight,ibz_krank%free,libtetrabz_dbldelta
+!!      xmpi_sum
 !!
 !! SOURCE
 

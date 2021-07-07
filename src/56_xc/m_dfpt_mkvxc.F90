@@ -132,7 +132,7 @@ contains
 !!      m_pead_nl_loop,m_respfn_driver
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
+!!      xcpotdq
 !!
 !! SOURCE
 
@@ -506,7 +506,7 @@ end subroutine dfpt_mkvxc
 !!      m_dfpt_mkvxc
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
+!!      xcpotdq
 !!
 !! SOURCE
 
@@ -785,7 +785,7 @@ end subroutine dfpt_mkvxcgga
 !!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_forstr,m_respfn_driver
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,rotate_back_mag,rotate_back_mag_dfpt,rotate_mag,timab
+!!      xcpotdq
 !!
 !! SOURCE
 
@@ -978,7 +978,7 @@ end subroutine dfpt_mkvxc_noncoll
 !!      m_dfpt_lw
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,timab
+!!      xcpotdq
 !!
 !! SOURCE
 
@@ -1115,7 +1115,7 @@ end subroutine dfpt_mkvxcggadq
 !!      m_mklocl
 !!
 !! CHILDREN
-!!      dfpt_mkvxc,timab
+!!      xcpotdq
 !!
 !! SOURCE
 

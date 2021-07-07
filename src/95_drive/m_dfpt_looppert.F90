@@ -2618,7 +2618,6 @@ end subroutine dfpt_looppert
 !!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
 !!
 !! PARENTS
-!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!

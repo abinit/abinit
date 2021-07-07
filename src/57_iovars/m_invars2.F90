@@ -105,9 +105,10 @@ contains
 !!      m_common
 !!
 !! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
+!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
+!!      timab,wrtout
 !!
 !! SOURCE
 
@@ -228,9 +229,10 @@ end subroutine invars2m
 !!      m_invars2
 !!
 !! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
+!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
+!!      timab,wrtout
 !!
 !! SOURCE
 

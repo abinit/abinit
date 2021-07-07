@@ -782,8 +782,10 @@ end subroutine xmpi_init
 !!  Set internal flag to use MPI_IN_PLACE whenever possible.
 !!
 !! PARENTS
+!!      m_argparse
 !!
 !! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -843,9 +845,8 @@ end function xmpi_get_unit
 !!  None
 !!
 !! PARENTS
-!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,lapackprof
-!!      m_multibinit_driver,macroave,mrggkk,optic,testtransposer,ujdet
-!!      vdw_kernelgen
+!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,m_multibinit_driver
+!!      macroave,mrggkk,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -1801,12 +1802,12 @@ end subroutine xmpi_comm_translate_ranks
 !!      m_chebfi,m_datafordmft,m_ddk,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
 !!      m_dtfil,m_dvdb,m_errors,m_exc_build,m_exc_diago,m_exc_itdiago
 !!      m_exc_spectra,m_fit_polynomial_coeff,m_forctqmc,m_green,m_gstateimg
-!!      m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ksdiago,m_mkrho
-!!      m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho,m_plowannier
-!!      m_polynomial_coeff,m_precpred_1geo,m_primitive_potential_list
-!!      m_rf2_init,m_sigma_driver,m_sigmaph,m_slk,m_spmat_csr,m_tddft,m_vtorho
-!!      m_vtorhorec,m_wfd,m_wfd_optic,m_wffile,m_wfk,m_wfk_analyze
-!!      testtransposer
+!!      m_gwrdm,m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ipi
+!!      m_ksdiago,m_mkrho,m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho
+!!      m_plowannier,m_polynomial_coeff,m_precpred_1geo
+!!      m_primitive_potential_list,m_rf2_init,m_sigma_driver,m_sigmaph,m_slk
+!!      m_spmat_csr,m_tddft,m_vtorho,m_vtorhorec,m_wfd,m_wfd_optic,m_wffile
+!!      m_wfk,m_wfk_analyze,testtransposer
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -1953,7 +1954,7 @@ end subroutine xmpi_iprobe
 !!
 !! PARENTS
 !!      m_dfpt_scfcv,m_dvdb,m_fftw3,m_mover,m_paw_an,m_paw_ij,m_paw_occupancies
-!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002
+!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002,m_sigmaph
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -2482,7 +2483,7 @@ end subroutine xmpi_split_list
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
 !! PARENTS
-!!      m_exc_build,m_screening,m_screening_driver,m_skw
+!!      m_exc_build,m_phonons,m_screening,m_screening_driver,m_skw
 !!
 !! CHILDREN
 !!      xmpi_comm_free

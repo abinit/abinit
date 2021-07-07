@@ -285,6 +285,7 @@ contains  !=====================================================
 !!      m_eph_driver
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -677,6 +678,7 @@ end function rta_new
 !! PARENTS
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -1097,6 +1099,7 @@ end subroutine compute_rta
 !! PARENTS
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -1214,9 +1217,9 @@ end subroutine compute_rta_mobility
 !! ncid=Netcdf file handle.
 !!
 !! PARENTS
-!!      m_rta
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -1350,6 +1353,7 @@ end subroutine rta_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -1541,6 +1545,7 @@ end subroutine write_tensor
 !! PARENTS
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -1609,6 +1614,7 @@ end subroutine rta_free
 !!      m_eph_driver
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 
@@ -2113,8 +2119,10 @@ end subroutine ibte_driver
 !! comm=MPI communicator.
 !!
 !! PARENTS
+!!      m_rta
 !!
 !! CHILDREN
+!!      safe_div
 !!
 !! SOURCE
 

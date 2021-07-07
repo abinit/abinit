@@ -734,7 +734,7 @@ end subroutine wigner_seitz
 !!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
 !!
 !! PARENTS
-!!      m_a2ftr,m_ddb,m_elphon,m_ifc,m_iogkk
+!!      m_a2ftr,m_ddb,m_elphon,m_ifc,m_iogkk,m_phonons
 !!
 !! CHILDREN
 !!
@@ -1248,17 +1248,17 @@ end function det3r
 !!      m_bethe_salpeter,m_chkinp,m_common,m_conducti,m_crystal,m_cut3d
 !!      m_cutoff_cylinder,m_d2frnl,m_ddb,m_dens,m_dfpt_elt,m_dfpt_looppert
 !!      m_dfpt_scfcv,m_dft_energy,m_dtset,m_effective_potential
-!!      m_effective_potential_file,m_elpolariz,m_extraprho,m_fft,m_fft_prof
-!!      m_fit_data,m_fit_polynomial_coeff,m_forces,m_forstr,m_geometry,m_gstate
-!!      m_gstateimg,m_gtermcutoff,m_hamiltonian,m_ingeo,m_inkpts,m_invars2
-!!      m_io_kss,m_ioarr,m_kpts,m_ksdiago,m_memeval,m_mep,m_mlwfovlp_qp,m_mover
-!!      m_mpi_setup,m_newrho,m_newvtr,m_odamix,m_orbmag,m_paw_dfpt,m_paw_optics
-!!      m_pawpwij,m_prcref,m_pred_bfgs,m_pred_delocint,m_pred_fire
-!!      m_pred_isothermal,m_pred_langevin,m_pred_nose,m_pred_srkna14
-!!      m_pred_verlet,m_psolver,m_rhotoxc,m_scfcv_core,m_screening
-!!      m_screening_driver,m_sigma_driver,m_spacepar,m_stress,m_tdep_latt
-!!      m_thmeig,m_use_ga,m_vcoul,m_vdw_dftd2,m_vdw_dftd3,m_wfk,m_wvl_rho
-!!      m_xchybrid,m_xfpack,mkcore_wvl,mrgscr,optic
+!!      m_effective_potential_file,m_elpolariz,m_extfpmd,m_extraprho,m_fft
+!!      m_fft_prof,m_fit_data,m_fit_polynomial_coeff,m_forces,m_forstr
+!!      m_geometry,m_gstate,m_gstateimg,m_gtermcutoff,m_hamiltonian,m_ingeo
+!!      m_inkpts,m_invars2,m_io_kss,m_ioarr,m_kpts,m_ksdiago,m_memeval,m_mep
+!!      m_mlwfovlp_qp,m_mover,m_mpi_setup,m_newrho,m_newvtr,m_odamix,m_orbmag
+!!      m_paw_dfpt,m_paw_optics,m_pawpwij,m_prcref,m_pred_bfgs,m_pred_delocint
+!!      m_pred_fire,m_pred_isothermal,m_pred_langevin,m_pred_nose
+!!      m_pred_srkna14,m_pred_verlet,m_psolver,m_rhotoxc,m_scfcv_core
+!!      m_screening,m_screening_driver,m_sigma_driver,m_spacepar,m_stress
+!!      m_tdep_latt,m_thmeig,m_use_ga,m_vcoul,m_vdw_dftd2,m_vdw_dftd3,m_wfk
+!!      m_wvl_rho,m_xchybrid,m_xfpack,mkcore_wvl,mrgscr,optic
 !!
 !! CHILDREN
 !!
@@ -1666,7 +1666,7 @@ end subroutine mkrdim
 !! PARENTS
 !!      m_abi2big,m_cut3d,m_dens,m_driver,m_dvdb,m_effective_potential
 !!      m_effective_potential_file,m_evdw_wannier,m_generate_training_set
-!!      m_ingeo,m_mep,m_mover,m_mover_effpot,m_parser,m_paw_mkaewf
+!!      m_ingeo,m_ipi,m_mep,m_mover,m_mover_effpot,m_parser,m_paw_mkaewf
 !!      m_paw_pwaves_lmn,m_pimd_langevin,m_pimd_nosehoover,m_prcref
 !!      m_pred_delocint,m_pred_diisrelax,m_pred_isokinetic,m_pred_isothermal
 !!      m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose,m_pred_srkna14
@@ -3237,6 +3237,7 @@ end subroutine stresssym
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_ipi,m_results_gs
 !!
 !! CHILDREN
 !!

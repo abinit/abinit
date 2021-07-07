@@ -180,10 +180,10 @@ contains
 !! PARENTS
 !!      m_cgprj,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy
 !!      m_fock_getghc,m_forstr,m_getgh1c,m_io_kss,m_ksdiago,m_nonlop_test
-!!      m_orbmag,m_pead_nl_loop,m_vkbr,m_vtorho,m_wfd
+!!      m_orbmag,m_pead_nl_loop,m_phgamma,m_sigmaph,m_vkbr,m_vtorho,m_wfd
 !!
 !! CHILDREN
-!!      mkkin,splfit,timab
+!!      mkkin,splfit,timab,xmpi_isum_ip,xmpi_sum
 !!
 !! SOURCE
 

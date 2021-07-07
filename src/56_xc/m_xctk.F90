@@ -88,7 +88,7 @@ contains
 !!      m_gammapositron,m_rhotoxc
 !!
 !! CHILDREN
-!!      fourdp,phase,ptabs_fourdp,timab
+!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 
@@ -389,7 +389,7 @@ end subroutine xcden
 !!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
 !!
 !! CHILDREN
-!!      fourdp,phase,ptabs_fourdp,timab
+!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 
@@ -722,10 +722,10 @@ end subroutine xcpot
 !!      At input already includes three terms. 
 !!
 !! PARENTS
-!!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
+!!      m_dfpt_mkvxc
 !!
 !! CHILDREN
-!!      fourdp,phase,ptabs_fourdp,timab
+!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 

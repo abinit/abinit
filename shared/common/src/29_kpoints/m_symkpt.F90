@@ -97,7 +97,7 @@ contains
 !!      m_ifc,m_kpts,m_tdep_psij,m_unittests
 !!
 !! CHILDREN
-!!      krank%free,wrtout
+!!      krank%free
 !!
 !! SOURCE
 
@@ -434,7 +434,7 @@ end subroutine symkpt
 !!      m_kpts,m_lgroup,m_unittests
 !!
 !! CHILDREN
-!!      krank%free,wrtout
+!!      krank%free
 !!
 !! SOURCE
 
@@ -682,8 +682,10 @@ end subroutine symkpt_new
 !! bz2ibz_smap = mapping of indices in list 2 with their irreducible origin in list 1, symop and timrev needed to transform them
 !!
 !! PARENTS
+!!      m_wfk
 !!
 !! CHILDREN
+!!      krank%free
 !!
 !! SOURCE
 
