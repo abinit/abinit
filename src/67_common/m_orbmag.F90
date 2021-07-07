@@ -1632,11 +1632,11 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      orbmag_terms(1:3,berrycurve_qij,nn) = orbmag_terms(1:3,berrycurve_qij,nn) + REAL(bckn(1:3,2))*trnrm
      orbmag_terms(1:3,berrycurve_dij,nn) = orbmag_terms(1:3,berrycurve_dij,nn) + REAL(bckn(1:3,3))*trnrm
 
-     !call orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dtset,Enk,&
-     !  & gs_hamk,nn,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw,pawtab)
-     !orbmag_terms(1:3,om1,nn) = orbmag_terms(1:3,om1,nn) + REAL(ompw(1:3))*trnrm
+     call orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
+       & gs_hamk,nn,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw)
+     orbmag_terms(1:3,om1,nn) = orbmag_terms(1:3,om1,nn) + REAL(ompw(1:3))*trnrm
 
-     !if (Enk .GT. local_fermie) local_fermie = Enk
+     if (Enk .GT. local_fermie) local_fermie = Enk
 
      !call orbmag_duppy_k_n(cprj_k,cprj1_k,Enk,nn,dtset%natom,nband_k,dtset%ntypat,&
      !  & omdp,paw_ij,pawtab,dtset%typat)
@@ -1772,8 +1772,8 @@ end subroutine orbmag_ddk
 !!
 !! SOURCE
 
-subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dtset,Enk,&
-    & gs_hamk,iband,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw,pawtab,&
+subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
+    & gs_hamk,iband,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw,&
     & fermi_input) ! optional input
 
  !Arguments ------------------------------------
@@ -1786,11 +1786,10 @@ subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dtset,Enk,&
  type(MPI_type), intent(inout) :: mpi_enreg
 
  !arrays
- integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
  complex(dpc),intent(out) :: ompw(3)
  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,dtset%mband),cprj1_k(dtset%natom,dtset%mband,3)
- type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
  !scalars
@@ -1799,7 +1798,6 @@ subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dtset,Enk,&
  real(dp) :: c2,doti,dotr,lambda,fermi
 
  !arrays
- integer,allocatable :: dimlmn(:),nattyp_dum(:)
  real(dp),allocatable :: cwavef(:,:),ghc(:,:),ghc_dir(:,:,:),gsc(:,:),gvnlc(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj1(:,:)
 
@@ -1816,9 +1814,6 @@ subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dtset,Enk,&
  ! one for each wavefunction derivative) 
  c2=1.0d0/(two_pi*two_pi)
 
- ABI_MALLOC(nattyp_dum,(dtset%ntypat)) 
- ABI_MALLOC(dimlmn,(dtset%natom))
- call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
  ABI_MALLOC(cwaveprj,(dtset%natom,1))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
  ABI_MALLOC(cwaveprj1,(dtset%natom,1))
@@ -1894,8 +1889,6 @@ subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dtset,Enk,&
  ABI_FREE(cwavef)
  ABI_FREE(ghc_dir)
 
- ABI_FREE(nattyp_dum)
- ABI_FREE(dimlmn)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
  call pawcprj_free(cwaveprj1)
