@@ -67,6 +67,8 @@ contains
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine quadrature_sigma_cw(Sigp,Sr,weights)
@@ -217,9 +219,11 @@ end function calc_Ec_GM_k
 !! OUTPUT
 !! Updated rdm_k matrix array with Go (Sigma_x - alpha*Sigma_x - Vxc) Go
 !! PARENTS
-!!  m_sigma_driver
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,rdm_k,BSt)
@@ -288,9 +292,11 @@ end subroutine calc_rdmx
 !! OUTPUT
 !! Updated rdm_k matrix array with int Go(iw) Sigma_c(iw) Go(iw) dw
 !! PARENTS
-!!  m_sigma_driver
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,BSt,rdm_k)
@@ -365,9 +371,11 @@ end subroutine calc_rdmc
 !! OUTPUT
 !! Compute the nat. orbitals and occ. numbers from the rdm_k matrix (for exchange and correlations)
 !! PARENTS
-!!  m_sigma_driver
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine natoccs(ib1,ib2,rdm_k,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
@@ -533,9 +541,11 @@ end subroutine natoccs
 !! OUTPUT
 !! Updated Hdr and BSt information
 !! PARENTS
-!!  m_sigma_driver
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
@@ -603,9 +613,11 @@ end subroutine update_hdr_bst
 !! Print the total (averaged) occ. = sum_k weight_k * Nelec_k
 !!
 !! PARENTS
-!!  m_sigma_driver
+!!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine print_tot_occ(sigma,kmesh,BSt)
@@ -679,6 +691,8 @@ end subroutine print_tot_occ
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rdm_fname_in)
@@ -829,6 +843,8 @@ end subroutine get_chkprdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
@@ -915,6 +931,8 @@ end subroutine print_chkprdm
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine change_matrix(Sigp,Sr,Mels,Kmesh,nateigv)
@@ -999,6 +1017,8 @@ end subroutine change_matrix
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine print_total_energy(ekin_energy,evext_energy,evextnl_energy,e_corepsp,eh_energy,ex_energy,&
@@ -1108,6 +1128,8 @@ end subroutine print_total_energy
 !!      m_sigma_driver
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,BSt,new_hartr,old_purex)
@@ -1206,9 +1228,11 @@ end subroutine print_band_energies
 !! Mat=at the end an array containing the matrix elements in NO or KS basis
 !!
 !! PARENTS
-!!  m_sigma_driver
+!!      m_gwrdm
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
@@ -1250,8 +1274,11 @@ end subroutine rotate_ks_no
 !! mat=array in the NO basis
 !!
 !! PARENTS
-!!  rotate_ks_no
+!!      m_gwrdm
+!!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine ks2no(ndim,mat,rot)
@@ -1295,9 +1322,11 @@ end subroutine ks2no
 !! mat=array in the KS basis
 !!
 !! PARENTS
-!!  rotate_ks_no
+!!      m_gwrdm
 !!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine no2ks(ndim,mat,rot)
@@ -1340,7 +1369,10 @@ end subroutine no2ks
 !! OUTPUT
 !! Print the 1-RDM matrix
 !! PARENTS
+!!
 !! CHILDREN
+!!      wrtout
+!!
 !! SOURCE
 
 subroutine printrdm_k(ib1,ib2,rdm_k) ! Only used for debug on this file, do not use it with large arrays!

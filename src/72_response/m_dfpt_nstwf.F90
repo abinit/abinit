@@ -217,6 +217,7 @@ contains
 !!      m_dfpt_scfcv
 !!
 !! CHILDREN
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1902,6 +1903,7 @@ end subroutine dfpt_nstpaw
 !!      m_dfpt_scfcv
 !!
 !! CHILDREN
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2366,6 +2368,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !!      m_dfpt_nstwf
 !!
 !! CHILDREN
+!!      xmpi_sum
 !!
 !! SOURCE
 

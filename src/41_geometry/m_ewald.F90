@@ -75,7 +75,7 @@ contains
 !!      m_setvtr
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -402,7 +402,7 @@ end subroutine ewald
 !!      m_stress
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -669,7 +669,7 @@ end subroutine ewald2
 !!      m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 

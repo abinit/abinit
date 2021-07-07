@@ -185,7 +185,8 @@ contains
 !!      m_ephwg,m_fstab,m_kpts,m_phonons,m_unittests
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -905,7 +906,8 @@ end subroutine htetra_init
 !!      m_htetra
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -989,7 +991,8 @@ end subroutine htetra_get_ibz
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1031,7 +1034,8 @@ end subroutine htetra_print
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1311,8 +1315,11 @@ end subroutine get_onetetra_blochl
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_htetra
 !!
 !! CHILDREN
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1654,7 +1661,8 @@ end subroutine get_onetetetra_lambinvigneron_imag
 !!      m_htetra
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1802,7 +1810,8 @@ end subroutine htetra_get_onewk
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1972,7 +1981,8 @@ end subroutine htetra_get_delta_mask
 !!      m_htetra
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2069,6 +2079,8 @@ end subroutine htetra_wvals_weights
 !! PARENTS
 !!
 !! CHILDREN
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2162,7 +2174,8 @@ end subroutine htetra_wvals_weights_delta
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_ontetra_lambinvigneron,sim0twoi,xmpi_sum
+!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
+!!      xmpi_sum
 !!
 !! SOURCE
 

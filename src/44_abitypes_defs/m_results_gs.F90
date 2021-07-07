@@ -251,9 +251,12 @@ CONTAINS
 !!  results_gs=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_mover_effpot,m_results_img
+!!      m_gstateimg,m_mover_effpot,m_results_img
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -352,6 +355,9 @@ end subroutine init_results_gs
 !! PARENTS
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -455,9 +461,12 @@ end subroutine init_results_gs_array
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_mover_effpot,m_results_img
+!!      m_gstateimg,m_mover_effpot,m_results_img
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -511,6 +520,9 @@ end subroutine destroy_results_gs
 !! PARENTS
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -573,9 +585,12 @@ end subroutine destroy_results_gs_array
 !!  results_gs_out=<type(results_gs_type)>=output results_gs datastructure
 !!
 !! PARENTS
-!!      m_results_img
+!!      m_gstateimg,m_results_img
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -834,6 +849,9 @@ end function results_gs_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 ! CP modified argument list

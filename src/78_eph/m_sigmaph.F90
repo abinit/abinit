@@ -600,8 +600,8 @@ contains  !=====================================================
 !!      m_eph_driver
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3296,8 +3296,8 @@ end function sigmaph_new
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3884,8 +3884,8 @@ end function sigmaph_get_ebands
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3945,8 +3945,8 @@ end subroutine sigmaph_compare
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4066,8 +4066,8 @@ end subroutine sigmaph_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4351,8 +4351,8 @@ end function sigmaph_skip_phmode
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4568,8 +4568,8 @@ end subroutine sigmaph_setup_qloop
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5035,8 +5035,8 @@ end subroutine sigmaph_gather_and_write
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5156,8 +5156,8 @@ end subroutine sigmaph_print
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5334,8 +5334,8 @@ end subroutine sigmaph_get_all_qweights
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,listkk,wrtout
-!!      xmpi_sum
+!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
+!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
