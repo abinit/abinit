@@ -471,7 +471,8 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only,mixflexo,mpert,natom,piezofr,pol1,psinvdm,rprimd,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only, &
+              & mixflexo,mpert,natom,piezofr,pol1,psinvdm,rprimd,ucvol)
 
 !Arguments -------------------------------
 !scalars
@@ -1140,31 +1141,31 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      call wrtout([ab_out,std_out],msg,'COLL')
      hatCsupkap(:,:,:,:,:)=hatCsupkap(:,:,:,:,:)*Ha_eV
      do iat=1,natom
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xx', hatCsupkap(1,iat,1,1,1),hatCsupkap(1,iat,1,2,2),hatCsupkap(1,iat,1,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'xx',hatCsupkap(1,iat,1,1,1),hatCsupkap(1,iat,1,2,2),hatCsupkap(1,iat,1,3,3),&
                                                      & hatCsupkap(1,iat,1,2,3),hatCsupkap(1,iat,1,1,3),hatCsupkap(1,iat,1,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yy', hatCsupkap(2,iat,2,1,1),hatCsupkap(2,iat,2,2,2),hatCsupkap(2,iat,2,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'yy',hatCsupkap(2,iat,2,1,1),hatCsupkap(2,iat,2,2,2),hatCsupkap(2,iat,2,3,3),&
                                                      & hatCsupkap(2,iat,2,2,3),hatCsupkap(2,iat,2,1,3),hatCsupkap(2,iat,2,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zz', hatCsupkap(3,iat,3,1,1),hatCsupkap(3,iat,3,2,2),hatCsupkap(3,iat,3,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'zz',hatCsupkap(3,iat,3,1,1),hatCsupkap(3,iat,3,2,2),hatCsupkap(3,iat,3,3,3),&
                                                      & hatCsupkap(3,iat,3,2,3),hatCsupkap(3,iat,3,1,3),hatCsupkap(3,iat,3,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yz', hatCsupkap(2,iat,3,1,1),hatCsupkap(2,iat,3,2,2),hatCsupkap(2,iat,3,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'yz',hatCsupkap(2,iat,3,1,1),hatCsupkap(2,iat,3,2,2),hatCsupkap(2,iat,3,3,3),&
                                                      & hatCsupkap(2,iat,3,2,3),hatCsupkap(2,iat,3,1,3),hatCsupkap(2,iat,3,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xz', hatCsupkap(1,iat,3,1,1),hatCsupkap(1,iat,3,2,2),hatCsupkap(1,iat,3,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'xz',hatCsupkap(1,iat,3,1,1),hatCsupkap(1,iat,3,2,2),hatCsupkap(1,iat,3,3,3),&
                                                      & hatCsupkap(1,iat,3,2,3),hatCsupkap(1,iat,3,1,3),hatCsupkap(1,iat,3,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', hatCsupkap(1,iat,2,1,1),hatCsupkap(1,iat,2,2,2),hatCsupkap(1,iat,2,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'xy',hatCsupkap(1,iat,2,1,1),hatCsupkap(1,iat,2,2,2),hatCsupkap(1,iat,2,3,3),&
                                                      & hatCsupkap(1,iat,2,2,3),hatCsupkap(1,iat,2,1,3),hatCsupkap(1,iat,2,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', hatCsupkap(3,iat,2,1,1),hatCsupkap(3,iat,2,2,2),hatCsupkap(3,iat,2,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'zy',hatCsupkap(3,iat,2,1,1),hatCsupkap(3,iat,2,2,2),hatCsupkap(3,iat,2,3,3),&
                                                      & hatCsupkap(3,iat,2,2,3),hatCsupkap(3,iat,2,1,3),hatCsupkap(3,iat,2,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', hatCsupkap(3,iat,1,1,1),hatCsupkap(3,iat,1,2,2),hatCsupkap(3,iat,1,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'zx',hatCsupkap(3,iat,1,1,1),hatCsupkap(3,iat,1,2,2),hatCsupkap(3,iat,1,3,3),&
                                                      & hatCsupkap(3,iat,1,2,3),hatCsupkap(3,iat,1,1,3),hatCsupkap(3,iat,1,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
-       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', hatCsupkap(2,iat,1,1,1),hatCsupkap(2,iat,1,2,2),hatCsupkap(2,iat,1,3,3),&
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'yx',hatCsupkap(2,iat,1,1,1),hatCsupkap(2,iat,1,2,2),hatCsupkap(2,iat,1,3,3),&
                                                      & hatCsupkap(2,iat,1,2,3),hatCsupkap(2,iat,1,1,3),hatCsupkap(2,iat,1,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
      end do
