@@ -1652,8 +1652,8 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      call make_onsite_l_k_n(atindx,cprj_k,dtset,nn,nband_k,olkn,pawrad,pawtab)
      orbmag_terms(1:3,om3,nn) = orbmag_terms(1:3,om3,nn) + REAL(olkn(1:3))*trnrm
 
-     !call orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,nn,nband_k,pawtab)
-     !orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
+     call orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,nn,nband_k,pawtab)
+     orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
 
      !call orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
      !  & lmn_size_max,nband_k,pawang,pawrad,pawtab)
@@ -2574,7 +2574,7 @@ end subroutine orbmag_ddij_k_n
 !!
 !! SOURCE
 
-subroutine orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,pawtab,&
+subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,pawtab,&
     & fermi_input)
 
  !Arguments ------------------------------------
@@ -2585,6 +2585,7 @@ subroutine orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,
  type(dataset_type),intent(in) :: dtset
 
  !arrays
+ integer,intent(in) :: atindx(dtset%natom)
  real(dp),intent(in) :: gprimd(3,3)
  complex(dpc),intent(out) :: dqijkn(3)
  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k),cprj1_k(dtset%natom,nband_k,3)
@@ -2592,8 +2593,8 @@ subroutine orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
- real(dp) :: c1,c2,fermi
+ integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ real(dp) :: c1,c2,dltij,fermi
  complex(dpc) :: cpi,cpj,dqijterm,dup_b,dup_g,udp_b,udp_g
 
  !arrays
@@ -2633,11 +2634,15 @@ subroutine orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,
        gdir = modulo(adir,3)+1
      end if
 
-     do iatom=1,dtset%natom
-       itypat=dtset%typat(iatom)
+     do iat=1,dtset%natom
+       iatom=atindx(iat)
+       itypat=dtset%typat(iat)
        do ilmn=1,pawtab(itypat)%lmn_size
          do jlmn=1,pawtab(itypat)%lmn_size
-           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+           dltij=one
+           if(ilmn .EQ. jlmn) dltij = half
+           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
+           klmn=(row-1)*row/2 + col
 
            dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
@@ -2658,7 +2663,7 @@ subroutine orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,
 
          end do ! end loop over jlmn
        end do ! end loop over ilmn
-     end do ! end loop over atoms
+     end do ! end loop over iat
    end do ! end loop over epsabg
  
    dqijkn(adir) = c2*dqijterm
@@ -2789,10 +2794,14 @@ subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iba
            qijterm = qijterm + j_dpc*epsabg*&
              & (cdup_b+cudp_b)*pawtab(itypat)%sij(klmn)*dltij*(dup_g+udp_g)
 
+           ! convert the moments from cartesian axes to reduced coords
+           dijl_cart(1:3) = c1*pawtab(itypat)%qijl(idirindx(1:3),klmn)
+           dijl_red(1:3) = MATMUL(TRANSPOSE(gprimd),dijl_cart(1:3))
+
            dijterm =dijterm + j_dpc*epsabg*&
-             & (cdup_b+cudp_b)*(-j_dpc)*c1*pawtab(itypat)%qijl(idirindx(gdir),klmn)*dltij*cpj 
+             & (cdup_b+cudp_b)*(-j_dpc)*c1*dijl_red(gdir)*dltij*cpj 
            dijterm =dijterm + j_dpc*epsabg*&
-             & cpi*(j_dpc)*c1*pawtab(itypat)%qijl(idirindx(bdir),klmn)*dltij*(dup_g+udp_g)
+             & cpi*(j_dpc)*dijl_red(bdir)*dltij*(dup_g+udp_g)
 
          end do ! end loop over jlmn
        end do ! end loop over ilmn
@@ -2801,11 +2810,9 @@ subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iba
  
    bckn(adir,1) = c2*cg1wfn
    bckn(adir,2) = c2*qijterm 
-   dijl_cart(adir) = c2*dijterm
+   bckn(adir,3) = c2*dijterm
     
  end do ! end loop over adir
-
- bckn(1:3,3) = MATMUL(TRANSPOSE(gprimd),dijl_cart)
 
  ABI_FREE(cwaveb)
  ABI_FREE(cwaveg)
