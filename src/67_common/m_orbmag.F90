@@ -1515,7 +1515,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  call make_pawrhoij(dtset,mpi_enreg,occ)
 
  ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
-! call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+ call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  icg = 0
  ikg = 0
@@ -1655,9 +1655,9 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      call orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,nn,nband_k,pawtab)
      orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
 
-     !call orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
-     !  & lmn_size_max,nband_k,pawang,pawrad,pawtab)
-     !orbmag_terms(1:3,om5,nn) = orbmag_terms(1:3,om5,nn) + REAL(ddijkn(1:3))*trnrm
+     call orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
+       & lmn_size_max,nband_k,pawang,pawrad,pawtab)
+     orbmag_terms(1:3,om5,nn) = orbmag_terms(1:3,om5,nn) + REAL(ddijkn(1:3))*trnrm
 
    end do ! end loop over bands n
 
@@ -2152,8 +2152,9 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  ! assemble terms
 
- !dldij(:,:,:,:) = dldij_kinetic(:,:,:,:) + dldij_vhnzc(:,:,:,:)
- dldij(:,:,:,:) = dldij_vhnzc(:,:,:,:)
+ !dldij(:,:,:,:) = dldij_kinetic(:,:,:,:)
+ !dldij(:,:,:,:) = dldij_vhnzc(:,:,:,:)
+ dldij(:,:,:,:) = dldij_kinetic(:,:,:,:) + dldij_vhnzc(:,:,:,:)
 
  ABI_FREE(dldij_kinetic)
  ABI_FREE(dldij_vhnzc)
@@ -2465,7 +2466,7 @@ end subroutine make_dldij_kinetic
 !!
 !! SOURCE
 
-subroutine orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
+subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
     & iband,lmn_size_max,nband_k,pawang,pawrad,pawtab)
 
  !Arguments ------------------------------------
@@ -2475,6 +2476,7 @@ subroutine orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
  type(pawang_type),intent(in) :: pawang
 
  !arrays
+ integer,intent(in) :: atindx(dtset%natom)
  real(dp),intent(in) :: gprimd(3,3)
  complex(dpc),intent(in) :: dldij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
  complex(dpc),intent(out) :: ddijkn(3)
@@ -2484,8 +2486,8 @@ subroutine orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn
- real(dp) :: c2
+ integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ real(dp) :: c2,dltij
  complex(dpc) :: cpi,cpj,ddijterm,dup_b,dup_g,udp_b,udp_g
 
  !arrays
@@ -2511,11 +2513,15 @@ subroutine orbmag_ddij_k_n(cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
        gdir = modulo(adir,3)+1
      end if
 
-     do iatom=1,dtset%natom
-       itypat=dtset%typat(iatom)
+     do iat=1,dtset%natom
+       iatom=atindx(iat)
+       itypat=dtset%typat(iat)
        do ilmn=1,pawtab(itypat)%lmn_size
          do jlmn=1,pawtab(itypat)%lmn_size
-           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+           dltij=one
+           if(ilmn .EQ. jlmn) dltij = half
+           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
+           klmn=(row-1)*row/2 + col
 
            dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
