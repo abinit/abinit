@@ -924,7 +924,7 @@ end subroutine initorbmag
 !!
 !! SOURCE
 
-subroutine make_onsite_l_k_n(cprj_k,dtset,iband,nband_k,olkn,pawrad,pawtab)
+subroutine make_onsite_l_k_n(atindx,cprj_k,dtset,iband,nband_k,olkn,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -933,14 +933,15 @@ subroutine make_onsite_l_k_n(cprj_k,dtset,iband,nband_k,olkn,pawrad,pawtab)
   type(dataset_type),intent(in) :: dtset
 
   !arrays
+  integer,intent(in) :: atindx(dtset%natom)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size
-  real(dp) :: intg
+  integer :: adir,col,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size,row
+  real(dp) :: dltij,intg
   complex(dpc) :: cpb,cpk,orbl_me
 
   !arrays
@@ -950,21 +951,27 @@ subroutine make_onsite_l_k_n(cprj_k,dtset,iband,nband_k,olkn,pawrad,pawtab)
 
   olkn = czero
   do adir = 1, 3
-    do iatom=1,dtset%natom
-      itypat=dtset%typat(iatom)
+    do iat=1,dtset%natom
+      iatom = atindx(iat)
+      itypat = dtset%typat(iat)
       mesh_size=pawtab(itypat)%mesh_size
       ABI_MALLOC(ff,(mesh_size))
       do jlmn=1,pawtab(itypat)%lmn_size
          jl=pawtab(itypat)%indlmn(1,jlmn)
          jm=pawtab(itypat)%indlmn(2,jlmn)
          do ilmn=1,pawtab(itypat)%lmn_size
+            dltij=one
+            if(ilmn .EQ. jlmn) dltij = half
             il=pawtab(itypat)%indlmn(1,ilmn)
             im=pawtab(itypat)%indlmn(2,ilmn)
-            klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+            row=max(jlmn,ilmn); col=min(jlmn,ilmn)
+            klmn=(row-1)*row/2 + col
             kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
             ! compute <L_dir>
             call slxyzs(il,im,adir,jl,jm,orbl_me)
-            ! compute integral of phi_i*phi_j - tphi_i*tphi_j
+            ! compute radial integral of phi_i*phi_j - tphi_i*tphi_j
+            ! this is necessary because pawtab%sij contains the full integral (radial and angular)
+            ! but our angular integral is different and done in the slxyzs call
             if (abs(orbl_me) > tol8) then
                ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
                call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
@@ -1642,8 +1649,8 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      !  & omdp,paw_ij,pawtab,dtset%typat)
      !orbmag_terms(1:3,om2,nn) = orbmag_terms(1:3,om2,nn) + REAL(omdp(1:3))*trnrm
 
-     !call make_onsite_l_k_n(cprj_k,dtset,nn,nband_k,olkn,pawrad,pawtab)
-     !orbmag_terms(1:3,om3,nn) = orbmag_terms(1:3,om3,nn) + REAL(olkn(1:3))*trnrm
+     call make_onsite_l_k_n(atindx,cprj_k,dtset,nn,nband_k,olkn,pawrad,pawtab)
+     orbmag_terms(1:3,om3,nn) = orbmag_terms(1:3,om3,nn) + REAL(olkn(1:3))*trnrm
 
      !call orbmag_dqij_k_n(cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,nn,nband_k,pawtab)
      !orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
