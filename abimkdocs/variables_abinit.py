@@ -4106,7 +4106,7 @@ The choice is among:
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task == -4.
-* 9 --> Compute polaron effective mass along the 3 meaningful crystallographic directions in the triply-degenerate VB or CB cubic case.
+* 10 --> Compute polaron effective mass along the 3 meaningful crystallographic directions in the triply-degenerate VB or CB cubic case.
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.

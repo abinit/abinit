@@ -646,7 +646,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Solve IBTE from SIGEPH file.
    call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
- case (9)
+ case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
    call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
