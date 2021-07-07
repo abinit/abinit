@@ -1512,7 +1512,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  cplex_rhoij = 2
  call pawrhoij_alloc(rhoij,cplex_rhoij,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
    & pawtab=pawtab)
- call make_pawrhoij(dtset,mpi_enreg,occ)
+ call make_pawrhoij(atindx,atindx1,cprj,dtset,dimlmn,mcprj,mpi_enreg,occ,rhoij)
 
  ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
  call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
@@ -2058,17 +2058,19 @@ end subroutine orbmag_duppy_k_n
 !!
 !! SOURCE
 
-subroutine make_pawrhoij(dtset,mpi_enreg,occ)
+subroutine make_pawrhoij(atindx,atindx1,cprj,dtset,dimlmn,mcprj,mpi_enreg,occ,pawrhoij)
 
  !Arguments ------------------------------------
  !scalars
+ integer,intent(in) :: mcprj
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
 
  !arrays
+ integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),dimlmn(dtset%natom)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
- !type(pawcprj_type),intent(in) :: cprj(natom,mcprj)
-! type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
+ type(pawcprj_type),intent(in) :: cprj(dtset%natom,mcprj)
+ type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
 
  !Local variables -------------------------
  !scalars
@@ -2082,10 +2084,10 @@ subroutine make_pawrhoij(dtset,mpi_enreg,occ)
  call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,dtset%mband,&
    & dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,dtset%nsppol,occ,dtset%usedmft,paw_dmft,&
    & dtset%usedmft,dtset%dmft_solv,mpi_enreg)
-
-! 
-! call pawmkrhoij(atindx,atindx1,cprj,dimcprj,istwfk,kptopt,mband,mband_cprj,mcprj,mkmem,mpi_enreg,&
-!   & natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
+ 
+ call pawmkrhoij(atindx,atindx1,cprj,dimlmn,dtset%istwfk,dtset%kptopt,dtset%mband,dtset%mband,mcprj,dtset%mkmem,mpi_enreg,&
+   & dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij,0,&
+   & dtset%usewvl,dtset%wtk)
 
 end subroutine make_pawrhoij
 !!***
