@@ -1387,7 +1387,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
- integer,allocatable :: atindx(:),atindx1(:),dimlmn_srt(:),dimlmn_unsrt(:),kg_k(:,:),nattyp(:)
+ integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),kg_k(:,:),nattyp(:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),lambda_ndat(1),nonlop_enlout(1),rhodum(1),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: bra(:,:),cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
@@ -1439,19 +1439,17 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
 
  ncpgr = 3
- ABI_MALLOC(dimlmn_srt,(dtset%natom))
- call pawcprj_getdim(dimlmn_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
- ABI_MALLOC(dimlmn_unsrt,(dtset%natom))
- call pawcprj_getdim(dimlmn_unsrt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'R')
+ ABI_MALLOC(dimlmn,(dtset%natom))
+ call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
  ABI_MALLOC(cprj_k,(dtset%natom,dtset%mband))
- call pawcprj_alloc(cprj_k,ncpgr,dimlmn_srt)
+ call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
  ABI_MALLOC(cwaveprj,(dtset%natom,1))
- call pawcprj_alloc(cwaveprj,ncpgr,dimlmn_srt)
+ call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
 
  ncpgr1 = 0
  ABI_MALLOC(cprj1_k,(dtset%natom,dtset%mband,3))
  do adir = 1, 3
-   call pawcprj_alloc(cprj1_k(:,:,adir),ncpgr1,dimlmn_srt)
+   call pawcprj_alloc(cprj1_k(:,:,adir),ncpgr1,dimlmn)
  end do
 
  !==== Initialize most of the Hamiltonian ====
@@ -1620,7 +1618,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
        
        call pawcprj_put(atindx,cwaveprj,cprj1_k(:,:,adir),dtset%natom,&
          & nn,0,ikpt,0,isppol,nband_k,dtset%mkmem,&
-         & dtset%natom,1,nband_k,dimlmn_unsrt,dtset%nspinor,dtset%nsppol,0,&
+         & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
          & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
 
      end do
@@ -1729,8 +1727,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  call pawrhoij_free(rhoij)
  ABI_FREE(rhoij)
 
- ABI_FREE(dimlmn_srt)
- ABI_FREE(dimlmn_unsrt)
+ ABI_FREE(dimlmn)
  call pawcprj_free(cprj_k)
  ABI_FREE(cprj_k)
  call pawcprj_free(cwaveprj)
