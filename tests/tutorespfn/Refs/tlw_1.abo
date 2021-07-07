@@ -1,6 +1,6 @@
 
 .Version 9.5.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  7 Jul 2021.
-- ( at 15h36 )
+- ( at 18h29 )
   
-- input  file    -> /home/buildbot/bb3/ABINIT/abiref_gnu_9.2_debug/mroyo_develop_GGA/Test_suite/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/Test_suite/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.abi
 - output file    -> tlw_1.abo
 - root for input  files -> tlw_1i
 - root for output files -> tlw_1o
@@ -31,10 +31,10 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =           4        mffmem =           1         mkmem =         128
+-    mband =           4        mffmem =           1         mkmem =          32
        mpw =         101          nfft =        2700          nkpt =         128
 ================================================================================
-P This job should need less than                       3.208 Mbytes of memory.
+P This job should need less than                       1.840 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -48,11 +48,11 @@ _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
   nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
       nsym =       2    n1xccc =       0    ntypat =       1    occopt =       1
    xclevel =       1
--    mband =           4        mffmem =           1         mkmem =         128
--   mkqmem =         128        mk1mem =         128           mpw =         101
+-    mband =           4        mffmem =           1         mkmem =          32
+-   mkqmem =          32        mk1mem =          32           mpw =         101
       nfft =        2700          nkpt =         128
 ================================================================================
-P This job should need less than                       4.708 Mbytes of memory.
+P This job should need less than                       2.044 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -66,11 +66,11 @@ _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
   nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
       nsym =       2    n1xccc =       0    ntypat =       1    occopt =       1
    xclevel =       1
--    mband =           4        mffmem =           1         mkmem =         128
--   mkqmem =         128        mk1mem =         128           mpw =         101
+-    mband =           4        mffmem =           1         mkmem =          32
+-   mkqmem =          32        mk1mem =          32           mpw =         101
       nfft =        2700          nkpt =         128
 ================================================================================
-P This job should need less than                       4.708 Mbytes of memory.
+P This job should need less than                       2.044 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -84,11 +84,11 @@ _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
   nloc_mem =       1    nspden =       1   nspinor =       1    nsppol =       1
       nsym =       2    n1xccc =       0    ntypat =       1    occopt =       1
    xclevel =       1
--    mband =           4        mffmem =           1         mkmem =         128
--   mkqmem =         128        mk1mem =         128           mpw =         101
+-    mband =           4        mffmem =           1         mkmem =          32
+-   mkqmem =          32        mk1mem =          32           mpw =         101
       nfft =        2700          nkpt =         128
 ================================================================================
-P This job should need less than                       6.698 Mbytes of memory.
+P This job should need less than                       4.035 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -102,10 +102,10 @@ _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =           4        mffmem =           1         mkmem =         128
+-    mband =           4        mffmem =           1         mkmem =          32
        mpw =         101          nfft =        2700          nkpt =         128
 ================================================================================
-P This job should need less than                       3.208 Mbytes of memory.
+P This job should need less than                       1.840 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -221,9 +221,9 @@ _ WF disk file :      0.791 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
          lw_flexo3          0
          lw_flexo4          0
          lw_flexo5          1
-P           mkmem         128
-P          mkqmem         128
-P          mk1mem         128
+P           mkmem          32
+P          mkqmem          32
+P          mk1mem          32
             natom           2
             nband           4
            ndtset           5
@@ -316,7 +316,7 @@ P          mk1mem         128
                        1.3388183377E+00  1.0320013922E+00  1.3759665778E+00
             xcart     -2.6500000000E-01  2.5255000000E-01 -1.2450000000E-02
                        2.5300000000E+00  1.9502000000E+00  2.6002000000E+00
-             xred      5.0000000000E-02 -5.0000000000E-02 -1.5178830415E-18
+             xred      5.0000000000E-02 -5.0000000000E-02 -2.9160849267E-18
                        2.0000000000E-01  3.0000000000E-01  2.0000000000E-01
             znucl       14.00000
 
@@ -334,7 +334,7 @@ P          mk1mem         128
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -361,8 +361,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00993
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb3/ABINIT/abiref_gnu_9.2_debug/mroyo_develop_GGA/tests/Psps_for_tests/14si.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_gnu_9.2_debug/mroyo_develop_GGA/tests/Psps_for_tests/14si.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/Psps_for_tests/14si.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/Psps_for_tests/14si.fhi
 - Si, fhi98PP : LDA PerdewWang, l=2 local
 - 14.00000   4.00000    150901                znucl, zion, pspdat
     6    7    2    2       495   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -388,18 +388,18 @@ tolerances: {tolvrs: 1.00E-18, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.8597877873121    -7.860E+00 2.198E-03 2.636E+00
- ETOT  2  -7.8669857679140    -7.198E-03 7.531E-04 4.942E-02
- ETOT  3  -7.8670653566605    -7.959E-05 3.132E-06 1.117E-03
- ETOT  4  -7.8670666536763    -1.297E-06 3.038E-08 9.874E-06
- ETOT  5  -7.8670666678617    -1.419E-08 6.397E-10 8.656E-08
- ETOT  6  -7.8670666680086    -1.470E-10 3.129E-11 2.041E-09
- ETOT  7  -7.8670666680130    -4.371E-12 1.565E-12 3.488E-11
- ETOT  8  -7.8670666680131    -1.235E-13 9.547E-14 1.563E-13
- ETOT  9  -7.8670666680132    -1.954E-14 5.055E-15 1.385E-15
- ETOT 10  -7.8670666680132    -8.882E-16 3.065E-16 1.217E-16
- ETOT 11  -7.8670666680131     1.332E-14 1.629E-17 2.575E-18
- ETOT 12  -7.8670666680131    -4.441E-15 9.951E-19 1.556E-19
+ ETOT  1  -7.8597877873122    -7.860E+00 2.198E-03 2.636E+00
+ ETOT  2  -7.8669857679141    -7.198E-03 7.531E-04 4.942E-02
+ ETOT  3  -7.8670653566606    -7.959E-05 3.132E-06 1.117E-03
+ ETOT  4  -7.8670666536764    -1.297E-06 3.038E-08 9.874E-06
+ ETOT  5  -7.8670666678618    -1.419E-08 6.397E-10 8.656E-08
+ ETOT  6  -7.8670666680088    -1.470E-10 3.129E-11 2.041E-09
+ ETOT  7  -7.8670666680131    -4.373E-12 1.565E-12 3.488E-11
+ ETOT  8  -7.8670666680133    -1.235E-13 9.547E-14 1.563E-13
+ ETOT  9  -7.8670666680133    -1.776E-14 5.055E-15 1.385E-15
+ ETOT 10  -7.8670666680133    -8.882E-16 3.065E-16 1.217E-16
+ ETOT 11  -7.8670666680133     1.510E-14 1.629E-17 2.575E-18
+ ETOT 12  -7.8670666680133    -5.329E-15 9.951E-19 1.556E-19
 
  At SCF step   12       vres2   =  1.56E-19 < tolvrs=  1.00E-18 =>converged.
 
@@ -419,7 +419,7 @@ lattice_vectors:
 lattice_lengths: [   7.14319,    7.49533,    6.64680, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5164082E+02
-convergence: {deltae: -4.441E-15, res2:  1.556E-19, residm:  9.951E-19, diffor: null, }
+convergence: {deltae: -5.329E-15, res2:  1.556E-19, residm:  9.951E-19, diffor: null, }
 etotal    :  -7.86706667E+00
 entropy   :   0.00000000E+00
 fermie    :   2.97709821E-01
@@ -429,7 +429,7 @@ cartesian_stress_tensor: # hartree/bohr^3
 - [ -2.23285449E-04,   1.00592150E-04,   3.35351101E-05, ]
 pressure_GPa:  -2.4742E-01
 xred      :
-- [  5.0000E-02,  -5.0000E-02,  -1.5179E-18, Si]
+- [  5.0000E-02,  -5.0000E-02,  -2.9161E-18, Si]
 - [  2.0000E-01,   3.0000E-01,   2.0000E-01, Si]
 cartesian_forces: # hartree/bohr
 - [  2.98441459E-02,  -6.56908640E-02,   1.46163714E-02, ]
@@ -459,13 +459,13 @@ force_length_stats: {min:   7.36179392E-02, max:   7.36179392E-02, mean:   7.361
     2      1.33881833773270     1.03200139219222     1.37596657777572
 
  cartesian forces (hartree/bohr) at end:
-    1      0.02984414592406    -0.06569086402673     0.01461637143118
-    2     -0.02984414592406     0.06569086402673    -0.01461637143118
+    1      0.02984414592406    -0.06569086402674     0.01461637143118
+    2     -0.02984414592406     0.06569086402674    -0.01461637143118
  frms,max,avg= 4.2503337E-02 6.5690864E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      1.53464755762487    -3.37795976113460     0.75160397537500
-    2     -1.53464755762487     3.37795976113460    -0.75160397537500
+    1      1.53464755762488    -3.37795976113460     0.75160397537501
+    2     -1.53464755762488     3.37795976113460    -0.75160397537501
  frms,max,avg= 2.1856093E+00 3.3779598E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.102000000000 10.600000000000  9.400000000000 bohr
               =  5.345748161176  5.609278411054  4.974265760746 angstroms
@@ -481,15 +481,15 @@ force_length_stats: {min:   7.36179392E-02, max:   7.36179392E-02, mean:   7.361
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.03827805693787E+00
-hartree             :  4.81060889717921E-01
+hartree             :  4.81060889717922E-01
 xc                  : -2.41436379816696E+00
 Ewald energy        : -8.60735884649436E+00
-psp_core            : -5.11538107610738E-02
-local_psp           : -2.36892173420856E+00
+psp_core            : -5.11538107611956E-02
+local_psp           : -2.36892173420857E+00
 non_local_psp       :  2.05539257496203E+00
-total_energy        : -7.86706666801315E+00
-total_energy_eV     : -2.14073770955517E+02
-band_energy         :  5.37318742952992E-01
+total_energy        : -7.86706666801327E+00
+total_energy_eV     : -2.14073770955520E+02
+band_energy         :  5.37318742952990E-01
 ...
 
 
@@ -505,7 +505,7 @@ band_energy         :  5.37318742952992E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -565,20 +565,20 @@ tolerances: {tolwfr: 1.00E-20, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -8.6755523948283     -8.676E+00 2.618E-01 0.000E+00
- ETOT  2  -8.6906624395167     -1.511E-02 5.430E-03 0.000E+00
- ETOT  3  -8.6908843810295     -2.219E-04 1.401E-04 0.000E+00
- ETOT  4  -8.6908904989767     -6.118E-06 1.924E-06 0.000E+00
+ ETOT  2  -8.6906624395166     -1.511E-02 5.430E-03 0.000E+00
+ ETOT  3  -8.6908843810296     -2.219E-04 1.401E-04 0.000E+00
+ ETOT  4  -8.6908904989766     -6.118E-06 1.924E-06 0.000E+00
  ETOT  5  -8.6908906948626     -1.959E-07 1.260E-07 0.000E+00
- ETOT  6  -8.6908907017309     -6.868E-09 3.198E-09 0.000E+00
- ETOT  7  -8.6908907019935     -2.626E-10 1.465E-10 0.000E+00
- ETOT  8  -8.6908907020045     -1.105E-11 8.289E-12 0.000E+00
- ETOT  9  -8.6908907020050     -4.921E-13 3.215E-13 0.000E+00
- ETOT 10  -8.6908907020051     -3.730E-14 2.136E-14 0.000E+00
- ETOT 11  -8.6908907020050      1.776E-15 8.801E-16 0.000E+00
- ETOT 12  -8.6908907020051     -8.882E-15 5.598E-17 0.000E+00
- ETOT 13  -8.6908907020050      2.842E-14 2.534E-18 0.000E+00
- ETOT 14  -8.6908907020051     -4.441E-14 1.576E-19 0.000E+00
- ETOT 15  -8.6908907020051      8.882E-15 9.857E-21 0.000E+00
+ ETOT  6  -8.6908907017308     -6.868E-09 3.198E-09 0.000E+00
+ ETOT  7  -8.6908907019934     -2.626E-10 1.465E-10 0.000E+00
+ ETOT  8  -8.6908907020045     -1.104E-11 8.289E-12 0.000E+00
+ ETOT  9  -8.6908907020050     -5.098E-13 3.215E-13 0.000E+00
+ ETOT 10  -8.6908907020050     -1.066E-14 2.136E-14 0.000E+00
+ ETOT 11  -8.6908907020050     -3.553E-15 8.801E-16 0.000E+00
+ ETOT 12  -8.6908907020050     -7.105E-15 5.598E-17 0.000E+00
+ ETOT 13  -8.6908907020050      7.105E-15 2.534E-18 0.000E+00
+ ETOT 14  -8.6908907020050     -3.020E-14 1.576E-19 0.000E+00
+ ETOT 15  -8.6908907020050      7.105E-15 9.857E-21 0.000E+00
 
  At SCF step   15   max residual=  9.86E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -629,21 +629,21 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -7.9322113464917     -7.932E+00 2.171E-01 0.000E+00
+-ETOT  1  -7.9322113464916     -7.932E+00 2.171E-01 0.000E+00
  ETOT  2  -7.9412263947550     -9.015E-03 2.704E-03 0.000E+00
  ETOT  3  -7.9413730180927     -1.466E-04 6.528E-05 0.000E+00
  ETOT  4  -7.9413781480883     -5.130E-06 3.934E-06 0.000E+00
  ETOT  5  -7.9413783559633     -2.079E-07 1.224E-07 0.000E+00
  ETOT  6  -7.9413783649362     -8.973E-09 7.186E-09 0.000E+00
  ETOT  7  -7.9413783653323     -3.961E-10 2.502E-10 0.000E+00
- ETOT  8  -7.9413783653501     -1.775E-11 1.486E-11 0.000E+00
- ETOT  9  -7.9413783653509     -8.038E-13 5.310E-13 0.000E+00
- ETOT 10  -7.9413783653509     -4.530E-14 3.180E-14 0.000E+00
- ETOT 11  -7.9413783653509      2.665E-15 1.158E-15 0.000E+00
- ETOT 12  -7.9413783653509     -1.155E-14 6.975E-17 0.000E+00
+ ETOT  8  -7.9413783653500     -1.775E-11 1.486E-11 0.000E+00
+ ETOT  9  -7.9413783653508     -8.011E-13 5.310E-13 0.000E+00
+ ETOT 10  -7.9413783653509     -4.174E-14 3.180E-14 0.000E+00
+ ETOT 11  -7.9413783653509     -4.441E-15 1.158E-15 0.000E+00
+ ETOT 12  -7.9413783653509      0.000E+00 6.975E-17 0.000E+00
  ETOT 13  -7.9413783653509      1.332E-14 2.589E-18 0.000E+00
- ETOT 14  -7.9413783653509      3.553E-15 1.565E-19 0.000E+00
- ETOT 15  -7.9413783653509     -6.217E-15 9.981E-21 0.000E+00
+ ETOT 14  -7.9413783653509     -8.882E-16 1.565E-19 0.000E+00
+ ETOT 15  -7.9413783653509     -1.243E-14 9.981E-21 0.000E+00
 
  At SCF step   15   max residual=  9.98E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -701,15 +701,15 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  5  -10.142932834567     -9.542E-08 5.677E-08 0.000E+00
  ETOT  6  -10.142932838479     -3.912E-09 3.203E-09 0.000E+00
  ETOT  7  -10.142932838663     -1.838E-10 1.444E-10 0.000E+00
- ETOT  8  -10.142932838673     -9.395E-12 8.153E-12 0.000E+00
- ETOT  9  -10.142932838673     -5.098E-13 4.092E-13 0.000E+00
- ETOT 10  -10.142932838673     -1.066E-14 2.298E-14 0.000E+00
- ETOT 11  -10.142932838673     -2.132E-14 1.236E-15 0.000E+00
- ETOT 12  -10.142932838673     -3.553E-15 6.950E-17 0.000E+00
- ETOT 13  -10.142932838673     -8.882E-15 3.845E-18 0.000E+00
- ETOT 14  -10.142932838673      3.553E-15 2.169E-19 0.000E+00
- ETOT 15  -10.142932838673      7.105E-15 1.211E-20 0.000E+00
- ETOT 16  -10.142932838673      3.553E-15 9.935E-21 0.000E+00
+ ETOT  8  -10.142932838673     -9.374E-12 8.153E-12 0.000E+00
+ ETOT  9  -10.142932838673     -5.009E-13 4.092E-13 0.000E+00
+ ETOT 10  -10.142932838673     -2.487E-14 2.298E-14 0.000E+00
+ ETOT 11  -10.142932838673     -1.776E-15 1.236E-15 0.000E+00
+ ETOT 12  -10.142932838673      1.776E-15 6.950E-17 0.000E+00
+ ETOT 13  -10.142932838673     -5.329E-15 3.845E-18 0.000E+00
+ ETOT 14  -10.142932838673     -5.329E-15 2.169E-19 0.000E+00
+ ETOT 15  -10.142932838673      1.776E-15 1.211E-20 0.000E+00
+ ETOT 16  -10.142932838673     -1.776E-15 9.935E-21 0.000E+00
 
  At SCF step   16   max residual=  9.94E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -762,7 +762,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -821,7 +821,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   606.06716180597      6.061E+02 9.954E-21 0.000E+00
+-ETOT  1   606.06716180525      6.061E+02 9.954E-21 0.000E+00
 
  At SCF step    1   max residual=  9.95E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -860,7 +860,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   102.10469247561      1.021E+02 9.988E-21 0.000E+00
+-ETOT  1   102.10469247554      1.021E+02 9.988E-21 0.000E+00
 
  At SCF step    1   max residual=  9.99E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -899,7 +899,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   218.79717343776      2.188E+02 9.949E-21 0.000E+00
+-ETOT  1   218.79717343826      2.188E+02 9.949E-21 0.000E+00
 
  At SCF step    1   max residual=  9.95E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -939,7 +939,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -90.536023885456     -9.054E+01 9.991E-21 0.000E+00
+-ETOT  1  -90.536023885466     -9.054E+01 9.991E-21 0.000E+00
 
  At SCF step    1   max residual=  9.99E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -979,7 +979,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -200.32230004304     -2.003E+02 9.985E-21 0.000E+00
+-ETOT  1  -200.32230004295     -2.003E+02 9.985E-21 0.000E+00
 
  At SCF step    1   max residual=  9.98E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -1019,7 +1019,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   98.463481198462      9.846E+01 9.864E-21 0.000E+00
+-ETOT  1   98.463481198301      9.846E+01 9.864E-21 0.000E+00
 
  At SCF step    1   max residual=  9.86E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -1045,7 +1045,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1120,13 +1120,13 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   12.692069747209     -3.371E+01 4.764E-01 1.629E+03
- ETOT  2   3.9341516109573     -8.758E+00 5.188E-02 8.157E+00
+ ETOT  2   3.9341516109572     -8.758E+00 5.188E-02 8.157E+00
  ETOT  3   3.8784095459486     -5.574E-02 4.535E-04 2.249E-01
  ETOT  4   3.8775752654132     -8.343E-04 3.329E-05 3.599E-03
- ETOT  5   3.8775634202561     -1.185E-05 6.160E-07 4.452E-05
- ETOT  6   3.8775631968306     -2.234E-07 4.859E-08 4.040E-06
- ETOT  7   3.8775631719506     -2.488E-08 1.513E-09 1.258E-07
- ETOT  8   3.8775631712523     -6.983E-10 1.118E-10 2.351E-09
+ ETOT  5   3.8775634202562     -1.185E-05 6.160E-07 4.452E-05
+ ETOT  6   3.8775631968307     -2.234E-07 4.859E-08 4.040E-06
+ ETOT  7   3.8775631719507     -2.488E-08 1.513E-09 1.258E-07
+ ETOT  8   3.8775631712523     -6.984E-10 1.118E-10 2.351E-09
 
  At SCF step    8       vres2   =  2.35E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1179,7 +1179,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   30.166878301047     -3.850E+01 1.320E-01 3.044E+03
- ETOT  2   14.648427953910     -1.552E+01 2.585E-02 3.146E+01
+ ETOT  2   14.648427953909     -1.552E+01 2.585E-02 3.146E+01
  ETOT  3   14.452207982151     -1.962E-01 3.361E-04 7.235E-01
  ETOT  4   14.449519524451     -2.688E-03 1.621E-05 3.997E-02
  ETOT  5   14.449307057413     -2.125E-04 7.375E-07 8.550E-04
@@ -1238,13 +1238,13 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   11.963467448215     -3.069E+01 1.952E-01 1.107E+03
- ETOT  2   5.9217497117171     -6.042E+00 2.346E-02 6.452E+00
+ ETOT  2   5.9217497117172     -6.042E+00 2.346E-02 6.452E+00
  ETOT  3   5.8801574558516     -4.159E-02 4.888E-04 3.762E-01
- ETOT  4   5.8782032145275     -1.954E-03 2.644E-05 2.367E-02
+ ETOT  4   5.8782032145276     -1.954E-03 2.644E-05 2.367E-02
  ETOT  5   5.8780838618012     -1.194E-04 1.015E-06 1.851E-04
- ETOT  6   5.8780829296120     -9.322E-07 4.584E-08 2.402E-06
- ETOT  7   5.8780829171695     -1.244E-08 1.715E-09 3.519E-08
- ETOT  8   5.8780829168499     -3.196E-10 1.010E-10 4.897E-10
+ ETOT  6   5.8780829296121     -9.322E-07 4.584E-08 2.402E-06
+ ETOT  7   5.8780829171694     -1.244E-08 1.715E-09 3.519E-08
+ ETOT  8   5.8780829168500     -3.194E-10 1.010E-10 4.897E-10
 
  At SCF step    8       vres2   =  4.90E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1297,11 +1297,11 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   12.692038443411     -3.371E+01 4.764E-01 1.629E+03
- ETOT  2   3.9341430815254     -8.758E+00 5.188E-02 8.157E+00
- ETOT  3   3.8784009720145     -5.574E-02 4.535E-04 2.249E-01
+ ETOT  2   3.9341430815253     -8.758E+00 5.188E-02 8.157E+00
+ ETOT  3   3.8784009720146     -5.574E-02 4.535E-04 2.249E-01
  ETOT  4   3.8775666975682     -8.343E-04 3.328E-05 3.599E-03
- ETOT  5   3.8775548527784     -1.184E-05 6.160E-07 4.453E-05
- ETOT  6   3.8775546292802     -2.235E-07 4.859E-08 4.043E-06
+ ETOT  5   3.8775548527783     -1.184E-05 6.160E-07 4.453E-05
+ ETOT  6   3.8775546292800     -2.235E-07 4.859E-08 4.043E-06
  ETOT  7   3.8775546043782     -2.490E-08 1.514E-09 1.257E-07
  ETOT  8   3.8775546036800     -6.982E-10 1.118E-10 2.350E-09
 
@@ -1359,10 +1359,10 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  2   14.648264421481     -1.552E+01 2.585E-02 3.146E+01
  ETOT  3   14.452046784124     -1.962E-01 3.361E-04 7.235E-01
  ETOT  4   14.449358278602     -2.689E-03 1.621E-05 3.997E-02
- ETOT  5   14.449145813978     -2.125E-04 7.375E-07 8.551E-04
+ ETOT  5   14.449145813977     -2.125E-04 7.375E-07 8.551E-04
  ETOT  6   14.449141690182     -4.124E-06 2.212E-08 5.254E-06
- ETOT  7   14.449141669944     -2.024E-08 1.045E-09 5.780E-08
- ETOT  8   14.449141669684     -2.597E-10 6.934E-11 8.812E-10
+ ETOT  7   14.449141669943     -2.024E-08 1.045E-09 5.780E-08
+ ETOT  8   14.449141669684     -2.594E-10 6.934E-11 8.812E-10
 
  At SCF step    8       vres2   =  8.81E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1419,9 +1419,9 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  3   5.8798012312910     -4.159E-02 4.888E-04 3.762E-01
  ETOT  4   5.8778467731525     -1.954E-03 2.644E-05 2.367E-02
  ETOT  5   5.8777274113947     -1.194E-04 1.015E-06 1.854E-04
- ETOT  6   5.8777264783751     -9.330E-07 4.585E-08 2.401E-06
- ETOT  7   5.8777264659310     -1.244E-08 1.716E-09 3.522E-08
- ETOT  8   5.8777264656115     -3.195E-10 1.010E-10 4.899E-10
+ ETOT  6   5.8777264783752     -9.330E-07 4.585E-08 2.401E-06
+ ETOT  7   5.8777264659311     -1.244E-08 1.716E-09 3.522E-08
+ ETOT  8   5.8777264656115     -3.196E-10 1.010E-10 4.899E-10
 
  At SCF step    8       vres2   =  4.90E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1474,14 +1474,14 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -771.38555603076     -7.714E+02 4.253E+01 5.026E+03
- ETOT  2  -802.76796843531     -3.138E+01 6.646E-01 6.530E+02
- ETOT  3  -807.27431750527     -4.506E+00 1.988E-02 1.004E+00
- ETOT  4  -807.28147898475     -7.161E-03 3.244E-04 2.569E-02
+-ETOT  1  -771.38555603078     -7.714E+02 4.253E+01 5.026E+03
+ ETOT  2  -802.76796843530     -3.138E+01 6.646E-01 6.530E+02
+ ETOT  3  -807.27431750525     -4.506E+00 1.988E-02 1.004E+00
+ ETOT  4  -807.28147898474     -7.161E-03 3.244E-04 2.569E-02
  ETOT  5  -807.28158412014     -1.051E-04 1.201E-05 9.822E-04
- ETOT  6  -807.28158777915     -3.659E-06 2.694E-07 1.339E-05
- ETOT  7  -807.28158785017     -7.102E-08 1.617E-08 2.731E-07
- ETOT  8  -807.28158785220     -2.031E-09 4.163E-10 2.937E-09
+ ETOT  6  -807.28158777914     -3.659E-06 2.694E-07 1.339E-05
+ ETOT  7  -807.28158785017     -7.103E-08 1.617E-08 2.731E-07
+ ETOT  8  -807.28158785221     -2.039E-09 4.163E-10 2.937E-09
 
  At SCF step    8       vres2   =  2.94E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1527,14 +1527,14 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -388.94400325148     -3.889E+02 4.360E+01 5.865E+03
+-ETOT  1  -388.94400325147     -3.889E+02 4.360E+01 5.865E+03
  ETOT  2  -421.97538908627     -3.303E+01 2.758E-01 6.061E+02
- ETOT  3  -426.17472682462     -4.199E+00 1.212E-02 2.876E+00
+ ETOT  3  -426.17472682461     -4.199E+00 1.212E-02 2.876E+00
  ETOT  4  -426.19197232646     -1.725E-02 8.065E-04 6.133E-02
  ETOT  5  -426.19220885500     -2.365E-04 1.745E-05 7.402E-04
- ETOT  6  -426.19221256984     -3.715E-06 9.037E-07 1.104E-05
- ETOT  7  -426.19221267421     -1.044E-07 3.016E-08 4.710E-07
- ETOT  8  -426.19221267872     -4.510E-09 1.406E-09 5.724E-09
+ ETOT  6  -426.19221256983     -3.715E-06 9.037E-07 1.104E-05
+ ETOT  7  -426.19221267420     -1.044E-07 3.016E-08 4.710E-07
+ ETOT  8  -426.19221267871     -4.509E-09 1.406E-09 5.724E-09
 
  At SCF step    8       vres2   =  5.72E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1585,9 +1585,9 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  3  -444.73583268012     -6.925E-01 2.637E-03 2.112E+00
  ETOT  4  -444.74967638176     -1.384E-02 1.405E-04 1.448E-02
  ETOT  5  -444.74974196506     -6.558E-05 4.137E-06 4.701E-04
- ETOT  6  -444.74974368498     -1.720E-06 3.040E-07 4.109E-06
- ETOT  7  -444.74974372071     -3.573E-08 9.015E-09 8.997E-08
- ETOT  8  -444.74974372219     -1.487E-09 5.602E-10 3.627E-09
+ ETOT  6  -444.74974368497     -1.720E-06 3.040E-07 4.109E-06
+ ETOT  7  -444.74974372070     -3.573E-08 9.015E-09 8.997E-08
+ ETOT  8  -444.74974372218     -1.487E-09 5.602E-10 3.627E-09
 
  At SCF step    8       vres2   =  3.63E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1631,13 +1631,13 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.8637218710335     -3.505E+00 1.555E-02 3.993E+01
- ETOT  2   1.6843657702449     -1.794E-01 4.452E-04 6.861E-01
- ETOT  3   1.6825279092211     -1.838E-03 4.467E-06 2.326E-02
- ETOT  4   1.6824654791376     -6.243E-05 2.462E-07 2.086E-04
- ETOT  5   1.6824650100389     -4.691E-07 1.178E-08 2.565E-06
- ETOT  6   1.6824649995309     -1.051E-08 5.561E-10 3.208E-08
- ETOT  7   1.6824649993823     -1.486E-10 1.563E-11 5.723E-10
+-ETOT  1   1.8637218710250     -3.505E+00 1.555E-02 3.993E+01
+ ETOT  2   1.6843657702364     -1.794E-01 4.452E-04 6.861E-01
+ ETOT  3   1.6825279092125     -1.838E-03 4.467E-06 2.326E-02
+ ETOT  4   1.6824654791290     -6.243E-05 2.462E-07 2.086E-04
+ ETOT  5   1.6824650100303     -4.691E-07 1.178E-08 2.565E-06
+ ETOT  6   1.6824649995223     -1.051E-08 5.561E-10 3.208E-08
+ ETOT  7   1.6824649993737     -1.486E-10 1.563E-11 5.723E-10
 
  At SCF step    7       vres2   =  5.72E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1666,7 +1666,7 @@ tolerances: {tolvrs: 1.00E-08, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=  -5.11538108E-02
  Resulting in :
- 2DEtotal=    0.1682464999E+01 Ha. Also 2DEtotal=    0.457822009292E+02 eV
+ 2DEtotal=    0.1682464999E+01 Ha. Also 2DEtotal=    0.457822009290E+02 eV
     (2DErelax=   -3.6860827820E+00 Ha. 2DEnonrelax=    5.3685477814E+00 Ha)
     (  non-var. 2DEtotal :    1.6824649759E+00 Ha)
 
@@ -1690,13 +1690,13 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.5154400871821     -4.193E+00 1.815E-02 5.232E+01
- ETOT  2   1.2754561349122     -2.400E-01 8.034E-04 9.274E-01
- ETOT  3   1.2726797488225     -2.776E-03 1.395E-05 2.536E-02
- ETOT  4   1.2726109987037     -6.875E-05 1.066E-06 3.407E-04
- ETOT  5   1.2726100470902     -9.516E-07 1.558E-08 7.409E-06
- ETOT  6   1.2726100245706     -2.252E-08 1.810E-09 5.576E-08
- ETOT  7   1.2726100243120     -2.586E-10 4.589E-11 7.391E-10
+-ETOT  1   1.5154400870919     -4.193E+00 1.815E-02 5.232E+01
+ ETOT  2   1.2754561348219     -2.400E-01 8.034E-04 9.274E-01
+ ETOT  3   1.2726797487322     -2.776E-03 1.395E-05 2.536E-02
+ ETOT  4   1.2726109986134     -6.875E-05 1.066E-06 3.407E-04
+ ETOT  5   1.2726100469999     -9.516E-07 1.558E-08 7.409E-06
+ ETOT  6   1.2726100244803     -2.252E-08 1.810E-09 5.576E-08
+ ETOT  7   1.2726100242217     -2.586E-10 4.589E-11 7.391E-10
 
  At SCF step    7       vres2   =  7.39E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1725,9 +1725,9 @@ tolerances: {tolvrs: 1.00E-08, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=  -5.11538108E-02
  Resulting in :
- 2DEtotal=    0.1272610024E+01 Ha. Also 2DEtotal=    0.346294798756E+02 eV
-    (2DErelax=   -4.4353579631E+00 Ha. 2DEnonrelax=    5.7079679874E+00 Ha)
-    (  non-var. 2DEtotal :    1.2726099229E+00 Ha)
+ 2DEtotal=    0.1272610024E+01 Ha. Also 2DEtotal=    0.346294798732E+02 eV
+    (2DErelax=   -4.4353579631E+00 Ha. 2DEnonrelax=    5.7079679873E+00 Ha)
+    (  non-var. 2DEtotal :    1.2726099228E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1749,13 +1749,13 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.0555360568233     -3.135E+00 1.213E-02 2.933E+01
- ETOT  2   1.9258384258612     -1.297E-01 3.584E-04 6.099E-01
- ETOT  3   1.9240683712967     -1.770E-03 9.329E-06 2.136E-02
- ETOT  4   1.9240063881728     -6.198E-05 7.751E-07 2.192E-04
- ETOT  5   1.9240057304419     -6.577E-07 2.222E-08 7.126E-06
- ETOT  6   1.9240057070603     -2.338E-08 1.707E-09 2.927E-08
- ETOT  7   1.9240057068042     -2.561E-10 5.144E-11 4.486E-10
+-ETOT  1   2.0555360567982     -3.135E+00 1.213E-02 2.933E+01
+ ETOT  2   1.9258384258361     -1.297E-01 3.584E-04 6.099E-01
+ ETOT  3   1.9240683712716     -1.770E-03 9.329E-06 2.136E-02
+ ETOT  4   1.9240063881477     -6.198E-05 7.751E-07 2.192E-04
+ ETOT  5   1.9240057304168     -6.577E-07 2.222E-08 7.126E-06
+ ETOT  6   1.9240057070352     -2.338E-08 1.707E-09 2.927E-08
+ ETOT  7   1.9240057067791     -2.561E-10 5.144E-11 4.486E-10
 
  At SCF step    7       vres2   =  4.49E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1784,7 +1784,7 @@ tolerances: {tolvrs: 1.00E-08, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=  -5.11538108E-02
  Resulting in :
- 2DEtotal=    0.1924005707E+01 Ha. Also 2DEtotal=    0.523548578367E+02 eV
+ 2DEtotal=    0.1924005707E+01 Ha. Also 2DEtotal=    0.523548578360E+02 eV
     (2DErelax=   -3.2668521241E+00 Ha. 2DEnonrelax=    5.1908578309E+00 Ha)
     (  non-var. 2DEtotal :    1.9240052138E+00 Ha)
 
@@ -1808,13 +1808,13 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.5749189703040     -2.746E+00 4.046E-02 1.359E+02
- ETOT  2  0.93102316649325     -6.439E-01 1.726E-03 1.255E+00
- ETOT  3  0.92505882869085     -5.964E-03 6.670E-05 6.791E-02
- ETOT  4  0.92483296986763     -2.259E-04 2.304E-06 8.836E-04
- ETOT  5  0.92483024064327     -2.729E-06 1.322E-07 8.351E-06
- ETOT  6  0.92483020790115     -3.274E-08 7.635E-09 6.384E-08
- ETOT  7  0.92483020698609     -9.151E-10 3.514E-10 5.938E-10
+-ETOT  1   1.5749189702889     -2.746E+00 4.046E-02 1.359E+02
+ ETOT  2  0.93102316647812     -6.439E-01 1.726E-03 1.255E+00
+ ETOT  3  0.92505882867571     -5.964E-03 6.670E-05 6.791E-02
+ ETOT  4  0.92483296985251     -2.259E-04 2.304E-06 8.836E-04
+ ETOT  5  0.92483024062814     -2.729E-06 1.322E-07 8.351E-06
+ ETOT  6  0.92483020788601     -3.274E-08 7.635E-09 6.384E-08
+ ETOT  7  0.92483020697096     -9.150E-10 3.514E-10 5.938E-10
 
  At SCF step    7       vres2   =  5.94E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1843,9 +1843,9 @@ tolerances: {tolvrs: 1.00E-08, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9248302070E+00 Ha. Also 2DEtotal=    0.251659097676E+02 eV
+ 2DEtotal=    0.9248302070E+00 Ha. Also 2DEtotal=    0.251659097672E+02 eV
     (2DErelax=   -3.3962323386E+00 Ha. 2DEnonrelax=    4.3210625456E+00 Ha)
-    (  non-var. 2DEtotal :    9.2483004473E-01 Ha)
+    (  non-var. 2DEtotal :    9.2483004472E-01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1867,13 +1867,13 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.8718407857704     -2.990E+00 6.753E-02 1.396E+02
- ETOT  2   1.1999855049970     -6.719E-01 7.664E-03 1.085E+00
- ETOT  3   1.1945105760926     -5.475E-03 2.086E-04 5.934E-02
- ETOT  4   1.1942969639671     -2.136E-04 1.232E-05 6.116E-04
- ETOT  5   1.1942937739683     -3.190E-06 6.840E-07 8.890E-06
- ETOT  6   1.1942936899833     -8.399E-08 2.949E-08 7.015E-08
- ETOT  7   1.1942936864226     -3.561E-09 1.798E-09 8.873E-10
+-ETOT  1   1.8718407857519     -2.990E+00 6.753E-02 1.396E+02
+ ETOT  2   1.1999855049785     -6.719E-01 7.664E-03 1.085E+00
+ ETOT  3   1.1945105760740     -5.475E-03 2.086E-04 5.934E-02
+ ETOT  4   1.1942969639486     -2.136E-04 1.232E-05 6.116E-04
+ ETOT  5   1.1942937739499     -3.190E-06 6.840E-07 8.890E-06
+ ETOT  6   1.1942936899648     -8.399E-08 2.949E-08 7.015E-08
+ ETOT  7   1.1942936864041     -3.561E-09 1.798E-09 8.873E-10
 
  At SCF step    7       vres2   =  8.87E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1902,7 +1902,7 @@ tolerances: {tolvrs: 1.00E-08, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1194293686E+01 Ha. Also 2DEtotal=    0.324983839428E+02 eV
+ 2DEtotal=    0.1194293686E+01 Ha. Also 2DEtotal=    0.324983839423E+02 eV
     (2DErelax=   -3.6674917757E+00 Ha. 2DEnonrelax=    4.8617854621E+00 Ha)
     (  non-var. 2DEtotal :    1.1942948585E+00 Ha)
 
@@ -1926,13 +1926,13 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.6231658753303     -2.586E+00 5.028E-02 1.417E+02
- ETOT  2  0.94701414506369     -6.762E-01 1.991E-03 1.731E+00
- ETOT  3  0.93820338997843     -8.811E-03 1.396E-04 8.232E-02
- ETOT  4  0.93791916229501     -2.842E-04 9.987E-06 8.905E-04
- ETOT  5  0.93791642986288     -2.732E-06 2.193E-07 6.944E-06
- ETOT  6  0.93791638893610     -4.093E-08 2.140E-08 5.639E-08
- ETOT  7  0.93791638757336     -1.363E-09 5.135E-10 1.675E-09
+-ETOT  1   1.6231658753035     -2.586E+00 5.028E-02 1.417E+02
+ ETOT  2  0.94701414503681     -6.762E-01 1.991E-03 1.731E+00
+ ETOT  3  0.93820338995152     -8.811E-03 1.396E-04 8.232E-02
+ ETOT  4  0.93791916226813     -2.842E-04 9.987E-06 8.905E-04
+ ETOT  5  0.93791642983598     -2.732E-06 2.193E-07 6.944E-06
+ ETOT  6  0.93791638890919     -4.093E-08 2.140E-08 5.639E-08
+ ETOT  7  0.93791638754645     -1.363E-09 5.135E-10 1.675E-09
 
  At SCF step    7       vres2   =  1.68E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
@@ -1961,9 +1961,9 @@ tolerances: {tolvrs: 1.00E-08, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9379163876E+00 Ha. Also 2DEtotal=    0.255220028508E+02 eV
+ 2DEtotal=    0.9379163875E+00 Ha. Also 2DEtotal=    0.255220028501E+02 eV
     (2DErelax=   -3.2717297827E+00 Ha. 2DEnonrelax=    4.2096461703E+00 Ha)
-    (  non-var. 2DEtotal :    9.3791603300E-01 Ha)
+    (  non-var. 2DEtotal :    9.3791603298E-01 Ha)
 
 ================================================================================
 
@@ -2124,16 +2124,16 @@ tolerances: {tolvrs: 1.00E-08, }
    3    4   3    6        -0.0000164503         0.0000000000
   
    1    5   1    5         1.6824649759         0.0000000000
-   1    5   2    5         0.6773542548         0.0000000000
+   1    5   2    5         0.6773542547         0.0000000000
    1    5   3    5         0.8089300732         0.0000000000
    1    5   1    6        -0.1859005948         0.0000000000
-   1    5   2    6         0.4705460744         0.0000000000
+   1    5   2    6         0.4705460743         0.0000000000
    1    5   3    6         0.1303370718         0.0000000000
   
    2    5   1    5         0.6773542627         0.0000000000
-   2    5   2    5         1.2726099229         0.0000000000
+   2    5   2    5         1.2726099228         0.0000000000
    2    5   3    5         0.6133269949         0.0000000000
-   2    5   1    6        -0.2217890360         0.0000000000
+   2    5   1    6        -0.2217890361         0.0000000000
    2    5   2    6         0.3633272407         0.0000000000
    2    5   3    6         0.2555933665         0.0000000000
   
@@ -2145,7 +2145,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    5   3    6        -0.1093834871         0.0000000000
   
    1    6   1    5        -0.1859009239         0.0000000000
-   1    6   2    5        -0.2217898162         0.0000000000
+   1    6   2    5        -0.2217898163         0.0000000000
    1    6   3    5        -0.2261323853         0.0000000000
    1    6   1    6         0.9248300447         0.0000000000
    1    6   2    6        -0.0169194911         0.0000000000
@@ -2154,9 +2154,9 @@ tolerances: {tolvrs: 1.00E-08, }
    2    6   1    5         0.4705456119         0.0000000000
    2    6   2    5         0.3633284176         0.0000000000
    2    6   3    5         0.4527205028         0.0000000000
-   2    6   1    6        -0.0169200388         0.0000000000
+   2    6   1    6        -0.0169200389         0.0000000000
    2    6   2    6         1.1942948585         0.0000000000
-   2    6   3    6        -0.2072869355         0.0000000000
+   2    6   3    6        -0.2072869356         0.0000000000
   
    3    6   1    5         0.1303381251         0.0000000000
    3    6   2    5         0.2555934559         0.0000000000
@@ -2445,7 +2445,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 ================================================================================
 == DATASET  5 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2604,7 +2604,7 @@ meta: {optdriver: 10, }
     2       1       2       2          -11.7635386674         0.0000000000
     2       2       2       2           11.7635727526         0.0000000000
     2       1       3       2           -0.6230008867         0.0000000000
-    2       2       3       2            0.6230168979         0.0000000000
+    2       2       3       2            0.6230168980         0.0000000000
     3       1       1       2            8.5632720372         0.0000000000
     3       2       1       2           -8.5632672986         0.0000000000
     3       1       2       2           -3.8649282703         0.0000000000
@@ -2836,7 +2836,7 @@ meta: {optdriver: 10, }
     1        2        2        3        1             0.1960158624         0.0000000000
     2        2        2        3        1            -0.0171796484         0.0000000000
     1        3        2        3        1            -0.0704617500         0.0000000000
-    2        3        2        3        1            -0.0000000000         0.0000000000
+    2        3        2        3        1             0.0000000000         0.0000000000
  
     1        1        1        1        2            -0.0000000000         0.0000000000
     2        1        1        1        2            -0.0919255354         0.0000000000
@@ -2845,7 +2845,7 @@ meta: {optdriver: 10, }
     1        3        1        1        2            -0.0024369996         0.0000000000
     2        3        1        1        2            -0.1804072808         0.0000000000
     1        1        2        1        2             0.0919255354         0.0000000000
-    2        1        2        1        2            -0.0000000000         0.0000000000
+    2        1        2        1        2             0.0000000000         0.0000000000
     1        2        2        1        2            -0.0859531834         0.0000000000
     2        2        2        1        2             0.0096904028         0.0000000000
     1        3        2        1        2             0.1804073052         0.0000000000
@@ -2859,14 +2859,14 @@ meta: {optdriver: 10, }
     1        1        2        2        2            -0.0859533510         0.0000000000
     2        1        2        2        2            -0.0096904028         0.0000000000
     1        2        2        2        2            -0.0175018809         0.0000000000
-    2        2        2        2        2            -0.0000000000         0.0000000000
+    2        2        2        2        2             0.0000000000         0.0000000000
     1        3        2        2        2             0.0487204328         0.0000000000
     2        3        2        2        2             0.0108534836         0.0000000000
     1        1        1        3        2             0.0024369996         0.0000000000
     2        1        1        3        2            -0.1804073052         0.0000000000
     1        2        1        3        2             0.0108532404         0.0000000000
     2        2        1        3        2            -0.0487204328         0.0000000000
-    1        3        1        3        2            -0.0000000000         0.0000000000
+    1        3        1        3        2             0.0000000000         0.0000000000
     2        3        1        3        2            -0.0717769607         0.0000000000
     1        1        2        3        2             0.1804072808         0.0000000000
     2        1        2        3        2            -0.0024368382         0.0000000000
@@ -2882,7 +2882,7 @@ meta: {optdriver: 10, }
     1        3        1        1        3            -0.0193130650         0.0000000000
     2        3        1        1        3             0.0829942396         0.0000000000
     1        1        2        1        3             0.0267213105         0.0000000000
-    2        1        2        1        3            -0.0000000000         0.0000000000
+    2        1        2        1        3             0.0000000000         0.0000000000
     1        2        2        1        3             0.1972696471         0.0000000000
     2        2        2        1        3            -0.0148563552         0.0000000000
     1        3        2        1        3            -0.0829940114         0.0000000000
@@ -3012,16 +3012,16 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
     1       3       2       2       1            0.1663613998         0.0000000000
     2       1       2       2       1            0.5241254901         0.0000000000
     2       2       2       2       1            0.1681986708         0.0000000000
-    2       3       2       2       1            0.1663611169         0.0000000000
+    2       3       2       2       1            0.1663611168         0.0000000000
  
     1       1       3       2       1           -0.0829229684         0.0000000000
     1       2       3       2       1            0.1357200860         0.0000000000
     1       3       3       2       1           -0.0361344713         0.0000000000
     2       1       3       2       1           -0.0829210896         0.0000000000
     2       2       3       2       1            0.1357238701         0.0000000000
-    2       3       3       2       1           -0.0361375620         0.0000000000
+    2       3       3       2       1           -0.0361375621         0.0000000000
  
-    1       1       1       3       1            0.2667728316         0.0000000000
+    1       1       1       3       1            0.2667728315         0.0000000000
     1       2       1       3       1           -0.1202904353         0.0000000000
     1       3       1       3       1            0.5985233314         0.0000000000
     2       1       1       3       1            0.2667716139         0.0000000000
@@ -3054,14 +3054,14 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
     1       3       2       1       2            0.1663613998         0.0000000000
     2       1       2       1       2            0.5241254901         0.0000000000
     2       2       2       1       2            0.1681986708         0.0000000000
-    2       3       2       1       2            0.1663611169         0.0000000000
+    2       3       2       1       2            0.1663611168         0.0000000000
  
     1       1       3       1       2           -0.0829229684         0.0000000000
     1       2       3       1       2            0.1357200860         0.0000000000
     1       3       3       1       2           -0.0361344713         0.0000000000
     2       1       3       1       2           -0.0829210896         0.0000000000
     2       2       3       1       2            0.1357238701         0.0000000000
-    2       3       3       1       2           -0.0361375620         0.0000000000
+    2       3       3       1       2           -0.0361375621         0.0000000000
  
     1       1       1       2       2            0.3369832240         0.0000000000
     1       2       1       2       2            0.1133676591         0.0000000000
@@ -3072,9 +3072,9 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
  
     1       1       2       2       2            0.1795298534         0.0000000000
     1       2       2       2       2            0.6960220028         0.0000000000
-    1       3       2       2       2           -0.1230473829         0.0000000000
+    1       3       2       2       2           -0.1230473830         0.0000000000
     2       1       2       2       2            0.1795364850         0.0000000000
-    2       2       2       2       2            0.6960311591         0.0000000000
+    2       2       2       2       2            0.6960311590         0.0000000000
     2       3       2       2       2           -0.1230570066         0.0000000000
  
     1       1       3       2       2            0.1877077989         0.0000000000
@@ -3103,9 +3103,9 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
     1       3       3       3       2           -0.1101246718         0.0000000000
     2       1       3       3       2            0.0081546594         0.0000000000
     2       2       3       3       2            0.4727952798         0.0000000000
-    2       3       3       3       2           -0.1101256332         0.0000000000
+    2       3       3       3       2           -0.1101256333         0.0000000000
  
-    1       1       1       1       3            0.2667728316         0.0000000000
+    1       1       1       1       3            0.2667728315         0.0000000000
     1       2       1       1       3           -0.1202904353         0.0000000000
     1       3       1       1       3            0.5985233314         0.0000000000
     2       1       1       1       3            0.2667716139         0.0000000000
@@ -3145,7 +3145,7 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
     1       3       3       2       3           -0.1101246718         0.0000000000
     2       1       3       2       3            0.0081546594         0.0000000000
     2       2       3       2       3            0.4727952798         0.0000000000
-    2       3       3       2       3           -0.1101256332         0.0000000000
+    2       3       3       2       3           -0.1101256333         0.0000000000
  
     1       1       1       3       3            0.3820338757         0.0000000000
     1       2       1       3       3           -0.0434644925         0.0000000000
@@ -3162,10 +3162,10 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
     2       3       2       3       3           -0.0890918782         0.0000000000
  
     1       1       3       3       3            0.2630617472         0.0000000000
-    1       2       3       3       3           -0.1293433958         0.0000000000
+    1       2       3       3       3           -0.1293433959         0.0000000000
     1       3       3       3       3            0.9954624787         0.0000000000
     2       1       3       3       3            0.2630589371         0.0000000000
-    2       2       3       3       3           -0.1293573693         0.0000000000
+    2       2       3       3       3           -0.1293573694         0.0000000000
     2       3       3       3       3            0.9954754548         0.0000000000
  
  
@@ -3276,7 +3276,7 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
            etotal1    -7.8670666680E+00
            etotal2    -1.0142932839E+01
            etotal3     9.8463481198E+01
-           etotal4     9.3791638757E-01
+           etotal4     9.3791638755E-01
            etotal5     0.0000000000E+00
             fcart1     2.9844145924E-02 -6.5690864027E-02  1.4616371431E-02
                       -2.9844145924E-02  6.5690864027E-02 -1.4616371431E-02
@@ -3380,9 +3380,9 @@ atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
          lw_flexo3          0
          lw_flexo4          0
          lw_flexo5          1
-P           mkmem         128
-P          mkqmem         128
-P          mk1mem         128
+P           mkmem          32
+P          mkqmem          32
+P          mk1mem          32
             natom           2
             nband           4
            ndtset           5
@@ -3481,7 +3481,7 @@ P          mk1mem         128
                        1.3388183377E+00  1.0320013922E+00  1.3759665778E+00
             xcart     -2.6500000000E-01  2.5255000000E-01 -1.2450000000E-02
                        2.5300000000E+00  1.9502000000E+00  2.6002000000E+00
-             xred      5.0000000000E-02 -5.0000000000E-02 -1.5178830415E-18
+             xred      5.0000000000E-02 -5.0000000000E-02 -2.9160849267E-18
                        2.0000000000E-01  3.0000000000E-01  2.0000000000E-01
             znucl       14.00000
 
@@ -3586,10 +3586,10 @@ P          mk1mem         128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        128.3  wall=        132.0
+- Proc.   0 individual time (sec): cpu=         33.3  wall=         33.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        128.3  wall=        132.0
+.Delivered   1 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=        133.5  wall=        134.1
