@@ -606,6 +606,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dipdip
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dipdip','INT',0)
 
+ intarr(1,:)=dtsets(:)%dipquad
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dipquad','INT',0)
+
 !dmatpawu
  if (dmatpuflag==1.and.mxvals%natpawu>0) then
    prtimg(:,:)=1

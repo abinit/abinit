@@ -677,9 +677,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
  end if
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
- mkmem_rbz =my_nkpt_rbz 
+ mkmem_rbz =my_nkpt_rbz
  call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
- 
+
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 & kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
@@ -1392,7 +1392,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  ABI_FREE(qdrptens_red)
  ABI_FREE(dqpol_red)
 
-!1st transform coordenates of the atomic displacement derivative
+!1st transform coordinates of the atomic displacement derivative
  do iq1dir=1,3
    do iq2dir=1,3
      do ii=1,2
@@ -2426,7 +2426,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
  end if
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
- mkmem_rbz =my_nkpt_rbz 
+ mkmem_rbz =my_nkpt_rbz
  call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
 
 !Set up the basis sphere of planewaves at k

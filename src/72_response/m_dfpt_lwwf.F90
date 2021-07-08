@@ -37,11 +37,13 @@ module m_dfpt_lwwf
  use m_cgtools
  use m_pawcprj
  use m_pawfgr
- use m_io_tools, only : file_exists
  use m_wfk
  use m_xmpi
  use m_getgh1c
  use m_mklocl
+
+ use m_fstrings, only : itoa, sjoin
+ use m_io_tools, only : file_exists
  use m_time, only : cwtime
  use m_kg, only : mkkpg
 
@@ -232,9 +234,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  end if
 
  if(dtset%prtvol>2)then
-   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' Quadrupoles calculation; k pt #',ikpt,'k=',&
-&   kpt(:)
-   call wrtout(std_out,msg,'PERS')
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' Quadrupoles calculation; k pt #',ikpt,'k=',kpt(:)
+   call wrtout(std_out,msg)
  end if
 
 !Additional definitions
@@ -459,7 +460,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  do iatpert=1,natpert
    !k-point index check
    ii = wfk_t_atdis(iatpert)%findk(kpt(:))
-   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt in atomic displacement wf1 file")
+   ABI_CHECK(ii == indkpt1(ikpt), sjoin("ii !=  indkpt in atomic displacement wf1 file for iatpert:", itoa(iatpert)))
    !npw check
    npw_disk = wfk_t_atdis(iatpert)%hdr%npwarr(ii)
    if (npw_k /= npw_disk) then
@@ -475,7 +476,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  do iq2grad=1,nq2grad
    !k-point index check
    ii = wfk_t_efield(iq2grad)%findk(kpt(:))
-   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in electric field wf1 file")
+   ABI_CHECK(ii == indkpt1(ikpt), sjoin("ii !=  indkpt1 in electric field wf1 file for iq2grad:", itoa(iq2grad)))
    !npw check
    npw_disk = wfk_t_efield(iq2grad)%hdr%npwarr(ii)
    if (npw_k /= npw_disk) then
@@ -491,7 +492,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  do iq1grad=1,nq1grad
    !k-point index check
    ii = wfk_t_ddk(iq1grad)%findk(kpt(:))
-   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in ddk wf1 file")
+   ABI_CHECK(ii == indkpt1(ikpt), sjoin("ii != indkpt1 in ddk wf1 file for iq1grad:", itoa(iq1grad)))
    !npw check
    npw_disk = wfk_t_ddk(iq1grad)%hdr%npwarr(ii)
    if (npw_k /= npw_disk) then
@@ -507,7 +508,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  do iq1q2grad=1,nq1q2grad
    !k-point index check
    ii = wfk_t_dkdk(iq1q2grad)%findk(kpt(:))
-   ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1 in dkdk wf1 file")
+   ABI_CHECK(ii == indkpt1(ikpt), sjoin("ii != indkpt1 in dkdk wf1 file for iq1q2grad:", itoa(iq1q2grad)))
    !npw check
    npw_disk = wfk_t_dkdk(iq1q2grad)%hdr%npwarr(ii)
    if (npw_k /= npw_disk) then
@@ -1117,9 +1118,8 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
  end if
 
  if(dtset%prtvol>2)then
-   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' Electronic FxE tensor calculation; k pt #',ikpt,'k=',&
-&   kpt(:)
-   call wrtout(std_out,msg,'PERS')
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' Electronic FxE tensor calculation; k pt #',ikpt,'k=',kpt(:)
+   call wrtout(std_out,msg)
  end if
 
 !Additional definitions
@@ -1992,9 +1992,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  DBG_ENTER("COLL")
 
  if(dtset%prtvol>2)then
-   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' First q-moment IFCs calculation; k pt #',ikpt,'k=',&
-&   kpt(:)
-   call wrtout(std_out,msg,'PERS')
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' First q-moment IFCs calculation; k pt #',ikpt,'k=',kpt(:)
+   call wrtout(std_out,msg)
  end if
 
 !Additional definitions
@@ -2651,9 +2650,8 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  DBG_ENTER("COLL")
 
  if(dtset%prtvol>2)then
-   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' First q-moment internal strain calculation; k pt #',ikpt,'k=',&
-&   kpt(:)
-   call wrtout(std_out,msg,'PERS')
+   write(msg,'(2a,i5,2x,a,3f9.5)')ch10,' First q-moment internal strain calculation; k pt #',ikpt,'k=',kpt(:)
+   call wrtout(std_out,msg)
  end if
 
 !Additional definitions
