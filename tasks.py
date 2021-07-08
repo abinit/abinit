@@ -301,6 +301,7 @@ def env(ctx):
     print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
     print(f"export PATH={binpath}:$PATH")
 
+
 @task
 def diff2(ctx, filename="run.abo"):
     """
@@ -336,6 +337,17 @@ def diff3(ctx, filename="run.abo"):
 def add_trunk(ctx):
     """Register trunk as remote."""
     cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def remote_add(ctx, remote):
+    """Register `remote` as remote branch and fetch it"""
+    cmd = f"git remote add {remote} git@gitlab.abinit.org:{remote}/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+    cmd = f"git fetch {remote}"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
