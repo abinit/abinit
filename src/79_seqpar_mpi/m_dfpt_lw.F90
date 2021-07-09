@@ -2186,7 +2186,9 @@ end if
        end do
      end do
    end do
-   if (nkxc == 7) ABI_FREE(vxc1dqc)
+   if (nkxc == 7) then
+     ABI_FREE(vxc1dqc)
+   end if
  end if
 
 !Calculate here the Cartesian q-gradient of the GGA xc kernel which is the same
@@ -2306,8 +2308,8 @@ end if
  ABI_FREE(vqgradhart)
  if (nkxc == 7) then
    ABI_FREE(vxc1dq)
-   if (allocated(vxc1dqc)) ABI_FREE(vxc1dqc)
-   if (allocated(rhor1_tmp)) ABI_FREE(rhor1_tmp)
+   ABI_SFREE(vxc1dqc)
+   ABI_SFREE(rhor1_tmp)
  end if
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
    ABI_FREE(rhog1_atdis)
