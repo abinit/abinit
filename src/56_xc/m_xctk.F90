@@ -788,13 +788,13 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
  end do
 
 ! Obtain agradn(G)*phase in wkcmpx from input agradn(r)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,agradn,ispden,nfft,work)
  ispden=1
  ABI_MALLOC(gcart1,(n1))
  ABI_MALLOC(gcart2,(n2))
  ABI_MALLOC(gcart3,(n3))
  do idir=1, 3
 
+  !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,agradn,ispden,nfft,work)
    do ifft=1,cplex*nfft
      work(ifft)=agradn(ifft,ispden,idir)
    end do
@@ -847,7 +847,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
  call timab(82,1,tsec)
  call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
  call timab(82,2,tsec)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vxc,work,two_pi)
  do ifft=1,nfft
    vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
    !Apply here the two pi factor
