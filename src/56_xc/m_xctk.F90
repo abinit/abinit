@@ -794,7 +794,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
  ABI_MALLOC(gcart3,(n3))
  do idir=1, 3
 
-  !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,agradn,ispden,nfft,work)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,agradn,ispden,nfft,work)
    do ifft=1,cplex*nfft
      work(ifft)=agradn(ifft,ispden,idir)
    end do
