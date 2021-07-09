@@ -107,7 +107,7 @@ diemac 13.0
 #%% test_chain =  t46.abi
 #%% [files]
 #%% files_to_test =
-#%%   t46.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  8.000e-05, fld_options=-medium
+#%%   t46.abo, tolnlines=  5, tolabs=  1.000e-05, tolrel=  5.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
