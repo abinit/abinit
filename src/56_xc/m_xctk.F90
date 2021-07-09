@@ -847,7 +847,7 @@ subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, &
  call timab(82,1,tsec)
  call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
  call timab(82,2,tsec)
-!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vxc,work,two_pi)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vxc,work)
  do ifft=1,nfft
    vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
    !Apply here the two pi factor
