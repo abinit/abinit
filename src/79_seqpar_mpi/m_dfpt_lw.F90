@@ -2217,8 +2217,12 @@ end if
    ABI_FREE(rhog1_atdis)
    ABI_FREE(rhor1_atdis)
  end if
- if (lw_flexo==1.or.lw_flexo==2) ABI_FREE(rhog1_efield)
- if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) ABI_FREE(rhor1_strain)
+ if (lw_flexo==1.or.lw_flexo==2) then
+     ABI_FREE(rhog1_efield)
+ end if
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+   ABI_FREE(rhor1_strain)
+ end if
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 
