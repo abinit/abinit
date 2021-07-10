@@ -61,7 +61,7 @@ module m_orbmag
   use m_paw_overlap,      only : overlap_k1k2_paw
   use m_paw_occupancies,  only : pawmkrhoij
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen
-  use m_pawrhoij,         only : pawrhoij_alloc,pawrhoij_free,pawrhoij_type
+  use m_pawrhoij,         only : pawrhoij_alloc,pawrhoij_free,pawrhoij_type,pawrhoij_print_rhoij
   use m_paw_sphharm,      only : setsym_ylm,slxyzs
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_put,pawcprj_output,&
@@ -1513,6 +1513,10 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  call pawrhoij_alloc(rhoij,cplex_rhoij,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
    & pawtab=pawtab)
  call make_pawrhoij(atindx,atindx1,cprj,dtset,dimlmn,mcprj,mpi_enreg,occ,rhoij)
+
+ do iatom = 1, dtset%natom
+   call pawrhoij_print_rhoij(rhoij(iatom)%rhoijp,cplex_rhoij,1,iatom,dtset%natom,title_msg="JWZ debug rhoij")
+ end do
 
  ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
  call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
