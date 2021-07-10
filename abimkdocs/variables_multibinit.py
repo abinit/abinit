@@ -83,6 +83,25 @@ or not specified in the XML file), (by default in Hartree).
 ),
 
 Variable(
+    abivarname="lwf_constraint@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier Function use CONSTRAINT",
+    added_in_version="9.5.3",
+    text=r"""
+    Whether to use constraint in Lattice Wannier function dynamics. The constraints are defined in a LWF initial state file by three parameters:
+    n_fixed_lwf: number of fixed LWF.
+    fixed_lwf_ids: indices of fixed LWFs.
+    fixed_lwf_values: values of fixed LWFs.
+""",
+),
+
+
+
+Variable(
     abivarname="ncoeff@multibinit",
     varset="multibinit",
     vartype="integer",
