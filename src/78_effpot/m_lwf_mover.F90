@@ -68,6 +68,12 @@ module m_lwf_mover
      real(dp), pointer :: lwf_masses(:) => null()
      real(dp) :: Ek=0.0_dp     ! kinetic energy
      real(dp) :: T_ob=0.0_dp    ! observed temperature
+
+     ! constraints
+     integer :: n_fixed_lwf = 0
+     integer, allocatable :: fixed_lwf_ids(:)
+     integer, allocatable :: fixed_lwf_values(:)
+
    contains
      procedure :: initialize
      procedure :: finalize
@@ -81,6 +87,9 @@ module m_lwf_mover
      procedure :: prepare_ncfile
      procedure :: set_ncfile_name
      procedure :: read_hist_lwf_state
+     procedure :: read_lwf_constraints
+     procedure :: apply_fixed_lwf
+     procedure :: apply_constraints
   end type lwf_mover_t
 
 contains
@@ -105,6 +114,8 @@ contains
     self%energy=0.0_dp
     self%lwf_masses=>self%supercell%lwf%lwf_masses
     call self%hist%initialize(nlwf=self%nlwf, mxhist=1)
+
+    !call self%read_lwf_constraints()
   end subroutine initialize
 
 
@@ -117,6 +128,12 @@ contains
     ABI_SFREE(self%lwf_force)
     nullify(self%lwf_masses)
     call self%hist%finalize()
+
+    ! constraints
+    self%n_fixed_lwf=0
+    ABI_SFREE(self%fixed_lwf_ids)
+    ABI_SFREE(self%fixed_lwf_values)
+
     !call self%ncfile%finalize()
   end subroutine finalize
 
@@ -250,7 +267,8 @@ contains
 
       self%lwf(:)=0.0
       select case(mode)
-      case(0)
+      case(0) ! using k-vector
+              ! TODO make it more generic
          kpoint(:)=[0.5_dp, 0.0_dp, 0.5_dp]
          do i=1, self%supercell%ncell
            tmp=0.2*real(exp(cmplx(0.0,two_pi, kind=dp) * &
@@ -258,7 +276,7 @@ contains
            self%lwf(i*2-1)=tmp
            self%lwf(i*2)=tmp
          enddo
-      ! random
+      ! random number between -0.1 0.1
       case(1)
          call self%rng%rand_unif_01_array(self%lwf, self%nlwf)
          self%lwf=(self%lwf-0.5)*0.1
@@ -325,6 +343,56 @@ contains
 #endif
 
   end subroutine read_hist_lwf_state
+
+
+  !-------------------------------------------------------------------!
+  ! read_lwf_constrain
+  !  read the constrains from file
+  !-------------------------------------------------------------------!
+  subroutine read_lwf_constraints(self, fname)
+    class(lwf_mover_t), intent(inout) :: self
+    character(len=fnlen), intent(in) :: fname
+    integer :: ierr, ncid, id_id, value_id
+    character(len=118) :: msg
+    ! open file
+#if defined HAVE_NETCDF
+    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    NCF_CHECK_MSG(ierr, "Trying to read constrain from netcdf file "//trim(fname)//" Failed. ")
+
+    ! sanity check. If the hist file is consistent with the current calculation
+    ierr=nctk_get_dim(ncid, "n_fixed_lwf" , self%n_fixed_lwf)
+    NCF_CHECK_MSG(ierr, "when reading n_fixed_lwf")
+
+    if (self%n_fixed_lwf .ne. 0) then
+      ABI_MALLOC(self%fixed_lwf_ids, (self%n_fixed_lwf))
+      ABI_MALLOC(self%fixed_lwf_values, (self%n_fixed_lwf))
+
+
+      ! read fixed lwf ids and values 
+      ierr =nf90_inq_varid(ncid, "fixed_lwf_ids", id_id)
+      NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids.")
+  
+      ierr = nf90_get_var(ncid=ncid, varid=id_id, values=self%fixed_lwf_ids(:), &
+           & start=[1], count=[self%n_fixed_lwf])
+      NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids from file "//trim(fname)//". " )
+  
+      ierr =nf90_inq_varid(ncid, "fixed_lwf_values", value_id)
+      NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values.")
+  
+      ierr = nf90_get_var(ncid=ncid, varid=value_id, values=self%fixed_lwf_values(:), &
+           & start=[1], count=[self%n_fixed_lwf])
+      NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values from file "//trim(fname)//". " )
+    endif
+
+
+    ! close file
+    ierr=nf90_close(ncid)
+    NCF_CHECK_MSG(ierr, "Close netcdf file")
+#else
+    ABI_ERROR("reading lwf constrain file but abinit is not compiled with netcdf.")
+#endif
+
+  end subroutine read_lwf_constraints
 
 
 
@@ -465,6 +533,21 @@ contains
   end subroutine run_varT
   !!***
 
+
+  subroutine apply_fixed_lwf(self, lwf)
+    class(lwf_mover_t), intent(inout) :: self
+    real(dp), intent(inout) :: lwf(:)
+    integer :: i
+    do i=1, self%n_fixed_lwf
+        lwf(self%fixed_lwf_ids(i))=self%fixed_lwf_values(i)    
+    end do
+  end subroutine apply_fixed_lwf
+
+  subroutine apply_constraints(self, lwf)
+    class(lwf_mover_t), intent(inout) :: self
+    real(dp), intent(inout) :: lwf(:)
+    call self%apply_fixed_lwf(lwf)
+  end subroutine apply_constraints
 
 end module m_lwf_mover
 

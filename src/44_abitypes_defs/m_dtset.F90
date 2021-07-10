@@ -3262,6 +3262,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
  list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
+ list_vars=trim(list_vars)//' lwf_constraint'
  list_vars=trim(list_vars)//' lwf_dt lwf_dynamics lwf_init_state lwf_init_hist_fname'
  list_vars=trim(list_vars)//' lwf_mc_avg_amp lwf_nctime lwf_ntime'
  list_vars=trim(list_vars)//' lwf_pot_fname'

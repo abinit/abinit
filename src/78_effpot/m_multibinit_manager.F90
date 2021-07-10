@@ -560,6 +560,8 @@ contains
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
     call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state, &
         & restart_hist_fname=trim(self%params%lwf_init_hist_fname))
+    call self%lwf_mover%read_lwf_constraints(trim(self%params%lwf_init_hist_fname))
+
   end subroutine set_lwf_mover
 
 

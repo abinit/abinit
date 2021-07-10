@@ -82,22 +82,19 @@ module m_lwf_berendsen_mover
       character(len=40) :: key
       ABI_UNUSED_A(lwf)
       ! scale the velocity.
-      call self%scale_velocities()
       self%energy=0.0
       self%lwf_force(:) =0.0
       call effpot%calculate( displacement=displacement, strain=strain, &
            & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
            & energy=self%energy, energy_table=energy_table)
-      !print *, "lwf_force", self%lwf_force
-      !print *, "lwf_masses", self%lwf_masses
+
       do i=1, self%nlwf
          self%vcart(i) = self%vcart(i) + &
               & (0.5_dp * self%dt) * self%lwf_force(i)/self%lwf_masses(i)
       end do
-      !print *, "vcart", self%vcart
-      !call self%force_stationary()
+      call self%scale_velocities()
       self%lwf= self%lwf+self%vcart * self%dt
-      !print *, "lwf", self%lwf
+      call self%apply_constraints(self%lwf)
 
 
       self%energy=0.0
@@ -113,7 +110,9 @@ module m_lwf_berendsen_mover
               & (0.5_dp * self%dt) * self%lwf_force(i)/self%lwf_masses(i)
       end do
       !call self%force_stationary()
+      call self%scale_velocities()
       self%lwf= self%lwf+self%vcart * self%dt
+      call self%apply_constraints(self%lwf)
       call self%get_T_and_Ek()
 
       if (present(energy_table)) then

@@ -141,6 +141,7 @@ module m_multibinit_dataset
   integer :: latt_lwf_anharmonic
 
   ! parameters for lwf
+  integer :: lwf_constraint
   integer :: lwf_dynamics
   integer :: lwf_init_state
   integer :: lwf_ntime
@@ -443,6 +444,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
  multibinit_dtset%latt_lwf_anharmonic = 0
 
+ multibinit_dtset%lwf_constraint = 0
  multibinit_dtset%lwf_dynamics = 0
  multibinit_dtset%lwf_nctime = 1
  multibinit_dtset%lwf_ntime = 0
@@ -1171,6 +1173,7 @@ multibinit_dtset%latt_temperature_start=0.0
       & key_value=multibinit_dtset%lwf_init_hist_fname)
  if(.not. tread==1) multibinit_dtset%lwf_init_hist_fname="lwf_init_hist.nc"
 
+
  multibinit_dtset%spin_init_hist_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_hist_fname',tread,'KEY',&
       & key_value=multibinit_dtset%spin_init_hist_fname)
@@ -1199,6 +1202,18 @@ multibinit_dtset%latt_temperature_start=0.0
  multibinit_dtset%slc_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
       & key_value=multibinit_dtset%slc_pot_fname)
+
+
+ multibinit_dtset%lwf_constraint=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_constraint',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_constraint=intarr(1)
+ if( .not. (multibinit_dtset%lwf_constraint == 0 .or. multibinit_dtset%lwf_constraint == 1) ) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'lwf_constraint is ',multibinit_dtset%lwf_constraint,', but the only allowed values',ch10,&
+         &   'are 0 or 1',ch10,&
+         &   'Action: correct lwf_constraint in your input file.'
+    ABI_ERROR(message)
+ end if
 
 
  multibinit_dtset%lwf_dynamics=0
@@ -1320,10 +1335,6 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'Action: correct lwf_var_temperature in your input file.'
     ABI_ERROR(message)
  end if
-
-
-
-
 
 !N
  multibinit_dtset%natifc=natom

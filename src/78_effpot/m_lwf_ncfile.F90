@@ -62,7 +62,12 @@ module m_lwf_ncfile
      integer :: write_traj=1
      !whether to write the trajectory
      character(len=fnlen) :: filename
+
      ! netcdf filename
+     logical :: has_constrain=.False.
+     integer :: n_fixed_lwf
+     integer, allocatable :: fixed_lwf_ids(:)
+     real(dp), allocatable :: fixed_lwf_values(:)
    contains
      ! initialize
      procedure :: initialize
