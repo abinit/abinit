@@ -30,6 +30,7 @@ module m_abicore
  use m_specialmsg !,  only : herald, specialmsg_setcount, specialmsg_getcount, specialmsg_mpisum, wrtout
  !use m_errors
 
+
  implicit none
 
  public

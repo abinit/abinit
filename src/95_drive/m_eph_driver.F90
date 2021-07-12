@@ -164,7 +164,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc
+ integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
+ integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -177,7 +178,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
- type(ddb_type) :: ddb
+ type(ddb_type) :: ddb, ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb
  type(ifc_type) :: ifc
@@ -327,7 +328,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      end do
    end do
    write(ab_out,'(a)')"..."
-   ABI_ERROR_NODUMP("Aborting now")
+   ABI_STOP("Stopping now!")
  end if
 
  call cwtime(cpu, wall, gflops, "start")
@@ -409,13 +410,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
                       prtvol=dtset%prtvol)
  end if
- call ddb_hdr%free()
+
  ABI_FREE(dummy_atifc)
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
  ddb_nqshift = 1
  ABI_CALLOC(ddb_qshifts, (3, ddb_nqshift))
  ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
+
 
  ! Get Dielectric Tensor
  iblock_dielt = ddb%get_dielt(dtset%rfmeth, dielt)
@@ -433,7 +435,68 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+ !iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+
+ iblock_quadrupoles = 0
+ qdrp_cart = zero
+
+ if (my_rank == master) then
+   ! MG: Temporary hack to read the quadrupole tensor from a text file
+   ! Will be removed when the EPH code will be able to read Q* from the DDB.
+
+   if (file_exists("quadrupoles_cart.out")) then
+     call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
+     quad_unt = 71
+     open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+     do ii=1,2
+       read(quad_unt,*) msg
+       write(std_out, *)" msg: ", trim(msg)
+     end do
+
+     do ii=1,3
+       do jj=1,3*3*ddb%natom
+         read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
+         write(std_out, *) iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
+       end do
+       read(quad_unt,'(a)') msg
+     end do
+     close(quad_unt)
+     iblock_quadrupoles = 1
+   end if
+ end if
+ call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
+ call xmpi_bcast(qdrp_cart, master, comm, ierr)
+
+ ! Here we get the quadrupoles from the DDB file (this should become the official API).
+ ! Section Copied from Anaddb.
+
+if (iblock_quadrupoles == 0) then
+ mtyp = ddb_hdr%mblktyp
+ mpert = dtset%natom + MPERT_MAX
+ !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+ !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
+
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+
+ ! Get Quadrupole tensor
+ qdrp_cart=zero
+ if (mtyp==33) then
+   lwsym=1
+   call ddb_lw_copy(ddb,ddb_lw,mpert,dtset%natom,dtset%ntypat)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+   call ddb_lw%free()
+ end if
+endif
+
+ ! The default value is 1. Here we set the flags to zero if Q* is not available.
+ if (iblock_quadrupoles == 0) then
+   dtset%dipquad = 0
+   dtset%quadquad = 0
+ end if
+
+ call ddb_hdr%free()
+
  if (my_rank == master) then
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_filepath))
@@ -443,14 +506,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- ! TODO: Add support for dipquad and quadquad in abinit
  call ifc_init(ifc, cryst, ddb, &
    dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm)
+   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
+   dipquad=dtset%dipquad, quadquad=dtset%quadquad)
 
  ABI_FREE(ddb_qshifts)
- call ifc%print(unit=std_out)
+ if (my_rank == master) then
+   call ifc%print(unit=std_out)
+   !call ifc%print(unit=ab_out)
+ end if
 
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)

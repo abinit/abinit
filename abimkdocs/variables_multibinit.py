@@ -204,9 +204,9 @@ Variable(
     mnemonics="Prt test-set evaluation into file ph_test.nc",
     added_in_version="before_v9",
     text=r"""
-Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc. 
+Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc.
 
-Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc. 
+Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc.
 """,
 ),
 
@@ -238,8 +238,8 @@ Variable(
     mnemonics="FIT on Energy, Forces, and or, Stresses",
     added_in_version="v9",
     text=r"""
-Specifies on which first-principles quantities the anharmonic coefficients will be fitted. 
-The first number flags the fitting on the energies, the second the fitting on the forces, and the third on the stressses. 
+Specifies on which first-principles quantities the anharmonic coefficients will be fitted.
+The first number flags the fitting on the energies, the second the fitting on the forces, and the third on the stressses.
 
 Default value is 0 1 1, so anharmonic coefficients get fitted on Forces and Stresses but not on energies
 """,
@@ -285,9 +285,9 @@ Variable(
     defaultval=0,
     mnemonics="FIT anharmonic terms around ATOM I",
     added_in_version="before_v9",
-    text=r"""Gives the index of the atom in the reference structure around which the anharmonic terms will be generated. 
-If 0 (default) a loop over all atoms in the reference structure will be perforemed and fit_ncoeff coefficienst will be fitted and selected per atom. 
-If -1 all possible cross terms will be generated (e.G. (A_x-B_x)^2*(C_y-D_y)^1. This options generates much more terms. 
+    text=r"""Gives the index of the atom in the reference structure around which the anharmonic terms will be generated.
+If 0 (default) a loop over all atoms in the reference structure will be perforemed and fit_ncoeff coefficienst will be fitted and selected per atom.
+If -1 all possible cross terms will be generated (e.G. (A_x-B_x)^2*(C_y-D_y)^1. This options generates much more terms.
 """,
 ),
 
@@ -371,7 +371,7 @@ Variable(
     mnemonics="FIT Strain Phonon Coupling maximum Strain",
     added_in_version="v9",
     text=r"""
-Set maximum power of strain body in strain-phonon coupling terms. 
+Set maximum power of strain body in strain-phonon coupling terms.
 """,
 ),
 
@@ -534,7 +534,7 @@ Flag to activate the bound process:
 
 **Related variables:1 and 2** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
 
-*3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained. 
+*3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained.
 """,
 ),
 
@@ -724,18 +724,18 @@ Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via 
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
 
-* 101 --> NVE ensemble with velocity Verlet algorithm  [[cite:Swope1982]] . 
+* 101 --> NVE ensemble with velocity Verlet algorithm  [[cite:Swope1982]] .
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run. 
+([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run.
 
-* 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] . 
+* 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] .
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the friction [[multibinit:latt_friction]].
-The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term. 
+The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term.
 
 
 * 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
@@ -747,8 +747,8 @@ The atoms are coupled to the heat bath, which is represented by a gauss noise  i
 * 120 --> Dummy mover. Atoms does not move. For testing only.
 """,
 
-# Not yet fully implemented. Need to be properly documented and tested. Disactivated temporarily. 
-#* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
+# Not yet fully implemented. Need to be properly documented and tested. Disactivated temporarily.
+#* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled.
 #**Purpose:** Molecular dynamics
 #**Cell optimization:** No (Use [[optcell]]=0 only)
 #**Related variables:** The time step ([[dtion]]), the temperatures
@@ -769,9 +769,9 @@ Variable(
     mnemonics="DYNamics CHeK SYMmetry",
     added_in_version="v9",
     text=r"""
-Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.  
-Useful to do symmetry constrained relaxation with structural realxations algorithms. 
-Be cautious to use it with large number of atoms, symmetry detection might take a long time. 
+Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.
+Useful to do symmetry constrained relaxation with structural realxations algorithms.
+Be cautious to use it with large number of atoms, symmetry detection might take a long time.
 
 **Related variables:** Restart flag for multibinit dynamcis ([[multibinit:restartxf]]), symmetry on symmetry finder ([[multibinit:dyn_tolsym]]))
 """,
@@ -816,7 +816,7 @@ Variable(
     mnemonics="LATTice dynamics FRICTION parameter",
     added_in_version="before_v9",
     text=r"""
-    Parameter of the friction coefficient used in Langevin dynamics [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2. 
+    Parameter of the friction coefficient used in Langevin dynamics [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2.
 """,
 ),
 
@@ -1034,14 +1034,14 @@ Variable(
     added_in_version="v9",
     mnemonics="Select on Energy, Forces, and or, Stresses",
     text=r"""
-Specifies on which goal function quantities the anharmonic coefficients will be selected. 
-The first number flags the selecting on the energies, the second the fitting on the forces, and the third on the stressses. 
+Specifies on which goal function quantities the anharmonic coefficients will be selected.
+The first number flags the selecting on the energies, the second the fitting on the forces, and the third on the stressses.
 
 Default value is 0 1 1, so anharmonic coefficients get selected on Forces and Stresses but not on energies
 """,
 ),
 
-# The below are not yet functioning, comment out temporarily. 
+# The below are not yet functioning, comment out temporarily.
 #Variable(
 #    abivarname="spin_calc_correlation_obs@multibinit",
 #    varset="multibinit",
@@ -1199,7 +1199,7 @@ Flag to initialize spin state.
 
 * 3 --> State with q-vector using [[multibinit:spin_init_qpoint]], [[multibinit:spin_init_rotate_axis]], and [[multibinit:spin_init_orientation]]. Please check default values for those variables.
 
-* 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc". 
+* 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc".
 """,
 ),
 
@@ -1277,7 +1277,7 @@ Variable(
     text=r"""
 Spin initial orientation. It is used for setting the initial spin in a supercell.
     For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
-    from the initial orientation along the rotate axis. 
+    from the initial orientation along the rotate axis.
     Default is along z(0,0,1) direction.
 """,
 ),
@@ -1297,7 +1297,7 @@ Variable(
     text=r"""
 Spin wave vector. It is used for setting the initial spin in a supercell.
     For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
-    from the initial orientation along the rotate axis. 
+    from the initial orientation along the rotate axis.
     Default is Gamma (0, 0, 0).
 """,
 ),
@@ -1316,7 +1316,7 @@ Variable(
     text=r"""
 Spin initial rotate axis. It is used for setting the initial spin in a supercell.
     For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
-    from the initial orientation along the rotate axis. 
+    from the initial orientation along the rotate axis.
     Default is along x axis (1,0,0).
 """,
 ),
@@ -1374,7 +1374,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
-The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit, 
+The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit,
 put eV or Ry at the end.
 """,
 ),
@@ -1531,7 +1531,7 @@ abivarname="analyze_anh_pot@multibinit",
     added_in_version="before_v9",
     text=r"""
 * 0 --> Nothing.
-* 1 --> Print energy contribution of each anharmonic term in the effective Potential. 
+* 1 --> Print energy contribution of each anharmonic term in the effective Potential.
         If it is a Molecular Dynamics (MD) run, the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat .
         If the effective potential is tested against a test set the contribution of each term for each configuration in the test set is printed in TES_anharmonic_terms_energy.dat .
         If the effective potential is fitted, the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat
@@ -1567,9 +1567,9 @@ Variable(
     mnemonics="OPTimize NUMBER of COEFFicients",
     added_in_version="before_v9",
     text=r"""
-* Number of anharmonic terms to refit in the effective potential. 
+* Number of anharmonic terms to refit in the effective potential.
 **Related variables:** [[multibinit:opt_coeff]]
-""", 
+""",
 ),
 
 Variable(
@@ -1582,7 +1582,7 @@ Variable(
     mnemonics="OPTimize Cofficients",
     added_in_version="before_v9",
     text=r"""
-Indices of the terms to refit in the effective potential. 
+Indices of the terms to refit in the effective potential.
 """,
 ),
 
