@@ -102,9 +102,9 @@ module m_lwf_berendsen_mover
       call effpot%calculate( displacement=displacement, strain=strain, &
            & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
            & energy=self%energy, energy_table=energy_table)
-      call effpot%calculate( displacement=displacement, strain=strain, &
-           & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
-           & energy=self%energy, energy_table=energy_table)
+   !call effpot%calculate( displacement=displacement, strain=strain, &
+   !        & spin=spin, lwf=self%lwf, lwf_force=self%lwf_force, &
+   !        & energy=self%energy, energy_table=energy_table)
       do i=1, self%nlwf
          self%vcart(i) = self%vcart(i) + &
               & (0.5_dp * self%dt) * self%lwf_force(i)/self%lwf_masses(i)
