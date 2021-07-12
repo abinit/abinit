@@ -102,6 +102,7 @@ contains
        NCF_CHECK_MSG(ncerr, "close netcdf lattice history file"//trim(self%filename)//".")
     end if
 #endif
+
   end subroutine finalize
 
   subroutine write_cell(self, supercell)
@@ -154,7 +155,6 @@ contains
     ! ncerr=nf90_put_var(self%ncid, self%rvec_id, [supercell%lattice%rvec], &
     !      &      start=[1,1], count=[3, supercell%lattice%natom])
     ! NCF_CHECK_MSG(ncerr, "Error when writting ilatt_prim in lattice history file.")
-
 
      ncerr=nf90_put_var(self%ncid, self%zion_id, [supercell%lattice%zion], &
           &      start=[1], count=[supercell%lattice%natom])
@@ -261,7 +261,7 @@ contains
 
   subroutine close(self)
     class(lattice_ncfile_t) :: self
-
+    self%isopen=.False.
   end subroutine close
 
 

@@ -26,9 +26,8 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% system_xml = tmulti5_1.xml
+#%% spin_pot = tmulti5_1.xml
 #%% exclude_builders = .*_nag_7.0_.*
-#%% coeff_xml = no
 #%% [files]
 #%% files_to_test = 
 #%%   tmulti5_1.abo,tolnlines = 1, tolabs = 2.000e+03, tolrel = 3.000e-1, fld_options = -medium;

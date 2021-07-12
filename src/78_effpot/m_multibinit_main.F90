@@ -62,10 +62,12 @@ contains
 !!      manager%run_all
 !!
   !! SOURCE
-  subroutine multibinit_main2(filnam)
-    character(len=fnlen), intent(inout) :: filnam(17)
+  subroutine multibinit_main2(input_path, filnam, dry_run)
+    character(len=fnlen), intent(inout) :: input_path
+    character(len=fnlen), intent(inout) :: filnam(18)
+    integer, intent(in) :: dry_run
     type(mb_manager_t) :: manager
-    call manager%run_all(filnam)
+    call manager%run_all(input_path, filnam, dry_run)
   end subroutine multibinit_main2
   !!***
 

@@ -254,11 +254,10 @@ contains
     !>
     !> @param[in]  mode: a integer to define the kind of initial state.
     !----------------------------------------------------------------------
-    subroutine set_initial_state(self, mode, restart_hist_fname)
+    subroutine set_initial_state(self, mode)
       ! set initial positions, spin, etc
       class(lwf_mover_t), intent(inout) :: self
       integer, optional, intent(in) :: mode
-      character(len=*), optional, intent(in) :: restart_hist_fname
       integer :: i
       real(dp) :: tmp
       real(dp) :: kpoint(3)
@@ -284,7 +283,7 @@ contains
       ! read from lwf hist file
       case(4)
          !print*, "Reading from lwf hist file: ", trim(restart_hist_fname)
-         call self%read_hist_lwf_state(restart_hist_fname)
+         call self%read_hist_lwf_state(self%params%restart_hist_fname)
       end select
 
       call self%rng%rand_normal_array(self%vcart(:), self%nlwf)

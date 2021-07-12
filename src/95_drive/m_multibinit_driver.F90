@@ -78,7 +78,7 @@ module m_multibinit_driver
 #endif
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
-  use m_init10,              only : init10
+  use m_init10,              only : init10, postfix_fnames
   use m_parser,     only : instrng
   use m_fstrings,   only : replace, inupper
   use m_dtset,      only : chkvars
@@ -116,14 +116,14 @@ contains
 !!      scup_kpath_print,wrtout,xmpi_bcast,xmpi_end
 !!
   !! SOURCE
-  subroutine multibinit_main(filnam, dry_run)
-    character(len=fnlen), intent(inout) :: filnam(17)
+  subroutine multibinit_main(input_path, filnam, dry_run)
+    character(len=fnlen), intent(inout) :: input_path 
+    character(len=fnlen), intent(inout) :: filnam(18)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential
     type(abihist) :: hist, hist_tes
 
-    ! data for spin
     !type(spin_model_t) :: spin_model
     type(mb_manager_t) :: manager
     character(len=strlen) :: string, raw_string
@@ -173,37 +173,32 @@ contains
     my_rank = xmpi_comm_rank(comm)
     iam_master = (my_rank == master)
 
-
-    !To automate a maximum calculation, multibinit reads the number of atoms
-    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
-    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-
-    !TODO: hexu comment: why no if(iam_master) ?
-    write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-         & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-
-    call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
-
-    !Read the input file, and store the information in a long string of characters
-    !strlen from defs_basis module
+    !Read the input file, only to the the name of the file which contains the ddb file or xml file 
+    ! for getting the number of atoms.
     option=1
     if (iam_master) then
        call instrng (filnam(1),lenstr,option,strlen,string,raw_string)
        !To make case-insensitive, map characters to upper case:
        call inupper(string(1:lenstr))
-
        !Check whether the string only contains valid keywords
        call chkvars(string)
-
     end if
-
     call xmpi_bcast(string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
+    !To automate a maximum calculation, multibinit reads the number of atoms
+    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
+    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
+    write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
+         & '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+    call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt)
+
+
 
     !Read the input file
     call invars10(inp,lenstr,natom,string)
+    call postfix_fnames(input_path, filnam, inp)
 
     if (iam_master) then
        !  Echo the inputs to console and main output file
@@ -225,7 +220,7 @@ contains
                &     'reading spin terms.'
        end if
        !call spin_model%initialize( filnam, inp )
-       call  manager%initialize(filnam, params=inp)
+       call  manager%initialize(input_path, filnam, params=inp)
     else
        !  Read the model (from DDB or XML)
        call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)

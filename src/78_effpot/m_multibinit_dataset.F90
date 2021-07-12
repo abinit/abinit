@@ -29,7 +29,10 @@ module m_multibinit_dataset
  use m_abicore
  use m_errors
 
- use m_parser, only : intagm
+ use m_xmpi
+ use m_parser, only : intagm, instrng
+ use m_fstrings,   only : replace, inupper
+ use m_dtset,      only : chkvars 
  use m_ddb,    only : DDB_QTOL
  use m_scup_dataset
 
@@ -41,6 +44,8 @@ module m_multibinit_dataset
  public :: multibinit_dtset_init
  public :: multibinit_dtset_free
  public :: outvars_multibinit
+ public :: invars_multibinit_filenames
+ public :: invars_multibinit_filenames_from_input_file
  public :: invars10
 !!***
 
@@ -137,6 +142,7 @@ module m_multibinit_dataset
   integer :: latt_var_temperature
   integer :: latt_temperature_nstep
 
+<<<<<<< HEAD
   ! parameter for hybrid lattice_lwf
   integer :: latt_lwf_anharmonic
 
@@ -149,6 +155,10 @@ module m_multibinit_dataset
   integer :: lwf_self_bound_order
   integer :: lwf_temperature_nstep    ! var temperature number of steps
   integer :: lwf_var_temperature
+=======
+
+ ! integer :: random_seed
+>>>>>>> mbfiles
 
   ! parameters for spin
  ! integer :: spin_calc_traj_obs
@@ -205,6 +215,7 @@ module m_multibinit_dataset
   real(dp) :: latt_temperature_start
   real(dp) :: latt_temperature_end
 
+<<<<<<< HEAD
   ! lwf related
   real(dp) :: lwf_dt
   real(dp) :: lwf_mc_avg_amp
@@ -214,6 +225,8 @@ module m_multibinit_dataset
   real(dp) :: lwf_temperature_start   ! var temperature start
   real(dp) :: lwf_temperature_end     ! var temperature end
 
+=======
+>>>>>>> mbfiles
 
   !  parameters for spin
   real(dp) :: spin_dt
@@ -296,6 +309,7 @@ module m_multibinit_dataset
 
 
 ! characters
+<<<<<<< HEAD
   character(len=fnlen) :: lwf_init_hist_fname
   character(len=fnlen) :: spin_init_hist_fname
   character(len=fnlen) :: latt_init_hist_fname
@@ -304,6 +318,26 @@ module m_multibinit_dataset
   character(len=fnlen) :: lwf_pot_fname
   character(len=fnlen) :: slc_pot_fname
 
+=======
+!  character(len=fnlen) :: lwf_init_hist_fname
+  character(len=fnlen) :: spin_init_hist_fname
+  character(len=fnlen) :: latt_init_hist_fname
+  character(len=fnlen) :: latt_pot_fname
+
+  character(len=fnlen) :: latt_inp_ddb_fname
+  character(len=fnlen) :: latt_inp_coeff_fname
+  character(len=fnlen) :: latt_training_set_fname
+  character(len=fnlen) :: latt_test_set_fname
+  character(len=fnlen) :: latt_ddb_fnames(12)
+
+
+  character(len=fnlen) :: spin_pot_fname
+!  character(len=fnlen) :: lwf_pot_fname
+  character(len=fnlen) :: slc_pot_fname
+
+  character(len=fnlen) :: outdata_prefix
+
+>>>>>>> mbfiles
 
  end type multibinit_dtset_type
 !!***
@@ -442,6 +476,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%latt_temperature_nstep=0
  multibinit_dtset%latt_var_temperature=0
 
+<<<<<<< HEAD
  multibinit_dtset%latt_lwf_anharmonic = 0
 
  multibinit_dtset%lwf_constraint = 0
@@ -469,12 +504,35 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
 
  
+=======
+
+
+ multibinit_dtset%latt_init_hist_fname=""
+ multibinit_dtset%latt_pot_fname=""
+ multibinit_dtset%latt_inp_ddb_fname=""
+ multibinit_dtset%latt_inp_coeff_fname=""
+ multibinit_dtset%latt_training_set_fname=""
+ multibinit_dtset%latt_test_set_fname=""
+ multibinit_dtset%latt_ddb_fnames(12)=""
+
+
+
+
+ !multibinit_dtset%lwf_pot_fname=""
+
+
+! multibinit_dtset%random_seed=-1
+
+>>>>>>> mbfiles
  !multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
  !multibinit_dtset%spin_calc_correlation_obs=0
  multibinit_dtset%spin_dipdip=0
+ multibinit_dtset%spin_dt=100
  multibinit_dtset%spin_dynamics=0
+ multibinit_dtset%spin_init_hist_fname=""
  multibinit_dtset%spin_init_state=1
+
  multibinit_dtset%spin_ntime_pre=0
  multibinit_dtset%spin_ntime=10000
  multibinit_dtset%spin_nctime=100
@@ -482,7 +540,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 !multibinit_dtset%spin_n1l=1
 !multibinit_dtset%spin_n2l=0
 
- multibinit_dtset%spin_dt=100
+ multibinit_dtset%spin_pot_fname=""
 
  multibinit_dtset%spin_damping=-1.0
  multibinit_dtset%spin_sia_add=0
@@ -497,7 +555,11 @@ multibinit_dtset%spin_temperature_nstep= 0
 multibinit_dtset%spin_var_temperature=0 
 multibinit_dtset%spin_write_traj=1 
 
+multibinit_dtset%slc_pot_fname=""
 multibinit_dtset%slc_coupling=0
+
+
+multibinit_dtset%outdata_prefix=""
 
 !=======================================================================
 !Arrays
@@ -638,6 +700,73 @@ end subroutine multibinit_dtset_free
 
 !----------------------------------------------------------------------
 
+!===============================================================
+! Parsing of input variables for Multibinit
+! read only the latt_inp_ddb_fname, and the outdata_prefix.
+! It contains the reference structure, so that the natom can be decided
+!> @ fname: the name of the ddb file
+!> @ string: the input file in string
+!> @ lenstr: the length of string
+!===============================================================
+subroutine invars_multibinit_filenames( string, lenstr, outdata_prefix, sys_fname )
+  character(len=fnlen), optional, intent(inout) :: outdata_prefix, sys_fname
+  character(len=*), intent(inout) :: string
+  integer, intent(in) :: lenstr 
+  integer :: jdtset,marr,tread
+  !arrays
+  integer,allocatable :: intarr(:)
+  real(dp),allocatable :: dprarr(:)
+  marr=300
+  ABI_ALLOCATE(intarr,(marr))
+  ABI_ALLOCATE(dprarr,(marr))
+  jdtset=1
+
+  if(present(outdata_prefix)) then
+     outdata_prefix=""
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'outdata_prefix',tread,'KEY',&
+          & key_value=outdata_prefix)
+     if(.not. tread==1) outdata_prefix=""
+  end if
+
+  if(present(sys_fname)) then
+     sys_fname=""
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
+          & key_value=sys_fname)
+     if(.not. tread==1) sys_fname=""
+  end if
+  ABI_SFREE(intarr)
+  ABI_SFREE(dprarr)
+end subroutine invars_multibinit_filenames
+
+
+subroutine invars_multibinit_filenames_from_input_file(input_path, outdata_prefix, sys_fname)
+  character(len=fnlen), optional, intent(inout) :: outdata_prefix, sys_fname, input_path
+  character(len=strlen)  :: string
+  integer :: lenstr, option
+
+  integer :: master, my_rank, comm, nproc, ierr
+  logical :: iam_master
+  master = 0
+  comm = xmpi_world
+  nproc = xmpi_comm_size(comm)
+  my_rank = xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
+
+
+  option=1
+  if (iam_master) then
+     call instrng (input_path,lenstr,option,strlen,string)
+     !To make case-insensitive, map characters to upper case:
+     call inupper(string(1:lenstr))
+     !Check whether the string only contains valid keywords
+     call chkvars(string)
+  end if
+  call xmpi_bcast(string,master, comm, ierr)
+  call xmpi_bcast(lenstr,master, comm, ierr)
+  call invars_multibinit_filenames( string=string, lenstr=lenstr, sys_fname=sys_fname, outdata_prefix=outdata_prefix)
+end subroutine invars_multibinit_filenames_from_input_file
+
+
 !!****f* m_multibinit_dataset/invars10
 !!
 !! NAME
@@ -683,6 +812,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:),work(:)
+
+ ! strings
+ character(len=fnlen*12) :: lattddb_string
+ integer :: sidx(13), cnt, i1, i2
 
 !*********************************************************************
  marr=30
@@ -1105,7 +1238,11 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'latt_temperature_start is ',multibinit_dtset%latt_temperature_start,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
          &   'Action: correct latt_semperature_start in your input file.'
+<<<<<<< HEAD
     ABI_ERROR(message)
+=======
+    MSG_ERROR(message)
+>>>>>>> mbfiles
  end if
 
  multibinit_dtset%latt_temperature_end=0.0
@@ -1116,7 +1253,11 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'latt_temperature_end is ',multibinit_dtset%latt_temperature_end,'. The only allowed values',ch10,&
          &   'are positives values.',ch10,&
          &   'Action: correct latt_semperature_end in your input file.'
+<<<<<<< HEAD
     ABI_ERROR(message)
+=======
+    MSG_ERROR(message)
+>>>>>>> mbfiles
  end if
 
  multibinit_dtset%latt_temperature_nstep=1
@@ -1126,7 +1267,11 @@ multibinit_dtset%latt_temperature_start=0.0
     write(message, '(a,i0,a,a,a,a)' )&
          &   'latt_temperature_nstep is',multibinit_dtset%latt_temperature_nstep,', while it should be larger than 0',ch10,&
          &   'Action: correct latt_temperature_nstep in your input file.'
+<<<<<<< HEAD
     ABI_ERROR(message)
+=======
+    MSG_ERROR(message)
+>>>>>>> mbfiles
  end if
 
  multibinit_dtset%latt_var_temperature=0
@@ -1137,7 +1282,11 @@ multibinit_dtset%latt_temperature_start=0.0
          &   'latt_var_temperature is',multibinit_dtset%latt_var_temperature,'. The only allowed values',ch10,&
          &   'are 0, or 1.',ch10,&
          &   'Action: correct latt_var_temperature in your input file.'
+<<<<<<< HEAD
     ABI_ERROR(message)
+=======
+    MSG_ERROR(message)
+>>>>>>> mbfiles
  end if
 
 
@@ -1335,6 +1484,95 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'Action: correct lwf_var_temperature in your input file.'
     ABI_ERROR(message)
  end if
+
+
+
+ multibinit_dtset%spin_init_hist_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%spin_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%spin_init_hist_fname="spin_init_hist.nc"
+
+ multibinit_dtset%latt_init_hist_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_init_hist_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_init_hist_fname)
+ if(.not. tread==1) multibinit_dtset%latt_init_hist_fname="latt_init_hist.nc"
+
+
+
+ multibinit_dtset%spin_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%spin_pot_fname)
+ if(.not. tread==1) multibinit_dtset%spin_pot_fname=""
+
+ multibinit_dtset%latt_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_pot_fname)
+ if(.not. tread==1) multibinit_dtset%latt_pot_fname=""
+
+ multibinit_dtset%latt_inp_ddb_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_ddb_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_inp_ddb_fname)
+ if(.not. tread==1) multibinit_dtset%latt_inp_ddb_fname=""
+
+ multibinit_dtset%latt_inp_coeff_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_inp_coeff_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_inp_coeff_fname)
+ if(.not. tread==1) multibinit_dtset%latt_inp_coeff_fname=""
+
+ multibinit_dtset%latt_training_set_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_training_set_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_training_set_fname)
+ if(.not. tread==1) multibinit_dtset%latt_training_set_fname=""
+
+ multibinit_dtset%latt_test_set_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_test_set_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_test_set_fname)
+ if(.not. tread==1) multibinit_dtset%latt_test_set_fname=""
+
+
+ multibinit_dtset%latt_ddb_fnames=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_ddb_fnames',tread,'KEY',&
+      & key_value=lattddb_string)
+ if(.not. tread==1) then
+    lattddb_string=""
+    multibinit_dtset%latt_ddb_fnames(:)=""
+ else
+    sidx(1) = 1; sidx(13) = len(lattddb_string)
+    cnt = 1
+    do ii=1,len(lattddb_string)
+       if (lattddb_string(ii:ii) == ",") then
+          lattddb_string(ii:ii) = " "
+          cnt = cnt + 1
+          sidx(cnt) = ii
+          ABI_CHECK(cnt <= 12, "Too many commas in latt_ddb_fnames!")
+       end if
+    end do
+
+    do ii=1,cnt
+       i1 = sidx(ii)
+       i2 = sidx(ii + 1)
+       cnt = len(adjustl(trim(lattddb_string(i1:i2))))
+       ABI_CHECK(cnt <= fnlen, "latt_ddb_fnames path too small, increase fnlen")
+       multibinit_dtset%latt_ddb_fnames(ii) = adjustl(trim(lattddb_string(i1:i2)))
+       ! if (len_trim(pp_dirpath) > 0) then
+       !   if (len_trim(pp_dirpath) + len_trim(pseudo_paths(ii)) > fnlen) then
+       !     MSG_ERROR(sjoin("String of len fnlen:", itoa(fnlen), " too small to contain full pseudo path"))
+       !   end if
+       !   pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
+       !end if
+    end do
+ end if
+
+
+ multibinit_dtset%slc_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%slc_pot_fname)
+ if(.not. tread==1) multibinit_dtset%slc_pot_fname=""
+
+ multibinit_dtset%outdata_prefix=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'outdata_prefix',tread,'KEY',&
+      & key_value=multibinit_dtset%outdata_prefix)
+ if(.not. tread==1) multibinit_dtset%outdata_prefix="multibinit"
 
 !N
  multibinit_dtset%natifc=natom
@@ -1619,6 +1857,12 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'Action: correct rifcsph in your input file.'
    ABI_ERROR(message)
  end if
+
+
+! R
+!  multibinit_dtset%random_seed=-1
+!  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_seed',tread,'INT')
+!  if(tread==1) multibinit_dtset%random_seed=intarr(1)
 
 !S
 

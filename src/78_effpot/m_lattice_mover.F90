@@ -175,17 +175,13 @@ contains
   !    if mode=1, use a Boltzman distribution to init the velocities.
   !    if mode=2, ...
   !-------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode, restart_hist_fname)
+  subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    character(len=*), optional, intent(in) :: restart_hist_fname
-
-
     real(dp) :: xi(3, self%natom)
     integer :: i
 
-    ABI_UNUSED(restart_hist_fname)
 
     if(mode==1) then ! using a boltzmann distribution. 
        ! Should only be used for a constant Temperature mover
@@ -216,7 +212,6 @@ contains
        call self%get_T_and_Ek()
     end if
 
-    ABI_UNUSED(restart_hist_fname)
 
   end subroutine set_initial_state
 
@@ -387,7 +382,6 @@ contains
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
-       !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
        if(modulo(i, self%params%nctime)==0) then
           write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
@@ -502,6 +496,9 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
 
     if (iam_master) then
        T_start=self%params%latt_temperature_start

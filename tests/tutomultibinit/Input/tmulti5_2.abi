@@ -41,7 +41,7 @@ spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% system_xml = tmulti5_2.xml
+#%% spin_pot = tmulti5_2.xml
 #%% exclude_builders = .*_nag_7.0_.*
 #%% coeff_xml = no
 #%% [files]

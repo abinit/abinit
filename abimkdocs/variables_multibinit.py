@@ -820,6 +820,92 @@ Variable(
 """,
 ),
 
+Variable(
+    abivarname="latt_inp_coeff_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice INPut COEFFicients File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the input coefficients from fitted polynomial in multibinit lattice calculation, which can be a xml file. The string must be enclosed between quotation marks:
+
+    latt_inp_coeff_fname "BaTiO3_coeff.xml"
+
+"""
+),
+
+
+Variable(
+    abivarname="latt_inp_ddb_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice INPut Derivative DataBase File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the input derivative database of reference structure in multibinit lattice calculation, which can be a DDB file or a xml file. The string must be enclosed between quotation marks:
+
+    latt_inp_ddb_fname "BaTiO3.ddb"
+
+"""
+),
+
+Variable(
+    abivarname="latt_training_set_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice potential TRAINING SET File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the training set file name for building multibinit lattice potential, which is usually a abinit molecular dynamics history  netcdf file. The string must be enclosed between quotation marks:
+
+    latt_training_set_fname "BaTiO3_md_hist.nc"
+
+"""
+),
+
+Variable(
+    abivarname="latt_test_set_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice potential TEST SET File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the test set file name for building multibinit lattice potential, which is usually a abinit molecular dynamics history  netcdf file. The string must be enclosed between quotation marks:
+
+    latt_test_set_fname "BaTiO3_md_hist.nc"
+
+"""
+),
+
+
+Variable(
+    abivarname="latt_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice POTential FileNAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the lattice potential file name in the multibinit lattice dynamics calculation, which can be a netcdf file. This variable is only used in the harmonic-only lattice potential for testing only. The string must be enclosed between quotation marks:
+
+    latt_pot_fname "BaTiO3.nc"
+"""
+),
+
 
 Variable(
     abivarname="latt_taut@multibinit",
@@ -950,7 +1036,28 @@ Variable(
 Give the size of the supercell for the dynamics in the format of a matrix. 
 Currently allowed in spin dynamics and spin and LWF dynamics. 
 It will override the [[multibinit:ncell]] if specified.
-""",
+"""
+),
+
+Variable(
+    abivarname="outdata_prefix",
+    varset="multibinit",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="OUTput DATA PREFIX",
+    added_in_version="9.3.3",
+    text=r"""
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file* .
+This variable is used when Abinit is executed with the new syntax:
+
+    multibinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the filename ends with an extension, e.g. `.ext`. (`.abi` is recommended)
+If the input filename does not have a file extension, a default is provided.
+"""
 ),
 
 
@@ -1182,6 +1289,25 @@ Otherwise, use Depondt-Mertens method can be more efficient.
 ),
 
 Variable(
+    abivarname="spin_init_hist_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="SPIN INITIAL state HISTory file name",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the initial state of the multibinit spin dynamics calculation, which can be a spin_hist netcdf file, usually generated from previous spin dynamics calculations. It is used when [[multibinit:spin_init_state]]=4 The string must be enclosed between quotation marks:
+
+    spin_init_hist_fname "last_step_spin_hist.nc"
+"""
+
+),
+
+
+
+Variable(
     abivarname="spin_init_state@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -1199,7 +1325,7 @@ Flag to initialize spin state.
 
 * 3 --> State with q-vector using [[multibinit:spin_init_qpoint]], [[multibinit:spin_init_rotate_axis]], and [[multibinit:spin_init_orientation]]. Please check default values for those variables.
 
-* 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc".
+* 4 --> Restart from last step of input spin hist file, as specified in [[multibinit:spin_init_hist_fname]]. 
 """,
 ),
 
@@ -1321,7 +1447,22 @@ Spin initial rotate axis. It is used for setting the initial spin in a supercell
 """,
 ),
 
+Variable(
+    abivarname="spin_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="SPIN POTential File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the spin potential file name in the multibinit spin dynamics calculation, which can be either a xml or a netcdf file. The string must be enclosed between quotation marks:
 
+    spin_pot_fname "Fe.xml"
+"""
+
+),
 
 Variable(
     abivarname="spin_projection_qpoint@multibinit",
@@ -1609,6 +1750,26 @@ Which spin-lattice coupling terms are used in the calculation, different terms c
 * 1000 --> Coupling term quadratic in spin and lattice coordinate
 """,
 ),
+
+Variable(
+    abivarname="slc_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="SLC POTential FileNAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the spin-lattice-coupling potential file name in the coupled spin-lattice multibinit dynamics calculation, which can be a netcdf file. The string must be enclosed between quotation marks:
+
+    slc_pot_fname "BaTiO3_slc.nc"
+"""
+
+),
+
+
+
 
 ]
 
