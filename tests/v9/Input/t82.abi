@@ -27,7 +27,8 @@ spin_dt=1e-16 s
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.0_.*
-#%% system_xml = t81.xml
+#%% spin_pot = t81.xml
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   t82.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;

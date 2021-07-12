@@ -477,6 +477,10 @@ TESTCNF_KEYWORDS = {
     "md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
     "test_set"        : (str       , ""   , "setup","The test set (HIST format) read by multibinit"),
     "no_check"       : (_str2bool , "no" , "setup","Explicitly do not check any files"),
+    "spin_pot"        : (str       , ""   , "setup","The spin potential file read by multibinit"),
+    "latt_pot"        : (str       , ""   , "setup","The lattice potential file read by multibinit"),
+    "slc_pot"        : (str       , ""   , "setup","The spin-lattice coupling potential file read by multibinit"),
+    "lwf_pot"        : (str       , ""   , "setup","The LWF potential file read by multibinit"),
     # [files]
     "files_to_test"  : (_str2filestotest, "", "files", "List with the output files that are be compared with the reference results. Format:\n" +
                                                        "\t file_name, tolnlines = int, tolabs = float, tolrel = float [,fld_options = -medium]\n" +
@@ -1973,7 +1977,7 @@ pp_dirpath $ABI_PSPDIR
             # just to make sure we still support the legacy mode.
 
             use_files_file = self.use_files_file
-            if self.executable not in ("abinit", "anaddb", "optic"):  # FIXME: Add support for more executables
+            if self.executable not in ("abinit", "anaddb", "optic", "multibinit"):  # FIXME: Add support for more executables
                 use_files_file = True
 
             if use_files_file:
@@ -2720,6 +2724,87 @@ class MultibinitTest(BaseTest):
     """
     Class for Multibinit tests. Redefine the make_stdin method of BaseTest
     """
+
+    def get_spin_pot(self):
+        if self.spin_pot:
+            spin_pot_fname = os.path.join(self.inp_dir, self.spin_pot)
+            if not os.path.isfile(spin_pot_fname):
+                self.exceptions.append(self.Error("%s no such spin potential file: " % spin_pot_fname))
+            return spin_pot_fname
+        else:
+            return None
+
+    def get_latt_pot(self):
+        if self.latt_pot:
+            latt_pot_fname = os.path.join(self.inp_dir, self.latt_pot)
+            if not os.path.isfile(latt_pot_fname):
+                self.exceptions.append(self.Error("%s no such lattice potential file: " % latt_pot_fname))
+            return latt_pot_fname
+        else:
+            return None
+
+    def get_slc_pot(self):
+        if self.slc_pot:
+            slc_pot_fname = os.path.join(self.inp_dir, self.slc_pot)
+            if not os.path.isfile(slc_pot_fname):
+                self.exceptions.append(self.Error("%s no such slc potential file: " % slc_pot_fname))
+            return slc_pot_fname
+        else:
+            return None
+
+    def get_lwf_pot(self):
+        if self.lwf_pot:
+            lwf_pot_fname= os.path.join(self.inp_dir, self.lwf_pot)
+            if not os.path.isfile(lwf_pot_fname):
+                self.exceptions.append(self.Error("%s no such lwf potential file: " % lwf_pot_fname))
+            return lwf_pot_fname
+        else:
+            return None
+
+
+
+    def get_input_ddb_path(self):
+        if self.input_ddb:
+            iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
+            if not os.path.isfile(iddb_fname):
+                self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
+            return iddb_fname
+        else:
+            if self.system_xml:
+                sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
+                if not os.path.isfile(sys_xml_fname):
+                    self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
+                return sys_xml_fname
+            else:
+                return None
+
+    def get_coeff_xml(self):
+        if self.coeff_xml:
+            coeffxml_fname = os.path.join(self.inp_dir, self.coeff_xml)
+            if not os.path.isfile(coeffxml_fname):
+                self.exceptions.append(self.Error("%s no such XML file for coeffs: " % coeffxml_fname))
+        else:
+            coeffxml_fname = None
+        return coeffxml_fname
+
+    def get_md_hist(self):
+        if self.md_hist:
+            md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
+            if not os.path.isfile(md_hist_fname):
+                self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
+            return md_hist_fname
+        else:
+            return None
+
+    def get_test_set(self):
+        if self.test_set:
+            test_set_fname =  os.path.join(self.inp_dir,self.test_set)
+            if not os.path.isfile(test_set_fname):
+                self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
+            return test_set_fname
+        else:
+            return None
+
     def make_stdin(self):
         t_stdin = StringIO()
 
@@ -2771,6 +2856,62 @@ class MultibinitTest(BaseTest):
             t_stdin.write(test_set_fname + "\n")
 
         return t_stdin.getvalue()
+
+
+    def prepare_new_cli_invokation(self):
+        """Perform operations required to execute test with new CLI."""
+        # Need to add extra variables depending on calculation type.
+        with open(self.inp_fname, "rt") as fh:
+            line = fh.read()
+
+        extra = ["# Added by runtests.py"]
+        app = extra.append
+
+        # Add extra variables for ddb_filepath, output_file if not already present.
+        # Note that the code checks for the presence of `varname = "`
+        spin_pot_fname = self.get_spin_pot()
+        if spin_pot_fname is not None and 'spin_pot_fname = "' not in line:
+            app('spin_pot_fname = "%s"' % (spin_pot_fname))
+
+        latt_pot_fname = self.get_latt_pot()
+        if latt_pot_fname is not None and 'latt_pot_fname = "' not in line:
+            app('latt_pot_fname = "%s"' % (latt_pot_fname))
+
+        slc_pot_fname = self.get_slc_pot()
+        if slc_pot_fname is not None and 'slc_pot_fname = "' not in line:
+            app('slc_pot_fname = "%s"' % (slc_pot_fname))
+
+        lwf_pot_fname = self.get_lwf_pot()
+        if lwf_pot_fname is not None and 'lwf_pot_fname = "' not in line:
+            app('lwf_pot_fname = "%s"' % (lwf_pot_fname))
+
+        inp_ddb_fname = self.get_input_ddb_path()
+        if inp_ddb_fname is not None and 'latt_inp_ddb_fname = "' not in line:
+            app('latt_inp_ddb_fname = "%s"' % (inp_ddb_fname))
+
+        inp_coeff_fname = self.get_coeff_xml()
+        if inp_coeff_fname is not None and 'latt_inp_coeff_fname = "' not in line:
+            app('latt_inp_coeff_fname = "%s"' % (inp_coeff_fname))
+
+        training_set_fname = self.get_md_hist()
+        if training_set_fname is not None and 'latt_training_set_fname = "' not in line:
+            app('latt_training_set_fname = "%s"' % (training_set_fname))
+
+        test_set_fname = self.get_test_set()
+        if test_set_fname is not None and 'latt_test_set_fname = "' not in line:
+            app('latt_test_set_fname = "%s"' % (test_set_fname))
+
+        app('outdata_prefix = "%s"' % (self.id + ".abo"))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".abo"))
+ 
+        app("# end runtests.py section\n\n")
+
+        path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
+        with open(path, "wt") as fh:
+            fh.write("\n".join(extra) + line)
+
 
 
 class TdepTest(BaseTest):
