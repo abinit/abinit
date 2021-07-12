@@ -72,7 +72,7 @@ module m_lwf_mover
      ! constraints
      integer :: n_fixed_lwf = 0
      integer, allocatable :: fixed_lwf_ids(:)
-     integer, allocatable :: fixed_lwf_values(:)
+     real(dp), allocatable :: fixed_lwf_values(:)
 
    contains
      procedure :: initialize
@@ -217,10 +217,8 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    !nstep=floor(self%total_time/self%dt)
-    !do i =1, nstep
-    !   call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
-    !end do
+
+    call self%apply_constraints(self%lwf)
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
@@ -304,7 +302,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine read_hist_lwf_state(self, fname)
     class(lwf_mover_t), intent(inout) :: self
-    character(len=fnlen), intent(in) :: fname
+    character(len=*), intent(in) :: fname
     integer :: ierr, ncid, varid
     integer :: nlwf, ntime
     character(len=118) :: msg
@@ -351,10 +349,16 @@ contains
   !-------------------------------------------------------------------!
   subroutine read_lwf_constraints(self, fname)
     class(lwf_mover_t), intent(inout) :: self
-    character(len=fnlen), intent(in) :: fname
+    character(len=*), intent(in) :: fname
     integer :: ierr, ncid, id_id, value_id
     character(len=118) :: msg
     ! open file
+    if (self%params%lwf_constraint .eq. 0) then
+      self%n_fixed_lwf=0
+      ABI_MALLOC(self%fixed_lwf_ids, (self%n_fixed_lwf))
+      ABI_MALLOC(self%fixed_lwf_values, (self%n_fixed_lwf))
+    else
+
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "Trying to read constrain from netcdf file "//trim(fname)//" Failed. ")
@@ -372,14 +376,14 @@ contains
       ierr =nf90_inq_varid(ncid, "fixed_lwf_ids", id_id)
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids.")
   
-      ierr = nf90_get_var(ncid=ncid, varid=id_id, values=self%fixed_lwf_ids(:), &
+      ierr = nf90_get_var(ncid=ncid, varid=id_id, values=self%fixed_lwf_ids, &
            & start=[1], count=[self%n_fixed_lwf])
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids from file "//trim(fname)//". " )
   
       ierr =nf90_inq_varid(ncid, "fixed_lwf_values", value_id)
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values.")
   
-      ierr = nf90_get_var(ncid=ncid, varid=value_id, values=self%fixed_lwf_values(:), &
+      ierr = nf90_get_var(ncid=ncid, varid=value_id, values=self%fixed_lwf_values, &
            & start=[1], count=[self%n_fixed_lwf])
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values from file "//trim(fname)//". " )
     endif
@@ -391,6 +395,8 @@ contains
 #else
     ABI_ERROR("reading lwf constrain file but abinit is not compiled with netcdf.")
 #endif
+
+   endif
 
   end subroutine read_lwf_constraints
 
@@ -515,6 +521,7 @@ contains
           if(i==1) then
              call self%set_initial_state(mode=self%params%lwf_init_state)
           endif
+          call self%apply_constraints(self%lwf)
 
           write(post_fname, "(I4.4)") i
           call self%prepare_ncfile( self%params, &
@@ -539,6 +546,7 @@ contains
     real(dp), intent(inout) :: lwf(:)
     integer :: i
     do i=1, self%n_fixed_lwf
+        self%vcart(self%fixed_lwf_ids(i))=0.0_dp
         lwf(self%fixed_lwf_ids(i))=self%fixed_lwf_values(i)    
     end do
   end subroutine apply_fixed_lwf
