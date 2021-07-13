@@ -139,7 +139,7 @@ contains
     class(abstract_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
 
-    MSG_ERROR("set_initial_state not implemented for this mover")
+    ABI_ERROR("set_initial_state not implemented for this mover")
     ABI_UNUSED_A(self)
     ABI_UNUSED(mode)
 

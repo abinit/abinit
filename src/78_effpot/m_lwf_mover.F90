@@ -282,8 +282,7 @@ contains
          self%lwf(:)=0.0
       ! read from lwf hist file
       case(4)
-         !print*, "Reading from lwf hist file: ", trim(restart_hist_fname)
-         call self%read_hist_lwf_state(self%params%restart_hist_fname)
+         call self%read_hist_lwf_state(self%params%lwf_init_hist_fname)
       end select
 
       call self%rng%rand_normal_array(self%vcart(:), self%nlwf)

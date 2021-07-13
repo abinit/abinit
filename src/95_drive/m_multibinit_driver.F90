@@ -184,6 +184,7 @@ contains
        call chkvars(string)
     end if
     call xmpi_bcast(string,master, comm, ierr)
+    call xmpi_bcast(raw_string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
     !To automate a maximum calculation, multibinit reads the number of atoms
     !in the file (ddb or xml). If DDB file is present in input, the ifc calculation

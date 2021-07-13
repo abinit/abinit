@@ -371,7 +371,7 @@ contains
              &  trim(self%params%spin_init_hist_fname), '.'  
           call wrtout(ab_out,msg,'COLL')
           call wrtout(std_out,msg,'COLL')
-           call self%read_hist_spin_state(fname=self%params%restart_hist_fname)
+           call self%read_hist_spin_state(fname=self%params%spin_init_hist_fname)
 
        end select
 

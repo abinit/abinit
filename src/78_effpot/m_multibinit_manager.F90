@@ -314,15 +314,17 @@ contains
        call inupper(string(1:lenstr))
 
        !Check whether the string only contains valid keywords
-       call chkvars(string)
+       !call chkvars(string)
     end if
 
     call xmpi_bcast(string,master, comm, ierr)
+    call xmpi_bcast(raw_string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
 
+    INPUT_STRING=raw_string
 
     !Read the input file
-    call invars10(self%params,lenstr,natom,string)
+    call invars10(self%params,lenstr,natom, string)
     call postfix_fnames(self%input_path, self%filenames, self%params )
     if (iam_master) then
        !  Echo the inputs to console and main output file
@@ -498,10 +500,9 @@ contains
     if (self%params%spin_dynamics>0) then
        ABI_MALLOC_TYPE_SCALAR(spin_mover_t, self%spin_mover)
     end if
-    fname=trim(self%filenames(2))//"_spinhist_input.nc"
+    !fname=trim(self%filenames(2))//"_spinhist_input.nc"
     call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=fname)
+            & supercell=self%supercell, rng=self%rng)
    end subroutine set_spin_mover
 
 
@@ -544,8 +545,7 @@ contains
        ABI_MALLOC_TYPE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
     end select
     call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
-    call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state, &
-        & restart_hist_fname=trim(self%params%lwf_init_hist_fname))
+    call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state )
     call self%lwf_mover%read_lwf_constraints(trim(self%params%lwf_init_hist_fname))
 
   end subroutine set_lwf_mover
