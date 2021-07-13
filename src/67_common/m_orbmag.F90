@@ -56,12 +56,12 @@ module m_orbmag
   use m_nonlop,           only : nonlop
   use m_pawang,           only : pawang_type
   use m_pawfgr,           only : pawfgr_type
-  use m_paw_dmft,         only : init_sc_dmft,paw_dmft_type
+  use m_paw_dmft,         only : init_sc_dmft,paw_dmft_type,destroy_dmft
   use m_paw_ij,           only : paw_ij_type
-  use m_paw_overlap,      only : overlap_k1k2_paw
   use m_paw_occupancies,  only : pawmkrhoij
+  use m_paw_overlap,      only : overlap_k1k2_paw
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen
-  use m_pawrhoij,         only : pawrhoij_alloc,pawrhoij_free,pawrhoij_type,pawrhoij_print_rhoij
+  use m_pawrhoij,         only : pawrhoij_type,pawrhoij_print_rhoij,pawrhoij_alloc,pawrhoij_free
   use m_paw_sphharm,      only : setsym_ylm,slxyzs
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_put,pawcprj_output,&
@@ -178,12 +178,12 @@ module m_orbmag
   private :: orbmag_duppy_k_n
   private :: orbmag_dqij_k_n
   private :: orbmag_ddij_k_n
+  private :: make_pawrhoij
   private :: make_dldij
   private :: make_dldij_kinetic
   private :: make_dldij_vhnzc
   private :: make_onsite_l_k_n
   private :: make_onsite_bm_k_n
-  private :: make_pawrhoij
   private :: make_rhorij1_k_n
   private :: make_S1trace_k_n
   private :: orbmag_wf_output
@@ -1379,9 +1379,9 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  !Local
  !scalars
- integer :: adir,bdir,buff_size,cplex_rhoij,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt,epsabg
+ integer :: adir,bdir,buff_size,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt,epsabg
  integer :: getghc_cpopt,getghc_prtvol,getghc_sij_opt,getghc_tim,getghc_type_calc
- integer :: gdir,iat,iatom,icg,icprj,ider,idir,ierr,ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn_size_max
+ integer :: gdir,iat,iatom,icg,icprj,ider,idir,ierr,ikg,ikg1,ikpt,ilm,indx,isel,isppol,istwf_k,itypat,klmn,lmn_size_max
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ncpgr1,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nnp,nkpg,npw_k
  integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_pawopt,nonlop_signs,nonlop_tim
@@ -1442,9 +1442,6 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    end do
  end do
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-
  ncpgr = 3
  ABI_MALLOC(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
@@ -1458,6 +1455,22 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  do adir = 1, 3
    call pawcprj_alloc(cprj1_k(:,:,adir),ncpgr1,dimlmn)
  end do
+
+ ! rhoij will be made here explicitly from the ground state cprj, which we 
+ ! know are correct because they reproduce properly the ground state E_nk values.
+ ! on the other hand, the pawrhoij object available from dfpt_looppert, the
+ ! routine calling orbmag_ddk, appear to be those generated in respfn_driver
+ ! by initrhoij, which constructs them from the constituent atoms, not from
+ ! the GS wavefunctions (and hence cprj)
+ ABI_MALLOC(rhoij,(dtset%natom))
+ call pawrhoij_alloc(rhoij,2,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat, & 
+   & pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
+
+ ! note that the returned rhoij is in input atom order, not type sort order (see comments
+ ! in make_pawrhoij elsewhere in this module
+ call make_pawrhoij(atindx,atindx1,cprj,dimlmn,dtset,mcprj,mpi_enreg,nband_k,occ,rhoij)
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  !==== Initialize most of the Hamiltonian ====
  !Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -1506,16 +1519,6 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  lmn_size_max = 0
  do itypat=1,dtset%ntypat
    if (pawtab(itypat)%lmn_size .GT. lmn_size_max) lmn_size_max = pawtab(itypat)%lmn_size
- end do
-
- ABI_MALLOC(rhoij,(dtset%natom))
- cplex_rhoij = 2
- call pawrhoij_alloc(rhoij,cplex_rhoij,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
-   & pawtab=pawtab)
- call make_pawrhoij(atindx,atindx1,cprj,dtset,dimlmn,mcprj,mpi_enreg,occ,rhoij)
-
- do iatom = 1, dtset%natom
-   call pawrhoij_print_rhoij(rhoij(iatom)%rhoijp,cplex_rhoij,1,iatom,dtset%natom,title_msg="JWZ debug rhoij")
  end do
 
  ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
@@ -1735,9 +1738,6 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_FREE(atindx1)
  ABI_FREE(nattyp)
 
- call pawrhoij_free(rhoij)
- ABI_FREE(rhoij)
-
  ABI_FREE(dimlmn)
  call pawcprj_free(cprj_k)
  ABI_FREE(cprj_k)
@@ -1747,6 +1747,9 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    call pawcprj_free(cprj1_k(:,:,adir))
  end do
  ABI_FREE(cprj1_k)
+
+ call pawrhoij_free(rhoij)
+ ABI_FREE(rhoij)
 
 end subroutine orbmag_ddk
 !!***
@@ -1962,6 +1965,7 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
  integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
  real(dp) :: c2,dltij,fermi,qij
  complex(dpc) :: dij,dup_b,dup_g,udp_b,udp_g
+ logical :: cplex_dij
 
  !arrays
 
@@ -1970,9 +1974,7 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
  fermi=zero
  if(present(fermi_input)) fermi = fermi_input
 
- if (paw_ij(1)%cplex_dij .NE. 2) then
-   ABI_BUG("duppy_k_n called with real paw_ij but complex paw_ij required")
- end if
+ cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
 
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in the Chern number,
@@ -2012,8 +2014,12 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
            dup_g = cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
            udp_g = cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
 
-           dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
-           if (jlmn .GT. ilmn) dij=conjg(dij)
+           if (cplex_dij) then
+             dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+             if (jlmn .GT. ilmn) dij=conjg(dij)
+           else
+             dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
+           end if
 
            qij = (Enk-two*fermi)*pawtab(itypat)%sij(klmn)
 
@@ -2031,12 +2037,12 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
 end subroutine orbmag_duppy_k_n
 !!***
 
-!!****f* ABINIT/make_pawrhorij
+!!****f* ABINIT/make_pawrhoij
 !! NAME
 !! make_pawrhoij
 !!
 !! FUNCTION
-!! Compute rhoij for ground state
+!! make rhoij by hand
 !!
 !! COPYRIGHT
 !! Copyright (C) 2003-2020 ABINIT  group
@@ -2054,6 +2060,8 @@ end subroutine orbmag_duppy_k_n
 !! TODO
 !!
 !! NOTES
+!! this is really just a wrapper to pawmkrhoij, so we don't have to look at the
+!! paw_dmft code in orbmag_ddk
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
@@ -2062,11 +2070,14 @@ end subroutine orbmag_duppy_k_n
 !!
 !! SOURCE
 
-subroutine make_pawrhoij(atindx,atindx1,cprj,dtset,dimlmn,mcprj,mpi_enreg,occ,pawrhoij)
+subroutine make_pawrhoij(atindx,atindx1,cprj,dimlmn,dtset,mcprj,mpi_enreg,nband_k,occ,rhoij,&
+    & filter_tol,prtopt)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcprj
+ integer,intent(in) :: mcprj,nband_k
+ integer,optional,intent(in) :: prtopt
+ real(dp),optional,intent(in) :: filter_tol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
 
@@ -2074,28 +2085,83 @@ subroutine make_pawrhoij(atindx,atindx1,cprj,dtset,dimlmn,mcprj,mpi_enreg,occ,pa
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),dimlmn(dtset%natom)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  type(pawcprj_type),intent(in) :: cprj(dtset%natom,mcprj)
- type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
+ type(pawrhoij_type),intent(inout) :: rhoij(dtset%natom)
 
  !Local variables -------------------------
  !scalars
- type(paw_dmft_type) :: paw_dmft
-
+ integer :: iat,iatom,iband,icprj,ikpt,isel,klmn,the_prtopt
+ real(dp) :: the_filter_tol
+ complex(dpc) :: crhoij
+ 
  !arrays
-
+ integer,allocatable :: istwfk(:),nband_all(:)
+ type(paw_dmft_type) :: paw_dmft
  !-----------------------------------------------------------------------
 
- ! initialize paw_dmft, even though not using
- call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,dtset%mband,&
-   & dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,dtset%nsppol,occ,dtset%usedmft,paw_dmft,&
-   & dtset%usedmft,dtset%dmft_solv,mpi_enreg)
- 
- call pawmkrhoij(atindx,atindx1,cprj,dimlmn,dtset%istwfk,dtset%kptopt,dtset%mband,dtset%mband,mcprj,dtset%mkmem,mpi_enreg,&
-   & dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij,0,&
-   & dtset%usewvl,dtset%wtk)
+ if (present(filter_tol)) then
+   the_filter_tol = filter_tol
+ else
+   the_filter_tol = tol8
+ end if
+
+ if (present(prtopt)) then
+   the_prtopt = prtopt
+ else
+   the_prtopt = 0
+ end if
+
+ call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,&
+   & dtset%mband,dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,dtset%nsppol,occ,&
+   & dtset%usedmft,paw_dmft,dtset%usedmft,dtset%dmft_solv,mpi_enreg)
+
+ ABI_MALLOC(istwfk,(dtset%nkpt))
+ istwfk = 1
+ ABI_MALLOC(nband_all,(dtset%nkpt))
+ nband_all = nband_k
+
+ call pawmkrhoij(atindx,atindx1,cprj,dimlmn,istwfk,dtset%kptopt,nband_k,nband_k,mcprj,&
+   & dtset%mkmem,mpi_enreg,dtset%natom,nband_all,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
+   & occ,dtset%paral_kgb,paw_dmft,rhoij,0,0,dtset%wtk)
+
+ do iat = 1, dtset%natom
+   isel = 0
+   do klmn = 1, rhoij(iat)%lmn2_size
+     if (rhoij(iat)%cplex_rhoij .EQ. 2) then
+       crhoij = cmplx(rhoij(iat)%rhoij_(2*klmn-1,1),rhoij(iat)%rhoij_(2*klmn,1),KIND=dpc)
+     else
+       crhoij = cmplx(rhoij(iat)%rhoij_(klmn,1),zero,KIND=dpc)
+     end if
+     if (abs(crhoij) .GT. the_filter_tol) then
+       isel = isel+1
+       rhoij(iat)%rhoijselect(isel) = klmn
+       if (rhoij(iat)%cplex_rhoij .EQ. 2) then
+         rhoij(iat)%rhoijp(2*isel-1,1) = real(crhoij)
+         rhoij(iat)%rhoijp(2*isel,1) = aimag(crhoij)
+       else
+         rhoij(iat)%rhoijp(isel,1) = real(crhoij)
+       end if
+     end if
+   end do
+   rhoij(iat)%nrhoijsel=isel
+ end do
+
+ ! note use of atindx1 in the following; pawmkrhoij seems to deliver rhoij in input atom order.
+ ! atindx1 can be used to access rhoij in type sort order
+ if(prtopt .GT. 0) then
+   do iat=1,dtset%natom
+     iatom=atindx1(iat)
+     call pawrhoij_print_rhoij(rhoij(iatom)%rhoij_,rhoij(iatom)%cplex_rhoij,&
+       & 1,iatom,dtset%natom)
+   end do
+ end if
+
+ call destroy_dmft(paw_dmft)
+
+ ABI_FREE(istwfk)
+ ABI_FREE(nband_all)
 
 end subroutine make_pawrhoij
 !!***
-
 
 !!****f* ABINIT/make_dldij
 !! NAME
@@ -2150,9 +2216,11 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  !-----------------------------------------------------------------------
 
+ ! Torrent iron term 1
  ABI_MALLOC(dldij_kinetic,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
  call make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
+ ! Torrent iron term 2b
  ABI_MALLOC(dldij_vhnzc,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
  call make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
