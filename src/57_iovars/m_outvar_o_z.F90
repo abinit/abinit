@@ -722,6 +722,10 @@ contains
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'quadmom','DPR',0)
 
+ intarr(1,:)=dtsets(:)%quadquad
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'quadquad','INT',0)
+
+
 !###########################################################
 !### 03. Print all the input variables (R)
 !##
@@ -1240,6 +1244,9 @@ contains
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
+
+ intarr(1,:)=dtsets(:)%use_oldchi
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_oldchi','INT',0)
 
 
 !###########################################################

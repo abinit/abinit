@@ -29,15 +29,18 @@ module m_nonlop_ylm
  use m_abicore
  use m_errors
 
- use defs_abitypes, only : MPI_type
- use m_geometry,    only : strconv
- use m_kg,          only : ph1d3d, mkkpg
- use m_pawcprj,     only : pawcprj_type
- use m_opernla_ylm, only : opernla_ylm
- use m_opernlb_ylm, only : opernlb_ylm
- use m_opernlc_ylm, only : opernlc_ylm
- use m_opernld_ylm, only : opernld_ylm
- use m_kg,          only : mkkpgcart
+ use defs_abitypes,      only : MPI_type
+ use m_geometry,         only : strconv
+ use m_kg,               only : ph1d3d, mkkpg
+ use m_pawcprj,          only : pawcprj_type
+ use m_opernla_ylm,      only : opernla_ylm,opernla_counter
+ use m_opernla_ylm_mv,   only : opernla_ylm_mv,opernla_mv_counter,opernla_mv_dgemv_counter
+ use m_opernlb_ylm,      only : opernlb_ylm,opernlb_counter
+ use m_opernlb_ylm_mv,   only : opernlb_ylm_mv,opernlb_mv_counter,opernlb_mv_dgemv_counter
+ use m_opernlc_ylm,      only : opernlc_ylm
+ use m_opernld_ylm,      only : opernld_ylm
+ use m_kg,               only : mkkpgcart
+ use m_time,             only : timab
 
  implicit none
 
@@ -45,6 +48,9 @@ module m_nonlop_ylm
 !!***
 
  public :: nonlop_ylm
+ public :: nonlop_ylm_init_counters
+ public :: nonlop_ylm_stop_counters
+ public :: nonlop_ylm_output_counters
 !!***
 
 contains
@@ -354,14 +360,15 @@ contains
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
-&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,qdir)
+&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,&
+&                      enlout_im,ndat_left,qdir)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,nkpgin,nkpgout,nnlout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
- integer,intent(in),optional :: qdir
+ integer,intent(in),optional :: qdir,ndat_left
  real(dp),intent(in) :: lambda,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -379,6 +386,7 @@ contains
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
  real(dp),intent(inout) :: vectin(:,:)
  real(dp),intent(out) :: enlout(:)
+ real(dp),intent(out),optional :: enlout_im(:)
  real(dp),intent(out) :: svectout(:,:)
  real(dp),intent(inout) :: vectout (:,:)
  type(pawcprj_type),intent(inout) :: cprjin(:,:)
@@ -388,10 +396,10 @@ contains
 !scalars
  integer :: choice_a,choice_b,cplex,cplex_enl,cplex_fac,ia,ia1,ia2,ia3,ia4,ia5
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
- integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
+ integer :: n1,n2,n3,nd2gxdt,ndat_left_,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
- real(dp) :: enlk
- logical :: check,testnl
+ real(dp) :: enlk, tsec(2)
+ logical :: check,testnl,no_opernla_mv,no_opernlb_mv
  character(len=500) :: message
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -409,6 +417,8 @@ contains
 ! **********************************************************************
 
  DBG_ENTER("COLL")
+
+ call timab(1100,1,tsec)
 
 !Check consistency of arguments
 !==============================================================
@@ -485,6 +495,27 @@ contains
 &   'Their value is ',mincat,' and ',matblk,'.'
    ABI_BUG(message)
  end if
+ ndat_left_=1
+ if (present(ndat_left)) then
+   ndat_left_=ndat_left
+ end if
+ if (nloalg(1)<2.or.nloalg(1)>10) then
+   ABI_ERROR('nloalg(1) should be between 2 and 10.')
+ end if
+ ! Determine which implementation to use : matrix-vector (mv), matrix-vector with dgmev (mv-dgemv), or native
+ !nloalg(1)|  opernla |  opernlb
+ !------------------------------
+ !    2    | mv-dgemv | mv-dgemv
+ !    3    |    mv    |    mv
+ !  4(def) |  native  |  native
+ !    5    | mv-dgemv |    mv
+ !    6    |    mv    | mv-dgemv
+ !    7    | mv-dgemv |  native
+ !    8    |  native  |    mv
+ !    9    |    mv    |  native
+ !   10    |  native  | mv-dgemv
+ no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with getcprj
+ no_opernlb_mv = nloalg(1)==4.or.nloalg(1)==7.or.nloalg(1)==9
 
 !Define dimensions of projected scalars
 !==============================================================
@@ -623,6 +654,9 @@ contains
    ABI_MALLOC(strnlk,(6))
    enlk=zero;fnlk=zero;ddkk=zero;strnlk=zero
    enlout(:)=zero
+   if (present(enlout_im)) then
+     enlout_im(:)=zero
+   end if
  end if
  if (signs==2) then
    if (paw_opt==0.or.paw_opt==1.or.paw_opt==4) vectout(:,:)=zero
@@ -733,11 +767,11 @@ contains
 
 !      Allocate memory for projected scalars
        ABI_MALLOC(gx,(cplex,nlmn,nincat,nspinor))
+       ABI_MALLOC(gxfac,(cplex_fac,nlmn,nincat,nspinor))
        ABI_MALLOC(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
        ABI_MALLOC(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
        ABI_MALLOC(d2gxdtfac,(cplex_fac,nd2gxdtfac,nlmn,nincat,nspinor))
        ABI_MALLOC(dgxdtfac,(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor))
-       ABI_MALLOC(gxfac,(cplex_fac,nlmn,nincat,nspinor))
        gx(:,:,:,:)=zero;gxfac(:,:,:,:)=zero
        if (ndgxdt>0) dgxdt(:,:,:,:,:)=zero
        if (ndgxdtfac>0) dgxdtfac(:,:,:,:,:)=zero
@@ -846,11 +880,25 @@ contains
          end if
        end if
 
-!      Computation of <p_lmn|c> (and derivatives) for this block of atoms
-       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
-         call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
-&         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
-&         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
+       ! Computation or <p_lmn|c> (and derivatives) for this block of atoms if :
+       !    <p_lmn|c> are not in memory : cpopt<=1
+       ! OR <p_lmn|c> are in memory, but we need derivatives : cpopt<=3 and abs(choice_a)>1
+       ! OR <p_lmn|c> and first derivatives are in memory, but we need second derivatives : choice=8 or 81
+       if (cpopt<=1.or.(cpopt<=3.and.abs(choice_a)>1).or.choice==8.or.choice==81) then
+!       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
+         if (abs(choice_a)>1.or.no_opernla_mv) then
+           call timab(1101,1,tsec)
+           call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
+&           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
+&           nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
+           call timab(1101,2,tsec)
+         else
+           call timab(1102,1,tsec)
+           call opernla_ylm_mv(choice_a,cplex,dimffnlin,ffnlin_typ,gx,&
+&           ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
+&           nloalg,npwin,nspinor,ph3din,ucvol,vectin)
+           call timab(1102,2,tsec)
+         end if
        end if
 
 !      Transfer result to output variable cprj (if requested)
@@ -898,11 +946,13 @@ contains
 !      If choice==0, that's all for these atoms !
        if (choice>0) then
          if(choice/=7) then
+           call timab(1105,1,tsec)
 !          Contraction from <p_i|c> to Sum_j[Dij.<p_j|c>] (and derivatives)
            call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
 &           d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,gx,gxfac,gxfac_sij,&
 &           iatm,indlmn_typ,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+           call timab(1105,2,tsec)
          else
            gxfac_sij=gx
          end if
@@ -912,13 +962,15 @@ contains
 !        ==============================================================
          if (signs==1) then
            if (.not.present(cprjin_left)) then
+             call timab(1106,1,tsec)
              call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
+&             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+             call timab(1106,2,tsec)
            else
-             ABI_MALLOC(gx_left,(cplex,nlmn,nincat,nspinor))
+             ABI_MALLOC(gx_left,(cplex,nlmn,nincat,nspinor*ndat_left_))
 !            Retrieve <p_lmn|c> coeffs
-             do ispinor=1,nspinor
+             do ispinor=1,nspinor*ndat_left_
                do ia=1,nincat
                  gx_left(1:cplex,1:nlmn,ia,ispinor)=cprjin_left(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
                end do
@@ -931,9 +983,19 @@ contains
 !            end do
 !            end do
 !            end if
-             call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&             enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,ndgxdtfac,&
-&             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+             if (present(enlout_im)) then
+               call timab(1108,1,tsec)
+               call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
+&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
+&               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,enlout_im=enlout_im)
+               call timab(1108,2,tsec)
+             else
+               call timab(1107,1,tsec)
+               call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
+&               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
+&               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
+               call timab(1107,2,tsec)
+             end if
              ABI_FREE(gx_left)
            end if
          end if
@@ -946,10 +1008,20 @@ contains
            if(nloalg(2)<=0) then
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
-           call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-&           d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
-&           idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
-&           nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
+           if (abs(choice_b)>1.or.no_opernlb_mv) then
+             call timab(1103,1,tsec)
+             call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+&             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
+&             idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
+&             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
+             call timab(1103,2,tsec)
+           else
+             call timab(1104,1,tsec)
+             call opernlb_ylm_mv(choice_b,cplex,cplex_fac,&
+&             dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,indlmn_typ,matblk,nincat,nlmn,&
+&             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
+             call timab(1104,2,tsec)
+           end if
          end if
 
        end if ! choice==0
@@ -1269,9 +1341,179 @@ contains
    ABI_FREE(kpgout_)
  end if
 
+ call timab(1100,2,tsec)
+
  DBG_EXIT("COLL")
 
 end subroutine nonlop_ylm
+!!***
+
+!!****f* ABINIT/nonlop_ylm_init_counters
+!! NAME
+!! nonlop_ylm_init_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlop_ylm_init_counters()
+
+   opernla_counter = 0
+   opernlb_counter = 0
+   opernla_mv_counter = 0
+   opernlb_mv_counter = 0
+   opernla_mv_dgemv_counter = 0
+   opernlb_mv_dgemv_counter = 0
+
+end subroutine nonlop_ylm_init_counters
+!!***
+
+!!****f* ABINIT/nonlop_ylm_stop_counters
+!! NAME
+!! nonlop_ylm_stop_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlop_ylm_stop_counters()
+
+   opernla_counter = -1
+   opernlb_counter = -1
+   opernla_mv_counter = -1
+   opernlb_mv_counter = -1
+   opernla_mv_dgemv_counter = -1
+   opernlb_mv_dgemv_counter = -1
+
+end subroutine nonlop_ylm_stop_counters
+!!***
+
+!!****f* ABINIT/nonlop_ylm_output_counters
+!! NAME
+!! nonlop_ylm_output_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_nonlop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlop_ylm_output_counters(natom,nbandtot,ntypat,typat,mpi_enreg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nbandtot,ntypat
+ integer,intent(in) :: typat(:)
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ integer :: cnt,ia1,ia2,ia3,ia4,ia5,iatm,ierr,itypat,mincat,nincat,opernl_calls
+!arrays
+ integer :: nattyp(ntypat)
+
+ do itypat=1,ntypat
+   nattyp(itypat)=0
+   do iatm=1,natom
+     if(typat(iatm)==itypat)then
+!       atindx(iatom)=indx
+!       atindx1(indx)=iatom
+!       indx=indx+1
+       nattyp(itypat)=nattyp(itypat)+1
+     end if
+   end do
+ end do
+ call wrtout([std_out,ab_out],'','COLL')
+ write(msg,'(a)')                ' --- NONLOP YLM COUNTERS -----------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ mincat=min(NLO_MINCAT,maxval(nattyp))
+ ia1=1;iatm=0;opernl_calls=0
+ do itypat=1,ntypat
+!  Get atom loop indices for different types:
+   ia2=ia1+nattyp(itypat)-1;ia5=1
+   do ia3=ia1,ia2,mincat
+     ia4=min(ia2,ia3+mincat-1)
+!    Give the increment of number of atoms in this subset.
+     nincat=ia4-ia3+1
+     opernl_calls=opernl_calls+1
+!    End sum on atom subset loop
+     iatm=iatm+nincat;ia5=ia5+nincat
+   end do
+!  End atom type loop
+   ia1=ia2+1
+ end do
+ if (iatm/=natom) then
+   ABI_ERROR('iatm should be equal to natom!')
+ end if
+ write(msg,'(a,i6)')             ' Number of Calls in nonlop_ylm : NC = ',opernl_calls
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                '                      | total count (TC) |            TC/NC |         TC/NC/NB'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ call xmpi_sum(opernla_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernlb_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernla_mv_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernlb_mv_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernla_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
+ call xmpi_sum(opernlb_mv_dgemv_counter,mpi_enreg%comm_kpt,ierr)
+ cnt=opernla_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_ylm          | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernla_mv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_ylm_mv       | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernla_mv_dgemv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernla_ylm_mv(dgemv)| ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernlb_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_ylm          | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernlb_mv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_ylm_mv       | ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=opernlb_mv_dgemv_counter
+ if (cnt>0) then
+   write(msg,'(2(a,i16),a,f16.1)') ' opernlb_ylm_mv(dgemv)| ',&
+     & cnt,' | ',cnt/opernl_calls,' | ',dble(cnt)/opernl_calls/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+
+end subroutine nonlop_ylm_output_counters
 !!***
 
 end module m_nonlop_ylm
