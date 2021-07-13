@@ -1,4 +1,5 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
+INSTALL_gpu.md
 INSTALL_EasyBuild.md
 INSTALL_CentOS.md
 INSTALL_MacOS.md
