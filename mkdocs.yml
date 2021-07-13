@@ -3,6 +3,7 @@
 site_name: abinit
 site_url: https://docs.abinit.org
 site_description: Abinit documentation
+site_author: The Abinit group
 docs_dir: doc
 
 repo_name: github-abinit
@@ -73,6 +74,7 @@ nav:
     - topics/ElPhonTransport.md
     - topics/ElecDOS.md
     - topics/ElecBandStructure.md
+    - topics/ExtFPMD.md
     - topics/FileFormats.md
     - topics/FitProcess.md
     - topics/ForcesStresses.md
@@ -189,7 +191,7 @@ nav:
         - tutorial/eph_intro.md
         - tutorial/eph4mob.md
         - tutorial/eph4zpr.md
-          #- tutorial/eph4isotc.md
+        #- tutorial/eph4isotc.md
     - EPH-legacy:
         - tutorial/eph.md
         - tutorial/tdepes.md
@@ -217,6 +219,14 @@ nav:
     - tutorial/positron.md
     - tutorial/tddft.md
     - tutorial/wannier90.md
+- FAQ:
+    - Configuration and compilation: faq/configuration_and_compilation.md
+    - General questions: faq/general_questions.md
+    - Pre/Post processing: faq/pre_and_post_processing.md
+    - Ground state: faq/ground_state.md
+    - DFPT: faq/dfpt.md
+    #- GW and BSE faq/gw_and_bse.md
+    #- EPH: faq/eph.md
 - Theory:
     - Geometry: theory/geometry.md
     - Spherical Harmonics: theory/spherical_harmonics.md
@@ -329,7 +339,8 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.5.1
+    version: 9.5.3
+    previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github
           link: https://github.com/abinit/abinit
