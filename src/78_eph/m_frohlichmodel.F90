@@ -971,7 +971,7 @@ function invmat3(A) result(B)
     B(1,3) = +detinv * (A(1,2)*A(2,3) - A(1,3)*A(2,2))
     B(2,3) = -detinv * (A(1,1)*A(2,3) - A(1,3)*A(2,1))
     B(3,3) = +detinv * (A(1,1)*A(2,2) - A(1,2)*A(2,1))
-end function
+end function invmat3
 
 function hamiltonian(luttin, V) result(H)
     !Build the Hamiltonian that enters the self-energy integral
@@ -989,7 +989,7 @@ function hamiltonian(luttin, V) result(H)
     H(3,2) = H(2,3) 
     H(3,3) = luttin(1)*V(3)**2.0_dp + luttin(2)*( V(1)**2.0_dp + V(2)**2.0_dp ) 
     
-end function
+end function hamiltonian
 
 end module m_frohlichmodel
 !!***
