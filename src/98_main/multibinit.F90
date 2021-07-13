@@ -52,8 +52,6 @@ program multibinit
   use m_specialmsg, only : specialmsg_getcount, herald
   use m_io_tools,   only : flush_unit, open_file
   use m_time,       only : asctime, timein
-  use m_parser,     only : instrng
-  use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
 
   !use m_generate_training_set, only : generate_training_set
@@ -126,7 +124,7 @@ program multibinit
 
   ! set filnam(2), and (3) from input path
   if (len_trim(args%input_path)/=0) then
-     call invars_multibinit_filenames_from_input_file( args%input_path, filnam(2), filnam(3))
+     call invars_multibinit_filenames_from_input_file(args%input_path, filnam(2), filnam(3))
   end if
 
   !******************************************************************

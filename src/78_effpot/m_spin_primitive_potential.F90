@@ -797,6 +797,7 @@ contains
        else
          if(.not. usia) write(std_out,'(A34)') " SIA term in xml file not used."
        end if
+
        if(.not. present(use_bi)) then
           ubi=.True.
        else

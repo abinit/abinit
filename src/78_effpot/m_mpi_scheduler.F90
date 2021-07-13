@@ -91,7 +91,6 @@ contains
    logical, intent(inout) :: iam_master
    integer, intent(inout) :: my_rank, comm, nproc
    master=0
-   iam_master=.True.
    comm = xmpi_world
    nproc = xmpi_comm_size(comm)
    my_rank = xmpi_comm_rank(comm)
