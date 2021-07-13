@@ -10658,6 +10658,17 @@ Variable(
 [[nband]] bands, are to be considered as part of a buffer.
 A negative value is interpreted as percentage of [[nband]] (added in v9).
 
+
+!!! important
+
+    The default value is usually too small, especially when performing GS NSCF calculations.
+    In this case, it is strongly recommended to specify nbdbuf in the input and increase [[nband]] accordingly.
+    For small systems (e.g. Silicon), nbdbuf = 4 is OK so using `nband 12 and nbdbuf = 4`
+    will give a band structure with the first 8 bands converged within [[tolwfr]].
+    For more complex systems and/or GS NSCF calculations with many empty states, one usually needs
+    to increase [[nbdbuf]], let's say 10% of [[nband]].
+
+
 This concept is useful in three situations: in non-self-consistent calculations, for the
 determination of the convergence tolerance; for response functions of metals,
 to avoid instabilities, and also when finite electric fields or non-linear
