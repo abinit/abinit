@@ -1893,8 +1893,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nloalg(1)= nloc_alg
-!  Must be 2, 3, 4
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   if(dt%useylm==0) then
+!    Must be 2, 3, 4
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   else
+!    Must be between 2 and 10
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),9,(/2,3,4,5,6,7,8,9,10/),iout)
+   end if
 
 !  nloc_mem= nloalg(2)*(nloalg(3)+1)
 !  nloalg(2) must be -1 or 1 ; nloalg(3) is 0 or 1.
@@ -3569,6 +3574,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
    end if
+
+! use_oldchi
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_oldchi',dt%use_oldchi,2,(/0,1/),iout)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)
