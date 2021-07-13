@@ -777,8 +777,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        call getnel(doccde,dosdeltae,eigen,entropye,fermie_mid,fermie_mid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1))
 
-       ! Blanchet - Compute the number of free electrons with corresponding chemical
-       ! potential and add to nelect bounds.
+       ! Compute the number of free electrons of the extfpmd model
+       ! with corresponding chemical potential and add to nelect bounds.
        if(present(extfpmd)) then
          if(associated(extfpmd)) then
            call extfpmd%compute_nelect(fermie_mid,nelectmid,tsmear)
