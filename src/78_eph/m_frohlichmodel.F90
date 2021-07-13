@@ -517,12 +517,6 @@ ntheta   = dtset%efmas_ntheta
 nphi     = 2*ntheta
 nqdir    = nphi*ntheta
 
-!Set nkgrid and krange
-!For the time being we need 2 points for the finite difference
-!krange = 1E-4 - will be improved
-nkgrid = 2
-krange = 1.0E-5 !Remove the absolute value with a material dep. one
-
 !Define constants
 ! 3x3 Unitary matrix
 unitary_33  = 0.0_dp
@@ -738,6 +732,14 @@ do idir = 1,3*cryst%natom
   endif
  enddo
 enddo
+
+!Set nkgrid and krange
+!For the time being we need 2 points for the finite difference
+!krange = 1E-4 - will be improved
+nkgrid = 2
+!Set material depedent length scale for the finite difference
+!Lowest optical phonon frequency to be used
+krange = phfrq_qdir(4,1)/100.0
 
 !Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
