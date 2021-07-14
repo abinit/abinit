@@ -192,14 +192,10 @@ if(icutcoul.eq.1) then
                  &(abs(ig3).lt.ngfft(3))) then
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
-<<<<<<< HEAD
                   !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
+                  !term=exp(-arg)/gsq*gcutoff(ii)
+                  !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
                   term=exp(-arg)/gsq*gcutoff(ii)
-||||||| fa3f29b48... Correct Ewald cut-off.
-                  term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
-=======
-                  term=exp(-arg)/gsq*gcutoff(ii)
->>>>>>> parent of fa3f29b48... Correct Ewald cut-off.
                else if (icutcoul.ne.3) then
                   term=zero !exp(-arg)/gsq
                else
