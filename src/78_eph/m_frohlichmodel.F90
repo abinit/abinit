@@ -476,10 +476,10 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  integer  :: deg_dim, counter, signpm
  integer  :: i, iband, jband, ideg, idir, iqdir, ieig
  integer  :: ikpt, ixi, ipar, iphi, iphon, itheta, ik
- integer  :: qsampling, nqdir, ntheta, nphi, nqpt, nxi, nphonons, nkgrid
+ integer  :: nqdir, ntheta, nphi, nxi, nphonons, nkgrid
  integer  :: info, lwork
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
- real(dp) :: costheta, phi, qpt, krange, nq_factor, half_pi = pi/2.0_dp, detinv
+ real(dp) :: costheta, phi, qpt, krange, nq_factor
  !character(len=500) :: msg
 !arrays
 !Electronic
@@ -500,7 +500,7 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp), allocatable :: polarity_qdir(:,:,:)
  real(dp), allocatable :: phfrq_qdir(:,:)
 !Self-energy and polaron mass
- real(dp) :: theta, xi, inv_epsilon
+ real(dp) :: xi
  real(dp) :: temporary1(3,3), temporary2(3), temporary3
  real(dp) :: unitary_33(3,3)
  real(dp) :: eham(3,3)
@@ -728,7 +728,9 @@ do idir = 1,3*cryst%natom
   !For ease of treatment loop over all phonon branches but...
   !Avoid the acoustic branches 
   if(idir > 3) then
-    invepsilonstar(idir) = four*pi/cryst%ucvol*(dot_product(unit_qdir(:,iqdir),polarity_qdir(:,idir,iqdir))/( dielt_qdir(iqdir)*phfrq_qdir(idir,iqdir)) )**two
+    invepsilonstar(idir) = &
+      four*pi/cryst%ucvol*(dot_product(unit_qdir(:,iqdir),polarity_qdir(:,idir,iqdir)) &
+      /( dielt_qdir(iqdir)*phfrq_qdir(idir,iqdir)) )**two
   endif
  enddo
 enddo
@@ -837,7 +839,9 @@ do iphon = 1, 3*cryst%natom
                !build k+q vector
                k_plus_q = k_vector + q_vector
                !write(ab_out,'(a,3x,3f10.6,3x,i5.2,3x,i5.2)')'k+q',k_plus_q, ieig, counter
-               intsum(:,:,ik, idir) = abs(eigenval(ieig,ik,idir))*unitary_33 - ( signpm*hamiltonian(lutt_params, k_plus_q ) + omega_zero(iphon)*unitary_33 )
+               intsum(:,:,ik, idir) = &
+                      abs(eigenval(ieig,ik,idir))*unitary_33 - &
+                      ( signpm*hamiltonian(lutt_params, k_plus_q ) + omega_zero(iphon)*unitary_33 )
                temporary1 = invmat3( intsum(:,:,ik, idir) )
                !ABI_MALLOC(work,(deg_dim))
                !call dgetri(deg_dim,intsum(:,:,ik, idir),deg_dim,deg_dim,work,lwork,info)
@@ -851,18 +855,20 @@ do iphon = 1, 3*cryst%natom
                temporary2 = matmul( temporary1, eigenvec(:,ieig,nkgrid,idir) )
                temporary3 = dot_product( eigenvec(:,ieig,nkgrid,idir), temporary2 )
                if( ( iphi .EQ. 0 ) .OR. ( iphi .EQ. nphi )  ) then
-	             temporary3 = temporary3/2.0_dp
+                 temporary3 = temporary3/2.0_dp
                endif
                if( ( itheta .EQ. 0 ) .OR. ( itheta .EQ. ntheta ) ) then
-	             temporary3 = temporary3/2.0_dp
+                 temporary3 = temporary3/2.0_dp
                endif
                if( ixi .EQ. 0 ) then
-	             temporary3 = temporary3/2.0_dp
+                 temporary3 = temporary3/2.0_dp
                endif
                if( ixi .EQ. nxi ) then
-			     temporary3 = zero
+                 temporary3 = zero
                endif
-               sigma(ik,ieig,idir) = sigma(ik,ieig,idir) + signpm*piinv*invepsilonstar(iphon)*omega_zero(iphon)*temporary3*(omega_zero(iphon)/abs(lutt_params(1)))**half/(cos(xi))**two
+               sigma(ik,ieig,idir) = sigma(ik,ieig,idir) &
+                   + signpm*piinv*invepsilonstar(iphon)*omega_zero(iphon) &
+                   *temporary3*(omega_zero(iphon)/abs(lutt_params(1)))**half/(cos(xi))**two
              enddo
            enddo
         enddo

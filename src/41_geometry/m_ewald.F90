@@ -184,7 +184,8 @@ if(icutcoul.eq.1) then
                  &(abs(ig3).lt.ngfft(3))) then
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
-                  term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
+                  !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
+                  term=exp(-arg)/gsq*gcutoff(ii)
                else if (icutcoul.ne.3) then
                   term=zero !exp(-arg)/gsq
                else
