@@ -98,7 +98,7 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term,zcut
+ real(dp) :: t1,term !,zcut
  !character(len=500) :: message
 !arrays
  real(dp),allocatable :: gcutoff(:)
