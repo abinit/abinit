@@ -128,10 +128,18 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !easier at fixed eta.
 if(icutcoul.eq.1) then
    eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3))))
- else if (icutcoul.eq.2) then
-   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
 !   eta=217.6_dp/zcut**2.0_dp
-   eta=1.0_dp/zcut**2.0_dp
+!   eta=1.0_dp/zcut**2.0_dp
+!   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=SQRT(8.0_dp/zcut)
+!   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=SQRT(8.0_dp/zcut)
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
@@ -184,8 +192,14 @@ if(icutcoul.eq.1) then
                  &(abs(ig3).lt.ngfft(3))) then
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
+<<<<<<< HEAD
                   !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
                   term=exp(-arg)/gsq*gcutoff(ii)
+||||||| fa3f29b48... Correct Ewald cut-off.
+                  term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
+=======
+                  term=exp(-arg)/gsq*gcutoff(ii)
+>>>>>>> parent of fa3f29b48... Correct Ewald cut-off.
                else if (icutcoul.ne.3) then
                   term=zero !exp(-arg)/gsq
                else
@@ -349,7 +363,8 @@ if(icutcoul.eq.1) then
 
 !Finally assemble Ewald energy, eew
  if(icutcoul.ne.3) then
-   eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+    !eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+    eew=sumg+sumr-chsq*reta/sqrt(pi)
  else
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
@@ -357,8 +372,8 @@ if(icutcoul.eq.1) then
  ABI_FREE(gcutoff)
 
 !DEBUG
-write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
-write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
+!write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
+!write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
 !ENDDEBUG
 
 !Length scale grads handled with stress tensor, ewald2
