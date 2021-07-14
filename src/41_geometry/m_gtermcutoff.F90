@@ -247,7 +247,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        if(abs(gpq(ig))<tol4) then
           gcutoff(ig)=0.0
        else
-          gcutoff(ig)=one-cos(rcut_loc/sqrt(gpq2(ii)))
+          gcutoff(ig)=one-cos(rcut_loc*sqrt(four_pi/gpq2(ig)))
+          !gcutoff(ig)=one-cos(rcut_loc/sqrt(gpq2(ii)))
       end if
      end do
 
