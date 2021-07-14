@@ -1521,7 +1521,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    if (pawtab(itypat)%lmn_size .GT. lmn_size_max) lmn_size_max = pawtab(itypat)%lmn_size
  end do
 
- ABI_MALLOC(dldij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
+ ABI_MALLOC(dldij,(dtset%natom,lmn_size_max,lmn_size_max,3))
  call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  icg = 0
@@ -2147,7 +2147,7 @@ subroutine make_pawrhoij(atindx,atindx1,cprj,dimlmn,dtset,mcprj,mpi_enreg,nband_
 
  ! note use of atindx1 in the following; pawmkrhoij seems to deliver rhoij in input atom order.
  ! atindx1 can be used to access rhoij in type sort order
- if(prtopt .GT. 0) then
+ if(the_prtopt .GT. 0) then
    do iat=1,dtset%natom
      iatom=atindx1(iat)
      call pawrhoij_print_rhoij(rhoij(iatom)%rhoij_,rhoij(iatom)%cplex_rhoij,&
@@ -2204,12 +2204,13 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  !arrays
  real(dp),intent(in) :: gprimd(3,3)
- complex(dpc),intent(out) :: dldij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
+ complex(dpc),intent(out) :: dldij(dtset%natom,lmn_size_max,lmn_size_max,3)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
  !scalars
+ integer :: iat,itypat
 
  !arrays
  complex(dpc),allocatable :: dldij_kinetic(:,:,:,:),dldij_vhnzc(:,:,:,:)
@@ -2225,10 +2226,15 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
  call make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  ! assemble terms
+ ! terms 1 and 2b only vary by atom type
+ ! terms 2a vary by individual atom
 
- !dldij(:,:,:,:) = dldij_kinetic(:,:,:,:)
- !dldij(:,:,:,:) = dldij_vhnzc(:,:,:,:)
- dldij(:,:,:,:) = dldij_kinetic(:,:,:,:) + dldij_vhnzc(:,:,:,:)
+ dldij = czero
+ do iat = 1, dtset%natom
+   itypat = dtset%typat(iat)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_kinetic(itypat,:,:,:)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
+ end do
 
  ABI_FREE(dldij_kinetic)
  ABI_FREE(dldij_vhnzc)
@@ -2552,7 +2558,7 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
  !arrays
  integer,intent(in) :: atindx(dtset%natom)
  real(dp),intent(in) :: gprimd(3,3)
- complex(dpc),intent(in) :: dldij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
+ complex(dpc),intent(in) :: dldij(dtset%natom,lmn_size_max,lmn_size_max,3)
  complex(dpc),intent(out) :: ddijkn(3)
  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k),cprj1_k(dtset%natom,nband_k,3)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
@@ -2597,6 +2603,7 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
            row=max(jlmn,ilmn); col=min(jlmn,ilmn)
            klmn=(row-1)*row/2 + col
 
+           ! cprj is sorted by type atom order
            dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
            
@@ -2606,9 +2613,10 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
            cpi = cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc) 
            cpj = cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc) 
 
+           ! note that dldij is sorted by input atom order, like paw_ij
            ddijterm = ddijterm + half*j_dpc*epsabg*( &
-             & conjg(cpi)*dldij(itypat,ilmn,jlmn,bdir)*(dup_g+udp_g) + &
-             & conjg(dup_b+udp_b)*conjg(dldij(itypat,jlmn,ilmn,gdir))*cpj)
+             & conjg(cpi)*dldij(iat,ilmn,jlmn,bdir)*(dup_g+udp_g) + &
+             & conjg(dup_b+udp_b)*conjg(dldij(iat,jlmn,ilmn,gdir))*cpj)
 
          end do ! end loop over jlmn
        end do ! end loop over ilmn
