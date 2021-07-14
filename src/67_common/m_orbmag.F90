@@ -30,6 +30,8 @@
 
 #include "abi_common.h"
 
+#define MATPACK(row,col) (MAX(row,col)*(MAX(row,col)-1)/2 + MIN(row,col))
+
 module m_orbmag
 
   use defs_basis
@@ -182,6 +184,7 @@ module m_orbmag
   private :: make_dldij
   private :: make_dldij_kinetic
   private :: make_dldij_vhnzc
+  !private :: make_dldij_vhn1
   private :: make_onsite_l_k_n
   private :: make_onsite_bm_k_n
   private :: make_rhorij1_k_n
@@ -202,6 +205,7 @@ module m_orbmag
   private :: make_onsite_l_k
   private :: make_onsite_bm
   private :: make_rhorij1
+
   
 CONTAINS  !========================================================================================
 !!***
@@ -940,7 +944,7 @@ subroutine make_onsite_l_k_n(atindx,cprj_k,dtset,iband,nband_k,olkn,pawrad,pawta
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,col,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size,row
+  integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size
   real(dp) :: dltij,intg
   complex(dpc) :: cpb,cpk,orbl_me
 
@@ -964,8 +968,7 @@ subroutine make_onsite_l_k_n(atindx,cprj_k,dtset,iband,nband_k,olkn,pawrad,pawta
             if(ilmn .EQ. jlmn) dltij = half
             il=pawtab(itypat)%indlmn(1,ilmn)
             im=pawtab(itypat)%indlmn(2,ilmn)
-            row=max(jlmn,ilmn); col=min(jlmn,ilmn)
-            klmn=(row-1)*row/2 + col
+            klmn=MATPACK(jlmn,ilmn)
             kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
             ! compute <L_dir>
             call slxyzs(il,im,adir,jl,jm,orbl_me)
@@ -1068,7 +1071,7 @@ subroutine make_onsite_bm_k_n(cprj_k,dtset,iband,idir,nband_k,onsite_bm_k_n,&
         do ilmn=1,pawtab(itypat)%lmn_size
            il=pawtab(itypat)%indlmn(1,ilmn)
            im=pawtab(itypat)%indlmn(2,ilmn)
-           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+           klmn=MATPACK(jlmn,ilmn)
            kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
            klm = pawtab(itypat)%indklmn(1,klmn) ! need this for bm2 gaunt integral selection
            ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r
@@ -1215,7 +1218,7 @@ subroutine make_S1trace_k_n(adir,cprj_k,dtset,ENK,iband,nband_occ,pawtab,S1trace
       itypat=dtset%typat(iatom)
       do ilmn=1,pawtab(itypat)%lmn_size
         do jlmn=1,pawtab(itypat)%lmn_size
-          klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+          klmn=MATPACK(jlmn,ilmn)
           cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
           cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
           S1trace=S1trace-half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
@@ -1297,7 +1300,7 @@ subroutine make_rhorij1_k_n(adir,cprj_k,dtset,iband,nband_occ,&
       itypat=dtset%typat(iatom)
       do ilmn=1,pawtab(itypat)%lmn_size
         do jlmn=1,pawtab(itypat)%lmn_size
-          klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+          klmn=MATPACK(jlmn,ilmn)
           cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
           cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
           if (paw_ij(iatom)%cplex_dij .EQ. 2) then
@@ -1962,7 +1965,7 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn
  real(dp) :: c2,dltij,fermi,qij
  complex(dpc) :: dij,dup_b,dup_g,udp_b,udp_g
  logical :: cplex_dij
@@ -2005,8 +2008,7 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
          do jlmn=1,pawtab(itypat)%lmn_size
            dltij=one
            if(ilmn .EQ. jlmn) dltij = half
-           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
-           klmn=(row-1)*row/2 + col
+           klmn=MATPACK(jlmn,ilmn)
 
            dup_b = cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            udp_b = cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
@@ -2214,6 +2216,7 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  !arrays
  complex(dpc),allocatable :: dldij_kinetic(:,:,:,:),dldij_vhnzc(:,:,:,:)
+ complex(dpc),allocatable :: dldij_vhn1(:,:,:,:)
 
  !-----------------------------------------------------------------------
 
@@ -2224,6 +2227,9 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
  ! Torrent iron term 2b
  ABI_MALLOC(dldij_vhnzc,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
  call make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+
+ ! Torrent iron term 2a
+ ABI_MALLOC(dldij_vhn1,(dtset%natom,lmn_size_max,lmn_size_max,3))
 
  ! assemble terms
  ! terms 1 and 2b only vary by atom type
@@ -2238,9 +2244,167 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
 
  ABI_FREE(dldij_kinetic)
  ABI_FREE(dldij_vhnzc)
+ ABI_FREE(dldij_vhn1)
 
 end subroutine make_dldij
 !!***
+
+!!!****f* ABINIT/make_dldij_vhn1
+!!! NAME
+!!! make_dldij_vhn1
+!!!
+!!! FUNCTION
+!!! Compute Dij term arising from <d\phi_i/dk|v_H[n^1]|\phi_j>
+!!!
+!!! COPYRIGHT
+!!! Copyright (C) 2003-2020 ABINIT  group
+!!! This file is distributed under the terms of the
+!!! GNU General Public License, see ~abinit/COPYING
+!!! or http://www.gnu.org/copyleft/gpl.txt .
+!!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!!
+!!! INPUTS
+!!!
+!!! OUTPUT
+!!!
+!!! SIDE EFFECTS
+!!!
+!!! TODO
+!!!
+!!! NOTES
+!!! Direct questions and comments to J Zwanziger
+!!!
+!!! PARENTS
+!!!
+!!! CHILDREN
+!!!
+!!! SOURCE
+!
+!subroutine make_dldij_vhn1(dldij_vhn1,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
+!
+! !Arguments ------------------------------------
+! !scalars
+! integer,intent(in) :: lmn_size_max
+! type(dataset_type),intent(in) :: dtset
+! type(pawang_type),intent(in) :: pawang
+!
+! !arrays
+! real(dp),intent(in) :: gprimd(3,3)
+! complex(dpc),intent(out) :: dldij_vhn1(dtset%natom,lmn_size_max,lmn_size_max,3)
+! type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+! type(pawrhoij_type),intent(in) :: rhoij(dtset%natom)
+! type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+!
+! !Local variables -------------------------
+! !scalars
+! integer :: adir,ignt,ijlm,il,im,ilm,ilmn,iln,imesh,itypat,jl,jm,jlm,jlmn,jln,lkmk,mesh_size
+! real(dp) :: c1,intg,the_gnt
+!
+! !arrays
+! integer,dimension(3) :: idirindx = (/4,2,3/)
+! complex(dpc) :: dlij_cart(3),dlij_red(3)
+! real(dp),allocatable :: ff(:)
+!
+! !-----------------------------------------------------------------------
+!
+! ! ilm = 1: S_{00}
+! ! ilm = 2: S_{1,-1}
+! ! ilm = 3: S_{1,0}
+! ! ilm = 4: S_{1,1}
+!
+! ! for the real spherical harmonics, 
+! ! S_{1,-1} \propto y 
+! ! S_{1,0} \propto z
+! ! S_{1,1} \propto  x
+! ! so adir 1 (x) gets mapped to ilm 4
+! ! so adir 2 (y) gets mapped to ilm 2
+! ! so adir 3 (z) gets mapped to ilm 3
+!
+! c1 = sqrt(four_pi/three)
+!
+! do iat = 1,dtset%natom
+!   itypat = dtset%typat(iat)
+!
+!   mesh_size = pawtab(itypat)%mesh_size
+!   ABI_MALLOC(ff,(mesh_size))
+!
+!   do ilmn=1,pawtab(itypat)%lmn_size
+!     il = pawtab(itypat)%indlmn(1,ilmn)
+!     im = pawtab(itypat)%indlmn(2,ilmn)
+!     ilm = pawtab(itypat)%indlmn(4,ilmn)
+!     iln = pawtab(itypat)%indlmn(5,ilmn)
+! 
+!     do jlmn=1,pawtab(itypat)%lmn_size
+!       jl = pawtab(itypat)%indlmn(1,jlmn)
+!       jm = pawtab(itypat)%indlmn(2,jlmn)
+!       jlm = pawtab(itypat)%indlmn(4,jlmn)
+!       jln = pawtab(itypat)%indlmn(5,jlmn)
+!
+!       dlij_cart = czero
+!       !! ijlm=max(jlm,ilm)*(max(jlm,ilm)-1)/2 + min(jlm,ilm)
+!
+!       do adir = 1, 3
+!
+!         one_alpha = idirindx(adir)
+!
+!         do isel = 1, rhoij(iat)%nrhoijsel
+!           klmn = rhoij(iat)%rhoijselect(isel)
+!           klm = pawtab(itypat)%indklmn(1,klmn)
+!
+!           do bigl = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn)
+!             do bigm = 1, 2*bigl+1
+!               biglm = bigl*bigl + bigm 
+!               ignt1 = pawang%gntselect(biglm,klm)
+!               if (ignt1 .EQ. 0) cycle
+!               gnt1 = pawang%realgnt(ignt1)
+!
+!               biglt_min = max(abs(il-1),abs(bigl-jl))
+!               biglt_max = min((il+1),(bigl+jl))
+!
+!               do biglt = biglt_min, biglt_max
+!                 do bigmt = 1, 2*biglt + 1
+!                   bigltmt = biglt*biglt + bigmt
+!                   ignt2 =pawang%gntselect(bigltmt,)
+!                   if (ignt2 .EQ. 0) cycle
+!                   ignt3 = pawang%gntselect(bigltmt,)
+!                   if (ignt3 .EQ. 0) cycle
+!                   gnt2 = pawang%realgnt(ignt2)
+!                   gnt3 = pawang%realgnt(ignt3)
+!
+!                   radial_integral = one
+!
+!         ignt = pawang%gntselect(lkmk,ijlm)
+!         if (ignt .EQ. 0) cycle
+!         the_gnt = pawang%realgnt(ignt)
+!
+!         do imesh = 2, mesh_size
+!           ff(imesh) = pawtab(itypat)%phi(imesh,iln)*pawtab(itypat)%phi(imesh,jln)*&
+!             & pawtab(itypat)%VHnZC(imesh)
+!           ff(imesh) = ff(imesh) - pawtab(itypat)%tphi(imesh,iln)*pawtab(itypat)%tphi(imesh,jln)*&
+!             & pawtab(itypat)%vhtnzc(imesh)
+!           ff(imesh) = ff(imesh)*pawrad(itypat)%rad(imesh)
+!         end do
+!         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+!         call simp_gen(intg,ff,pawrad(itypat))
+!
+!         dlij_cart(adir) = j_dpc*c1*the_gnt*intg 
+!
+!       end do ! end loop over adir
+!
+!       ! convert from cartesian axes to reduced coords
+!       dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+!       dldij_vhnzc(itypat,ilmn,jlmn,1:3) = dlij_red(1:3)
+!       
+!     end do ! end loop over ilmn
+!   end do ! end loop over jlmn
+!
+!   ABI_FREE(ff)
+!
+! end do ! end loop over ntypat
+!
+!end subroutine make_dldij_vhnzc
+!!!***
+
 
 !!****f* ABINIT/make_dldij_vhnzc
 !! NAME
@@ -2336,7 +2500,7 @@ subroutine make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,
        ilm = pawtab(itypat)%indlmn(4,ilmn)
        iln = pawtab(itypat)%indlmn(5,ilmn)
 
-       ijlm=max(jlm,ilm)*(max(jlm,ilm)-1)/2 + min(jlm,ilm)
+       ijlm=MATPACK(jlm,ilm)
        dlij_cart = czero
        do adir = 1, 3
 
@@ -2470,7 +2634,7 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,paw
        iln = pawtab(itypat)%indlmn(5,ilmn)
        ilm = pawtab(itypat)%indlmn(4,ilmn)
 
-       ijlm=max(jlm,ilm)*(max(jlm,ilm)-1)/2 + min(jlm,ilm)
+       ijlm = MATPACK(jlm,ilm)
        dkij_cart = czero
        do adir = 1, 3
 
@@ -2566,7 +2730,7 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn
  real(dp) :: c2,dltij
  complex(dpc) :: cpi,cpj,ddijterm,dup_b,dup_g,udp_b,udp_g
 
@@ -2600,8 +2764,7 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
          do jlmn=1,pawtab(itypat)%lmn_size
            dltij=one
            if(ilmn .EQ. jlmn) dltij = half
-           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
-           klmn=(row-1)*row/2 + col
+           klmn=MATPACK(jlmn,ilmn)
 
            ! cprj is sorted by type atom order
            dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
@@ -2681,7 +2844,7 @@ subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,n
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn
  real(dp) :: c1,c2,dltij,fermi
  complex(dpc) :: cpi,cpj,dqijterm,dup_b,dup_g,udp_b,udp_g
 
@@ -2729,8 +2892,7 @@ subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,n
          do jlmn=1,pawtab(itypat)%lmn_size
            dltij=one
            if(ilmn .EQ. jlmn) dltij = half
-           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
-           klmn=(row-1)*row/2 + col
+           klmn = MATPACK(jlmn,ilmn)
 
            dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
@@ -2811,7 +2973,7 @@ subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iba
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,row
+ integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn
  real(dp) :: c1,c2,dltij,doti,dotr
  complex(dpc) :: cg1wfn,cpi,cpj,dijterm,cdup_b,dup_g,qijterm,cudp_b,udp_g
 
@@ -2867,8 +3029,7 @@ subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iba
          do jlmn=1,pawtab(itypat)%lmn_size
            dltij=one
            if(ilmn .EQ. jlmn) dltij = half
-           row=max(jlmn,ilmn); col=min(jlmn,ilmn)
-           klmn=(row-1)*row/2 + col
+           klmn = MATPACK(jlmn,ilmn)
 
            cdup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),-cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
            dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
