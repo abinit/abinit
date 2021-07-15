@@ -73,6 +73,7 @@ inp_files = [
 "t63.abi",
 "t64.abi",
 "t65.abi",
+"t66.abi",
 # Spin dynamics in multibinit
 "t81.abi", # set initial spin using rotation q-modulation
 "t82.abi", # damping
