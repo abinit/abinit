@@ -475,7 +475,7 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 !scalars
  integer  :: deg_dim, counter, signpm
  integer  :: i, iband, jband, ideg, idir, iqdir, ieig
- integer  :: ikpt, ixi, ipar, iphi, iphon, itheta, ik
+ integer  :: ikpt, ixi, ipar, iphi, iphon, imode, itheta, ik
  integer  :: nqdir, ntheta, nphi, nxi, nphonons, nkgrid
  integer  :: info, lwork
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
@@ -503,7 +503,7 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp) :: xi
  real(dp) :: temporary1(3,3), temporary2(3), temporary3
  real(dp) :: unitary_33(3,3)
- real(dp) :: eham(3,3)
+ real(dp) :: minelecmass,eham(3,3)
  real(dp) :: kpt(3), k_vector(3), q_vector(3), k_plus_q(3)
  real(dp), allocatable :: omega_zero(:)
  real(dp), allocatable :: intsum(:,:,:,:)
@@ -658,7 +658,7 @@ do ikpt=1,dtset%nkpt
            endif
            write(ab_out, '(a)') ch10
          else
-           write(ab_out, '(a,3f14.6)') ' Luttinger parameters (A, B, C) (a.u.): ',lutt_params(:)
+           write(ab_out, '(a,3f14.6)') '   Luttinger parameters (A, B, C) (a.u.): ',lutt_params(:)
          endif
      endif
 
@@ -667,6 +667,24 @@ do ikpt=1,dtset%nkpt
 
    enddo ! ideg
 enddo ! ikpt
+
+!Build inverse electronic effective mass for different directions from Luttinger params
+deg_dim = 3
+ABI_MALLOC(invemass,(deg_dim,deg_dim))
+! 100 -direction
+invemass(1,1) = two*lutt_params(1) ! 2A
+invemass(2,1) = two*lutt_params(2) ! 2B
+invemass(3,1) = two*lutt_params(2) ! 2B
+! 110 -direction
+invemass(1,2) = lutt_params(1) + lutt_params(2) + lutt_params(3) ! A + B + C
+invemass(2,2) = MIN(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! 2B
+invemass(3,2) = MAX(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! A + B - C
+! 111 -direction
+invemass(1,3) = two*( lutt_params(1) + two*lutt_params(2) + two*lutt_params(3) ) / three ! 2(A + 2B + 2C)/3
+invemass(2,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
+invemass(3,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
+
+!END Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
 ABI_MALLOC(unit_qdir,(3,nqdir))
 ABI_MALLOC(polarity_qdir,(3,3*cryst%natom,nqdir))
@@ -723,14 +741,14 @@ ABI_MALLOC(invepsilonstar,(3*cryst%natom))
 ABI_MALLOC(omega_zero,(3*cryst%natom))
 invepsilonstar = zero
 
-do idir = 1,3*cryst%natom
+do imode = 1,3*cryst%natom
  do iqdir = 1,10
   !For ease of treatment loop over all phonon branches but...
   !Avoid the acoustic branches 
-  if(idir > 3) then
-    invepsilonstar(idir) = &
-      four*pi/cryst%ucvol*(dot_product(unit_qdir(:,iqdir),polarity_qdir(:,idir,iqdir)) &
-      /( dielt_qdir(iqdir)*phfrq_qdir(idir,iqdir)) )**two
+  if(imode > 3) then
+    invepsilonstar(imode) = &
+      four*pi/cryst%ucvol*(dot_product(unit_qdir(:,iqdir),polarity_qdir(:,imode,iqdir)) &
+      /( dielt_qdir(iqdir)*phfrq_qdir(imode,iqdir)) )**two
   endif
  enddo
 enddo
@@ -741,12 +759,12 @@ enddo
 nkgrid = 2
 !Set material depedent length scale for the finite difference
 !Lowest optical phonon frequency to be used
-krange = phfrq_qdir(4,1)/100.0
+minelecmass=1.0_dp/maxval(abs(invemass))
+krange = sqrt(two*minelecmass*phfrq_qdir(4,1)/1000.0)
 
 !Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
 !Initializations for the diagonalization routine
-deg_dim = 3
 ABI_MALLOC(eigenval,(deg_dim,nkgrid,3))
 ABI_MALLOC(eigenvec,(deg_dim,deg_dim,nkgrid,3))
 lwork=-1
@@ -770,8 +788,6 @@ enddo
 
 ABI_FREE(rwork)
 ABI_FREE(work)
-
-!END Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
 ABI_MALLOC(intsum,(deg_dim,deg_dim,nkgrid,deg_dim))
 ABI_MALLOC(sigma,(nkgrid,deg_dim,deg_dim))
@@ -803,6 +819,7 @@ sigma = zero
 !Summation over IR active phonon modes
 do iphon = 1, 3*cryst%natom
  if( iphon > 3 ) then
+ !if( invepsilonstar(imode) > tol10 ) then
     !Summation over relevant directions (100,110,111)
     do idir=1,3
      !Summation over electronic eigenvalues 
@@ -895,21 +912,6 @@ do idir = 1,3
    enddo
 enddo
 
-!Build inverse electronic effective mass tensor from Luttinger params
-ABI_MALLOC(invemass,(deg_dim,deg_dim))
-! 100 -direction
-invemass(1,1) = two*lutt_params(1) ! 2A
-invemass(2,1) = two*lutt_params(2) ! 2B
-invemass(3,1) = two*lutt_params(2) ! 2B
-! 110 -direction
-invemass(1,2) = lutt_params(1) + lutt_params(2) + lutt_params(3) ! A + B + C
-invemass(2,2) = MIN(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! 2B
-invemass(3,2) = MAX(two*lutt_params(2), lutt_params(1) + lutt_params(2) - lutt_params(3) ) ! A + B - C
-! 111 -direction
-invemass(1,3) = two*( lutt_params(1) + two*lutt_params(2) + two*lutt_params(3) ) / three ! 2(A + 2B + 2C)/3
-invemass(2,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
-invemass(3,3) = two*( lutt_params(1) + two*lutt_params(2) -     lutt_params(3) ) / three ! 2(A + 2B - 2C)/3
-
 ABI_MALLOC(invpolmass,(deg_dim,deg_dim))
 
 do idir = 1,3
@@ -919,20 +921,28 @@ do idir = 1,3
  enddo
 enddo
 
-!Print inverse electroic effective masses in the output
+!Print inverse electronic effective masses in the output
 write(ab_out,'(a)')'--------------------------------------------------------------------------------'
-write(ab_out,'(a)')' Polaron properties'
+write(ab_out,'(a)')'   Polaron properties from the generalized Fröhlich model'
 write(ab_out,'(a)')'--------------------------------------------------------------------------------'
-write(ab_out,'(a,f10.6)')' ZPR (eV): ',sigma(1,1,1)*Ha_eV
+write(ab_out,'(a)')'   Polar modes'
+write(ab_out,'(a)')'   ##      Frequency(meV)            Epsilon*'
+do imode = 1,3*cryst%natom
+  if(invepsilonstar(imode) > tol10) then
+    write(ab_out,'(2x,i3,5x,f15.6,5x,f15.6)')imode,omega_zero(imode)*Ha_eV*1000.0_dp,1.0_dp/invepsilonstar(imode)
+  endif
+enddo
 write(ab_out,'(a)')' '
-write(ab_out,'(a)')'   Electronic effective (a.u.) along 3 directions'
+write(ab_out,'(a,f10.2)')'   ZPR (meV): ',sigma(1,1,1)*Ha_eV*1000.0_dp
+write(ab_out,'(a)')' '
+write(ab_out,'(a)')'   Electronic effective mass (a.u.) along 3 directions'
 write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invemass(:,1)
 write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invemass(:,2)
 write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invemass(:,3)
 
 !Print inverse polaron effective masses in the output
 write(ab_out,'(a)')' '
-write(ab_out,'(a)')'   Polaron effective (a.u.) along 3 directions'
+write(ab_out,'(a)')'   Polaron effective mass (a.u.) along 3 directions'
 write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invpolmass(:,1)
 write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invpolmass(:,2)
 write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invpolmass(:,3)
