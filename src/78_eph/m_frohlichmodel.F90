@@ -923,7 +923,7 @@ enddo
 
 !Print inverse electronic effective masses in the output
 write(ab_out,'(a)')'--------------------------------------------------------------------------------'
-write(ab_out,'(a)')'   Polaron properties from the generalized Fröhlich model'
+write(ab_out,'(a)')'   Polaron properties from the generalized Froehlich model'
 write(ab_out,'(a)')'--------------------------------------------------------------------------------'
 write(ab_out,'(a)')'   Polar modes'
 write(ab_out,'(a)')'   ##      Frequency(meV)            Epsilon*'
@@ -965,6 +965,7 @@ ABI_FREE(invpolmass)
 ABI_FREE(invemass)
 
 end subroutine polaronmass
+!!***
 
 function invmat3(A) result(B)
     !Invert a 3x3 matrix  directly - Faster than calling LAPACK 
