@@ -64,7 +64,7 @@ module m_orbmag
   use m_paw_overlap,      only : overlap_k1k2_paw
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen
   use m_pawrhoij,         only : pawrhoij_type,pawrhoij_print_rhoij,pawrhoij_alloc,pawrhoij_free
-  use m_paw_sphharm,      only : setsym_ylm,slxyzs
+  use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_put,pawcprj_output,&
    &  pawcprj_getdim, pawcprj_get,pawcprj_mpi_recv,pawcprj_mpi_send,pawcprj_set_zero,pawcprj_reorder
@@ -184,7 +184,7 @@ module m_orbmag
   private :: make_dldij
   private :: make_dldij_kinetic
   private :: make_dldij_vhnzc
-  !private :: make_dldij_vhn1
+  private :: make_dldij_vhn1
   private :: make_onsite_l_k_n
   private :: make_onsite_bm_k_n
   private :: make_rhorij1_k_n
@@ -1355,7 +1355,7 @@ end subroutine make_rhorij1_k_n
 !! SOURCE
 
 subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
+    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
     & xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -1364,7 +1364,6 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
- type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
 
@@ -1525,7 +1524,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  end do
 
  ABI_MALLOC(dldij,(dtset%natom,lmn_size_max,lmn_size_max,3))
- call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+ call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
 
  icg = 0
  ikg = 0
@@ -1666,7 +1665,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
 
      call orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
-       & lmn_size_max,nband_k,pawang,pawrad,pawtab)
+       & lmn_size_max,nband_k,pawtab)
      orbmag_terms(1:3,om5,nn) = orbmag_terms(1:3,om5,nn) + REAL(ddijkn(1:3))*trnrm
 
    end do ! end loop over bands n
@@ -2196,40 +2195,59 @@ end subroutine make_pawrhoij
 !!
 !! SOURCE
 
-subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: lmn_size_max
  type(dataset_type),intent(in) :: dtset
- type(pawang_type),intent(in) :: pawang
 
  !arrays
  real(dp),intent(in) :: gprimd(3,3)
  complex(dpc),intent(out) :: dldij(dtset%natom,lmn_size_max,lmn_size_max,3)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawrhoij_type),intent(in) :: rhoij(dtset%natom)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
  !scalars
- integer :: iat,itypat
+ integer :: iat,itypat,l_max,l_size,ngnt
 
  !arrays
+ integer,allocatable :: gntselect(:,:)
+ real(dp),allocatable :: realgnt(:)
  complex(dpc),allocatable :: dldij_kinetic(:,:,:,:),dldij_vhnzc(:,:,:,:)
  complex(dpc),allocatable :: dldij_vhn1(:,:,:,:)
 
  !-----------------------------------------------------------------------
 
+ ! make our own set of gaunt coefficients, the standard set in pawang is not large enough
+ ! the additional factors of d phi/dk here introduce factors of r, proportional to S_1m,
+ ! therefore effectively one more unit of angular momentum than expected from the phi_i basis
+ l_size = 0
+ do itypat = 1, dtset%ntypat
+   if (pawtab(itypat)%l_size .GT. l_size) l_size = pawtab(itypat)%l_size
+ end do
+ ! pawtab contains l_size but not l_max, recall l_size = 2*l_max - 1
+ l_max = (l_size + 1)/2 + 1 ! increment l_max by one to account for additional angular momentum
+ ABI_MALLOC(gntselect,((2*l_max-1)**2,l_max**2*(l_max**2+1)/2))
+ ABI_MALLOC(realgnt,((2*l_max-1)**2*(l_max)**4))
+ call realgaunt(l_max,ngnt,gntselect,realgnt)
+
  ! Torrent iron term 1
  ABI_MALLOC(dldij_kinetic,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
- call make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+ call make_dldij_kinetic(dldij_kinetic,dtset,gntselect,gprimd,&
+   & l_max,lmn_size_max,pawrad,pawtab,realgnt)
 
  ! Torrent iron term 2b
  ABI_MALLOC(dldij_vhnzc,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
- call make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+ call make_dldij_vhnzc(dldij_vhnzc,dtset,gntselect,gprimd,&
+   & l_max,lmn_size_max,pawrad,pawtab,realgnt)
 
  ! Torrent iron term 2a
  ABI_MALLOC(dldij_vhn1,(dtset%natom,lmn_size_max,lmn_size_max,3))
+ call make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
+   & l_max,lmn_size_max,pawrad,pawtab,realgnt,rhoij)
 
  ! assemble terms
  ! terms 1 and 2b only vary by atom type
@@ -2238,172 +2256,174 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
  dldij = czero
  do iat = 1, dtset%natom
    itypat = dtset%typat(iat)
-   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_kinetic(itypat,:,:,:)
-   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
+   !dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_kinetic(itypat,:,:,:)
+   !dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhn1(iat,:,:,:)
  end do
 
  ABI_FREE(dldij_kinetic)
  ABI_FREE(dldij_vhnzc)
  ABI_FREE(dldij_vhn1)
+ ABI_FREE(gntselect)
+ ABI_FREE(realgnt)
 
 end subroutine make_dldij
 !!***
 
-!!!****f* ABINIT/make_dldij_vhn1
-!!! NAME
-!!! make_dldij_vhn1
-!!!
-!!! FUNCTION
-!!! Compute Dij term arising from <d\phi_i/dk|v_H[n^1]|\phi_j>
-!!!
-!!! COPYRIGHT
-!!! Copyright (C) 2003-2020 ABINIT  group
-!!! This file is distributed under the terms of the
-!!! GNU General Public License, see ~abinit/COPYING
-!!! or http://www.gnu.org/copyleft/gpl.txt .
-!!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!!
-!!! INPUTS
-!!!
-!!! OUTPUT
-!!!
-!!! SIDE EFFECTS
-!!!
-!!! TODO
-!!!
-!!! NOTES
-!!! Direct questions and comments to J Zwanziger
-!!!
-!!! PARENTS
-!!!
-!!! CHILDREN
-!!!
-!!! SOURCE
-!
-!subroutine make_dldij_vhn1(dldij_vhn1,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
-!
-! !Arguments ------------------------------------
-! !scalars
-! integer,intent(in) :: lmn_size_max
-! type(dataset_type),intent(in) :: dtset
-! type(pawang_type),intent(in) :: pawang
-!
-! !arrays
-! real(dp),intent(in) :: gprimd(3,3)
-! complex(dpc),intent(out) :: dldij_vhn1(dtset%natom,lmn_size_max,lmn_size_max,3)
-! type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-! type(pawrhoij_type),intent(in) :: rhoij(dtset%natom)
-! type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-!
-! !Local variables -------------------------
-! !scalars
-! integer :: adir,ignt,ijlm,il,im,ilm,ilmn,iln,imesh,itypat,jl,jm,jlm,jlmn,jln,lkmk,mesh_size
-! real(dp) :: c1,intg,the_gnt
-!
-! !arrays
-! integer,dimension(3) :: idirindx = (/4,2,3/)
-! complex(dpc) :: dlij_cart(3),dlij_red(3)
-! real(dp),allocatable :: ff(:)
-!
-! !-----------------------------------------------------------------------
-!
-! ! ilm = 1: S_{00}
-! ! ilm = 2: S_{1,-1}
-! ! ilm = 3: S_{1,0}
-! ! ilm = 4: S_{1,1}
-!
-! ! for the real spherical harmonics, 
-! ! S_{1,-1} \propto y 
-! ! S_{1,0} \propto z
-! ! S_{1,1} \propto  x
-! ! so adir 1 (x) gets mapped to ilm 4
-! ! so adir 2 (y) gets mapped to ilm 2
-! ! so adir 3 (z) gets mapped to ilm 3
-!
-! c1 = sqrt(four_pi/three)
-!
-! do iat = 1,dtset%natom
-!   itypat = dtset%typat(iat)
-!
-!   mesh_size = pawtab(itypat)%mesh_size
-!   ABI_MALLOC(ff,(mesh_size))
-!
-!   do ilmn=1,pawtab(itypat)%lmn_size
-!     il = pawtab(itypat)%indlmn(1,ilmn)
-!     im = pawtab(itypat)%indlmn(2,ilmn)
-!     ilm = pawtab(itypat)%indlmn(4,ilmn)
-!     iln = pawtab(itypat)%indlmn(5,ilmn)
-! 
-!     do jlmn=1,pawtab(itypat)%lmn_size
-!       jl = pawtab(itypat)%indlmn(1,jlmn)
-!       jm = pawtab(itypat)%indlmn(2,jlmn)
-!       jlm = pawtab(itypat)%indlmn(4,jlmn)
-!       jln = pawtab(itypat)%indlmn(5,jlmn)
-!
-!       dlij_cart = czero
-!       !! ijlm=max(jlm,ilm)*(max(jlm,ilm)-1)/2 + min(jlm,ilm)
-!
-!       do adir = 1, 3
-!
-!         one_alpha = idirindx(adir)
-!
-!         do isel = 1, rhoij(iat)%nrhoijsel
-!           klmn = rhoij(iat)%rhoijselect(isel)
-!           klm = pawtab(itypat)%indklmn(1,klmn)
-!
-!           do bigl = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn)
-!             do bigm = 1, 2*bigl+1
-!               biglm = bigl*bigl + bigm 
-!               ignt1 = pawang%gntselect(biglm,klm)
-!               if (ignt1 .EQ. 0) cycle
-!               gnt1 = pawang%realgnt(ignt1)
-!
-!               biglt_min = max(abs(il-1),abs(bigl-jl))
-!               biglt_max = min((il+1),(bigl+jl))
-!
-!               do biglt = biglt_min, biglt_max
-!                 do bigmt = 1, 2*biglt + 1
-!                   bigltmt = biglt*biglt + bigmt
-!                   ignt2 =pawang%gntselect(bigltmt,)
-!                   if (ignt2 .EQ. 0) cycle
-!                   ignt3 = pawang%gntselect(bigltmt,)
-!                   if (ignt3 .EQ. 0) cycle
-!                   gnt2 = pawang%realgnt(ignt2)
-!                   gnt3 = pawang%realgnt(ignt3)
-!
-!                   radial_integral = one
-!
-!         ignt = pawang%gntselect(lkmk,ijlm)
-!         if (ignt .EQ. 0) cycle
-!         the_gnt = pawang%realgnt(ignt)
-!
-!         do imesh = 2, mesh_size
-!           ff(imesh) = pawtab(itypat)%phi(imesh,iln)*pawtab(itypat)%phi(imesh,jln)*&
-!             & pawtab(itypat)%VHnZC(imesh)
-!           ff(imesh) = ff(imesh) - pawtab(itypat)%tphi(imesh,iln)*pawtab(itypat)%tphi(imesh,jln)*&
-!             & pawtab(itypat)%vhtnzc(imesh)
-!           ff(imesh) = ff(imesh)*pawrad(itypat)%rad(imesh)
-!         end do
-!         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-!         call simp_gen(intg,ff,pawrad(itypat))
-!
-!         dlij_cart(adir) = j_dpc*c1*the_gnt*intg 
-!
-!       end do ! end loop over adir
-!
-!       ! convert from cartesian axes to reduced coords
-!       dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
-!       dldij_vhnzc(itypat,ilmn,jlmn,1:3) = dlij_red(1:3)
-!       
-!     end do ! end loop over ilmn
-!   end do ! end loop over jlmn
-!
-!   ABI_FREE(ff)
-!
-! end do ! end loop over ntypat
-!
-!end subroutine make_dldij_vhnzc
-!!!***
+!!****f* ABINIT/make_dldij_vhn1
+!! NAME
+!! make_dldij_vhn1
+!!
+!! FUNCTION
+!! Compute Dij term arising from <d\phi_i/dk|v_H[n^1]|\phi_j>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
+    & l_max,lmn_size_max,pawrad,pawtab,realgnt,rhoij)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: l_max,lmn_size_max
+ type(dataset_type),intent(in) :: dtset
+
+ !arrays
+ integer,intent(in) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(in) :: gprimd(3,3),realgnt((2*l_max-1)**2*(l_max)**4)
+ complex(dpc),intent(out) :: dldij_vhn1(dtset%natom,lmn_size_max,lmn_size_max,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawrhoij_type),intent(in) :: rhoij(dtset%natom)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,bl,bm,blm,iat,ignt1,ignt2,ignt3,i1a,il,ilm,ilmn,iln,isel,itypat
+ integer :: jl,jlm,jlmn,jln,klmn,klm,mesh_size,my_ngnt
+ integer :: mp_1a_lm,mp_blm_jlm,my_l_size,tl,tlm,tl_min,tl_max,tm
+ real(dp) :: c1,c2,intg,gnt1,gnt2,gnt3,rrhoij
+
+ !arrays
+ integer,dimension(3) :: idirindx = (/4,2,3/)
+ complex(dpc) :: dlij_cart(3),dlij_red(3)
+ real(dp),allocatable :: ff(:)
+
+ !-----------------------------------------------------------------------
+
+ ! ilm = 1: S_{00}
+ ! ilm = 2: S_{1,-1}
+ ! ilm = 3: S_{1,0}
+ ! ilm = 4: S_{1,1}
+
+ ! for the real spherical harmonics, 
+ ! S_{1,-1} \propto y 
+ ! S_{1,0} \propto z
+ ! S_{1,1} \propto  x
+ ! so adir 1 (x) gets mapped to ilm 4
+ ! so adir 2 (y) gets mapped to ilm 2
+ ! so adir 3 (z) gets mapped to ilm 3
+
+ c1 = sqrt(four_pi/three)
+
+ do iat = 1,dtset%natom
+   itypat = dtset%typat(iat)
+
+   mesh_size = pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+
+   do ilmn=1,pawtab(itypat)%lmn_size
+     il =  pawtab(itypat)%indlmn(1,ilmn)
+     ilm = pawtab(itypat)%indlmn(4,ilmn)
+     iln = pawtab(itypat)%indlmn(5,ilmn)
+ 
+     do jlmn=1,pawtab(itypat)%lmn_size
+       jl =  pawtab(itypat)%indlmn(1,jlmn)
+       jlm = pawtab(itypat)%indlmn(4,jlmn)
+       jln = pawtab(itypat)%indlmn(5,jlmn)
+
+       dlij_cart = czero
+
+       do adir = 1, 3
+
+         i1a = idirindx(adir)
+         mp_1a_lm = MATPACK(i1a,ilm)
+
+         do isel = 1, rhoij(iat)%nrhoijsel
+           klmn = rhoij(iat)%rhoijselect(isel)
+           klm = pawtab(itypat)%indklmn(1,klmn)
+           if (rhoij(iat)%cplex_rhoij .EQ. 2) then
+             rrhoij = rhoij(iat)%rhoijp(2*isel-1,1)
+           else
+             rrhoij = rhoij(iat)%rhoijp(isel,1)
+           end if
+
+           do bl = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn)
+             c2 = four_pi/(two*bl+one)
+             do bm = 1, 2*bl+1
+               blm = bl*bl + bm 
+               mp_blm_jlm = MATPACK(blm,jlm)
+               ignt1 = gntselect(blm,klm)
+               if (ignt1 .EQ. 0) cycle
+               gnt1 = realgnt(ignt1)
+
+               tl_min = max(abs(il-1),abs(bl-jl))
+               tl_max = min((il+1),(bl+jl))
+
+               do tl = tl_min, tl_max
+                 do tm = 1, 2*tl + 1
+                   tlm = tl*tl+tm
+                   ignt2 = gntselect(tlm,mp_1a_lm)
+                   ignt3 = gntselect(tlm,mp_blm_jlm)
+                   if ( (ignt2 .EQ. 0) .OR. (ignt3 .EQ. 0) ) cycle
+                   gnt2 = realgnt(ignt2)
+                   gnt3 = realgnt(ignt3)
+
+                   intg = one
+
+                   dlij_cart(adir) = dlij_cart(adir) + &
+                     & j_dpc*c1*(two*rrhoij)*gnt1*gnt2*gnt3*c2*intg
+                 end do ! end loop over bigmt
+               end do ! end loop over biglt
+             end do ! end loop over bigm
+           end do ! end loop over bigl
+         end do ! end loop over isel (rho_kl non-zero elements)
+
+       end do ! end loop over adir
+
+       ! convert from cartesian axes to reduced coords
+       dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+       dldij_vhn1(iat,ilmn,jlmn,1:3) = dlij_red(1:3)
+       
+     end do ! end loop over ilmn
+   end do ! end loop over jlmn
+
+   ABI_FREE(ff)
+
+ end do ! end loop over iat
+
+end subroutine make_dldij_vhn1
+!!***
 
 
 !!****f* ABINIT/make_dldij_vhnzc
@@ -2437,16 +2457,17 @@ end subroutine make_dldij
 !!
 !! SOURCE
 
-subroutine make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+subroutine make_dldij_vhnzc(dldij_vhnzc,dtset,gntselect,gprimd,&
+    & l_max,lmn_size_max,pawrad,pawtab,realgnt)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: lmn_size_max
+ integer,intent(in) :: l_max,lmn_size_max
  type(dataset_type),intent(in) :: dtset
- type(pawang_type),intent(in) :: pawang
 
  !arrays
- real(dp),intent(in) :: gprimd(3,3)
+ integer,intent(in) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(in) :: gprimd(3,3),realgnt((2*l_max-1)**2*(l_max)**4)
  complex(dpc),intent(out) :: dldij_vhnzc(dtset%ntypat,lmn_size_max,lmn_size_max,3)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2505,9 +2526,9 @@ subroutine make_dldij_vhnzc(dldij_vhnzc,dtset,gprimd,lmn_size_max,pawang,pawrad,
        do adir = 1, 3
 
          lkmk = idirindx(adir)
-         ignt = pawang%gntselect(lkmk,ijlm)
+         ignt = gntselect(lkmk,ijlm)
          if (ignt .EQ. 0) cycle
-         the_gnt = pawang%realgnt(ignt)
+         the_gnt = realgnt(ignt)
 
          do imesh = 2, mesh_size
            ff(imesh) = pawtab(itypat)%phi(imesh,iln)*pawtab(itypat)%phi(imesh,jln)*&
@@ -2569,16 +2590,17 @@ end subroutine make_dldij_vhnzc
 !!
 !! SOURCE
 
-subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab)
+subroutine make_dldij_kinetic(dldij_kinetic,dtset,gntselect,gprimd,&
+    & l_max,lmn_size_max,pawrad,pawtab,realgnt)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: lmn_size_max
+ integer,intent(in) :: l_max,lmn_size_max
  type(dataset_type),intent(in) :: dtset
- type(pawang_type),intent(in) :: pawang
 
  !arrays
- real(dp),intent(in) :: gprimd(3,3)
+ integer,intent(in) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(in) :: gprimd(3,3),realgnt((2*l_max-1)**2*(l_max)**4)
  complex(dpc),intent(out) :: dldij_kinetic(dtset%ntypat,lmn_size_max,lmn_size_max,3)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2639,9 +2661,9 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gprimd,lmn_size_max,pawang,paw
        do adir = 1, 3
 
          lkmk = idirindx(adir)
-         ignt = pawang%gntselect(lkmk,ijlm)
+         ignt = gntselect(lkmk,ijlm)
          if (ignt .EQ. 0) cycle
-         the_gnt = pawang%realgnt(ignt)
+         the_gnt = realgnt(ignt)
 
          do imesh = 2, mesh_size
            rr = pawrad(itypat)%rad(imesh)
@@ -2711,13 +2733,12 @@ end subroutine make_dldij_kinetic
 !! SOURCE
 
 subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
-    & iband,lmn_size_max,nband_k,pawang,pawrad,pawtab)
+    & iband,lmn_size_max,nband_k,pawtab)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: iband,lmn_size_max,nband_k
  type(dataset_type),intent(in) :: dtset
- type(pawang_type),intent(in) :: pawang
 
  !arrays
  integer,intent(in) :: atindx(dtset%natom)
@@ -2725,7 +2746,6 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
  complex(dpc),intent(in) :: dldij(dtset%natom,lmn_size_max,lmn_size_max,3)
  complex(dpc),intent(out) :: ddijkn(3)
  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k),cprj1_k(dtset%natom,nband_k,3)
- type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------

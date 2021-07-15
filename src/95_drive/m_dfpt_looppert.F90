@@ -2195,7 +2195,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      vtrial_local = vtrial
      call orbmag_ddk(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-       & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
+       & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,&
        & vtrial_local,xred,ylm,ylmgr)
 
      if( ALLOCATED(vtrial_local) ) then
