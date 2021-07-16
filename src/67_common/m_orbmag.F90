@@ -2256,8 +2256,8 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
  dldij = czero
  do iat = 1, dtset%natom
    itypat = dtset%typat(iat)
-   !dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_kinetic(itypat,:,:,:)
-   !dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_kinetic(itypat,:,:,:)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhn1(iat,:,:,:)
  end do
 
@@ -2319,15 +2319,16 @@ subroutine make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bl,bm,blm,iat,ignt1,ignt2,ignt3,i1a,il,ilm,ilmn,iln,isel,itypat
- integer :: jl,jlm,jlmn,jln,klmn,klm,mesh_size,my_ngnt
- integer :: mp_1a_lm,mp_blm_jlm,my_l_size,tl,tlm,tl_min,tl_max,tm
- real(dp) :: c1,c2,intg,gnt1,gnt2,gnt3,rrhoij
+ integer :: adir,bl,bm,blm,iat,ignt1,ignt2,ignt3,ijlmn,ijln,i1a,il,ilm,ilmn,iln,imesh,imeshp,isel,itypat
+ integer :: jl,jlm,jlmn,jln,klmn,klm,kln,mesh_size,my_ngnt
+ integer :: mp_1a_lm,mp_blm_jlm,mp_ilmn_jlmn,tl,tlm,tl_min,tl_max,tm
+ real(dp) :: c1,c2,intg,intgpl,intgph,intgplt,intgpht,gnt1,gnt2,gnt3,rr,rrp,rrp1,rrl,rrlr,rrhoij
 
  !arrays
  integer,dimension(3) :: idirindx = (/4,2,3/)
  complex(dpc) :: dlij_cart(3),dlij_red(3)
- real(dp),allocatable :: ff(:)
+ real(dp),allocatable :: ff(:),ffpl(:),ffplt(:),ffph(:),ffpht(:),intgstore(:,:,:)
+ logical,allocatable :: has_intg(:,:,:)
 
  !-----------------------------------------------------------------------
 
@@ -2349,76 +2350,140 @@ subroutine make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
  do iat = 1,dtset%natom
    itypat = dtset%typat(iat)
 
+   ABI_MALLOC(has_intg,(pawtab(itypat)%lmn2_size,pawtab(itypat)%lmn2_size,pawtab(itypat)%l_size))
+   has_intg = .FALSE.
+   ABI_MALLOC(intgstore,(pawtab(itypat)%lmn2_size,pawtab(itypat)%lmn2_size,pawtab(itypat)%l_size))
+   intgstore = zero
+
    mesh_size = pawtab(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
+   ABI_MALLOC(ffpl,(mesh_size))
+   ABI_MALLOC(ffph,(mesh_size))
+   ABI_MALLOC(ffplt,(mesh_size))
+   ABI_MALLOC(ffpht,(mesh_size))
 
-   do ilmn=1,pawtab(itypat)%lmn_size
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     ilmn = pawtab(itypat)%indklmn(7,ijlmn)
+     jlmn = pawtab(itypat)%indklmn(8,ijlmn)
+     ilm  = pawtab(itypat)%indklmn(5,ijlmn)
+     jlm  = pawtab(itypat)%indklmn(6,ijlmn)
+     ijln = pawtab(itypat)%indklmn(2,ijlmn)
+     
      il =  pawtab(itypat)%indlmn(1,ilmn)
-     ilm = pawtab(itypat)%indlmn(4,ilmn)
-     iln = pawtab(itypat)%indlmn(5,ilmn)
+     jl =  pawtab(itypat)%indlmn(1,jlmn)
  
-     do jlmn=1,pawtab(itypat)%lmn_size
-       jl =  pawtab(itypat)%indlmn(1,jlmn)
-       jlm = pawtab(itypat)%indlmn(4,jlmn)
-       jln = pawtab(itypat)%indlmn(5,jlmn)
+     dlij_cart = czero
 
-       dlij_cart = czero
+     do adir = 1, 3
 
-       do adir = 1, 3
+       i1a = idirindx(adir)
+       mp_1a_lm = MATPACK(i1a,ilm)
 
-         i1a = idirindx(adir)
-         mp_1a_lm = MATPACK(i1a,ilm)
+       do isel = 1, rhoij(iat)%nrhoijsel
+         klmn = rhoij(iat)%rhoijselect(isel)
+         klm = pawtab(itypat)%indklmn(1,klmn)
+         kln = pawtab(itypat)%indklmn(2,klmn)
+         if (rhoij(iat)%cplex_rhoij .EQ. 2) then
+           rrhoij = rhoij(iat)%rhoijp(2*isel-1,1)
+         else
+           rrhoij = rhoij(iat)%rhoijp(isel,1)
+         end if
 
-         do isel = 1, rhoij(iat)%nrhoijsel
-           klmn = rhoij(iat)%rhoijselect(isel)
-           klm = pawtab(itypat)%indklmn(1,klmn)
-           if (rhoij(iat)%cplex_rhoij .EQ. 2) then
-             rrhoij = rhoij(iat)%rhoijp(2*isel-1,1)
-           else
-             rrhoij = rhoij(iat)%rhoijp(isel,1)
-           end if
+         do bl = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn)
+           c2 = four_pi/(two*bl+one)
 
-           do bl = pawtab(itypat)%indklmn(3,klmn), pawtab(itypat)%indklmn(4,klmn)
-             c2 = four_pi/(two*bl+one)
-             do bm = 1, 2*bl+1
-               blm = bl*bl + bm 
-               mp_blm_jlm = MATPACK(blm,jlm)
-               ignt1 = gntselect(blm,klm)
-               if (ignt1 .EQ. 0) cycle
-               gnt1 = realgnt(ignt1)
+           do bm = 1, 2*bl+1
+             blm = bl*bl + bm 
+             ignt1 = gntselect(blm,klm)
+             if (ignt1 .EQ. 0) cycle
+             gnt1 = realgnt(ignt1)
 
-               tl_min = max(abs(il-1),abs(bl-jl))
-               tl_max = min((il+1),(bl+jl))
+             mp_blm_jlm = MATPACK(blm,jlm)
 
-               do tl = tl_min, tl_max
-                 do tm = 1, 2*tl + 1
-                   tlm = tl*tl+tm
-                   ignt2 = gntselect(tlm,mp_1a_lm)
-                   ignt3 = gntselect(tlm,mp_blm_jlm)
-                   if ( (ignt2 .EQ. 0) .OR. (ignt3 .EQ. 0) ) cycle
-                   gnt2 = realgnt(ignt2)
-                   gnt3 = realgnt(ignt3)
+             tl_min = max(abs(il-1),abs(bl-jl))
+             tl_max = min((il+1),(bl+jl))
 
-                   intg = one
+             do tl = tl_min, tl_max
+               do tm = 1, 2*tl + 1
+                 tlm = tl*tl+tm
+                 ignt2 = gntselect(tlm,mp_1a_lm)
+                 ignt3 = gntselect(tlm,mp_blm_jlm)
+                 if ( (ignt2 .EQ. 0) .OR. (ignt3 .EQ. 0) ) cycle
+                 gnt2 = realgnt(ignt2)
+                 gnt3 = realgnt(ignt3)
 
-                   dlij_cart(adir) = dlij_cart(adir) + &
-                     & j_dpc*c1*(two*rrhoij)*gnt1*gnt2*gnt3*c2*intg
-                 end do ! end loop over bigmt
-               end do ! end loop over biglt
-             end do ! end loop over bigm
-           end do ! end loop over bigl
-         end do ! end loop over isel (rho_kl non-zero elements)
+                 if ( .NOT. has_intg(ijlmn,klmn,bl+1)) then
+                   do imesh = 2, mesh_size
+                     rr = pawrad(itypat)%rad(imesh)
+                     rrl =rr**bl
+                     rrlr = one/(rr*rrl)
 
-       end do ! end loop over adir
+                     do imeshp = 2, imesh
+                       rrp = pawrad(itypat)%rad(imeshp)
+                       rrp1 = rrp**bl
+                       ffpl(imeshp)  = rrp1*pawtab(itypat)%phiphj(imeshp,kln)
+                       ffplt(imeshp) = rrp1*pawtab(itypat)%tphitphj(imeshp,kln)
+                       ffph(imeshp) = zero
+                       ffpht(imeshp) = zero
+                     end do
+                     do imeshp = imesh+1, mesh_size
+                       rrp = pawrad(itypat)%rad(imeshp)
+                       rrp1 = one/(rrp**(bl+1))
+                       ffpl(imeshp) = zero
+                       ffplt(imeshp) = zero
+                       ffph(imeshp)  = pawtab(itypat)%phiphj(imeshp,kln)*rrp1
+                       ffpht(imeshp) = pawtab(itypat)%tphitphj(imeshp,kln)*rrp1
+                     end do
+                     call pawrad_deducer0(ffpl,mesh_size,pawrad(itypat))
+                     call pawrad_deducer0(ffplt,mesh_size,pawrad(itypat))
+                     call pawrad_deducer0(ffph,mesh_size,pawrad(itypat))
+                     call pawrad_deducer0(ffpht,mesh_size,pawrad(itypat))
 
-       ! convert from cartesian axes to reduced coords
-       dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
-       dldij_vhn1(iat,ilmn,jlmn,1:3) = dlij_red(1:3)
+                     call simp_gen(intgpl,ffpl,pawrad(itypat),rr)
+                     call simp_gen(intgplt,ffplt,pawrad(itypat),rr)
+                     call simp_gen(intgph,ffph,pawrad(itypat),rr)
+                     call simp_gen(intgpht,ffpht,pawrad(itypat),rr)
+
+                     ff(imesh) = rr*pawtab(itypat)%phiphj(imesh,ijln)*&
+                       & (intgpl*rrlr + intgph*rrl)
+                     ff(imesh) = ff(imesh) - rr*pawtab(itypat)%tphitphj(imesh,ijln)*&
+                       &(intgplt*rrlr + intgpht*rrl)
+                   end do
+
+                   call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+                   call simp_gen(intg,ff,pawrad(itypat))
+
+                   intgstore(ijlmn,klmn,bl+1) = intg
+                   has_intg(ijlmn,klmn,bl+1) = .TRUE.
+
+                 end if
+
+                 dlij_cart(adir) = dlij_cart(adir) + &
+                   & j_dpc*c1*pawtab(itypat)%dltij(klmn)*rrhoij*gnt1*gnt2*gnt3*c2*intgstore(ijlmn,klmn,bl+1)
+
+               end do ! end loop over bigmt
+             end do ! end loop over biglt
+           end do ! end loop over bigm
+         end do ! end loop over bigl
+       end do ! end loop over isel (rho_kl non-zero elements)
+
+     end do ! end loop over adir
+
+     ! convert from cartesian axes to reduced coords
+     dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+     dldij_vhn1(iat,ilmn,jlmn,1:3) = dlij_red(1:3)
+     dldij_vhn1(iat,jlmn,ilmn,1:3) = dlij_red(1:3)
        
-     end do ! end loop over ilmn
-   end do ! end loop over jlmn
+   end do ! end loop over ijlmn
+
+   ABI_FREE(has_intg)
+   ABI_FREE(intgstore)
 
    ABI_FREE(ff)
+   ABI_FREE(ffpl)
+   ABI_FREE(ffph)
+   ABI_FREE(ffplt)
+   ABI_FREE(ffpht)
 
  end do ! end loop over iat
 
