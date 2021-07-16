@@ -2436,13 +2436,12 @@ subroutine make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
                      end do
                      call pawrad_deducer0(ffpl,mesh_size,pawrad(itypat))
                      call pawrad_deducer0(ffplt,mesh_size,pawrad(itypat))
-                     call pawrad_deducer0(ffph,mesh_size,pawrad(itypat))
-                     call pawrad_deducer0(ffpht,mesh_size,pawrad(itypat))
+                     ffph(1) = zero; ffpht(1) = zero
 
-                     call simp_gen(intgpl,ffpl,pawrad(itypat),rr)
-                     call simp_gen(intgplt,ffplt,pawrad(itypat),rr)
-                     call simp_gen(intgph,ffph,pawrad(itypat),rr)
-                     call simp_gen(intgpht,ffpht,pawrad(itypat),rr)
+                     call simp_gen(intgpl,ffpl,pawrad(itypat))
+                     call simp_gen(intgplt,ffplt,pawrad(itypat))
+                     call simp_gen(intgph,ffph,pawrad(itypat))
+                     call simp_gen(intgpht,ffpht,pawrad(itypat))
 
                      ff(imesh) = rr*pawtab(itypat)%phiphj(imesh,ijln)*&
                        & (intgpl*rrlr + intgph*rrl)
