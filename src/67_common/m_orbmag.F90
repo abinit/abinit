@@ -57,6 +57,7 @@ module m_orbmag
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
   use m_pawang,           only : pawang_type
+  use m_paw_denpot,       only : pawdensities
   use m_pawfgr,           only : pawfgr_type
   use m_paw_dmft,         only : init_sc_dmft,paw_dmft_type,destroy_dmft
   use m_paw_ij,           only : paw_ij_type
@@ -184,6 +185,7 @@ module m_orbmag
   private :: make_dldij
   private :: make_dldij_kinetic
   private :: make_dldij_vhnzc
+  private :: make_dldij_vxc
   private :: make_dldij_vhn1
   private :: make_onsite_l_k_n
   private :: make_onsite_bm_k_n
@@ -1355,7 +1357,7 @@ end subroutine make_rhorij1_k_n
 !! SOURCE
 
 subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
+    & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
     & xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -1364,6 +1366,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
+ type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
 
@@ -1524,7 +1527,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  end do
 
  ABI_MALLOC(dldij,(dtset%natom,lmn_size_max,lmn_size_max,3))
- call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
+ call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
 
  icg = 0
  ikg = 0
@@ -2195,12 +2198,13 @@ end subroutine make_pawrhoij
 !!
 !! SOURCE
 
-subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
+subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: lmn_size_max
  type(dataset_type),intent(in) :: dtset
+ type(pawang_type),intent(in) :: pawang
 
  !arrays
  real(dp),intent(in) :: gprimd(3,3)
@@ -2217,7 +2221,7 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
  integer,allocatable :: gntselect(:,:)
  real(dp),allocatable :: realgnt(:)
  complex(dpc),allocatable :: dldij_kinetic(:,:,:,:),dldij_vhnzc(:,:,:,:)
- complex(dpc),allocatable :: dldij_vhn1(:,:,:,:)
+ complex(dpc),allocatable :: dldij_vxc(:,:,:,:),dldij_vhn1(:,:,:,:)
 
  !-----------------------------------------------------------------------
 
@@ -2248,6 +2252,11 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
  ABI_MALLOC(dldij_vhn1,(dtset%natom,lmn_size_max,lmn_size_max,3))
  call make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
    & l_max,lmn_size_max,pawrad,pawtab,realgnt,rhoij)
+ 
+ ! Torrent iron term 3a
+ ABI_MALLOC(dldij_vxc,(dtset%natom,lmn_size_max,lmn_size_max,3))
+ call make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
+    & pawang,pawrad,rhoij,pawtab,realgnt)
 
  ! assemble terms
  ! terms 1 and 2b only vary by atom type
@@ -2259,11 +2268,13 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawrad,pawtab,rhoij)
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_kinetic(itypat,:,:,:)
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhn1(iat,:,:,:)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vxc(iat,:,:,:)
  end do
 
  ABI_FREE(dldij_kinetic)
  ABI_FREE(dldij_vhnzc)
  ABI_FREE(dldij_vhn1)
+ ABI_FREE(dldij_vxc)
  ABI_FREE(gntselect)
  ABI_FREE(realgnt)
 
@@ -2488,6 +2499,121 @@ subroutine make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
 
 end subroutine make_dldij_vhn1
 !!***
+
+!!****f* ABINIT/make_dldij_vxc
+!! NAME
+!! make_dldij_vxc
+!!
+!! FUNCTION
+!! Compute Dij term arising from <d\phi_i/dk|v_xc[n1+nc]|\phi_j>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
+    & pawang,pawrad,pawrhoij,pawtab,realgnt)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: l_max,lmn_size_max
+ type(dataset_type),intent(in) :: dtset
+ type(pawang_type),intent(in) :: pawang
+
+ !arrays
+ integer,intent(in) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(in) :: gprimd(3,3),realgnt((2*l_max-1)**2*(l_max)**4)
+ complex(dpc),intent(out) :: dldij_vxc(dtset%natom,lmn_size_max,lmn_size_max,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawrhoij_type),intent(in) :: pawrhoij(dtset%natom)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: cplex,iat,itypat,lm_size
+ integer :: mesh_size,nzlmopt,opt_compch,opt_dens,opt_l,opt_print
+ real(dp) :: c1,compch_sph
+
+ !arrays
+ integer,dimension(3) :: idirindx = (/4,2,3/)
+ complex(dpc) :: dlij_cart(3),dlij_red(3)
+ real(dp),allocatable :: ff(:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+ logical,allocatable :: lmselectin(:),lmselectout(:)
+
+ !-----------------------------------------------------------------------
+
+ ! ilm = 1: S_{00}
+ ! ilm = 2: S_{1,-1}
+ ! ilm = 3: S_{1,0}
+ ! ilm = 4: S_{1,1}
+
+ ! for the real spherical harmonics, 
+ ! S_{1,-1} \propto y 
+ ! S_{1,0} \propto z
+ ! S_{1,1} \propto  x
+ ! so adir 1 (x) gets mapped to ilm 4
+ ! so adir 2 (y) gets mapped to ilm 2
+ ! so adir 3 (z) gets mapped to ilm 3
+
+ c1 = sqrt(four_pi/three)
+
+ do iat = 1, dtset%natom
+   itypat = dtset%typat(iat)
+
+   mesh_size = pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+
+   lm_size = (pawtab(itypat)%l_size)**2
+   cplex = pawrhoij(iat)%qphase
+   opt_compch = 0
+   opt_dens = 1 ! compute only all electron and pseudo, no nhat
+   opt_l = -1 ! all l moments contribute
+   opt_print = 1
+   ABI_MALLOC(lmselectin,(lm_size))
+   nzlmopt = -1
+   lmselectin=.TRUE.
+   ABI_MALLOC(lmselectout,(lm_size))
+   ABI_MALLOC(nhat1,(cplex*mesh_size,lm_size,dtset%nspden*(1-((opt_dens+1)/2))))
+   ABI_MALLOC(rho1,(cplex*mesh_size,lm_size,dtset%nspden))
+   ABI_MALLOC(trho1,(cplex*mesh_size,lm_size,dtset%nspden*(1-(opt_dens/2))))
+   call pawdensities(compch_sph,cplex,iat,lmselectin,lmselectout,lm_size,nhat1,dtset%nspden,&
+     & nzlmopt,opt_compch,opt_dens,opt_l,opt_print,pawang,dtset%pawprtvol,&
+     & pawrad(itypat),pawrhoij(iat),pawtab(itypat),rho1,trho1)
+
+   ABI_FREE(lmselectin)
+   ABI_FREE(lmselectout)
+   ABI_FREE(nhat1)
+   ABI_FREE(rho1)
+   ABI_FREE(trho1)
+   ABI_FREE(ff)
+
+ end do ! end loop over iat
+
+ dldij_vxc = czero
+
+end subroutine make_dldij_vxc
+!!***
+
 
 
 !!****f* ABINIT/make_dldij_vhnzc
