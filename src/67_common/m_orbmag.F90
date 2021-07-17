@@ -2538,7 +2538,7 @@ subroutine make_dldij_vhnzc(dldij_vhnzc,dtset,gntselect,gprimd,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,ignt,ijlm,il,im,ilm,ilmn,iln,imesh,itypat,jl,jm,jlm,jlmn,jln,lkmk,mesh_size
+ integer :: adir,ignt,ijlmn,ijlm,ijln,ilmn,imesh,itypat,jlmn,mesh_size,s1a
  real(dp) :: c1,intg,the_gnt
 
  !arrays
@@ -2573,47 +2573,38 @@ subroutine make_dldij_vhnzc(dldij_vhnzc,dtset,gntselect,gprimd,&
    mesh_size = pawtab(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
 
-   do jlmn=1,pawtab(itypat)%lmn_size
-     jl = pawtab(itypat)%indlmn(1,jlmn)
-     jm = pawtab(itypat)%indlmn(2,jlmn)
-     jlm = pawtab(itypat)%indlmn(4,jlmn)
-     jln = pawtab(itypat)%indlmn(5,jlmn)
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     ilmn = pawtab(itypat)%indklmn(7,ijlmn)
+     jlmn = pawtab(itypat)%indklmn(8,ijlmn)
+     ijlm = pawtab(itypat)%indklmn(1,ijlmn)
+     ijln = pawtab(itypat)%indklmn(2,ijlmn)
 
-     do ilmn=1,pawtab(itypat)%lmn_size
-       il = pawtab(itypat)%indlmn(1,ilmn)
-       im = pawtab(itypat)%indlmn(2,ilmn)
-       ilm = pawtab(itypat)%indlmn(4,ilmn)
-       iln = pawtab(itypat)%indlmn(5,ilmn)
+     dlij_cart = czero
+     do adir = 1, 3
 
-       ijlm=MATPACK(jlm,ilm)
-       dlij_cart = czero
-       do adir = 1, 3
+       s1a = idirindx(adir)
+       ignt = gntselect(s1a,ijlm)
+       if (ignt .EQ. 0) cycle
+       the_gnt = realgnt(ignt)
 
-         lkmk = idirindx(adir)
-         ignt = gntselect(lkmk,ijlm)
-         if (ignt .EQ. 0) cycle
-         the_gnt = realgnt(ignt)
+       do imesh = 2, mesh_size
+         ff(imesh) = (pawtab(itypat)%phiphj(imesh,ijln)*pawtab(itypat)%VHnZC(imesh) - &
+           & pawtab(itypat)%tphitphj(imesh,ijln)*pawtab(itypat)%vhtnzc(imesh)) * &
+           & pawrad(itypat)%rad(imesh)
+       end do
+       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+       call simp_gen(intg,ff,pawrad(itypat))
 
-         do imesh = 2, mesh_size
-           ff(imesh) = pawtab(itypat)%phi(imesh,iln)*pawtab(itypat)%phi(imesh,jln)*&
-             & pawtab(itypat)%VHnZC(imesh)
-           ff(imesh) = ff(imesh) - pawtab(itypat)%tphi(imesh,iln)*pawtab(itypat)%tphi(imesh,jln)*&
-             & pawtab(itypat)%vhtnzc(imesh)
-           ff(imesh) = ff(imesh)*pawrad(itypat)%rad(imesh)
-         end do
-         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-         call simp_gen(intg,ff,pawrad(itypat))
+       dlij_cart(adir) = j_dpc*c1*the_gnt*intg 
 
-         dlij_cart(adir) = j_dpc*c1*the_gnt*intg 
+     end do ! end loop over adir
 
-       end do ! end loop over adir
-
-       ! convert from cartesian axes to reduced coords
-       dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
-       dldij_vhnzc(itypat,ilmn,jlmn,1:3) = dlij_red(1:3)
+     ! convert from cartesian axes to reduced coords
+     dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+     dldij_vhnzc(itypat,ilmn,jlmn,1:3) = dlij_red(1:3)
+     dldij_vhnzc(itypat,jlmn,ilmn,1:3) = dlij_red(1:3)
        
-     end do ! end loop over ilmn
-   end do ! end loop over jlmn
+   end do ! end loop over ijlmn
 
    ABI_FREE(ff)
 
