@@ -88,12 +88,12 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn,rfttype)
 !Local variables-------------------------------
 character(len=512) :: msg
 !scalars
- integer :: ii,iq,ir,irmax,jr,mm,nn,nq
+ integer :: iq,ir,irmax,jr,nq
  real(dp) :: arg,cc,dq,dr,fr,qmax,qq,r0tor1,r1torm,rmax,rmtoin,rn,rr,rstep
  logical :: begin_r0
 !arrays
  real(dp),allocatable :: ff(:),intg(:),rzf(:)
- real(dp) :: gg(0:2*mrgrid),fn(2,0:2*mrgrid),pp(2)
+ real(dp) :: fn(2,0:2*mrgrid),pp(2)
 
 ! *************************************************************************
 
@@ -223,61 +223,14 @@ character(len=512) :: msg
 
  case(2)  
 
-!       INTEGER, intent(in) :: L       ! Angular momentum of function
-!       INTEGER, intent(in) :: NR --> mrgrid ! Number of radial points
-!       real(dp),intent(in) :: RMAX--> rgrid(mrgrid)! Radius of last point
-!       real(dp),intent(in) :: F(0:NR)-->funr(mrgrid) ! Function to Fourier-transform
-!       real(dp),intent(out):: G(0:NR)-->funq(mqgrid) ! Fourier transform of F(r)
-!       ! Take care here since in ABINIT funr(0) and funq(0) are
-!       ! not defined!!!!  ---> NOW they are defined!
-! ! -------------------------------------------------------------------
-! 
-! ! ERRFFT is the typical truncation error in the FFT routine ---------
-!      real(dp),   PARAMETER ::    ERRFFT = 1.0E-8_dp ---> tol8
-! ! -------------------------------------------------------------------
-! 
-! ! Internal variable types and dimensions ----------------------------
-!      INTEGER  ::  I, IQ, IR, JR, M, MQ, N, NQ
-!      real(dp) ::  C, DQ, DR, FR, PI, R, RN, Q, QMAX
-!      real(dp) ::  GG(0:2*NR), FN(2,0:2*NR), P(2,0:L,0:L)
-! ! -------------------------------------------------------------------
-! 
-! ! Start time counter ------------------------------------------------
-! !    CALL TIMER_START( 'RADFFT' )
-! ! -------------------------------------------------------------------
-!    
-! ! Find some constants -----------------------------------------------
-!       PI = 4.D0 * ATAN( 1.D0 )
-        rmax = rgrid(mrgrid)
-        nq = mrgrid  !NQ = NR
-        dr = rgrid(mrgrid) / mrgrid !RMAX / NR
-        dq = pi / rmax
-        qmax = nq * dq
-        cc = dr / sqrt(2 * pi)
-! ! -------------------------------------------------------------------
-! 
-! ! Set up a complex polynomial such that the spherical Bessel function:
-! !   j_l(x) = Real( Sum_n( P(n,l) * x**n ) * exp(i*x) ) / x**(l+1)
+       rmax = rgrid(mrgrid)
+       nq = mrgrid  !NQ = NR
+       dr = rgrid(mrgrid) / mrgrid !RMAX / NR
+       dq = pi / rmax
+       qmax = nq * dq
+       cc = dr / sqrt(2 * pi)
        pp(1) =  0.0_dp
        pp(2) = -1.0_dp
-!     ! if (l.gt.0) then
-!     !   P(1,0,1) =  0.D0
-!     !   P(2,0,1) = -1.D0
-!     !   P(1,1,1) = -1.D0
-!     !   P(2,1,1) =  0.D0
-!     !   if (l.gt.1) then
-!     !     DO M = 2,L
-!     !     DO N = 0,M
-!     !     DO I = 1,2
-!     !       P(I,N,M) = 0.D0
-!     !       IF (N .LT. M) P(I,N,M) = P(I,N,M) + (2*M-1) * P(I,N,M-1)
-!     !       IF (N .GE. 2) P(I,N,M) = P(I,N,M) - P(I,N-2,M-2)
-!     !     ENDDO
-!     !     ENDDO
-!     !     ENDDO
-!     !   endif
-!     ! endif
-! C -------------------------------------------------------------------
 ! C Initialize accumulation array -------------------------------------
        do iq = 0,nq
          funq(iq) = 0.0_dp !gg(iq) = 0.0_dp
@@ -325,7 +278,6 @@ character(len=512) :: msg
          do iq = 1,nq
            qq = iq * dq
            funq(iq) = ( funq(iq) + fn(1,iq) ) / qq
-           !gg(iq) = ( gg(iq) + fn(1,iq) ) / qq
          end do
 ! 
 !       ENDDO
@@ -338,33 +290,9 @@ character(len=512) :: msg
          do ir = 1,mrgrid
            rr = ir * dr
            funq(0) = funq(0) + rr*rr * funr(ir)
-           !gg(0) = gg(0) + rr*rr * funr(ir)
          end do
          funq(0) = funq(0) * 2.0_dp * cc
-         !gg(0) = gg(0) * 2.0_dp * cc
      !  ENDIF
-! ! -------------------------------------------------------------------
-!  !   Direct integration for the smallest Q's ---------------------------
-!       IF (L.EQ.0) THEN
-!        mq = 0
-!       ELSE
-!         MQ = NQ * ERRFFT**(1.D0/L)
-!       ENDIF
-!      do iq = 1,MQ
-!        Q = IQ * DQ
-!        GG(IQ) = 0.D0
-!        DO IR = 1,NR
-!          R = IR * DR
-!          GG(IQ) = GG(IQ) + R*R * F(IR) * BESSPH(L,Q*R)
-!        ENDDO
-!        GG(IQ) = GG(IQ) * 2.D0 * C
-!      ENDDO
-! C -------------------------------------------------------------------
-! C Copy from local to output array -----------------------------------
-      ! do iq = 0,nq
-      !   gg(iq) = gg(iq)
-      ! end do
-
  case default 
    
    write(msg,'(2x,a,1x,i2)') " Unknown radial sine FFT type", rfttype
