@@ -57,6 +57,7 @@ module m_orbmag
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
   use m_pawang,           only : pawang_type
+  use m_pawxc,            only : pawxcm
   use m_paw_denpot,       only : pawdensities
   use m_pawfgr,           only : pawfgr_type
   use m_paw_dmft,         only : init_sc_dmft,paw_dmft_type,destroy_dmft
@@ -2551,13 +2552,16 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
  !Local variables -------------------------
  !scalars
  integer :: cplex,iat,itypat,lm_size
- integer :: mesh_size,nzlmopt,opt_compch,opt_dens,opt_l,opt_print
- real(dp) :: c1,compch_sph
+ integer :: mesh_size,my_pawxcdev,nkxc,nzlmopt,opt_compch,opt_dens,opt_l,opt_print
+ integer :: pawxcm_option,usecore,usexcnhat
+ real(dp) :: c1,compch_sph,enxc,enxcdc
+ logical :: non_magnetic_xc
 
  !arrays
  integer,dimension(3) :: idirindx = (/4,2,3/)
  complex(dpc) :: dlij_cart(3),dlij_red(3)
- real(dp),allocatable :: ff(:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+ real(dp),allocatable :: ff(:),kxc(:,:,:),nhat1(:,:,:),rho1(:,:,:),trho1(:,:,:)
+ real(dp),allocatable :: vxc1(:,:,:),vxct1(:,:,:)
  logical,allocatable :: lmselectin(:),lmselectout(:)
 
  !-----------------------------------------------------------------------
@@ -2600,11 +2604,31 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
      & nzlmopt,opt_compch,opt_dens,opt_l,opt_print,pawang,dtset%pawprtvol,&
      & pawrad(itypat),pawrhoij(iat),pawtab(itypat),rho1,trho1)
 
+   my_pawxcdev = 1
+   nkxc = 0
+   non_magnetic_xc = .FALSE.
+   pawxcm_option = 1 ! compute potential only
+   usecore = 1
+   usexcnhat = 0
+   ABI_MALLOC(vxc1,(mesh_size,lm_size,dtset%nspden))
+   ABI_MALLOC(kxc,(mesh_size,lm_size,nkxc))
+   call pawxcm(pawtab(itypat)%coredens,enxc,enxcdc,dtset%useexexch,dtset%ixc,kxc,lm_size,lmselectout,&
+     & nhat1,nkxc,non_magnetic_xc,mesh_size,dtset%nspden,pawxcm_option,pawang,pawrad(itypat),&
+     & my_pawxcdev,rho1,usecore,usexcnhat,vxc1,dtset%xclevel,dtset%xc_denpos)
+
+   ABI_MALLOC(vxct1,(mesh_size,lm_size,dtset%nspden))
+   call pawxcm(pawtab(itypat)%tcoredens,enxc,enxcdc,dtset%useexexch,dtset%ixc,kxc,lm_size,lmselectout,&
+     & nhat1,nkxc,non_magnetic_xc,mesh_size,dtset%nspden,pawxcm_option,pawang,pawrad(itypat),&
+     & my_pawxcdev,trho1,usecore,usexcnhat,vxct1,dtset%xclevel,dtset%xc_denpos)
+
    ABI_FREE(lmselectin)
    ABI_FREE(lmselectout)
    ABI_FREE(nhat1)
    ABI_FREE(rho1)
    ABI_FREE(trho1)
+   ABI_FREE(vxc1)
+   ABI_FREE(vxct1)
+   ABI_FREE(kxc)
    ABI_FREE(ff)
 
  end do ! end loop over iat
