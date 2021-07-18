@@ -2227,7 +2227,7 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
  !-----------------------------------------------------------------------
 
  ! make our own set of gaunt coefficients, the standard set in pawang is not large enough
- ! the additional factors of d phi/dk here introduce factors of r, proportional to S_1m,
+ ! the additional factors of d phi/dk_i here introduce factors of r_i, proportional to S_1i,
  ! therefore effectively one more unit of angular momentum than expected from the phi_i basis
  l_size = 0
  do itypat = 1, dtset%ntypat
@@ -2258,10 +2258,10 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
  ABI_MALLOC(dldij_vxc,(dtset%natom,lmn_size_max,lmn_size_max,3))
  call make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
     & pawang,pawrad,rhoij,pawtab,realgnt)
-
+ 
  ! assemble terms
  ! terms 1 and 2b only vary by atom type
- ! terms 2a vary by individual atom
+ ! terms 2a, 3a vary by individual atom
 
  dldij = czero
  do iat = 1, dtset%natom
@@ -2551,10 +2551,10 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
 
  !Local variables -------------------------
  !scalars
- integer :: cplex,iat,itypat,lm_size
- integer :: mesh_size,my_pawxcdev,nkxc,nzlmopt,opt_compch,opt_dens,opt_l,opt_print
- integer :: pawxcm_option,usecore,usexcnhat
- real(dp) :: c1,compch_sph,enxc,enxcdc
+ integer :: adir,bl,bm,blm,cplex,iat,ignt1,ignt2,ijlm,ijlmn,ijln,ilmn,imesh,itypat,jlmn,lm_size
+ integer :: mesh_size,mp_s1a_tlm,my_l_max,my_l_size,my_pawxcdev,nkxc,nzlmopt
+ integer :: opt_compch,opt_dens,opt_l,opt_print,pawxcm_option,s1a,tl,tm,tlm,usecore,usexcnhat
+ real(dp) :: c1,compch_sph,enxc,enxcdc,gnt1,gnt2,intg,rr
  logical :: non_magnetic_xc
 
  !arrays
@@ -2587,7 +2587,11 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
    mesh_size = pawtab(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
 
-   lm_size = (pawtab(itypat)%l_size)**2
+   ! pawtab contains l_size but not l_max, recall l_size = 2*l_max - 1
+   my_l_max = (pawtab(itypat)%l_size + 1)/2 + 1 ! increment l_max by one to account for additional angular momentum
+   my_l_size = 2*my_l_max - 1
+   !lm_size = (pawtab(itypat)%l_size)**2
+   lm_size = my_l_size**2
    cplex = pawrhoij(iat)%qphase
    opt_compch = 0
    opt_dens = 1 ! compute only all electron and pseudo, no nhat
@@ -2621,6 +2625,56 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
      & nhat1,nkxc,non_magnetic_xc,mesh_size,dtset%nspden,pawxcm_option,pawang,pawrad(itypat),&
      & my_pawxcdev,trho1,usecore,usexcnhat,vxct1,dtset%xclevel,dtset%xc_denpos)
 
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     ilmn = pawtab(itypat)%indklmn(7,ijlmn)
+     jlmn = pawtab(itypat)%indklmn(8,ijlmn)
+     ijlm = pawtab(itypat)%indklmn(1,ijlmn)
+     ijln = pawtab(itypat)%indklmn(2,ijlmn)
+
+     dlij_cart = czero
+
+     do tl = pawtab(itypat)%indklmn(3,ijlmn),pawtab(itypat)%indklmn(4,ijlmn)
+       do tm = 1, 2*tl+1
+         tlm = tl*tl+tm
+         ignt1 = gntselect(tlm,ijlm)
+         if (ignt1 .EQ. 0) cycle
+         gnt1 = realgnt(ignt1)
+
+         do adir = 1, 3 
+           s1a = idirindx(adir)
+
+           do bl = abs(tl-1),tl+1
+             do bm = 1, 2*bl+1
+               blm = bl*bl+bm
+               mp_s1a_tlm = MATPACK(s1a,tlm)
+               ignt2 = gntselect(blm,mp_s1a_tlm)
+               if ( (ignt2 .EQ. 0) .OR. ( .NOT. lmselectout(blm) ) ) cycle
+               gnt2 = realgnt(ignt2)
+
+               do imesh = 2, mesh_size
+                 rr = pawrad(itypat)%rad(imesh)
+                 ff(imesh) = rr*pawtab(itypat)%phiphj(imesh,ijln)*vxc1(imesh,blm,1) - &
+                   & rr*pawtab(itypat)%tphitphj(imesh,ijln)*vxct1(imesh,blm,1)
+               end do
+
+               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+               call simp_gen(intg,ff,pawrad(itypat))
+
+               dlij_cart(adir) = dlij_cart(adir) + j_dpc*c1*gnt1*gnt2*intg
+               
+             end do ! end loop over bm
+           end do ! end loop over bl
+         end do ! end loop over adir
+       end do ! end loop over tm
+     end do ! end loop over tl
+
+     ! convert from cartesian axes to reduced coords
+     dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+     dldij_vxc(iat,ilmn,jlmn,1:3) = dlij_red(1:3)
+     dldij_vxc(iat,jlmn,ilmn,1:3) = dlij_red(1:3)
+
+   end do ! end loop over ijlmn
+
    ABI_FREE(lmselectin)
    ABI_FREE(lmselectout)
    ABI_FREE(nhat1)
@@ -2632,8 +2686,6 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
    ABI_FREE(ff)
 
  end do ! end loop over iat
-
- dldij_vxc = czero
 
 end subroutine make_dldij_vxc
 !!***
@@ -3002,7 +3054,7 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
            cpj = cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc) 
 
            ! note that dldij is sorted by input atom order, like paw_ij
-           ddijterm = ddijterm + half*j_dpc*epsabg*( &
+           ddijterm = ddijterm + half*j_dpc*epsabg*dltij*( &
              & conjg(cpi)*dldij(iat,ilmn,jlmn,bdir)*(dup_g+udp_g) + &
              & conjg(dup_b+udp_b)*conjg(dldij(iat,jlmn,ilmn,gdir))*cpj)
 
