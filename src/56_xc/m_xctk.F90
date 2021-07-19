@@ -42,6 +42,7 @@ module m_xctk
 
  public :: xcden
  public :: xcpot
+ public :: xcpotdq
 !!***
 
 contains
@@ -87,7 +88,7 @@ contains
 !!      m_gammapositron,m_rhotoxc
 !!
 !! CHILDREN
-!!      fourdp,phase,ptabs_fourdp,timab
+!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 
@@ -388,7 +389,7 @@ end subroutine xcden
 !!      m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_newvtr,m_rhotoxc
 !!
 !! CHILDREN
-!!      fourdp,phase,ptabs_fourdp,timab
+!!      fourdp,ptabs_fourdp,timab
 !!
 !! SOURCE
 
@@ -694,6 +695,168 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
  end if ! End condition on ishift/ngrad
 
 end subroutine xcpot
+!!***
+
+!!****f* ABINIT/xcpotdq
+!! NAME
+!! xcpotdq
+!!
+!! FUNCTION
+!! Equivalent to xcpot for the q-derivative of the GGA xc kernel.
+!!
+!! INPUTS
+!!  agradn(cplex*nfft,nspgrad,3)=kxc(:,4)*gradrho(:,:)*gradrho(:,qdir)*rho1(*)
+!!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
+!!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
+!!  ishift : if ==0, do not shift the xc grid (usual case);
+!!           if ==1, shift the xc grid (not implemented) 
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ngrad : =1, only take into account derivative wrt the density ;
+!!          =2, also take into account derivative wrt the gradient of the density.
+!!  nspden=number of spin-density components
+!!  nspgrad=number of spin-density and spin-density-gradient components
+!!
+!! OUTPUT
+!!  vxc(cplex*nfft,nspden)]=q-derivative of the GGA xc potential.
+!!      At input already includes three terms. 
+!!
+!! PARENTS
+!!      m_dfpt_mkvxc
+!!
+!! CHILDREN
+!!      fourdp,ptabs_fourdp,timab
+!!
+!! SOURCE
+
+subroutine xcpotdq (agradn,cplex,gprimd,ishift,mpi_enreg, & 
+&    nfft,ngfft,ngrad,nspden,nspgrad,vxc) 
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,ishift,nfft,ngrad,nspden,nspgrad
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: agradn(cplex*nfft,nspgrad,3)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(inout) :: vxc(2*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,id1,id2,id3,idir,ifft,ig1,ig2,ig3,ispden,n1,n2,n3
+ real(dp),parameter :: lowden=1.d-14,precis=1.d-15
+ real(dp) :: gc23_idir,gcart_idir
+ character(len=500) :: message
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: gcart1(:),gcart2(:),gcart3(:)
+ real(dp),allocatable :: wkcmpx(:,:)
+ real(dp),allocatable :: work(:),workgr(:,:)
+
+! *************************************************************************
+
+ if (ishift/=0) then
+   write(message, '(a,i0)' )' ishift must be 0 ; input was',ishift
+   ABI_BUG(message)
+ end if
+
+ if (ngrad/=2) then
+   write(message, '(a,i0)' )' ngrad must be 2 ; input was',ngrad
+   ABI_BUG(message)
+ end if
+
+!Keep local copy of fft dimensions
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+
+!Initialize computation of G in cartesian coordinates
+ id1=n1/2+2  ; id2=n2/2+2  ; id3=n3/2+2
+
+ !Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ !Compute the real-space gradient of de second term
+ ABI_MALLOC(work,(cplex*nfft))
+ ABI_MALLOC(wkcmpx,(2,nfft))
+ ABI_MALLOC(workgr,(2,nfft))
+
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(nfft,wkcmpx)
+ do ifft=1,nfft
+   wkcmpx(:,ifft)=zero
+ end do
+
+! Obtain agradn(G)*phase in wkcmpx from input agradn(r)
+ ispden=1
+ ABI_MALLOC(gcart1,(n1))
+ ABI_MALLOC(gcart2,(n2))
+ ABI_MALLOC(gcart3,(n3))
+ do idir=1, 3
+
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,idir,agradn,ispden,nfft,work)
+   do ifft=1,cplex*nfft
+     work(ifft)=agradn(ifft,ispden,idir)
+   end do
+   call timab(82,1,tsec)
+   call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
+   call timab(82,2,tsec)
+  
+   do i1=1,n1
+     ig1=i1-(i1/id1)*n1-1
+     gcart1(i1)=gprimd(idir,1)*two_pi*dble(ig1)
+   end do
+  !Note that the G <-> -G symmetry must be maintained
+   if(mod(n1,2)==0) gcart1(n1/2+1)=zero
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+     gcart2(i2)=gprimd(idir,2)*two_pi*dble(ig2)
+   end do
+   if(mod(n2,2)==0) gcart2(n2/2+1)=zero
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gcart3(i3)=gprimd(idir,3)*two_pi*dble(ig3)
+   end do
+   if(mod(n3,2)==0) gcart3(n3/2+1)=zero
+  
+  ! !$OMP PARALLEL DO PRIVATE(ifft,i1,i2,i3,gc23_idir,gcart_idir) &
+  ! !$OMP&SHARED(gcart1,gcart2,gcart3,n1,n2,n3,wkcmpx,workgr)
+   ifft = 0
+   do i3=1,n3
+     do i2=1,n2
+       gc23_idir=gcart2(i2)+gcart3(i3)
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         do i1=1,n1
+           ifft=ifft+1
+           gcart_idir=gc23_idir+gcart1(i1)
+  !        Multiply by  -i 2pi G(idir) and accumulate in wkcmpx
+           wkcmpx(1,ifft)=wkcmpx(1,ifft)+gcart_idir*workgr(2,ifft)
+           wkcmpx(2,ifft)=wkcmpx(2,ifft)-gcart_idir*workgr(1,ifft)
+         end do
+       end if
+     end do
+   end do
+
+ end do
+
+ ABI_FREE(gcart1)
+ ABI_FREE(gcart2)
+ ABI_FREE(gcart3)
+ ABI_FREE(workgr)
+
+ call timab(82,1,tsec)
+ call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
+ call timab(82,2,tsec)
+!$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,vxc,work)
+ do ifft=1,nfft
+   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)+work(ifft)
+   !Apply here the two pi factor
+   vxc(2*ifft,ispden)=vxc(2*ifft,ispden)*two_pi
+ end do
+ ABI_FREE(wkcmpx)
+ ABI_FREE(work)
+
+end subroutine xcpotdq
 !!***
 
 end module m_xctk

@@ -126,7 +126,7 @@ contains
 !!      m_chi0,m_conducti,m_dfpt_looppert,m_ebands,m_gstate,m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -520,7 +520,7 @@ end subroutine getnel
 !!      m_ebands,m_gstate,m_respfn_driver,m_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1092,7 +1092,7 @@ end subroutine newocc
 !!      m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1643,7 +1643,7 @@ end subroutine init_occ_ent
 !!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1956,7 +1956,7 @@ end function occ_dbe
 !!      m_epjdos,m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 

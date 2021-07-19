@@ -123,9 +123,10 @@ contains
 !! 3-projector derivatives (abs(choice)>1) are not implemented yet
 !!
 !! PARENTS
-!!      nonlop_ylm_mv
+!!      m_nonlop_ylm
 !!
 !! CHILDREN
+!!      dgemv
 !!
 !! SOURCE
 

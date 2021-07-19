@@ -281,11 +281,11 @@ contains
 !!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
 !!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
 !!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      orbmag,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
-!!      setnoccmmp,spin_current,timab,total_energies,transgrid,write_energies
-!!      wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big
-!!      wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big
-!!      xcden,xmpi_sum,xred2xcart
+!!      orbmag_wf,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
+!!      scprqt,setnoccmmp,spin_current,timab,total_energies,transgrid
+!!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
+!!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
+!!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
