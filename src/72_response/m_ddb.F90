@@ -1060,7 +1060,7 @@ end subroutine ddb_read_block
 !! OUTPUT
 !! acell(3)=length scales of cell (bohr)
 !! amu(ntypat)=mass of the atoms (atomic mass unit)
-!! ddb : ddb blok datatype
+!! ddb: ddb blok datatype
 !!   contents: ddb%flg(msize,nblok)= flag of existence for each element of the DDB
 !!             ddb%nrm(3,nblok)  : blok wavevector normalization
 !!             ddb%qpt(9,nblok)  : blok wavevector (unnormalized)

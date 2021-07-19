@@ -21794,6 +21794,7 @@ Other options (again for testing purposes):
     1: --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
            This is the standard approach for polar materials.
     -1:  --> Remove LR model when building W(R,r). DO NOT reintroduce it after the Fourier interpolation.
+    2:   --> Similar to 1 but include only the dipole part. Q* are set to zero even if the DDB file contains them.
     4, 5, 6: --> Use model for the LR part only:
 
            4: --> Use dipole + quadrupole part

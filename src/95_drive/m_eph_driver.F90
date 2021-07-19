@@ -617,6 +617,14 @@ endif
      end if
    end if
 
+   if (dvdb%add_lr == 2) then
+      if (dvdb%has_quadrupoles) then
+        call wrtout(std_out, "dvdb_add_lr == 2 --> Quadrupoles are set to zero and won't be used in the interpolation")
+      end if
+      dvdb%has_quadrupoles = .False.
+      dvdb%qstar = zero
+   end if
+
    if (my_rank == master) then
      call dvdb%print()
      call dvdb%list_perts([-1, -1, -1], npert_miss)
