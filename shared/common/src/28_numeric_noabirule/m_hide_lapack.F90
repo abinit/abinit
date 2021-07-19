@@ -224,6 +224,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -321,6 +322,7 @@ end subroutine wrap_CHEEV
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -475,8 +477,10 @@ end subroutine wrap_ZHEEV
 !!          diagonal, is destroyed.
 !!
 !! PARENTS
+!!      m_ksdiago
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -670,6 +674,7 @@ end subroutine xheev_cplex
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -780,6 +785,7 @@ end subroutine wrap_CHPEV
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -952,6 +958,7 @@ end subroutine wrap_ZHPEV
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1141,8 +1148,10 @@ end subroutine wrap_ZHEGV
 !!          B = U**H*U or B = L*L**H if CPLEX=2
 !!
 !! PARENTS
+!!      m_ksdiago
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1410,6 +1419,7 @@ end subroutine xhegv_cplex
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1640,8 +1650,10 @@ end subroutine wrap_ZHEEVX
 !!          destroyed.
 !!
 !! PARENTS
+!!      m_ksdiago
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -1918,6 +1930,7 @@ end subroutine xheevx_cplex
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2179,8 +2192,10 @@ end subroutine wrap_ZHEGVX
 !!          U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
 !!
 !! PARENTS
+!!      m_ksdiago
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2420,6 +2435,7 @@ end subroutine xhegvx_cplex
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2538,6 +2554,7 @@ end subroutine wrap_CGEEV
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2625,6 +2642,7 @@ end subroutine wrap_ZGEEV
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2814,6 +2832,7 @@ end subroutine cginv
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -2957,6 +2976,7 @@ end subroutine zginv
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3090,6 +3110,7 @@ end subroutine zhpd_invert
 !!      m_mlwfovlp,m_paw_optics,m_symtk,m_vcoul,m_wfd_optic
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3211,6 +3232,7 @@ end subroutine matrginv
 !!      m_geometry
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3268,6 +3290,7 @@ end subroutine matr3eigval
 !!      m_bader,m_conducti
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3558,6 +3581,7 @@ END SUBROUTINE LUBKSB
 !!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -3747,6 +3771,7 @@ end subroutine dzgedi
 !!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 
@@ -4006,6 +4031,7 @@ end subroutine test_xginv
 !! PARENTS
 !!
 !! CHILDREN
+!!      dsysv,zhesv
 !!
 !! SOURCE
 

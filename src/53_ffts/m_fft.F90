@@ -183,7 +183,7 @@ CONTAINS  !===========================================================
 !!      m_argparse
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -217,7 +217,7 @@ end subroutine fft_allow_ialltoall
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -258,7 +258,7 @@ end subroutine fftbox_plan3
 !!      m_fft,m_fft_prof,m_oscillators,m_pawpwij
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -300,7 +300,7 @@ end subroutine fftbox_plan3_many
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -352,7 +352,7 @@ end subroutine fftbox_plan3_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -394,7 +394,7 @@ end subroutine fftbox_execute_ip_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -435,7 +435,7 @@ end subroutine fftbox_execute_ip_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -477,7 +477,7 @@ end subroutine fftbox_execute_op_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -528,7 +528,7 @@ end subroutine fftbox_execute_op_dpc
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -580,7 +580,7 @@ end subroutine fft_ug_dp
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -630,7 +630,7 @@ end subroutine fft_ug_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -686,7 +686,7 @@ end subroutine fft_ug_dpc
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -744,7 +744,7 @@ end subroutine fft_ur_dp
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -799,7 +799,7 @@ end subroutine fft_ur_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -849,7 +849,7 @@ end subroutine fft_ur_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -946,7 +946,7 @@ end subroutine fftpad_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1055,7 +1055,7 @@ end subroutine fftpad_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1114,7 +1114,7 @@ end subroutine fft_poisson
 !!      fftprof
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2266,13 +2266,13 @@ end function fftu_mpi_utests
 !!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
 !!
 !! PARENTS
-!!      m_cut3d,m_dfpt_mkrho,m_epjdos,m_fft_prof,m_fock,m_fock_getghc,m_getgh1c
-!!      m_getghc,m_gwls_hamiltonian,m_mkrho,m_mlwfovlp,m_orbmag,m_paw_mkaewf
-!!      m_paw_nhat,m_pead_nl_loop,m_positron,m_prep_kgb,m_spin_current
-!!      m_suscep_stat,m_tddft,m_vtowfk
+!!      m_cgwf_cprj,m_cut3d,m_dfpt_mkrho,m_epjdos,m_fft_prof,m_fock
+!!      m_fock_getghc,m_getgh1c,m_getghc,m_gwls_hamiltonian,m_mkrho,m_mlwfovlp
+!!      m_paw_mkaewf,m_paw_nhat,m_pead_nl_loop,m_positron,m_prep_kgb
+!!      m_spin_current,m_suscep_stat,m_tddft,m_vtowfk
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2936,7 +2936,7 @@ end subroutine fourwf
 !!      m_vtorhorec,m_xctk,mrgscr
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3341,7 +3341,7 @@ end subroutine fourdp
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3449,7 +3449,7 @@ end subroutine ccfft
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3582,7 +3582,7 @@ end subroutine fourdp_mpi
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4044,7 +4044,7 @@ end subroutine fourwf_mpi
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4119,7 +4119,7 @@ end subroutine fftmpi_u
 !!      m_prcref,m_respfn_driver,m_spacepar,m_stress
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4300,7 +4300,7 @@ end subroutine zerosym
 !!      m_kxc
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4426,12 +4426,12 @@ end subroutine fourdp_6d
 !!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
 !!
 !! PARENTS
-!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dft_energy
-!!      m_epjdos,m_fock_getghc,m_getgh1c,m_gwls_hamiltonian,m_io_kss,m_ksdiago
-!!      m_mkrho,m_orbmag,m_pead_nl_loop,m_suscep_stat,m_vtorho
+!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_epjdos
+!!      m_fock_getghc,m_getgh1c,m_gwls_hamiltonian,m_hamiltonian,m_mkrho
+!!      m_orbmag,m_pead_nl_loop,m_suscep_stat,m_vtorho
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4576,7 +4576,7 @@ end subroutine fftpac
 !!      m_fourier_interpol,m_prcref
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4696,8 +4696,10 @@ end subroutine indirect_parallel_Fourier
 !! FUNCTION
 !!
 !! PARENTS
+!!      m_gstate
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4718,6 +4720,7 @@ end subroutine fft_init_counters
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4736,8 +4739,10 @@ end subroutine fft_stop_counters
 !! FUNCTION
 !!
 !! PARENTS
+!!      m_gstate
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

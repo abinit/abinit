@@ -106,10 +106,10 @@ contains
 !! 3-projector derivatives (abs(choice)>1) are not implemented yet
 !!
 !! PARENTS
-!!      getcprj,nonlop_ylm
+!!      m_cgprj,m_nonlop_ylm
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
+!!      dgemv,timab,xmpi_sum
 !!
 !! SOURCE
 
