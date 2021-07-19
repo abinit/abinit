@@ -2177,8 +2177,8 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
    write(ount, '(a,i3,a)' ) ' The header contain ',hdr%npsp+2,' additional records.'
  else
    write(ount, '(a)' ) ' Third record :'
-   write(ount, '(a,(12i4,8x))') ' istwfk=',hdr%istwfk
-   write(ount, '(a,(12i4,8x))') ' nband =',hdr%nband
+   write(ount, '(a,(12i5,8x))') ' istwfk=',hdr%istwfk
+   write(ount, '(a,(12i5,8x))') ' nband =',hdr%nband
    write(ount, '(a,(10i5,8x))') ' npwarr=',hdr%npwarr
 
    write(ount, '(a,(12i4,8x))') ' so_psp=',hdr%so_psp(:)
