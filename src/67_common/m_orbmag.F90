@@ -188,6 +188,7 @@ module m_orbmag
   private :: make_dldij_vhnzc
   private :: make_dldij_vxc
   private :: make_dldij_vhn1
+  private :: make_dldij_nd
   private :: make_onsite_l_k_n
   private :: make_onsite_bm_k_n
   private :: make_rhorij1_k_n
@@ -2222,7 +2223,7 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
  integer,allocatable :: gntselect(:,:)
  real(dp),allocatable :: realgnt(:)
  complex(dpc),allocatable :: dldij_kinetic(:,:,:,:),dldij_vhnzc(:,:,:,:)
- complex(dpc),allocatable :: dldij_vxc(:,:,:,:),dldij_vhn1(:,:,:,:)
+ complex(dpc),allocatable :: dldij_vxc(:,:,:,:),dldij_vhn1(:,:,:,:),dldij_nd(:,:,:,:)
 
  !-----------------------------------------------------------------------
 
@@ -2259,6 +2260,12 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
  call make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
     & pawang,pawrad,rhoij,pawtab,realgnt)
  
+ ! Nuclear dipole term
+ ! this term may be zero by symmetry, need to investigate further
+ ABI_MALLOC(dldij_nd,(dtset%natom,lmn_size_max,lmn_size_max,3))
+ call make_dldij_nd(dldij_nd,dtset,gntselect,gprimd,l_max,lmn_size_max,&
+    & pawrad,pawtab,realgnt)
+ 
  ! assemble terms
  ! terms 1 and 2b only vary by atom type
  ! terms 2a, 3a vary by individual atom
@@ -2270,12 +2277,14 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhnzc(itypat,:,:,:)
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vhn1(iat,:,:,:)
    dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_vxc(iat,:,:,:)
+   dldij(iat,:,:,:) = dldij(iat,:,:,:) + dldij_nd(iat,:,:,:)
  end do
 
  ABI_FREE(dldij_kinetic)
  ABI_FREE(dldij_vhnzc)
  ABI_FREE(dldij_vhn1)
  ABI_FREE(dldij_vxc)
+ ABI_FREE(dldij_nd)
  ABI_FREE(gntselect)
  ABI_FREE(realgnt)
 
@@ -2500,6 +2509,151 @@ subroutine make_dldij_vhn1(dldij_vhn1,dtset,gntselect,gprimd,&
 
 end subroutine make_dldij_vhn1
 !!***
+
+!!****f* ABINIT/make_dldij_nd
+!! NAME
+!! make_dldij_nd
+!!
+!! FUNCTION
+!! Compute Dij term arising from <d\phi_i/dk|\alpha^2 mu.L/r^3 |\phi_j>, the
+!! nuclear dipole term
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dldij_nd(dldij_nd,dtset,gntselect,gprimd,l_max,lmn_size_max,&
+    & pawrad,pawtab,realgnt)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: l_max,lmn_size_max
+ type(dataset_type),intent(in) :: dtset
+
+ !arrays
+ integer,intent(in) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(in) :: gprimd(3,3),realgnt((2*l_max-1)**2*(l_max)**4)
+ complex(dpc),intent(out) :: dldij_nd(dtset%natom,lmn_size_max,lmn_size_max,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,bl,blm,bm,bmctr,iat,ignt,ijlmn,ijln,il,ilm,ilmn,im,imesh
+ integer :: jl,jm,jlmn,itypat,mp_s1a_ilm,mesh_size,s1a
+ real(dp) :: c1,gnt,intg,mu_nd,rr
+ complex(dpc) :: dldij_term,lms
+
+ !arrays
+ integer,dimension(3) :: idirindx = (/4,2,3/)
+ complex(dpc) :: dlij_cart(3),dlij_red(3)
+ real(dp),allocatable :: ff(:)
+
+ !-----------------------------------------------------------------------
+
+ ! ilm = 1: S_{00}
+ ! ilm = 2: S_{1,-1}
+ ! ilm = 3: S_{1,0}
+ ! ilm = 4: S_{1,1}
+
+ ! for the real spherical harmonics, 
+ ! S_{1,-1} \propto y 
+ ! S_{1,0} \propto z
+ ! S_{1,1} \propto  x
+ ! so adir 1 (x) gets mapped to ilm 4
+ ! so adir 2 (y) gets mapped to ilm 2
+ ! so adir 3 (z) gets mapped to ilm 3
+
+ c1 = sqrt(four_pi/three)
+ dldij_nd = czero
+
+ do iat = 1, dtset%natom
+
+   if ( .NOT. ANY(abs(dtset%nucdipmom(:,iat)) .GT. tol8) ) cycle
+   itypat = dtset%typat(iat)
+
+   mesh_size = pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     ilmn = pawtab(itypat)%indklmn(7,ijlmn)
+     jlmn = pawtab(itypat)%indklmn(8,ijlmn)
+     ijln = pawtab(itypat)%indklmn(2,ijlmn)
+
+     ilm = pawtab(itypat)%indklmn(5,ijlmn) 
+     il = pawtab(itypat)%indlmn(1,ilmn)
+     im = pawtab(itypat)%indlmn(2,ilmn)
+     jl = pawtab(itypat)%indlmn(1,jlmn)
+     jm = pawtab(itypat)%indlmn(2,jlmn)
+
+     do imesh = 2, mesh_size
+       rr = pawrad(itypat)%rad(imesh)
+       ff(imesh) = (pawtab(itypat)%phiphj(imesh,ijln) - &
+        &  pawtab(itypat)%tphitphj(imesh,ijln))/rr**2
+     end do
+     call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+     call simp_gen(intg,ff,pawrad(itypat))
+
+     dlij_cart = czero
+
+     do adir = 1, 3 
+       if (abs(dtset%nucdipmom(adir,iat)) .LT. tol8) cycle
+       mu_nd = dtset%nucdipmom(adir,iat)
+       s1a = idirindx(adir)
+       mp_s1a_ilm = MATPACK(s1a,ilm)
+
+       do bl = abs(il-1),il+1
+         if (bl .NE. jl) cycle
+         if (bl .EQ. 0) cycle
+         do bmctr = 1, 2*bl+1
+           blm = bl*bl+bmctr
+           ignt = gntselect(blm,mp_s1a_ilm)
+           if (ignt .EQ. 0) cycle
+           gnt = realgnt(ignt)
+           bm = bmctr - bl - 1
+           call slxyzs(bl,bm,adir,jl,jm,lms)
+
+           dldij_term = j_dpc*c1*FineStructureConstant2*mu_nd*gnt*lms*intg
+           dlij_cart(adir) = dlij_cart(adir) + dldij_term
+              
+         end do ! end loop over bm
+       end do ! end loop over bl
+     end do ! end loop over adir
+
+     ! convert from cartesian axes to reduced coords
+     dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+     dldij_nd(iat,ilmn,jlmn,1:3) = dlij_red(1:3)
+     dldij_nd(iat,jlmn,ilmn,1:3) = dlij_red(1:3)
+
+   end do ! end loop over ijlmn
+
+   ABI_FREE(ff)
+
+ end do ! end loop over iat
+
+end subroutine make_dldij_nd
+!!***
+
 
 !!****f* ABINIT/make_dldij_vxc
 !! NAME
