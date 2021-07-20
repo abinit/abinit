@@ -136,11 +136,11 @@ contains
 !!      dvdb%free,dvdb%interpolate_and_write,dvdb%list_perts,dvdb%open_read
 !!      dvdb%print,dvdb%write_v1qavg,ebands_free,ebands_prtbltztrp,ebands_write
 !!      efmas_ncread,efmasdeg_free_array,efmasval_free_array,eph_gkk
-!!      eph_phgamma,eph_phpi,ephtk_update_ebands,frohlichmodel,ifc%free
-!!      ifc%outphbtrap,ifc%print,ifc%printbxsf,ifc_init,ifc_mkphbs
+!!      eph_phgamma,eph_phpi,ephtk_update_ebands,frohlichmodel,ibte_driver
+!!      ifc%free,ifc%outphbtrap,ifc%print,ifc%printbxsf,ifc_init,ifc_mkphbs
 !!      init_distribfft_seq,initmpi_seq,mkphdos,ncwrite_v1qnu,pawfgr_destroy
 !!      pawfgr_init,phdos%free,phdos%ncwrite,phdos%print,print_ngfft,pspini
-!!      rta_driver,sigmaph,wfk0_hdr%free,wfk0_hdr%vs_dtset,wfk_read_eigenvalues
+!!      rta_driver,sigmaph,test_phrotation,wfk0_hdr%free,wfk0_hdr%vs_dtset
 !!      wfq_hdr%free,wrtout,xmpi_bcast
 !!
 !! SOURCE
