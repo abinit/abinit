@@ -1,3 +1,10 @@
+# Added by runtests.py
+output_file = "t34.abo"
+indata_prefix = "t34i"
+outdata_prefix = "t34o"
+tmpdata_prefix = "t34t"
+# end runtests.py section
+
 # Test for ionmov = 25 - hybrid Monte Carlo sampling
 # bcc Fe, low ecut, coarse kpt grid
 
@@ -32,13 +39,14 @@
   optcell 0        # no optimization of cell geometry 
   hmcsst  0        # number of strain steps (optimization of unit cell geometry)
   ntime   4        # number of HMC sweeps
+  nnos    1        # number ov nose hover thermostats
 
   kptopt   1
   ngkpt    2 2 2
   nshiftk  1
   shiftk   0.0  0.0  0.0
 
- pp_dirpath "$ABI_PSPDIR"
+ pp_dirpath "/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/Psps_for_tests/"
  pseudos "PseudosTM_pwteter/26fe.pspnc"
 
 #%%<BEGIN TEST_INFO>

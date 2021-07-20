@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.5.3 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 25 Feb 2021.
-- ( at 09h50 )
+.Starting date : Tue 20 Jul 2021.
+- ( at 10h58 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/mschmitt/abninit-git/abinit/tests/v8/Input/t14_sys.xml
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -44,6 +44,7 @@
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  4
+     fit_dispterms  1
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
@@ -72,8 +73,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t14_sys.xml
--Reading the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t14_sys.xml with LibXML library
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -160,13 +161,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t14_coeffs.xml with LibXML library
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_coeffs.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_coeffs.xml with LibXML library
 
 ================================================================================
 
 -Reading the training-set file :
--/home/mschmitt/abninit-git/abinit/tests/v8/Input/t13_HIST
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t13_HIST
 
 
 --------------------------------------------------------------------------------
@@ -179,26 +180,26 @@ dipdip_range         1         1         1
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372991533524820E-05
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     3           9.8851588852E-06  4.0003838705E-03  3.8455523719E-03  1.5483149867E-04
- 4     4           1.0270937376E-05  3.7876180836E-03  3.6336164702E-03  1.5400161341E-04
+ 3     3           9.8269210000E-06  3.9567590496E-03  3.8455243722E-03  1.1123467737E-04
+ 4     4           1.0210073497E-05  3.7452862503E-03  3.6335881317E-03  1.1169811858E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.8804979988E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2571058361E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8288686787E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0098977360E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.0270937376058839E-05
-   Forces+Stresses :   3.7876180836315470E-03
-   Forces          :   3.6336164702180920E-03
-   Stresses        :   1.5400161341345503E-04
+   Energy          :   1.0210073496606064E-05
+   Forces+Stresses :   3.7452862502799162E-03
+   Forces          :   3.6335881317023666E-03
+   Stresses        :   1.1169811857754943E-04
 
 
 ================================================================================
@@ -208,10 +209,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
 ================================================================================
 
-+Total cpu time      0.084  and wall time      0.237 sec
++Total cpu time      0.285  and wall time      0.338 sec
 
  multibinit : the run completed succesfully.
