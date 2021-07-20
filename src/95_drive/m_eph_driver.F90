@@ -483,8 +483,8 @@ if (iblock_quadrupoles == 0) then
  qdrp_cart=zero
  if (mtyp==33) then
    lwsym=1
-   call ddb_lw_copy(ddb,ddb_lw,mpert,dtset%natom,dtset%ntypat)
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
    call ddb_lw%free()
  end if
 endif
