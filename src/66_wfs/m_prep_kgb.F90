@@ -92,7 +92,7 @@ contains
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
 !!
 !! PARENTS
-!!      m_chebfi,m_dft_energy,m_lobpcgwf,m_lobpcgwf_old
+!!      m_chebfi,m_dft_energy,m_lobpcgwf,m_lobpcgwf_old,m_rmm_diis
 !!
 !! CHILDREN
 !!
@@ -589,7 +589,7 @@ end subroutine prep_getghc
 !! (if useylm=0, should have cpopt=-1)
 !!
 !! PARENTS
-!!      m_dft_energy,m_forstr,m_invovl,m_lobpcgwf,m_vtowfk
+!!      m_dft_energy,m_forstr,m_invovl,m_lobpcgwf,m_rmm_diis,m_vtowfk
 !!
 !! CHILDREN
 !!

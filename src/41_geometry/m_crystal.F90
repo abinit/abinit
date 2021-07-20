@@ -796,6 +796,7 @@ end subroutine crystal_print
 !! PARENTS
 !!
 !! CHILDREN
+!!      atomdata_from_znucl
 !!
 !! SOURCE
 

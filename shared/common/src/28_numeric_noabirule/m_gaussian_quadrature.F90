@@ -453,7 +453,7 @@ end subroutine cdgqf
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_efmas,m_frohlichmodel,m_gaussian_quadrature
+!!      m_efmas,m_frohlichmodel,m_gaussian_quadrature,m_gwrdm
 !!
 !! CHILDREN
 !!      imtqlx
