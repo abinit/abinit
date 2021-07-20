@@ -118,8 +118,8 @@ contains
 !!  cwaveprj(natom,my_nspinor*(1+cpopt)*ndat)= wave function projected on nl projectors (PAW only)
 !!
 !! PARENTS
-!!      m_cgwf,m_chebfi,m_dfpt_cgwf,m_dft_energy,m_getghc,m_gwls_hamiltonian
-!!      m_io_kss,m_ksdiago,m_lobpcgwf_old,m_orbmag,m_rf2
+!!      m_cgwf,m_cgwf_cprj,m_chebfi,m_dfpt_cgwf,m_dft_energy,m_getghc
+!!      m_gwls_hamiltonian,m_ksdiago,m_lobpcgwf_old,m_orbmag,m_rf2,m_rmm_diis
 !!
 !! CHILDREN
 !!      getghc,mkl_set_num_threads,omp_set_nested
@@ -897,7 +897,7 @@ end subroutine getghc
 !! integrated into that code, to simplify maintenance
 !!
 !! PARENTS
-!!      m_getghc
+!!      m_dfpt_vtowfk,m_getghc,m_vtowfk
 !!
 !! CHILDREN
 !!      getghc,mkl_set_num_threads,omp_set_nested

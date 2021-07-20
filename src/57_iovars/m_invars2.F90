@@ -107,9 +107,10 @@ contains
 !!      m_common
 !!
 !! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
+!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
+!!      timab,wrtout
 !!
 !! SOURCE
 
@@ -231,9 +232,10 @@ end subroutine invars2m
 !!      m_invars2
 !!
 !! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
+!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
+!!      timab,wrtout
 !!
 !! SOURCE
 
@@ -598,7 +600,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%gwgmcorr=intarr(1)
 
  ! RESPFN integer input variables (needed here to get the value of response)
- ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+ ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
  if(tread==1) dtset%rfasr=intarr(1)
 
@@ -625,6 +627,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
  if(tread==1) dtset%rfstrs=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs_ref',tread,'INT')
+ if(tread==1) dtset%rfstrs_ref=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfuser',tread,'INT')
  if(tread==1) dtset%rfuser=intarr(1)
