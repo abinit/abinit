@@ -46,7 +46,7 @@ tmpdata_prefix = "t34t"
   nshiftk  1
   shiftk   0.0  0.0  0.0
 
- pp_dirpath "/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/Psps_for_tests/"
+ pp_dirpath "$ABI_PSPDIR" 
  pseudos "PseudosTM_pwteter/26fe.pspnc"
 
 #%%<BEGIN TEST_INFO>
