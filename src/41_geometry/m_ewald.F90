@@ -75,7 +75,7 @@ contains
 !!      m_setvtr
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -99,7 +99,7 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
  real(dp) :: t1,term,zcut
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gcutoff(:)
 
@@ -153,9 +153,9 @@ if(icutcoul.eq.1) then
 !   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
 !   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
 !   if (ng > 20 .and. mod(ng,10)==0) then
-!      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
+!      write (msg,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
-!      ABI_WARNING(message)
+!      ABI_WARNING(msg)
 !   end if
    ii=1
    do ig3=-ng,ng
@@ -207,7 +207,7 @@ if(icutcoul.eq.1) then
                  summi=summi+zion(typat(ia))*sin(arg)
                end do
 
-!              The following two checks avoid an annoying underflow error message
+!              The following two checks avoid an annoying underflow error msg
                if (abs(summr)<1.d-16) summr=0.0_dp
                if (abs(summi)<1.d-16) summi=0.0_dp
 
@@ -270,9 +270,9 @@ if(icutcoul.eq.1) then
 !   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
 !   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
 !   if (nr > 20 .and. mod(nr,10)==0) then
-!      write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
+!      write (msg,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
 !&       " If you have a metal consider setting dipdip 0.  nr = ", nr
-!      ABI_WARNING(message)
+!      ABI_WARNING(msg)
 !   end if
 !
    do ir3=-nr,nr
@@ -362,8 +362,8 @@ if(icutcoul.eq.1) then
 !Length scale grads handled with stress tensor, ewald2
 
 !Output the final values of ng and nr
-! write(message, '(a,a,i4,a,i4)' )ch10,' ewald : nr and ng are ',nr,' and ',ng
-! call wrtout(std_out,message,'COLL')
+! write(msg, '(a,a,i4,a,i4)' )ch10,' ewald : nr and ng are ',nr,' and ',ng
+! call wrtout(std_out,msg,'COLL')
 
 end subroutine ewald
 !!***
@@ -402,7 +402,7 @@ end subroutine ewald
 !!      m_stress
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -630,8 +630,7 @@ end subroutine ewald2
 !! gmet(3,3) = metric in reciprocal space.
 !! gprim(3,3)=dimensionless primitive translations in reciprocal space
 !! natom=number of atoms in unit cell
-!! qphon(3)=phonon wavevector (same system of coordinates as the
-!!  reciprocal lattice vectors)
+!! qphon(3)=phonon wavevector (same system of coordinates as the reciprocal lattice vectors)
 !! rmet = metric in real space
 !! rprim(3,3)=dimensionless primitive translations in real space
 !! sumg0: if=1, the sum in reciprocal space must include g=0,
@@ -669,7 +668,7 @@ end subroutine ewald2
 !!      m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -689,7 +688,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: mr=10000,ny2_spline=1024*10
+ integer,parameter :: mr=10000
  integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj
  integer :: info,lwork,mu,newg,newr,ng,nr,nu,ng_expxq
  integer :: ewald_option
@@ -704,7 +703,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
  real(dp) :: minexparg,sigma_max
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
- character(len=700) :: message
+ character(len=700) :: msg
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
  real(dp) :: c3r(2*mr+1),cosqxred(natom),wdielt(3,3),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
@@ -732,7 +731,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  dipquad_=0; if(present(dipquad)) dipquad_=dipquad
  quadquad_=0; if(present(quadquad)) quadquad_=quadquad
 
- ! Deactivate real space sums for quadrupolar fileds or for dipdip=-1
+ ! Deactivate real space sums for quadrupolar fields or for dipdip = -1
  ewald_option = 0; if (present(option)) ewald_option = option
  if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
 
@@ -743,8 +742,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 ! initialize complex phase factors
  do ia = 1, natom
    arga = two_pi*( (qphon(1))*xred(1,ia)&
-&                 +(qphon(2))*xred(2,ia)&
-&                 +(qphon(3))*xred(3,ia) )
+                  +(qphon(2))*xred(2,ia)&
+                  +(qphon(3))*xred(3,ia) )
    exp2piqx(ia) = exp(arga*j_dpc)
  end do
  ng_expxq = 1000
@@ -797,19 +796,18 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    if (firstcall) then
      firstcall = .FALSE.
-     write(message, '(4a,f9.4,9a)' ) ch10,&
-    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, &
-    &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', ch10, &
-    &' One should check whether this choice leads to correct results for the specific system under study', &
-    &' and q-point grid.',ch10, &
-    &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', ch10, &
-    &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.', ch10
-     call wrtout([ab_out,std_out],message,'COLL')
+     write(msg, '(4a,f9.4,9a)' ) ch10,&
+    ' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, &
+    ' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', ch10, &
+    ' One should check whether this choice leads to correct results for the specific system under study', &
+    ' and q-point grid.',ch10, &
+    ' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', ch10, &
+    ' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.', ch10
+     call wrtout([ab_out,std_out], msg)
    end if
 
    !Internally eta is the square of the gaussians width
    eta=eta*eta
-
  end if
 
  inv4eta = one / four / eta
@@ -872,11 +870,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !          Skip q=0:
            if (gsq<1.0d-20) then
              if (sumg0==1) then
-               write(message,'(a,a,a,a,a)' )&
-&               'The phonon wavelength should not be zero :',ch10,&
-&               'there are non-analytical terms that cannot be treated.',ch10,&
-&               'Action: subtract this wavelength from the input file.'
-               ABI_ERROR(message)
+               write(msg,'(a,a,a,a,a)' )&
+               'The phonon wavelength should not be zero :',ch10,&
+               'there are non-analytical terms that cannot be treated.',ch10,&
+               'Action: subtract this wavelength from the input file.'
+               ABI_ERROR(msg)
              end if
 
            else
@@ -1006,14 +1004,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 & dielt(1,2)*dielt(2,1)*dielt(3,3)
 
  if(detdlt<tol6)then
-   write(message, '(a,es16.6,11a)' )&
-&   'The determinant of the dielectrix matrix, detdlt=',detdlt,' is smaller than 1.0d-6.',ch10,&
-&   'The use of the dipole-dipole model for interatomic force constants is not possible.',ch10,&
-&   'It is likely that you have not treated the electric field perturbations,',ch10,&
-&   'because you not are dealing with an insulator, so that',ch10,&
-&   'your dielectric matrix was simply set to zero in the Derivative DataBase.',ch10,&
-&   'Action: set the input variable dipdip to 0 .'
-   ABI_ERROR(message)
+   write(msg, '(a,es16.6,11a)' )&
+   'The determinant of the dielectrix matrix, detdlt=',detdlt,' is smaller than 1.0d-6.',ch10,&
+   'The use of the dipole-dipole model for interatomic force constants is not possible.',ch10,&
+   'It is likely that you have not treated the electric field perturbations,',ch10,&
+   'because you not are dealing with an insulator, so that',ch10,&
+   'your dielectric matrix was simply set to zero in the Derivative DataBase.',ch10,&
+   'Action: set the input variable dipdip to 0 .'
+   ABI_ERROR(msg)
  end if
 
  inv_detdlt = one / sqrt(detdlt)
@@ -1121,11 +1119,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  else
                    ! If zero denominator, the atoms should be identical
                    if (ia/=ib)then
-                     write(message, '(5a,i0,a,i0,a)' )&
+                     write(msg, '(5a,i0,a,i0,a)' )&
                        'The distance between two atoms seem to vanish.',ch10,&
                        'This is not allowed.',ch10,&
                        'Action: check the input for the atoms number',ia,' and',ib,'.'
-                     ABI_ERROR(message)
+                     ABI_ERROR(msg)
                    else
                      ! This is the correction when the atoms are identical
                      do nu=1,3

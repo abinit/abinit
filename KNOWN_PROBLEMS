@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv9.5.1 is for development
+The present release ABINITv9.5.3 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -91,6 +91,8 @@ Memory was not tested.
 
 ===============================================
 2. List of known problems
+
+(This list of known problem should gradually become obsolete. The new problems should be registered as issues on the ABINIT gitlab)
 
 All the problems are listed cumulatively.
 Those specific to version 8.0 are found at the end of this file

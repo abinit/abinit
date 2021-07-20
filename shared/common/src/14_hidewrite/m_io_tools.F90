@@ -227,7 +227,7 @@ end function file_exists
 !!  The specified file is deleted.
 !!
 !! PARENTS
-!!      ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
+!!      abinit,ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
 !!
 !! CHILDREN
 !!
@@ -937,6 +937,9 @@ end function iomode_from_fname
 !!  Set the value of the enforce_fortran__ global variable.
 !!
 !! PARENTS
+!!      abitk,m_argparse
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

@@ -79,6 +79,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -112,6 +113,7 @@ end subroutine efmasval_free
 !!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -158,6 +160,7 @@ end subroutine efmasval_free_array
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -191,6 +194,7 @@ end subroutine efmasdeg_free
 !!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -231,6 +235,7 @@ end subroutine efmasdeg_free
 !!      m_d2frnl
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -353,6 +358,7 @@ end subroutine efmasdeg_free
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -516,6 +522,7 @@ end subroutine print_efmas
 !!      m_eph_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -641,6 +648,7 @@ end subroutine print_efmas
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -844,6 +852,7 @@ end subroutine print_efmas
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -1120,6 +1129,7 @@ end subroutine print_efmas
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 

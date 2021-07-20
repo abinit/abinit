@@ -97,7 +97,7 @@ contains
 !!      m_ifc,m_kpts,m_tdep_psij,m_unittests
 !!
 !! CHILDREN
-!!      krank%free,wrtout
+!!      krank%free
 !!
 !! SOURCE
 
@@ -434,7 +434,7 @@ end subroutine symkpt
 !!      m_kpts,m_lgroup,m_unittests
 !!
 !! CHILDREN
-!!      krank%free,wrtout
+!!      krank%free
 !!
 !! SOURCE
 
@@ -679,11 +679,14 @@ end subroutine symkpt_new
 !!
 !! OUTPUT
 !! nkirred = number of irreducible k needed from list 1 (in)
-!! bz2ibz_smap = mapping of indices in list 2 with their irreducible origin in list 1, symop and timrev needed to transform them
+!! bz2ibz_smap = mapping of indices in list 2 with their irreducible origin in list 1,
+!!   symop and timrev needed to transform them
 !!
 !! PARENTS
+!!      m_wfk
 !!
 !! CHILDREN
+!!      krank%free
 !!
 !! SOURCE
 
@@ -800,7 +803,7 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
  end if ! End check on possibility of change
  !call cwtime_report(" ibz", cpu, wall, gflops)
 
- ! Initialize 
+ ! Initialize
  bz2kin_smap = 0
 
  ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk

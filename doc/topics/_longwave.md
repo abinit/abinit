@@ -59,7 +59,7 @@ lead to quantitatively and qualitatively different outcomes. On the other hand, 
 when the surface-specific part is accounted for, as done e.g. in [[cite:Stengel2014]].
 
 The longwave implementation is still under heavy development. To date it requires the use of norm-conserving 
-pseudopotentials without XC nonlinear core corrections and is limited to LDA XC functionals. 
+pseudopotentials without XC nonlinear core corrections and it can be used with LDA and GGA XC functionals. 
 The use of spherical harmonics for the nonlocal projectors is mandatory through the option [[useylm]]=1.   
 
 The following steps are required to perform a longwave DFPT calculation of the bulk flexoelectric tensor

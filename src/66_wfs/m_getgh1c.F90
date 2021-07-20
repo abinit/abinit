@@ -122,8 +122,7 @@ contains
 !!      m_phpi,m_rf2,m_sigmaph
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -277,9 +276,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
      weight=one ; tim_fourwf=4
      call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gh1c,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-&     use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      if(gs_hamkq%nspinor==2)then
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
@@ -289,9 +288,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          cwave_sp(2,ipw)=cwave(2,ipw+npw)
        end do
        call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave_sp,gh1c_sp,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+         gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+         npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+         use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !$OMP PARALLEL DO
        do ipw=1,npw1
          gh1c(1,ipw+npw1)=gh1c_sp(1,ipw)
@@ -300,7 +299,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_FREE(cwave_sp)
        ABI_FREE(gh1c_sp)
      end if
-   else ! Non-Collinear magnetism for nvloc=4
+   else
+     ! Non-Collinear magnetism for nvloc=4
      if (gs_hamkq%nspinor==2) then
        weight=one ; tim_fourwf=4
        ABI_MALLOC(gh1c1,(2,npw1))
@@ -308,29 +308,30 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_MALLOC(gh1c3,(2,npw1))
        ABI_MALLOC(gh1c4,(2,npw1))
        gh1c1(:,:)=zero; gh1c2(:,:)=zero; gh1c3(:,:)=zero ;  gh1c4(:,:)=zero
-       ABI_MALLOC(vlocal1_tmp,(rf_hamkq%cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6)) !SPr: notation/dimension corrected vlocal_tmp -> vlocal1_tmp
+       ABI_MALLOC(vlocal1_tmp,(rf_hamkq%cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+       !SPr: notation/dimension corrected vlocal_tmp -> vlocal1_tmp
        ABI_MALLOC(cwavef1,(2,npw))
        ABI_MALLOC(cwavef2,(2,npw))
        do ipw=1,npw
          cwavef1(1:2,ipw)=cwave(1:2,ipw)
          cwavef2(1:2,ipw)=cwave(1:2,ipw+npw)
        end do
-!      gh1c1=v11*phi1
+       ! gh1c1=v11*phi1
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-!      gh1c2=v22*phi2
+         gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+         npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+         use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+       ! gh1c2=v22*phi2
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+         gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+         npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+         use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_FREE(vlocal1_tmp)
        cplex1=2
        ABI_MALLOC(vlocal1_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-!      gh1c3=(re(v12)-im(v12))*phi1 => v^21*phi1
+       ! gh1c3=(re(v12)-im(v12))*phi1 => v^21*phi1
        if(rf_hamkq%cplex==1) then
          do i3=1,gs_hamkq%n6
            do i2=1,gs_hamkq%n5
@@ -341,8 +342,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end do
        else
-       !SPr: modified definition of local potential components for cplex=2 (see dotprod_vn)
-       !also, v21==v12* not always holds (e.g. magnetic field perturbation)
+         !SPr: modified definition of local potential components for cplex=2 (see dotprod_vn)
+         !also, v21==v12* not always holds (e.g. magnetic field perturbation)
          do i3=1,gs_hamkq%n6
            do i2=1,gs_hamkq%n5
              do i1=1,gs_hamkq%n4
@@ -353,10 +354,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        end if
        call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-!      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
+         gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+         npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+         use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+       ! gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
        if(rf_hamkq%cplex==1) then
          do i3=1,gs_hamkq%n6
            do i2=1,gs_hamkq%n5
@@ -377,13 +378,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        end if
        call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-&       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-&       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+         gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+         npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+         use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_FREE(vlocal1_tmp)
-!      Build gh1c from pieces
-!      gh1c_1 = (v11, v12) (psi1) matrix vector product
-!      gh1c_2 = (v12*,v22) (psi2)
+       ! Build gh1c from pieces
+       ! gh1c_1 = (v11, v12) (psi1) matrix vector product
+       ! gh1c_2 = (v12*,v22) (psi2)
        do ipw=1,npw1
          gh1c(1:2,ipw)     =gh1c1(1:2,ipw)+gh1c4(1:2,ipw)
          gh1c(1:2,ipw+npw1)=gh1c3(1:2,ipw)+gh1c2(1:2,ipw)
@@ -853,8 +854,7 @@ end subroutine getgh1c
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -956,8 +956,7 @@ end subroutine rf_transgrid_and_pack
 !!      m_ddk,m_dfpt_lwwf,m_dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1269,8 +1268,7 @@ end subroutine getgh1c_setup
 !!      m_dfpt_cgwf,m_dfpt_nstwf
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1323,7 +1321,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
    if (bands_treated_now(band_) == 0) cycle
    dcwavef_tmp = zero
 
-! distribute dcwavef_tmp to my band pool 
+! distribute dcwavef_tmp to my band pool
 ! everyone works on a single band s1cwave0 = <G|S^(1)|C_k>
    if (band_ == band) then
 !$OMP PARALLEL DO
@@ -1340,7 +1338,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 &   dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
 
 
-! sum all of the corrections 
+! sum all of the corrections
 ! dcwavef = Nprocband * <G|S^(1)|C_k> - Sum_{ALLj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
    call xmpi_sum(dcwavef_tmp,mpi_enreg%comm_band,ierr)
 
@@ -1440,8 +1438,7 @@ end subroutine getdc1
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1672,8 +1669,7 @@ end subroutine getgh1dqc
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1871,13 +1867,15 @@ end subroutine getgh1dqc_setup
 !! NOTES
 !! This codes only the DDK response for A.p, so effectively A_ipert|C>. The nuclear dipole Hamiltonian
 !! (to first order in the nuclear dipole strength) is A.p where in atomic units
-!! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space 
-!! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the 
+!! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space
+!! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the
 !! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
 !!
 !! PARENTS
+!!      m_dfpt_vtowfk,m_getgh1c
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1955,7 +1953,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
        call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
          & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
          & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
-       
+
        do idat=1,ndat
          do ipw=1,npw_k
            gh1ndc(1:2,ipw+(idat-1)*npw_k)=two_pi*FineStructureConstant2*ghc1(1:2,ipw+(idat-1)*npw_k)

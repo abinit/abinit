@@ -5454,6 +5454,8 @@ end subroutine wfd_plot_ur
 !! PARENTS
 !!
 !! CHILDREN
+!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
+!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
