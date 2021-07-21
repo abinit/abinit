@@ -113,6 +113,8 @@ MODULE m_results_gs
 !!!  real(dp) :: enxcdc   ! exchange-correlation double-counting energy (Hartree)
 !!!  real(dp) :: epaw     ! PAW spherical energy (Hartree)
 !!!  real(dp) :: epawdc   ! PAW spherical double-counting energy (Hartree)
+  real(dp) :: entropy_extfpmd ! Entropy contribution of the Extended FPMD model
+                              ! for high temperature simulations
   real(dp) :: etotal   ! total energy (Hartree)
                        ! for fixed occupation numbers (occopt==0,1,or 2):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl+PAW_spherical_part
@@ -251,9 +253,12 @@ CONTAINS
 !!  results_gs=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_mover_effpot,m_results_img
+!!      m_gstateimg,m_mover_effpot,m_results_img
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -284,6 +289,7 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
+ results_gs%entropy_extfpmd=zero
  results_gs%etotal =zero
  results_gs%fermie =zero
  results_gs%fermih =zero ! CP added for case occopt 9
@@ -352,6 +358,9 @@ end subroutine init_results_gs
 !! PARENTS
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -391,6 +400,7 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
+       results_gs(jj,ii)%entropy_extfpmd=zero
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
        results_gs(jj,ii)%fermih =zero ! CP added for occopt 9 cases
@@ -455,9 +465,12 @@ end subroutine init_results_gs_array
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_mover_effpot,m_results_img
+!!      m_gstateimg,m_mover_effpot,m_results_img
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -511,6 +524,9 @@ end subroutine destroy_results_gs
 !! PARENTS
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -573,9 +589,12 @@ end subroutine destroy_results_gs_array
 !!  results_gs_out=<type(results_gs_type)>=output results_gs datastructure
 !!
 !! PARENTS
-!!      m_results_img
+!!      m_gstateimg,m_results_img
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 
@@ -666,6 +685,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%deltae =results_gs_in%deltae
  results_gs_out%diffor =results_gs_in%diffor
  results_gs_out%entropy=results_gs_in%entropy
+ results_gs_out%entropy_extfpmd=results_gs_in%entropy_extfpmd
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
  results_gs_out%fermih =results_gs_in%fermih ! CP added for occopt 9
@@ -749,7 +769,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
 !  "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih",&
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "entropy_extfpmd", "etotal", "fermie", "fermih",&
 &  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"]) ! CP added fermih
  ! End CP modified
  NCF_CHECK(ncerr)
@@ -780,9 +800,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
 !&  datamode=.True.)
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih',&
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'entropy_extfpmd', 'etotal', 'fermie', 'fermih',&
 &  'nelect_extfpmd', 'residm', 'res2', 'shiftfactor_extfpmd'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih,&
+&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%entropy_extfpmd, res%etotal, res%fermie, res%fermih,&
 &  res%nelect_extfpmd, res%residm, res%res2, res%shiftfactor_extfpmd],&
 &  datamode=.True.)
  ! End CP modified
@@ -834,6 +854,9 @@ end function results_gs_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
+!!      stress_voigt_to_mat,ydoc%add_real,ydoc%add_real1d,ydoc%add_real2d
+!!      ydoc%add_reals,ydoc%add_string,ydoc%set_keys_to_string
+!!      ydoc%write_and_free
 !!
 !! SOURCE
 ! CP modified argument list

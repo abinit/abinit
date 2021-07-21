@@ -1372,7 +1372,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nsym1,dtset%ntypat,occ_rbz,&
 &   ph1d,dtset%prtbbb,psps,dtset%qptn,rhog,&
 &   rhor,rhor1,rmet,rprimd,symrc1,dtset%typat,ucvol,&
-&   wtk_rbz,xred,ylm,ylm1,ylmgr,ylmgr1)
+&   wtk_rbz,xred,ylm,ylm1,ylmgr,ylmgr1,&
+&   rfstrs_ref=dtset%rfstrs_ref)
  end if
 
 !Use of NSTPAW3 for NCPP (instead of DFPT_NSELT/DFPT_NSTDY) can be forced with userie=919
@@ -2394,6 +2395,7 @@ end subroutine dfpt_newvtr
 !!  ylm1(mpw1*mk1mem,mpsang*mpsang)= real spherical harmonics for each G and k+q point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical for each G and k point
 !!  ylmgr1(mpw1*mk1mem,3,mpsang*mpsang*useylm)= gradients of real spherical for each G and k+g point
+!! [rfstrs_ref]= if eq 1 the reference energy in vlocalstr is shited to the same valuea as in the FxE routines
 !!
 !! OUTPUT
 !!  blkflg(3,mpert,3,mpert)=flags for each element of the 2DTE (=1 if computed)
@@ -2422,7 +2424,8 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & ph1d,prtbbb,psps,qphon,rhog,&
 & rhor,rhor1,rmet,rprimd,symrc1,typat,ucvol,&
 & wtk_rbz,&
-& xred,ylm,ylm1,ylmgr,ylmgr1)
+& xred,ylm,ylm1,ylmgr,ylmgr1,&
+& rfstrs_ref)
 
 !Arguments -------------------------------
 !scalars
@@ -2431,6 +2434,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer,intent(in) :: mkmem,mpert,mpsang,mpw,mpw1,natom,nfft,nkpt_rbz
  integer,intent(in) :: nkxc,nspden,nspinor,nsppol,nsym1,ntypat
  integer,intent(in) :: prtbbb
+ integer,intent(in),optional :: rfstrs_ref
  real(dp),intent(in) :: ecut,ecutsm,effmass_free,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
@@ -2460,11 +2464,11 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ban2tot,bantot,bd2tot_index,bdtot_index
+ integer :: ban2tot,bantot,bd2tot_index,bdtot_index,g0term
  integer :: icg,icg1,idir1,ifft,ii,ikg,ikg1,ikpt,comm
  integer :: ilm,ipert1,ispden,isppol,istr1,istwf_k
  integer :: mbd2kpsp,mbdkpsp,me,n1,n2,n3,n3xccc,n4,n5,n6
- integer :: nband_k,nfftot,npw1_k,npw_k,option
+ integer :: nband_k,nfftot,npw1_k,npw_k,option,rfstrs_ref_
  logical :: nmxc=.false.
  real(dp) :: doti,dotr
  real(dp) :: wtk_k
@@ -2703,6 +2707,11 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  ABI_MALLOC(vhartr01,(nfft))
  xccc3d1(:)=zero
 
+!To compute Absolute Deformation Potentials toghether with FxE tensor
+!the reference has to be the same as in the FxE routines
+rfstrs_ref_=0; if (present(rfstrs_ref)) rfstrs_ref_=rfstrs_ref
+g0term=0; if (rfstrs_ref_==1) g0term=1
+
 !Double loop over strain perturbations
  do ipert1=natom+3,natom+4
    do idir1=1,3
@@ -2715,7 +2724,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 !    Get first-order local potential.
      call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfft,mpi_enreg,&
 &     psps%mqgrid_vl,natom,gs_hamk%nattyp,nfft,ngfft,ntypat,ph1d,psps%qgrid_vl,&
-&     ucvol,psps%vlspl,vpsp1)
+&     ucvol,psps%vlspl,vpsp1,g0term=g0term)
 
 !    Get first-order hartree potential.
      call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
