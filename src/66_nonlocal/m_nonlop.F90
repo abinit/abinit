@@ -325,8 +325,9 @@ contains
 !!
 !! PARENTS
 !!      m_cgwf,m_d2frnl,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_fock_getghc
-!!      m_forstr,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf,m_nonlop_test
-!!      m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_vtowfk
+!!      m_forstr,m_getchc,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf
+!!      m_nonlop_test,m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_rmm_diis
+!!      m_vtowfk,m_wfd
 !!
 !! CHILDREN
 !!      dotprod_g,gpu_nonlop

@@ -115,13 +115,11 @@ contains
 !!  Spin-orbit
 !!
 !! PARENTS
-!!      m_cgprj,m_cgwf,m_dfpt_mkrho,m_dfpt_nstwf,m_dfptnl_pert,m_ksdiago
-!!      m_orbmag,m_rf2_init,m_wfd
+!!      m_cgprj,m_cgwf,m_cgwf_cprj,m_dfpt_mkrho,m_dfpt_nstwf,m_dfptnl_pert
+!!      m_ksdiago,m_orbmag,m_rf2_init,m_wfd
 !!
 !! CHILDREN
-!!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
-!!      pawcprj_put,pawcprj_set_zero,ph1d3d,strconv,xmpi_allgather
-!!      xmpi_allgatherv,xmpi_alltoallv
+!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 
@@ -454,13 +452,11 @@ contains
 !!                                       Usually ncprj=natom
 !!
 !! PARENTS
-!!      m_berryphase_new,m_dfpt_looppert,m_extraprho,m_forstr,m_scfcv_core
-!!      m_vtorho
+!!      m_berryphase_new,m_dfpt_looppert,m_extraprho,m_forstr,m_gstate
+!!      m_positron,m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
-!!      pawcprj_put,pawcprj_set_zero,ph1d3d,strconv,xmpi_allgather
-!!      xmpi_allgatherv,xmpi_alltoallv
+!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 
@@ -991,8 +987,10 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      m_vtowfk
 !!
 !! CHILDREN
+!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 

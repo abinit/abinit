@@ -74,6 +74,8 @@ contains  !=====================================================
 !!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -138,6 +140,8 @@ end subroutine ephtk_set_phmodes_skip
 !!      m_phgamma,m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -205,6 +209,8 @@ end subroutine ephtk_set_pertables
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -293,6 +299,8 @@ end subroutine ephtk_mkqtabs
 !!      m_phgamma
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -356,6 +364,8 @@ end subroutine ephtk_gam_atm2qnu
 !!      m_sigmaph
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 
@@ -414,6 +424,8 @@ end subroutine ephtk_gkknu_from_atm
 !!      m_eph_driver,m_rta
 !!
 !! CHILDREN
+!!      ebands_apply_scissors,ebands_print,ebands_set_extrael,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,wrtout
 !!
 !! SOURCE
 

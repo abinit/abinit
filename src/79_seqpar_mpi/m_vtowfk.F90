@@ -153,7 +153,12 @@ contains
 !!      m_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
+!!      build_h,cg_hprotate_and_get_diag,cg_hrotate_and_get_diag,cgtk_fixphase
+!!      cgwf,cgwf_cprj,chebfi,cprj_rotate,cprj_update,cprj_update_oneband
+!!      cwtime,fourwf,getghc_nucdip,lobpcgwf,lobpcgwf2,meanvalue_g,mksubovl
+!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
+!!      prep_nonlop,pw_orthon,pw_orthon_cprj,rmm_diis,subdiago
+!!      subdiago_low_memory,timab,wrtout,xmpi_sum
 !!
 !! NOTES
 !!  The cprj are distributed over band and spinors processors.
