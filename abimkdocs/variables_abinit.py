@@ -6166,8 +6166,7 @@ the particular run-level (see discussion below).
 [[gw_nqlwl]] defines the number of directions in reciprocal space used to
 describe the non-analytical behaviour of the heads ($G = G'=0$) and the wings
 ($G=0$ or $G'=0$) of the dielectric matrix in the optical limit (i.e. for $q$
-tending to zero). The number of directions is specified by the additional
-variable [[gw_qlwl]].
+tending to zero). The number of directions is specified by the additional variable [[gw_qlwl]].
 
 When [[optdriver]] = 3, [[gw_nqlwl]] and **gw_qlwl** define the set of "small" $q$
 that will be calculated and stored in the final SCR file. Therefore, the two
@@ -6240,14 +6239,14 @@ value). This variable simplifies the specification of the list of kpoints and
 of the bands to be used for the computation of the quasi-particle corrections.
 The possible values are:
 
-  * 0 --> Compute the QP corrections only for the fundamental and the optical gap
+  * 0 --> Compute the QP corrections only for the fundamental and the direct gap
   * +num --> Compute the QP corrections for all the k-points in the irreducible zone,
      and include `num` bands above and below the Fermi level.
   * -num --> Compute the QP corrections for all the k-points in the irreducible zone.
      Include all occupied states and `num` empty states.
 
 The default value is 0 and is very handy for one-shot calculations. It is
-important to stress, however, that the position of the optical/fundamental
+important to stress, however, that the position of the direct/fundamental
 gaps is deduced from the energies computed on the k-mesh used for the WFK
 file. Therefore the computed gaps might differ from the correct ones that can
 only be obtained with an appropriate sampling of the irreducible zone.
@@ -17406,7 +17405,7 @@ Variable(
     mnemonics="Response Function with respect to STRainS with the energy REFerence at the average electrostatic potential",
     added_in_version="v9",
     text=r"""
-If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the reference energy placed at the average electrostatic potential. The later is the reference adopted in the longwave driver. First-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, in the calculation of absolute deformation potentials [[cite:Stengel2015]].   
+If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the reference energy placed at the average electrostatic potential. The later is the reference adopted in the longwave driver. First-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, in the calculation of absolute deformation potentials [[cite:Stengel2015]].
 """,
 ),
 
@@ -21376,7 +21375,8 @@ produced at the end of the ground-state calculation. Remember to set [[iomode]] 
 
 The form factors are needed to compute the matrix elements of the commutator [Vnl, r]
 of the non-local part of the (NC) pseudopotentials.
-This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo.
+This WFK file can therefore be used to perform optical and/or many-body calculations with external
+codes such as DP/EXC and Yambo.
 The option is ignored if PAW.
 
 !!! important
