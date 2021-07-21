@@ -1994,8 +1994,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
            end do
            WRITE(unit_xml,'(a)')''
          end do
+         WRITE(unit_xml,'("    </correction_strain_force>")')
        end if
-       WRITE(unit_xml,'("    </correction_strain_force>")')
        if (eff_pot%anharmonics_terms%has_strain_coupling) then
          do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
            WRITE(unit_xml,'("    <correction_force_constant units=""hartree/bohrradius**2"">")')
