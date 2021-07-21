@@ -184,6 +184,7 @@ module m_orbmag
   private :: orbmag_ddij_k_n
   private :: make_pawrhoij
   private :: make_dldij
+  private :: make_dlrij
   private :: make_dldij_kinetic
   private :: make_dldij_vhnzc
   private :: make_dldij_vxc
@@ -1411,7 +1412,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc) :: bckn(3,3),ddijkn(3),dqijkn(3),olkn(3),omdp(3),ompw(3)
- complex(dpc),allocatable :: dldij(:,:,:,:)
+ complex(dpc),allocatable :: dldij(:,:,:,:),dlrij(:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: rhoij(:)
 
@@ -1522,14 +1523,15 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
  call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
 
- ! compute first order Dij terms d/dk(left) Dij
+ ! compute first order Dij terms d/dk(left) Dij and bare d/dk(left) term for Berry
  lmn_size_max = 0
  do itypat=1,dtset%ntypat
    if (pawtab(itypat)%lmn_size .GT. lmn_size_max) lmn_size_max = pawtab(itypat)%lmn_size
  end do
 
  ABI_MALLOC(dldij,(dtset%natom,lmn_size_max,lmn_size_max,3))
- call make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
+ ABI_MALLOC(dlrij,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
+ call make_dldij(dldij,dlrij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
 
  icg = 0
  ikg = 0
@@ -1648,7 +1650,8 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
    do nn = 1, nband_k
 
-     call berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,nn,mcgk,nband_k,nattyp,npw_k,pawtab)
+     call berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dlrij,dtset,&
+       & gprimd,nn,lmn_size_max,mcgk,nband_k,nattyp,npw_k,pawtab)
      orbmag_terms(1:3,berrycurve_pw,nn) = orbmag_terms(1:3,berrycurve_pw,nn) + REAL(bckn(1:3,1))*trnrm
      orbmag_terms(1:3,berrycurve_qij,nn) = orbmag_terms(1:3,berrycurve_qij,nn) + REAL(bckn(1:3,2))*trnrm
      orbmag_terms(1:3,berrycurve_dij,nn) = orbmag_terms(1:3,berrycurve_dij,nn) + REAL(bckn(1:3,3))*trnrm
@@ -1738,6 +1741,7 @@ subroutine orbmag_ddk(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_FREE(kinpw)
  ABI_FREE(ph1d)
  ABI_FREE(dldij)
+ ABI_FREE(dlrij)
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
 
@@ -2200,7 +2204,7 @@ end subroutine make_pawrhoij
 !!
 !! SOURCE
 
-subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
+subroutine make_dldij(dldij,dlrij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij)
 
  !Arguments ------------------------------------
  !scalars
@@ -2211,6 +2215,7 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
  !arrays
  real(dp),intent(in) :: gprimd(3,3)
  complex(dpc),intent(out) :: dldij(dtset%natom,lmn_size_max,lmn_size_max,3)
+ complex(dpc),intent(out) :: dlrij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawrhoij_type),intent(in) :: rhoij(dtset%natom)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2239,6 +2244,9 @@ subroutine make_dldij(dldij,dtset,gprimd,lmn_size_max,pawang,pawrad,pawtab,rhoij
  ABI_MALLOC(gntselect,((2*l_max-1)**2,l_max**2*(l_max**2+1)/2))
  ABI_MALLOC(realgnt,((2*l_max-1)**2*(l_max)**4))
  call realgaunt(l_max,ngnt,gntselect,realgnt)
+
+ ! bare <phi|(r-R)_alpha|phi> term for Berry
+ call make_dlrij(dlrij,dtset,gntselect,gprimd,l_max,lmn_size_max,pawrad,pawtab,realgnt)
 
  ! Torrent iron term 1
  ABI_MALLOC(dldij_kinetic,(dtset%ntypat,lmn_size_max,lmn_size_max,3))
@@ -2844,6 +2852,122 @@ subroutine make_dldij_vxc(dldij_vxc,dtset,gntselect,gprimd,l_max,lmn_size_max,&
 end subroutine make_dldij_vxc
 !!***
 
+!!****f* ABINIT/make_dlrij
+!! NAME
+!! make_dlrij
+!!
+!! FUNCTION
+!! Compute ij term arising from <d\phi_i/dk|\phi_j> needed for Berry
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dlrij(dlrij,dtset,gntselect,gprimd,l_max,lmn_size_max,pawrad,pawtab,realgnt)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: l_max,lmn_size_max
+ type(dataset_type),intent(in) :: dtset
+
+ !arrays
+ integer,intent(in) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
+ real(dp),intent(in) :: gprimd(3,3),realgnt((2*l_max-1)**2*(l_max)**4)
+ complex(dpc),intent(out) :: dlrij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,ignt,ijlmn,ijlm,ijln,ilmn,imesh,itypat,jlmn,mesh_size,s1a
+ real(dp) :: c1,intg,the_gnt
+
+ !arrays
+ integer,dimension(3) :: idirindx = (/4,2,3/)
+ complex(dpc) :: dlij_cart(3),dlij_red(3)
+ real(dp),allocatable :: ff(:)
+
+ !-----------------------------------------------------------------------
+
+ ! ilm = 1: S_{00}
+ ! ilm = 2: S_{1,-1}
+ ! ilm = 3: S_{1,0}
+ ! ilm = 4: S_{1,1}
+
+ ! for the real spherical harmonics, 
+ ! S_{1,-1} \propto y 
+ ! S_{1,0} \propto z
+ ! S_{1,1} \propto  x
+ ! so adir 1 (x) gets mapped to ilm 4
+ ! so adir 2 (y) gets mapped to ilm 2
+ ! so adir 3 (z) gets mapped to ilm 3
+ ! constant of proportionality is \sqrt(4\pi/3)
+
+ c1 = sqrt(four_pi/three)
+
+ do itypat=1,dtset%ntypat
+
+   mesh_size = pawtab(itypat)%mesh_size
+   ABI_MALLOC(ff,(mesh_size))
+
+   do ijlmn=1,pawtab(itypat)%lmn2_size
+     ilmn = pawtab(itypat)%indklmn(7,ijlmn)
+     jlmn = pawtab(itypat)%indklmn(8,ijlmn)
+     ijlm = pawtab(itypat)%indklmn(1,ijlmn)
+     ijln = pawtab(itypat)%indklmn(2,ijlmn)
+
+     dlij_cart = czero
+     do adir = 1, 3
+
+       s1a = idirindx(adir)
+       ignt = gntselect(s1a,ijlm)
+       if (ignt .EQ. 0) cycle
+       the_gnt = realgnt(ignt)
+
+       do imesh = 2, mesh_size
+         ff(imesh) = (pawtab(itypat)%phiphj(imesh,ijln) - pawtab(itypat)%tphitphj(imesh,ijln)) * &
+           & pawrad(itypat)%rad(imesh)
+       end do
+       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+       call simp_gen(intg,ff,pawrad(itypat))
+
+       dlij_cart(adir) = j_dpc*c1*the_gnt*intg 
+
+     end do ! end loop over adir
+
+     ! convert from cartesian axes to reduced coords
+     dlij_red(1:3) = MATMUL(TRANSPOSE(gprimd),dlij_cart(1:3))
+     dlrij(itypat,ilmn,jlmn,1:3) = dlij_red(1:3)
+     dlrij(itypat,jlmn,ilmn,1:3) = dlij_red(1:3)
+       
+   end do ! end loop over ijlmn
+
+   ABI_FREE(ff)
+
+ end do ! end loop over ntypat
+
+end subroutine make_dlrij
+!!***
 
 
 !!****f* ABINIT/make_dldij_vhnzc
@@ -3386,17 +3510,18 @@ end subroutine orbmag_dqij_k_n
 !!
 !! SOURCE
 
-subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iband,&
-    & mcgk,nband_k,nattyp,npw_k,pawtab)
+subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,&
+    & dlrij,dtset,gprimd,iband,lmn_size_max,mcgk,nband_k,nattyp,npw_k,pawtab)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: iband,mcgk,nband_k,npw_k
+ integer,intent(in) :: iband,lmn_size_max,mcgk,nband_k,npw_k
  type(dataset_type),intent(in) :: dtset
 
  !arrays
  integer,intent(in) :: atindx(dtset%natom),nattyp(dtset%ntypat)
  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),gprimd(3,3)
+ complex(dpc),intent(in) :: dlrij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
  complex(dpc),intent(out) :: bckn(3,3)
  type(pawcprj_type),intent(inout) :: cprj_k(dtset%natom,nband_k)
  type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,nband_k,3)
@@ -3405,27 +3530,16 @@ subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iba
  !Local variables -------------------------
  !scalars
  integer :: adir,bdir,col,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn
- real(dp) :: c1,c2,dltij,doti,dotr
+ real(dp) :: c2,doti,dotr
  complex(dpc) :: cg1wfn,cpi,cpj,dijterm,cdup_b,dup_g,qijterm,cudp_b,udp_g
 
  !arrays
- integer,dimension(3) :: idirindx = (/4,2,3/)
- real(dp) :: dijl_cart(3),dijl_red(3)
  real(dp),allocatable :: cwaveb(:,:),cwaveg(:,:)
 
  !-----------------------------------------------------------------------
 
  ABI_MALLOC(cwaveb,(2,npw_k))
  ABI_MALLOC(cwaveg,(2,npw_k))
-
- ! comment copied from pawpolev routine, where also onsite r-R is needed.
- !note that when vector r is expanded in real spherical harmonics, the factor
- !sqrt(four_pi/three) appears, as in the following
- !x = sqrt(four_pi/three)*r*S_{1,1}  , element 4 in pawtab%qijl
- !y = sqrt(four_pi/three)*r*S_{1,-1} , element 2 in pawtab%qijl
- !z = sqrt(four_pi/three)*r*S_{1,0}  , element 3 in pawtab%qijl
- !note also that x,y,z here are cartesian. 
- c1=sqrt(four_pi/three)
 
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in the Chern number,
@@ -3458,30 +3572,22 @@ subroutine berrycurve_k_n(atindx,bckn,cg_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,iba
        itypat = dtset%typat(iat)
        do ilmn=1,pawtab(itypat)%lmn_size
          do jlmn=1,pawtab(itypat)%lmn_size
-           dltij=one
-           if(ilmn .EQ. jlmn) dltij = half
            klmn = MATPACK(jlmn,ilmn)
 
            cdup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),-cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
-           dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
-
            cudp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),-cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
+
+           dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
            udp_g=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
 
            cpi=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),-cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)     
            cpj=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc)     
 
            qijterm = qijterm + j_dpc*epsabg*&
-             & (cdup_b+cudp_b)*pawtab(itypat)%sij(klmn)*dltij*(dup_g+udp_g)
+             & (cdup_b+cudp_b)*pawtab(itypat)%sij(klmn)*(dup_g+udp_g)
 
-           ! convert the moments from cartesian axes to reduced coords
-           dijl_cart(1:3) = c1*pawtab(itypat)%qijl(idirindx(1:3),klmn)
-           dijl_red(1:3) = MATMUL(TRANSPOSE(gprimd),dijl_cart(1:3))
-
-           dijterm =dijterm + j_dpc*epsabg*&
-             & (cdup_b+cudp_b)*(-j_dpc)*c1*dijl_red(gdir)*dltij*cpj 
-           dijterm =dijterm + j_dpc*epsabg*&
-             & cpi*(j_dpc)*dijl_red(bdir)*dltij*(dup_g+udp_g)
+           dijterm = dijterm + j_dpc*epsabg*(cpi*dlrij(itypat,ilmn,jlmn,bdir)*(dup_g+udp_g) + &
+             & (cdup_b+cudp_b)*conjg(dlrij(itypat,ilmn,jlmn,gdir))*cpj)
 
          end do ! end loop over jlmn
        end do ! end loop over ilmn
