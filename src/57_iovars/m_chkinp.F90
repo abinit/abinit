@@ -82,7 +82,7 @@ contains
 !!
 !! CHILDREN
 !!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dt%free,metric,wrtout,xmpi_sum
+!!      dt%free,metric,symmetrize_xred,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2426,11 +2426,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
    end if
    !Longwave calculation function only for LDA
-   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
-   if(allow)then
-     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
-   end if
+!   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
+!   if(allow)then
+!     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
+!   end if
    !Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
     write(msg, '(3a,i0,2a)' )&

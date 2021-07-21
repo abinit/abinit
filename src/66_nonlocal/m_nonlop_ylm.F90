@@ -350,8 +350,7 @@ contains
 !!      m_nonlop
 !!
 !! CHILDREN
-!!      mkkpg,mkkpgcart,opernla_ylm,opernlb_ylm,opernlc_ylm,opernld_ylm,ph1d3d
-!!      strconv,xmpi_sum
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1355,9 +1354,10 @@ end subroutine nonlop_ylm
 !! FUNCTION
 !!
 !! PARENTS
-!!      m_nonlop
+!!      m_gstate
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1380,9 +1380,9 @@ end subroutine nonlop_ylm_init_counters
 !! FUNCTION
 !!
 !! PARENTS
-!!      m_nonlop
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1405,9 +1405,10 @@ end subroutine nonlop_ylm_stop_counters
 !! FUNCTION
 !!
 !! PARENTS
-!!      m_nonlop
+!!      m_gstate
 !!
 !! CHILDREN
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

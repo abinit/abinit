@@ -58,6 +58,7 @@ inp_files = [
 "t43.abi",
 "t44.abi", # test orbital magnetism with DDK wavefunctions
 "t45.abi", # test orbital magnetism with finite difference wavefunctions
+"t46.abi", # longwave GGA
 # Electron-phonon
 "t50.abi",
 "t51.abi",
