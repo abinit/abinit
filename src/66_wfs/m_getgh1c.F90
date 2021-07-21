@@ -122,8 +122,7 @@ contains
 !!      m_phpi,m_rf2,m_sigmaph
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -855,8 +854,7 @@ end subroutine getgh1c
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -958,8 +956,7 @@ end subroutine rf_transgrid_and_pack
 !!      m_ddk,m_dfpt_lwwf,m_dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1271,8 +1268,7 @@ end subroutine getgh1c_setup
 !!      m_dfpt_cgwf,m_dfpt_nstwf
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1442,8 +1438,7 @@ end subroutine getdc1
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1674,8 +1669,7 @@ end subroutine getgh1dqc
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      gs_hamkq%load_k,gs_hamkq%load_kprime,mkffnl,mkkin,mkkin_metdqdq,mkkpg
-!!      rf_hamkq%load_k
+!!      fourwf
 !!
 !! SOURCE
 
@@ -1878,8 +1872,10 @@ end subroutine getgh1dqc_setup
 !! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
 !!
 !! PARENTS
+!!      m_dfpt_vtowfk,m_getgh1c
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 

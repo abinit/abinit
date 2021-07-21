@@ -919,7 +919,7 @@ end if ! condition on nlflag
    call wrtout([std_out, ab_out], msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
-   call ddb_flexo(inp%asr,asrq0%d2asr,ddb,ddb_lw,crystal,filnam(3),inp%flexoflag,zeff)
+   call ddb_flexo(inp%asr,asrq0%d2asr,ddb,ddb_lw,crystal,filnam(3),inp%flexoflag,inp%prtvol,zeff)
  end if
 
 !**********************************************************************

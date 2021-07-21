@@ -65,14 +65,14 @@
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,bigdft_init_errors
 !!      bigdft_init_timing_categories,chkinp,chkvars,clnmpi_atom,clnmpi_grid
-!!      clnmpi_img,clnmpi_pert,date_and_time,destroy_mpi_enreg
+!!      clnmpi_img,clnmpi_pert,date_and_time,delete_file,destroy_mpi_enreg
 !!      destroy_results_out,driver,dtsets,dump_config,dump_cpp_options
-!!      dump_optim,f_lib_finalize,f_lib_initialize,flush_unit
+!!      dump_optim,f_lib_finalize,f_lib_initialize,f_timing_reset,flush_unit
 !!      gather_results_out,get_dtsets_pspheads,herald,init_results_out,iofn1
 !!      libpaw_spmsg_getcount,memory_eval,mpi_setup,nctk_test_mpiio,out_acknowl
 !!      outvars,outxml_finalise,outxml_open,print_kinds,setdevice_cuda
 !!      specialmsg_getcount,testfi,timab,timana,timein,unsetdevice_cuda,wrtout
-!!      xmpi_init,xmpi_show_info,xmpi_sum,xomp_show_info,xpapi_init
+!!      wvl_timing,xmpi_init,xmpi_show_info,xmpi_sum,xomp_show_info,xpapi_init
 !!      xpapi_show_info,xpapi_shutdown
 !!
 !! SOURCE

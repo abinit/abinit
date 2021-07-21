@@ -2586,6 +2586,11 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
  if (optene>-1) then
 
+!  Add the contribution of extfpmd to the entropy
+   if(associated(extfpmd)) then
+     energies%entropy=energies%entropy+extfpmd%entropy
+   end if
+
 !  When the finite-temperature VG broadening scheme is used,
 !  the total entropy contribution "tsmear*entropy" has a meaning,
 !  and gather the two last terms of Eq.8 of VG paper
@@ -2715,14 +2720,12 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
    end if
 
-!  Blanchet Add the energy contribution to the internal energy
+!  Add the extfpmd energy contribution to the internal energy
    if(associated(extfpmd)) then
-     energies%entropy=energies%entropy+extfpmd%entropy
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
      if(optene==0) etotal=etotal+energies%e_extfpmd
      if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
-     etotal=etotal-dtset%tsmear*extfpmd%entropy
    end if
 
 !  Compute energy residual
