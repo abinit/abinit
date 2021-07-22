@@ -65,7 +65,7 @@ module m_dfpt_loopert
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf, outresid
  use m_ioarr,      only : read_rhor
- use m_orbmag,     only : orbmag_ddk
+ use m_orbmag,     only : orbmag_modmag, orbmag_magsym
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -2192,17 +2192,25 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
+   if ( (dtset%orbmag .GT. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
      & (COUNT(has_cg1_3) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag_ddk(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-       & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
-       & vtrial_local,xred,ylm,ylmgr)
-
+     if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 3)) then
+       !this version uses the modern theory or orbital magnetism directly
+       call orbmag_modmag(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+         & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
+         & vtrial_local,xred,ylm,ylmgr)
+     end if 
+     if((dtset%orbmag .GE. 11) .AND. (dtset%orbmag .LE. 13)) then
+       !this version uses magnetic translation symmetry to compute \partial E/\partial B
+       call orbmag_magsym(atindx,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,nattyp,&
+         & nfftf,ngfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
+         & vtrial_local,xred,ylm,ylmgr)
+     end if 
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if
