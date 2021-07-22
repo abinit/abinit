@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 22 Jul 2021.
-- ( at 12h58 )
+- ( at 13h16 )
   
 -  nproc =    2
 
@@ -317,6 +317,6 @@
 
 ================================================================================
 
-+Total cpu time      5.170  and wall time      5.224 sec
++Total cpu time      5.142  and wall time      5.196 sec
 
  multibinit : the run completed succesfully.
