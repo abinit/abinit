@@ -87,7 +87,6 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     @lazy_property
     def locus(self):
         """Location of the entry. This is (hopefully) unique."""
-        #return "%s:%s" % (self.file, self.line)
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
     def __hash__(self):
@@ -227,7 +226,9 @@ class AbimemFile(object):
                 # skip header line of abimem files
                 if line.startswith("#"): continue
                 try:
-                    app(Entry.from_line(line))
+                    entry = Entry.from_line(line)
+                    #if entry.size >  1024 * 8
+                    app(entry)
                 except Exception as exc:
                     print("Error while parsing lineno %d, line:\n%s" % (lineno, line))
                     raise exc

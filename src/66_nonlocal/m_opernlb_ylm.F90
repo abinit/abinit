@@ -37,6 +37,7 @@ module m_opernlb_ylm
 !!***
 
  public :: opernlb_ylm
+ integer,public,save :: opernlb_counter = -1
 !!***
 
 contains
@@ -239,6 +240,11 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  end if
 
 if (choice==33) two_piinv=1.0_dp/two_pi
+
+ if (opernlb_counter>=0) then
+   opernlb_counter = opernlb_counter + 1
+   if (paw_opt==4) opernlb_counter = opernlb_counter + 1
+ end if
 
  ABI_MALLOC(ztab,(npw))
 
