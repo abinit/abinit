@@ -33,7 +33,7 @@ module m_psp8
  use defs_datatypes,  only : nctab_t
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
  use m_psps,          only : nctab_eval_tvalespl
- use m_psptk,  only : psp8lo, psp8nl
+ use m_psptk,         only : psp8lo, psp8nl
 
  implicit none
 
@@ -106,8 +106,6 @@ contains
 subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -210,10 +208,10 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  if(lloc<4) then
    if (nproj_tmp(lloc+1)/=0) then
      write(msg, '(a,i4,a,a,i4,5a)' )&
-&     'Pseudopotential input file has nproj=',nproj_tmp(lloc+1),ch10,&
-&     'for angular momentum',lloc,' which is the local potential.',ch10,&
-&     'Should be 0 for the local potential',ch10,&
-&     'Action: check your pseudopotential input file.'
+     'Pseudopotential input file has nproj=',nproj_tmp(lloc+1),ch10,&
+     'for angular momentum',lloc,' which is the local potential.',ch10,&
+     'Should be 0 for the local potential',ch10,&
+     'Action: check your pseudopotential input file.'
      ABI_ERROR(msg)
    end if
  end if
@@ -517,8 +515,6 @@ end subroutine psp8in
 !! SOURCE
 
 subroutine psp8cc(mmax,n1xccc,rchrg,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

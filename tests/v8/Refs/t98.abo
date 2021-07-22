@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.5.3 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 24 Feb 2021.
-- ( at 15h42 )
+.Starting date : Tue 20 Jul 2021.
+- ( at 11h36 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/mschmitt/abninit-git/abinit/tests/v8/Input/t98_model.xml
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -54,8 +54,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t98_model.xml
--Reading the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t98_model.xml with LibXML library
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -78,8 +78,8 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t98_model.xml
--Reading the file /home/mschmitt/abninit-git/abinit/tests/v8/Input/t98_model.xml with LibXML library
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
 ================================================================================
 
@@ -89,24 +89,24 @@ dipdip_range         2         2         2
 
 TEST - SET Option
 -Reading the test-set file :
--/home/mschmitt/abninit-git/abinit/tests/v8/Input/t98.nc
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t98.nc
 
 
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Energy          :   1.4594344277064647E-05
-   Forces+Stresses :   1.5633997907362168E-03
-   Forces          :   5.7262029535544391E-04
-   Stresses        :   9.9077949538077287E-04
+   Energy          :   1.4594344277064652E-05
+   Forces+Stresses :   8.3648035769898514E-04
+   Forces          :   5.7262029535544727E-04
+   Stresses        :   2.6386006234353787E-04
 
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.3
+- Proc.   0 individual time (sec): cpu=         10.3  wall=         10.4
 
 ================================================================================
 
-+Total cpu time      1.028  and wall time      1.259 sec
++Total cpu time     10.347  and wall time     10.443 sec
 
  multibinit : the run completed succesfully.

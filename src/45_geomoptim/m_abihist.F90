@@ -610,10 +610,10 @@ end subroutine abihist_bcast_1D
 !! hist<type abihist>=Historical record of positions, forces, acell, stresses, and energies,
 !!
 !! PARENTS
-!!      m_fit_polynomial_coeff,m_generate_training_set,m_gstateimg,m_mover
-!!      m_pred_bfgs,m_pred_delocint,m_pred_diisrelax,m_pred_fire,m_pred_hmc
-!!      m_pred_isokinetic,m_pred_isothermal,m_pred_langevin,m_pred_lotf
-!!      m_pred_moldyn,m_pred_nose,m_pred_srkna14,m_pred_steepdesc
+!!      m_fit_polynomial_coeff,m_generate_training_set,m_gstateimg,m_ipi
+!!      m_mover,m_pred_bfgs,m_pred_delocint,m_pred_diisrelax,m_pred_fire
+!!      m_pred_hmc,m_pred_isokinetic,m_pred_isothermal,m_pred_langevin
+!!      m_pred_lotf,m_pred_moldyn,m_pred_nose,m_pred_srkna14,m_pred_steepdesc
 !!      m_pred_velverlet,m_pred_verlet
 !!
 !! CHILDREN
@@ -738,7 +738,7 @@ end function abihist_findIndex
 !!  rprimd(3,3) = dimensional real space primitive translations (bohr)
 !!
 !! PARENTS
-!!      m_gstateimg,m_mover,m_precpred_1geo,m_pred_bfgs,m_pred_delocint
+!!      m_gstateimg,m_ipi,m_mover,m_precpred_1geo,m_pred_bfgs,m_pred_delocint
 !!      m_pred_diisrelax,m_pred_fire,m_pred_hmc,m_pred_isokinetic
 !!      m_pred_isothermal,m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose
 !!      m_pred_srkna14,m_pred_steepdesc,m_pred_velverlet,m_pred_verlet

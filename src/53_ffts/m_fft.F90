@@ -82,6 +82,11 @@ MODULE m_fft
 ! Main entry points.
  public :: fourdp
  public :: fourwf
+ integer,public,save :: fourdp_counter = -1
+ integer,public,save :: fourwf_counter = -1
+ public :: fft_init_counters
+ public :: fft_stop_counters
+ public :: fft_output_counters
 
 ! Driver routines for MPI version.
  public :: fourdp_mpi           ! MPI FFT of densities/potentials on the full box.
@@ -178,7 +183,7 @@ CONTAINS  !===========================================================
 !!      m_argparse
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -212,7 +217,7 @@ end subroutine fft_allow_ialltoall
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -253,7 +258,7 @@ end subroutine fftbox_plan3
 !!      m_fft,m_fft_prof,m_oscillators,m_pawpwij
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -295,7 +300,7 @@ end subroutine fftbox_plan3_many
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -347,7 +352,7 @@ end subroutine fftbox_plan3_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -389,7 +394,7 @@ end subroutine fftbox_execute_ip_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -430,7 +435,7 @@ end subroutine fftbox_execute_ip_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -472,7 +477,7 @@ end subroutine fftbox_execute_op_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -523,7 +528,7 @@ end subroutine fftbox_execute_op_dpc
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -575,7 +580,7 @@ end subroutine fft_ug_dp
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -625,7 +630,7 @@ end subroutine fft_ug_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -681,7 +686,7 @@ end subroutine fft_ug_dpc
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -739,7 +744,7 @@ end subroutine fft_ur_dp
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -794,7 +799,7 @@ end subroutine fft_ur_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -844,7 +849,7 @@ end subroutine fft_ur_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -941,7 +946,7 @@ end subroutine fftpad_spc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1050,7 +1055,7 @@ end subroutine fftpad_dpc
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1109,7 +1114,7 @@ end subroutine fft_poisson
 !!      fftprof
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2261,13 +2266,13 @@ end function fftu_mpi_utests
 !!   modification of the different wrappers used for specialized FFTs such as FFTW3 and MKL-DFTI
 !!
 !! PARENTS
-!!      m_cut3d,m_dfpt_mkrho,m_epjdos,m_fft_prof,m_fock,m_fock_getghc,m_getgh1c
-!!      m_getghc,m_gwls_hamiltonian,m_mkrho,m_mlwfovlp,m_orbmag,m_paw_mkaewf
-!!      m_paw_nhat,m_pead_nl_loop,m_positron,m_prep_kgb,m_spin_current
-!!      m_suscep_stat,m_tddft,m_vtowfk
+!!      m_cgwf_cprj,m_cut3d,m_dfpt_mkrho,m_epjdos,m_fft_prof,m_fock
+!!      m_fock_getghc,m_getgh1c,m_getghc,m_gwls_hamiltonian,m_mkrho,m_mlwfovlp
+!!      m_paw_mkaewf,m_paw_nhat,m_pead_nl_loop,m_positron,m_prep_kgb
+!!      m_spin_current,m_suscep_stat,m_tddft,m_vtowfk
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2312,6 +2317,11 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 
  ! Accumulate timing
  call timab(840+tim_fourwf,1,tsec)
+
+ if (fourwf_counter>=0) then
+   fourwf_counter = fourwf_counter + ndat
+   if (option==2) fourwf_counter = fourwf_counter + ndat
+ end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3); nfftot=n1*n2*n3
  fftcache=ngfft(8)
@@ -2856,6 +2866,20 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
    end if
 
+   if (option==0.and.(fftalga==FFT_SG.or.fftalga==FFT_SG2002)) then
+     ! In these cases, add the periodic image of the borders so all fofr components are computed
+     do i3=1,n3
+       if (n1==n4-1) then
+         do i2=1,n2
+           fofr(:,n4,i2,i3)=fofr(:,1,i2,i3)
+         end do
+       end if
+       if (n2==n5-1) then
+         fofr(:,:,n5,i3)=fofr(:,:,1,i3)
+       end if
+     end do
+   end if
+
    ABI_SFREE(work4)
    ABI_SFREE(work2)
  end select
@@ -2912,7 +2936,7 @@ end subroutine fourwf
 !!      m_vtorhorec,m_xctk,mrgscr
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2947,6 +2971,10 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
 
  ! Keep track of timing
  call timab(260+tim_fourdp,1,tsec)
+
+ if (fourdp_counter>=0) then
+   fourdp_counter = fourdp_counter + ndat
+ end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
@@ -3313,7 +3341,7 @@ end subroutine fourdp
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3421,7 +3449,7 @@ end subroutine ccfft
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3554,7 +3582,7 @@ end subroutine fourdp_mpi
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4016,7 +4044,7 @@ end subroutine fourwf_mpi
 !!      m_fft
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4091,7 +4119,7 @@ end subroutine fftmpi_u
 !!      m_prcref,m_respfn_driver,m_spacepar,m_stress
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4272,7 +4300,7 @@ end subroutine zerosym
 !!      m_kxc
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4398,12 +4426,12 @@ end subroutine fourdp_6d
 !!  option=11 aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) complex case like option 1 imag part
 !!
 !! PARENTS
-!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dft_energy
-!!      m_epjdos,m_fock_getghc,m_getgh1c,m_gwls_hamiltonian,m_io_kss,m_ksdiago
-!!      m_mkrho,m_orbmag,m_pead_nl_loop,m_suscep_stat,m_vtorho
+!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_epjdos
+!!      m_fock_getghc,m_getgh1c,m_gwls_hamiltonian,m_hamiltonian,m_mkrho
+!!      m_orbmag,m_pead_nl_loop,m_suscep_stat,m_vtorho
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4548,7 +4576,7 @@ end subroutine fftpac
 !!      m_fourier_interpol,m_prcref
 !!
 !! CHILDREN
-!!      mpi_alltoall,ptabs_fourdp
+!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4659,6 +4687,103 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
  ABI_FREE(ffti2r_global)
 
 end subroutine indirect_parallel_Fourier
+!!***
+
+!!****f* ABINIT/fft_init_counters
+!! NAME
+!! fft_init_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_gstate
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine fft_init_counters()
+
+   fourdp_counter = 0
+   fourwf_counter = 0
+
+end subroutine fft_init_counters
+!!***
+
+!!****f* ABINIT/fft_stop_counters
+!! NAME
+!! fft_stop_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine fft_stop_counters()
+
+   fourdp_counter = -1
+   fourwf_counter = -1
+
+end subroutine fft_stop_counters
+!!***
+
+!!****f* ABINIT/fft_output_counters
+!! NAME
+!! fft_output_counters
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!      m_gstate
+!!
+!! CHILDREN
+!!      wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine fft_output_counters(nbandtot,mpi_enreg)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nbandtot
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ integer :: cnt,ierr
+!arrays
+
+ call wrtout([std_out,ab_out],'','COLL')
+ write(msg,'(a)')                ' --- FFT COUNTERS ------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                '                      | total count (TC) |            TC/NB'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+ call xmpi_sum(fourwf_counter,mpi_enreg%comm_kpt,ierr)
+ cnt=fourdp_counter
+ if (cnt>0) then
+   write(msg,'(a,i16,a)')       ' fourdp               | ',cnt,' |'
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ cnt=fourwf_counter
+ if (cnt>0) then
+   write(msg,'(a,i16,a,f16.1)') ' fourwf               | ',cnt,' | ',dble(cnt)/nbandtot
+   call wrtout([std_out,ab_out],msg,'COLL')
+ end if
+ write(msg,'(a)')                ' -----------------------------------------------------------------------------'
+ call wrtout([std_out,ab_out],msg,'COLL')
+
+end subroutine fft_output_counters
 !!***
 
 END MODULE m_fft

@@ -678,7 +678,7 @@ subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
  end do
  gnkt=nfree*ktemp
 !Update the forces
- glogs(1)=(two*ekin-gnkt)/qmass(1)
+ 
  vlogs(nnos)=vlogs(nnos)+glogs(nnos)*dtion/four
  do inos=1,nnos-1
    alocal=exp(-dtion/eight*vlogs(nnos+1-inos))

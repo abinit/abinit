@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.5.3 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
-.Copyright (C) 1998-2020 ABINIT group . 
+.Copyright (C) 1998-2021 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 24 Feb 2021.
-- ( at 15h11 )
+.Starting date : Tue 20 Jul 2021.
+- ( at 11h36 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/mschmitt/abninit-git/abinit/tests/v8/Input/t103_ddb.in
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t103_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -43,6 +43,7 @@
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  3
+     fit_dispterms  1
     fit_anhaStrain  1
     fit_SPCoupling  1
       fit_SPC_maxS  2
@@ -176,7 +177,7 @@
 ================================================================================
 
 -Reading the training-set file :
--/home/mschmitt/abninit-git/abinit/tests/v8/Input/t103_HIST
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t103_HIST
 
 
 ================================================================================
@@ -207,24 +208,24 @@
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372993081225752E-05
-   Forces+Stresses :   7.5066662460727624E-03
-   Forces          :   7.3678367059228514E-03
-   Stresses        :   1.3882954014991054E-04
+   Forces+Stresses :   7.4805075157626357E-03
+   Forces          :   7.3678367059228271E-03
+   Stresses        :   1.1267080983980854E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1     101         3.6528615544E-05  7.2017976833E-03  7.0615821397E-03  1.4021554357E-04
- 2     175         3.5766239976E-05  7.1214314908E-03  6.9812486354E-03  1.4018285536E-04
+ 1     101         3.6517069801E-05  7.1737450037E-03  7.0615922572E-03  1.1215274647E-04
+ 2     175         3.5756076605E-05  7.0936467919E-03  6.9812575543E-03  1.1238923756E-04
 
  Fitted coefficients at the end of the fit process:
- 101 =>  -4.4454506692E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
- 175 =>  -1.5298522736E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 101 =>  -4.4596107148E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 175 =>  -1.5273104573E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   3.5766239976436715E-05
-   Forces+Stresses :   7.1214314907564451E-03
-   Forces          :   6.9812486353974228E-03
-   Stresses        :   1.4018285535902233E-04
+   Energy          :   3.5756076604803089E-05
+   Forces+Stresses :   7.0936467918695243E-03
+   Forces          :   6.9812575543045262E-03
+   Stresses        :   1.1238923756499858E-04
 
 
 --------------------------------------------------------------------------------
@@ -242,26 +243,26 @@
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372993081225752E-05
-   Forces+Stresses :   7.5066662460727624E-03
-   Forces          :   7.3678367059228514E-03
-   Stresses        :   1.3882954014991054E-04
+   Forces+Stresses :   7.4805075157626357E-03
+   Forces          :   7.3678367059228271E-03
+   Stresses        :   1.1267080983980854E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     10          2.6091836616E-05  6.2590991459E-03  6.1165464683E-03  1.4255267761E-04
- 4     9           2.4635991033E-05  6.0493358680E-03  5.9065415319E-03  1.4279433618E-04
+ 3     10          2.6072550852E-05  6.2292396792E-03  6.1165628023E-03  1.1267687687E-04
+ 4     9           2.4617002113E-05  6.0194044643E-03  5.9065575180E-03  1.1284694631E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>  -4.4696157124E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
- 2 =>  -1.1793070423E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
- 10 =>  -1.2658682195E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
- 9 =>   8.1079519835E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 1 =>  -4.4837177321E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -1.1764466976E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 10 =>  -1.2676828081E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 9 =>   8.1093269326E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   2.4635991032509980E-05
-   Forces+Stresses :   6.0493358680483887E-03
-   Forces          :   5.9065415318726592E-03
-   Stresses        :   1.4279433617572958E-04
+   Energy          :   2.4617002112603598E-05
+   Forces+Stresses :   6.0194044642715300E-03
+   Forces          :   5.9065575179596723E-03
+   Stresses        :   1.1284694631185753E-04
 
 
 --------------------------------------------------------------------------------
@@ -279,28 +280,28 @@
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372993081225752E-05
-   Forces+Stresses :   7.5066662460727624E-03
-   Forces          :   7.3678367059228514E-03
-   Stresses        :   1.3882954014991054E-04
+   Forces+Stresses :   7.4805075157626357E-03
+   Forces          :   7.3678367059228271E-03
+   Stresses        :   1.1267080983980854E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 5     140         2.3430849247E-05  5.6680365755E-03  5.5249301048E-03  1.4310647072E-04
- 6     337         2.0174392225E-05  5.2536040373E-03  5.1095264032E-03  1.4407763404E-04
+ 5     140         2.3411968624E-05  5.6378752407E-03  5.5249458785E-03  1.1292936226E-04
+ 6     337         2.0153290479E-05  5.2224853797E-03  5.1095437870E-03  1.1294159274E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>  -4.0406815443E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
- 2 =>  -7.7142242597E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
- 3 =>  -1.2688571115E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
- 4 =>   9.8916093586E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
- 140 =>  -7.1414569952E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
- 337 =>   7.7922929364E-02 (Ru_y-O1_y)^2(O3_z-O1_z)^1
+ 1 =>  -4.0545626075E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -7.6817206083E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 3 =>  -1.2706158618E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   9.8937626457E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 140 =>  -7.1445348692E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
+ 337 =>   7.8012384201E-02 (Ru_y-O1_y)^2(O3_z-O1_z)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   2.0174392224656596E-05
-   Forces+Stresses :   5.2536040372835159E-03
-   Forces          :   5.1095264032471463E-03
-   Stresses        :   1.4407763403636957E-04
+   Energy          :   2.0153290478842716E-05
+   Forces+Stresses :   5.2224853797160544E-03
+   Forces          :   5.1095437869772223E-03
+   Stresses        :   1.1294159273883286E-04
 
 
 ================================================================================
@@ -312,10 +313,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.1
+- Proc.   0 individual time (sec): cpu=         41.3  wall=         42.0
 
 ================================================================================
 
-+Total cpu time      4.005  and wall time      4.138 sec
++Total cpu time     41.279  and wall time     42.013 sec
 
  multibinit : the run completed succesfully.

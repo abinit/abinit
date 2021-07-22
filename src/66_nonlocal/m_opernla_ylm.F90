@@ -41,7 +41,7 @@ module m_opernla_ylm
 !!***
 
  public :: opernla_ylm
-!!***
+ integer,public,save :: opernla_counter = -1
 
 contains
 !!***
@@ -252,6 +252,16 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  nthreads=OMP_GET_NUM_THREADS()
 #endif
 
+if (opernla_counter>=0) then
+  if (choice>=0) opernla_counter = opernla_counter + 1
+  if ((signs==1).and.(choice_==2.or.choice_==4.or.choice_==6.or.choice_==23.or.choice_==24.or.choice_==54)) then
+    opernla_counter = opernla_counter + 3 ! 3 directions
+  end if
+  if ((signs==2).and.(choice_==2)) opernla_counter = opernla_counter + 1 ! 1 direction
+  if ((signs==1).and.(choice_==3.or.choice_==6.or.choice_==23.or.choice_==55)) opernla_counter = opernla_counter + 6 ! 6 directions
+  if ((signs==2).and.(choice_==3)) opernla_counter = opernla_counter + 1 ! 1 direction
+end if
+
 !==========================================================================
 !========== STANDARD VERSION ==============================================
 !==========================================================================
@@ -287,6 +297,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      --------------------------------------------------------------------
 
        if (choice>=0) then
+
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -326,6 +337,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        if ((signs==1).and. &
 &       (choice_==2.or.choice_==4.or.choice_==6.or.choice_==23.or.choice_==24.or.choice_==54)) then
          mu0=1;if (choice_==23.or.choice_==6) mu0=7
+
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -392,6 +404,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      Accumulate dGxdt --- derivative wrt atm pos. --- for direction IDIR
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==2)) then
+
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -482,6 +495,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      Accumulate dGxdt --- derivative wrt strain --- for all directions
 !      --------------------------------------------------------------------
        if ((signs==1).and.(choice_==3.or.choice_==6.or.choice_==23.or.choice_==55)) then
+
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -594,6 +608,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      Accumulate dGxdt --- derivative wrt strain --- for direction IDIR
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==3)) then
+
          mu0=1;ffnl_dir(1)=1;if (dimffnl>2) ffnl_dir(1)=idir
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -635,6 +650,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      for directions fixed by idir and qdir
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==33)) then
+
          !Use same notation as the notes for clarity
          ibeta=nalpha(idir)
          idelta=nbeta(idir)
