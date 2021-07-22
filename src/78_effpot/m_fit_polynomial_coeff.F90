@@ -156,6 +156,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out,ncoeff_impose
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr
+ integer :: ncopy_terms
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  type(effective_potential_type) :: eff_pot_fixed
@@ -170,7 +171,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:),fixcoeff_corr(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
  integer,allocatable  :: my_coeffindexes(:),singular_coeffs(:)
- integer,allocatable  :: my_coefflist(:) ,stat_coeff(:)
+ integer,allocatable  :: my_coefflist(:) ,stat_coeff(:),list_coeffs_copy(:) 
  real(dp),allocatable :: gf_values_iter(:,:)
  real(dp),allocatable :: buffGF(:,:),coeff_values(:),energy_coeffs(:,:)
  real(dp),allocatable :: energy_coeffs_tmp(:,:)
@@ -297,6 +298,7 @@ else
     call effective_potential_freeCoeffs(eff_pot_fixed) 
 endif
 
+ncopy_terms = 0 
 !Set consistency between fixcoeff and imposecoeff.
 if ( nfixcoeff > 0 .and. nimposecoeff >0)then 
     ABI_MALLOC(fix_and_impose,(nfixcoeff))
@@ -316,11 +318,22 @@ if ( nfixcoeff > 0 .and. nimposecoeff >0)then
         endif
     enddo
     nfixcoeff_corr = nfixcoeff - nfix_and_impose
-elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
-    nfixcoeff_corr = 0 
-    write(message,'(3a)') "nfixcoeff and nimposecoeff are equal to -1.",ch10,& 
-&                         "This does not make sense. nfixcoeff will be set to 0."
-    ABI_WARNING(message)
+    ncopy_terms = ncoeff_model - nimposecoeff 
+    ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+    ia = 1
+    do ii = 1,ncoeff_model 
+        if( .not. any(imposecoeff == ii))then 
+            list_coeffs_copy(ia) = ii 
+            ia = ia + 1
+        endif 
+    enddo   
+    do ii = 1,ncopy_terms
+        do ia = 1,nfixcoeff_corr 
+            if (list_coeffs_copy(ii) == fixcoeff_corr(ia))then 
+                fixcoeff_corr(ia) = ii
+            endif
+        enddo  
+    enddo 
 elseif (nfixcoeff == -1 .and. nimposecoeff > 0)then
     ABI_MALLOC(fix_and_impose,(ncoeff_model))
     fix_and_impose = .FALSE.
@@ -329,20 +342,41 @@ elseif (nfixcoeff == -1 .and. nimposecoeff > 0)then
            fix_and_impose(ii) = .TRUE. 
         endif
     enddo 
-    nfix_and_impose = count(fix_and_impose)
-    ABI_MALLOC(fixcoeff_corr,(ncoeff_model-nfix_and_impose))
+    nfix_and_impose = nimposecoeff 
+    ncopy_terms = ncoeff_model - nimposecoeff
+    ABI_MALLOC(fixcoeff_corr,(ncopy_terms))
+    ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
     ia = 1
     do ii = 1,ncoeff_model
         if (.not. fix_and_impose(ii))then 
-            fixcoeff_corr(ia) = ii
+            fixcoeff_corr(ia) = ia
+            list_coeffs_copy(ia) = ii
             ia = ia + 1            
         endif
     enddo 
     nfixcoeff_corr = ncoeff_model- nfix_and_impose
+elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
+    nfixcoeff_corr = 0 
+    write(message,'(3a)') "nfixcoeff and nimposecoeff are set to -1.",ch10,& 
+&                         "This does not make sense. nfixcoeff will be set to 0."
+    if(iam_master) ABI_WARNING(message)
+    ncopy_terms = 0 
+    ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+elseif (nfixcoeff >0 .and. nimposecoeff ==-1)then
+    nfixcoeff_corr = 0 
+    write(message,'(3a)') "nfixcoeff is > 0 and nimposecoeff is set to -1.",ch10,& 
+&                         "This does not make sense. nfixcoeff will be set to 0."
+    if(iam_master) ABI_WARNING(message)
+    ncopy_terms = 0 
 else 
     nfixcoeff_corr = nfixcoeff
     ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
     fixcoeff_corr = fixcoeff
+    ncopy_terms = ncoeff_model
+    ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+    do ii = 1,ncopy_terms 
+        list_coeffs_copy(ii) = ii 
+    enddo 
 endif 
 
 
@@ -442,7 +476,7 @@ endif
 
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
- if(iam_master .and. ncoeff_model > 0) my_ncoeff = my_ncoeff + ncoeff_model
+ if((iam_master .and. ncopy_terms > 0)) my_ncoeff = my_ncoeff + ncopy_terms
 
 !Get number of fixed coeff
  ncoeff_fix = 0  
@@ -480,11 +514,12 @@ endif
 
 !  Only copy the input coefficients on the CPU0
    if(my_rank==0) then
-     if(icoeff <= ncoeff_model)then
+     if(icoeff <= ncopy_terms)then
        coeffs_in => eff_pot%anharmonics_terms%coefficients
+       jcoeff = list_coeffs_copy(icoeff)
      else
        coeffs_in => coeffs_tmp
-       jcoeff = jcoeff-ncoeff_model
+       jcoeff = jcoeff - ncopy_terms
      end if
    else
      coeffs_in => coeffs_tmp
@@ -608,7 +643,7 @@ endif
 !Compute the variation of the displacement due to strain of each configuration.
 !Compute fixed forces and stresse and get the standard deviation.
 !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
- call fit_data_compute(fit_data,eff_pot_fixed,hist,comm,verbose=need_verbose)
+ call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of  
@@ -1383,6 +1418,7 @@ call effective_potential_free(eff_pot_fixed)
  ABI_FREE(stat_coeff)
  if(allocated(fixcoeff_corr)) ABI_FREE(fixcoeff_corr)
  if(allocated(fix_and_impose)) ABI_FREE(fix_and_impose)
+ if(allocated(list_coeffs_copy)) ABI_FREE(list_coeffs_copy)
 
 end subroutine fit_polynomial_coeff_fit
 !!***
