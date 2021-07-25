@@ -2207,7 +2207,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if 
      if((dtset%orbmag .GE. 11) .AND. (dtset%orbmag .LE. 13)) then
        !this version uses magnetic translation symmetry to compute \partial E/\partial B
-       call orbmag_magsym(atindx,cg,cg1,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,nattyp,&
+       call orbmag_magsym(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
          & nfftf,ngfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
          & vtrial_local,xred,ylm,ylmgr)
      end if 
