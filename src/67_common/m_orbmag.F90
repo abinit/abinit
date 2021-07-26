@@ -179,10 +179,10 @@ module m_orbmag
   public :: orbmag_wf
 
   private :: berrycurve_k_n
-  private :: orbmag_pw_k_n
-  private :: orbmag_duppy_k_n
-  private :: orbmag_dqij_k_n
-  private :: orbmag_ddij_k_n
+  private :: orbmag_modmag_pw_k_n
+  private :: orbmag_modmag_duppy_k_n
+  private :: orbmag_modmag_dqij_k_n
+  private :: orbmag_modmag_ddij_k_n
   private :: orbmag_magsym_dpsdp
   private :: orbmag_magsym_pdsdp
   private :: make_pawrhoij
@@ -1656,23 +1656,24 @@ subroutine orbmag_modmag(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      orbmag_terms(1:3,berrycurve_qij,nn) = orbmag_terms(1:3,berrycurve_qij,nn) + REAL(bckn(1:3,2))*trnrm
      orbmag_terms(1:3,berrycurve_dij,nn) = orbmag_terms(1:3,berrycurve_dij,nn) + REAL(bckn(1:3,3))*trnrm
 
-     call orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
+     call orbmag_modmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
        & gs_hamk,nn,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw)
      orbmag_terms(1:3,om1,nn) = orbmag_terms(1:3,om1,nn) + REAL(ompw(1:3))*trnrm
 
      if (Enk .GT. local_fermie) local_fermie = Enk
 
-     call orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,nn,dtset%natom,nband_k,dtset%ntypat,&
+     call orbmag_modmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,nn,dtset%natom,nband_k,dtset%ntypat,&
        & omdp,paw_ij,pawtab,dtset%typat)
      orbmag_terms(1:3,om2,nn) = orbmag_terms(1:3,om2,nn) + REAL(omdp(1:3))*trnrm
 
      call make_onsite_l_k_n(atindx,cprj_k,dtset,nn,nband_k,olkn,pawrad,pawtab)
      orbmag_terms(1:3,om3,nn) = orbmag_terms(1:3,om3,nn) + REAL(olkn(1:3))*trnrm
 
-     call orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,nn,nband_k,pawtab)
+     call orbmag_modmag_dqij_k_n(atindx,cprj_k,cprj1_k,dlrij,dqijkn,dtset,Enk,&
+       & gprimd,nn,lmn_size_max,nband_k,pawtab)
      orbmag_terms(1:3,om4,nn) = orbmag_terms(1:3,om4,nn) + REAL(dqijkn(1:3))*trnrm
 
-     call orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
+     call orbmag_modmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,nn,&
        & lmn_size_max,nband_k,pawtab)
      orbmag_terms(1:3,om5,nn) = orbmag_terms(1:3,om5,nn) + REAL(ddijkn(1:3))*trnrm
 
@@ -1766,9 +1767,9 @@ subroutine orbmag_modmag(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 end subroutine orbmag_modmag
 !!***
 
-!!****f* ABINIT/orbmag_pw_k_n
+!!****f* ABINIT/orbmag_modmag_pw_k_n
 !! NAME
-!! orbmag_pw_k_n
+!! orbmag_modmag_pw_k_n
 !!
 !! FUNCTION
 !! Compute the planewave contribution to the orbital magnetization at one k and n value 
@@ -1798,7 +1799,7 @@ end subroutine orbmag_modmag
 !!
 !! SOURCE
 
-subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
+subroutine orbmag_modmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
     & gs_hamk,iband,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw,&
     & fermi_input) ! optional input
 
@@ -1920,12 +1921,12 @@ subroutine orbmag_pw_k_n(atindx,cg_k,cg1_k,cprj_k,cprj1_k,dimlmn,dtset,Enk,&
  call pawcprj_free(cwaveprj1)
  ABI_FREE(cwaveprj1)
 
-end subroutine orbmag_pw_k_n
+end subroutine orbmag_modmag_pw_k_n
 !!***
 
-!!****f* ABINIT/orbmag_duppy_k_n
+!!****f* ABINIT/orbmag_modmag_duppy_k_n
 !! NAME
-!! orbmag_duppy_k_n
+!! orbmag_modmag_duppy_k_n
 !!
 !! FUNCTION
 !! Compute the orbital magnetization due to d <u|p> / dk at one band and k point
@@ -1955,7 +1956,7 @@ end subroutine orbmag_pw_k_n
 !!
 !! SOURCE
 
-subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
+subroutine orbmag_modmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
     & natom,nband_k,ntypat,omdp,paw_ij,pawtab,typat,&
     & fermi_input)
 
@@ -2034,6 +2035,8 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
 
            qij = (Enk-two*fermi)*pawtab(itypat)%sij(klmn)
 
+           ! note that 4th term with conjg(dup_b)*dup_g is already included in
+           ! orbmag_modmag_pw_k_n
            omdp(adir) = omdp(adir) + half*j_dpc*epsabg*dltij*(dij+qij)*&
              & (conjg(udp_b)*dup_g + conjg(dup_b)*udp_g + conjg(udp_b)*udp_g)
 
@@ -2045,7 +2048,7 @@ subroutine orbmag_duppy_k_n(atindx,cprj_k,cprj1_k,Enk,iband,&
  end do ! end loop over adir
  omdp = c2*omdp
 
-end subroutine orbmag_duppy_k_n
+end subroutine orbmag_modmag_duppy_k_n
 !!***
 
 !!****f* ABINIT/make_pawrhoij
@@ -3236,9 +3239,9 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gntselect,gprimd,&
 end subroutine make_dldij_kinetic
 !!***
 
-!!****f* ABINIT/orbmag_ddij_k_n
+!!****f* ABINIT/orbmag_modmag_ddij_k_n
 !! NAME
-!! orbmag_ddij_k_n
+!! orbmag_modmag_ddij_k_n
 !!
 !! FUNCTION
 !! Compute the orbmag contribution due to d Dij /dk terms at single kpt and band
@@ -3268,7 +3271,7 @@ end subroutine make_dldij_kinetic
 !!
 !! SOURCE
 
-subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
+subroutine orbmag_modmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
     & iband,lmn_size_max,nband_k,pawtab)
 
  !Arguments ------------------------------------
@@ -3346,12 +3349,12 @@ subroutine orbmag_ddij_k_n(atindx,cprj_k,cprj1_k,ddijkn,dldij,dtset,gprimd,&
  
  end do ! end loop over adir
 
-end subroutine orbmag_ddij_k_n
+end subroutine orbmag_modmag_ddij_k_n
 !!***
 
-!!****f* ABINIT/orbmag_dqij_k_n
+!!****f* ABINIT/orbmag_modmag_dqij_k_n
 !! NAME
-!! orbmag_dqij_k_n
+!! orbmag_modmag_dqij_k_n
 !!
 !! FUNCTION
 !! Compute the orbmag contribution due to d qij /dk terms at single kpt and band
@@ -3381,12 +3384,13 @@ end subroutine orbmag_ddij_k_n
 !!
 !! SOURCE
 
-subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,nband_k,pawtab,&
+subroutine orbmag_modmag_dqij_k_n(atindx,cprj_k,cprj1_k,dlrij,dqijkn,dtset,&
+    & Enk,gprimd,iband,lmn_size_max,nband_k,pawtab,&
     & fermi_input)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: iband,nband_k
+ integer,intent(in) :: iband,lmn_size_max,nband_k
  real(dp),intent(in) :: Enk
  real(dp),intent(in),optional :: fermi_input
  type(dataset_type),intent(in) :: dtset
@@ -3394,6 +3398,7 @@ subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,n
  !arrays
  integer,intent(in) :: atindx(dtset%natom)
  real(dp),intent(in) :: gprimd(3,3)
+ complex(dpc),intent(in) :: dlrij(dtset%ntypat,lmn_size_max,lmn_size_max,3)
  complex(dpc),intent(out) :: dqijkn(3)
  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k),cprj1_k(dtset%natom,nband_k,3)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -3401,26 +3406,15 @@ subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,n
  !Local variables -------------------------
  !scalars
  integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn
- real(dp) :: c1,c2,dltij,fermi
- complex(dpc) :: cpi,cpj,dqijterm,dup_b,dup_g,udp_b,udp_g
+ real(dp) :: c2,dltij,fermi
+ complex(dpc) :: cpi,cpj,dqijterm,cdup_b,dup_g,cudp_b,udp_g
 
  !arrays
- integer,dimension(3) :: idirindx = (/4,2,3/)
- real(dp) :: dijl_cart(3),dijl_red(3)
 
  !-----------------------------------------------------------------------
 
  fermi=zero
  if(present(fermi_input)) fermi = fermi_input
-
- ! comment copied from pawpolev routine, where also onsite r-R is needed.
- !note that when vector r is expanded in real spherical harmonics, the factor
- !sqrt(four_pi/three) appears, as in the following
- !x = sqrt(four_pi/three)*r*S_{1,1}  , element 4 in pawtab%qijl
- !y = sqrt(four_pi/three)*r*S_{1,-1} , element 2 in pawtab%qijl
- !z = sqrt(four_pi/three)*r*S_{1,0}  , element 3 in pawtab%qijl
- !note also that x,y,z here are cartesian. 
- c1=sqrt(four_pi/three)
 
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in the Chern number,
@@ -3450,22 +3444,18 @@ subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,n
            if(ilmn .EQ. jlmn) dltij = half
            klmn = MATPACK(jlmn,ilmn)
 
-           dup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
-           udp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
+           cdup_b=cmplx(cprj1_k(iatom,iband,bdir)%cp(1,ilmn),-cprj1_k(iatom,iband,bdir)%cp(2,ilmn),KIND=dpc)
+           cudp_b=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),-cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)     
            
            dup_g=cmplx(cprj1_k(iatom,iband,gdir)%cp(1,jlmn),cprj1_k(iatom,iband,gdir)%cp(2,jlmn),KIND=dpc)
            udp_g=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)     
 
-           ! convert the moments from cartesian axes to reduced coords
-           dijl_cart(1:3) = c1*pawtab(itypat)%qijl(idirindx(1:3),klmn)
-           dijl_red(1:3) = MATMUL(TRANSPOSE(gprimd),dijl_cart(1:3))
-           
            ! <p_i|u>, <p_j|u>
-           cpi = cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc) 
+           cpi = cmplx(cprj_k(iatom,iband)%cp(1,ilmn),-cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc) 
            cpj = cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc) 
 
-           dqijterm = dqijterm + j_dpc*half*epsabg*(-j_dpc*conjg(dup_b+udp_b)*dijl_red(gdir)*(Enk-two*fermi)*cpj + &
-             &                                j_dpc*conjg(cpi)*dijl_red(bdir)*(Enk-two*fermi)*(dup_g+udp_g))
+           dqijterm = dqijterm + j_dpc*epsabg*dltij*(cpi*dlrij(itypat,ilmn,jlmn,bdir)*(dup_g+udp_g) + &
+             & (cdup_b+cudp_b)*conjg(dlrij(itypat,ilmn,jlmn,gdir))*cpj)
 
          end do ! end loop over jlmn
        end do ! end loop over ilmn
@@ -3476,7 +3466,7 @@ subroutine orbmag_dqij_k_n(atindx,cprj_k,cprj1_k,dqijkn,dtset,Enk,gprimd,iband,n
  
  end do ! end loop over adir
 
-end subroutine orbmag_dqij_k_n
+end subroutine orbmag_modmag_dqij_k_n
 !!***
 
 !!****f* ABINIT/orbmag_magsym_dpsdp
