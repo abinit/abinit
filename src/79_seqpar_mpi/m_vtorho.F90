@@ -1182,12 +1182,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
+!    Compute extfpmd u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(extfpmd)) then
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
-       ! if(dtset%userra/=zero) extfpmd%shiftfactor=dtset%userra
      end if
 
 !    Compute the new occupation numbers from eigen
@@ -1205,7 +1204,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
 
 
-!    Blanchet Once we have occupation, compute number of free electrons
+!    Compute number of free electrons of extfpmd model
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)

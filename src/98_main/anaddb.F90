@@ -93,7 +93,7 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: comm,iatom,iblok,iblok_stress,iblok_epsinf,idir,ii,index
+ integer :: comm,iatom,iblok,iblok_stress,iblok_epsinf,iblock_quadrupoles, idir,ii,index
  integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
@@ -194,8 +194,8 @@ program anaddb
 
  call ddb_hdr%free()
 
- mpert=natom+MPERT_MAX
- msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+ mpert = natom + MPERT_MAX
+ msize = 3*mpert*3*mpert; if (mtyp==3) msize = msize*3*mpert
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
@@ -313,17 +313,19 @@ program anaddb
 !**********************************************************************
 
  ! Get Quadrupole tensor
+ iblock_quadrupoles = 0
  qdrp_cart=zero
  if (mtyp==33) then
    write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
    call wrtout([ab_out,std_out],msg,'COLL')
    lwsym=1
-   iblok = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
-   if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
-     call wrtout(std_out, "--- !WARNING")
-     call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
-     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding longwave 3rd derivatives")
-   end if
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+ end if
+
+ ! The default value is 1. Here we set the flags to zero if Q* is not available.
+ if (iblock_quadrupoles == 0) then
+   inp%dipquad = 0
+   inp%quadquad = 0
  end if
 
  ! Get the electronic dielectric tensor (epsinf) and Born effective charges (zeff)
@@ -348,19 +350,21 @@ program anaddb
 #ifdef HAVE_NETCDF
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'),&
+   nctkarr_t('quadrupoles_cart', "dp", 'three, three, three, number_of_atoms'),&
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
    defmode=.True.)
    NCF_CHECK(ncerr)
    ncerr = nctk_def_iscalars(ana_ncid, [character(len=nctk_slen) :: &
-       "asr", "chneut", "dipdip", "symdynmat"])
+       "asr", "chneut", "dipdip", "symdynmat", "dipquad", "quadquad"])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ana_ncid))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'emacro_cart'), epsinf))
+   NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'quadrupoles_cart'), qdrp_cart))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'becs_cart'), zeff))
    ncerr = nctk_write_iscalars(ana_ncid, [character(len=nctk_slen) :: &
-     "asr", "chneut", "dipdip", "symdynmat"], &
-     [inp%asr, inp%chneut, inp%dipdip, inp%symdynmat])
+     "asr", "chneut", "dipdip", "symdynmat", "dipquad", "quadquad"], &
+     [inp%asr, inp%chneut, inp%dipdip, inp%symdynmat, inp%dipquad, inp%quadquad])
    NCF_CHECK(ncerr)
 #endif
  end if
@@ -915,7 +919,7 @@ end if ! condition on nlflag
    call wrtout([std_out, ab_out], msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
-   call ddb_flexo(inp%asr,asrq0%d2asr,ddb,ddb_lw,crystal,filnam(3),inp%flexoflag,zeff)
+   call ddb_flexo(inp%asr,asrq0%d2asr,ddb,ddb_lw,crystal,filnam(3),inp%flexoflag,inp%prtvol,zeff)
  end if
 
 !**********************************************************************

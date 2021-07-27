@@ -2530,7 +2530,7 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok)
+integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblok)
 
 !Arguments -------------------------------
 !scalars
@@ -2547,36 +2547,7 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
 
-#if 1
- integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir, quad_unt
-
 ! *********************************************************************
-
- ! MG: Temporary hack to read the quadrupole tensor from a text file
- ! Will be removed when the EPH code will be able to read Q* from the DDB.
- iblok = 0
- quadrupoles = zero
- if (file_exists("quadrupoles_cart.out")) then
-   call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
-   quad_unt = 71
-   open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
-   do ii=1,2
-     read(quad_unt,*) msg
-     write(std_out, *)" msg: ", trim(msg)
-   end do
-
-   do ii=1,3
-     do jj=1,3*3*ddb%natom
-       read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
-       write(std_out, *) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
-     end do
-     read(quad_unt,'(a)') msg
-   end do
-   close(quad_unt)
-   iblok = 1
-   return
- end if
-#endif
 
  ! Look for the Gamma Block in the DDB
  qphon(:,:)=zero
@@ -4438,40 +4409,39 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !Local variables -------------------------
 !scalars
  integer :: ii,nblok,nsize
-!arrays
 
 ! *********************************************************************
 
-   call ddb_copy(ddb, ddb_lw)
-   call ddb%free()
-   nsize=3*mpert*3*mpert
-   nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
-   call ddb%malloc(nsize, nblok, natom, ntypat)
+ call ddb_copy(ddb, ddb_lw)
+ call ddb%free()
+ nsize=3*mpert*3*mpert
+ nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
+ call ddb%malloc(nsize, nblok, natom, ntypat)
 
  ! Copy dimensions and static variables.
-   ddb%msize = nsize
-   ddb%mpert = ddb_lw%mpert
-   ddb%nblok = nblok
-   ddb%natom = ddb_lw%natom
-   ddb%ntypat = ddb_lw%ntypat
-   ddb%occopt = ddb_lw%occopt
-   ddb%prtvol = ddb_lw%prtvol
+ ddb%msize = nsize
+ ddb%mpert = ddb_lw%mpert
+ ddb%nblok = nblok
+ ddb%natom = ddb_lw%natom
+ ddb%ntypat = ddb_lw%ntypat
+ ddb%occopt = ddb_lw%occopt
+ ddb%prtvol = ddb_lw%prtvol
 
-   ddb%rprim = ddb_lw%rprim
-   ddb%gprim = ddb_lw%gprim
-   ddb%acell = ddb_lw%acell
+ ddb%rprim = ddb_lw%rprim
+ ddb%gprim = ddb_lw%gprim
+ ddb%acell = ddb_lw%acell
 
  ! Copy the allocatable arrays.
-   ddb%amu(:) = ddb_lw%amu(:)
-   do ii=1,ddb_lw%nblok
-     if (ddb_lw%typ(ii)/=33) then
-       ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
-       ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
-       ddb%typ(ii)     = ddb_lw%typ(ii)
-       ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
-       ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
-     end if
-   end do
+ ddb%amu(:) = ddb_lw%amu(:)
+ do ii=1,ddb_lw%nblok
+   if (ddb_lw%typ(ii)/=33) then
+     ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
+     ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
+     ddb%typ(ii)     = ddb_lw%typ(ii)
+     ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
+     ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
+   end if
+ end do
 
  end subroutine ddb_lw_copy
 !!***

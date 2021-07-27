@@ -182,9 +182,7 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -283,7 +281,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: xrdm_k_full(:,:,:),rdm_k(:,:),potk(:,:),nateigv(:,:,:,:)
+ complex(dpc),allocatable :: xrdm_k_full(:,:,:),rdm_k(:,:),pot_k(:,:),nateigv(:,:,:,:)
  complex(dpc),allocatable :: old_ks_purex(:,:),new_hartr(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
@@ -1873,8 +1871,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      dim_kxcg = 0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  @WC: bootstrap --
    case (-3, -4, -5, -6, -7, -8)
+   !  bootstrap kernels
 !    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
      ABI_CHECK(Er%ID==0,"Er%ID should be 0")
 
@@ -1913,7 +1911,38 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-     ! --@WC
+
+   case (-11)
+   !  LR+ALDA kernel
+!    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
+     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
+
+     if (Dtset%usepaw==1) then
+       ! If we have PAW, we need the full density on the fine grid
+       ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
+       if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
+         ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
+       end if
+       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
+       if (.not. file_exists(dtfil%filpawdensin)) then
+         ABI_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
+       end if
+
+       ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
+
+       call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
+       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+
+       call hdr_rhor%free()
+       call pawrhoij_free(tmp_pawrhoij)
+       ABI_FREE(tmp_pawrhoij)
+     end if ! Dtset%usepaw==1
+
+     id_required=4; ikxc=7; dim_kxcg=1
+     approx_type=7
+     option_test=1
+     ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
+     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
    case default
      ABI_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
@@ -2453,12 +2482,12 @@ endif
 &       Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &       gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        if (rdm_update) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed
-         ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
-         ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw))
+         ABI_MALLOC(pot_k,(ib1:ib2,ib1:ib2))
+         ABI_MALLOC(rdm_k,(ib1:ib2,ib1:ib2))
          rdm_k=czero
 !        Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
-         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs
-         call calc_rdmx(ib1,ib2,ik_ibz,potk,rdm_k,QP_BSt)                                                 ! Only restricted closed-shell calcs
+         pot_k(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs
+         call calc_rdmx(ib1,ib2,ik_ibz,pot_k,rdm_k,QP_BSt)                                                ! Only restricted closed-shell calcs
 !        Update the full 1RDM with the exchange corrected one for this k-point
          xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
 !        Compute NAT ORBS for exchange corrected 1-RDM
@@ -2466,7 +2495,7 @@ endif
            rdm_k(ib,ib)=rdm_k(ib,ib)+QP_BSt%occ(ib,ik_ibz,1)           ! Only restricted closed-shell calcs
          enddo
          call natoccs(ib1,ib2,rdm_k,nateigv,nat_occs,QP_BSt,ik_ibz,0)  ! Only restricted closed-shell calcs
-         ABI_FREE(potk)
+         ABI_FREE(pot_k)
          ABI_FREE(rdm_k)
        end if
      else
@@ -2518,7 +2547,7 @@ endif
        if (rdm_update) then
          if (sigmak_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed
            if (x1rdm/=1) then
-             ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw))
+             ABI_MALLOC(rdm_k,(ib1:ib2,ib1:ib2))
              rdm_k=czero
              call calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,QP_BSt,rdm_k)    ! Only restricted closed-shell calcs
 !            Update the full 1RDM with the GW corrected one for this k-point
@@ -3031,9 +3060,7 @@ end subroutine sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4020,9 +4047,7 @@ end subroutine setup_sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4207,9 +4232,7 @@ end subroutine sigma_tables
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4359,9 +4382,7 @@ end subroutine sigma_bksmask
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 

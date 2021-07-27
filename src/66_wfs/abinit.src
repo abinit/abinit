@@ -24,6 +24,7 @@ sources = [
  "m_chebfi.F90",
  "m_cgcprj.F90",
  "m_fock_getghc.F90",
+ "m_getchc.F90",
  "m_getghc.F90",
  "m_getgh1c.F90",
  "m_getgh2c.F90",

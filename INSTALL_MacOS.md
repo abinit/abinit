@@ -160,7 +160,7 @@ To configure the sequential version, use:
 For the parallel version (only if MPI installed):
 
     ../configure FC=mpif90 CC=mpicc FCFLAGS_EXTRA="-ffree-line-length-none" \
-                 --enable-mpi  --enable-mpi-io
+                 --enable-mpi --enable-mpi-io
 
 Compile with:
 

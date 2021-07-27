@@ -322,8 +322,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
       can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')&
-&         " Symmetrization cannot be performed for spin: ",spin,ch10,&
-&         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
+          " Symmetrization cannot be performed for spin: ",spin,ch10,&
+          " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
         ABI_WARNING(msg)
       end if
     end do
