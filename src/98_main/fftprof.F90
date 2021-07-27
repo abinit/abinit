@@ -195,7 +195,6 @@ program fftprof
    call xmpi_bcast(symrel,master,comm,ierr)
  end if
 
-
  ! Set precision for FFT libs.
  ii = fftcore_set_mixprec(mixprec)
 

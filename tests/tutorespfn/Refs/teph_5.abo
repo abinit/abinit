@@ -31,8 +31,8 @@
       chneut         0
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         0
-      quadqu         0
+      dipqua         1
+      quadqu         1
       ifcana         1
       ifcout         0
  Description of grid 1 :
