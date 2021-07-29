@@ -1065,6 +1065,39 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
+   ! RT-TDDFT
+   if (dt%optdriver == RUNL_RTTDDFT) then
+     ! getwfk / getwfk_filepath / irdwfk
+     if (dt%getwfk == 0 .and. dt%irdwfk == 0 .and. dt%getwfk_filepath==ABI_NOFILE) then
+       write(msg, '(3a)' ) &
+       & 'Initial KS orbitals need to be read in WFK file for RT-TDDFT runs!',ch10,&
+       & 'Action: set irdwfk or getwfk /= 0 or specify the WFK filename using getwfk_filepath.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usewvl
+     if (dt%usewvl /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and wavelets are not compatible, set usewvl to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! nimage
+     if (dt%nimage > 1) then
+        write(msg,'(a)') 'RT-TDDFT and multiple image are not compatible, set nimage to 1.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! tfkinfunc
+     if (dt%tfkinfunc == 2) then
+        write(msg,'(a)') 'RT-TDDFT and Thomas-Fermi functional using the recursion method &
+         & are not compatible, set tfkinfunc /= 2.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     !TODO FB: Should probably be made possible later
+     ! useextfpmd
+     if (dt%useextfpmd /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and extFPMD are not compatible, set useextfpmd to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+   endif
+
    ! gw_invalid_freq
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,[0,1,2],iout)
 
@@ -1322,7 +1355,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 !  Mixing on density is only allowed for GS calculations or for drivers where it is not used.
    if(optdriver /= RUNL_GSTATE .and. all(optdriver/=[RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH,&
-&     RUNL_WFK,RUNL_NONLINEAR])) then
+&     RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT])) then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
@@ -2266,9 +2299,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  end if
 
 !  optdriver
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,11,&
 &   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE,&
-&   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
+&   RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE,RUNL_RTTDDFT],iout)
    if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
@@ -2303,7 +2336,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! Is optdriver compatible with PAW?
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
      call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&     'optdriver',optdriver,7,[RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR],iout)
+&     'optdriver',optdriver,8,[RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT],iout)
    end if
 
 !  Linear and Non-linear response calculations
