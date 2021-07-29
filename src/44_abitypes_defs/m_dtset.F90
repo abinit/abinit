@@ -709,6 +709,7 @@ type, public :: dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
+ real(dp) :: dtele
  !real(dp) :: dvdb_qcache_mb = 1024.0_dp
  real(dp) :: dvdb_qcache_mb = zero
  real(dp) :: dvdb_qdamp = 0.1_dp
@@ -1981,6 +1982,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dilatmx            = dtin%dilatmx
  dtout%dosdeltae          = dtin%dosdeltae
  dtout%dtion              = dtin%dtion
+ dtout%dtele              = dtin%dtele
  dtout%ecut               = dtin%ecut
  dtout%ecuteps            = dtin%ecuteps
  dtout%ecutsigx           = dtin%ecutsigx
@@ -3176,7 +3178,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
 !list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d dmft_wanorthnorm' ! dmft_x2my2d is not tested neither documented.
- list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
+ list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'

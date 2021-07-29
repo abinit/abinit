@@ -799,6 +799,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtion',tread,'DPR')
  if(tread==1) dtset%dtion=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtele',tread,'DPR')
+ if(tread==1) dtset%dtele=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecut',tread,'ENE')
  if(tread==1) dtset%ecut=dprarr(1)
 
