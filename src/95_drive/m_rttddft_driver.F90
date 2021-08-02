@@ -28,16 +28,17 @@
 module m_rttddft_driver
 
  use defs_basis
- use defs_abitypes,  only: MPI_type
- use defs_datatypes, only: pseudopotential_type
+ use defs_abitypes,       only: MPI_type
+ use defs_datatypes,      only: pseudopotential_type
 
- use m_dtfil,        only: datafiles_type
- use m_dtset,        only: dataset_type
- use m_pawang,       only: pawang_type
- use m_pawrad,       only: pawrad_type
- use m_pawtab,       only: pawtab_type
- use m_rttddft_tdks, only: tdks_type
- use m_specialmsg,   only: wrtout
+ use m_dtfil,             only: datafiles_type
+ use m_dtset,             only: dataset_type
+ use m_pawang,            only: pawang_type
+ use m_pawrad,            only: pawrad_type
+ use m_pawtab,            only: pawtab_type
+ use m_rttddft_types,     only: tdks_type
+ use m_rttddft_propagate, only: rttddft_propagate_ele
+ use m_specialmsg,        only: wrtout
    
  implicit none
 
@@ -124,17 +125,19 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  write(msg,'(3a)') ch10,'---------------------------   Initialization   ----------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
+
  call tdks%init(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
  !2) Propagation loop (rttddft_propagate):
- !write(msg,'(3a)') ch10,'-------------------------   Starting propagation   -------------------------',ch10
- !call wrtout(ab_out,msg)
- !if (do_write_log) call wrtout(std_out,msg)
- !do itime = 1, tdks%ntime
- !  call tdks%propagate_ele(itime)
- !  !FB TODO: If Ehrenfest perform nuclear step here
- !  call tdks%propagate_nuc(itime)
- !end do
+ write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
+ call wrtout(ab_out,msg)
+ if (do_write_log) call wrtout(std_out,msg)
+
+ do itime = 1, tdks%ntime
+   call rttddft_propagate_ele(tdks,itime,mpi_enreg,psps)
+   !FB TODO: If Ehrenfest perform nuclear step here
+   !call tdks%propagate_nuc(itime)
+ end do
 
  !3) Final Output and free memory
  write(msg,'(7a)') ch10,'---------------------------------------------------------------------------',&

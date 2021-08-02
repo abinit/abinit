@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_rttddft_tdks
+!!****m* ABINIT/m_rttddft_types
 !! NAME
 !!  m_rttddft_tdks
 !!
@@ -26,7 +26,7 @@
 
 #include "abi_common.h"
 
-module m_rttddft_tdks
+module m_rttddft_types
 
  use defs_basis
  use defs_abitypes,      only: MPI_type
@@ -65,7 +65,8 @@ module m_rttddft_tdks
  use m_paw_nhat,         only: nhatgrid
  use m_paw_occupancies,  only: initrhoij, pawmkrhoij
  use m_pawrad,           only: pawrad_type
- use m_pawrhoij,         only: pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_alloc, pawrhoij_inquire_dim
+ use m_pawrhoij,         only: pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_alloc, &
+                               pawrhoij_inquire_dim
  use m_paw_sphharm,      only: setsym_ylm
  use m_pawtab,           only: pawtab_type, pawtab_get_lsize
  use m_paw_tools,        only: chkpawovlp
@@ -96,6 +97,7 @@ module m_rttddft_tdks
    integer                          :: nfftf       !nb of FFT grid pts (fine grid)
    integer                          :: nfft        !nb of FFT grid pts (coarse grid)
    integer                          :: ntime       !max nb of time steps
+   real(dp)                         :: zion        !total ionic charge
    type(energies_type)              :: energies    !contains various energy values
    type(hdr_type)                   :: hdr         !header: contains various info
    type(paw_dmft_type)              :: paw_dmft    !paw_dmft object (unused only here because various subroutines need it as input)
@@ -193,7 +195,6 @@ subroutine tdks_init(tdks, codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  
  !Local variables-------------------------------
  !scalars
- integer                     :: ikpt
  integer                     :: my_natom
  integer                     :: psp_gencond
  real(dp)                    :: entropy, ecut_eff
@@ -445,7 +446,8 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,gmet,mpi_enreg,pawrad,pa
 
  !Init FFT grid(s) sizes (be careful !)
  !See NOTES in the comments at the beginning of this file.
- call pawfgr_init(tdks%pawfgr,dtset,mgfftf,tdks%nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)
+ call pawfgr_init(tdks%pawfgr,dtset,mgfftf,tdks%nfftf,ecut_eff,ecutdg_eff, &
+                & ngfft,ngfftf)
 
  !Init to zero different energies
  call energies_init(tdks%energies)
@@ -619,6 +621,12 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,gmet,mpi_enreg,pawrad,pa
        tdks%nattyp(itypat)=tdks%nattyp(itypat)+1
      end if
    end do
+ end do
+
+ !Calculate zion: the total positive charge acting on the valence electrons
+ tdks%zion=zero
+ do iatom=1,dtset%natom
+   tdks%zion=tdks%zion+psps%ziontypat(dtset%typat(iatom))
  end do
 
 end subroutine first_setup
@@ -1095,5 +1103,5 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
 
  end subroutine calc_density
 
-end module m_rttddft_tdks
+end module m_rttddft_types
 !!***
