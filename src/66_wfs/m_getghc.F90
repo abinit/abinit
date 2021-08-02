@@ -1567,8 +1567,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_OPENMP
  ithread = omp_get_thread_num()
  nthreads = omp_get_num_threads()
- is_nested = omp_get_nested()
- call omp_set_nested(.false.)
+! is_nested = omp_get_nested()
+ is_nested = .false.
+! call omp_set_nested(.false.)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(1)
 #endif
@@ -1613,7 +1614,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    end if
  end if
 #ifdef HAVE_OPENMP
- call omp_set_nested(is_nested)
+! call omp_set_nested(is_nested)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(nthreads)
 #endif
