@@ -36,7 +36,9 @@ module m_rttddft
  use m_mkrho,           only: mkrho
  use m_paw_mkrho,       only: pawmkrho
  use m_paw_occupancies, only: pawmkrhoij
- use m_rttddft_tdks,    only: tdks_type 
+ use m_pawrhoij,        only: pawrhoij_type,  pawrhoij_free, &
+                              pawrhoij_alloc, pawrhoij_inquire_dim
+ use m_rttddft_types,   only: tdks_type 
 
  implicit none
 
