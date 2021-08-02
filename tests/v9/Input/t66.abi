@@ -6,7 +6,7 @@ ndtset     6
  kptrlatt -2  2  2      # In cartesian coordinates, this grid is simple cubic
            2 -2  2      
            2  2 -2
-   tolvrs  1.0d-16
+   tolvrs  1.0d-10
      nqpt  1
       qpt  3*0.0
 
@@ -22,7 +22,7 @@ ndtset     6
    rfdir2  1 1 1
   rfelfd2  2
   kptopt2  2
-  tolwfr2  1.0d-12
+  tolwfr2  1.0d-10
   getwfk2 -1
     iscf2 -3
    nband2  8
@@ -46,7 +46,7 @@ ndtset     6
   kptopt4  0        # K-points can be specified in any way one want, they just need to be present in the
     nkpt4  1        # ground state calc. too.
      kpt4  0.00 0.00 0.00   # Gamma
-  tolwfr4  1.0d-16  # Must use tolwfr for non-self-consistent calculations.
+  tolwfr4  1.0d-10  # Must use tolwfr for non-self-consistent calculations.
     nqpt4  0
 
 # Response Function calculation : d/dk  at the specific points, with added bands.
@@ -59,7 +59,7 @@ ndtset     6
   kptopt5  0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
     nkpt5  1        
      kpt5  0.00 0.00 0.00   # Gamma                                                                       
-  tolwfr5   1.0d-13  # Must use tolwfr for non-self-consistent calculations.
+  tolwfr5   1.0d-10  # Must use tolwfr for non-self-consistent calculations.
   
     efmas5        1     # Triggers the calculation of effective mass tensors for the specified k-points.
     efmas_bands5  6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
@@ -82,7 +82,7 @@ efmas_calc_dirs5  1
        getddb6  3
        getwfk6  4
      getefmas6  5
- efmas_ntheta6  64
+ efmas_ntheta6  80
 eph_frohlichm6  1
      eph_task6  10
        kptopt6  0        # K-points can be specified in any way one want, they just need to be present in the
@@ -121,7 +121,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t66.abo, tolnlines = 4, tolabs = 1.1e-6, tolrel = 2.0e-4, fld_options=-medium;
+#%%   t66.abo, tolnlines = 10, tolabs = 1.1e-3, tolrel = 1.0e-2, fld_options=-medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -131,7 +131,7 @@ nstep 100
 #%%  CaO polaron effective mass along different direction: 100,110,111. 
 #%%  Frohlich ZPR is also computed.
 #%%  Method available only for cubic materials.
-#%% topics = PolaronMass
+#%% topics = 
 #%%<END TEST_INFO>
 
 
