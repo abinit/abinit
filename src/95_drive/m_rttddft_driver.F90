@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_rttddft
+!!****m* ABINIT/m_rttddft_driver
 !! NAME
 !!  m_rttddft
 !!
@@ -36,6 +36,7 @@ module m_rttddft_driver
  use m_pawang,            only: pawang_type
  use m_pawrad,            only: pawrad_type
  use m_pawtab,            only: pawtab_type
+ use m_rttddft_output,    only: rttddft_output
  use m_rttddft_types,     only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
  use m_specialmsg,        only: wrtout
@@ -50,7 +51,7 @@ module m_rttddft_driver
 
 contains 
 
-!!****f* m_rttddft/rttddft
+!!****f* m_rttddft_driver/rttddft
 !! NAME
 !! rttddft
 !!
@@ -63,7 +64,7 @@ contains
 !! 2) Propagation loop (rttddft_propagate):
 !!    for i = 1, nstep
 !!       - propagate KS orbitals
-!!       - propagate nuclei if requested (RTDDFT+Erhenfest dymaics)
+!!       - propagate nuclei if requested (RTDDFT+Erhenfest dynamics)
 !!       - compute new density and occupation
 !!       - print requested quantities
 !! 3) Final printout and finalize
@@ -109,7 +110,7 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  !Local variables-------------------------------
  !scalars
  character(len=500)   :: msg
- integer              :: itime
+ integer              :: istep
  type(tdks_type)      :: tdks
  !arrays
 
@@ -133,10 +134,20 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- do itime = 1, tdks%ntime
-   call rttddft_propagate_ele(tdks,itime,mpi_enreg,psps)
+ do istep = 1, tdks%ntime
+   call rttddft_propagate_ele(tdks,dtset,istep,mpi_enreg,psps)
+
    !FB TODO: If Ehrenfest perform nuclear step here
    !call tdks%propagate_nuc(itime)
+
+   !Update header, with evolving variables
+   call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih, &
+                      & tdks%hdr%residm,tdks%rprimd,dtset%occ_orig,tdks%pawrhoij, &
+                      & dtset%xred_orig,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom, &
+                      & mpi_atmtab=mpi_enreg%my_atmtab)
+
+   call rttddft_output(tdks)
+
  end do
 
  !3) Final Output and free memory
