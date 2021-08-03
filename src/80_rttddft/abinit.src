@@ -19,6 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
 "m_rttddft.F90",
+"m_rttddft_output.F90",
 "m_rttddft_propagate.F90",
 "m_rttddft_types.F90",
  ]

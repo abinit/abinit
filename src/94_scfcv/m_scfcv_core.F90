@@ -1316,7 +1316,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !    and eventually add it to density from WFs
      nhatgrdim=0
      dummy_nhatgr = .False.
-!    This is executed only in the positron case.
      if (psps%usepaw==1.and.(dtset%positron>=0.or.ipositron/=1) &
 &     .and.((usexcnhat==0) &
 &     .or.(dtset%xclevel==2.and.(dtfil%ireadwf/=0.or.dtfil%ireadden/=0.or.initialized/=0)) &
