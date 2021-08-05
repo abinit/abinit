@@ -1081,13 +1081,28 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      endif
      ! nimage
      if (dt%nimage > 1) then
-        write(msg,'(a)') 'RT-TDDFT and multiple image are not compatible, set nimage to 1.'
+        write(msg,'(a)') 'RT-TDDFT and multiple images are not compatible, set nimage to 1.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
      ! tfkinfunc
      if (dt%tfkinfunc == 2) then
         write(msg,'(a)') 'RT-TDDFT and Thomas-Fermi functional using the recursion method &
          & are not compatible, set tfkinfunc /= 2.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usepawu
+     if (dt%usepawu /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and DFT+U are not compatible, set usepawu to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usedmft
+     if (dt%usedmft /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! positron
+     if (dt%positron /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and Positron are not compatible, set positron to 0.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
      !TODO FB: Should probably be made possible later
