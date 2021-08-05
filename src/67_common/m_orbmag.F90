@@ -177,6 +177,7 @@ module m_orbmag
   public :: orbmag_modmag
   public :: orbmag_magsym
   public :: orbmag_wf
+  public :: testprj
 
   private :: berrycurve_k_n
   private :: orbmag_modmag_pw_k_n
@@ -1237,7 +1238,7 @@ subroutine make_S1trace_k_n(atindx,cprj_k,dtset,ENK,iband,nband_occ,pawtab,S1tra
             klmn=MATPACK(jlmn,ilmn)
             cpb=cmplx(cprj_k(iatom,iband)%dcp(1,bdir,ilmn),cprj_k(iatom,iband)%dcp(2,bdir,ilmn),KIND=dpc)
             cpk=cmplx(cprj_k(iatom,iband)%dcp(1,gdir,jlmn),cprj_k(iatom,iband)%dcp(2,gdir,jlmn),KIND=dpc)
-            S1trace(adir)=S1trace(adir)-&
+            S1trace(adir)=S1trace(adir)+&
               & half*j_dpc*epsabg*ENK*c2*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
           end do ! end loop over jlmn
         end do ! end loop over ilmn
@@ -1340,7 +1341,7 @@ subroutine make_rhorij1_k_n(atindx,cprj_k,dtset,iband,nband_occ,&
             else
                cdij=cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
             end if
-            rhorij1(adir)=rhorij1(adir)-half*j_dpc*epsabg*c2*conjg(cpb)*cdij*cpk
+            rhorij1(adir)=rhorij1(adir)+half*j_dpc*epsabg*c2*conjg(cpb)*cdij*cpk
           end do ! end loop over jlmn
         end do ! end loop over ilmn
       end do ! end loop over atoms
@@ -4211,6 +4212,67 @@ subroutine orbmag_wf_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_trac
 
 end subroutine orbmag_wf_output
 !!***
+
+!!****f* ABINIT/testprj
+!! NAME
+!! testprj
+!!
+!! FUNCTION
+!! test completeness of PAW projectors
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_afterscfloop
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine testprj(cg,cprj,dtset,mcg,mcprj,mpi_enreg,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: mcg,mcprj
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type), intent(inout) :: mpi_enreg
+ type(pseudopotential_type),intent(in) :: psps
+
+ !arrays
+ real(dp),intent(in) :: cg(2,mcg),rprimd(3,3)
+ real(dp),intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+ type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+
+ !Local variables -------------------------
+ !scalars
+
+ !arrays
+
+ ! ***********************************************************************
+ ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+
+end subroutine testprj
+!!***
+
 
 !!****f* ABINIT/orbmag_wf
 !! NAME
