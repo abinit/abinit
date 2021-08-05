@@ -489,6 +489,7 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,
 
  !Init FFT grid(s) sizes (be careful !)
  !See NOTES in the comments at the beginning of this file.
+ tdks%nfft = dtset%nfft
  call pawfgr_init(tdks%pawfgr,dtset,mgfftf,tdks%nfftf,ecut_eff,ecutdg_eff, &
                 & ngfft,ngfftf)
 
