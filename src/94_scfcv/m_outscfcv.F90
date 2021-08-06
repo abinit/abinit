@@ -300,7 +300,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp), allocatable :: vh1_corrector(:)
  real(dp), allocatable :: radii(:)
  real(dp), ABI_CONTIGUOUS pointer :: rho_ptr(:,:)
- type(pawrhoij_type) :: pawrhoij_dum(0)
+ type(pawrhoij_type) :: pawrhoij_dum(1)
+ !type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated

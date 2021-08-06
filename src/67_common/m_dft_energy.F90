@@ -975,7 +975,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  real(dp) :: tsec(2)
  real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
- type(pawcprj_type) :: cwaveprj(0,0)
+ type(pawcprj_type) :: cwaveprj(1,1)
 
 ! *************************************************************************
 
