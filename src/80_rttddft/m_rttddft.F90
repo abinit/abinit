@@ -30,7 +30,7 @@ module m_rttddft
  use defs_basis
  use defs_abitypes,     only: MPI_type
  use defs_datatypes,    only: pseudopotential_type
- 
+
  use m_cgprj,            only: ctocprj
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
@@ -48,7 +48,7 @@ module m_rttddft
  use m_pawrhoij,         only: pawrhoij_type,  pawrhoij_free, &
                                pawrhoij_alloc, pawrhoij_inquire_dim
  use m_paw_tools,        only: chkpawovlp
- use m_rttddft_types,    only: tdks_type 
+ use m_rttddft_types,    only: tdks_type
  use m_specialmsg,       only: wrtout
  use m_setvtr,           only: setvtr
  use m_xmpi,             only: xmpi_paral
@@ -62,7 +62,7 @@ module m_rttddft
  public :: update_after_nuc_step
  public :: update_paw
 
-contains 
+contains
 
 !!****f* m_rttddft/calc_density
 !!
@@ -99,7 +99,7 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
- 
+
  !Local variables-------------------------------
  !scalars
  integer                     :: cplex, cplex_rhoij
@@ -109,17 +109,17 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
  integer                     :: tim_mkrho
  real(dp)                    :: compch_fft
  !arrays
- real(dp)                    :: gmet(3,3) 
+ real(dp)                    :: gmet(3,3)
  real(dp),allocatable        :: nhat(:,:)
  real(dp),allocatable        :: ph1d(:,:)
  real(dp)                    :: qpt(3)
- real(dp)                    :: rmet(3,3) 
+ real(dp)                    :: rmet(3,3)
  real(dp),allocatable        :: rhowfg(:,:), rhowfr(:,:)
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
- 
+
 ! ***********************************************************************
 
- my_natom=mpi_enreg%my_natom 
+ my_natom=mpi_enreg%my_natom
 
  tim_mkrho=1
 
@@ -163,7 +163,7 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
        pawrhoij_unsym => tdks%pawrhoij
    end if
 
-   ! 4-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k} 
+   ! 4-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
    call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk, &
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor, &
@@ -258,7 +258,7 @@ subroutine update_after_nuc_step(tdks, dtset, istep, mpi_enreg, psps)
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
- 
+
  !Local variables-------------------------------
  !scalars
  logical              :: tfw_activated
@@ -275,21 +275,21 @@ subroutine update_after_nuc_step(tdks, dtset, istep, mpi_enreg, psps)
  real(dp),allocatable :: grewtn(:,:)
  real(dp),allocatable :: kxc(:,:)
  real(dp)             :: strsxc(6)
- 
+
 ! ***********************************************************************
 
- my_natom=mpi_enreg%my_natom 
+ my_natom=mpi_enreg%my_natom
 
  !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
  !FB: Needed? Box didn't change only nuclear pos..
- if (psps%usepaw==1) then 
+ if (psps%usepaw==1) then
    call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
              & std_out,k0,tdks%pawfgr%ngfft)
  else
    call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
              & std_out,k0,tdks%pawfgr%ngfft)
  end if
-   
+
  !Compute structure factor phases (exp(2Pi i G.xred)) on coarse and fine grid
  call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
           & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
@@ -299,9 +299,9 @@ subroutine update_after_nuc_step(tdks, dtset, istep, mpi_enreg, psps)
  else
     tdks%ph1df(:,:)=tdks%ph1d(:,:)
  end if
- 
- !PAW specific 
- if (psps%usepaw==1) then 
+
+ !PAW specific
+ if (psps%usepaw==1) then
     !Check for non-overlapping PAW spheres
     call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,tdks%pawtab,tdks%rmet, &
                   & dtset%typat,tdks%xred)
@@ -325,23 +325,23 @@ subroutine update_after_nuc_step(tdks, dtset, istep, mpi_enreg, psps)
 
  end if
 
- !!FB: Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
- !!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
- !!atomic position so should be done for nstep = 1 and for updated ion positions
- !if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
- !   with_vectornd = 1
- !else
- !   with_vectornd = 0
- !end if
- !if(allocated(vectornd)) then
- !   ABI_FREE(vectornd)
- !end if
- !ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
- !vectornd=zero
- !if(with_vectornd .EQ. 1) then
- !   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
- !        & rprimd,vectornd,xred)
- !endif
+!!FB: Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
+!!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
+!!atomic position so should be done for nstep = 1 and for updated ion positions
+!if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
+!   with_vectornd = 1
+!else
+!   with_vectornd = 0
+!end if
+!if(allocated(vectornd)) then
+!   ABI_FREE(vectornd)
+!end if
+!ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
+!vectornd=zero
+!if(with_vectornd .EQ. 1) then
+!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
+!        & rprimd,vectornd,xred)
+!endif
 
  !** Set up the potential (calls setvtr)
  !    The following steps have been gathered in the setvtr routine:
@@ -351,10 +351,13 @@ subroutine update_after_nuc_step(tdks, dtset, istep, mpi_enreg, psps)
  !    - possibly compute 3D core kinetic energy density
  !    - possibly compute vxc and vhartr
  !    - set up vtrial
- optene = 4; nkxc=0; moved_atm_inside=0; moved_rhor=0
+ !FB: Are the values of moved_atm_inside and moved_rhor correct?
+ optene = 4; nkxc=0; moved_atm_inside=1; moved_rhor=1
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=tdks%pawfgr%nfft
  strsxc(:)=zero
+ !FB: tfw_activated is a save variable in scfcv, should check where it appears again
+ tfw_activated=.false.
  if (dtset%tfkinfunc==12) tfw_activated=.true.
  ABI_MALLOC(grchempottn,(3,dtset%natom))
  ABI_MALLOC(grewtn,(3,dtset%natom))
@@ -414,7 +417,7 @@ subroutine update_paw(tdks, dtset, istep, mpi_enreg, psps)
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
- 
+
  !Local variables-------------------------------
  !scalars
  character(len=500)   :: msg
@@ -432,10 +435,10 @@ subroutine update_paw(tdks, dtset, istep, mpi_enreg, psps)
  !arrays
  real(dp),parameter   :: k0(3)=(/zero,zero,zero/)
  real(dp)             :: vpotzero(2)
- 
+
 ! ***********************************************************************
 
- my_natom=mpi_enreg%my_natom 
+ my_natom=mpi_enreg%my_natom
 
  !** Local exact exch.: impose occ. matrix if required
  if (dtset%useexexch/=0) then
@@ -462,21 +465,19 @@ subroutine update_paw(tdks, dtset, istep, mpi_enreg, psps)
  !** Force the recomputation of on-site potentials and Dij
  call paw_an_reset_flags(tdks%paw_an)
  !FB: Changed self_consistent to false here. Is this right?
- call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.) 
+ call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
  !FB: Used option = 0 here so both potentials and energies are recomputed.
  !FB: Would potentials only be sufficient?
  option=0; compch_sph=-1.d5; nzlmopt=0
- vpotzero(:)=zero
  call pawdenpot(compch_sph,tdks%energies%e_paw,tdks%energies%e_pawdc,ipert, &
               & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,    &
               & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,     &
               & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,        &
               & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,   &
               & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,tdks%ucvol,   &
-              & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,                & 
+              & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,                &
               & mpi_atmtab=mpi_enreg%my_atmtab,hyb_mixing=hyb_mixing,       &
               & hyb_mixing_sr=hyb_mixing_sr,vpotzero=vpotzero)
-
  !Correct the average potential with the calculated constant vpotzero
  !Correct the total energies accordingly
  !vpotzero(1) = -beta/ucvol
@@ -508,7 +509,7 @@ subroutine update_paw(tdks, dtset, istep, mpi_enreg, psps)
            & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
            & hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,                    &
            & nucdipmom=dtset%nucdipmom)
-        
+
  !Symetrize Dij
  call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &
            & psps%ntypat,0,tdks%paw_ij,tdks%pawang,dtset%pawprtvol,         &

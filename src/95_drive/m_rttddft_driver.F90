@@ -40,7 +40,7 @@ module m_rttddft_driver
  use m_rttddft_types,     only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
  use m_specialmsg,        only: wrtout
-   
+
  implicit none
 
  private
@@ -49,7 +49,7 @@ module m_rttddft_driver
  public :: rttddft
 !!***
 
-contains 
+contains
 
 !!****f* m_rttddft_driver/rttddft
 !! NAME
@@ -106,7 +106,7 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  !arrays
  type(pawrad_type),         intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),         intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
- 
+
  !Local variables-------------------------------
  !scalars
  character(len=500)   :: msg

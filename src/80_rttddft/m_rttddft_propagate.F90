@@ -95,12 +95,12 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
  integer                   :: usecprj_local
  type(gs_hamiltonian_type) :: gs_hamk
  !arrays
- real(dp)             :: grnl(3*dtset%natom)
- real(dp),allocatable :: eknk(:),eknk_nd(:,:,:,:,:)
- real(dp),allocatable :: enlxnk(:)
- real(dp),allocatable :: EigMin(:,:)
- real(dp),allocatable :: focknk(:),fockfornk(:,:,:)
- real(dp),allocatable :: grnlnk(:,:)
+ real(dp)                  :: grnl(3*dtset%natom)
+ real(dp),allocatable      :: eknk(:),eknk_nd(:,:,:,:,:)
+ real(dp),allocatable      :: enlxnk(:)
+ real(dp),allocatable      :: EigMin(:,:)
+ real(dp),allocatable      :: focknk(:),fockfornk(:,:,:)
+ real(dp),allocatable      :: grnlnk(:,:)
  
 ! ***********************************************************************
 
