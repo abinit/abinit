@@ -504,7 +504,7 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp) :: temporary1(3,3), temporary2(3), temporary3
  real(dp) :: unitary_33(3,3)
  real(dp) :: minelecmass,eham(3,3)
- real(dp) :: kpt(3), k_vector(3), q_vector(3), k_plus_q(3)
+ real(dp) :: kpt(3), q_vector(3), k_plus_q(3)
  real(dp), allocatable :: omega_zero(:)
  real(dp), allocatable :: intsum(:,:,:,:)
  real(dp), allocatable :: sigma(:,:,:), d2sigmadk2(:,:)
