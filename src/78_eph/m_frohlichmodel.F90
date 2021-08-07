@@ -866,7 +866,6 @@ do iphon = 1, 3*cryst%natom
                !   write(ab_out,'(a)')'Matrix inversion failed!'
 	           !endif
                !ABI_FREE(work)
-               !write(ab_out,'(a,9f10.3,i5.2,i5.2)')'inverse',temporary1, ieig, counter
                temporary2 = matmul( temporary1(1:3,1:3), eigenvec(1:3,ieig,nkgrid,idir) )
                temporary3 = dot_product( eigenvec(1:3,ieig,nkgrid,idir), temporary2(1:3) )
                if( ( iphi .EQ. 0 ) .OR. ( iphi .EQ. nphi )  ) then
@@ -941,6 +940,12 @@ write(ab_out,'(a)')'   Polaron effective mass (a.u.) along 3 directions'
 write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invpolmass(:,1)
 write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invpolmass(:,2)
 write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invpolmass(:,3)
+write(ab_out,'(a)')' '
+write(ab_out,'(a)')'   Sum rule of inverse masses check-up(for convergence purposes):'
+write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',SUM(invpolmass(:,1))
+write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',SUM(invpolmass(:,2))
+write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',SUM(invpolmass(:,3))
+
 
 ABI_FREE(eigenvec)
 ABI_FREE(eigenval)
