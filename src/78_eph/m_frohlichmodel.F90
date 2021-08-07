@@ -941,7 +941,7 @@ write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',one/invpolmass(:,1)
 write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',one/invpolmass(:,2)
 write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',one/invpolmass(:,3)
 write(ab_out,'(a)')' '
-write(ab_out,'(a)')'   Sum rule of inverse masses check-up(for convergence purposes):'
+write(ab_out,'(a)')'   Sum rule of inverse polaron masses check-up(for convergence purposes):'
 write(ab_out,'(a, 3f15.6)')'    Direction 100:         ',SUM(invpolmass(:,1))
 write(ab_out,'(a, 3f15.6)')'    Direction 110:         ',SUM(invpolmass(:,2))
 write(ab_out,'(a, 3f15.6)')'    Direction 111:         ',SUM(invpolmass(:,3))
