@@ -742,7 +742,7 @@ ABI_MALLOC(omega_zero,(3*cryst%natom))
 invepsilonstar = zero
 
 do imode = 1,3*cryst%natom
- do iqdir = 1,10
+ do iqdir = 1,nqdir
   !For ease of treatment loop over all phonon branches but...
   !Avoid the acoustic branches 
   if(imode > 3) then
@@ -760,7 +760,7 @@ nkgrid = 2
 !Set material depedent length scale for the finite difference
 !Lowest optical phonon frequency to be used
 minelecmass=1.0_dp/maxval(abs(invemass))
-krange = sqrt(two*minelecmass*phfrq_qdir(4,1)/1000.0)
+krange = sqrt(two*minelecmass*phfrq_qdir(4,1)/100000.0)
 
 !Diagonalize 3x3 Luttinger-Kohn Hamiltonian 
 
@@ -811,15 +811,15 @@ nphi     = ntheta
 nxi      = ntheta
 
 !Normalization factor for the integral
-nq_factor = (ntheta+1)*(nphi+1)*nxi*two/pi
+nq_factor = ntheta*nphi*nxi*two/pi
 
 !Initialize self-energy
 sigma = zero
 
 !Summation over IR active phonon modes
 do iphon = 1, 3*cryst%natom
- if( iphon > 3 ) then
- !if( invepsilonstar(imode) > tol10 ) then
+ !if( iphon > 3 ) then
+ if( invepsilonstar(iphon) > 1E-10 ) then
     !Summation over relevant directions (100,110,111)
     do idir=1,3
      !Summation over electronic eigenvalues 
@@ -835,26 +835,24 @@ do iphon = 1, 3*cryst%natom
          !Use a mapping to a tangent function - faster convergence wrt qpt sampling
          !Enforce one sampling parameter nxi = ntheta = nphi
          counter = 0
-         do ixi = 0,nxi-1
-           xi = ixi*pi/ ( 2.0_dp * nxi)         
+         do ixi = 0,nxi
+           xi = ixi*pi/( 2.0_dp * nxi)
+           if ( ixi .EQ. nxi ) xi = xi - tol8
+           !Wave-vector length
+           qpt = ( omega_zero(iphon)/abs(lutt_params(1)) )**half*tan(xi)
            do itheta = 0,ntheta
              !theta = (itheta - 1.0_dp)/ntheta
+             !Remap theta points on the sphere instead of a linear f(x) = x mapping
+             !Use f(x) = 2x - 1 mapping              
              costheta = 2.0_dp * itheta /ntheta - 1.0_dp
              do iphi = 0,nphi
                phi = iphi*two*pi/nphi
-               !Remap theta points on the sphere instead of a linear f(x) = x mapping
-               !Use f(x) = 2x - 1 mapping              
-               qpt = ( omega_zero(iphon)/abs(lutt_params(1)) )**half*tan(xi)
-               !counter = counter + 1
-               !write(ab_out,'(a,f10.5,i5.2,f10.5)')'q',qpt, counter, ( omega_zero(iphon)/abs(lutt_params(1)) )**half
                !build q vector
                q_vector(1) = qpt*(1.0_dp - costheta**2.0_dp)**0.5_dp*cos(phi)
                q_vector(2) = qpt*(1.0_dp - costheta**2.0_dp)**0.5_dp*sin(phi)
                q_vector(3) = qpt*costheta
-               !build k vector
-               !kpoint(:) = (ik -1.0_dp)*krange*lutt_unit_kdir(:,idir)
                !build k+q vector
-               k_plus_q = k_vector + q_vector
+               k_plus_q = kpoint + q_vector
                !write(ab_out,'(a,3x,3f10.6,3x,i5.2,3x,i5.2)')'k+q',k_plus_q, ieig, counter
                intsum(:,:,ik, idir) = &
                       abs(eigenval(ieig,ik,idir))*unitary_33 - &
@@ -869,19 +867,16 @@ do iphon = 1, 3*cryst%natom
 	           !endif
                !ABI_FREE(work)
                !write(ab_out,'(a,9f10.3,i5.2,i5.2)')'inverse',temporary1, ieig, counter
-               temporary2 = matmul( temporary1, eigenvec(:,ieig,nkgrid,idir) )
-               temporary3 = dot_product( eigenvec(:,ieig,nkgrid,idir), temporary2 )
+               temporary2 = matmul( temporary1(1:3,1:3), eigenvec(1:3,ieig,nkgrid,idir) )
+               temporary3 = dot_product( eigenvec(1:3,ieig,nkgrid,idir), temporary2(1:3) )
                if( ( iphi .EQ. 0 ) .OR. ( iphi .EQ. nphi )  ) then
                  temporary3 = temporary3/2.0_dp
                endif
                if( ( itheta .EQ. 0 ) .OR. ( itheta .EQ. ntheta ) ) then
                  temporary3 = temporary3/2.0_dp
                endif
-               if( ixi .EQ. 0 ) then
+               if( (ixi .EQ. 0) .OR. (ixi .EQ. nxi) ) then
                  temporary3 = temporary3/2.0_dp
-               endif
-               if( ixi .EQ. nxi ) then
-                 temporary3 = zero
                endif
                sigma(ik,ieig,idir) = sigma(ik,ieig,idir) &
                    + signpm*piinv*invepsilonstar(iphon)*omega_zero(iphon) &
@@ -908,7 +903,7 @@ do idir = 1,3
    !Here consider a small BZ region around Gamma
    !A convergene study might be performed around this value
    !Finite difference for the 2nd derivative of the self energy         
-   d2sigmadk2(ieig,idir) = 1.0_dp/krange**2.0_dp*( sigma(nkgrid,ieig,idir) - sigma(1,ieig,idir) )       
+   d2sigmadk2(ieig,idir) = 2.0_dp/krange**2.0_dp*( sigma(nkgrid,ieig,idir) - sigma(1,ieig,idir) )
    enddo
 enddo
 
