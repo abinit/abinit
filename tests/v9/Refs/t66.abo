@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  3 Aug 2021.
-- ( at 13h49 )
+.Starting date : Sat  7 Aug 2021.
+- ( at 20h29 )
   
 - input  file    -> t66.abi
 - output file    -> t66.abo
@@ -1930,7 +1930,7 @@ meta: {optdriver: 7, eph_task: 10, }
    ##      Frequency(meV)            Epsilon*
     6           66.541611            4.721243
  
-   ZPR (meV):     222.57
+   ZPR (meV):     231.24
  
    Electronic effective mass (a.u.) along 3 directions
     Direction 100:               -0.358805      -2.925580      -2.925580
@@ -1938,9 +1938,14 @@ meta: {optdriver: 7, eph_task: 10, }
     Direction 111:               -0.493869      -1.383295      -1.383295
  
    Polaron effective mass (a.u.) along 3 directions
-    Direction 100:               -2.358680     -19.193859     -19.166341
-    Direction 110:               -2.965930      -7.185569     -19.166337
-    Direction 111:               -3.242988      -9.073367      -9.074316
+    Direction 100:               -6.441970      -6.206766      -6.213920
+    Direction 110:               -7.730593      -5.347819      -6.213919
+    Direction 111:               -8.327171      -5.610542      -5.605491
+ 
+   Sum rule of inverse polaron masses check-up(for convergence purposes):
+    Direction 100:               -0.477276
+    Direction 110:               -0.477277
+    Direction 111:               -0.476721
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2290,10 +2295,10 @@ P          mk1mem6          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         36.0  wall=         36.3
+- Proc.   0 individual time (sec): cpu=         36.9  wall=         37.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         36.0  wall=         36.3
++Overall time at end (sec) : cpu=         36.9  wall=         37.0

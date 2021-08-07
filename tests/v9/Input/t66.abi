@@ -82,7 +82,7 @@ efmas_calc_dirs5  1
        getddb6  3
        getwfk6  4
      getefmas6  5
- efmas_ntheta6  80
+ efmas_ntheta6  100
 eph_frohlichm6  1
      eph_task6  10
        kptopt6  0        # K-points can be specified in any way one want, they just need to be present in the
