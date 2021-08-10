@@ -1055,23 +1055,23 @@ module m_lobpcg2
 
     type(lobpcg_t), intent(inout) :: lobpcg
 
-#ifdef HAVE_OPENMP
-    lobpcg%is_nested = omp_get_nested()
-    call omp_set_nested(.true.)
-#else
+!#ifdef HAVE_OPENMP
+!    lobpcg%is_nested = omp_get_nested()
+!    call omp_set_nested(.true.)
+!#else
     lobpcg%is_nested = .false.
-#endif
+!#endif
   end subroutine lobpcg_allowNested
 
   subroutine lobpcg_restoreNested(lobpcg)
 
     type(lobpcg_t), intent(inout) :: lobpcg
 
-#ifdef HAVE_OPENMP
-    call omp_set_nested(lobpcg%is_nested)
-#else
+!#ifdef HAVE_OPENMP
+!    call omp_set_nested(lobpcg%is_nested)
+!#else
     lobpcg%is_nested = .false.
-#endif
+!#endif
   end subroutine lobpcg_restoreNested
 
 
