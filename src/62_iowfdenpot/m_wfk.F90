@@ -3999,6 +3999,10 @@ subroutine wfk_compute_offsets(Wfk)
 !scalars
  integer :: spin,ik_ibz,npw_k,nband_k,bsize_frm,mpi_type_frm,base !,band
  integer(XMPI_OFFSET_KIND) :: offset
+! this variable is needed to force arithmetic in the right kind 
+! and avoid integer overflows with large nband npw.
+! TODO: check if same is needed elsewhere for offsets
+ integer(XMPI_OFFSET_KIND) :: increment
 
 ! *************************************************************************
 
@@ -4081,21 +4085,30 @@ subroutine wfk_compute_offsets(Wfk)
          offset = offset + 2*nband_k*xmpi_bsize_dp + 2*bsize_frm
          Wfk%offset_ks(ik_ibz,spin,REC_CG) = offset
          !
-         ! Wavefunction coefficients
+         !---------------------------------------------------------------------------
+         ! Fourth record: Wavefunction coefficients
+         !---------------------------------------------------------------------------
          ! do band=1,nband_k; write(unitwf) cg_k(1:2,npw_k*nspinor); end do
          !offset = offset + Wfk%mband * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm)
-         offset = offset + nband_k * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm)
+         increment = 2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm
+         increment = nband_k * increment
+         offset = offset + increment
+         !offset = offset + nband_k * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm)
 
        else if (Wfk%formeig==1) then
          ! read(unitwf) eigen(2*nband_k)
          !Wfk%offset_ks(ik_ibz,spin,REC_CG) = offset + 2*Wfk%mband*xmpi_bsize_dp + 2*bsize_frm
          Wfk%offset_ks(ik_ibz,spin,REC_CG) = offset + 2*nband_k*xmpi_bsize_dp + 2*bsize_frm
 
-         offset = offset + &
+         !---------------------------------------------------------------------------
+         ! Fourth record: Wavefunction coefficients
+         !---------------------------------------------------------------------------
+         increment = (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm) + &
+&                    (2*nband_k*xmpi_bsize_dp + 2*bsize_frm)
 !&          Wfk%mband * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm) + &
 !&          Wfk%mband * (2*Wfk%mband*xmpi_bsize_dp + 2*bsize_frm)
-&          nband_k * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm) + &
-&          nband_k * (2*nband_k*xmpi_bsize_dp + 2*bsize_frm)
+         increment = nband_k * increment
+         offset = offset + increment
 
        else
          ABI_ERROR("Wrong formeig")
