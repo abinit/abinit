@@ -290,7 +290,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer, pointer :: my_atmtab(:)
  real(dp) :: tsec(2),nt_ntone_norm(nspden),rhomag(2,nspden)
  real(dp),allocatable :: eigen2(:)
- real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),gr_dum(:,:,:),intgden(:,:)
+ real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),intgden(:,:)
  real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
  real(dp), allocatable :: doccde(:)
@@ -995,8 +995,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
    ABI_MALLOC(intgden,(nspden,natom))
-   ABI_MALLOC(gr_dum,(3,nspden,natom))
-   call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,&
+   call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
 &   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
 !  for rhomag:
 !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
@@ -1036,7 +1035,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call wrtout([std_out, ab_out], msg)
    end if
    ABI_SFREE(intgden)
-   ABI_SFREE(gr_dum)
  end if
 
  call timab(1166,2,tsec)
