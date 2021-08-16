@@ -153,8 +153,8 @@ contains
 !!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawaccrhoij
 !!      pawcprj_alloc,pawcprj_free,pawdij2e1kb,pawdijfr,pawfgrtab_free
 !!      pawfgrtab_init,pawgrnl,pawrhoij_free,pawrhoij_gather,pawrhoij_nullify
-!!      pawrhoij_symrhoij,pawtab_get_lsize,strconv,timab,wfk_open_read,wrtout
-!!      xmpi_sum
+!!      pawrhoij_symrhoij,pawtab_get_lsize,proc_distrb_band,strconv,timab
+!!      wfk_open_read,wrtout,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

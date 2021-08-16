@@ -1185,7 +1185,7 @@ end subroutine getng
 !! PARENTS
 !!      m_bandfft_kpt,m_cut3d,m_dfpt_elt,m_dfpt_mkrho,m_epjdos,m_fft,m_fft_prof
 !!      m_fock,m_fock_getghc,m_gsphere,m_hamiltonian,m_inwffil,m_mkrho
-!!      m_mlwfovlp,m_orbmag,m_paw_mkaewf,m_positron,m_scfcv_core,m_sigmaph
+!!      m_mlwfovlp,m_paw_mkaewf,m_positron,m_scfcv_core,m_sigmaph
 !!      m_spin_current,m_suscep_stat,m_tddft,m_wfd
 !!
 !! CHILDREN

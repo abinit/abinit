@@ -169,7 +169,8 @@ contains
 !!      m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
+!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -241,6 +242,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !arrays
  logical,allocatable :: cycle_bands(:)
  integer :: band_procs(nband_k)
+ integer :: bands_treated_now(nband_k)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:),ghc_vectornd(:,:)
@@ -435,7 +437,11 @@ unit_me = 6
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
-       call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+       bands_treated_now = 0
+       bands_treated_now(iband) = 1
+       call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+
+       call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       rf2,dcwavef,&
 &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
@@ -733,7 +739,8 @@ end subroutine dfpt_vtowfk
 !!      m_dfpt_vtowfk
 !!
 !! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
+!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -902,7 +909,8 @@ end subroutine full_active_wf1
 !!      m_dfpt_vtowfk
 !!
 !! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
+!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 

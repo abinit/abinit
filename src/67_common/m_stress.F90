@@ -30,6 +30,7 @@ module m_stress
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_extfpmd
 
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
@@ -173,8 +174,8 @@ contains
 !!
 !! SOURCE
 
- subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
-&                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
+ subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,extfpmd,&
+&                  ixc,kinstr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
 &                  typat,usefock,usekden,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
@@ -187,6 +188,7 @@ contains
  integer,intent(in) :: nsym,ntypat,prtvol,usefock,usekden,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
  type(MPI_type),intent(in) :: mpi_enreg
@@ -587,6 +589,11 @@ contains
    uncorr(mu)=strten(mu)+strsii
    strten(mu)=uncorr(mu)
  end do
+
+!Adding the extfpmd continous contribution to stress tensor
+ if(associated(extfpmd)) then
+   strten(1:3)=strten(1:3)-(2./3.)*extfpmd%e_kinetic/extfpmd%ucvol
+ end if
 
 !=======================================================================
 !================ Print out info about stress tensor ===================

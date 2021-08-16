@@ -79,6 +79,7 @@ CONTAINS
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -112,6 +113,7 @@ end subroutine efmasval_free
 !!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -158,6 +160,7 @@ end subroutine efmasval_free_array
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -191,6 +194,7 @@ end subroutine efmasdeg_free
 !!      m_eph_driver,m_respfn_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -231,6 +235,7 @@ end subroutine efmasdeg_free
 !!      m_d2frnl
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -353,6 +358,7 @@ end subroutine efmasdeg_free
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -516,6 +522,7 @@ end subroutine print_efmas
 !!      m_eph_driver
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -641,6 +648,7 @@ end subroutine print_efmas
 !!      m_efmas
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -844,6 +852,7 @@ end subroutine print_efmas
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
@@ -948,14 +957,15 @@ end subroutine print_efmas
           do iband=1,deg_dim
             do jband=1,deg_dim
               eigen1_deg(iband,jband) = cmplx(eigen1(2*(jband+degl)-1+(iband+degl-1)*2*nband_k,adir,ipert),&
-&              eigen1(2*(jband+degl)+(iband+degl-1)*2*nband_k,adir,ipert),dpc)
+&                                             eigen1(2*(jband+degl)  +(iband+degl-1)*2*nband_k,adir,ipert),dpc)
             end do
           end do
 
           efmasdeg(ikpt)%max_abs_eigen1 = max(efmasdeg(ikpt)%max_abs_eigen1, maxval(abs(eigen1_deg)))
           if (.not.(ALL(ABS(eigen1_deg)<tol5))) then
             write(msg,'(a,a)') ' Effective masses calculations require given k-point(s) to be band extrema for given bands, ',&
-&            'but max abs gradient component of band(s) was found to be greater than 1e-5.'
+&                              'but max abs gradient of band(s) was found to be greater than 1e-5. Abinit will continue anyway.'
+            ABI_WARNING(TRIM(msg))
             ABI_WARNING(msg)
             ABI_WARNING_UNIT(msg, ab_out)
           end if
@@ -1119,6 +1129,7 @@ end subroutine print_efmas
 !!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cgqf,dgemm,dgetrf,dgetri,dsyev,print_tr_efmas,zgemm,zgetrf,zgetri,zheev
 !!
 !! SOURCE
 
