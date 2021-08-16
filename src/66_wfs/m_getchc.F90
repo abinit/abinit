@@ -108,12 +108,10 @@ contains
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!   cgwf_paw
-!!
-!! NOTE
-!!   Case k_left/=k is not implemented yet
+!!      m_cgwf_cprj
 !!
 !! CHILDREN
+!!      dgemv,nonlop,timab,zgemv
 !!
 !! SOURCE
 
@@ -486,8 +484,10 @@ end subroutine getchc
 !!   csc(2*ndat)=matrix elements <C_left|S|C>
 !!
 !! PARENTS
+!!      m_cgwf_cprj
 !!
 !! CHILDREN
+!!      dgemv,nonlop,timab,zgemv
 !!
 !! SOURCE
 

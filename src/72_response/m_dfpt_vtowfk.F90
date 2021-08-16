@@ -169,7 +169,8 @@ contains
 !!      m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
+!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -738,7 +739,8 @@ end subroutine dfpt_vtowfk
 !!      m_dfpt_vtowfk
 !!
 !! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
+!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -907,7 +909,8 @@ end subroutine full_active_wf1
 !!      m_dfpt_vtowfk
 !!
 !! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
+!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
+!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 

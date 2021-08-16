@@ -120,7 +120,7 @@ CONTAINS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_chebfi,m_chi0
+!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_cgwf_cprj,m_chebfi,m_chi0
 !!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
 !!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
 !!      m_dfptnl_pert,m_dft_energy,m_electronpositron,m_epjdos,m_exc_analyze
@@ -193,7 +193,7 @@ end subroutine pawcprj_alloc
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_chebfi,m_chi0
+!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_cgwf_cprj,m_chebfi,m_chi0
 !!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
 !!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
 !!      m_dfptnl_pert,m_dft_energy,m_efield,m_electronpositron,m_epjdos
@@ -252,7 +252,7 @@ end subroutine pawcprj_free
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      m_cgprj,m_dfpt_cgwf,m_fock,m_orbmag
+!!      m_cgprj,m_dfpt_cgwf,m_dfpt_vtowfk,m_fock,m_orbmag
 !!
 !! CHILDREN
 !!
@@ -306,10 +306,10 @@ end subroutine pawcprj_set_zero
 !!  MG: What about an option to report a pointer to cprj_in?
 !!
 !! PARENTS
-!!      m_berryphase_new,m_cgwf,m_chebfi,m_chi0,m_classify_bands,m_cohsex
-!!      m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!      m_electronpositron,m_extraprho,m_fock,m_getghc,m_io_kss,m_nonlop
-!!      m_orbmag,m_paw_sym,m_pawcprj,m_positron,m_prep_calc_ucrpa,m_sigc,m_sigx
+!!      m_berryphase_new,m_cgprj,m_cgwf,m_cgwf_cprj,m_chebfi,m_chi0
+!!      m_classify_bands,m_cohsex,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtowfk,m_electronpositron,m_extraprho,m_fock,m_getghc,m_io_kss
+!!      m_nonlop,m_paw_sym,m_pawcprj,m_positron,m_prep_calc_ucrpa,m_sigc,m_sigx
 !!      m_vtowfk,m_wfd
 !!
 !! CHILDREN
@@ -416,8 +416,8 @@ end subroutine pawcprj_copy
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
 !! PARENTS
-!!      m_chebfi,m_dfpt_cgwf,m_dfpt_scfcv,m_extraprho,m_getgh1c,m_invovl
-!!      m_scfcv_core
+!!      m_cgtools,m_cgwf_cprj,m_chebfi,m_dfpt_cgwf,m_dfpt_scfcv,m_extraprho
+!!      m_getgh1c,m_invovl,m_scfcv_core
 !!
 !! CHILDREN
 !!
@@ -538,7 +538,7 @@ end subroutine pawcprj_axpby
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
 !! PARENTS
-!!      m_dfpt_vtowfk,m_extraprho
+!!      m_cgtk,m_cgtools,m_cgwf_cprj,m_dfpt_vtowfk,m_extraprho
 !!
 !! CHILDREN
 !!
@@ -722,10 +722,9 @@ end subroutine pawcprj_zaxpby
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
 !! PARENTS
-!!      corrmetalwf1,extrapwf
+!!      m_cgwf_cprj
 !!
 !! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -837,7 +836,7 @@ end subroutine pawcprj_projbd
 !!  whether it is implemented correctly for nonsymmorphic symmetries.
 !!
 !! PARENTS
-!!      m_berryphase_new,m_cgwf,m_fock,m_orbmag
+!!      m_berryphase_new,m_cgwf,m_fock
 !!
 !! CHILDREN
 !!
@@ -1034,7 +1033,7 @@ end subroutine pawcprj_conjg
 !!  cprj_in and cprj_out must be dimensionned as cprj_in(n1,n2*nn) and cprj_in(n1,n2)
 !!
 !! PARENTS
-!!      m_cgcprj,m_extraprho,m_getgh1c,m_scfcv_core
+!!      m_cgcprj,m_cgprj,m_extraprho,m_getgh1c,m_scfcv_core
 !!
 !! CHILDREN
 !!
@@ -2085,7 +2084,7 @@ end subroutine pawcprj_mpi_recv
 !!  ierr=Error status.
 !!
 !! PARENTS
-!!      m_cgprj
+!!      m_cgprj,m_dfpt_vtowfk,m_getgh1c
 !!
 !! CHILDREN
 !!
