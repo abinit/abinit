@@ -195,6 +195,8 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !
 ! === Save dimension and other useful quantities in vcut% ===
  vcut%nfft      = PRODUCT(ngfft(1:3))  ! Number of points in the FFT mesh.
+ ! ng and gvec are not used yet we don't want to use them without being defined
+ ng = -1
  vcut%ng        = ng                   ! Number of G-vectors in the Coulomb matrix elements.
  vcut%rcut      = rcut                 ! Cutoff radius for cylinder.
  vcut%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).

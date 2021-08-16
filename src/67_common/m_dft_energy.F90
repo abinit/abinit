@@ -35,6 +35,7 @@ module m_dft_energy
  use m_xcdata
  use m_cgtools
  use m_dtset
+ use m_extfpmd
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -221,7 +222,7 @@ contains
 !! SOURCE
 
 subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-& energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
+& energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
@@ -238,6 +239,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
@@ -811,6 +813,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+!Add the contribution of extfpmd to the entropy
+ if(associated(extfpmd)) then
+   energies%entropy=energies%entropy+extfpmd%entropy
+   energies%e_extfpmd=extfpmd%e_kinetic
+   energies%edc_extfpmd=extfpmd%edc_kinetic
+   if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
+   if(optene==1.or.optene==3) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+ end if
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron
@@ -839,7 +849,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (psps%usepaw==0) then
    tim_mkrho=3
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs)
+&   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs,&
+&   extfpmd=extfpmd)
    if(dtset%usekden==1)then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
@@ -868,7 +879,9 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    ABI_MALLOC(rhowfg,(2,dtset%nfft))
    rhowfr(:,:)=zero
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs)
+&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs,&
+&   extfpmd=extfpmd)
+
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,0,dtset%paral_kgb,pawfgr,rhowfg,rhodum,rhowfr,rhor)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
    call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)

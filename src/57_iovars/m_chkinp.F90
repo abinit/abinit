@@ -82,7 +82,7 @@ contains
 !!
 !! CHILDREN
 !!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dt%free,metric,wrtout,xmpi_sum
+!!      dt%free,metric,symmetrize_xred,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1893,8 +1893,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nloalg(1)= nloc_alg
-!  Must be 2, 3, 4
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   if(dt%useylm==0) then
+!    Must be 2, 3, 4
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   else
+!    Must be between 2 and 10
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),9,(/2,3,4,5,6,7,8,9,10/),iout)
+   end if
 
 !  nloc_mem= nloalg(2)*(nloalg(3)+1)
 !  nloalg(2) must be -1 or 1 ; nloalg(3) is 0 or 1.
@@ -2421,11 +2426,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
    end if
    !Longwave calculation function only for LDA
-   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
-   if(allow)then
-     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
-   end if
+!   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
+!   if(allow)then
+!     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
+!   end if
    !Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
     write(msg, '(3a,i0,2a)' )&
@@ -2475,8 +2480,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
+  ! only values of -3..+3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
@@ -3569,6 +3574,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
    end if
+
+! use_oldchi
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_oldchi',dt%use_oldchi,2,(/0,1/),iout)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)

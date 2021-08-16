@@ -168,12 +168,10 @@ contains
 !! NOT OUTPUT NOW !
 !!
 !! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear
-!!      m_pead_nl_loop,m_respfn_driver
+!!      m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear,m_pead_nl_loop
 !!
 !! CHILDREN
-!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
-!!      sphereboundary,timab,wrtout,xmpi_sum
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1106,8 +1104,7 @@ end subroutine inwffil
 !!      m_inwffil
 !!
 !! CHILDREN
-!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
-!!      sphereboundary,timab,wrtout,xmpi_sum
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1832,8 +1829,7 @@ end subroutine wfsinp
 !!      m_inwffil
 !!
 !! CHILDREN
-!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
-!!      sphereboundary,timab,wrtout,xmpi_sum
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -2060,8 +2056,7 @@ end subroutine initwf
 !!      m_inwffil
 !!
 !! CHILDREN
-!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
-!!      sphereboundary,timab,wrtout,xmpi_sum
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -2655,8 +2650,7 @@ end subroutine newkpt
 !!      m_inwffil
 !!
 !! CHILDREN
-!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
-!!      sphereboundary,timab,wrtout,xmpi_sum
+!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -3300,7 +3294,7 @@ end subroutine wfconv
 !!   it does not treat the eigenvalues as a matrix.
 !!
 !! PARENTS
-!!      newkpt,wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      timab,xmpi_bcast,xmpi_sum

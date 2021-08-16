@@ -270,6 +270,9 @@ contains  !=====================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -396,6 +399,9 @@ end subroutine phdos_print
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -499,6 +505,9 @@ end subroutine phdos_print_debye
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -610,6 +619,9 @@ end subroutine phdos_print_thermo
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -651,6 +663,9 @@ end subroutine phdos_free
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -746,6 +761,9 @@ end subroutine phdos_init
 !!      anaddb,m_eph_driver,m_tdep_phdos
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1265,6 +1283,9 @@ end subroutine mkphdos
 !!      anaddb
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1440,6 +1461,9 @@ end subroutine zacharias_supercell_make
 !!      m_generate_training_set
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1634,6 +1658,9 @@ end subroutine thermal_supercell_make
 !!      anaddb,m_generate_training_set
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1673,6 +1700,9 @@ end subroutine thermal_supercell_free
 !!      anaddb
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1721,6 +1751,9 @@ end subroutine zacharias_supercell_print
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1772,6 +1805,9 @@ end subroutine thermal_supercell_print
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1861,6 +1897,9 @@ end subroutine phdos_ncwrite
 !!      anaddb
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2163,6 +2202,9 @@ end subroutine mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2230,6 +2272,9 @@ end subroutine phdos_calc_vsound
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2294,6 +2339,9 @@ end subroutine phdos_print_vsound
 !! PARENTS
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2455,6 +2503,9 @@ end subroutine phdos_print_msqd
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2535,6 +2586,9 @@ end subroutine phonons_ncwrite
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2635,6 +2689,9 @@ end subroutine phonons_write_phfrq
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2760,6 +2817,9 @@ end subroutine phonons_write_xmgrace
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2886,6 +2946,9 @@ end subroutine phonons_write_gnuplot
 !!      m_eph_driver
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3046,6 +3109,9 @@ end subroutine ifc_mkphbs
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3270,6 +3336,9 @@ end subroutine dfpt_symph
 !!      m_phonons
 !!
 !! CHILDREN
+!!      cg_zgemm,ifc%fourq,kpts_ibz_from_kptrlatt,massmult_and_breaksym
+!!      pheigvec_rotate,print_arr,qrank%free,qrank%get_mapping,sg_multable
+!!      wrtout
 !!
 !! SOURCE
 !!
