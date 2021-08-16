@@ -24,7 +24,7 @@ tmpdata_prefix = "t34t"
 
   prtden   0
   iscf     7
-  toldfe   1.0d-10
+  toldff   1.0d-5
   nstep    10      # This is to improve the portability in the automatic testing
 
   nband   20
