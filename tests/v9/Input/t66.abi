@@ -126,7 +126,7 @@ nstep 100
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = B. Guster
-#%% keywords = DFPT, EPH
+#%% keywords = NC, DFPT, EPH
 #%% description =
 #%%  CaO polaron effective mass along different direction: 100,110,111. 
 #%%  Frohlich ZPR is also computed.
