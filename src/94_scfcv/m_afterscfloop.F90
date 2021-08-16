@@ -281,11 +281,11 @@ contains
 !!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
 !!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
 !!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      orbmag,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
-!!      setnoccmmp,spin_current,timab,total_energies,transgrid,write_energies
-!!      wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big
-!!      wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big
-!!      xcden,xmpi_sum,xred2xcart
+!!      orbmag_wf,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
+!!      scprqt,setnoccmmp,spin_current,timab,total_energies,transgrid
+!!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
+!!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
+!!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
@@ -544,7 +544,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
  end if
- 
+
 !----------------------------------------------------------------------
 ! Orbital magnetization calculation: discretized wavefunction variant
 !----------------------------------------------------------------------
@@ -1094,6 +1094,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (associated(extfpmd)) then
+   results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
    results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
  end if
