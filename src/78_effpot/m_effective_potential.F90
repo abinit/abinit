@@ -2953,7 +2953,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   du_delta=zero
   do ia=1,my_natom
     ib = my_atoms(ia)
-    !Calc (1+eta)⁻1 * disp(ib) 
+    !Calc (1+eta)^-1 * disp(ib) 
     strain_inv_u = MATMUL(strain_inv,displacement(:,ib))
 !    write(*,*) "--- strain_inv_u ---" 
 !    write(*,*) strain_inv_u
