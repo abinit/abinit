@@ -681,7 +681,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
 &                             +bound_factors(3)*bound_EFS(3)*mses_ini)  
                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," GF/GF_ini: ",GF_arr(i)
                  call wrtout(std_out,message,'COLL')
-                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," GF: ",(bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef& 
+                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," GF: ",(bound_factors(1)*bound_EFS(1)*mse&
+&                                                                       +bound_factors(2)*bound_EFS(2)*msef& 
 &                                                                       +bound_factors(3)*bound_EFS(3)*mses)
                  call wrtout(std_out,message,'COLL')                   
                  coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
@@ -706,9 +707,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-                write(message,'(a,ES24.16)') "GF/GF_ini after_opt: ", (bound_factors(1)*bound_EFS(1)*mse+bound_factors(2)*bound_EFS(2)*msef& 
+                write(message,'(a,ES24.16)') "GF/GF_ini after_opt: ", (bound_factors(1)*bound_EFS(1)*mse&
+&                                                                     +bound_factors(2)*bound_EFS(2)*msef& 
 &                                                                     +bound_factors(3)*bound_EFS(3)*mses) / & 
-&                                                                     (bound_factors(1)*bound_EFS(1)*mse_ini+bound_factors(2)*bound_EFS(2)*msef_ini& 
+&                                                                     (bound_factors(1)*bound_EFS(1)*mse_ini&
+&                                                                     +bound_factors(2)*bound_EFS(2)*msef_ini& 
 &                                                                     +bound_factors(3)*bound_EFS(3)*mses_ini)  
                 call wrtout(std_out,message,'COLL')
                 mse_ini  = mse
