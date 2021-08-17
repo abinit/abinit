@@ -39,8 +39,10 @@ tmpdata_prefix = "t34t"
   optcell 0        # no optimization of cell geometry 
   hmcsst  0        # number of strain steps (optimization of unit cell geometry)
   ntime   4        # number of HMC sweeps
-  nnos    1        # number ov nose hover thermostats
-
+  nnos    1        # number of nose hover thermostats
+  qmass   50 
+  bmass   5000
+ 
   kptopt   1
   ngkpt    2 2 2
   nshiftk  1
