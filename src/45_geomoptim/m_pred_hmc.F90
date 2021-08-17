@@ -100,12 +100,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
  logical,intent(in)          :: zDEBUG
 
 !Local variables-------------------------------
-
  integer,save  :: seed                                   ! seed for rnd generator
- integer       :: iacc,ii,jj                             ! dummy integers for loop indexes and acceptance decision flag
+ integer       :: iacc                                   ! dummy integers for loop indexes and acceptance decision flag
  real(dp)      :: etotal,epot,ekin,de                    ! total, potential (electronic), kinetic (ionic) energies and energy difference
  !real(dp)      :: mv2tot,factor                          ! dummies used for rescaling of velocities
- real(dp)      :: rnd
  real(dp)      :: xred(3,ab_mover%natom)                 ! reduced coordinates of all ions
  real(dp)      :: vel(3,ab_mover%natom)                  ! ionic velocities in Cartesian coordinates
  !real(dp)      :: mvtot(3)                               ! total momentum of the cell used to rescale velocities
@@ -114,9 +112,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
  real(dp)      :: rprimd(3,3)                            ! lattice vectors
 
  real(dp),save :: etotal_hmc_prev,epot_hmc_prev          ! total energy of the initial state
- real(dp),save :: acell_hmc_prev(3)                      !
- real(dp),save :: rprimd_hmc_prev(3,3)                   !
- real(dp),save :: strain_hmc_prev(3,3)                   !
  real(dp),save :: strain(3,3),dstrain                    ! strain tensor
  real(dp),save :: rprimd_original(3,3)                   ! initial lattice vectors <= itime=1,icycle=1
  real(dp),allocatable,save :: xred_hmc_prev(:,:)         ! reduced coordinates of the ions corresponding to the initial state
@@ -127,7 +122,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
  integer,save  :: strain_steps
  logical       :: strain_sweep
 
- character(len=500) :: message
+! character(len=500) :: message
 ! *************************************************************************
 
  DBG_ENTER("COLL")

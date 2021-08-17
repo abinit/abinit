@@ -131,12 +131,12 @@ contains
     character(len=fnlen) :: name
 
     integer :: filetype,ii,lenstr,iiter,niter
-    integer :: natom,nph1l,nrpt,ntypat,isym,iat
+    integer :: natom,nph1l,nrpt,ntypat
     integer :: option
     logical :: need_analyze_anh_pot,need_prt_files
 ! MS
 ! temporary variables for testing SCALE-UP with Multibinit
-  !Variable to pass tu effpot_evaluate routine of multibinit
+  !Variable to pass to effpot_evaluate routine of multibinit
   !To declare evaluation of electronice model
   logical  :: elec_eval
 #if defined DEV_MS_SCALEUP
