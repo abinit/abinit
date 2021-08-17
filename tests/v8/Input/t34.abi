@@ -60,10 +60,10 @@ tmpdata_prefix = "t34t"
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = S. PROKHORENKO
+#%% authors = S. PROKHORENKO, M. Schmitt 
 #%% keywords = MD,MC,Monte Carlo
 #%% description = 
-#%%   Hybrid Monte Carlo Sampling for NVT ensemble   
+#%%   Hybrid Monte Carlo Sampling for NPT ensemble   
 #%% topics = MolecularDynamics
 #%%<END TEST_INFO>
 
