@@ -325,6 +325,19 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
    call anharmonics_terms_setElastic3rd(eff_pot%anharmonics_terms,elastic3rd)
  end if
 
+!TODO Comment Marcus: Uncomment and implement below if you want to use the elastic4th implementation, which is there, but 
+! not used anywere 
+! Below I just ensured that the has_elastic4th variable is set to FALSE as it was causing problems on some builders 
+! in the test farm
+! Set the 4th order elastic tensor
+! if(present(elastic4th).and.has_anharmonicsTerms)then
+!   call anharmonics_terms_setElastic3rd(eff_pot%anharmonics_terms,elastic4th)
+! end if
+
+!MS Ensure has_elastic4th is .FALSE.
+ eff_pot%anharmonics_terms%has_elastic4th=.FALSE.
+
+
 !Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
  if(present(elastic_displacement).and.has_anharmonicsTerms)then
    call anharmonics_terms_setElasticDispCoupling(eff_pot%anharmonics_terms,crystal%natom,&

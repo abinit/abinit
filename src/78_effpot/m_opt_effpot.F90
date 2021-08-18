@@ -665,7 +665,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
 !            mses_ini = mses
 
             else 
-            !Optimizing coefficient precisely ?
+            !Optimizing coefficient with GF criterion
               coeff_opt = 0 
               GF_arr = 0 
                 i = 1 
