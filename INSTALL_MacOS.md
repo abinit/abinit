@@ -165,6 +165,9 @@ For the parallel version (only if MPI installed):
     ../configure FC=mpif90 CC=mpicc FCFLAGS_EXTRA="-ffree-line-length-none" \
                  --enable-mpi --enable-mpi-io
 
+For the GNU compiler version 10 or beyond, "-ffree-line-length-none" needs to be replaced
+by "-ffree-line-length-none -fallow-argument-mismatch".
+
 Compile with:
 
     make -j4
@@ -209,7 +212,7 @@ After this step, one can follow the steps described in the subsection "Installin
 
 When switching from GNU compiler version 10 to GNU compiler version 11 on the same machine, with MacOs Big Sur v11.5, it has been seen that Xcode needs to be reinstalled.
 Indeed, at the level of the abinit compilation, the system library (-lSystem) was not found, which was quite hard to debug.
-Actually, the reinstallation of Xcode might be good practice to solve other problems
+Actually, the reinstallation of Xcode might be good practice to solve other problems.
 To do this, use
 
     sudo rm -rf /Library/Developer/CommandLineTools
