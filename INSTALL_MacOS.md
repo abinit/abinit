@@ -9,6 +9,7 @@ This file describes how to install ABINIT on macOS using one of the following ap
  - Homebrew package manager
  - MacPorts package manager
  - Compilation from source
+ - Example : MacPorts + ABINIT source
 
 ## Using [homebrew](http://brew.sh)
 
@@ -30,7 +31,7 @@ Before the first installation, type:
 
     brew tap abinit/tap
 
-To install ABINIT just type:
+To install ABINIT just type
 
     brew install abinit
 
@@ -84,6 +85,8 @@ By default, ABINIT is installed with libXC and Wannier90
 To activate support for the FFTW3 library:
 
      sudo port install abinit @X.Y.Z +fftw3
+
+where X.Y.X is to be replaced by the version of ABINIT that has been installed (you might skip X.Y.Z if there is only one version installed).
 
 To link ABINIT with the parallel Linear Algebra ScaLapack:
 
@@ -143,11 +146,11 @@ Other options available, see:
 
 ### Installing ABINIT from source
 
-For normal users it is advised to get the newest version from our website (replace 9.0.4 by the newest version available).
+For normal users it is advised to get the newest version from our website (replace 9.4.2 by the newest version available).
 
-    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
-    tar xzf abinit-9.0.4.tar.gz
-    cd abinit-9.0.4
+    wget https://www.abinit.org/sites/default/files/packages/abinit-9.4.2.tar.gz
+    tar xzf abinit-9.4.2.tar.gz
+    cd abinit-9.4.2
 
 Create a working directory:
 
@@ -171,6 +174,51 @@ Install (optional):
     make install
 
 Remember that on MacOs, the environment variant LD_LIBRARY_PATH should be replaced by DYLD_LIBRARY_PATH.
+
+## Example : [macports](http://www.macports.org) + ABINIT source
+
+We give an example of using ABINIT sources (to get the latest ABINIT version) combined with the ease of installation of Macports.
+Indeed, the libraries (mandatory or optional) used by ABINIT are available from the MacPorts project.
+The procedure has been tested with Mac OS X v11.5 (Big Sur) 
+
+Start with the prerequisite of the macports approach, as explained in the section [using macports](#using-macports). Then,
+install the libraries needed by ABINIT. There are different choices for the linear algebra and mpi,
+as mentioned in the section [Compiling from source](#compiling-from-source-under-macos). Focusing on the choice
+of OpenBLAS and openmpi, and supposing that GNU compiler version 11 is to be used, one might issue 
+
+     sudo port install gcc11
+     sudo port install OpenBLAS +gcc11+fortran
+     sudo port install openmpi-gcc11 +gfortran
+     sudo port install fftw-3 +gfortran
+     sudo port install fftw-3-single +gfortran
+     sudo port install fftw-3-long +gfortran
+     sudo port install hdf5 +cxx+gcc11+hl+openmpi
+     sudo port install netcdf +cdf5+dap+x+gcc11+netcdf4+openmpi 
+     sudo port install netcdf-fortran +gcc11+openmpi 
+     sudo port install libxc4 +gcc11
+
+and optionally
+
+     sudo port install wannier90 +accelerate+gcc11
+     sudo port install atompaw +accelerate+gcc11+libxc
+
+After this step, one can follow the steps described in the subsection "Installing ABINIT from source" of
+[Compiling from source](#compiling-from-source-under-macos).
+
+## Troubleshooting
+
+When switching from GNU compiler version 10 to GNU compiler version 11 on the same machine, with MacOs Big Sur v11.5, it has been seen that Xcode needs to be reinstalled.
+Indeed, at the level of the abinit compilation, the system library (-lSystem) was not found, which was quite hard to debug.
+Actually, the reinstallation of Xcode might be good practice to solve other problems
+To do this, use
+
+    sudo rm -rf /Library/Developer/CommandLineTools
+    sudo xcode-select --install
+
+You might have to accept the licence on the screen. Also, possibly first using
+ 
+    sudo xcodebuild -license
+
 
 ## Comments
 
