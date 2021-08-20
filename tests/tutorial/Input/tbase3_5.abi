@@ -6,7 +6,7 @@
 ndtset 2
 
 #Definition of the unit cell
-acell 3*10.195         # This is equivalent to   10.216 10.216 10.216
+acell 3*10.195         # This is equivalent to   10.195 10.195 10.195
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0

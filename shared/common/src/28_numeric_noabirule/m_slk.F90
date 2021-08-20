@@ -551,7 +551,6 @@ end subroutine init_matrix_scalapack
 !!  Destroys a matrix descriptor for ScaLAPACK.
 !!
 !! PARENTS
-!!      m_exc_diago,m_hide_lapack,m_slk
 !!
 !! CHILDREN
 !!
@@ -3236,7 +3235,6 @@ end subroutine slk_pzhegvx
 !!    In output the matrix inverted and distributed among the nodes.
 !!
 !! PARENTS
-!!      m_exc_diago,m_hide_lapack
 !!
 !! CHILDREN
 !!
@@ -3326,7 +3324,6 @@ end subroutine slk_zinvert
 !!    On exit, the local pieces of the upper or lower triangle of the (Hermitian) inverse of sub( A )
 !!
 !! PARENTS
-!!      m_hide_lapack
 !!
 !! CHILDREN
 !!

@@ -221,20 +221,21 @@ module defs_basis
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
  real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
  real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
- real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree, in cm^-1
- real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree, in eV
+ real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
+ real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
+ real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
  real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
- real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree, in meV
- real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree, in Kelvin
- real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree, in THz
- real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree, in s
- real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
- real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
+ real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
+ real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
+ real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
+ real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
+ real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
+ real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
- real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value. )
+ real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
  real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
- real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit, in electronic mass
- real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3, in GPa
+ real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
+ real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
  real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
  real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
 !real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
@@ -245,11 +246,11 @@ module defs_basis
  real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
  real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
  real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
- real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time, in seconds
+ real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
- real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec**2 ! Siemens in SI
- real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI
+ real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec ! Siemens in SI: A/V = C^2 / (J * s)
+ real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI: J/C
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
  real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
@@ -304,7 +305,7 @@ module defs_basis
  integer, parameter, public :: RUNL_EPH        = 7
  integer, parameter, public :: RUNL_WFK        = 8
  integer, parameter, public :: RUNL_GWLS       = 66
- integer, parameter, public :: RUNL_BSE        = 99 !9
+ integer, parameter, public :: RUNL_BSE        = 99
  integer, parameter, public :: RUNL_LONGWAVE   = 10
 
  ! Integer flags defining the task to be performed in wfk_analyze
@@ -336,7 +337,6 @@ module defs_basis
 
 ! Parameter to compute the maximum index of the perturbation
   integer,parameter,public :: MPERT_MAX = 8
-
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file
