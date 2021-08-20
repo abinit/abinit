@@ -38,7 +38,7 @@ module m_fit_polynomial_coeff
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
  use m_effective_potential,only : effective_potential_getDisp, effective_potential_writeAnhHead
- use m_effective_potential,only : effective_potential_copy,effective_potential_free
+ use m_effective_potential,only : effective_potential_copy,effective_potential_free,effective_potential_init
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
  use m_io_tools,   only : open_file,get_unit
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
@@ -289,8 +289,8 @@ if (nimposecoeff > 0)then
         call polynomial_coeff_free(coeffs_tmp(ii))
     enddo 
     ABI_FREE(coeffs_tmp)
-!Fix the whole input potential
-elseif (nimposecoeff == -1)then 
+!Fix the whole input potential, copy the input potential to eff_pot
+elseif (nimposecoeff == -1)then
     call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
 !Fix only the harmonic potential 
 else 
@@ -309,7 +309,8 @@ if ( nfixcoeff > 0 .and. nimposecoeff >0)then
         endif
     enddo 
     nfix_and_impose = count(fix_and_impose)
-    ABI_MALLOC(fixcoeff_corr,(nfixcoeff-nfix_and_impose))
+    nfixcoeff_corr = nfixcoeff - nfix_and_impose
+    ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
     ia = 1
     do ii = 1,nfixcoeff
         if (.not. fix_and_impose(ii))then 
@@ -317,7 +318,6 @@ if ( nfixcoeff > 0 .and. nimposecoeff >0)then
             ia = ia + 1            
         endif
     enddo
-    nfixcoeff_corr = nfixcoeff - nfix_and_impose
     ncopy_terms = ncoeff_model - nimposecoeff 
     ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
     ia = 1
@@ -371,6 +371,8 @@ elseif (nfixcoeff >0 .and. nimposecoeff ==-1)then
 else 
     nfixcoeff_corr = nfixcoeff
     ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
+    !nimposecoeff or nfixcoeff always 0 here so fix_and_impose is empty
+    ABI_MALLOC(fix_and_impose,(0))
     fixcoeff_corr = fixcoeff
     ncopy_terms = ncoeff_model
     ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
@@ -378,7 +380,6 @@ else
         list_coeffs_copy(ii) = ii 
     enddo 
 endif 
-
 
  if(need_verbose) then
    write(message,'(a,(80a))') ch10,('-',ii=1,80)
@@ -1212,11 +1213,11 @@ endif
    end do
 
 !TEST_AM
-   call xmpi_sum(stat_coeff, comm, ierr)
-   do ii=1,ncoeff_tot
-     write(100,*) ii,stat_coeff(ii)
-   end do
-   close(100)
+!   call xmpi_sum(stat_coeff, comm, ierr)
+!   do ii=1,ncoeff_tot
+!     write(100,*) ii,stat_coeff(ii)
+!   end do
+!   close(100)
 !TEST_AM
 
 !  Transfer final model
@@ -1388,7 +1389,7 @@ endif
  do ii=1,ncoeff_out
    call polynomial_coeff_free(coeffs_out(ii))
  end do
- if(allocated(coeffs_out))ABI_FREE(coeffs_out)
+ ABI_FREE(coeffs_out)
 
  
 !Deallocate fixed eff_pot
@@ -1416,6 +1417,7 @@ call effective_potential_free(eff_pot_fixed)
  ABI_FREE(strten_coeffs)
  ABI_FREE(strten_coeffs_tmp)
  ABI_FREE(stat_coeff)
+
  if(allocated(fixcoeff_corr)) ABI_FREE(fixcoeff_corr)
  if(allocated(fix_and_impose)) ABI_FREE(fix_and_impose)
  if(allocated(list_coeffs_copy)) ABI_FREE(list_coeffs_copy)

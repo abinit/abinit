@@ -222,7 +222,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
  real(dp),optional,intent(in) :: elastic3rd(6,6,6)
  real(dp),optional,intent(in) :: elastic_displacement(6,6,3,crystal%natom)
- type(polynomial_coeff_type),optional :: coeffs(ncoeff)
+ type(polynomial_coeff_type),optional,intent(in) :: coeffs(:)
  real(dp),optional,intent(in) :: strten(6)
  real(dp),optional,intent(in) :: fcart(3,crystal%natom)
  type(polynomial_conf_type),optional,intent(in) :: polynomial_conf
@@ -335,7 +335,7 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 ! end if
 
 !MS Ensure has_elastic4th is .FALSE.
- eff_pot%anharmonics_terms%has_elastic4th=.FALSE.
+! eff_pot%anharmonics_terms%has_elastic4th=.FALSE.
 
 
 !Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
@@ -447,7 +447,7 @@ end subroutine effective_potential_initmpi
 !!****f* m_effective_potential/effective_potential_copy
 !!
 !! NAME
-!! effective_potential_init
+!! effective_potential_copy
 !!
 !! FUNCTION
 !! Copy one effective potential to another i.e. initialize the output effective potentiale 
@@ -472,7 +472,7 @@ subroutine effective_potential_copy(eff_pot_out,eff_pot_in,comm)
 
 !Arguments ------------------------------------
 !scalars
- type(effective_potential_type),intent(inout)  :: eff_pot_out
+ type(effective_potential_type),intent(out)  :: eff_pot_out
  type(effective_potential_type),intent(in)  :: eff_pot_in
  integer,intent(in)     :: comm
 ! ***********************************************************************
