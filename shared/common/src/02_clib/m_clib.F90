@@ -32,7 +32,7 @@ MODULE m_clib
  public :: clib_mtrace
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack   ! Set stack size limit to maximum allowed value.
- !public :: clib_usleep        ! Suspend calling thread for microseconds of clock time
+ !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
 
 !FIXME the interfaces below have been commented out since abilint
 ! JB : because interface must have a name in abilint
@@ -187,13 +187,15 @@ subroutine clib_print_mallinfo(unit)
 
   call clib_mallinfo(arena, hblkhd, usmblks, fsmblks, uordblks, fordblks)
 
-  write(unit, *)""
-  write(unit,*)' Total space in arena            : ',arena
-  write(unit,*)' Space in holding block headers  : ',hblkhd
-  write(unit,*)' Space in small blocks in use    : ',usmblks
-  write(unit,*)' Space in free small blocks      : ',fsmblks
-  write(unit,*)' Space in ordinary blocks in use : ',uordblks
-  write(unit,*)' Space in free ordinary blocks   : ',fordblks
+  write(unit,*)""
+  write(unit,*)"--- !Mallinfo"
+  write(unit,*)' Total space in arena: ',arena
+  write(unit,*)' Space in holding block headers: ',hblkhd
+  write(unit,*)' Space in small blocks in use: ',usmblks
+  write(unit,*)' Space in free small blocks: ',fsmblks
+  write(unit,*)' Space in ordinary blocks in use: ',uordblks
+  write(unit,*)' Space in free ordinary blocks: ',fordblks
+  write(unit,*)"..."
   write(unit,*)""
 
 end subroutine clib_print_mallinfo

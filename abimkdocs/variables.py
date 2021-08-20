@@ -196,6 +196,7 @@ ABI_TOPICS = [
     "ElPhonTransport",
     "ElecDOS",
     "ElecBandStructure",
+    "ExtFPMD",
     "FileFormats",
     "FitProcess",
     "ForcesStresses",

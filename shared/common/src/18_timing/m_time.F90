@@ -484,8 +484,8 @@ end function abi_wtime
 !!      lapackprof,m_bse_io,m_chi0,m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg
 !!      m_epjdos,m_exc_build,m_exc_itdiago,m_fft,m_fft_prof,m_fstab,m_gkk
 !!      m_gruneisen,m_hide_lapack,m_ifc,m_ioarr,m_iowf,m_phgamma,m_phonons
-!!      m_phpi,m_rta,m_sigc,m_sigmaph,m_sigx,m_skw,m_time,m_unittests,m_vtowfk
-!!      m_wfd,m_wfk
+!!      m_phpi,m_rmm_diis,m_rta,m_sigc,m_sigmaph,m_sigx,m_skw,m_time
+!!      m_unittests,m_vtowfk,m_wfd,m_wfk
 !!
 !! CHILDREN
 !!      papif_flops,papif_perror,timein
@@ -568,8 +568,8 @@ end subroutine cwtime
 !!
 !! PARENTS
 !!      m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg,m_fstab,m_gruneisen,m_ifc
-!!      m_ioarr,m_iowf,m_phgamma,m_phonons,m_rta,m_sigmaph,m_skw,m_unittests
-!!      m_wfd,m_wfk
+!!      m_ioarr,m_iowf,m_phgamma,m_phonons,m_rmm_diis,m_rta,m_sigmaph,m_skw
+!!      m_unittests,m_wfd,m_wfk
 !!
 !! CHILDREN
 !!      papif_flops,papif_perror,timein
@@ -784,13 +784,14 @@ end function time_get_papiopt
 !!  Timing subroutine. Calls machine-dependent "timein" which returns elapsed cpu and wall clock times in sec.
 !!  Depending on value of "option" routine will:
 !!
-!!  (0) zero all accumulators
-!!  (1) start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
-!!  (2) stop time slice; add time to accumulator n also increase by one the counter for this accumulator
-!!  (3) start with new incremental time slice for accumulator n
+!!  (0) Zero all accumulators
+!!  (1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  (2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  (3) Start with new incremental time slice for accumulator n
 !!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
-!!  (4) report time slice for accumlator n (not full time accumlated)
-!!  (5) option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!        Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
+!!  (4) Report time slice for accumlator n (not full time accumlated)
+!!  (5) Option to suppress timing (nn should be 0) or reenable it (nn /=0)
 !!
 !!  If, on first entry, subroutine is not being initialized, it
 !!  will automatically initialize as well as rezero accumulator n.
@@ -810,28 +811,29 @@ end function time_get_papiopt
 !!
 !! PARENTS
 !!      abinit,anaddb,m_ab7_mixing,m_afterscfloop,m_atm2fft,m_bandfft_kpt
-!!      m_berryphase_new,m_bethe_salpeter,m_cgtk,m_cgtools,m_cgwf,m_chebfi
-!!      m_chi0,m_cohsex,m_common,m_d2frnl,m_dens,m_dfpt_cgwf,m_dfpt_elt
-!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_mkvxc,m_dfpt_mkvxcstr,m_dfpt_nstwf
-!!      m_dfpt_rhotov,m_dfpt_scfcv,m_dfpt_vtorho,m_dfpt_vtowfk,m_dfptnl_loop
-!!      m_dft_energy,m_dmft,m_driver,m_dvdb,m_dyson_solver,m_eig2d,m_epjdos
-!!      m_ewald,m_exc_build,m_fft,m_fftcore,m_fftw3,m_fock,m_fock_getghc
-!!      m_forces,m_forstr,m_getgh1c,m_getghc,m_green,m_gstate,m_gstateimg
-!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
-!!      m_gwls_QR_factorization,m_gwls_lineqsolver,m_gwls_model_polarisability
-!!      m_gwls_polarisability,m_gwls_sternheimer,m_haydock,m_hexc,m_ifc
-!!      m_inkpts,m_invars2,m_invovl,m_inwffil,m_io_kss,m_iowf,m_kpts,m_lobpcg
-!!      m_lobpcg2,m_lobpcgwf,m_lobpcgwf_old,m_mkcore,m_mkffnl,m_mklocl
-!!      m_mklocl_realspace,m_mkrho,m_newrho,m_newvtr,m_nonlinear,m_nonlop,m_occ
-!!      m_odamix,m_opernla_ylm,m_optics_vloc,m_orbmag,m_outscfcv,m_paral_pert
+!!      m_berryphase_new,m_bethe_salpeter,m_cgprj,m_cgtk,m_cgtools,m_cgwf
+!!      m_cgwf_cprj,m_chebfi,m_chi0,m_cohsex,m_common,m_d2frnl,m_dens
+!!      m_dfpt_cgwf,m_dfpt_elt,m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_mkvxc
+!!      m_dfpt_mkvxcstr,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_dfpt_vtorho
+!!      m_dfpt_vtowfk,m_dfptnl_loop,m_dft_energy,m_dmft,m_driver,m_dvdb
+!!      m_dyson_solver,m_eig2d,m_epjdos,m_exc_build,m_fft,m_fftcore,m_fftw3
+!!      m_fock,m_fock_getghc,m_forces,m_forstr,m_getchc,m_getgh1c,m_getghc
+!!      m_green,m_gstate,m_gstateimg,m_gwls_ComputeCorrelationEnergy
+!!      m_gwls_DielectricArray,m_gwls_QR_factorization,m_gwls_lineqsolver
+!!      m_gwls_model_polarisability,m_gwls_polarisability,m_gwls_sternheimer
+!!      m_haydock,m_hexc,m_ifc,m_inkpts,m_invars2,m_invovl,m_inwffil,m_io_kss
+!!      m_ioarr,m_iowf,m_kpts,m_lobpcg,m_lobpcg2,m_lobpcgwf,m_lobpcgwf_old
+!!      m_mkcore,m_mkffnl,m_mklocl,m_mklocl_realspace,m_mkrho,m_newrho,m_newvtr
+!!      m_nonlinear,m_nonlop,m_nonlop_ylm,m_occ,m_odamix,m_opernla_ylm
+!!      m_opernla_ylm_mv,m_optics_vloc,m_orbmag,m_outscfcv,m_paral_pert
 !!      m_paw_denpot,m_paw_dfpt,m_paw_efield,m_paw_init,m_paw_mkrho,m_paw_nhat
 !!      m_paw_optics,m_pead_nl_loop,m_prcref,m_prep_calc_ucrpa,m_prep_kgb
 !!      m_pspheads,m_pspini,m_rayleigh_ritz,m_rec,m_respfn_driver,m_rf2_init
-!!      m_rhotov,m_rhotoxc,m_rwwf,m_scfcv_core,m_screening_driver,m_setvtr
-!!      m_sg2002,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_spacepar,m_stress
-!!      m_suscep_stat,m_symsg,m_tddft,m_timana,m_vtorho,m_vtorhorec,m_vtorhotf
-!!      m_vtowfk,m_wfk_analyze,m_wfutils,m_xctk,m_xg,m_xgScalapack
-!!      m_xgTransposer,mkcore_wvl,testtransposer
+!!      m_rhotov,m_rhotoxc,m_rmm_diis,m_rwwf,m_scfcv_core,m_screening_driver
+!!      m_setvtr,m_sg2002,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_spacepar
+!!      m_stress,m_suscep_stat,m_symsg,m_tddft,m_timana,m_vtorho,m_vtorhorec
+!!      m_vtorhotf,m_vtowfk,m_wfd,m_wfk_analyze,m_wfutils,m_xctk,m_xg
+!!      m_xgScalapack,m_xgTransposer,mkcore_wvl,testtransposer
 !!
 !! CHILDREN
 !!      papif_flops,papif_perror,timein
@@ -928,6 +930,7 @@ subroutine timab(nn, option, tottim)
 
    case (3)
      ! Use previously obtained values to initialize timab for nn
+     ! Typically used immediately after a call to timab for another counter with option=2 . This saves one call to timein.
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
 #ifdef HAVE_PAPI

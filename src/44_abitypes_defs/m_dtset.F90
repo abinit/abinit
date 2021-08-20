@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_dtset
 !! NAME
 !!  m_dtset
@@ -34,6 +32,7 @@ module m_dtset
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
+ use m_crystal,      only : crystal_t, crystal_init
 
  implicit none
 
@@ -75,7 +74,6 @@ module m_dtset
 
 type, public :: dataset_type
 
-! Integer
 !A
  integer :: accuracy
  integer :: adpimd
@@ -116,11 +114,15 @@ type, public :: dataset_type
  integer :: chksymbreak
  integer :: chksymtnons
  integer :: cineb_start
+ integer :: cprj_in_memory
+ integer :: cprj_update_lvl
+
 !D
  integer :: delayperm
  integer :: densfor_pred
  integer :: diismemory
  integer :: dipdip = 1
+ integer :: dipquad = 1
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -173,16 +175,19 @@ type, public :: dataset_type
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
+
  integer :: eph_restart = 0
  integer :: eph_stern = 0
  integer :: eph_task = 1
  integer :: eph_transport = 0
  integer :: eph_use_ftinterp = 0
  integer :: exchn2n3d
+ integer :: extfpmd_nbcut = 25
  integer :: extrapwf
  integer :: expert_user
 !F
  integer :: fftgw = 21
+ integer :: fft_count = 0
  integer :: fockoptmix
  integer :: fock_icutcoul
  integer :: frzfermi
@@ -265,6 +270,11 @@ type, public :: dataset_type
  integer :: hmcsst
  integer :: hmctt
 !I
+ real(dp) :: ibte_abs_tol = tol4
+ real(dp) :: ibte_alpha_mix = 0.7_dp
+ integer :: ibte_niter = 100
+ integer :: ibte_prep = 0
+
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
@@ -327,6 +337,7 @@ type, public :: dataset_type
  integer :: maxnsym
  integer :: max_ncpus = 0
  integer :: mband
+ integer :: mband_mem
  integer :: mep_solver
  integer :: mem_test = 1
  integer :: mffmem
@@ -376,6 +387,7 @@ type, public :: dataset_type
  integer :: nomegasi = 12
  integer :: nomegasrd = 9
  integer :: nonlinear_info
+ integer :: nonlop_ylm_count = 0
  integer :: npband
  integer :: npfft
  integer :: nphf
@@ -520,6 +532,7 @@ type, public :: dataset_type
  integer :: ptgroupma
 !Q
  integer :: qptopt
+ integer :: quadquad = 1
 !R
  integer :: random_atpos
  integer :: recgratio
@@ -535,6 +548,7 @@ type, public :: dataset_type
  integer :: rfmeth
  integer :: rfphon
  integer :: rfstrs
+ integer :: rfstrs_ref
  integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
@@ -584,8 +598,10 @@ type, public :: dataset_type
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
+ integer :: useextfpmd = 0
  integer :: use_yaml = 0
  integer :: use_slk
+ integer :: use_oldchi = 1
 !V
  integer :: vacnum
  integer :: vdw_nfrag
@@ -751,7 +767,7 @@ type, public :: dataset_type
  real(dp) :: ne_qFD = zero ! CP added
  real(dp) :: nh_qFD = zero  ! CP added
  real(dp) :: noseinert
- real(dp) :: nqfd = zero 
+ real(dp) :: nqfd = zero
  real(dp) :: omegasimax = 50/Ha_eV
  real(dp) :: omegasrdmax = 1.0_dp/Ha_eV  ! = 1eV
  real(dp) :: pawecutdg
@@ -951,6 +967,9 @@ type, public :: dataset_type
  procedure :: testsusmat => dtset_testsusmat
    ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
+ procedure :: get_crystal => dtset_get_crystal
+   !  Build crystal_t object from dtset and image index.
+
  end type dataset_type
 !!***
 
@@ -974,7 +993,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | cellcharge(nimage)=number of electrons missing (+) or added (-) to system (usually 0)
-!!   |  might depend on the image, but only with occopt=2 
+!!   |  might depend on the image, but only with occopt=2
 !!   | iscf= if>0, SCF calculation ; if<=0, non SCF calculation (wtk might
 !!   |  not be defined)
 !!   | natom=number of atoms in unit cell
@@ -1092,7 +1111,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
 &           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
             ABI_ERROR(msg)
           end if
-       
+
        if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
        ! now do it for excited electrons in the conduction bands > ivalence
        nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
@@ -1370,8 +1389,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
  dtout%cineb_start        = dtin%cineb_start
+ dtout%cprj_in_memory     = dtin%cprj_in_memory
+ dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
+ dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
  dtout%dmft_dc            = dtin%dmft_dc
@@ -1442,6 +1464,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -1478,10 +1501,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%exchn2n3d          = dtin%exchn2n3d
  dtout%expert_user        = dtin%expert_user
+ dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
  dtout%fftgw              = dtin%fftgw
+ dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
@@ -1575,6 +1600,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hyb_range_fock  = dtin%hyb_range_fock
  dtout%hmcsst             = dtin%hmcsst
  dtout%hmctt              = dtin%hmctt
+ dtout%ibte_abs_tol       = dtin%ibte_abs_tol
+ dtout%ibte_alpha_mix     = dtin%ibte_alpha_mix
+ dtout%ibte_niter         = dtin%ibte_niter
+ dtout%ibte_prep          = dtin%ibte_prep
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
  dtout%icutcoul           = dtin%icutcoul
@@ -1635,6 +1664,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%maxnsym            = dtin%maxnsym
  dtout%max_ncpus          = dtin%max_ncpus
  dtout%mband              = dtin%mband
+ dtout%mband_mem          = dtin%mband_mem
  dtout%mdf_epsinf         = dtin%mdf_epsinf
  dtout%mep_solver         = dtin%mep_solver
  dtout%mem_test           = dtin%mem_test
@@ -1675,6 +1705,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nkpthf             = dtin%nkpthf
  dtout%nkptgw             = dtin%nkptgw
  dtout%nonlinear_info     = dtin%nonlinear_info
+ dtout%nonlop_ylm_count   = dtin%nonlop_ylm_count
  dtout%nline              = dtin%nline
  dtout%nnsclo             = dtin%nnsclo
  dtout%nnsclohf           = dtin%nnsclohf
@@ -1818,6 +1849,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prt1dm             = dtin%prt1dm
  dtout%ptgroupma          = dtin%ptgroupma
  dtout%qptopt             = dtin%qptopt
+ dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
@@ -1833,6 +1865,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfmeth             = dtin%rfmeth
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs
+ dtout%rfstrs_ref         = dtin%rfstrs_ref
  dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
@@ -1860,9 +1893,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
+ dtout%useextfpmd       = dtin%useextfpmd
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
+ dtout%use_oldchi         = dtin%use_oldchi
  dtout%usedmatpu          = dtin%usedmatpu
  dtout%usedmft            = dtin%usedmft
  dtout%useexexch          = dtin%useexexch
@@ -2491,7 +2526,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Desactivate perturbation symmetries for a longwave calculation (TODO)
+!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
  if (dtset%prepalw==1) then
    do ipert=1,dtset%natom+6
      do idir=1,3
@@ -2538,8 +2573,8 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
  rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
 
-!Determine existence of pertubations and of pertubation symmetries
-!Create array with pertubations which have to be calculated
+!Determine existence of perturbations and of perturbation symmetries
+!Create array with perturbations which have to be calculated
  ABI_MALLOC(pert_tmp,(2,3*(dtset%natom+6)+18))
 
  do ipert=1,mpert
@@ -2600,17 +2635,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  write(std_out,'(a)')'irred_perts:'
 
  do icase=1,npert
-!   pert = pert_tmp(icase)
-
-!   if (pert <= dtset%natom*3) then
-!     idir = mod(pert, 3)
-!     if (idir==0) idir=3
-!     ipert=((pert-idir) / 3 + 1)
-!   else
-!     idir = mod(pert, 3)
-!     if (idir==0) idir=3
-!     ipert = dtset%natom + ((pert - 3*dtset%natom - 1) / 3) + 1
-!   end if
    ipert = pert_calc(1,icase)
    idir = pert_calc(2,icase)
 
@@ -2766,6 +2790,60 @@ logical function dtset_testsusmat(dtset, dielop, dielstrt, istep) result(compute
  if (istep==dielstrt .and. dielop>=1) compute=.TRUE.
 
 end function dtset_testsusmat
+!!***
+
+!!****f* m_dtset/dtset_get_crystal
+!! NAME
+!! dtset_get_crystal
+!!
+!! FUNCTION
+!!  Build crystal_t object from dtset and image index.
+!!  Note that acell_orig, rprim_orig and xred_orig are used by default
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),target,intent(in) :: dtset
+ integer,intent(in) :: img
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii, gw_timrev
+ logical,parameter :: remove_inv = .False.
+!arrays
+ real(dp) :: my_rprimd(3,3)
+ real(dp),pointer :: my_xred(:,:)
+ character(len=500) :: my_title(dtset%ntypat)
+
+! *********************************************************************
+
+ call mkrdim(dtset%acell_orig(:, img), dtset%rprim_orig(:, :, img), my_rprimd)
+ my_xred => dtset%xred_orig(:, :, img)
+
+ do ii=1,dtset%ntypat
+    my_title(ii) = "No info on pseudo available"
+ end do
+
+ gw_timrev = 1; if (any(dtset%kptopt == [3, 4])) gw_timrev = 0
+ gw_timrev = gw_timrev + 1
+
+ call crystal_init(dtset%amu_orig(:, img), cryst, dtset%spgroup, dtset%natom, dtset%npsp, &
+   dtset%ntypat, dtset%nsym, my_rprimd, dtset%typat, my_xred, dtset%ziontypat, dtset%znucl, gw_timrev, &
+   dtset%nspden==2 .and. dtset%nsppol==1, remove_inv, my_title,&
+   symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
+
+end function dtset_get_crystal
 !!***
 
 !!****f* m_dtset/macroin
@@ -3141,12 +3219,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkprim'
- list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
+ list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
+ list_vars=trim(list_vars)//' cprj_update_lvl cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
@@ -3177,12 +3256,12 @@ subroutine chkvars(string)
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
+ list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta'
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
- list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extrapwf'
+ list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
- list_vars=trim(list_vars)//' fftalg fftcache fftgw'
+ list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_fixcoeff'
  list_vars=trim(list_vars)//' fit_EFS'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
@@ -3218,6 +3297,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
+ list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
@@ -3252,7 +3332,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
- list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info noseinert npband'
+ list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info nonlop_ylm_count noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
@@ -3289,13 +3369,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
- list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
+ list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
- list_vars=trim(list_vars)//' rfstrs rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
+ list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
@@ -3344,7 +3424,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk useextfpmd use_yaml'
+ list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

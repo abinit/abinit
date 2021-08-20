@@ -39,6 +39,7 @@ module m_vtorho
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_extfpmd
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -283,7 +284,7 @@ contains
 subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &           eigen,electronpositron,energies,etotal,gbound_diel,&
-&           gmet,gprimd,grnl,gsqcut,hdr,indsym,irrzon,irrzondiel,&
+&           gmet,gprimd,grnl,gsqcut,hdr,extfpmd,indsym,irrzon,irrzondiel,&
 &           istep,istep_mix,itimes,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
@@ -308,6 +309,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type), intent(inout) :: energies
  type(hdr_type), intent(inout) :: hdr
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
@@ -1180,6 +1182,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
+!    Compute extfpmd u0 energy shift factor from eigenvalues and kinetic energy.
+     if(associated(extfpmd)) then
+       extfpmd%vtrial=vtrial
+       call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
+&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+     end if
+
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
      ! CP modified
@@ -1189,9 +1198,20 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,&
-&     dtset%tsmear,dtset%wtk)
+&     dtset%tsmear,dtset%wtk,&
+&     extfpmd)
      ! End CP modified
      call timab(990,2,tsec)
+
+
+!    Compute number of free electrons of extfpmd model
+     if(associated(extfpmd)) then
+       extfpmd%nelect=zero
+       call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,nfftf,dtset%nspden,&
+&       dtset%tsmear,vtrial)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
+     end if
 
 !    !=========  DMFT call begin ============================================
      dmft_dftocc=0
@@ -1449,10 +1469,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-         rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       extfpmd=extfpmd)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-         rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       extfpmd=extfpmd)
      end if
      call timab(992,2,tsec)
 
@@ -1694,7 +1716,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
          bdtot_index=bdtot_index+1
        end do
-       if(min_occ>0.01_dp)then
+       if(min_occ>0.01_dp .and. .not. associated(extfpmd))then
          if(dtset%nsppol==1)then
            write(msg, '(a,i0,3a,f7.3,5a)' )&
              'For k-point number: ',ikpt,',',ch10,&

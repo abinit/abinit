@@ -137,8 +137,13 @@ In what follows, we will restrict ourselves to the grids with [[nkpt]] = 2, 10 a
 <a id="3"></a>
 ## The convergence study with respect to both number of k-points and broadening factor
 
-The theoretical convergence rate for [[tsmear]] heading to 0, in the case of [[occopt]] = 4, is quartic.
-This is obtained in the hypothesis of infinitely dense k-point grid.
+The theoretical convergence rate as a function of [[tsmear]] heading to 0, in the case of [[occopt]] = 4, is cubic.
+We rely on this value of [[occopt]] for this tutorial. Still, it might not be always robust,
+as this value might yield difficulties to find univocally the Fermi energy.
+A slightly worse convergence rate (quadratic) is obtained with [[occopt]] = 7, which is actually 
+the recommended value for metallic systems.
+
+Such convergence rates are obtained in the hypothesis of infinitely dense k-point grid.
 We will check the evolution of [[acell]] as a function of [[tsmear]], for the following values
 of *tsmear*: 0.01, 0.02, 0.03 and 0.04.
 

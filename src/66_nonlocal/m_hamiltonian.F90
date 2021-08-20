@@ -545,7 +545,7 @@ CONTAINS  !===========================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -669,12 +669,12 @@ end subroutine destroy_hamiltonian
 !!
 !! PARENTS
 !!      m_d2frnl,m_ddk,m_dfpt_lw,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
-!!      m_dfptnl_loop,m_dft_energy,m_fock_getghc,m_forstr,m_gkk,m_io_kss
-!!      m_ksdiago,m_nonlop_test,m_orbmag,m_pead_nl_loop,m_phgamma,m_phpi
-!!      m_sigmaph,m_vtorho
+!!      m_dfptnl_loop,m_dft_energy,m_fock_getghc,m_forstr,m_gkk,m_ksdiago
+!!      m_nonlop_test,m_orbmag,m_pead_nl_loop,m_phgamma,m_phpi,m_sigmaph
+!!      m_vtorho,m_wfd
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -932,7 +932,7 @@ end subroutine init_hamiltonian
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1105,7 +1105,7 @@ end subroutine load_k_hamiltonian
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1237,7 +1237,7 @@ end subroutine load_kprime_hamiltonian
 !!      m_gwls_hamiltonian
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1414,7 +1414,7 @@ end subroutine copy_hamiltonian
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1486,7 +1486,7 @@ end subroutine load_spin_hamiltonian
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1556,7 +1556,7 @@ end subroutine destroy_rf_hamiltonian
 !!      m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1706,7 +1706,7 @@ end subroutine init_rf_hamiltonian
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1781,7 +1781,7 @@ end subroutine load_spin_rf_hamiltonian
 !! PARENTS
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1841,7 +1841,7 @@ end subroutine load_k_rf_hamiltonian
 !!      m_hamiltonian
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -1925,7 +1925,7 @@ end subroutine pawdij2ekb
 !!      m_d2frnl,m_dfpt_nstwf,m_dfptnl_pert,m_hamiltonian
 !!
 !! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,xmpi_sum
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
@@ -2046,8 +2046,10 @@ end subroutine pawdij2e1kb
 !! SIDE EFFECTS
 !!
 !! PARENTS
+!!      m_dft_energy,m_ksdiago,m_vtorho
 !!
 !! CHILDREN
+!!      fftpac,transgrid
 !!
 !! SOURCE
 
