@@ -339,7 +339,6 @@ module defs_basis
 ! Parameter to compute the maximum index of the perturbation
   integer,parameter,public :: MPERT_MAX = 8
 
-
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file
  logical, public, save :: do_write_log   =.true.

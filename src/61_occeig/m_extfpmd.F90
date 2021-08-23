@@ -94,11 +94,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-  !!  m_gstate
-  !!
+!!
   !! CHILDREN
-  !!  metric
-  !!
+!!
   !! SOURCE
   subroutine init(this,mband,nbcut,nfftf,nspden,rprimd,version)
     ! Arguments -------------------------------
@@ -145,10 +143,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-  !!  m_gstate
-  !!
+!!
   !! CHILDREN
-  !!
+!!
   !! SOURCE
   subroutine destroy(this)
 
@@ -197,10 +194,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-  !!  m_vtorho
-  !!
+!!
   !! CHILDREN
-  !!
+!!
   !! SOURCE
   subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
     ! Arguments -------------------------------
@@ -316,10 +312,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-  !!  m_gstate,m_vtorho,m_occ
-  !!
+!!
   !! CHILDREN
-  !!
+!!
   !! SOURCE
   subroutine compute_nelect(this,fermie,nelect,tsmear)
     ! Arguments -------------------------------
@@ -391,10 +386,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-  !!  m_gstate,m_vtorho
-  !!
+!!
   !! CHILDREN
-  !!
+!!
   !! SOURCE
   subroutine compute_e_kinetic(this,fermie,nfftf,nspden,tsmear,vtrial)
     ! Arguments -------------------------------
@@ -477,10 +471,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-  !!  m_vtorho
-  !!
+!!
   !! CHILDREN
-  !!
+!!
   !! SOURCE
   subroutine compute_entropy(this,fermie,tsmear)
     ! Arguments -------------------------------
