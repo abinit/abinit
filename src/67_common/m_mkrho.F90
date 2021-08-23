@@ -731,7 +731,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
-!Blanchet Add free electrons contribution to density
+!Add extfpmd free electrons contribution to density
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
      rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden

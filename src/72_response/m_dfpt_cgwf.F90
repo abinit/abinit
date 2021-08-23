@@ -147,7 +147,7 @@ contains
 !! CHILDREN
 !!      cg_precon,cg_zaxpy,cg_zcopy,dotprod_g,getdc1,getgh1c,getghc
 !!      pawcprj_alloc,pawcprj_axpby,pawcprj_free,pawcprj_set_zero,projbd
-!!      sqnorm_g,timab,wrtout
+!!      sqnorm_g,timab,wrtout,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

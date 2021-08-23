@@ -136,7 +136,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
 
   # Command-line options for @package@
   AC_ARG_WITH([@package@],
-    AC_HELP_STRING([--with-@package@],
+    AS_HELP_STRING([--with-@package@],
       [Install prefix to look for @package@, or automatic configuration if set to 'yes' or 'no' (default: @default@)]),
     [ if test "${withval}" = "no" -o "${withval}" = "yes"; then
         abi_@package@_enable="${withval}"
@@ -228,7 +228,7 @@ AC_DEFUN([ABI_TRIGGERS_INIT],[
             trig_substs["default_flavor"] = trig_params[pkg]["flavors"][0]
             trig_substs["with_flavor"] = """
   AC_ARG_WITH([@package@-flavor],
-    AC_HELP_STRING([--with-@package@-flavor],
+    AS_HELP_STRING([--with-@package@-flavor],
       [Flavor of @name@ to use (default: @default_flavor@),
        see ~abinit/doc/build/config-template.ac9 for details]),
     [abi_@package@_flavor="${withval}"],

@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Bindings],[9.5.2],
+AC_INIT([ABINIT-Bindings],[9.5.4],
   [https://bugs.launchpad.net/abinit/],[abinit-bindings])
 AC_REVISION([Autotools support for the ABINIT Bindings])
 AC_CONFIG_AUX_DIR([config/gnu])
@@ -102,25 +102,25 @@ AC_SUBST(RANLIB)
 #
 
 AC_ARG_WITH([abinit-builddir],
-  AC_HELP_STRING([--with-abinit-builddir],
+  AS_HELP_STRING([--with-abinit-builddir],
     [Top build directory of Abinit]))
 
 AC_ARG_WITH([abinit-srcdir],
-  AC_HELP_STRING([--with-abinit-srcdir],
+  AS_HELP_STRING([--with-abinit-srcdir],
     [Top source directory of Abinit]))
 
 AC_ARG_WITH(abinit-config,
-  AC_HELP_STRING([--with-abinit-config],
+  AS_HELP_STRING([--with-abinit-config],
     [Full path to the config.sh file produced by Abinit]))
 AC_SUBST(with_abinit_config)
 
 AC_ARG_WITH(fc-vendor,
-  AC_HELP_STRING([--with-fc-vendor],
+  AS_HELP_STRING([--with-fc-vendor],
     [Fortran compiler vendor, as defined for Abinit]))
 AC_SUBST(with_fc_vendor)
 
 AC_ARG_WITH(fc-version,
-  AC_HELP_STRING([--with-fc-version],
+  AS_HELP_STRING([--with-fc-version],
     [Fortran compiler version, as defined for Abinit]))
 AC_SUBST(with_fc_version)
 

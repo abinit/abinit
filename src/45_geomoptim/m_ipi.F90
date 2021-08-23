@@ -122,6 +122,13 @@ contains
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      m_argparse
+!!
+!! CHILDREN
+!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
+!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
+!!
 !! SOURCE
 
 subroutine ipi_setup(string, comm)
@@ -175,6 +182,13 @@ end subroutine ipi_setup
 !! OUTPUT
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!      m_invars2
+!!
+!! CHILDREN
+!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
+!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -238,6 +252,13 @@ end subroutine ipi_check_initial_consistency
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      m_ipi
+!!
+!! CHILDREN
+!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
+!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
+!!
 !! SOURCE
 
 subroutine handle_posdata(out_natom, out_rprimd, out_xred)
@@ -278,6 +299,12 @@ end subroutine handle_posdata
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
+!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
+!!
 !! SOURCE
 
 subroutine ipi_shutdown()
@@ -311,6 +338,13 @@ end subroutine ipi_shutdown
 !! hist <type(abihist)>: History of positions,forces,acell, rprimd, stresses
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!      m_precpred_1geo
+!!
+!! CHILDREN
+!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
+!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 

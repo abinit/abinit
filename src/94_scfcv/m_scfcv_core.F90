@@ -572,7 +572,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !Stresses and forces flags
  forces_needed=0;prtfor=0
- if ((dtset%optforces==1.or.dtset%ionmov==4.or.dtset%ionmov==5.or.abs(tollist(3))>tiny(0._dp))) then
+ if ((dtset%optforces==1.or.dtset%ionmov==4.or.dtset%ionmov==5.or.&
+   & abs(tollist(3))>tiny(0._dp)).or.abs(tollist(7))>tiny(0._dp)) then
    if (dtset%iscf>0.and.nstep>0) forces_needed=1
    if (nstep==0) forces_needed=2
    prtfor=1
@@ -1149,6 +1150,21 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        end if
        call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
+     if (initialized/=0.and.dtset%usewvl == 0.and.ipositron/=1) then
+       ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
+       if (dtset%cprj_in_memory/=0) then
+         iatom=0
+         idir=0
+         iorder_cprj=0
+         call wrtout(std_out,' Computing cprj from wavefunctions (scfcv_core)')
+         call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,idir,&
+&          iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&          dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&          dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&          xred,ylm,ylmgr)
+         call wrtout(std_out,' cprj is computed')
+       end if
+     end if
 
      ! if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
      ! atomic position so should be done for nstep = 1 and for updated ion positions
@@ -1303,7 +1319,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     grchempottn,grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,initialized0,indsym,istep,istep_mix,kg,&
 &     kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,&
 &     nkxc,npwarr,nvresid,occ,optres,paw_ij,pawang,pawfgr,pawfgrtab,&
-&     pawrad,pawrhoij,pawtab,ph1df,ph1d,psps,rhog,rhor,rprimd,&
+&     pawrad,pawrhoij,pawtab,ph1df,ph1d,psps,rhog,rhor,rmet,rprimd,&
 &     stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
 &     xccc3d,xcctau3d,xred,ylm,ylmgr)
      ipositron=electronpositron_calctype(electronpositron)
@@ -2569,6 +2585,11 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
  if (optene>-1) then
 
+!  Add the contribution of extfpmd to the entropy
+   if(associated(extfpmd)) then
+     energies%entropy=energies%entropy+extfpmd%entropy
+   end if
+
 !  When the finite-temperature VG broadening scheme is used,
 !  the total entropy contribution "tsmear*entropy" has a meaning,
 !  and gather the two last terms of Eq.8 of VG paper
@@ -2698,14 +2719,12 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
    end if
 
-!  Blanchet Add the energy contribution to the internal energy
+!  Add the extfpmd energy contribution to the internal energy
    if(associated(extfpmd)) then
-     energies%entropy=energies%entropy+extfpmd%entropy
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
      if(optene==0) etotal=etotal+energies%e_extfpmd
      if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
-     etotal=etotal-dtset%tsmear*extfpmd%entropy
    end if
 
 !  Compute energy residual

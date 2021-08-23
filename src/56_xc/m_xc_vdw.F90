@@ -2113,13 +2113,14 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 !Arguments ------------------------------------
   integer,intent(in) :: nqpts,nrpts,sofswt
   integer,intent(out) :: ngpts
-  real(dp),intent(in) :: rcut,gcut
-
+  real(dp),intent(in) :: rcut
+  real(dp),intent(inout) :: gcut
 !Local variables ------------------------------
-  integer :: ig,iq1,iq2,ir
-  real(dp) :: dg,dr,lstep,ptmp,q1,q2,xr,yq1,yqn,yr1,yrn
+  integer :: ig,iq1,iq2,ir,rfftt,id1,ndpts,ng
+  real(dp) :: dg,dr,lstep,ptmp,q1,q2,qcut,qtol,un,xr
+  real(dp) :: x1,x2,yq1,yqn,yr1,yrn,gmax
   real(dp),allocatable :: gmesh(:),rmesh(:),utmp(:)
-
+  real(dp),allocatable :: q1sat(:),q2sat(:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -2128,27 +2129,64 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
 
   dr = rcut / nrpts
+  ngpts = nrpts
   dg = pi / rcut
-  ngpts = 1 + int(gcut/dg)
+  gcut =  pi / dr  !kmax in siesta
+  gmax = 10.639734883681651 !kcut in siesta for a particular 
+! system (Ar). This should be computed each time in terms of 
+! the FFT and BZ parameters, not hard wired like now. 
+  ng = 1 + int(gmax/dg) ! nk in siesta
+  rfftt = 2 !Type of radial sin transform
 
-  ABI_MALLOC(utmp,(nrpts))
+  ABI_MALLOC(utmp,(0:nrpts))
 
-  ! Create radial mesh for radial FT: src/32_util/radsintr.F90
-  ABI_MALLOC(rmesh,(nrpts))
-  forall(ir=1:nrpts) rmesh(ir) = dr * dble(ir-1)
+  ! Create radial mesh for radial FT: 
+  ! shared/common/src/32_util/radsintr.F90
+  ABI_MALLOC(rmesh,(0:nrpts))
+  forall(ir=1:nrpts) rmesh(ir) = dr * dble(ir)
 
   if ( sofswt == 1 ) then
   ! Create reciprocal radial mesh
-   ABI_MALLOC(gmesh,(ngpts))
-   forall(ig=1:ngpts) gmesh(ig) = dg * dble(ig-1)
+   ABI_MALLOC(gmesh,(0:ngpts))
+   forall(ig=0:ngpts) gmesh(ig) = dg * dble(ig)
   end if
 
+  ABI_MALLOC(q1sat,(2))
+  ABI_MALLOC(q2sat,(2))
 
   ! Build filtered kernel for each (q1,q2) pair
   do iq1=1,nqpts
-    do iq2=1,iq1
-      q1 = qmesh(iq1)
-      q2 = qmesh(iq2)
+    !Inverse saturation of q1-mesh value 
+    x1 = 0
+    x2 = 1.5_dp * qcut
+    do
+      q1 = (x1+x2)/2
+      call vdw_df_saturation( q1, qcut, q1sat )
+      if (abs(qmesh(iq1)-q1sat(1))<qtol) then
+        exit
+      else if (q1sat(1) < qmesh(iq1)) then
+        x1 = q1
+      else
+        x2 = q1
+      end if
+    end do ! end calculation of unsaturated qmesh(iq1)
+
+    do iq2=1,iq1      
+    !Rather than this q2 = qmesh(iq2), the values of q-mesh
+    !are unsaturated. 
+      x1 = 0
+      x2 = 1.5_dp * qcut
+      do
+        q2 = (x1+x2)/2
+        call vdw_df_saturation( q2, qcut, q2sat )
+        if (abs(qmesh(iq2)-q2sat(1))<qtol) then
+          exit
+        else if (q2sat(1) < qmesh(iq2)) then
+          x1 = q2
+        else
+          x2 = q2
+        end if                           
+      end do ! end calculation of unsaturated qmesh(iq2)
 
       if ( sofswt == 1 ) then
       ! Build kernel in real space
@@ -2157,50 +2195,58 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        do ir=1,nrpts
          xr=rmesh(ir)
          phir(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
-&          (one - ((ir - 1) / nrpts)**8)**4
+&          (one - ( xr / rmesh(nrpts))**8)**4
        end do
 
       ! Obtain kernel in reciprocal space
-       call radsintr(phir(:,iq1,iq2),phig(:,iq1,iq2),ngpts,nrpts,gmesh,rmesh,yq1,yqn)
+       call radsintr(phir(:,iq1,iq2),phig(:,iq1,iq2),ngpts,nrpts,gmesh,rmesh,yq1,yqn,rfftt)
+       if (rfftt == 2) then
+         phig(:,iq1,iq2) = phig(:,iq1,iq2) * (2*pi)**1.5_dp
+       end if
 
       ! Filter in reciprocal space
-       do ig=1,ngpts
+       phig(ng:ngpts,iq1,iq2) = zero 
+       do ig=1,ng
          phig(ig,iq1,iq2) = phig(ig,iq1,iq2) * &
-&          (one - ((ig - 1) / ngpts)**8)**4
+&          (one - ( gmesh(ig) / gmesh(ng))**8)**4
        end do
-       phig(ngpts+1:nrpts,iq1,iq2) = zero
 
       ! Go back to real space
-       call radsintr(phig(:,iq1,iq2),phir(:,iq1,iq2),nrpts,ngpts,rmesh,gmesh,yr1,yrn)
-
+       call radsintr(phig(:,iq1,iq2),phir(:,iq1,iq2),nrpts,ngpts,rmesh,gmesh,yr1,yrn,rfftt)
+       phir(:,iq1,iq2) = phir(:,iq1,iq2) / (2*pi)**1.5_dp
+       
       ! Calculate second derivative in real space
-       d2phidr2(1,iq1,iq2) = zero
-       d2phidr2(nrpts,iq1,iq2) = zero
-       utmp(1) = zero
-       do ir=2,nrpts-1
+       d2phidr2(0,iq1,iq2) = -half
+       utmp(0) = (three / dr) * (phir(1,iq1,iq2)-phir(0,iq1,iq2)) / dr
+       do ir=1,nrpts-1
          ptmp = half * d2phidr2(ir-1,iq1,iq2) + two
          d2phidr2(ir,iq1,iq2) = (half - one) / ptmp
          utmp(ir) = (three * (phir(ir+1,iq1,iq2) + phir(ir-1,iq1,iq2) - &
 &          two*phir(ir,iq1,iq2)) / (dr**2) - half * utmp(ir-1)) / ptmp
        end do
-       do ir=nrpts-1,1,-1
+       un = (three / dr) * (phir(nrpts-1,iq1,iq2)-phir(nrpts,iq1,iq2)) / dr
+       d2phidr2(nrpts,iq1,iq2) = (un - half * utmp(nrpts-1)) /  &
+         (half * d2phidr2(nrpts-1,iq1,iq2) + one) 
+       do ir=nrpts-1,0,-1
          d2phidr2(ir,iq1,iq2) = d2phidr2(ir,iq1,iq2) * &
 &          d2phidr2(ir+1,iq1,iq2) + utmp(ir)
        end do
 
       ! Calculate second derivative in reciprocal space
-       d2phidg2(1,iq1,iq2) = zero
-       d2phidg2(ngpts,iq1,iq2) = zero
-       utmp(1) = zero
-       do ig=2,ngpts-1
+       d2phidg2(0,iq1,iq2) = -half 
+       utmp(0) = (three / dg) * (phig(1,iq1,iq2)-phig(0,iq1,iq2)) / dg
+       do ig=1,ngpts-1
          ptmp = half * d2phidg2(ig-1,iq1,iq2) + two
          d2phidg2(ig,iq1,iq2) = (half - one) / ptmp
          utmp(ig) = (three * (phig(ig+1,iq1,iq2) + phig(ig-1,iq1,iq2) - &
-&          two*phig(ig,iq1,iq2)) / (dr**2) - half * utmp(ig-1)) / ptmp
+&          two*phig(ig,iq1,iq2)) / (dg**2) - half * utmp(ig-1)) / ptmp
        end do
-       do ig=ngpts-1,1,-1
-         d2phidg2(ig,iq1,iq2) = d2phidg2(ig,iq1,iq2) * d2phidg2(ig+1,iq1,iq2) + &
-&          utmp(ig)
+       un = (three / dg) * (phig(ngpts-1,iq1,iq2)-phig(ngpts,iq1,iq2)) / dg
+       d2phidg2(ngpts,iq1,iq2) = (un - half * utmp(ngpts-1)) /  &
+         (half * d2phidg2(ngpts-1,iq1,iq2) + one)
+       do ig=ngpts-1,0,-1
+         d2phidg2(ig,iq1,iq2) = d2phidg2(ig,iq1,iq2) * &                          
+&         d2phidg2(ig+1,iq1,iq2) + utmp(ig)
        end do
 
       ! Symmetrize kernels & derivatives
@@ -2208,25 +2254,27 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        phig(:,iq2,iq1) = phig(:,iq1,iq2)
        d2phidr2(:,iq2,iq1) = d2phidr2(:,iq1,iq2)
        d2phidg2(:,iq2,iq1) = d2phidg2(:,iq1,iq2)
-      end if ! sofswt == 1
+      else! sofswt == 1
 
-      if ( sofswt == 0) then
       ! Build unsoftened kernel in real space
       ! Note: smoothly going to zero when approaching rcut
       ! radial mesh is indeed a mesh of |\vec{r1}-\vec{r2}| values.
-       do ir=1,nrpts
+       do ir=0,nrpts
          xr=rmesh(ir)
          phir_u(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
-&          (one - ((ir - 1) / nrpts)**8)**4
+&          (one - ( xr / rmesh(nrpts))**8)**4
        end do
+
       ! Symmetrize unsoftened kernel
        phir_u(:,iq2,iq1) = phir_u(:,iq1,iq2)
-      end if ! sofswt == 0
+      end if ! sofswt == 1
 
-     end do
-   end do
+    end do !loop on iq2
+  end do !loop on iq1
 
   ABI_FREE(utmp)
+  ABI_FREE(q1sat)
+  ABI_FREE(q2sat)
 
   DBG_EXIT("COLL")
 
@@ -3084,6 +3132,63 @@ subroutine vdw_df_internal_checks(test_mode)
   DBG_EXIT("COLL")
 
 end subroutine vdw_df_internal_checks
+!!***
+
+!!****f* m_xc_vdw/vdw_df_saturation
+!! NAME
+!!  vdw_df_saturation
+!!
+!! FUNCTION
+!!  Obtain a saturated value of q0 which is always inside
+!!  the interpolation range (eq. 5 RS09.)
+!!  * q0s = q0c * (1 - exp(-Sum_i=1,ns 1/i (q0/q0c)**i))
+!!  * dq0sdq0 = dq0s / dq |q=q0
+!!
+!! INPUTS 
+!!  q0 = q0 value to be saturated  
+!!  q0c = Saturation value, max q0 value  
+!!
+!! OUTPUTS 
+!!  q0s(1) = saturated q0 value
+!!  q0s(2) = derivative of q0s(1) wrt q at q0 
+!!
+!! NOTES
+!!  This routine is usually interfaced with the macros defined in abi_common.h
+!!  and uses this information to define a line offset.
+!!
+!! PARENTS
+!!      xc_vdw_energy,vdw_df_filter
+!! CHILDREN
+!!      
+!!
+!! SOURCE
+
+subroutine vdw_df_saturation(q0,q0c,q0s)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: q0, q0c
+ real(dp),intent(out) :: q0s(2)  
+!integer,intent(in) :: ncerr
+!character(len=*),optional,intent(in) :: file_name
+!integer,optional,intent(in) :: file_line
+
+!Local variables-------------------------------
+ integer  :: is,ns
+ real(dp) :: ptm, dptmdq
+! *************************************************************************
+
+ ns = my_vdw_params%nsmooth
+
+ ptm = (q0 / q0c) / ns
+ dptmdq = 1._dp / q0c
+ do is=ns-1,1,-1
+   ptm = (ptm + 1._dp / is) * q0 / q0c
+   dptmdq = (dptmdq * q0 + 1) / q0c ! (dptmdq * q0 + one) / q0c
+ end do 
+ q0s(1) = q0c * (1 - exp(-ptm)) !q0c * (one - exp(-ptm))
+ q0s(2) = q0c * dptmdq * exp(-ptm)
+
+end subroutine vdw_df_saturation
 !!***
 
 !!****f* m_xc_vdw/vdw_df_netcdf_ioerr
