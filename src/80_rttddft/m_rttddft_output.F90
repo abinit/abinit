@@ -52,7 +52,7 @@ contains
 !!  Main output subroutine
 !!
 !! INPUTS
-!!  tdks <class(tdks_type)> = the tdks object to initialize
+!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
 !!
@@ -70,7 +70,7 @@ subroutine rttddft_output(tdks)
 
  !Arguments ------------------------------------
  !scalars
- class(tdks_type),           intent(inout)        :: tdks
+ type(tdks_type),           intent(inout)        :: tdks
  !arrays
  
  !Local variables-------------------------------

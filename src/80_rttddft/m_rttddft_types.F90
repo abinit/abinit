@@ -238,7 +238,6 @@ subroutine tdks_init(tdks, codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
 
  !Local variables-------------------------------
  !scalars
- integer                     :: ikpt
  integer                     :: my_natom
  integer                     :: psp_gencond
  real(dp)                    :: entropy, ecut_eff
@@ -284,41 +283,6 @@ subroutine tdks_init(tdks, codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%pawang => pawang
  tdks%pawrad => pawrad
  tdks%pawtab => pawtab
-
-!print*, "KS Oribtals have been read in file:", dtfil%fnamewffk
-!print*, ""
-!print*, "**************** TEST *******************"
-!print*, tdks%mcg, "WFK coefficients have been read."
-!print*, "nkpt=",dtset%nkpt,"npw=",dtset%mpw,"nband=",dtset%nband(1),"nkpt*npw*nband=",dtset%nkpt*dtset%mpw*dtset%nband(1)
-!print*, "Here are the cg coefficients:"
-!do ikpt=1, tdks%mcg
-!  print*, tdks%cg(1,ikpt), tdks%cg(2,ikpt)
-!end do
-!print*, "**************** TEST *******************"
-!print*, dtset%mpw*dtset%mkmem, "k+G vectors have been read."
-!print*, "nkpt=",dtset%nkpt,"npw=",dtset%mpw,"nkpt*npw=",dtset%nkpt*dtset%mpw
-!print*, "Here are the kg vectors:"
-!do ikpt=1, dtset%mpw*dtset%mkmem
-!  print*, tdks%kg(1,ikpt), tdks%kg(2,ikpt), tdks%kg(3,ikpt)
-!end do
-!print*, "**************** TEST *******************"
-!print*, "The k-point grid is composed of ", dtset%nkpt, "k-points"
-!print*, "Here are their coordinates:"
-!do ikpt=1, dtset%nkpt
-!  print*, dtset%kptns(1,ikpt), dtset%kptns(2,ikpt), dtset%kptns(3,ikpt)
-!end do
-!print*, "**************** TEST *******************"
-!print*, "Eigenvalues:"
-!print*, "nkpt=",dtset%nkpt,"mband=",dtset%mband,"nsppol=",dtset%nsppol,"nkpt*mband*nsppol=",dtset%nkpt*dtset%mband*dtset%nsppol
-!do ikpt=1, dtset%mband*dtset%nkpt*dtset%nsppol
-!  print*, tdks%eigen(ikpt)
-!end do
-!print*, "**************** TEST *******************"
-!print*, "Computed density:"
-!do ikpt=1, tdks%nfftf
-!  print*, tdks%rhor(ikpt,1)
-!end do
-!print*, "Norm=", SUM(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf
 
 end subroutine tdks_init
 
@@ -438,7 +402,7 @@ end subroutine tdks_free
 !!  in particular PW, FFT, PSP, Symmetry etc.
 !!
 !! INPUTS
-!!  tdks <class(tdks_type)> = the tdks object to initialize
+!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!  codvsn = code version
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
@@ -465,7 +429,7 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,
 
  !Arguments ------------------------------------
  !scalars
- class(tdks_type),           intent(inout) :: tdks
+ type(tdks_type),            intent(inout) :: tdks
  character(len=8),           intent(in)    :: codvsn
  integer,                    intent(out)   :: psp_gencond
  real(dp),                   intent(out)   :: ecut_eff
@@ -479,7 +443,7 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,
 
  !Local variables-------------------------------
  !scalars
- integer,parameter   :: response=0, cplex1=1
+ integer,parameter   :: response=0, cplex=1
  integer             :: comm_psp
  integer             :: gscase
  integer             :: ierr, iatom, itypat, indx
@@ -606,7 +570,7 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,
  if (psps%usepaw == 1) then
    call initrhoij(dtset%pawcpxocc,dtset%lexexch,dtset%lpawu,my_natom,dtset%natom, &
                 & dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,           &
-                & tdks%pawrhoij,dtset%pawspnorb,pawtab,cplex1,dtset%spinat,       &
+                & tdks%pawrhoij,dtset%pawspnorb,pawtab,cplex,dtset%spinat,       &
                 & dtset%typat,comm_atom=mpi_enreg%comm_atom,                      &
                 & mpi_atmtab=mpi_enreg%my_atmtab)
  end if
@@ -728,7 +692,7 @@ end subroutine first_setup
 !! occupation numbers in paticular related to PAW
 !!
 !! INPUTS
-!! tdks <class(tdks_type)> = the tdks object to initialize
+!! tdks <type(tdks_type)> = the tdks object to initialize
 !! dtset <type(dataset_type)> = all input variables for this dataset
 !! mpi_enreg <MPI_type> = MPI-parallelisation information
 !! pawang <type(pawang_type)> = paw angular mesh and related data
@@ -753,7 +717,7 @@ subroutine second_setup(tdks, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, p
 
  !Arguments ------------------------------------
  !scalars
- class(tdks_type),           intent(inout) :: tdks
+ type(tdks_type),           intent(inout) :: tdks
  integer,                    intent(in)    :: psp_gencond
  type(pawang_type),          intent(inout) :: pawang
  type(dataset_type),         intent(inout) :: dtset
@@ -846,13 +810,14 @@ subroutine second_setup(tdks, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, p
       end if
    end if
    ABI_MALLOC(tdks%dimcprj,(dtset%natom))
-   ABI_MALLOC(dimcprj_srt,(dtset%natom))
+   !ABI_MALLOC(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(tdks%dimcprj,dtset%natom,tdks%nattyp,dtset%ntypat, &
                      & dtset%typat,pawtab,'R')
-   call pawcprj_getdim(dimcprj_srt,dtset%natom,tdks%nattyp,dtset%ntypat,  &
-                     & dtset%typat,pawtab,'O')
-   call pawcprj_alloc(tdks%cprj,ncpgr,dimcprj_srt)
-   ABI_FREE(dimcprj_srt)
+   !call pawcprj_getdim(dimcprj_srt,dtset%natom,tdks%nattyp,dtset%ntypat,  &
+   !                  & dtset%typat,pawtab,'O')
+   !call pawcprj_alloc(tdks%cprj,ncpgr,dimcprj_srt)
+   call pawcprj_alloc(tdks%cprj,ncpgr,tdks%dimcprj)
+   !ABI_FREE(dimcprj_srt)
 
    !** Variables/arrays related to the fine FFT grid
    ABI_MALLOC(tdks%pawfgrtab,(my_natom))
@@ -1064,7 +1029,7 @@ end subroutine second_setup
 !! Reads initial wavefunctions (KS orbitals) in WFK file (call inwfill)
 !!
 !! INPUTS
-!! tdks <class(tdks_type)> = the tdks object to initialize
+!! tdks <type(tdks_type)> = the tdks object to initialize
 !! dtfil <type datafiles_type> = infos about file names, file unit numbers
 !! dtset <type(dataset_type)> = all input variables for this dataset
 !! ecut_eff <real(dp)> = effective PW cutoff energy
@@ -1086,7 +1051,7 @@ subroutine read_wfk(tdks, dtfil, dtset, ecut_eff, mpi_enreg)
 
  !Arguments ------------------------------------
  !scalars
- class(tdks_type),           intent(inout) :: tdks
+ type(tdks_type),           intent(inout) :: tdks
  real(dp),                   intent(in)    :: ecut_eff
  type(datafiles_type),       intent(in)    :: dtfil
  type(dataset_type),         intent(inout) :: dtset
@@ -1178,7 +1143,7 @@ end subroutine read_wfk
 !!  Compute electronic density (in 1/bohr^3) from the WF (cg coefficients)
 !!
 !! INPUTS
-!!  tdks <class(tdks_type)> = the tdks object to initialize
+!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
@@ -1199,7 +1164,7 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
 
  !Arguments ------------------------------------
  !scalars
- class(tdks_type),           intent(inout) :: tdks
+ type(tdks_type),            intent(inout) :: tdks
  type(datafiles_type),       intent(in)    :: dtfil
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
@@ -1210,7 +1175,8 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
 
  !Local variables-------------------------------
  !scalars
- integer                     :: cplex, cplex_rhoij
+ integer, parameter          :: cplex=1
+ integer                     :: cplex_rhoij
  integer                     :: ipert, idir, ider, izero
  integer                     :: my_natom
  integer                     :: nspden_rhoij
@@ -1239,7 +1205,7 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
    ABI_MALLOC(tdks%nhat,(tdks%nfftf,dtset%nspden*psps%usepaw))
 
    tdks%nhatgrdim=0;if (dtset%xclevel==2) tdks%nhatgrdim=tdks%usexcnhat*dtset%pawnhatxc
-   cplex=1;ider=2*tdks%nhatgrdim;izero=0
+   ider=2*tdks%nhatgrdim;izero=0
    if (tdks%nhatgrdim>0)   then
       ABI_MALLOC(tdks%nhatgr,(cplex*tdks%nfftf,dtset%nspden,3*tdks%nhatgrdim))
    else

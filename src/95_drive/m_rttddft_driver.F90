@@ -36,6 +36,7 @@ module m_rttddft_driver
  use m_pawang,            only: pawang_type
  use m_pawrad,            only: pawrad_type
  use m_pawtab,            only: pawtab_type
+ use m_rttddft,           only: rttddft_calc_density
  use m_rttddft_output,    only: rttddft_output
  use m_rttddft_types,     only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
@@ -133,6 +134,8 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
+ 
+ write(99,*) tdks%rhor
 
  do istep = 1, tdks%ntime
    call rttddft_propagate_ele(tdks,dtset,istep,mpi_enreg,psps)
@@ -140,12 +143,18 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
    !FB TODO: If Ehrenfest perform nuclear step here
    !call tdks%propagate_nuc(itime)
 
+   !Calc new electronic density 
+   call rttddft_calc_density(tdks,dtfil,dtset,mpi_enreg,psps)
+
+   write(99,*) tdks%rhor
+
    !Update header, with evolving variables
    call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih, &
                       & tdks%hdr%residm,tdks%rprimd,dtset%occ_orig,tdks%pawrhoij, &
                       & dtset%xred_orig,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom, &
                       & mpi_atmtab=mpi_enreg%my_atmtab)
 
+   !Output useful values
    call rttddft_output(tdks)
 
  end do
