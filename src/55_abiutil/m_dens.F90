@@ -810,6 +810,7 @@ end subroutine constrained_dft_free
 !!  e_constrained_dft=correction to the total energy, to make it variational
 !!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
 !!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
+!!  strscondft(6)=stress due to constraints = -d(E_constrained_DFT)/d(strain) / ucvol  (hartree/Bohr^3)
 !!
 !! SIDE EFFECTS
 !!  vresid(nfft,nspden)==array for potential residual in real space
@@ -825,7 +826,7 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
- subroutine constrained_residual(c_dft,e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,vresid,xred)
+ subroutine constrained_residual(c_dft,e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,strscondft,vresid,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -836,6 +837,7 @@ end subroutine constrained_dft_free
  real(dp),intent(out) :: grcondft(:,:) ! 3,natom
  real(dp),intent(out) :: intgres(:,:) ! nspden,natom
  real(dp),intent(in) :: rhor(c_dft%nfftf,c_dft%nspden)
+ real(dp),intent(out) :: strscondft(6) 
  real(dp),intent(inout) :: vresid(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(in) :: xred(3,c_dft%natom)
 
@@ -973,6 +975,7 @@ end subroutine constrained_dft_free
 !Also projects the residual in case constraint_kind 2
  e_constrained_dft=zero
  grcondft=zero
+ strscondft=zero
  ABI_MALLOC(intgden_delta,(nspden,natom))
  intgden_delta(:,:)=zero
  do iatom=1,natom
@@ -1050,10 +1053,10 @@ end subroutine constrained_dft_free
    do ii=1,3
      grcondft(ii,iatom)=grcondft(ii,iatom)+sum(gr_intgden(ii,:,iatom)*intgres(:,iatom))
    enddo
-!NOT YET ACTIVATED
-!  do ii=1,6
-!    strscondft(ii,iatom)=strscondft(ii,iatom)+sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
-!  enddo
+!  For the stress, this is the place where the summation over atoms is performed.
+   do ii=1,6
+     strscondft(ii)=strscondft(ii)+sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
+   enddo
  enddo
 
  ABI_FREE(gr_intgden)
