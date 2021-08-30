@@ -808,7 +808,7 @@ end subroutine constrained_dft_free
 !!
 !! OUTPUT
 !!  e_constrained_dft=correction to the total energy, to make it variational
-!!  grcondft=d(E_constrained_DFT)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
 !!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!
 !! SIDE EFFECTS
@@ -846,13 +846,14 @@ end subroutine constrained_dft_free
  real(dp) :: intgd,intgden_norm,intgden_proj,intgres_proj,norm
 !arrays
  integer :: ipiv(c_dft%natom)
- real(dp) :: corr_denmag(4)
+ real(dp) :: corr_denmag(4),gr_intgd(3),strs_intgd(6)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: gr_intgden(:,:,:) ! 3,nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgden_delta(:,:) ! nspden,natom
  real(dp), allocatable :: intgres_tmp(:,:) ! nspden,natom
  real(dp), allocatable :: intgr(:,:) ! natom,nspden
+ real(dp), allocatable :: strs_intgden(:,:,:) ! 6,nspden,natom
  real(dp) :: intgf2(c_dft%natom,c_dft%natom),rhomag(2,c_dft%nspden),work(2*c_dft%natom)
  real(dp) :: spinat_normed(3)
 
@@ -870,8 +871,9 @@ end subroutine constrained_dft_free
 !We need the integrated magnetic moments
  ABI_MALLOC(intgden,(nspden,natom))
  ABI_MALLOC(gr_intgden,(3,nspden,natom))
+ ABI_MALLOC(strs_intgden,(6,nspden,natom))
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
-&  xred,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag)
+&  xred,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !DEBUG
@@ -981,9 +983,14 @@ end subroutine constrained_dft_free
      intgden(2,iatom)=intgden(1,iatom)-intgden(2,iatom)
      intgden(1,iatom)=intgd
      do ii=1,3
-       intgd           =gr_intgden(ii,1,iatom)+gr_intgden(ii,2,iatom)
+       gr_intgd(ii)          =gr_intgden(ii,1,iatom)+gr_intgden(ii,2,iatom)
        gr_intgden(ii,2,iatom)=gr_intgden(ii,1,iatom)-gr_intgden(ii,2,iatom)
-       gr_intgden(ii,1,iatom)=intgd
+       gr_intgden(ii,1,iatom)=gr_intgd(ii)
+     enddo
+     do ii=1,6
+       strs_intgd(ii)          =strs_intgden(ii,1,iatom)+strs_intgden(ii,2,iatom)
+       strs_intgden(ii,2,iatom)=strs_intgden(ii,1,iatom)-strs_intgden(ii,2,iatom)
+       strs_intgden(ii,1,iatom)=strs_intgd(ii)
      enddo
    endif
 
@@ -1040,9 +1047,13 @@ end subroutine constrained_dft_free
 !  because chrgat and spinat have directly been used in the definition of intgden_delta.
 !  WOOPS : chrgat comes with a POSITIVE sign in intgden_delta ?!?!
    e_constrained_dft=e_constrained_dft-sum(intgden_delta(:,iatom)*intgres(:,iatom))
-   grcondft(1,iatom)=grcondft(1,iatom)+sum(gr_intgden(1,:,iatom)*intgres(:,iatom))
-   grcondft(2,iatom)=grcondft(2,iatom)+sum(gr_intgden(2,:,iatom)*intgres(:,iatom))
-   grcondft(3,iatom)=grcondft(3,iatom)+sum(gr_intgden(3,:,iatom)*intgres(:,iatom))
+   do ii=1,3
+     grcondft(ii,iatom)=grcondft(ii,iatom)+sum(gr_intgden(ii,:,iatom)*intgres(:,iatom))
+   enddo
+!NOT YET ACTIVATED
+!  do ii=1,6
+!    strscondft(ii,iatom)=strscondft(ii,iatom)+sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
+!  enddo
  enddo
 
  ABI_FREE(gr_intgden)
@@ -1454,6 +1465,7 @@ end subroutine mag_penalty_e
 !! FUNCTION
 !! Compute and print integral of total density inside spheres around atoms,
 !! or optionally of integral of potential residual.
+!! Also can compute the contributions to forces and stresses due to density-magnetization type constraints.
 !!
 !! INPUTS
 !!  mpi_enreg=information about MPI parallelization
@@ -1473,14 +1485,15 @@ end subroutine mag_penalty_e
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
+!!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol. Optional argument
 !!  gr_intgden(3,nspden,natom)=grad wrt atomic positions, of integrated density (magnetization...) for each atom in a sphere. Optional arg
-!!  rhomag(2,nspden)=integrated complex density (magnetization...) over full u.c. vol, optional argument
-!!    in collinear case component 1 is total density and 2 is _magnetization_ up-down
-!!    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
 !!  intgf2(natom,natom)=overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
+!!  rhomag(2,nspden)=integrated complex density (magnetization...) over full u.c. vol. Optional argument
+!!    In collinear case component 1 is total density and 2 is _magnetization_ up-down
+!!    In non collinear case component 1 is total density, and 2:4 are the magnetization vector
+!!  strs_intgden(6,nspden,natom)=stress contribution due to constrained integrated density (magnetization...), due to each atom. Optional arg
 !!  Rest is printing
 !!
 !! PARENTS
@@ -1492,7 +1505,7 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    option,cplex,intgden,gr_intgden,dentot,rhomag,intgf2)
+&    option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1505,15 +1518,16 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
-!integer,intent(out),optional   :: atgridpts(nfft)
- real(dp),intent(out),optional  :: intgden(nspden,natom)
+ real(dp),intent(out),optional  :: dentot(nspden)
  real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)   
+ real(dp),intent(out),optional  :: intgden(nspden,natom)
  real(dp),intent(out),optional  :: intgf2(natom,natom)
- real(dp),intent(out),optional  :: dentot(nspden),rhomag(2,nspden)
+ real(dp),intent(out),optional  :: rhomag(2,nspden)
+ real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)   
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndir=3,ishift=5
- integer :: i1,i2,i3,iatom,ierr,ifft_local,ispden,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
+ integer :: i1,i2,i3,iatom,ierr,ifft_local,ii,isp,ispden,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
  integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
@@ -1523,7 +1537,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
- real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4),intg(4),rhomag_(2,nspden),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
+ real(dp) :: intg(4),rhomag_(2,nspden)
+ real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
@@ -1535,6 +1551,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  intgden_=zero
  if(present(gr_intgden))then
    gr_intgden=zero
+ endif
+ if(present(strs_intgden))then
+   strs_intgden=zero
  endif
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -1649,12 +1668,22 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            endif
 !          Integral of density or potential residual
            intg(1:nspden)=intg(1:nspden)+fsm*rhor(ifft_local,1:nspden)
-           if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+           if((present(gr_intgden).or.present(strs_intgden)).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
-               fact=two*dfsm*rhor(ifft_local,ispden)
-               gr_intg(1,ispden)=gr_intg(1,ispden)+difx*fact
-               gr_intg(2,ispden)=gr_intg(2,ispden)+dify*fact
-               gr_intg(3,ispden)=gr_intg(3,ispden)+difz*fact
+               fact=dfsm*rhor(ifft_local,ispden)
+               if(present(gr_intgden))then
+                 gr_intg(1,ispden)=gr_intg(1,ispden)+difx*fact
+                 gr_intg(2,ispden)=gr_intg(2,ispden)+dify*fact
+                 gr_intg(3,ispden)=gr_intg(3,ispden)+difz*fact
+               endif
+               if(present(strs_intgden))then
+                 strs_intg(1,ispden)=strs_intg(1,ispden)+difx*difx*fact
+                 strs_intg(2,ispden)=strs_intg(2,ispden)+dify*dify*fact
+                 strs_intg(3,ispden)=strs_intg(3,ispden)+difz*difz*fact
+                 strs_intg(4,ispden)=strs_intg(4,ispden)+dify*difz*fact
+                 strs_intg(5,ispden)=strs_intg(5,ispden)+difx*difz*fact
+                 strs_intg(6,ispden)=strs_intg(6,ispden)+difx*dify*fact
+               endif
              enddo
            endif
          end do
@@ -1669,8 +1698,32 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    intg(:)=intg(:)*ucvol/dble(nfftot)
 
    if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+!    Convert to gradient in reduced coordinates
      gr_intg=matmul(rmet,gr_intg)
-     gr_intg(:,:)=gr_intg(:,:)*ucvol/dble(nfftot)
+     gr_intg(:,:)=gr_intg(:,:)*two*ucvol/dble(nfftot)
+   endif
+
+   if(present(strs_intgden).and. option<10 .and. ratsm2>tol12)then
+!    Convert to stress in cartesian coordinates, for each spin constraint
+     do isp=1,4
+!      First change the representation
+       strs(1,1)=strs_intg(1,isp) ; strs(2,2)=strs_intg(2,isp) ; strs(3,3)=strs_intg(3,isp)
+       strs(2,3)=strs_intg(4,isp) ; strs(3,2)=strs_intg(4,isp)
+       strs(1,3)=strs_intg(5,isp) ; strs(3,1)=strs_intg(5,isp)
+       strs(1,2)=strs_intg(6,isp) ; strs(2,1)=strs_intg(6,isp)
+!      Then perform representation change, following Eq.(25) in Hamann2005
+       do ii=1,3
+         strs_cartred(:,ii)=matmul(rprimd,strs(:,ii)) 
+       enddo
+       do ii=1,3
+         strs(ii,:)=matmul(rprimd,strs_cartred(ii,:))
+       enddo
+       strs_intg(1,isp)=two*strs(1,1) ; strs_intg(2,isp)=two*strs(2,2) ; strs_intg(3,isp)=two*strs(3,3)
+       strs_intg(4,isp)=strs(2,3)+strs(3,2) 
+       strs_intg(5,isp)=strs(1,3)+strs(3,1) 
+       strs_intg(6,isp)=strs(1,2)+strs(2,1)
+     enddo 
+     strs_intg(:,:)=strs_intg(:,:)/dble(nfftot)
    endif
 
    if(nspden==2 .and. option/=11)then
@@ -1683,10 +1736,17 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        gr_intgden(:,1,iatom)=gr_intg(:,2)
        gr_intgden(:,2,iatom)=gr_intg(:,1)-gr_intg(:,2)
      endif
+     if(present(strs_intgden).and. option<10 .and. ratsm2>tol12)then
+       strs_intgden(:,1,iatom)=strs_intg(:,2)
+       strs_intgden(:,2,iatom)=strs_intg(:,1)-strs_intg(:,2)
+     endif
    else
      intgden_(1:nspden,iatom)=intg(1:nspden)
      if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
        gr_intgden(:,1:nspden,iatom)=gr_intg(:,1:nspden)
+     endif
+     if(present(strs_intgden).and. option<10 .and. ratsm2>tol12)then
+       strs_intgden(:,1:nspden,iatom)=strs_intg(:,1:nspden)
      endif
    endif
 
@@ -1749,6 +1809,14 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    if(mpi_enreg%nproc_fft>1)then
      call timab(48,1,tsec)
      call xmpi_sum(gr_intgden,mpi_enreg%comm_fft,ierr)
+     call timab(48,2,tsec)
+   end if
+ end if
+
+if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
+   if(mpi_enreg%nproc_fft>1)then
+     call timab(48,1,tsec)
+     call xmpi_sum(strs_intgden,mpi_enreg%comm_fft,ierr)
      call timab(48,2,tsec)
    end if
  end if
