@@ -89,7 +89,7 @@ subroutine xomp_show_info(unit)
  write(my_unt,'(a,i0)') "- Num_threads:       ",xomp_get_num_threads(open_parallel=.True.)
  write(my_unt,'(a,i0)') "- Num_procs:         ",omp_get_num_procs()
  write(my_unt,'(a,l1)') "- Dynamic:           ",omp_get_dynamic()
- write(my_unt,'(a,l1)') "- Nested:            ",omp_get_nested()
+ !write(my_unt,'(a,l1)') "- Nested:            ",omp_get_nested()
  !write(my_unt,'(a,i0)')"- Thread_limit:      ",omp_get_thread_limit()
  !write(my_unt,'(a,i0)')"- Max_active_levels: ",omp_get_max_active_levels()
 #else
