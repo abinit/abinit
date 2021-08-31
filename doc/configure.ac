@@ -58,7 +58,7 @@ AX_PROG_MKDIR_P
 
 # Option to test the absence of LaTeX
 AC_ARG_ENABLE(portability-tests,
-  AC_HELP_STRING([--enable-portability-tests],
+  AS_HELP_STRING([--enable-portability-tests],
     [Maintainer-only option to force build parameters (default: disabled)]))
 test "${enable_portability_tests}" = "" && enable_portability_tests="no"
 

@@ -676,7 +676,6 @@ end subroutine add_atomic_fcts
  real(dp) :: ucvol
 !arrays
  real(dp), allocatable :: intgf2(:,:) ! natom,natom
- real(dp), allocatable :: gr_dum(:,:,:) ! 3,nspden,natom
  real(dp), allocatable :: rhor_dum(:,:) ! nfftf,nspden
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
@@ -690,12 +689,10 @@ end subroutine add_atomic_fcts
  if(any(constraint_kind(:)/=0))then
    !We need to precompute intgf2
    ABI_MALLOC(rhor_dum,(nfftf,nspden))
-   ABI_MALLOC(gr_dum,(3,nspden,natom))
    rhor_dum(:,:)=zero
-   call calcdenmagsph(gr_dum,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
+   call calcdenmagsph(mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
 &    ratsm,ratsph,rhor_dum,rprimd,typat,xred,0,cplex1,intgf2=intgf2)
    ABI_FREE(rhor_dum)
-   ABI_FREE(gr_dum)
  else
    intgf2=zero
  endif
@@ -851,7 +848,6 @@ end subroutine constrained_dft_free
  integer :: ipiv(c_dft%natom)
  real(dp) :: corr_denmag(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
- real(dp), allocatable :: gr_dum(:,:,:) ! 3,nspden,natom
  real(dp), allocatable :: gr_intgden(:,:,:) ! 3,nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgden_delta(:,:) ! nspden,natom
@@ -874,8 +870,8 @@ end subroutine constrained_dft_free
 !We need the integrated magnetic moments
  ABI_MALLOC(intgden,(nspden,natom))
  ABI_MALLOC(gr_intgden,(3,nspden,natom))
- call calcdenmagsph(gr_intgden,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+ call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
+&  xred,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !DEBUG
@@ -884,11 +880,9 @@ end subroutine constrained_dft_free
 
 !We need the integrated residuals
  ABI_MALLOC(intgres_tmp,(nspden,natom))
- ABI_MALLOC(gr_dum,(3,nspden,natom))
  intgres_tmp(:,:)=zero
- call calcdenmagsph(gr_dum,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
+ call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
- ABI_FREE(gr_dum)
 
 !DEBUG
  write(std_out,*) ' intgres_tmp(1:nspden,1:natom)=',intgres_tmp(1:nspden,1:natom)
@@ -1193,7 +1187,6 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  real(dp) :: intgden_proj,norm
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
- real(dp), allocatable :: gr_dum(:,:,:) ! 3,nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp) :: rhomag(2,c_dft%nspden),spinat_normed(3)
 
@@ -1207,13 +1200,11 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
  ABI_MALLOC(coeffs_constr_dft,(nspden,natom))
  ABI_MALLOC(intgden,(nspden,natom))
- ABI_MALLOC(gr_dum,(3,nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,&
+ call calcdenmagsph(mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
- ABI_FREE(gr_dum)
 
 !Loop over atoms
 !-------------------------------------------
@@ -1350,7 +1341,6 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 !arrays
  real(dp) :: intmm(3), mag_1atom(3)
  real(dp), allocatable :: intgden(:,:)
- real(dp), allocatable :: gr_dum(:,:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),ucvol
  real(dp) :: rhomag(2,nspden),spinat_normed(3)
  character(len=500) :: msg
@@ -1361,14 +1351,12 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ABI_MALLOC(intgden, (nspden,natom))
- ABI_MALLOC(gr_dum, (3,nspden,natom))
 
 !We need the integrated magnetic moments
  cplex1=1
- call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
+ call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
 & 1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,ratsm,ratsph,rhomag,typat)
- ABI_FREE(gr_dum)
 
  Epen=0
  Econstr=0
@@ -1486,7 +1474,7 @@ end subroutine mag_penalty_e
 !!
 !! OUTPUT
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
-!!  gr_intgden(3,nspden,natom)=grad wrt atomic positions, of integrated density (magnetization...) for each atom in a sphere. Should be Optional arg
+!!  gr_intgden(3,nspden,natom)=grad wrt atomic positions, of integrated density (magnetization...) for each atom in a sphere. Optional arg
 !!  rhomag(2,nspden)=integrated complex density (magnetization...) over full u.c. vol, optional argument
 !!    in collinear case component 1 is total density and 2 is _magnetization_ up-down
 !!    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
@@ -1503,8 +1491,8 @@ end subroutine mag_penalty_e
 !!
 !! SOURCE
 
-subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    option,cplex,intgden,dentot,rhomag,intgf2)
+subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
+&    option,cplex,intgden,gr_intgden,dentot,rhomag,intgf2)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1516,10 +1504,10 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
 !arrays
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
- real(dp),intent(out) :: gr_intgden(3,nspden,natom)   ! This should be optional
  real(dp),intent(in) :: xred(3,natom)
 !integer,intent(out),optional   :: atgridpts(nfft)
  real(dp),intent(out),optional  :: intgden(nspden,natom)
+ real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)   
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: dentot(nspden),rhomag(2,nspden)
 !Local variables ------------------------------
@@ -1545,7 +1533,9 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  nfftot=n1*n2*n3
  intgden_=zero
- gr_intgden=zero
+ if(present(gr_intgden))then
+   gr_intgden=zero
+ endif
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1659,7 +1649,7 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
            endif
 !          Integral of density or potential residual
            intg(1:nspden)=intg(1:nspden)+fsm*rhor(ifft_local,1:nspden)
-           if(present(intgden).and. option<10 .and. ratsm2>tol12)then
+           if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
                fact=two*dfsm*rhor(ifft_local,ispden)
                gr_intg(1,ispden)=gr_intg(1,ispden)+difx*fact
@@ -1678,8 +1668,10 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
 
    intg(:)=intg(:)*ucvol/dble(nfftot)
 
-   gr_intg=matmul(rmet,gr_intg)
-   gr_intg(:,:)=gr_intg(:,:)*ucvol/dble(nfftot)
+   if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+     gr_intg=matmul(rmet,gr_intg)
+     gr_intg(:,:)=gr_intg(:,:)*ucvol/dble(nfftot)
+   endif
 
    if(nspden==2 .and. option/=11)then
 !    Specific treatment of collinear density, due to the storage mode.
@@ -1687,11 +1679,15 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
 !    intgden_(2,iatom)= integral of dn density
      intgden_(1,iatom)=intg(2)
      intgden_(2,iatom)=intg(1)-intg(2)
-     gr_intgden(:,1,iatom)=gr_intg(:,2)
-     gr_intgden(:,2,iatom)=gr_intg(:,1)-gr_intg(:,2)
+     if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+       gr_intgden(:,1,iatom)=gr_intg(:,2)
+       gr_intgden(:,2,iatom)=gr_intg(:,1)-gr_intg(:,2)
+     endif
    else
      intgden_(1:nspden,iatom)=intg(1:nspden)
-     gr_intgden(:,1:nspden,iatom)=gr_intg(:,1:nspden)
+     if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+       gr_intgden(:,1:nspden,iatom)=gr_intg(:,1:nspden)
+     endif
    endif
 
  end do ! iatom
@@ -1749,7 +1745,7 @@ subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,rat
    if(present(intgden))intgden = intgden_
  end if
 
- if(present(intgden) .and. option<10 .and. ratsm2>tol12) then
+ if(present(gr_intgden) .and. option<10 .and. ratsm2>tol12) then
    if(mpi_enreg%nproc_fft>1)then
      call timab(48,1,tsec)
      call xmpi_sum(gr_intgden,mpi_enreg%comm_fft,ierr)
