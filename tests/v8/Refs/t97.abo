@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h36 )
+.Starting date : Wed  1 Sep 2021.
+- ( at 19h14 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t97/t97.in
-- output file    -> t97.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/TestBot_MPI1/v8_t97/t97.abi
+- output file    -> t97.abo
 - root for input  files -> t97i
 - root for output files -> t97o
 
@@ -427,8 +427,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -565,10 +565,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)       0.020182    0.000000    0.161457
  Total magnetization (exact)         0.048554    0.000000    0.388432
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Potential       B(x)        B(y)        B(z)
+ Atom    Radius       Torque          T(x)        T(y)        T(z)
     1   1.00000        0.000000      0.016112   -0.008205    0.128893
     2   1.00000        0.000000      0.016112    0.008205    0.128893
  ---------------------------------------------------------------------
@@ -578,7 +578,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   49.391E-14; max=  97.804E-14
    0.0000  0.0000  0.0000    1  9.78041E-13 kpt; spin; max resid(k); each band:
-   1.44E-14  9.78E-13  9.78E-13  5.26E-15
+  1.44E-14 9.78E-13 9.78E-13 5.26E-15
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.000000000000      0.000000000000
@@ -778,10 +778,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000000    0.020000    0.000000
  Total magnetization (exact)         0.000000    0.033042   -0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Potential       B(x)        B(y)        B(z)
+ Atom    Radius       Torque          T(x)        T(y)        T(z)
     1   1.00000        0.000000     -0.000950    0.023927   -0.007593
     2   1.00000        0.000000      0.000950    0.023927    0.007593
  ---------------------------------------------------------------------
@@ -791,7 +791,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   18.897E-14; max=  31.466E-14
    0.0000  0.0000  0.0000    1  3.14660E-13 kpt; spin; max resid(k); each band:
-   3.15E-13  7.00E-14  6.97E-14  3.01E-13
+  3.15E-13 7.00E-14 6.97E-14 3.01E-13
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.000000000000      0.000000000000
@@ -1040,10 +1040,10 @@ force_length_stats: {min:   6.58164666E-07, max:   6.58164666E-07, mean:   6.581
  Total magnetization (spheres)       0.080567    0.080567    0.080567
  Total magnetization (exact)         0.192740    0.192740    0.192740
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Potential       B(x)        B(y)        B(z)
+ Atom    Radius       Torque          T(x)        T(y)        T(z)
     1   1.00000        0.000000      0.365904   -0.387682    0.125491
     2   1.00000        0.000000      0.125483    0.366019   -0.388069
     3   1.00000        0.000000     -0.387835    0.125235    0.366086
@@ -1054,7 +1054,7 @@ force_length_stats: {min:   6.58164666E-07, max:   6.58164666E-07, mean:   6.581
 
  Mean square residual over all n,k,spin=   83.664E-09; max=  12.814E-08
    0.0000  0.0000  0.0000    1  1.28142E-07 kpt; spin; max resid(k); each band:
-   1.28E-07  1.20E-07  3.17E-09  1.20E-07  1.28E-07  3.11E-09
+  1.28E-07 1.20E-07 3.17E-09 1.20E-07 1.28E-07 3.11E-09
  reduced coordinates (array xred) for    3 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.333333333333      0.333333333333      0.333333333333
@@ -1255,10 +1255,10 @@ force_length_stats: {min:   1.59718064E-21, max:   3.21774160E-05, mean:   2.145
  Total magnetization (spheres)       0.000000    0.000000   -0.000000
  Total magnetization (exact)        -0.000000    0.000000   -0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Potential       B(x)        B(y)        B(z)
+ Atom    Radius       Torque          T(x)        T(y)        T(z)
     1   1.00000        0.000000     -0.000000    0.000000   -0.000000
     2   1.00000        0.000000     -0.020086   -0.020086   -0.020086
     3   1.00000        0.000000      0.020086    0.020086    0.020086
@@ -1269,7 +1269,7 @@ force_length_stats: {min:   1.59718064E-21, max:   3.21774160E-05, mean:   2.145
 
  Mean square residual over all n,k,spin=   43.602E-15; max=  66.632E-15
    0.0000  0.0000  0.0000    1  6.66322E-14 kpt; spin; max resid(k); each band:
-   6.66E-14  6.66E-14  2.89E-14  2.89E-14  3.53E-14  3.53E-14
+  6.66E-14 6.66E-14 2.89E-14 2.89E-14 3.53E-14 3.53E-14
  reduced coordinates (array xred) for    3 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.333333333333      0.333333333333      0.333333333333
@@ -1477,10 +1477,10 @@ force_length_stats: {min:   1.70212177E-01, max:   1.70212177E-01, mean:   1.702
  Total magnetization (spheres)       0.000000   -0.000000   -0.000000
  Total magnetization (exact)        -0.000000    0.000000    0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Potential       B(x)        B(y)        B(z)
+ Atom    Radius       Torque          T(x)        T(y)        T(z)
     1   1.00000        0.000000     -0.007136    0.000000    0.000000
     2   1.00000        0.000000     -0.000000    0.007136    0.000000
     3   1.00000        0.000000      0.007136   -0.000000    0.000000
@@ -1492,7 +1492,7 @@ force_length_stats: {min:   1.70212177E-01, max:   1.70212177E-01, mean:   1.702
 
  Mean square residual over all n,k,spin=   35.342E-15; max=  56.477E-15
    0.0000  0.0000  0.0000    1  5.64767E-14 kpt; spin; max resid(k); each band:
-   5.65E-14  5.65E-14  4.61E-14  4.61E-14  4.27E-15  4.78E-15  3.40E-14  3.46E-14
+  5.65E-14 5.65E-14 4.61E-14 4.61E-14 4.27E-15 4.78E-15 3.40E-14 3.46E-14
  reduced coordinates (array xred) for    4 atoms
       -0.125000000000      0.125000000000      0.125000000000
        0.125000000000     -0.125000000000      0.125000000000
@@ -1753,10 +1753,10 @@ force_length_stats: {min:   1.75681105E-01, max:   1.75681105E-01, mean:   1.756
  Total magnetization (spheres)       0.000000    0.000000    0.022320
  Total magnetization (exact)        -0.000000   -0.000000    0.762544
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius       Potential       B(x)        B(y)        B(z)
+ Atom    Radius       Torque          T(x)        T(y)        T(z)
     1   1.00000        0.000000      0.024826    0.000000   -0.007796
     2   1.00000        0.000000     -0.000000   -0.024826   -0.007796
     3   1.00000        0.000000     -0.024826   -0.000000   -0.007796
@@ -1768,7 +1768,7 @@ force_length_stats: {min:   1.75681105E-01, max:   1.75681105E-01, mean:   1.756
 
  Mean square residual over all n,k,spin=   10.691E-07; max=  21.600E-07
    0.0000  0.0000  0.0000    1  2.16003E-06 kpt; spin; max resid(k); each band:
-   3.89E-07  2.45E-07  1.69E-06  2.16E-06  1.39E-09  1.49E-09  1.95E-06  2.12E-06
+  3.89E-07 2.45E-07 1.69E-06 2.16E-06 1.39E-09 1.49E-09 1.95E-06 2.12E-06
  reduced coordinates (array xred) for    4 atoms
       -0.125000000000      0.125000000000      0.125000000000
        0.125000000000     -0.125000000000      0.125000000000
@@ -2251,10 +2251,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.9  wall=         12.0
+- Proc.   0 individual time (sec): cpu=         10.1  wall=         10.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  69 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.9  wall=         12.0
+.Delivered  63 WARNINGs and  27 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.1  wall=         10.3
