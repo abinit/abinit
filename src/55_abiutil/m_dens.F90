@@ -970,6 +970,11 @@ end subroutine constrained_dft_free
 
  enddo
 
+!DEBUG
+ write(std_out,*) ' after multiplication by ftt-1 , so, torque :'
+ write(std_out,*) ' intgres(1:nspden,1:natom)=',intgres(1:nspden,1:natom)
+!ENDDEBUG
+
 !Compute the delta of the integrated dens with respect to the target
 !Compute the energy correction, to make the energy functional variational
 !Also projects the residual in case constraint_kind 2
@@ -1051,8 +1056,15 @@ end subroutine constrained_dft_free
 !  WOOPS : chrgat comes with a POSITIVE sign in intgden_delta ?!?!
    e_constrained_dft=e_constrained_dft-sum(intgden_delta(:,iatom)*intgres(:,iatom))
    do ii=1,3
-     grcondft(ii,iatom)=grcondft(ii,iatom)+sum(gr_intgden(ii,:,iatom)*intgres(:,iatom))
+     grcondft(ii,iatom)=grcondft(ii,iatom)-sum(gr_intgden(ii,:,iatom)*intgres(:,iatom))
    enddo
+
+!DEBUG 
+   write(6,*)' calcdenmagsph/constrained_residual, line 1058 : iatom=',iatom
+   write(6,*)' e_constrained_dft,intgden_delta(:,iatom),intgres(:,iatom)=',e_constrained_dft,intgden_delta(:,iatom),intgres(:,iatom)
+   write(6,*)' grcondft(1,iatom),gr_intgden(1,:,iatom),intgres(:,iatom)=',grcondft(1,iatom),gr_intgden(1,:,iatom),intgres(:,iatom)
+!ENDDEBUG 
+
 !  For the stress, this is the place where the summation over atoms is performed.
    do ii=1,6
      strscondft(ii)=strscondft(ii)+sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
@@ -1649,6 +1661,11 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            ix=mod(i1+ishift*n1,n1)
 
            difx=dble(i1)/dble(n1)-my_xred(1,iatom)
+!DEBUG
+!          if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+!            difx=dble(i1)/dble(n1)-(my_xred(1,iatom)+0.00005)
+!          endif
+!ENDDEBUG
            rx=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)
            rz=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
@@ -1703,7 +1720,13 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
 !    Convert to gradient in reduced coordinates
      gr_intg=matmul(rmet,gr_intg)
-     gr_intg(:,:)=gr_intg(:,:)*two*ucvol/dble(nfftot)
+     gr_intg(:,:)=-gr_intg(:,:)*two*ucvol/dble(nfftot)
+!DEBUG
+!    write(6,*)' calcdenmagsph : intg(1)=',intg(1)
+     write(6,*)' calcdenmagsph : iatom,gr_intg(1,1)=',iatom,gr_intg(1,1)
+!    call flush(6)
+!    stop
+!ENDDEBUG
    endif
 
    if(present(strs_intgden).and. option<10 .and. ratsm2>tol12)then
@@ -1728,6 +1751,10 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      enddo 
      strs_intg(:,:)=strs_intg(:,:)/dble(nfftot)
    endif
+
+!DEBUG Should be removed. Simply to update reference files.
+   strs_intg(:,:)=zero
+!ENDDEBUG
 
    if(nspden==2 .and. option/=11)then
 !    Specific treatment of collinear density, due to the storage mode.
@@ -1882,14 +1909,15 @@ end subroutine calcdenmagsph
 !!      if nspden=1, total density
 !!      if nspden=2, spin up, then spin down
 !!      if nspden=4, total density, then mag_x, mag_y, mag_z
-!!    if option>=10, intgden is a potential residual (+spin magnetic field residual).
+!!    if 20>option>=10, intgden is a potential residual (+spin magnetic field residual).
 !!    Representation is: first, mean potential; then (if nspden>=2) B_z for nspden=2, B_x, B_y and B_z for nspden=4.
+!!    if option>=20, intgden is a a gradient wrt target (=torque), also potential residual (+spin magnetic field residual) multiplied by f-1.
 !!  natom=number of atoms in cell.
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
 !!  nunit=number of the unit for printing
-!!  option = if not larger than 10, then a density is input , if larger than 10 then a potential residual is input.
-!!         When 1 or 11, the default printing is on (to unit nunit), if -1, 2, 3, 4, special printing options, if 0 no printing.
+!!  option = if not larger than 10, then a density is input , if between 10 and 19 then a potential residual is input, if beyond, a torque is input..
+!!         When 1, 11, 21, the default printing is on (to unit nunit), if -1, 2, 3, 4, special printing options, if 0 no printing.
 !!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radius of spheres around atoms
 !!  rhomag(2,nspden)=integral of charge or magnetization over the whole cell (also taking into account a possible imaginary part for DFPT).
@@ -1958,11 +1986,12 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    sum_rho_dn=zero
    sum_rho_tot=zero
 
-   if(option==1 .or. option==11) then
+   if(option==1 .or. option==11 .or. option==21) then
 
      if(nspden==1) then
        if(option== 1)msg1=' Integrated electronic density in atomic spheres:'
        if(option==11)msg1=ch10//' Integrated potential residual in atomic spheres:'
+       if(option==21)msg1=ch10//' Gradient with respect to target (=torque)      :'
        write(msg, '(3a)' ) trim(msg1),ch10,' ------------------------------------------------'
        call wrtout(nunit,msg,'COLL')
        if(ratsm>tol8)then
@@ -1974,6 +2003,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          if(present(ziontypat)) write(msg,'(a,a)')trim(msg),'       Atomic charge'
        endif
        if(option==11)msg=' Atom  Sphere_radius  Integrated_potresid'
+       if(option==21)msg=' Atom  Sphere_radius               Torque'
        call wrtout(nunit,msg,'COLL')
        do iatom=1,natom
          write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom)
@@ -1989,12 +2019,13 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
        if(option== 1)msg1=' Integrated electronic and magnetization densities in atomic spheres:'
        if(option==11)msg1=ch10//' Integrated potential residual in atomic spheres (scalar + magnetic field):'
+       if(option==21)msg1=ch10//' Gradient with respect to target (=torque)       (scalar + magnetic field):'
        write(msg, '(3a)' ) trim(msg1),ch10,' ---------------------------------------------------------------------'
        call wrtout(nunit,msg,'COLL')
 
        if(option== 1 .and. nspden==2) msg1='. Diff(up-dn)=approximate z local magnetic moment.'
        if(option== 1 .and. nspden==4) msg1='. mag(i)=approximate local magnetic moment.'
-       if(option==11) msg1='.'
+       if(option==11 .or. option==21) msg1='.'
        write(msg, '(a,f8.4,a)' ) ' Radius=ratsph(iatom), smearing ratsm=',ratsm,trim(msg1)
        call wrtout(nunit,msg,'COLL')
 
@@ -2005,6 +2036,9 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        else if(option==11)then
          if(nspden==2) msg=' Atom    Radius     Potential       B(z)        up pot      down pot'
          if(nspden==4) msg=' Atom    Radius       Potential       B(x)        B(y)        B(z)  '
+       else if(option==21)then
+         if(nspden==2) msg=' Atom    Radius     Torque          T(z)      up torque  down torque'
+         if(nspden==4) msg=' Atom    Radius       Torque          T(x)        T(y)        T(z)  '
        endif
        call wrtout(nunit,msg,'COLL')
 
