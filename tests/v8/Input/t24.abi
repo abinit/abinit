@@ -35,6 +35,7 @@
  tolwfr 1.0d-14
  nstep  20
  ecut 5
+ ecutsm 0.5
 
  pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
  pseudos "1h.pspnc, 1h.pspnc"
@@ -53,4 +54,10 @@
 #%% keywords = 
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation with constrained charges 
 #%%  Constrain the charge around atom 1 to the value 0.5, then work with both atoms and larger spheres
+#%%  For dataset 2, the derivative of the total energy with respect to atomic displacement has been checked.
+#%%  For atom 1, dE/dt is 8.330114676. Changing the atomic position of the first atom from -1.1 to -1.10015
+#%%  gives etotal -0.99172669330, to -1.09985 gives etotal -0.99156009221, delivering 8.330054.
+#%%  The result of a similar finite-difference estimation with twice bigger values gives 8.329896.
+#%%  Combining both results to eliminate the quadratic error gives 8.330107, with an agreement of 5 digits. 
+#%%  
 #%%<END TEST_INFO>
