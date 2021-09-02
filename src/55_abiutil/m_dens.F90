@@ -1067,7 +1067,7 @@ end subroutine constrained_dft_free
 
 !  For the stress, this is the place where the summation over atoms is performed.
    do ii=1,6
-     strscondft(ii)=strscondft(ii)+sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
+     strscondft(ii)=strscondft(ii)-sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
    enddo
  enddo
 
@@ -1722,7 +1722,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      gr_intg=matmul(rmet,gr_intg)
      gr_intg(:,:)=-gr_intg(:,:)*two*ucvol/dble(nfftot)
 !DEBUG
-!    write(6,*)' calcdenmagsph : intg(1)=',intg(1)
+     write(6,*)' calcdenmagsph : intg(1)=',intg(1)
      write(6,*)' calcdenmagsph : iatom,gr_intg(1,1)=',iatom,gr_intg(1,1)
 !    call flush(6)
 !    stop
@@ -1749,12 +1749,14 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        strs_intg(5,isp)=strs(1,3)+strs(3,1) 
        strs_intg(6,isp)=strs(1,2)+strs(2,1)
      enddo 
-     strs_intg(:,:)=strs_intg(:,:)/dble(nfftot)
-   endif
-
-!DEBUG Should be removed. Simply to update reference files.
-   strs_intg(:,:)=zero
+     strs_intg(:,:)=-strs_intg(:,:)/dble(nfftot)
+!DEBUG
+     strs_intg(:,:)=zero
+!    write(6,*)' calcdenmagsph : iatom,-strs_intg(1,1)*ucvol=',iatom,-strs_intg(1,1)*ucvol
+     call flush(6)
+!    stop
 !ENDDEBUG
+   endif
 
    if(nspden==2 .and. option/=11)then
 !    Specific treatment of collinear density, due to the storage mode.
@@ -2007,7 +2009,11 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        call wrtout(nunit,msg,'COLL')
        do iatom=1,natom
          write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom)
-         !Also print atomic charge
+         if(option==21)then
+!          There is a change of sign to get the gradient wrt chrgat.
+           write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom)
+         endif 
+         !If option=1, print atomic charge
          if(option==1 .and. present(ziontypat))then
            write(msg, '(a,f20.8)' ) trim(msg),ziontypat(typat(iatom))-intgden(1,iatom)
          endif
@@ -2037,7 +2043,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          if(nspden==2) msg=' Atom    Radius     Potential       B(z)        up pot      down pot'
          if(nspden==4) msg=' Atom    Radius       Potential       B(x)        B(y)        B(z)  '
        else if(option==21)then
-         if(nspden==2) msg=' Atom    Radius     Torque          T(z)      up torque  down torque'
+         if(nspden==2) msg=' Atom    Radius       grchrg        T(z)      up torque  down torque'
          if(nspden==4) msg=' Atom    Radius       Torque          T(x)        T(y)        T(z)  '
        endif
        call wrtout(nunit,msg,'COLL')
@@ -2046,7 +2052,11 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
      if(nspden==2)then
        do iatom=1,natom
-         write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom),intgden(2,iatom)
+         if(option/=21)then
+           write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom),intgden(2,iatom)
+         else
+           write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom),intgden(2,iatom)
+         endif
          write(msg,'(a,a,f12.6,a,f12.6)')trim(msg),'  ',(intgden(1,iatom)+intgden(2,iatom)),' ',(intgden(1,iatom)-intgden(2,iatom))
          if(option==1 .and. present(ziontypat))&
 &          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(1,iatom)+intgden(2,iatom))
@@ -2072,7 +2082,11 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
      elseif(nspden==4) then
 
        do iatom=1,natom
-         write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom),'  ',(intgden(ix,iatom),ix=2,4)
+         if(option/=21)then
+           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom),'  ',(intgden(ix,iatom),ix=2,4)
+         else
+           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom),'  ',(intgden(ix,iatom),ix=2,4)
+         endif
          if(option==1 .and. present(ziontypat))&
 &          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden(1,iatom)
          call wrtout(nunit,msg,'COLL')
