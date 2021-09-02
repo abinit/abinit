@@ -862,7 +862,7 @@ end subroutine constrained_dft_free
 ! ***********************************************************************************************
 
 !DEBUG
- write(std_out,*) ' constrained_residual : enter '
+!write(std_out,*) ' constrained_residual : enter '
 !ENDDEBUG
 
  natom=c_dft%natom
@@ -879,7 +879,7 @@ end subroutine constrained_dft_free
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !DEBUG
- write(std_out,*) ' intgden(1:nspden,1:natom)=',intgden(1:nspden,1:natom)
+!write(std_out,*) ' intgden(1:nspden,1:natom)=',intgden(1:nspden,1:natom)
 !ENDDEBUG
 
 !We need the integrated residuals
@@ -889,7 +889,7 @@ end subroutine constrained_dft_free
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
 
 !DEBUG
- write(std_out,*) ' intgres_tmp(1:nspden,1:natom)=',intgres_tmp(1:nspden,1:natom)
+!write(std_out,*) ' intgres_tmp(1:nspden,1:natom)=',intgres_tmp(1:nspden,1:natom)
 !ENDDEBUG
 
 !Make the proper combination of intgres_tmp, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
@@ -971,8 +971,8 @@ end subroutine constrained_dft_free
  enddo
 
 !DEBUG
- write(std_out,*) ' after multiplication by ftt-1 , so, torque :'
- write(std_out,*) ' intgres(1:nspden,1:natom)=',intgres(1:nspden,1:natom)
+!write(std_out,*) ' after multiplication by ftt-1 , so, torque :'
+!write(std_out,*) ' intgres(1:nspden,1:natom)=',intgres(1:nspden,1:natom)
 !ENDDEBUG
 
 !Compute the delta of the integrated dens with respect to the target
@@ -1058,17 +1058,20 @@ end subroutine constrained_dft_free
    do ii=1,3
      grcondft(ii,iatom)=grcondft(ii,iatom)-sum(gr_intgden(ii,:,iatom)*intgres(:,iatom))
    enddo
-
-!DEBUG 
-   write(6,*)' calcdenmagsph/constrained_residual, line 1058 : iatom=',iatom
-   write(6,*)' e_constrained_dft,intgden_delta(:,iatom),intgres(:,iatom)=',e_constrained_dft,intgden_delta(:,iatom),intgres(:,iatom)
-   write(6,*)' grcondft(1,iatom),gr_intgden(1,:,iatom),intgres(:,iatom)=',grcondft(1,iatom),gr_intgden(1,:,iatom),intgres(:,iatom)
-!ENDDEBUG 
-
 !  For the stress, this is the place where the summation over atoms is performed.
    do ii=1,6
      strscondft(ii)=strscondft(ii)-sum(strs_intgden(ii,:,iatom)*intgres(:,iatom))
    enddo
+
+!DEBUG
+!  write(6,*)' calcdenmagsph/constrained_residual, line 1058 : iatom=',iatom
+!  write(6,*)' e_constrained_dft,intgden_delta(:,iatom),intgres(:,iatom)=',e_constrained_dft,intgden_delta(:,iatom),intgres(:,iatom)
+!  write(6,*)' grcondft(1,iatom),gr_intgden(1,:,iatom),intgres(:,iatom)=',grcondft(1,iatom),gr_intgden(1,:,iatom),intgres(:,iatom)
+!  write(6,*)' strscondft(1),strs_intgden(1,:,iatom),intgres(:,iatom)=',strscondft(1),strs_intgden(1,:,iatom),intgres(:,iatom)
+!  call flush(6)
+!  stop
+!ENDDEBUG
+
  enddo
 
  ABI_FREE(gr_intgden)
@@ -1559,11 +1562,16 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
 
+!real(dp) :: rprimd_mod(3,3),strain
+
 ! *************************************************************************
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  nfftot=n1*n2*n3
  intgden_=zero
+ if(present(intgden))then
+   intgden=zero
+ endif
  if(present(gr_intgden))then
    gr_intgden=zero
  endif
@@ -1646,6 +1654,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
    intg(:)=zero
    gr_intg(:,:)=zero
+   strs_intg(:,:)=zero
 
    do i3=n3a,n3b
      iz=mod(i3+ishift*n3,n3)
@@ -1667,6 +1676,14 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !          endif
 !ENDDEBUG
            rx=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
+
+!DEBUG
+!          if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
+!            strain=-0.001
+!            rx=difx*rprimd(1,1)*(one+strain)+dify*rprimd(1,2)+difz*rprimd(1,3)
+!          endif
+!ENDDEBUG
+
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)
            rz=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
            r2=rx**2+ry**2+rz**2
@@ -1722,8 +1739,8 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      gr_intg=matmul(rmet,gr_intg)
      gr_intg(:,:)=-gr_intg(:,:)*two*ucvol/dble(nfftot)
 !DEBUG
-     write(6,*)' calcdenmagsph : intg(1)=',intg(1)
-     write(6,*)' calcdenmagsph : iatom,gr_intg(1,1)=',iatom,gr_intg(1,1)
+!    write(6,*)' calcdenmagsph : intg(1)=',intg(1)
+!    write(6,*)' calcdenmagsph : iatom,gr_intg(1,1)=',iatom,gr_intg(1,1)
 !    call flush(6)
 !    stop
 !ENDDEBUG
@@ -1737,6 +1754,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        strs(2,3)=strs_intg(4,isp) ; strs(3,2)=strs_intg(4,isp)
        strs(1,3)=strs_intg(5,isp) ; strs(3,1)=strs_intg(5,isp)
        strs(1,2)=strs_intg(6,isp) ; strs(2,1)=strs_intg(6,isp)
+
 !      Then perform representation change, following Eq.(25) in Hamann2005
        do ii=1,3
          strs_cartred(:,ii)=matmul(rprimd,strs(:,ii)) 
@@ -1744,16 +1762,28 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        do ii=1,3
          strs(ii,:)=matmul(rprimd,strs_cartred(ii,:))
        enddo
+
+!DEBUG 
+!      rprimd_mod=rprimd
+!      rprimd_mod(1,1)=rprimd(1,1)*(one+strain)
+!      do ii=1,3
+!        strs_cartred(:,ii)=matmul(rprimd_mod,strs(:,ii))
+!      enddo
+!      do ii=1,3
+!        strs(ii,:)=matmul(rprimd_mod,strs_cartred(ii,:))
+!      enddo
+!ENDDEBUG
+
        strs_intg(1,isp)=two*strs(1,1) ; strs_intg(2,isp)=two*strs(2,2) ; strs_intg(3,isp)=two*strs(3,3)
        strs_intg(4,isp)=strs(2,3)+strs(3,2) 
        strs_intg(5,isp)=strs(1,3)+strs(3,1) 
        strs_intg(6,isp)=strs(1,2)+strs(2,1)
      enddo 
-     strs_intg(:,:)=-strs_intg(:,:)/dble(nfftot)
+     strs_intg(:,:)=strs_intg(:,:)/dble(nfftot)
 !DEBUG
-     strs_intg(:,:)=zero
-!    write(6,*)' calcdenmagsph : iatom,-strs_intg(1,1)*ucvol=',iatom,-strs_intg(1,1)*ucvol
-     call flush(6)
+!    strs_intg(:,:)=zero
+!    write(6,*)' calcdenmagsph : iatom,-strs_intg(1,1)*ucvol=',iatom,strs_intg(1,1)*ucvol
+!    call flush(6)
 !    stop
 !ENDDEBUG
    endif

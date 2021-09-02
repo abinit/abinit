@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu  2 Sep 2021.
-- ( at 06h32 )
+- ( at 21h49 )
   
 - input  file    -> /Users/gonze/_Research/ABINIT_git/gonze/tests/Test_suite/v9_t03/t03.abi
 - output file    -> t03.abo
@@ -294,9 +294,9 @@ tolerances: {tolvrs: 1.00E-09, }
  At SCF step   37       vres2   =  8.97E-10 < tolvrs=  1.00E-09 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.78604721E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.78604721E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.78604721E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.78601516E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.78601516E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.78601516E-02  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -314,10 +314,10 @@ etotal    :  -2.48287090E+02
 entropy   :   0.00000000E+00
 fermie    :   2.49453447E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.78604721E-02,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   1.78604721E-02,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   1.78604721E-02, ]
-pressure_GPa:  -5.2547E+02
+- [  1.78601516E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.78601516E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.78601516E-02, ]
+pressure_GPa:  -5.2546E+02
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
 - [  5.0000E-01,   5.0000E-01,   5.0000E-01, Fe]
@@ -783,14 +783,14 @@ total_energy_dc_eV  : -6.75620305898979E+03
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.78604721E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.78604721E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.78604721E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.78601516E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.78601516E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.78601516E-02  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.2547E+02 GPa]
-- sigma(1 1)=  5.25473142E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.25473142E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.25473142E+02  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -5.2546E+02 GPa]
+- sigma(1 1)=  5.25463714E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.25463714E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.25463714E+02  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -899,7 +899,7 @@ P           mkmem           8
           spgroup          89
            spinat      0.0000000000E+00  0.0000000000E+00  2.2500000000E+00
                        0.0000000000E+00  0.0000000000E+00  2.3000000000E+00
-           strten1     1.7860472081E-02  1.7860472081E-02  1.7860472094E-02
+           strten1     1.7860151614E-02  1.7860151614E-02  1.7860151627E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symafm        1   -1    1   -1   -1    1   -1    1
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
@@ -1014,10 +1014,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.7  wall=         25.7
+- Proc.   0 individual time (sec): cpu=         26.6  wall=         26.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.7  wall=         25.7
++Overall time at end (sec) : cpu=         26.6  wall=         26.7
