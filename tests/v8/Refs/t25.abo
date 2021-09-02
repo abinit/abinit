@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu  2 Sep 2021.
-- ( at 06h25 )
+- ( at 21h45 )
   
 - input  file    -> /Users/gonze/_Research/ABINIT_git/gonze/tests/Test_suite/v8_t25/t25.abi
 - output file    -> t25.abo
@@ -426,9 +426,9 @@ tolerances: {tolwfr: 1.00E-14, }
  At SCF step   13   max residual=  3.99E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -446,10 +446,10 @@ etotal    :  -1.04956451E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.12059428E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33772062E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.54143599E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.54143599E-05, ]
-pressure_GPa:  -2.0065E+00
+- [  1.43238266E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.83080461E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.83080461E-05, ]
+pressure_GPa:  -2.3523E+00
 xred      :
 - [ -7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
@@ -528,14 +528,14 @@ band_energy         : -6.24118856031974E-01
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.0065E+00 GPa]
-- sigma(1 1)=  3.93570928E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.04192627E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.04192627E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.3523E+00 GPa]
+- sigma(1 1)=  4.21421457E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.42127155E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.42127155E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -597,9 +597,9 @@ tolerances: {tolwfr: 1.00E-14, }
  At SCF step   16   max residual=  2.86E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33588672E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.59847306E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.59847306E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.41865299E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.71412355E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.71412355E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -617,10 +617,10 @@ etotal    :  -1.04956325E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.11596971E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33588672E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.59847306E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.59847306E-05, ]
-pressure_GPa:  -2.0159E+00
+- [  1.41865299E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.71412355E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.71412355E-05, ]
+pressure_GPa:  -2.3159E+00
 xred      :
 - [ -7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
@@ -699,14 +699,14 @@ band_energy         : -6.23193942036413E-01
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33588672E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.59847306E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.59847306E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.41865299E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.71412355E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.71412355E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.0159E+00 GPa]
-- sigma(1 1)=  3.93031375E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.05870715E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.05870715E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.3159E+00 GPa]
+- sigma(1 1)=  4.17382049E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.38694280E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.38694280E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -765,9 +765,9 @@ tolerances: {tolwfr: 1.00E-14, }
  At SCF step   13   max residual=  3.99E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -785,10 +785,10 @@ etotal    :  -1.04956451E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.12059428E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33772062E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.54143599E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.54143599E-05, ]
-pressure_GPa:  -2.0065E+00
+- [  1.43238266E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.83080461E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.83080461E-05, ]
+pressure_GPa:  -2.3523E+00
 xred      :
 - [ -7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
@@ -867,14 +867,14 @@ band_energy         : -6.24118856032224E-01
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.0065E+00 GPa]
-- sigma(1 1)=  3.93570928E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.04192627E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.04192627E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.3523E+00 GPa]
+- sigma(1 1)=  4.21421457E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.42127155E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.42127155E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1114,13 +1114,13 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00 -8.0000000000E-02
            strten1     1.4343867764E-04  3.8315273459E-05  3.8315273459E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.3377206180E-04  3.5414359940E-05  3.5414359940E-05
+           strten2     1.4323826590E-04  4.8308046146E-05  4.8308046146E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     1.3358867154E-04  3.5984730588E-05  3.5984730588E-05
+           strten3     1.4186529877E-04  4.7141235481E-05  4.7141235481E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     1.3377206180E-04  3.5414359940E-05  3.5414359940E-05
+           strten4     1.4323826590E-04  4.8308046146E-05  4.8308046146E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5     1.4343867764E-04  3.8315273459E-05  3.8315273459E-05
+           strten5     1.4343867764E-04  3.8315273462E-05  3.8315273462E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symafm        1   -1   -1    1    1   -1   -1    1    1   -1
                         -1    1    1   -1   -1    1
@@ -1231,10 +1231,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.3
++Overall time at end (sec) : cpu=          2.2  wall=          2.3
