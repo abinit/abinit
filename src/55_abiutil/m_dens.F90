@@ -1075,6 +1075,7 @@ end subroutine constrained_dft_free
  enddo
 
  ABI_FREE(gr_intgden)
+ ABI_FREE(strs_intgden)
 
  ABI_MALLOC(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
