@@ -34,8 +34,10 @@ module m_rttddft_propagate
  
  use m_bandfft_kpt,   only: bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
                             bandfft_kpt_get_ikpt, prep_bandfft_tabs
+ use m_cgtools,       only: dotprod_g
  use m_dtset,         only: dataset_type
  use m_getghc,        only: getghc
+ use m_gemm_nonlop,   only: make_gemm_nonlop
  use m_hamiltonian,   only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,        only: make_invovl, apply_invovl
  use m_kg,            only: mkkin, mkkpg
@@ -46,6 +48,7 @@ module m_rttddft_propagate
  use m_rttddft_types, only: tdks_type 
  use m_specialmsg,    only: wrtout
  use m_symtk,         only: symmetrize_xred
+ use m_xmpi,          only: xmpi_sum
 
  implicit none
 
@@ -99,6 +102,7 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
  character(len=500)             :: msg
  integer                        :: calc_forces
  integer                        :: dimffnl
+ integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: ibg, icg
  integer                        :: ider, idir, ilm
  integer                        :: ikpt, ikpt_loc, ikg
@@ -172,7 +176,6 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
       call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
-
 !FB: Needed?
 !  ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
 !  ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
@@ -216,7 +219,7 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
        kpoint(:)=dtset%kptns(:,ikpt)
 
       !** Set up the remaining k-dependent part of the Hamiltonian
-      ! Compute (1/2) (2 Pi)**2 (k+G)**2:
+      ! Kinetic energy - Compute (1/2) (2 Pi)**2 (k+G)**2:
        ABI_MALLOC(kinpw,(npw_k))
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0)
       ! Compute (k+G) vectors (only if useylm=1)
@@ -268,23 +271,24 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
       end if
 
-! FB: Needed?
-!     ! Setup gemm_nonlop
-!     if (gemm_nonlop_use_gemm) then
-!        !set the global variable indicating to gemm_nonlop where to get its data from
-!        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-!        if (istep <= 1) then
-!           !Init the arrays
-!           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,        &
-!                               & gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
-!                               & gs_hamk%ffnl_k,gs_hamk%ph3d_k)
-!        end if
-!     end if
-!      ! Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
-!      if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
-!      if (psps%usepaw==1 .and. usefock) then
-!        if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
-!      end if
+     ! Setup gemm_nonlop
+     if (tdks%gemm_nonlop_use_gemm) then
+        !set the global variable indicating to gemm_nonlop where to get its data from
+        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+        if (istep <= 1) then
+           !Init the arrays
+           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,        &
+                               & gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
+                               & gs_hamk%ffnl_k,gs_hamk%ph3d_k)
+        end if
+     end if
+     
+     !FB: Needed?
+     !! Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
+     !if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
+     !if (psps%usepaw==1 .and. usefock) then
+     !  if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
+     !end if
       
       !FB: Here we should now call the propagator to evolve the cg
       !1. Apply H (get_ghc) and possibly S^-1 (apply_invovl) as many times as needed
@@ -360,17 +364,24 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
  
  !Local variables-------------------------------
  !scalars
- integer                         :: icg
+ integer                         :: iband, icg, ierr
  integer                         :: ikpt_this_proc
  integer                         :: nband, npw
+ integer                         :: shift
  integer                         :: sij_opt,cpopt
  integer                         :: tim_getghc = 5
  logical                         :: paw
- real(dp)                        :: eval
  !arrays
+ integer,            allocatable :: nline_bands(:)
  real(dp)                        :: cg_old(2)
- real(dp),           allocatable :: gsc(:,:), gsm1hc(:,:)
- real(dp),           allocatable :: ghc(:,:), gvnlxc(:,:)
+ real(dp)                        :: dprod_r, dprod_i
+ real(dp)                        :: eig(nband_k)
+ real(dp), pointer               :: exp_operator(:,:)
+ real(dp), target,   allocatable :: ghc(:,:)
+ real(dp), target,   allocatable :: gsm1hc(:,:)
+ real(dp),           allocatable :: gsc(:,:)
+ real(dp),           allocatable :: gvnlxc(:,:)
+ real(dp),           allocatable :: resids(:), residvec(:,:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
 
  if (dtset%paral_kgb == 1) then
@@ -390,6 +401,7 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
    sij_opt = 1 ! recompute S
    cpopt = 0   ! save cprojs
  else
+    ABI_MALLOC(cwaveprj,(0,0))
    sij_opt = 0
    cpopt = -1
  end if
@@ -400,43 +412,76 @@ subroutine rttddft_propagate_ele(tdks, dtset, istep, mpi_enreg, psps)
  ABI_MALLOC(gvnlxc, (2, npw*nspinor*nband))
  ABI_MALLOC(gsm1hc, (2, npw*nspinor*nband))
 
- !** Apply Hamiltonian to the cg (computes H|\psi>)
- !In paral_kgb case, we are in the representation where 
+ !** Apply Hamiltonian to the cg (computes <G|H|C>)
+ !In paral_kgb case, we are here in the representation where 
  !the procs have all the bands but only some G-points 
- if (dtset%paral_kgb == 0) then
-   call getghc(cpopt,cg,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,&
-             & eval,mpi_enreg,nband_k,dtset%prtvol,sij_opt,tim_getghc,0)
+ if (dtset%paral_kgb /= 1) then
+   call getghc(cpopt,cg,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,1.0_dp,mpi_enreg,nband_k, &
+             & dtset%prtvol,sij_opt,tim_getghc,0)
  else
     !FB: already_transposed put to false since we have not done any all_to_all before contrarily to chebfi
-   call prep_getghc(cg,gs_hamk,gvnlxc,ghc,gsc,eval,nband_k,mpi_enreg,&
-                  & dtset%prtvol,sij_opt,cpopt,cwaveprj,already_transposed=.false.)
+   call prep_getghc(cg,gs_hamk,gvnlxc,ghc,gsc,1.0_dp,nband_k,mpi_enreg,dtset%prtvol, &
+                  & sij_opt,cpopt,cwaveprj,already_transposed=.false.)
  end if
 
+ ! update eigenvalues and residuals
+ ABI_MALLOC(resids, (nband))
+ ABI_MALLOC(residvec, (2, npw*nspinor))
+ ABI_MALLOC(nline_bands, (nband))
+ do iband=1, nband
+   shift = npw*nspinor*(iband-1)
+   call dotprod_g(eig(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,ghc(:, shift+1:shift+npw*nspinor),&
+                & cg(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+   if(paw) then
+     call dotprod_g(dprod_r,dprod_i,gs_hamk%istwf_k,npw*nspinor,1,gsc(:, shift+1:shift+npw*nspinor),&
+                  & cg(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     eig(iband) = eig(iband)/dprod_r
+   end if
+
+   if(paw) then
+     residvec = ghc(:, shift+1 : shift+npw*nspinor) - eig(iband)*gsc(:, shift+1 : shift+npw*nspinor)
+   else
+     residvec = ghc(:, shift+1 : shift+npw*nspinor) - eig(iband)*cg(:, shift+1 : shift+npw*nspinor)
+   end if
+   resids(iband) = SUM(residvec**2)
+ end do
+ call xmpi_sum(resids,mpi_enreg%comm_fft,ierr)
+
+ print*, "TEST - eigenvalues", eig(:)
+ print*, "TEST - resids", resids(:)
+
+ ABI_FREE(resids)
+ ABI_FREE(residvec)
+ ABI_FREE(nline_bands)
+
  !** Also apply S^-1 in PAW case
- if(paw) then
-   call apply_invovl(gs_hamk, ghc, gsm1hc, cwaveprj, npw, nband, mpi_enreg, nspinor)
-   !** Now update the associated cg 
-   !cg(1,:) = cg(1,:) + gsm1hc(2,:)*dtset%dtele !real part
-   !cg(2,:) = cg(2,:) - gsm1hc(1,:)*dtset%dtele !imaginary part
-   print*, "Sum of |cg|^2 - before:", SUM(cg(1,:)**2+cg(2,:)**2)
-   do icg = 1, size(cg(1,:))
-      cg_old(1) = cg(1,icg)
-      cg_old(2) = cg(2,icg)
-      cg(1,icg) = cg_old(1)*cos(dtset%dtele/5.0_dp)-cg_old(2)*sin(dtset%dtele/5.0_dp) !real part
-      cg(2,icg) = cg_old(1)*sin(dtset%dtele/5.0_dp)+cg_old(2)*cos(dtset%dtele/5.0_dp) !imaginary part
-   end do
-   print*, "Sum of |cg|^2 - after:", SUM(cg(1,:)**2+cg(2,:)**2)
+ if(paw) then 
+    call apply_invovl(gs_hamk, ghc, gsm1hc, cwaveprj, npw, nband, mpi_enreg, nspinor)
+    exp_operator => gsm1hc
+ else
+    exp_operator => ghc
  end if
+
+ write(97,*) cg(1,:)
+ write(98,*) cg(2,:)
+ !** Now update the cg 
+ cg(1,:) = cg(1,:) + exp_operator(2,:)*dtset%dtele !real part
+ cg(2,:) = cg(2,:) - exp_operator(1,:)*dtset%dtele !imaginary part
+ ! Multiplication by a fixed phase - for tests
+ !do icg = 1, size(cg(1,:))
+ !   cg_old(1) = cg(1,icg)
+ !   cg_old(2) = cg(2,icg)
+ !   cg(1,icg) = cg_old(1)*cos(dtset%dtele/5.0_dp)-cg_old(2)*sin(dtset%dtele/5.0_dp) !real part
+ !   cg(2,icg) = cg_old(1)*sin(dtset%dtele/5.0_dp)+cg_old(2)*cos(dtset%dtele/5.0_dp) !imaginary part
+ !end do
 
  ABI_FREE(ghc)
  ABI_FREE(gsc)
  ABI_FREE(gvnlxc)
  ABI_FREE(gsm1hc)
 
- if(paw) then
-   call pawcprj_free(cwaveprj)
-   ABI_FREE(cwaveprj)
- end if
+ if(paw) call pawcprj_free(cwaveprj)
+ ABI_FREE(cwaveprj)
 
  end subroutine rttddft_update_cg_k
 
