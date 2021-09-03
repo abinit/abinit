@@ -177,7 +177,7 @@ module m_rttddft_types
    type(pawfgrtab_type),allocatable :: pawfgrtab(:) !PAW atomic data on fine grid
    type(paw_ij_type),allocatable    :: paw_ij(:)   !various arrays on partial waves (i,j channels)
    type(pawrad_type),pointer        :: pawrad(:) => NULL()   !radial grid in PAW sphere
-   type(pawrhoij_type),pointer      :: pawrhoij(:) => NULL() !operator rho_ij= <psi|p_i><p_j|psi>
+   type(pawrhoij_type),pointer      :: pawrhoij(:) !operator rho_ij= <psi|p_i><p_j|psi>
    type(pawtab_type),pointer        :: pawtab(:) => NULL()   !tabulated PAW atomic data
 
     contains
@@ -338,24 +338,19 @@ subroutine tdks_free(tdks,dtset,mpi_enreg)
       call fock_destroy(tdks%fock)
       nullify(tdks%fock)
    end if
-   call paw_an_free(tdks%paw_an)
-   call paw_ij_free(tdks%paw_ij)
-   call pawcprj_free(tdks%cprj)
    call pawfgr_destroy(tdks%pawfgr)
-   call pawfgrtab_free(tdks%pawfgrtab)
-   call pawrhoij_free(tdks%pawrhoij)
    call tdks%hdr%free()
 
    !Nullify pointers
    if(associated(tdks%pawang)) tdks%pawang => null()
    if(associated(tdks%pawrad)) tdks%pawrad => null()
    if(associated(tdks%pawtab)) tdks%pawtab => null()
+   if(associated(tdks%pawrhoij)) call pawrhoij_free(tdks%pawrhoij)
 
    !Deallocate allocatables
    if(allocated(tdks%atindx))      ABI_FREE(tdks%atindx)
    if(allocated(tdks%atindx1))     ABI_FREE(tdks%atindx1)
    if(allocated(tdks%cg))          ABI_FREE(tdks%cg)
-   if(allocated(tdks%cprj))        ABI_FREE(tdks%cprj)
    if(allocated(tdks%dimcprj))     ABI_FREE(tdks%dimcprj)
    if(allocated(tdks%eigen))       ABI_FREE(tdks%eigen)
    if(allocated(tdks%grvdw))       ABI_FREE(tdks%grvdw)
@@ -370,9 +365,6 @@ subroutine tdks_free(tdks,dtset,mpi_enreg)
    if(allocated(tdks%ph1d))        ABI_FREE(tdks%ph1d)
    if(allocated(tdks%ph1df))       ABI_FREE(tdks%ph1df)
    if(allocated(tdks%phnons))      ABI_FREE(tdks%phnons)
-   if(allocated(tdks%paw_an))      ABI_FREE(tdks%paw_an)
-   if(allocated(tdks%paw_ij))      ABI_FREE(tdks%paw_ij)
-   if(allocated(tdks%pawfgrtab))   ABI_FREE(tdks%pawfgrtab)
    if(allocated(tdks%rhog))        ABI_FREE(tdks%rhog)
    if(allocated(tdks%rhor))        ABI_FREE(tdks%rhor)
    if(allocated(tdks%symrec))      ABI_FREE(tdks%symrec)
@@ -389,6 +381,23 @@ subroutine tdks_free(tdks,dtset,mpi_enreg)
    if(allocated(tdks%xcctau3d))    ABI_FREE(tdks%xcctau3d)
    if(allocated(tdks%ylm))         ABI_FREE(tdks%ylm)
    if(allocated(tdks%ylmgr))       ABI_FREE(tdks%ylmgr)
+
+   if (allocated(tdks%cprj)) then       
+      call pawcprj_free(tdks%cprj)
+      ABI_FREE(tdks%cprj)
+   end if
+   if (allocated(tdks%paw_an)) then
+      call paw_an_free(tdks%paw_an)
+      ABI_FREE(tdks%paw_an)
+   end if
+   if(allocated(tdks%pawfgrtab)) then
+      call pawfgrtab_free(tdks%pawfgrtab)
+      ABI_FREE(tdks%pawfgrtab)
+   end if
+   if (allocated(tdks%paw_ij)) then
+      call paw_ij_free(tdks%paw_ij)
+      ABI_FREE(tdks%paw_ij)
+   end if
 
 end subroutine tdks_free
 
@@ -835,7 +844,8 @@ subroutine second_setup(tdks, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, p
    ABI_MALLOC(tdks%paw_an,(my_natom))
    call paw_an_nullify(tdks%paw_an)
    call paw_ij_nullify(tdks%paw_ij)
-   has_dijhat=0;if (dtset%iscf==22) has_dijhat=1
+   !has_dijhat=0; if (dtset%iscf==22) has_dijhat=1
+   has_dijhat=1
    has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
    has_dijfock=0; if (dtset%usefock==1) has_dijfock=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
@@ -1220,6 +1230,8 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
 
+   write(99,*) tdks%rhor
+
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,      &
               & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft, &
@@ -1281,6 +1293,10 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
    end if
 
  else
+
+   ABI_MALLOC(tdks%nhat,(0,0))
+   ABI_MALLOC(tdks%nhatgr,(0,0,0))
+   tdks%nhatgrdim=0
 
    ! 1-Compute density from WFs
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &

@@ -123,19 +123,22 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- !1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
+ !** 1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
  write(msg,'(3a)') ch10,'---------------------------   Initialization   ----------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
  call tdks%init(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
- !2) Propagation loop (rttddft_propagate):
+ !Output useful values
+ call rttddft_output(tdks)
+
+ !** 2) Propagation loop (rttddft_propagate):
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
  
- write(99,*) tdks%rhor
+!write(99,*) tdks%rhor
 
  do istep = 1, tdks%ntime
    call rttddft_propagate_ele(tdks,dtset,istep,mpi_enreg,psps)
@@ -145,8 +148,6 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
 
    !Calc new electronic density 
    call rttddft_calc_density(tdks,dtfil,dtset,mpi_enreg,psps)
-
-   write(99,*) tdks%rhor
 
    !Update header, with evolving variables
    call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih, &
@@ -159,7 +160,7 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
 
  end do
 
- !3) Final Output and free memory
+ !** 3) Final Output and free memory
  write(msg,'(7a)') ch10,'---------------------------------------------------------------------------',&
  &                 ch10,'----------------   Finished real-time time dependent DFT   ----------------',&
  &                 ch10,'---------------------------------------------------------------------------',ch10

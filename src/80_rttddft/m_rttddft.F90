@@ -205,6 +205,62 @@ subroutine rttddft_setup_ele_step(tdks, dtset, gs_hamk, istep, mpi_enreg, psps)
 
  end if
 
+ if (dtset%usefock==1) then
+   usecprj=0
+   if (tdks%mcprj>0) then
+      usecprj=1
+   end if
+   ! Update data relative to the occupied states in fock
+   call fock_updatecwaveocc(tdks%cg,tdks%cprj,dtset,tdks%fock,tdks%indsym,tdks%mcg,tdks%mcprj,mpi_enreg, &
+                          & tdks%nattyp,tdks%npwarr,tdks%occ,tdks%ucvol)
+   ! Possibly (re)compute the ACE operator
+   if(tdks%fock%fock_common%use_ACE/=0) then
+      call fock2ACE(tdks%cg,tdks%cprj,tdks%fock,dtset%istwfk,tdks%kg,dtset%kptns,dtset%mband,tdks%mcg,tdks%mcprj,  &
+                  & dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,      &
+                  & dtset%nfft,tdks%pawfgr%ngfftc,dtset%nkpt,dtset%nloalg,tdks%npwarr,dtset%nspden,dtset%nspinor,  &
+                  & dtset%nsppol,dtset%ntypat,tdks%occ,dtset%optforces,tdks%paw_ij,tdks%pawtab,tdks%ph1d,psps,     &
+                  & tdks%rprimd,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,tdks%xred,tdks%ylm)
+      tdks%energies%e_fock0=tdks%fock%fock_common%e_fock0
+   end if
+ endif
+
+ !** Set up the potential (calls setvtr)
+ !**  The following steps have been gathered in the setvtr routine:
+ !**  - get Ewald energy and Ewald forces
+ !**  - compute local ionic pseudopotential vpsp
+ !**  - possibly compute 3D core electron density xccc3d
+ !**  - possibly compute 3D core kinetic energy density
+ !**  - possibly compute vxc and vhartr
+ !**  - set up vtrial
+ !** Only the local part of the potential is computed here
+ !FB: Are the values of moved_atm_inside and moved_rhor correct?
+ optene = 4; nkxc=0; moved_atm_inside=0; moved_rhor=1
+ n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
+ n3xccc=0;if (psps%n1xccc/=0) n3xccc=tdks%pawfgr%nfft
+ strsxc(:)=zero
+ !FB: tfw_activated is a save variable in scfcv, should check where it appears again
+ tfw_activated=.false.
+ if (dtset%tfkinfunc==12) tfw_activated=.true.
+ ABI_MALLOC(grchempottn,(3,dtset%natom))
+ ABI_MALLOC(grewtn,(3,dtset%natom))
+ ABI_MALLOC(kxc,(tdks%pawfgr%nfft,nkxc))
+ call setvtr(tdks%atindx1,dtset,tdks%energies,tdks%gmet,tdks%gprimd,grchempottn,  &
+          & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,            &
+          & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,   &
+          & tdks%pawfgr%ngfft,tdks%ngrvdw,tdks%nhat,tdks%nhatgr,tdks%nhatgrdim,   &
+          & nkxc,psps%ntypat,psps%n1xccc,n3xccc,optene,tdks%pawrad,tdks%pawtab,   &
+          & tdks%ph1df,psps,tdks%rhog,tdks%rhor,tdks%rmet,tdks%rprimd,strsxc,     &
+          & tdks%ucvol,tdks%usexcnhat,tdks%vhartr,tdks%vpsp,tdks%vtrial,tdks%vxc, &
+          & vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,taur=tdks%taur,                 &
+          & vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,add_tfw=tfw_activated,&
+          & xcctau3d=tdks%xcctau3d)
+ ABI_FREE(grchempottn)
+ ABI_FREE(grewtn)
+ ABI_FREE(kxc)
+
+ ! set the zero of the potentials here
+ if(dtset%usepotzero==2) tdks%vpsp(:) = tdks%vpsp(:) + tdks%ecore / ( tdks%zion * tdks%ucvol )
+
  !** Update PAW quantities
  !** Compute energies and potentials in the augmentation regions (spheres)
  !** and pseudopotential strengths (Dij quantities)
@@ -284,63 +340,7 @@ subroutine rttddft_setup_ele_step(tdks, dtset, gs_hamk, istep, mpi_enreg, psps)
              & psps%ntypat,0,tdks%paw_ij,tdks%pawang,dtset%pawprtvol,         &
              & tdks%pawtab,tdks%rprimd,dtset%symafm,tdks%symrec,              &
              & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   
  end if
-
- if (dtset%usefock==1) then
-   usecprj=0
-   if (tdks%mcprj>0) then
-      usecprj=1
-   end if
-   ! Update data relative to the occupied states in fock
-   call fock_updatecwaveocc(tdks%cg,tdks%cprj,dtset,tdks%fock,tdks%indsym,tdks%mcg,tdks%mcprj,mpi_enreg, &
-                          & tdks%nattyp,tdks%npwarr,tdks%occ,tdks%ucvol)
-   ! Possibly (re)compute the ACE operator
-   if(tdks%fock%fock_common%use_ACE/=0) then
-      call fock2ACE(tdks%cg,tdks%cprj,tdks%fock,dtset%istwfk,tdks%kg,dtset%kptns,dtset%mband,tdks%mcg,tdks%mcprj,  &
-                  & dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,      &
-                  & dtset%nfft,tdks%pawfgr%ngfftc,dtset%nkpt,dtset%nloalg,tdks%npwarr,dtset%nspden,dtset%nspinor,  &
-                  & dtset%nsppol,dtset%ntypat,tdks%occ,dtset%optforces,tdks%paw_ij,tdks%pawtab,tdks%ph1d,psps,     &
-                  & tdks%rprimd,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,tdks%xred,tdks%ylm)
-      tdks%energies%e_fock0=tdks%fock%fock_common%e_fock0
-   end if
- endif
-
- !** Set up the potential (calls setvtr)
- !**  The following steps have been gathered in the setvtr routine:
- !**  - get Ewald energy and Ewald forces
- !**  - compute local ionic pseudopotential vpsp
- !**  - possibly compute 3D core electron density xccc3d
- !**  - possibly compute 3D core kinetic energy density
- !**  - possibly compute vxc and vhartr
- !**  - set up vtrial
- !FB: Are the values of moved_atm_inside and moved_rhor correct?
- optene = 4; nkxc=0; moved_atm_inside=1; moved_rhor=1
- n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
- n3xccc=0;if (psps%n1xccc/=0) n3xccc=tdks%pawfgr%nfft
- strsxc(:)=zero
- !FB: tfw_activated is a save variable in scfcv, should check where it appears again
- tfw_activated=.false.
- if (dtset%tfkinfunc==12) tfw_activated=.true.
- ABI_MALLOC(grchempottn,(3,dtset%natom))
- ABI_MALLOC(grewtn,(3,dtset%natom))
- ABI_MALLOC(kxc,(tdks%pawfgr%nfft,nkxc))
- call setvtr(tdks%atindx1,dtset,tdks%energies,tdks%gmet,tdks%gprimd,grchempottn,  &
-          & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,            &
-          & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,   &
-          & tdks%pawfgr%ngfft,tdks%ngrvdw,tdks%nhat,tdks%nhatgr,tdks%nhatgrdim,   &
-          & nkxc,psps%ntypat,psps%n1xccc,n3xccc,optene,tdks%pawrad,tdks%pawtab,   &
-          & tdks%ph1df,psps,tdks%rhog,tdks%rhor,tdks%rmet,tdks%rprimd,strsxc,     &
-          & tdks%ucvol,tdks%usexcnhat,tdks%vhartr,tdks%vpsp,tdks%vtrial,tdks%vxc, &
-          & vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,taur=tdks%taur,                 &
-          & vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,add_tfw=tfw_activated,&
-          & xcctau3d=tdks%xcctau3d)
- ABI_FREE(grchempottn)
- ABI_FREE(grewtn)
- ABI_FREE(kxc)
-
- ! set the zero of the potentials here
- if(dtset%usepotzero==2) tdks%vpsp(:) = tdks%vpsp(:) + tdks%ecore / ( tdks%zion * tdks%ucvol )
 
 !tdks%energies%e_eigenvalues = zero
 !tdks%energies%e_kinetic     = zero
@@ -468,6 +468,8 @@ subroutine rttddft_calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
    ! transfer density from the coarse to the fine FFT grid
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
+
+   write(99,*) tdks%rhor
 
    ! 3-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &
