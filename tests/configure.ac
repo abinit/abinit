@@ -72,9 +72,9 @@ AC_PROG_CC
 
 # Timeout support
 AC_ARG_ENABLE([test-timeout],
-  AC_HELP_STRING([--enable-test-timeout],[Enable timeout for tests (default: no)]))
+  AS_HELP_STRING([--enable-test-timeout],[Enable timeout for tests (default: no)]))
 AC_ARG_WITH([test-timeout],
-  AC_HELP_STRING([--with-test-timeout],[Test timeout in seconds]))
+  AS_HELP_STRING([--with-test-timeout],[Test timeout in seconds]))
 
 # ---------------------------------------------------------------------------- #
 
