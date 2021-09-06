@@ -45,8 +45,8 @@ module m_orbmag
   use m_berrytk,          only : smatrix
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
-  use m_fft,              only : fftpac
-  use m_fftcore,          only : kpgsph
+  use m_fft,              only : fftpac,fourwf
+  use m_fftcore,          only : kpgsph,sphereboundary
   use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
@@ -71,6 +71,7 @@ module m_orbmag
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_put,pawcprj_output,&
    &  pawcprj_getdim, pawcprj_get,pawcprj_mpi_recv,pawcprj_mpi_send,pawcprj_set_zero,pawcprj_reorder
   use m_spacepar,         only : make_vectornd
+  use m_special_funcs,    only : sbf8
   use m_symtk,            only : symatm
   use m_time,             only : timab
 
@@ -201,6 +202,7 @@ module m_orbmag
   private :: orbmag_wf_output
   private :: orbmag_modmag_output
   private :: orbmag_magsym_output
+  private :: pawsphere
   private :: make_eeig
   private :: duqdu
   private :: duq_she_qdu
@@ -3199,7 +3201,8 @@ subroutine make_dldij_kinetic(dldij_kinetic,dtset,gntselect,gprimd,&
 
  do itypat=1,dtset%ntypat
 
-   mesh_size = pawtab(itypat)%mesh_size
+   !mesh_size = pawtab(itypat)%mesh_size
+   mesh_size = pawrad(itypat)%mesh_size
    ABI_MALLOC(ff,(mesh_size))
    ABI_MALLOC(ujp,(mesh_size))
    ABI_MALLOC(ujpp,(mesh_size))
@@ -4213,6 +4216,92 @@ subroutine orbmag_wf_output(dtset,fermie,nband_k,nterms,orbmag_terms,orbmag_trac
 end subroutine orbmag_wf_output
 !!***
 
+!!****f* ABINIT/pawsphere
+!! NAME
+!! pawsphere
+!!
+!! FUNCTION
+!! return boolean list of real space points in unit cell, indexed by atom in cell
+!! true if point is within PAW sphere of the given atom
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawsphere(dtset,in_pawsphere,nfft1,nfft2,nfft3,pawtab,rmet,xred)
+
+  !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: nfft1,nfft2,nfft3
+ type(dataset_type),intent(in) :: dtset
+
+ !arrays
+ real(dp),intent(in) :: rmet(3,3)
+ real(dp),intent(in) :: xred(3,dtset%natom)
+ logical,intent(out) :: in_pawsphere(nfft1,nfft2,nfft3,dtset%natom)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: i1,i2,i3,iat,ic1,ic2,ic3,itypat
+ real(dp) :: rdiffl,rdiffl_min
+
+ !arrays
+ real(dp) :: rcell(3),rdiff(3),xatom(3)
+ 
+ ! ***********************************************************************
+
+ in_pawsphere = .FALSE.
+
+ do i1 = 1, nfft1
+   rcell(1) = REAL(i1-1,KIND=dp)/nfft1
+   do i2 = 1, nfft2
+     rcell(2) = REAL(i2-1,KIND=dp)/nfft2
+     do i3 = 1, nfft3
+       rcell(3) = REAL(i3-1,KIND=dp)/nfft3
+       do iat = 1, dtset%natom
+         itypat = dtset%typat(iat)
+         rdiffl_min = 1.0D6
+         do ic1 = -1, 1
+           xatom(1) = xred(1,iat) + ic1
+           do ic2 = -1, 1
+             xatom(2) = xred(2,iat) + ic2
+             do ic3 = -1, 1
+               xatom(3) = xred(3,iat) + ic3
+               rdiff = xatom - rcell
+               rdiffl = SQRT(DOT_PRODUCT(rdiff,MATMUL(rmet,rdiff)))
+               IF (rdiffl .LT. rdiffl_min) rdiffl_min = rdiffl
+             end do
+           end do
+         end do
+         IF (rdiffl_min .LE. pawtab(itypat)%rpaw) in_pawsphere(i1,i2,i3,iat) = .TRUE.
+       end do ! end loop over atoms
+     end do ! end loop over nfft3
+   end do ! end loop over nfft2
+ end do ! end loop over nfft1
+
+end subroutine pawsphere
+!!***
+
 !!****f* ABINIT/testprj
 !! NAME
 !! testprj
@@ -4244,7 +4333,8 @@ end subroutine orbmag_wf_output
 !!
 !! SOURCE
 
-subroutine testprj(cg,cprj,dtset,mcg,mcprj,mpi_enreg,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
+subroutine testprj(atindx,atindx1,cg,cprj,dtset,kg,mcg,mcprj,mpi_enreg,&
+    & nattyp,npwarr,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
@@ -4254,6 +4344,8 @@ subroutine testprj(cg,cprj,dtset,mcg,mcprj,mpi_enreg,pawrad,pawtab,psps,rprimd,x
  type(pseudopotential_type),intent(in) :: psps
 
  !arrays
+ integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
+ integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%ntypat),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),rprimd(3,3)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -4264,11 +4356,275 @@ subroutine testprj(cg,cprj,dtset,mcg,mcprj,mpi_enreg,pawrad,pawtab,psps,rprimd,x
 
  !Local variables -------------------------
  !scalars
+ integer :: fourwf_cplex,fourwf_ndat,fourwf_option
+ integer :: i1,i2,i3,i4,i5,i6,iat,iatom,iband,itypat,icg,icprj,ikg,ikpt,il,ilm,ilmn,iln
+ integer :: imesh,in_paw,ipw,isppol,istwf_k,iunr
+ integer :: l_max,max_l_size,max_mesh_size,me,mesh_size,my_nspinor
+ integer :: nband_k,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nproc,npw_k
+ integer :: ph_iat,ph_iatom,spaceComm,tim_fourwf,ylm_ilm
+ real(dp) :: arg,c1,jarg,kpgl,intcprj,intpprj,rmredl,rr,ucvol,unk,weight_i,weight_r
+ complex(dpc) :: c2,c3,ccg,cph
 
  !arrays
-
+ integer,allocatable :: dimlmn(:),gbound(:,:),kg_k(:,:)
+ real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rmet(3,3),rred(3),rmred(3)
+ real(dp),allocatable :: cwaveg(:,:),cwaveg_out(:,:),cwaver(:,:,:,:),denpot(:,:,:),ff(:)
+ real(dp),allocatable :: kpg_k(:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),pp_k(:,:,:)
+ real(dp),allocatable :: sbf8_sphharm(:),sphharm(:,:,:,:),unr(:)
+ real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
+ logical,allocatable :: in_pawsphere(:,:,:,:)
+ complex(dpc),dimension(0:3) :: ipowl
+ type(pawcprj_type),allocatable :: cprj_k(:,:),my_cprj_k(:,:),my_pprj_k(:,:)
+ 
  ! ***********************************************************************
- ! my_nspinor=max(1,dtorbmag%nspinor/mpi_enreg%nproc_spinor)
+
+ isppol = 1
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ spaceComm=mpi_enreg%comm_cell
+ nproc=xmpi_comm_size(spaceComm)
+ me = mpi_enreg%me_kpt
+ nband_k = dtset%mband
+ ngfft1=dtset%ngfft(1) ; ngfft2=dtset%ngfft(2) ; ngfft3=dtset%ngfft(3)
+ ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
+ 
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ c1 = four_pi/sqrt(ucvol)
+ ipowl = (/cone,j_dpc,-cone,-j_dpc/)
+
+ ABI_MALLOC(in_pawsphere,(ngfft1,ngfft2,ngfft3,dtset%natom))
+ call pawsphere(dtset,in_pawsphere,ngfft1,ngfft2,ngfft3,pawtab,rmet,xred)
+
+ ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
+ call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
+ 
+ ABI_MALLOC(unr,(dtset%natom))
+ 
+ ncpgr=0
+ ABI_MALLOC(dimlmn,(dtset%natom))
+ call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
+ ABI_MALLOC(my_cprj_k,(dtset%natom,nband_k))
+ call pawcprj_alloc(my_cprj_k,ncpgr,dimlmn)
+ ABI_MALLOC(cprj_k,(dtset%natom,nband_k))
+ call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
+ ABI_MALLOC(my_pprj_k,(dtset%natom,nband_k))
+ call pawcprj_alloc(my_pprj_k,ncpgr,dimlmn)
+
+ ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
+ istwf_k = 1
+
+ icg = 0
+ ikg = 0
+ icprj = 0
+ do ikpt = 1, dtset%nkpt
+
+   ! if the current kpt is not on the current processor, cycle
+   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+
+   ! retrieve cprj_k
+   call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
+     & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+   call pawcprj_set_zero(my_cprj_k)
+   call pawcprj_set_zero(my_pprj_k)
+
+   ABI_MALLOC(pp_k,(2,dtset%natom,nband_k))
+
+   kpoint(:)=dtset%kptns(:,ikpt)
+   npw_k = npwarr(ikpt)
+
+   ! retrieve kg_k at this k point
+   ABI_MALLOC(kg_k,(3,npw_k))
+   kg_k(1:3,1:npw_k) = kg(1:3,ikg+1:ikg+npw_k)
+
+   ! make sphere boundary for FFTs
+   call sphereboundary(gbound,istwf_k,kg_k,dtset%mgfft,npw_k)
+
+   ! retrieve ylm at this k point
+   ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang))
+   ABI_MALLOC(ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm))
+   do ilm=1,psps%mpsang*psps%mpsang
+     ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+     ylmgr_k(1:npw_k,1:3,ilm)=ylmgr(1+ikg:npw_k+ikg,1:3,ilm)
+   end do
+
+   ! Compute k+G at this k point
+   nkpg = 3
+   ABI_MALLOC(kpg_k,(npw_k,nkpg))
+   call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+
+   ! make all spherical bessel functions at this k pt
+   max_l_size = 0
+   max_mesh_size = 0
+   do itypat = 1, dtset%ntypat
+     if (pawtab(itypat)%mesh_size .GT. max_mesh_size) max_mesh_size = pawtab(itypat)%mesh_size
+     l_max = (pawtab(itypat)%l_size+1)/2
+     if(l_max .GT. max_l_size) max_l_size = l_max
+   end do
+   ABI_MALLOC(sphharm,(max_mesh_size,max_l_size,npw_k,dtset%ntypat))
+   ABI_MALLOC(sbf8_sphharm,(l_max))
+   do itypat = 1, dtset%ntypat
+     do ipw = 1, npw_k
+       kpgl=sqrt(DOT_PRODUCT(kpg_k(ipw,:),MATMUL(gmet,kpg_k(ipw,:))))
+       do imesh = 1, pawtab(itypat)%mesh_size
+         rr = pawrad(itypat)%rad(imesh)
+         jarg = two_pi*kpgl*rr
+         call sbf8(l_max,jarg,sbf8_sphharm)
+         sphharm(imesh,1:l_max,ipw,itypat) = sbf8_sphharm(1:l_max)
+       end do
+     end do
+   end do
+   ABI_FREE(sbf8_sphharm)
+
+   ! Make 3d phase factors
+   ABI_MALLOC(phkxred,(2,dtset%natom))
+   do iat = 1, dtset%natom
+     iatom = atindx(iat)
+     arg=two_pi*DOT_PRODUCT(kpoint,xred(:,iat))
+     phkxred(1,iatom)=cos(arg);phkxred(2,iatom)=sin(arg)
+   end do
+   ABI_MALLOC(ph3d,(2,npw_k,dtset%natom))
+   call ph1d3d(1,dtset%natom,kg_k,dtset%natom,dtset%natom,&
+     & npw_k,ngfft1,ngfft2,ngfft3,phkxred,ph1d,ph3d)
+
+   do iat=1,dtset%natom
+     iatom = atindx(iat)
+     itypat = dtset%typat(iat)
+     if (pawtab(itypat)%has_tproj .NE. 2) then
+       ABI_ERROR("tproj not available in routine testprj")
+     end if
+     mesh_size=pawtab(itypat)%mesh_size
+     ABI_MALLOC(ff,(mesh_size))
+
+     do ilmn=1,pawtab(itypat)%lmn_size
+       il  = pawtab(itypat)%indlmn(1,ilmn)
+       c2 = c1*ipowl(mod(il,4))
+       ilm = pawtab(itypat)%indlmn(4,ilmn)
+       iln = pawtab(itypat)%indlmn(5,ilmn)
+
+       do ipw = 1, npw_k
+         cph = cmplx(ph3d(1,ipw,iatom),ph3d(2,ipw,iatom))
+
+         ff(2:mesh_size) = pawrad(itypat)%rad(2:mesh_size)*pawtab(itypat)%tproj(2:mesh_size,iln)*&
+           & sphharm(2:mesh_size,il+1,ipw,itypat)
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(intcprj,ff,pawrad(itypat))
+
+         ff(2:mesh_size) = pawrad(itypat)%rad(2:mesh_size)*pawtab(itypat)%tphi(2:mesh_size,iln)*&
+           & sphharm(2:mesh_size,il+1,ipw,itypat)
+         call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+         call simp_gen(intpprj,ff,pawrad(itypat))
+
+         ! now make cprj and pprj for this kpt, one band at a time
+         do iband = 1, nband_k
+           ccg = cmplx(cg(1,icg+(iband-1)*npw_k+ipw),cg(2,icg+(iband-1)*npw_k+ipw))
+           c3 = c2*ylm_k(ipw,ilm)*intcprj*ccg*cph
+           my_cprj_k(iatom,iband)%cp(1,ilmn) = my_cprj_k(iatom,iband)%cp(1,ilmn) + real(c3)
+           my_cprj_k(iatom,iband)%cp(2,ilmn) = my_cprj_k(iatom,iband)%cp(2,ilmn) + aimag(c3)
+           c3 = c2*ylm_k(ipw,ilm)*intpprj*ccg*cph
+           my_pprj_k(iatom,iband)%cp(1,ilmn) = my_pprj_k(iatom,iband)%cp(1,ilmn) + real(c3)
+           my_pprj_k(iatom,iband)%cp(2,ilmn) = my_pprj_k(iatom,iband)%cp(2,ilmn) + aimag(c3)
+         end do ! end loop over iband
+
+       end do ! end loop over npw_k
+
+       !do iband = 1, nband_k
+       !  write(std_out,'(a,4i4,2es16.8)')'JWZ debug ikpt iatom ilmn iband diff ',&
+       !    &ikpt,iatom,ilmn,iband,&
+       !    &my_cprj_k(iatom,iband)%cp(1,ilmn) - cprj_k(iatom,iband)%cp(1,ilmn),&
+       !    &my_cprj_k(iatom,iband)%cp(2,ilmn) - cprj_k(iatom,iband)%cp(2,ilmn)
+       !end do
+
+       do iband = 1, nband_k
+         pp_k(1,iatom,iband) = pp_k(1,iatom,iband) + &
+           & my_pprj_k(iatom,iband)%cp(1,ilmn)*my_cprj_k(iatom,iband)%cp(1,ilmn) + &
+           & my_pprj_k(iatom,iband)%cp(2,ilmn)*my_cprj_k(iatom,iband)%cp(2,ilmn) 
+         pp_k(2,iatom,iband) = pp_k(2,iatom,iband) + &
+           & my_pprj_k(iatom,iband)%cp(1,ilmn)*my_cprj_k(iatom,iband)%cp(2,ilmn) - &
+           & my_pprj_k(iatom,iband)%cp(2,ilmn)*my_cprj_k(iatom,iband)%cp(1,ilmn) 
+       end do
+
+     end do ! end loop over ilmn
+     ABI_FREE(ff)
+   end do ! end loop over iat
+
+   !do iband = 1, nband_k
+   !  write(std_out,'(a,2i4,2es16.8)')'JWZ debug ikpt iband <u_nk|phi><p|u_nk>',ikpt,iband,&
+   !    & pp_k(1,iband),pp_k(2,iband)
+   !end do
+
+   !call pawcprj_output(my_cprj_k)
+   !call pawcprj_output(my_pprj_k)
+
+   fourwf_ndat = 1
+   fourwf_cplex = 1
+   fourwf_option = 0
+   tim_fourwf = 0
+   weight_r = one
+   weight_i = one
+   ABI_MALLOC(denpot,(fourwf_cplex*ngfft4,ngfft5,ngfft6))
+   ABI_MALLOC(cwaveg,(2,npw_k))
+   ABI_MALLOC(cwaveg_out,(2,npw_k))
+   ABI_MALLOC(cwaver,(2,ngfft4,ngfft5,ngfft6*fourwf_ndat))
+   do iband = 1, nband_k
+     cwaveg(1:2,1:npw_k) = cg(1:2,icg+(iband-1)*npw_k+1:icg+iband*npw_k)
+     unk = DOT_PRODUCT(cwaveg(1,:),cwaveg(1,:)) + DOT_PRODUCT(cwaveg(2,:),cwaveg(2,:))
+     call fourwf(fourwf_cplex,denpot,cwaveg,cwaveg_out,cwaver,gbound,gbound,istwf_k,&
+       & kg_k,kg_k,dtset%mgfft,mpi_enreg,fourwf_ndat,dtset%ngfft,npw_k,npw_k,&
+       & ngfft4,ngfft5,ngfft6,fourwf_option,tim_fourwf,weight_r,weight_i)
+     unr = zero
+     in_paw = 0
+     weight_r = SQRT(REAL(ngfft1*ngfft2*ngfft3,KIND=dp))
+     do i1 = 1, ngfft1
+       do i2 = 1, ngfft2
+         do i3 = 1, ngfft3
+           do iat = 1, dtset%natom
+             IF ( in_pawsphere(i1,i2,i3,iat) ) THEN
+               in_paw = in_paw + 1
+               unr(iat) = unr(iat) + (cwaver(1,i1,i2,i3)**2 + cwaver(2,i1,i2,i3)**2)/(weight_r*weight_r)
+             end if
+           end do
+         end do
+       end do
+     end do
+     do iat = 1, dtset%natom
+       iatom = atindx(iat)
+       itypat=dtset%typat(iat)
+       write(std_out,'(a,4i4,5es16.8)')'JWZ debug ikpt iband iatom in_paw rpaw unr ppk_re ppk_im ratio ',&
+         & ikpt,iband,iatom,in_paw,&
+         & pawtab(itypat)%rpaw,unr(iatom),pp_k(1,iatom,iband),pp_k(2,iatom,iband),&
+         & pp_k(1,iatom,iband)/unr(iatom)
+     end do
+   end do
+   ABI_FREE(denpot)
+   ABI_FREE(cwaveg)
+   ABI_FREE(cwaveg_out)
+   ABI_FREE(cwaver)
+   
+   icg = icg + npw_k*nband_k
+   ikg = ikg + npw_k
+   icprj = icprj + nband_k
+
+   ABI_FREE(ylm_k)
+   ABI_FREE(ylmgr_k)
+   ABI_FREE(kg_k)
+   ABI_FREE(kpg_k)
+   ABI_FREE(phkxred)
+   ABI_FREE(ph3d)
+   ABI_FREE(sphharm)
+   ABI_FREE(pp_k)
+
+ end do ! end loop over k points
+
+ ABI_FREE(unr)
+ ABI_FREE(in_pawsphere)
+ ABI_FREE(ph1d)
+ ABI_FREE(dimlmn)
+ ABI_FREE(gbound)
+ call pawcprj_free(my_cprj_k)
+ ABI_FREE(my_cprj_k)
+ call pawcprj_free(my_pprj_k)
+ ABI_FREE(my_pprj_k)
+ call pawcprj_free(cprj_k)
+ ABI_FREE(cprj_k)
 
 end subroutine testprj
 !!***

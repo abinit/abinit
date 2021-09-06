@@ -60,7 +60,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag_type, orbmag_wf
+ use m_orbmag,           only : orbmag_type, orbmag_wf, testprj
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -555,7 +555,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
         & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
  end if
 
-
+ if(dtset%userid.EQ.1) then
+   call testprj(atindx,atindx1,cg,cprj,dtset,kg,mcg,mcprj,mpi_enreg,&
+     & nattyp,npwarr,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
+ end if
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
