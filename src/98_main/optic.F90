@@ -68,7 +68,7 @@
 !!      hdr_copy,hdr_ddk,hdr_ncread,herald,int2char4,linelop,linopt,mati3inv
 !!      matr3inv,metric,nctk_fort_or_ncfile,nlinopt,nonlinopt,pmat2cart
 !!      pmat_renorm,renorm_bst,sym2cart,timein,wfk0%close,wfk0%read_eigk
-!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
+!!      wfk_open_read,wfks,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -330,10 +330,10 @@ program optic
 &      ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,&
 &      trim(wfkfile)
      ! split the write since long filenames can bust the 500 char limit of 'msg'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      do ii=1,3
        write(msg, "(12a)")trim(infiles(ii))
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      enddo
 
      if (hdr%compare(hdr_ddk(1)) /= 0) then
@@ -460,9 +460,9 @@ program optic
 
  ! Initializes crystal
  call crystal_init(hdr%amu, cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
-& hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
-& (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
-& symrel, hdr%tnons, hdr%symafm)
+   hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
+   (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
+   symrel, hdr%tnons, hdr%symafm)
 
  if (my_rank == master) then
    write(std_out,*)

@@ -331,7 +331,7 @@ CONTAINS
 !!      optic
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -491,7 +491,7 @@ end subroutine wfk_open_read
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -703,7 +703,7 @@ end subroutine wfk_open_write
 !!      m_inwffil
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -802,7 +802,7 @@ end subroutine wfk_close
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -980,7 +980,7 @@ end function wfk_findk
 !!      m_io_kss,m_iowf,m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -1182,7 +1182,7 @@ end function wfk_compare
 !!      m_inwffil,m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -1601,7 +1601,7 @@ end subroutine wfk_read_band_block
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -1853,7 +1853,7 @@ end subroutine wfk_read_bks
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -2308,7 +2308,7 @@ end subroutine wfk_write_band_block
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -2894,7 +2894,7 @@ end function wfk_read_ebands
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -2946,11 +2946,11 @@ end subroutine wfk_read_eigk
 !!  Hdr_out<hdr_type>=The header of the file
 !!
 !! PARENTS
-!!      m_bethe_salpeter,m_common,m_dfpt_looppert,m_eph_driver
-!!      m_screening_driver,m_sigma_driver,m_wfk,m_wfk_analyze
+!!      m_bethe_salpeter,m_common,m_dfpt_looppert,m_screening_driver
+!!      m_sigma_driver,m_wfk,m_wfk_analyze
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -3070,8 +3070,13 @@ end subroutine wfk_read_eigenvalues
 !! NOTES
 !!
 !! PARENTS
+!!      m_dfpt_looppert,m_respfn_driver
 !!
 !! CHILDREN
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
+!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
+!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
+!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -3509,8 +3514,13 @@ end subroutine wfk_read_my_kptbands
 !! NOTES
 !!
 !! PARENTS
+!!      m_dfpt_looppert
 !!
 !! CHILDREN
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
+!!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
+!!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
+!!      owfk%write_band_block,wfk_open_read
 !!
 !! SOURCE
 
@@ -3687,7 +3697,7 @@ end subroutine wfk_write_my_kptbands
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -3745,7 +3755,7 @@ end subroutine wfk_write_h1mat
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -3821,7 +3831,7 @@ end subroutine wfk_read_h1mat
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -3872,7 +3882,7 @@ end subroutine wfk_rewind
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -3940,7 +3950,7 @@ end subroutine wfk_seek
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -3983,7 +3993,7 @@ end subroutine wfk_update_f90ptr
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4144,7 +4154,7 @@ end subroutine wfk_compute_offsets
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4222,7 +4232,7 @@ end subroutine wfk_show_offsets
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4302,7 +4312,7 @@ end subroutine mpio_read_kg_k
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4389,7 +4399,7 @@ end subroutine mpio_write_kg_k
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4518,7 +4528,7 @@ end subroutine mpio_read_eigocc_k
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4646,7 +4656,7 @@ end subroutine mpio_write_eigocc_k
 !!      m_gstate,m_wfk_analyze
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -4957,7 +4967,7 @@ end subroutine wfk_tofullbz
 !!  - Only GS WFK files are supported (formeig==0)
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -5037,7 +5047,7 @@ end subroutine wfk_nc2fort
 !!      ioprof
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -5232,7 +5242,7 @@ end subroutine wfk_prof
 !!      ioprof
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -5341,7 +5351,7 @@ end subroutine wfk_create_wfkfile
 !!      ioprof
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -5486,7 +5496,7 @@ end subroutine wfk_check_wfkfile
 !!      m_wfk
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -5631,7 +5641,7 @@ end subroutine fill_or_check
 !! PARENTS
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read
@@ -5809,7 +5819,7 @@ end subroutine wfk_diff
 !!      m_gstate
 !!
 !! CHILDREN
-!!      cryst%free,cwtime,cwtime_report,ebands_free,ebands_print
+!!      cryst%free,cwtime,cwtime_report,delete_file,ebands_free,ebands_print
 !!      ebands_update_occ,fine_hdr%echo,fine_hdr%free,hdr_ncread,iwfk%close
 !!      iwfk%hdr%echo,iwfk%read_band_block,owfk%close,owfk%open_write
 !!      owfk%write_band_block,wfk_open_read

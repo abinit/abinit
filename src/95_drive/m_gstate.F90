@@ -103,6 +103,9 @@ module m_gstate
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
+ use m_cgprj,            only : ctocprj
+ use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
+ use m_fft,              only : fft_init_counters,fft_output_counters
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -266,15 +269,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !52  for density rho(r)       (fformr)
 !102 for potential V(r) file. (fformv)  NOT USED
 !scalars
+ logical :: compute_cprj
  integer,parameter :: formeig=0, level=101, response=0 ,cplex1=1, master=0, itime0=0
  integer :: ndtpawuj=0  ! Cannot use parameter because scfargs points to this! Have to get rid of pointers to scalars!
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
- integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
+ integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
  integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,ncpgr,nfftf,nfftot,npwmin
+ integer :: nband_k,nbandtot,nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
@@ -310,7 +314,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
  real(dp),allocatable :: doccde(:)
- real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
+ real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
@@ -662,11 +666,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
  ! Here we count the number of states treated by the proc. if cnt == 0, mcg is then set to 0.
  cnt = 0
+ nbandtot = 0
  do spin=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
-     do band=1,dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+     nband_k = dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+     do band=1,nband_k
        if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, band, band, spin, mpi_enreg%me_kpt)) cnt = cnt + 1
      end do
+     nbandtot = nbandtot + nband_k
    end do
  end do
 
@@ -769,6 +776,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ end if
+
+ ! Now that wavefunctions are initialized, calls of nonlocal operations are possible, so we start the counting (if enabled)
+ if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
+   call nonlop_ylm_init_counters()
+ end if
+ ! Same for fft counters
+ if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
+   call fft_init_counters()
  end if
 
 !###########################################################
@@ -1032,17 +1048,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 ! Initialisation of cprj
  usecprj=0; mcprj=0;mband_cprj=0
- if (dtset%usepaw==1) then
-   if (associated(electronpositron)) then
-     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+ compute_cprj=.false.
+ ! PAW keeping cprj in memory : some cases are excluded for now...
+ if (dtset%cprj_in_memory/=0) then
+   compute_cprj=.true.
+   usecprj=1
+ else
+   if (dtset%usepaw==1) then
+     if (associated(electronpositron)) then
+       if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+     end if
+     if (dtset%prtnabla>0) usecprj=1
+     if (dtset%extrapwf>0) usecprj=1
+     if (dtset%pawfatbnd>0)usecprj=1
+     if (dtset%prtdos==3)  usecprj=1
+     if (dtset%usewvl==1)  usecprj=1
+     if (dtset%nstep==0) usecprj=0
+     if (dtset%usefock==1)  usecprj=1
    end if
-   if (dtset%prtnabla>0) usecprj=1
-   if (dtset%extrapwf>0) usecprj=1
-   if (dtset%pawfatbnd>0)usecprj=1
-   if (dtset%prtdos==3)  usecprj=1
-   if (dtset%usewvl==1)  usecprj=1
-   if (dtset%nstep==0) usecprj=0
-   if (dtset%usefock==1)  usecprj=1
  end if
  if (usecprj==0) then
    ABI_MALLOC(cprj,(0,0))
@@ -1057,7 +1080,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
    ABI_MALLOC(cprj,(dtset%natom,mcprj))
    ncpgr=0
-   if (dtset%usefock==1) then
+   if (dtset%usefock==1) then ! Note that compute_cprj = false if usefock/=0
      if (dtset%optforces == 1) then
        ncpgr = 3
      end if
@@ -1068,6 +1091,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
+   if (compute_cprj) then
+     choice      = 1 ! no derivative...
+     idir        = 0 ! ...so no direction
+     iatom       = 0 ! all atoms
+     iorder_cprj = 0 ! ordered by atom types
+     ncprj       = dtset%natom
+!    Compute structure factor phases and large sphere cut-off (gsqcut):
+     ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+     call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
+     call wrtout(std_out,' Computing cprj from initial wavefunctions (gstate)')
+     call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
+&   iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&   dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
+     call wrtout(std_out,' cprj is computed')
+     ABI_FREE(ph1d)
+   end if
  end if
 
 !Timing for initialisation period
@@ -1604,6 +1644,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
+ end if
+
+ ! Write nonlop_ylm_counters (if enabled) in outputs
+ if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
+   call nonlop_ylm_output_counters(dtset%natom,nbandtot,dtset%ntypat,dtset%typat,mpi_enreg)
+ end if
+ ! Write fft_counters (if enabled) in output
+ if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
+   call fft_output_counters(nbandtot,mpi_enreg)
  end if
 
  if(dtset%imgwfstor==1)then

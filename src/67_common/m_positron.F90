@@ -75,6 +75,7 @@ module m_positron
  use m_fftcore,     only : sphereboundary
  use m_prep_kgb,    only : prep_fourwf
  use m_fft,         only : fourwf, fourdp
+ use m_cgprj,       only : ctocprj
 
  implicit none
 
@@ -151,6 +152,7 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  stress_needed=if >0 stresses are needed
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  ucvol=unit cell volume in bohr**3.
@@ -192,7 +194,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
+&          rmet,rprimd,stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
 &          xccc3d,xcctau3d,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
@@ -220,7 +222,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
- real(dp),intent(in) :: strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: rmet(3,3),strscondft(6),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -392,7 +394,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &       favg_dum,fcart_dum,fock,forold_dum,gred_tmp,grchempottn,grcondft,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
 &       extfpmd,indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
-&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
+&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strscondft,strsxc,str_tmp,symrec,&
 &       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%gred_ep(:,:)=gred_tmp(:,:)
@@ -819,6 +821,18 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
        eigen(iocc)=electronpositron%eigen_ep(iocc)
        electronpositron%eigen_ep(iocc)=eigtmp
      end do
+   end if
+
+   ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
+   if (dtset%cprj_in_memory/=0) then
+     iatom=0
+     call wrtout(std_out,' Computing cprj from wavefunctions (positron)')
+     call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&
+&      0,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&      dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&      dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&      xred,ylm,ylmgr)
+     call wrtout(std_out,' cprj is computed')
    end if
 
 !  =============================================
