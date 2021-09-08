@@ -301,7 +301,6 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 
  nband_k = rf2%nband_k
  size_wf = rf2%size_wf
- factor = one
 
  call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v1j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
