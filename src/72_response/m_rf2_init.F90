@@ -159,7 +159,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),allocatable,target :: cprj_jband(:,:),dudkprj(:,:)
  type(pawcprj_type),pointer :: cprj_dudk(:,:),cprj_j(:,:)
- type(rf_hamiltonian_type),pointer :: rf_hamk_idiri
+ type(rf_hamiltonian_type),pointer :: rf_hamk_idir
 
 ! *********************************************************************
 
@@ -785,7 +785,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_i => cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
            call rf2_accumulate_bands(rf2,4,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_i,h_cwave,s_cwave,gactor_in)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave,factor_in)
          end if
        end do
 
