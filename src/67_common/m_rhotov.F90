@@ -125,6 +125,7 @@ contains
 !!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
 !!  intgres(nspden,ngrcondft)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if optxc==2.
+!!  strscondft(6)=constrained DFT contribution to stress tensor (hartree/bohr^3) 
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
 !!  vxc(nfft,nspden)=Vxc(r) (already computed above; gets recomputed below too)
 !!  vxcavg=mean of the vxc potential
@@ -165,7 +166,7 @@ contains
 
 subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
-&  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
+&  rhog,rhor,rprimd,strscondft,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &  electronpositron,taur,vxc_hybcomp,vxctau,vtauresid,add_tfw,xcctau3d) ! optional arguments
 
@@ -193,6 +194,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  real(dp),intent(out) :: grcondft(:,:) ! (3,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: intgres(:,:) ! (nspden,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
+ real(dp),intent(out) :: strscondft(6) 
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
@@ -489,7 +491,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 
      !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
      if( any(dtset%constraint_kind(:)/=0))then
-       call constrained_residual(constrained_dft,energies%e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,vresidnew,xred)
+       call constrained_residual(constrained_dft,energies%e_constrained_dft,&
+&        grcondft,intgres,mpi_enreg,rhor,strscondft,vresidnew,xred)
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
 

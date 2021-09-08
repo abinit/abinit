@@ -2184,6 +2184,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chksymtnons=1
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
+   dtsets(idtset)%cprj_update_lvl=0
 !  D
    dtsets(idtset)%ddamp=0.1_dp
    dtsets(idtset)%delayperm=0
@@ -2585,6 +2586,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfmeth=1
    dtsets(idtset)%rfphon=0
    dtsets(idtset)%rfstrs=0
+   dtsets(idtset)%rfstrs_ref=0
    dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
