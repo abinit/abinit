@@ -54,31 +54,31 @@ contains
 
 !!****f* m_rttddft_driver/rttddft
 !! NAME
-!! rttddft
+!!  rttddft
 !!
 !! FUNCTION
-!! Primary routine that drives real-time TDDFT calculations.
-!! 1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
+!!  Primary routine that drives real-time TDDFT calculations.
+!!  1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
 !!    - intialize various important parameters
 !!    - read KS orbitals and associated occupation in WFK file
 !!    - compute initial density from KS orbitals
-!! 2) Propagation loop (rttddft_propagate):
+!!  2) Propagation loop (rttddft_propagate):
 !!    for i = 1, nstep
 !!       - propagate KS orbitals
 !!       - propagate nuclei if requested (RTDDFT+Erhenfest dynamics)
 !!       - compute new density and occupation
 !!       - print requested quantities
-!! 3) Final printout and finalize
+!!  3) Final printout and finalize
 !!
 !! INPUTS
-!! codvsn = code version
-!! dtset <type(dataset_type)> = all input variables for this dataset
-!! dtfil <type datafiles_type> = infos about file names, file unit numbers
-!! mpi_enreg <MPI_type> = MPI-parallelisation information
-!! pawang <type(pawang_type)> = paw angular mesh and related data
-!! pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
-!! pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
-!! psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  codvsn = code version
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  pawang <type(pawang_type)> = paw angular mesh and related data
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
 !! OUTPUT
 !!
@@ -128,7 +128,7 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- call tdks%init(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
+ call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  !Output useful values
  call rttddft_output(tdks)
@@ -141,13 +141,13 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
 !write(99,*) tdks%rhor
 
  do istep = 1, tdks%ntime
-   call rttddft_propagate_ele(tdks,dtset,istep,mpi_enreg,psps)
+   call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
    !FB TODO: If Ehrenfest perform nuclear step here
-   !call tdks%propagate_nuc(itime)
+   !call  rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    !Calc new electronic density 
-   call rttddft_calc_density(tdks,dtfil,dtset,mpi_enreg,psps)
+   call rttddft_calc_density(dtfil,dtset,mpi_enreg,psps,tdks)
 
    !Update header, with evolving variables
    call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih, &
@@ -167,7 +167,6 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- !4) Destroy tdks object
  call tdks%free(dtset,mpi_enreg)
 
 end subroutine rttddft

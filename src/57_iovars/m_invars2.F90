@@ -2099,6 +2099,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_mexcit',tread,'INT')
  if(tread==1) dtset%td_mexcit=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_exp_order',tread,'INT')
+ if(tread==1) dtset%td_exp_order=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_propagator',tread,'INT')
+ if(tread==1) dtset%td_propagator=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npvel',tread,'INT')
  if(tread==1) dtset%npvel=intarr(1)
 

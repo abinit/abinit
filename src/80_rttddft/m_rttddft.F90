@@ -14,6 +14,8 @@
 !! NOTES
 !!
 !! PARENTS
+!!  m_rttddft_driver
+!!  m_rttddft_propagate
 !!
 !! CHILDREN
 !!
@@ -48,7 +50,7 @@ module m_rttddft
  use m_paw_mkrho,        only: pawmkrho
  use m_paw_nhat,         only: nhatgrid
  use m_paw_occupancies,  only: pawmkrhoij
- use m_pawrhoij,         only: pawrhoij_type,  pawrhoij_free, &
+ use m_pawrhoij,         only: pawrhoij_type, pawrhoij_free, &
                                pawrhoij_alloc, pawrhoij_inquire_dim
  use m_paw_tools,        only: chkpawovlp
  use m_rttddft_types,    only: tdks_type
@@ -63,6 +65,8 @@ module m_rttddft
 
  public :: rttddft_calc_density
  public :: rttddft_setup_ele_step
+ public :: rttddft_init_hamiltonian
+!!***
 
 contains
 
@@ -76,64 +80,45 @@ contains
 !!  propagation of KS orbitals
 !!
 !! INPUTS
-!!  tdks <type(tdks_type)> = the tdks object to initialize
-!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_propagate
+!!  m_rttddft_propagate/rttddft_propagate_ele
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_setup_ele_step(tdks, dtset, gs_hamk, istep, mpi_enreg, psps)
+subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- type(tdks_type),           intent(inout) :: tdks
  integer,                    intent(in)    :: istep
  type(dataset_type),         intent(inout) :: dtset
  type(gs_hamiltonian_type),  intent(out)   :: gs_hamk
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
+ type(tdks_type),            intent(inout) :: tdks
 
  !Local variables-------------------------------
  !scalars
- character(len=500)        :: msg
- integer                   :: comm
- integer,parameter         :: cplex=1
  integer                   :: forces_needed
- integer,parameter         :: ipert=0
- integer                   :: initialized0
- integer                   :: istep_mix
- integer                   :: moved_atm_inside, moved_rhor
  integer                   :: my_natom
- integer                   :: nfftotf
- integer                   :: nzlmopt
- integer                   :: optcut, optgr0, optgr1, optgr2, optrad, optene
- integer                   :: option
+ integer                   :: optcut, optgr0, optgr1, optgr2, optrad
  integer                   :: stress_needed
- integer                   :: nkxc, n1xccc, n3xccc
- integer                   :: usecprj, usecprj_local
- logical                   :: tfw_activated
- real(dp)                  :: compch_sph
- real(dp)                  :: vxcavg
- real(dp)                  :: hyb_mixing,hyb_mixing_sr
+ integer                   :: usecprj
  !arrays
- real(dp),allocatable      :: grchempottn(:,:)
- real(dp),allocatable      :: grewtn(:,:)
  real(dp),parameter        :: k0(3)=(/zero,zero,zero/)
- real(dp),allocatable      :: kxc(:,:)
- real(dp)                  :: strsxc(6)
- real(dp)                  :: vpotzero(2)
 
 ! ***********************************************************************
 
@@ -223,6 +208,80 @@ subroutine rttddft_setup_ele_step(tdks, dtset, gs_hamk, istep, mpi_enreg, psps)
       tdks%energies%e_fock0=tdks%fock%fock_common%e_fock0
    end if
  endif
+
+end subroutine rttddft_setup_ele_step
+
+!!****f* m_rttddft/rttddft_init_hamiltonian
+!!
+!! NAME
+!!  rttddft_init_hamiltonian
+!!
+!! FUNCTION
+!!  Init/Update various quantities in order to set up
+!!  the Hamiltonian
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
+!!  istep <integer> = step number
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = Main RT-TDDFT object
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!  m_rttddft_propagators/rttddft_propagator_er
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,                    intent(in)    :: istep
+ type(dataset_type),         intent(inout) :: dtset
+ type(gs_hamiltonian_type),  intent(out)   :: gs_hamk
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(pseudopotential_type), intent(inout) :: psps
+ type(tdks_type),            intent(inout) :: tdks
+
+ !Local variables-------------------------------
+ !scalars
+ character(len=500)        :: msg
+ integer                   :: comm
+ integer,parameter         :: cplex=1
+ integer,parameter         :: ipert=0
+ integer                   :: initialized0
+ integer                   :: istep_mix
+ integer                   :: moved_atm_inside, moved_rhor
+ integer                   :: my_natom
+ integer                   :: nfftotf
+ integer                   :: nzlmopt
+ integer                   :: optene
+ integer                   :: option
+ integer                   :: nkxc, n1xccc, n3xccc
+ integer                   :: usecprj_local
+ logical                   :: tfw_activated
+ real(dp)                  :: compch_sph
+ real(dp)                  :: vxcavg
+ real(dp)                  :: hyb_mixing,hyb_mixing_sr
+ !arrays
+ real(dp),allocatable      :: grchempottn(:,:)
+ real(dp),allocatable      :: grewtn(:,:)
+ real(dp),parameter        :: k0(3)=(/zero,zero,zero/)
+ real(dp),allocatable      :: kxc(:,:)
+ real(dp)                  :: strsxc(6)
+ real(dp)                  :: vpotzero(2)
+
+! ***********************************************************************
+
+ my_natom=mpi_enreg%my_natom
 
  !** Set up the potential (calls setvtr)
  !**  The following steps have been gathered in the setvtr routine:
@@ -392,7 +451,7 @@ subroutine rttddft_setup_ele_step(tdks, dtset, gs_hamk, istep, mpi_enreg, psps)
 !  end if
 !end if
 
-end subroutine rttddft_setup_ele_step
+end subroutine rttddft_init_hamiltonian
 
 !!****f* m_rttddft/rttddft_calc_density
 !!
@@ -403,22 +462,23 @@ end subroutine rttddft_setup_ele_step
 !!  Compute electronic density (in 1/bohr^3) from the WF (cg coefficients)
 !!
 !! INPUTS
-!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_driver
+!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
+subroutine rttddft_calc_density(dtfil, dtset, mpi_enreg, psps, tdks)
 
  implicit none
 
@@ -440,7 +500,6 @@ subroutine rttddft_calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
  integer                     :: tim_mkrho
  real(dp)                    :: compch_fft
  !arrays
- real(dp)                    :: gmet(3,3)
  real(dp)                    :: qpt(3)
  real(dp),allocatable        :: rhowfg(:,:), rhowfr(:,:)
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
@@ -469,7 +528,7 @@ subroutine rttddft_calc_density(tdks, dtfil, dtset, mpi_enreg, psps)
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
 
-   write(99,*) tdks%rhor
+   !write(99,*) tdks%rhor
 
    ! 3-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &
