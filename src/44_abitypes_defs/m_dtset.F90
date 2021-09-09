@@ -570,7 +570,9 @@ type, public :: dataset_type
  integer :: symsigma = 1
  integer :: symv1scf = 0
 !T
+ integer :: td_exp_order
  integer :: td_mexcit
+ integer :: td_propagator
  integer :: tfkinfunc
  integer :: tim1rev
  integer :: timopt
@@ -1888,7 +1890,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%symchi             = dtin%symchi
  dtout%symmorphi          = dtin%symmorphi
  dtout%symsigma           = dtin%symsigma
+ dtout%td_exp_order       = dtin%td_exp_order
  dtout%td_mexcit          = dtin%td_mexcit
+ dtout%td_propagator      = dtin%td_propagator
  dtout%tfkinfunc          = dtin%tfkinfunc
  dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
@@ -3417,7 +3421,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
+ list_vars=trim(list_vars)//'  td_exp_order td_maxene td_mexcit td_propagator'
+ list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'

@@ -40,6 +40,7 @@ module m_rttddft_output
 !!***
 
  public :: rttddft_output
+!!***
 
 contains 
 

@@ -47,8 +47,7 @@ module m_rttddft_types
  use m_extfpmd,          only: extfpmd_type
  use m_fock,             only: fock_type, fock_init, fock_destroy,    &
                              & fock_ACE_destroy, fock_common_destroy, &
-                             & fock_BZ_destroy, fock_update_exc,      &
-                             & fock_updatecwaveocc
+                             & fock_BZ_destroy, fock_updatecwaveocc
  use m_fock_getghc,      only: fock2ACE
  use m_fourier_interpol, only: transgrid
  use m_gemm_nonlop,      only: init_gemm_nonlop, destroy_gemm_nonlop
@@ -199,7 +198,6 @@ contains
 !!  Initialize the tdks object
 !!
 !! INPUTS
-!!  tdks <class(tdks_type)> = the tdks object to initialize
 !!  codvsn = code version
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
@@ -208,6 +206,7 @@ contains
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <class(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
 !!
@@ -219,7 +218,7 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
-subroutine tdks_init(tdks, codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
+subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
  implicit none
 
@@ -250,11 +249,11 @@ subroutine tdks_init(tdks, codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  my_natom=mpi_enreg%my_natom
 
  !1) Various initializations & checks (MPI, PW, FFT, PSP, Symmetry ...)
- call first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad, &
-                & pawtab,psps,psp_gencond)
+ call first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad, &
+                & pawtab,psps,psp_gencond,tdks)
 
  !2) Reads initial KS orbitals from file (calls inwffil)
- call read_wfk(tdks,dtfil,dtset,ecut_eff,mpi_enreg)
+ call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
 
  !3) Compute occupation numbers from WF
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -267,10 +266,10 @@ subroutine tdks_init(tdks, codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  ABI_FREE(doccde)
 
  !4) Some further initialization (Mainly for PAW)
- call second_setup(tdks,dtset,dtfil,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond)
+ call second_setup(dtset,dtfil,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !5) Compute charge density from WFs
- call calc_density(tdks,dtfil,dtset,mpi_enreg,pawang,pawtab,psps)
+ call calc_density(dtfil,dtset,mpi_enreg,pawang,pawtab,psps,tdks)
 
  !TODO FB: That should be all for now but there were a few more initialization in
  !g_state.F90 in particular related to electric field, might want to check that out
@@ -411,7 +410,6 @@ end subroutine tdks_free
 !!  in particular PW, FFT, PSP, Symmetry etc.
 !!
 !! INPUTS
-!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!  codvsn = code version
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
@@ -421,6 +419,7 @@ end subroutine tdks_free
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  psp_gencond <integer> = store conditions for generating psp
+!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
 !!
@@ -432,13 +431,12 @@ end subroutine tdks_free
 !! CHILDREN
 !!
 !! SOURCE
-subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond)
+subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- type(tdks_type),            intent(inout) :: tdks
  character(len=8),           intent(in)    :: codvsn
  integer,                    intent(out)   :: psp_gencond
  real(dp),                   intent(out)   :: ecut_eff
@@ -446,6 +444,7 @@ subroutine first_setup(tdks,codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,
  type(dataset_type),         intent(inout) :: dtset
  type(pseudopotential_type), intent(inout) :: psps
  type(MPI_type),             intent(inout) :: mpi_enreg
+ type(tdks_type),            intent(inout) :: tdks
  !arrays
  type(pawrad_type),          intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),          intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
@@ -701,14 +700,15 @@ end subroutine first_setup
 !! occupation numbers in paticular related to PAW
 !!
 !! INPUTS
-!! tdks <type(tdks_type)> = the tdks object to initialize
 !! dtset <type(dataset_type)> = all input variables for this dataset
+!! dtfil <type datafiles_type> = infos about file names, file unit numbers
 !! mpi_enreg <MPI_type> = MPI-parallelisation information
 !! pawang <type(pawang_type)> = paw angular mesh and related data
 !! pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
 !! pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
 !! psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !! psp_gencond <integer> = store conditions for generating psp
+!! tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
 !!
@@ -720,13 +720,12 @@ end subroutine first_setup
 !! CHILDREN
 !!
 !! SOURCE
-subroutine second_setup(tdks, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond)
+subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- type(tdks_type),           intent(inout) :: tdks
  integer,                    intent(in)    :: psp_gencond
  type(pawang_type),          intent(inout) :: pawang
  type(dataset_type),         intent(inout) :: dtset
@@ -736,6 +735,7 @@ subroutine second_setup(tdks, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, p
  !arrays
  type(pawrad_type),          intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),          intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(tdks_type),            intent(inout) :: tdks
 
  !Local variables-------------------------------
  !scalars
@@ -759,7 +759,6 @@ subroutine second_setup(tdks, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, p
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
  !arrays
- integer,allocatable :: dimcprj_srt(:)
  integer,allocatable :: l_size_atm(:)
 
 ! ***********************************************************************
@@ -1039,11 +1038,11 @@ end subroutine second_setup
 !! Reads initial wavefunctions (KS orbitals) in WFK file (call inwfill)
 !!
 !! INPUTS
-!! tdks <type(tdks_type)> = the tdks object to initialize
 !! dtfil <type datafiles_type> = infos about file names, file unit numbers
 !! dtset <type(dataset_type)> = all input variables for this dataset
 !! ecut_eff <real(dp)> = effective PW cutoff energy
 !! mpi_enreg <MPI_type> = MPI-parallelisation information
+!! tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
 !!
@@ -1055,17 +1054,17 @@ end subroutine second_setup
 !! CHILDREN
 !!
 !! SOURCE
-subroutine read_wfk(tdks, dtfil, dtset, ecut_eff, mpi_enreg)
+subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- type(tdks_type),           intent(inout) :: tdks
  real(dp),                   intent(in)    :: ecut_eff
  type(datafiles_type),       intent(in)    :: dtfil
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
+ type(tdks_type),            intent(inout) :: tdks
 
  !Local variables-------------------------------
  !scalars
@@ -1153,10 +1152,12 @@ end subroutine read_wfk
 !!  Compute electronic density (in 1/bohr^3) from the WF (cg coefficients)
 !!
 !! INPUTS
-!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  pawang <type(pawang_type)> = paw angular mesh and related data
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
+!!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
 !!
@@ -1168,18 +1169,18 @@ end subroutine read_wfk
 !! CHILDREN
 !!
 !! SOURCE
-subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
+subroutine calc_density(dtfil, dtset, mpi_enreg, pawang, pawtab, psps, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- type(tdks_type),            intent(inout) :: tdks
  type(datafiles_type),       intent(in)    :: dtfil
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pawang_type),          intent(inout) :: pawang
  type(pseudopotential_type), intent(inout) :: psps
+ type(tdks_type),            intent(inout) :: tdks
  !arrays
  type(pawtab_type),          intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -1230,7 +1231,7 @@ subroutine calc_density(tdks, dtfil, dtset, mpi_enreg, pawang, pawtab, psps)
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
 
-   write(99,*) tdks%rhor
+   !write(99,*) tdks%rhor
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,      &
