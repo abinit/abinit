@@ -521,7 +521,7 @@ elec_eval = .FALSE.
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
 
-    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,inp%bound_EFS,inp%bound_factors,comm) 
+    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,inp%bound_EFS,inp%bound_factors,inp%bound_penalty,comm) 
 
     end if
 
