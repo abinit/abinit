@@ -722,6 +722,10 @@ contains
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'quadmom','DPR',0)
 
+ intarr(1,:)=dtsets(:)%quadquad
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'quadquad','INT',0)
+
+
 !###########################################################
 !### 03. Print all the input variables (R)
 !##
@@ -819,6 +823,9 @@ contains
 
  intarr(1,:)=dtsets(:)%rfstrs
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs','INT',0)
+
+ intarr(1,:)=dtsets(:)%rfstrs_ref
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs_ref','INT',0)
 
  intarr(1,:)=dtsets(:)%rfuser
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
@@ -1181,6 +1188,9 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%useextfpmd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useextfpmd','INT',0)
+
  intarr(1,:)=dtsets(:)%use_yaml
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
 
@@ -1237,6 +1247,9 @@ contains
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
+
+ intarr(1,:)=dtsets(:)%use_oldchi
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_oldchi','INT',0)
 
 
 !###########################################################

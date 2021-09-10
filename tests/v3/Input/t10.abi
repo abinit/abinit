@@ -35,12 +35,12 @@
   kptopt 0
  kpt   3*0
  natom  2
- nband 5 3
+ nband 5 5
+ occ 8*1 2*0
  nkpt 1
  nsppol 2
  nstep 25
  ntypat  1
- occ 8*1
  occopt 2
  tolvrs 1.0d-15
  typat  2*1

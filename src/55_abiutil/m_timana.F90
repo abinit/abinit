@@ -4,6 +4,9 @@
 !!
 !! FUNCTION
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
+!! number of calls to different routines is also provided, as comments,
+!! at the end of the routine, as well as, in the single dataset mode (ndtset<2),
+!! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
@@ -376,6 +379,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(232)='nonlop%prep_nonl%forstrn        '
  names(233)='nonlop%appinvovl                '
  names(234)='nonlop%prep_nonl%energy         '
+ names(235)='nonlop%getchc                   '; basic(235)=1
+ names(236)='nonlop%getcsc                   '; basic(236)=1
 
  names(238)='scfcv_core                      '
  names(239)='scfcv_core(Berry)               '
@@ -555,6 +560,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(575)='prep_bandfft_tabs               '; basic(575)=1
 
+ names(578)='vtowfk(cprj_rotate)             '
  names(581)='prep_nonlop(alltoall)           '
  names(583)='vtowfk(pw_orthon)               '
  names(584)='xcopy%lobpcg                    '
@@ -747,6 +753,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(862)='fourwf%suskmm !0 part 2         '
  names(871)='fourwf%suskmm !3 part 1         '
  names(872)='fourwf%suskmm !3 part 2         '
+ names(880)='fourwf%cgwf_cprj                '
 
  names(901)='newvtr(before selection)        '
  names(902)='newvtr(bef. prcref_PMA)         '
@@ -814,6 +821,17 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1021)='listkk                          '; basic(1021) = 1
 
+ names(1100)='nonlop_ylm                      '
+ names(1101)='nlo_ylm%opernla                 '
+ names(1102)='nlo_ylm%opernla_mv              '
+ names(1103)='nlo_ylm%opernlb                 '
+ names(1104)='nlo_ylm%opernlb_mv              '
+ names(1105)='nlo_ylm%opernlc                 '
+ names(1106)='nlo_ylm%opernld                 '
+ names(1107)='nlo_ylm%opernld(l)              '
+ names(1108)='nlo_ylm%opernld(l+im)           '
+ names(1119)='nlo_ylm(other)                  '
+
  names(1150)='outscfcv                        '
  names(1151)='outscfcv(preparation)           '
  names(1152)='outscfcv(mlwfovlp)              '
@@ -856,7 +874,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !names(1194)='outscfcv(gsr5) '
 !names(1195)='outscfcv(gsr6) '
 
-
  names(1200)='gstateimg                       '
  names(1203)='gstateimg(init)                 '
  names(1204)='gstateimg(bef. loop img)        '
@@ -866,18 +883,49 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1209)='gstateimg(aft. loop img)        '
  names(1210)='gstateimg(finalize)             '
 
- names(1211)='gstate(pspini)                  '
- names(1213)='gstate->kpgsph                  '
- names(1214)='gstate  (2)                     '
- names(1215)='gstate(...scfcv)                '
- names(1216)='gstate(prt gap)                 '
- names(1217)='gstate(prtwf)                   '
- names(1218)='gstate(clnup1)                  '
- names(1219)='gstate(prtelfield)              '
- names(1220)='gstate(DDB)                     '
- names(1221)='gstate(clnup2)                  '
+ names(1211)='gstate(1)                       '
+ names(1212)='gstate(pspini)                  '
+ names(1213)='gstate(2)                       '
+ names(1214)='gstate(init rhor rhog)          '
+ names(1215)='gstate(init history)            '
+ names(1225)='gstate(...scfcv)                '
+ names(1226)='gstate(prt gap)                 '
+ names(1227)='gstate(prtwf)                   '
+ names(1228)='gstate(clnup1)                  '
+ names(1229)='gstate(prtelfield)              '
+ names(1230)='gstate(DDB)                     '
+ names(1231)='gstate(clnup2)                  '
 
- names(1222)='gstate                          '
+ names(1232)='gstate                          '
+
+ names(1280)='read_rho                        '
+ names(1281)='interpolate_denpot              '
+
+ names(1290)='getcprj(all)                    '
+ names(1291)='getcprj%opernla                 '; basic(1291)=1
+ names(1292)='getcprj%opernla_mv              '; basic(1292)=1
+ names(1293)='getcprj(cgwf_cprj)              '
+ names(1294)='getcprj(ctocprj)                '
+ names(1295)='getcprj(vtowfk)                 '
+ names(1299)='getcprj(other)                  '
+
+ names(1300)='cgwf_cprj                       '
+ names(1301)='cgwf_cprj%other                 '
+ names(1302)='pawcprj(zaxpby)                 '
+ names(1303)='pawcprj(projbd)                 '; basic(1303)=1
+ names(1304)='subham(dotprod_g)               '; basic(1304)=1
+ names(1305)='cgwf_cprj%npw_work              '; basic(1305)=1
+
+ names(1360)='getcsc(all)                     '
+ names(1361)='getcsc%dotprod_g                '; basic(1361)=1
+ names(1362)='getcsc%other                    '
+ names(1363)='getcsc(cgwf_cprj)               '
+ names(1364)='getcsc(subovl)                  '
+
+ names(1370)='getchc                          '
+ names(1371)='getchc%local                    '; basic(1371)=1
+ names(1372)='getchc%kin                      '; basic(1372)=1
+ names(1375)='getchc%other                    '
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1180,7 +1228,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(8)
      tslots(:4)=(/803, 842,843,846/)
    case(9)
-     tslots(:10)=(/804, 845,847,848,850,854,858,859,861,862/)
+     tslots(:11)=(/804, 845,847,848,850,854,858,859,861,862,880/)
    case(10)
      tslots(:6)=(/805, 849,851,857,871,872/)
    case(11)
@@ -1207,14 +1255,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:4)=(/-98, 200,-841,-221/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
-     tslots(:5)=(/-40, 22,530,-201,-211/)
+     tslots(:6)=(/-40, 22,530,1300,-201,-211/)
    case(20)
 !      Estimate the complement of dfpt_cgwf (non getghc,projbd,nonlop,fourwf)
      tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
-!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-lobpcgwf2-chebfi )
-     tslots(:6)=(/-588, 39,-22,-530, -1600, -1650/)
+!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
+     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1650,-1295,-1364/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1276,8 +1324,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-788,781,782,783,784,785,786/)
    case(40)
 !      More complements in vtowfk
-!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon
-     tslots(:7)=(/-590,39,-22,-530,-585,-583, -1600/)
+!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon - cprj_rotate - getcprj(vtowfk)
+     tslots(:10)=(/-590,39,-22,-1300,-1600,-530,-585,-583,-578,-1295/)
    case(41)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
@@ -1287,6 +1335,27 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
+   case(45)
+!      Estimate the complement of nonlop_ylm
+     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+   case(46)
+!      Sum the calls of getcprj
+     tslots(:4)=(/1290,1293,1294,1295/)
+   case(47)
+!      Estimate the complement of getcprj
+     tslots(:5)=(/1299,1290,-1293,-1294,-1295/)
+   case(48)
+!      Estimate the complement of cgwf_cprj
+     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1293,-1363,-1370,-201,-211,-880/)
+   case(49)
+!      Sum calls of getcsc
+     tslots(:3)=(/1360,1363,1364/)
+   case(50)
+!      Estimate the complement of getcsc
+     tslots(:4)=(/1362,1360,-1363,-1364/)
+   case(51)
+!      Estimate the complement of getchc
+     tslots(:5)=(/1375,1370,-235,-1371,-1372/)
 
    case default
      cycle
@@ -1538,7 +1607,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(2)
          list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)        ; msg='driver '
        case(3)
-         list(:22)=(/ (ii,ii=1200,1221,1) /)                         ; msg='gstateimg+gstate '
+         list(:32)=(/ (ii,ii=1200,1231,1) /)                         ; msg='gstateimg+gstate '
        case(4)
          list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); msg='scfcv_core '
        case(5)
@@ -1547,7 +1616,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          msg= 'vtorho '
        case(7)
-         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; msg='vtowfk '
+         list(:18)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1295,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
            list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
@@ -1574,7 +1643,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(16)
          list(:4)=(/200,841,221,98/)                                 ; msg='getghc '
        case(17)
-         list(:20)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858/)
+         list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
        case(18)
          list(:5)=(/933,934,936,937,938/)                            ; msg='outkss '
@@ -1662,6 +1731,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          msg='low-level xgScalapack type '
        case(78)
          list(:8)=(/ (ii,ii=1662,1669,1) /)                          ; msg='low-level xgTransposer type '
+       case(79)
+         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
+         msg='cgwf_cprj'
+       case(80)
+         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
+         msg='nonlop_ylm'
+       case(81)
+         list(:5)=(/1290,1293,1294,1295,1299/)
+         msg='getcprj'
+       case(82)
+         list(:4)=(/1360,1363,1364,1362/)
+         msg='getcsc'
+       case(83)
+         list(:5)=(/1370,235,1371,1372,1375/)
+         msg='getchc'
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
@@ -1756,7 +1840,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      if(xmpi_paral==1)then
        write(ount, '(a,/,a)' )'-','-Synchronisation (=leave_test) and MPI calls '
        nlist=14
-       list(:14)=(/48,61,62,63,64,65,66,67,71,85,86,543,544,787/)
+       list(:nlist)=(/48,61,62,63,64,65,66,67,71,85,86,543,544,787/)
        subcpu=zero; subwal=zero
        if(ncount(list(1))/=0)then
          do ilist=1,nlist
@@ -1782,8 +1866,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if !ncount
      end if !xmpi_paral
 
-     nlist=25
-     list(:25)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333/)
+     nlist=27
+     list(:nlist)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,1280,1281/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -1799,7 +1883,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      end do
 
      nlist=23
-     list(:23)=(/550,551,552,553,554,555,556,558,559,560,561,562,563,564,565,566,567,593,594,595,596,597,598/)
+     list(:nlist)=(/550,551,552,553,554,555,556,558,559,560,561,562,563,564,565,566,567,593,594,595,596,597,598/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -1821,7 +1905,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
        nlist=8
-       list(:8)=(/802,803,9,75,76,77,210,11/)
+       list(:nlist)=(/802,803,9,75,76,77,210,11/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then

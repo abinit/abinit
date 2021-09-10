@@ -438,11 +438,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
    if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
-   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-               Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+     call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                 Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
    else
-   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-               Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
+     call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                 Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
    end if
 
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
@@ -861,7 +861,7 @@ subroutine ifc_print(ifc, header, unit, prtvol)
  unt = std_out; if (present(unit)) unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- msg = ' ==== Info on the ifc% object ==== '
+ msg = ' ==== Info on the interatomic force constants ==== '
  if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(unt, msg)
 
@@ -872,11 +872,13 @@ subroutine ifc_print(ifc, header, unit, prtvol)
    call wrtout(unt,msg)
  end do
  call wrtout(unt, sjoin(" acell:", ltoa(ifc%acell)))
-
  call wrtout(unt, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
  call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
  call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
  call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
+ call wrtout(unt, sjoin(" Dipole-quadrupole interaction flag (dipquad):", itoa(ifc%dipquad)))
+ call wrtout(unt, sjoin(" quadrupole-quadrupole interaction flag (quadquad):", itoa(ifc%quadquad)))
+ call wrtout(unt, sjoin(" Ewald option:", itoa(ifc%ewald_option)))
  call wrtout(unt, sjoin(" Dielectric tensor: ", ch10, ltoa(reshape(ifc%dielt, [9]), fmt="f10.2")))
  call wrtout(unt, " Effective charges:")
  do iatom=1,ifc%natom

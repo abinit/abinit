@@ -2,12 +2,12 @@
 
 Version 9.4, released on February 25, 2021.
 List of changes with respect to version 9.2.
-<!-- Release notes updated on March 22, 2021. -->
+<!-- Release notes updated on April 30, 2021. -->
 
 Many thanks to the contributors to the ABINIT project between
-November 2020 and March 2021. These release notes
+November 2020 and April 2021. These release notes
 are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
-<!-- Merge requests up to and including MR766 are taken into account also MR768 (backported) up to MR772. -->
+<!-- Merge requests up to and including MR766 are taken into account, also MR768 (backported) up to MR772 and MR780, 781, 782. -->
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
@@ -119,7 +119,7 @@ By Mauricio Rodriguez-Mayorga and F. Bruneval (MR722).
 See [[cite:Sadigh2015]] and [[cite:Sadigh2015a]]. This is based on the `images` capability
 of ABINIT, that has been extended to different values of the input variable [[cellcharge]]
 for different images, and also parallelized. To activate pSIC, use [[imgmov]]=6 with the proper occupation numbers.
-See the test examples [[test:v9_22]], [[test:psic_01]] and [[test:psic_03]].
+See the test examples [[test:v9_22]], [[test:psic_01]], [[test:psic_02]] and [[test:psic_03]].
 
 By X. Gonze (initial test from C. Tantardini) (MR770).
 
@@ -205,7 +205,10 @@ By M. Giantomassi. MR 770.
 **D.9** Document i-pi interface with links to ASE docs.
 By M. Giantomassi. MR 770.
 
-**D.10** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
+**D.10** Correction (from a message on the forum) related to the forces in electron-positron mode.
+By M. Torrent. MR 780
+
+**D.11** Miscellaneous additional bug fixes, improvements of documentation including for the build system (many other were made
 in the upgrade of tutorials)..
 By B. Amadon, L. Baguet, F. Bruneval, T. Karatsu, G. Petretto, Y. Pouillon, M. Torrent, J. Zwanziger.
 
@@ -782,7 +785,6 @@ By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
@@ -1515,7 +1517,6 @@ By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
@@ -1946,7 +1947,7 @@ B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the 
 
 B.6 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
     See the theory in [[cite:Ceresoli2006]].
-    Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
+    Associated input variable: [[orbmag]]. 
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
     this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call.
     Tutorial [[tutorial:nuc|nuc]] is nightly tested.
