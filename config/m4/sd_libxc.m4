@@ -55,6 +55,10 @@ AC_DEFUN([SD_LIBXC_INIT], [
       no-fortran)
         sd_libxc_enable_fc="no"
         ;;
+      mandatory)
+        sd_libxc_enable="yes"
+        sd_libxc_enable_def="yes"
+        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg LibXC option: '${kwd}'])
         ;;
