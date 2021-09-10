@@ -35,6 +35,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   sd_netcdf_cxxflags_def="$5"
   sd_netcdf_fcflags_def="$6"
   sd_netcdf_ldflags_def="$7"
+  sd_netcdf_enable_def=""
 
   # Process options
   for kwd in ${sd_netcdf_options}; do
@@ -48,6 +49,10 @@ AC_DEFUN([SD_NETCDF_INIT], [
       fail|skip|warn)
         sd_netcdf_policy="${kwd}"
         ;;
+      mandatory)
+        sd_netcdf_enable="yes"
+        sd_netcdf_enable_def="yes"
+        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg NetCDF option: '${kwd}'])
         ;;
@@ -59,6 +64,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   test -z "${sd_netcdf_policy}" && sd_netcdf_policy="fail"
   test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="no"
   test -z "${sd_netcdf_libs_def}" && sd_netcdf_libs_def="-lnetcdf"
+  test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="no"
   case "${sd_netcdf_status}" in
     implicit|required)
       sd_netcdf_enable_def="yes"
