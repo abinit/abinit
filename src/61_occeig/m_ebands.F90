@@ -54,7 +54,7 @@ MODULE m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
-                              isdiagmat, get_diag, interpol3d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -200,6 +200,8 @@ MODULE m_ebands
    ! Write eDOS to netcdf file.
 
    procedure :: get_carriers => edos_get_carriers
+   ! Compute number of holes (nh) and electrons (ne) per unit cell from a given
+   ! list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
 
  end type edos_t
 !!***
@@ -382,7 +384,6 @@ CONTAINS  !=====================================================================
 !!      abitk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -628,7 +629,6 @@ end function get_gaps_
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -678,7 +678,6 @@ end subroutine gaps_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -820,7 +819,6 @@ end subroutine gaps_print
 !!      m_mlwfovlp_qp,m_outscfcv,m_screening_driver,m_sigma_driver,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1068,7 +1066,6 @@ end function ebands_from_dtset
 !!      m_sigmaph,m_sigtk,m_wfk,m_wfk_analyze,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1112,10 +1109,9 @@ end subroutine ebands_free
 !!
 !! PARENTS
 !!      m_bethe_salpeter,m_ebands,m_eph_double_grid,m_exc_spectra,m_haydock
-!!      m_screening_driver,m_sigma_driver,m_sigmaph,optic
+!!      m_screening_driver,m_sigma_driver,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1188,7 +1184,6 @@ end subroutine ebands_copy
 !!      m_rta
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1229,7 +1224,6 @@ end subroutine ebands_move_alloc
 !!      abitk,m_bethe_salpeter,m_ephtk,m_sigtk,m_wfk,m_wfk_analyze
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1334,7 +1328,6 @@ end subroutine ebands_print
 !!      m_chi0,m_ebands,m_ioarr,m_iowf
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1399,7 +1392,6 @@ end subroutine unpack_eneocc
 !!      m_chi0,m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1456,7 +1448,6 @@ end subroutine pack_eneocc
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1518,7 +1509,6 @@ end subroutine get_eneocc_vect
 !!      m_dfpt_looppert,m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1842,7 +1832,6 @@ end function ebands_vcbm_range_from_gaps
 !!      m_bethe_salpeter,m_ephtk,m_screening_driver,m_sigmaph
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1996,7 +1985,6 @@ end function ebands_get_occupied
 !!      m_sigma_driver,m_sigmaph
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2088,7 +2076,6 @@ end subroutine ebands_enclose_degbands
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2385,11 +2372,10 @@ end function ebands_write_bxsf
 !!   %entropy=Set to zero
 !!
 !! PARENTS
-!!      abitk,m_a2ftr,m_bethe_salpeter,m_ebands,m_elphon,m_ephtk
-!!      m_screening_driver,m_sigma_driver,m_sigtk,m_wfk,optic
+!!      m_a2ftr,m_bethe_salpeter,m_ebands,m_elphon,m_ephtk,m_screening_driver
+!!      m_sigma_driver,m_sigtk,m_wfk,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2558,10 +2544,9 @@ end subroutine ebands_update_occ
 !!  by another call to set_extrael (update_occ is expensive for large k-meshes). Default: True.
 !!
 !! PARENTS
-!!      abitk,m_ebands,m_ephtk,m_sigmaph
+!!      m_ebands,m_ephtk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2626,7 +2611,6 @@ end subroutine ebands_set_scheme
 !!      m_ephtk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2724,10 +2708,9 @@ end subroutine ebands_set_fermie
 !! Use ebands_set_scheme before calling this routine, if you have a semiconductor.
 !!
 !! PARENTS
-!!      abitk,m_ephtk,m_sigmaph
+!!      m_ephtk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 ! CP modified for it to work with occopt 9
@@ -2810,10 +2793,9 @@ end subroutine ebands_set_extrael
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_rta,m_sigmaph
+!!      abitk,m_rta,m_sigmaph
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2954,7 +2936,6 @@ end function ebands_calc_nelect
 !!      m_bethe_salpeter,m_exc_diago,m_gstate,m_sigma_driver
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3523,7 +3504,6 @@ end function ebands_get_edos
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3563,7 +3543,6 @@ end subroutine edos_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3749,7 +3728,6 @@ end function edos_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3834,6 +3812,9 @@ end subroutine edos_print
 !! FUNCTION
 !!  Compute number of holes (nh) and electrons (ne) per unit cell from a given
 !!  list of `ntemp` temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
+!!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.!!
+!!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
 !!
 !! INPUTS
 !!
@@ -3845,55 +3826,54 @@ end subroutine edos_print
 !!
 !! SOURCE
 
-subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, nh, ne)
+subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, n_ehst)
 
 !Arguments ------------------------------------
  class(edos_t),intent(in) :: edos
  integer,intent(in) :: ntemp
 !arrays
  real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
- real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+ real(dp),intent(out) :: n_ehst(2, edos%nsppol, ntemp)
 
 !Local variables-------------------------------
- integer :: itemp, iw
- !real(dp) :: max_occ
+ integer :: itemp, iw, spin
  real(dp),allocatable :: values(:)
 
 ! *************************************************************************
 
  ! Copy important dimensions
- !max_occ = two / (edos%nspinor * edos%nsppol)
- ne = zero; nh = zero
-
+ n_ehst = zero
  ABI_MALLOC(values, (edos%nw))
-
- ! TODO: May spline the DOS to improve accuracy of the results.
- !new_edos = edos%spline()
 
  do itemp=1,ntemp
 
+   ! For electrons (assuming ef inside the gap if semiconductor)
+   do spin=1,edos%nsppol
+     do iw=1,edos%nw
+       if (edos%mesh(iw) >= mu_e(itemp)) then
+         values(iw) = edos%dos(iw, spin) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
+       else
+         values(iw) = zero
+       end if
+     end do
+     n_ehst(1, spin, itemp) = simpson(edos%step, values)
+   end do ! spin
+
    ! For holes
-   do iw=1,edos%nw
-     if (edos%mesh(iw) < mu_e(itemp)) then
-       values(iw) = edos%dos(iw, 0) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
-     else
-       values(iw) = zero
-     end if
-   end do
-   nh(itemp) = simpson(edos%step, values)
+   do spin=1,edos%nsppol
+     do iw=1,edos%nw
+       if (edos%mesh(iw) < mu_e(itemp)) then
+         values(iw) = edos%dos(iw, spin) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
+       else
+         values(iw) = zero
+       end if
+     end do
+     n_ehst(2, spin, itemp) = simpson(edos%step, values)
+   end do ! spin
 
-   ! For electrons
-   do iw=1,edos%nw
-     if (edos%mesh(iw) >= mu_e(itemp)) then
-       values(iw) = edos%dos(iw, 0) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
-     else
-       values(iw) = zero
-     end if
-   end do
-   ne(itemp) = simpson(edos%step, values)
+ end do ! itemp
 
- end do
-
+ if (edos%nsppol == 1 .and. edos%nspinor == 1) n_ehst = two * n_ehst
  ABI_FREE(values)
 
 end subroutine edos_get_carriers
@@ -4030,7 +4010,6 @@ end function ebands_write_nesting
 !!      m_wfk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -4393,7 +4372,6 @@ end function ebands_chop
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -4833,7 +4811,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
 !Local variables-------------------------------
 !scalars
- integer :: nproc, my_rank, nw, spin, band, ib, ik_ibz, cnt, idat, ierr, bcorr
+ integer :: nproc, my_rank, nw, spin, band, ib, ik_ibz, cnt, idat, ierr, bcorr, time_opt
  integer :: ii, jj, ief, ihf, bmin_, bmax_ ! CP added ihf
  real(dp),parameter :: max_occ1 = one
  real(dp) :: emax, emin, wtk, max_occ
@@ -4906,6 +4884,8 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    ABI_CALLOC(out_tensdos, (nw, 2, 3, 3, ntens, ebands%nsppol))
  end if
 
+ time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
+
  !call wrtout(std_out, " Computing DOS weighted by matrix elements.")
  select case (intmeth)
  case (1)
@@ -4938,7 +4918,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
          ! vectors
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wme0(:) * vsum(ii)
              call simpson_int(nw, step, out_vecsdos(:,1,ii,idat,spin), out_vecsdos(:,2,ii,idat,spin))
@@ -4948,7 +4928,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
          ! tensor
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              do jj=1,3
                out_tensdos(:,1,jj,ii,idat,spin) = out_tensdos(:,1,jj,ii,idat,spin) + wme0(:) * tsum(jj,ii)
@@ -5016,7 +4996,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 !$OMP PARALLEL DO PRIVATE(vsum)
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              out_vecsdos(:, :, ii, idat, spin) = out_vecsdos(:, :, ii, idat, spin) + weights(:, :) * vsum(ii)
            end do
@@ -5026,7 +5006,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 !$OMP PARALLEL DO PRIVATE(tsum)
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin), time_opt)
            do ii=1,3
              do jj=1,3
                out_tensdos(:, :, jj, ii, idat, spin) = out_tensdos(:, :, jj, ii, idat, spin) + weights(:, :) * tsum(jj,ii)
@@ -5378,7 +5358,6 @@ end function jdos_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5420,7 +5399,6 @@ end subroutine jdos_free
 !!      m_eph_driver,m_outscfcv
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5643,7 +5621,6 @@ end subroutine ebands_prtbltztrp
 !!      m_a2ftr
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5834,7 +5811,6 @@ end subroutine ebands_prtbltztrp_tau_out
 !!      abitk,m_ebands,m_eph_driver,m_outscfcv
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5894,7 +5870,6 @@ end subroutine ebands_write
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6025,7 +6000,6 @@ end subroutine ebands_write_xmgrace
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6160,7 +6134,6 @@ end subroutine ebands_write_gnuplot
 !!      m_outscfcv,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6332,7 +6305,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 
  ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, bsize, nsppol, ndat))
 
- ! Build array in the full BZ to prepare call to interpol3d.
+ ! Build array in the full BZ to prepare call to interpol3d_0d.
  ikf = 0
  do iz=1,nkz
    do iy=1,nky
@@ -6365,7 +6338,6 @@ end function klinterp_new
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6397,7 +6369,6 @@ end subroutine klinterp_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6427,7 +6398,7 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%bsize
-        val = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
+        val = interpol3d_0d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
 
         !if (val <= zero) then
         !  vv(1) = self%data_uk_bsd(ir1, ir2, ir3, band, spin, idat)
@@ -6454,12 +6425,20 @@ end subroutine klinterp_eval_bsd
 !! ebands_get_carriers
 !!
 !! FUNCTION
-!!  Compute number of holes (nh) and electrons (ne) per unit cell from a given list of `ntemp`
+!!  Compute number of electrons (e) and holes (h) per unit cell from a given list of `ntemp`
 !!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
+!!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
+!!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
+!!
+!! PARENTS
+!!      abitk,m_rta
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
-subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
+subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
 
 !Arguments ------------------------------------
 !scalars
@@ -6467,7 +6446,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
  integer,intent(in) :: ntemp
 !arrays
  real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
- real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+ real(dp),intent(out) :: n_ehst(2, self%nsppol, ntemp)
 
 !Local variables-------------------------------
  integer :: spin, ik_ibz, ib, itemp
@@ -6476,7 +6455,7 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 ! *********************************************************************
 
  max_occ = two / (self%nspinor * self%nsppol)
- ne = zero; nh = zero
+ n_ehst = zero
 
  do spin=1,self%nsppol
    do ik_ibz=1,self%nkpt
@@ -6486,9 +6465,13 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
 
        do itemp=1,ntemp
          if (eig_nk >= mu_e(itemp)) then
-           ne(itemp) = ne(itemp) + wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
+           ! electron (assuming ef inside the gap if semiconductor)
+           n_ehst(1, spin, itemp) = n_ehst(1, spin, itemp) + &
+                                    wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
          else
-           nh(itemp) = nh(itemp) + wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
+           ! electron
+           n_ehst(2, spin, itemp) = n_ehst(2, spin, itemp) + &
+                                    wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
          end if
        end do
 

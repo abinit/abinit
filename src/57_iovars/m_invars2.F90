@@ -49,6 +49,8 @@ module m_invars2
  use m_inkpts,    only : inkpts
  use m_ingeo,     only : invacuum
  use m_ipi,       only : ipi_check_initial_consistency
+ use m_crystal,   only : crystal_t
+ use m_bz_mesh,   only : kmesh_init, kmesh_t, find_qmesh
 
  implicit none
 
@@ -105,9 +107,10 @@ contains
 !!      m_common
 !!
 !! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
+!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
+!!      timab,wrtout
 !!
 !! SOURCE
 
@@ -125,6 +128,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
 !Local variables -------------------------------
 !scalars
  integer :: idtset,jdtset,mband_upper,nsheps,nshsigx,nshwfn,usepaw
+ !integer,parameter :: master = 0
  real(dp) :: ucvol
 !arrays
  integer :: bravais(11)
@@ -228,9 +232,10 @@ end subroutine invars2m
 !!      m_invars2
 !!
 !! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
+!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img
+!!      invacuum,ipi_check_initial_consistency,libxc_functionals_end
+!!      libxc_functionals_get_hybridparams,libxc_functionals_init,sort_int
+!!      timab,wrtout
 !!
 !! SOURCE
 
@@ -248,18 +253,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: master = 0
  integer :: bantot,berryopt,dmatsize,ndim,getocc,narr,nprocs
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
- integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
- integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
+ integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
+ integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
  character(len=500) :: msg
  character(len=fnlen) :: key_value
+ type(crystal_t) :: cryst
+ type(kmesh_t) :: kmesh, qmesh
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
@@ -270,7 +278,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call timab(191,1,tsec)
 
- nprocs = xmpi_comm_size(comm)
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! Compute the maximum size of arrays intarr and dprarr
  natom=dtset%natom
@@ -469,6 +477,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbcut',tread,'INT')
+ if(tread==1) dtset%extfpmd_nbcut=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
 
@@ -589,7 +600,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%gwgmcorr=intarr(1)
 
  ! RESPFN integer input variables (needed here to get the value of response)
- ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+ ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
  if(tread==1) dtset%rfasr=intarr(1)
 
@@ -616,6 +627,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
  if(tread==1) dtset%rfstrs=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs_ref',tread,'INT')
+ if(tread==1) dtset%rfstrs_ref=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfuser',tread,'INT')
  if(tread==1) dtset%rfuser=intarr(1)
@@ -653,6 +667,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
  if(tread==1) dtset%nonlinear_info=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlop_ylm_count',tread,'INT')
+ if(tread==1) dtset%nonlop_ylm_count=intarr(1)
 
  ! NONLINEAR integer input variables (same definition as for rfarr)
  ! Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
@@ -748,8 +765,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nonscf_gkk',tread,'INT')
  if(tread==1) dtset%use_nonscf_gkk=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
+ if(tread==1) dtset%useextfpmd=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
  if(tread==1) dtset%use_yaml=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_oldchi',tread,'INT')
+ if(tread==1) dtset%use_oldchi=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
  if(tread==1) dtset%brav=intarr(1)
@@ -1089,6 +1112,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftgw',tread,'INT')
  if(tread==1) dtset%fftgw=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fft_count',tread,'INT')
+ if(tread==1) dtset%fft_count=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsuscep',tread,'INT')
  if(tread==1) dtset%getsuscep=intarr(1)
 
@@ -1249,7 +1275,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      sum_spinat=zero
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
-       sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
+       sum_spinat=sum_spinat+dtset%spinat(3,iatom)
      end do
      zelect=zval-cellcharge_min
      ! Then select the minimum number of bands, and add the required number.
@@ -1265,7 +1291,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nband(ikpt)=nband1
    end do
 
-   ! CP added 
+   ! CP added
    if (occopt==9)then
 ! Read the valence band index
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
@@ -1415,8 +1441,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
  if(tread==1) dtset%asr=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
- if(tread==1) dtset%dipdip=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread_dipdip,'INT')
+ if(tread_dipdip==1) dtset%dipdip=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
  if(tread==1) dtset%chneut=intarr(1)
@@ -1452,7 +1478,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%eph_task == -4 .and. dtset%symsigma == 0) dtset%eph_intmeth = 1
  end if
 
- ! Allow use to dope the system or shift artificially the Fermi level
+ ! Allow use to dope the system or to shift artificially the Fermi level
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_extrael',tread_extrael,'DPR')
  if (tread_extrael == 1) dtset%eph_extrael = dprarr(1)
 
@@ -1567,6 +1593,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extrapwf',tread,'INT')
  if(tread==1) dtset%extrapwf=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_abs_tol',tread,'DPR')
+ if(tread==1) dtset%ibte_abs_tol=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_alpha_mix',tread,'DPR')
+ if(tread==1) dtset%ibte_alpha_mix=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_niter',tread,'INT')
+ if(tread==1) dtset%ibte_niter=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_prep',tread,'INT')
+ ! ibte_prep is only available when we compute the imaginary part.
+ if(tread==1 .and. dtset%eph_task == -4) dtset%ibte_prep=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iboxcut',tread,'INT')
  if(tread==1) dtset%iboxcut=intarr(1)
 
@@ -1623,6 +1662,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'istatimg',tread,'INT')
  if(tread==1) dtset%istatimg=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
+ if(tread==1) dtset%quadquad=intarr(1)
+
  ! variables for random positions in unit cell
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',tread,'INT')
  if(tread==1) dtset%random_atpos=intarr(1)
@@ -1661,7 +1703,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%ionmov=12
    write(msg, '(4a)' )&
      'LOTF is disabled, ionmov can not be 23.',ch10,&
-    'Set ionmov to 12.',ch10
+     'Set ionmov to 12.',ch10
    ABI_COMMENT(msg)
 #endif
  end if
@@ -1909,7 +1951,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%efmas>0) then
    call intagm(dprarr,intarr,jdtset,marr,2*nkpt,string(1:lenstr),'efmas_bands',tread,'INT')
    if(tread==1) then
-     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt),(/2,nkpt/))
+     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt), [2,nkpt])
    else
      dtset%efmas_bands(1,:)=1
      dtset%efmas_bands(2,:)=dtset%nband(:)
@@ -2062,6 +2104,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diismemory',tread,'INT')
  if(tread==1) dtset%diismemory=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
+ if(tread==1) dtset%dipquad=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'goprecon',tread,'INT')
  if(tread==1) dtset%goprecon=intarr(1)
@@ -2488,6 +2533,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nloalg(2)=1 ; if(intarr(1)<0)dtset%nloalg(2)=-1
    dtset%nloalg(3)=abs(intarr(1))-1
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
+ if(tread==1) dtset%cprj_update_lvl=intarr(1)
 
  ! LOOP variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nline',tread,'INT')
@@ -3249,9 +3297,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
 #ifdef HAVE_NETCDF
-   ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
-   NCF_CHECK(ncerr)
+   if (my_rank == 0) then
+     ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
+     NCF_CHECK(ncerr)
+   end if
 #endif
+   call xmpi_barrier(comm)
    ABI_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
 
@@ -3552,7 +3603,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! band range for self-energy corrections.
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
- if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+ if (tread == 1) then
+   dtset%sigma_erange = dprarr(1:2)
+   !if (all(dtset%sigma_erange < zero) .and. .not. tread_dipdip == 1) dtset%dipdip = 0
+ end if
 
  ! IBZ k-points for transport calculation in terms of transport_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'transport_ngkpt', tread, 'INT')
@@ -3593,6 +3647,51 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
+
+ !Now all inputs are read, we can determine if "cprj_in_memory" implementation can be used or not
+ dtset%cprj_in_memory=0
+ if (dtset%cprj_update_lvl/=0) then
+   dtset%cprj_in_memory=1
+   ! Must be ground state computation...
+   if (dtset%optdriver/=0) dtset%cprj_in_memory = 0
+   ! ...with PAW...
+   if (dtset%usepaw/=1) dtset%cprj_in_memory = 0
+   ! ... and Conjugate Gradient...
+   if (dtset%wfoptalg/=10) dtset%cprj_in_memory = 0
+   ! ...without kgb parallelization...
+   if (dtset%paral_kgb/=0) dtset%cprj_in_memory = 0
+   ! ...without RMM-DIIS...
+   if (dtset%rmm_diis/=0) dtset%cprj_in_memory = 0
+   ! ...without electric field...
+   if (dtset%berryopt/=0) dtset%cprj_in_memory = 0
+   ! ...without Fock exchange...
+   if (dtset%usefock/=0) dtset%cprj_in_memory = 0
+   ! ...without nuclear dipolar moments...
+   if (sum(abs(dtset%nucdipmom))>tol16) dtset%cprj_in_memory = 0
+ end if
+
+ if (dtset%nqptdm == -1) then
+   cryst = dtset%get_crystal(1)
+   !call cryst%print(mode_paral='COLL')
+   call kmesh_init(Kmesh, Cryst, dtset%nkpt, dtset%kptns, Dtset%kptopt, wrap_1zone=.FALSE.)
+
+   ! Some required information are not filled up inside kmesh_init
+   ! So doing it here, even though it is not clean
+   Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
+   Kmesh%nshift        =Dtset%nshiftk
+   ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
+   Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
+   !call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0, "COLL")
+   call find_qmesh(Qmesh, Cryst, Kmesh)
+#ifdef HAVE_NETCDF
+   if (my_rank == master) then
+      ncerr = nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt)
+      NCF_CHECK(ncerr)
+   end if
+#endif
+   call xmpi_barrier(comm)
+   ABI_ERROR_NODUMP("Aborting now")
+ end if
 
  call timab(191,2,tsec)
 

@@ -165,6 +165,8 @@ contains
 !!      m_vtowfk
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -712,6 +714,8 @@ end subroutine rmm_diis
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -862,6 +866,8 @@ end function rmm_diis_exit_iter
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -917,8 +923,11 @@ end subroutine rmm_diis_print_block
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1051,6 +1060,8 @@ end function rmm_diis_new
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1089,6 +1100,8 @@ end subroutine rmm_diis_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1183,6 +1196,8 @@ end subroutine rmm_diis_update_block
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1246,8 +1261,11 @@ end subroutine rmm_diis_eval_mats
 !! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1308,8 +1326,11 @@ end subroutine my_pack_matrix
 !!  gsc(2,*)=update <G|S|C>
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
+!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 

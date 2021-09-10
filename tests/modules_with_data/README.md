@@ -41,7 +41,6 @@ that points to e.g. ~abinit/tests/modules_with_data/MgO_eph_zpr/
 
 For an example, see tutorespfn/Input/teph4zpr_3.in
 
-
     git submodule update --remote --init
 
 [submodule "tests/modules_with_data/MgO_eph_zpr"]

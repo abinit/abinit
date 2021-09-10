@@ -37,8 +37,10 @@ module m_cgprj
  use m_mkffnl,   only : mkffnl
  use m_mpinfo,   only : proc_distrb_cycle
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, &
-                        pawcprj_set_zero, pawcprj_mpi_sum
+                        pawcprj_set_zero, pawcprj_mpi_sum, pawcprj_copy, pawcprj_lincom
  use m_opernla_ylm, only : opernla_ylm
+ use m_opernla_ylm_mv, only : opernla_ylm_mv
+ use m_time,           only : timab
 
  implicit none
 
@@ -46,6 +48,7 @@ module m_cgprj
 !!***
 
  public :: getcprj
+ public :: cprj_rotate
  public :: ctocprj
 !!***
 
@@ -112,13 +115,11 @@ contains
 !!  Spin-orbit
 !!
 !! PARENTS
-!!      m_cgprj,m_cgwf,m_dfpt_mkrho,m_dfpt_nstwf,m_dfptnl_pert,m_ksdiago
-!!      m_orbmag,m_rf2_init,m_wfd
+!!      m_cgprj,m_cgwf,m_cgwf_cprj,m_dfpt_mkrho,m_dfpt_nstwf,m_dfptnl_pert
+!!      m_ksdiago,m_orbmag,m_rf2_init,m_wfd
 !!
 !! CHILDREN
-!!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
-!!      pawcprj_put,pawcprj_set_zero,ph1d3d,strconv,xmpi_allgather
-!!      xmpi_allgatherv,xmpi_alltoallv
+!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 
@@ -143,9 +144,11 @@ contains
 
 !Local variables-------------------------------
 !scalars
+ logical :: no_opernla_mv
  integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat
  integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs
 !arrays
+ real(dp) :: tsec(2)
  integer,allocatable :: cplex_dgxdt(:),cplex_d2gxdt(:),indlmn_typ(:,:)
  real(dp),allocatable :: d2gxdt(:,:,:,:,:),dgxdt(:,:,:,:,:),ffnl_typ(:,:,:)
  real(dp),allocatable :: gx(:,:,:,:)
@@ -154,6 +157,8 @@ contains
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ call timab(1290,1,tsec)
 
 !Nothing to do in that case
  if (cpopt==1.and.choice==1) return
@@ -190,6 +195,8 @@ contains
      ABI_BUG('Incorrect size for ph3d!')
    end if
  end if
+
+ no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with nonlop_ylm
 
 !Define dimensions of projected scalars
  dimffnl=size(ffnl,2)
@@ -278,9 +285,19 @@ contains
      end if
 
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
-     call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
-&     ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
-&     nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+     if (abs(choice_)>1.or.no_opernla_mv) then
+       call timab(1291,1,tsec)
+       call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
+&       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
+&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+       call timab(1291,2,tsec)
+     else
+       call timab(1292,1,tsec)
+       call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx,&
+&       ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
+&       nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef)
+       call timab(1292,2,tsec)
+     end if
 
 !    Transfer result to output variable cwaveprj
      if (cpopt==0) then
@@ -356,6 +373,8 @@ contains
    ABI_FREE(ph3d_)
  end if
 
+ call timab(1290,2,tsec)
+
  DBG_EXIT('COLL')
 
  end subroutine getcprj
@@ -397,7 +416,7 @@ contains
 !!  istwfk(nkpt)=option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  kpt(3,nkpt)=reduced coordinates of k points.
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband_mem*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
@@ -407,6 +426,8 @@ contains
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)= # atoms of each type
 !!  nband(nkpt*nsppol)=number of bands at this k point for that spin polarization
+!TODO : distribute cprj over bands as well
+!!  mband_mem=max number of bands for this processor (in case of band parallelism)
 !!  ncprj=1st dim. of cprj array (natom if iatom<=0, 1 if iatom>0)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~ABINIT/Infos/vargs.htm#ngfft
 !!  nkpt=number of k points
@@ -431,13 +452,11 @@ contains
 !!                                       Usually ncprj=natom
 !!
 !! PARENTS
-!!      m_berryphase_new,m_dfpt_looppert,m_extraprho,m_forstr,m_scfcv_core
-!!      m_vtorho
+!!      m_berryphase_new,m_dfpt_looppert,m_extraprho,m_forstr,m_gstate
+!!      m_positron,m_scfcv_core,m_vtorho
 !!
 !! CHILDREN
-!!      getcprj,mkffnl,mkkpg,pawcprj_alloc,pawcprj_free,pawcprj_mpi_sum
-!!      pawcprj_put,pawcprj_set_zero,ph1d3d,strconv,xmpi_allgather
-!!      xmpi_allgatherv,xmpi_alltoallv
+!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
 !!
 !! SOURCE
 
@@ -450,6 +469,8 @@ contains
 !scalars
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mcg,mcprj,mgfft,mkmem,mpsang,mpw
  integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
+!TODO : distribute cprj over bands as well
+! integer,intent(in) :: mband_mem
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
@@ -480,7 +501,7 @@ contains
  integer,allocatable :: dimlmn(:),kg_k(:,:),kg_k_loc(:,:)
  integer,allocatable :: npw_block(:),npw_disp(:)
  integer,pointer :: atindx_atm(:),indlmn_atm(:,:,:),nattyp_atm(:),pspso_atm(:)
- real(dp) :: kpoint(3),work(6)
+ real(dp) :: kpoint(3),work(6),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef_tmp(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),ffnl_npw(:,:,:,:),ffnl_tmp(:,:,:,:),ffnl_tmp_npw(:,:,:,:)
  real(dp),allocatable :: kpg_k(:,:)
@@ -535,13 +556,15 @@ contains
    spaceComm=mpi_enreg%comm_cell
    spaceComm_fft=xmpi_comm_self
    npband_bandfft=1
-   cg_bandpp=1;cprj_bandpp=1
+   cg_bandpp=1
+   cprj_bandpp=1
    cg_band_distributed=.false.
    cprj_band_distributed=.false.
+   spaceComm_band=xmpi_comm_self
    if (mpi_enreg%paralbd==1) then
+     cg_band_distributed=.true.
+     cprj_band_distributed=.true.
      spaceComm_band=mpi_enreg%comm_band
-   else
-     spaceComm_band=xmpi_comm_self
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then
@@ -862,10 +885,12 @@ contains
          iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
          do jdir=istart,iend
+           call timab(1294,1,tsec)
            call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
 &           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
+           call timab(1294,2,tsec)
          end do
        end do
 !      Export cwaveprj to big array cprj
@@ -916,7 +941,7 @@ contains
  end if
 
 !If needed, gather computed scalars
- if (.not.cg_band_distributed) then
+ if (.not.(cg_band_distributed .and. cprj_band_distributed)) then
    call pawcprj_mpi_sum(cprj,spaceComm_band,ierr)
  end if
 
@@ -946,6 +971,74 @@ contains
  DBG_EXIT('COLL')
 
  end subroutine ctocprj
+!!***
+
+!!****f* ABINIT/cprj_rotate
+!! NAME
+!! cprj_rotate
+!!
+!! FUNCTION
+!!   Compute cprj_nk = \sum_m z_m cprj_mk
+!!   where z_m is an array of complex values.
+!!   The input is overwritten.
+!!
+!! INPUTS
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      m_vtowfk
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_lincom
+!!
+!! SOURCE
+
+ subroutine cprj_rotate(cprj_in,evec,dimcprj,natom,nband,nspinor)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom,nband,nspinor
+!arrays
+ integer,intent(in) :: dimcprj(:)
+ real(dp) :: evec(:,:)
+ type(pawcprj_type),intent(inout) :: cprj_in(natom,nspinor*nband)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iband,ncpgr
+!arrays
+! real(dp) :: tsec(2)
+ real(dp) :: z_tmp(2,nband)
+ type(pawcprj_type),pointer :: cprj_iband(:,:)
+ type(pawcprj_type),allocatable,target :: cprj_tmp(:,:)
+
+
+! *********************************************************************
+
+ DBG_ENTER('COLL')
+
+! call timab(1211,1,tsec)
+
+ ncpgr=cprj_in(1,1)%ncpgr
+ ABI_MALLOC(cprj_tmp,(natom,nspinor*nband))
+ call pawcprj_alloc(cprj_tmp,ncpgr,dimcprj)
+
+ do iband=1,nband
+   z_tmp  = reshape(evec(:,iband),(/2,nband/))
+   cprj_iband => cprj_tmp(:,nspinor*(iband-1)+1:nspinor*iband)
+   call pawcprj_lincom(z_tmp,cprj_in,cprj_iband,nband)
+ end do
+
+ call pawcprj_copy(cprj_tmp,cprj_in)
+ call pawcprj_free(cprj_tmp)
+ ABI_FREE(cprj_tmp)
+
+! call timab(1211,2,tsec)
+
+ DBG_EXIT('COLL')
+
+ end subroutine cprj_rotate
 !!***
 
 end module m_cgprj

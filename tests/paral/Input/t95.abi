@@ -85,13 +85,15 @@ ndtset 3 jdtset 1 2 3
  pp_dirpath "$ABI_PSPDIR"
  pseudos "al_ps.abinit.paw, as_ps.paw"
 
+#This commented line was incorrect
+#test_chain = t95.abi,t96.abi,t97.abi,t98.abi
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t95.abi,t96.abi,t97.abi,t98.abi
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 1, 2, 4, 10
+#%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 10
 #%% [NCPU_1]
 #%% files_to_test = 
@@ -107,7 +109,7 @@ ndtset 3 jdtset 1 2 3
 #%%   t95_MPI4o_DS3_DDB, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t95_MPI10.abo, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t95_MPI10.abo, tolnlines = 3, tolabs = 5.e-2, tolrel = 0.2, fld_options = -easy;
 #%%   t95_MPI10o_DS3_DDB, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN

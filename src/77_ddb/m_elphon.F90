@@ -134,7 +134,6 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -1409,7 +1408,6 @@ end subroutine elphon
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -1766,7 +1764,6 @@ end subroutine outelph
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -1842,7 +1839,6 @@ end subroutine rchkGSheader
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -2039,7 +2035,6 @@ end subroutine mkFSkgrid
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -2589,7 +2584,6 @@ end subroutine mka2f
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -2781,7 +2775,6 @@ end subroutine mka2fQgrid
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -2874,7 +2867,6 @@ end subroutine order_fs_kpts
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! NOTES
 !!
@@ -3074,7 +3066,6 @@ end subroutine ep_setupqpt
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -3099,7 +3090,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !arrays
  integer :: ndiv(nqpath-1)
  integer, allocatable :: indxprtqpt(:)
- real(dp),parameter :: c0(2)=(/0._dp,0._dp/),c1(2)=(/1._dp,0._dp/)
+ complex(dpc),parameter :: c0=dcmplx(0._dp,0._dp),c1=dcmplx(1._dp,0._dp)
  real(dp) :: displ_cart(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: displ_red(2,3*Cryst%natom,3*Cryst%natom)
  real(dp) :: eigval(3*Cryst%natom)
@@ -3416,7 +3407,6 @@ end subroutine mkph_linwid
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -3555,7 +3545,6 @@ end subroutine get_fs_bands
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -3656,7 +3645,6 @@ end subroutine get_all_gkk2
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -3903,7 +3891,6 @@ end subroutine interpolate_gkk
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -4063,7 +4050,6 @@ end subroutine get_all_gkq
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -4185,7 +4171,6 @@ end subroutine get_all_gkr
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -4221,13 +4206,13 @@ subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprim
  real(dp),allocatable :: gkk_qpt_new(:,:,:,:,:),gkk_qpt_tmp(:,:,:,:,:)
 
  real(dp) :: ss_allatoms(2,elph_ds%nbranch,elph_ds%nbranch)
- real(dp) :: c_one(2), c_zero(2)
+ complex(dpc) :: c_one, c_zero
 
 
 ! *********************************************************************
 
- c_one = (/one,zero/)
- c_zero = (/zero,zero/)
+ c_one = dcmplx(one,zero)
+ c_zero = dcmplx(zero,zero)
 
 !Generation of the gkk matrices relative to the q points
 !of the set which samples the entire Brillouin zone
@@ -4521,7 +4506,6 @@ end subroutine complete_gkk
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5023,7 +5007,6 @@ end subroutine get_nv_fs_en
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5149,7 +5132,6 @@ end subroutine get_nv_fs_temp
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5221,7 +5203,6 @@ end subroutine get_veloc_tr
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5348,7 +5329,6 @@ end subroutine integrate_gamma
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5512,7 +5492,6 @@ end subroutine integrate_gamma_tr
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5722,7 +5701,6 @@ end subroutine integrate_gamma_tr_lova
 !!      m_elphon
 !!
 !! CHILDREN
-!!      ftgkk
 !!
 !! NOTES
 !!   copied from ftiaf9.f

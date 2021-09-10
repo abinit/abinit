@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.5.1 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Tue  6 Apr 2021.
+- ( at 23h27 )
   
 
 ================================================================================
@@ -32,8 +32,8 @@
    symdynmat         0
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         0
-      quadqu         0
+      dipqua         1
+      quadqu         1
       ifcana         1
       ifcout         0
  Description of grid 1 :
@@ -92,7 +92,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.039  and twall      0.040 sec
+-begin at tcpu      0.036  and twall      0.042 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -142,9 +142,9 @@
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -1.129682E-03    5.944772E-22    5.208755E-18
-       2       -1.129682E-03   -1.669318E-21   -1.462641E-17
-       3        1.231062E-03    3.670247E-22    2.707990E-18
+       1       -1.129682E-03   -3.860434E-23   -3.382476E-19
+       2       -1.129682E-03   -1.446446E-21   -1.267363E-17
+       3        1.231062E-03    1.485433E-22    1.095986E-18
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -155,14 +155,14 @@
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -1.070872E-03    5.600905E-06    5.461284E-02
-       2        9.900223E-04    5.081929E-05    5.797622E-01
-       3        9.900223E-04    5.600908E-06    6.389689E-02
+       2        9.900223E-04    5.081927E-05    5.797620E-01
+       3        9.900223E-04    5.600924E-06    6.389708E-02
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1       -1.129682E-03    5.944772E-22    5.208755E-18
-       2       -1.129682E-03   -1.669318E-21   -1.462641E-17
-       3        1.231062E-03    3.670247E-22    2.707990E-18
+       1       -1.129682E-03   -3.860434E-23   -3.382476E-19
+       2       -1.129682E-03   -1.446446E-21   -1.267363E-17
+       3        1.231062E-03    1.485433E-22    1.095986E-18
 
 
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
@@ -213,12 +213,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
+-  1  0.00000000E+00  4.63824830E-07 -4.50906596E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
+-  1  0.00000000E+00  4.50906596E-03  4.63825059E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -232,8 +232,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -248,12 +248,12 @@
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.34466895E-04 -3.00797315E-03  3.34244004E-03
+-  1  3.33703120E-04 -3.00841531E-03  3.34211843E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66641277E-03  2.12286321E-03  1.54354956E-03
+-  1  3.66648236E-03  2.12223656E-03  1.54424580E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03 -2.60331046E-03 -2.60331046E-03
@@ -272,12 +272,12 @@
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.34191889E-04 -3.00813237E-03 -3.34232426E-03
+-  1  3.34398879E-04 -3.00801253E-03 -3.34241141E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66643784E-03  2.12263759E-03 -1.54380026E-03
+-  1  3.66641897E-03  2.12280741E-03 -1.54361156E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03 -2.60331046E-03  2.60331046E-03
@@ -296,12 +296,12 @@
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.63442571E-07  4.50906597E-03  0.00000000E+00
+-  1  7.34191595E-07  4.50906592E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  4.50906597E-03 -3.63442571E-07  0.00000000E+00
+-  1  4.50906592E-03 -7.34191595E-07  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
@@ -320,12 +320,12 @@
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.34707586E-04  3.00783378E-03  3.34254137E-03
+-  1  3.34303713E-04  3.00806763E-03  3.34237134E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66639080E-03 -2.12306067E-03  1.54333013E-03
+-  1  3.66642765E-03 -2.12272933E-03  1.54369832E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03 -2.60331046E-03
@@ -344,12 +344,12 @@
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
+-  1  1.02676837E-06  0.00000000E+00 -4.50906586E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
+-  1  4.50906586E-03  0.00000000E+00  1.02676837E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
@@ -368,12 +368,12 @@
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
+-  1  0.00000000E+00  7.21650960E-05  4.50848846E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
+-  1  0.00000000E+00  4.50848846E-03 -7.21650960E-05
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
@@ -392,21 +392,21 @@
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.34018823E-04  3.00823256E-03 -3.34225138E-03
+-  1  3.34276210E-04  3.00808355E-03 -3.34235976E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66645361E-03 -2.12249559E-03 -1.54395802E-03
+-  1  3.66643016E-03 -2.12270677E-03 -1.54372339E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
 
 ================================================================================
 
-+Total cpu time      1.105  and wall time      1.110 sec
++Total cpu time      1.001  and wall time      1.021 sec
 
  anaddb : the run completed succesfully.

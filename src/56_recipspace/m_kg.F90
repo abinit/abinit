@@ -99,7 +99,7 @@ contains
 !!
 !! PARENTS
 !!      m_common,m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_nonlinear,m_pawfgr
-!!      m_positron,m_respfn_driver,m_scfcv_core
+!!      m_positron,m_respfn_driver,m_scfcv_core,m_sigma_driver
 !!
 !! CHILDREN
 !!
@@ -580,7 +580,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  if (npw1<nband(ikpt)) then
 !  write(msg, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
 !  &   ' kpgio : ERROR -',ch10,&
-!  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
+!  &   '  At k point number',ikpt,' k=',(kptns(ierr,ikpt),ierr=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
 !  &   '  Action: change either ecut or nband in input file.'
@@ -592,6 +592,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
    ikg=ikg+npw1
  end do !  End of the loop over k points
 
+! TODO: this fails on some platforms if nproc > nkpt
  if(mode_paral == 'PERS') then
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
@@ -949,8 +950,8 @@ end subroutine kpgstr
 !!
 !! PARENTS
 !!      m_bandfft_kpt,m_cgprj,m_d2frnl,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dfptnl_pert,m_fock_getghc,m_forstr,m_getgh1c,m_io_kss,m_ksdiago
-!!      m_nonlop_test,m_nonlop_ylm,m_orbmag,m_pead_nl_loop,m_vtorho,m_wfd
+!!      m_dfptnl_pert,m_fock_getghc,m_forstr,m_getgh1c,m_ksdiago,m_nonlop_test
+!!      m_nonlop_ylm,m_orbmag,m_pead_nl_loop,m_phgamma,m_sigmaph,m_vtorho,m_wfd
 !!
 !! CHILDREN
 !!
@@ -1043,7 +1044,6 @@ end subroutine mkkpg
 !! NOTES
 !!
 !! PARENTS
-!!      m_orbmag
 !!
 !! CHILDREN
 !!

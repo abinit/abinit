@@ -1190,9 +1190,9 @@ end subroutine WffOpen
 !! ierr=error code
 !!
 !! PARENTS
-!!      m_conducti,m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_elpolariz,m_gstate
-!!      m_ioarr,m_iowf,m_longwave,m_nonlinear,m_optics_vloc,m_paw_optics
-!!      m_pead_nl_loop,m_positron,m_respfn_driver,m_wfk
+!!      m_conducti,m_dfpt_lw,m_dfptnl_loop,m_elpolariz,m_gstate,m_ioarr,m_iowf
+!!      m_longwave,m_nonlinear,m_optics_vloc,m_paw_optics,m_pead_nl_loop
+!!      m_positron,m_wfk
 !!
 !! CHILDREN
 !!

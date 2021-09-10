@@ -30,10 +30,10 @@ MODULE m_xmpi
 
  use defs_basis
  use m_profiling_abi
-! use m_errors
+ !use m_errors
  use iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
- use ISO_FORTRAN_ENV, only : int16,int32,int64
+ use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
 #ifdef HAVE_MPI2
  use mpi
@@ -516,6 +516,7 @@ interface xmpi_recv
   module procedure xmpi_recv_dp1d
   module procedure xmpi_recv_dp2d
   module procedure xmpi_recv_dp3d
+  module procedure xmpi_recv_dp4d
 end interface xmpi_recv
 
 !----------------------------------------------------------------------
@@ -558,6 +559,7 @@ interface xmpi_send
   module procedure xmpi_send_dp1d
   module procedure xmpi_send_dp2d
   module procedure xmpi_send_dp3d
+  module procedure xmpi_send_dp4d
 end interface xmpi_send
 
 !----------------------------------------------------------------------
@@ -708,13 +710,6 @@ subroutine xmpi_init()
 
 ! *************************************************************************
 
- ! Increase stack size.
- call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
- if (ierr /= 0) then
-   write(std_out,*)" WARNING: cannot increase stack size limit. "
-   !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
- end if
-
  mpierr=0
 #ifdef HAVE_MPI
 
@@ -754,8 +749,17 @@ subroutine xmpi_init()
  end if
 #endif
 
+ ! Increase stack size.
+ call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
+
  ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment
  if (xmpi_comm_rank(xmpi_world) == 0) then
+
+    if (ierr /= 0) then
+      write(std_out,*)" WARNING: cannot increase stack size limit. "
+      !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
+    end if
+
     inquire(file=ABI_MPIABORTFILE, exist=exists)
     if (exists) then
        ! Get free unit (emulate F2008 newunit for portability reasons)
@@ -780,8 +784,10 @@ end subroutine xmpi_init
 !!  Set internal flag to use MPI_IN_PLACE whenever possible.
 !!
 !! PARENTS
+!!      m_argparse
 !!
 !! CHILDREN
+!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -841,9 +847,8 @@ end function xmpi_get_unit
 !!  None
 !!
 !! PARENTS
-!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,lapackprof
-!!      m_multibinit_driver,macroave,mrggkk,optic,testtransposer,ujdet
-!!      vdw_kernelgen
+!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,m_multibinit_driver
+!!      macroave,mrggkk,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -894,7 +899,7 @@ end subroutine xmpi_end
 !!
 !! SOURCE
 
-subroutine xmpi_abort(comm,mpierr,msg,exit_status)
+subroutine xmpi_abort(comm, mpierr, msg, exit_status)
 
 !Arguments-------------------------
  integer,optional,intent(in) :: comm,mpierr,exit_status
@@ -949,6 +954,7 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
+ !ierr = clib_usleep(300000_c_int32_t)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
@@ -1798,12 +1804,12 @@ end subroutine xmpi_comm_translate_ranks
 !!      m_chebfi,m_datafordmft,m_ddk,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
 !!      m_dtfil,m_dvdb,m_errors,m_exc_build,m_exc_diago,m_exc_itdiago
 !!      m_exc_spectra,m_fit_polynomial_coeff,m_forctqmc,m_green,m_gstateimg
-!!      m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ksdiago,m_mkrho
-!!      m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho,m_plowannier
-!!      m_polynomial_coeff,m_precpred_1geo,m_primitive_potential_list
-!!      m_rf2_init,m_sigma_driver,m_sigmaph,m_slk,m_spmat_csr,m_tddft,m_vtorho
-!!      m_vtorhorec,m_wfd,m_wfd_optic,m_wffile,m_wfk,m_wfk_analyze
-!!      testtransposer
+!!      m_gwrdm,m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ipi
+!!      m_ksdiago,m_mkrho,m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho
+!!      m_plowannier,m_polynomial_coeff,m_precpred_1geo
+!!      m_primitive_potential_list,m_rf2_init,m_sigma_driver,m_sigmaph,m_slk
+!!      m_spmat_csr,m_tddft,m_vtorho,m_vtorhorec,m_wfd,m_wfd_optic,m_wffile
+!!      m_wfk,m_wfk_analyze,testtransposer
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -1950,7 +1956,7 @@ end subroutine xmpi_iprobe
 !!
 !! PARENTS
 !!      m_dfpt_scfcv,m_dvdb,m_fftw3,m_mover,m_paw_an,m_paw_ij,m_paw_occupancies
-!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002
+!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002,m_sigmaph
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -2479,7 +2485,7 @@ end subroutine xmpi_split_list
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
 !! PARENTS
-!!      m_exc_build,m_screening,m_screening_driver,m_skw
+!!      m_exc_build,m_phonons,m_screening,m_screening_driver,m_skw
 !!
 !! CHILDREN
 !!      xmpi_comm_free
@@ -4093,11 +4099,11 @@ subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
      ierr=2
    end if
    if (ANY(bufdelim4/=delim_record)) ierr=1
-   !if (ierr==1) then
-   !  do irec=1,2*nfrec
-   !    write(std_out,*)"irec, bufdelim4, delim_record: ",irec,bufdelim4(irec),delim_record(irec)
-   !  end do
-   !end if
+   if (ierr==1) then
+     do irec=1,2*nfrec
+       write(std_out,*)"irec, bufdelim4, delim_record: ",irec,bufdelim4(irec),delim_record(irec)
+     end do
+   end if
    ABI_FREE(bufdelim4)
 
  CASE (8)
