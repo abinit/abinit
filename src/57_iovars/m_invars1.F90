@@ -1881,7 +1881,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      sum_spinat=zero
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
-       sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
+       sum_spinat=sum_spinat+dtset%spinat(3,iatom)
      end do
      zelect=zval-cellcharge_min
      mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
