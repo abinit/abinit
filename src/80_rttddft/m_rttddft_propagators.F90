@@ -366,12 +366,15 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  !Local variables-------------------------------
  !scalars
  integer  :: ics
+ logical  :: lconv
  !arrays
+ real(dp) :: conv(2)
  real(dp) :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
  
 ! ***********************************************************************
 
  cg(:,:) = tdks%cg(:,:) !Psi(t)
+ conv(1) = sum(tdks%cg(1,:)); conv(2) = sum(tdks%cg(2,:))
 
  !** Predictor step
  ! predict psi(t+dt) using ER propagator
@@ -384,21 +387,42 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  tdks%cg(:,:) = cg(:,:)
  ! evolve psi(t) using estimated density at t+dt/2
  call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
- print*, "predictor - cg:", tdks%cg(1,1)
+ 
+ if (100*abs(conv(1)-sum(tdks%cg(1,:)))/conv(1) < dtset%td_scthr .and. &
+   & 100*abs(conv(2)-sum(tdks%cg(2,:)))/conv(2) < dtset%td_scthr) then
+   lconv = .true.
+   ics = 0
+ else
+   lconv = .false.
+   !** Corrector steps
+   do ics = 1, dtset%td_ncormax
+      conv(1) = sum(tdks%cg(1,:)); conv(2) = sum(tdks%cg(2,:))
+      ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
+      tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
+      ! calc associated density at t+dt/2
+      call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
+      ! start back from time t
+      tdks%cg(:,:) = cg(:,:)
+      ! evolve psi(t) using estimated density at t+dt/2
+      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+      ! check convergence
+      if (100*abs(conv(1)-sum(tdks%cg(1,:)))/conv(1) < dtset%td_scthr .and. &
+       & 100*abs(conv(2)-sum(tdks%cg(2,:)))/conv(2) < dtset%td_scthr) then
+         lconv = .true.
+         exit
+     else
+        print*, 100*abs(conv(1)-sum(tdks%cg(1,:)))/conv(1), 100*abs(conv(2)-sum(tdks%cg(2,:)))/conv(2), dtset%td_scthr
+        conv(1) = sum(tdks%cg(1,:))
+        conv(2) = sum(tdks%cg(2,:))
+     end if
+   end do
+ end if
 
- !** Corrector steps
- do ics = 1, dtset%td_ncormax
-   ! check convergence
-   ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
-   tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
-   ! calc associated density at t+dt/2
-   call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
-   ! start back from time t
-   tdks%cg(:,:) = cg(:,:)
-   ! evolve psi(t) using estimated density at t+dt/2
-   call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
-   print*, "corrector", ics, " - cg:", tdks%cg(1,1)
- end do
+ if (lconv) then
+   print*, "Converged after ", ics, "self-consistent corrector steps"
+ else
+   print*, "Reached maximum number of corrector steps before convergence"
+ end if
  
  end subroutine rttddft_propagator_emr
 
