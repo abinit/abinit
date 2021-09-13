@@ -478,14 +478,13 @@ end subroutine rttddft_init_hamiltonian
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_density(dtfil, dtset, mpi_enreg, psps, tdks)
+subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
  type(tdks_type),            intent(inout) :: tdks
- type(datafiles_type),       intent(in)    :: dtfil
  type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
@@ -536,7 +535,7 @@ subroutine rttddft_calc_density(dtfil, dtset, mpi_enreg, psps, tdks)
               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
               & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
-              & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,dtfil%unpaw,tdks%xred, &
+              & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred, &
               & tdks%ylm,tdks%ylmgr)
 
    !paral atom
@@ -556,7 +555,7 @@ subroutine rttddft_calc_density(dtfil, dtset, mpi_enreg, psps, tdks)
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
                  & dtset%nsppol,tdks%occ,dtset%paral_kgb,tdks%paw_dmft,             &
-                 & pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+                 & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
    ! 5-Symetrize rhoij, compute nhat and add it to rhor
    ! Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij

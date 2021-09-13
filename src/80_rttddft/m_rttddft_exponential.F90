@@ -82,7 +82,7 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine rttddft_exp_taylor(cg,dtset,gs_hamk,method,mpi_enreg,nband_k,npw_k,nspinor)
+ subroutine rttddft_exp_taylor(cg,dt,dtset,gs_hamk,method,mpi_enreg,nband_k,npw_k,nspinor)
 
  implicit none
 
@@ -93,6 +93,7 @@ contains
  integer,                   intent(in)    :: npw_k
  integer,                   intent(in)    :: nspinor
  type(dataset_type),        intent(in)    :: dtset
+ real(dp),                  intent(in)    :: dt
  type(gs_hamiltonian_type), intent(inout) :: gs_hamk
  type(MPI_type),            intent(inout) :: mpi_enreg
  !arrays
@@ -163,11 +164,11 @@ contains
       !** Also apply S^-1 in PAW case
       if(paw) then 
          call apply_invovl(gs_hamk, ghc, gsm1hc, cwaveprj, npw, nband, mpi_enreg, nspinor)
-         tmp(1,:) =  dtset%dtele*gsm1hc(2,:)/real(nfact,dp)
-         tmp(2,:) = -dtset%dtele*gsm1hc(1,:)/real(nfact,dp)
+         tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
+         tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
       else
-         tmp(1,:) =  dtset%dtele*ghc(2,:)/real(nfact,dp)
-         tmp(2,:) = -dtset%dtele*ghc(1,:)/real(nfact,dp)
+         tmp(1,:) =  dt*ghc(2,:)/real(nfact,dp)
+         tmp(2,:) = -dt*ghc(1,:)/real(nfact,dp)
       end if
       cg(:,:) = cg(:,:) + tmp(:,:)
       nfact = nfact*(iorder+1)

@@ -109,6 +109,7 @@ module m_rttddft_types
    integer                          :: nhatgrdim   !dimension of nhatgr array
    integer                          :: ngrvdw      !dimension of grvdw array
    integer                          :: ntime       !max nb of time steps
+   integer                          :: unpaw       !paw data tmp file unit
    integer                          :: usexcnhat   !max nb of time steps
    real(dp)                         :: boxcut      !boxcut ratio (gcut(box)/gcut(sphere))
    real(dp)                         :: dt          !propagation time step
@@ -276,6 +277,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !once we reach the point of including external electric field
 
  !Keep some additional stuff in memory within the tdks object
+ tdks%unpaw  = dtfil%unpaw
  tdks%dt     = dtset%dtele
  tdks%ntime  = dtset%ntime
 
