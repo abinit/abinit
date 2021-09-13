@@ -147,7 +147,7 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
    !call  rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    !Calc new electronic density 
-   call rttddft_calc_density(dtfil,dtset,mpi_enreg,psps,tdks)
+   call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
    !Update header, with evolving variables
    call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih, &

@@ -32,15 +32,17 @@ module m_rttddft_propagators
  use defs_abitypes,         only: MPI_type
  use defs_datatypes,        only: pseudopotential_type
  
- use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
-                                  prep_bandfft_tabs
+ use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
+                                & bandfft_kpt_set_ikpt, &
+                                & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_gemm_nonlop,         only: make_gemm_nonlop
  use m_hamiltonian,         only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,              only: make_invovl
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
- use m_rttddft,             only: rttddft_init_hamiltonian
+ use m_rttddft,             only: rttddft_init_hamiltonian, &
+                                & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_types,       only: tdks_type 
 
@@ -50,6 +52,7 @@ module m_rttddft_propagators
 !!***
 
  public :: rttddft_propagator_er
+ public :: rttddft_propagator_emr
 !!***
 
 contains 
@@ -61,7 +64,7 @@ contains
 !!
 !! FUNCTION
 !!  Main subroutine to propagate the KS orbitals using 
-!!  the Euler propagator
+!!  the Exponential Rule (ER) propagator.
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -76,8 +79,13 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!  This is a rather bad propagator that probably should not be used 
-!!  except for test purposes or preliminary studies
+!!  Other propagators such as the Exponential Midpoint Rule (EMR) 
+!!  propagator should be prefered over this one since the ER propagator 
+!!  violates time reversal symmetry. Using this propagator with the 
+!!  exponential approximated by Taylor expansion of order 2 leads to 
+!!  the famous Euler method which is fast and simple but extremely 
+!!  unstable and thus usually insufficient for RT-TDDFT.
+!!  
 !!
 !! PARENTS
 !!  m_rttddft_propagate/rttddft_propagate_ele
@@ -283,11 +291,8 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
      !  if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
      !end if
       
-      write(97,*) tdks%cg(1,:)
-      write(98,*) tdks%cg(2,:)
-
       !FB: Here we should now call the propagator to evolve the cg
-      call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor)
+      call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor)
 
       ABI_FREE(kg_k)
       ABI_FREE(ylm_k)
@@ -313,6 +318,89 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  end if
 
  end subroutine rttddft_propagator_er
+
+!!****f* m_rttddft/rttddft_propagator_emr
+!!
+!! NAME
+!!  rttddft_propagator_emr
+!!
+!! FUNCTION
+!!  Main subroutine to propagate the KS orbitals using 
+!!  the Euler propagator
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
+!!  istep <integer> = step number
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = the tdks object to initialize
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!  This propagator is time reversible (if H(t+dt/2) and the exponential 
+!!  would be computed exactly).
+!!
+!! PARENTS
+!!  m_rttddft_propagate/rttddft_propagate_ele
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,                    intent(in)    :: istep
+ type(dataset_type),         intent(inout) :: dtset
+ type(gs_hamiltonian_type),  intent(inout) :: gs_hamk
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(pseudopotential_type), intent(inout) :: psps
+ type(tdks_type),            intent(inout) :: tdks
+ 
+ !Local variables-------------------------------
+ !scalars
+ integer  :: ics
+ !arrays
+ real(dp) :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
+ 
+! ***********************************************************************
+
+ cg(:,:) = tdks%cg(:,:) !Psi(t)
+
+ !** Predictor step
+ ! predict psi(t+dt) using ER propagator
+ call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+ ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
+ tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
+ ! calc associated density at t+dt/2
+ call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
+ ! go back to time t
+ tdks%cg(:,:) = cg(:,:)
+ ! evolve psi(t) using estimated density at t+dt/2
+ call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+ print*, "predictor - cg:", tdks%cg(1,1)
+
+ !** Corrector steps
+ do ics = 1, dtset%td_ncormax
+   ! check convergence
+   ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
+   tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
+   ! calc associated density at t+dt/2
+   call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
+   ! start back from time t
+   tdks%cg(:,:) = cg(:,:)
+   ! evolve psi(t) using estimated density at t+dt/2
+   call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+   print*, "corrector", ics, " - cg:", tdks%cg(1,1)
+ end do
+ 
+ end subroutine rttddft_propagator_emr
 
 end module m_rttddft_propagators
 !!***

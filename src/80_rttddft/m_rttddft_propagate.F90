@@ -37,7 +37,8 @@ module m_rttddft_propagate
  use m_errors,              only: msg_hndl
  use m_hamiltonian,         only: gs_hamiltonian_type
  use m_rttddft,             only: rttddft_setup_ele_step
- use m_rttddft_propagators, only: rttddft_propagator_er
+ use m_rttddft_propagators, only: rttddft_propagator_er, &
+                                & rttddft_propagator_emr
  use m_rttddft_types,       only: tdks_type 
  use m_specialmsg,          only: wrtout
  use m_symtk,               only: symmetrize_xred
@@ -105,12 +106,15 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  ! Init/Update various quantities before performing propagating KS orbitals
  call rttddft_setup_ele_step(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
 
+ write(97,*) tdks%cg(1,:)
+ write(98,*) tdks%cg(2,:)
+
  ! Propagate cg
  select case (dtset%td_propagator) 
    case(0)
       call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
    case(1)
-     ! call rttddft_propagator_emr(tdks,dtset,istep,mpi_enreg,psps)  
+      call rttddft_propagator_emr(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)  
    case default
       write(msg,"(a,a)") "Unknown Propagator - check the value of td_propagator", ch10
       ABI_ERROR(msg)
