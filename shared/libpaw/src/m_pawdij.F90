@@ -3050,7 +3050,8 @@ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,
  cplex_rhoij=pawrhoij%cplex_rhoij
  compute_im=(cplex_dij==2.and.cplex_rhoij==2)
  fact=one
- if (pawrhoij%nspden==1) fact=two
+ ! If nspden=1, rho_up = rho_down = 1/2*rho_tot so \sum_\sigma rho_\sigma**2 = 1/2 \rho_tot**2
+ if (pawrhoij%nspden==1) fact=half
 
 !Loops over spin-components
  do sig2=1,min(pawrhoij%nspden,2)
@@ -3096,15 +3097,19 @@ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,
                end if
              end if
 
-!             ! If nspden==1, so up=down, add off-diagonal part
-!             if (pawrhoij%nspden==1) then
-!               diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(sig1,2,ilmn,jlmn,ilmnp,jlmnp)
-!               if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(sig1,2,jlmn,ilmn,ilmnp,jlmnp)
-!               if (compute_im) then
-!                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(sig1,2,ilmn,jlmn,ilmnp,jlmnp)
-!                 if (ilmn/=jlmn) diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(sig1,2,jlmn,ilmn,ilmnp,jlmnp)
-!               end if
-!             end if
+             if (pawrhoij%nspden==1) then ! If nspden=1, we have to add the non-diagonal part (select_euijkl=2)
+!              Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
+               diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
+               if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
+
+!              Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
+               if (compute_im) then
+                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
+                 if (ilmn/=jlmn) then
+                   diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
+                 end if
+               end if
+             end if
 
            end do ! k,l
          end do ! i,j
