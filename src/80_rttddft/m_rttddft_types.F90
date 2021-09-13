@@ -1037,7 +1037,7 @@ end subroutine second_setup
 !! read_wfk
 !!
 !! FUNCTION
-!! Reads initial wavefunctions (KS orbitals) in WFK file (call inwfill)
+!! Reads initial wavefunctions (KS orbitals) in WFK file (call inwffill)
 !!
 !! INPUTS
 !! dtfil <type datafiles_type> = infos about file names, file unit numbers
@@ -1132,6 +1132,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  wff1%unwff=dtfil%unwff1
  optorth=0   !No need to orthogonalize the wfk
  tdks%hdr%rprimd=tdks%rprimd
+ tdks%cg=0._dp
  call inwffil(ask_accurate,tdks%cg,dtset,dtset%ecut,ecut_eff,tdks%eigen,     &
             & dtset%exchn2n3d,formeig,tdks%hdr,dtfil%ireadwf,dtset%istwfk,   &
             & tdks%kg,dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,      &

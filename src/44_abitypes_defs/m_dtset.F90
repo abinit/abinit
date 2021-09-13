@@ -803,6 +803,7 @@ type, public :: dataset_type
  real(dp) :: strfact
  real(dp) :: strprecon
  real(dp) :: td_maxene
+ real(dp) :: td_scthr
  real(dp) :: tfw_toldfe
  real(dp) :: tl_radius
  real(dp) :: toldfe
@@ -1895,6 +1896,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%td_mexcit          = dtin%td_mexcit
  dtout%td_ncormax         = dtin%td_ncormax
  dtout%td_propagator      = dtin%td_propagator
+ dtout%td_scthr           = dtin%td_scthr
  dtout%tfkinfunc          = dtin%tfkinfunc
  dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
@@ -3423,7 +3425,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '
 !T
- list_vars=trim(list_vars)//'  td_exp_order td_maxene td_mexcit td_ncormax td_propagator'
+ list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_ncormax td_propagator td_scthr'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
