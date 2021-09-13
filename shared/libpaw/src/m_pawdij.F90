@@ -3021,12 +3021,12 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,jrhoij
+integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,jrhoij,select_euijkl
  integer :: klmn,klmnp,klmn1,lmn2_size,sig1,sig2
  logical :: compute_im
  character(len=500) :: msg
 !arrays
- real(dp) :: ro(2)
+ real(dp) :: ro(2),fact
 
 ! *************************************************************************
 
@@ -3049,10 +3049,18 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
  diju=zero
  cplex_rhoij=pawrhoij%cplex_rhoij
  compute_im=(cplex_dij==2.and.cplex_rhoij==2)
+ fact=one
+ if (pawrhoij%nspden==1) fact=two
 
 !Loops over spin-components
- do sig2=1,max(pawrhoij%nspden,2)
-   do sig1=1,max(pawrhoij%nspden,2)
+ do sig2=1,min(pawrhoij%nspden,2)
+   do sig1=1,min(pawrhoij%nspden,2)
+
+     if (sig1==sig2) then
+       select_euijkl = 1
+     else
+       select_euijkl = 2
+     end if
 
      !Loop over phase exp(iqr) phase real/imaginary part
      do iq=1,qphase
@@ -3077,14 +3085,26 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
              klmn1=iq0_dij+cplex_dij*(klmnp-1)+1
 
 !            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
-             diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+             diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,select_euijkl)
+             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,select_euijkl)
 
 !            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
              if (compute_im) then
-               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-               if (ilmn/=jlmn) diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,select_euijkl)
+               if (ilmn/=jlmn) then
+                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,select_euijkl)
+               end if
              end if
+
+!             ! If nspden==1, so up=down, add off-diagonal part
+!             if (pawrhoij%nspden==1) then
+!               diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(sig1,2,ilmn,jlmn,ilmnp,jlmnp)
+!               if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(sig1,2,jlmn,ilmn,ilmnp,jlmnp)
+!               if (compute_im) then
+!                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(sig1,2,ilmn,jlmn,ilmnp,jlmnp)
+!                 if (ilmn/=jlmn) diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(sig1,2,jlmn,ilmn,ilmnp,jlmnp)
+!               end if
+!             end if
 
            end do ! k,l
          end do ! i,j
@@ -3096,7 +3116,6 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
    end do  !sig1
  end do !sig2
-
 
 ! OLD VERSION FROM LUCAS BAGUET
 ! ----------------------------------------------------------------

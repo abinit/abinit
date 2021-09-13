@@ -281,6 +281,7 @@ MODULE m_pawtab
    ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC
    ! usepawu=-1 ; use PAW+U formalism (FLL) - No use of the occupation matrix - Experimental
    ! usepawu=-2 ; use PAW+U formalism (AMF) - No use of the occupation matrix - Experimental
+   ! usepawu=-4 ; use PAW+U formalism (FLL) without polarization in the XC - No use of the occupation matrix - Experimental
    ! usepawu=10 ; use PAW+U within DMFT
    ! usepawu=14 ; use PAW+U within DMFT without polarization in the XC
 
@@ -428,7 +429,7 @@ MODULE m_pawtab
    ! Screened Hartree kernel for the on-site terms (E_hartree=Sum_ijkl[rho_ij rho_kl e_ijkl_sr])
    ! Used for screened Fock contributions
 
-  real(dp), allocatable :: euijkl(:,:,:,:,:,:)
+  real(dp), allocatable :: euijkl(:,:,:,:,:)
    ! euijkl(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
    ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_s1s2 Sum_ijkl [rho_ij^s1 rho_kl^s2 euijkl^s1s2] )
    ! Contrary to eijkl and eijkl_sr, euijkl is not invariant with respect to the permutations i <--> j or k <--> l
@@ -1712,8 +1713,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        nn_dpr=nn_dpr+siz_eijkl_sr
      end if
      if (allocated(pawtab%euijkl)) then
-       siz_euijkl=size(pawtab%euijkl)                 !(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
-       if (siz_euijkl/=4*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
+       siz_euijkl=size(pawtab%euijkl)                 !(lmn_size,lmn_size,lmn_size,lmn_size,3)
+       if (siz_euijkl/=3*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
        nn_dpr=nn_dpr+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then
@@ -2764,8 +2765,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_DEALLOCATE(pawtab%euijkl)
      end if
      if (siz_euijkl>0) then
-       LIBPAW_ALLOCATE(pawtab%euijkl,(2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
-       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
+       LIBPAW_ALLOCATE(pawtab%euijkl,(pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,3))
+       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,3/))
        ii=ii+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then

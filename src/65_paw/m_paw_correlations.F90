@@ -141,13 +141,13 @@ CONTAINS  !=====================================================================
  integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
- integer :: mesh_size,int_meshsz,mkyc,sig,sigp,sz1
+ integer :: mesh_size,int_meshsz,mkyc,sz1
  logical :: compute_euijkl,compute_euij_fll
  real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp) :: euijkl_temp(2,2),euijkl_temp2(2,2),euijkl_dc(2,2)
+ real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(2)
  real(dp),allocatable :: ff(:),fk(:),gg(:)
 
 ! *************************************************************************
@@ -191,6 +191,9 @@ CONTAINS  !=====================================================================
    write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL (no use of occupation matrix) - experimental"
  else if(usepawu==-2) then
    write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: AMF (no use of occupation matrix) - experimental"
+ else if(usepawu==-4) then
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL with no spin polarization in the xc functional &
+     & (no use of occupation matrix) - experimental"
  end if
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
  if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
@@ -557,14 +560,14 @@ CONTAINS  !=====================================================================
      !  write(std_out,'(a,f12.6)')  " J=", testu-testumj
      !  write(std_out,*) "------------------------"
 
-!      c. For DFT (or with exp. values usepawu=-1 or -2), compute euijkl
+!      c. For DFPT (or with exp. values usepawu=-1,-2 or -4), compute euijkl
 !      ---------------------------------------------
        compute_euijkl=(is_dfpt.or.usepawu<0)
        if (compute_euijkl) then
          if (allocated(pawtab(itypat)%euijkl)) then
            ABI_FREE(pawtab(itypat)%euijkl)
          end if
-         ABI_MALLOC(pawtab(itypat)%euijkl,(2,2,lmn_size,lmn_size,lmn_size,lmn_size))
+         ABI_MALLOC(pawtab(itypat)%euijkl,(lmn_size,lmn_size,lmn_size,lmn_size,3))
          pawtab(itypat)%euijkl = zero
          compute_euij_fll = .false.
          euijkl_temp2=zero
@@ -611,33 +614,26 @@ CONTAINS  !=====================================================================
 !                Compute the double-counting part of euijkl (invariant when exchanging i<-->j or ip<-->jp)
                  if (m1==m2.and.m3==m4) then ! In that case, we have to add the double-counting term
 
-                     do sig=1,2
-                       do sigp=1,2
+                   if (abs(usepawu)==1) then ! FLL
 
-                         if (abs(usepawu)==1.or.abs(usepawu)==4) then ! FLL
+                     euijkl_dc(1) = &
+&                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
+                     euijkl_dc(2) = &
+&                     phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
 
-                           if (sig==sigp) then
-                             euijkl_dc(sig,sigp) = &
-&                             phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
-                           else
-                             euijkl_dc(sig,sigp) = &
-&                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
-                           end if
+                   else if (abs(usepawu)==2) then ! AMF
 
-                         else if (abs(usepawu)==2) then ! AMF
+                     euijkl_dc(1) = &
+&                     two*lpawu/(two*lpawu+one) * phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
+                     euijkl_dc(2) = &
+&                     phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
 
-                           if (sig==sigp) then
-                             euijkl_dc(sig,sigp) = &
-&                             two*lpawu/(two*lpawu+one) * phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
-                           else
-                             euijkl_dc(sig,sigp) = &
-&                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
-                           end if
+                   else if (abs(usepawu)==4) then ! FLL without polarization in XC
 
-                         end if
+                     euijkl_dc(:) = &
+&                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - half*pawtab(itypat)%jpawu )
 
-                       end do ! sigp
-                     end do ! sig
+                   end if
 
                  end if ! double-counting term
 
@@ -648,11 +644,7 @@ CONTAINS  !=====================================================================
 !                Also : vee(13|24) = vee(31|42) ( so : i,j  <--> ip,jp )
 !                ==> vee1 is invariant with respect to the permutations i <--> j , ip <--> jp and i,ip <--> j,jp
 !                ( The term 'phiint_ij * phiint_ipjp' has the same properties)
-                 do sig=1,2
-                   do sigp=1,2
-                     euijkl_temp(sig,sigp) = phiint_ij * phiint_ipjp * vee1
-                   end do
-                 end do
+                 euijkl_temp(1:2) = phiint_ij * phiint_ipjp * vee1
 
                  vee2 = pawtab(itypat)%vee(m11,m31,m41,m21)
 !                Note : vee(13|42) = vee(43|12) ( so : ip   <--> j     )
@@ -663,26 +655,21 @@ CONTAINS  !=====================================================================
 !                       vee(13|42) = vee(42|13) = vee(24|31) ( so : i,ip  <--> j,jp )
 !                ==> vee2 is invariant only with respect to the permutation i,ip <--> j,jp
 
+                 euijkl_temp2(:) = zero 
 !                Terms i,j,ip,jp (m2,m1,m4,m3) and j,i,jp,ip (m1,m2,m3,m4)
-                 do sig=1,2
-                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
-                 end do
-                 pawtab(itypat)%euijkl(:,:,ilmn,jlmn,ilmnp,jlmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
-                 pawtab(itypat)%euijkl(:,:,jlmn,ilmn,jlmnp,ilmnp) = pawtab(itypat)%euijkl(:,:,ilmn,jlmn,ilmnp,jlmnp)
+                 euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(ilmn,jlmn,ilmnp,jlmnp,1:2) = euijkl_temp(1:2) - euijkl_temp2(1:2) - euijkl_dc(:)
+                 pawtab(itypat)%euijkl(jlmn,ilmn,jlmnp,ilmnp,1:2) = pawtab(itypat)%euijkl(ilmn,jlmn,ilmnp,jlmnp,1:2)
 
 !                Term j,i,ip,jp (m1,m2,m4,m3)
                  vee2 = pawtab(itypat)%vee(m21,m31,m41,m11)
-                 do sig=1,2
-                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
-                 end do
-                 pawtab(itypat)%euijkl(:,:,jlmn,ilmn,ilmnp,jlmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+                 euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(jlmn,ilmn,ilmnp,jlmnp,1:2) = euijkl_temp(1:2) - euijkl_temp2(1:2) - euijkl_dc(:)
 
 !                Term i,j,jp,ip (m2,m1,m3,m4)
                  vee2 = pawtab(itypat)%vee(m11,m41,m31,m21)
-                 do sig=1,2
-                   euijkl_temp2(sig,sig) = phiint_ij * phiint_ipjp * vee2
-                 end do
-                 pawtab(itypat)%euijkl(:,:,ilmn,jlmn,jlmnp,ilmnp) = euijkl_temp(:,:) - euijkl_temp2(:,:) - euijkl_dc(:,:)
+                 euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(ilmn,jlmn,jlmnp,ilmnp,1:2) = euijkl_temp(1:2) - euijkl_temp2(1:2) - euijkl_dc(:)
 
                end if ! correlated orbitals
              end do ! klmnb
@@ -1418,7 +1405,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  integer :: jspden,klmn,kspden,lcur,ldim,lmax,lmin,lpawu,lwork,my_comm_atom,ndij,nmat,nspden,nsploop
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: antiferro,my_atmtab_allocated,noccsym_error,paral_atom,use_afm
- real(dp),parameter :: invsqrt2=one/sqrt2
+! real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn,snorm,sx,sy,szp,szm
  character(len=4) :: wrt_mode
  character(len=500) :: message
@@ -1432,7 +1419,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
  character(len=9),parameter :: dspinc(6)= (/"up       ","down     ","up-up    ","down-down","up-dn    ","dn-up    "/)
- character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
+! character(len=9),parameter :: dspinc2(6)=(/"up       ","down     ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
  character(len=9),parameter :: dspinm(6)= (/"dn       ","up i     ","n        ","mx       ","my       ","mz       "/)
  type(coeff4_type),allocatable :: tmp_noccmmp(:)
 
