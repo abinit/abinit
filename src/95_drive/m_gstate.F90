@@ -295,7 +295,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(extfpmd_type),pointer :: extfpmd => null()
- type(macro_uj_type) :: dtpawuj(0)
+ type(macro_uj_type) :: dtpawuj(1)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
