@@ -2498,7 +2498,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
    il=indlmn(1,ilmn)
    jl=indlmn(1,jlmn)
 
-   im=indlmn(2,ilmn) 
+   im=indlmn(2,ilmn)
    jm=indlmn(2,jlmn)
    kln=indklmn(2,klmn)
 
@@ -3008,25 +3008,24 @@ end subroutine pawdiju
 !!
 !! SOURCE
 
-subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
+subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,qphase
 !arrays
  real(dp),intent(out) :: diju(:,:)
- real(dp),intent(out),optional :: diju_im(:,:)
  type(pawrhoij_type),intent(in) :: pawrhoij
  type(pawtab_type),intent(in) :: pawtab
 
 !Local variables ---------------------------------------
 !scalars
-integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,jrhoij,select_euijkl
- integer :: klmn,klmnp,klmn1,lmn2_size,sig1,sig2
+ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,jrhoij,select_euijkl
+ integer :: klmn,klmnp,klmn1,lmn2_size,max_euijkl,min_euijkl,sig1,sig2
  logical :: compute_im
  character(len=500) :: msg
 !arrays
- real(dp) :: ro(2),fact
+ real(dp) :: ro(2,ndij),euijkl_temp(3,2)
 
 ! *************************************************************************
 
@@ -3040,8 +3039,8 @@ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,
    msg='pawrhoij%qphase must be >=qphase!'
    LIBPAW_BUG(msg)
  end if
- if (ndij==4) then
-   msg='pawdiju_euijkl not yet available for ndij=4!'
+ if (ndij/=pawrhoij%nspden) then
+   msg='pawrhoij%nspden must be equal to ndij!'
    LIBPAW_BUG(msg)
  end if
 
@@ -3049,78 +3048,142 @@ integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,
  diju=zero
  cplex_rhoij=pawrhoij%cplex_rhoij
  compute_im=(cplex_dij==2.and.cplex_rhoij==2)
- fact=one
- ! If nspden=1, rho_up = rho_down = 1/2*rho_tot so \sum_\sigma rho_\sigma**2 = 1/2 \rho_tot**2
- if (pawrhoij%nspden==1) fact=half
 
-!Loops over spin-components
- do sig2=1,min(pawrhoij%nspden,2)
-   do sig1=1,min(pawrhoij%nspden,2)
+!Loop over spin-components (Dij)
+ do sig1=1,ndij
 
-     if (sig1==sig2) then
-       select_euijkl = 1
-     else
-       select_euijkl = 2
-     end if
+   if (sig1<=2) then
+     min_euijkl = 1
+     max_euijkl = 2
+   else
+     min_euijkl = 3
+     max_euijkl = 3
+   end if
 
-     !Loop over phase exp(iqr) phase real/imaginary part
-     do iq=1,qphase
-       !First loop: we store the real part in dij(1 -> lmn2_size)
-       !2nd loop: we store the imaginary part in dij(lmn2_size+1 -> 2*lmn2_size)
-       iq0_dij=merge(0,cplex_dij*lmn2_size,iq==1)
-       iq0_rhoij=merge(0,cplex_rhoij*lmn2_size,iq==1)
+   !Loop over phase exp(iqr) phase real/imaginary part
+   do iq=1,qphase
+     !First loop: we store the real part in dij(1 -> lmn2_size)
+     !2nd loop: we store the imaginary part in dij(lmn2_size+1 -> 2*lmn2_size)
+     iq0_dij=merge(0,cplex_dij*lmn2_size,iq==1)
+     iq0_rhoij=merge(0,cplex_rhoij*lmn2_size,iq==1)
 
-       !Loop over rhoij elements
-       jrhoij=iq0_rhoij+1
-       do irhoij=1,pawrhoij%nrhoijsel
-         klmn=pawrhoij%rhoijselect(irhoij)
-         ilmn=pawtab%indklmn(7,klmn)
-         jlmn=pawtab%indklmn(8,klmn)
+     !Loop over rhoij elements
+     jrhoij=iq0_rhoij+1
+     do irhoij=1,pawrhoij%nrhoijsel
+       klmn=pawrhoij%rhoijselect(irhoij)
+       ilmn=pawtab%indklmn(7,klmn)
+       jlmn=pawtab%indklmn(8,klmn)
 
-         ro(1:cplex_rhoij)=pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,sig2)
+       !Loop over spin-components (rhoij)
+       if (ndij==1) then ! rho_up = rho_down = 1/2 rho_tot
+         ro(1:cplex_rhoij,1)=half*pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)
+       else if (ndij==2) then
+         do sig2=1,ndij
+           ro(1:cplex_rhoij,sig2)=pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,sig2)
+         end do
+       else ! ndij=4
+         !up   up           = 1/2 ( tot + z )
+         ro(1:cplex_rhoij,1)=half*(pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)+pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,4))
+         !down down         = 1/2 ( tot - z )
+         ro(1:cplex_rhoij,2)=half*(pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)-pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,4))
+         if (cplex_rhoij==1) ro(2,1:2) = zero
+         !down up = x + i y
+         ro(1,3)=pawrhoij%rhoijp(jrhoij,2)
+         ro(2,3)=pawrhoij%rhoijp(jrhoij,3)
+         if (cplex_rhoij==2) then
+           ro(1,3)=ro(1,3)-pawrhoij%rhoijp(jrhoij+1,3)
+           ro(2,3)=ro(2,3)+pawrhoij%rhoijp(jrhoij+1,2)
+         end if
+         !up down = x - i y
+         ro(1,4)= pawrhoij%rhoijp(jrhoij,2)
+         ro(2,4)=-pawrhoij%rhoijp(jrhoij,3)
+         if (cplex_rhoij==2) then
+           ro(1,4)=ro(1,4)+pawrhoij%rhoijp(jrhoij+1,3)
+           ro(2,4)=ro(2,4)+pawrhoij%rhoijp(jrhoij+1,2)
+         end if
+       end if
 
-         do jlmnp=1,pawtab%lmn_size
-           j0lmnp=jlmnp*(jlmnp-1)/2
-           do ilmnp=1,jlmnp
-             klmnp=j0lmnp+ilmnp
-             klmn1=iq0_dij+cplex_dij*(klmnp-1)+1
+       do jlmnp=1,pawtab%lmn_size
+         j0lmnp=jlmnp*(jlmnp-1)/2
+         do ilmnp=1,jlmnp
+           klmnp=j0lmnp+ilmnp
+           klmn1=iq0_dij+cplex_dij*(klmnp-1)+1
 
-!            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
-             diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,select_euijkl)
-             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,select_euijkl)
+           euijkl_temp(:,1) = pawtab%euijkl(:,ilmn,jlmn,ilmnp,jlmnp)
+           euijkl_temp(:,2) = pawtab%euijkl(:,jlmn,ilmn,ilmnp,jlmnp)
 
-!            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
-             if (compute_im) then
-               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,select_euijkl)
-               if (ilmn/=jlmn) then
-                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,select_euijkl)
-               end if
-             end if
-
-             if (pawrhoij%nspden==1) then ! If nspden=1, we have to add the non-diagonal part (select_euijkl=2)
-!              Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
-               diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
-               if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
-
-!              Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
-               if (compute_im) then
-                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
-                 if (ilmn/=jlmn) then
-                   diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
+           !Loop over spin-components (rhoij)
+           do select_euijkl=min_euijkl,max_euijkl
+             if (sig1<=2) then ! up/up and down/down Dij components
+               if (ndij==1) then
+                 sig2=1
+               else
+                 if (select_euijkl==1) then ! Diagonal part of the spin matrix
+                   sig2=sig1
+                 else if (select_euijkl==2) then ! Non-diagonal part
+                   if (sig1==1) sig2=2
+                   if (sig1==2) sig2=1
                  end if
                end if
+             else ! select_euijkl = 3
+               sig2 = sig1
+!               if (sig1==3) sig2=4
+!               if (sig1==4) sig2=3
              end if
+             !Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
+             diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,sig2)*euijkl_temp(select_euijkl,1)
+             if (ilmn/=jlmn) then
+               diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,sig2)*euijkl_temp(select_euijkl,2)
+             end if
+             !Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
+             if (compute_im) then
+               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2,sig2)*euijkl_temp(select_euijkl,1)
+               if (ilmn/=jlmn) then
+                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2,sig2)*euijkl_temp(select_euijkl,2)
+               end if
+             end if
+           end do
 
-           end do ! k,l
-         end do ! i,j
+!           ! Non-diagonal part of the spin matrix
+!           select_euijkl = 2
+!
+!           if (ndij==1) then ! If nspden=1, we have to add the non-diagonal part (select_euijkl=2)
+!!            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
+!             diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
+!             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
+!
+!!            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
+!             if (compute_im) then
+!               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2,1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
+!               if (ilmn/=jlmn) then
+!                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2,1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
+!               end if
+!             end if
+!           end if
 
-         jrhoij=jrhoij+cplex_rhoij
-       end do
+!           if (sig1/=sig2.and.pawrhoij%nspden==4) then ! If nspden=4, we have to add the non-collinear part (select_euijkl=3)
+!!            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
+!             diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,3)
+!             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,3)
+!
+!!            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
+!             if (compute_im) then
+!               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,3)
+!               if (ilmn/=jlmn) then
+!                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,3)
+!               end if
+!             end if
+!           end if
 
-     end do ! q phase
+         end do
+       end do ! k,l
 
-   end do  !sig1
- end do !sig2
+       jrhoij=jrhoij+cplex_rhoij
+     end do ! i,j
+
+   end do ! q phase
+
+ end do !sig1
 
 ! OLD VERSION FROM LUCAS BAGUET
 ! ----------------------------------------------------------------

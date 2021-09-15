@@ -430,8 +430,8 @@ MODULE m_pawtab
    ! Used for screened Fock contributions
 
   real(dp), allocatable :: euijkl(:,:,:,:,:)
-   ! euijkl(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
-   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_s1s2 Sum_ijkl [rho_ij^s1 rho_kl^s2 euijkl^s1s2] )
+   ! euijkl(3,lmn_size,lmn_size,lmn_size,lmn_size)
+   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_ijkl Sum_s1s2 [rho_ij^s1 rho_kl^s2 euijkl(s1,s2)] )
    ! Contrary to eijkl and eijkl_sr, euijkl is not invariant with respect to the permutations i <--> j or k <--> l
    ! However, it is still invariant with respect to the permutation i,k <--> j,l, see pawpuxinit.F90
    ! Also, it depends on two spin indexes
@@ -2765,8 +2765,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_DEALLOCATE(pawtab%euijkl)
      end if
      if (siz_euijkl>0) then
-       LIBPAW_ALLOCATE(pawtab%euijkl,(pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,3))
-       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,3/))
+       LIBPAW_ALLOCATE(pawtab%euijkl,(3,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
+       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/3,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
        ii=ii+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then
