@@ -92,7 +92,7 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  pawtab <type(pawtab_type)>=paw tabulated data read at start:
-!!     %euijkl=(2,2,lmn2_size,lmn2_size)= array for computing DFT+U terms without occupancies
+!!     %euijkl=(3,lmn2_size,lmn2_size)= array for computing DFT+U terms without occupancies
 !!     %ij_proj= nproj*(nproju+1)/2
 !!     %klmntomn(4,lmn2_size)= Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
 !!     %lnproju(nproj)= value of ln for projectors on which paw+u/local exact-exchange acts.
@@ -118,12 +118,12 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
-&           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
+&           nspinor,ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
 &           ucrpa) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: dmatpuopt,ntypat,pawprtvol,use_dmft,useexexch,usepawu
+ integer,intent(in) :: dmatpuopt,nspinor,ntypat,pawprtvol,use_dmft,useexexch,usepawu
  logical :: is_dfpt
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
@@ -147,7 +147,7 @@ CONTAINS  !=====================================================================
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
- real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(2)
+ real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
  real(dp),allocatable :: ff(:),fk(:),gg(:)
 
 ! *************************************************************************
@@ -567,7 +567,7 @@ CONTAINS  !=====================================================================
          if (allocated(pawtab(itypat)%euijkl)) then
            ABI_FREE(pawtab(itypat)%euijkl)
          end if
-         ABI_MALLOC(pawtab(itypat)%euijkl,(lmn_size,lmn_size,lmn_size,lmn_size,3))
+         ABI_MALLOC(pawtab(itypat)%euijkl,(3,lmn_size,lmn_size,lmn_size,lmn_size))
          pawtab(itypat)%euijkl = zero
          compute_euij_fll = .false.
          euijkl_temp2=zero
@@ -610,32 +610,39 @@ CONTAINS  !=====================================================================
                  m3 = pawtab(itypat)%indlmn(2,jlmnp) ! mjp
                  m31=m3+lpawu+1
 
-                 euijkl_dc = zero
+                 euijkl_dc(:) = zero
 !                Compute the double-counting part of euijkl (invariant when exchanging i<-->j or ip<-->jp)
                  if (m1==m2.and.m3==m4) then ! In that case, we have to add the double-counting term
 
-                   if (abs(usepawu)==1) then ! FLL
+                   if (abs(usepawu)==1.and.nspinor==1) then ! FLL
 
                      euijkl_dc(1) = &
 &                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
                      euijkl_dc(2) = &
 &                     phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
 
-                   else if (abs(usepawu)==2) then ! AMF
+                   else if (abs(usepawu)==2.and.nspinor==1) then ! AMF
 
                      euijkl_dc(1) = &
 &                     two*lpawu/(two*lpawu+one) * phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - pawtab(itypat)%jpawu )
                      euijkl_dc(2) = &
 &                     phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
 
-                   else if (abs(usepawu)==4) then ! FLL without polarization in XC
+                   else if (abs(usepawu)==4.or.nspinor>1) then ! FLL without polarization in XC or nspinor>1
 
-                     euijkl_dc(:) = &
+                     euijkl_dc(1:2) = &
 &                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - half*pawtab(itypat)%jpawu )
 
                    end if
 
                  end if ! double-counting term
+
+                 ! Array of size 3:
+                 ! 1st element : coupled with up/up or down/down terms
+                 ! 2nd element : coupled with up/down or down/up terms (collinear part)
+                 ! 3rd element : coupled with up/down or down/up terms (non-collinear part)
+                 euijkl_temp(:) = zero
+                 euijkl_temp2(:) = zero
 
                  vee1 = pawtab(itypat)%vee(m11,m31,m21,m41)
 !                Note : vee(13|24) = vee(23|14) ( so : i    <--> j     )
@@ -655,21 +662,23 @@ CONTAINS  !=====================================================================
 !                       vee(13|42) = vee(42|13) = vee(24|31) ( so : i,ip  <--> j,jp )
 !                ==> vee2 is invariant only with respect to the permutation i,ip <--> j,jp
 
-                 euijkl_temp2(:) = zero 
 !                Terms i,j,ip,jp (m2,m1,m4,m3) and j,i,jp,ip (m1,m2,m3,m4)
                  euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
-                 pawtab(itypat)%euijkl(ilmn,jlmn,ilmnp,jlmnp,1:2) = euijkl_temp(1:2) - euijkl_temp2(1:2) - euijkl_dc(:)
-                 pawtab(itypat)%euijkl(jlmn,ilmn,jlmnp,ilmnp,1:2) = pawtab(itypat)%euijkl(ilmn,jlmn,ilmnp,jlmnp,1:2)
+                 euijkl_temp2(3) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(:,ilmn,jlmn,ilmnp,jlmnp) = euijkl_temp(:) - euijkl_temp2(:) - euijkl_dc(:)
+                 pawtab(itypat)%euijkl(:,jlmn,ilmn,jlmnp,ilmnp) = pawtab(itypat)%euijkl(:,ilmn,jlmn,ilmnp,jlmnp)
 
 !                Term j,i,ip,jp (m1,m2,m4,m3)
                  vee2 = pawtab(itypat)%vee(m21,m31,m41,m11)
                  euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
-                 pawtab(itypat)%euijkl(jlmn,ilmn,ilmnp,jlmnp,1:2) = euijkl_temp(1:2) - euijkl_temp2(1:2) - euijkl_dc(:)
+                 euijkl_temp2(3) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(:,jlmn,ilmn,ilmnp,jlmnp) = euijkl_temp(:) - euijkl_temp2(:) - euijkl_dc(:)
 
 !                Term i,j,jp,ip (m2,m1,m3,m4)
                  vee2 = pawtab(itypat)%vee(m11,m41,m31,m21)
                  euijkl_temp2(1) = phiint_ij * phiint_ipjp * vee2
-                 pawtab(itypat)%euijkl(ilmn,jlmn,jlmnp,ilmnp,1:2) = euijkl_temp(1:2) - euijkl_temp2(1:2) - euijkl_dc(:)
+                 euijkl_temp2(3) = phiint_ij * phiint_ipjp * vee2
+                 pawtab(itypat)%euijkl(:,ilmn,jlmn,jlmnp,ilmnp) = euijkl_temp(:) - euijkl_temp2(:) - euijkl_dc(:)
 
                end if ! correlated orbitals
              end do ! klmnb
