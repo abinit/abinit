@@ -103,4 +103,5 @@ inp_files = [
 "t105.abi", # test usepawu options (including negative ones), nsppol=nspinor=nspden=1
 "t106.abi", # test usepawu options (including negative ones), nsppol=2,nspden=2
 "t107.abi", # test usepawu options (including negative ones), nspinor=2,nspden=4
+"t108.abi", # test usepawu options (including negative ones), nspinor=2,nspden=1
 ]
