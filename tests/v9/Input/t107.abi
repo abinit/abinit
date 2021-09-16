@@ -19,11 +19,11 @@ acell   3*7.92
 rprim 0.0 1/2 1/2
       1/2 0.0 1/2
       1.0 1.0 0.0
-nband 60
+nband 50
 occopt 7  tsmear 0.015
 
 # === SCF cycle options
-nstep 5  tolvrs 1.d-7
+nstep 3  tolvrs 1.d-7
 ecut 8. pawecutdg 10.
 diemix 0.5
 
@@ -39,6 +39,8 @@ usepawu1  1
 usepawu2 -1
 usepawu3  4
 usepawu4 -4
+
+spnorbscl 1000 # To enhance spin-orbit coupling, non physical
 
 lpawu   2 -1        # Applied on d electrons of Nickel
 upawu  0.30   0.0   # Value of U parameter
