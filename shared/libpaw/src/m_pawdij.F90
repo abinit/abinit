@@ -3021,7 +3021,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,ilmn,ilmnp,irhoij,j0lmnp,jlmn,jlmnp,jrhoij,select_euijkl
- integer :: klmn,klmnp,klmn1,lmn2_size,max_euijkl,min_euijkl,sig1,sig2
+ integer :: klmn,klmnp,klmn1,lmn2_size,max_euijkl,min_euijkl,sig1,sig2,sig2p
  logical :: compute_im
  character(len=500) :: msg
 !arrays
@@ -3047,7 +3047,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
 !Initialization
  diju=zero
  cplex_rhoij=pawrhoij%cplex_rhoij
- compute_im=(cplex_dij==2.and.cplex_rhoij==2)
+ compute_im=(cplex_dij==2)
 
 !Loop over spin-components (Dij)
  do sig1=1,ndij
@@ -3087,19 +3087,19 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
          !down down         = 1/2 ( tot - z )
          ro(1:cplex_rhoij,2)=half*(pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)-pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,4))
          if (cplex_rhoij==1) ro(2,1:2) = zero
-         !down up = x + i y
-         ro(1,3)=pawrhoij%rhoijp(jrhoij,2)
-         ro(2,3)=pawrhoij%rhoijp(jrhoij,3)
+         !up down = 1/2 ( x - i y )
+         ro(1,3)= half*pawrhoij%rhoijp(jrhoij,2)
+         ro(2,3)=-half*pawrhoij%rhoijp(jrhoij,3)
          if (cplex_rhoij==2) then
-           ro(1,3)=ro(1,3)-pawrhoij%rhoijp(jrhoij+1,3)
-           ro(2,3)=ro(2,3)+pawrhoij%rhoijp(jrhoij+1,2)
+           ro(1,3)=ro(1,3)+half*pawrhoij%rhoijp(jrhoij+1,3)
+           ro(2,3)=ro(2,3)+half*pawrhoij%rhoijp(jrhoij+1,2)
          end if
-         !up down = x - i y
-         ro(1,4)= pawrhoij%rhoijp(jrhoij,2)
-         ro(2,4)=-pawrhoij%rhoijp(jrhoij,3)
+         !down up = 1/2 ( x + i y )
+         ro(1,4)=half*pawrhoij%rhoijp(jrhoij,2)
+         ro(2,4)=half*pawrhoij%rhoijp(jrhoij,3)
          if (cplex_rhoij==2) then
-           ro(1,4)=ro(1,4)+pawrhoij%rhoijp(jrhoij+1,3)
-           ro(2,4)=ro(2,4)+pawrhoij%rhoijp(jrhoij+1,2)
+           ro(1,4)=ro(1,4)-half*pawrhoij%rhoijp(jrhoij+1,3)
+           ro(2,4)=ro(2,4)+half*pawrhoij%rhoijp(jrhoij+1,2)
          end if
        end if
 
@@ -3125,55 +3125,25 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
                    if (sig1==2) sig2=1
                  end if
                end if
+               sig2p = sig2
              else ! select_euijkl = 3
                sig2 = sig1
-!               if (sig1==3) sig2=4
-!               if (sig1==4) sig2=3
+               if (sig1==3) sig2p=4
+               if (sig1==4) sig2p=3
              end if
              !Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
              diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,sig2)*euijkl_temp(select_euijkl,1)
              if (ilmn/=jlmn) then
-               diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,sig2)*euijkl_temp(select_euijkl,2)
+               diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,sig2p)*euijkl_temp(select_euijkl,2)
              end if
              !Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
              if (compute_im) then
                diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2,sig2)*euijkl_temp(select_euijkl,1)
                if (ilmn/=jlmn) then
-                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2,sig2)*euijkl_temp(select_euijkl,2)
+                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2,sig2p)*euijkl_temp(select_euijkl,2)
                end if
              end if
            end do
-
-!           ! Non-diagonal part of the spin matrix
-!           select_euijkl = 2
-!
-!           if (ndij==1) then ! If nspden=1, we have to add the non-diagonal part (select_euijkl=2)
-!!            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
-!             diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
-!             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1,1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
-!
-!!            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
-!             if (compute_im) then
-!               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2,1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,2)
-!               if (ilmn/=jlmn) then
-!                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2,1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,2)
-!               end if
-!             end if
-!           end if
-
-!           if (sig1/=sig2.and.pawrhoij%nspden==4) then ! If nspden=4, we have to add the non-collinear part (select_euijkl=3)
-!!            Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)
-!             diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,3)
-!             if (ilmn/=jlmn) diju(klmn1,sig1)=diju(klmn1,sig1)+fact*ro(1)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,3)
-!
-!!            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
-!             if (compute_im) then
-!               diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+fact*ro(2)*pawtab%euijkl(ilmn,jlmn,ilmnp,jlmnp,3)
-!               if (ilmn/=jlmn) then
-!                 diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-fact*ro(2)*pawtab%euijkl(jlmn,ilmn,ilmnp,jlmnp,3)
-!               end if
-!             end if
-!           end if
 
          end do
        end do ! k,l
