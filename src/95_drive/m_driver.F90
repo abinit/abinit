@@ -838,7 +838,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &     pawrad,pawtab,psps,xred)
 
    case(RUNL_RTTDDFT)
-     call rttddft(codvsn,dtset,dtfil,mpi_enregs(idtset),pawang,pawrad,pawtab,psps)
+     call rttddft(codvsn,dtfil,dtset,mpi_enregs(idtset),pawang,pawrad,pawtab,psps)
 
    case default
      ! Bad value for optdriver

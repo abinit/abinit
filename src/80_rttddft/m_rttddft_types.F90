@@ -92,8 +92,8 @@ module m_rttddft_types
 
 ! NAME
 ! tdks_type: Time Dependent Kohn-Sham type
-! Object containing the TD KS orbitals and most of the important
-! variables and subroutines required to run RT-TDDFT
+! Object containing the TD KS orbitals and all other 
+! important variables required to run RT-TDDFT
 !
 ! SOURCE
  type,public :: tdks_type
@@ -109,11 +109,13 @@ module m_rttddft_types
    integer                          :: nhatgrdim   !dimension of nhatgr array
    integer                          :: ngrvdw      !dimension of grvdw array
    integer                          :: ntime       !max nb of time steps
+   integer                          :: tdener_unit !unit nb of the energy file
    integer                          :: unpaw       !paw data tmp file unit
-   integer                          :: usexcnhat   !max nb of time steps
+   integer                          :: usexcnhat   !use nhat in the computation of the XC term
    real(dp)                         :: boxcut      !boxcut ratio (gcut(box)/gcut(sphere))
    real(dp)                         :: dt          !propagation time step
    real(dp)                         :: ecore       !core energy
+   real(dp)                         :: etot        !total energy
    real(dp)                         :: gsqcut      !cut-off on G^2
    real(dp)                         :: ucvol       !primitive cell volume
    real(dp)                         :: zion        !total ionic charge
@@ -256,15 +258,19 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !2) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
 
- !3) Compute occupation numbers from WF
+ !3) Init occupation numbers
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
- call newocc(doccde,tdks%eigen,entropy,tdks%energies%e_fermie,               &
-           & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
-           & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
-           & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ,dtset%occopt,    &
-           & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
- ABI_FREE(doccde)
+ tdks%occ(:)=dtset%occ_orig(:,1)
+ !calc occupation number using the previously read WF in the case of mettalic occupation
+ if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
+   ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   call newocc(doccde,tdks%eigen,entropy,tdks%energies%e_fermie,               &
+             & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
+             & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
+             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ,dtset%occopt,    &
+             & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
+   ABI_FREE(doccde)
+ end if
 
  !4) Some further initialization (Mainly for PAW)
  call second_setup(dtset,dtfil,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
@@ -483,6 +489,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  !** Init to zero different energies
  call energies_init(tdks%energies)
  tdks%ecore = zero
+ tdks%etot = zero
 
  !** various additional setup
  call setup1(dtset%acell_orig,tdks%bantot,dtset,ecutdg_eff,ecut_eff,tdks%gmet, &
@@ -887,6 +894,7 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
  end if
 
  !Allocate various required arrays for calculation of the Hamiltonian
+ !Potentials
  ABI_MALLOC(tdks%vhartr,(tdks%nfftf))
  tdks%vhartr=zero
  ABI_MALLOC(tdks%vpsp,(tdks%nfftf))

@@ -34,17 +34,24 @@ module m_rttddft_propagators
  
  use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
                                 & bandfft_kpt_set_ikpt, &
+                                & bandfft_kpt_get_ikpt, &
                                 & prep_bandfft_tabs
+ use m_cgtools,             only: dotprod_g
  use m_dtset,               only: dataset_type
+ use m_energies,            only: energies_type, energies_init, energies_copy
  use m_gemm_nonlop,         only: make_gemm_nonlop
  use m_hamiltonian,         only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,              only: make_invovl
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
+ use m_mpinfo,              only : proc_distrb_cycle
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_types,       only: tdks_type 
+ use m_spacepar,            only: meanvalue_g
+ use m_specialmsg,          only: wrtout
+ use m_xmpi,                only: xmpi_comm_rank
 
  implicit none
 
@@ -93,13 +100,14 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
+subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, store_energies)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
+ logical,          optional, intent(in)    :: store_energies
  type(dataset_type),         intent(inout) :: dtset
  type(gs_hamiltonian_type),  intent(inout) :: gs_hamk
  type(MPI_type),             intent(inout) :: mpi_enreg
@@ -108,26 +116,41 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
+ integer                        :: bdtot_index
+ integer                        :: blocksize
  integer                        :: calc_forces
  integer                        :: dimffnl
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: ibg, icg
+ integer                        :: iblocksize, iblock, iband
  integer                        :: ider, idir, ilm
  integer                        :: ikpt, ikpt_loc, ikg
+ integer                        :: ikpt_this_proc
  integer                        :: istwf_k
+ integer                        :: me_distrb
  integer                        :: my_ikpt, my_nspinor
  integer                        :: nband_k, nband_cprj_k
+ integer                        :: nblockbd
  integer                        :: npw_k, nkpg
+ integer                        :: npw, nband
+ integer                        :: spaceComm_distrb
+ integer                        :: shift
  integer                        :: isppol
  integer                        :: n4, n5, n6
  logical                        :: with_vxctau
+ real(dp)                       :: ar
+ real(dp)                       :: dprod_i
+ real(dp)                       :: enlx
+ type(energies_type)            :: energies
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  !arrays
  integer,allocatable            :: kg_k(:,:)
  real(dp),allocatable           :: ffnl(:,:,:,:)
+ real(dp),allocatable           :: gvnlxc(:,:)
  real(dp),allocatable           :: kpg_k(:,:)
  real(dp)                       :: kpoint(3)
  real(dp),allocatable           :: kinpw(:)
+ real(dp),allocatable           :: occ_k(:)
  real(dp),allocatable           :: ph3d(:,:,:)
  real(dp),allocatable           :: vlocal(:,:,:,:)
  real(dp),allocatable           :: vxctaulocal(:,:,:,:,:)
@@ -135,8 +158,16 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  
 ! ***********************************************************************
 
+ !Init MPI
+ spaceComm_distrb=mpi_enreg%comm_cell
+ me_distrb=xmpi_comm_rank(spaceComm_distrb)
+
+ !Init to zero different energies
+ call energies_init(energies)
+ energies%e_corepsp=tdks%energies%e_corepsp
+
  !Set vtrial and intialize the Hamiltonian
- call rttddft_init_hamiltonian(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+ call rttddft_init_hamiltonian(dtset,energies,gs_hamk,istep,mpi_enreg,psps,tdks)
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
@@ -150,6 +181,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  else
    calc_forces=0
  end if
+ bdtot_index=0
 
 !FB: Needed?
 !has_vectornd = (with_vectornd .EQ. 1)
@@ -205,37 +237,42 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
       istwf_k=dtset%istwfk(ikpt)
       npw_k=tdks%npwarr(ikpt)
 
+      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
+         bdtot_index=bdtot_index+nband_k
+         cycle
+      end if
+
       if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
       call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 
-       ABI_MALLOC(kg_k,(3,npw_k))
-       ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
-       kg_k(:,1:npw_k)=tdks%kg(:,1+ikg:npw_k+ikg)
-       if (psps%useylm==1) then
+      ABI_MALLOC(kg_k,(3,npw_k))
+      ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+      kg_k(:,1:npw_k)=tdks%kg(:,1+ikg:npw_k+ikg)
+      if (psps%useylm==1) then
          do ilm=1,psps%mpsang*psps%mpsang
-           ylm_k(1:npw_k,ilm)=tdks%ylm(1+ikg:npw_k+ikg,ilm)
+            ylm_k(1:npw_k,ilm)=tdks%ylm(1+ikg:npw_k+ikg,ilm)
          end do
-       end if
+      end if
 
-       kpoint(:)=dtset%kptns(:,ikpt)
+      kpoint(:)=dtset%kptns(:,ikpt)
 
       !** Set up the remaining k-dependent part of the Hamiltonian
       ! Kinetic energy - Compute (1/2) (2 Pi)**2 (k+G)**2:
-       ABI_MALLOC(kinpw,(npw_k))
-       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+      ABI_MALLOC(kinpw,(npw_k))
+      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0)
       ! Compute (k+G) vectors (only if useylm=1)
-       nkpg=3*calc_forces*dtset%nloalg(3)
-       ABI_MALLOC(kpg_k,(npw_k,nkpg))
-       if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+      nkpg=3*calc_forces*dtset%nloalg(3)
+      ABI_MALLOC(kpg_k,(npw_k,nkpg))
+      if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
       ! Compute nonlocal form factors ffnl at all (k+G):
-       ider=0;idir=0;dimffnl=1
-       ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
-       if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
+      ider=0;idir=0;dimffnl=1
+      ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+      if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
                    & ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,     &
                    & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
                    & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
-       end if
+      end if
 
       !** Load k-dependent part in the Hamiltonian datastructure
       !**  - Compute 3D phase factors
@@ -272,17 +309,17 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
       end if
 
-     ! Setup gemm_nonlop
-     if (tdks%gemm_nonlop_use_gemm) then
-        !set the global variable indicating to gemm_nonlop where to get its data from
-        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-        if (istep <= 1) then
-           !Init the arrays
-           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,        &
+      ! Setup gemm_nonlop
+      if (tdks%gemm_nonlop_use_gemm) then
+         !set the global variable indicating to gemm_nonlop where to get its data from
+         gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+         if (istep <= 1) then
+            !Init the arrays
+            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,        &
                                & gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
                                & gs_hamk%ffnl_k,gs_hamk%ph3d_k)
-        end if
-     end if
+         end if
+      end if
      
      !FB: Needed?
      !! Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
@@ -290,10 +327,50 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
      !if (psps%usepaw==1 .and. usefock) then
      !  if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
      !end if
-      
-      !FB: Here we should now call the propagator to evolve the cg
-      call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor)
+  
+      if (dtset%paral_kgb == 1) then
+         ikpt_this_proc = bandfft_kpt_get_ikpt()
+         npw = bandfft_kpt(ikpt_this_proc)%ndatarecv
+         nband = mpi_enreg%bandpp
+      else
+         npw = npw_k
+         nband = nband_k
+      end if
 
+      ABI_MALLOC(gvnlxc, (2, npw*my_nspinor*nband))
+
+      call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,gs_hamk,gvnlxc,1,mpi_enreg,nband,npw,my_nspinor)
+
+      if (PRESENT(store_energies)) then
+         if (store_energies) then
+            ABI_MALLOC(occ_k,(nband_k))
+            occ_k(:)=tdks%occ(1+bdtot_index:nband_k+bdtot_index)
+            nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
+            blocksize=nband_k/nblockbd
+            do iblock=1,nblockbd
+               do iblocksize=1,blocksize
+                  iband=(iblock-1)*blocksize+iblocksize
+                  shift = npw_k*my_nspinor*(iband-1)
+                  !Compute kinetic energy contribution 
+                  call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
+                                 & tdks%cg(:,1+shift+icg:shift+npw_k*my_nspinor+icg),&
+                                 & tdks%cg(:,1+shift+icg:shift+npw_k*my_nspinor+icg),0)
+                  energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*occ_k(iband)*ar
+                  !Compute non local psp energy contribution
+                  if (gs_hamk%usepaw /= 1) then
+                     call dotprod_g(enlx,dprod_i,gs_hamk%istwf_k,npw_k*my_nspinor,1,&
+                                  & tdks%cg(:,1+shift+icg:shift+npw_k*my_nspinor+icg),&
+                                  & gvnlxc(:,1+shift:shift+npw_k*my_nspinor),&
+                                  & mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+                     energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*occ_k(iband)*enlx                    
+                  end if
+               end do
+            end do
+            ABI_FREE(occ_k)
+         end if
+      end if
+
+      ABI_FREE(gvnlxc)
       ABI_FREE(kg_k)
       ABI_FREE(ylm_k)
       ABI_FREE(kpg_k)
@@ -316,6 +393,13 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  if(dtset%usekden/=0) then
    ABI_FREE(vxctaulocal)
  end if
+
+ !Keep these energies in memory if required
+ if (PRESENT(store_energies)) then
+   if (store_energies) call energies_copy(energies,tdks%energies)
+ end if
+
+ !FB: There should be some MPI reduce here I think..
 
  end subroutine rttddft_propagator_er
 
@@ -365,38 +449,43 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
- integer  :: ics
- logical  :: lconv
+ character(len=500)   :: msg
+ integer              :: ics
+ logical              :: lconv
  !arrays
- real(dp) :: conv(2)
- real(dp) :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
+ real(dp)             :: conv(2)
+ real(dp)             :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
  
 ! ***********************************************************************
 
  cg(:,:) = tdks%cg(:,:) !Psi(t)
- conv(1) = sum(tdks%cg(1,:)); conv(2) = sum(tdks%cg(2,:))
 
  !** Predictor step
  ! predict psi(t+dt) using ER propagator
- call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+ call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks,store_energies=.true.)
+ ! for convergence check
+ conv(1) = sum(abs(tdks%cg(1,:))); conv(2) = sum(abs(tdks%cg(2,:)))
  ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
  tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
  ! calc associated density at t+dt/2
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
- ! go back to time t
+ ! go back to time t ..
  tdks%cg(:,:) = cg(:,:)
- ! evolve psi(t) using estimated density at t+dt/2
+ ! .. and evolve psi(t) using the EMR propagator with the estimated density at t+dt/2
  call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
  
- if (100*abs(conv(1)-sum(tdks%cg(1,:)))/conv(1) < dtset%td_scthr .and. &
-   & 100*abs(conv(2)-sum(tdks%cg(2,:)))/conv(2) < dtset%td_scthr) then
+ ! Check convergence
+ if (100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1) < dtset%td_scthr .and. &
+   & 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2) < dtset%td_scthr) then
    lconv = .true.
    ics = 0
+   print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
+        & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
  else
    lconv = .false.
    !** Corrector steps
    do ics = 1, dtset%td_ncormax
-      conv(1) = sum(tdks%cg(1,:)); conv(2) = sum(tdks%cg(2,:))
+      conv(1) = sum(abs(tdks%cg(1,:))); conv(2) = sum(abs(tdks%cg(2,:)))
       ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
       tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
       ! calc associated density at t+dt/2
@@ -406,22 +495,29 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
       ! evolve psi(t) using estimated density at t+dt/2
       call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
       ! check convergence
-      if (100*abs(conv(1)-sum(tdks%cg(1,:)))/conv(1) < dtset%td_scthr .and. &
-       & 100*abs(conv(2)-sum(tdks%cg(2,:)))/conv(2) < dtset%td_scthr) then
+      if (100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1) < dtset%td_scthr .and. &
+        & 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2) < dtset%td_scthr) then
          lconv = .true.
+         print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
+               & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
          exit
      else
-        print*, 100*abs(conv(1)-sum(tdks%cg(1,:)))/conv(1), 100*abs(conv(2)-sum(tdks%cg(2,:)))/conv(2), dtset%td_scthr
-        conv(1) = sum(tdks%cg(1,:))
-        conv(2) = sum(tdks%cg(2,:))
+        conv(1) = sum(abs(tdks%cg(1,:)))
+        conv(2) = sum(abs(tdks%cg(2,:)))
+         print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
+               & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
      end if
    end do
  end if
 
  if (lconv) then
-   print*, "Converged after ", ics, "self-consistent corrector steps"
+   write(msg,'(a,i4,a)') "Converged after ", ics, " self-consistent corrector steps"
+   call wrtout(ab_out,msg)
+   if (do_write_log) call wrtout(std_out,msg)
  else
-   print*, "Reached maximum number of corrector steps before convergence"
+   write(msg,'(a)') "Reached maximum number of corrector steps before convergence"
+   call wrtout(ab_out,msg)
+   if (do_write_log) call wrtout(std_out,msg)
  end if
  
  end subroutine rttddft_propagator_emr
