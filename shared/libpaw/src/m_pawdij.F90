@@ -2935,7 +2935,7 @@ end subroutine pawdiju
 !! Compute the DFT+U contribution to the PAW pseudopotential strength Dij (for one atom only).
 !! Alternative to pawdiju using the following property:
 !!     D_ij^pawu^{\sigma}_{mi,ni,mj,nj}=\sum_{k,l} [rho^{\sigma}_kl*e^U_ijkl]
-!! The routine structure is very similar to the one of pawdijhartree.
+!! The routine structure is similar to pawdijhartree.
 !!
 !! INPUTS
 !!  cplex_dij=2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
@@ -2958,9 +2958,18 @@ end subroutine pawdiju
 !! NOTES
 !! There are some subtleties :
 !!   Contrary to eijkl, eu_ijkl is not invariant with respect to the permutation of i <--> j or k <--> l.
-!!   So the correct expression of Dij is:
+!!   Also, we have to deal with spin polarization.
+!!   In the non-collinear magnetism case, the correct expression of Dij^st (s and t being spin indexes) is:
 !!
-!!     D_kl = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ji eu_jikl )
+!!     D_kl^st = delta_st sum_ij rho_ij^ss eu_ijkl(1)
+!!             + delta_st sum_ij rho_ij^-s-s eu_ijkl(2)
+!!             + (1-delta_st) sum_ij rho_ij^st eu_ijkl(3)
+!!
+!!   As only the lower triangular part of the Dij matrix is stored (i<=j), in practice we have:
+!!
+!!     D_kl^st = delta_st sum_i<=j ( rho_ij^ss eu_ijkl(1) + (1-delta_ij) rho_ji^ss eu_jikl(1) )
+!!             + delta_st sum_i<=j ( rho_ij^-s-s eu_ijkl(2) + (1-delta_ij) rho_ji^-s-s eu_jikl(2) )
+!!             + (1-delta_st) sum_i<=j ( rho_ij^st eu_ijkl(3) + (1-delta_ij) rho_ji^st eu_jikl(3) )
 !!
 !!   In the following, we will use that: (according to the rules in pawpuxinit.F90)
 !!    (a) eu_ijkl + eu_jikl =   eu_ijlk + eu_jilk (invariant      when exchanging k <--> l)
@@ -2969,18 +2978,48 @@ end subroutine pawdiju
 !!    (c) eu_iikl = eu_iilk (if i=j, invariant when exchanging k <--> l)
 !!    (d) eu_ijkk = eu_jikk (if k=l, invariant when exchanging i <--> j)
 !!
-!!   1) If qphase=1 (ipert=0 or q=0) we have simply:
-!!        rho_ji = rho_ij^*
-!!      So:
-!!           D_kl  = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) rho_ij^* eu_jikl )
-!!      As eu_ijkl is real:
-!! [I] :  Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
-!!        Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
-!!      So:
-!!        Re(D_kl) = sum_i<=j Re(rho_ij) ( eu_ijlk + (1-delta_ij) eu_jilk ) =  Re(D_lk)  ( using (a) and (c) )
-!!        Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)  ( using (b) and (c) )
+!!   qphase=1 (ipert=0 or q=0):
+!!   --------------------------
 !!
-!!   2) If qphase=2 (so ipert>0 and q/=0), we have:
+!!   --- Non-collinear case:
+!!
+!!   We have:
+!!         rho_ji^st = (rho_ij^ts)^*
+!!     Re(rho_ji^st) =  Re(rho_ij^ts)
+!!     Im(rho_ji^st) = -Im(rho_ij^ts)
+!!
+!!   As eu_ijkl is real one gets:
+!!
+!!     Re(D_kl^st) = delta_st     sum_i<=j Re(rho_ij^ss)   ( eu_ijkl(1) + (1-delta_ij) eu_jikl(1) )
+!!                 + delta_st     sum_i<=j Re(rho_ij^-s-s) ( eu_ijkl(2) + (1-delta_ij) eu_jikl(2) )
+!!                 + (1-delta_st) sum_i<=j ( Re(rho_ij^st) eu_ijkl(3) + (1-delta_ij) Re(rho_ij^ts) eu_jikl(3) )
+!!
+!!     Im(D_kl^st) = delta_st     sum_i<=j Im(rho_ij^ss)   ( eu_ijkl(1) - (1-delta_ij) eu_jikl(1) )
+!!                 + delta_st     sum_i<=j Im(rho_ij^-s-s) ( eu_ijkl(2) - (1-delta_ij) eu_jikl(2) )
+!!                 + (1-delta_st) sum_i<=j ( Im(rho_ij^st) eu_ijkl(3) - (1-delta_ij) Im(rho_ij^ts) eu_jikl(3) )
+!!
+!!   --- Collinear case:
+!!
+!!     Re(D_kl^s) = sum_i<=j Re(rho_ij^s)  ( eu_ijkl(1) + (1-delta_ij) eu_jikl(1) )
+!!                + sum_i<=j Re(rho_ij^-s) ( eu_ijkl(2) + (1-delta_ij) eu_jikl(2) )
+!!
+!!     Im(D_kl^s) = sum_i<=j Im(rho_ij^s)  ( eu_ijkl(1) - (1-delta_ij) eu_jikl(1) )
+!!                + sum_i<=j Im(rho_ij^-s) ( eu_ijkl(2) - (1-delta_ij) eu_jikl(2) )
+!!
+!!   Using (a) and (c) one gets:
+!!     Re(D_kl^s) =  Re(D_lk^s)
+!!   Using (b) and (c) one gets:
+!!     Im(D_kl^s) = -Im(D_lk^s)
+!!
+!!   --- Without magnetism (rho_ij^up = rho_ij^down = 1/2 rho_ij^tot):
+!!
+!!     Re(D_kl) = 1/2 sum_i<=j Re(rho_ij) ( eu_ijkl(1) + eu_ijkl(2) + (1-delta_ij) ( eu_jikl(1) + euijkl(2) ) )
+!!
+!!     Im(D_kl) = 1/2 sum_i<=j Im(rho_ij) ( eu_ijkl(1) + eu_ijkl(2) - (1-delta_ij) ( eu_jikl(1) + euijkl(2) ) )
+!!
+!!   qphase=2 (ipert>0 and q/=0) - no magnetism or collinear:
+!!   -------------------------------------------------------
+!!   We have:
 !!        rho_ji = rhoA_ji + rhoB_ji
 !!      where:
 !!        rhoA_ji = rhoA_ij^*
@@ -2988,8 +3027,8 @@ end subroutine pawdiju
 !!      So:
 !!           D_kl = sum_i<=j ( rho_ij eu_ijkl + (1-delta_ij) (rhoA_ij^* + rhoB_ij) eu_jikl )
 !!      As eu_ijkl is real:
-!! [Ib] : Re(D_kl) = sum_i<=j Re(rho_ij)  ( eu_ijkl + (1-delta_ij) eu_jikl )  (same as [I])
-!! [II] : Im(D_kl) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!        Re(D_kl) = sum_i<=j Re(rho_ij)  ( eu_ijkl + (1-delta_ij) eu_jikl )
+!!        Im(D_kl) = sum_i<=j Im(rhoB_ij) ( eu_ijkl + (1-delta_ij) eu_jikl )
 !!                 + sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
 !!      We note:
 !!        Im(D_kl^A) = sum_i<=j Im(rhoA_ij) ( eu_ijkl - (1-delta_ij) eu_jikl )
@@ -3074,7 +3113,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
        ilmn=pawtab%indklmn(7,klmn)
        jlmn=pawtab%indklmn(8,klmn)
 
-       !Loop over spin-components (rhoij)
+       !Storage of rhoij in ro (with a change of representation if nspinor=2)
        if (ndij==1) then ! rho_up = rho_down = 1/2 rho_tot
          ro(1:cplex_rhoij,1)=half*pawrhoij%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)
        else if (ndij==2) then
@@ -3154,93 +3193,6 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
    end do ! q phase
 
  end do !sig1
-
-! OLD VERSION FROM LUCAS BAGUET
-! ----------------------------------------------------------------
-!  if (compute_diju_im) then
-!    if (size(diju_im,1)/=lmn2_size.or.size(diju_im,2)/=ndij) then
-!      msg='invalid sizes for diju_im !'
-!      LIBPAW_BUG(msg)
-!    end if
-!  end if
-!  if (cplex_dij/=1) then
-!    msg='pawdiju_euijkl not yet available for cplex_dij=2!'
-!    LIBPAW_ERROR(msg)
-!  end if
-!
-!  lmn2_size=pawtab%lmn2_size
-!  cplex_rhoij=pawrhoij%cplex_rhoij
-!  compute_diju_im=(qphase==2.and.present(diju_im))
-!
-!  diju=zero
-!  if (compute_diju_im) diju_im = zero
-!
-! !Real on-site quantities
-!  if (qphase==1) then
-!    do sig1=1,ndij
-!      do sig2=1,ndij
-!        jrhoij=1
-!        do irhoij=1,pawrhoij%nrhoijsel
-!          klmn=pawrhoij%rhoijselect(irhoij)
-!          ilmn=pawtab%indklmn(7,klmn)
-!          jlmn=pawtab%indklmn(8,klmn)
-!          ro(1)=pawrhoij%rhoijp(jrhoij,sig2)
-!          do jlmnp=1,pawtab%lmn_size
-!            do ilmnp=1,jlmnp
-!              klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
-!
-! !            Thanks to Eq.[I] in the comment above:
-!              diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-!              if (ilmn/=jlmn) then
-!                diju(klmn1,sig1)=diju(klmn1,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-!              end if
-!
-!            end do
-!          end do
-!          jrhoij=jrhoij+cplex_rhoij
-!        end do
-!      end do
-!    end do
-!
-! !Complex on-site quantities
-!  else
-!    do sig1=1,ndij
-!      do sig2=1,ndij
-!        jrhoij=1
-!        do irhoij=1,pawrhoij%nrhoijsel
-!          klmn=pawrhoij%rhoijselect(irhoij)
-!          ilmn=pawtab%indklmn(7,klmn)
-!          jlmn=pawtab%indklmn(8,klmn)
-!          ro(1:2)=pawrhoij%rhoijp(jrhoij:jrhoij+1,sig2)
-!          do jlmnp=1,pawtab%lmn_size
-!            do ilmnp=1,jlmnp
-!              klmn1 = ilmnp + jlmnp*(jlmnp-1)/2
-!              kklmn1 = klmn1 + lmn2_size
-!              ro_im = pawrhoij%rhoijim(klmn1,sig2)
-!
-! !            Thanks to Eq.[I] in the comment above:
-!              diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-!              diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-!              diju(kklmn1,sig1)=diju(kklmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-!              if (compute_diju_im) then
-!                diju_im(klmn1,sig1)=diju_im(klmn1,sig1)+ro_im*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-!              end if
-!
-!              if (ilmn/=jlmn) then
-!                diju(klmn1 ,sig1)=diju(klmn1 ,sig1)+ro(1)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-!                diju(kklmn1,sig1)=diju(klmn1 ,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-!                diju(kklmn1,sig1)=diju(kklmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-!                if (compute_diju_im) then
-!                    diju_im(klmn1,sig1)=diju_im(klmn1,sig1)-ro_im*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
-!                end if
-!              end if
-!            end do
-!          end do
-!          jrhoij=jrhoij+cplex_rhoij
-!        end do
-!      end do
-!    end do
-!  end if
 
 end subroutine pawdiju_euijkl
 !!***
