@@ -36,7 +36,8 @@ module m_rttddft_driver
  use m_pawang,            only: pawang_type
  use m_pawrad,            only: pawrad_type
  use m_pawtab,            only: pawtab_type
- use m_rttddft,           only: rttddft_calc_density
+ use m_rttddft,           only: rttddft_calc_density, &
+                              & rttddft_calc_etot 
  use m_rttddft_output,    only: rttddft_output
  use m_rttddft_types,     only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
@@ -60,7 +61,7 @@ contains
 !!  Primary routine that drives real-time TDDFT calculations.
 !!  1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
 !!    - intialize various important parameters
-!!    - read KS orbitals and associated occupation in WFK file
+!!    - read KS orbitals in WFK file
 !!    - compute initial density from KS orbitals
 !!  2) Propagation loop (rttddft_propagate):
 !!    for i = 1, nstep
@@ -87,26 +88,26 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      m_driver
+!!  m_driver
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps)
+subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- character(len=8),          intent(in)    :: codvsn
- type(dataset_type),        intent(inout) :: dtset
- type(datafiles_type),      intent(in)    :: dtfil
- type(MPI_type),            intent(inout) :: mpi_enreg
- type(pawang_type),         intent(inout) :: pawang
- type(pseudopotential_type),intent(inout) :: psps
+ character(len=8),           intent(in)    :: codvsn
+ type(dataset_type),         intent(inout) :: dtset
+ type(datafiles_type),       intent(inout) :: dtfil
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(pawang_type),          intent(inout) :: pawang
+ type(pseudopotential_type), intent(inout) :: psps
  !arrays
- type(pawrad_type),         intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type),         intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawrad_type),          intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
+ type(pawtab_type),          intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
  !Local variables-------------------------------
  !scalars
@@ -118,8 +119,8 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
 ! ***********************************************************************
 
  write(msg,'(7a)') ch10,'---------------------------------------------------------------------------',&
- &                 ch10,'----------------   Starting real-time time dependent DFT   ----------------',&
- &                 ch10,'---------------------------------------------------------------------------',ch10
+                 & ch10,'----------------   Starting real-time time dependent DFT   ----------------',&
+                 & ch10,'---------------------------------------------------------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
@@ -131,39 +132,36 @@ subroutine rttddft(codvsn, dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  !Output useful values
- call rttddft_output(tdks)
+ call rttddft_output(dtfil,dtset,0,mpi_enreg,tdks)
 
  !** 2) Propagation loop (rttddft_propagate):
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
  
-!write(99,*) tdks%rhor
-
  do istep = 1, tdks%ntime
-   call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
    !FB TODO: If Ehrenfest perform nuclear step here
-   !call  rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
+   !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
+
+   !Perform electronic step
+   call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
+
+   !Calc total energy
+   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot)
 
    !Calc new electronic density 
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
-   !Update header, with evolving variables
-   call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih, &
-                      & tdks%hdr%residm,tdks%rprimd,dtset%occ_orig,tdks%pawrhoij, &
-                      & dtset%xred_orig,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom, &
-                      & mpi_atmtab=mpi_enreg%my_atmtab)
-
    !Output useful values
-   call rttddft_output(tdks)
+   call rttddft_output(dtfil,dtset,istep,mpi_enreg,tdks)
 
  end do
 
  !** 3) Final Output and free memory
  write(msg,'(7a)') ch10,'---------------------------------------------------------------------------',&
- &                 ch10,'----------------   Finished real-time time dependent DFT   ----------------',&
- &                 ch10,'---------------------------------------------------------------------------',ch10
+                 & ch10,'----------------   Finished real-time time dependent DFT   ----------------',&
+                 & ch10,'---------------------------------------------------------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 

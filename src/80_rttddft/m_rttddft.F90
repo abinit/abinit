@@ -36,6 +36,8 @@ module m_rttddft
  use m_cgprj,            only: ctocprj
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
+ use m_efield,           only: efield_type
+ use m_energies,         only: energies_type
  use m_fock,             only: fock_updatecwaveocc
  use m_fock_getghc,      only: fock2ACE
  use m_fourier_interpol, only: transgrid
@@ -64,6 +66,7 @@ module m_rttddft
 !!***
 
  public :: rttddft_calc_density
+ public :: rttddft_calc_etot
  public :: rttddft_setup_ele_step
  public :: rttddft_init_hamiltonian
 !!***
@@ -238,7 +241,7 @@ end subroutine rttddft_setup_ele_step
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
+subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, psps, tdks)
 
  implicit none
 
@@ -246,6 +249,7 @@ subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks
  !scalars
  integer,                    intent(in)    :: istep
  type(dataset_type),         intent(inout) :: dtset
+ type(energies_type),        intent(inout) :: energies
  type(gs_hamiltonian_type),  intent(out)   :: gs_hamk
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
@@ -303,7 +307,7 @@ subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks
  ABI_MALLOC(grchempottn,(3,dtset%natom))
  ABI_MALLOC(grewtn,(3,dtset%natom))
  ABI_MALLOC(kxc,(tdks%pawfgr%nfft,nkxc))
- call setvtr(tdks%atindx1,dtset,tdks%energies,tdks%gmet,tdks%gprimd,grchempottn,  &
+ call setvtr(tdks%atindx1,dtset,energies,tdks%gmet,tdks%gprimd,grchempottn,  &
           & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,            &
           & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,   &
           & tdks%pawfgr%ngfft,tdks%ngrvdw,tdks%nhat,tdks%nhatgr,tdks%nhatgrdim,   &
@@ -350,10 +354,10 @@ subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks
    call paw_an_reset_flags(tdks%paw_an)
    !FB: Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
-   !FB: Used option = 0 here so both potentials and energies are recomputed.
+   !FB: Used option = 0 here so both potentials and energies are computed.
    !FB: Would potentials only be sufficient?
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,tdks%energies%e_paw,tdks%energies%e_pawdc,ipert, &
+   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert, &
                 & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,    &
                 & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,     &
                 & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,        &
@@ -373,10 +377,10 @@ subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks
    tdks%vtrial(:,:)=tdks%vtrial(:,:)+SUM(vpotzero(:))
    if(option/=1)then
       !Fix the direct total energy (non-zero only for charged systems)
-      tdks%energies%e_paw=tdks%energies%e_paw-SUM(vpotzero(:))*dtset%cellcharge(1)
+      energies%e_paw=energies%e_paw-SUM(vpotzero(:))*dtset%cellcharge(1)
       !Fix the double counting total energy accordingly (for both charged AND
       !neutral systems)
-      tdks%energies%e_pawdc=tdks%energies%e_pawdc-SUM(vpotzero(:))*tdks%zion+ &
+      energies%e_pawdc=energies%e_pawdc-SUM(vpotzero(:))*tdks%zion+ &
                           & vpotzero(2)*dtset%cellcharge(1)
    end if
    
@@ -401,15 +405,15 @@ subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks
              & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
-!tdks%energies%e_eigenvalues = zero
-!tdks%energies%e_kinetic     = zero
-!tdks%energies%e_nucdip      = zero
-!tdks%energies%e_nlpsp_vfock = zero
+!energies%e_eigenvalues = zero
+!energies%e_kinetic     = zero
+!energies%e_nucdip      = zero
+!energies%e_nlpsp_vfock = zero
 !if (dtset%usefock/=0) then
-!  tdks%energies%e_exactX=zero
-!  tdks%energies%e_fock=zero
-!  tdks%energies%e_fockdc=zero
-!  if (tdks%fock%fock_common%optfor) tdks%fock%fock_common%forces=zero
+!  energies%e_exactX=zero
+!  energies%e_fock=zero
+!  energies%e_fockdc=zero
+! if (tdks%fock%fock_common%optfor) tdks%fock%fock_common%forces=zero
 !end if
 !grnl(:)=zero
 !tdks%eigen(:) = zero
@@ -452,7 +456,7 @@ subroutine rttddft_init_hamiltonian(dtset, gs_hamk, istep, mpi_enreg, psps, tdks
 !end if
 
 end subroutine rttddft_init_hamiltonian
-
+ 
 !!****f* m_rttddft/rttddft_calc_density
 !!
 !! NAME
@@ -462,7 +466,6 @@ end subroutine rttddft_init_hamiltonian
 !!  Compute electronic density (in 1/bohr^3) from the WF (cg coefficients)
 !!
 !! INPUTS
-!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
@@ -516,8 +519,8 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    !FB: Only needed if xred changed so if ionmov /= 1
    ! 1-Compute structure factor phases for current atomic pos
-   call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfft(1),tdks%pawfgr%ngfft(2), &
-            & tdks%pawfgr%ngfft(3),tdks%ph1d,tdks%xred)
+   call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
+            & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
 
    ! 2-Compute density from WFs (without compensation charge density nhat)
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
@@ -535,7 +538,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
               & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
-              & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred, &
+              & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
               & tdks%ylm,tdks%ylmgr)
 
    !paral atom
@@ -605,6 +608,90 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  endif
 
  end subroutine rttddft_calc_density
+
+!!****f* m_rttddft/rttddft_calc_energy
+!!
+!! NAME
+!!  rttddft_calc_energy
+!!
+!! FUNCTION
+!!  Compute total energy and various part of it 
+!!
+!! INPUTS
+!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  energies <energies_type> = contains the different contribution ot the total energy
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = Main RT-TDDFT object
+!!
+!! OUTPUT
+!!  etotal <real(dp)> = the total energy
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!  m_rttddft_driver/rttddft
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine rttddft_calc_etot(dtset, energies, etotal)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ real(dp),                   intent(out)   :: etotal
+ type(dataset_type),         intent(inout) :: dtset
+ type(energies_type),        intent(inout) :: energies
+
+ !Local variables-------------------------------
+ !scalars
+ !arrays
+! ***********************************************************************
+
+!  When the finite-temperature VG broadening scheme is used,
+!  the total entropy contribution "tsmear*entropy" has a meaning,
+!  and gather the two last terms of Eq.8 of VG paper
+!  Warning : might have to be changed for fixed moment calculations
+ if(dtset%occopt>=3 .and. dtset%occopt<=8) then
+   if (abs(dtset%tphysel) < tol10) then
+      energies%e_entropy = - dtset%tsmear * energies%entropy
+   else
+      energies%e_entropy = - dtset%tphysel * energies%entropy
+   end if
+ else
+   energies%e_entropy = zero
+ end if
+
+ etotal = energies%e_kinetic    &
+      & + energies%e_hartree    &  
+      & + energies%e_xc         &
+      & + energies%e_localpsp   &   
+      & + energies%e_corepsp    &
+      & + energies%e_entropy    &
+      & + energies%e_ewald      &
+      & + energies%e_vdw_dftd   &
+      & + energies%e_paw
+!     & + energies%e_chempot    &
+!     & + energies%e_elecfield  &  
+!     & + energies%e_magfield   &
+!     & + energies%e_nucdip     &
+!     & + energies%e_hybcomp_E0 &
+!     & - energies%e_hybcomp_v0 &
+!     & + energies%e_hybcomp_v  &
+!     & + energies%e_constrained_dft
+
+print*, "TEST-HERE:"
+print*, energies%e_nlpsp_vfock
+print*, energies%e_fock
+print*, energies%e_fock0
+
+!if (psps%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
+!if (psps%usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
+
+ end subroutine rttddft_calc_etot
 
 end module m_rttddft
 !!***

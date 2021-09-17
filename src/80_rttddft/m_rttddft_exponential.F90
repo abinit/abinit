@@ -32,7 +32,6 @@ module m_rttddft_exponential
  use defs_basis
  use defs_abitypes,   only: MPI_type
 
- use m_bandfft_kpt,   only: bandfft_kpt, bandfft_kpt_get_ikpt
  use m_dtset,         only: dataset_type
  use m_getghc,        only: getghc
  use m_hamiltonian,   only: gs_hamiltonian_type
@@ -82,7 +81,7 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine rttddft_exp_taylor(cg,dt,dtset,gs_hamk,method,mpi_enreg,nband_k,npw_k,nspinor)
+ subroutine rttddft_exp_taylor(cg,dt,dtset,gs_hamk,gvnlxc,method,mpi_enreg,nband_k,npw_k,nspinor)
 
  implicit none
 
@@ -94,6 +93,7 @@ contains
  integer,                   intent(in)    :: nspinor
  type(dataset_type),        intent(in)    :: dtset
  real(dp),                  intent(in)    :: dt
+ real(dp),                  intent(out)   :: gvnlxc(:,:)
  type(gs_hamiltonian_type), intent(inout) :: gs_hamk
  type(MPI_type),            intent(inout) :: mpi_enreg
  !arrays
@@ -102,7 +102,6 @@ contains
  !Local variables-------------------------------
  !scalars
  integer                         :: iorder
- integer                         :: ikpt_this_proc
  integer                         :: sij_opt,cpopt
  integer                         :: tim_getghc = 5
  integer                         :: nband, npw
@@ -112,21 +111,11 @@ contains
  real(dp),           allocatable :: ghc(:,:)
  real(dp),           allocatable :: gsm1hc(:,:)
  real(dp),           allocatable :: gsc(:,:)
- real(dp),           allocatable :: gvnlxc(:,:)
  real(dp),           allocatable :: tmp(:,:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
  
 ! ***********************************************************************
 
- if (dtset%paral_kgb == 1) then
-   ikpt_this_proc = bandfft_kpt_get_ikpt()
-   npw = bandfft_kpt(ikpt_this_proc)%ndatarecv
-   nband = mpi_enreg%bandpp
- else
-    npw = npw_k
-    nband = nband_k
- end if
-   
  paw = gs_hamk%usepaw == 1
  if(paw) then
    ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband))
@@ -143,7 +132,6 @@ contains
  !FB: Probably not needed to create so many arrrays
  ABI_MALLOC(ghc,    (2, npw*nspinor*nband))
  ABI_MALLOC(gsc,    (2, npw*nspinor*nband))
- ABI_MALLOC(gvnlxc, (2, npw*nspinor*nband))
  ABI_MALLOC(gsm1hc, (2, npw*nspinor*nband))
 
  !*** Taylor expansion ***
@@ -178,7 +166,6 @@ contains
 
  ABI_FREE(ghc)
  ABI_FREE(gsc)
- ABI_FREE(gvnlxc)
  ABI_FREE(gsm1hc)
 
  if(paw) call pawcprj_free(cwaveprj)

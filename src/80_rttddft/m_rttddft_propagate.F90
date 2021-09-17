@@ -99,24 +99,24 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  
 ! ***********************************************************************
 
- write(msg,'(2a,i5,a)') ch10,'--- Iteration',istep,ch10
+ write(msg,'(a,i5,a)') '--- Iteration',istep,ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
  ! Init/Update various quantities before performing propagating KS orbitals
  call rttddft_setup_ele_step(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
 
- write(97,*) tdks%cg(1,:)
- write(98,*) tdks%cg(2,:)
+ !write(97,*) tdks%cg(1,:)
+ !write(98,*) tdks%cg(2,:)
 
  ! Propagate cg
  select case (dtset%td_propagator) 
    case(0)
-      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks,store_energies=.true.)
    case(1)
       call rttddft_propagator_emr(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)  
    case default
-      write(msg,"(a,a)") "Unknown Propagator - check the value of td_propagator", ch10
+      write(msg,"(a)") "Unknown Propagator - check the value of td_propagator"
       ABI_ERROR(msg)
  end select
 
