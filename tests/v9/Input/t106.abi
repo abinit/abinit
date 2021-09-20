@@ -59,7 +59,7 @@ pawprtvol 3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t106.abo, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00
+#%%   t106.abo, tolnlines = 272, tolabs = 1.200e-04, tolrel = 5.000e-04
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
