@@ -182,9 +182,7 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -3062,9 +3060,7 @@ end subroutine sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4051,9 +4047,7 @@ end subroutine setup_sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4238,9 +4232,7 @@ end subroutine sigma_tables
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4390,9 +4382,7 @@ end subroutine sigma_bksmask
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 

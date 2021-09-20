@@ -965,6 +965,7 @@ end subroutine dfpt_qdrpwf
 !!  istwf_k=parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
@@ -974,6 +975,7 @@ end subroutine dfpt_qdrpwf
 !!  nfft=(effective) number of FFT grid points (for this proc)
 !!  ngfft(1:18)=integer array with FFT box dimensions and other
 !!  nkpt_rbz= number of k-points in the RBZ
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
 !!  npw_k=number of plane waves at this k point
 !!  nq1grad=number of q1 (q_{\gamma}) gradients
 !!  nq1q2grad=number of q1q2 2nd order gradients
@@ -989,6 +991,7 @@ end subroutine dfpt_qdrpwf
 !!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
 !!  q1q2grad(4,nq1q2grad)=array with the info for the q1q2 2nd order gradients
 !!  rhog(2,nfftf)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
@@ -1032,11 +1035,11 @@ end subroutine dfpt_qdrpwf
 subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k,&
      &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
      &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
-     &  kg_k,kpt,mkmem, &
-     &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
+     &  kg_k,kpt,kxc,mkmem, &
+     &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz,nkxc, &
      &  npw_k,nq1grad, &
      &  nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
-     &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
+     &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rhor,rmet,ucvol,useylmgr, &
      &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
      &  wfk_t_dkdk,wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
 
@@ -1044,7 +1047,7 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
 !scalars
  integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
  integer,intent(in) :: mkmem,mpw,nband_k,nefipert,nfft
- integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nq1q2grad,nspden,nsppol,nstrpert,nylmgr
+ integer,intent(in) :: nkpt_rbz,nkxc,npw_k,nq1grad,nq1q2grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
  type(dataset_type),intent(in) :: dtset
@@ -1061,9 +1064,9 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
  real(dp),intent(out) :: elflexowf_t1_k(2,3,3,3,3),elflexowf_t2_k(2,3,3,3,3)
  real(dp),intent(out) :: elflexowf_t3_k(2,3,3,3,3),elflexowf_t4_k(2,3,3,3,3)
  real(dp),intent(out) :: elflexowf_t5_k(2,3,3,3,3)
- real(dp),intent(in) :: kpt(3),occ_k(nband_k)
+ real(dp),intent(in) :: kpt(3),occ_k(nband_k),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3)
  real(dp),intent(in) :: vhxc1_strain(nstrpert,cplex*nfft)
  real(dp),intent(in) :: vhxc1_efield(nefipert,cplex*nfft)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
@@ -1100,7 +1103,7 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: vhart1dqdq(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dqdq(:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dqdq(:),vxc1dqdq(:)
  real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
@@ -1645,6 +1648,7 @@ c0_VefielddQ_c1strain_bks=zero
 !Specific allocations
  ABI_MALLOC(vhart1dqdq,(2*nfft))
  ABI_MALLOC(vpsp1dqdq,(2*nfft))
+ ABI_MALLOC(vxc1dqdq,(2*nfft))
  ABI_MALLOC(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(gh1dqdqc,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
@@ -1662,15 +1666,15 @@ c0_VefielddQ_c1strain_bks=zero
    do iq1grad=1,nq1grad
 
      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-     !contribution from ground state density
-     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
+     !(and XC if GGA) contribution from ground state density
+     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,kxc,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom, &
-     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),nkxc,nspden,opthartdqdq, &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,rhog,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq)
+     &  dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
 
-     !Merge both local contributions
-     vpsp1dqdq=vpsp1dqdq+vhart1dqdq
+     !Merge the local contributions
+     vpsp1dqdq=vpsp1dqdq+vhart1dqdq+vxc1dqdq
 
      !Set up q-gradient of strain potential vlocal1dqdq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -1745,6 +1749,7 @@ c0_VefielddQ_c1strain_bks=zero
  ABI_FREE(cwave0i)
  ABI_FREE(cg1_efield)
  ABI_FREE(vhart1dqdq)
+ ABI_FREE(vxc1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! Acumulates all the wf dependent terms of the flexoelectric tensor
@@ -2498,6 +2503,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!  istwf_k=parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  matom= number of atoms in the unit cell
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
@@ -2508,6 +2514,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!  nfft=(effective) number of FFT grid points (for this proc)
 !!  ngfft(1:18)=integer array with FFT box dimensions and other
 !!  nkpt_rbz= number of k-points in the RBZ
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
 !!  npw_k=number of plane waves at this k point
 !!  nq1grad=number of q1 (q_{\gamma}) gradients
 !!  nspden=number of spin-density components
@@ -2521,6 +2528,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
 !!  rhog(2,nfftf)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
@@ -2563,9 +2571,9 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
 subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isdqwf_k, &
      &  isdqwf_t1_k,isdqwf_t2_k,isdqwf_t3_k,isdqwf_t4_k,isdqwf_t5_k,isppol,istwf_k, &
-     &  kg_k,kpt,matom,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+     &  kg_k,kpt,kxc,matom,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz,nkxc, &
      &  npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
-     &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+     &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rhor,rmet,ucvol,useylmgr, &
      &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
      &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
 
@@ -2573,7 +2581,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !scalars
  integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
  integer,intent(in) :: matom,mkmem,mpw,natpert,nband_k,nfft
- integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
+ integer,intent(in) :: nkpt_rbz,nkxc,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
  type(dataset_type),intent(in) :: dtset
@@ -2591,9 +2599,9 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  real(dp),intent(out) :: isdqwf_t1_k(2,matom,3,nq1grad,3,3),isdqwf_t2_k(2,matom,3,nq1grad,3,3)
  real(dp),intent(out) :: isdqwf_t3_k(2,matom,3,nq1grad,3,3),isdqwf_t4_k(2,matom,3,3,3,nq1grad)
  real(dp),intent(out) :: isdqwf_t5_k(2,matom,3,nq1grad,3,3)
- real(dp),intent(in) :: kpt(3),occ_k(nband_k)
+ real(dp),intent(in) :: kpt(3),occ_k(nband_k),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3)
  real(dp),intent(in) :: vhxc1_atdis(natpert,cplex*nfft)
  real(dp),intent(in) :: vhxc1_strain(nstrpert,cplex*nfft)
  real(dp),intent(in) :: xred(3,dtset%natom)
@@ -2633,7 +2641,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
  real(dp),allocatable :: vhart1dqdq(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:)
  real(dp),allocatable :: vlocal1dq(:,:,:,:),vlocal1dqdq(:,:,:,:),dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dq(:),vpsp1dqdq(:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dq(:),vpsp1dqdq(:),vxc1dqdq(:)
  real(dp),allocatable :: dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
@@ -3135,6 +3143,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
 !Specific allocations
  ABI_MALLOC(vhart1dqdq,(2*nfft))
  ABI_MALLOC(vpsp1dqdq,(2*nfft))
+ ABI_MALLOC(vxc1dqdq,(2*nfft))
  ABI_MALLOC(vlocal1dqdq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(gh1dqdqc,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(gvloc1dqdqc,(2,npw_k*dtset%nspinor))
@@ -3152,15 +3161,15 @@ c0_HatdisdagdQ_c1strain_bks=zero
    do iq1grad=1,nq1grad
 
      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-     !contribution from ground state density
-     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,mpi_enreg, &
+     !(and XC if GGA) contribution from ground state density
+     call dfpt_vmetdqdq(2,gs_hamkq%gmet,gs_hamkq%gprimd,gsqcut,idir,ipert,kxc,mpi_enreg, &
      &  psps%mqgrid_vl,dtset%natom, &
-     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),opthartdqdq, &
+     &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3),nkxc,nspden,opthartdqdq, &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,rhog,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq)
+     &  dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
 
-     !Merge both local contributions
-     vpsp1dqdq=vpsp1dqdq+vhart1dqdq
+     !Merge the local contributions
+     vpsp1dqdq=vpsp1dqdq+vhart1dqdq+vxc1dqdq
 
      !Set up q-gradient of strain potential vlocal1dqdq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -3231,6 +3240,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
  ABI_FREE(gvnl1dqdqc)
  ABI_FREE(vpsp1dqdq)
  ABI_FREE(vlocal1dqdq)
+ ABI_FREE(vxc1dqdq)
 
 !--------------------------------------------------------------------------------------
 ! q1-gradient of atomic displacement 1st-order Hamiltonian:

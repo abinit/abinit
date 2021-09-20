@@ -813,6 +813,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+!Add the contribution of extfpmd to the entropy
+ if(associated(extfpmd)) then
+   energies%entropy=energies%entropy+extfpmd%entropy
+   energies%e_extfpmd=extfpmd%e_kinetic
+   energies%edc_extfpmd=extfpmd%edc_kinetic
+   if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
+   if(optene==1.or.optene==3) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+ end if
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron
@@ -831,16 +839,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (optene==0.or.optene==2) electronpositron%e0=etotal
    if (optene==1.or.optene==3) electronpositron%e0=etotal-energies%edc_electronpositron
    etotal=electronpositron%e0+energies%e0_electronpositron+energies%e_electronpositron
- end if
-
-!Blanchet Add the energy contribution to extfpmd free electron model
- if(associated(extfpmd)) then
-   energies%entropy=energies%entropy+extfpmd%entropy
-   energies%e_extfpmd=extfpmd%e_kinetic
-   energies%edc_extfpmd=extfpmd%edc_kinetic
-   if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
-   if(optene==1.or.optene==3) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
-   etotal=etotal-dtset%tsmear*extfpmd%entropy
  end if
 
 !Compute new charge density based on incoming wf
@@ -975,7 +973,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  real(dp) :: tsec(2)
  real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
- type(pawcprj_type) :: cwaveprj(0,0)
+ type(pawcprj_type) :: cwaveprj(1,1)
 
 ! *************************************************************************
 

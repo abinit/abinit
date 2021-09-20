@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h20 )
+.Starting date : Wed  7 Jul 2021.
+- ( at 18h55 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.in
-- output file    -> tlw_4.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
+- output file    -> tlw_4.abo
 - root for input  files -> tlw_4i
 - root for output files -> tlw_4o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =         144          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.250 Mbytes of memory.
+P This job should need less than                       2.369 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.090 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -1318,8 +1318,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31-Ga.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31-Ga.LDA.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/Psps_for_tests/31-Ga.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/Psps_for_tests/31-Ga.LDA.fhi
 - gallium, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 0 local
 - 31.00000   3.00000     11001                znucl, zion, pspdat
     6    7    3    0       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1332,8 +1332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -1.913945
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/15-P.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/15-P.LDA.fhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/Psps_for_tests/15-P.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mroyo_develop_GGA/tests/Psps_for_tests/15-P.LDA.fhi
 - phosphorus, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 2 local
 - 15.00000   5.00000     21003                znucl, zion, pspdat
     6    7    3    2       499   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1513,7 +1513,6 @@ meta: {optdriver: 1, rfelfd: 2, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1560,7 +1559,6 @@ meta: {optdriver: 1, rfelfd: 2, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1629,7 +1627,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1692,7 +1689,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1757,7 +1753,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1822,7 +1817,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2082,7 +2076,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2126,7 +2119,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2198,7 +2190,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2264,7 +2255,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2304,7 +2294,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2344,7 +2333,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2384,7 +2372,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2425,7 +2412,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2466,7 +2452,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2721,7 +2706,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2746,7 +2730,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2805,7 +2788,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2864,7 +2846,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2923,7 +2904,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2983,7 +2963,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3043,7 +3022,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3103,7 +3081,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3157,7 +3134,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3178,7 +3154,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5  -209.08111872891     -5.268E-05 1.531E-06 8.365E-04
  ETOT  6  -209.08112113864     -2.410E-06 5.880E-08 9.644E-06
  ETOT  7  -209.08112117356     -3.492E-08 1.345E-09 9.027E-08
- ETOT  8  -209.08112117391     -3.514E-10 6.238E-11 2.589E-09
+ ETOT  8  -209.08112117391     -3.513E-10 6.238E-11 2.589E-09
 
  At SCF step    8       vres2   =  2.59E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_4o_DS2_1WF7
@@ -3211,7 +3187,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3781,7 +3756,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.16828
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3812,10 +3786,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -3873,10 +3845,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -3932,10 +3902,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -3956,8 +3924,8 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  8   9.2376925907228     -1.432E-06 4.534E-08 1.203E-04
  ETOT  9   9.2376925109260     -7.980E-08 1.969E-09 6.362E-06
  ETOT 10   9.2376925079238     -3.002E-09 1.004E-10 5.160E-08
- ETOT 11   9.2376925078752     -4.860E-11 5.137E-12 1.520E-08
- ETOT 12   9.2376925078694     -5.798E-12 2.615E-13 1.922E-10
+ ETOT 11   9.2376925078752     -4.857E-11 5.137E-12 1.520E-08
+ ETOT 12   9.2376925078694     -5.826E-12 2.615E-13 1.922E-10
 
  At SCF step   12       vres2   =  1.92E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -3994,10 +3962,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4011,7 +3977,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   40.061658988429     -7.415E+01 5.914E-01 9.052E+03
  ETOT  2   8.6207554675501     -3.144E+01 1.999E-01 1.346E+02
  ETOT  3   7.9248406901144     -6.959E-01 7.954E-03 2.999E+00
- ETOT  4   7.9179653459406     -6.875E-03 9.228E-05 2.303E-02
+ ETOT  4   7.9179653459405     -6.875E-03 9.228E-05 2.303E-02
  ETOT  5   7.9179162346862     -4.911E-05 8.775E-06 2.183E-04
  ETOT  6   7.9179156256027     -6.091E-07 7.807E-08 1.514E-05
  ETOT  7   7.9179156086916     -1.691E-08 1.311E-08 1.401E-06
@@ -4186,7 +4152,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10012
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4217,10 +4182,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4231,7 +4194,7 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   94.995601107906      2.599E+01 4.123E-01 7.030E+04
+-ETOT  1   94.995601107905      2.599E+01 4.123E-01 7.030E+04
  ETOT  2   15.396577611903     -7.960E+01 8.494E-02 2.506E+03
  ETOT  3   10.507349534841     -4.889E+00 6.917E-03 4.372E+02
  ETOT  4   10.072263609979     -4.351E-01 4.292E-04 5.484E+00
@@ -4277,10 +4240,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4298,7 +4259,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5   7.7497899760219     -1.120E-05 2.266E-06 6.371E-05
  ETOT  6   7.7497897848834     -1.911E-07 1.160E-07 2.636E-06
  ETOT  7   7.7497897752180     -9.665E-09 6.695E-09 1.116E-07
- ETOT  8   7.7497897748999     -3.181E-10 3.542E-10 4.132E-09
+ ETOT  8   7.7497897749000     -3.181E-10 3.542E-10 4.132E-09
 
  At SCF step    8       vres2   =  4.13E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -4336,10 +4297,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4352,14 +4311,14 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   444.74053337356      2.931E+02 1.452E+00 3.519E+05
  ETOT  2   32.027062027721     -4.127E+02 8.403E-01 1.183E+04
- ETOT  3   11.181122234411     -2.085E+01 4.109E-02 7.400E+02
+ ETOT  3   11.181122234410     -2.085E+01 4.109E-02 7.400E+02
  ETOT  4   10.279893316225     -9.012E-01 1.746E-03 3.182E+01
  ETOT  5   10.242243181867     -3.765E-02 6.487E-05 1.829E-01
  ETOT  6   10.242005021369     -2.382E-04 8.010E-06 1.834E-03
  ETOT  7   10.242001884831     -3.137E-06 2.199E-07 7.324E-05
  ETOT  8   10.242001736129     -1.487E-07 2.276E-08 2.175E-06
  ETOT  9   10.242001733082     -3.047E-09 5.334E-10 2.012E-07
- ETOT 10   10.242001732873     -2.097E-10 4.784E-11 1.721E-09
+ ETOT 10   10.242001732873     -2.098E-10 4.784E-11 1.721E-09
 
  At SCF step   10       vres2   =  1.72E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -4396,10 +4355,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4418,7 +4375,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  6   8.2531143028394     -7.420E-07 1.952E-07 7.877E-06
  ETOT  7   8.2531142839634     -1.888E-08 2.122E-08 1.739E-07
  ETOT  8   8.2531142833499     -6.136E-10 3.999E-10 1.741E-08
- ETOT  9   8.2531142832991     -5.079E-11 4.295E-11 4.671E-10
+ ETOT  9   8.2531142832990     -5.080E-11 4.295E-11 4.671E-10
 
  At SCF step    9       vres2   =  4.67E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -4588,7 +4545,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.16884
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4626,10 +4582,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4649,7 +4603,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  7   8.8411918646754     -9.019E-06 3.980E-08 9.907E-05
  ETOT  8   8.8411918054558     -5.922E-08 7.790E-10 1.998E-06
  ETOT  9   8.8411918038475     -1.608E-09 1.389E-11 3.239E-08
- ETOT 10   8.8411918038065     -4.101E-11 4.010E-13 4.619E-10
+ ETOT 10   8.8411918038065     -4.100E-11 4.010E-13 4.619E-10
 
  At SCF step   10       vres2   =  4.62E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -4686,10 +4640,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4703,13 +4655,13 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   771.22100529824      6.296E+02 1.054E+00 1.719E+06
  ETOT  2   18.650554016531     -7.526E+02 8.446E-01 5.458E+03
  ETOT  3   11.068750579121     -7.582E+00 2.341E-02 4.572E+03
- ETOT  4   9.1688367134758     -1.900E+00 2.390E-03 3.054E+01
+ ETOT  4   9.1688367134759     -1.900E+00 2.390E-03 3.054E+01
  ETOT  5   9.1424213417318     -2.642E-02 1.495E-04 1.343E+00
  ETOT  6   9.1414832056748     -9.381E-04 6.448E-06 3.233E-02
  ETOT  7   9.1414652497595     -1.796E-05 1.340E-07 3.822E-04
  ETOT  8   9.1414650475016     -2.023E-07 2.677E-09 8.857E-06
  ETOT  9   9.1414650401507     -7.351E-09 1.170E-10 1.840E-07
- ETOT 10   9.1414650400223     -1.284E-10 3.003E-12 1.341E-09
+ ETOT 10   9.1414650400224     -1.283E-10 3.003E-12 1.341E-09
 
  At SCF step   10       vres2   =  1.34E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -4879,7 +4831,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.09954
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4901,10 +4852,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4961,10 +4910,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -4984,7 +4931,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  7   8.5744809717633     -1.697E-06 3.112E-08 2.999E-05
  ETOT  8   8.5744809301595     -4.160E-08 9.286E-10 2.558E-07
  ETOT  9   8.5744809295493     -6.102E-10 1.957E-11 2.012E-08
- ETOT 10   8.5744809295116     -3.770E-11 5.035E-13 1.647E-09
+ ETOT 10   8.5744809295116     -3.769E-11 5.035E-13 1.647E-09
 
  At SCF step   10       vres2   =  1.65E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -5021,10 +4968,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5079,10 +5024,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5102,7 +5045,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  7   10.187882590554     -4.558E-06 9.409E-08 2.301E-04
  ETOT  8   10.187882234767     -3.558E-07 2.823E-09 1.263E-05
  ETOT  9   10.187882211068     -2.370E-08 7.420E-11 4.214E-07
- ETOT 10   10.187882210270     -7.985E-10 4.835E-12 6.679E-09
+ ETOT 10   10.187882210270     -7.986E-10 4.835E-12 6.679E-09
 
  At SCF step   10       vres2   =  6.68E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -5139,10 +5082,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5199,10 +5140,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5220,8 +5159,8 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  5   8.7588562769297     -1.093E-04 4.151E-06 3.671E-04
  ETOT  6   8.7588551972107     -1.080E-06 3.201E-08 7.385E-06
  ETOT  7   8.7588551821180     -1.509E-08 7.421E-10 6.249E-07
- ETOT  8   8.7588551808443     -1.274E-09 1.613E-11 3.266E-08
- ETOT  9   8.7588551807770     -6.732E-11 9.146E-13 8.509E-11
+ ETOT  8   8.7588551808444     -1.274E-09 1.613E-11 3.266E-08
+ ETOT  9   8.7588551807770     -6.733E-11 9.146E-13 8.509E-11
 
  At SCF step    9       vres2   =  8.51E-11 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -5391,7 +5330,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.17110
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -5421,10 +5359,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5481,10 +5417,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5539,10 +5473,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5599,10 +5531,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5621,7 +5551,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  6   8.3900672590254     -7.983E-07 1.237E-08 6.449E-06
  ETOT  7   8.3900672462104     -1.282E-08 2.689E-10 1.510E-07
  ETOT  8   8.3900672459737     -2.367E-10 6.438E-12 2.038E-08
- ETOT  9   8.3900672459431     -3.061E-11 1.644E-13 1.389E-10
+ ETOT  9   8.3900672459431     -3.060E-11 1.644E-13 1.389E-10
 
  At SCF step    9       vres2   =  1.39E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -5791,7 +5721,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10244
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -5829,10 +5758,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5848,7 +5775,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  3   10.053949950018     -1.336E+00 8.993E-03 1.418E+02
  ETOT  4   9.8496756565947     -2.043E-01 3.180E-04 1.081E+00
  ETOT  5   9.8478907371784     -1.785E-03 1.132E-05 4.169E-02
- ETOT  6   9.8478293631722     -6.137E-05 4.730E-07 9.728E-04
+ ETOT  6   9.8478293631721     -6.137E-05 4.730E-07 9.728E-04
  ETOT  7   9.8478277074988     -1.656E-06 3.045E-08 4.689E-06
  ETOT  8   9.8478276949496     -1.255E-08 5.155E-10 1.390E-07
  ETOT  9   9.8478276945006     -4.491E-10 3.890E-11 2.655E-09
@@ -5888,10 +5815,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -5910,7 +5835,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  6   10.086803288276     -1.071E-05 1.425E-07 2.016E-04
  ETOT  7   10.086802982068     -3.062E-07 4.853E-09 2.947E-06
  ETOT  8   10.086802976168     -5.900E-09 3.875E-11 5.825E-08
- ETOT  9   10.086802976047     -1.212E-10 1.012E-12 2.254E-09
+ ETOT  9   10.086802976046     -1.212E-10 1.012E-12 2.254E-09
 
  At SCF step    9       vres2   =  2.25E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -6080,7 +6005,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10477
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -6110,10 +6034,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -6169,10 +6091,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -6228,10 +6148,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -6245,13 +6163,13 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   139.34200258870      7.675E+00 9.845E-01 6.701E+04
  ETOT  2   12.699112382790     -1.266E+02 3.796E-01 8.172E+02
  ETOT  3   9.9314713166271     -2.768E+00 8.332E-03 7.080E+01
- ETOT  4   9.8347257438562     -9.675E-02 2.139E-04 6.822E-01
+ ETOT  4   9.8347257438561     -9.675E-02 2.139E-04 6.822E-01
  ETOT  5   9.8338872466919     -8.385E-04 5.751E-06 1.774E-02
  ETOT  6   9.8338601577658     -2.709E-05 1.605E-07 1.101E-03
  ETOT  7   9.8338579728780     -2.185E-06 7.606E-09 7.168E-05
  ETOT  8   9.8338578223443     -1.505E-07 3.132E-10 2.043E-06
  ETOT  9   9.8338578184418     -3.903E-09 8.296E-12 3.155E-08
- ETOT 10   9.8338578184022     -3.961E-11 2.211E-13 7.873E-10
+ ETOT 10   9.8338578184022     -3.962E-11 2.211E-13 7.873E-10
 
  At SCF step   10       vres2   =  7.87E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -6288,10 +6206,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tlw_4o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -7534,7 +7450,12 @@ P          mk1mem12       256
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] First-Principles Theory of Spatial Dispersion: Dynamical Quadrupoles and Flexoelectricity, 
+- M. Royo and M. Stengel, Phys. Rev. X 9, 021050 (2019).
+- Comment : Flexoelectricity (see lw_flexo) or dynamical quadrupoles (see lw_qdrpl) have been computed.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#royo2019
+-
+- [2] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -7551,24 +7472,24 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [5] ABINIT: Overview, and focus on selected capabilities
+- [6] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -7585,7 +7506,7 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [6] Recent developments in the ABINIT software package.
+- [7] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -7603,10 +7524,10 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        306.6  wall=        307.8
+- Proc.   0 individual time (sec): cpu=        363.3  wall=        365.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and 346 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        306.6  wall=        307.8
+.Delivered   8 WARNINGs and  95 COMMENTs to log file.
++Overall time at end (sec) : cpu=        363.3  wall=        365.1

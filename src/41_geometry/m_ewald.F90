@@ -75,7 +75,7 @@ contains
 !!      m_setvtr
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -98,8 +98,8 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term,zcut
- !character(len=500) :: msg
+ real(dp) :: t1,term ,zcut
+ !character(len=500) :: message
 !arrays
  real(dp),allocatable :: gcutoff(:)
 
@@ -126,11 +126,21 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
+zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
 if(icutcoul.eq.1) then
    eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
- else if (icutcoul.eq.2) then
-   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
-   eta=SQRT(8.0_dp/zcut)
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=217.6_dp/zcut**2.0_dp
+!   eta=1.0_dp/zcut**2.0_dp
+!   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=SQRT(8.0_dp/zcut)
+!   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=SQRT(8.0_dp/zcut)
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
@@ -183,6 +193,9 @@ if(icutcoul.eq.1) then
                  &(abs(ig3).lt.ngfft(3))) then
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
+                  !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
+                  !term=exp(-arg)/gsq*gcutoff(ii)
+                  !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
                   term=exp(-arg)/gsq*gcutoff(ii)
                else if (icutcoul.ne.3) then
                   term=zero !exp(-arg)/gsq
@@ -347,7 +360,8 @@ if(icutcoul.eq.1) then
 
 !Finally assemble Ewald energy, eew
  if(icutcoul.ne.3) then
-   eew=sumg+sumr-chsq*reta/sqrt(pi)
+    !eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+    eew=sumg+sumr-chsq*reta/sqrt(pi)
  else
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
@@ -402,7 +416,7 @@ end subroutine ewald
 !!      m_stress
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -668,7 +682,7 @@ end subroutine ewald2
 !!      m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
-!!      dsyev,matr3inv,timab,wrtout
+!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 

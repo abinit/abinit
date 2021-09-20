@@ -99,14 +99,10 @@ contains
 !! NOTES
 !!
 !! PARENTS
-!!      vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
-!!      cg_precon,cg_zaxpy,cg_zcopy,cg_zscal,dotprod_g,etheta,fock_set_ieigen
-!!      getcprj,getghc,linemin,make_grad_berry,mksubham,pawcprj_alloc
-!!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_allgather,pawcprj_put
-!!      pawcprj_symkn,projbd,smatrix,smatrix_k_paw,sqnorm_g,timab,wrtout
-!!      xmpi_allgather
+!!      fourwf
 !!
 !! SOURCE
 
@@ -789,8 +785,10 @@ end subroutine cgwf_cprj
 !! NOTES
 !!
 !! PARENTS
+!!      m_vtowfk
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 !!
@@ -857,8 +855,10 @@ end subroutine mksubovl
 !! NOTES
 !!
 !! PARENTS
+!!      m_cgwf_cprj,m_vtowfk
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 !!
@@ -923,8 +923,10 @@ end subroutine cprj_update
 !! NOTES
 !!
 !! PARENTS
+!!      m_cgwf_cprj,m_vtowfk
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 !!
@@ -985,6 +987,7 @@ end subroutine cprj_update_oneband
 !! PARENTS
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 !!
@@ -1088,6 +1091,7 @@ end subroutine cprj_check
 !! PARENTS
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 !!
@@ -1221,8 +1225,10 @@ end function get_cprj_id
 !! NOTES
 !!
 !! PARENTS
+!!      m_cgwf_cprj
 !!
 !! CHILDREN
+!!      fourwf
 !!
 !! SOURCE
 !!

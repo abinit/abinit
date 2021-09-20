@@ -58,6 +58,7 @@ inp_files = [
 "t43.abi",
 "t44.abi", # test orbital magnetism with DDK wavefunctions
 "t45.abi", # test orbital magnetism with finite difference wavefunctions
+"t46.abi", # longwave GGA
 # Electron-phonon
 "t50.abi",
 "t51.abi",
@@ -75,6 +76,7 @@ inp_files = [
 "t63.abi",
 "t64.abi",
 "t65.abi",
+"t66.abi",
 # Spin dynamics in multibinit
 "t81.abi", # set initial spin using rotation q-modulation
 "t82.abi", # damping
