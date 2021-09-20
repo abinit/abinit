@@ -953,6 +953,18 @@ contains
     end if
 
     call xmpi_bcast(T_nstep, 0, comm, ierr)
+
+    ! write header of varT file
+    if(iam_master) then
+       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
+            "#", "Temperature (K)", "Cv (1)", "chi (1)",  "BinderU4 (1)", "Mst/Ms(1)", (ii, ii=1, self%spin_ob%nsublatt)
+       call wrtout(Tfile, Tmsg, "COLL")
+       flush(Tfile)
+    endif
+
+
+
+
     do i=1, T_nstep
        if(iam_master) then
           T=T_start+(i-1)*T_step
@@ -1001,7 +1013,16 @@ contains
           !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
           Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
           Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
+
+          ! write to varT file
+          write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
+                  Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
+                  & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
+          call wrtout(Tfile, Tmsg, "COLL")
+          flush(Tfile)
+
        endif
+
     end do
 
 
@@ -1032,17 +1053,7 @@ contains
        call wrtout(ab_out, msg, "COLL")
 
 
-       ! write to .varT file
-       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
-            "#", "Temperature (K)", "Cv (1)", "chi (1)",  "BinderU4 (1)", "Mst/Ms(1)", (ii, ii=1, self%spin_ob%nsublatt)
-       call wrtout(Tfile, Tmsg, "COLL")
-
-       do i = 1, T_nstep
-          write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
-               Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
-               & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
-          call wrtout(Tfile, Tmsg, "COLL")
-       end do
+       ! close varT file
        iostat= close_unit(unit=Tfile, iomsg=iomsg)
 
        ABI_FREE(Tlist)

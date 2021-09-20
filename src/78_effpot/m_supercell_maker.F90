@@ -96,7 +96,7 @@ contains
   !-----------------------------------------------------------------------
   !> @brief initialize
   !> @param [in] sc_matrix: the supercell matrix which maps the primitive cell to sc
-  !>       if does not have to be diagonal.
+  !>       it does not have to be diagonal.
   !-----------------------------------------------------------------------
   subroutine initialize(self, sc_matrix)
     class(supercell_maker_t), intent(inout) :: self
