@@ -271,7 +271,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,parameter :: level=11,response=1,formeig1=1,master=0,fake_unit=-666
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
- integer :: gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
+ integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: mband_mem_rbz
@@ -1628,9 +1628,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
      if(ipert==dtset%natom+3 .or. ipert==dtset%natom+4) then
 !      Section for strain perturbation
+
+       !To compute Absolute Deformation Potentials toghether with FxE tensor
+       !the reference has to be the same as in the FxE routines
+       g0term=0; if (dtset%rfstrs_ref==1) g0term=1
+ 
        call vlocalstr(gmet,gprimd,gsqcut,istr,mgfftf,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
-&       ucvol,psps%vlspl,vpsp1)
+&       ucvol,psps%vlspl,vpsp1,g0term=g0term)
      else
        call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
 &       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
@@ -1810,7 +1815,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ABI_MALLOC(rho1wfg,(2,dtset%nfft))
          ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
            occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
@@ -1819,7 +1824,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !SPr: need to modify dfpt_mkrho to taken into account q,-q and set proper formulas when +q and -q spinors are related
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
            occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
        end if
@@ -2613,7 +2618,6 @@ end subroutine dfpt_looppert
 !!  phasecg = phase of different wavefunction products <k,n | k+q,n'>
 !!
 !! PARENTS
-!!      m_dfpt_looppert
 !!
 !! CHILDREN
 !!

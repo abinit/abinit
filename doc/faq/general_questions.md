@@ -81,7 +81,7 @@ Anyhow, see the next items in this troubleshooting page.
 
 Well, **it depends**.
 The value reported by the code in the case of ground-state or DFPT calculations should
-represent a reasonble estimate
+represent a reasonable estimate.
 Very likely, it is smaller than the real value because not all workspace arrays are taken into account.
 
 Unfortunately, it is not easy to estimate the memory requirements for GW, BSE, EPH calculations
@@ -118,13 +118,15 @@ Pseudos in UPF2 format are not supported.
 Note that it is not just a matter of format.
 There are indeed fundamental differences between the formalism implemented in
 Abinit and the one used by QE, especially for PAW and NC-pseudos with SOC.
-The pseudodojo project provides NC-pseudos
+The pseudodojo project provides NC-pseudos.
 
 ## Can I run calculations with an XC functional different from the one used to generate the pseudos?
 
 Yes, use [[ixc]] to change the XC functional in the input file.
 
 ## Is there any tool to print a pseudo in a more human-readable format?
+
+Use abipy :
 
 ```
 abiopen.py PSEUDO_FILE -p
@@ -186,18 +188,17 @@ xred
 
 Using the primitive cell ensures the **fastest calculation** and the **best use of symmetry operations**,
 so in general you should listen to abinit and reduce your unit cell.
-If you have a good reason to do so, you can override abinit and force it to use a non-primitive unit cell,
+If you have a good reason not to use the primitive cell, you can override abinit and force it to use a non-primitive unit cell,
 by setting [[chkprim]] 1 in the input file.
-This will, however, disable symmetry operations in certain places.
 
 One possible reason to do this is, for example, making a large supercell of a crystal (say 3x3x3 primitive unit cells)
 in which you want to introduce a defect. 
 Doing the pristine crystal calculation in the 3x3x3 supercell is possible, but not useful 
-(you will just get 27 times the energy). 
+(you will just get 27 times the energy). Moreover, the pure translation symmetries will be incorporated in the symmetry recognition algorithm,
+and you might end up with a number of symmetry operations that exceeds ABINIT internal maximum.
 Once you have introduced the defect, of course,
 you will lower the supercell's symmetry and abinit will no longer complain that the cell is not primitive.
-[[chkprim]] 1 is no longer to be used for the defected cell in which you want all possible symmetries 
-to be exploited once again.
+[[chkprim]] 1 is no longer to be used for the defected cell.
 
 ## pspxc from pseudopotential not equal to ixc
 

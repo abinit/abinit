@@ -152,6 +152,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -198,6 +199,7 @@ end subroutine cg_tocplx
 !! PARENTS
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -346,6 +348,7 @@ end subroutine cg_setaug_zero
 !! PARENTS
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -388,6 +391,7 @@ end subroutine cg_to_reim
 !! PARENTS
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -433,9 +437,11 @@ end subroutine cg_from_reim
 !!  y = In output, y contains a copy of the values of x.
 !!
 !! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk,m_iowf
+!!      lapackprof,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk
+!!      m_iowf,m_rmm_diis,m_wfd
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -472,9 +478,10 @@ end subroutine cg_zcopy
 !!  x = Updated vector.
 !!
 !! PARENTS
-!!      m_cgtools,m_cgwf
+!!      m_cgtools,m_cgwf,m_cgwf_cprj
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -708,9 +715,10 @@ end function cg_zdotu
 !!  y = Array. In output, y contains the updated vector.
 !!
 !! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_rf2_init
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_rf2_init
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -758,6 +766,7 @@ end subroutine cg_zaxpy
 !! PARENTS
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -806,9 +815,10 @@ end subroutine cg_zaxpby
 !! OUTPUT
 !!
 !! PARENTS
-!!      lapackprof,m_cgtools
+!!      lapackprof,m_cgtools,m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -870,9 +880,10 @@ end subroutine cg_zgemv
 !! OUTPUT
 !!
 !! PARENTS
-!!      lapackprof,m_cgtools,m_sigmaph
+!!      lapackprof,m_cgtools,m_phonons,m_rmm_diis,m_sigmaph
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1012,9 +1023,11 @@ end function set_istwfk
 !!  dotr= <vect|vect>
 !!
 !! PARENTS
-!!      m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy,m_epjdos,m_rf2_init
+!!      m_cgtools,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy
+!!      m_epjdos,m_rf2_init
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1088,12 +1101,13 @@ end subroutine sqnorm_g
 !!  $dotr=\Re ( <vect1|vect2> )$
 !!
 !! PARENTS
-!!      m_cgcprj,m_cgwf,m_chebfi,m_d2frnl,m_dfpt_cgwf,m_dfpt_lwwf,m_dfpt_nstwf
-!!      m_dfpt_scfcv,m_dfpt_vtowfk,m_dfptnl_pert,m_dft_energy,m_efmas,m_eig2d
-!!      m_extraprho,m_fock_getghc,m_gkk,m_nonlop,m_nonlop_test,m_pead_nl_loop
-!!      m_phpi,m_rf2,m_rf2_init
+!!      m_cgcprj,m_cgtools,m_cgwf,m_cgwf_cprj,m_chebfi,m_d2frnl,m_dfpt_cgwf
+!!      m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk,m_dfptnl_pert
+!!      m_dft_energy,m_efmas,m_eig2d,m_extraprho,m_fock_getghc,m_gkk,m_nonlop
+!!      m_nonlop_test,m_pead_nl_loop,m_phpi,m_rf2,m_rf2_init,m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1187,6 +1201,7 @@ end subroutine dotprod_g
 !!      m_dfpt_vtowfk
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1343,6 +1358,7 @@ end subroutine matrixelmt_g
 !!      m_epjdos
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1447,6 +1463,7 @@ end subroutine dotprod_v
 !!      m_rhotoxc,m_setvtr
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1690,6 +1707,7 @@ end subroutine dotprod_vn
 !!      m_dfpt_rhotov,m_dfpt_vtorho,m_rhotov,m_vtorho
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1777,6 +1795,7 @@ end subroutine sqnorm_v
 !!      m_rhotov,m_rhotoxc
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1839,6 +1858,7 @@ end subroutine mean_fftr
 !!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -1910,6 +1930,7 @@ end subroutine cg_getspin
 !! PARENTS
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2070,6 +2091,7 @@ end subroutine cg_gsph2box
 !!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2175,6 +2197,7 @@ end subroutine cg_box2gsph
 !!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2253,6 +2276,7 @@ end subroutine cg_addtorho
 !!      m_dfti,m_fftw3
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2366,9 +2390,10 @@ end subroutine cg_vlocpsi
 !!  [umat]=Cholesky upper triangle matrix.
 !!
 !! PARENTS
-!!      m_cgtools
+!!      m_cgtools,m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2531,9 +2556,10 @@ end subroutine cgnc_cholesky
 !!  [umat]=Cholesky upper triangle matrix.
 !!
 !! PARENTS
-!!      m_cgtools
+!!      m_cgtools,m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2659,9 +2685,10 @@ end subroutine cgpaw_cholesky
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_cgtools
+!!      m_cgtools,m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2750,6 +2777,7 @@ end subroutine cgnc_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2892,9 +2920,10 @@ end subroutine cgnc_gramschmidt
 !!    output: New S|C> compute with the new |C>
 !!
 !! PARENTS
-!!      m_cgtools
+!!      m_cgtools,m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -2990,6 +3019,7 @@ end subroutine cgpaw_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -3168,9 +3198,11 @@ end subroutine cgpaw_gramschmidt
 !!  4) cg_zgemv wraps ZGEMM whose implementation is more efficient, especially in the threaded case.
 !!
 !! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
+!!      lapackprof,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -3309,6 +3341,7 @@ end subroutine projbd
 !!      m_inwffil
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -3400,6 +3433,7 @@ end subroutine cg_envlop
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -3490,9 +3524,10 @@ end subroutine cg_normev
 !!  vect(2,npw*nspinor)=<G|(H-eval)|C_{n,k}>*(polynomial ratio)
 !!
 !! PARENTS
-!!      m_cgwf,m_dfpt_cgwf
+!!      m_cgtools,m_cgwf,m_cgwf_cprj,m_dfpt_cgwf
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -3628,6 +3663,7 @@ end subroutine cg_precon
 !!      m_lobpcg
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -3919,6 +3955,7 @@ end subroutine cg_precon_block
 !!      m_lobpcg
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -4082,6 +4119,7 @@ end subroutine cg_zprecon_block
 !!      m_dynmat,m_rayleigh_ritz
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -4312,6 +4350,7 @@ end subroutine fxphas_seq
 !!      m_berrytk,m_dfpt_fef
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -4384,10 +4423,10 @@ end subroutine overlap_g
 !!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
 !!
 !! PARENTS
-!!      m_rayleigh_ritz,m_vtowfk
+!!      m_rayleigh_ritz,m_rmm_diis,m_vtowfk
 !!
 !! CHILDREN
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
+!!      daxpy
 !!
 !! SOURCE
 
@@ -4621,10 +4660,10 @@ end subroutine subdiago
 !!  cg(2,mcg)=wavefunctions
 !!
 !! PARENTS
-!!      rayleigh_ritz,vtowfk
+!!      m_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xgemm,abi_xhpev,abi_xhpgv,cg_normev,hermit
+!!      daxpy
 !!
 !! SOURCE
 
@@ -4856,6 +4895,7 @@ end subroutine subdiago_low_memory
 !!      lapackprof,m_inwffil,m_vtowfk
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5560,8 +5600,10 @@ end subroutine pw_orthon_cprj
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_vtowfk
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5622,8 +5664,10 @@ end subroutine cg_hprotate_and_get_diag
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_vtowfk
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5692,8 +5736,10 @@ end subroutine cg_hrotate_and_get_diag
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5740,8 +5786,10 @@ end subroutine cg_get_eigens
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5785,8 +5833,10 @@ end subroutine cg_get_residvecs
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5821,8 +5871,10 @@ end subroutine cg_norm2g
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5876,8 +5928,10 @@ end subroutine cg_zdotg_zip
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 
@@ -5924,8 +5978,10 @@ end subroutine cg_precon_many
 !!  y = Array. In output, y contains the updated vector.
 !!
 !! PARENTS
+!!      m_rmm_diis
 !!
 !! CHILDREN
+!!      daxpy
 !!
 !! SOURCE
 

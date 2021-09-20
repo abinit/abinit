@@ -83,7 +83,7 @@ contains
 !!  Inspired to wfconv.
 !!
 !! CHILDREN
-!!      sphere
+!!      pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -243,7 +243,7 @@ end subroutine cgtk_rotate
 !!      m_wfd
 !!
 !! CHILDREN
-!!      sphere
+!!      pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -317,7 +317,7 @@ end subroutine cgtk_change_gsphere
 !!      m_vtowfk
 !!
 !! CHILDREN
-!!      timab,xmpi_sum
+!!      pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 

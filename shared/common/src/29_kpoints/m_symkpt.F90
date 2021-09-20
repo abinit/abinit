@@ -97,7 +97,7 @@ contains
 !!      m_ifc,m_kpts,m_tdep_psij,m_unittests
 !!
 !! CHILDREN
-!!      krank%free,wrtout
+!!      krank%free
 !!
 !! SOURCE
 
@@ -434,7 +434,7 @@ end subroutine symkpt
 !!      m_kpts,m_lgroup,m_unittests
 !!
 !! CHILDREN
-!!      krank%free,wrtout
+!!      krank%free
 !!
 !! SOURCE
 
@@ -683,8 +683,10 @@ end subroutine symkpt_new
 !!   symop and timrev needed to transform them
 !!
 !! PARENTS
+!!      m_wfk
 !!
 !! CHILDREN
+!!      krank%free
 !!
 !! SOURCE
 

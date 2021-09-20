@@ -511,9 +511,8 @@ end function symkchk
 !!  the comparison of the squared lengths of the separate vectors.
 !!
 !! PARENTS
-!!      m_berryphase_new,m_dvdb,m_ebands,m_eph_double_grid,m_ephwg,m_eprenorms
-!!      m_exc_diago,m_fock,m_fstab,m_haydock,m_inwffil,m_lgroup,m_mlwfovlp_qp
-!!      m_orbmag,m_phgamma,m_rta,m_sigmaph,m_sigtk,m_unittests
+!!      m_berryphase_new,m_dvdb,m_ebands,m_eprenorms,m_exc_diago,m_fock
+!!      m_haydock,m_inwffil,m_lgroup,m_mlwfovlp_qp,m_orbmag,m_unittests,m_wfk
 !!
 !! CHILDREN
 !!      wrtout

@@ -177,7 +177,9 @@ contains
 !!      m_driver,m_gwls_sternheimer
 !!
 !! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
+!!      copy_results_gs,destroy_results_gs,destroy_results_img
+!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
+!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -826,7 +828,9 @@ end subroutine gstateimg
 !!      m_gstateimg
 !!
 !! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
+!!      copy_results_gs,destroy_results_gs,destroy_results_img
+!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
+!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1022,7 +1026,9 @@ end subroutine prtimg
 !!      m_gstateimg
 !!
 !! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
+!!      copy_results_gs,destroy_results_gs,destroy_results_img
+!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
+!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1180,7 +1186,9 @@ end subroutine predictimg
 !!      m_gstateimg
 !!
 !! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
+!!      copy_results_gs,destroy_results_gs,destroy_results_img
+!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
+!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1262,7 +1270,9 @@ end subroutine predict_copy
 !!      m_gstateimg
 !!
 !! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
+!!      copy_results_gs,destroy_results_gs,destroy_results_img
+!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
+!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 

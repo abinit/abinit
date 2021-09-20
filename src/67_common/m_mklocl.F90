@@ -43,6 +43,7 @@ module m_mklocl
  use m_gtermcutoff,only : termcutoff
 
  use m_splines,  only : splfit
+ use m_dfpt_mkvxc, only : dfpt_mkvxcgga_n0met
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -132,7 +133,7 @@ contains
 !!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -281,7 +282,7 @@ end subroutine mklocl
 !!      m_mklocl,m_respfn_driver,m_stress
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -744,7 +745,7 @@ end subroutine mklocl_recipspace
 !!      m_pead_nl_loop
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1008,7 +1009,7 @@ end subroutine dfpt_vlocal
 !!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1354,7 +1355,7 @@ end subroutine vlocalstr
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1617,7 +1618,7 @@ end subroutine dfpt_vlocaldq
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1847,7 +1848,7 @@ end subroutine dfpt_vlocaldqdq
 !! Compute second q-gradient (at q=0) of the local part of 1st-order 
 !! metric potential from the appropriate atomic pseudopotential 
 !! with structure and derivative factor. Additionaly, compute the 
-!! second q-gradient (at q=0) of the Hartree potential of the metric 
+!! second q-gradient (at q=0) of the Hartree and XC (if GGA) potentials of the metric 
 !! perturbation.
 !! Cartesian coordinates are employed to define the direction of the 
 !! metric perturbation and the two q-gradients.
@@ -1860,12 +1861,15 @@ end subroutine dfpt_vlocaldqdq
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  idir= strain perturbation direction
 !!  ipert=number of the atom being displaced in the frozen-phonon
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimension of q grid for pseudopotentials
 !!  natom=number of atoms in cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential 
@@ -1874,14 +1878,15 @@ end subroutine dfpt_vlocaldqdq
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!
 !! OUTPUT
 !!  vhart1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density Hartree potential from the metric perturbation
-!!
 !!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order metric local 
 !!  crystal pseudopotential in real space
+!!  vxc1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density XC potential from the metric perturbation (only finite if GGA)
 !!
 !! NOTES
 !! ** IMPORTANT: the formalism followed in this routine
@@ -1908,39 +1913,42 @@ end subroutine dfpt_vlocaldqdq
 !!      m_dfpt_lwwf
 !!
 !! CHILDREN
-!!      fourdp,ptabs_fourdp,splfit
+!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
 subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
-& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,&
-& ucvol,vlspl,vhart1dqdq,vpsp1dqdq)
+& kxc,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+& ntypat,n1,n2,n3,nkxc,nspden,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,rhor,&
+& ucvol,vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
 
  implicit none
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- integer,intent(in) :: opthartdqdq,qdir
+ integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,nkxc,ntypat
+ integer,intent(in) :: nspden,opthartdqdq,qdir
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18)
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3), rhog(2,nfft)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3), kxc(nfft,nkxc)
+ real(dp),intent(in) :: ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rhor(cplex*nfft,nspden)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat)
  real(dp),intent(out) :: vhart1dqdq(cplex*nfft),vpsp1dqdq(cplex*nfft)
+ real(dp),intent(out) :: vxc1dqdq(cplex*nfft)
 
 !Local variables -------------------------
 !scalars
  integer :: beta, delta, gamma
- integer :: ia,i1,i2,i3,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
- integer :: itypat,re=1
+ integer :: ia,i1,i2,i3,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ii1
+ integer :: itypat,jj
+ integer, parameter :: im=2, re=1
  real(dp),parameter :: tolfix=1.000000001_dp
  real(dp) :: cutoff,delbd,delbg,deldg,gfact,gmag,gq1
  real(dp) :: gq2,gq3,gsquar,pisqrinv
- real(dp) :: sfi,sfr,term1,term2,uogsquar,work1re,xnorm
+ real(dp) :: sfi,sfr,term1,term2,tmpre,tmpim,uogsquar,work1re,xnorm
  logical :: qeq0
  character(len=500) :: msg
 !arrays
@@ -2144,6 +2152,21 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    end if
 
    ABI_FREE(work1)
+
+!  Calculate the GS density XC contribution (if GGA)
+   vxc1dqdq(:)=zero
+   if (nkxc == 7) then
+     call dfpt_mkvxcgga_n0met(beta,1,delta,gamma,gprimd,kxc,mpi_enreg, &
+   & nfft,ngfft,nkxc,nspden,rhor,vxc1dqdq)
+
+     !Fictitious i factor temporarily applied. 
+     !It is later canceled by the (-i) factor of the total matrix element
+     do ii=1,nfft
+       jj=ii*2
+       tmpre=vxc1dqdq(jj-1); tmpim=vxc1dqdq(jj)
+       vxc1dqdq(jj-1)=-tmpim; vxc1dqdq(jj)=tmpre
+     end do
+   end if
 
 !End the condition of non-electric-field
  end if
