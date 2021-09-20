@@ -329,7 +329,8 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
                     If you set the FFT flavor to fftw3, the configure script
                     will abort. Otherwise, your FFTW3 settings will be ignored.
-   ])
+
+])
 
   # Clean-up the mess
   unset tmp_fft_has_fftw3
