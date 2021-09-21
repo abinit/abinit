@@ -749,7 +749,7 @@ AC_DEFUN([ABI_MPI_INIT], [
 
   # Allow MPI flavors
   AC_ARG_WITH([mpi-flavor],
-    AC_HELP_STRING([--with-mpi-flavor],
+    AS_HELP_STRING([--with-mpi-flavor],
       [Flavor of MPI to use (default: auto),
        see ~abinit/doc/build/config-template.ac9 for details]),
     [abi_mpi_flavor="${withval}"],
