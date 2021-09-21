@@ -34,7 +34,7 @@ For obvious reasons, they are the only options that cannot be stored in a config
 
 Well, there are many reasons why configure can fail.
 
-First of all, make sure that your LD_LIBRARY_PATH (DYLD_LIBRARY_PATH), PATH environment variables
+First of all, make sure that your LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on MacOs), PATH environment variables
 are properly set **before** running configure.
 By the same token, one should load all the modules before configuring.
 If your environment is propertly set and configure keeps on failing, you will need to search 
@@ -88,8 +88,8 @@ The version provided by Spack/EasyBuild pa
 
 ## Why do we provide fallbacks?
 
-Abinit Fallbacks is a package builder for the external dependencies in environments lacking these components.
-Note, indeed, that **all** the external libraries indeed should be compiled with the same MPI wrapper/compiler
+Abinit Fallbacks is a package builder for the external dependencies of ABINIT in environments lacking these components.
+Note, indeed, that **all** the external libraries should be compiled with the same MPI wrapper/compiler
 used to build ABINIT.
 Unfortunately, not all HPC centers provide a complete set modules covering the external dependencies required by ABINIT.
 <!--
@@ -113,7 +113,7 @@ at two different levels.
 1. The Abinit Fortran routines
 2. External libraries for BLAS/Lapack and FFTs.
 
-To activate OpenMP in 1), add
+To activate OpenMP in 1), add to the .ac file
 
 ```
 enable_openmp="yes"
@@ -121,7 +121,7 @@ FCFLAGS_OPENMP="-fopenmp"    # for the GFORTRAN compiler
 #FCFLAGS_OPENMP="-qopenmp"   # for the INTEL FORTRAN compiler
 ```
 
-Finally, remember to set 
+Finally, remember to set the environment variable
 
 ```
 export OMP_NUM_THREADS=1
