@@ -87,7 +87,7 @@ This method allows one to drastically reduce the needed number of bands for high
 using pure single plane waves description based on the Fermi gas model beyond explicitly computed bands.
 The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
 
-See [[topics:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]].
+See [[topic:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]].
 ee tests [[test:v9_92]].
 
 By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
@@ -164,7 +164,7 @@ New test [[test:v9_37]].
 
 By M. Rodriguez-Mayorga (MR792)
 
-**D.11** Introduced new input variable [[use_oldchi]].
+**D.11** Introduced new input variable use_oldchi.
 Not documented, not tested.
 
 By Wei Chen (modified line 743 in src/95_drive/screening.F90 on 23 April 2021).
