@@ -52,13 +52,13 @@ Also, the usage of the quadrupoles has been rationalized (and made easier) in an
 Finally, the input variable [[rfstrs_ref]] has been introduced, to perform strain response-function calculations 
 with the reference energy placed at the average electrostatic potential, to get absolute deformation potentials.
 
-Test for GGA + longwaves [[tests:v9_46]].
+Test for GGA + longwaves [[test:v9_46]].
 Test missing for rfstrs_ref, dipquad and quadquad ?
 By M. Royo (MR795)
 
 
 **B.4** Stresses are available within cDFT (constrained DFT).
-See tests [[tests:v9_01]], [[tests:v9_02]] and [[tests:v9_03]].
+See tests [[test:v9_01]], [[test:v9_02]] and [[test:v9_03]].
 
 By X. Gonze (MR802)
 
@@ -67,7 +67,7 @@ By X. Gonze (MR802)
 is now available, for cubic materials.
 Activate it using [[eph_task]]=10.
 
-See test [[tests:v9_66]].
+See test [[test:v9_66]].
 
 By B. Guster (MR800)
 
@@ -78,7 +78,7 @@ There is also an internal variable [[cprj_in_memory]] exposed in the documentati
 Other input variables have been introduced in the development process : [[fft_count]] and [[nonlop_ylm_count]].
 They allow one to monitor better the number of FFTs and non-local operator applications.
 
-See tests [[tests:v9_101]], [[tests:v9_102]], [[tests:v9_103]] and [[tests:v9_104]].
+See tests [[test:v9_101]], [[test:v9_102]], [[test:v9_103]] and [[test:v9_104]].
 
 By L. Baguet (MR793).
 
@@ -88,7 +88,7 @@ using pure single plane waves description based on the Fermi gas model beyond ex
 The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
 
 See [[topics:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]].
-ee tests [[tests:v9_92]].
+ee tests [[test:v9_92]].
 
 By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
 
@@ -113,7 +113,7 @@ Added this flag in order to make it possible to print the different elements tha
 These elements are namely: the matrix elements, the renormalized electronic eigenvalues, the occupations and the kpt weights.
 Everything is dumped into the _OPTIC.nc file by the main process. Thus optimization could be done memory-wise and speed wise if mpi-io is implemented for this nc file.
 
-[[tests:v9_49]] was created which is the same as [[tests:v9_48]] except with the aforementioned flag set to 1. 
+[[test:v9_49]] was created which is the same as [[test:v9_48]] except with the aforementioned flag set to 1. 
 This test checks that everything works well even though we print the matrix elements. 
 It does not test that matrix elements are well printed because that would require testing of the OPTIC.nc file. 
 Although it is possible to check that it works well using a simple python script (see the figure in the merge request on Gitlab).
