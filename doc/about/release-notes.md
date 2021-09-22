@@ -78,7 +78,7 @@ There is also an internal variable [[cprj_in_memory]] exposed in the documentati
 Other input variables have been introduced in the development process : [[fft_count]] and [[nonlop_ylm_count]].
 They allow one to monitor better the number of FFTs and non-local operator applications.
 
-See tests [[test:v9_101]], [[test:v9_102]], [[test:v9_103]] and [[test:v9_104]].
+See tests [[test:v9_71]], [[test:v9_72]], [[test:v9_73]] and [[test:v9_74]].
 
 By L. Baguet (MR793).
 
