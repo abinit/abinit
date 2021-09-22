@@ -25,8 +25,6 @@ inp_files = [
 "t10.abi", # optic
 "t11.abi", # GGA-PBE PAW nsppol=2
 "t12.abi", # optic
-"t13.abi", # metallic iron GGA-PBE PAW nsppol=2
-"t14.abi", # optic
 "t15.abi", # check slight misalignment of rprim, with large tolsym
 "t16.abi", # check slightly incorrect xred, with large tolsym
 "t17.abi", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
@@ -59,6 +57,10 @@ inp_files = [
 "t44.abi", # test orbital magnetism with DDK wavefunctions
 "t45.abi", # test orbital magnetism with finite difference wavefunctions
 "t46.abi", # longwave GGA
+"t47.abi", # metallic iron GGA-PBE PAW nsppol=2
+"t48.abi", # optic
+"t49.abi", # optic (same as t14 but prtlincompmatrixelements = 1)
+
 # Electron-phonon
 "t50.abi",
 "t51.abi",
@@ -95,9 +97,8 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
-"t100.abi",  # optic (same as t14 but prtlincompmatrixelements = 1)
-"t101.abi", # test nloc_alg options, istwfk=1
-"t102.abi", # test nloc_alg options, istwfk>=2
+"t101.abi", # test cprj_update_lvl and nloc_alg options, istwfk=1
+"t102.abi", # test cprj_update_lvl and nloc_alg options, istwfk>=2
 "t103.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
 "t104.abi", # test cprj_update_lvl options, forces computed during SCF iterations
 ]

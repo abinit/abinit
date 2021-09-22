@@ -1,3 +1,181 @@
+## v9.6
+
+Version 9.6, released on October 1, 2021.
+List of changes with respect to version 9.4.
+<!-- Release notes updated on September 21, 2021. -->
+
+Many thanks to the contributors to the ABINIT project between
+February 2021 and September 2021. These release notes
+are relative to modifications/improvements of ABINIT v9.6 with respect to v9.4.
+<!-- Merge requests up to and including MR804 are taken into account. -->
+
+The list of contributors includes:
+L. Baguet, J.-M. Beuken, J. Bieder, A. Blanchet,
+J. Clerouin, C. Espejo, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
+B. Guster, Ch. Paillard, 
+Y. Pouillon, M. Rodriguez-Mayorga, M. Royo, F. Soubiran,
+M. Torrent, M. Verstraete, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+(nothing to mention for this v9.6)
+
+* * *
+
+### **B.** Most noticeable achievements
+
+**B.1** Band-parallel implementation of DFPT : the memory footprint is now distributed over different processors.
+Previously, the memory was distributed only for k-point parallelism. 
+This is automatically managed, no user action is to be taken to activate this memory saving.
+
+See test [[test:dfpt_04]].
+
+By M. Verstraete (MR784, 803)
+
+**B.2** The Iterative Boltzmann Transport Equation (IBTE) to compute the electric conductivity has been implemented.
+Use [[eph_task]]=8.
+Related input variables : [[ibte_niter]], [[ibte_prep]], and [[ibte_alpha_mix]]. 
+
+See test [[test:v9_65]], where a preparatory run is made. However, no real test of [[ibte_niter]] and [[ibte_alpha_mix]]. Also the
+new input variable [[ibte_abs_tol]] is not yet tested....
+
+By M. Giantomassi (MR794)
+
+**B.3** The computation of dynamical quadrupoles and flexoelectricity is now available within the GGA.
+Also, the usage of the quadrupoles has been rationalized (and made easier) in anaddb. See the ANADDB input variables [[dipquad@anaddb]] and [[quadquad@anaddb]].
+Finally, the input variable [[rfstrs_ref]] has been introduced, to perform strain response-function calculations 
+with the reference energy placed at the average electrostatic potential, to get absolute deformation potentials.
+
+Test for GGA + longwaves [[tests:v9_46]].
+Test missing for rfstrs_ref, dipquad and quadquad ?
+By M. Royo (MR795)
+
+
+**B.4** Stresses are available within cDFT (constrained DFT).
+See tests [[tests:v9_01]], [[tests:v9_02]] and [[tests:v9_03]].
+
+By X. Gonze (MR802)
+
+
+**B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
+is now available, for cubic materials.
+Activate it using [[eph_task]]=10.
+
+See test [[tests:v9_66]].
+
+By B. Guster (MR800)
+
+**B.6** Important speed-up of the PAW calculations is allowed thanks to the storage of "cprj" coefficients. 
+See the input variable [[cprj_update_lvl]]. However, at present this is only possible for ground-state
+calculations, with several restrictions, spelled in [[cprj_update_lvl]]. So, this is not activated by default.
+There is also an internal variable [[cprj_in_memory]] exposed in the documentation.
+Other input variables have been introduced in the development process : [[fft_count]] and [[nonlop_ylm_count]].
+They allow one to monitor better the number of FFTs and non-local operator applications.
+
+See tests [[tests:v9_101]], [[tests:v9_102]], [[tests:v9_103]] and [[tests:v9_104]].
+
+By L. Baguet (MR793).
+
+**B.7** The Extended First-Principles Molecular Dynamics has been implemented.
+This method allows one to drastically reduce the needed number of bands for high temperature simulations, 
+using pure single plane waves description based on the Fermi gas model beyond explicitly computed bands.
+The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
+
+See [[topics:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]].
+ee tests [[tests:v9_92]].
+
+By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
+
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+**C.1** Supported compilers
+
+* gfort (GNU) compiler: v11 newly supported.
+
+By JM Beuken
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.1** New input variable for "optic" : [[prtlincompmatrixelements@optic]].
+
+Added this flag in order to make it possible to print the different elements that are used to build the susceptibility of the linear component of the dielectric tensor.
+These elements are namely: the matrix elements, the renormalized electronic eigenvalues, the occupations and the kpt weights.
+Everything is dumped into the _OPTIC.nc file by the main process. Thus optimization could be done memory-wise and speed wise if mpi-io is implemented for this nc file.
+
+[[tests:v9_49]] was created which is the same as [[tests:v9_48]] except with the aforementioned flag set to 1. 
+This test checks that everything works well even though we print the matrix elements. 
+It does not test that matrix elements are well printed because that would require testing of the OPTIC.nc file. 
+Although it is possible to check that it works well using a simple python script (see the figure in the merge request on Gitlab).
+(Note that the tests v9_13 and v9_14 have been moved to v9_47 and v9_48 in this change).
+
+By F. Goudreault (MR776)
+
+**D.2** New radial sine transform for the vdW-DF kernel.
+
+By C. Espejo (MR 797)
+
+
+**D.3** New test of orbital magnetism, [[test:v9_37]].
+Also, on-going work on orbital magnetism, including use with DDK wavefunctions.
+
+By J. Zwanziger (MR767, MR775, MR779 and MR787)
+
+**D.4** Migrate to mkdocs==1.1.2 and  mkdocs-material==7.0.6.
+mksite.py now requires python >= 3.6
+Activate search capabilities available in the new mkdocs version (really cool).
+
+By M. Giantomassi (MR774) 
+
+**D.5** Fixed bug in make_efg_onsite for [[nspden]]=2 case.
+
+By J. Zwanziger (MR783)
+
+**D.6** Correction of tutorials Rf1 and Rf2 for version 9
+
+By O. Gingras (MR785)
+
+**D.7** Fixed errors and bugs detected by using -ftrapuv intel option
+
+By M. Giantomassi (MR789)
+
+**D.8** Bug fix in [[nspden]]=4 DFPT for Fe
+
+By M. Verstraete (MR790)
+
+**D.9** Fixed a spurious test line 711 of m_occ.F90 that caused abinit to abort in the case of [[occopt]]=9, 
+if the number of conduction bands was enough to accomodate nqFD but not enough to accomodate nelect.
+
+By Ch. Paillard (MR791)
+
+**D.10** GW methodology with Kohn-Sham density matrix.
+Solving a bug producing a segmentation fault when using [[bdgw]] and [[gw1rdm]].
+New test [[test:v9_37]].
+
+By M. Rodriguez-Mayorga (MR792)
+
+**D.11** Introduced new input variable [[use_oldchi]].
+Not documented, not tested.
+
+By Wei Chen (modified line 743 in src/95_drive/screening.F90 on 23 April 2021).
+
+
+**D.12** Miscellaneous additional bug fixes, or upgrade of build system.
+in the upgrade of tutorials)..
+By J. Bieder, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+
+* * *
+
 ## v9.4
 
 Version 9.4, released on February 25, 2021.
