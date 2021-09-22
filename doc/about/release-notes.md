@@ -87,8 +87,8 @@ This method allows one to drastically reduce the needed number of bands for high
 using pure single plane waves description based on the Fermi gas model beyond explicitly computed bands.
 The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
 
-See [[topic:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]].
-ee tests [[test:v9_92]].
+See [[topic:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]],
+and test [[test:v9_92]].
 
 By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
 
@@ -131,9 +131,9 @@ Also, on-going work on orbital magnetism, including use with DDK wavefunctions.
 
 By J. Zwanziger (MR767, MR775, MR779 and MR787)
 
-**D.4** Migrate to mkdocs==1.1.2 and  mkdocs-material==7.0.6.
-mksite.py now requires python >= 3.6
-Activate search capabilities available in the new mkdocs version (really cool).
+**D.4** Migration to mkdocs==1.1.2 and  mkdocs-material==7.0.6.
+mksite.py now requires python >= 3.6 .
+Activated search capabilities, available in the new mkdocs version (really cool).
 
 By M. Giantomassi (MR774) 
 
