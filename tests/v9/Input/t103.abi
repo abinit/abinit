@@ -1,4 +1,4 @@
-# Test nloc_alg options (PAW, so useylm=1) on AlAs (optforces=2)
+# Test cprj_update_lvl and nloc_alg options (PAW, so useylm=1) on AlAs (optforces=2)
 
   nonlop_ylm_count 1 # enable nonlop counting
   fft_count 1        # enable fft counting
