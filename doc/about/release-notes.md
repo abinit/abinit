@@ -1120,7 +1120,7 @@ By N. Pike (MR 575).
 
 **D.35** Optic: print spin-decomposition when applicable.
 Fixed reflectivity screwed results. Test more thoroughly optics (incl. interfacing using NetCDF),
-see new tests [[test:v9_05]] to [[test:v9_14]]
+see new tests [[test:v9_05]] to [[test:v9_12]], also [[test:v9_47]] and [[test:v9_48]]
 
 By X. Gonze (MR 654, 674).
 
