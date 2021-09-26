@@ -22783,12 +22783,13 @@ Variable(
     requires="[[optdriver]] == 3",
     added_in_version="9.5.2",
     text=r"""
-This input variable defines whether to keep the old implementation for which the polarizability
-$\chi^{0}$ is evaluated when the eigenvalues are read from an existing QPS file (e.g. with quasiparticle
-self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting point.
+This input variable defines whether to keep the old implementation in which the polarizability
+$\chi^{0}$ is evaluated when the eigenvalues are read from an existing QPS file (e.g. in quasiparticle
+self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting point.)
 
 * 0 --> Do not use the old implementation.
-  1 --> Keep the old implementation.
+
+* 1 --> Keep the old implementation.
 """,
 ),
 
