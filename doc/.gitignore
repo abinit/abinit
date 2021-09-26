@@ -1,18 +1,18 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-INSTALL_MacOS.md
+INSTALL_gpu.md
 INSTALL_Ubuntu.md
+INSTALL_MacOS.md
 INSTALL_EasyBuild.md
 INSTALL_CentOS.md
-INSTALL_gpu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/aim.md
-variables/anaddb.md
-variables/atdep.md
-variables/optic.md
 variables/multibinit.md
+variables/optic.md
+variables/atdep.md
+variables/anaddb.md
+variables/aim.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
