@@ -100,4 +100,8 @@ inp_files = [
 "t102.abi", # test nloc_alg options, istwfk>=2
 "t103.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
 "t104.abi", # test cprj_update_lvl options, forces computed during SCF iterations
+"t105.abi", # test usepawu options (including negative ones), nsppol=nspinor=nspden=1
+"t106.abi", # test usepawu options (including negative ones), nsppol=2,nspden=2
+"t107.abi", # test usepawu options (including negative ones), nspinor=2,nspden=4
+"t108.abi", # test usepawu options (including negative ones), nspinor=2,nspden=1
 ]
