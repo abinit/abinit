@@ -166,7 +166,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  call energies_init(energies)
  energies%e_corepsp=tdks%energies%e_corepsp
 
- !Set vtrial and intialize the Hamiltonian
+ !Set "vtrial" and intialize the Hamiltonian
  call rttddft_init_hamiltonian(dtset,energies,gs_hamk,istep,mpi_enreg,psps,tdks)
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -183,7 +183,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  end if
  bdtot_index=0
 
-!FB: Needed?
+!FB: @MT Needed?
 !has_vectornd = (with_vectornd .EQ. 1)
 !if(has_vectornd) then
 !  ABI_MALLOC(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
@@ -210,7 +210,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       call gs_hamk%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
-!FB: Needed?
+!FB: @MT Needed?
 !  ! if vectornd is present, set it up for addition to gs_hamk similarly to how it's done for
 !  ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
 !  ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
@@ -279,17 +279,9 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       !**  - Prepare various tabs in case of band-FFT parallelism
       !**  - Load k-dependent quantities in the Hamiltonian
       ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
-      if (dtset%usefock==1) then
-         if(tdks%fock%fock_common%use_ACE/=0) then
-            call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k, &
-                              & kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=tdks%fock%fockACE(ikpt,isppol),ph3d_k=ph3d,  &
-                              & compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1),compute_gbound=(mpi_enreg%paral_kgb/=1))
-         end if
-      else
-         call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,         &
-                           & kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), &
-                           & compute_gbound=(mpi_enreg%paral_kgb/=1))
-      end if
+      call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,         &
+                        & kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), &
+                        & compute_gbound=(mpi_enreg%paral_kgb/=1))
 
       !** Load band-FFT tabs (transposed k-dependent arrays)
       if (mpi_enreg%paral_kgb==1) then
@@ -303,9 +295,8 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
                            & ph3d_k   =my_bandfft_kpt%ph3d_gather)
       end if
    
-      !FB: Should this be done at every step?
       !** Build inverse of overlap matrix
-      if(psps%usepaw == 1 .and. istep <= 1) then
+      if(psps%usepaw == 1) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
       end if
 
@@ -321,13 +312,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          end if
       end if
      
-     !FB: Needed?
-     !! Update the value of ikpt,isppol in fock_exchange and allocate the memory space to perform HF calculation.
-     !if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
-     !if (psps%usepaw==1 .and. usefock) then
-     !  if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
-     !end if
-  
       if (dtset%paral_kgb == 1) then
          ikpt_this_proc = bandfft_kpt_get_ikpt()
          npw = bandfft_kpt(ikpt_this_proc)%ndatarecv
@@ -338,9 +322,11 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       end if
 
       ABI_MALLOC(gvnlxc, (2, npw*my_nspinor*nband))
-
+      
+      !** Compute the exp[(S^{-1})H]*cg using taylor expansion to approximate the exponential
       call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,gs_hamk,gvnlxc,1,mpi_enreg,nband,npw,my_nspinor)
 
+      !** Compute different contribution to the energy if needed
       if (PRESENT(store_energies)) then
          if (store_energies) then
             ABI_MALLOC(occ_k,(nband_k))
@@ -394,12 +380,12 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
    ABI_FREE(vxctaulocal)
  end if
 
- !Keep these energies in memory if required
+ !Keep the computed energies in memory
  if (PRESENT(store_energies)) then
    if (store_energies) call energies_copy(energies,tdks%energies)
  end if
 
- !FB: There should be some MPI reduce here I think..
+ !FB: There should be some MPI reduce here I think.. ?!
 
  end subroutine rttddft_propagator_er
 

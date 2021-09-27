@@ -101,8 +101,8 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, tdks)
    end if 
    write(msg,'(a)') "# RT-TDDFT -- Energy file  All quantities are in atomic units"
    call wrtout(tdks%tdener_unit,msg)
-   write(msg,'(a)') "#   step    time      E_total    E_kinetic    E_hartree     E_xc     E_ewald   &
-                   & E_localpsp    E_corepsp   E_entropy    E_vdw      E_paw"
+   write(msg,'(a)') "#   step    time      E_total      E_kinetic    E_hartree      E_xc        E_ewald   &
+                   & E_corepsp   E_localpsp   E_nonlocalpsp   E_paw       E_entropy     E_vdw"
    call wrtout(tdks%tdener_unit,msg)
 
    write(msg,'(a,f14.6,a)') 'Integrated density (ie. total nb of electrons) = ', &
@@ -112,12 +112,6 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, tdks)
  end if
 
  if (istep /= 0) then
-   !Update header, with evolving variables
-   call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
-                       & tdks%hdr%residm,tdks%rprimd,tdks%occ,tdks%pawrhoij,                 &
-                       & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,             &
-                       & mpi_atmtab=mpi_enreg%my_atmtab)
-
    !Write in output file
    write(msg,'(a,f14.6,a)') 'Total energy = ', tdks%etot,' Ha'
    call wrtout(ab_out,msg)
@@ -129,12 +123,19 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, tdks)
    if (do_write_log) call wrtout(std_out,msg)
 
    !Write in energy file
-   write(msg,'(i8,f10.5,10f12.6)') istep, istep*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                   &
-                                 & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,         &
-                                 & tdks%energies%e_localpsp, tdks%energies%e_corepsp, tdks%energies%e_entropy, &
-                                 & tdks%energies%e_vdw_dftd, tdks%energies%e_paw
+   write(msg,'(i8,f10.5,11(f12.6,X))') istep, istep*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                       &
+                                 & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
+                                 & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, & 
+                                 & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
    call wrtout(tdks%tdener_unit,msg)
  end if
+
+ !Update header, with evolving variables
+ call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
+                    & tdks%hdr%residm,tdks%rprimd,tdks%occ,tdks%pawrhoij,                  &
+                    & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
+                    & mpi_atmtab=mpi_enreg%my_atmtab)
+
 
  !Close files at the end
  if (istep == tdks%ntime) then

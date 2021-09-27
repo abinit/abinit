@@ -1105,6 +1105,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         write(msg,'(a)') 'RT-TDDFT and Positron are not compatible, set positron to 0.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
+     if (dt%usefock==1) then 
+        write(msg,'(a)') 'RT-TDDFT and Exact exchange are not compatible, set usefock to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     end if
      !TODO FB: Should probably be made possible later
      ! useextfpmd
      if (dt%useextfpmd /= 0) then

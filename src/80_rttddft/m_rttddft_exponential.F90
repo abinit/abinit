@@ -104,7 +104,6 @@ contains
  integer                         :: iorder
  integer                         :: sij_opt,cpopt
  integer                         :: tim_getghc = 5
- integer                         :: nband, npw
  integer                         :: nfact
  logical                         :: paw
  !arrays
@@ -116,9 +115,9 @@ contains
  
 ! ***********************************************************************
 
- paw = gs_hamk%usepaw == 1
+ paw = (gs_hamk%usepaw == 1)
  if(paw) then
-   ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband))
+   ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband_k))
    call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
    !FB: Not sure about the values of sij_opt and cpopt
    sij_opt = 1 ! recompute S
@@ -129,29 +128,31 @@ contains
    cpopt = -1
  end if
 
- !FB: Probably not needed to create so many arrrays
- ABI_MALLOC(ghc,    (2, npw*nspinor*nband))
- ABI_MALLOC(gsc,    (2, npw*nspinor*nband))
- ABI_MALLOC(gsm1hc, (2, npw*nspinor*nband))
+ !FB: Probably not needed to create so many arrrays ?
+ ABI_MALLOC(ghc,    (2, npw_k*nspinor*nband_k))
+ ABI_MALLOC(gsc,    (2, npw_k*nspinor*nband_k))
+ ABI_MALLOC(gsm1hc, (2, npw_k*nspinor*nband_k))
 
  !*** Taylor expansion ***
  if (method == 1) then 
-   ABI_MALLOC(tmp, (2, npw*nspinor*nband))
+   ABI_MALLOC(tmp, (2, npw_k*nspinor*nband_k))
    tmp(:,:) = cg(:,:)
    nfact = 1
    do iorder = 1, dtset%td_exp_order
       !** Apply Hamiltonian 
+      ! Using gsm1hc only as a temporary array here
       if (dtset%paral_kgb /= 1) then
-         call getghc(cpopt,tmp,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,1.0_dp,mpi_enreg,nband_k, &
+         call getghc(cpopt,tmp,cwaveprj,ghc,gsc,gs_hamk,gsm1hc,1.0_dp,mpi_enreg,nband_k, &
                    & dtset%prtvol,sij_opt,tim_getghc,0)
       else
          !FB: already_transposed put to false since we have not done any all_to_all before contrarily to chebfi
-         call prep_getghc(tmp,gs_hamk,gvnlxc,ghc,gsc,1.0_dp,nband_k,mpi_enreg,dtset%prtvol, &
+         call prep_getghc(tmp,gs_hamk,gsm1hc,ghc,gsc,1.0_dp,nband_k,mpi_enreg,dtset%prtvol, &
                         & sij_opt,cpopt,cwaveprj,already_transposed=.false.)
       end if
+      if (iorder == 1) gvnlxc(:,:) = gsm1hc(:,:)
       !** Also apply S^-1 in PAW case
       if(paw) then 
-         call apply_invovl(gs_hamk, ghc, gsm1hc, cwaveprj, npw, nband, mpi_enreg, nspinor)
+         call apply_invovl(gs_hamk, ghc, gsm1hc, cwaveprj, npw_k, nband_k, mpi_enreg, nspinor)
          tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
          tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
       else
