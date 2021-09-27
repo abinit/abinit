@@ -3490,7 +3490,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,10,(/-4,-2,-1,0,1,2,3,4,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)
@@ -3504,6 +3504,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &       '  (not yet in production)'
        ABI_WARNING(msg)
      end if
+   end if
+
+!  usepawu and response : q must be zero
+   if(dt%usepawu/=0.and.response==1) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+     call chkdpr(1,1,cond_string,cond_values,ierr,'norm(qpt)',sum(dt%qptn(:)**2),0,zero,iout)
    end if
 
 !  useexexch AND usepawu
