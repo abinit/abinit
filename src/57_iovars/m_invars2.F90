@@ -3258,6 +3258,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if(dtset%ngfft(7)==314)ii=1
  if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5) ii=1
+ !Enforce istwfk = 1 for all k-points in RT-TDDFT calculations
  if(dtset%optdriver==RUNL_RTTDDFT) ii=1
 
  call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&

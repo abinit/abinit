@@ -165,7 +165,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- call tdks%free(dtset,mpi_enreg)
+ call tdks%free(dtset,mpi_enreg,psps)
 
 end subroutine rttddft
 

@@ -38,8 +38,6 @@ module m_rttddft
  use m_dtset,            only: dataset_type
  use m_efield,           only: efield_type
  use m_energies,         only: energies_type
- use m_fock,             only: fock_updatecwaveocc
- use m_fock_getghc,      only: fock2ACE
  use m_fourier_interpol, only: transgrid
  use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
  use m_kg,               only: getcut, getph
@@ -119,7 +117,6 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  integer                   :: my_natom
  integer                   :: optcut, optgr0, optgr1, optgr2, optrad
  integer                   :: stress_needed
- integer                   :: usecprj
  !arrays
  real(dp),parameter        :: k0(3)=(/zero,zero,zero/)
 
@@ -131,7 +128,7 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  !** after a change of xred during the nuclear step
  if (istep == 1 .or. dtset%ionmov /= 0) then
    !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
-   !FB: Needed? The box didn't change only nuclear pos..
+   !FB: @MT Probably not needed? The box didn't change only nuclear pos..
    if (psps%usepaw==1) then
      call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
                & std_out,k0,tdks%pawfgr%ngfft)
@@ -174,7 +171,7 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
                   & distribfft=mpi_enreg%distribfft)
    endif
 
-!!FB: Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
+!!FB: @MT Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
 !!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
 !!atomic position so should be done for nstep = 1 and for updated ion positions
 !if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
@@ -192,25 +189,6 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
 !        & rprimd,vectornd,xred)
 
  end if
-
- if (dtset%usefock==1) then
-   usecprj=0
-   if (tdks%mcprj>0) then
-      usecprj=1
-   end if
-   ! Update data relative to the occupied states in fock
-   call fock_updatecwaveocc(tdks%cg,tdks%cprj,dtset,tdks%fock,tdks%indsym,tdks%mcg,tdks%mcprj,mpi_enreg, &
-                          & tdks%nattyp,tdks%npwarr,tdks%occ,tdks%ucvol)
-   ! Possibly (re)compute the ACE operator
-   if(tdks%fock%fock_common%use_ACE/=0) then
-      call fock2ACE(tdks%cg,tdks%cprj,tdks%fock,dtset%istwfk,tdks%kg,dtset%kptns,dtset%mband,tdks%mcg,tdks%mcprj,  &
-                  & dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,      &
-                  & dtset%nfft,tdks%pawfgr%ngfftc,dtset%nkpt,dtset%nloalg,tdks%npwarr,dtset%nspden,dtset%nspinor,  &
-                  & dtset%nsppol,dtset%ntypat,tdks%occ,dtset%optforces,tdks%paw_ij,tdks%pawtab,tdks%ph1d,psps,     &
-                  & tdks%rprimd,dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,tdks%xred,tdks%ylm)
-      tdks%energies%e_fock0=tdks%fock%fock_common%e_fock0
-   end if
- endif
 
 end subroutine rttddft_setup_ele_step
 
@@ -343,12 +321,6 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                     & dtset%typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
    
-   hyb_mixing=zero; hyb_mixing_sr=zero
-   if (dtset%usefock==1) then
-      hyb_mixing=tdks%fock%fock_common%hyb_mixing
-      hyb_mixing_sr=tdks%fock%fock_common%hyb_mixing_sr
-   endif
-   
    !** Computation of on-site densities/potentials/energies
    !** Force the recomputation of on-site potentials and Dij
    call paw_an_reset_flags(tdks%paw_an)
@@ -405,55 +377,14 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
-!energies%e_eigenvalues = zero
-!energies%e_kinetic     = zero
-!energies%e_nucdip      = zero
-!energies%e_nlpsp_vfock = zero
-!if (dtset%usefock/=0) then
-!  energies%e_exactX=zero
-!  energies%e_fock=zero
-!  energies%e_fockdc=zero
-! if (tdks%fock%fock_common%optfor) tdks%fock%fock_common%forces=zero
-!end if
-!grnl(:)=zero
-!tdks%eigen(:) = zero
-!bdtot_index=0
-!ibg=0;icg=0
-! mbdkpsp=dtset%mband*dtset%nkpt*dtset%nsppol
-!ABI_MALLOC(eknk,(mbdkpsp))
-!ABI_MALLOC(enlxnk,(mbdkpsp))
-!ABI_MALLOC(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*tdks%paw_dmft%use_dmft))
-!ABI_MALLOC(grnlnk,(3*dtset%natom,mbdkpsp*dtset%optforces))
-!if (dtset%usefock==0) then
-!  ABI_MALLOC(focknk,(mbdkpsp))
-!  focknk=zero
-!  if (dtset%optforces>0)then
-!     ABI_MALLOC(fockfornk,(3,dtset%natom,mbdkpsp))
-!     fockfornk=zero
-!  end if
-!end if
-!eknk(:)=zero;enlxnk(:)=zero
-!if (dtset%optforces>0) grnlnk(:,:)=zero
-
  !** Initialize most of the Hamiltonian
  !** Allocate all arrays and initialize quantities that do not depend on k and spin.
  usecprj_local=0; if (psps%usepaw==1) usecprj_local=1
  call init_hamiltonian(gs_hamk,psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,    &
                      & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
-                     & ph1d=tdks%ph1d,usecprj=usecprj_local,fock=tdks%fock,comm_atom=mpi_enreg%comm_atom,           &
+                     & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
                      & mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,nucdipmom=dtset%nucdipmom, &
                      & use_gpu_cuda=dtset%use_gpu_cuda)
-
-!ABI_FREE(eknk)
-!ABI_FREE(enlxnk)
-!ABI_FREE(eknk_nd)
-!ABI_FREE(grnlnk)
-!if (dtset%usefock==0) then
-!  ABI_FREE(focknk)
-!  if (dtset%optforces>0)then
-!     ABI_FREE(fockfornk)
-!  end if
-!end if
 
 end subroutine rttddft_init_hamiltonian
  
@@ -673,7 +604,8 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
       & + energies%e_entropy    &
       & + energies%e_ewald      &
       & + energies%e_vdw_dftd   &
-      & + energies%e_paw
+      & + energies%e_paw        &
+      & + energies%e_nlpsp_vfock
 !     & + energies%e_chempot    &
 !     & + energies%e_elecfield  &  
 !     & + energies%e_magfield   &
@@ -682,11 +614,6 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
 !     & - energies%e_hybcomp_v0 &
 !     & + energies%e_hybcomp_v  &
 !     & + energies%e_constrained_dft
-
-print*, "TEST-HERE:"
-print*, energies%e_nlpsp_vfock
-print*, energies%e_fock
-print*, energies%e_fock0
 
 !if (psps%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
 !if (psps%usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock

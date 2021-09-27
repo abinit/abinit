@@ -45,10 +45,6 @@ module m_rttddft_types
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
- use m_fock,             only: fock_type, fock_init, fock_destroy,    &
-                             & fock_ACE_destroy, fock_common_destroy, &
-                             & fock_BZ_destroy, fock_updatecwaveocc
- use m_fock_getghc,      only: fock2ACE
  use m_fourier_interpol, only: transgrid
  use m_gemm_nonlop,      only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
@@ -122,7 +118,6 @@ module m_rttddft_types
    logical                          :: gemm_nonlop_use_gemm !use efficient BLAS call
                                                    !for computing  non local potential
    type(energies_type)              :: energies    !contains various energy values
-   type(fock_type),pointer          :: fock => NULL() !Object for exact Fock exchange in Hybrid functionals  !FB: Needed?
    type(hdr_type)                   :: hdr         !header: contains various info
    type(paw_dmft_type)              :: paw_dmft    !paw_dmft object (unused but
                                                    !required by various routines)
@@ -261,7 +256,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !3) Init occupation numbers
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
  tdks%occ(:)=dtset%occ_orig(:,1)
- !calc occupation number using the previously read WF in the case of mettalic occupation
+ !calc occupation number with metallic occupation using the previously read WF
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    call newocc(doccde,tdks%eigen,entropy,tdks%energies%e_fermie,               &
@@ -305,6 +300,7 @@ end subroutine tdks_init
 !!  tdks <class(tdks_type)> = the tdks object to free
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!
 !! OUTPUT
 !!
@@ -316,35 +312,30 @@ end subroutine tdks_init
 !! CHILDREN
 !!
 !! SOURCE
-subroutine tdks_free(tdks,dtset,mpi_enreg)
+subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- class(tdks_type),   intent(inout) :: tdks
- type(dataset_type), intent(inout) :: dtset
- type(MPI_type),     intent(inout) :: mpi_enreg
+ class(tdks_type),           intent(inout) :: tdks
+ type(dataset_type),         intent(inout) :: dtset
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(pseudopotential_type), intent(inout) :: psps
 
 ! ***********************************************************************
 
    !Destroy hidden save variables
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
-   call destroy_invovl(dtset%nkpt)
+   if (psps%usepaw ==1) then 
+      call destroy_invovl(dtset%nkpt)
+   end if
    if(tdks%gemm_nonlop_use_gemm) then
       call destroy_gemm_nonlop(dtset%nkpt)
    end if
 
    !Call type destructors
    call destroy_sc_dmft(tdks%paw_dmft)
-   ! Deallocate exact exchange data at the end of the calculation
-   if (dtset%usefock==1) then
-      if (tdks%fock%fock_common%use_ACE/=0) call fock_ACE_destroy(tdks%fock%fockACE)
-      call fock_common_destroy(tdks%fock%fock_common)
-      call fock_BZ_destroy(tdks%fock%fock_BZ)
-      call fock_destroy(tdks%fock)
-      nullify(tdks%fock)
-   end if
    call pawfgr_destroy(tdks%pawfgr)
    call tdks%hdr%free()
 
@@ -497,7 +488,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
            & dtset%nsppol,response,tdks%rmet,dtset%rprim_orig,tdks%rprimd,     &
            & tdks%ucvol,psps%usepaw)
 
-!FB: Needed?
+!FB: @MT Needed?
 !!In some cases (e.g. getcell/=0), the plane wave vectors have
 !! to be generated from the original simulation cell
 !rprimd_for_kg=rprimd
@@ -515,7 +506,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
                       & mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,tdks%npwarr,   &
                       & dtset%nsppol)
 
- !** Setup to use efficient BLAS calls for computing the non local potential
+ !** Use efficient BLAS calls for computing the non local potential
  if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=1) then
    ! set global variable
    tdks%gemm_nonlop_use_gemm = .true.
@@ -524,7 +515,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%gemm_nonlop_use_gemm = .false.
  end if
 
- !** Set up the Ylm for each k point
+ !** Setup the Ylm for each k point
  if (psps%useylm==1) then
    ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
@@ -563,7 +554,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%energies%e_corepspdc = zero
  end select
 
- !FB: The npwarr_ pointer array doesn't seem necessary?
+ !FB: @MT The npwarr_ pointer array doesn't seem necessary?
  !** Initialize band structure datatype
  !if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
  !  ABI_MALLOC(npwarr_,(dtset%nkpt))
@@ -601,7 +592,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  call hdr_init(bstruct,codvsn,dtset,tdks%hdr,pawtab,gscase,psps,tdks%wvl%descr,&
              & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
- !Clean band structure datatype (should use it more in the future !)
+ !Clean band structure datatype
  call ebands_free(bstruct)
 
  !** PW basis set: test if the problem is ill-defined.
@@ -638,7 +629,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  tdks%indsym(:,:,:)=0
  tdks%symrec(:,:,:)=0
 
- !TODO FB: Symmetry should not be used when ions are moving. Modify for Ehrenfest
+ !TODO FB: I think symmetry should not be used when ions are moving. Modify for Ehrenfest dynamics
  !Do symmetry stuff if nsym>1
  if (dtset%nsym>1) then
    call setsym(tdks%indsym,tdks%irrzon,dtset%iscf,dtset%natom, &
@@ -646,10 +637,10 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    & tdks%phnons,dtset%symafm,tdks%symrec,dtset%symrel, &
    & dtset%tnons,dtset%typat,dtset%xred_orig)
 
- !Make sure dtset%iatfix does not break symmetry
+   !Make sure dtset%iatfix does not break symmetry
    call fixsym(dtset%iatfix,tdks%indsym,dtset%natom,dtset%nsym)
  else
-   !The symrec array is used by initberry even in case nsym = 1 - FB: Needed ?
+   !The symrec array is used by initberry even in case nsym = 1 - FB: @MT Needed ?
    tdks%symrec(:,:,1) = 0
    tdks%symrec(1,1,1) = 1 ; tdks%symrec(2,2,1) = 1 ; tdks%symrec(3,3,1) = 1
  end if
@@ -661,13 +652,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  !Eventually symmetrize atomic coordinates over space group elements
  call symmetrize_xred(dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,tdks%xred, &
                     & indsym=tdks%indsym)
-
- !Update header, with evolving variables, when available
- !Here, rprimd, xred and occ are potentially available
- call tdks%hdr%update(tdks%bantot,tdks%hdr%etot,tdks%hdr%fermie,tdks%hdr%fermih,    &
-                    & tdks%hdr%residm,tdks%rprimd,dtset%occ_orig,tdks%pawrhoij,     &
-                    & dtset%xred_orig,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom, &
-                    & mpi_atmtab=mpi_enreg%my_atmtab)
 
  !** Create the atindx array
  !** index table of atoms, in order for them to be used type after type.
@@ -759,7 +743,7 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
  integer             :: hyb_mixing, hyb_mixing_sr
  integer             :: iatom, idir
  integer             :: iorder_cprj
- integer             :: my_natom
+ integer             :: my_natom, my_nspinor
  integer             :: ncpgr
  integer             :: optcut, optgr0, optgr1, optgr2, optrad
  integer             :: stress_needed
@@ -773,7 +757,9 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
 ! ***********************************************************************
 
  my_natom=mpi_enreg%my_natom
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
+ !FB: @MT needed?
  if (psps%usepaw==1) then
     call pawrhoij_copy(tdks%hdr%pawrhoij,tdks%pawrhoij,comm_atom=mpi_enreg%comm_atom, &
                      & mpi_atmtab=mpi_enreg%my_atmtab)
@@ -818,14 +804,10 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
    !** Initialisation of cprj
    tdks%mband_cprj=dtset%mband
    if (dtset%paral_kgb/=0) tdks%mband_cprj=tdks%mband_cprj/mpi_enreg%nproc_band
-   tdks%mcprj=tdks%my_nspinor*tdks%mband_cprj*dtset%mkmem*dtset%nsppol
+   tdks%mcprj=my_nspinor*tdks%mband_cprj*dtset%mkmem*dtset%nsppol
    ABI_MALLOC(tdks%cprj,(dtset%natom,tdks%mcprj))
    ncpgr=0
-   if (dtset%usefock==1) then
-      if (dtset%optforces == 1) then
-         ncpgr = 3
-      end if
-   end if
+   !FB: @MT dimcprj_srt needed?
    ABI_MALLOC(tdks%dimcprj,(dtset%natom))
    !ABI_MALLOC(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(tdks%dimcprj,dtset%natom,tdks%nattyp,dtset%ntypat, &
@@ -855,8 +837,8 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
    !has_dijhat=0; if (dtset%iscf==22) has_dijhat=1
    has_dijhat=1
    has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
-   has_dijfock=0; if (dtset%usefock==1) has_dijfock=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
+   has_dijfock=0
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
    has_vxctau=dtset%usekden
    call paw_an_init(tdks%paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,        &
@@ -877,7 +859,7 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
 
    !** Identify parts of the rectangular grid where the density has to be calculated
    optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
-   forces_needed=0 !FB TODO needs to be changed if Ehrenfest?
+   forces_needed=0 !FB TODO Maybe needs to be changed if Ehrenfest?
    stress_needed=0
    if ((forces_needed==1) .or.                                                &
      & (dtset%xclevel==2 .and. dtset%pawnhatxc>0 .and. tdks%usexcnhat>0) .or. &
@@ -918,7 +900,7 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
  tdks%vxctau=zero
  !For hybrid functionals
  use_hybcomp=0
- if(mod(dtset%fockoptmix,100)==11)use_hybcomp=1
+ if(mod(dtset%fockoptmix,100)==11) use_hybcomp=1
  ABI_MALLOC(tdks%vxc_hybcomp,(tdks%pawfgr%nfft,dtset%nspden*use_hybcomp))
  tdks%vxc_hybcomp=zero
  !For VDW corrected functionals
@@ -950,7 +932,7 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
    tdks%ph1df(:,:)=tdks%ph1d(:,:)
  end if
 
-!!FB: Needed? If yes, then don't forget to put it back in the begining of
+!!FB: @MT Needed? If yes, then don't forget to put it back in the begining of
 !! propagate_ele as well
 !!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
 !!atomic position so should be done for nstep = 1 and for updated ion positions
@@ -969,73 +951,10 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
 !        & rprimd,vectornd,xred)
 !endif
 
- !** Initialize data in the case of an Exact-exchange (Hartree-Fock) or hybrid XC calculation
- hyb_mixing=zero;hyb_mixing_sr=zero
- if (dtset%usefock==1) then
-   ! Initialize data_type fock for the calculation
-   cplex_hf=cplex
-   if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
-   call fock_init(tdks%atindx,cplex_hf,dtset,tdks%fock,tdks%gsqcut,tdks%kg,    &
-                & mpi_enreg,tdks%nattyp,tdks%npwarr,pawang,tdks%pawfgr,pawtab, &
-                & tdks%rprimd)
-   if (tdks%fock%fock_common%usepaw==1) then
-      optcut = 0 ! use rpaw to construct local_pawfgrtab
-      optgr0 = 0; optgr1 = 0; optgr2 = 0 ! dont need gY terms locally
-      optrad = 1 ! do store r-R
-      call nhatgrid(tdks%atindx1,tdks%gmet,dtset%natom,dtset%natom,tdks%nattyp, &
-                  & tdks%pawfgr%ngfft,psps%ntypat,optcut,optgr0,optgr1,optgr2,  &
-                  & optrad,tdks%fock%fock_common%pawfgrtab,pawtab,tdks%rprimd,  &
-                  & dtset%typat,tdks%ucvol,tdks%xred,typord=1)
-      iatom=-1;idir=0
-      if (dtset%optforces == 1) then
-         ctocprj_choice = 2
-      else
-         ctocprj_choice = 1
-      end if
-      iorder_cprj = 0 ! cprj are sorted by atom type
-      call ctocprj(tdks%atindx,tdks%cg,ctocprj_choice,tdks%cprj,tdks%gmet,  &
-                 & tdks%gprimd,iatom,idir,iorder_cprj,dtset%istwfk,tdks%kg, &
-                 & dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,dtset%mkmem, &
-                 & mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp, &
-                 & dtset%nband,dtset%natom,tdks%pawfgr%ngfftc,dtset%nkpt,   &
-                 & dtset%nloalg,tdks%npwarr,dtset%nspinor,dtset%nsppol,     &
-                 & dtset%ntypat,dtset%paral_kgb,tdks%ph1d,psps,tdks%rmet,   &
-                 & dtset%typat,tdks%ucvol,dtfil%unpaw,tdks%xred,tdks%ylm,   &
-                 & tdks%ylmgr)
-   end if
-
-   !Fock energy & forces
-   tdks%energies%e_exactX=zero
-   if (tdks%fock%fock_common%optfor) tdks%fock%fock_common%forces=zero
-
-   !Update data relative to the occupied states in fock
-   call fock_updatecwaveocc(tdks%cg,tdks%cprj,dtset,tdks%fock,tdks%indsym,         &
-                          & tdks%mcg,tdks%mcprj,mpi_enreg,tdks%nattyp,tdks%npwarr, &
-                          & tdks%occ,tdks%ucvol)
-   !Possibly (re)compute the ACE operator
-   if(tdks%fock%fock_common%use_ACE/=0) then
-      if (tdks%mcprj>0) then
-         usecprj=1
-      else
-         usecprj=0
-      end if
-      call fock2ACE(tdks%cg,tdks%cprj,tdks%fock,dtset%istwfk,tdks%kg,dtset%kptns, &
-                  & dtset%mband,tdks%mcg,tdks%mcprj,dtset%mgfft,dtset%mkmem,      &
-                  & mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,         &
-                  & dtset%nband,dtset%nfft,tdks%pawfgr%ngfftc,dtset%nkpt,         &
-                  & dtset%nloalg,tdks%npwarr,dtset%nspden,dtset%nspinor,          &
-                  & dtset%nsppol,dtset%ntypat,tdks%occ,dtset%optforces,           &
-                  & tdks%paw_ij,pawtab,tdks%ph1d,psps,tdks%rprimd,dtset%typat,    &
-                  & usecprj,dtset%use_gpu_cuda,dtset%wtk,tdks%xred,tdks%ylm)
-      tdks%energies%e_fock0=tdks%fock%fock_common%e_fock0
-   end if
-
+ !Required in the PAW case to compute the inverse of the overlap (invovl) operator
+ if (psps%usepaw == 1) then 
+   call init_invovl(dtset%nkpt)
  end if
-
- !FB: Needed to compute the inverse of the overlap (invovl) operator
- !FB: This seems to init an involv_kpt object declared in the invovl module with the
- !save argument which does not sounds great..
- call init_invovl(dtset%nkpt)
 
 end subroutine second_setup
 
@@ -1045,7 +964,7 @@ end subroutine second_setup
 !! read_wfk
 !!
 !! FUNCTION
-!! Reads initial wavefunctions (KS orbitals) in WFK file (call inwffill)
+!! Reads initial wavefunctions (KS orbitals) in WFK file (call inwffil)
 !!
 !! INPUTS
 !! dtfil <type datafiles_type> = infos about file names, file unit numbers
@@ -1083,6 +1002,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  integer                     :: band
  integer                     :: cnt
  integer                     :: ierr, ikpt
+ integer                     :: my_nspinor
  integer                     :: optorth
  integer                     :: spin
  type(wffile_type)           :: wff1, wffnow
@@ -1103,8 +1023,8 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
    end do
  end do
 
- tdks%my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- tdks%mcg=dtset%mpw*tdks%my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ tdks%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
  if (cnt == 0) then
    tdks%mcg = 0
    write(msg,"(2(a,i0))")"rank: ",mpi_enreg%me, "does not have wavefunctions to treat. Setting mcg to: ",tdks%mcg
@@ -1112,7 +1032,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  end if
 
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
-   if (tdks%my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
+   if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
       ierr = 0
       write (msg,'(9a)')&
      & "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
@@ -1122,7 +1042,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
      & "to decrease the memory requirements. Consider also OpenMP threads."
       ABI_ERROR_NOSTOP(msg,ierr)
       write (msg,'(5(a,i0), 2a)')&
-     & "my_nspinor: ",tdks%my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
+     & "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
      & ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
      & 'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
       ABI_ERROR(msg)
