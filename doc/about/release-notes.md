@@ -39,7 +39,7 @@ See test [[test:dfpt_04]].
 By M. Verstraete (MR784, 803)
 
 **B.2** The Iterative Boltzmann Transport Equation (IBTE) to compute the electric conductivity has been implemented.
-To activate the IBTE, use [[ibte_prep]] = 1 with [[eph__task]] -4.
+To activate the IBTE, use [[ibte_prep]] = 1 with [[eph_task]] -4.
 The IBTE solver can also be invoked in standalone mode by providing a SIGEPH file with [[eph_task]] = 8.
 Related input variables: [[ibte_niter]], [[ibte_abs_tol]] and [[ibte_alpha_mix]].
 See test [[test:v9_65]].
@@ -57,7 +57,7 @@ Indeed, the default value of [[dipdip@anaddb]] is 1 hence the dipolar term is au
 if the DDB contains the Born effective charges and the electronic dielectric tensor.
 Still, the user can deactivate the inclusion of the different terms by setting the corresponding
 variable to zero for testing purposes.
-See the ANADDB input variables and test [[test:lw_6.abi]]
+See the ANADDB input variables and test [[test:lw_6]]
 
 Finally, the input variable [[rfstrs_ref]] has been introduced, to perform strain response-function calculations
 with the reference energy placed at the average electrostatic potential, to get absolute deformation potentials.
