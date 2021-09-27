@@ -840,15 +840,8 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    call dotprod_g(prod2,doti,istwf_k,npw1*nspinor,1,cwavef,gh1c,me_g0,mpi_enreg%comm_spinorfft)
    d2te=two*(-prod1+prod2)
    ! write(std_out,'(a,f14.6,a,f14.6)') 'prod1 = ',prod1,' prod2 = ',prod2 ! Keep this debugging feature!
-
-   ! Compute residual (squared) norm
-   call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
-   if (prtvol==-level.or.prtvol==-19)then
-     write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
-      ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
-      '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
-     call wrtout(std_out,msg)
-   end if
+print *, 'prod1 = ',prod1,' prod2 = ',prod2
+print 100, 'band ', band, 'gresid ', gresid
 
    ! Compute <u_m(1)|H(0)-e_m(0)|u_m(1)>
    ! (<u_m(1)|H(0)-e_m(0).S|u_m(1)> if gen. eigenPb),
@@ -864,7 +857,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    u1h0me0u1=-prod1-prod2
 
    ! Some tolerance is allowed, to account for very small numerical inaccuracies and cancellations.
-   if(u1h0me0u1<-tol_restart .and. skipme == 0)then
+   if(u1h0me0u1<-tol_restart) then ! .and. skipme == 0)then
      if (prtvol==-level.or.prtvol==-19) then
        write(msg,'(a,es22.13e3)') '  cgwf3: u1h0me0u1 = ',u1h0me0u1
        call wrtout(std_out,msg)
@@ -884,6 +877,18 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 
 !DEBUG     exit ! Exit from the loop on iline
      skipme = 1
+   end if
+
+   if (skipme == 0) then
+     ! Compute residual (squared) norm
+     call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
+print *, ' resid fresh ', resid, " d2te ",  d2te
+     if (prtvol==-level.or.prtvol==-19)then
+       write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
+        ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
+        '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
+       call wrtout(std_out,msg)
+     end if
    end if
 
    ! If residual sufficiently small stop line minimizations
@@ -1159,6 +1164,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
      end if
    end if
 
+   bands_skipped_now = 0
    bands_skipped_now(band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
 
@@ -1167,6 +1173,10 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
 ! if all bands are skippable, we can exit the iline loop for good.
 !   otherwise, all procs are needed for the projbd and other operations,
 !   even if the present band will not be updated
+print *, " cgwf band ", band
+print *, 'bands_skipped_now ', bands_skipped_now
+print *, 'bands_treated_now ', bands_treated_now
+
    if (sum(abs(bands_skipped_now - bands_treated_now)) == 0) then
      exit
    end if
