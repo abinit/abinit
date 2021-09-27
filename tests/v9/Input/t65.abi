@@ -76,5 +76,5 @@ shiftk2   0.0 0.0 0.0
 #%% authors = O. Nadeau
 #%% keywords = NC, DFPT, EPH, RTA, IBTE
 #%% description = 
-#%%   Calculation of conductivity in metals. 
+#%%   Calculation of conductivity in metals, including the IBTE solver.
 #%%<END TEST_INFO>
