@@ -656,7 +656,7 @@ ABI_MSG_SECTION([Initialization of optional features])
 # Init HDF5
 #SD_HDF5_INIT([optional fail no-fortran])
 #SD_HDF5_INIT([optional warn no-fortran])
-SD_HDF5_INIT([mandatory warn no-fortran])
+SD_HDF5_INIT([required no-fortran warn])
 
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
@@ -670,15 +670,15 @@ SD_LIBPSML_INIT([optional warn])
 
 # Init LibXC
 #SD_LIBXC_INIT([no-fortran optional fail])
-SD_LIBXC_INIT([no-fortran optional warn])
+SD_LIBXC_INIT([required no-fortran warn])
 
 # Init NetCDF
 #SD_NETCDF_INIT([optional fail])
-SD_NETCDF_INIT([optional warn])
+SD_NETCDF_INIT([required warn])
 
 # Init NetCDF-Fortran
 #SD_NETCDF_FORTRAN_INIT([optional fail])
-SD_NETCDF_FORTRAN_INIT([optional warn])
+SD_NETCDF_FORTRAN_INIT([required warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
