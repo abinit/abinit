@@ -841,7 +841,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
    d2te=two*(-prod1+prod2)
    ! write(std_out,'(a,f14.6,a,f14.6)') 'prod1 = ',prod1,' prod2 = ',prod2 ! Keep this debugging feature!
 print *, 'prod1 = ',prod1,' prod2 = ',prod2
-print 100, 'band ', band, 'gresid ', gresid
+write (100,*) 'band ', band, 'gresid ', gresid
 
    ! Compute <u_m(1)|H(0)-e_m(0)|u_m(1)>
    ! (<u_m(1)|H(0)-e_m(0).S|u_m(1)> if gen. eigenPb),
