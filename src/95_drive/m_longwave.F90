@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_longwave
 !! NAME
 !!  m_longwave
@@ -29,7 +28,6 @@
 module m_longwave
 
  use defs_basis
-! use m_profiling_abi
  use m_errors
  use m_xmpi
  use defs_datatypes
@@ -58,7 +56,6 @@ module m_longwave
  use m_inwffil,     only : inwffil
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
- use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
  use m_fft,         only : fourdp
  use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
@@ -184,19 +181,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Not valid for PAW
  if (psps%usepaw==1) then
-   msg='This routine cannot be used for PAW (use pawnst3 instead) !'
+   msg='This routine cannot be used for PAW!'
    ABI_BUG(msg)
  end if
 
 !Not valid for finite wave-vector perturbations
  if (sqrt(sum(dtset%qptn**2))/=0_dp) then
-   msg='This routine cannot be used for q=/0.d0'
+   msg='This routine cannot be used for q /= 0 '
    ABI_BUG(msg)
  end if
 
 !Only usable with spherical harmonics
  if (dtset%useylm/=1) then
-   msg='This routine cannot be used for uselim/=1'
+   msg='This routine cannot be used for useylm/=1'
    ABI_BUG(msg)
  end if
 
@@ -493,7 +490,7 @@ ecore=zero
    ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
-!#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
+!#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
 !Calculate the nonvariational terms
 !1st q-gradient of Ewald contribution to the dynamical matrix

@@ -36,6 +36,7 @@ module m_afterscfloop
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : mpi_type
@@ -59,6 +60,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
+ use m_orbmag,           only : orbmag_type, orbmag_wf
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -186,6 +188,7 @@ contains
 !!  rhor(nfftf,nspden)=total electron density (including compensation density in PAW)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  stress_needed=1 if stresses are needed, 0 otherwise
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
@@ -279,32 +282,33 @@ contains
 !!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
 !!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
 !!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      orbmag,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
-!!      setnoccmmp,spin_current,timab,total_energies,transgrid,write_energies
-!!      wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big
-!!      wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big
-!!      xcden,xmpi_sum,xred2xcart
+!!      orbmag_wf,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
+!!      scprqt,setnoccmmp,spin_current,timab,total_energies,transgrid
+!!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
+!!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
+!!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
 !!
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
-& rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
+& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,with_vectornd
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -313,9 +317,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
+ type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -336,8 +342,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: strscondft(6)
  real(dp),intent(in) :: tollist(12),vpsp(nfftf)
- real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -540,6 +547,18 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
  end if
 
+!----------------------------------------------------------------------
+! Orbital magnetization calculation: discretized wavefunction variant
+!----------------------------------------------------------------------
+ if(dtset%orbmag.LT.0) then
+   call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
+        & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+        & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
+        & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
+ end if
+
+
+
  call timab(252,2,tsec)
  call timab(253,1,tsec)
 
@@ -653,12 +672,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    paw_dmft%use_dmft=0 ! dmft not used here
    if (psps%usepaw==0) then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&     extfpmd=extfpmd,option=1)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&     extfpmd=extfpmd,option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
@@ -924,12 +945,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
 &   forold,gred,grchempottn,grcondft,gresid,grewtn,&
-&   grhf,grvdw,grxc,gsqcut,indsym,&
+&   grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
-&   psps,rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,&
+&   psps,rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,&
 &   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
  end if
 
@@ -1074,6 +1095,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
+ if (associated(extfpmd)) then
+   results_gs%entropy_extfpmd=extfpmd%entropy
+   results_gs%nelect_extfpmd=extfpmd%nelect
+   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+ end if
 
  results_gs%intgres(:,:)=zero
  results_gs%grcondft(:,:)=zero

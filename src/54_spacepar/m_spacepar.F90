@@ -46,8 +46,8 @@ module m_spacepar
 !!***
 
 public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of rho(G)/pi/(G+q)**2)
-public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space 
-public :: make_vectornd2     ! compute vector potential due to nuclear magnetic dipoles, in real space 
+public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space
+public :: make_vectornd2     ! compute vector potential due to nuclear magnetic dipoles, in real space
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -82,7 +82,6 @@ contains
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
 !!
 !! PARENTS
-!!      m_scfcv_core
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp
@@ -174,7 +173,7 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
          gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
          gqcart(1:3) = MATMUL(gprimd,gqred)
          gs = DOT_PRODUCT(gqcart,gqcart)
-         
+
          if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
 
             do iatom = 1, natom
@@ -229,12 +228,12 @@ subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmo
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,1)=ndvecr(:)
  ABI_FREE(work1)
- 
+
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,2) = ndvecr(:)
  ABI_FREE(work2)
- 
+
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,3) = ndvecr(:)
@@ -263,7 +262,7 @@ end subroutine make_vectornd2
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
 !!
 !! PARENTS
-!!      m_scfcv_core
+!!      m_dfpt_scfcv,m_orbmag,m_scfcv_core
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp
@@ -335,7 +334,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
        nd_m(:,nd_atom_tot) = MATMUL(TRANSPOSE(gprimd),nucdipmom(:,iatom))
     end if
  end do
- 
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
@@ -394,11 +393,11 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
        ! Final inner loop on the first dimension (note the lower limit)
        do i1=ii1,n1
           gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-          ig1 = i1 - (i1/id1)*n1 -1 
+          ig1 = i1 - (i1/id1)*n1 -1
           ii=i1+i23
 
           gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
-         
+
           if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
 
              do iatom = 1, nd_atom_tot
@@ -408,13 +407,13 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 
                 ! cross product m x G
                 call wedge_product(mcgc,nd_m(:,iatom),gqred,rgbasis)
-                
+
                 ! express mcgc relative to rprimd translations. This is done because
                 ! we wish ultimately to apply A.p to |cwavef>; in getghc_nucdip, the
                 ! p|cwavef> is done in reduced coordinates so do that here too, because
                 ! r.G has no need of the metric if both terms are in reduced coords
                 mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
-                
+
                 work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
                 work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
                 work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
@@ -458,12 +457,12 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,1)=ndvecr(:)
  ABI_FREE(work1)
- 
+
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,2) = ndvecr(:)
  ABI_FREE(work2)
- 
+
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
  vectornd(:,3) = ndvecr(:)
@@ -508,7 +507,7 @@ end subroutine make_vectornd
 !! PARENTS
 !!      m_dfpt_rhotov,m_dft_energy,m_fock_getghc,m_forstr,m_kxc,m_nonlinear
 !!      m_odamix,m_pead_nl_loop,m_positron,m_prcref,m_respfn_driver,m_rhotov
-!!      m_setvtr,m_tddft
+!!      m_setvtr,m_sigma_driver,m_tddft
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp
@@ -599,7 +598,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
  end if
 
  !Initialize Gcut-off array from m_gtermcutoff
- !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  ! In order to speed the routine, precompute the components of g+q
@@ -705,7 +704,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
  call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
- ABI_FREE(gcutoff) 
+ ABI_FREE(gcutoff)
  ABI_FREE(work1)
 
  call timab(10,2,tsec)
@@ -1781,9 +1780,9 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
              tau1=tnons_used(1,jsym)
              tau2=tnons_used(2,jsym)
-             tau3=tnons_used(3,jsym) 
+             tau3=tnons_used(3,jsym)
              if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
-!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case) 
+!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case)
                arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
                phr=cos(arg)
                phi=-sin(arg)
@@ -1797,7 +1796,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 
-!            The magnetization should transform as a vector in real space 
+!            The magnetization should transform as a vector in real space
 !            However, one acts with the INVERSE of the symmetry operation.
 !            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
@@ -1878,7 +1877,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !TO BE COMMENTED
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
-!            The magnetization should transform as a vector in real space 
+!            The magnetization should transform as a vector in real space
 !            => symrel_cart  ?!?
              mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
              mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
@@ -1941,7 +1940,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
    integer :: map_symrhg
    integer,intent(in) :: j1,n1
-!  Map into [0,n-1] 
+!  Map into [0,n-1]
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 
@@ -2134,7 +2133,7 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
              j3=symrel_used(1,3,isym)*l1+&
 &             symrel_used(2,3,isym)*l2+symrel_used(3,3,isym)*l3
 
-!            Map into [0,n-1] 
+!            Map into [0,n-1]
              k1=mod(n1+mod(j1,n1),n1)
              k2=mod(n2+mod(j2,n2),n2)
              k3=mod(n3+mod(j3,n3),n3)
@@ -2661,7 +2660,7 @@ end subroutine setsym
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  qdir= indicates the direction of the q-gradient (1,2 or 3)
 !!  rhog(2,nfft)=electron density in G space
-!!  
+!!
 !! OUTPUT
 !!  vqgradhart(cplex*nfft)=q-gradient of the Hartree potential at q=0in real space, either REAL or COMPLEX
 !!
@@ -2704,15 +2703,15 @@ subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp),allocatable :: work1(:,:)
  real(dp) :: gvec(3)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
-!Get the distrib associated with this fft_grid 
+!Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Initialize a few quantities
@@ -2745,7 +2744,7 @@ subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
 
          gvec=(/ig1,ig2,ig3/)
          gnorm=normv(gvec,gmet,'r') !'r' is to avoid the 2pi scalling
-   
+
          if (gnorm**2<=cutoff) then
            num=dot_product(gmet(qdir,:),gvec(:))
            gfact=piinv2*num/gnorm**4

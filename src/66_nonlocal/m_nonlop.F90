@@ -325,8 +325,9 @@ contains
 !!
 !! PARENTS
 !!      m_cgwf,m_d2frnl,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_fock_getghc
-!!      m_forstr,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf,m_nonlop_test
-!!      m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_vtowfk
+!!      m_forstr,m_getchc,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf
+!!      m_nonlop_test,m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_rmm_diis
+!!      m_vtowfk,m_wfd
 !!
 !! CHILDREN
 !!      dotprod_g,gpu_nonlop
@@ -335,12 +336,12 @@ contains
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
-&                 enl,iatom_only,only_SO,qdir,select_k) !optional arguments
+&                 cprjin_left,enl,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,idir,ndat,nnlout,paw_opt,signs,tim_nonlop
- integer,intent(in),optional :: iatom_only,only_SO,qdir,select_k
+ integer,intent(in),optional :: iatom_only,only_SO,qdir,ndat_left,select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
@@ -348,13 +349,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),intent(in),target,optional :: enl(:,:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
  real(dp),intent(out),target :: enlout(:),svectout(:,:)
+ real(dp),intent(out),optional :: enlout_im(:)
  real(dp),intent(inout),target :: vectout(:,:)
  type(pawcprj_type),intent(inout),target :: cprjin(:,:)
+ type(pawcprj_type),intent(inout),target,optional :: cprjin_left(:,:)
+
 
 !Local variables-------------------------------
 !scalars
  integer :: dimenl1,dimenl2,dimenl2_,dimekbq,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
- integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm
+ integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm,ndat_left_
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
  logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
  character(len=500) :: msg
@@ -537,6 +541,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ABI_BUG('Incorrect size for cprjin!')
    end if
  end if
+ ndat_left_ = 1
+ if (present(ndat_left)) then
+   ndat_left_ = ndat_left
+ end if
+ if(present(cprjin_left)) then
+   if (size(cprjin_left)/=hamk%natom*my_nspinor*ndat*ndat_left_) then
+     msg = 'Incorrect size for cprjin_left!'
+     ABI_BUG(msg)
+   end if
+ end if
 
 !Non-local coefficients connecting projectors:
 !If enl is present in the arg list, use it; instead use hamk%ebk
@@ -716,8 +730,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end if
      if (nnlout>0) then
       !enlout_idat => enlout((idat-1)*nnlout+1:(idat*nnlout))
-       b4 = (idat-1)*nnlout+1
-       e4 = (idat*nnlout)
+       b4 = (idat-1)*nnlout*ndat_left_+1
+       e4 = (idat*nnlout*ndat_left_)
      else
       !enlout_idat => enlout
        b4 = lbound(enlout,dim=1)
@@ -735,13 +749,24 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version
      else if (hamk%use_gpu_cuda==0) then
-       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
-&       dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
-&       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
-&       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
-&       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
-&       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir)
+       if (present(cprjin_left).and.present(enlout_im)) then
+         call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
+&         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
+&         indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
+&         hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
+&         nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
+&         ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
+&         svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir,&
+          cprjin_left=cprjin_left,enlout_im=enlout_im,ndat_left=ndat_left_)
+       else 
+         call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
+&         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
+&         indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
+&         hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
+&         nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
+&         ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
+&         svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir)
+       end if
 !    GPU version
      else
        call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b3:e3),dimenl1,dimenl2_,&

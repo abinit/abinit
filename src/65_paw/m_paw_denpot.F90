@@ -840,7 +840,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      else
 
 !      PAW+U Dij computation from eU_ijkl
-       ABI_CHECK(ndij/=4,'ndij=4 not yet available!')
        !First, compute DijU
        call pawdiju_euijkl(paw_ij(iatom)%dijU,cplex_dij,cplex,ndij, &
 &                          pawrhoij(iatom),pawtab(itypat))

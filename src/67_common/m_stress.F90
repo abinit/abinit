@@ -30,6 +30,7 @@ module m_stress
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_extfpmd
 
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
@@ -112,6 +113,7 @@ contains
 !!  red_efieldbar(3) = efield in reduced units relative to reciprocal lattice
 !!  rhog(2,nfft)=Fourier transform of charge density (bohr^-3)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  typat(natom)=type integer for each atom in cell
@@ -173,10 +175,10 @@ contains
 !!
 !! SOURCE
 
- subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,ixc,kinstr,&
-&                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
+ subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,extfpmd,&
+&                  ixc,kinstr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
-&                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
+&                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strscondft,strsxc,symrec,&
 &                  typat,usefock,usekden,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxctau,vxc_hf,xccc1d,xccc3d,xcctau3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
@@ -187,6 +189,7 @@ contains
  integer,intent(in) :: nsym,ntypat,prtvol,usefock,usekden,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
  type(MPI_type),intent(in) :: mpi_enreg
@@ -196,7 +199,7 @@ contains
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
- real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strsxc(6)
+ real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strscondft(6),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
  real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
@@ -440,6 +443,8 @@ contains
 !Kinetic part of stress has already been computed
 !(in forstrnps)
 
+!cDFT part of stress tensor has already been computed in "constrained_residual"
+
 !XC part of stress tensor has already been computed in "strsxc"
 
 !ii part of stress (diagonal) is trivial!
@@ -530,7 +535,7 @@ contains
 !=======================================================================
 !In cartesian coordinates (symmetric storage)
 
- strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
+ strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strscondft(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
 
  if (usefock==1 .and. associated(fock)) then
    if (fock%fock_common%optstr) then
@@ -588,6 +593,11 @@ contains
    strten(mu)=uncorr(mu)
  end do
 
+!Adding the extfpmd continous contribution to stress tensor
+ if(associated(extfpmd)) then
+   strten(1:3)=strten(1:3)-(2./3.)*extfpmd%e_kinetic/extfpmd%ucvol
+ end if
+
 !=======================================================================
 !================ Print out info about stress tensor ===================
 !=======================================================================
@@ -643,6 +653,17 @@ contains
 &     ' stress: component',mu,' of xc stress is',strsxc(mu)
      call wrtout(std_out,message,'COLL')
    end do
+
+   if( any( abs(strscondft(:))>tol8 ) )then
+     write(message, '(a)' ) ' '
+     call wrtout(std_out,message,'COLL')
+     do mu=1,6
+       write(message, '(a,i5,a,1p,e22.12)' ) &
+&       ' stress: component',mu,' of cDFT stress is',strscondft(mu)
+       call wrtout(std_out,message,'COLL')
+     end do
+   endif
+
    if (vdw_xc>=5.and.vdw_xc<=7) then
      write(message, '(a)' ) ' '
      call wrtout(std_out,message,'COLL')

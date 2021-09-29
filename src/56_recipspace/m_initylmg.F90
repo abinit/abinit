@@ -94,8 +94,8 @@ contains
 !!
 !! PARENTS
 !!      m_cut3d,m_ddk,m_dfpt_looppert,m_dfpt_lw,m_dfpt_nstwf,m_dfptnl_pert
-!!      m_epjdos,m_forstr,m_gstate,m_ksdiago,m_mover,m_nonlop_test,m_orbmag
-!!      m_pawpwij,m_pead_nl_loop,m_respfn_driver,m_scfcv_core,m_wfd
+!!      m_epjdos,m_forstr,m_gstate,m_ksdiago,m_mover,m_nonlop_test,m_pawpwij
+!!      m_pead_nl_loop,m_respfn_driver,m_scfcv_core,m_wfd
 !!
 !! CHILDREN
 !!      plm_coeff

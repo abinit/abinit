@@ -31,6 +31,7 @@ module m_occ
  use m_abicore
  use m_splines
  use m_xmpi
+ use m_extfpmd
 
  use m_time,         only : timab, cwtime, cwtime_report
  use m_fstrings,     only : sjoin, itoa
@@ -125,7 +126,7 @@ contains
 !!      m_chi0,m_conducti,m_dfpt_looppert,m_ebands,m_gstate,m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -519,12 +520,14 @@ end subroutine getnel
 !!      m_ebands,m_gstate,m_respfn_driver,m_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
 subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
-  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, stmbias, tphysel, tsmear, wtk) ! CP modified:
+  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, stmbias, tphysel, tsmear, wtk, &
+  extfpmd) ! Optional argument
+  ! CP modified:
 !  added fermih, ivalence, ne_qFD, nh_qFD for occopt 9 case
 
 !Arguments ------------------------------------
@@ -532,6 +535,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
  real(dp),intent(in) :: spinmagntarget,nelect,stmbias,tphysel,tsmear
  real(dp),intent(out) :: entropy,fermie,fermih ! CP added fermih
+ type(extfpmd_type),pointer,intent(inout),optional :: extfpmd
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
@@ -687,7 +691,16 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! End CP modified
 
- ! Prepare fixed moment calculation
+ ! Compute the number of free electrons with corresponding chemical
+ ! potential and add to nelect bounds.
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     call extfpmd%compute_nelect(fermie_lo,nelectlo,tsmear)
+     call extfpmd%compute_nelect(fermie_hi,nelecthi,tsmear)
+   end if
+ end if
+
+!Prepare fixed moment calculation
  if(abs(spinmagntarget+99.99_dp)>1.0d-10)then
  ! CP added
    if (occopt==9)then
@@ -706,8 +719,9 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    end do
  end if
 
+
  ! If the target nelect is not between nelectlo and nelecthi, exit
- if (nelect < nelectlo .or. nelect > nelecthi) then
+ if ((nelect < nelectlo .or. nelect > nelecthi) .and. (occopt <= 8)) then
    not_enough_bands = .true.
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
     ' newocc: ',ch10,&
@@ -763,6 +777,15 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
        call getnel(doccde,dosdeltae,eigen,entropye,fermie_mid,fermie_mid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1))
+
+       ! Compute the number of free electrons of the extfpmd model
+       ! with corresponding chemical potential and add to nelect bounds.
+       if(present(extfpmd)) then
+         if(associated(extfpmd)) then
+           call extfpmd%compute_nelect(fermie_mid,nelectmid,tsmear)
+         end if
+       end if
+
       !write(std_out,'(a,i0,1x, 3(a,es13.5))' ) " iter: ", ii, &
       !  ' fermi_mid: ',fermimid * Ha_eV, ', n_mid: ',nelectmid, &
       !  ", (n_mid-nelect)/nelect: ", (nelectmid - nelect) / nelect
@@ -1069,7 +1092,7 @@ end subroutine newocc
 !!      m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1620,7 +1643,7 @@ end subroutine init_occ_ent
 !!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1933,7 +1956,7 @@ end function occ_dbe
 !!      m_epjdos,m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 

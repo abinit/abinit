@@ -328,9 +328,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !=============================================
  call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
-!=== Initialize dimensions and basic objects ===
- call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
-& ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
+ ! === Initialize dimensions and basic objects ===
+ call setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
+   ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
  call timab(302,2,tsec) ! screening(init)
  call print_ngfft(ngfft_gw,'FFT mesh used for oscillator strengths')
@@ -392,7 +392,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  * Initialize and compute data for DFT+U.
 !  paw_dmft%use_dmft=dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
    if (my_rank == master) call pawtab_print(Pawtab)
@@ -740,7 +740,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
-   KS_BSt%eig=QP_BSt%eig
+   if (dtset%use_oldchi == 1) then
+     KS_BSt%eig=QP_BSt%eig
+   end if
 
    ! Calculate new occ. factors and fermi level.
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget)
@@ -860,7 +862,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,taur,ucvol=ucvol,optrhor=1)
  end if
 
- if (dtset%gwgamma>0) then
+ if (dtset%gwgamma>0 .or. dtset%gwgamma==-11) then
    ABI_MALLOC(rhor_kernel,(nfftf,Dtset%nspden))
  end if
 
@@ -1312,8 +1314,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      dim_kxcg=0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  bootstrap --
    case (-3, -4, -5, -6, -7, -8)
+   ! Bootstrap kernel and variants
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
        ABI_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
@@ -1330,24 +1332,40 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-!
+
+   case (-11)
+   ! LR+ALDA hybrid vertex kernel
+     ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
+     ikxc=7; dim_kxcg=1
+     ABI_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
+     approx_type=7
+     option_test=1  ! TESTELECTRON
+     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
+     rhor_kernel = rhor
+     call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,rhor_kernel,&
+     Ep%npwe,dim_kxcg,kxcg,Gsph_epsG0%gvec,xmpi_comm_self)
+     rhoav = (omegaplasma*omegaplasma)/four_pi
 
    case default
      ABI_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
    end select
 
-   if (approx_type<2) then
+   if (approx_type<2) then !ALDA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
-   else if (approx_type<3) then !@WC: ADA
+   else if (approx_type<3) then !ADA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
-   else if (approx_type<7) then !@WC: bootstrap
+   else if (approx_type<7) then !Bootstrap
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
+   else if (approx_type<8) then  !LR+ALDA
+     call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
+     approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
+     chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,rhor=rhoav)
    else
      ABI_ERROR(sjoin("Wrong approx_type:", itoa(approx_type)))
    end if
@@ -1585,7 +1603,7 @@ end subroutine screening
 !!
 !! SOURCE
 
-subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
+subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,Dtset,Psps,Pawtab,&
 & ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
 !Arguments ------------------------------------
@@ -1594,7 +1612,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: wfk_fname
  type(Dataset_type),intent(inout) :: Dtset !INOUT is due to setshells
- type(datafiles_type),intent(in) :: dtfil
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Dtset%usepaw)
  type(em1params_t),intent(out) :: Ep
@@ -1615,7 +1632,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  integer,parameter :: NOMEGAGAUSS=30,NOMEGAREAL=201,pertcase0=0,master=0
  integer :: bantot,ib,ibtot,ikibz,iq,iqp,isppol,ig,ng,ierr
  integer :: jj,mod10,mband,ng_kss,iqbz,isym,iq_ibz,itim
- integer :: timrev,use_umklp,ncerr
+ integer :: timrev,use_umklp !,ncerr
  integer :: npwepG0,nshepspG0,method,enforce_sym,nfftgw_tot !,spin,band,ik_ibz,
  integer :: istart,iend,test_npwkss,my_rank,nprocs !ii
  real(dp),parameter :: OMEGAERMAX=100.0/Ha_eV
@@ -1774,17 +1791,18 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    end if
  end do
 
+ ! This section is now performed in invars2
  ! Write the list of qpoints for the screening in netcdf format and exit.
  ! This file is used by abipy to generate multiple input files.
- if (Dtset%nqptdm == -1) then
-   if (my_rank==master) then
-#ifdef HAVE_NETCDF
-      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
-      NCF_CHECK(ncerr)
-#endif
-   end if
-   ABI_ERROR_NODUMP("Aborting now")
- end if
+! if (Dtset%nqptdm == -1) then
+!   if (my_rank==master) then
+!#ifdef HAVE_NETCDF
+!      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
+!      NCF_CHECK(ncerr)
+!#endif
+!   end if
+!   ABI_ERROR_NODUMP("Aborting now")
+! end if
 
  if (Dtset%gw_nqlwl==0) then
    Ep%nqlwl=1
@@ -2660,9 +2678,10 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
    else ! numerical integration over the coupling constant
 
-      if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
+     !if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
 
      do ilambda=1,gwrpacorr
+       if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
        lambda=zl(ilambda)
        do ig1=1,Ep%npwe
          chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)

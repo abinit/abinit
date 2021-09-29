@@ -313,12 +313,18 @@ module m_dvdb
 
   integer :: add_lr = 1
    ! Flag defining the treatment of the long range component in the interpolation of the DFPT potentials.
+   !
    ! 0 --> No treatment
    ! 1 --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
    !       This is the standard approach for polar materials.
    ! -1 --> Remove LR model when building W(R,r). DO NOT reintroduce it after Fourier interpolation.
    !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
    !       in order to remove the long range component from the DFPT potentials.
+   ! 4,5,6,7 --> Use model for the LR part only.
+   !        4: Use dipole + quadrupole part (if available)
+   !        5: Use dipole part only.
+   !        6: Use quadrupole part only.
+   !        7: Use electric field only.
 
   integer :: symv1 = 0
    ! Flag for the symmetrization of v1 potentials.
@@ -3029,8 +3035,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ! with all procs inside comm_rpt to avoid MPI deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
- if (db%add_lr == 4) then
-   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr = 4")
+ if (db%add_lr >= 4) then
+   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr >= 4. Wll use LR part only!")
    return
  end if
 
@@ -3056,7 +3062,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
 
  ! Select my_rpoints.
- ! Use REMALLOC so that we can call this routine multiple times i.e. for chaning add_lr
+ ! Use REMALLOC so that we can call this routine multiple times i.e. for changing add_lr
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
 
@@ -3543,7 +3549,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !scalars
  integer,intent(in) :: nfft, comm_rpt
  integer,optional,intent(in) :: add_lr
- class(dvdb_t),intent(in) :: db
+ class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
@@ -3555,6 +3561,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !, ifft, ir
  !real(dp) :: qmod
  !real(sp) :: beta_sp !, wr !,wi
+ logical :: prev_has_zeff, prev_has_quadrupoles, prev_has_efield
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
@@ -3569,8 +3576,21 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  !qcart = two_pi * matmul(db%cryst%gprimd, qpt)
  !qmod = sqrt(dot_product(qcart, qcart))
 
- if (my_add_lr == 4) then
+ if (my_add_lr >= 4) then
    ! Use LR part only and return immediately.
+
+   if (my_add_lr > 4) then
+     prev_has_zeff = db%has_zeff
+     prev_has_quadrupoles = db%has_quadrupoles
+     prev_has_efield = db%has_efield
+     db%has_zeff = .False.
+     db%has_quadrupoles = .False.
+     db%has_efield = .False.
+     if (my_add_lr == 5 .and. prev_has_zeff)  db%has_zeff = .True.
+     if (my_add_lr == 6 .and. prev_has_quadrupoles) db%has_quadrupoles = .True.
+     if (my_add_lr == 7 .and. prev_has_efield) db%has_efield = .True.
+   end if
+
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3579,6 +3599,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, 1, imyp))
      if (db%nspden /= 1) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
    end do
+
+   if (my_add_lr > 4) then
+     ! Restore input flags.
+     db%has_zeff = prev_has_zeff
+     db%has_quadrupoles = prev_has_quadrupoles
+     db%has_efield = prev_has_efield
+   end if
+
    return
  end if
 
@@ -3604,58 +3632,33 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (db%nprocs_rpt > 1) ov1r = zero
  ABI_MALLOC(ov1r_sp, (2, nfft))
 
-#define DEV_USE_SGEMV
-
-#ifdef DEV_USE_SGEMV
  ABI_MALLOC(weiqr_sp, (db%my_nrpt, 2))
  ABI_MALLOC(eiqr_sp, (db%my_nrpt, 2))
  eiqr_sp = transpose(eiqr)
-#else
- ABI_MALLOC(weiqr_sp, (2, db%my_nrpt))
-#endif
 
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
 
-#ifdef DEV_USE_SGEMV
    weiqr_sp(:, 1) = db%my_wratm(:, ipert) * eiqr_sp(:, 1)
    weiqr_sp(:, 2) = db%my_wratm(:, ipert) * eiqr_sp(:, 2)
-#else
-   weiqr_sp(1, :) = db%my_wratm(:, ipert) * eiqr(1, :)
-   weiqr_sp(2, :) = db%my_wratm(:, ipert) * eiqr(2, :)
-#endif
 
    do ispden=1,db%nspden
 
-#ifdef DEV_USE_SGEMV
      ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
      ! Use BLAS2 to compute ov1r = W (x + iy) but need to handle kind conversion as ov1r is double-precision
+     ! NB: Can use MKL BLAS-like extensions to perform 2 matrix-vector operations:
+     !   call dgem2vu(m, n, alpha, a, lda, x1, incx1, x2, incx2, beta, y1, incy1, y2, incy2)
+     ! unfortunately the API does not support transa so one has to transport db%wsr.
 
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
                 zero_sp, ov1r_sp(1,1), 2)
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
                 zero_sp, ov1r_sp(2,1), 2)
 
+
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
      ! Add the long-range part of the potential
      if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
-
-#else
-     ! Slow FT with do loops
-     do ifft=1,nfft
-       do ir=1,db%my_nrpt
-         wr = db%wsr(1, ir, ifft, ispden, imyp)
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr_sp(:, ir)
-         !wi = db%wsr(2, ir, ifft, ispden, imyp)
-         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr_sp(1, ir) ! - wi * weiqr_sp(2, ir)
-         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr_sp(2, ir) ! + wi * weiqr_sp(1, ir)
-       end do
-       ! Add the long-range part of the potential
-       if (my_add_lr > 0) then
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + v1r_lr(:, ifft, imyp)
-       end if
-     end do ! ifft
-#endif
 
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
@@ -5908,6 +5911,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 !arrays
  integer :: ngfft(18)
  integer, allocatable :: gfft(:,:),ig2ifft(:), gsmall(:,:)
+ real(dp) :: dvdb_qdamp(1)
  real(dp) :: vals2(2)
  real(dp),pointer :: this_qpts(:,:)
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
@@ -6050,7 +6054,8 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      "has_dielt", "has_zeff", "has_quadrupoles", "has_efield"], &
      l2int([dvdb%has_dielt, dvdb%has_zeff, dvdb%has_quadrupoles, dvdb%has_efield]))
    NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+   dvdb_qdamp = dvdb%qdamp
+   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], dvdb_qdamp))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gsmall"), gsmall))
  end if
 #endif
@@ -6577,43 +6582,45 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! TODO: May use zero-padded FFT with small G-sphere
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
- !if (db%has_zeff .or. db%has_quadrupoles) then
  ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero
- do ig=1,nfft
-   ! (q + G)
-   qG_red = qpt + gfft(:,ig)
-   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   ! (q + G) . Zeff(:,idir,iatom)
-   qGZ = dot_product(qG_red, Zstar)
-   ! (q + G) . dielt . (q + G)
-   denom = dot_product(qG_red, matmul(dielt_red, qG_red))
-   ! Avoid (q + G) = 0
-   if (denom < tol_denom) cycle
-   denom_inv = one / denom
-   ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
-   !if (half*qG_mod**2 > 1) cycle
-   if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
-   qGS = zero
-   if (db%has_quadrupoles) then
-     do ii=1,3
-       do jj=1,3
-         qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
+ if (db%has_zeff .or. db%has_quadrupoles) then
+
+   do ig=1,nfft
+     ! (q + G)
+     qG_red = qpt + gfft(:,ig)
+     qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+     qG_mod = sqrt(sum(qG_cart ** 2))
+     ! (q + G) . Zeff(:,idir,iatom)
+     qGZ = dot_product(qG_red, Zstar)
+     ! (q + G) . dielt . (q + G)
+     denom = dot_product(qG_red, matmul(dielt_red, qG_red))
+     ! Avoid (q + G) = 0
+     if (denom < tol_denom) cycle
+     denom_inv = one / denom
+     ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
+     !if (half*qG_mod**2 > 1) cycle
+     if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
+     qGS = zero
+     if (db%has_quadrupoles) then
+       do ii=1,3
+         do jj=1,3
+           qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
+         end do
        end do
-     end do
-   end if
+     end if
 
-   ! Phase factor exp(-i (q+G) . tau)
-   qtau = - two_pi * dot_product(qG_red, tau_red)
-   phre = cos(qtau); phim = sin(qtau)
-   !phre = one; phim = zero
+     ! Phase factor exp(-i (q+G) . tau)
+     qtau = - two_pi * dot_product(qG_red, tau_red)
+     phre = cos(qtau); phim = sin(qtau)
+     !phre = one; phim = zero
 
-   re = +fac * qGS * denom_inv !re = zero
-   im = fac * qGZ * denom_inv
-   v1G_lr(1,ig) = phre * re - phim * im
-   v1G_lr(2,ig) = phim * re + phre * im
- end do
+     re = +fac * qGS * denom_inv !re = zero
+     im = fac * qGZ * denom_inv
+     v1G_lr(1,ig) = phre * re - phim * im
+     v1G_lr(2,ig) = phim * re + phre * im
+   end do
+ end if
 
  ! FFT to get the long-range potential in r-space
  call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)

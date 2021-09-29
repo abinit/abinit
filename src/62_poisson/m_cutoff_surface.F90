@@ -180,5 +180,5 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
 end subroutine cutoff_surface
 !!***
 
-endmodule m_cutoff_surface
+end module m_cutoff_surface
 !!***

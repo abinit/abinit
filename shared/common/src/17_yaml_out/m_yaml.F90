@@ -1492,6 +1492,7 @@ end subroutine yaml_single_dict
 !! PARENTS
 !!
 !! CHILDREN
+!!      stream%push
 !!
 !! SOURCE
 

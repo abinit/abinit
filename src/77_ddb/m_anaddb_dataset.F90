@@ -70,6 +70,7 @@ module m_anaddb_dataset
   integer :: dipdip
   integer :: dipquad
   integer :: dossum
+  integer :: dos_maxmode
   integer :: ep_scalprod
   integer :: eivec
   integer :: elaflag
@@ -398,7 +399,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    ABI_ERROR(message)
  end if
 
- anaddb_dtset%dipquad=0
+ anaddb_dtset%dipquad=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
  if(tread==1) anaddb_dtset%dipquad=intarr(1)
  if(anaddb_dtset%dipquad<-1.or.anaddb_dtset%dipquad>1)then
@@ -450,6 +451,16 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    write(message, '(a,i0,5a)' )&
    'dossum is ',anaddb_dtset%dossum,', but the only allowed values',ch10,&
    'are 0, 1',ch10,'Action: correct dossum in your input file.'
+   ABI_ERROR(message)
+ end if
+
+ anaddb_dtset%dos_maxmode=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dos_maxmode',tread,'INT')
+ if(tread==1) anaddb_dtset%dos_maxmode=intarr(1)
+ if(anaddb_dtset%dos_maxmode < 0 .or. anaddb_dtset%dos_maxmode > 3*natom)then
+   write(message, '(a,i0,5a)' )&
+   'dos_maxmode is ',anaddb_dtset%dos_maxmode,', but the only allowed values',ch10,&
+   'are 0 to 3*natom ',ch10,'Action: correct dos_maxmode in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -1167,7 +1178,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    end if
  end do
 
- anaddb_dtset%quadquad=0
+ anaddb_dtset%quadquad=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
  if(tread==1) anaddb_dtset%quadquad=intarr(1)
  if(anaddb_dtset%quadquad<-1.or.anaddb_dtset%quadquad>1)then
@@ -2211,7 +2222,7 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars=trim(list_vars)//' chneut'
 !D
- list_vars=trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol'
+ list_vars=trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars=trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars=trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'

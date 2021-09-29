@@ -75,7 +75,6 @@ CONTAINS  !===========================================================
 !!  Data written in file whose name is filapp//'-etsf.nc'
 !!
 !! PARENTS
-!!      m_iowf
 !!
 !! CHILDREN
 !!
@@ -130,7 +129,6 @@ end subroutine abi_etsf_init
 !!  New dimensions and variables are added to the initial NetCDF file.
 !!
 !! PARENTS
-!!      m_abi_etsf
 !!
 !! CHILDREN
 !!
