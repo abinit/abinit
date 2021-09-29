@@ -473,6 +473,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    do ii=1,tmp_nkpt
      ! Index of k-point in ebands.
      ik = sigmak2ebands(ii)
+     ! Will use this initial values to understand if k-point is in energy window.
      ib_work(1, ii, spin) = huge(1)
      ib_work(2, ii, spin) = -huge(1)
      do band=1,ebands%nband(ik + (spin-1) * ebands%nkpt)
@@ -795,6 +796,11 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure, fine_hdr and fine_ebands defined on the fine k-mesh.
    ! fine_ebands will be used to compare with the ab-initio NSCF eigenvalues.
+   !
+   ! TODO: The size of the KERANGE.nc quickly increases with the k-mesh.
+   ! It is ~700 Mb for a ~ 300^3 grid due to occ and eigens
+   ! But these quantities are now used in inkpts so it may be possible to avoid writing them to disk.
+   !
    NCF_CHECK(fine_hdr%ncwrite(ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))

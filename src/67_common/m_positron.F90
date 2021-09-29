@@ -37,6 +37,7 @@ module m_positron
  use m_bandfft_kpt
  use m_dtset
  use m_dtfil
+ use m_extfpmd
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
@@ -74,6 +75,7 @@ module m_positron
  use m_fftcore,     only : sphereboundary
  use m_prep_kgb,    only : prep_fourwf
  use m_fft,         only : fourwf, fourdp
+ use m_cgprj,       only : ctocprj
 
  implicit none
 
@@ -150,6 +152,7 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  stress_needed=if >0 stresses are needed
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  ucvol=unit cell volume in bohr**3.
@@ -188,10 +191,10 @@ contains
 
 subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,etotal,electronpositron,&
 &          energies,fock,forces_needed,gred,gmet,gprimd,grchempottn,&
-&          grcondft,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
+&          grcondft,grewtn,grvdw,gsqcut,hdr,extfpmd,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
+&          rmet,rprimd,stress_needed,strscondft,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
 &          xccc3d,xcctau3d,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
@@ -206,11 +209,12 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
-type(fock_type),pointer, intent(inout) :: fock
+ type(fock_type),pointer, intent(inout) :: fock
 !arrays
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%natom),ngfft(18)
@@ -218,7 +222,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
- real(dp),intent(in) :: strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: rmet(3,3),strscondft(6),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -388,9 +392,9 @@ type(fock_type),pointer, intent(inout) :: fock
        if (electronpositron%calctype==-1) n3xccc0=0  ! Note: if calctype=-1, previous calculation was positron
        call forstr(atindx1,cg,cprj,diffor_dum,dtefield,dtset,eigen,electronpositron,energies,&
 &       favg_dum,fcart_dum,fock,forold_dum,gred_tmp,grchempottn,grcondft,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
-&       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
+&       extfpmd,indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
-&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
+&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strscondft,strsxc,str_tmp,symrec,&
 &       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%gred_ep(:,:)=gred_tmp(:,:)
@@ -819,6 +823,18 @@ type(fock_type),pointer, intent(inout) :: fock
      end do
    end if
 
+   ! In some cases cprj are kept in memory, so we have to update them before the call of vtorho
+   if (dtset%cprj_in_memory/=0) then
+     iatom=0
+     call wrtout(std_out,' Computing cprj from wavefunctions (positron)')
+     call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&
+&      0,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&      dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&      dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&      xred,ylm,ylmgr)
+     call wrtout(std_out,' cprj is computed')
+   end if
+
 !  =============================================
  end if  ! the type of e-p calculation changes
 !=============================================
@@ -978,6 +994,9 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
      ABI_BUG(msg)
    end if
  end if
+
+ ! This to avoid using unitialized variables.
+ lambda_core = zero; lambda_paw = zero; lambda_core_paw = zero
 
 !Constants
  fact=0.0

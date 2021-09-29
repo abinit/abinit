@@ -813,6 +813,10 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
      cadd(16)=cadd(16)+my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc ! Rhoij and related data
      cadd(17)=cadd(17)+my_nattyp(ii)*(2+lmn2_size(ii))    ! (rhoijselect, ...)
    end do
+   !PAW:cprj
+   do ii=1,ntypat
+     cadd(16)=cadd(16)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
+   end do
  end if
 
 !SCF history (if selected)
@@ -889,7 +893,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
        cadd(25)=cadd(25)+my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc*n_fftgr*mffmem ! f_paw
      end if
    end do
-   cadd(25)=cadd(25)+(1+3*pawnhatxc*(ngrad/2))*nspden*nfftf       !nhat,nhatgr
+!   cadd(25)=cadd(25)+(1+3*pawnhatxc*(ngrad/2))*nspden*nfftf       !nhat,nhatgr
+   cfftf(29)=cfftf(29)+(1+3*pawnhatxc*(ngrad/2))*nspden       !nhat,nhatgr
  end if
 
 !(3)                     in rhotoxc, xcden -------------------------------
@@ -993,13 +998,13 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  cadd(56)=(14+3*natom)*mband   ; dttyp(56)=8
 !ylm_k
  cmpw(57)=mpsang*mpsang*useylm ; dttyp(57)=8
-!PAW:cprj
- if (usepaw==1) then
-   dttyp(58)=8
-   do ii=1,ntypat
-     cadd(58)=cadd(58)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
-   end do
- end if
+!!PAW:cprj
+! if (usepaw==1) then
+!   dttyp(58)=8
+!   do ii=1,ntypat
+!     cadd(58)=cadd(58)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
+!   end do
+! end if
 
 !(6)                     in vtorho----------------------------------------
 
@@ -1079,7 +1084,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  if(nloalg(2)<=0)matblk=natom
  cmpw(75)=2*matblk             ; dttyp(75)=8
 !gsc(if PAW)
- cmpw(76)=2*mband*nspinor*usepaw          ; dttyp(76)=8
+! cmpw(76)=2*mband*nspinor*usepaw          ; dttyp(76)=8
 !Note : matvnl and mat1 do not belong to a chain defined until now
 !
  if(occopt<3 .and. iscf>0)then
@@ -1093,14 +1098,22 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    cadd(79)=2*(ngfft(4)*ngfft(5)*ngfft(6)-nfft)
  end if
 
+
+!(8)                     in cgwf_cprj-------------------------------------
+
+!conjgr, direc, direc_tmp, gvnlx
+ cmpw(81)=2*4*nspinor          ; dttyp(81)=8
+! cwavef_r,direc_r
+ cfft(82)=2*2*nspinor          ; dttyp(82)=8
+
 !(8)                     in cgwf------------------------------------------
 
-!conjgr, cwavef, direc, gh_direc, gvnlx_direc
- cmpw(81)=2*5*nspinor          ; dttyp(81)=8
-!ghc,gvnlxc
- cmpw(82)=2*2*nspinor          ; dttyp(82)=8
-!PAW: scwavef,direc_tmp,ghc_all
- cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
+!!conjgr, cwavef, direc, gh_direc, gvnlx_direc
+! cmpw(81)=2*5*nspinor          ; dttyp(81)=8
+!!ghc,gvnlxc
+! cmpw(82)=2*2*nspinor          ; dttyp(82)=8
+!!PAW: scwavef,direc_tmp,ghc_all
+! cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
 
 
 !(9a)                    in getghc and fourwf----------------------------
@@ -1130,15 +1143,17 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    cadd(98)=3*mpw*nloalg(3)      ; dttyp(98)=8
  else                                        ! ===== nonlop_ylm
 !  gx + gxfac + gxfac_sij
-   cadd(94)=2*lmnmax*mincat*(mpw+1+usepaw)    ; dttyp(94)=8
+!   cadd(94)=2*lmnmax*mincat*(mpw+1+usepaw)    ; dttyp(94)=8
+   cmpw(94)=2*lmnmax*mincat                   ; dttyp(94)=8
+   cadd(99)=2*lmnmax*mincat*(1+usepaw)        ; dttyp(99)=8
 !  kpg
-   cadd(95)=3*mpw       ; dttyp(95)=8
+   cmpw(95)=3             ; dttyp(95)=8
 !  indlmn_typ, ffnl_typ
    cadd(96)=lmnmax*6; dttyp(96)=4
 !  ffnl_typ
-   cadd(97)=lmnmax*mpw; dttyp(97)=8
+   cmpw(97)=lmnmax; dttyp(97)=8
 !  opernla_ylm: scalar,scali
-   cadd(98)=2*mpw; dttyp(98)=8
+   cmpw(98)=2; dttyp(98)=8
  end if
 
 !(10)                    in suscep and suskmm ----------------------------
@@ -1697,9 +1712,8 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      write(msg,'(a,f11.3,a)')' memana : allocated an array of',mbbigarr+tol10,' Mbytes, for testing purposes. '
      call wrtout(std_out,msg,'COLL')
    end if
-   if(allocated(bigarray)) then
-     ABI_FREE(bigarray)
-   end if
+
+   ABI_SFREE(bigarray)
 
 !  Test the ability to allocate the needed total memory : use 8 segments,
 !  hoping that the maximal segment size is not so much smaller than the
@@ -1734,30 +1748,14 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     ' The job will continue.'
      call wrtout(std_out,msg,'COLL')
    end if
-   if(allocated(bigarray1)) then
-     ABI_FREE(bigarray1)
-   end if
-   if(allocated(bigarray2)) then
-     ABI_FREE(bigarray2)
-   end if
-   if(allocated(bigarray3)) then
-     ABI_FREE(bigarray3)
-   end if
-   if(allocated(bigarray4)) then
-     ABI_FREE(bigarray4)
-   end if
-   if(allocated(bigarray5)) then
-     ABI_FREE(bigarray5)
-   end if
-   if(allocated(bigarray6)) then
-     ABI_FREE(bigarray6)
-   end if
-   if(allocated(bigarray7)) then
-     ABI_FREE(bigarray7)
-   end if
-   if(allocated(bigarray8)) then
-     ABI_FREE(bigarray8)
-   end if
+   ABI_SFREE(bigarray1)
+   ABI_SFREE(bigarray2)
+   ABI_SFREE(bigarray3)
+   ABI_SFREE(bigarray4)
+   ABI_SFREE(bigarray5)
+   ABI_SFREE(bigarray6)
+   ABI_SFREE(bigarray7)
+   ABI_SFREE(bigarray8)
 
  end if
 
@@ -1801,9 +1799,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      nquarter_mbytes=dble(nquarter_mbytes)*1.25_dp
      nmbytes=nquarter_mbytes/4.0_dp
    end do
-   if(allocated(bigarray)) then
-     ABI_FREE(bigarray)
-   end if
+   ABI_SFREE(bigarray)
 
    ABI_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
  end if !  End the test of the available memory

@@ -26,7 +26,7 @@
 -   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Au.xml
 
 --- !Autoparal
-#Autoparal section for GS calculations with paral_kgb
+# Autoparal section for GS calculations with paral_kgb 1
 info:
     autoparal: 1
     paral_kgb: 1
@@ -42,8 +42,8 @@ configurations:
       efficiency:  0.661381768
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 4,
             npband: 16,
             bandpp: 10,
@@ -54,8 +54,8 @@ configurations:
       efficiency:  0.653809390
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 8,
             npband: 8,
             bandpp: 20,
@@ -66,8 +66,8 @@ configurations:
       efficiency:  0.652034578
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 16,
             npband: 4,
             bandpp: 40,
@@ -78,8 +78,8 @@ configurations:
       efficiency:  0.668215873
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 6,
             npband: 10,
             bandpp: 16,
@@ -90,11 +90,71 @@ configurations:
       efficiency:  0.650905287
       vars: {
             npimage: 1,
-            np_spkpt:1,
-            npspinor:1,
+            npkpt: 1,
+            npspinor: 1,
             npfft: 15,
             npband: 4,
             bandpp: 40,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.610039107
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 4,
+            npband: 16,
+            bandpp: 8,
+            }
+    - tot_ncpus: 60
+      mpi_ncpus: 60
+      omp_ncpus: 1
+      efficiency:  0.650428659
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 12,
+            npband: 5,
+            bandpp: 32,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.603092191
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 8,
+            npband: 8,
+            bandpp: 16,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.601454880
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 16,
+            npband: 4,
+            bandpp: 32,
+            }
+    - tot_ncpus: 60
+      mpi_ncpus: 60
+      omp_ncpus: 1
+      efficiency:  0.638648569
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 3,
+            npband: 20,
+            bandpp: 8,
             }
 ...
 

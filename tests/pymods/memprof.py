@@ -87,7 +87,6 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     @lazy_property
     def locus(self):
         """Location of the entry. This is (hopefully) unique."""
-        #return "%s:%s" % (self.file, self.line)
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
     def __hash__(self):
@@ -148,15 +147,25 @@ class AbimemFile(object):
         app(df.to_string())
         return "\n".join(lines)
 
-    def find_small_allocs(self, nbytes=160):
+    def find_small_allocs(self, nbits=160*8):
         """Zero sized allocations are not counted."""
         smalles = []
         for e in self.all_entries:
             if not e.isalloc: continue
-            if 0 < e.size <= nbytes: smalles.append(e)
+            if 0 < e.size <= nbits: smalles.append(e)
 
         pprint(smalles)
         return smalles
+
+    def find_large_allocs(self, nbits=10 *8*1024*1024):
+        """Allocations below 10 Mbytes are not counted."""
+        larges = []
+        for e in self.all_entries:
+            if not e.isalloc: continue
+            if e.size > nbits: larges.append(e)
+
+        pprint(larges)
+        return larges
 
     def get_intense_dataframe(self):
         """
@@ -217,7 +226,9 @@ class AbimemFile(object):
                 # skip header line of abimem files
                 if line.startswith("#"): continue
                 try:
-                    app(Entry.from_line(line))
+                    entry = Entry.from_line(line)
+                    #if entry.size >  1024 * 8
+                    app(entry)
                 except Exception as exc:
                     print("Error while parsing lineno %d, line:\n%s" % (lineno, line))
                     raise exc

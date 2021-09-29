@@ -106,7 +106,7 @@
 #%% [setup]
 #%% executable = anaddb
 #%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
-#%% input_ddb = trf2_3.ddb.out 
+#%% input_ddb = trf2_3.ddb.abo 
 #%% [files]
 #%% files_to_test = 
 #%%   trf2_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy

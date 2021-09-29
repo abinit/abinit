@@ -46,16 +46,19 @@ inp_files = [
 # GW/BSE
 "t31.abi", # HF exchange checking q->0 terms
 "t32.abi", # AC GW
-"t33.abi", # GW 1RDM and related quantities 
+"t33.abi", # GW 1RDM and related quantities
 "t34.abi", # Same as t33.in but reading checkpoints
 "t35.abi", # GW 1RDM and related quantities (using only Sigma_x)
 "t36.abi", # GW 1RDM and related quantities but using Silicon
+"t37.abi", # GW 1RDM and related quantities but using Silicon with diff. bdgw values
 "t40.abi", # chi0 with inclvkb=2
 # DFPT
 "t41.abi",
 "t42.abi",
 "t43.abi",
-"t44.abi", # test nuclear dipoles with DDK perturbation
+"t44.abi", # test orbital magnetism with DDK wavefunctions
+"t45.abi", # test orbital magnetism with finite difference wavefunctions
+"t46.abi", # longwave GGA
 # Electron-phonon
 "t50.abi",
 "t51.abi",
@@ -73,6 +76,7 @@ inp_files = [
 "t63.abi",
 "t64.abi",
 "t65.abi",
+"t66.abi",
 # Spin dynamics in multibinit
 "t81.abi", # set initial spin using rotation q-modulation
 "t82.abi", # damping
@@ -85,10 +89,19 @@ inp_files = [
 # GS Coulomb cut-off
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
 "t91.abi", # occopt 9 tests on Si
+"t92.abi", # check extended fpmd routines with low number of bands
 "t95.abi", # test treatment of inaccurate POSCAR file
 "t96.abi", # test treatment of inaccurate POSCAR file
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
 "t100.abi",  # optic (same as t14 but prtlincompmatrixelements = 1)
+"t101.abi", # test nloc_alg options, istwfk=1
+"t102.abi", # test nloc_alg options, istwfk>=2
+"t103.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
+"t104.abi", # test cprj_update_lvl options, forces computed during SCF iterations
+"t105.abi", # test usepawu options (including negative ones), nsppol=nspinor=nspden=1
+"t106.abi", # test usepawu options (including negative ones), nsppol=2,nspden=2
+"t107.abi", # test usepawu options (including negative ones), nspinor=2,nspden=4
+"t108.abi", # test usepawu options (including negative ones), nspinor=2,nspden=1
 ]

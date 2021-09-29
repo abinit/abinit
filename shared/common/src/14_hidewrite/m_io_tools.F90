@@ -227,7 +227,7 @@ end function file_exists
 !!  The specified file is deleted.
 !!
 !! PARENTS
-!!      ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
+!!      abinit,ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
 !!
 !! CHILDREN
 !!
@@ -249,7 +249,7 @@ subroutine delete_file(fname,ierr)
 
  if (.not.exists) then
    ierr = 111
-   write(std_out,*)" Asked to delete not existent file: ",TRIM(fname)
+   write(std_out,*)" Asked to delete non existent file: ",TRIM(fname)
    return
  end if
 
@@ -937,6 +937,9 @@ end function iomode_from_fname
 !!  Set the value of the enforce_fortran__ global variable.
 !!
 !! PARENTS
+!!      abitk,m_argparse
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
