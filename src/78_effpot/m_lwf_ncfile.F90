@@ -89,7 +89,7 @@ contains
 #if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in lwf history file "//trim(self%filename)//"."
     !  Create netCDF file
-    ncerr = nf90_create(path=trim(self%filename), cmode=NF90_CLOBBER, ncid=self%ncid)
+    ncerr = nf90_create(path=trim(self%filename), cmode=NF90_NETCDF4, ncid=self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when creating netcdf history file")
     self%isopen=.True.
     ncerr =nf90_enddef(self%ncid)
@@ -265,6 +265,10 @@ contains
     !if(self%write_traj==1) then
        call ab_define_var(self%ncid, (/ self%nlwf, self%ntime /), &
             &         self%lwf_id, NF90_DOUBLE, "lwf", "lwf amplitude", "dimensionless")
+        
+        ncerr=nf90_def_var_deflate(self%ncid, self%lwf_id, shuffle=1, deflate=1, deflate_level=2)
+        NCF_CHECK_MSG(ncerr, "Error when defining delfating for variable lwf")
+
     !endif
 
     !call ab_define_var(self%ncid, (/ self%ntime /), &
