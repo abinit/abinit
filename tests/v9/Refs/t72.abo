@@ -17,10 +17,10 @@
 .Starting date : Tue 15 Jun 2021.
 - ( at 15h43 )
   
-- input  file    -> /home/baguetl/PROGRAM/abinit/cgwf-cprj/build/prof/Test_suite/v9_t102/t102.abi
-- output file    -> t102.abo
-- root for input  files -> t102i
-- root for output files -> t102o
+- input  file    -> /home/baguetl/PROGRAM/abinit/cgwf-cprj/build/prof/Test_suite/v9_t72/t72.abi
+- output file    -> t72.abo
+- root for input  files -> t72i
+- root for output files -> t72o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/baguetl/PROGRAM/abinit/cgwf-cprj/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
@@ -577,7 +577,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS1_EIG
+ prteigrs : about to open file t72o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -811,7 +811,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS2_EIG
+ prteigrs : about to open file t72o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1045,7 +1045,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS3_EIG
+ prteigrs : about to open file t72o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1278,7 +1278,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS4_EIG
+ prteigrs : about to open file t72o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1512,7 +1512,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS5_EIG
+ prteigrs : about to open file t72o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1746,7 +1746,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS6_EIG
+ prteigrs : about to open file t72o_DS6_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1980,7 +1980,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS7_EIG
+ prteigrs : about to open file t72o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2213,7 +2213,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS8_EIG
+ prteigrs : about to open file t72o_DS8_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2447,7 +2447,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS9_EIG
+ prteigrs : about to open file t72o_DS9_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2680,7 +2680,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS10_EIG
+ prteigrs : about to open file t72o_DS10_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2914,7 +2914,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS11_EIG
+ prteigrs : about to open file t72o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3148,7 +3148,7 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
  frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
               =  5.630445499398  5.630445499398  5.630445499398 angstroms
- prteigrs : about to open file t102o_DS12_EIG
+ prteigrs : about to open file t72o_DS12_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
