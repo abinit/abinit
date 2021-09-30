@@ -678,7 +678,7 @@ SD_NETCDF_INIT([required warn])
 
 # Init NetCDF-Fortran
 #SD_NETCDF_FORTRAN_INIT([optional fail])
-+SD_NETCDF_FORTRAN_INIT([required warn])
+SD_NETCDF_FORTRAN_INIT([required warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
