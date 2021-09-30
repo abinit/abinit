@@ -4222,8 +4222,10 @@ The choice is among:
 * 6 --> Estimate correction to the ZPR in polar materials using the generalized Frohlich model. Requires EFMAS.nc file. See [[cite:Miglio2020]].
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
-        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task == -4.
-* 10 --> Compute polaron effective mass along the 3 crystallographic directions: (100), (110) and (111); in the triply-degenerate VB or CB cubic case.
+        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
+* 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirement than for [[eph_task]]=6.
+         Reference B. Guster et al to be published (2021) or (2022).
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
@@ -22775,7 +22777,7 @@ Variable(
     abivarname="use_oldchi",
     varset="gw",
     vartype="integer",
-    topics=['Susceptibility_useful'],
+    topics=['Susceptibility_expert'],
     dimensions="scalar",
     defaultval=1,
     mnemonics=r"USE OLD CHI implementation for evaluating $\chi^{0}$ with eigenvalues taken from a QPS file",
@@ -22790,6 +22792,8 @@ self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting po
 * 0 --> Do not use the old implementation.
 
 * 1 --> Keep the old implementation.
+
+See line 743 in src/95_drive/screening.F90 .
 """,
 ),
 
