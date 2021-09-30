@@ -743,7 +743,7 @@ phonon mode, then let it relax in abinit afterwards.
 **freeze_displ** is unitless (for abinit), but has a physical meaning: it is related to the
 Bose distribution $n_B$ and the frequency $\omega_{qs}$ of the phonon mode. At a given
 temperature $T$, **freeze_displ** will give the root mean square displacement of
-atoms (along with the displacement vectors, which are in *bohr*). In atomic
+atoms (along with the displacement vectors, which are in *Bohr*). In atomic
 units **freeze_displ** = $\sqrt{< \hat{x}^2 >} = \sqrt{(0.5 + n_B(\omega_{qs}/kT))/ \omega_{qs}}$
 where $\hat{x}\propto \hat{a} + \hat{a}^\dagger$ is the
 displacement operator and $a^\dagger$ and $a$ are the phonon creation and annihilation operators respectively.
