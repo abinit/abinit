@@ -1,13 +1,13 @@
 ## v9.6
 
-Version 9.6, released on October 1, 2021.
+Version 9.6, released on October 4, 2021.
 List of changes with respect to version 9.4.
-<!-- Release notes updated on September 21, 2021. -->
+<!-- Release notes updated on October 2, 2021. -->
 
 Many thanks to the contributors to the ABINIT project between
 February 2021 and September 2021. These release notes
 are relative to modifications/improvements of ABINIT v9.6 with respect to v9.4.
-<!-- Merge requests up to and including MR804 are taken into account. -->
+<!-- Merge requests up to and including MR808 except MR805 are taken into account. -->
 
 The list of contributors includes:
 L. Baguet, J.-M. Beuken, J. Bieder, A. Blanchet,
@@ -71,7 +71,7 @@ By X. Gonze (MR802)
 
 
 **B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
-is now available, for cubic materials.
+is now available, for cubic materials. An article has been submitted, see <https:arxiv.org/abs/2109.12594>.
 Activate it using [[eph_task]]=10.
 
 See test [[test:v9_66]].
@@ -182,7 +182,7 @@ By M. Royo
 
 
 **D.13** Miscellaneous additional bug fixes, or upgrade of build system.
-in the upgrade of tutorials)..
+in the upgrade of tutorials).
 By J. Bieder, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
 
 * * *
