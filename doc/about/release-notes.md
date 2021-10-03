@@ -1,13 +1,13 @@
 ## v9.6
 
-Version 9.6, released on October 1, 2021.
+Version 9.6, released on October 4, 2021.
 List of changes with respect to version 9.4.
-<!-- Release notes updated on September 21, 2021. -->
+<!-- Release notes updated on October 2, 2021. -->
 
 Many thanks to the contributors to the ABINIT project between
 February 2021 and September 2021. These release notes
 are relative to modifications/improvements of ABINIT v9.6 with respect to v9.4.
-<!-- Merge requests up to and including MR804 are taken into account. -->
+<!-- Merge requests up to and including MR808 except MR805 are taken into account. -->
 
 The list of contributors includes:
 L. Baguet, J.-M. Beuken, J. Bieder, A. Blanchet,
@@ -47,6 +47,8 @@ See test [[test:v9_65]].
 By M. Giantomassi (MR794)
 
 **B.3** The computation of dynamical quadrupoles and flexoelectricity is now available within the GGA.
+Test for GGA + longwaves [[test:v9_46]].
+
 Also, the usage of the quadrupoles has been rationalized (and made easier) in anaddb
 as the default value of [[dipquad@anaddb]] and [[quadquad@anaddb]] has been changed to 1.
 This means that dipole-quadrupole and quadrupole-quadrupole contributions are always included
@@ -59,12 +61,7 @@ Still, the user can deactivate the inclusion of the different terms by setting t
 variable to zero for testing purposes.
 See the ANADDB input variables and test [[test:lw_6]]
 
-Finally, the input variable [[rfstrs_ref]] has been introduced, to perform strain response-function calculations
-with the reference energy placed at the average electrostatic potential, to get absolute deformation potentials.
-
-Test for GGA + longwaves [[test:v9_46]].
-Test missing for rfstrs_ref?
-By M. Royo (MR795)
+By M. Royo with contribution by M. Giantomassi for the change of default (MR795)
 
 
 **B.4** Stresses are available within cDFT (constrained DFT).
@@ -74,7 +71,7 @@ By X. Gonze (MR802)
 
 
 **B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
-is now available, for cubic materials.
+is now available, for cubic materials. An article has been submitted, see <https:arxiv.org/abs/2109.12594>.
 Activate it using [[eph_task]]=10.
 
 See test [[test:v9_66]].
@@ -175,13 +172,17 @@ New test [[test:v9_37]].
 By M. Rodriguez-Mayorga (MR792)
 
 **D.11** Introduced new input variable use_oldchi.
-Not documented, not tested.
+This input variable is temporary, for testing purposes. It is documented, but not tested.
 
 By Wei Chen (modified line 743 in src/95_drive/screening.F90 on 23 April 2021).
 
+**D.12** The input variable [[rfstrs_ref]] has been introduced, but not yet documented and tested, as this is on-going work.
 
-**D.12** Miscellaneous additional bug fixes, or upgrade of build system.
-in the upgrade of tutorials)..
+By M. Royo 
+
+
+**D.13** Miscellaneous additional bug fixes, or upgrade of build system.
+in the upgrade of tutorials).
 By J. Bieder, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
 
 * * *
