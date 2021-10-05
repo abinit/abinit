@@ -121,7 +121,7 @@ diemac 6
 ecut   6
 nstep  20
 
-# pp_dirpath "$ABI_PSPDIR"
+ pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
  pseudos "Zr.psp8, S.psp8"
 
 #%%<BEGIN TEST_INFO>
