@@ -572,7 +572,8 @@ type, public :: dataset_type
 !T
  integer :: td_exp_order
  integer :: td_mexcit
- integer :: td_ncormax
+ integer :: td_scnmax
+ integer :: td_prtstr
  integer :: td_propagator
  integer :: tfkinfunc
  integer :: tim1rev
@@ -1894,7 +1895,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%symsigma           = dtin%symsigma
  dtout%td_exp_order       = dtin%td_exp_order
  dtout%td_mexcit          = dtin%td_mexcit
- dtout%td_ncormax         = dtin%td_ncormax
+ dtout%td_scnmax          = dtin%td_scnmax
+ dtout%td_prtstr          = dtin%td_prtstr
  dtout%td_propagator      = dtin%td_propagator
  dtout%td_scthr           = dtin%td_scthr
  dtout%tfkinfunc          = dtin%tfkinfunc
@@ -1902,7 +1904,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
- dtout%useextfpmd       = dtin%useextfpmd
+ dtout%useextfpmd         = dtin%useextfpmd
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -3425,7 +3427,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '
 !T
- list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_ncormax td_propagator td_scthr'
+ list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_propagator td_scthr'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'

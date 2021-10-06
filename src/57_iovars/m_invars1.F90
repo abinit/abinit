@@ -2614,7 +2614,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
-   dtsets(idtset)%td_ncormax=0
+   dtsets(idtset)%td_scnmax=0
+   dtsets(idtset)%td_prtstr=10
    dtsets(idtset)%td_propagator=1
    dtsets(idtset)%td_scthr=0.0001_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp

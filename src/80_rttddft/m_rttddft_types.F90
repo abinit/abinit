@@ -41,7 +41,7 @@ module m_rttddft_types
  use m_common,           only: setup1
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
- use m_ebands,           only: ebands_from_dtset, ebands_free
+ use m_ebands,           only: ebands_from_dtset, ebands_free, unpack_eneocc
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
@@ -252,6 +252,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
 
  !2) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
+ 
+ print*, "ival=", dtset%ivalence
 
  !3) Init occupation numbers
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -266,6 +268,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
              & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
    ABI_FREE(doccde)
  end if
+ print*, 'eigen:', tdks%eigen
+ print*, 'occ:', tdks%occ
 
  !4) Some further initialization (Mainly for PAW)
  call second_setup(dtset,dtfil,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
@@ -453,7 +457,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  integer,parameter   :: response=0, cplex=1
  integer             :: comm_psp
  integer             :: gscase
- integer             :: ierr, iatom, itypat, indx
+ integer             :: iatom, itypat, indx
  integer             :: mgfftf, my_natom
  integer             :: npwmin, nfftot
  integer             :: ylm_option
@@ -555,30 +559,33 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  end select
 
  !FB: @MT The npwarr_ pointer array doesn't seem necessary?
- !** Initialize band structure datatype
- !if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
- !  ABI_MALLOC(npwarr_,(dtset%nkpt))
- !  npwarr_(:)=tdks%npwarr(:)
- !  call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
- !else
- !  npwarr_ => npwarr
- !end if
- !bstruct = ebands_from_dtset(dtset, npwarr_)
- !if (dtset%paral_kgb/=0)  then
- !  ABI_FREE(npwarr_)
- !end if
- !nullify(npwarr_)
- if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
-   call xmpi_sum(tdks%npwarr,mpi_enreg%comm_bandfft,ierr)
- end if
+!!** Initialize band structure datatype
+!if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
+!  ABI_MALLOC(npwarr_,(dtset%nkpt))
+!  npwarr_(:)=tdks%npwarr(:)
+!  call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
+!else
+!  npwarr_ => npwarr
+!end if
+!bstruct = ebands_from_dtset(dtset, npwarr_)
+!if (dtset%paral_kgb/=0)  then
+!  ABI_FREE(npwarr_)
+!end if
+!nullify(npwarr_)
+!if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
+!  call xmpi_sum(tdks%npwarr,mpi_enreg%comm_bandfft,ierr)
+!end if
  bstruct = ebands_from_dtset(dtset, tdks%npwarr)
+ call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
+ print*, 'occopt:', bstruct%occopt
+ print*, 'occ:', bstruct%occ
 
  !** Initialize PAW atomic occupancies
  ABI_MALLOC(tdks%pawrhoij,(my_natom*psps%usepaw))
  if (psps%usepaw == 1) then
    call initrhoij(dtset%pawcpxocc,dtset%lexexch,dtset%lpawu,my_natom,dtset%natom, &
                 & dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,           &
-                & tdks%pawrhoij,dtset%pawspnorb,pawtab,cplex,dtset%spinat,       &
+                & tdks%pawrhoij,dtset%pawspnorb,pawtab,cplex,dtset%spinat,        &
                 & dtset%typat,comm_atom=mpi_enreg%comm_atom,                      &
                 & mpi_atmtab=mpi_enreg%my_atmtab)
  end if
@@ -734,20 +741,15 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
  !scalars
  logical             :: call_pawinit
  integer, parameter  :: cplex = 1
- integer             :: cplex_hf
- integer             :: ctocprj_choice
  integer             :: forces_needed
  integer             :: gnt_option
  integer             :: has_dijhat, has_vhartree, has_dijfock
  integer             :: has_dijnd, has_dijU, has_vxctau
- integer             :: hyb_mixing, hyb_mixing_sr
- integer             :: iatom, idir
- integer             :: iorder_cprj
  integer             :: my_natom, my_nspinor
  integer             :: ncpgr
  integer             :: optcut, optgr0, optgr1, optgr2, optrad
  integer             :: stress_needed
- integer             :: use_hybcomp, usecprj
+ integer             :: use_hybcomp
  real(dp)            :: gsqcut_shp
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
@@ -835,6 +837,7 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
    call paw_an_nullify(tdks%paw_an)
    call paw_ij_nullify(tdks%paw_ij)
    !has_dijhat=0; if (dtset%iscf==22) has_dijhat=1
+   !FB check if value of has_dijhat is correct
    has_dijhat=1
    has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
@@ -1061,6 +1064,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  optorth=0   !No need to orthogonalize the wfk
  tdks%hdr%rprimd=tdks%rprimd
  tdks%cg=0._dp
+ print*, dtset%occ_orig
  call inwffil(ask_accurate,tdks%cg,dtset,dtset%ecut,ecut_eff,tdks%eigen,     &
             & dtset%exchn2n3d,formeig,tdks%hdr,dtfil%ireadwf,dtset%istwfk,   &
             & tdks%kg,dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,      &

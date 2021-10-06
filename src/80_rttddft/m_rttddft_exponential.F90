@@ -115,6 +115,8 @@ contains
  
 ! ***********************************************************************
 
+ !FB: cwaveprj probably just need to point to the right part of the tdks%cpjr array
+ !and we should use cptopt=2 option in getghc to avoid recomputing cprj all the time
  paw = (gs_hamk%usepaw == 1)
  if(paw) then
    ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband_k))
