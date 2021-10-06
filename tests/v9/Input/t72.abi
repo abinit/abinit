@@ -1,4 +1,4 @@
-# Test nloc_alg options (PAW, so useylm=1) on AlAs, with istwfk>=2
+# Test cprj_update_lvl and nloc_alg options (PAW, so useylm=1) on AlAs, with istwfk>=2
 
   nonlop_ylm_count 1 # enable nonlop counting
   fft_count 1        # enable fft counting
@@ -83,7 +83,7 @@
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
-#%% files_to_test = t102.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
+#%% files_to_test = t72.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

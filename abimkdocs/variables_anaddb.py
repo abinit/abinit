@@ -740,11 +740,13 @@ file will be created containing a supercell of atoms with the corresponding
 phonon displacements frozen in. This is typically useful to freeze a soft
 phonon mode, then let it relax in abinit afterwards.
 
-**freeze_displ** is unitless, but has a physical meaning: it is related to the
+**freeze_displ** is unitless (for abinit), but has a physical meaning: it is related to the
 Bose distribution $n_B$ and the frequency $\omega_{qs}$ of the phonon mode. At a given
-temperature T, **freeze_displ** will give the mean square displacement of
-atoms (along with the displacement vectors, which are in Bohr). In atomic
-units **freeze_displ** = $\sqrt{(0.5 + n_B(\omega_{qs}/kT) / \omega_{qs}}$.
+temperature $T$, **freeze_displ** will give the root mean square displacement of
+atoms (along with the displacement vectors, which are in *Bohr*). In atomic
+units **freeze_displ** = $\sqrt{< \hat{x}^2 >} = \sqrt{(0.5 + n_B(\omega_{qs}/kT))/ \omega_{qs}}$
+where $\hat{x}\propto \hat{a} + \hat{a}^\dagger$ is the
+displacement operator and $a^\dagger$ and $a$ are the phonon creation and annihilation operators respectively.
 Typical values are 50-200 for a frequency of a few hundred cm$^{-1}$ and room temperature.
 If all you want is to break the symmetry in the right direction, any reasonable value
 (10-50) should be ok.
