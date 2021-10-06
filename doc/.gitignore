@@ -1,36 +1,19 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-<<<<<<< HEAD
 INSTALL_EasyBuild.md
 INSTALL_gpu.md
-||||||| merged common ancestors
-INSTALL_gpu.md
-INSTALL_EasyBuild.md
-=======
-INSTALL_gpu.md
->>>>>>> 995bbf1fee3b270bf260907dd79c5e8792d50368
 INSTALL_CentOS.md
 INSTALL_EasyBuild.md
 INSTALL_MacOS.md
 INSTALL_Ubuntu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
-<<<<<<< HEAD
 variables/index.md
 variables/external_parameters.md
 variables/optic.md
-||||||| merged common ancestors
-variables/index.md
-variables/external_parameters.md
 variables/multibinit.md
-variables/aim.md
 variables/atdep.md
-=======
 variables/aim.md
 variables/anaddb.md
-variables/atdep.md
-variables/anaddb.md
-variables/aim.md
->>>>>>> 995bbf1fee3b270bf260907dd79c5e8792d50368
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -53,18 +36,11 @@ variables/rlx.md
 variables/varset_stats.md
 variables/vdw.md
 variables/w90.md
-<<<<<<< HEAD
 variables/anaddb.md
 variables/aim.md
 variables/multibinit.md
 variables/atdep.md
 variables/varset_stats.md
-||||||| merged common ancestors
-variables/optic.md
-variables/anaddb.md
-variables/varset_stats.md
-=======
->>>>>>> 995bbf1fee3b270bf260907dd79c5e8792d50368
 topics/Abipy.md
 topics/APPA.md
 topics/Artificial.md
