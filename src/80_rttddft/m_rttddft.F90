@@ -249,6 +249,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  integer                   :: option
  integer                   :: nkxc, n1xccc, n3xccc
  integer                   :: usecprj_local
+ logical                   :: calc_ewald
  logical                   :: tfw_activated
  real(dp)                  :: compch_sph
  real(dp)                  :: vxcavg
@@ -285,6 +286,9 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  ABI_MALLOC(grchempottn,(3,dtset%natom))
  ABI_MALLOC(grewtn,(3,dtset%natom))
  ABI_MALLOC(kxc,(tdks%pawfgr%nfft,nkxc))
+ calc_ewald = .false.
+ if (dtset%ionmov/=0 .or. istep <= 1) calc_ewald=.true.
+ !FB: Should we also add an option to avoid recomputing xccc3d?
  call setvtr(tdks%atindx1,dtset,energies,tdks%gmet,tdks%gprimd,grchempottn,  &
           & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,            &
           & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,   &
@@ -294,7 +298,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
           & tdks%ucvol,tdks%usexcnhat,tdks%vhartr,tdks%vpsp,tdks%vtrial,tdks%vxc, &
           & vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,taur=tdks%taur,                 &
           & vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,add_tfw=tfw_activated,&
-          & xcctau3d=tdks%xcctau3d)
+          & xcctau3d=tdks%xcctau3d,calc_ewald=calc_ewald)
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(kxc)
@@ -324,10 +328,8 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    !** Computation of on-site densities/potentials/energies
    !** Force the recomputation of on-site potentials and Dij
    call paw_an_reset_flags(tdks%paw_an)
-   !FB: Changed self_consistent to false here. Is this right?
+   !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
-   !FB: Used option = 0 here so both potentials and energies are computed.
-   !FB: Would potentials only be sufficient?
    option=0; compch_sph=-1.d5; nzlmopt=0
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert, &
                 & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,    &
@@ -357,7 +359,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    end if
    
    !** Dij computation
-   !FB: fatvshift?
+   !FB: @MT fatvshift?
    nfftotf=tdks%pawfgr%ngfft(1)*tdks%pawfgr%ngfft(2)*tdks%pawfgr%ngfft(3)
    call pawdij(cplex,dtset%enunit,tdks%gprimd,ipert,my_natom,dtset%natom,            &
              & tdks%pawfgr%nfft,nfftotf,dtset%nspden,psps%ntypat,tdks%paw_an,        &
@@ -596,23 +598,24 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
    energies%e_entropy = zero
  end if
 
- etotal = energies%e_kinetic    &
-      & + energies%e_hartree    &  
-      & + energies%e_xc         &
-      & + energies%e_localpsp   &   
-      & + energies%e_corepsp    &
-      & + energies%e_entropy    &
-      & + energies%e_ewald      &
-      & + energies%e_vdw_dftd   &
-      & + energies%e_paw        &
-      & + energies%e_nlpsp_vfock
-!     & + energies%e_chempot    &
-!     & + energies%e_elecfield  &  
-!     & + energies%e_magfield   &
-!     & + energies%e_nucdip     &
-!     & + energies%e_hybcomp_E0 &
-!     & - energies%e_hybcomp_v0 &
-!     & + energies%e_hybcomp_v  &
+ etotal = energies%e_kinetic     &
+      & + energies%e_hartree     &  
+      & + energies%e_xc          &
+      & + energies%e_localpsp    &   
+      & + energies%e_corepsp     &
+      & + energies%e_entropy     &
+      & + energies%e_ewald       &
+      & + energies%e_vdw_dftd    &
+      & + energies%e_nlpsp_vfock &
+      & + energies%e_paw         
+!FB: @MT Should one add the last e_paw contribution or not?
+!     & + energies%e_chempot     &
+!     & + energies%e_elecfield   &  
+!     & + energies%e_magfield    &
+!     & + energies%e_nucdip      &
+!     & + energies%e_hybcomp_E0  &
+!     & - energies%e_hybcomp_v0  &
+!     & + energies%e_hybcomp_v   &
 !     & + energies%e_constrained_dft
 
 !if (psps%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0

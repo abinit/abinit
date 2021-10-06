@@ -44,7 +44,7 @@ module m_rttddft_propagators
  use m_invovl,              only: make_invovl
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
- use m_mpinfo,              only : proc_distrb_cycle
+ use m_mpinfo,              only: proc_distrb_cycle
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
@@ -165,6 +165,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  !Init to zero different energies
  call energies_init(energies)
  energies%e_corepsp=tdks%energies%e_corepsp
+ energies%e_ewald=tdks%energies%e_ewald
 
  !Set "vtrial" and intialize the Hamiltonian
  call rttddft_init_hamiltonian(dtset,energies,gs_hamk,istep,mpi_enreg,psps,tdks)
@@ -460,17 +461,17 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  ! .. and evolve psi(t) using the EMR propagator with the estimated density at t+dt/2
  call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
  
+ ics = 0
+ print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
+         & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
  ! Check convergence
  if (100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1) < dtset%td_scthr .and. &
    & 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2) < dtset%td_scthr) then
    lconv = .true.
-   ics = 0
-   print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
-        & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
  else
    lconv = .false.
    !** Corrector steps
-   do ics = 1, dtset%td_ncormax
+   do ics = 1, dtset%td_scnmax
       conv(1) = sum(abs(tdks%cg(1,:))); conv(2) = sum(abs(tdks%cg(2,:)))
       ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
       tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
@@ -488,10 +489,10 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
                & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
          exit
      else
-        conv(1) = sum(abs(tdks%cg(1,:)))
-        conv(2) = sum(abs(tdks%cg(2,:)))
          print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
                & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
+        conv(1) = sum(abs(tdks%cg(1,:)))
+        conv(2) = sum(abs(tdks%cg(2,:)))
      end if
    end do
  end if

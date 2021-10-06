@@ -132,7 +132,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  !Output useful values
- call rttddft_output(dtfil,dtset,0,mpi_enreg,tdks)
+ call rttddft_output(dtfil,dtset,0,mpi_enreg,psps,tdks)
 
  !** 2) Propagation loop (rttddft_propagate):
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
@@ -154,7 +154,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
    !Output useful values
-   call rttddft_output(dtfil,dtset,istep,mpi_enreg,tdks)
+   call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
 
  end do
 
