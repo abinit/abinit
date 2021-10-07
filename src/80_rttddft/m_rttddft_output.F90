@@ -265,8 +265,6 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
  ABI_FREE(doccde)
 
- print*, "eigen:", tdks%eigen
-
  !Generate DOS using the tetrahedron method or using Gaussians
  WRITE(step_nb,*) istep 
  dos = epjdos_new(dtset, psps, tdks%pawtab)

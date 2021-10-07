@@ -253,8 +253,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !2) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
  
- print*, "ival=", dtset%ivalence
-
  !3) Init occupation numbers
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
  tdks%occ(:)=dtset%occ_orig(:,1)
@@ -268,8 +266,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
              & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
    ABI_FREE(doccde)
  end if
- print*, 'eigen:', tdks%eigen
- print*, 'occ:', tdks%occ
 
  !4) Some further initialization (Mainly for PAW)
  call second_setup(dtset,dtfil,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
@@ -577,8 +573,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 !end if
  bstruct = ebands_from_dtset(dtset, tdks%npwarr)
  call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
- print*, 'occopt:', bstruct%occopt
- print*, 'occ:', bstruct%occ
 
  !** Initialize PAW atomic occupancies
  ABI_MALLOC(tdks%pawrhoij,(my_natom*psps%usepaw))
@@ -1064,7 +1058,6 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  optorth=0   !No need to orthogonalize the wfk
  tdks%hdr%rprimd=tdks%rprimd
  tdks%cg=0._dp
- print*, dtset%occ_orig
  call inwffil(ask_accurate,tdks%cg,dtset,dtset%ecut,ecut_eff,tdks%eigen,     &
             & dtset%exchn2n3d,formeig,tdks%hdr,dtfil%ireadwf,dtset%istwfk,   &
             & tdks%kg,dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,      &

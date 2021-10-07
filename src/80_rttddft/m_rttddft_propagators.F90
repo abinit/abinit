@@ -36,7 +36,6 @@ module m_rttddft_propagators
                                 & bandfft_kpt_set_ikpt, &
                                 & bandfft_kpt_get_ikpt, &
                                 & prep_bandfft_tabs
- use m_cgtools,             only: dotprod_g
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
  use m_gemm_nonlop,         only: make_gemm_nonlop
@@ -49,7 +48,6 @@ module m_rttddft_propagators
                                 & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_types,       only: tdks_type 
- use m_spacepar,            only: meanvalue_g
  use m_specialmsg,          only: wrtout
  use m_xmpi,                only: xmpi_comm_rank
 
@@ -117,12 +115,10 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  !Local variables-------------------------------
  !scalars
  integer                        :: bdtot_index
- integer                        :: blocksize
  integer                        :: calc_forces
  integer                        :: dimffnl
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: ibg, icg
- integer                        :: iblocksize, iblock, iband
  integer                        :: ider, idir, ilm
  integer                        :: ikpt, ikpt_loc, ikg
  integer                        :: ikpt_this_proc
@@ -130,27 +126,21 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  integer                        :: me_distrb
  integer                        :: my_ikpt, my_nspinor
  integer                        :: nband_k, nband_cprj_k
- integer                        :: nblockbd
  integer                        :: npw_k, nkpg
  integer                        :: npw, nband
  integer                        :: spaceComm_distrb
- integer                        :: shift
  integer                        :: isppol
  integer                        :: n4, n5, n6
  logical                        :: with_vxctau
- real(dp)                       :: ar
- real(dp)                       :: dprod_i
- real(dp)                       :: enlx
+ logical                        :: lstore_ene
  type(energies_type)            :: energies
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  !arrays
  integer,allocatable            :: kg_k(:,:)
  real(dp),allocatable           :: ffnl(:,:,:,:)
- real(dp),allocatable           :: gvnlxc(:,:)
  real(dp),allocatable           :: kpg_k(:,:)
  real(dp)                       :: kpoint(3)
  real(dp),allocatable           :: kinpw(:)
- real(dp),allocatable           :: occ_k(:)
  real(dp),allocatable           :: ph3d(:,:,:)
  real(dp),allocatable           :: vlocal(:,:,:,:)
  real(dp),allocatable           :: vxctaulocal(:,:,:,:,:)
@@ -167,6 +157,10 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  energies%e_corepsp=tdks%energies%e_corepsp
  energies%e_ewald=tdks%energies%e_ewald
 
+ !Do we store resulting energies in tdks?
+ lstore_ene = .false.
+ if (present(store_energies)) lstore_ene = store_energies
+
  !Set "vtrial" and intialize the Hamiltonian
  call rttddft_init_hamiltonian(dtset,energies,gs_hamk,istep,mpi_enreg,psps,tdks)
 
@@ -182,7 +176,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  else
    calc_forces=0
  end if
- bdtot_index=0
 
 !FB: @MT Needed?
 !has_vectornd = (with_vectornd .EQ. 1)
@@ -192,6 +185,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 !end if
 
  icg=0
+ bdtot_index=0
 
  !*** LOOP OVER SPINS
  do isppol=1,dtset%nsppol
@@ -238,10 +232,10 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       istwf_k=dtset%istwfk(ikpt)
       npw_k=tdks%npwarr(ikpt)
 
-      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
-         bdtot_index=bdtot_index+nband_k
-         cycle
-      end if
+      !if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
+      !   bdtot_index=bdtot_index+nband_k
+      !   cycle
+      !end if
 
       if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
       call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
@@ -322,48 +316,24 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          nband = nband_k
       end if
 
-      ABI_MALLOC(gvnlxc, (2, npw*my_nspinor*nband))
-      
       !** Compute the exp[(S^{-1})H]*cg using taylor expansion to approximate the exponential
-      call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,gs_hamk,gvnlxc,1,mpi_enreg,nband,npw,my_nspinor)
-
-      !** Compute different contribution to the energy if needed
-      if (PRESENT(store_energies)) then
-         if (store_energies) then
-            ABI_MALLOC(occ_k,(nband_k))
-            occ_k(:)=tdks%occ(1+bdtot_index:nband_k+bdtot_index)
-            nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
-            blocksize=nband_k/nblockbd
-            do iblock=1,nblockbd
-               do iblocksize=1,blocksize
-                  iband=(iblock-1)*blocksize+iblocksize
-                  shift = npw_k*my_nspinor*(iband-1)
-                  !Compute kinetic energy contribution 
-                  call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
-                                 & tdks%cg(:,1+shift+icg:shift+npw_k*my_nspinor+icg),&
-                                 & tdks%cg(:,1+shift+icg:shift+npw_k*my_nspinor+icg),0)
-                  energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*occ_k(iband)*ar
-                  !Compute non local psp energy contribution
-                  if (gs_hamk%usepaw /= 1) then
-                     call dotprod_g(enlx,dprod_i,gs_hamk%istwf_k,npw_k*my_nspinor,1,&
-                                  & tdks%cg(:,1+shift+icg:shift+npw_k*my_nspinor+icg),&
-                                  & gvnlxc(:,1+shift:shift+npw_k*my_nspinor),&
-                                  & mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-                     energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*occ_k(iband)*enlx                    
-                  end if
-               end do
-            end do
-            ABI_FREE(occ_k)
-         end if
+      if (lstore_ene) then
+         !Also gather some contribution to the energy if needed
+         call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
+                               & gs_hamk,ikpt,1,mpi_enreg,nband,npw,my_nspinor,tdks%occ(1+bdtot_index:nband_k+bdtot_index),energies)
+      else
+         call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
+                               & gs_hamk,ikpt,1,mpi_enreg,nband,npw,my_nspinor,tdks%occ(1+bdtot_index:nband_k+bdtot_index))
       end if
 
-      ABI_FREE(gvnlxc)
       ABI_FREE(kg_k)
       ABI_FREE(ylm_k)
       ABI_FREE(kpg_k)
       ABI_FREE(kinpw)
       ABI_FREE(ffnl)
       ABI_FREE(ph3d)
+
+      bdtot_index = bdtot_index+nband_k
 
       !** Also shift array memory if dtset%mkmem/=0
       if (dtset%mkmem/=0) then
@@ -382,9 +352,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  end if
 
  !Keep the computed energies in memory
- if (PRESENT(store_energies)) then
-   if (store_energies) call energies_copy(energies,tdks%energies)
- end if
+ if (lstore_ene) call energies_copy(energies,tdks%energies)
 
  !FB: There should be some MPI reduce here I think.. ?!
 
