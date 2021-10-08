@@ -185,6 +185,7 @@ contains
 !!  rhog(2,nfftf)=Fourier transform of charge density (bohr^-3)
 !!  rhor(nfftf,nspden)=array for electron density in electrons/bohr**3.
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  stress_needed=1 if computation of stress tensor is required
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
@@ -255,7 +256,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
-&                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
+&                 strscondft,strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
 &                 vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
 
 !Arguments ------------------------------------
@@ -286,7 +287,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfftf),strsxc(6),vhartr(nfftf)
+ real(dp),intent(in) :: rhog(2,nfftf),strscondft(6),strsxc(6),vhartr(nfftf)
  real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -509,7 +510,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   energies%e_hartree,energies%e_corepsp,fock,gsqcut,extfpmd,dtset%ixc,kinstr,mgfftf,&
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
-&   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
+&   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strscondft,strsxc,symrec,&
 &   dtset%typat,dtset%usefock,dtset%usekden,psps%usepaw,&
 &   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxctau,vxc_hf,&
 &   psps%xccc1d,xccc3d,xcctau3d,psps%xcccrc,xred,psps%ziontypat,psps%znucltypat,qvpotzero,&
