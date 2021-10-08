@@ -362,7 +362,7 @@ end subroutine opt_effpot
 !!
 !! SOURCE
 
-subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,print_anh)
+subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_penalty,comm,print_anh)
 
  implicit none 
          
@@ -371,6 +371,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
  integer,intent(in) :: comm
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
+ real(dp) :: bound_penalty
 !arrays 
  integer,intent(in) :: order_ran(2),bound_EFS(3)
  real(dp),intent(in) :: bound_factors(3)
@@ -697,7 +698,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,comm,p
                      i=i+1
                   end if 
                 enddo ! while mse/mse_ini>10
-                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(GF_arr,coeff_opt)
+                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = opt_boundcoeff(GF_arr,coeff_opt,bound_penalty)
                 write(message,'(a,ES24.16)') "coeff after opt1:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
                 call wrtout(std_out,message,'COLL')
                 coeff_tmp = ANINT(eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d10)
@@ -2019,12 +2020,12 @@ end subroutine opt_getHOSingleDispTerms
 !!
 !! SOURCE
 
-function opt_boundcoeff(yvalues,cvalues) result (coeff)
+function opt_boundcoeff(yvalues,cvalues,penalty_in) result (coeff)
 !Arguments ------------------------------------
  implicit none
 
 !Arguments ------------------------------------
-  real(dp),intent(in) :: yvalues(2),cvalues(2)
+  real(dp),intent(in) :: yvalues(2),cvalues(2),penalty_in
   real(dp) :: coeff
 !local
 !variable
@@ -2039,7 +2040,7 @@ function opt_boundcoeff(yvalues,cvalues) result (coeff)
  
  !write(*,*) "a", a
  !write(*,*) "b", b
- penalty = 0.001
+ penalty = penalty_in - 1 
  coeff_tmp = -b/(2*a)
  !write(*,*) "coeff_tmp", coeff_tmp 
  if(coeff_tmp > 0)then

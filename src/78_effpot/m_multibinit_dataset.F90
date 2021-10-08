@@ -186,6 +186,7 @@ module m_multibinit_dataset
   real(dp) :: fit_factors(3)
   real(dp) :: opt_factors(3)
   real(dp) :: bound_factors(3)
+  real(dp) :: bound_penalty
   real(dp) :: strten_reference(6)
   real(dp) :: strtarget(6)
   real(dp) :: conf_cutoff_strain(6)
@@ -353,6 +354,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%enunit=0
  multibinit_dtset%fit_anhaStrain=0
  multibinit_dtset%bound_model=0
+ multibinit_dtset%bound_penalty=1.001d+0
  multibinit_dtset%bound_anhaStrain=0
  multibinit_dtset%bound_cutoff=0 
  multibinit_dtset%bound_maxCoeff=4
@@ -2062,6 +2064,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    ABI_ERROR(message)
  end if
 
+ multibinit_dtset%bound_penalty=1.001d+0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_penalty',tread,'DPR')
+ if(tread==1) multibinit_dtset%bound_penalty=intarr(1)
+ if(multibinit_dtset%bound_penalty<1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'bound_penalty is',multibinit_dtset%bound_penalty,', but the only allowed values',ch10,&
+&   'are between larger than 1.',ch10,&
+&   'Action: correct bound_penalty in your input file.'
+   ABI_ERROR(message)
+ end if
+
  multibinit_dtset%bound_anhaStrain=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_anhaStrain',tread,'INT')
  if(tread==1) multibinit_dtset%bound_anhaStrain=intarr(1)
@@ -3016,14 +3029,16 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%bound_model /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
+   write(nunit,'(1x,a16,I3.1)') '     bound_model',multibinit_dtset%bound_model
+   write(nunit,'(1x,a16,es12.4)') '   bound_penalty',multibinit_dtset%bound_penalty
    write(nunit,'(1x,a16,I3)')    'bound_anhaStrain',multibinit_dtset%bound_anhaStrain   
    write(nunit,'(1x,a16,I3)')    'bound_SPCoupling',multibinit_dtset%bound_SPCoupling
    write(nunit,'(1x,a16,es16.8)')'    bound_cutoff',multibinit_dtset%bound_cutoff
-   write(nunit,'(1x,a16,1x,3I3)')   '      bound_cell',multibinit_dtset%bound_cell
-   write(nunit,'(1x,a16,1x,I3)')    '  bound_maxCoeff',multibinit_dtset%bound_maxCoeff
-   write(nunit,'(1x,a16,es16.8)') '      bound_temp',multibinit_dtset%bound_temp
-   write(nunit,'(1x,a16,I7)')   '      bound_step',multibinit_dtset%bound_step
-   write(nunit,'(1x,a16,2I3.1)')'bound_rangePower',multibinit_dtset%bound_rangePower
+   write(nunit,'(1x,a16,1x,3I3)')'      bound_cell',multibinit_dtset%bound_cell
+   write(nunit,'(1x,a16,1x,I3)') '  bound_maxCoeff',multibinit_dtset%bound_maxCoeff
+   write(nunit,'(1x,a16,es16.8)')'      bound_temp',multibinit_dtset%bound_temp
+   write(nunit,'(1x,a16,I7)')    '      bound_step',multibinit_dtset%bound_step
+   write(nunit,'(1x,a16,2I3.1)') 'bound_rangePower',multibinit_dtset%bound_rangePower
  end if
 
 !MS Variables for SCALE-UP 
