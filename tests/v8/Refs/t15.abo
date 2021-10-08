@@ -1,5 +1,5 @@
 
-.Version 9.5.3 of MULTIBINIT 
+.Version 9.7.1 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 20 Jul 2021.
-- ( at 10h58 )
+.Starting date : Fri  8 Oct 2021.
+- ( at 12h52 )
   
 -  nproc =    1
 
@@ -50,6 +50,8 @@
      fit_nfixcoeff -1
       fit_fixcoeff
  Bound the coefficients :
+      bound_model  2
+    bound_penalty  1.0010E+00
  bound_anhaStrain  0
  bound_SPCoupling  1
      bound_cutoff  3.80000000E+00
@@ -445,10 +447,15 @@ dipdip_range         2         2         2
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          9.5
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
-+Total cpu time      4.942  and wall time      9.459 sec
++Total cpu time      3.919  and wall time      3.951 sec
 
  multibinit : the run completed succesfully.
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
+-   There were 0 allocations and 0 deallocations in C code
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
+-   There were 172320 allocations and 172320 deallocations in Fortran
+-   Remaining memory at the end of the calculation is 0
