@@ -275,6 +275,21 @@ Give the number of anharmonic coefficients to add in the model during the fit pr
 ),
 
 Variable(
+    abivarname="fit_ncoeff_per_iatom@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FIT Number of COEFFicients",
+    added_in_version="before_v9",
+    text=r"""
+Give the number of anharmonic coefficients per symmetric irreducible atoms to add during fit process.
+[[multibinit:fit_ncoeff]]/(nirred_atoms*fit_ncoeff_per_iatom) gives the number of fitting loops performed during the fit process, where in each loop fit_ncoeff_per_iatom coefficients for each irreducible atom will be added to the anharmonic potential. 
+""",
+),
+
+Variable(
     abivarname="fit_generateCoeff@multibinit",
     varset="multibinit",
     vartype="integer",
