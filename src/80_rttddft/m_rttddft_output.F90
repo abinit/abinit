@@ -296,15 +296,15 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    call dos_calcnwrite(dos,dtset,crystal,ebands,fname,spacecomm)
  end if
 
-#ifdef HAVE_NETCDF
-   ! Write netcdf file with dos% results.
-   if (me == master) then
-     fname = trim(dtfil%filnam_ds(4))//'_FATBANDS_'//trim(adjustl(step_nb))//'.nc'
-     NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-     call fatbands_ncwrite(dos, crystal, ebands, tdks%hdr, dtset, psps, tdks%pawtab, ncid)
-     NCF_CHECK(nf90_close(ncid))
-   end if
-#endif
+!#ifdef HAVE_NETCDF
+!   ! Write netcdf file with dos% results.
+!   if (me == master) then
+!     fname = trim(dtfil%filnam_ds(4))//'_FATBANDS_'//trim(adjustl(step_nb))//'.nc'
+!     NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+!     call fatbands_ncwrite(dos, crystal, ebands, tdks%hdr, dtset, psps, tdks%pawtab, ncid)
+!     NCF_CHECK(nf90_close(ncid))
+!   end if
+!#endif
 
  call dos%free()
  call crystal%free()
