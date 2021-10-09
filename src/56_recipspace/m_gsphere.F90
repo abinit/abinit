@@ -1144,7 +1144,7 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    if ((maxpw+nshell(in)) > sizepw) then
      ! We need to increase the size of the gbase, gbig and cnorm arrays while still keeping their content.
      ! This is done using two temporary arrays gtmp and ctmp
-     ABI_WARNING("Had to reallocate gbase, gbig, cnorm")
+     ABI_WARNING("Had to reallocate gbase, gbig, cnorm. Perhaps the input geometry is too inaccurate. Possible fix: correct your input file.")
      ABI_MALLOC(ctmp,(sizepw))
      ABI_MALLOC(gtmp,(3,sizepw))
      sizeold=sizepw
