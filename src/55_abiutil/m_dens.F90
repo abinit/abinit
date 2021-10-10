@@ -1051,7 +1051,7 @@ end subroutine constrained_dft_free
            intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
            intgden_normed(:) = intgden(2:nspden,iatom)/intgden_norm
            !Calculate the difference vector between the actual magnetization and the target magnetization.
-           intgres(2:nspden,iatom)=intgres_normed(1:3)-spinat_normed(1:3)
+           intgres(2:nspden,iatom)=intgden_normed(1:3)-spinat_normed(1:3)
          else if(nspden==2)then
            !When the actual magnetization and the target magnetization have same sign, the residual is zero. Otherwise,
            !it is set (arbitrarily) to their difference
