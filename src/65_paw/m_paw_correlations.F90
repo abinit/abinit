@@ -441,14 +441,28 @@ CONTAINS  !=====================================================================
        call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
 &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee)
 
-     !  testu=0
-     !  write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
-     !  do m1=1,2*lpawu+1
-     !    write(std_out,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2),m2=1,2*lpawu+1)
-     !    do m2=1,2*lpawu+1
-     !      testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
-     !   enddo
-     !  enddo
+      ! testu=0
+      ! write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
+      ! do m1=1,2*lpawu+1
+      !   write(std_out,'(2x,14(f12.6,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2),m2=1,2*lpawu+1)
+      !   do m2=1,2*lpawu+1
+      !     testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
+      !  enddo
+      ! enddo
+       write(message,'(a)') ch10
+       call wrtout(std_out,message,'COLL')
+       write(message,'(a)') " Matrix of interaction vee(m1,m2,m1,m2)"
+       call wrtout(std_out,message,'COLL')
+       do m1=1,2*lpawu+1
+         write(message,'(2x,14(f20.14,2x))') (pawtab(itypat)%vee(m1,m2,m1,m2)*Ha_eV,m2=1,2*lpawu+1)
+         call wrtout(std_out,message,'COLL')
+       !  do m2=1,2*lpawu+1
+       !    testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
+       ! enddo
+       enddo
+       write(message,'(a)') ch10
+       call wrtout(std_out,message,'COLL')
+
      !  testu=testu/((two*lpawu+one)**2)
      !  write(std_out,*) "------------------------"
      !  write(std_out,'(a,f12.6)') " U=", testu
@@ -1208,6 +1222,11 @@ CONTAINS  !=====================================================================
  else if(pawtab%usepawu==2.or.dmftdc==2) then
    edctemp=edctemp+upawu*(n_upup*n_dndn)&
 &   +half*(upawu-jpawu)*(n_upup**2+n_dndn**2) &
+&   *(dble(2*lpawu)/dble(2*lpawu+1))
+   edcdctemp=-edctemp
+ else if(pawtab%usepawu==6.or.dmftdc==6) then
+   edctemp=edctemp+upawu*(n_tot*n_tot/4_dp)&
+&   +half*(upawu-jpawu)*(n_tot**2+n_tot**2)/4_dp &
 &   *(dble(2*lpawu)/dble(2*lpawu+1))
    edcdctemp=-edctemp
  else if(pawtab%usepawu==3.or.dmftdc==3) then
