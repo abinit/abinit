@@ -25,6 +25,7 @@ fit_iatom = 0
 fit_EFS = 1 1 1 
 sel_EFS = 1 1 1
 fit_factors = 1 1 1
+prt_GF_csv = 1
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -37,6 +38,12 @@ fit_factors = 1 1 1
 #%%   t103.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t103_sys.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t103_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   GF_values_iatom1_proc000_iter001.csv,tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   GF_values_iatom1_proc000_iter002.csv,tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   GF_values_iatom2_proc000_iter003.csv,tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   GF_values_iatom2_proc000_iter004.csv,tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   GF_values_iatom2_proc000_iter003.csv,tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   GF_values_iatom2_proc000_iter004.csv,tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
