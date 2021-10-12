@@ -2066,7 +2066,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
  multibinit_dtset%bound_penalty=1.001d+0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_penalty',tread,'DPR')
- if(tread==1) multibinit_dtset%bound_penalty=intarr(1)
+ if(tread==1) multibinit_dtset%bound_penalty=dprarr(1)
  if(multibinit_dtset%bound_penalty<1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'bound_penalty is',multibinit_dtset%bound_penalty,', but the only allowed values',ch10,&
