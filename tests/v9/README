@@ -13,7 +13,9 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 41-49 concern response functions except electron-phonon 
 
-* Tests 50-80 concern electron-phonon
+* Tests 50-70 concern electron-phonon
+
+* Tests 71-80 concern ground state
 
 * Tests 81-89 concern multibinit
 
