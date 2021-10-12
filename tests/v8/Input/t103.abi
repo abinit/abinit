@@ -13,6 +13,7 @@ ncell = 2 2 2
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
 fit_coeff = 1
+fit_ncoeff_per_iatom = 2
 fit_rangePower = 3 3
 fit_cutoff = 5.4
 fit_ncoeff = 6
