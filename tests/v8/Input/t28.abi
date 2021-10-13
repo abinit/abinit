@@ -1,13 +1,12 @@
 # Hydrogen diatomic molecule for tests--constrained DFT
 
- ndtset 6
+ ndtset 5
 
 #Constrained DFT 
  constraint_kind2   1   # Dataset 2 is constrained DFT for the collinear magnetization
  constraint_kind3  11   # Dataset 3 is constrained DFT for the collinear magnetization and charge
  constraint_kind4   3   # Dataset 4 is constrained DFT for the collinear magnetization amplitude
  constraint_kind5   2   # Dataset 5 is constrained DFT for the collinear magnetization axis (actually not useful !)
- constraint_kind6   4   # Dataset 5 is constrained DFT for the collinear magnetization direction (actually not useful !)
 
 #Constrained DFT data
  magcon_lambda      2   

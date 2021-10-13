@@ -845,7 +845,7 @@ end subroutine constrained_dft_free
 !scalars
  integer :: conkind,iatom,ii,jatom,info,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
- real(dp) :: intgd,intgden_norm,intgden_proj,intgres_proj,norm
+ real(dp) :: intgd,intgden_norm,intgden_proj,intgres_proj,norm,scprod
 !arrays
  integer :: ipiv(c_dft%natom)
  real(dp) :: corr_denmag(4),gr_intgd(3),strs_intgd(6)
@@ -1031,7 +1031,7 @@ end subroutine constrained_dft_free
 &            spinat_normed(2)*intgden(3,iatom)+ &
 &            spinat_normed(3)*intgden(4,iatom)
            intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)-spinat_normed(1:3)*intgden_proj
-           !Also projects the residual
+           !Also projects the residual, so that the usual optimization is done is the largest possible space
            intgres_proj=spinat_normed(1)*intgres(2,iatom)+ &
 &            spinat_normed(2)*intgres(3,iatom)+ &
 &            spinat_normed(3)*intgres(4,iatom)
@@ -1050,13 +1050,38 @@ end subroutine constrained_dft_free
            spinat_normed(:) = c_dft%spinat(:,iatom) / norm
            intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
            intgden_normed(:) = intgden(2:nspden,iatom)/intgden_norm
-           !Calculate the difference vector between the actual magnetization and the target magnetization.
-           intgres(2:nspden,iatom)=intgden_normed(1:3)-spinat_normed(1:3)
+           !Calculate the difference vector between the actual magnetization vectoro, times the scalar product between the 
+           !directions of present magnetization and target one, and the target magnetization direction renormalized by the magnetization length.
+           !See notes 12 October 2021
+!DEBUG First possibility
+!          intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)-spinat_normed(1:3)*intgden_norm
+!ENDDEBUG
+!DEBUG Second possibility
+           scprod=sum(spinat_normed(:)*intgden_normed(:))
+           intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)*scprod-spinat_normed(1:3)*intgden_norm
+!ENDDEBUG
+           !Also projects the residual. There might be some misalignement of the intgden_delta with the correct space of allowed variations 
+           !(not exactly perpendicular to spinat_normed or intgden_normed, or even frankly not at all perpendicular),
+           !but when close to fulfilling the constraint, this difference becomes negligible.
+           !The present choice, couple with the above definition of intgden_delta aligns both.
+!DEBUG First possibility
+            intgres_proj=intgden_normed(1)*intgres(2,iatom)+ &
+ &            intgden_normed(2)*intgres(3,iatom)+ &
+ &            intgden_normed(3)*intgres(4,iatom)
+            intgres(2:nspden,iatom)=intgres(2:nspden,iatom)-intgden_normed(1:3)*intgres_proj
+!ENDDEBUG
+!DEBUG Second possibility
+!           intgres_proj=spinat_normed(1)*intgres(2,iatom)+ &
+!&            spinat_normed(2)*intgres(3,iatom)+ &
+!&            spinat_normed(3)*intgres(4,iatom)
+!           intgres(2:nspden,iatom)=intgres(2:nspden,iatom)-spinat_normed(1:3)*intgres_proj
+!ENDDEBUG
          else if(nspden==2)then
-           !When the actual magnetization and the target magnetization have same sign, the residual is zero. Otherwise,
-           !it is set (arbitrarily) to their difference
+           !This case is ill-defined ... What follows is rather arbitrary.
+           !When the actual magnetization and the target magnetization have same sign, the intgden_delta is zero. 
+           ! Otherwise, intgres is set to the difference between the present intgden and the target
            intgden_delta(2,iatom)=zero
-           if(c_dft%spinat(2,iatom)*intgden(2,iatom)<-tol10)intgden_delta(2,iatom)=intgden(2,iatom)-c_dft%spinat(2,iatom)
+           if(c_dft%spinat(2,iatom)*intgden(2,iatom)<-tol10)intgden_delta(2,iatom)=c_dft%spinat(2,iatom)-intgden(2,iatom)
          endif
        endif
      else
@@ -1064,7 +1089,6 @@ end subroutine constrained_dft_free
        intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)
      endif
    end if
-
 !  Lagrange energy contribution. Note that intgres is the derivative with respect to the chrgat and spinat constraints,
 !  because chrgat and spinat have directly been used in the definition of intgden_delta.
 !  WOOPS : chrgat comes with a POSITIVE sign in intgden_delta ?!?!
