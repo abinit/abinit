@@ -2299,7 +2299,7 @@ if(need_compute_symmetric)then
     call wrtout(std_out,message,'COLL')
     write(message,'(1a)')' Compute symmetric combinations of combinations of irreducible pairs'
     call wrtout(std_out,message,'COLL')
-    write(message,'(3a)')' ---> Try to match number of CPU to number combinations of irreucible pairs',ch10,&
+    write(message,'(3a)')' ---> Try to match number of CPU to number combinations of irreducible pairs',ch10,&
     &                    '      for max. speedup'
     call wrtout(std_out,message,'COLL')
   endif
