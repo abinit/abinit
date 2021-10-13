@@ -1760,9 +1760,9 @@ magnetization.
 When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
 
 When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the collinear case) of the magnetization is constrained;
-When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (only meaningful in the non-collinear case);
+When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (only meaningful in the non-collinear case, albeit allowed);
 When [[constraint_kind]]=3 or 13, only the magnetization magnitude is constrained.
-When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case);
+When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case, not allowed in the collinear case);
 
 For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
 so the algorithm works only with [[iscf]] between 2 and 9.
@@ -1780,8 +1780,8 @@ that they belong to different types, even if the same pseudopotential file is us
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
 
 The difference between [[constraint_kind]]=4 or 14 and [[constraint_kind]]=2 or 12 lies in the fact that [[constraint_kind]]=2 or 12 will consider similarly
-a magnetization vector and its opposite, considering that the constraint is just alignment on a line, while [[constraint_kind]]=4 or 14 enforces that
-the scalar product of the target magnetization direction (normalized vector) and the actual magnetization direction (normalized vector) should be positive.
+a magnetization vector and its opposite, as this constraint is just alignment on an axis, while [[constraint_kind]]=4 or 14 enforces that
+the scalar product of the target magnetization direction (normalized vector) and the actual optimized magnetization direction (normalized vector) is positive.
 
 Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle.
 """,
