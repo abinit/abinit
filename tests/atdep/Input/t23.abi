@@ -15,7 +15,7 @@ temperature  50.00000000E+02
 #DEFINE_COMPUTATIONAL_DETAILS
 nstep_max 20
 nstep_min 1
-rcut  9.5 
+rcut  9.8 
 #OPTIONAL_INPUT_VARIABLES
 order 3 5.
 ngqpt1 6 6 6
