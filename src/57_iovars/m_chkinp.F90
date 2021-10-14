@@ -82,7 +82,7 @@ contains
 !!
 !! CHILDREN
 !!      chkdpr,chkgrp,chkint,chkint_eq,chkint_ge,chkint_le,chkint_ne,chkorthsy
-!!      dt%free,metric,wrtout,xmpi_sum
+!!      dt%free,metric,symmetrize_xred,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -904,7 +904,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       16, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 15, -15, 16], iout)
+       16, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 10, 15, -15, 16], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -1893,8 +1893,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  nloalg(1)= nloc_alg
-!  Must be 2, 3, 4
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   if(dt%useylm==0) then
+!    Must be 2, 3, 4
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
+   else
+!    Must be between 2 and 10
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),9,(/2,3,4,5,6,7,8,9,10/),iout)
+   end if
 
 !  nloc_mem= nloalg(2)*(nloalg(3)+1)
 !  nloalg(2) must be -1 or 1 ; nloalg(3) is 0 or 1.
@@ -2421,11 +2426,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
    end if
    !Longwave calculation function only for LDA
-   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
-   if(allow)then
-     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
-   end if
+!   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
+!   if(allow)then
+!     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
+!   end if
    !Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
     write(msg, '(3a,i0,2a)' )&
@@ -3433,7 +3438,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,10,(/-4,-2,-1,0,1,2,3,4,10,14/),iout)
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)
@@ -3447,6 +3452,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &       '  (not yet in production)'
        ABI_WARNING(msg)
      end if
+   end if
+
+!  usepawu and response : q must be zero
+   if(dt%usepawu/=0.and.response==1) then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+     call chkdpr(1,1,cond_string,cond_values,ierr,'norm(qpt)',sum(dt%qptn(:)**2),0,zero,iout)
    end if
 
 !  useexexch AND usepawu

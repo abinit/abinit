@@ -37,7 +37,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP (4th order)
+#%%   test aTDEP (2nd order)
 #%%   UMo (bcc) with 128 atoms at T = 900 K with 75% of U atoms
 #%%                                          and 25% of Mo atoms using VCA 
 #%% topics = aTDEP

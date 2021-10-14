@@ -818,6 +818,7 @@ end function proc_distrb_nband
 !! INPUTS
 !!
 !! PARENTS
+!!      m_dfpt_vtowfk
 !!
 !! CHILDREN
 !!
@@ -903,6 +904,7 @@ end subroutine proc_distrb_kptband
 !! INPUTS
 !!
 !! PARENTS
+!!      m_d2frnl,m_dfpt_fef,m_dfpt_nstwf,m_dfpt_vtowfk
 !!
 !! CHILDREN
 !!

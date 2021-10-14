@@ -384,7 +384,6 @@ CONTAINS  !=====================================================================
 !!      abitk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -630,7 +629,6 @@ end function get_gaps_
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -680,7 +678,6 @@ end subroutine gaps_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -822,7 +819,6 @@ end subroutine gaps_print
 !!      m_mlwfovlp_qp,m_outscfcv,m_screening_driver,m_sigma_driver,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1070,7 +1066,6 @@ end function ebands_from_dtset
 !!      m_sigmaph,m_sigtk,m_wfk,m_wfk_analyze,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1114,10 +1109,9 @@ end subroutine ebands_free
 !!
 !! PARENTS
 !!      m_bethe_salpeter,m_ebands,m_eph_double_grid,m_exc_spectra,m_haydock
-!!      m_screening_driver,m_sigma_driver,m_sigmaph,optic
+!!      m_screening_driver,m_sigma_driver,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1190,7 +1184,6 @@ end subroutine ebands_copy
 !!      m_rta
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1231,7 +1224,6 @@ end subroutine ebands_move_alloc
 !!      abitk,m_bethe_salpeter,m_ephtk,m_sigtk,m_wfk,m_wfk_analyze
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1336,7 +1328,6 @@ end subroutine ebands_print
 !!      m_chi0,m_ebands,m_ioarr,m_iowf
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1401,7 +1392,6 @@ end subroutine unpack_eneocc
 !!      m_chi0,m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1458,7 +1448,6 @@ end subroutine pack_eneocc
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1520,7 +1509,6 @@ end subroutine get_eneocc_vect
 !!      m_dfpt_looppert,m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1844,7 +1832,6 @@ end function ebands_vcbm_range_from_gaps
 !!      m_bethe_salpeter,m_ephtk,m_screening_driver,m_sigmaph
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -1998,7 +1985,6 @@ end function ebands_get_occupied
 !!      m_sigma_driver,m_sigmaph
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2090,7 +2076,6 @@ end subroutine ebands_enclose_degbands
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2387,11 +2372,10 @@ end function ebands_write_bxsf
 !!   %entropy=Set to zero
 !!
 !! PARENTS
-!!      abitk,m_a2ftr,m_bethe_salpeter,m_ebands,m_elphon,m_ephtk
-!!      m_screening_driver,m_sigma_driver,m_sigtk,m_wfk,optic
+!!      m_a2ftr,m_bethe_salpeter,m_ebands,m_elphon,m_ephtk,m_screening_driver
+!!      m_sigma_driver,m_sigtk,m_wfk,optic
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2560,10 +2544,9 @@ end subroutine ebands_update_occ
 !!  by another call to set_extrael (update_occ is expensive for large k-meshes). Default: True.
 !!
 !! PARENTS
-!!      abitk,m_ebands,m_ephtk,m_sigmaph
+!!      m_ebands,m_ephtk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2628,7 +2611,6 @@ end subroutine ebands_set_scheme
 !!      m_ephtk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2726,10 +2708,9 @@ end subroutine ebands_set_fermie
 !! Use ebands_set_scheme before calling this routine, if you have a semiconductor.
 !!
 !! PARENTS
-!!      abitk,m_ephtk,m_sigmaph
+!!      m_ephtk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 ! CP modified for it to work with occopt 9
@@ -2812,10 +2793,9 @@ end subroutine ebands_set_extrael
 !! OUTPUT
 !!
 !! PARENTS
-!!      m_rta,m_sigmaph
+!!      abitk,m_rta,m_sigmaph
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -2956,7 +2936,6 @@ end function ebands_calc_nelect
 !!      m_bethe_salpeter,m_exc_diago,m_gstate,m_sigma_driver
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3525,7 +3504,6 @@ end function ebands_get_edos
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3565,7 +3543,6 @@ end subroutine edos_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3751,7 +3728,6 @@ end function edos_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -3843,6 +3819,10 @@ end subroutine edos_print
 !! INPUTS
 !!
 !! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -4030,7 +4010,6 @@ end function ebands_write_nesting
 !!      m_wfk
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -4393,7 +4372,6 @@ end function ebands_chop
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5380,7 +5358,6 @@ end function jdos_ncwrite
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5422,7 +5399,6 @@ end subroutine jdos_free
 !!      m_eph_driver,m_outscfcv
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5645,7 +5621,6 @@ end subroutine ebands_prtbltztrp
 !!      m_a2ftr
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5836,7 +5811,6 @@ end subroutine ebands_prtbltztrp_tau_out
 !!      abitk,m_ebands,m_eph_driver,m_outscfcv
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -5896,7 +5870,6 @@ end subroutine ebands_write
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6027,7 +6000,6 @@ end subroutine ebands_write_xmgrace
 !!      m_ebands
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6162,7 +6134,6 @@ end subroutine ebands_write_gnuplot
 !!      m_outscfcv,m_sigma_driver,m_wfk_analyze
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6367,7 +6338,6 @@ end function klinterp_new
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6399,7 +6369,6 @@ end subroutine klinterp_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrap2_zero_one
 !!
 !! SOURCE
 
@@ -6461,6 +6430,11 @@ end subroutine klinterp_eval_bsd
 !!  Return n_ehst(2, nsppol, ntemp) where the first dimension if for electrons/holes.
 !!  If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
 !!  To discern between electrons and holes in semiconductors we assume that ef is inside the gap.
+!!
+!! PARENTS
+!!      abitk,m_rta
+!!
+!! CHILDREN
 !!
 !! SOURCE
 

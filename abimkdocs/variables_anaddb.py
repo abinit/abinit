@@ -269,13 +269,26 @@ Variable(
     added_in_version="before_v9",
     text=r"""
   * 0 --> the dipole-dipole interaction is not handled separately in the treatment of the interatomic forces.
-    This option is available for testing purposes or if effective charge and/or dielectric tensor is not available
-    in the derivative database. It gives results much less accurate than **dipdip** =1.
+    This option is available for testing purposes or if effective charge and/or dielectric tensor are not available
+    in the DDB file. In semiconductors, this option  gives results much less accurate than **dipdip** = 1.
+    Using this value in metals is fine since the interatomic forces are usually short-ranged.
+
   * 1 --> the dipole-dipole interaction is subtracted from the dynamical matrices before Fourier transform,
     so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
     when the phonon spectrum is interpolated, or if the interatomic force constants have to be analysed in real space.
+    Note that the Ewald contribution to the dynamical matrix consists of two terms: a G-space sum and
+    and another (expensive) sum in R-space.
+    See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (71) to (75).
+    This approach is very accurate but the computation of the R-space sum is rather expensive, especially
+    when one has to interpolate many q-points e.g. for PHDOS computations.
+    See dipdip -1 option below for a faster algorithm.
 
-The abinit input variable [[dipdip]] has a similar meaning.
+  * -1 --> Similar to +1 with the difference that the code computes a material-dependent width for
+    the Gaussians that will hopefully make the Ewald real-space summation unnecessary.
+    This option is **much faster** that dipdip 1 and is activated by default when
+    [[anaddb:dipquad]] or [[anaddb:quadquad]] are set to 1.
+    It is recommended to check that calculations with dipdip = 1 and -1 (both with dipquad = 0 and quadquad = 0)
+    lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.
 """,
 ),
 
@@ -285,17 +298,23 @@ Variable(
     vartype="integer",
     topics=['longwave_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="DIPole-QUADdrupole interaction",
     characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
-  * 0 --> the dipole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
-  * 1 --> the dipole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
-    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
-    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
-    or a [[lw_flexo]] = 1 or 2 run.
+* 0 --> the dipole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
+* 1 --> the dipole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
+  so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+  when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
+  or a [[lw_flexo]] = 1 or 2 run.
 
+!!! important
+
+    The default value is 1.
+    This means that the dipole-quadrupole interaction is always included **provided** the DDB file contains
+    the dynamical quadrupoles.
+    If the DDB file does not contain the dynamical quadrupoles, this variable is automatically set to zero at runtime.
 """,
 ),
 
@@ -305,17 +324,23 @@ Variable(
     vartype="integer",
     topics=['longwave_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="QUADdrupole-QUADdrupole interaction",
     characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
-  * 0 --> the quadrupole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
-  * 1 --> the quadrupole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
-    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
-    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
-    or a [[lw_flexo]] = 1 or 2 run.
+* 0 --> the quadrupole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
+* 1 --> the quadrupole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
+  so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+  when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
+  or a [[lw_flexo]] = 1 or 2 run.
 
+!!! important
+
+    The default value is 1.
+    This means that the quadrupole-quadrupole interaction is always included **provided** the DDB file contains
+    the dynamical quadrupoles.
+    If the DDB file does not contain the dynamical quadrupoles, this variable is automatically set to zero at runtime.
 """,
 ),
 
@@ -715,11 +740,13 @@ file will be created containing a supercell of atoms with the corresponding
 phonon displacements frozen in. This is typically useful to freeze a soft
 phonon mode, then let it relax in abinit afterwards.
 
-**freeze_displ** is unitless, but has a physical meaning: it is related to the
+**freeze_displ** is unitless (for abinit), but has a physical meaning: it is related to the
 Bose distribution $n_B$ and the frequency $\omega_{qs}$ of the phonon mode. At a given
-temperature T, **freeze_displ** will give the mean square displacement of
-atoms (along with the displacement vectors, which are in Bohr). In atomic
-units **freeze_displ** = $\sqrt{(0.5 + n_B(\omega_{qs}/kT) / \omega_{qs}}$.
+temperature $T$, **freeze_displ** will give the root mean square displacement of
+atoms (along with the displacement vectors, which are in *Bohr*). In atomic
+units **freeze_displ** = $\sqrt{< \hat{x}^2 >} = \sqrt{(0.5 + n_B(\omega_{qs}/kT))/ \omega_{qs}}$
+where $\hat{x}\propto \hat{a} + \hat{a}^\dagger$ is the
+displacement operator and $a^\dagger$ and $a$ are the phonon creation and annihilation operators respectively.
 Typical values are 50-200 for a frequency of a few hundred cm$^{-1}$ and room temperature.
 If all you want is to break the symmetry in the right direction, any reasonable value
 (10-50) should be ok.

@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Documentation],[9.5.2],
+AC_INIT([ABINIT-Documentation],[9.7.1],
   [https://bugs.launchpad.net/abinit/],[abinit-doc])
 AC_REVISION([Autotools support for the ABINIT Documentation])
 AC_CONFIG_AUX_DIR([config/gnu])
@@ -58,7 +58,7 @@ AX_PROG_MKDIR_P
 
 # Option to test the absence of LaTeX
 AC_ARG_ENABLE(portability-tests,
-  AC_HELP_STRING([--enable-portability-tests],
+  AS_HELP_STRING([--enable-portability-tests],
     [Maintainer-only option to force build parameters (default: disabled)]))
 test "${enable_portability_tests}" = "" && enable_portability_tests="no"
 

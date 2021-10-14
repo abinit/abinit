@@ -126,7 +126,7 @@ contains
 !!      m_chi0,m_conducti,m_dfpt_looppert,m_ebands,m_gstate,m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -520,7 +520,7 @@ end subroutine getnel
 !!      m_ebands,m_gstate,m_respfn_driver,m_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -719,8 +719,9 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    end do
  end if
 
+
  ! If the target nelect is not between nelectlo and nelecthi, exit
- if (nelect < nelectlo .or. nelect > nelecthi) then
+ if ((nelect < nelectlo .or. nelect > nelecthi) .and. (occopt <= 8)) then
    not_enough_bands = .true.
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
     ' newocc: ',ch10,&
@@ -777,8 +778,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        call getnel(doccde,dosdeltae,eigen,entropye,fermie_mid,fermie_mid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1))
 
-       ! Blanchet - Compute the number of free electrons with corresponding chemical
-       ! potential and add to nelect bounds.
+       ! Compute the number of free electrons of the extfpmd model
+       ! with corresponding chemical potential and add to nelect bounds.
        if(present(extfpmd)) then
          if(associated(extfpmd)) then
            call extfpmd%compute_nelect(fermie_mid,nelectmid,tsmear)
@@ -1091,7 +1092,7 @@ end subroutine newocc
 !!      m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1642,7 +1643,7 @@ end subroutine init_occ_ent
 !!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1955,7 +1956,7 @@ end function occ_dbe
 !!      m_epjdos,m_occ
 !!
 !! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 

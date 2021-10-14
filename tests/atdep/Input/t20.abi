@@ -40,7 +40,7 @@ TheEnd
 #%% authors = F. Bottin & J. Bouchet
 #%% keywords = atdep
 #%% description = 
-#%%   test aTDEP (3rd order)
+#%%   test aTDEP (2nd order)
 #%%   UO2 (fluorite) with 192 atoms at T = 1200 K. With LOTO.
 #%% topics = aTDEP
 #%%<END TEST_INFO>
