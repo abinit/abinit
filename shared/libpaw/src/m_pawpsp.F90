@@ -4553,7 +4553,9 @@ subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 &        xclibxc(1:5)=='LDA_X'.or.xclibxc(1:5)=='LDA_C'.or. &
 &        xclibxc(1:5)=='lda_x'.or.xclibxc(1:5)=='lda_c'.or. &
 &        xclibxc(1:5)=='GGA_X'.or.xclibxc(1:5)=='GGA_C'.or. &
-&        xclibxc(1:5)=='gga_x'.or.xclibxc(1:5)=='gga_c') then
+&        xclibxc(1:5)=='gga_x'.or.xclibxc(1:5)=='gga_c'.or. &
+&        xclibxc(1:6)=='MGGA_X'.or.xclibxc(1:6)=='MGGA_C'.or. &
+&        xclibxc(1:6)=='mgga_x'.or.xclibxc(1:6)=='mgga_c') then
 #if defined LIBPAW_HAVE_LIBXC
        ii=index(xclibxc,'+')
        if (ii>0) then
