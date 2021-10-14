@@ -86,6 +86,11 @@ AC_DEFUN([SD_FFT_DETECT], [
       dfti)
         _SD_DFTI_DETECT
         if test "${sd_dfti_ok}" = "yes"; then
+          sd_fft_cppflags="${sd_dfti_cppflags}"
+          sd_fft_cflags="${sd_dfti_cflags}"
+          sd_fft_fcflags="${sd_dfti_fcflags}"
+          sd_fft_ldflags="${sd_dfti_ldflags}"
+          sd_fft_libs="${sd_dfti_libs}"
           sd_fft_ok="yes"
         fi
         ;;
