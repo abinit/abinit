@@ -530,6 +530,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'corecs','DPR',multivals%ntypat)
 
+ intarr(1,:)=dtsets(:)%cprj_update_lvl
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cprj_update_lvl','INT',0)
+
 !###########################################################
 !### 03. Print all the input variables (D)
 !##
@@ -602,6 +605,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dipdip
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dipdip','INT',0)
+
+ intarr(1,:)=dtsets(:)%dipquad
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dipquad','INT',0)
 
 !dmatpawu
  if (dmatpuflag==1.and.mxvals%natpawu>0) then
@@ -949,6 +955,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%fftgw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftgw','INT',0)
 
+ intarr(1,:)=dtsets(:)%fft_count
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fft_count','INT',0)
+
  intarr(1,:)=dtsets(:)%fockoptmix
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fockoptmix','INT',0)
 
@@ -1148,8 +1157,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
        if(dtsets(idtset)%iscf>=0 .or. idtset==0)then
          do iimage=1,dtsets(idtset)%nimage
            if (narrm(idtset)>0) then
+!            Note the minus sign, because chrgat is the ziontypat minus the electronic charge
              dprarr_images(1:narrm(idtset),iimage,idtset)=&
-&             results_out(idtset)%intgres(1,1:size2,iimage)
+&             -results_out(idtset)%intgres(1,1:size2,iimage)
            end if
            if(.not.(dtsets(idtset)%dynimage(iimage)==1.or.compute_static_images))then
              prtimg(iimage,idtset)=0

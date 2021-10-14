@@ -182,9 +182,7 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -283,7 +281,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: xrdm_k_full(:,:,:),rdm_k(:,:),potk(:,:),nateigv(:,:,:,:)
+ complex(dpc),allocatable :: xrdm_k_full(:,:,:),rdm_k(:,:),pot_k(:,:),nateigv(:,:,:,:)
  complex(dpc),allocatable :: old_ks_purex(:,:),new_hartr(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
@@ -512,7 +510,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
       Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
    if (my_rank == master) call pawtab_print(Pawtab)
@@ -2484,12 +2482,12 @@ endif
 &       Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &       gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,tol_empty)
        if (rdm_update) then ! Only recompute exchange update to the 1-RDM if the point read was broken or not precomputed
-         ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
-         ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw))
+         ABI_MALLOC(pot_k,(ib1:ib2,ib1:ib2))
+         ABI_MALLOC(rdm_k,(ib1:ib2,ib1:ib2))
          rdm_k=czero
 !        Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc. (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
-         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs
-         call calc_rdmx(ib1,ib2,ik_ibz,potk,rdm_k,QP_BSt)                                                 ! Only restricted closed-shell calcs
+         pot_k(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,1) ! Only restricted calcs
+         call calc_rdmx(ib1,ib2,ik_ibz,pot_k,rdm_k,QP_BSt)                                                ! Only restricted closed-shell calcs
 !        Update the full 1RDM with the exchange corrected one for this k-point
          xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)=xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz)+rdm_k(ib1:ib2,ib1:ib2)
 !        Compute NAT ORBS for exchange corrected 1-RDM
@@ -2497,7 +2495,7 @@ endif
            rdm_k(ib,ib)=rdm_k(ib,ib)+QP_BSt%occ(ib,ik_ibz,1)           ! Only restricted closed-shell calcs
          enddo
          call natoccs(ib1,ib2,rdm_k,nateigv,nat_occs,QP_BSt,ik_ibz,0)  ! Only restricted closed-shell calcs
-         ABI_FREE(potk)
+         ABI_FREE(pot_k)
          ABI_FREE(rdm_k)
        end if
      else
@@ -2549,7 +2547,7 @@ endif
        if (rdm_update) then
          if (sigmak_todo(ik_ibz)==1) then ! Only recompute correlation update to the 1-RDM if the point read was broken or not precomputed
            if (x1rdm/=1) then
-             ABI_MALLOC(rdm_k,(b1gw:b2gw,b1gw:b2gw))
+             ABI_MALLOC(rdm_k,(ib1:ib2,ib1:ib2))
              rdm_k=czero
              call calc_rdmc(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,QP_BSt,rdm_k)    ! Only restricted closed-shell calcs
 !            Update the full 1RDM with the GW corrected one for this k-point
@@ -3062,9 +3060,7 @@ end subroutine sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4051,9 +4047,7 @@ end subroutine setup_sigma
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4238,9 +4232,7 @@ end subroutine sigma_tables
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 
@@ -4390,9 +4382,7 @@ end subroutine sigma_bksmask
 !!      m_sigma_driver
 !!
 !! CHILDREN
-!!      paw_an_init,paw_an_nullify,paw_ij_init,paw_ij_nullify,pawdenpot
-!!      pawmknhat,pawrhoij_alloc,pawrhoij_inquire_dim,pawrhoij_symrhoij
-!!      pawrhoij_unpack,wfd%pawrhoij,wrtout
+!!      get_xclevel,vcoul_init
 !!
 !! SOURCE
 

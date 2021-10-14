@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.5.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h31 )
+.Starting date : Fri 18 Jun 2021.
+- ( at 19h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t17/t17.in
-- output file    -> t17.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/TestBot_MPI1/v7_t17/t17.abi
+- output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
 
@@ -260,6 +260,8 @@ P           mkmem          10
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         225
+        spnorbscl1     9.9999999000E-01
+        spnorbscl2     1.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
                       -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
@@ -332,8 +334,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pt-sp_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
 - Pt    ONCVPSP  r_core=  1.41  1.46  1.41
 - 78.00000  18.00000    160330                znucl, zion, pspdat
     8   11    2    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -346,7 +348,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              0    2.331189   31.398658
              1    7.045402    1.078520    0.020238    0.000035
              2    2.621990    0.537937    0.017068    0.000225
+ Rescaling spin-orbit KB energies using spnorbscl. 1.000000E+00
   spin-orbit 1    1.273026   -0.990430    0.035291   -0.000486
+ Rescaling spin-orbit KB energies using spnorbscl. 1.000000E+00
   spin-orbit 2    0.181703   -0.124634    0.058710   -0.001813
  pspatm: atomic psp has been read  and splines computed
 
@@ -364,13 +368,13 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -129.80992037529    -1.298E+02 4.997E-01 4.398E+01
- ETOT  2  -129.85487909912    -4.496E-02 3.966E-02 2.673E+01
- ETOT  3  -129.86835403251    -1.347E-02 2.777E-03 9.948E-03
- ETOT  4  -129.86836103233    -7.000E-06 5.638E-04 3.232E-04
- ETOT  5  -129.86836116154    -1.292E-07 5.320E-04 1.099E-06
- ETOT  6  -129.86836116172    -1.882E-10 3.972E-04 1.584E-08
- ETOT  7  -129.86836116173    -6.338E-12 2.688E-04 1.776E-11
+ ETOT  1  -129.80992037203    -1.298E+02 4.997E-01 4.398E+01
+ ETOT  2  -129.85487909587    -4.496E-02 3.966E-02 2.673E+01
+ ETOT  3  -129.86835402929    -1.347E-02 2.777E-03 9.948E-03
+ ETOT  4  -129.86836102910    -7.000E-06 5.638E-04 3.232E-04
+ ETOT  5  -129.86836115831    -1.292E-07 5.320E-04 1.099E-06
+ ETOT  6  -129.86836115850    -1.938E-10 3.972E-04 1.584E-08
+ ETOT  7  -129.86836115851    -3.638E-12 2.688E-04 1.776E-11
 
  At SCF step    7       vres2   =  1.78E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -390,7 +394,7 @@ lattice_vectors:
 lattice_lengths: [   5.23966,    5.23966,    5.23966, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0171726E+02
-convergence: {deltae: -6.338E-12, res2:  1.776E-11, residm:  2.688E-04, diffor: null, }
+convergence: {deltae: -3.638E-12, res2:  1.776E-11, residm:  2.688E-04, diffor: null, }
 etotal    :  -1.29868361E+02
 entropy   :   0.00000000E+00
 fermie    :   6.11555334E-01
@@ -451,18 +455,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.74974791102683E+01
-hartree             :  1.89033659424018E+01
-xc                  : -2.29498598973286E+01
+kinetic             :  3.74974791075705E+01
+hartree             :  1.89033659422020E+01
+xc                  : -2.29498598972055E+01
 Ewald energy        : -1.00235851013014E+02
 psp_core            :  4.69105642167867E+00
-local_psp           : -7.53315621172416E+01
-non_local_psp       :  7.56753090903339E+00
-internal            : -1.29857840644202E+02
-'-kT*entropy'       : -1.05205175284882E-02
-total_energy        : -1.29868361161731E+02
-total_energy_eV     : -3.53389782684098E+03
-band_energy         : -9.37509305378102E+00
+local_psp           : -7.53315621159648E+01
+non_local_psp       :  7.56753091376573E+00
+internal            : -1.29857840640968E+02
+'-kT*entropy'       : -1.05205175393768E-02
+total_energy        : -1.29868361158507E+02
+total_energy_eV     : -3.53389782675325E+03
+band_energy         : -9.37509305082163E+00
 ...
 
 
@@ -512,8 +516,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pt-sp_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
 - Pt    ONCVPSP  r_core=  1.41  1.46  1.41
 - 78.00000  18.00000    160330                znucl, zion, pspdat
     8   11    2    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -883,7 +887,9 @@ P           mkmem          10
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         225
-           strten1     5.1361985125E-03  5.1361985125E-03  5.1361985125E-03
+        spnorbscl1     9.9999999000E-01
+        spnorbscl2     1.0000000000E+00
+           strten1     5.1361985115E-03  5.1361985115E-03  5.1361985115E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     5.0982796368E-03  5.0982796368E-03  5.0982796368E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1011,10 +1017,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         51.3  wall=         51.4
+- Proc.   0 individual time (sec): cpu=         57.3  wall=         57.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         51.3  wall=         51.4
+.Delivered   0 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         57.3  wall=         57.5

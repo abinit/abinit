@@ -85,13 +85,15 @@ ndtset 3 jdtset 1 2 3
  pp_dirpath "$ABI_PSPDIR"
  pseudos "al_ps.abinit.paw, as_ps.paw"
 
+#This commented line was incorrect
+#test_chain = t95.abi,t96.abi,t97.abi,t98.abi
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t95.abi,t96.abi,t97.abi,t98.abi
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 1, 2, 4, 10
+#%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 10
 #%% [NCPU_1]
 #%% files_to_test = 
