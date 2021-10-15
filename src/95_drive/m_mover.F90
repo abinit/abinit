@@ -196,7 +196,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,6 +216,7 @@ real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
+integer,optional,intent(in) :: sc_size(3)
 
 !Local variables-------------------------------
 !scalars
@@ -294,7 +295,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
  if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_ini(deloc)
 
- if (ab_mover%ionmov==13) call mttk_ini(mttk_vars,ab_mover%nnos)
+ if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
+   call mttk_ini(mttk_vars,ab_mover%nnos)
+ end if
 
 !###########################################################
 !### 03. Set the number of iterations ntime
@@ -351,7 +354,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      if(present(effective_potential))then
-       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size) ! Map Hist to Ref to order atoms
        xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
        hist%ihist = 1
      end if
@@ -371,9 +374,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
  ncycle=specs%ncycle
 
  if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
-   ncycle=scfcv_args%dtset%hmctt
+   ncycle=scfcv_args%dtset%hmctt   
    if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
-     ncycle=ncycle+scfcv_args%dtset%hmcsst
+      ncycle=ncycle+scfcv_args%dtset%hmcsst 
    endif
  endif
 
@@ -629,7 +632,8 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !          For monte carlo don't need to recompute energy here (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+               if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,&
+&                                                                      need_verbose,sc_size=sc_size)!Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -967,7 +971,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !One should instead have a datastructure associated with the preconditioner.
  if (ab_mover%goprecon>0) call prec_simple(ab_mover,preconforstr,hist,1,1,1)
 
- if (ab_mover%ionmov==13) call mttk_fin(mttk_vars)
+ if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
+   call mttk_fin(mttk_vars)
+ end if
 
  if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_fin(deloc)
 
