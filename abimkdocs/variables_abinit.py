@@ -1760,8 +1760,9 @@ magnetization.
 When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
 
 When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the collinear case) of the magnetization is constrained;
-When [[constraint_kind]]=2 or 12, only the direction is constrained (only meaningful in the non-collinear case);
-When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (only meaningful in the non-collinear case, albeit allowed);
+When [[constraint_kind]]=3 or 13, only the magnetization magnitude is constrained.
+When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case, not allowed in the collinear case);
 
 For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
 so the algorithm works only with [[iscf]] between 2 and 9.
@@ -1777,6 +1778,10 @@ Atoms of the same type are supposed to incur the same constraint.
 If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+The difference between [[constraint_kind]]=4 or 14 and [[constraint_kind]]=2 or 12 lies in the fact that [[constraint_kind]]=2 or 12 will consider similarly
+a magnetization vector and its opposite, as this constraint is just alignment on an axis, while [[constraint_kind]]=4 or 14 enforces that
+the scalar product of the target magnetization direction (normalized vector) and the actual optimized magnetization direction (normalized vector) is positive.
 
 Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle.
 """,
@@ -9928,7 +9933,7 @@ Variable(
 Turns on the imposition of a constraint on the magnetization, using a penalty function. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
 a penalty function is applied to bring it to the input values of [[spinat]].
-The constraint can be either on the direction only ([[magconon]] = 1) or on the full
+The constraint can be either on the direction/axis only ([[magconon]] = 1) or on the full
 vector ([[magconon]] = 2). The penalty function has an amplitude
 [[magcon_lambda]] that should be neither too big (bad or impossible convergence) nor too small (no effect).
 The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
@@ -9936,6 +9941,10 @@ approach, which is a misnomer for the algorithm that they describe. It has the d
 the exact sought value for the magnetization. So, the true Lagrange approach has to be preferred, except for testing purposes.
 This is provided by the algorithm governed by the input variable [[constraint_kind]], which is actually also much more flexible
 than the implementation corresponding to [[magconon]].
+
+Final subtlety: when [[magconon]] = 1, if [[nspden]]==2 (collinear case), then the direction of magnetization is constraint (positive or negative along z),
+while if [[nspden]]==4, then the axis of magnetization is constraint (the actual direction is not imposed, both directions are equivalent). This might be 
+confusing.
 """,
 ),
 
