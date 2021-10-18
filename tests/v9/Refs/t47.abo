@@ -17,10 +17,10 @@
 .Starting date : Tue 10 Nov 2020.
 - ( at 22h36 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t13-t14/t13.in
-- output file    -> t13.out
-- root for input  files -> t13i
-- root for output files -> t13o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t47/t47.in
+- output file    -> t47.out
+- root for input  files -> t47i
+- root for output files -> t47o
 
 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
@@ -1710,7 +1710,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t13o_DS1_EIG
+ prteigrs : about to open file t47o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.24703   Average Vxc (hartree)=  -0.50287
  Magnetization (Bohr magneton)=  2.05921342E+00
  Total spin up =  9.02960671E+00   Total spin down =  6.97039329E+00
@@ -1815,10 +1815,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.19444
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS1_WFK
 
 ================================================================================
- prteigrs : about to open file t13o_DS2_EIG
+ prteigrs : about to open file t47o_DS2_EIG
 
  SPIN UP channel
  Non-SCF case, kpt    1 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
@@ -1972,7 +1972,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t13o_DS2_EIG
+ prteigrs : about to open file t47o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   6  k points, SPIN UP:
  kpt#   1, nband= 30, wtk=  0.12500, kpt=  0.1250  0.1250  0.1250 (reduced coord)
   -3.03223   -1.76361   -1.76071   -1.76071    0.08098    0.14801    0.14801    0.21087
@@ -2030,10 +2030,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.19444
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS2_WFK
 
 ================================================================================
- prteigrs : about to open file t13o_DS3_EIG
+ prteigrs : about to open file t47o_DS3_EIG
 
  SPIN UP channel
  Non-SCF case, kpt    1 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
@@ -2234,7 +2234,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
- prteigrs : about to open file t13o_DS3_EIG
+ prteigrs : about to open file t47o_DS3_EIG
  Eigenvalues (hartree) for nkpt=  32  k points, SPIN UP:
  kpt#   1, nband= 30, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
   -3.03223   -1.76361   -1.76071   -1.76071    0.08098    0.14801    0.14801    0.21087
@@ -2291,7 +2291,7 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.19444
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS3_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2308,7 +2308,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS3_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS3_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2333,7 +2333,7 @@ tolerances: {tolvrs: 1.00E-09, }
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    8.6008453271E+01
           f-sum rule ratio=    4.1506609081E-01
- prteigrs : about to open file t13t_1WF1_EIG
+ prteigrs : about to open file t47t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 30, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -2414,7 +2414,7 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.19444
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS3_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2431,7 +2431,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS3_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS3_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2456,7 +2456,7 @@ tolerances: {tolvrs: 1.00E-09, }
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    8.6008453271E+01
           f-sum rule ratio=    4.1511630656E-01
- prteigrs : about to open file t13t_1WF1_EIG
+ prteigrs : about to open file t47t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 30, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
@@ -2537,7 +2537,7 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.19444
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS3_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2554,7 +2554,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t13o_DS3_WFK
+-inwffil : will read wavefunctions from disk file t47o_DS3_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2579,7 +2579,7 @@ tolerances: {tolvrs: 1.00E-09, }
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
  dfpt_looppert : ek2=    8.6008453271E+01
           f-sum rule ratio=    4.1515275268E-01
- prteigrs : about to open file t13t_1WF1_EIG
+ prteigrs : about to open file t47t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 30, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)

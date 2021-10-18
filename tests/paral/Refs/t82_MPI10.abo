@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of MULTIBINIT 
+.Version 9.5.2 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h54 )
+.Starting date : Thu 22 Jul 2021.
+- ( at 13h24 )
   
 -  nproc =   10
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_sys.xml
+-/home/mschmitt/abninit-git/abinit/tests/paral/Input/t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -43,6 +43,7 @@
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  3
+     fit_dispterms  1
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
@@ -71,8 +72,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_sys.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_sys.xml with Fortran
+-Opening the file /home/mschmitt/abninit-git/abinit/tests/paral/Input/t82_sys.xml
+-Reading the file /home/mschmitt/abninit-git/abinit/tests/paral/Input/t82_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -159,16 +160,16 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_coeffs.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t82_coeffs.xml with Fortran
+-Opening the file /home/mschmitt/abninit-git/abinit/tests/paral/Input/t82_coeffs.xml
+-Reading the file /home/mschmitt/abninit-git/abinit/tests/paral/Input/t82_coeffs.xml with LibXML library
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/paral/Input/t81_HIST
+-/home/mschmitt/abninit-git/abinit/tests/paral/Input/t81_HIST
 
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
@@ -180,30 +181,29 @@ dipdip_range         1         1         1
 
  60 coefficients generated 
 
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
-    Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     3           8.2581347440E+00  4.0003838705E-03  3.8455523719E-03  1.5483149867E-04
- 4     4           8.5804227752E+00  3.7876180836E-03  3.6336164702E-03  1.5400161341E-04
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     3           9.8269210000E-06  3.9567590496E-03  3.8455243722E-03  1.1123467737E-04
+ 4     4           1.0210073497E-05  3.7452862503E-03  3.6335881317E-03  1.1169811858E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.8804979988E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2571058361E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8288686787E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0098977360E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   8.5804227751882269E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836315487E-03
-   Forces          :   3.6336164702180937E-03
-   Stresses        :   1.5400161341345517E-04
+   Energy          :   1.0210073496606129E-05
+   Forces+Stresses :   3.7452862502799183E-03
+   Forces          :   3.6335881317023687E-03
+   Stresses        :   1.1169811857754947E-04
 
 
 ================================================================================
@@ -213,10 +213,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      9.182  and wall time      9.207 sec
++Total cpu time      3.399  and wall time      3.552 sec
 
  multibinit : the run completed succesfully.
