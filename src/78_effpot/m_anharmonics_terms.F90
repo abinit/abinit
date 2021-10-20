@@ -165,12 +165,14 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
 
 !Set the 3rd order elastic tensor
  anharmonics_terms%elastic3rd = zero
+ anharmonics_terms%has_elastic3rd = .FALSE.
  if(present(elastic3rd))then
    call anharmonics_terms_setElastic3rd(anharmonics_terms,elastic3rd)
  end if
 
 !Set the 3rd order elastic tensor
  anharmonics_terms%elastic4th = zero
+ anharmonics_terms%has_elastic4th = .FALSE.
  if(present(elastic4th))then
    call anharmonics_terms_setElastic4th(anharmonics_terms,elastic4th)
  end if
