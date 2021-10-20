@@ -6,7 +6,7 @@ It also discusses how to test whether the compilation was successful by running 
 Finally, it gives related complements for the developers.
 
 Any comment or suggestion to improve the procedure or this page is welcome!
-Simply contact the ABINIT group on the [forum](https://forum.abinit.org).
+Simply contact the ABINIT group on the [discourse forum](https://discourse.abinit.org).
 
 ## Overview
 
@@ -494,7 +494,7 @@ If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.
 If it is only very occasional, you might as well rely on the [ABINIT Github Web site](https://github.com/abinit).
 
-It is strongly advised to subscribe to the [ABINIT forum](https://forum.abinit.org/)
+It is strongly advised to subscribe to the [ABINIT discourse forum](https://discourse.abinit.org/)
 to receive the latest information concerning new developments.
 
 After having installed git, and obtained a gitlab branch on the ABINIT internal server, 
