@@ -4408,7 +4408,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 
 !Local variables -------------------------
 !scalars
- integer :: ii,nblok,nsize
+ integer :: ii,nblok,nsize,cnt
 
 ! *********************************************************************
 
@@ -4433,13 +4433,15 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 
  ! Copy the allocatable arrays.
  ddb%amu(:) = ddb_lw%amu(:)
+ cnt = 0
  do ii=1,ddb_lw%nblok
    if (ddb_lw%typ(ii)/=33) then
-     ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
-     ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
-     ddb%typ(ii)     = ddb_lw%typ(ii)
-     ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
-     ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
+     cnt = cnt + 1
+     ddb%flg(:,cnt)   = ddb_lw%flg(1:nsize,ii)
+     ddb%val(:,:,cnt) = ddb_lw%val(:,1:nsize,ii)
+     ddb%typ(cnt)     = ddb_lw%typ(ii)
+     ddb%nrm(:,cnt)   = ddb_lw%nrm(:,ii)
+     ddb%qpt(:,cnt)   = ddb_lw%qpt(:,ii)
    end if
  end do
 
