@@ -482,7 +482,7 @@ function pimd_is_restart(mass,vel,vel_cell)
  integer :: pimd_is_restart
 !arrays
  real(dp),intent(in) :: mass(:,:),vel(:,:,:)
- real(dp),intent(in),optional :: vel_cell(:,:,:)
+ real(dp),intent(in),optional :: vel_cell(:,:)
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: zero_temp=tol7
@@ -632,16 +632,17 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
  real(dp) :: mtot
  character(len=500) :: msg
 !arrays
- real(dp) :: acell(3),cdm(3),forcetot(3),rprim(3,3)
+ real(dp) :: acell(3),cdm_cart(3),cdm_red(3),forcetot(3),rprim(3,3)
  real(dp),allocatable :: centroid(:,:),qudeloc(:)
 
 !************************************************************************
 
 !Temperature
- if(itimimage==1)then
-   if(irestart==0) then
+if(itimimage==1)then
+   msg=ch10
+   if(mod(irestart,10)==0) then
      write(msg,'(2a)') ch10,' This is a PIMD calculation from scratch'
-   else if (irestart==1) then
+   else if (mod(irestart,10)==1) then
      write(msg,'(2a)') ch10,' This is a RESTART calculation'
    end if
    call wrtout(ab_out,msg,'COLL')
@@ -707,15 +708,19 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 
 !position of mass center
  if (prtvolimg<=1) then
-   mtot=zero;cdm=zero
+   mtot=zero;cdm_cart=zero;cdm_red=zero
    do iimage=1,trotter
      do iatom=1,natom
-       cdm(:)=cdm(:)+inertmass(iatom)*xcart(:,iatom,iimage)
+       cdm_cart(:)=cdm_cart(:)+inertmass(iatom)*xcart(:,iatom,iimage)
+       cdm_red (:)=cdm_red (:)+inertmass(iatom)*xred (:,iatom,iimage)
        mtot=mtot+inertmass(iatom)
      end do
    end do
-   cdm=cdm/mtot
-   write(msg,'(3a,3f18.10)') ch10,' Center of mass:',ch10,cdm(:)
+   cdm_cart=cdm_cart/mtot
+   cdm_red =cdm_red /mtot
+   write(msg,'(3a,3x,3f18.10,3a,3x,3f18.10)') ch10,&
+&    ' Center of mass, in cartes. coordinates :',ch10,cdm_cart(:),ch10,&
+&    ' Center of mass, in reduced coordinates :',ch10,cdm_red(:)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
