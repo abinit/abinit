@@ -1,4 +1,4 @@
-# Test nloc_alg options (PAW, so useylm=1) on AlAs (optforces=2)
+# Test cprj_update_lvl and nloc_alg options (PAW, so useylm=1) on AlAs (optforces=1)
 
   nonlop_ylm_count 1 # enable nonlop counting
   fft_count 1        # enable fft counting
@@ -18,7 +18,7 @@
   cprj_update_lvl2 -2 # A + B + C + D + E (for debugging only, poor performance)
   cprj_update_lvl1  0 # "cprj in memory" implementation is disabled, use of the native implementation instead
 
-  optforces 2
+  optforces 1
   optstress 1
 
 # Elementary cell
@@ -74,12 +74,12 @@
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
-#%% files_to_test = t103.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
+#%% files_to_test = t74.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW
 #%% description = Quick test on AlAs (PAW) to check that different cprj_update_lvl options give the correct energy.
-#%%               Compute forces and stress at the end of the run.
+#%%               Compute forces at every iteration, compute stress at the end of the run.
 #%%<END TEST_INFO>
