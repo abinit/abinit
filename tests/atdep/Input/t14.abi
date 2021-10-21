@@ -37,6 +37,6 @@ TheEnd
 #%% keywords = atdep
 #%% description = 
 #%%   test aTDEP (2nd order)
-#%%   Uranium (C-face centered othorombic with 2 atoms) with 144 atoms at T = 300 K.
+#%%   Uranium (C-face centered orthorombic with 2 atoms) with 144 atoms at T = 300 K.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

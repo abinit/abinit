@@ -25,6 +25,7 @@ TheEnd
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
+#%% exclude_builders = bob_gnu_7.5_openmp
 #%% md_hist = t15
 #%% [files]
 #%% files_to_test = 
@@ -38,6 +39,6 @@ TheEnd
 #%% keywords = atdep
 #%% description = 
 #%%   test aTDEP (2nd order)
-#%%   Uranium (othorombic with 8 atoms) with 96 atoms at T = 50 K. Debug mode.
+#%%   Uranium (orthorombic with 8 atoms) with 96 atoms at T = 50 K. Debug mode.
 #%% topics = aTDEP
 #%%<END TEST_INFO>

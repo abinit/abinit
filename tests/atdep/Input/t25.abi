@@ -22,6 +22,7 @@ TheEnd
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
+#%% exclude_builders = bob_gnu_7.5_openmp
 #%% md_hist = t25
 #%% [files]
 #%% files_to_test = 
