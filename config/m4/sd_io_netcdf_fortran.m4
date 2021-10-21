@@ -289,15 +289,30 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_USE], [
   # Check if we can do parallel I/O
   if test "${sd_netcdf_fortran_ok}" = "yes" -a "${sd_mpi_ok}" = "yes"; then
     if test "${sd_hdf5_mpi_ok}" = "yes"; then
+      echo
+      echo "netcdf-f : Check if we can do parallel I/O"
       AC_MSG_CHECKING([whether the NetCDF Fortran interface has parallel I/O])
       AC_LANG_PUSH([Fortran])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      AC_RUN_IFELSE([AC_LANG_PROGRAM([],
         [[
           use mpi
           use netcdf
+
+          integer :: process_Rank, size_Of_Cluster, ierror
           integer :: ierr, ncid
+          size_Of_Cluster = 1
+
+          call MPI_INIT(ierror)
+          call MPI_COMM_SIZE(MPI_COMM_WORLD, size_Of_Cluster, ierror)
+          call MPI_COMM_RANK(MPI_COMM_WORLD, process_Rank, ierror)
+
           ierr = nf90_create("conftest.nc", ior(NF90_NETCDF4, NF90_MPIPOSIX), &
             ncid, comm=MPI_COMM_WORLD, info=MPI_INFO_NULL)
+          write(*,*) "JMB netcdf-f nfcreate -> ierr= ", ierr
+
+          call MPI_FINALIZE(ierror)
+
+          call exit(ierr)
         ]])], [sd_netcdf_fortran_mpi_ok="yes"], [sd_netcdf_fortran_mpi_ok="no"])
       AC_LANG_POP([Fortran])
       AC_MSG_RESULT([${sd_netcdf_fortran_mpi_ok}])
