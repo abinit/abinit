@@ -266,22 +266,36 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   AC_MSG_RESULT([${sd_netcdf_ok}])
 
   # Check if we can do parallel I/O
+  echo
+  echo "netcdf-c : Check if we can do parallel I/O"
   if test "${sd_netcdf_ok}" = "yes" -a "${sd_mpi_ok}" = "yes"; then
+    echo "JMB Check // IO netcdf-c"
     if test "${sd_hdf5_mpi_ok}" = "yes"; then
+      echo " sd_hdf5_mpi_ok = yes"
+      echo " whether NetCDF has parallel I/O"
       AC_MSG_CHECKING([whether NetCDF has parallel I/O])
       AC_LANG_PUSH([C])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM(
+      AC_RUN_IFELSE([AC_LANG_PROGRAM(
         [[
 #         include <mpi.h>
 #         include <netcdf.h>
+#         include <stdio.h>
         ]],
         [[
+          MPI_Init(NULL,NULL);
           MPI_Comm comm = MPI_COMM_WORLD;
           MPI_Info info = MPI_INFO_NULL;
+
           int ierr, ncid;
-          ierr = nc_create_par(file_name, NC_NETCDF4, comm, info, &ncid);
+          ierr = nc_create_par("conftest.nc", NC_NETCDF4, comm, info, &ncid);
+          printf("  nc_create_par : ierr= %d\n",ierr);
+          MPI_Finalize();
+
+          if(ierr != 0) return 1;
+
         ]])], [sd_netcdf_mpi_ok="yes"], [sd_netcdf_mpi_ok="no"])
       AC_LANG_POP([C])
+      echo "  sd_netcdf_mpi_ok = ${sd_netcdf_mpi_ok}"
       AC_MSG_RESULT([${sd_netcdf_mpi_ok}])
     else
       sd_netcdf_mpi_ok="no"
