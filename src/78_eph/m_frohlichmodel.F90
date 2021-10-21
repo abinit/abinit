@@ -594,10 +594,10 @@ do ikpt=1,dtset%nkpt
 
        !Check degeneracies in (100) direction, and evaluate A and B.
        !Eigenvalues are 2*A (d=1), 2*B (d=2)
-       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol5) then
+       if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,3))<tol3) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,3))/2)
          lutt_params(1)=0.5*lutt_eigenval(1,1)
-       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol5) then
+       else if(abs(lutt_eigenval(1,2)-lutt_eigenval(1,1))<tol3) then
          lutt_params(2)=0.5*((lutt_eigenval(1,2)+lutt_eigenval(1,1))/2)
          lutt_params(1)=0.5*lutt_eigenval(1,3)
        else
@@ -606,9 +606,9 @@ do ikpt=1,dtset%nkpt
 
        !Check degeneracies in (111) direction and evaluate C
        !Eigenvalues are 2/3*(A+2B-C) (d=2), 2/3*(A+2B+2C) (d=1)
-       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol5) then
+       if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,3))<tol3) then
          lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,3)))
-       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol5) then
+       else if(abs(lutt_eigenval(3,2)-lutt_eigenval(3,1))<tol3) then
          lutt_params(3)=lutt_params(1)+2*lutt_params(2)-1.5*(0.5*(lutt_eigenval(3,2)+lutt_eigenval(3,1)))
        else
          lutt_warn(2)=.true.
@@ -618,11 +618,11 @@ do ikpt=1,dtset%nkpt
        !Eigenvalues are 2B, A+B-C, A+B+C
        lutt_found=(/.false.,.false.,.false./)
        do ipar=1,deg_dim
-         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol4) then
+         if(abs(lutt_eigenval(2,ipar)-2*lutt_params(2))<tol3) then
            lutt_found(1)=.true.
-         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol4) then
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)-lutt_params(3)))<tol3) then
            lutt_found(2)=.true.
-         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol4) then
+         else if(abs(lutt_eigenval(2,ipar)-(lutt_params(1)+lutt_params(2)+lutt_params(3)))<tol3) then
            lutt_found(3)=.true.
          endif
        enddo
