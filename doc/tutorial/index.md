@@ -216,10 +216,6 @@ the tutorial on non-linear optics, and the group of electron-phonon tutorials:**
     explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap 
     as well as temperature-dependent band gaps (or the whole electronic structure).
 
-  * [The tutorial on polaron effective mass in cubic materials](eph4pem) 
-    explains how to obtain the polaron effective mass in cubic materials for the degenerate electronic band case, 
-    having as a byproduct the zero-point renormalization energy of the respective bands.
-
 **Two obsolete tutorials on electron-phonon interaction are still present. 
 The implementations are still available at time of writing,
 but have been superseded by the new implementations, described in the above-mentioned tutorials.
