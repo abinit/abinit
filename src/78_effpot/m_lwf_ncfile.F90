@@ -230,12 +230,19 @@ contains
          &         supercell%lwf%lwf_latt_coeffs%coeffs%ind%data(1, 1:nnz), &
          &      start=[1], count=[nnz])
     NCF_CHECK_MSG(ncerr, "Error when writting id_map_idisp in lwf history file.")
+    ncerr=nf90_def_var_deflate(self%ncid, id_map_idisp, shuffle=1, deflate=1, deflate_level=2)
+    NCF_CHECK_MSG(ncerr, "Error when defining delfating for variable id_map_idisp")
+
 
 
     ncerr=nf90_put_var(self%ncid, id_map_ilwf,  &
          &         supercell%lwf%lwf_latt_coeffs%coeffs%ind%data(2, 1:nnz), &
          &      start=[1], count=[nnz])
     NCF_CHECK_MSG(ncerr, "Error when writting id_map_ilwf in lwf history file.")
+    ncerr=nf90_def_var_deflate(self%ncid, id_map_ilwf, shuffle=1, deflate=1, deflate_level=2)
+    NCF_CHECK_MSG(ncerr, "Error when defining delfating for variable id_map_ilwf")
+
+
 
     ncerr=nf90_put_var(self%ncid, id_map_val,  &
          &         supercell%lwf%lwf_latt_coeffs%coeffs%val%data(1:nnz), &
