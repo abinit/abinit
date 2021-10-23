@@ -804,8 +804,8 @@ program optic
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
    itemp = 1
 
-   if (hdr%kptopt /= 3) then
-     ABI_WARNING("second harmonic generation with symmetries (kptopt != 3) is not tested. Use at your own risk!")
+   if (hdr%kptopt == 1) then
+     ABI_WARNING("second harmonic generation with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
    call nlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,fermie,pmat,&
@@ -826,8 +826,8 @@ program optic
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
    itemp = 1
 
-   if (hdr%kptopt /= 3) then
-     ABI_WARNING("linear electro-optic with symmetries (kptopt != 3) is not tested. Use at your own risk!")
+   if (hdr%kptopt == 1) then
+     ABI_ERROR("linear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
    call linelop(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
@@ -848,8 +848,8 @@ program optic
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
    itemp = 1
 
-   if (hdr%kptopt /= 3) then
-     ABI_WARNING("nonlinear electro-optic with symmetries (kptopt != 3) is not tested. Use at your own risk!")
+   if (hdr%kptopt == 1) then
+     ABI_ERROR("nonlinear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
    call nonlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
