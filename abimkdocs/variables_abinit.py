@@ -3696,7 +3696,7 @@ filtered, and some components are ignored. As a side effect, the wavefunctions
 are no more normalized, and also, no more orthogonal. This also means
 that the q=0, Q=0 or q=0, Q'=0 matrix elements of the susceptibility are not zero
 as they should, which might be a problem in some cases depending on the intended usage of the
-susceptibility matrix beyond standard GW and BSE calculations. 
+susceptibility matrix beyond standard GW and BSE calculations.
 
 Anyhow, the set of plane waves can be much smaller for [[optdriver]] = 3, than for [[optdriver]] = 4,
 although a convergence study is needed to choose correctly both values.
@@ -9942,7 +9942,7 @@ This is provided by the algorithm governed by the input variable [[constraint_ki
 than the implementation corresponding to [[magconon]].
 
 Final subtlety: when [[magconon]] = 1, if [[nspden]]==2 (collinear case), then the direction of magnetization is constraint (positive or negative along z),
-while if [[nspden]]==4, then the axis of magnetization is constraint (the actual direction is not imposed, both directions are equivalent). This might be 
+while if [[nspden]]==4, then the axis of magnetization is constraint (the actual direction is not imposed, both directions are equivalent). This might be
 confusing.
 """,
 ),
@@ -21479,25 +21479,44 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 
-This variable defines the quantity to compute starting from a previously generated WFK file.
+This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_full" --> Read WFK file and produce new WFK file with k-points in the full BZ.
-        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-        This option can be used to interface Abinit with external tools requiring k-points in the full BZ.
+  * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
+    Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
+    This option can be used to interface Abinit with external tools (e.g. lobster)
+    requiring $\kk$-points in the full BZ.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate band structure using the parameters specified by [[einterp]].
+  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
+    using the parameters specified by [[einterp]].
 
-  * "wfk_ddk" --> Compute DDK matrix elements for all bands and k-points in the WFK file.
-     The contribution due to the non-local part of the pseudopotential can be ignored
-     by setting [[inclvkb]] = 0 (not recommended unless you know what you are doing).
+  * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
+    The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
+    operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
+    These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
+    without having to call the DFPT part that is much more expensive at the level of memory.
 
-  * "wfk_kpts_erange" --> Read WFK file,
-        use star-function and [[einterp]] parameters to interpolate electron energies onto fine k-mesh
-        defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-        Find k-points inside (electron/hole) pockets according to the values specified in [[sigma_erange]].
-        Write KERANGE.nc file with the tables required by the code to automate NSCF band structure calculations
-        inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+    Please note that, at present, the computation of non-linear optical properties in optic requires
+    [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
+    can take advantage of spatial and time-reversal symmetries.
+    If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
+    has the correct value of [[kptopt]] according to the physical properties you want to compute.
+
+    In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
+    To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
+    to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
+
+  * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
+    and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
+    This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
+    in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
+    less memory demanding.
+
+  * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
+    electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+    Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
+    Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
+    inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 """,
 ),
 
