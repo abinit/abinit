@@ -326,9 +326,8 @@ program optic
    if (.not. use_ncevk(1)) then
 
      write(msg, "(12a)")ch10,&
-&      ' Check the consistency of the wavefunction files (esp. k point and number of bands). ',ch10,&
-&      ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,&
-&      trim(wfkfile)
+       ' Check the consistency of the wavefunction files (esp. k point and number of bands). ',ch10,&
+       ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,trim(wfkfile)
      ! split the write since long filenames can bust the 500 char limit of 'msg'
      call wrtout(std_out,msg)
      do ii=1,3
@@ -351,7 +350,6 @@ program optic
    ! TODO: one should perform basic consistency tests for the EVK files, e.g.
    ! k-points and their order, spins, number of bands could differ in the four files.
    ! Note indeed that we are assuming the same numer of bands in all the files.
-
 
    !Handle electron-phonon file
    ep_nc_fname = 'test_EP.nc'; if (do_temperature) ep_nc_fname = epfile
@@ -560,17 +558,11 @@ program optic
  istwfk = hdr%istwfk
  npwarr = hdr%npwarr
 
-! CP modified
-! call ebands_init(bantot, ks_ebands, nelect, doccde, eigen0, istwfk, kpt, &
-!& nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
-!& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-!& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
  call ebands_init(bantot, ks_ebands, nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
-& doccde, eigen0, istwfk, kpt, &
-& nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
-& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
-! End CP modified
+     doccde, eigen0, istwfk, kpt, &
+     nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
+     hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+     hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
  !YG : should we use broadening for ebands_init
  call ebands_update_occ(ks_ebands, -99.99d0)
@@ -811,8 +803,13 @@ program optic
    ABI_CHECK((s3(1:1)/='#'),'Bug: string length too short!')
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
    itemp = 1
+
+   if (hdr%kptopt /= 3) then
+     ABI_WARNING("second harmonic generation with symmetries (kptopt != 3) is not tested. Use at your own risk!")
+   end if
+
    call nlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,fermie,pmat,&
-&   nlin1,nlin2,nlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,optic_ncid,comm)
+                nlin1,nlin2,nlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,optic_ncid,comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors
@@ -828,8 +825,13 @@ program optic
    call int2char4(linel3,s3)
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
    itemp = 1
+
+   if (hdr%kptopt /= 3) then
+     ABI_WARNING("linear electro-optic with symmetries (kptopt != 3) is not tested. Use at your own risk!")
+   end if
+
    call linelop(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
-&   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
+   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
  ! nonlinear electro-optical susceptibility for semiconductors
@@ -845,8 +847,13 @@ program optic
    call int2char4(nonlin3,s3)
    tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_"//trim(s3)
    itemp = 1
+
+   if (hdr%kptopt /= 3) then
+     ABI_WARNING("nonlinear electro-optic with symmetries (kptopt != 3) is not tested. Use at your own risk!")
+   end if
+
    call nonlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
-&   nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
+    nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
 !---------------------------------------------------------------------------------
@@ -882,7 +889,7 @@ program optic
  if (my_rank == master) then
    write(std_out,'(a,80a,a,a,a)' )ch10,('=',ii=1,80),ch10,ch10,' Calculation completed.'
    write(std_out, '(a,a,a,f13.1,a,f13.1)' ) &
-&   '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
+    '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
 
  call xmpi_sum(tsec,comm,ierr)

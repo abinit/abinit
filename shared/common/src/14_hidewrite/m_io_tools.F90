@@ -233,7 +233,7 @@ end function file_exists
 !!
 !! SOURCE
 
-subroutine delete_file(fname,ierr)
+subroutine delete_file(fname, ierr)
 
  integer,intent(out) :: ierr
  character(len=*),intent(in) :: fname

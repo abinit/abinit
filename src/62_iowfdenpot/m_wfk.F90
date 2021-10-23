@@ -1236,7 +1236,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  nspinor_disk = Wfk%nspinor
 
  nband_disk   = Wfk%nband(ik_ibz,spin)
- ! there are several cases here, reading in fewer than mband bands, 
+ ! there are several cases here, reading in fewer than mband bands,
  !   or possibly more than you have allocated, and truncating
  !   nband_disk_keep could be used to distinguish these cases
  nband_disk_keep = nband_disk
@@ -3090,7 +3090,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  integer, intent(in) :: comm, nkpt_in, formeig
  integer, intent(in) :: mcg, mpw_in, mkmem_in
  integer, intent(in) ::  mband_in, mband_mem_in, natom_in, nspinor_in, nsppol_in, usepaw_in
- real(dp), intent(in) :: ecut_eff_in 
+ real(dp), intent(in) :: ecut_eff_in
 !=dtset%ecut*(dtset%dilatmx)**2 ! ecut * dilatmx**2
 !arrays
  integer, intent(in) :: istwfk_in(nkpt_in)
@@ -3157,7 +3157,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
  wfk_unt = get_unit()
-! TODO: this still does not read in parallel properly: 
+! TODO: this still does not read in parallel properly:
 ! if I use xmpi_comm_self only the mother thread gets eigen and cg
 ! if I use comm and MPIO_stuff then it hangs on this call
 ! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
@@ -3364,7 +3364,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
            if (formeig > 0) then
              call wfk_disk%read_band_block([iband,iband+nband_me_disk-1],ik_disk,spin,xmpio_single,&
                kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
-           else 
+           else
              call wfk_disk%read_band_block([iband,iband+nband_me_disk-1],ik_disk,spin,xmpio_single,&
                kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
            end if
@@ -3376,7 +3376,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
            nband_me_saved = nband_me_disk
            spin_saved = spin
          end if
-       
+
          ! reset isym for each spin_sym
          isym = rbz2disk(ikf,2)
          ! there is a first time reversal possible from the irred set found above to the kptns in input.
@@ -3405,7 +3405,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
            ibdoff = ibdocc(ikf,spin_sym)+(iband-1)
            occ(ibdoff+1:ibdoff+nband_me_disk) = occ_disk(iband:iband-1+nband_me_disk)
          end if
-  
+
          ! The test on npwarr is needed because we may change istwfk e.g. gamma.
          if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_disk) == npwarr(ikf)) then
            if (present(kg)) then
@@ -3432,7 +3432,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
            gmax = 2*gmax + 1
            call ngfft_seq(work_ngfft, gmax)
            ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
-  
+
            ! Rotate nband_k wavefunctions (output in cg)
            call cgtk_rotate(cryst,k_disk,isym,itimrev,g0,nspinor,nband_me_disk,&
 &            npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
@@ -3620,7 +3620,7 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 
    end do
  end do
- 
+
  do spin=1,nsppol_in
    do ik_rbz=1,nkpt_in
 
@@ -3661,7 +3661,7 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 &        cg_k=cg(:,icg(ik_rbz,spin)+1:icg(ik_rbz,spin)+npw_k*nband_me*nspinor_in),&
 &        eig_k=eigen(ibdeig(ik_rbz,spin)+1:ibdeig(ik_rbz,spin)+nband_k*(2*nband_k)**formeig))
      end if
- 
+
    end do ! kpt
  end do ! sppol
 
@@ -4009,7 +4009,7 @@ subroutine wfk_compute_offsets(Wfk)
 !scalars
  integer :: spin,ik_ibz,npw_k,nband_k,bsize_frm,mpi_type_frm,base !,band
  integer(XMPI_OFFSET_KIND) :: offset
-! this variable is needed to force arithmetic in the right kind 
+! this variable is needed to force arithmetic in the right kind
 ! and avoid integer overflows with large nband npw.
 ! TODO: check if same is needed elsewhere for offsets
  integer(XMPI_OFFSET_KIND) :: increment
@@ -4716,7 +4716,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
    ABI_ERROR(msg)
  end if
- call wrtout(std_out, sjoin("Converting:", my_inpath, "to", out_path))
+ call wrtout(std_out, sjoin(" Converting:", my_inpath, "to", out_path))
 
  in_iomode = iomode_from_fname(my_inpath)
 
@@ -4851,8 +4851,8 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    !     - For each k-point in the star of kpt_ibz:
    !        - Rotate wavefunctions in G-space to get the k-point in the full BZ.
    !        - Write kbz data to file.
-   if (out_iomode == IO_MODE_MPI) call wrtout(std_out,"Using MPI-IO to generate full WFK file", do_flush=.True.)
-   if (out_iomode == IO_MODE_ETSF) call wrtout(std_out,"Using Netcdf-IO to generate full WFK file", do_flush=.True.)
+   if (out_iomode == IO_MODE_MPI) call wrtout(std_out," Using MPI-IO to generate full WFK file", do_flush=.True.)
+   if (out_iomode == IO_MODE_ETSF) call wrtout(std_out, "Using Netcdf-IO to generate full WFK file", do_flush=.True.)
 
    ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
    ABI_MALLOC(iperm, (nkfull))
@@ -4932,7 +4932,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
    ABI_FREE(bz2ibz_sort)
  end if
 
- call cwtime_report(" FULL_WFK written to file. ", cpu, wall, gflops)
+ call cwtime_report(sjoin(" FULL_WFK written to: ", out_path), cpu, wall, gflops)
 
  ABI_FREE(kg_ki)
  ABI_FREE(cg_ki)
