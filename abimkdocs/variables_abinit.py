@@ -21489,7 +21489,7 @@ Variable(
 This variable defines the quantity to compute starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_full" --> Read WFK file and produce new WFK file with k-points in the full BZ.
+  * "wfk_fullbz" --> Read WFK file and produce new WFK file with k-points in the full BZ.
         Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
         This option can be used to interface Abinit with external tools requiring k-points in the full BZ.
 
