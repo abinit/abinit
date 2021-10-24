@@ -1,5 +1,3 @@
-! CP modified
-
 !!****p* ABINIT/optic
 !! NAME
 !! optic
@@ -22,42 +20,15 @@
 !!  (main routine)
 !!
 !! NOTES
-!!  bantot
-!!  doccde(mband*nkpt_rbz*nsppol)=derivative of occ_rbz wrt the energy.
 !!  domega=frequency range
-!!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree).
-!!  eigen11(2*mband*mband*nkpt_rbz*nsppol)=first-order eigenvalues (hartree)
-!!  in reciprocal direction 100
-!!  eigen12(2*mband*mband*nkpt_rbz*nsppol)=first-order eigenvalues (hartree)
-!!  in reciprocal direction 010
-!!  eigen13(2*mband*mband*nkpt_rbz*nsppol)=first-order eigenvalues (hartree)
-!!  in reciprocal direction 001
-!!  ecut=kinetic energy planewave cutoff (hartree).
-!!  entropy= entropy associated with the smearing (adimensional)
-!!  fermie= fermi energy (Hartree)
-!!  gmet(3,3)=reciprocal space metric ($\textrm{bohr}^{2}$).
-!!  gmet_inv(3,3)=inverse of reciprocal space metric ($\textrm{bohr}^{2}$).
-!!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1).
+!!  eigen11(2*mband*mband*nkpt_rbz*nsppol)=first-order eigenvalues (hartree) in reciprocal direction 100
+!!  eigen12(2*mband*mband*nkpt_rbz*nsppol)=first-order eigenvalues (hartree) in reciprocal direction 010
+!!  eigen13(2*mband*mband*nkpt_rbz*nsppol)=first-order eigenvalues (hartree) in reciprocal direction 001
 !!  nomega=number of frequency for conductivity computation
 !!  mband=maximum number of bands.
-!!  natom = number of atoms in the unit cell.
-!!  nband(nkpt*nsppol)=number of bands at each RF k point for each spin.
-!!  nelect=number of electrons per unit cell
-!!  nkpt=number of k points in the IBZ for this perturbation
-!!  ngfft(3)=integer fft box dimensions.
-!!  nspinor=number of spinorial components of the wavefunctions.
-!!  nsppol=1 for unpolarized, 2 for spin-polarized.
-!!  ntypat = number of atom types.
-!!  occ(mband*nkpt*nsppol)=occupation number for each band and k.
 !!  occopt==option for occupancies
-!!  rmet(3,3)=real space metric ($\textrm{bohr}^{2}$).
-!!  rprimd(3,3)=real space primitive translations.
-!!  of primitive translations.
 !!  broadening=smearing width (or temperature) in Hartree
-!!  ucvol=unit cell volume in ($\textrm{bohr}^{3}$).
 !!  maxomega=frequency windows for computations of sigma
-!!  wtk(nkpt)=weight assigned to each k point.
-!!  znucl(natom)=atomic number of atoms
 !!
 !! PARENTS
 !!
@@ -112,13 +83,13 @@ program optic
 !Arguments -----------------------------------
 
 !Local variables-------------------------------
- integer,parameter :: formeig0=0,formeig1=1,tim_rwwf=0,master=0
+ integer,parameter :: formeig0 = 0, formeig1 = 1, master = 0
  integer :: fform,finunt,ep_ntemp,itemp,i1,i2
  integer :: bantot,bdtot0_index,bdtot_index
- integer :: headform,ierr,ii,jj,ikpt,isym
- integer :: isppol,mband,nomega,natom,nband1,nsym
- integer :: nkpt,nspinor,nsppol,ntypat
- integer :: occopt,nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
+ integer :: ierr,ii,jj,ikpt,isym
+ integer :: isppol,mband,nomega,nband1
+ integer :: nkpt,nsppol
+ integer :: nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
  integer :: iomode0,comm,nproc,my_rank, optic_ncid
 #ifdef HAVE_NETCDF
@@ -129,9 +100,9 @@ program optic
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
  integer :: prtlincompmatrixelements=0
- real(dp) :: domega,ecut,fermie, eff
- real(dp) :: broadening,ucvol,maxomega,scissor,tolerance,tphysel
- real(dp) :: tcpu,tcpui,twall,twalli,nelect
+ real(dp) :: domega, eff
+ real(dp) :: broadening,maxomega,scissor,tolerance
+ real(dp) :: tcpu,tcpui,twall,twalli
  logical :: do_antiresonant, do_temperature
  logical :: do_ep_renorm
  logical,parameter :: remove_inv = .False.
@@ -143,12 +114,11 @@ program optic
  type(args_t) :: args
 !arrays
  integer :: iomode_ddk(3)
- integer,allocatable :: istwfk(:), npwarr(:), nband(:), symrel(:,:,:), symrec(:,:,:)
- real(dp) :: tsec(2), gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
- real(dp),allocatable :: symcart(:,:,:), kpt(:,:),wmesh(:)
- real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:), eig0tmp(:), eigen0(:)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: wmesh(:)
+ real(dp),allocatable :: doccde(:), eig0tmp(:), eigen0(:)
  real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
- real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
+ real(dp),allocatable :: eigtmp(:)
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncevk(0:3)
@@ -157,8 +127,7 @@ program optic
 ! for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp
- character(len=24) :: codename
- character(len=24) :: start_datetime
+ character(len=24) :: codename, start_datetime
  character(len=500) :: msg
  character(len=fnlen) :: ep_nc_fname
  type(hdr_type) :: hdr_ddk(3)
@@ -169,12 +138,12 @@ program optic
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
                        autoparal, max_ncpus, prtlincompmatrixelements
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
-&        num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
+          num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
 
 ! *********************************************************************************
 
-!Change communicator for I/O (mandatory!)
+ ! Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
 
  call xmpi_init()
@@ -184,9 +153,9 @@ program optic
  ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
- !Initialize memory profiling if it is activated
- !if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
- !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
@@ -295,12 +264,12 @@ program optic
 
      if (.not. use_ncevk(ii)) then
        call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
-       call hdr_copy(wfks(ii)%hdr,hdr_ddk(ii))
+       call hdr_copy(wfks(ii)%hdr, hdr_ddk(ii))
      else
 
 #ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
-       call hdr_ncread(hdr_ddk(ii),ncid, fform)
+       call hdr_ncread(hdr_ddk(ii), ncid, fform)
        ABI_CHECK(fform /= 0, sjoin("Error while reading:", infiles(ii)))
 
        NCF_CHECK(nf90_close(ncid))
@@ -329,14 +298,14 @@ program optic
        ' Check the consistency of the wavefunction files (esp. k point and number of bands). ',ch10,&
        ' Will compare, pairwise ( 1/2, 2/3, 3/4 ), the four following files :',ch10,trim(wfkfile)
      ! split the write since long filenames can bust the 500 char limit of 'msg'
-     call wrtout(std_out,msg)
+     call wrtout(std_out, msg)
      do ii=1,3
        write(msg, "(12a)")trim(infiles(ii))
-       call wrtout(std_out,msg)
+       call wrtout(std_out, msg)
      enddo
 
      if (hdr%compare(hdr_ddk(1)) /= 0) then
-       write(msg, "(3a)")" Ground-state wavefunction file and ddkfile ",trim(infiles(1))," are not consistent. See above messages."
+       write(msg, "(3a)")" GS WFK file and ddkfile ",trim(infiles(1))," are not consistent. See above messages."
        ABI_ERROR(msg)
      end if
      do ii=1,2
@@ -396,92 +365,64 @@ program optic
 
  end if
 
- call hdr%bcast(master, my_rank, comm)
  !TODO put parameters in datastructure
- call xmpi_bcast(broadening,master,comm,ierr)
- call xmpi_bcast(domega,master,comm,ierr)
- call xmpi_bcast(maxomega,master,comm,ierr)
- call xmpi_bcast(scissor,master,comm,ierr)
- call xmpi_bcast(tolerance,master,comm,ierr)
- call xmpi_bcast(num_lin_comp,master,comm,ierr)
- call xmpi_bcast(prtlincompmatrixelements,master,comm,ierr)
- call xmpi_bcast(lin_comp,master,comm,ierr)
- call xmpi_bcast(num_nonlin_comp,master,comm,ierr)
- call xmpi_bcast(nonlin_comp,master,comm,ierr)
- call xmpi_bcast(num_linel_comp,master,comm,ierr)
- call xmpi_bcast(linel_comp,master,comm,ierr)
- call xmpi_bcast(num_nonlin2_comp,master,comm,ierr)
- call xmpi_bcast(nonlin2_comp,master,comm,ierr)
- call xmpi_bcast(do_antiresonant,master,comm,ierr)
- call xmpi_bcast(do_ep_renorm,master,comm,ierr)
- call xmpi_bcast(ep_ntemp,master,comm,ierr)
+ call hdr%bcast(master, my_rank, comm)
+ call xmpi_bcast(broadening, master, comm, ierr)
+ call xmpi_bcast(domega, master, comm, ierr)
+ call xmpi_bcast(maxomega, master, comm, ierr)
+ call xmpi_bcast(scissor, master, comm, ierr)
+ call xmpi_bcast(tolerance, master, comm, ierr)
+ call xmpi_bcast(num_lin_comp, master, comm, ierr)
+ call xmpi_bcast(prtlincompmatrixelements, master, comm, ierr)
+ call xmpi_bcast(lin_comp,master, comm, ierr)
+ call xmpi_bcast(num_nonlin_comp,master, comm, ierr)
+ call xmpi_bcast(nonlin_comp, master, comm, ierr)
+ call xmpi_bcast(num_linel_comp, master, comm, ierr)
+ call xmpi_bcast(linel_comp, master, comm, ierr)
+ call xmpi_bcast(num_nonlin2_comp, master, comm, ierr)
+ call xmpi_bcast(nonlin2_comp, master, comm, ierr)
+ call xmpi_bcast(do_antiresonant, master, comm, ierr)
+ call xmpi_bcast(do_ep_renorm, master, comm, ierr)
+ call xmpi_bcast(ep_ntemp, master, comm, ierr)
  call xmpi_bcast(filnam_out, master, comm, ierr)
  call xmpi_bcast(prefix, master, comm, ierr)
  if (do_ep_renorm) call eprenorms_bcast(Epren, master, comm)
 
 !Extract info from the header
- headform=hdr%headform
- bantot=hdr%bantot
- ecut=hdr%ecut_eff
- natom=hdr%natom
- nkpt=hdr%nkpt
- nspinor=hdr%nspinor
- nsppol=hdr%nsppol
- ntypat=hdr%ntypat
- occopt=hdr%occopt
- rprimd(:,:)=hdr%rprimd(:,:)
- ABI_MALLOC(nband,(nkpt*nsppol))
- ABI_MALLOC(occ,(bantot))
- !fermie=hdr%fermie
- ! YG Fermi energy contained in the header of a NSCF computation is always 0 !!
- occ(1:bantot)=hdr%occ(1:bantot)
- nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
+ bantot = hdr%bantot
+ nkpt = hdr%nkpt
+ nsppol = hdr%nsppol
 
- nsym=hdr%nsym
- ABI_MALLOC(symrel,(3,3,nsym))
- ABI_MALLOC(symrec,(3,3,nsym))
- symrel(:,:,:) = hdr%symrel(:,:,:)
- do isym=1,nsym
-   call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
- end do
+ ! Get mband as the maximum value of nband(nkpt)
+ mband = maxval(hdr%nband)
+ ABI_CHECK(all(hdr%nband == mband), "nband must be constant across kpts")
 
- ABI_MALLOC(kpt,(3,nkpt))
- kpt(:,:) = hdr%kptns(:,:)
-
-!Get mband, as the maximum value of nband(nkpt)
- mband=maxval(nband(:))
- do ii=1,nkpt
-   if (nband(ii) /= mband) then
-     ABI_ERROR("nband must be constant across kpts")
-   end if
- end do
-
- ! Initializes crystal
+ ! Initializes crystal object
  call crystal_init(hdr%amu, cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
-   hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
+   hdr%nsym, hdr%rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
    (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
-   symrel, hdr%tnons, hdr%symafm)
+   hdr%symrel, hdr%tnons, hdr%symafm)
 
  if (my_rank == master) then
    write(std_out,*)
-   write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1:3,1)
-   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,2)
-   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,3)
-   write(std_out,'(a,i8)')       ' natom             =',natom
+   write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',cryst%rprimd(1:3,1)
+   write(std_out,'(a,3f10.5,a)' )'                    ',cryst%rprimd(1:3,2)
+   write(std_out,'(a,3f10.5,a)' )'                    ',cryst%rprimd(1:3,3)
+   write(std_out,'(a,i8)')       ' natom             =',cryst%natom
    write(std_out,'(a,2i8)')      ' nkpt,mband        =',nkpt,mband
-   write(std_out,'(a, f10.5,a)' ) ' ecut              =',ecut,' Ha'
+   write(std_out,'(a, f10.5,a)' ) ' ecut              =',hdr%ecut_eff,' Ha'
  end if
 
  ! Read the eigenvalues of ground-state and ddk files
- ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
+ ABI_MALLOC(eigen0, (mband*nkpt*nsppol))
  ! MG: Do not understand why not [...,3]
- ABI_MALLOC(eigen11,(2*mband*mband*nkpt*nsppol))
- ABI_MALLOC(eigen12,(2*mband*mband*nkpt*nsppol))
- ABI_MALLOC(eigen13,(2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen11, (2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen12, (2*mband*mband*nkpt*nsppol))
+ ABI_MALLOC(eigen13, (2*mband*mband*nkpt*nsppol))
 
  if (my_rank == master) then
-   ABI_MALLOC(eigtmp,(2*mband*mband))
-   ABI_MALLOC(eig0tmp,(mband))
+   ABI_MALLOC(eigtmp, (2*mband*mband))
+   ABI_MALLOC(eig0tmp, (mband))
 
    do ii=1,3
      if (.not. use_ncevk(ii)) cycle
@@ -501,7 +442,7 @@ program optic
    bdtot0_index=0 ; bdtot_index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt
-       nband1=nband(ikpt+(isppol-1)*nkpt)
+       nband1 = hdr%nband(ikpt+(isppol-1)*nkpt)
        eigtmp = zero
        eig0tmp = zero
 
@@ -532,54 +473,36 @@ program optic
    ABI_FREE(eig0tmp)
  end if ! master
 
- call xmpi_bcast(eigen0,master,comm,ierr)
- call xmpi_bcast(eigen11,master,comm,ierr)
- call xmpi_bcast(eigen12,master,comm,ierr)
- call xmpi_bcast(eigen13,master,comm,ierr)
+ call xmpi_bcast(eigen0, master,comm, ierr)
+ call xmpi_bcast(eigen11, master, comm, ierr)
+ call xmpi_bcast(eigen12, master, comm, ierr)
+ call xmpi_bcast(eigen13, master, comm, ierr)
 
-!---------------------------------------------------------------------------------
-!gmet inversion
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- call matr3inv(gmet,gmet_inv)
+ ! Recompute fermie from header
+ ! WARNING no guarantee that it works for other materials than insulators
 
-!---------------------------------------------------------------------------------
-!derivative of occupation wrt the energy.
- ABI_MALLOC(wtk,(nkpt))
- wtk = hdr%wtk
+ ABI_MALLOC(doccde, (mband * nkpt * nsppol))
 
- ABI_MALLOC(doccde,(mband*nkpt*nsppol))
-
- !Recompute fermie from header
- !WARNING no guarantee that it works for other materials than insulators
- nelect = hdr%nelect
- tphysel = zero
- ABI_MALLOC(istwfk,(nkpt))
- ABI_MALLOC(npwarr,(nkpt))
- istwfk = hdr%istwfk
- npwarr = hdr%npwarr
-
- call ebands_init(bantot, ks_ebands, nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
-     doccde, eigen0, istwfk, kpt, &
-     nband, nkpt, npwarr, nsppol, nspinor, tphysel, broadening, occopt, occ, wtk, &
+ call ebands_init(bantot, ks_ebands, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+     doccde, eigen0, hdr%istwfk, hdr%kptns, &
+     hdr%nband, nkpt, hdr%npwarr, nsppol, hdr%nspinor, hdr%tphysel, broadening, hdr%occopt, hdr%occ, hdr%wtk, &
      hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
      hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
+ ABI_FREE(eigen0)
+ ABI_FREE(doccde)
+ !ks_ebands = ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
+
  !YG : should we use broadening for ebands_init
  call ebands_update_occ(ks_ebands, -99.99d0)
- fermie = ks_ebands%fermie
- ABI_FREE(istwfk)
- ABI_FREE(npwarr)
 
-!---------------------------------------------------------------------------------
-!size of the frequency range
+  !size of the frequency range
  nomega=int((maxomega+domega*0.001_dp)/domega)
  maxomega = dble(nomega)*domega
- ABI_MALLOC(cond_nd,(nomega))
- ABI_MALLOC(cond_kg,(nomega))
 
  optic_ncid = nctk_noid
  if (my_rank == master) then
-   write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
+   write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',ks_ebands%fermie,' Ha',ks_ebands%fermie*Ha_eV,' eV'
    write(std_out,'(a,f10.5,a)')' Scissor shift     =', scissor, ' Ha'
    write(std_out,'(a,f10.5,a)')' Tolerance on closeness to singularities     =', tolerance, ' Ha'
    write(std_out,'(a,f10.5,a)')' Smearing factor      =', broadening, ' Ha'
@@ -732,17 +655,16 @@ program optic
 #endif
  end if
 
- ABI_MALLOC(symcart,(3,3,nsym))
- !YG: we need to transpose gprimd since matrinv give the transpose of the inverse!
- gprimd_trans = transpose(gprimd)
- call sym2cart(gprimd_trans,nsym,rprimd,symrel,symcart)
+ ! Get velocity matrix elements in cartesian coordinates from reduced coords.
+ call wrtout(std_out," optic : Call pmat2cart")
+ ABI_MALLOC(pmat, (mband, mband, nkpt, 3, nsppol))
+ call pmat2cart(eigen11, eigen12, eigen13, mband, nkpt, nsppol, pmat, cryst%rprimd)
+ ABI_FREE(eigen11)
+ ABI_FREE(eigen12)
+ ABI_FREE(eigen13)
 
- ABI_MALLOC(pmat,(mband,mband,nkpt,3,nsppol))
- call wrtout(std_out," optic : Call pmat2cart","COLL")
-
- call pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
- call pmat_renorm(fermie, eigen0, mband, nkpt, nsppol, pmat, scissor)
-
+ ! Renormalize matrix elements if scissors is being used.
+ call pmat_renorm(ks_ebands%fermie, ks_ebands%eig, mband, nkpt, nsppol, pmat, scissor)
 
 !---------------------------------------------------------------------------------
 ! Perform calculations
@@ -751,17 +673,14 @@ program optic
 ! XG_2020_05_25 : All these subroutines should be rationalized. There are numerous
 ! similar sections, e.g. at the level of the checking, and set up ...
 
-!IN CALLED ROUTINE
-!call linopt(nspin,,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat,v1,v2,nmesh,de,scissor,brod)
-!
-!v1,v2=desired component of the dielectric function(integer) 1=x,2=y,3=z
-!nmesh=desired number of energy mesh points(integer)
-!de=desired step in energy(real); nmesh*de=maximum energy
-!scissor=scissors shift in Ha(real)
-!brod=broadening in Ha(real)
+! v1,v2=desired component of the dielectric function(integer) 1=x,2=y,3=z
+! nmesh=desired number of energy mesh points(integer)
+! de=desired step in energy(real); nmesh*de=maximum energy
+! scissor=scissors shift in Ha(real)
+! brod=broadening in Ha(real)
 
  ! optical frequency dependent dielectric function for semiconductors
- call wrtout(std_out," optic : Call linopt","COLL")
+ call wrtout(std_out," optic : Call linopt")
 
  do itemp=1,ep_ntemp
    call ebands_copy(ks_ebands, eph_ebands)
@@ -770,7 +689,7 @@ program optic
      lin1 = int(lin_comp(ii)/10.0_dp)
      lin2 = mod(lin_comp(ii),10)
      write(msg,*) ' linopt ', lin1,lin2
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
      call int2char4(lin1,s1)
      call int2char4(lin2,s2)
      call int2char4(itemp,stemp)
@@ -779,7 +698,8 @@ program optic
      ABI_CHECK((stemp(1:1)/='#'),'Bug: string length too short!')
      tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)
      if (do_ep_renorm) tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
-     call linopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,ks_ebands,eph_ebands,fermie,pmat, &
+     call linopt(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands,eph_ebands, &
+     ks_ebands%fermie,pmat, &
      lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,optic_ncid,comm,prtlincompmatrixelements)
    end do
    call ebands_free(eph_ebands)
@@ -788,13 +708,13 @@ program optic
  if (do_ep_renorm) call eprenorms_free(Epren)
 
  ! second harmonic generation susceptibility for semiconductors
- call wrtout(std_out," optic : Call nlinopt","COLL")
+ call wrtout(std_out," optic : Call nlinopt")
  do ii=1,num_nonlin_comp
    nlin1 = int( nonlin_comp(ii)/100.0_dp)
    nlin2 = int((nonlin_comp(ii)-nlin1*100.0_dp)/10.0_dp)
    nlin3 = mod( nonlin_comp(ii),10)
    write(msg,*) ' nlinopt ', nlin1,nlin2,nlin3
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    call int2char4(nlin1,s1)
    call int2char4(nlin2,s2)
    call int2char4(nlin3,s3)
@@ -808,18 +728,18 @@ program optic
      ABI_WARNING("second harmonic generation with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,fermie,pmat,&
+   call nlinopt(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands%eig,ks_ebands%fermie,pmat,&
                 nlin1,nlin2,nlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,optic_ncid,comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors
- call wrtout(std_out," optic : Call linelop","COLL")
+ call wrtout(std_out," optic : Call linelop")
  do ii=1,num_linel_comp
    linel1 = int( linel_comp(ii)/100.0_dp)
    linel2 = int((linel_comp(ii)-linel1*100.0_dp)/10.0_dp)
    linel3 = mod( linel_comp(ii),10)
    write(msg,*) ' linelop ',linel1,linel2,linel3
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    call int2char4(linel1,s1)
    call int2char4(linel2,s2)
    call int2char4(linel3,s3)
@@ -830,18 +750,18 @@ program optic
      ABI_ERROR("linear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call linelop(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
+   call linelop(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands%eig,hdr%occ,ks_ebands%fermie,pmat,&
    linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
  ! nonlinear electro-optical susceptibility for semiconductors
- call wrtout(std_out," optic : Call nonlinopt","COLL")
+ call wrtout(std_out," optic : Call nonlinopt")
  do ii=1,num_nonlin2_comp
    nonlin1 = int( nonlin2_comp(ii)/100.0_dp)
    nonlin2 = int((nonlin2_comp(ii)-nonlin1*100.0_dp)/10.0_dp)
    nonlin3 = mod( nonlin2_comp(ii),10)
    write(msg,*) ' nonlinopt ',nonlin1,nonlin2,nonlin3
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    call int2char4(nonlin1,s1)
    call int2char4(nonlin2,s2)
    call int2char4(nonlin3,s3)
@@ -852,39 +772,24 @@ program optic
      ABI_ERROR("nonlinear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nonlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
+   call nonlinopt(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands%eig,hdr%occ,ks_ebands%fermie,pmat,&
     nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
-!---------------------------------------------------------------------------------
-
- ABI_FREE(nband)
- ABI_FREE(occ)
- ABI_FREE(eigen11)
- ABI_FREE(eigen12)
- ABI_FREE(eigen13)
- ABI_FREE(eigen0)
- ABI_FREE(doccde)
- ABI_FREE(wtk)
- ABI_FREE(cond_nd)
- ABI_FREE(cond_kg)
- ABI_FREE(kpt)
- ABI_FREE(symrel)
- ABI_FREE(symrec)
- ABI_FREE(symcart)
+ ! Free memory
  ABI_FREE(pmat)
 
  call hdr%free()
- call hdr_ddk(1)%free()
- call hdr_ddk(2)%free()
- call hdr_ddk(3)%free()
+ do ii=1,3
+   call hdr_ddk(ii)%free()
+ end do
  call ebands_free(ks_ebands)
  call cryst%free()
 
- call timein(tcpu,twall)
+ call timein(tcpu, twall)
 
- tsec(1)=tcpu-tcpui
- tsec(2)=twall-twalli
+ tsec(1) = tcpu - tcpui
+ tsec(2) = twall - twalli
 
  if (my_rank == master) then
    write(std_out,'(a,80a,a,a,a)' )ch10,('=',ii=1,80),ch10,ch10,' Calculation completed.'
@@ -892,7 +797,7 @@ program optic
     '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
 
- call xmpi_sum(tsec,comm,ierr)
+ call xmpi_sum(tsec, comm, ierr)
 
  if (my_rank == master) then
    ! Write YAML document with the final summary.
@@ -918,7 +823,7 @@ program optic
  end if
 #endif
 
-!Write information on file about the memory before ending mpi module, if memory profiling is enabled
+ ! Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam)
 
 100 call xmpi_end()
