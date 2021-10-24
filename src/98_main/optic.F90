@@ -99,7 +99,7 @@ program optic
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
- integer :: prtlincompmatrixelements=0
+ integer :: prtlincompmatrixelements=0, nband_sum = -1
  real(dp) :: domega, eff
  real(dp) :: broadening,maxomega,scissor,tolerance
  real(dp) :: tcpu,tcpui,twall,twalli
@@ -135,7 +135,7 @@ program optic
  ! Input file
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
-                       autoparal, max_ncpus, prtlincompmatrixelements
+                       autoparal, max_ncpus, prtlincompmatrixelements, nband_sum
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
           num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
@@ -373,6 +373,7 @@ program optic
  call xmpi_bcast(tolerance, master, comm, ierr)
  call xmpi_bcast(num_lin_comp, master, comm, ierr)
  call xmpi_bcast(prtlincompmatrixelements, master, comm, ierr)
+ call xmpi_bcast(nband_sum, master, comm, ierr)
  call xmpi_bcast(lin_comp,master, comm, ierr)
  call xmpi_bcast(num_nonlin_comp,master, comm, ierr)
  call xmpi_bcast(nonlin_comp, master, comm, ierr)
@@ -392,9 +393,13 @@ program optic
  nkpt = hdr%nkpt
  nsppol = hdr%nsppol
 
- ! Get mband as the maximum value of nband(nkpt)
+ ! Get mband as the maximum value of nband(nkpt) and init nband_sum if negative
  mband = maxval(hdr%nband)
  ABI_CHECK(all(hdr%nband == mband), "nband must be constant across kpts")
+ if (nband_sum == -1) nband_sum = mband
+ if (nband_sum <= 0 .or. nband_sum > mband) then
+    ABI_ERROR(sjoin("nband_sum should be in [1, mband] while it is:", itoa(nband_sum), "with mband:", itoa(mband)))
+ end if
 
  ! Initializes crystal object
  call crystal_init(hdr%amu, cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
@@ -697,7 +702,7 @@ program optic
      ABI_CHECK((stemp(1:1)/='#'),'Bug: string length too short!')
      tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)
      if (do_ep_renorm) tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
-     call linopt(ii, itemp, cryst, ks_ebands, eph_ebands, pmat, &
+     call linopt(ii, itemp, nband_sum, cryst, ks_ebands, eph_ebands, pmat, &
        lin1, lin2, nomega, domega, scissor, broadening, tmp_radix, optic_ncid, prtlincompmatrixelements, comm)
    end do
    call ebands_free(eph_ebands)
@@ -726,7 +731,7 @@ program optic
      ABI_WARNING("second harmonic generation with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nlinopt(ii, itemp, cryst, ks_ebands, pmat, &
+   call nlinopt(ii, itemp, nband_sum, cryst, ks_ebands, pmat, &
                 nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, optic_ncid, comm)
  end do
 
@@ -748,7 +753,7 @@ program optic
      ABI_ERROR("linear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call linelop(ii, itemp, cryst, ks_ebands, pmat, &
+   call linelop(ii, itemp, nband_sum, cryst, ks_ebands, pmat, &
                 linel1, linel2, linel3, nomega, domega, scissor, broadening, &
                 tolerance, tmp_radix, do_antiresonant, optic_ncid, comm)
  end do
@@ -771,7 +776,7 @@ program optic
      ABI_ERROR("nonlinear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nonlinopt(ii, itemp, cryst, ks_ebands, pmat, &
+   call nonlinopt(ii, itemp, nband_sum, cryst, ks_ebands, pmat, &
                   nonlin1, nonlin2, nonlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, &
                   do_antiresonant, optic_ncid, comm)
  end do

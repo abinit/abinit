@@ -213,6 +213,7 @@ end subroutine pmat_renorm
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
+!!  nband_sum=Number of bands included in the sum. Must be <= mband
 !!  pmat(mband,mband,nkpt,3,nsppol)=momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2=desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh=desired number of energy mesh points(integer)
@@ -244,11 +245,11 @@ end subroutine pmat_renorm
 !!
 !! SOURCE
 
-subroutine linopt(icomp, itemp, cryst, ks_ebands, EPBSt, pmat, &
+subroutine linopt(icomp, itemp, nband_sum, cryst, ks_ebands, EPBSt, pmat, &
   v1, v2, nmesh, de, sc, brod, fnam, ncid, prtlincompmatrixelements, comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp,itemp,ncid
+integer, intent(in) :: icomp,itemp,nband_sum, ncid
 type(crystal_t), intent(in) :: cryst
 type(ebands_t),intent(in) :: ks_ebands,EPBSt
 complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
@@ -282,6 +283,7 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
  nkpt = ks_ebands%nkpt
  nsppol = ks_ebands%nsppol
  mband = ks_ebands%mband
+ ABI_CHECK(nband_sum <= mband, "nband_sum <= mband")
 
  if (my_rank == master) then
    ! check polarisation
@@ -377,7 +379,7 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
  emax=zero
  do ik=1,nkpt
    do isp=1,nsppol
-     do ist1=1,mband
+     do ist1=1,nband_sum
        emin=min(emin,EPBSt%eig(ist1,ik,isp))
        emax=max(emax,EPBSt%eig(ist1,ik,isp))
      end do
@@ -399,7 +401,7 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
  do isp=1,nsppol
    do ik=my_k1,my_k2
      write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-     do ist1=1,mband
+     do ist1=1,nband_sum
        e1=ks_ebands%eig(ist1,ik,isp)
        e1_ep=EPBSt%eig(ist1,ik,isp)
        ! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
@@ -407,7 +409,7 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
        if(do_linewidth) then
          e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
-       do ist2=1,mband
+       do ist2=1,nband_sum
          e2=ks_ebands%eig(ist2,ik,isp)
          e2_ep=EPBSt%eig(ist2,ik,isp)
          if(do_linewidth) then
@@ -594,6 +596,7 @@ end subroutine linopt
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
+!!  nband_sum=Number of bands included in the sum. Must be <= mband
 !!  fermie = Fermi energy in Ha(real)
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
@@ -627,10 +630,11 @@ end subroutine linopt
 !!
 !! SOURCE
 
-subroutine nlinopt(icomp, itemp, cryst, ks_ebands, pmat, v1, v2, v3, nmesh, de, sc, brod, tol, fnam, ncid, comm)
+subroutine nlinopt(icomp, itemp, nband_sum, cryst, ks_ebands, pmat, &
+                   v1, v2, v3, nmesh, de, sc, brod, tol, fnam, ncid, comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp, itemp, ncid
+integer, intent(in) :: icomp, itemp, nband_sum, ncid
 type(crystal_t),intent(in) :: cryst
 type(ebands_t),intent(in) :: ks_ebands
 complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
@@ -1313,6 +1317,7 @@ end subroutine nlinopt
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
+!!  nband_sum=Number of bands included in the sum. Must be <= mband
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
@@ -1350,11 +1355,11 @@ end subroutine nlinopt
 !!
 !! SOURCE
 
-subroutine linelop(icomp, itemp, cryst, ks_ebands, &
+subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
                    pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !Arguments ------------------------------------
- integer, intent(in) :: icomp, itemp, ncid
+ integer, intent(in) :: icomp, itemp, nband_sum, ncid
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ks_ebands
  complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
@@ -1513,6 +1518,8 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
  ABI_MALLOC(sym, (3, 3, 3))
  ABI_MALLOC(s, (3, 3))
 
+ ABI_CHECK(nband_sum <= mband, "nband_sum <= mband")
+
  ! generate the symmetrizing tensor
  sym(:,:,:)=zero
  do isym=1,cryst%nsym
@@ -1544,7 +1551,7 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
    write(std_out,*) "P-",my_rank,": ",ik,'of',ks_ebands%nkpt
    do isp=1,ks_ebands%nsppol
      ! Calculate the scissor corrected energies and the energy window
-     do ist1=1,mband
+     do ist1=1,nband_sum
        en = ks_ebands%eig(ist1,ik,isp)
        my_emin=min(my_emin,en)
        my_emax=max(my_emax,en)
@@ -1555,9 +1562,9 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
      end do
 
      ! calculate \Delta_nm and r_mn^a
-     do istn=1,mband
+     do istn=1,nband_sum
        en = enk(istn)
-       do istm=1,mband
+       do istm=1,nband_sum
          em = enk(istm)
          wmn = em - en
          delta(istn,istm,1:3)=pmat(istn,istn,ik,1:3,isp)-pmat(istm,istm,ik,1:3,isp)
@@ -1570,9 +1577,9 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
      end do
 
      ! calculate \r^b_mn;c
-     do istm=1,mband
+     do istm=1,nband_sum
        em = enk(istm)
-       do istn=1,mband
+       do istn=1,nband_sum
          en = enk(istn)
          wmn = em - en
          if(abs(wmn) > tol) then
@@ -1582,7 +1589,7 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
                den1 = wmn
                term1 = num1/den1
                term2 = zero
-               do istp=1,mband
+               do istp=1,nband_sum
                  ep = enk(istp)
                  wmp = em - ep
                  wpn = ep - en
@@ -1600,13 +1607,13 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
 
      ! initialise the factors
      ! start the calculation
-     do istn=1,mband
+     do istn=1,nband_sum
        en=enk(istn)
        if (do_antiresonant .and. en .ge. ks_ebands%fermie) then
          cycle
        end if
        fn=ks_ebands%occ(istn,ik,isp)
-       do istm=1,mband
+       do istm=1,nband_sum
          em=enk(istm)
          if (do_antiresonant .and. em .le. ks_ebands%fermie) then
            cycle
@@ -1642,7 +1649,7 @@ subroutine linelop(icomp, itemp, cryst, ks_ebands, &
          chi2_2b = zero
          chi2(:) = zero
          ! Three band terms
-         do istl=1,mband
+         do istl=1,nband_sum
            el=enk(istl)
            fl = ks_ebands%occ(istl,ik,isp)
            wlm = el-em
@@ -1845,6 +1852,7 @@ end subroutine linelop
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
+!!  nband_sum=Number of bands included in the sum. Must be <= mband
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
@@ -1882,11 +1890,11 @@ end subroutine linelop
 !!
 !! SOURCE
 
-subroutine nonlinopt(icomp, itemp, cryst, ks_ebands, &
+subroutine nonlinopt(icomp, itemp, nband_sum, cryst, ks_ebands, &
                       pmat, v1, v2, v3, nmesh, de, sc, brod, tol, fnam, do_antiresonant, ncid, comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp, itemp, ncid
+integer, intent(in) :: icomp, itemp, nband_sum, ncid
 type(crystal_t),intent(in) :: cryst
 type(ebands_t),intent(in) :: ks_ebands
 complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
@@ -2037,6 +2045,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
  ! allocate local arrays
  mband = ks_ebands%mband
+ ABI_CHECK(nband_sum <= mband, "nband_sum <= mband")
  ABI_MALLOC(enk, (mband))
  ABI_MALLOC(delta, (mband, mband, 3))
  ABI_MALLOC(rmnbc, (mband, mband, 3, 3))
@@ -2084,7 +2093,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) "P-",my_rank,": ",ik,'of ', ks_ebands%nkpt
    do isp=1,ks_ebands%nsppol
      ! Calculate the scissor corrected energies and the energy window
-     do ist1=1,mband
+     do ist1=1,nband_sum
        en = ks_ebands%eig(ist1,ik,isp)
        my_emin=min(my_emin,en)
        my_emax=max(my_emax,en)
@@ -2095,9 +2104,9 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      end do
 
      ! calculate \Delta_nm and r_mn^a
-     do istn=1,mband
+     do istn=1,nband_sum
        en = enk(istn)
-       do istm=1,mband
+       do istm=1,nband_sum
          em = enk(istm)
          wmn = em - en
          delta(istn,istm,1:3)=pmat(istn,istn,ik,1:3,isp)-pmat(istm,istm,ik,1:3,isp)
@@ -2110,9 +2119,9 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      end do
 
      ! calculate \r^b_mn;c
-     do istm=1,mband
+     do istm=1,nband_sum
        em = enk(istm)
-       do istn=1,mband
+       do istn=1,nband_sum
          en = enk(istn)
          wmn = em - en
          if (abs(wmn) < tol) then ! Degenerate energies
@@ -2126,7 +2135,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
              den1 = wmn
              term1 = num1/den1
              term2 = zero
-             do istp=1,mband
+             do istp=1,nband_sum
                ep = enk(istp)
                wmp = em - ep
                wpn = ep - en
@@ -2143,13 +2152,13 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
      ! initialise the factors
      ! start the calculation
-     do istn=1,mband
+     do istn=1,nband_sum
        en=enk(istn)
        fn=ks_ebands%occ(istn,ik,isp)
        if(do_antiresonant .and. en .ge. ks_ebands%fermie) then
          cycle
        end if
-       do istm=1,mband
+       do istm=1,nband_sum
          em=enk(istm)
          if (do_antiresonant .and. em .le. ks_ebands%fermie) then
            cycle
@@ -2171,7 +2180,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
            sigma1 = zero
            sigma2_1 = zero
            ! Three band terms
-           do istl=1,mband
+           do istl=1,nband_sum
              el=enk(istl)
              fl = ks_ebands%occ(istl,ik,isp)
              wlm = el-em
