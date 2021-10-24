@@ -279,13 +279,13 @@ program optic
      end if
    end do
 
-!   if(any(iomode_ddk(:)/=iomode0))then
-!     write(msg, "(5a)")&
-!&      ' The ground-state and ddk files should have the same format,',ch10,&
-!&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
-!&      ' Action : see input variable iomode.'
-!     ABI_ERROR(msg)
-!   endif
+   !   if(any(iomode_ddk(:)/=iomode0))then
+   !     write(msg, "(5a)")&
+   !&      ' The ground-state and ddk files should have the same format,',ch10,&
+   !&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
+   !&      ' Action : see input variable iomode.'
+   !     ABI_ERROR(msg)
+   !   endif
 
    ! Perform basic consistency tests for the GS WFK and the DDK files, e.g.
    ! k-points and their order, spins, number of bands could differ in the four files.
@@ -362,9 +362,9 @@ program optic
      ABI_ERROR_NODUMP("aborting now")
    end if
 
- end if
+ end if ! my_rank == master
 
- !TODO put parameters in datastructure
+ ! Master broadcasts input variables.
  call hdr%bcast(master, my_rank, comm)
  call xmpi_bcast(broadening, master, comm, ierr)
  call xmpi_bcast(domega, master, comm, ierr)
@@ -387,7 +387,7 @@ program optic
  call xmpi_bcast(prefix, master, comm, ierr)
  if (do_ep_renorm) call eprenorms_bcast(Epren, master, comm)
 
-!Extract info from the header
+ ! Extract basic info from the header
  bantot = hdr%bantot
  nkpt = hdr%nkpt
  nsppol = hdr%nsppol
@@ -536,7 +536,7 @@ program optic
    ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: "do_antiresonant", "do_ep_renorm"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-    "broadening", "domega", "maxomega", "scissor", "tolerance"])
+     "broadening", "domega", "maxomega", "scissor", "tolerance"])
    NCF_CHECK(ncerr)
 
    ! Define arrays containing output results
@@ -547,17 +547,17 @@ program optic
      ! Linear optic results.
      NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("linopt_ncomp", num_lin_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-      nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
-      nctkarr_t('linopt_epsilon', "dp", "two, nomega, linopt_ncomp, ntemp") &
+       nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
+       nctkarr_t('linopt_epsilon', "dp", "two, nomega, linopt_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
      if (prtlincompmatrixelements == 1) then
        ! Linear optic matrix elements
        ncerr = nctk_def_dims(optic_ncid, [ &
-        nctkdim_t("nkpt", nkpt), &
-        nctkdim_t("nband", mband), &
-        nctkdim_t("nsppol", nsppol)], &
-        defmode=.True.)
+         nctkdim_t("nkpt", nkpt), &
+         nctkdim_t("nband", mband), &
+         nctkdim_t("nsppol", nsppol)], &
+         defmode=.True.)
        NCF_CHECK(ncerr)
        ncerr = nctk_def_arrays(optic_ncid, [ &
         !nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
@@ -726,17 +726,16 @@ program optic
      ABI_WARNING("second harmonic generation with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nlinopt(ii, itemp, cryst, ks_ebands%nsppol, ks_ebands%nkpt, ks_ebands%wtk, mband, &
-                ks_ebands%eig, ks_ebands%fermie, pmat, &
+   call nlinopt(ii, itemp, cryst, ks_ebands, pmat, &
                 nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, optic_ncid, comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors
  call wrtout(std_out," optic : Call linelop")
  do ii=1,num_linel_comp
-   linel1 = int( linel_comp(ii)/100.0_dp)
+   linel1 = int(linel_comp(ii)/100.0_dp)
    linel2 = int((linel_comp(ii)-linel1*100.0_dp)/10.0_dp)
-   linel3 = mod( linel_comp(ii),10)
+   linel3 = mod(linel_comp(ii),10)
    write(msg,*) ' linelop ',linel1,linel2,linel3
    call wrtout(std_out, msg)
    call int2char4(linel1,s1)
@@ -749,17 +748,17 @@ program optic
      ABI_ERROR("linear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call linelop(ii,itemp, cryst, ks_ebands%nsppol, ks_ebands%nkpt, ks_ebands%wtk, mband, ks_ebands%eig, &
-                ks_ebands%occ, ks_ebands%fermie,pmat, linel1, linel2, linel3, nomega, domega, scissor, broadening, &
+   call linelop(ii, itemp, cryst, ks_ebands, pmat, &
+                linel1, linel2, linel3, nomega, domega, scissor, broadening, &
                 tolerance, tmp_radix, do_antiresonant, optic_ncid, comm)
  end do
 
  ! nonlinear electro-optical susceptibility for semiconductors
  call wrtout(std_out," optic : Call nonlinopt")
  do ii=1,num_nonlin2_comp
-   nonlin1 = int( nonlin2_comp(ii)/100.0_dp)
+   nonlin1 = int(nonlin2_comp(ii)/100.0_dp)
    nonlin2 = int((nonlin2_comp(ii)-nonlin1*100.0_dp)/10.0_dp)
-   nonlin3 = mod( nonlin2_comp(ii),10)
+   nonlin3 = mod(nonlin2_comp(ii),10)
    write(msg,*) ' nonlinopt ',nonlin1,nonlin2,nonlin3
    call wrtout(std_out, msg)
    call int2char4(nonlin1,s1)
@@ -772,15 +771,13 @@ program optic
      ABI_ERROR("nonlinear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nonlinopt(ii, itemp, cryst, ks_ebands%nsppol, ks_ebands%nkpt,ks_ebands%wtk, &
-                  mband, ks_ebands%eig, ks_ebands%occ, ks_ebands%fermie, pmat, &
+   call nonlinopt(ii, itemp, cryst, ks_ebands, pmat, &
                   nonlin1, nonlin2, nonlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, &
                   do_antiresonant, optic_ncid, comm)
  end do
 
  ! Free memory
  ABI_FREE(pmat)
-
  call hdr%free()
  do ii=1,3
    call hdr_ddk(ii)%free()
@@ -830,5 +827,5 @@ program optic
 
 100 call xmpi_end()
 
- end program optic
+end program optic
 !!***
