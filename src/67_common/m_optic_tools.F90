@@ -274,11 +274,8 @@ character(len=fnlen) :: fnam1
 character(len=500) :: msg
 ! allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
-complex(dpc), allocatable :: chi(:,:)
-complex(dpc), allocatable :: matrix_elements(:,:,:,:)  ! nbands x nbands x nkpts x nsppol
-complex(dpc), allocatable :: renorm_eigs(:,:,:)        ! nbands x nkpts x nsppol
 real(dp), allocatable :: im_refract(:),re_refract(:)
-complex(dpc), allocatable :: eps(:)
+complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,:), eps(:)
 
 ! *********************************************************************
 
@@ -288,7 +285,7 @@ complex(dpc), allocatable :: eps(:)
  mband = ks_ebands%mband
 
  if (my_rank == master) then
-  !check polarisation
+   ! check polarisation
    if (v1.le.0.or.v2.le.0.or.v1.gt.3.or.v2.gt.3) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
@@ -297,7 +294,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-  !number of energy mesh points
+   ! number of energy mesh points
    if (nmesh.le.0) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
@@ -307,7 +304,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-  !step in energy
+   ! step in energy
    if (de.le.zero) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
@@ -317,7 +314,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-  !broadening
+   ! broadening
    if (brod.gt.0.009) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    ATTENTION: broadening is quite high      '
@@ -329,14 +326,14 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '    ideally should be less than 0.005   '
      write(std_out,*) '----------------------------------------'
    end if
-  !fermi energy
+   ! fermi energy
    if(ks_ebands%fermie<-1.0d4) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    ATTENTION: Fermi energy seems extremely  '
      write(std_out,*) '    low                                      '
      write(std_out,*) '---------------------------------------------'
    end if
-  !scissors operator
+   ! scissors operator
    if (sc.lt.zero) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
@@ -345,10 +342,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-!fool proof end
  end if
-
- !ABI_CHECK(ks_ebands%mband==mband, "The number of bands in the BSt should be equal to mband !")
 
  do_linewidth = allocated(EPBSt%linewidth)
 ! TODO: activate this, and remove do_linewidth - always add it in even if 0.
@@ -365,9 +359,9 @@ complex(dpc), allocatable :: eps(:)
  ieta=(zero, 1._dp)*brod
  renorm_factor=1._dp/(cryst%ucvol*dble(cryst%nsym))
  ha2ev=13.60569172*2._dp
-!output file names
+ ! output file names
  fnam1=trim(fnam)//'-linopt.out'
-!construct symmetrisation tensor
+ ! construct symmetrisation tensor
  sym = zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
@@ -378,7 +372,7 @@ complex(dpc), allocatable :: eps(:)
    end do
  end do
 
-!calculate the energy window
+ ! calculate the energy window
  emin=zero
  emax=zero
  do ik=1,nkpt
@@ -410,8 +404,8 @@ complex(dpc), allocatable :: eps(:)
      do ist1=1,mband
        e1=ks_ebands%eig(ist1,ik,isp)
        e1_ep=EPBSt%eig(ist1,ik,isp)
-! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
-! instead of putting an if statement in a loop! See above
+       ! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
+       ! instead of putting an if statement in a loop! See above
        if(do_linewidth) then
          e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
@@ -422,7 +416,7 @@ complex(dpc), allocatable :: eps(:)
            e2_ep = e2_ep - EPBSt%linewidth(1,ist2,ik,isp)*(0.0_dp,1.0_dp)
          end if
          if (ist1.ne.ist2) then
-!          scissors correction of momentum matrix
+           ! scissors correction of momentum matrix
            if(REAL(e1) > REAL(e2)) then
              e12 = e1-e2+sc
            else
@@ -433,9 +427,9 @@ complex(dpc), allocatable :: eps(:)
            else
              e12_ep = e1_ep-e2_ep-sc
            end if
-!          e12=e1-e2-sc
+           ! e12=e1-e2-sc
            b11=zero
-!          symmetrization of momentum matrix
+           ! symmetrization of momentum matrix
            do lx=1,3
              do ly=1,3
                b11=b11+(sym(lx,ly)*pmat(ist1,ist2,ik,lx,isp)* &
@@ -449,7 +443,7 @@ complex(dpc), allocatable :: eps(:)
              renorm_eigs(ist1,ik,isp) = e1_ep
              renorm_eigs(ist2,ik,isp) = e2_ep
            endif
-!          calculate on the desired energy grid
+           ! calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
              chi(iw,isp)=chi(iw,isp)+(ks_ebands%wtk(ik)*(ks_ebands%occ(ist1,ik,isp)-ks_ebands%occ(ist2,ik,isp))* &
@@ -457,7 +451,6 @@ complex(dpc), allocatable :: eps(:)
            end do ! frequencies
          end if
        end do  ! states 2
-!      end if
      end do  ! states 1
    end do ! k points
  end do ! spin
@@ -482,7 +475,7 @@ complex(dpc), allocatable :: eps(:)
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
      ABI_ERROR(msg)
    end if
-   ! write the output
+   ! write output
    write(fout1, '(a,2i3,a)' )' #calculated the component:',v1,v2,'  of dielectric function'
    write(std_out,*) 'calculated the component:',v1,v2,'  of dielectric function'
    write(fout1, '(a,2es16.6)' ) ' #broadening:', real(ieta),aimag(ieta)
@@ -579,7 +572,7 @@ complex(dpc), allocatable :: eps(:)
    endif
 
 #endif
- end if  ! rank == master
+ end if ! rank == master
 
  ABI_FREE(chi)
  ABI_FREE(eps)
@@ -601,11 +594,6 @@ end subroutine linopt
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
-!!  nsppol = number of spins(integer)
-!!  nkpt  = total number of kpoints (integer)
-!!  wtk(nkpt) = weights of kpoints (real)
-!!  mband = Max number of bands in input arrays
-!!  eig(mband,nsppol,nkpt) = GS eigen values in Ha(
 !!  fermie = Fermi energy in Ha(real)
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
@@ -639,31 +627,19 @@ end subroutine linopt
 !!
 !! SOURCE
 
-subroutine nlinopt(icomp, itemp, cryst, nsppol, nkpt, wtk, mband, eig, fermie, &
-  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
+subroutine nlinopt(icomp, itemp, cryst, ks_ebands, pmat, v1, v2, v3, nmesh, de, sc, brod, tol, fnam, ncid, comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp,itemp,nsppol, ncid
+integer, intent(in) :: icomp, itemp, ncid
 type(crystal_t),intent(in) :: cryst
-integer, intent(in) :: nkpt
-real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: mband
-real(dp), intent(in) :: eig(mband,nkpt,nsppol)
-real(dp), intent(in) :: fermie
-complex(dpc), intent(in) :: pmat(mband,mband,nkpt,3,nsppol)
-integer, intent(in) :: v1
-integer, intent(in) :: v2
-integer, intent(in) :: v3
-integer, intent(in) :: nmesh
-integer, intent(in) :: comm
-real(dp), intent(in) :: de
-real(dp), intent(in) :: sc
-real(dp), intent(in) :: brod
-real(dp), intent(in) :: tol
+type(ebands_t),intent(in) :: ks_ebands
+complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+integer, intent(in) :: v1, v2, v3, nmesh, comm
+real(dp), intent(in) :: de, sc, brod, tol
 character(len=*), intent(in) :: fnam
 
 !Local variables -------------------------
-integer :: iw
+integer :: iw, mband
 integer :: i,j,k,lx,ly,lz
 integer :: isp,isym,ik
 integer :: ist1,ist2,istl,istn,istm
@@ -704,6 +680,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ mband = ks_ebands%mband
 
 !calculate the constant
  zi=(0._dp,1._dp)
@@ -741,8 +718,8 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    Action : set num_nonlin_comp to zero   '
      write(std_out,*) '-------------------------------------------'
      ABI_ERROR("Aborting now")
-  end if
-  !check polarisation
+   end if
+   ! check polarisation
    if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
@@ -753,7 +730,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-  !number of energy mesh points
+   !number of energy mesh points
    if (nmesh.le.0) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
@@ -763,7 +740,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-  !step in energy
+   !step in energy
    if (de.le.zero) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
@@ -773,7 +750,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '---------------------------------------------'
      ABI_ERROR("Aborting now")
    end if
-  !broadening
+   !broadening
    if (brod.gt.0.009) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    WARNING : broadening is quite high       '
@@ -785,7 +762,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      write(std_out,*) '    ideally should be less than 0.005   '
      write(std_out,*) '----------------------------------------'
    end if
-  !tolerance
+   !tolerance
    if (tol.gt.0.006) then
      write(std_out,*) '----------------------------------------'
      write(std_out,*) '    WARNING : tolerance is too high     '
@@ -805,7 +782,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  ABI_MALLOC(intra1wS,(nmesh))
  ABI_MALLOC(delta,(mband,mband,3))
 
-!generate the symmetrizing tensor
+ !generate the symmetrizing tensor
  sym = zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
@@ -817,16 +794,14 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      end do
    end do
  end do
- !DBYG
  ! Disable symmetries for now
  !sym(:,:,:) = zero
  !sym(v1,v2,v3) = nsym
- !ENDDBYG
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2)
+ call xmpi_split_work(ks_ebands%nkpt, comm, my_k1, my_k2)
 
-!initialise
+ ! initialise
  inter2w(:)=zero
  inter1w(:)=zero
  intra2w(:)=zero
@@ -836,18 +811,19 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 
  my_emin=HUGE(zero)
  my_emax=-HUGE(zero)
-! loop over kpts
+
+ ! loop over kpts
  do ik=my_k1,my_k2
-   write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-! loop over spins
-   do isp=1,nsppol
-!  loop over states
+   write(std_out,*) "P-",my_rank,": ",ik,'of',ks_ebands%nkpt
+   ! loop over spins
+   do isp=1,ks_ebands%nsppol
+     !  loop over states
      do ist1=1,mband
-       e1=eig(ist1,ik,isp)
-       if (e1.lt.fermie) then   ! ist1 is a valence state
+       e1 = ks_ebands%eig(ist1,ik,isp)
+       if (e1.lt.ks_ebands%fermie) then   ! ist1 is a valence state
          do ist2=1,mband
-           e2=eig(ist2,ik,isp)
-           if (e2.gt.fermie) then ! ist2 is a conduction state
+           e2 = ks_ebands%eig(ist2,ik,isp)
+           if (e2.gt.ks_ebands%fermie) then ! ist2 is a conduction state
 !            symmetrize the momentum matrix elements
              do lx=1,3
                do ly=1,3
@@ -860,22 +836,22 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                    pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
                  end do
                end do
-             end do
-!            end loop over states
+             end do ! end loop over states
            end if
          end do
        end if
      end do
-!    calculate the energy window and \Delta_nm
+
+     ! calculate the energy window and \Delta_nm
      do ist1=1,mband
-       my_emin=min(my_emin,eig(ist1,ik,isp))
-       my_emax=max(my_emax,eig(ist1,ik,isp))
+       my_emin=min(my_emin, ks_ebands%eig(ist1,ik,isp))
+       my_emax=max(my_emax, ks_ebands%eig(ist1,ik,isp))
        do ist2=1,mband
          delta(ist1,ist2,1:3)=pmat(ist1,ist1,ik,1:3,isp)-pmat(ist2,ist2,ik,1:3,isp)
        end do
      end do
-!    initialise the factors
-!    factors are named according to the Ref. article 2.
+     ! initialise the factors
+     ! factors are named according to the Ref. article 2.
      b111=zero
      b121=zero
      b131=zero
@@ -899,17 +875,17 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      b312=zero
      b313=zero
      b331=zero
-!    start the calculation
+     ! start the calculation
      do istn=1,mband
-       en=eig(istn,ik,isp)
-       if (en.lt.fermie) then    ! istn is a valence state
+       en=ks_ebands%eig(istn,ik,isp)
+       if (en.lt.ks_ebands%fermie) then  ! istn is a valence state
          do istm=1,mband
-           em=eig(istm,ik,isp)
-           if (em.gt.fermie) then   ! istm is a conduction state
+           em=ks_ebands%eig(istm,ik,isp)
+           if (em.gt.ks_ebands%fermie) then  ! istm is a conduction state
              em = em + sc ! Should add the scissor to conduction energies
              wmn=em-en
              wnm=-wmn
-!            calculate the matrix elements for two band intraband term
+             ! calculate the matrix elements for two band intraband term
              mat2w_tra=zero
              mat1w3_tra=zero
              do lx=1,3
@@ -919,9 +895,9 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                    *delta(istm,istn,ly)
                    mat1w3_tra=mat1w3_tra+px(istn,istm,lx,ly,lz)*pmat(istm,istn,ik,ly,isp)  &
                    *delta(istm,istn,lz)
-!                  NOTE:: lx to ly m to n in pmat matrices respectively
-!                  Changes are made so that this (b3) term is according to paper
-!                  [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
+                   ! NOTE:: lx to ly m to n in pmat matrices respectively
+                   ! Changes are made so that this (b3) term is according to paper
+                   ! [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
                  end do
                end do
              end do
@@ -934,16 +910,14 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 
              b231=8._dp*mat2w_tra/wmn
              b331=mat1w3_tra/(wnm)
-!            !!!!!!!!!!!!!!!!!!!
-!            istl < istn   !
-!            !!!!!!!!!!!!!!!!!!!
-             do istl=1,istn-1           ! istl is a valence state below istn
-               el=eig(istl,ik,isp)
-               wln=el-en                ! do not add sc to the valence bands!
+             ! istl < istn
+             do istl=1,istn-1  ! istl is a valence state below istn
+               el=ks_ebands%eig(istl,ik,isp)
+               wln=el-en  ! do not add sc to the valence bands!
                wml=em-el
                wnl=-wln
                wlm=-wml
-!              calculate the matrix elements for three band terms
+               ! calculate the matrix elements for three band terms
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
@@ -965,12 +939,11 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                b111=mat2w*(1._dp/(wln+wlm))*(1._dp/wlm)
                b121=mat1w1*(1._dp/(wnm+wlm))*(1._dp/wlm)
                b131=mat1w2*(1._dp/wlm)
-!
                b221=zero
                b211=mat1w1/wml
                b241=-mat2w/wml
-!
                b311=mat1w2/wlm
+
                if (abs(wln).gt.tol) then
                  b111=b111/wln
                  b121=b121/wln
@@ -995,15 +968,12 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                b21_22=b21_22-b211+b221
                b24=b24+2._dp*b241
                b31_32=b31_32+b311
-!              end loop over istl
-             end do
+             end do ! istl
 
-!            !!!!!!!!!!!!!!!!!!!!!!!!!!!
-!            istn < istl < istm    !
-!            !!!!!!!!!!!!!!!!!!!!!!!!!!!
+             ! istn < istl < istm
              do istl=istn+1,istm-1
-               el=eig(istl,ik,isp)
-!              calculate the matrix elements for three band terms
+               el=ks_ebands%eig(istl,ik,isp)
+               ! calculate the matrix elements for three band terms
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
@@ -1022,7 +992,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                    end do
                  end do
                end do
-               if (el.lt.fermie) then
+               if (el.lt.ks_ebands%fermie) then
                  wln=el-en
                  wnl=-wln
                  wml=em-el
@@ -1077,19 +1047,16 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                b24=b24+2._dp*b242
                b21_22=b21_22-b212+b222
                b31_32=b31_32+b312
-!              end loop over istl
-             end do
+             end do ! istl
 
-!            !!!!!!!!!!!!!!!!!!!!!
-!            istl > istm    !
-!            !!!!!!!!!!!!!!!!!!!!!
+             ! istl > istm    !
              do istl=istm+1,mband
-               el=eig(istl,ik,isp)+sc
+               el=ks_ebands%eig(istl,ik,isp)+sc
                wln=el-en
                wnl=-wln
                wml=em-el
                wlm=-wml
-!              calculate the matrix elements for three band terms
+               ! calculate the matrix elements for three band terms
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
@@ -1107,7 +1074,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                    end do
                  end do
                end do
-!
+
                b113=mat2w*(1._dp/(wnl+wml))*(1._dp/wnl)
                b123=mat1w1*(1._dp/wnl)
                b133=mat1w2*(1._dp/wnl)*(1._dp/(wnl+wnm))
@@ -1138,22 +1105,21 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                b21_22=b21_22-b213+b223
                b24=b24+2._dp*b243
                b31_32=b31_32+b313
-!              end loop over istl
-             end do
+             end do ! istl
 
              b11=b11*zi*(1._dp/wnm)*const_esu
              b12_13=b12_13*zi*(1._dp/wnm)*const_esu
              b24=(b24+b231)*zi*(1._dp/(wnm**3))*const_esu
              b21_22=(b21_22)*zi*(1._dp/(wnm**3))*const_esu
              b31_32=(b31_32-b331)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp
-!            calculate over the desired energy mesh and sum over k-points
+             ! calculate over the desired energy mesh and sum over k-points
              do iw=1,nmesh
                w=(iw-1)*de+idel
-               inter2w(iw)=inter2w(iw)+(wtk(ik)*(b11/(wmn-2._dp*w))) ! Inter(2w) from chi
-               inter1w(iw)=inter1w(iw)+(wtk(ik)*(b12_13/(wmn-w))) ! Inter(1w) from chi
-               intra2w(iw)=intra2w(iw)+(wtk(ik)*(b24/(wmn-2._dp*w))) ! Intra(2w) from eta
-               intra1w(iw)=intra1w(iw)+(wtk(ik)*((b21_22)/(wmn-w))) ! Intra(1w) from eta
-               intra1wS(iw)=intra1wS(iw)+(wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
+               inter2w(iw)=inter2w(iw)+(ks_ebands%wtk(ik)*(b11/(wmn-2._dp*w))) ! Inter(2w) from chi
+               inter1w(iw)=inter1w(iw)+(ks_ebands%wtk(ik)*(b12_13/(wmn-w))) ! Inter(1w) from chi
+               intra2w(iw)=intra2w(iw)+(ks_ebands%wtk(ik)*(b24/(wmn-2._dp*w))) ! Intra(2w) from eta
+               intra1w(iw)=intra1w(iw)+(ks_ebands%wtk(ik)*((b21_22)/(wmn-w))) ! Intra(1w) from eta
+               intra1wS(iw)=intra1wS(iw)+(ks_ebands%wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
              end do
            end if
          end do ! istn and istm
@@ -1210,7 +1176,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
      ABI_ERROR(msg)
    end if
-!  write headers
+   ! write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
    write(fout1, '(a,es16.6,a)' ) ' #broadening:',brod,'Ha'
@@ -1313,7 +1279,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    close(fout5)
    close(fout6)
    close(fout7)
-!  print information
+   ! print information
    write(std_out,*) ' '
    write(std_out,*) 'information about calculation just performed:'
    write(std_out,*) ' '
@@ -1360,15 +1326,6 @@ end subroutine nlinopt
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
-!!  nsppol = number of spins(integer)
-!!  nkpt  = total number of kpoints (integer)
-!!  wtk(nkpt) = weights of kpoints (real)
-!!  nsym = number of crystal symmetry operations(integer)
-!!  symrel_cart(3,3,nsym) = symmetry operations in cartisian coordinates(real)
-!!  mband = Max number of bands in input arrays.
-!!  eig(mband,nsppol,nkpt) = GS eigen values in Ha
-!!  occ(mband,nsppol,nkpt) = occupation number
-!!  fermie = Fermi energy in Ha(real)
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
@@ -1406,22 +1363,15 @@ end subroutine nlinopt
 !!
 !! SOURCE
 
-subroutine linelop(icomp, itemp, cryst, nsppol, nkpt, wtk, mband, eig, occ, fermie, &
+subroutine linelop(icomp, itemp, cryst, ks_ebands, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp,itemp,nsppol, ncid
+integer, intent(in) :: icomp, itemp, ncid
 type(crystal_t),intent(in) :: cryst
-integer, intent(in) :: nkpt
-real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: mband
-real(dp), intent(in) :: eig(mband,nkpt,nsppol)
-real(dp), intent(in) :: occ(mband,nkpt,nsppol)
-real(dp), intent(in) :: fermie
-complex(dpc), intent(in) :: pmat(mband,mband,nkpt,3,nsppol)
-integer, intent(in) :: v1
-integer, intent(in) :: v2
-integer, intent(in) :: v3
+type(ebands_t),intent(in) :: ks_ebands
+complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+integer, intent(in) :: v1, v2, v3
 integer, intent(in) :: nmesh
 integer, intent(in) :: comm
 real(dp), intent(in) :: de
@@ -1435,7 +1385,7 @@ logical, intent(in) :: do_antiresonant
 integer :: iw
 integer :: i,j,k,lx,ly,lz
 integer :: isp,isym,ik
-integer :: ist1,istl,istn,istm
+integer :: ist1,istl,istn,istm, mband
 real(dp) :: ha2ev
 real(dp) :: t1,t2,t3
 real(dp) :: ene,totre,totabs,totim
@@ -1512,7 +1462,7 @@ integer :: start4(4),count4(4)
    ABI_ERROR("Aborting now")
  end if
 
-!check polarisation
+ ! check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in linelop:                        '
@@ -1521,7 +1471,8 @@ integer :: start4(4),count4(4)
    write(std_out,*) '---------------------------------------------'
    ABI_ERROR("Aborting now")
  end if
-!number of energy mesh points
+
+ ! number of energy mesh points
  if (nmesh.le.0) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in linelop:                        '
@@ -1531,7 +1482,8 @@ integer :: start4(4),count4(4)
    write(std_out,*) '---------------------------------------------'
    ABI_ERROR("Aborting now")
  end if
-!step in energy
+
+ ! step in energy
  if (de.le.zero) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in linelop:                        '
@@ -1541,7 +1493,8 @@ integer :: start4(4),count4(4)
    write(std_out,*) '---------------------------------------------'
    ABI_ERROR("Aborting now")
  end if
-!broadening
+
+ ! broadening
  if (brod.gt.0.009) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    ATTENTION: broadening is quite high      '
@@ -1553,22 +1506,16 @@ integer :: start4(4),count4(4)
    write(std_out,*) '    ideally should be less than 0.005   '
    write(std_out,*) '----------------------------------------'
  end if
-!tolerance
+
+ ! tolerance
  if (tol.gt.0.006) then
    write(std_out,*) '----------------------------------------'
    write(std_out,*) '    ATTENTION: tolerance is too high    '
    write(std_out,*) '    ideally should be less than 0.004   '
    write(std_out,*) '----------------------------------------'
  end if
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!fool proof ends
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!allocate local arrays
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+ mband = ks_ebands%mband
  ABI_MALLOC(enk,(mband))
  ABI_MALLOC(delta,(mband,mband,3))
  ABI_MALLOC(rmnbc,(mband,mband,3,3))
@@ -1581,7 +1528,7 @@ integer :: start4(4),count4(4)
  ABI_MALLOC(sym,(3,3,3))
  ABI_MALLOC(s,(3,3))
 
-!generate the symmetrizing tensor
+ ! generate the symmetrizing tensor
  sym(:,:,:)=zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
@@ -1594,7 +1541,7 @@ integer :: start4(4),count4(4)
    end do
  end do
 
-!initialise
+ ! initialise
  delta(:,:,:)=zero
  rmnbc(:,:,:,:)=zero
  chi(:)=zero
@@ -1605,25 +1552,24 @@ integer :: start4(4),count4(4)
  my_emax=-HUGE(zero)
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2)
+ call xmpi_split_work(ks_ebands%nkpt,comm,my_k1,my_k2)
 
 ! loop over kpts
  do ik=my_k1,my_k2
-   write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-!  loop over spins
-   do isp=1,nsppol
-!    Calculate the scissor corrected energies and the energy window
+   write(std_out,*) "P-",my_rank,": ",ik,'of',ks_ebands%nkpt
+   do isp=1,ks_ebands%nsppol
+     ! Calculate the scissor corrected energies and the energy window
      do ist1=1,mband
-       en = eig(ist1,ik,isp)
+       en = ks_ebands%eig(ist1,ik,isp)
        my_emin=min(my_emin,en)
        my_emax=max(my_emax,en)
-       if(en > fermie) then
+       if(en > ks_ebands%fermie) then
          en = en + sc
        end if
        enk(ist1) = en
      end do
 
-!    calculate \Delta_nm and r_mn^a
+     ! calculate \Delta_nm and r_mn^a
      do istn=1,mband
        en = enk(istn)
        do istm=1,mband
@@ -1637,7 +1583,8 @@ integer :: start4(4),count4(4)
          end if
        end do
      end do
-!    calculate \r^b_mn;c
+
+     ! calculate \r^b_mn;c
      do istm=1,mband
        em = enk(istm)
        do istn=1,mband
@@ -1666,22 +1613,22 @@ integer :: start4(4),count4(4)
        end do
      end do
 
-!    initialise the factors
-!    start the calculation
+     ! initialise the factors
+     ! start the calculation
      do istn=1,mband
        en=enk(istn)
-       if (do_antiresonant .and. en .ge. fermie) then
+       if (do_antiresonant .and. en .ge. ks_ebands%fermie) then
          cycle
        end if
-       fn=occ(istn,ik,isp)
+       fn=ks_ebands%occ(istn,ik,isp)
        do istm=1,mband
          em=enk(istm)
-         if (do_antiresonant .and. em .le. fermie) then
+         if (do_antiresonant .and. em .le. ks_ebands%fermie) then
            cycle
          end if
          wmn=em-en
          wnm=-wmn
-         fm = occ(istm,ik,isp)
+         fm = ks_ebands%occ(istm,ik,isp)
          fnm = fn - fm
          fmn = fm - fn
          eta1 = zero
@@ -1709,10 +1656,10 @@ integer :: start4(4),count4(4)
          chi2_1b = zero
          chi2_2b = zero
          chi2(:) = zero
-!        Three band terms
+         ! Three band terms
          do istl=1,mband
            el=enk(istl)
-           fl = occ(istl,ik,isp)
+           fl = ks_ebands%occ(istl,ik,isp)
            wlm = el-em
            wln = el-en
            wnl = en-el
@@ -1739,14 +1686,14 @@ integer :: start4(4),count4(4)
          sigma1 = 0.5_dp*(sigma1_1-sigma1_2)
          eta2 = 0.5_dp*(eta2_1-eta2_2)
          chi1 = chi1_1 + chi1_2
-!
-!        calculate over the desired energy mesh and sum over k-points
+
+         !  calculate over the desired energy mesh and sum over k-points
          do iw=1,nmesh
            w=(iw-1)*de+idel
            ! Better way to compute it
-           chi(iw) = chi(iw) + 0.5_dp*wtk(ik)*((chi1/(wmn-w)) + ((chi2_1b+chi2_2b)/(wmn-w)))*const_esu
-           eta(iw) = eta(iw) + 0.5_dp*zi*wtk(ik)*((eta1/(wmn-w)) + (eta2/((wmn-w)**2)))*const_esu
-           sigma(iw) = sigma(iw) + 0.5_dp*zi*wtk(ik)*((sigma1/(wmn-w))- (sigma2/(wmn-w)))*const_esu
+           chi(iw) = chi(iw) + 0.5_dp*ks_ebands%wtk(ik)*((chi1/(wmn-w)) + ((chi2_1b+chi2_2b)/(wmn-w)))*const_esu
+           eta(iw) = eta(iw) + 0.5_dp*zi*ks_ebands%wtk(ik)*((eta1/(wmn-w)) + (eta2/((wmn-w)**2)))*const_esu
+           sigma(iw) = sigma(iw) + 0.5_dp*zi*ks_ebands%wtk(ik)*((sigma1/(wmn-w))- (sigma2/(wmn-w)))*const_esu
          end do
        end do ! istn and istm
      end do
@@ -1913,13 +1860,6 @@ end subroutine linelop
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
-!!  nsppol = number of spins(integer)
-!!  nkpt  = total number of kpoints (integer)
-!!  wtk(nkpt) = weights of kpoints (real)
-!!  mband = Max number of bands in input arrays.
-!!  eig(mband,nsppol,nkpt) = eigen value for each band in Ha(real)
-!!  occ(mband,nsppol,nkpt) = occupation numbers.
-!!  fermie = Fermi energy in Ha(real)
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2,v3 = desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh = desired number of energy mesh points(integer)
@@ -1957,33 +1897,23 @@ end subroutine linelop
 !!
 !! SOURCE
 
-subroutine nonlinopt(icomp, itemp, cryst, nsppol, nkpt, wtk, mband, eig, occ, fermie, &
+subroutine nonlinopt(icomp, itemp, cryst, ks_ebands, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp,itemp,nsppol, ncid
+integer, intent(in) :: icomp, itemp, ncid
 type(crystal_t),intent(in) :: cryst
-integer, intent(in) :: nkpt
-real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: mband
-real(dp), intent(in) :: eig(mband,nkpt,nsppol)
-real(dp), intent(in) :: occ(mband,nkpt,nsppol)
-real(dp), intent(in) :: fermie
-complex(dpc), intent(in) :: pmat(mband,mband,nkpt,3,nsppol)
-integer, intent(in) :: v1
-integer, intent(in) :: v2
-integer, intent(in) :: v3
+type(ebands_t),intent(in) :: ks_ebands
+complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+integer, intent(in) :: v1, v2, v3
 integer, intent(in) :: nmesh
 integer, intent(in) :: comm
-real(dp), intent(in) :: de
-real(dp), intent(in) :: sc
-real(dp), intent(in) :: brod
-real(dp), intent(in) :: tol
+real(dp), intent(in) :: de, sc, brod, tol
 character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
-integer :: iw,i,j,k,lx,ly,lz
+integer :: iw,i,j,k,lx,ly,lz,mband
 integer :: isp,isym,ik,ist1,istl,istn,istm
 real(dp) :: ha2ev
 real(dp) :: t1,t2,t3,tst
@@ -1998,7 +1928,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  integer :: start4(4),count4(4)
  real(dp) :: s(3,3),sym(3,3,3)
  integer :: istp
- real(dp) :: ep, wmp, wpn
+ real(dp) :: ep, wmp, wpn, wtk
  real(dp), allocatable :: enk(:) ! (n) = \omega_n(k), with scissor included !
  real(dp) :: fn, fm, fl, fnm, fnl, fml, fln, flm
  complex(dpc), allocatable :: delta(:,:,:) ! (m,n,a) = \Delta_{mn}^{a}
@@ -2057,7 +1987,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  fnam6=trim(fnam)//'-ChiSHGImDec.out'
  fnam7=trim(fnam)//'-ChiSHGReDec.out'
 
-!If there exists inversion symmetry exit with a mesg.
+ ! If there exists inversion symmetry exit with a mesg.
  if (cryst%idx_spatial_inversion() /= 0) then
    write(std_out,*) '-----------------------------------------'
    write(std_out,*) '    the crystal has inversion symmetry   '
@@ -2067,7 +1997,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    ABI_ERROR("Aborting now")
  end if
 
-!check polarisation
+ ! check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in nonlinopt:                        '
@@ -2077,7 +2007,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    ABI_ERROR("Aborting now")
  end if
 
-!number of energy mesh points
+ ! number of energy mesh points
  if (nmesh.le.0) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in nonlinopt:                        '
@@ -2088,7 +2018,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    ABI_ERROR("Aborting now")
  end if
 
-!step in energy
+ ! step in energy
  if (de.le.zero) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in nonlinopt:                        '
@@ -2099,7 +2029,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    ABI_ERROR("Aborting now")
  end if
 
-!broadening
+ ! broadening
  if (brod.gt.0.009) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    ATTENTION: broadening is quite high      '
@@ -2112,7 +2042,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) '----------------------------------------'
  end if
 
-!tolerance
+ ! tolerance
  if (tol.gt.0.006) then
    write(std_out,*) '----------------------------------------'
    write(std_out,*) '    ATTENTION: tolerance is too high    '
@@ -2121,6 +2051,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  end if
 
  ! allocate local arrays
+ mband = ks_ebands%mband
  ABI_MALLOC(enk,(mband))
  ABI_MALLOC(delta,(mband,mband,3))
  ABI_MALLOC(rmnbc,(mband,mband,3,3))
@@ -2135,7 +2066,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  ABI_MALLOC(eta1,(nmesh))
  ABI_MALLOC(symrmn,(mband,mband,mband))
 
-!generate the symmetrizing tensor
+ ! generate the symmetrizing tensor
  sym = zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
@@ -2148,8 +2079,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    end do
  end do
 
-
-!initialise
+ ! initialise
  delta = zero
  rmnbc = zero
  chiw = zero
@@ -2162,24 +2092,24 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  my_emax=-HUGE(one)
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2)
+ call xmpi_split_work(ks_ebands%nkpt, comm, my_k1, my_k2)
 
 ! loop over kpts
  do ik=my_k1,my_k2
-   write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
-   do isp=1,nsppol
+   write(std_out,*) "P-",my_rank,": ",ik,'of ', ks_ebands%nkpt
+   do isp=1,ks_ebands%nsppol
      ! Calculate the scissor corrected energies and the energy window
      do ist1=1,mband
-       en = eig(ist1,ik,isp)
+       en = ks_ebands%eig(ist1,ik,isp)
        my_emin=min(my_emin,en)
        my_emax=max(my_emax,en)
-       if(en > fermie) then
+       if(en > ks_ebands%fermie) then
          en = en + sc
        end if
        enk(ist1) = en
      end do
 
-!    calculate \Delta_nm and r_mn^a
+     ! calculate \Delta_nm and r_mn^a
      do istn=1,mband
        en = enk(istn)
        do istm=1,mband
@@ -2193,7 +2123,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
          end if
        end do
      end do
-!    calculate \r^b_mn;c
+
+     ! calculate \r^b_mn;c
      do istm=1,mband
        em = enk(istm)
        do istn=1,mband
@@ -2225,22 +2156,22 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
        end do
      end do
 
-!    initialise the factors
-!    start the calculation
+     ! initialise the factors
+     ! start the calculation
      do istn=1,mband
        en=enk(istn)
-       fn=occ(istn,ik,isp)
-       if(do_antiresonant .and. en .ge. fermie) then
+       fn=ks_ebands%occ(istn,ik,isp)
+       if(do_antiresonant .and. en .ge. ks_ebands%fermie) then
          cycle
        end if
        do istm=1,mband
          em=enk(istm)
-         if (do_antiresonant .and. em .le. fermie) then
+         if (do_antiresonant .and. em .le. ks_ebands%fermie) then
            cycle
          end if
          wmn=em-en
          wnm=-wmn
-         fm = occ(istm,ik,isp)
+         fm = ks_ebands%occ(istm,ik,isp)
          fnm = fn - fm
          if(abs(wmn) > tol) then
            chi1 = zero
@@ -2257,7 +2188,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
            ! Three band terms
            do istl=1,mband
              el=enk(istl)
-             fl = occ(istl,ik,isp)
+             fl = ks_ebands%occ(istl,ik,isp)
              wlm = el-em
              wln = el-en
              wnl = -wln
@@ -2302,27 +2233,28 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
              do ly = 1,3
                do lz = 1,3
                  eta2_1 = eta2_1 + sym(lx,ly,lz)*fnm*rmna(istn,istm,lx)*0.5_dp &
-&                    *(delta(istm,istn,ly)*rmna(istm,istn,lz)+delta(istm,istn,lz)*rmna(istm,istn,ly))
+                    *(delta(istm,istn,ly)*rmna(istm,istn,lz)+delta(istm,istn,lz)*rmna(istm,istn,ly))
                  ! Correct version (Sipe 1993)
                  sigma2_1 = sigma2_1 + sym(lx,ly,lz)*fnm*rmna(istn,istm,lx)*0.5_dp &
-&                    *(rmna(istm,istn,ly)*delta(istn,istm,lz)+rmna(istm,istn,lz)*delta(istn,istm,ly))
+                    *(rmna(istm,istn,ly)*delta(istn,istm,lz)+rmna(istm,istn,lz)*delta(istn,istm,ly))
 
                  ! Incorrect version (Hughes 1996)
                  !sigma2_1 = fnm*delta(istn,istm,v1)*0.5_dp*(rmna(istm,istn,v2)*rmna(istn,istm,v3)+rmna(istm,istn,v3)*rmna(istn,istm,v2))
                end do
              end do
            end do
-!
-!          calculate over the desired energy mesh and sum over k-points
+
+           ! calculate over the desired energy mesh and sum over k-points
+           wtk = ks_ebands%wtk(ik)
            do iw=1,nmesh
              w=(iw-1)*de+idel
-             chi2w(iw) = chi2w(iw) + zi*wtk(ik)*((2.0_dp*fnm*chi1/(wmn-2.0_dp*w)))*const_esu ! Inter(2w) from chi
-             chiw(iw) = chiw(iw) + zi*wtk(ik)*((chi2_1+chi2_2)/(wmn-w))*const_esu ! Inter(w) from chi
-             eta2w(iw) = eta2w(iw) + zi*wtk(ik)*(8.0_dp*(eta2_1/((wmn**2)*(wmn-2.0_dp*w))) &
-&                 + 2.0_dp*eta2_2/((wmn**2)*(wmn-2.0_dp*w)))*const_esu ! Intra(2w) from eta
-             etaw(iw) = etaw(iw) + zi*wtk(ik)*((eta1_1 + eta1_2)*fnm/((wmn**2)*(wmn-w)))*const_esu ! Intra(w) from eta
-             sigmaw(iw) = sigmaw(iw) + 0.5_dp*zi*wtk(ik)*(fnm*sigma1/((wmn**2)*(wmn-w)) &
-&                 + (sigma2_1/((wmn**2)*(wmn-w))))*const_esu ! Intra(1w) from sigma
+             chi2w(iw) = chi2w(iw) + zi*wtk*((2.0_dp*fnm*chi1/(wmn-2.0_dp*w)))*const_esu ! Inter(2w) from chi
+             chiw(iw) = chiw(iw) + zi*wtk*((chi2_1+chi2_2)/(wmn-w))*const_esu ! Inter(w) from chi
+             eta2w(iw) = eta2w(iw) + zi*wtk*(8.0_dp*(eta2_1/((wmn**2)*(wmn-2.0_dp*w))) &
+                 + 2.0_dp*eta2_2/((wmn**2)*(wmn-2.0_dp*w)))*const_esu ! Intra(2w) from eta
+             etaw(iw) = etaw(iw) + zi*wtk*((eta1_1 + eta1_2)*fnm/((wmn**2)*(wmn-w)))*const_esu ! Intra(w) from eta
+             sigmaw(iw) = sigmaw(iw) + 0.5_dp*zi*wtk*(fnm*sigma1/((wmn**2)*(wmn-w)) &
+                 + (sigma2_1/((wmn**2)*(wmn-w))))*const_esu ! Intra(1w) from sigma
            end do
          end if
        end do ! end loop over istn and istm
@@ -2381,7 +2313,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
      ABI_ERROR(msg)
    end if
-  !!write headers
+
+   ! write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
    write(fout1, '(a,es16.6,a)' ) ' #broadening:',brod,'Ha'
