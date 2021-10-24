@@ -39,13 +39,12 @@ module m_optic_tools
  use m_linalg_interfaces
  use m_xmpi
  use m_nctk
-
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
  use defs_datatypes,    only : ebands_t
- use m_numeric_tools,   only : wrap2_pmhalf, c2r
+ use m_numeric_tools,   only : c2r
  use m_io_tools,        only : open_file
  use m_crystal,         only : crystal_t
 
@@ -111,7 +110,7 @@ subroutine pmat2cart(eigen11, eigen12, eigen13, mband, nkpt, nsppol, pmat, rprim
 
 ! *************************************************************************
 
-!rescale the rprim
+ !rescale the rprim
  rprim(:,:) = rprimd(:,:) / two_pi
 
  do isppol=1,nsppol
@@ -351,16 +350,17 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
 !   EPBSt%linewidth = zero
 ! end if
 
-!allocate local arrays
- ABI_MALLOC(chi,(nmesh,nsppol))
- ABI_MALLOC(eps,(nmesh))
- ABI_MALLOC(im_refract,(nmesh))
- ABI_MALLOC(re_refract,(nmesh))
+ ABI_MALLOC(chi, (nmesh, nsppol))
+ ABI_MALLOC(eps, (nmesh))
+ ABI_MALLOC(im_refract, (nmesh))
+ ABI_MALLOC(re_refract, (nmesh))
  ieta=(zero, 1._dp)*brod
  renorm_factor=1._dp/(cryst%ucvol*dble(cryst%nsym))
  ha2ev=13.60569172*2._dp
+
  ! output file names
  fnam1=trim(fnam)//'-linopt.out'
+
  ! construct symmetrisation tensor
  sym = zero
  do isym=1,cryst%nsym
@@ -390,10 +390,8 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
  ! this is not optimized memory-wise since we could just allocate what is needed
  ! however we would need to write all data using mpi-io.
  if (prtlincompmatrixelements == 1) then
-   ABI_MALLOC(matrix_elements,(mband,mband,nkpt,nsppol))
-   ABI_MALLOC(renorm_eigs,(mband,nkpt,nsppol))
-   matrix_elements(:,:,:,:) = czero
-   renorm_eigs(:,:,:) = czero
+   ABI_CALLOC(matrix_elements, (mband, mband, nkpt, nsppol))
+   ABI_CALLOC(renorm_eigs, (mband, nkpt, nsppol))
  endif
 
  ! start calculating linear optical response
@@ -559,11 +557,10 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_matrix_elements"), c2r(matrix_elements),&
                           start=[1, 1, 1, 1, 1, icomp, itemp])
      NCF_CHECK(ncerr)
-     ABI_FREE(matrix_elements)
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_renorm_eigs"), c2r(renorm_eigs), start=[1, 1, 1, 1])
      NCF_CHECK(ncerr)
-     ABI_FREE(renorm_eigs)
-     ! also write occupations and kpt weights
+
+     ! write occupations and kpt weights
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_occupations"), ks_ebands%occ, start=[1, 1, 1])
      NCF_CHECK(ncerr)
      ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_wkpts"), ks_ebands%wtk, start=[1])
@@ -579,6 +576,9 @@ complex(dpc), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:
  ABI_FREE(im_refract)
  ABI_FREE(re_refract)
 
+ ABI_SFREE(matrix_elements)
+ ABI_SFREE(renorm_eigs)
+
 end subroutine linopt
 !!***
 
@@ -589,7 +589,7 @@ end subroutine linopt
 !! nlinopt
 !!
 !! FUNCTION
-!! Compute optical frequency dependent second harmonic generation susceptibility for semiconductors
+!! Compute second harmonic generation susceptibility for semiconductors
 !!
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
@@ -639,23 +639,16 @@ real(dp), intent(in) :: de, sc, brod, tol
 character(len=*), intent(in) :: fnam
 
 !Local variables -------------------------
-integer :: iw, mband
-integer :: i,j,k,lx,ly,lz
-integer :: isp,isym,ik
-integer :: ist1,ist2,istl,istn,istm
 integer,parameter :: master=0
-integer :: my_rank, nproc
-integer :: my_k1, my_k2
-integer :: ierr
+integer :: iw, mband,i,j,k,lx,ly,lz
+integer :: isp,isym,ik,ist1,ist2,istl,istn,istm
+integer :: my_rank, nproc, my_k1, my_k2, ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
-real(dp) :: f1,f2,f3
-real(dp) :: ha2ev
+real(dp) :: f1,f2,f3, ha2ev
 real(dp) :: t1,t2,t3
 real(dp) :: ene,totre,totabs,totim
-real(dp) :: e1,e2,el,en,em
-real(dp) :: emin,emax,my_emin,my_emax
-real(dp) :: const_esu,const_au,au2esu
-real(dp) :: wmn,wnm,wln,wnl,wml,wlm
+real(dp) :: e1,e2,el,en,em,emin,emax,my_emin,my_emax
+real(dp) :: const_esu,const_au,au2esu,wmn,wnm,wln,wnl,wml,wlm
 complex(dpc) :: idel,w,zi
 complex(dpc) :: mat2w,mat1w1,mat1w2,mat2w_tra,mat1w3_tra
 complex(dpc) :: b111,b121,b131,b112,b122,b132,b113,b123,b133
@@ -667,15 +660,9 @@ character(500) :: msg
 ! local allocatable arrays
 integer :: start4(4),count4(4)
 real(dp) :: s(3,3),sym(3,3,3)
-complex(dpc), allocatable :: px(:,:,:,:,:)
-complex(dpc), allocatable :: py(:,:,:,:,:)
-complex(dpc), allocatable :: pz(:,:,:,:,:)
-complex(dpc), allocatable :: delta(:,:,:)
-complex(dpc), allocatable :: inter2w(:)
-complex(dpc), allocatable :: inter1w(:)
-complex(dpc), allocatable :: intra2w(:)
-complex(dpc), allocatable :: intra1w(:)
-complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
+complex(dpc), allocatable :: px(:,:,:,:,:), py(:,:,:,:,:), pz(:,:,:,:,:)
+complex(dpc), allocatable :: delta(:,:,:), inter2w(:), inter1w(:)
+complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
 
 ! *********************************************************************
 
@@ -772,15 +759,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  end if
 
  !allocate local arrays
- ABI_MALLOC(px,(mband,mband,3,3,3))
- ABI_MALLOC(py,(mband,mband,3,3,3))
- ABI_MALLOC(pz,(mband,mband,3,3,3))
- ABI_MALLOC(inter2w,(nmesh))
- ABI_MALLOC(inter1w,(nmesh))
- ABI_MALLOC(intra2w,(nmesh))
- ABI_MALLOC(intra1w,(nmesh))
- ABI_MALLOC(intra1wS,(nmesh))
- ABI_MALLOC(delta,(mband,mband,3))
+ ABI_MALLOC(px, (mband, mband, 3, 3, 3))
+ ABI_MALLOC(py, (mband, mband, 3, 3, 3))
+ ABI_MALLOC(pz,(mband,mband, 3, 3, 3))
+ ABI_MALLOC(inter2w, (nmesh))
+ ABI_MALLOC(inter1w, (nmesh))
+ ABI_MALLOC(intra2w, (nmesh))
+ ABI_MALLOC(intra1w, (nmesh))
+ ABI_MALLOC(intra1wS, (nmesh))
+ ABI_MALLOC(delta, (mband, mband, 3))
 
  !generate the symmetrizing tensor
  sym = zero
@@ -824,7 +811,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
          do ist2=1,mband
            e2 = ks_ebands%eig(ist2,ik,isp)
            if (e2.gt.ks_ebands%fermie) then ! ist2 is a conduction state
-!            symmetrize the momentum matrix elements
+             ! symmetrize the momentum matrix elements
              do lx=1,3
                do ly=1,3
                  do lz=1,3
@@ -1364,42 +1351,41 @@ end subroutine nlinopt
 !! SOURCE
 
 subroutine linelop(icomp, itemp, cryst, ks_ebands, &
-  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
+                   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp, itemp, ncid
-type(crystal_t),intent(in) :: cryst
-type(ebands_t),intent(in) :: ks_ebands
-complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
-integer, intent(in) :: v1, v2, v3
-integer, intent(in) :: nmesh
-integer, intent(in) :: comm
-real(dp), intent(in) :: de
-real(dp), intent(in) :: sc
-real(dp), intent(in) :: brod
-real(dp), intent(in) :: tol
-character(len=*), intent(in) :: fnam
-logical, intent(in) :: do_antiresonant
+ integer, intent(in) :: icomp, itemp, ncid
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ks_ebands
+ complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+ integer, intent(in) :: v1, v2, v3
+ integer, intent(in) :: nmesh
+ integer, intent(in) :: comm
+ real(dp), intent(in) :: de
+ real(dp), intent(in) :: sc
+ real(dp), intent(in) :: brod
+ real(dp), intent(in) :: tol
+ character(len=*), intent(in) :: fnam
+ logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
-integer :: iw
-integer :: i,j,k,lx,ly,lz
-integer :: isp,isym,ik
-integer :: ist1,istl,istn,istm, mband
-real(dp) :: ha2ev
-real(dp) :: t1,t2,t3
-real(dp) :: ene,totre,totabs,totim
-real(dp) :: el,en,em
-real(dp) :: emin,emax,my_emin,my_emax
-real(dp) :: const_esu,const_au,au2esu
-real(dp) :: wmn,wnm,wln,wnl,wml,wlm
-complex(dpc) :: idel,w,zi
-character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5
+ integer,parameter :: master = 0
+ integer :: iw
+ integer :: i,j,k,lx,ly,lz
+ integer :: isp,isym,ik
+ integer :: ist1,istl,istn,istm, mband
+ real(dp) :: ha2ev
+ real(dp) :: t1,t2,t3
+ real(dp) :: ene,totre,totabs,totim
+ real(dp) :: el,en,em
+ real(dp) :: emin,emax,my_emin,my_emax
+ real(dp) :: const_esu,const_au,au2esu
+ real(dp) :: wmn,wnm,wln,wnl,wml,wlm
+ complex(dpc) :: idel,w,zi
+ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5
 ! local allocatable arrays
-real(dp), allocatable :: s(:,:)
-real(dp), allocatable :: sym(:,:,:)
-integer :: start4(4),count4(4)
-! DBYG
+ real(dp), allocatable :: s(:,:), sym(:,:,:)
+ integer :: start4(4),count4(4)
  integer :: istp
  real(dp) :: ep, wmp, wpn
  real(dp), allocatable :: enk(:) ! (n) = \omega_n(k), with scissor included !
@@ -1418,7 +1404,6 @@ integer :: start4(4),count4(4)
  complex(dpc) :: eta1, eta2, eta2_1, eta2_2
  complex(dpc) :: sigma1, sigma1_1, sigma1_2, sigma2
  !Parallelism
- integer,parameter :: master = 0
  integer :: my_rank, nproc, ierr, my_k1, my_k2
  integer :: fout1,fout2,fout3,fout4,fout5
  character(500) :: msg
@@ -1516,17 +1501,17 @@ integer :: start4(4),count4(4)
  end if
 
  mband = ks_ebands%mband
- ABI_MALLOC(enk,(mband))
- ABI_MALLOC(delta,(mband,mband,3))
- ABI_MALLOC(rmnbc,(mband,mband,3,3))
- ABI_MALLOC(roverw,(mband,mband,3,3))
- ABI_MALLOC(rmna,(mband,mband,3))
- ABI_MALLOC(chi,(nmesh))
- ABI_MALLOC(eta,(nmesh))
- ABI_MALLOC(sigma,(nmesh))
- ABI_MALLOC(chi2,(nmesh))
- ABI_MALLOC(sym,(3,3,3))
- ABI_MALLOC(s,(3,3))
+ ABI_MALLOC(enk, (mband))
+ ABI_MALLOC(delta, (mband, mband, 3))
+ ABI_MALLOC(rmnbc,(mband,mband, 3, 3))
+ ABI_MALLOC(roverw,(mband, mband, 3, 3))
+ ABI_MALLOC(rmna, (mband, mband, 3))
+ ABI_MALLOC(chi, (nmesh))
+ ABI_MALLOC(eta, (nmesh))
+ ABI_MALLOC(sigma, (nmesh))
+ ABI_MALLOC(chi2, (nmesh))
+ ABI_MALLOC(sym, (3, 3, 3))
+ ABI_MALLOC(s, (3, 3))
 
  ! generate the symmetrizing tensor
  sym(:,:,:)=zero
@@ -1554,7 +1539,7 @@ integer :: start4(4),count4(4)
  ! Split work
  call xmpi_split_work(ks_ebands%nkpt,comm,my_k1,my_k2)
 
-! loop over kpts
+ ! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',ks_ebands%nkpt
    do isp=1,ks_ebands%nsppol
@@ -1898,7 +1883,7 @@ end subroutine linelop
 !! SOURCE
 
 subroutine nonlinopt(icomp, itemp, cryst, ks_ebands, &
-  pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
+                      pmat, v1, v2, v3, nmesh, de, sc, brod, tol, fnam, do_antiresonant, ncid, comm)
 
 !Arguments ------------------------------------
 integer, intent(in) :: icomp, itemp, ncid
@@ -2052,19 +2037,19 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
  ! allocate local arrays
  mband = ks_ebands%mband
- ABI_MALLOC(enk,(mband))
- ABI_MALLOC(delta,(mband,mband,3))
- ABI_MALLOC(rmnbc,(mband,mband,3,3))
- ABI_MALLOC(roverw,(mband,mband,3,3))
- ABI_MALLOC(rmna,(mband,mband,3))
- ABI_MALLOC(chiw,(nmesh))
- ABI_MALLOC(etaw,(nmesh))
- ABI_MALLOC(chi2w,(nmesh))
- ABI_MALLOC(eta2w,(nmesh))
- ABI_MALLOC(sigmaw,(nmesh))
- ABI_MALLOC(chi2,(nmesh))
- ABI_MALLOC(eta1,(nmesh))
- ABI_MALLOC(symrmn,(mband,mband,mband))
+ ABI_MALLOC(enk, (mband))
+ ABI_MALLOC(delta, (mband, mband, 3))
+ ABI_MALLOC(rmnbc, (mband, mband, 3, 3))
+ ABI_MALLOC(roverw, (mband, mband, 3, 3))
+ ABI_MALLOC(rmna, (mband, mband, 3))
+ ABI_MALLOC(chiw, (nmesh))
+ ABI_MALLOC(etaw, (nmesh))
+ ABI_MALLOC(chi2w, (nmesh))
+ ABI_MALLOC(eta2w, (nmesh))
+ ABI_MALLOC(sigmaw, (nmesh))
+ ABI_MALLOC(chi2, (nmesh))
+ ABI_MALLOC(eta1, (nmesh))
+ ABI_MALLOC(symrmn, (mband, mband, mband))
 
  ! generate the symmetrizing tensor
  sym = zero
