@@ -112,15 +112,6 @@ module defs_datatypes
   ! Linewidth of each band
   ! MG: TODO: This array should be removed (I think Yannick introduced it, see also Ktmesh)
 
-  !real(dp),allocatable :: kTmesh(:)
-  ! kTmesh(ntemp)
-  ! List of temperatures (KT units).
-
-  !real(dp),allocatable :: velocity(:,:,:,:)
-  ! velocity(3,mband,nkpt,nsppol)
-  ! Group velocity of each band
-  ! MG: TODO: This array should be removed (I think HM introduced it)
-
   real(dp),allocatable :: occ(:,:,:)
   ! occ(mband, nkpt, nsppol)
   ! occupation of each band.

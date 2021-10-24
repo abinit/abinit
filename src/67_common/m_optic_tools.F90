@@ -53,7 +53,6 @@ module m_optic_tools
 
  private
 
- public :: sym2cart
  public :: pmat2cart
  public :: pmat_renorm
  public :: linopt           ! Compute dielectric function for semiconductors
@@ -61,67 +60,7 @@ module m_optic_tools
  public :: linelop          ! Linear electro-optic susceptibility for semiconductors
  public :: nonlinopt        ! nonlinear electro-optic susceptibility for semiconductors
 
-CONTAINS  !===========================================================
-!!***
-
-!!****f* m_optic_tools/sym2cart
-!! NAME
-!! sym2cart
-!!
-!! FUNCTION
-!! Routine called by the program optic
-!! Convert to symmetry matrice in cartesian coordinates
-!!
-!! INPUTS
-!!	gprimd(3,3)=dimensional primitive translations for reciprocal space
-!!	nsym=number of symmetries in group
-!!	rprimd(3,3)=dimensional real space primitive translations (bohr)
-!!	symrel(3,3,nsym)=symmetry matrices in terms of real space
-!!
-!! OUTPUT
-!!	symcart(3,3)=symmetry matrice in cartesian coordinates (reals)
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
-!!
-!! SOURCE
-
-
-subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
-
-!Arguments -----------------------------------------------
-!scalars
- integer,intent(in) :: nsym
-!arrays
- integer,intent(in) :: symrel(3,3,nsym)
- real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
- real(dp),intent(out) :: symcart(3,3,nsym)
-
-!Local variables-------------------------------
-!scalars
- integer :: isym
-!arrays
- real(dp) :: rsym(3,3),rsymcart(3,3),tmp(3,3)
-
-! *************************************************************************
-
- do isym=1,nsym
-   rsym(:,:) = dble(symrel(:,:,isym))
-!  write(std_out,*) 'rsym = ',rsym
-   call dgemm('N','N',3,3,3,one,rprimd,3,rsym,  3,zero,tmp,     3)
-   call dgemm('N','N',3,3,3,one,tmp,   3,gprimd,3,zero,rsymcart,3)
-!  write(std_out,*) 'rsymcart = ',rsymcart
-   symcart(:,:,isym) = rsymcart(:,:)
-! purify symops in cartesian dp coordinates
-   where( abs(symcart(:,:,isym))<tol14)
-     symcart(:,:,isym) = zero
-   end where
- end do
-
-end subroutine sym2cart
+contains
 !!***
 
 !----------------------------------------------------------------------
@@ -369,7 +308,7 @@ complex(dpc), allocatable :: eps(:)
      ABI_ERROR("Aborting now")
    end if
   !step in energy
-   if (de.le.0._dp) then
+   if (de.le.zero) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
      write(std_out,*) '    energy step is incorrect                 '
@@ -398,7 +337,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
    end if
   !scissors operator
-   if (sc.lt.0._dp) then
+   if (sc.lt.zero) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
      write(std_out,*) '    scissors shift is incorrect              '
@@ -423,13 +362,13 @@ complex(dpc), allocatable :: eps(:)
  ABI_MALLOC(eps,(nmesh))
  ABI_MALLOC(im_refract,(nmesh))
  ABI_MALLOC(re_refract,(nmesh))
- ieta=(0._dp,1._dp)*brod
+ ieta=(zero, 1._dp)*brod
  renorm_factor=1._dp/(cryst%ucvol*dble(cryst%nsym))
  ha2ev=13.60569172*2._dp
 !output file names
  fnam1=trim(fnam)//'-linopt.out'
 !construct symmetrisation tensor
- sym(:,:)=0._dp
+ sym = zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
@@ -440,8 +379,8 @@ complex(dpc), allocatable :: eps(:)
  end do
 
 !calculate the energy window
- emin=0._dp
- emax=0._dp
+ emin=zero
+ emax=zero
  do ik=1,nkpt
    do isp=1,nsppol
      do ist1=1,mband
@@ -464,7 +403,7 @@ complex(dpc), allocatable :: eps(:)
  endif
 
  ! start calculating linear optical response
- chi(:,:)=0._dp
+ chi(:,:)=zero
  do isp=1,nsppol
    do ik=my_k1,my_k2
      write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
@@ -495,7 +434,7 @@ complex(dpc), allocatable :: eps(:)
              e12_ep = e1_ep-e2_ep-sc
            end if
 !          e12=e1-e2-sc
-           b11=0._dp
+           b11=zero
 !          symmetrization of momentum matrix
            do lx=1,3
              do ly=1,3
@@ -825,7 +764,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      ABI_ERROR("Aborting now")
    end if
   !step in energy
-   if (de.le.0._dp) then
+   if (de.le.zero) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
      write(std_out,*) '    energy step is incorrect                 '
@@ -880,7 +819,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  end do
  !DBYG
  ! Disable symmetries for now
- !sym(:,:,:) = 0._dp
+ !sym(:,:,:) = zero
  !sym(v1,v2,v3) = nsym
  !ENDDBYG
 
@@ -888,15 +827,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !initialise
- inter2w(:)=0._dp
- inter1w(:)=0._dp
- intra2w(:)=0._dp
- intra1w(:)=0._dp
- intra1wS(:)=0._dp
- delta(:,:,:)=0._dp
+ inter2w(:)=zero
+ inter1w(:)=zero
+ intra2w(:)=zero
+ intra1w(:)=zero
+ intra1wS(:)=zero
+ delta(:,:,:)=zero
 
- my_emin=HUGE(0._dp)
- my_emax=-HUGE(0._dp)
+ my_emin=HUGE(zero)
+ my_emax=-HUGE(zero)
 ! loop over kpts
  do ik=my_k1,my_k2
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
@@ -937,29 +876,29 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
      end do
 !    initialise the factors
 !    factors are named according to the Ref. article 2.
-     b111=0._dp
-     b121=0._dp
-     b131=0._dp
-     b112=0._dp
-     b122=0._dp
-     b132=0._dp
-     b113=0._dp
-     b123=0._dp
-     b133=0._dp
-     b211=0._dp
-     b221=0._dp
-     b212=0._dp
-     b222=0._dp
-     b213=0._dp
-     b223=0._dp
-     b231=0._dp
-     b241=0._dp
-     b242=0._dp
-     b243=0._dp
-     b311=0._dp
-     b312=0._dp
-     b313=0._dp
-     b331=0._dp
+     b111=zero
+     b121=zero
+     b131=zero
+     b112=zero
+     b122=zero
+     b132=zero
+     b113=zero
+     b123=zero
+     b133=zero
+     b211=zero
+     b221=zero
+     b212=zero
+     b222=zero
+     b213=zero
+     b223=zero
+     b231=zero
+     b241=zero
+     b242=zero
+     b243=zero
+     b311=zero
+     b312=zero
+     b313=zero
+     b331=zero
 !    start the calculation
      do istn=1,mband
        en=eig(istn,ik,isp)
@@ -971,8 +910,8 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
              wmn=em-en
              wnm=-wmn
 !            calculate the matrix elements for two band intraband term
-             mat2w_tra=0._dp
-             mat1w3_tra=0._dp
+             mat2w_tra=zero
+             mat1w3_tra=zero
              do lx=1,3
                do ly=1,3
                  do lz=1,3
@@ -987,11 +926,11 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                end do
              end do
              b331=mat1w3_tra/wnm
-             b11=0._dp
-             b12_13=0._dp
-             b24=0._dp
-             b31_32=0._dp
-             b21_22=0._dp
+             b11=zero
+             b12_13=zero
+             b24=zero
+             b31_32=zero
+             b21_22=zero
 
              b231=8._dp*mat2w_tra/wmn
              b331=mat1w3_tra/(wnm)
@@ -1005,9 +944,9 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                wnl=-wln
                wlm=-wml
 !              calculate the matrix elements for three band terms
-               mat2w=0._dp
-               mat1w1=0._dp
-               mat1w2=0._dp
+               mat2w=zero
+               mat1w1=zero
+               mat1w2=zero
                do lx=1,3
                  do ly=1,3
                    do lz=1,3
@@ -1027,7 +966,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                b121=mat1w1*(1._dp/(wnm+wlm))*(1._dp/wlm)
                b131=mat1w2*(1._dp/wlm)
 !
-               b221=0._dp
+               b221=zero
                b211=mat1w1/wml
                b241=-mat2w/wml
 !
@@ -1040,16 +979,16 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                  b241=b241+(mat2w/wln)
                  b311=b311+(mat1w1/wln)
                else
-                 b111=0._dp
-                 b121=0._dp
-                 b131=0._dp
-                 b221=0._dp
+                 b111=zero
+                 b121=zero
+                 b131=zero
+                 b221=zero
                end if
                t1=wln-wnm
                if (abs(t1).gt.tol) then
                  b131=b131/t1
                else
-                 b131=0._dp
+                 b131=zero
                end if
                b11=b11-2._dp*b111
                b12_13=b12_13+b121+b131
@@ -1065,9 +1004,9 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
              do istl=istn+1,istm-1
                el=eig(istl,ik,isp)
 !              calculate the matrix elements for three band terms
-               mat2w=0._dp
-               mat1w1=0._dp
-               mat1w2=0._dp
+               mat2w=zero
+               mat1w1=zero
+               mat1w2=zero
                do lx=1,3
                  do ly=1,3
                    do lz=1,3
@@ -1096,13 +1035,13 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                  wlm=-wml
                end if
 !
-               b112=0._dp
+               b112=zero
                b122=mat1w1*(1._dp/(wnm+wlm))
                b132=mat1w2*(1._dp/(wnm+wnl))
-               b242=0._dp
-               b222=0._dp
-               b212=0._dp
-               b312=0._dp
+               b242=zero
+               b222=zero
+               b212=zero
+               b312=zero
                if (abs(wnl).gt.tol) then
                  b112=mat2w/wln
                  b122=b122/wnl
@@ -1111,8 +1050,8 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                  b222=mat1w2/wln
                  b312=mat1w1/wln
                else
-                 b122=0._dp
-                 b132=0._dp
+                 b122=zero
+                 b132=zero
                end if
                if (abs(wlm).gt.tol) then
                  b112=b112/wml
@@ -1122,16 +1061,16 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                  b212=mat1w1/wml
                  b312=b312+(mat1w2/wlm)
                else
-                 b112=0._dp
-                 b122=0._dp
-                 b132=0._dp
-                 b212=0._dp
+                 b112=zero
+                 b122=zero
+                 b132=zero
+                 b212=zero
                end if
                t1=wlm-wnl
                if (abs(t1).gt.tol) then
                  b112=b112/t1
                else
-                 b112=0._dp
+                 b112=zero
                end if
                b11=b11+2._dp*b112
                b12_13=b12_13-b122+b132
@@ -1151,9 +1090,9 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                wml=em-el
                wlm=-wml
 !              calculate the matrix elements for three band terms
-               mat2w=0._dp
-               mat1w1=0._dp
-               mat1w2=0._dp
+               mat2w=zero
+               mat1w1=zero
+               mat1w2=zero
                do lx=1,3
                  do ly=1,3
                    do lz=1,3
@@ -1174,7 +1113,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                b133=mat1w2*(1._dp/wnl)*(1._dp/(wnl+wnm))
                b243=mat2w/wln
                b223=mat1w2/wln
-               b213=0._dp
+               b213=zero
                b313=-1._dp*mat1w1/wnl
                if (abs(wml).gt.tol) then
                  b113=b113/wml
@@ -1184,15 +1123,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                  b213=mat1w1/wml
                  b313=b313+(mat1w2/wlm)
                else
-                 b113=0._dp
-                 b123=0._dp
-                 b133=0._dp
+                 b113=zero
+                 b123=zero
+                 b133=zero
                end if
                t1=wnm-wml
                if (abs(t1).gt.tol) then
                  b123=b123/t1
                else
-                 b123=0._dp
+                 b123=zero
                end if
                b11=b11+2._dp*b113
                b12_13=b12_13+b123-b133
@@ -1335,20 +1274,20 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
 
-   totim=0._dp
-   totre=0._dp
-   totabs=0._dp
+   totim=zero
+   totre=zero
+   totabs=zero
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
 
      totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totim=0._dp
+     totim=zero
 
      totre=dble(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout2,'(f15.6,2es15.6)') ene,totre,totre*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totre=0._dp
+     totre=zero
 
      write(fout3,'(f15.6,4es15.6)') ene,aimag(inter2w(iw))/1.d-7,      &
      aimag(inter1w(iw))/1.d-7,aimag(intra2w(iw))/1.d-7, aimag(intra1w(iw)+intra1wS(iw))/1.d-7
@@ -1358,7 +1297,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 
      totabs=abs(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout5,'(f15.6,2es15.6)') ene,totabs,totabs*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totabs=0._dp
+     totabs=zero
 
      write(fout6,'(f15.6,4es15.6)') ene,aimag(inter2w(iw)+inter1w(iw))/1.d-7,      &
      aimag(intra2w(iw)+intra1w(iw))/1.d-7,aimag(intra1wS(iw))/1.d-7
@@ -1593,7 +1532,7 @@ integer :: start4(4),count4(4)
    ABI_ERROR("Aborting now")
  end if
 !step in energy
- if (de.le.0._dp) then
+ if (de.le.zero) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in linelop:                        '
    write(std_out,*) '    energy step is incorrect                 '
@@ -1643,7 +1582,7 @@ integer :: start4(4),count4(4)
  ABI_MALLOC(s,(3,3))
 
 !generate the symmetrizing tensor
- sym(:,:,:)=0._dp
+ sym(:,:,:)=zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
@@ -1656,14 +1595,14 @@ integer :: start4(4),count4(4)
  end do
 
 !initialise
- delta(:,:,:)=0._dp
- rmnbc(:,:,:,:)=0._dp
- chi(:)=0._dp
- chi2(:) = 0._dp
- eta(:)=0._dp
- sigma(:)=0._dp
- my_emin=HUGE(0._dp)
- my_emax=-HUGE(0._dp)
+ delta(:,:,:)=zero
+ rmnbc(:,:,:,:)=zero
+ chi(:)=zero
+ chi2(:) = zero
+ eta(:)=zero
+ sigma(:)=zero
+ my_emin=HUGE(zero)
+ my_emax=-HUGE(zero)
 
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
@@ -1692,7 +1631,7 @@ integer :: start4(4),count4(4)
          wmn = em - en
          delta(istn,istm,1:3)=pmat(istn,istn,ik,1:3,isp)-pmat(istm,istm,ik,1:3,isp)
          if(abs(wmn) < tol) then
-           rmna(istm,istn,1:3) = 0._dp
+           rmna(istm,istn,1:3) = zero
          else
            rmna(istm,istn,1:3)=-zi*pmat(istm,istn,ik,1:3,isp)/wmn
          end if
@@ -1710,7 +1649,7 @@ integer :: start4(4),count4(4)
                num1 = (rmna(istm,istn,ly)*delta(istm,istn,lz))+(rmna(istm,istn,lz)*delta(istm,istn,ly))
                den1 = wmn
                term1 = num1/den1
-               term2 = 0._dp
+               term2 = zero
                do istp=1,mband
                  ep = enk(istp)
                  wmp = em - ep
@@ -1745,12 +1684,12 @@ integer :: start4(4),count4(4)
          fm = occ(istm,ik,isp)
          fnm = fn - fm
          fmn = fm - fn
-         eta1 = 0._dp
-         eta2_1 = 0._dp
-         eta2_2 = 0._dp
-         sigma1_1 = 0._dp
-         sigma1_2 = 0._dp
-         sigma2 = 0._dp
+         eta1 = zero
+         eta2_1 = zero
+         eta2_2 = zero
+         sigma1_1 = zero
+         sigma1_2 = zero
+         sigma2 = zero
          if(abs(wmn) > tol) then
            do lx = 1,3
              do ly = 1,3
@@ -1765,11 +1704,11 @@ integer :: start4(4),count4(4)
              end do
            end do
          end if
-         chi1_1 = 0._dp
-         chi1_2 = 0._dp
-         chi2_1b = 0._dp
-         chi2_2b = 0._dp
-         chi2(:) = 0._dp
+         chi1_1 = zero
+         chi1_2 = zero
+         chi2_1b = zero
+         chi2_2b = zero
+         chi2(:) = zero
 !        Three band terms
          do istl=1,mband
            el=enk(istl)
@@ -1898,25 +1837,25 @@ integer :: start4(4),count4(4)
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
 
-   totim=0._dp
-   totre=0._dp
-   totabs=0._dp
+   totim=zero
+   totre=zero
+   totabs=zero
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
      totim=aimag(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totim=0._dp
+     totim=zero
      totre=dble(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout2,'(f15.6,2es15.6)') ene,totre,totre*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totre=0._dp
+     totre=zero
      write(fout3,'(f15.6,3es15.6)') ene,aimag(chi(iw))/1.d-7,      &
      aimag(eta(iw))/1.d-7,aimag(sigma(iw))/1.d-7
      write(fout4,'(f15.6,3es15.6)') ene,dble(chi(iw))/1.d-7,       &
      dble(eta(iw))/1.d-7,dble(sigma(iw))/1.d-7
      totabs=abs(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout5,'(f15.6,2es15.6)') ene,totabs,totabs*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totabs=0._dp
+     totabs=zero
    end do
 
    close(fout1)
@@ -2150,7 +2089,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  end if
 
 !step in energy
- if (de.le.0._dp) then
+ if (de.le.zero) then
    write(std_out,*) '---------------------------------------------'
    write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    energy step is incorrect                 '
@@ -2197,7 +2136,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  ABI_MALLOC(symrmn,(mband,mband,mband))
 
 !generate the symmetrizing tensor
- sym(:,:,:)=0._dp
+ sym = zero
  do isym=1,cryst%nsym
    s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
@@ -2211,16 +2150,16 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
 
 !initialise
- delta(:,:,:)=0._dp
- rmnbc(:,:,:,:)=0._dp
- chiw(:)=0._dp
- chi2w(:)=0._dp
- chi2(:) = 0._dp
- etaw(:)=0._dp
- eta2w(:)=0._dp
- sigmaw(:)=0._dp
- my_emin=HUGE(0._dp)
- my_emax=-HUGE(0._dp)
+ delta = zero
+ rmnbc = zero
+ chiw = zero
+ chi2w = zero
+ chi2 = zero
+ etaw = zero
+ eta2w = zero
+ sigmaw = zero
+ my_emin=HUGE(one)
+ my_emax=-HUGE(one)
 
  ! Split work
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
@@ -2248,7 +2187,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
          wmn = em - en
          delta(istn,istm,1:3)=pmat(istn,istn,ik,1:3,isp)-pmat(istm,istm,ik,1:3,isp)
          if(abs(wmn) < tol) then
-           rmna(istm,istn,1:3) = 0._dp
+           rmna(istm,istn,1:3) = zero
          else
            rmna(istm,istn,1:3)=pmat(istm,istn,ik,1:3,isp)/wmn
          end if
@@ -2261,8 +2200,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
          en = enk(istn)
          wmn = em - en
          if (abs(wmn) < tol) then ! Degenerate energies
-           rmnbc(istm,istn,:,:) = 0.0
-           roverw(istm,istn,:,:) = 0.0
+           rmnbc(istm,istn,:,:) = zero
+           roverw(istm,istn,:,:) = zero
            cycle
          end if
          do ly = 1,3
@@ -2270,7 +2209,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
              num1 = (rmna(istm,istn,ly)*delta(istm,istn,lz))+(rmna(istm,istn,lz)*delta(istm,istn,ly))
              den1 = wmn
              term1 = num1/den1
-             term2 = 0._dp
+             term2 = zero
              do istp=1,mband
                ep = enk(istp)
                wmp = em - ep
@@ -2304,17 +2243,17 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
          fm = occ(istm,ik,isp)
          fnm = fn - fm
          if(abs(wmn) > tol) then
-           chi1 = 0._dp
-           chi2(:) = 0._dp
-           chi2_1 = 0._dp
-           chi2_2 = 0._dp
-           eta1(:) = 0._dp
-           eta1_1 = 0._dp
-           eta1_2 = 0._dp
-           eta2_1 = 0._dp
-           eta2_2 = 0._dp
-           sigma1 = 0._dp
-           sigma2_1 = 0._dp
+           chi1 = zero
+           chi2(:) = zero
+           chi2_1 = zero
+           chi2_2 = zero
+           eta1(:) = zero
+           eta1_1 = zero
+           eta1_2 = zero
+           eta2_1 = zero
+           eta2_2 = zero
+           sigma1 = zero
+           sigma2_1 = zero
            ! Three band terms
            do istl=1,mband
              el=enk(istl)
@@ -2357,8 +2296,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
            end do
 
            ! Two band terms
-           eta2_1 = 0.0_dp
-           sigma2_1 = 0.0_dp
+           eta2_1 = zero
+           sigma2_1 = zero
            do lx = 1,3
              do ly = 1,3
                do lz = 1,3
@@ -2506,20 +2445,20 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
 
-   totim=0._dp
-   totre=0._dp
-   totabs=0._dp
+   totim=zero
+   totre=zero
+   totabs=zero
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
 
      totim=aimag(chiw(iw)+chi2w(iw)+etaw(iw)+eta2w(iw)+sigmaw(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totim=0._dp
+     totim=zero
 
      totre=dble(chiw(iw)+chi2w(iw)+eta2w(iw)+etaw(iw)+sigmaw(iw))/1.d-7
      write(fout2,'(f15.6,2es15.6)') ene,totre,totre*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totre=0._dp
+     totre=zero
 
      write(fout3,'(f15.6,4es15.6)') ene,aimag(chi2w(iw))/1.d-7,aimag(chiw(iw))/1.d-7,     &
      aimag(eta2w(iw))/1.d-7,aimag(etaw(iw))/1.d-7+aimag(sigmaw(iw))/1.d-7
@@ -2529,7 +2468,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
      totabs=abs(chiw(iw)+chi2w(iw)+etaw(iw)+eta2w(iw)+sigmaw(iw))/1.d-7
      write(fout5,'(f15.6,2es15.6)') ene,totabs,totabs*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
-     totabs=0._dp
+     totabs=zero
 
      write(fout6,'(f15.6,4es15.6)') ene,aimag(chi2w(iw)+chiw(iw))/1.d-7,      &
      aimag(eta2w(iw)+etaw(iw))/1.d-7,aimag(sigmaw(iw))/1.d-7
