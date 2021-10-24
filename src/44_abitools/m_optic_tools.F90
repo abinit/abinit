@@ -47,7 +47,7 @@ module m_optic_tools
  use defs_datatypes,    only : ebands_t
  use m_numeric_tools,   only : wrap2_pmhalf, c2r
  use m_io_tools,        only : open_file
- !use m_crystal,         only : crystal_t
+ use m_crystal,         only : crystal_t
 
  implicit none
 
@@ -275,16 +275,6 @@ end subroutine pmat_renorm
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
-!!  nsppol=number of spins(integer)
-!!  omega=crystal volume in au (real)
-!!  nkpt=total number of kpoints (integer)
-!!  wtk(nkpt)=weights of kpoints (real)
-!!  nsym=number of crystal symmetry operations(integer)
-!!  symrel_cart(3,3,nsym)=symmetry operations in cartisian coordinates(real)
-!!  mband=Max number of valence states in input arrays
-!!  occ(mband,nkpt,nsppol)=occupation numbers for each band(real)
-!!  eig(mband,nkpt,nsppol)=GS eigen values in Ha
-!!  fermie=Fermi energy in Ha(real)
 !!  pmat(mband,mband,nkpt,3,nsppol)=momentum matrix elements in cartesian coordinates(complex)
 !!  v1,v2=desired component of the dielectric function(integer) 1=x,2=y,3=z
 !!  nmesh=desired number of energy mesh points(integer)
@@ -316,34 +306,24 @@ end subroutine pmat_renorm
 !!
 !! SOURCE
 
-subroutine linopt(icomp,itemp,nsppol,omega,nkpt,wtk,nsym,symrel_cart,mband,KSBSt,EPBSt,fermie,pmat, &
-  v1,v2,nmesh,de,sc,brod,fnam,ncid,comm,prtlincompmatrixelements)
+subroutine linopt(icomp, itemp, cryst, ks_ebands, EPBSt, pmat, &
+  v1, v2, nmesh, de, sc, brod, fnam, ncid, prtlincompmatrixelements, comm)
 
 !Arguments ------------------------------------
-integer, intent(in) :: icomp,itemp,nsppol,ncid
-real(dp), intent(in) :: omega
-integer, intent(in) :: nkpt
-real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: nsym
-real(dp), intent(in) :: symrel_cart(3,3,nsym)
-integer, intent(in) :: mband
-type(ebands_t),intent(in) :: KSBSt,EPBSt
-real(dp), intent(in) :: fermie
-complex(dpc), intent(in) :: pmat(mband,mband,nkpt,3,nsppol)
-integer, intent(in) :: v1
-integer, intent(in) :: v2
-integer, intent(in) :: nmesh
-real(dp), intent(in) :: de
-real(dp), intent(in) :: sc
-real(dp), intent(in) :: brod
+integer, intent(in) :: icomp,itemp,ncid
+type(crystal_t), intent(in) :: cryst
+type(ebands_t),intent(in) :: ks_ebands,EPBSt
+complex(dpc), intent(in) :: pmat(ks_ebands%mband, ks_ebands%mband, ks_ebands%nkpt, 3, ks_ebands%nsppol)
+integer, intent(in) :: v1, v2, nmesh
+real(dp), intent(in) :: de, sc, brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
 integer, intent(in) :: prtlincompmatrixelements
 
 !Local variables -------------------------
 integer,parameter :: master=0
-integer :: isp,i,j,isym,lx,ly,ik,ist1,ist2,iw
-integer :: my_rank, nproc, my_k1, my_k2, ierr, fout1
+integer :: isp,i,j,isym,lx,ly,ik,ist1,ist2,iw,nkpt
+integer :: my_rank, nproc, my_k1, my_k2, ierr, fout1, mband, nsppol
 #ifdef HAVE_NETCDF
 integer :: ncerr
 #endif
@@ -364,6 +344,9 @@ complex(dpc), allocatable :: eps(:)
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ nkpt = ks_ebands%nkpt
+ nsppol = ks_ebands%nsppol
+ mband = ks_ebands%mband
 
  if (my_rank == master) then
   !check polarisation
@@ -408,7 +391,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '----------------------------------------'
    end if
   !fermi energy
-   if(fermie<-1.0d4) then
+   if(ks_ebands%fermie<-1.0d4) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    ATTENTION: Fermi energy seems extremely  '
      write(std_out,*) '    low                                      '
@@ -426,7 +409,7 @@ complex(dpc), allocatable :: eps(:)
 !fool proof end
  end if
 
- ABI_CHECK(KSBSt%mband==mband, "The number of bands in the BSt should be equal to mband !")
+ !ABI_CHECK(ks_ebands%mband==mband, "The number of bands in the BSt should be equal to mband !")
 
  do_linewidth = allocated(EPBSt%linewidth)
 ! TODO: activate this, and remove do_linewidth - always add it in even if 0.
@@ -441,14 +424,14 @@ complex(dpc), allocatable :: eps(:)
  ABI_MALLOC(im_refract,(nmesh))
  ABI_MALLOC(re_refract,(nmesh))
  ieta=(0._dp,1._dp)*brod
- renorm_factor=1._dp/(omega*dble(nsym))
+ renorm_factor=1._dp/(cryst%ucvol*dble(cryst%nsym))
  ha2ev=13.60569172*2._dp
 !output file names
  fnam1=trim(fnam)//'-linopt.out'
 !construct symmetrisation tensor
  sym(:,:)=0._dp
- do isym=1,nsym
-   s(:,:)=symrel_cart(:,:,isym)
+ do isym=1,cryst%nsym
+   s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
      do j=1,3
        sym(i,j)=sym(i,j)+s(i,v1)*s(j,v2)
@@ -486,7 +469,7 @@ complex(dpc), allocatable :: eps(:)
    do ik=my_k1,my_k2
      write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
      do ist1=1,mband
-       e1=KSBSt%eig(ist1,ik,isp)
+       e1=ks_ebands%eig(ist1,ik,isp)
        e1_ep=EPBSt%eig(ist1,ik,isp)
 ! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
 ! instead of putting an if statement in a loop! See above
@@ -494,7 +477,7 @@ complex(dpc), allocatable :: eps(:)
          e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
        do ist2=1,mband
-         e2=KSBSt%eig(ist2,ik,isp)
+         e2=ks_ebands%eig(ist2,ik,isp)
          e2_ep=EPBSt%eig(ist2,ik,isp)
          if(do_linewidth) then
            e2_ep = e2_ep - EPBSt%linewidth(1,ist2,ik,isp)*(0.0_dp,1.0_dp)
@@ -530,7 +513,7 @@ complex(dpc), allocatable :: eps(:)
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
-             chi(iw,isp)=chi(iw,isp)+(wtk(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
+             chi(iw,isp)=chi(iw,isp)+(ks_ebands%wtk(ik)*(ks_ebands%occ(ist1,ik,isp)-ks_ebands%occ(ist2,ik,isp))* &
              (b12/(-e12_ep-w)))
            end do ! frequencies
          end if
@@ -649,15 +632,15 @@ complex(dpc), allocatable :: eps(:)
      NCF_CHECK(ncerr)
      ABI_FREE(renorm_eigs)
      ! also write occupations and kpt weights
-     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_occupations"), KSBSt%occ, start=[1, 1, 1])
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_occupations"), ks_ebands%occ, start=[1, 1, 1])
      NCF_CHECK(ncerr)
-     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_wkpts"), wtk, start=[1])
+     ncerr = nf90_put_var(ncid, nctk_idname(ncid, "linopt_wkpts"), ks_ebands%wtk, start=[1])
      NCF_CHECK(ncerr)
      write(std_out, '(a)') 'Writing linopt matrix elements done.'
    endif
 
 #endif
- end if  ! if main rank
+ end if  ! rank == master
 
  ABI_FREE(chi)
  ABI_FREE(eps)
@@ -680,11 +663,8 @@ end subroutine linopt
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
 !!  nsppol = number of spins(integer)
-!!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
 !!  wtk(nkpt) = weights of kpoints (real)
-!!  nsym = number of crystal symmetry operations(integer)
-!!  symrel_cart(3,3,nsym) = symmetry operations in cartisian coordinates(real)
 !!  mband = Max number of bands in input arrays
 !!  eig(mband,nsppol,nkpt) = GS eigen values in Ha(
 !!  fermie = Fermi energy in Ha(real)
@@ -720,16 +700,14 @@ end subroutine linopt
 !!
 !! SOURCE
 
-subroutine nlinopt(icomp,itemp,nsppol,omega,nkpt,wtk,nsym,symrel_cart,mband,eig,fermie, &
+subroutine nlinopt(icomp, itemp, cryst, nsppol, nkpt, wtk, mband, eig, fermie, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
 
 !Arguments ------------------------------------
 integer, intent(in) :: icomp,itemp,nsppol, ncid
-real(dp), intent(in) :: omega
+type(crystal_t),intent(in) :: cryst
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: nsym
-real(dp), intent(in) :: symrel_cart(3,3,nsym)
 integer, intent(in) :: mband
 real(dp), intent(in) :: eig(mband,nkpt,nsppol)
 real(dp), intent(in) :: fermie
@@ -757,7 +735,7 @@ integer :: ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
 real(dp) :: f1,f2,f3
 real(dp) :: ha2ev
-real(dp) :: t1,t2,t3,tst
+real(dp) :: t1,t2,t3
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: e1,e2,el,en,em
 real(dp) :: emin,emax,my_emin,my_emax
@@ -791,7 +769,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
 !calculate the constant
  zi=(0._dp,1._dp)
  idel=zi*brod
- const_au=-2._dp/(omega*dble(nsym))
+ const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
  au2esu=5.8300348177d-8
  const_esu=const_au*au2esu
  ha2ev=13.60569172*2._dp
@@ -816,27 +794,15 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  fnam7=trim(fnam)//'-ChiReDec.out'
 
  if(my_rank == master) then
-  !If there exists inversion symmetry exit with a message.
-   tst=1.d-09
-   do isym=1,nsym
-     t1=symrel_cart(1,1,isym)+1
-     t2=symrel_cart(2,2,isym)+1
-     t3=symrel_cart(3,3,isym)+1
-  !  test if diagonal elements are -1
-     if (abs(t1).lt.tst.and.abs(t2).lt.tst.and.abs(t3).lt.tst) then
-  !    test if off-diagonal elements are zero
-       if (abs(symrel_cart(1,2,isym)).lt.tst.and.abs(symrel_cart(1,3,isym)).lt.tst &
-       .and.abs(symrel_cart(2,1,isym)).lt.tst.and.abs(symrel_cart(2,3,isym)).lt.tst.and.  &
-       abs(symrel_cart(3,1,isym)).lt.tst.and.abs(symrel_cart(3,2,isym)).lt.tst) then
-         write(std_out,*) '-------------------------------------------'
-         write(std_out,*) '    The crystal has inversion symmetry     '
-         write(std_out,*) '    The SHG susceptibility is zero         '
-         write(std_out,*) '    Action : set num_nonlin_comp to zero   '
-         write(std_out,*) '-------------------------------------------'
-         ABI_ERROR("Aborting now")
-       end if
-     end if
-   end do
+   ! If there exists inversion symmetry exit with a message.
+   if (cryst%idx_spatial_inversion() /= 0) then
+     write(std_out,*) '-------------------------------------------'
+     write(std_out,*) '    The crystal has inversion symmetry     '
+     write(std_out,*) '    The SHG susceptibility is zero         '
+     write(std_out,*) '    Action : set num_nonlin_comp to zero   '
+     write(std_out,*) '-------------------------------------------'
+     ABI_ERROR("Aborting now")
+  end if
   !check polarisation
    if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
      write(std_out,*) '---------------------------------------------'
@@ -901,9 +867,9 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  ABI_MALLOC(delta,(mband,mband,3))
 
 !generate the symmetrizing tensor
- sym(:,:,:)=0._dp
- do isym=1,nsym
-   s(:,:)=symrel_cart(:,:,isym)
+ sym = zero
+ do isym=1,cryst%nsym
+   s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
      do j=1,3
        do k=1,3
@@ -1456,7 +1422,6 @@ end subroutine nlinopt
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
 !!  nsppol = number of spins(integer)
-!!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
 !!  wtk(nkpt) = weights of kpoints (real)
 !!  nsym = number of crystal symmetry operations(integer)
@@ -1502,16 +1467,14 @@ end subroutine nlinopt
 !!
 !! SOURCE
 
-subroutine linelop(icomp,itemp,nsppol,omega,nkpt,wtk,nsym,symrel_cart,mband,eig,occ,fermie, &
+subroutine linelop(icomp, itemp, cryst, nsppol, nkpt, wtk, mband, eig, occ, fermie, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !Arguments ------------------------------------
 integer, intent(in) :: icomp,itemp,nsppol, ncid
-real(dp), intent(in) :: omega
+type(crystal_t),intent(in) :: cryst
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: nsym
-real(dp), intent(in) :: symrel_cart(3,3,nsym)
 integer, intent(in) :: mband
 real(dp), intent(in) :: eig(mband,nkpt,nsppol)
 real(dp), intent(in) :: occ(mband,nkpt,nsppol)
@@ -1530,14 +1493,12 @@ character(len=*), intent(in) :: fnam
 logical, intent(in) :: do_antiresonant
 
 !Local variables -------------------------
-!no_abirules
-! present calculation related (user specific)
 integer :: iw
 integer :: i,j,k,lx,ly,lz
 integer :: isp,isym,ik
 integer :: ist1,istl,istn,istm
 real(dp) :: ha2ev
-real(dp) :: t1,t2,t3,tst
+real(dp) :: t1,t2,t3
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: el,en,em
 real(dp) :: emin,emax,my_emin,my_emax
@@ -1581,7 +1542,7 @@ integer :: start4(4),count4(4)
  zi=(0._dp,1._dp)
  idel=zi*brod
 ! Disable symmetries for now
- const_au=-2._dp/(omega*dble(nsym))
+ const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
  au2esu=5.8300348177d-8
  const_esu=const_au*au2esu
  ha2ev=13.60569172*2._dp
@@ -1602,29 +1563,16 @@ integer :: start4(4),count4(4)
  fnam3=trim(fnam)//'-ChiEOIm.out'
  fnam4=trim(fnam)//'-ChiEORe.out'
  fnam5=trim(fnam)//'-ChiEOAbs.out'
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! fool proof:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!If there exists inversion symmetry exit with a mesg.
- tst=1.d-09
- do isym=1,nsym
-   t1=symrel_cart(1,1,isym)+1
-   t2=symrel_cart(2,2,isym)+1
-   t3=symrel_cart(3,3,isym)+1
-!  test if diagonal elements are -1
-   if (abs(t1).lt.tst.and.abs(t2).lt.tst.and.abs(t3).lt.tst) then
-!    test if off-diagonal elements are zero
-     if (abs(symrel_cart(1,2,isym)).lt.tst.and.abs(symrel_cart(1,3,isym)).lt.tst &
-     .and.abs(symrel_cart(2,1,isym)).lt.tst.and.abs(symrel_cart(2,3,isym)).lt.tst.and.  &
-     abs(symrel_cart(3,1,isym)).lt.tst.and.abs(symrel_cart(3,2,isym)).lt.tst) then
-       write(std_out,*) '-----------------------------------------'
-       write(std_out,*) '    the crystal has inversion symmetry   '
-       write(std_out,*) '    the LEO susceptibility is zero       '
-       write(std_out,*) '-----------------------------------------'
-       ABI_ERROR("Aborting now")
-     end if
-   end if
- end do
+
+ ! If there exists inversion symmetry exit with a mesg.
+ if (cryst%idx_spatial_inversion() /= 0) then
+   write(std_out,*) '-----------------------------------------'
+   write(std_out,*) '    the crystal has inversion symmetry   '
+   write(std_out,*) '    the LEO susceptibility is zero       '
+   write(std_out,*) '-----------------------------------------'
+   ABI_ERROR("Aborting now")
+ end if
+
 !check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
    write(std_out,*) '---------------------------------------------'
@@ -1696,8 +1644,8 @@ integer :: start4(4),count4(4)
 
 !generate the symmetrizing tensor
  sym(:,:,:)=0._dp
- do isym=1,nsym
-   s(:,:)=symrel_cart(:,:,isym)
+ do isym=1,cryst%nsym
+   s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
      do j=1,3
        do k=1,3
@@ -2027,11 +1975,8 @@ end subroutine linelop
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
 !!  itemp=Temperature index (used for netcdf output)
 !!  nsppol = number of spins(integer)
-!!  omega = crystal volume in au (real)
 !!  nkpt  = total number of kpoints (integer)
 !!  wtk(nkpt) = weights of kpoints (real)
-!!  nsym = number of crystal symmetry operations(integer)
-!!  symrel_cart(3,3,nsym) = symmetry operations in cartisian coordinates(real)
 !!  mband = Max number of bands in input arrays.
 !!  eig(mband,nsppol,nkpt) = eigen value for each band in Ha(real)
 !!  occ(mband,nsppol,nkpt) = occupation numbers.
@@ -2073,16 +2018,14 @@ end subroutine linelop
 !!
 !! SOURCE
 
-subroutine nonlinopt(icomp,itemp,nsppol,omega,nkpt,wtk,nsym,symrel_cart,mband,eig,occ,fermie, &
+subroutine nonlinopt(icomp, itemp, cryst, nsppol, nkpt, wtk, mband, eig, occ, fermie, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
 !Arguments ------------------------------------
 integer, intent(in) :: icomp,itemp,nsppol, ncid
-real(dp), intent(in) :: omega
+type(crystal_t),intent(in) :: cryst
 integer, intent(in) :: nkpt
 real(dp), intent(in) :: wtk(nkpt)
-integer, intent(in) :: nsym
-real(dp), intent(in) :: symrel_cart(3,3,nsym)
 integer, intent(in) :: mband
 real(dp), intent(in) :: eig(mband,nkpt,nsppol)
 real(dp), intent(in) :: occ(mband,nkpt,nsppol)
@@ -2150,8 +2093,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !calculate the constant
  zi=(0._dp,1._dp)
  idel=zi*brod
- const_au=-2._dp/(omega*dble(nsym))
- !const_au=-2._dp/(omega)
+ const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
+ !const_au=-2._dp/(cryst%ucvol)
  au2esu=5.8300348177d-8
  const_esu=const_au*au2esu
  ha2ev=13.60569172*2._dp
@@ -2176,26 +2119,14 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  fnam7=trim(fnam)//'-ChiSHGReDec.out'
 
 !If there exists inversion symmetry exit with a mesg.
- tst=1.d-09
- do isym=1,nsym
-   t1=symrel_cart(1,1,isym)+1
-   t2=symrel_cart(2,2,isym)+1
-   t3=symrel_cart(3,3,isym)+1
-!  test if diagonal elements are -1
-   if (abs(t1).lt.tst.and.abs(t2).lt.tst.and.abs(t3).lt.tst) then
-!    test if off-diagonal elements are zero
-     if (abs(symrel_cart(1,2,isym)).lt.tst.and.abs(symrel_cart(1,3,isym)).lt.tst &
-     .and.abs(symrel_cart(2,1,isym)).lt.tst.and.abs(symrel_cart(2,3,isym)).lt.tst.and.  &
-     abs(symrel_cart(3,1,isym)).lt.tst.and.abs(symrel_cart(3,2,isym)).lt.tst) then
-       write(std_out,*) '-----------------------------------------'
-       write(std_out,*) '    the crystal has inversion symmetry   '
-       write(std_out,*) '    the nl electro-optical susceptibility'
-       write(std_out,*) '    is zero                              '
-       write(std_out,*) '-----------------------------------------'
-       ABI_ERROR("Aborting now")
-     end if
-   end if
- end do
+ if (cryst%idx_spatial_inversion() /= 0) then
+   write(std_out,*) '-----------------------------------------'
+   write(std_out,*) '    the crystal has inversion symmetry   '
+   write(std_out,*) '    the nl electro-optical susceptibility'
+   write(std_out,*) '    is zero                              '
+   write(std_out,*) '-----------------------------------------'
+   ABI_ERROR("Aborting now")
+ end if
 
 !check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
@@ -2267,8 +2198,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
 !generate the symmetrizing tensor
  sym(:,:,:)=0._dp
- do isym=1,nsym
-   s(:,:)=symrel_cart(:,:,isym)
+ do isym=1,cryst%nsym
+   s(:,:)=cryst%symrel_cart(:,:,isym)
    do i=1,3
      do j=1,3
        do k=1,3
