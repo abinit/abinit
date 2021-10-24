@@ -21426,7 +21426,7 @@ The set of bands can be specified either with [[sigma_erange]] or [[gw_qprange]]
 
 !!! important
 
-    sigma_ngkpt and [[nkptgw]] and are mutually exclusive.
+    sigma_ngkpt and [[nkptgw]] are mutually exclusive.
 """,
 ),
 
