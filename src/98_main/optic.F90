@@ -86,7 +86,7 @@ program optic
  integer,parameter :: formeig0 = 0, formeig1 = 1, master = 0
  integer :: fform,finunt,ep_ntemp,itemp,i1,i2
  integer :: bantot,bdtot0_index,bdtot_index
- integer :: ierr,ii,jj,ikpt,isym
+ integer :: ierr,ii,jj,ikpt
  integer :: isppol,mband,nomega,nband1
  integer :: nkpt,nsppol
  integer :: nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
@@ -124,7 +124,6 @@ program optic
  logical :: use_ncevk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname
  character(len=fnlen) :: infiles(0:3)
-! for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp
  character(len=24) :: codename, start_datetime
@@ -644,13 +643,13 @@ program optic
    ii = 0; if (do_antiresonant) ii = 1
    jj = 0; if (do_ep_renorm) jj = 1
    ncerr = nctk_write_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-   "do_antiresonant", "do_ep_renorm"], &
-   [ii, jj])
+     "do_antiresonant", "do_ep_renorm"], &
+     [ii, jj])
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-    "broadening", "domega", "maxomega", "scissor", "tolerance"], &
-   [broadening, domega, maxomega, scissor, tolerance])
+     "broadening", "domega", "maxomega", "scissor", "tolerance"], &
+     [broadening, domega, maxomega, scissor, tolerance])
    NCF_CHECK(ncerr)
 #endif
  end if
@@ -698,9 +697,8 @@ program optic
      ABI_CHECK((stemp(1:1)/='#'),'Bug: string length too short!')
      tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)
      if (do_ep_renorm) tmp_radix = trim(prefix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
-     call linopt(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands,eph_ebands, &
-     ks_ebands%fermie,pmat, &
-     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,optic_ncid,comm,prtlincompmatrixelements)
+     call linopt(ii, itemp, cryst, ks_ebands, eph_ebands, pmat, &
+       lin1, lin2, nomega, domega, scissor, broadening, tmp_radix, optic_ncid, prtlincompmatrixelements, comm)
    end do
    call ebands_free(eph_ebands)
  end do
@@ -728,8 +726,9 @@ program optic
      ABI_WARNING("second harmonic generation with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nlinopt(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands%eig,ks_ebands%fermie,pmat,&
-                nlin1,nlin2,nlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,optic_ncid,comm)
+   call nlinopt(ii, itemp, cryst, ks_ebands%nsppol, ks_ebands%nkpt, ks_ebands%wtk, mband, &
+                ks_ebands%eig, ks_ebands%fermie, pmat, &
+                nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, optic_ncid, comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors
@@ -750,8 +749,9 @@ program optic
      ABI_ERROR("linear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call linelop(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands%eig,hdr%occ,ks_ebands%fermie,pmat,&
-   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
+   call linelop(ii,itemp, cryst, ks_ebands%nsppol, ks_ebands%nkpt, ks_ebands%wtk, mband, ks_ebands%eig, &
+                ks_ebands%occ, ks_ebands%fermie,pmat, linel1, linel2, linel3, nomega, domega, scissor, broadening, &
+                tolerance, tmp_radix, do_antiresonant, optic_ncid, comm)
  end do
 
  ! nonlinear electro-optical susceptibility for semiconductors
@@ -772,8 +772,10 @@ program optic
      ABI_ERROR("nonlinear electro-optic with symmetries (kptopt == 1) is not tested. Use at your own risk!")
    end if
 
-   call nonlinopt(ii,itemp,nsppol,cryst%ucvol,nkpt,ks_ebands%wtk,cryst%nsym,cryst%symrel_cart,mband,ks_ebands%eig,hdr%occ,ks_ebands%fermie,pmat,&
-    nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
+   call nonlinopt(ii, itemp, cryst, ks_ebands%nsppol, ks_ebands%nkpt,ks_ebands%wtk, &
+                  mband, ks_ebands%eig, ks_ebands%occ, ks_ebands%fermie, pmat, &
+                  nonlin1, nonlin2, nonlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, &
+                  do_antiresonant, optic_ncid, comm)
  end do
 
  ! Free memory
