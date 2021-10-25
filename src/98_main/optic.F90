@@ -538,7 +538,8 @@ program optic
    ! Add optic input variables.
    NCF_CHECK(nctk_def_dims(optic_ncid, [nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega)], defmode=.True.))
 
-   ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: "do_antiresonant", "do_ep_renorm"])
+   ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: &
+       "do_antiresonant", "do_ep_renorm", "nband_sum"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
      "broadening", "domega", "maxomega", "scissor", "tolerance"])
@@ -648,8 +649,8 @@ program optic
    ii = 0; if (do_antiresonant) ii = 1
    jj = 0; if (do_ep_renorm) jj = 1
    ncerr = nctk_write_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "do_antiresonant", "do_ep_renorm"], &
-     [ii, jj])
+     "do_antiresonant", "do_ep_renorm", "nband_sum"], &
+     [ii, jj, nband_sum])
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
