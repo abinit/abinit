@@ -649,10 +649,9 @@ integer :: isp,isym,ik,ist1,ist2,istl,istn,istm
 integer :: my_rank, nproc, my_k1, my_k2, ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
 real(dp) :: f1,f2,f3, ha2ev
-real(dp) :: t1,t2,t3
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: e1,e2,el,en,em,emin,emax,my_emin,my_emax
-real(dp) :: const_esu,const_au,au2esu,wmn,wnm,wln,wnl,wml,wlm
+real(dp) :: const_esu,const_au,au2esu,wmn,wnm,wln,wnl,wml,wlm, t1
 complex(dpc) :: idel,w,zi
 complex(dpc) :: mat2w,mat1w1,mat1w2,mat2w_tra,mat1w3_tra
 complex(dpc) :: b111,b121,b131,b112,b122,b132,b113,b123,b133
@@ -809,10 +808,10 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
    ! loop over spins
    do isp=1,ks_ebands%nsppol
      !  loop over states
-     do ist1=1,mband
+     do ist1=1,nband_sum
        e1 = ks_ebands%eig(ist1,ik,isp)
        if (e1.lt.ks_ebands%fermie) then   ! ist1 is a valence state
-         do ist2=1,mband
+         do ist2=1,nband_sum
            e2 = ks_ebands%eig(ist2,ik,isp)
            if (e2.gt.ks_ebands%fermie) then ! ist2 is a conduction state
              ! symmetrize the momentum matrix elements
@@ -834,10 +833,10 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
      end do
 
      ! calculate the energy window and \Delta_nm
-     do ist1=1,mband
+     do ist1=1,nband_sum
        my_emin=min(my_emin, ks_ebands%eig(ist1,ik,isp))
        my_emax=max(my_emax, ks_ebands%eig(ist1,ik,isp))
-       do ist2=1,mband
+       do ist2=1,nband_sum
          delta(ist1,ist2,1:3)=pmat(ist1,ist1,ik,1:3,isp)-pmat(ist2,ist2,ik,1:3,isp)
        end do
      end do
@@ -867,10 +866,10 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
      b313=zero
      b331=zero
      ! start the calculation
-     do istn=1,mband
+     do istn=1,nband_sum
        en=ks_ebands%eig(istn,ik,isp)
        if (en.lt.ks_ebands%fermie) then  ! istn is a valence state
-         do istm=1,mband
+         do istm=1,nband_sum
            em=ks_ebands%eig(istm,ik,isp)
            if (em.gt.ks_ebands%fermie) then  ! istm is a conduction state
              em = em + sc ! Should add the scissor to conduction energies
@@ -1041,7 +1040,7 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
              end do ! istl
 
              ! istl > istm    !
-             do istl=istm+1,mband
+             do istl=istm+1,nband_sum
                el=ks_ebands%eig(istl,ik,isp)+sc
                wln=el-en
                wnl=-wln
@@ -1380,7 +1379,6 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
  integer :: isp,isym,ik
  integer :: ist1,istl,istn,istm, mband
  real(dp) :: ha2ev
- real(dp) :: t1,t2,t3
  real(dp) :: ene,totre,totabs,totim
  real(dp) :: el,en,em
  real(dp) :: emin,emax,my_emin,my_emax
@@ -1909,12 +1907,11 @@ logical, intent(in) :: do_antiresonant
 integer :: iw,i,j,k,lx,ly,lz,mband
 integer :: isp,isym,ik,ist1,istl,istn,istm
 real(dp) :: ha2ev
-real(dp) :: t1,t2,t3,tst
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: el,en,em
 real(dp) :: emin,emax, my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
-real(dp) :: wmn,wnm,wln,wnl,wml,wlm
+real(dp) :: wmn,wnm,wln,wnl,wml,wlm, t1
 complex(dpc) :: idel,w,zi
 character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 ! local allocatable arrays
