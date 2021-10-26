@@ -3110,7 +3110,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 !scalars
  integer,parameter :: formeig0=0
  integer :: spin,ikf,ik_disk,nband_k,mpw_disk,mband,nspinor
- integer :: iomode,nsppol,nkirred_disk,isym,itimrev
+ integer :: iomode,nsppol,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
  integer :: ibdoff
