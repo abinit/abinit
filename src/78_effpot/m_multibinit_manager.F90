@@ -182,6 +182,7 @@ contains
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     integer :: i
+    integer :: c
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%input_path=input_path
     self%filenames(:)=filenames(:)
@@ -199,7 +200,8 @@ contains
     ! Initialize the random number generator
     !if(self%params%mb_random_seed()
     !call self%rng%set_seed([111111_dp, 2_dp])
-    call self%rng%set_seed([int8(time())+111111_dp, int8(time()) ])
+    call system_clock(c)
+    call self%rng%set_seed([int(c, dp)+111111_dp, int(c, dp) ])
     ! use jump so that each cpu generates independent random numbers.
     if(my_rank>0) then
        do i =1,my_rank
