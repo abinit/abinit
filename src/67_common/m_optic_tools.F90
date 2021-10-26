@@ -1911,7 +1911,7 @@ real(dp) :: ene,totre,totabs,totim
 real(dp) :: el,en,em
 real(dp) :: emin,emax, my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu
-real(dp) :: wmn,wnm,wln,wnl,wml,wlm, t1
+real(dp) :: wmn,wnm,wln,wnl,wml,wlm !, t1
 complex(dpc) :: idel,w,zi
 character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 ! local allocatable arrays
