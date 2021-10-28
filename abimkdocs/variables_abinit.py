@@ -22727,7 +22727,7 @@ Variable(
 This variable allows one to save memory in the RMM-DIIS eigensolver when [[rmm_diis]] /= 0.
 By default, the RMM-DIIS routine allocates two extra arrays to reduce the number of applications of the Hamiltonian.
 The size of these arrays depends on the number of plane-waves treated by each processor and [[nband]].
-The amount of memory scales with [[npband]] and [[npfft] yet this extra memory is not negligible and the code
+The amount of memory scales with [[npband]] and [[npfft]] yet this extra memory is not negligible and the code
 may go out of memory for large systems.
 In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-DIIS that avoids these extra allocations.
 """,
