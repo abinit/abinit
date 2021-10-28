@@ -4690,17 +4690,22 @@ convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[fock_icutcoul]] defines the particular expression to be used for the Fock
-operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the
+operator in reciprocal space (see [[icutcoul]] for the Hartree contributions to ground state calculations,
+and [[gw_icutcoul]] for the corresponding treatment in GW calculations). 
+
+The choice of [[fock_icutcoul]] depends on the
 dimensionality and the character of the XC functional used (or otherwise the
 presence of the exclusive treatment of the short-range exchange interaction).
 Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available
 options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
-The corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
-  * 2 --> (W.I.P.) surface.
-  * 3 --> 3D crystal (Coulomb interaction without cut-off).
+Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[rcut]].
+  * 3 --> (W.I.P) 3D crystal (Coulomb interaction without cut-off).
   * 4 --> (W.I.P.)ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
 
@@ -6123,13 +6128,15 @@ the convergence with respect to the number of q-points used to sample the
 Brillouin zone. The convergence can be accelerated by integrating accurately
 the zone in the neighborhood of $\mathbf{G}=0$.
 
-[[gw_icutcoul]] defines the particular expression to be used for such integration.
-It can be used in conjunction with its equivalent for the ground state electronic
-structure cut-off [[icutcoul]].
+[[gw_icutcoul]] defines the particular expression to be used for such integration
+in GW calculations. See [[icutcoul]] and [[fock_icutcoul]] for ground-state calculations.
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> cylinder (nanowires, nanotubes).
-  * 2 --> surface.
+Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
   * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
@@ -6138,6 +6145,11 @@ structure cut-off [[icutcoul]].
   * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
   * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
   * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+
+It was shown in [[cite:Rangel2020]] that the Monte-Carlo approach [[gw_icutcoul]]=16 converges somewhat 
+faster as a function of the k-point sampling than the auxiliary function integration technique [[gw_icutcoul]]=6
+which is the current default. 
+However, the initialization might take time.
 """,
 ),
 
@@ -7254,19 +7266,20 @@ Variable(
     abivarname="icoulomb",
     varset="gstate",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Index for the COULOMB treatment",
     added_in_version="before_v9",
     text=r"""
-Defines the type of computation used for Hartree potential, local part of
+Defines the type of computation (reciprocal space or real space) used for Hartree potential, local part of
 pseudo-potential and ion-ion interaction:
 
-  * [[icoulomb]] = 0: usual reciprocal space computation, using $1/\GG^2$ for the Hartree potential and using Ewald correction.
+  * [[icoulomb]] = 0: usual reciprocal space computation, using [[icutcoul]], [[gw_icutcoul]] and [[fock_icutcoul]]
+to define the Hartree potential, and using Ewald correction.
   * [[icoulomb]] = 1: free boundary conditions are used when the Hartree potential is computed,
     real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials)
-    and simple coulomb interaction gives the ion-ion energy.
+    and simple coulomb interaction gives the ion-ion energy. The wavelet Coulomb solver is used in this case.
 """,
 ),
 
@@ -7274,7 +7287,7 @@ Variable(
     abivarname="icutcoul",
     varset="gstate",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_basic'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
@@ -7289,13 +7302,17 @@ convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
-in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
-of the system. Possible values of [[icutcoul]] are from 0 to 5. The
-corresponding influential variables are [[vcutgeo]] and [[rcut]].
+in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
+and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
+. 
+The choice of [[icutcoul]] depends on the dimensionality
+of the system. Possible values of [[icutcoul]] are from 0 to 5. 
+For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
-  * 2 --> surface.
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
   * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional). (W.I.P.)
@@ -16838,16 +16855,16 @@ Radius for extra spheres the DOS is projected into. See [[natsph_extra]] and
 
 Variable(
     abivarname="rcut",
-    varset="gw",
+    varset="gstate",
     vartype="real",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Radius of the CUT-off for coulomb interaction",
     added_in_version="before_v9",
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
-is governed by the cutoff shape option [[icutcoul]].
+is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the primitive cell.
@@ -20058,22 +20075,22 @@ planes of constant reduced coordinates in the investigated direction, must be em
 
 Variable(
     abivarname="vcutgeo",
-    varset="gw",
+    varset="gstate",
     vartype="real",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="V (potential) CUT-off GEOmetry",
     requires="[[icutcoul]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
-[[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
-used to truncate the Coulomb interaction, as well as the particular approach
-to be used. It has a meaning only for a periodic one-dimensional system, typically
+[[vcutgeo]] is used in conjunction with [[icutcoul]], [[fock_icutcoul]] and/or [[gw_icutcoul]]
+to specify the geometry used to truncate the Coulomb interaction, as well as the particular approach
+to be used. It has a meaning either for a periodic one-dimensional system, typically
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells (([[icutcoul]] = 2). For each
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
 of the methods)
@@ -21483,40 +21500,40 @@ This variable defines the quantity that should be computed starting from a previ
 Possible values are:
 
   * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
-    Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-    This option can be used to interface Abinit with external tools (e.g. lobster)
-    requiring $\kk$-points in the full BZ.
+     Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
+     This option can be used to interface Abinit with external tools (e.g. lobster)
+     requiring $\kk$-points in the full BZ.
 
   * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
-    using the parameters specified by [[einterp]].
+     using the parameters specified by [[einterp]].
 
   * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-    The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
-    operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
-    These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
-    without having to call the DFPT part that is much more expensive at the level of memory.
+     The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
+     operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
+     These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
+     without having to call the DFPT part that is much more expensive at the level of memory.
 
-    Please note that, at present, the computation of non-linear optical properties in optic requires
-    [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
-    can take advantage of spatial and time-reversal symmetries.
-    If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
-    has the correct value of [[kptopt]] according to the physical properties you want to compute.
+     Please note that, at present, the computation of non-linear optical properties in optic requires
+     [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
+     can take advantage of spatial and time-reversal symmetries.
+     If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
+     has the correct value of [[kptopt]] according to the physical properties you want to compute.
 
-    In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
-    To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
-    to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
+     In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
+     To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
+     to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
 
   * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
-    and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
-    This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-    in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
-    less memory demanding.
+     and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
+     This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
+     in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
+     less memory demanding.
 
   * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
-    electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-    Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
-    Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
-    inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+     electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+     Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
+     Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
+     inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 """,
 ),
 
