@@ -489,7 +489,7 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 19) Delete the status file, and, for build-in tests, analyse the correctness of results.
- if (ndtset == 0) then
+ if (ndtset == 0 .and. me == 0 .and. dtsets(1)%builtintest /= 0) then
    call testfi(dtsets(1)%builtintest,etotal,filstat,gred,natom,strten,xred)
  end if
 
