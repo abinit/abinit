@@ -3110,12 +3110,12 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 !scalars
  integer,parameter :: formeig0=0
  integer :: spin,ikf,ik_disk,nband_k,mpw_disk,mband,nspinor
- integer :: iomode,nsppol,nkirred_disk,isym,itimrev
+ integer :: iomode,nsppol,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
  integer :: ibdoff
  integer :: wfk_unt, iband, nband_me, nband_me_disk
- integer :: nband_me_saved, iband_saved, chksymbreak, iout
+ integer :: nband_me_saved, iband_saved
  integer :: spin_saved, spin_sym
  integer :: mpierr
  integer :: ask_accurate, sppoldbl
@@ -3142,7 +3142,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  call cwtime(cpu, wall, gflops, "start")
 
  inpath = inpath_
-!Checking the existence of data file
+ !Checking the existence of data file
  if (.not.file_exists(inpath)) then
    ! Trick needed to run Abinit test suite in netcdf mode.
    if (file_exists(nctk_ncify(inpath))) then
@@ -3154,9 +3154,10 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
    end if
  end if
 
-! now attack the cg reading
+ ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
  wfk_unt = get_unit()
+
 ! TODO: this still does not read in parallel properly:
 ! if I use xmpi_comm_self only the mother thread gets eigen and cg
 ! if I use comm and MPIO_stuff then it hangs on this call
@@ -3164,15 +3165,9 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  ABI_UNUSED(comm)
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
- if(present(eigen)) then
-   eigen = zero
- end if
- if(present(occ)) then
-   occ = zero
- end if
- if(present(kg)) then
-   kg = 0
- end if
+ if(present(eigen)) eigen = zero
+ if(present(occ)) occ = zero
+ if(present(kg)) kg = 0
 
 ! this initialization is needed in case we read a file with fewer bands and only fill part of cg
  cg = zero
@@ -3181,10 +3176,10 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  mband = wfk_disk%mband;
  ABI_CHECK(wfk_disk%nspinor == nspinor_in, "input nspinor does not agree with file")
  nspinor = wfk_disk%nspinor
-! checks: impose each individual nband conserved wrt disk?
+ !checks: impose each individual nband conserved wrt disk?
 
  ABI_CHECK(wfk_disk%nsppol <= nsppol_in, "nsppol can not decrease when reading from disk")
-! ABI_CHECK(wfk_disk%nsppol == nsppol_in, "nsppol does not agree with file")
+ !ABI_CHECK(wfk_disk%nsppol == nsppol_in, "nsppol does not agree with file")
  nsppol = nsppol_in;
  convnsppol1to2=.false.
  if (wfk_disk%nsppol < nsppol_in) convnsppol1to2 = .true.
@@ -3213,16 +3208,10 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  ask_accurate=1
  if (present(ask_accurate_)) ask_accurate=ask_accurate_
 
-!TODO remove the following, which is squashed by listkk below
- if (ask_accurate == 1) then
-   chksymbreak = 0
-   iout = 0
-   call mapkptsets(chksymbreak, cryst%gmet, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
-&       nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
-
- end if ! no accurate k
-!END remove
-
+ ! Use listkk instead of rank-based routines since in DFPT we may receive a k+q mesh
+ ! with q along a path --> max_linear_density in krank becomes large e.g. 1440
+ ! and the computation of the rank overflows.
+ ! Note also that ctgk_rotate assumes use_symrec=False and symrel in input.
  dksqmax = zero
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
@@ -3247,9 +3236,9 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  rbz2disk_sort = rbz2disk(:,1)
  call sort_int(nkpt_in, rbz2disk_sort, iperm)
 
-! prepare offsets for k-points, which could arrive in a random order from the irred k
-! these are valid in the output arrays, not in the disk file
-!TODO: if nband_me is not constant over the k-points, this becomes a huge pain to predict...
+ ! prepare offsets for k-points, which could arrive in a random order from the irred k
+ ! these are valid in the output arrays, not in the disk file
+ !TODO: if nband_me is not constant over the k-points, this becomes a huge pain to predict...
  ABI_MALLOC(icg, (nkpt_in,nsppol))
  ABI_MALLOC(ikg, (nkpt_in))
  ABI_MALLOC(ibdeig, (nkpt_in,nsppol))
@@ -3269,7 +3258,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
      ! conversion of single spin AFM wfk file to full 2 component one in memory
      spin_sym=spin
      if (convnsppol1to2) spin_sym=1
-! this allows for reading fewer bands from disk than the disk version of nband
+     ! this allows for reading fewer bands from disk than the disk version of nband
      nband_k = min(wfk_disk%nband(ik_disk,spin_sym), mband_in)
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
@@ -3277,17 +3266,17 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
      ll = ll+nband_k
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
-! TODO: this does not take into account variable nband(ik)
+     ! TODO: this does not take into account variable nband(ik)
      icg(ikpt,spin) = ii
      ikg(ikpt) = jj
-! this allows for variable nband_k < mband_mem
+     ! this allows for variable nband_k < mband_mem
      ii = ii+min(nband_k,mband_mem_in)*npwarr(ikpt)*nspinor_in
      jj = jj+npwarr(ikpt)
    end do
  end do
 
 
-! main loop reading in wfk and spinning them out to all kptns_in which need them
+ ! main loop reading in wfk and spinning them out to all kptns_in which need them
  do spin=1,nsppol
    ! for nsppol=1 input and nsppol=2 run, no need to continue the spin loop
    if (convnsppol1to2 .and. spin > 1) exit
@@ -3295,7 +3284,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
    do ik_disk=1,wfk_disk%hdr%nkpt
      k_disk = wfk_disk%hdr%kptns(:, ik_disk)
 
-! this allows for reading fewer bands from disk than the maximum
+     ! this allows for reading fewer bands from disk than the maximum
      nband_k = min(wfk_disk%nband(ik_disk,spin), mband_in)
      istwf_disk = wfk_disk%hdr%istwfk(ik_disk)
      npw_disk = wfk_disk%hdr%npwarr(ik_disk)
@@ -3316,13 +3305,13 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
        if (convnsppol1to2 .and. any(distrb_flags(iperm(ii),:,nsppol+1-spin))) needthisk=.true.
      end do ! loop over equivalent k
 
-! do we need the present kdisk, or one of its images?
-! TODO: check if the eigenvalues are correct all the same
+     ! do we need the present kdisk, or one of its images?
+     ! TODO: check if the eigenvalues are correct all the same
      if (.not. needthisk) cycle
 
      ABI_CHECK(nqst > 0 .and. rbz2disk_sort(iqst) == ik_disk, "Wrong iqst")
 
-! loop over equivalent images found in rbz set for current k_disk point
+     ! loop over equivalent images found in rbz set for current k_disk point
      iband_saved = -1
      nband_me_saved = -1
      do jj=0,nqst-1
@@ -3336,30 +3325,30 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
        do spin_sym = 1, nsppol
          if (.not. convnsppol1to2 .and. spin_sym /= spin) cycle
 
-! how many bands in memory for this cpu_
+         ! how many bands in memory for this cpu_
          nband_me = count(distrb_flags(ikf,:,spin_sym))
-! no need to put wfk at this k for this processor into memory
+         ! no need to put wfk at this k for this processor into memory
          if (nband_me == 0) cycle
 
-! find starting band index
+         ! find starting band index
          do iband = 1, nband_k
            if (distrb_flags(ikf,iband,spin_sym)) exit
          end do
-! check bands are contiguous in distrb_flags for this ikf and find first band needed, iband
+         ! check bands are contiguous in distrb_flags for this ikf and find first band needed, iband
          if (.not. distrb_flags(ikf,iband+nband_me-1,spin_sym)) then
-           stop "wfk_read_my_kptbands: bands not contiguous in distrb_flags"
+           ABI_ERROR("wfk_read_my_kptbands: bands not contiguous in distrb_flags")
          end if
 
-! if nband_me goes beyond the end of the bands on disk, just read those we have
+         ! if nband_me goes beyond the end of the bands on disk, just read those we have
          nband_me_disk = min(nband_k,nband_me)
 
-! In parallel, iband+nband_me-1 could be larger than mband_disk
-!   we want to limit nband_me_disk in that case too, just for the last band procs
+         ! In parallel, iband+nband_me-1 could be larger than mband_disk
+         ! we want to limit nband_me_disk in that case too, just for the last band procs
          if (iband+nband_me-1 > nband_k) then
            nband_me_disk = nband_k+1-iband
          end if
 
-! may need to re-read if for a different equivalent k if I need other bands
+         ! may need to re-read if for a different equivalent k if I need other bands
          if (iband /= iband_saved .or. nband_me_disk /= nband_me_saved .or. spin /= spin_saved) then
            if (formeig > 0) then
              call wfk_disk%read_band_block([iband,iband+nband_me_disk-1],ik_disk,spin,xmpio_single,&
@@ -3399,7 +3388,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
          if (present(eigen)) then
            ibdoff = ibdeig(ikf,spin_sym)+(iband-1)*(2*nband_k)**formeig
            eigen(ibdoff+1:ibdoff+nband_me_disk*(2*nband_k)**formeig) = &
-&            eig_disk((iband-1)*(2*nband_k)**formeig+1:(iband-1+nband_me_disk)*(2*nband_k)**formeig)
+             eig_disk((iband-1)*(2*nband_k)**formeig+1:(iband-1+nband_me_disk)*(2*nband_k)**formeig)
          end if
          if (present(occ)) then
            ibdoff = ibdocc(ikf,spin_sym)+(iband-1)
@@ -3412,7 +3401,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
              kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
            end if
            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*nspinor_in) = &
-&             cg_disk(:,1:npw_kf*nband_me_disk*nspinor_in)
+             cg_disk(:,1:npw_kf*nband_me_disk*nspinor_in)
          else
            ! Compute G-sphere centered on kf
            call get_kg(kf,istwf_kf,ecut_eff_in,cryst%gmet,npw_kf,kg_kf)
@@ -3435,9 +3424,9 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 
            ! Rotate nband_k wavefunctions (output in cg)
            call cgtk_rotate(cryst,k_disk,isym,itimrev,g0,nspinor,nband_me_disk,&
-&            npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
-&            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*nspinor_in),&
-&            work_ngfft,work)
+             npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
+              cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*nspinor_in),&
+            work_ngfft,work)
 
            ABI_FREE(work)
            ABI_FREE(kg_kf)
@@ -3447,17 +3436,11 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
    end do ! kpt disk
  end do ! sppol
 
-! this sums over the whole kpt communicator, so also the band procs.
-! need to 0 out bands which are not mine
- if(present(eigen)) then
-   call xmpi_sum(eigen,comm,mpierr)
- end if
- if(present(occ)) then
-   call xmpi_sum(occ,comm,mpierr)
- end if
- if(present(kg)) then
-   call xmpi_sum(kg,comm,mpierr)
- end if
+ ! this sums over the whole kpt communicator, so also the band procs.
+ ! need to 0 out bands which are not mine
+ if(present(eigen)) call xmpi_sum(eigen,comm,mpierr)
+ if(present(occ)) call xmpi_sum(occ,comm,mpierr)
+ if(present(kg)) call xmpi_sum(kg,comm,mpierr)
 
  if(present(pawrhoij) .and. usepaw_in==1) then
    call pawrhoij_copy(wfk_disk%hdr%pawrhoij,pawrhoij)
@@ -3645,7 +3628,7 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
        end do
 !TODO: check all nband_me entries in distrib_flags - the distribution could be random but with iband+nband_me-1 .true.
        if (.not. distrb_flags(ik_rbz,iband+nband_me-1,spin)) then
-         stop "wfk_write_my_kptbands: bands not contiguous in distrb_flags"
+         ABI_ERROR("wfk_write_my_kptbands: bands not contiguous in distrb_flags")
        end if
      end if
 

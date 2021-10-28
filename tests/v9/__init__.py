@@ -79,8 +79,9 @@ inp_files = [
 "t64.abi",
 "t65.abi",
 "t66.abi",
+"t67.abi",
 
-# More ground state 
+# More ground state
 "t71.abi", # test cprj_update_lvl and nloc_alg options, istwfk=1
 "t72.abi", # test cprj_update_lvl and nloc_alg options, istwfk>=2
 "t73.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
