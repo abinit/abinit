@@ -3947,7 +3947,7 @@ end subroutine dfpt_ciflexoout
 !Write the tensor in cartesian coordinates
  write(ab_out,'(a)')' '
  write(ab_out,'(a)')' 1st real-space moment of IFCs, in cartesian coordinates,'
- write(ab_out,'(a)')' iatom   iatdir   jatom   jatddir   qgrdir           real part          imaginary part'
+ write(ab_out,'(a)')' iatdir  iatom    jatdir  jatom    qgrdir           real part          imaginary part'
  do iq1dir=1,3
    do jatdir=1,3
      do jatom=1,matom
@@ -3955,7 +3955,7 @@ end subroutine dfpt_ciflexoout
          do iatom=1,matom
 
            if (cartflg(iatom,iatdir,jatom,jatdir,iq1dir)==1) then
-             write(ab_out,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+             write(ab_out,'(5(i5,4x),2(1x,f20.10))') iatdir, iatom, jatdir, jatom, iq1dir,       &
            & ddmdq_cart(:,iatom,iatdir,jatom,jatdir,iq1dir)
            end if
 
