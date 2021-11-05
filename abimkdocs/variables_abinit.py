@@ -4691,7 +4691,7 @@ case, a cut-off Coulomb interaction might prove useful.
 
 [[fock_icutcoul]] defines the particular expression to be used for the Fock
 operator in reciprocal space (see [[icutcoul]] for the Hartree contributions to ground state calculations,
-and [[gw_icutcoul]] for the corresponding treatment in GW calculations). 
+and [[gw_icutcoul]] for the corresponding treatment in GW calculations).
 
 The choice of [[fock_icutcoul]] depends on the
 dimensionality and the character of the XC functional used (or otherwise the
@@ -6146,9 +6146,9 @@ This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-
   * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
   * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 
-It was shown in [[cite:Rangel2020]] that the Monte-Carlo approach [[gw_icutcoul]]=16 converges somewhat 
+It was shown in [[cite:Rangel2020]] that the Monte-Carlo approach [[gw_icutcoul]]=16 converges somewhat
 faster as a function of the k-point sampling than the auxiliary function integration technique [[gw_icutcoul]]=6
-which is the current default. 
+which is the current default.
 However, the initialization might take time.
 """,
 ),
@@ -7304,9 +7304,9 @@ case, a cut-off Coulomb interaction might prove useful.
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
 and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
-. 
+.
 The choice of [[icutcoul]] depends on the dimensionality
-of the system. Possible values of [[icutcoul]] are from 0 to 5. 
+of the system. Possible values of [[icutcoul]] are from 0 to 5.
 For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
 This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
 
@@ -21669,12 +21669,26 @@ Variable(
     varset="eph",
     topics=['ElPhonInt_expert'],
     vartype="real",
-    defaultval="1e-4",
+    defaultval=-1.0,
     dimensions="scalar",
-    mnemonics="Iterative Boltzmann Equation: ALPHA TOLerance for convergence",
+    mnemonics="Iterative Boltzmann Equation: ABSolute TOLerance for convergence",
     added_in_version="9.3.0",
     text=r"""
-This variable is still under development.
+This variable defines the absolute tolerance used to stop the iterative solution of the Boltzmann equation.
+The code stops the iterations when $$ \max_\kk |{\bm F}_\kk^i - {\bm F}_\kk^{i-1}| $$
+is less than [[ibte_abs_tol]] where $${\bm F}_\kk^i$$ is the solution at iteration step i.
+
+Note, however, that the absolute value of $${\bm F}$$ strongly depends on the position of the Fermi level
+that in turns defines the free carrier density.
+As a consequence, the value of [[ibte_abs_tol]] should be adjusted according to the system
+under investigation.
+
+Since this procedure is not very practical, it's much easier to use a negative value
+for [[ibte_abs_tol]] (default behaviour) and let the code
+automatically define the convergence threshold from the free carrier density computed at runtime.
+
+According to numerical tests, a reasonable value of [[ibte_abs_tol]] can be estimated using
+1e-20 * carrier_density in cm^-3.
 """,
 ),
 
