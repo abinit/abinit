@@ -664,7 +664,7 @@ endif
 
  ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
- if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
+ if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
  ! ====================================================
  ! === This is the real EPH stuff once all is ready ===
