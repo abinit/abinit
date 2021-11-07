@@ -664,7 +664,7 @@ endif
 
  ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
- if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
+ if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
  ! ====================================================
  ! === This is the real EPH stuff once all is ready ===
@@ -710,7 +710,9 @@ endif
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
-   call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+   if (my_rank == master) then
+     call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+   end if
 
  case (7)
    ! Compute phonon-limited RTA from SIGEPH file.
@@ -722,7 +724,9 @@ endif
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
-   call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+   if (my_rank == master) then
+     call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+   end if
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
