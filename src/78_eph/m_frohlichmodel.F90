@@ -497,13 +497,13 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
 
 !Local variables ------------------------------
 !scalars
- integer  :: deg_dim, counter, signpm
+ integer  :: deg_dim, signpm
  integer  :: i, iband, jband, ideg, idir, iqdir, ieig
  integer  :: ikpt, ixi, ipar, iphi, iphon, imode, itheta, ik
- integer  :: nkdir, nqdir, ntheta, nphi, nxi, nphonons, nkgrid
+ integer  :: nkdir, nqdir, ntheta, nphi, nxi, nkgrid
  integer  :: info, lwork
  real(dp) :: angle_phi,cosph,costh,sinph,sinth,weight,weight_phi
- real(dp) :: costheta, phi, qpt, krange, nq_factor, sum_weights
+ real(dp) :: qpt, krange, nq_factor
  !character(len=500) :: msg
 !arrays
 !Electronic
@@ -529,7 +529,7 @@ subroutine polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
  real(dp) :: temporary1(3,3), temporary2(3), temporary3
  real(dp) :: unitary_33(3,3)
  real(dp) :: minelecmass,eham(3,3)
- real(dp) :: kpt(3), q_vector(3), k_plus_q(3)
+ real(dp) :: kpt(3), k_plus_q(3)
  real(dp), allocatable :: lutt_unit_kdir(:,:)
  real(dp), allocatable :: omega_zero(:)
  real(dp), allocatable :: intsum(:,:,:,:)
