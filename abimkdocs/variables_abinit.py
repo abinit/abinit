@@ -14882,8 +14882,7 @@ _ions+electrons+positron_ system) that, when reached, will cause the SCF cycle
 to stop before the number of steps is [[nstep]] or the number of
 electronic/positronic steps is [[posnstep]].
 
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[postoldfe]] has
-the [[ENERGY]] characteristics.
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[postoldfe]] has the [[ENERGY]] characteristics.
 One and only one of [[postoldfe]] or [[postoldff]] can be set.
 """,
 ),
@@ -21630,15 +21629,57 @@ Variable(
     abivarname="eph_phrange",
     varset="eph",
     topics=['SelfEnergy_expert'],
-    vartype="real",
+    vartype="integer",
     defaultval=[0, 0],
     dimensions=[2],
     mnemonics="EPH PHonon mode RANGE.",
     added_in_version="9.0.0",
     text=r"""
-This variable is used to select the range of phonon modes included in the computation of the electron-phonon self-energy.
-By default all phonon modes are included ([0, 0]), otherwise only the phonon modes with index between the first
-and second entry are included.
+This variable is used to select the range of phonon indices included in the computation
+of the electron-phonon self-energy.
+By default all phonon indices are included ([0, 0]), otherwise only the phonon indices between the first
+and second entry are **included**.
+Note that one can also use negative values to **exclude** a range of indices provided that
+abs(eph_phrange(1)) < abs(eph_phrange(2)).
+
+To summarize: use e.g. eph_phrange 4 6 to include phonon indices 4, 5, 6 in the calculation or
+use eph_phrange -4 -6 to include **ALL** phonon indices except 4, 5, 6.
+
+!!! important
+
+    The indices do not necessary correspond to phonon modes if there are crossings
+    in the phonon band structure.
+    At each q-point, indeed, phonons are ordered according to their energy.
+    and this order does not necessarly reflect the connection of the energy branch in q-space.
+""",
+),
+
+Variable(
+    abivarname="eph_phrange_w",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[0, 0],
+    dimensions=[2],
+    mnemonics="EPH PHonon mode RANGE (Frequency)",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="9.6.2",
+    text=r"""
+This variable is used to include/exclude phonon modes in the computation of the electron-phonon self-energy
+on the basis of the vibrational energy instead of the index as done in [[eph_phrange]].
+The usage of [[eph_phrange_w]] is recommended especially if there are crossings in the phonon band structure.
+
+By default all phonon frequencies are included ([0, 0]), otherwise only the phonons
+whose energy is between the first and second entry are **included**.
+Note that one can also use negative values to **exclude** energies inside a range provided that
+abs(eph_phrange_w(1)) < abs(eph_phrange_w(2)).
+
+To summarize: use e.g. eph_phrange_w 40 60 meV to **include** phonon frequencies between 40 and 60 meV.
+Use eph_phrange_w -40 -60 meV to **exclude** phonon frequencies between 40 and 60 meV.
+
+!!! important
+
+    This variable has the [[ENERGY]] characteristics so the code assume Hartree units by default.
 """,
 ),
 

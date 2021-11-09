@@ -1057,7 +1057,7 @@ end subroutine incomprs
 !!   'DPR'=>real(dp) (no special treatment)
 !!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
-!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
+!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
 !!
@@ -1988,7 +1988,7 @@ end subroutine intagm_img_2D
 !!   'DPR' => real(dp) (no special treatment)
 !!   'LEN' => real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!            and return in au -atomic units=bohr- )
-!!   'ENE' => real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
+!!   'ENE' => real(dp) (expect a "energy", identify Ha, hartree, eV, meV, Ry, Rydberg)
 !!   'BFI' => real(dp) (expect a "magnetic field", identify T, Tesla)
 !!   'TIM' => real(dp) (expect a "time", identify S, Second)
 !!   'LOG' => integer, but read logical variable T,F,.true., or .false.
@@ -2019,7 +2019,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  character(len=*),intent(in) :: typevarphys
  character(len=*),intent(in) :: cs
 !arrays
- integer,intent(inout) :: intarr(marr) !vz_i
+ integer,intent(inout) :: intarr(marr)
  real(dp),intent(out) :: dprarr(marr)
 
 !Local variables-------------------------------
@@ -2132,6 +2132,8 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
            factor=half
          else if(string(b1+1:b1+3)=='EV ')then
            factor=one/Ha_eV
+         else if(string(b1+1:b1+4)=='MEV ')then
+           factor=one/Ha_meV
          end if
        else if(typevarphys=='ENE' .and. b2>=2)then
          if(string(b1+1:b1+2)=='K ') factor=kb_HaK
@@ -3865,7 +3867,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
          'Found token: `',string(index_current:index_endfullword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. Perhaps you mistyped the input variable,',ch10,&
-&        'or specified "img", although this was not permitted for this input variable.'
+         'or specified "img", although this was not permitted for this input variable.'
          ABI_ERROR(msg)
        end if
      end if

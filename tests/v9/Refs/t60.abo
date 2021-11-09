@@ -1,6 +1,6 @@
 
-.Version 9.5.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.1 of ABINIT 
+.(MPI version, prepared for a x86_64_darwin20.3.0_gnu8.2 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  6 Apr 2021.
-- ( at 23h36 )
+.Starting date : Tue  9 Nov 2021.
+- ( at 21h42 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
@@ -238,6 +238,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
    eph_ngqpt_fine8       4    4    4
    eph_ngqpt_fine9       0    0    0
    eph_ngqpt_fine10      0    0    0
+    eph_phrange_w1     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w2     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w3     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w4     0.00000000E+00  3.67493254E-03 Hartree
+    eph_phrange_w5     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w6     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w7     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w8     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w9     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w10    0.00000000E+00  0.00000000E+00 Hartree
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -2360,6 +2370,16 @@ meta: {optdriver: 7, eph_task: -15, }
    eph_ngqpt_fine8       4    4    4
    eph_ngqpt_fine9       0    0    0
    eph_ngqpt_fine10      0    0    0
+    eph_phrange_w1     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w2     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w3     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w4     0.00000000E+00  3.67493254E-03 Hartree
+    eph_phrange_w5     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w6     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w7     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w8     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w9     0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w10    0.00000000E+00  0.00000000E+00 Hartree
       eph_restart           1
          eph_task1          4
          eph_task2          5

@@ -1468,6 +1468,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')
  if (tread == 1) dtset%eph_phrange = intarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange_w',tread,'ENE')
+ if (tread == 1) dtset%eph_phrange_w = dprarr(1:2)
+
+ if (any(abs(dtset%eph_phrange) /= 0) .and. any(abs(dtset%eph_phrange_w) > tol16)) then
+   ABI_ERROR("eph_phrange and eph_phrange_w are mutually exclusive")
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_intmeth',tread,'INT')
  if (tread == 1) then
    dtset%eph_intmeth = intarr(1)
