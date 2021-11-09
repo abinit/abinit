@@ -1760,8 +1760,9 @@ magnetization.
 When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
 
 When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the collinear case) of the magnetization is constrained;
-When [[constraint_kind]]=2 or 12, only the direction is constrained (only meaningful in the non-collinear case);
-When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (only meaningful in the non-collinear case, albeit allowed);
+When [[constraint_kind]]=3 or 13, only the magnetization magnitude is constrained.
+When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case, not allowed in the collinear case);
 
 For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
 so the algorithm works only with [[iscf]] between 2 and 9.
@@ -1777,6 +1778,10 @@ Atoms of the same type are supposed to incur the same constraint.
 If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+The difference between [[constraint_kind]]=4 or 14 and [[constraint_kind]]=2 or 12 lies in the fact that [[constraint_kind]]=2 or 12 will consider similarly
+a magnetization vector and its opposite, as this constraint is just alignment on an axis, while [[constraint_kind]]=4 or 14 enforces that
+the scalar product of the target magnetization direction (normalized vector) and the actual optimized magnetization direction (normalized vector) is positive.
 
 Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle.
 """,
@@ -4222,8 +4227,10 @@ The choice is among:
 * 6 --> Estimate correction to the ZPR in polar materials using the generalized Frohlich model. Requires EFMAS.nc file. See [[cite:Miglio2020]].
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
-        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task == -4.
-* 10 --> Compute polaron effective mass along the 3 crystallographic directions: (100), (110) and (111); in the triply-degenerate VB or CB cubic case.
+        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
+* 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirement than for [[eph_task]]=6.
+         Reference B. Guster et al to be published (2021) or (2022).
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
@@ -4683,17 +4690,22 @@ convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[fock_icutcoul]] defines the particular expression to be used for the Fock
-operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the
+operator in reciprocal space (see [[icutcoul]] for the Hartree contributions to ground state calculations,
+and [[gw_icutcoul]] for the corresponding treatment in GW calculations). 
+
+The choice of [[fock_icutcoul]] depends on the
 dimensionality and the character of the XC functional used (or otherwise the
 presence of the exclusive treatment of the short-range exchange interaction).
 Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available
 options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
-The corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
-  * 2 --> (W.I.P.) surface.
-  * 3 --> 3D crystal (Coulomb interaction without cut-off).
+Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[rcut]].
+  * 3 --> (W.I.P) 3D crystal (Coulomb interaction without cut-off).
   * 4 --> (W.I.P.)ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
 
@@ -6116,13 +6128,15 @@ the convergence with respect to the number of q-points used to sample the
 Brillouin zone. The convergence can be accelerated by integrating accurately
 the zone in the neighborhood of $\mathbf{G}=0$.
 
-[[gw_icutcoul]] defines the particular expression to be used for such integration.
-It can be used in conjunction with its equivalent for the ground state electronic
-structure cut-off [[icutcoul]].
+[[gw_icutcoul]] defines the particular expression to be used for such integration
+in GW calculations. See [[icutcoul]] and [[fock_icutcoul]] for ground-state calculations.
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> cylinder (nanowires, nanotubes).
-  * 2 --> surface.
+Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
   * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
@@ -6131,6 +6145,11 @@ structure cut-off [[icutcoul]].
   * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
   * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
   * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+
+It was shown in [[cite:Rangel2020]] that the Monte-Carlo approach [[gw_icutcoul]]=16 converges somewhat 
+faster as a function of the k-point sampling than the auxiliary function integration technique [[gw_icutcoul]]=6
+which is the current default. 
+However, the initialization might take time.
 """,
 ),
 
@@ -7248,19 +7267,20 @@ Variable(
     abivarname="icoulomb",
     varset="gstate",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Index for the COULOMB treatment",
     added_in_version="before_v9",
     text=r"""
-Defines the type of computation used for Hartree potential, local part of
+Defines the type of computation (reciprocal space or real space) used for Hartree potential, local part of
 pseudo-potential and ion-ion interaction:
 
-  * [[icoulomb]] = 0: usual reciprocal space computation, using $1/\GG^2$ for the Hartree potential and using Ewald correction.
+  * [[icoulomb]] = 0: usual reciprocal space computation, using [[icutcoul]], [[gw_icutcoul]] and [[fock_icutcoul]]
+to define the Hartree potential, and using Ewald correction.
   * [[icoulomb]] = 1: free boundary conditions are used when the Hartree potential is computed,
     real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials)
-    and simple coulomb interaction gives the ion-ion energy.
+    and simple coulomb interaction gives the ion-ion energy. The wavelet Coulomb solver is used in this case.
 """,
 ),
 
@@ -7268,7 +7288,7 @@ Variable(
     abivarname="icutcoul",
     varset="gstate",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_basic'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
@@ -7283,13 +7303,17 @@ convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
-in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
-of the system. Possible values of [[icutcoul]] are from 0 to 5. The
-corresponding influential variables are [[vcutgeo]] and [[rcut]].
+in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
+and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
+. 
+The choice of [[icutcoul]] depends on the dimensionality
+of the system. Possible values of [[icutcoul]] are from 0 to 5. 
+For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
-  * 2 --> surface.
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
   * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional). (W.I.P.)
@@ -9926,7 +9950,7 @@ Variable(
 Turns on the imposition of a constraint on the magnetization, using a penalty function. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
 a penalty function is applied to bring it to the input values of [[spinat]].
-The constraint can be either on the direction only ([[magconon]] = 1) or on the full
+The constraint can be either on the direction/axis only ([[magconon]] = 1) or on the full
 vector ([[magconon]] = 2). The penalty function has an amplitude
 [[magcon_lambda]] that should be neither too big (bad or impossible convergence) nor too small (no effect).
 The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
@@ -9934,6 +9958,10 @@ approach, which is a misnomer for the algorithm that they describe. It has the d
 the exact sought value for the magnetization. So, the true Lagrange approach has to be preferred, except for testing purposes.
 This is provided by the algorithm governed by the input variable [[constraint_kind]], which is actually also much more flexible
 than the implementation corresponding to [[magconon]].
+
+Final subtlety: when [[magconon]] = 1, if [[nspden]]==2 (collinear case), then the direction of magnetization is constraint (positive or negative along z),
+while if [[nspden]]==4, then the axis of magnetization is constraint (the actual direction is not imposed, both directions are equivalent). This might be 
+confusing.
 """,
 ),
 
@@ -16818,16 +16846,16 @@ Radius for extra spheres the DOS is projected into. See [[natsph_extra]] and
 
 Variable(
     abivarname="rcut",
-    varset="gw",
+    varset="gstate",
     vartype="real",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Radius of the CUT-off for coulomb interaction",
     added_in_version="before_v9",
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
-is governed by the cutoff shape option [[icutcoul]].
+is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the primitive cell.
@@ -20038,22 +20066,22 @@ planes of constant reduced coordinates in the investigated direction, must be em
 
 Variable(
     abivarname="vcutgeo",
-    varset="gw",
+    varset="gstate",
     vartype="real",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="V (potential) CUT-off GEOmetry",
     requires="[[icutcoul]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
-[[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
-used to truncate the Coulomb interaction, as well as the particular approach
-to be used. It has a meaning only for a periodic one-dimensional system, typically
+[[vcutgeo]] is used in conjunction with [[icutcoul]], [[fock_icutcoul]] and/or [[gw_icutcoul]]
+to specify the geometry used to truncate the Coulomb interaction, as well as the particular approach
+to be used. It has a meaning either for a periodic one-dimensional system, typically
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells (([[icutcoul]] = 2). For each
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
 of the methods)
@@ -21461,7 +21489,7 @@ Variable(
 This variable defines the quantity to compute starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_full" --> Read WFK file and produce new WFK file with k-points in the full BZ.
+  * "wfk_fullbz" --> Read WFK file and produce new WFK file with k-points in the full BZ.
         Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
         This option can be used to interface Abinit with external tools requiring k-points in the full BZ.
 
@@ -22768,6 +22796,30 @@ Variable(
     text=r"""
 
 Same meaning as [[quadquad@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="use_oldchi",
+    varset="gw",
+    vartype="integer",
+    topics=['Susceptibility_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics=r"USE OLD CHI implementation for evaluating $\chi^{0}$ with eigenvalues taken from a QPS file",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[optdriver]] == 3",
+    added_in_version="9.5.2",
+    text=r"""
+This input variable defines whether to keep the old implementation in which the polarizability
+$\chi^{0}$ is evaluated when the eigenvalues are read from an existing QPS file (e.g. in quasiparticle
+self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting point.)
+
+* 0 --> Do not use the old implementation.
+
+* 1 --> Keep the old implementation.
+
+See line 743 in src/95_drive/screening.F90 .
 """,
 ),
 
