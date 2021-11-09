@@ -4,14 +4,10 @@ This file contains the list of known problems
 at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
-NOTE that problems are presently (for about three years) most often reported on the issue manager of Github .
-Still, the list of platforms and corresponding failing tests is maintained.
+NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
+Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-<<<<<<< HEAD
-The present release ABINITv9.7.0 is for development
-=======
-The present release ABINITv9.6.2 is for production
->>>>>>> release-9.6
+The present release ABINITv9.7.1 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -20,11 +16,7 @@ The present release ABINITv9.6.2 is for production
 ================================================================
 0. Platforms
 
-<<<<<<< HEAD
-For ABINITv9.7.0, list closed on 2021 10 02
-=======
-For ABINITv9.6.2, list closed on 2021 11 09
->>>>>>> release-9.6
+For ABINITv9.7.1, list closed on 2021 11 09
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
