@@ -84,7 +84,7 @@ _ WF disk file :     15.932 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           getdvdb2         20
            getwfk1         20
            getwfk2          1
-     ibte_abs_tol1     1.0000000000E-04
+     ibte_abs_tol1    -1.0000000000E+00
      ibte_abs_tol2     1.0000000000E-03
    ibte_alpha_mix1     7.0000000000E-01
    ibte_alpha_mix2     6.0000000000E-01
@@ -935,7 +935,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
           getdvdb2         20
            getwfk1         20
            getwfk2          1
-     ibte_abs_tol1     1.0000000000E-04
+     ibte_abs_tol1    -1.0000000000E+00
      ibte_abs_tol2     1.0000000000E-03
    ibte_alpha_mix1     7.0000000000E-01
    ibte_alpha_mix2     6.0000000000E-01
