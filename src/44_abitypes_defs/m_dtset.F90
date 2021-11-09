@@ -175,6 +175,7 @@ type, public :: dataset_type
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_phrange(2) = 0
+ real(dp) :: eph_phrange_w(2) = zero
 
  integer :: eph_restart = 0
  integer :: eph_stern = 0
@@ -1455,6 +1456,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
  dtout%eph_phrange        = dtin%eph_phrange
+ dtout%eph_phrange_w      = dtin%eph_phrange_w
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
  dtout%eph_frohlichm      = dtin%eph_frohlichm
@@ -3258,7 +3260,7 @@ subroutine chkvars(string)
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta'
+ list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_tols_idelta'
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
@@ -3465,7 +3467,7 @@ subroutine chkvars(string)
 
 !Extra token, also admitted:
 !<ABINIT_UNITS>
- list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
+ list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
  list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ABINIT_UNITS>
 
