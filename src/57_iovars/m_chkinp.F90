@@ -489,7 +489,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  constraint_kind
    do itypat=1,dt%ntypat
      cond_string(1)='itypat';cond_values(1)=itypat
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),&
+&     10,(/0,1,2,3,4,10,11,12,13,14/),iout)
      !Only potential self-consistency is currently allowed with constrained_dft
      if (dt%iscf>10) then
        cond_string(1)='itypat';cond_values(1)=itypat
@@ -501,7 +502,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(2)='ionmov';cond_values(2)=dt%ionmov
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
-
+     if (dt%nspden==2) then
+       cond_string(1)='itypat';cond_values(1)=itypat
+       cond_string(2)='nspden';cond_values(2)=dt%nspden
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
+     endif
    enddo
 
 !  densfor_pred

@@ -295,7 +295,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(extfpmd_type),pointer :: extfpmd => null()
- type(macro_uj_type) :: dtpawuj(0)
+ type(macro_uj_type) :: dtpawuj(1)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
@@ -413,6 +413,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! to be generated from the original simulation cell
  rprimd_for_kg=rprimd
  if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
+ if (dtset%optcell/=0.and.dtset%imgmov/=0) rprimd_for_kg=args_gs%rprimd_orig
  call matr3inv(rprimd_for_kg,gprimd_for_kg)
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
