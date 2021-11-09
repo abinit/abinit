@@ -520,6 +520,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_)
    end if
+!DEBUG
+!  gvnlx1_(:,:)=zero
+!ENDDEBUG
 
 !  Electric field perturbation without Berry phase
 !  -------------------------------------------
@@ -731,7 +734,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ABI_BUG('need dkinpw allocated!')
  end if
 
- if (has_kin) then
+ if (has_kin) then    ! This is the correct line
+!DEBUG
+!if (.false.)then
+!ENDDEBUG
 !  Remember that npw=npw1 for ddk perturbation
    do ispinor=1,my_nspinor
 !$OMP PARALLEL DO PRIVATE(ipw,ipws) SHARED(cwave,ispinor,gvnlx1_,dkinpw,kinpw1,npw,my_nspinor)
