@@ -51,6 +51,8 @@ module m_special_funcs
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
  public :: levi_civita_3     ! Return Levi-Civita tensor of rank 3
+ public :: fermi_dirac        ! Fermi Dirac distribution
+ public :: bose_einstein      ! Bose Einstein distribution
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -61,9 +63,6 @@ module m_special_funcs
 !!  Object used to interpolate Bessel functions
 !!
 !! SOURCE
-
- public :: fermi_dirac        ! Fermi Dirac distribution
- public :: bose_einstein      ! Bose Einstein distribution
 
  type,public :: jlspline_t
 
@@ -1419,7 +1418,7 @@ function bose_einstein(energy, temperature)
      write(message,'(a)') 'No Bose Einstein for negative energies'
      ABI_WARNING(message)
    end if
- else 
+ else
    write(message,'(a)') 'No Bose Einstein for negative or 0 T'
    ABI_WARNING(message)
  end if
