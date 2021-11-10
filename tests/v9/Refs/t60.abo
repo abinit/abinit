@@ -248,6 +248,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
     eph_phrange_w8     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w9     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w10    0.00000000E+00  0.00000000E+00 Hartree
+   eph_prtscratew1          0
+   eph_prtscratew2          0
+   eph_prtscratew3          0
+   eph_prtscratew4          1
+   eph_prtscratew5          0
+   eph_prtscratew6          0
+   eph_prtscratew7          0
+   eph_prtscratew8          0
+   eph_prtscratew9          0
+   eph_prtscratew10         0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -2380,6 +2390,16 @@ meta: {optdriver: 7, eph_task: -15, }
     eph_phrange_w8     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w9     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w10    0.00000000E+00  0.00000000E+00 Hartree
+   eph_prtscratew1          0
+   eph_prtscratew2          0
+   eph_prtscratew3          0
+   eph_prtscratew4          1
+   eph_prtscratew5          0
+   eph_prtscratew6          0
+   eph_prtscratew7          0
+   eph_prtscratew8          0
+   eph_prtscratew9          0
+   eph_prtscratew10         0
       eph_restart           1
          eph_task1          4
          eph_task2          5
