@@ -21787,6 +21787,28 @@ mode by using [[eph_task]] = 8 with [[getsigeph_filepath]].
 ),
 
 Variable(
+    abivarname="eph_prtscratew",
+    varset="eph",
+    topics=['ElPhonInt_advanced'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    mnemonics="EPH PRINT spectral decomposition of SCATTERING RATES as a function of omega phonon.",
+    added_in_version="9.6.7",
+    text=r"""
+This variable can be used to compute the spectral decomposition of the SERTA/MRTA scattering rates
+in terms of an integral over phonon frequencies:
+
+$$
+1/tau_{n\kk} = \int_0^\infty f_{n\kk}(\ww)\dd\ww
+$$
+
+This option is available only when computing the imaginary part of the e-ph self-energy ([[eph_task]] = -4).
+The values of $f_{n\kk}(\ww)$ are stored in the SIGEPH file (scratew netcdf variable).
+""",
+),
+
+Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],

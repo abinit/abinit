@@ -1453,8 +1453,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symv1scf',tread,'INT')
  if(tread==1) dtset%symv1scf = intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_prtscratew',tread,'INT')
+ if(tread==1) dtset%eph_prtscratew = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
- if(tread==1) dtset%eph_restart=intarr(1)
+ if(tread==1) dtset%eph_restart = intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
  if(tread==1) dtset%eph_task=intarr(1)

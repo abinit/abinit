@@ -177,6 +177,7 @@ type, public :: dataset_type
  integer :: eph_phrange(2) = 0
  real(dp) :: eph_phrange_w(2) = zero
 
+ integer :: eph_prtscratew = 0
  integer :: eph_restart = 0
  integer :: eph_stern = 0
  integer :: eph_task = 1
@@ -1467,6 +1468,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
 
+ dtout%eph_prtscratew     = dtin%eph_prtscratew
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -3261,7 +3263,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_tols_idelta'
- list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
