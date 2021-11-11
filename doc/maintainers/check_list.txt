@@ -50,7 +50,7 @@ F. For the first release and other merges of a production version
 -----------------------------------------------
 Prepare the release, which means (send a letter to JMB) :
 F.1 Make available the files tar.gz and robodoc (from abiref*debug)
-F.2 Also update install notes for most noticeable achievements.
+F.2 Also update release notes for most noticeable achievements.
 
 *******************************************************************
 [This file can be found at doc/maintainers/check_list.txt]
