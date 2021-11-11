@@ -493,11 +493,11 @@ module m_sigmaph
 
   integer :: phmesh_size
    ! Number of phonon frequencies in phonon mesh used for Eliashberg functions and
-   ! and other w-resolved quantities
+   ! and other omega-resolved quantities.
 
   real(dp),allocatable :: phmesh(:)
    ! phmesh(phmesh_size)
-   ! phonon mesh
+   ! phonon mesh in Ha.
 
   real(dp),allocatable :: gf_nnuq(:,:,:,:)
    ! (nbcalc_ks, natom3, %nqibz_k, 3)
@@ -736,8 +736,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ecut = dtset%ecut ! dtset%dilatmx
 
  ! Check if a previous netcdf file is present and restart the calculation
- ! Here we try to read an existing SIGEPH file if eph_restart
- ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
+ ! Here we try to read an existing SIGEPH file if eph_restart == 1.
+ ! and we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  restart = 0; ierr = 1; sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (my_rank == master .and. dtset%eph_restart == 1) then
    sigma_restart = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr)
@@ -1107,7 +1107,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end if
  end if
 
- ! Used to store delta(w - w_qnu) with delta replaced by gaussian.
+ ! Array used to store delta(w - w_{q\nu}) with delta replaced by gaussian.
  ABI_MALLOC(gaussw_qnu, (sigma%phmesh_size))
 
  if (dtset%eph_prtscratew == 1) then
@@ -1868,6 +1868,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu, dtset%eph_phrange_w)) cycle
 
            if (dtset%eph_prtscratew == 1) then
+             ! Precompute delta(w-w_qnu)
              gaussw_qnu = gaussian(sigma%phmesh - wqnu, dtset%ph_smear)
            end if
 

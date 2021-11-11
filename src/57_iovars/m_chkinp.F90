@@ -3283,9 +3283,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do isym=1,dt%nsym
          if(sum(dt%tnons(:,isym)**2)>tol6)then
            write(msg, '(3a,i3,a,3f8.4,3a)' )&
-&           'When nbandkss/=0, all the components of tnons must be zero.',ch10,&
-&           'However, for the symmetry operation number ',isym,', tnons =',dt%tnons(:,isym),'.',ch10,&
-&           'Action: use the symmetry finder (nsym=0) with symmorphi==0.'
+           'When nbandkss/=0, all the components of tnons must be zero.',ch10,&
+           'However, for the symmetry operation number ',isym,', tnons =',dt%tnons(:,isym),'.',ch10,&
+           'Action: use the symmetry finder (nsym=0) with symmorphi==0.'
            ABI_ERROR_NOSTOP(msg,ierr)
          end if
        end do

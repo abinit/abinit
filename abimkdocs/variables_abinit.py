@@ -14365,7 +14365,7 @@ Variable(
     topics=['q-points_useful'],
     dimensions="scalar",
     defaultval="0.1 meV",
-    mnemonics="PHonons: frequency(W)  STEP.",
+    mnemonics="PHonons: frequency(W) STEP.",
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
@@ -21805,6 +21805,9 @@ $$
 
 This option is available only when computing the imaginary part of the e-ph self-energy ([[eph_task]] = -4).
 The values of $f_{n\kk}(\ww)$ are stored in the SIGEPH file (scratew netcdf variable).
+
+The delta function $\delta(\omega - \omega_{\qnu})$ is approximated with a gaussian of standard deviation [[ph_smear]]
+and the spectral decomposition is evaluated on a linear mesh of step [[ph_wstep]] covering the entire vibrational spectrum.
 """,
 ),
 
