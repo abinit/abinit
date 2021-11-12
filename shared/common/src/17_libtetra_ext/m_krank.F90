@@ -575,7 +575,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 !arrays
  integer :: dkint(3), my_symmat(3, 3, nsym)
  integer,allocatable :: rank2ikpt(:)
- integer(i1b),allocatable :: rank2symtime(:)
+ integer,allocatable :: rank2symtime(:)
  real(dp) :: kpt1a(3), dk(3)
 
 ! *************************************************************************
@@ -592,7 +592,6 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    end do
  end if
 
- ! Use 1 byte to save memory
  ABI_MALLOC(rank2symtime, (self%min_rank:self%max_rank))
  ABI_MALLOC(rank2ikpt, (self%min_rank:self%max_rank))
  rank2ikpt = -1
