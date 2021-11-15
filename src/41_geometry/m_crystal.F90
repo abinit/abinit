@@ -1749,7 +1749,7 @@ end subroutine prtposcar
 !!
 !! INPUTS
 !!  v(3)=Vector in Cartesian coordinates.
-!!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
+!!  time_opt=Prefactor that defines how the vectors transforms under TR. Usually +1 or -1
 !!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
 !!
 !! PARENTS

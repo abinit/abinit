@@ -464,6 +464,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
  !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
+ !print *, "max velocities", maxval(abs(new%vbks))
 
  if ( &
      dtset%useria == 888 .and. &
@@ -1113,7 +1114,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
 !Local variables ------------------------------
  integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta, time_opt
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
- real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
+ real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3) !, tmp_tens(3,3)
 
 !************************************************************************
 
@@ -1123,6 +1124,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
  time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
+ !time_opt = -1 ! This to preserve the previous behaviour in which TR was not used.
 
  ABI_CALLOC(self%mobility_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
  ABI_CALLOC(self%conductivity_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
@@ -1141,6 +1143,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  ! TODO: Implement other tensors. Compare these results with the ones obtained with spectral sigma
  ! In principle, they should be the same, in practice the integration of sigma requires enough resolution
  ! around the band edge.
+ !print *, "in RTA max velocities", maxval(abs(self%vbks))
  cnt = 0
  do spin=1,nsppol
    do ik_ibz=1,nkibz
@@ -1152,13 +1155,20 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
        ! Store outer product in vv_tens
        vr(:) = self%vbks(:, ib, ik_ibz, spin)
+       ! Don't remove this if: it makes the loop a bit faster and, most importantly,
+       ! it prevents intel from miscompiling the code.
+       if (all(abs(vr) == zero)) cycle
+
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj) = vr(ii) * vr(jj)
          end do
        end do
+
        ! Symmetrize tensor.
+       !print *, "intens", vv_tens
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
+       !print *, "out_tens", vv_tens
 
        ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
@@ -1167,6 +1177,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
            mu_e = self%transport_mu_e(itemp)
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
            linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
+           !print *, linewidth, wtk, occ_dfde(eig_nk, kT, mu_e), "tens", vv_tens
            call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw)
            self%conductivity_mu(:, :, ieh, spin, itemp, irta) = self%conductivity_mu(:, :, ieh, spin, itemp, irta) &
              + vv_tenslw(:, :)
