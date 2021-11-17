@@ -284,7 +284,7 @@ end subroutine int_array_type_insertion_sort
 subroutine int_array_type_sort(self, order)
   class(int_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
-  integer :: work(self%size/2), work_order(self%size/2)
+  integer :: work((self%size+1)/2), work_order((self%size+1)/2)
   call MergeSort(self%data(:self%size), work, order, work_order)
 end subroutine int_array_type_sort
 
@@ -483,7 +483,7 @@ end subroutine int2d_array_type_insertion_sort
 subroutine int2d_array_type_sort(self, order)
   class(int2d_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
-  integer :: work(size(self%data, dim=1), self%size/2), work_order(self%size/2)
+  integer :: work(size(self%data, dim=1), (self%size+1)/2), work_order((self%size+1)/2)
   call MergeSort2D(self%data(:, :self%size), work, order, work_order )
 end subroutine int2d_array_type_sort
 

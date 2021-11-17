@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h33 )
+.Starting date : Fri  8 Oct 2021.
+- ( at 12h52 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -43,12 +43,15 @@
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  4
+     fit_dispterms  1
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
      fit_nfixcoeff -1
       fit_fixcoeff
  Bound the coefficients :
+      bound_model  2
+    bound_penalty  1.0010E+00
  bound_anhaStrain  0
  bound_SPCoupling  1
      bound_cutoff  3.80000000E+00
@@ -80,8 +83,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml with Fortran
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -168,42 +171,41 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_coeffs.xml with Fortran
+-Opening the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_coeffs.xml
+-Reading the file /home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t14_coeffs.xml with LibXML library
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t13_HIST
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t13_HIST
 
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.8804979988E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2571058361E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8288686787E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0098977360E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   8.5804227751882269E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836315487E-03
-   Forces          :   3.6336164702180937E-03
-   Stresses        :   1.5400161341345517E-04
+   Energy          :   1.0210073496606064E-05
+   Forces+Stresses :   3.7452862502799162E-03
+   Forces          :   3.6335881317023666E-03
+   Stresses        :   1.1169811857754943E-04
 
 
 ================================================================================
@@ -212,7 +214,7 @@ dipdip_range         2         2         2
  Try to bound the model
  Check if the model is bounded or not
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
@@ -224,222 +226,216 @@ dipdip_range         2         2         2
 
  24 coefficients generated 
 
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
-    Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 5     11          8.0777738054E+00  3.6851746192E-03  3.5303356827E-03  1.5483893643E-04
- 6     17          7.7277959312E+00  3.6370878197E-03  3.4817009907E-03  1.5538682905E-04
- 7     5           7.6795127851E+00  3.6019608466E-03  3.4465938500E-03  1.5536699652E-04
- 8     9           7.5727931496E+00  3.5799774288E-03  3.4245004242E-03  1.5547700455E-04
- 9     7           7.6682485545E+00  3.5763904885E-03  3.4211272749E-03  1.5526321364E-04
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 5     11          9.6072845607E-06  3.6416711343E-03  3.5303055843E-03  1.1136555003E-04
+ 6     17          9.1879257634E-06  3.5929003289E-03  3.4816691303E-03  1.1123119858E-04
+ 7     5           9.1290430861E-06  3.5577614106E-03  3.4465621455E-03  1.1119926507E-04
+ 8     9           9.0013108748E-06  3.5356307770E-03  3.4244685653E-03  1.1116221163E-04
+ 9     7           9.1101049854E-06  3.5323283247E-03  3.4210927659E-03  1.1123555885E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   3.8937867761E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.1106795311E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.6660356176E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.7729555156E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 11 =>   4.3370789728E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
- 17 =>   2.6287085914E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
- 5 =>   3.6148237189E-01 (Ru_x-O1_x)^4
- 9 =>   5.4918098956E-01 (Ru_x-O1_x)^2(Ru_y-O1_y[1 0 0])^2
- 7 =>   2.8283381269E-01 (Ru_x-O1_x)^2(Ru_y-O2_y)^2
+ 1 =>   3.8766092615E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.1157004714E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.6628813865E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.7543240007E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 11 =>   4.3893496395E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
+ 17 =>   2.6352442458E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
+ 5 =>   3.6463978937E-01 (Ru_x-O1_x)^4
+ 9 =>   5.5327006352E-01 (Ru_x-O1_x)^2(Ru_y-O1_y[1 0 0])^2
+ 7 =>   2.7138606070E-01 (Ru_x-O1_x)^2(Ru_y-O2_y)^2
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   7.6682485545415808E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.5763904885082044E-03
-   Forces          :   3.4211272748680055E-03
-   Stresses        :   1.5526321364019928E-04
+   Energy          :   9.1101049853888423E-06
+   Forces+Stresses :   3.5323283247275135E-03
+   Forces          :   3.4210927658779350E-03
+   Stresses        :   1.1123555884957836E-04
 
 
 --
  Try to bound the model with 1 additional term
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.2588220626E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.1687400390E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.7674153670E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.5049971321E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 5 =>   5.4094095299E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
+ 1 =>   1.2589473518E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.1744344330E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.7643371584E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.4801612866E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   5.4402555202E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   8.0777738054189481E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.6851746191730495E-03
-   Forces          :   3.5303356827444498E-03
-   Stresses        :   1.5483893642860002E-04
+   Energy          :   9.6072845606607893E-06
+   Forces+Stresses :   3.6416711343440415E-03
+   Forces          :   3.5303055843180484E-03
+   Stresses        :   1.1136555002599319E-04
 
 
 --
  Try to bound the model with 2 additional terms
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.0677602793E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.1111877475E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.7845610704E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.5575252769E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 5 =>   5.4748930348E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
- 6 =>   2.8593064370E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
+ 1 =>   1.0665314859E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.1164742746E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.7816043745E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.5330615719E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   5.5062032290E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
+ 6 =>   2.8795706433E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   7.7277959312436026E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.6370878197205451E-03
-   Forces          :   3.4817009906669425E-03
-   Stresses        :   1.5538682905360282E-04
+   Energy          :   9.1879257634405047E-06
+   Forces+Stresses :   3.5929003289089231E-03
+   Forces          :   3.4816691303282310E-03
+   Stresses        :   1.1123119858069158E-04
 
 
 --
  Try to bound the model with 3 additional terms
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
 
  Fitted coefficients at the end of the fit process:
- 1 =>   8.4459846128E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.1022585445E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.7089256906E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   1.0185204085E-01 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 5 =>   5.4726731215E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
- 6 =>   2.4955905103E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
- 7 =>   4.8126854053E-01 (Ru_x-O1_x)^4
+ 1 =>   8.4333173033E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.1075435573E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.7059561377E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   1.0160847113E-01 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   5.5039829489E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
+ 6 =>   2.5157928666E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
+ 7 =>   4.8135036855E-01 (Ru_x-O1_x)^4
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   7.6795127851484244E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.6019608465728595E-03
-   Forces          :   3.4465938500488906E-03
-   Stresses        :   1.5536699652396869E-04
+   Energy          :   9.1290430861096281E-06
+   Forces+Stresses :   3.5577614105558450E-03
+   Forces          :   3.4465621454868888E-03
+   Stresses        :   1.1119926506895644E-04
 
 
 --
  Try to bound the model with 4 additional terms
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
 
  Fitted coefficients at the end of the fit process:
- 1 =>   4.1381311749E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.1040104634E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.6650926859E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.9350685030E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 5 =>   4.9020725102E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
- 6 =>   2.3066563497E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
- 7 =>   4.4081066471E-01 (Ru_x-O1_x)^4
- 8 =>   6.0060511475E-01 (Ru_x-O1_x)^2(Ru_y-O1_y[1 0 0])^2
+ 1 =>   4.1110637035E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.1093013393E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.6619766106E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.9098753898E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   4.9314749883E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
+ 6 =>   2.3262271543E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
+ 7 =>   4.4075725457E-01 (Ru_x-O1_x)^4
+ 8 =>   6.0261279142E-01 (Ru_x-O1_x)^2(Ru_y-O1_y[1 0 0])^2
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   7.5727931495827541E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.5799774287781239E-03
-   Forces          :   3.4245004242244486E-03
-   Stresses        :   1.5547700455367545E-04
+   Energy          :   9.0013108747715182E-06
+   Forces+Stresses :   3.5356307769613690E-03
+   Forces          :   3.4244685653353761E-03
+   Stresses        :   1.1116221162599306E-04
 
 
 --
  Try to bound the model with 5 additional terms
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372991533524820E-05
+   Forces+Stresses :   7.4805075157619557E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.1267080983977989E-04
 
 
  Fitted coefficients at the end of the fit process:
- 1 =>   3.8937867761E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.1106795311E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.6660356176E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.7729555156E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 5 =>   4.3370789728E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
- 6 =>   2.6287085914E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
- 7 =>   3.6148237189E-01 (Ru_x-O1_x)^4
- 8 =>   5.4918098956E-01 (Ru_x-O1_x)^2(Ru_y-O1_y[1 0 0])^2
- 9 =>   2.8283381269E-01 (Ru_x-O1_x)^2(Ru_y-O2_y)^2
+ 1 =>   3.8766092615E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.1157004714E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.6628813865E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.7543240007E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 5 =>   4.3893496395E-01 (Ru_x-O1_x)^2(Ru_z-O2_z)^2
+ 6 =>   2.6352442458E-01 (Ru_y-O1_y)^2(Ru_y-O1_y[1 0 0])^2
+ 7 =>   3.6463978937E-01 (Ru_x-O1_x)^4
+ 8 =>   5.5327006352E-01 (Ru_x-O1_x)^2(Ru_y-O1_y[1 0 0])^2
+ 9 =>   2.7138606070E-01 (Ru_x-O1_x)^2(Ru_y-O2_y)^2
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   7.6682485545415808E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.5763904885082044E-03
-   Forces          :   3.4211272748680055E-03
-   Stresses        :   1.5526321364019928E-04
+   Energy          :   9.1101049853888423E-06
+   Forces+Stresses :   3.5323283247275135E-03
+   Forces          :   3.4210927658779350E-03
+   Stresses        :   1.1123555884957836E-04
 
 
  => The model cannot be bounded
 
  Fitted coefficients at the end of the fit bound process:
- 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.8804979988E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2571058361E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8288686787E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0098977360E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
 ================================================================================
 
@@ -451,10 +447,15 @@ dipdip_range         2         2         2
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
-+Total cpu time      1.286  and wall time      1.290 sec
++Total cpu time      3.919  and wall time      3.951 sec
 
  multibinit : the run completed succesfully.
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
+-   There were 0 allocations and 0 deallocations in C code
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
+-   There were 172320 allocations and 172320 deallocations in Fortran
+-   Remaining memory at the end of the calculation is 0

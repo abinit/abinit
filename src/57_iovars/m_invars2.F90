@@ -1275,7 +1275,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      sum_spinat=zero
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
-       sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
+       sum_spinat=sum_spinat+dtset%spinat(3,iatom)
      end do
      zelect=zval-cellcharge_min
      ! Then select the minimum number of bands, and add the required number.
@@ -2026,7 +2026,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nbdbuf = max(nint(abs(dtset%nbdbuf) / 100.0_dp * maxval(dtset%nband)), 1)
    end if
  else
-   if(response/=1 .and. dtset%iscf<0)dtset%nbdbuf=2*dtset%nspinor
+   if(response/=1 .and. dtset%iscf<0) then
+     dtset%nbdbuf=2*dtset%nspinor
+     write(msg, "(5a)") &
+        "nbdbuf is not specified in input, using `nbdbuf = 2*nspinor` that may be too small!", ch10, &
+        "As a consequence, the NSCF cycle may have problems to converge the last bands within nstep iterations.", ch10, &
+        "To avoid this problem specify nbdbuf in the input file and adjust nband accordingly."
+     ABI_WARNING(msg)
+   end if
    if(response==1 .and. 3<=occopt .and. occopt<=8 )dtset%nbdbuf=2*dtset%nspinor
  end if
 

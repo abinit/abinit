@@ -245,9 +245,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
-          gcutoff(ig)=zero
+          gcutoff(ig)=0.0
        else
           gcutoff(ig)=one-cos(rcut_loc*sqrt(four_pi/gpq2(ig)))
+          !gcutoff(ig)=one-cos(rcut_loc/sqrt(gpq2(ii)))
       end if
      end do
 
@@ -535,6 +536,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
            if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
+           !if(gcart_para<tol12.and.ABS(gcart_perp)<tol12) then
              gcutoff(ii)=zero
            else
              gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)

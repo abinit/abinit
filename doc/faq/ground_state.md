@@ -34,7 +34,7 @@ particular **k**-points, see the [[istwfk]] input variable.
 
 The GS code stores in memory the Fourier components $u_\nks(\GG)$ and Fast Fourier Transforms
 are used to go from $u_\nks(\GG)$ to $u_\nks(\rr)$.
-The FFT mesh is defined by the fist three entries of the [[ngfft]] array that are automatically
+The FFT mesh is defined by the first three entries of the [[ngfft]] array that are automatically
 computed from [[ecut]] and [[boxcutmin]].
 There are also other additional arrays that depend on [[natom]], especially if PAW is used.
 All these variables are reported at the beginning of the main output file.
@@ -52,7 +52,7 @@ whereas the parallelism over bands and $\GG$-vectors is more network intensive.
 
 ## Is it a good idea to set the number of bands to the highest occupied state to accelerate a GS calculation?
 
-The answer is **NO** and the explanation requires some technical discussion about the KS solver.
+Usually, the answer is **NO** and the explanation requires some technical discussion about the KS solver.
 In principle, the workload as well as the memory footprint are proportional to [[nband]] so, at first sight,
 reducing the number of KS states seems to be a smart choice.
 On the other hand, a larger number of bands allows the eigenvalue solver to operate on a larger Hilbert subspace
@@ -84,7 +84,7 @@ so that atoms are moved in the right direction at each relaxation step.
 Note, however, that in high-symmetry systems the forces may be zero by symmetry.
 To avoid this problem, use [[tolvrs]]
 
-[[tolwfr] is the most stringent convergence criterion since it takes into account the convergence of
+[[tolwfr]] is the most stringent convergence criterion since it takes into account the convergence of
 all the [[nband]] - [[nbdbuf]] states (including **empty** states, if any).
 This is the recommended approach when computing GS wavefunctions to be used in the DFPT code
 or in the many-body part.
@@ -115,7 +115,7 @@ The default is very large, and suitable fo metals.
 Try running with a small value (perhaps 5) if your system is a bulk semiconductor or a molecule.
 If it is a doped solid, some intermediate value (perhaps 50) might be appropriate.
 
-If this does not work, try to address (1), set tolrde to 0.001, increase the value of [[nline]]
+If this does not work, try to address (1), set [[tolrde]] to 0.001, increase the value of [[nline]]
 (e.g. 6 or 8 instead of the default 4), as well as of [[nnsclo]]  (e.g. 2 instead of the default).
 Your residm should be significantly lower than without such modifications, and perhaps your problem will be solved.
 

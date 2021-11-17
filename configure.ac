@@ -38,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.5.3],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.7.2],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -656,7 +656,7 @@ ABI_MSG_SECTION([Initialization of optional features])
 # Init HDF5
 #SD_HDF5_INIT([optional fail no-fortran])
 #SD_HDF5_INIT([optional warn no-fortran])
-SD_HDF5_INIT([mandatory warn no-fortran])
+SD_HDF5_INIT([required no-fortran warn])
 
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
@@ -670,15 +670,15 @@ SD_LIBPSML_INIT([optional warn])
 
 # Init LibXC
 #SD_LIBXC_INIT([no-fortran optional fail])
-SD_LIBXC_INIT([no-fortran optional warn])
+SD_LIBXC_INIT([required no-fortran warn])
 
 # Init NetCDF
 #SD_NETCDF_INIT([optional fail])
-SD_NETCDF_INIT([optional warn])
+SD_NETCDF_INIT([required warn])
 
 # Init NetCDF-Fortran
 #SD_NETCDF_FORTRAN_INIT([optional fail])
-SD_NETCDF_FORTRAN_INIT([optional warn])
+SD_NETCDF_FORTRAN_INIT([required warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
