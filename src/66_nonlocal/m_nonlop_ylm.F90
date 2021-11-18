@@ -721,7 +721,7 @@ contains
 
 !  Test on local part
    testnl=(paw_opt/=0)
-   if (paw_opt==0) testnl=any(enl(:,:,:,:)>tol10)
+   if (paw_opt==0) testnl=any(abs(enl(:,:,:,:))>tol10)
 
 !  Some non-local part is to be applied for that type of atom
    if (testnl) then
