@@ -107,4 +107,7 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
+
+# Longwave
+"t100.abi", # test quadrupole calculation with all negative KB energies As PSP 
 ]
