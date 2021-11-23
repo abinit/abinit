@@ -14,7 +14,6 @@ tolvrs1   1.0d-4
 
 #Set 2: Response function calculation of d/dk wave function
 #**********************************************************
-kptopt2   2
 iscf2    -3     
 rfelfd2   2    
 tolwfr2   1.0d-4
@@ -22,7 +21,6 @@ rfdir2   1 1 1
 
 #Set 3: Response function calculation of d2/dkdk wave function
 #*************************************************************
-kptopt3   2
 getddk3   2
 iscf3    -3
 rf2_dkdk3 1
@@ -30,7 +28,6 @@ tolwfr3   1.0d-4
 
 #Set 4 : Response function calculation of Q=0 phonons and electric field
 #***********************************************************************
-kptopt4   2
 getddk4   2
 rfelfd4   3
 rfphon4   1
@@ -42,7 +39,6 @@ prepalw4  1
 #Set 5 : Dynamic Quadrupoles calculation
 #***************************************
 optdriver5 10
-kptopt5   2
 get1wf5   4
 get1den5  4
 getddk5   2
@@ -54,8 +50,7 @@ lw_qdrpl5 1
 
 getwfk  1            
 useylm  1
-nqpt    1
-qpt     0.00000000E+00  0.00000000E+00  0.00000000E+00
+kptopt 2
 
 #Definition of the unit cell
 acell 3*10.61          
@@ -82,9 +77,12 @@ nband  4
 ecut    5.0           # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
-kptrlatt -2  2  2 
-          2 -2  2 
-          2  2 -2 
+ngkpt 2 2 2
+nshiftk 4 
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
 
 #Definition of the SCF procedure
 nstep 30       
@@ -102,7 +100,7 @@ diemac 9.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t100.abo, tolnlines= 0, tolabs=  0.0e+00, tolrel= 0.0e+00, fld_options=-medium
+#%%   t100.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
