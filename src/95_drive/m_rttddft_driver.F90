@@ -131,29 +131,27 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
 
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
- !Output useful values
- call rttddft_output(dtfil,dtset,0,mpi_enreg,psps,tdks)
-
  !** 2) Propagation loop (rttddft_propagate):
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
  
- do istep = 1, tdks%ntime
+ do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
    !FB TODO: If Ehrenfest perform nuclear step here
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    !Perform electronic step
+   !Computes new WF at time t and energy contribution at time t-dt
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
-   !Calc total energy
+   !Computes total energy at time t-dt
    call rttddft_calc_etot(dtset,tdks%energies,tdks%etot)
 
-   !Calc new electronic density 
+   !Computes new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
-   !Output useful values
+   !Outputs useful values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
 
  end do
