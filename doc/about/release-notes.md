@@ -1,3 +1,194 @@
+## v9.6
+
+Version 9.6, released on October 4, 2021.
+List of changes with respect to version 9.4.
+<!-- Release notes updated on November 9, 2021. -->
+
+Many thanks to the contributors to the ABINIT project between
+February 2021 and September 2021. These release notes
+are relative to modifications/improvements of ABINIT v9.6 with respect to v9.4.
+<!-- Merge requests up to and including MR814 except MR812, then also MR818, 819, 820 and 822 are taken into account. -->
+
+The list of contributors includes:
+L. Baguet, J.-M. Beuken, J. Bieder, A. Blanchet,
+J. Clerouin, C. Espejo, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
+B. Guster, Ch. Paillard,
+Y. Pouillon, M. Rodriguez-Mayorga, M. Royo, F. Soubiran,
+M. Torrent, M. Verstraete, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+(nothing to mention for this v9.6)
+
+* * *
+
+### **B.** Most noticeable achievements
+
+**B.1** Band-parallel implementation of DFPT: the memory footprint is now distributed over different processors.
+Previously, the memory was distributed only for k-point parallelism.
+This is automatically managed, no user action is to be taken to activate this memory saving.
+
+See test [[test:dfpt_04]].
+
+By M. Verstraete (MR784, 803)
+
+**B.2** The Iterative Boltzmann Transport Equation (IBTE) to compute the electric conductivity has been implemented.
+To activate the IBTE, use [[ibte_prep]] = 1 with [[eph_task]] -4.
+The IBTE solver can also be invoked in standalone mode by providing a SIGEPH file with [[eph_task]] = 8.
+Related input variables: [[ibte_niter]], [[ibte_abs_tol]] and [[ibte_alpha_mix]].
+See test [[test:v9_65]].
+
+By M. Giantomassi (MR794)
+
+**B.3** The computation of dynamical quadrupoles and flexoelectricity is now available within the GGA.
+Test for GGA + longwaves [[test:v9_46]].
+
+Also, the usage of the quadrupoles has been rationalized (and made easier) in anaddb
+as the default value of [[dipquad@anaddb]] and [[quadquad@anaddb]] has been changed to 1.
+This means that dipole-quadrupole and quadrupole-quadrupole contributions are always included
+in the Fourier interpolation of the dynamical matrix provided the DDB provides these terms.
+
+This "default behaviour" is similar to the one used for the dipole-dipole treatment.
+Indeed, the default value of [[dipdip@anaddb]] is 1 hence the dipolar term is automatically included
+if the DDB contains the Born effective charges and the electronic dielectric tensor.
+Still, the user can deactivate the inclusion of the different terms by setting the corresponding
+variable to zero for testing purposes.
+See the ANADDB input variables and test [[test:lw_6]]
+
+By M. Royo with contribution by M. Giantomassi for the change of default (MR795)
+
+
+**B.4** Stresses are available within cDFT (constrained DFT).
+See tests [[test:v9_01]], [[test:v9_02]] and [[test:v9_03]].
+
+By X. Gonze (MR802)
+
+
+**B.5** The computation of effective mass renormalization due to electron-phonon coupling, treated in the generalized Frohlich model,
+is now available, for cubic materials. An article has been submitted, see <https:arxiv.org/abs/2109.12594>.
+Activate it using [[eph_task]]=10.
+
+See test [[test:v9_66]].
+
+By B. Guster (MR800)
+
+**B.6** Important speed-up of the PAW calculations is allowed thanks to the storage of "cprj" coefficients.
+See the input variable [[cprj_update_lvl]]. However, at present this is only possible for ground-state
+calculations, with several restrictions, spelled in [[cprj_update_lvl]]. So, this is not activated by default.
+There is also an internal variable [[cprj_in_memory]] exposed in the documentation.
+Other input variables have been introduced in the development process : [[fft_count]] and [[nonlop_ylm_count]].
+They allow one to monitor better the number of FFTs and non-local operator applications.
+
+See tests [[test:v9_71]], [[test:v9_72]], [[test:v9_73]] and [[test:v9_74]].
+
+By L. Baguet (MR793).
+
+**B.7** The Extended First-Principles Molecular Dynamics has been implemented.
+This method allows one to drastically reduce the needed number of bands for high temperature simulations,
+using pure single plane waves description based on the Fermi gas model beyond explicitly computed bands.
+The implementation and usage will be described in an upcoming paper which is currently under review (Authors: *A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran*).
+
+See [[topic:ExtFPMD]], as well as the input variables [[useextfpmd]] and [[extfpmd_nbcut]],
+and test [[test:v9_92]].
+
+By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
+
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+**C.1** Supported compilers
+
+* gfort (GNU) compiler: v11 newly supported.
+* ifort (Intel) compiler: v21.4 newly supported.
+Two new bots introduced in the test farm : alps_intel_21.4_elpa and graphene_gnu_11.2_macports .
+
+By JM Beuken
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.1** New input variable for "optic": [[prtlincompmatrixelements@optic]].
+
+Added this flag in order to make it possible to print the different elements that are used to build the susceptibility of the linear component of the dielectric tensor.
+These elements are namely: the matrix elements, the renormalized electronic eigenvalues, the occupations and the kpt weights.
+Everything is dumped into the _OPTIC.nc file by the main process. Thus optimization could be done memory-wise and speed wise if MPI-IO is implemented for this nc file.
+
+[[test:v9_49]] was created which is the same as [[test:v9_48]] except with the aforementioned flag set to 1.
+This test checks that everything works well even though we print the matrix elements.
+It does not test that matrix elements are well printed because that would require testing of the OPTIC.nc file.
+Although it is possible to check that it works well using a simple python script (see the figure in the merge request on Gitlab).
+(Note that the tests v9_13 and v9_14 have been moved to v9_47 and v9_48 in this change).
+
+By F. Goudreault (MR776)
+
+**D.2** New radial sine transform for the vdW-DF kernel.
+
+By C. Espejo (MR 797)
+
+
+**D.3** New test of orbital magnetism, [[test:v9_37]].
+Also, on-going work on orbital magnetism, including use with DDK wavefunctions.
+
+By J. Zwanziger (MR767, MR775, MR779 and MR787)
+
+**D.4** Migration to mkdocs==1.1.2 and  mkdocs-material==7.0.6.
+mksite.py now requires python >= 3.6 .
+Activated search capabilities, available in the new mkdocs version.
+
+By M. Giantomassi (MR774)
+
+**D.5** Fixed bug in make_efg_onsite for [[nspden]]=2 case.
+
+By J. Zwanziger (MR783)
+
+**D.6** Correction of tutorials Rf1 and Rf2 for version 9
+
+By O. Gingras (MR785)
+
+**D.7** Fixed errors and bugs detected by using -ftrapuv intel option
+
+By M. Giantomassi (MR789)
+
+**D.8** Bug fix in [[nspden]]=4 DFPT for Fe
+
+By M. Verstraete (MR790)
+
+**D.9** Fixed a spurious test line 711 of m_occ.F90 that caused abinit to abort in the case of [[occopt]]=9,
+if the number of conduction bands was enough to accommodate nqFD but not enough to accommodate nelect.
+
+By Ch. Paillard (MR791)
+
+**D.10** GW methodology with Kohn-Sham density matrix.
+Solving a bug producing a segmentation fault when using [[bdgw]] and [[gw1rdm]].
+New test [[test:v9_37]].
+
+By M. Rodriguez-Mayorga (MR792)
+
+**D.11** Introduced new input variable use_oldchi.
+This input variable is temporary, for testing purposes. It is documented, but not tested.
+
+By Wei Chen (modified line 743 in src/95_drive/screening.F90 on 23 April 2021).
+
+**D.12** The input variable [[rfstrs_ref]] has been introduced, but not yet documented and tested, as this is on-going work.
+
+By M. Royo 
+
+
+**D.13** Miscellaneous additional bug fixes, or upgrade of build system.
+in the upgrade of tutorials).
+By J. Bieder, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+
+* * *
+
 ## v9.4
 
 Version 9.4, released on February 25, 2021.
@@ -12,7 +203,7 @@ are relative to modifications/improvements of ABINIT v9.4 with respect to v9.2.
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, V. Brousseau, F. Bruneval,
 W. Chen, M. Cote, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault,
-B. Guster, T. Karatsu, A. H. Larsen, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto, 
+B. Guster, T. Karatsu, A. H. Larsen, O. Nadeau, R. Outerovich, Ch. Paillard, G. Petretto,
 S. Ponce, Y. Pouillon, G.-M. Rignanese, M. Rodriguez-Mayorga, M. Schmitt,
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
@@ -28,7 +219,7 @@ Xavier
 and the string `charge` present in some other input variables. For the time being, ABINIT still recognizes [[charge]]
 in the input file, but this might not last longer than in ABINITv9.
 
-**A.2** There is a new check, governed by the input variable [[chksymtnons]], to examine 
+**A.2** There is a new check, governed by the input variable [[chksymtnons]], to examine
 whether the [[tnons]] of all symmetry operations
 is zero or a rational number with small denominator, which is required for GW calculations as implemented in ABINIT.
 It is always possible to choose
@@ -41,7 +232,7 @@ By X. Gonze (MR712)
 **A.3** The input variable npkpt has been changed to np_spkpt . Indeed the parallelism governed by npkpt was about spin and k points,
 not only k points. For the time being npkpt is still admitted, but will become obsolete at the next major version change.
 
-By X. Gonze 
+By X. Gonze
 
 **A.4** When [[nimage]]>1, the default value of [[prtgsr]] is now 0, like for several prt* variables.
 
@@ -74,7 +265,7 @@ By M. Giantomassi (MR757, MR719, MR718)
 with populations of electrons (in the conduction bands) and holes (in the valence bands)
 has been implemented (gapped materials only, of course).
 This has been used e.g. in [[cite:Paillard2019]].
-See the variables [[occopt]]=9, and [[nqfd]]. 
+See the variables [[occopt]]=9, and [[nqfd]].
 See also the related input variable : [[ivalence]].
 Internal variables ne_qFD and nh_qFD are presently initialized to [[nqfd]], which is NOT INTERNAL.
 See test [[test:v9_91]].
@@ -110,7 +301,7 @@ See tests [[test:v9_33]] to [[test:v9_36]].
 
 Also, some missing tests have been added:
 - GW calculations based on Hartree-Fock wavefunctions can use mini Brillouin Zone integration technique, see [[test:v9_31]].
-- A new test [[test:v9_40]] has been provided for the computation of the susceptibility matrix 
+- A new test [[test:v9_40]] has been provided for the computation of the susceptibility matrix
 $\chi_0$ with [[inclvkb]].
 
 By Mauricio Rodriguez-Mayorga and F. Bruneval (MR722).
@@ -132,7 +323,7 @@ By O. Nadeau (MR756, MR716)
 **B.7** Implementation of the  i-pi client-server protocol as described in [[cite:Kapil2019]].
 This option requires [[ionmov]] 28 and the specification of the socket via command line options.
 For UNIX socket, use: --ipi {unixsocket}:UNIX .
-For INET socket, use  --ipi {host}:{port} . 
+For INET socket, use  --ipi {host}:{port} .
 Usage example:
 
      abinit run.abi --ipi {unixsocket}:UNIX > run.log
@@ -942,7 +1133,7 @@ By N. Pike (MR 575).
 
 **D.35** Optic: print spin-decomposition when applicable.
 Fixed reflectivity screwed results. Test more thoroughly optics (incl. interfacing using NetCDF),
-see new tests [[test:v9_05]] to [[test:v9_14]]
+see new tests [[test:v9_05]] to [[test:v9_12]], also [[test:v9_47]] and [[test:v9_48]]
 
 By X. Gonze (MR 654, 674).
 
@@ -1947,7 +2138,7 @@ B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the 
 
 B.6 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
     See the theory in [[cite:Ceresoli2006]].
-    Associated input variable: [[orbmag]]. 
+    Associated input variable: [[orbmag]].
     Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
     this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call.
     Tutorial [[tutorial:nuc|nuc]] is nightly tested.

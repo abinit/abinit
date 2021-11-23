@@ -25,8 +25,6 @@ inp_files = [
 "t10.abi", # optic
 "t11.abi", # GGA-PBE PAW nsppol=2
 "t12.abi", # optic
-"t13.abi", # metallic iron GGA-PBE PAW nsppol=2
-"t14.abi", # optic
 "t15.abi", # check slight misalignment of rprim, with large tolsym
 "t16.abi", # check slightly incorrect xred, with large tolsym
 "t17.abi", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
@@ -59,6 +57,10 @@ inp_files = [
 "t44.abi", # test orbital magnetism with DDK wavefunctions
 "t45.abi", # test orbital magnetism with finite difference wavefunctions
 "t46.abi", # longwave GGA
+"t47.abi", # metallic iron GGA-PBE PAW nsppol=2
+"t48.abi", # optic
+"t49.abi", # optic (same as t14 but prtlincompmatrixelements = 1)
+
 # Electron-phonon
 "t50.abi",
 "t51.abi",
@@ -77,6 +79,14 @@ inp_files = [
 "t64.abi",
 "t65.abi",
 "t66.abi",
+"t67.abi",
+
+# More ground state
+"t71.abi", # test cprj_update_lvl and nloc_alg options, istwfk=1
+"t72.abi", # test cprj_update_lvl and nloc_alg options, istwfk>=2
+"t73.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
+"t74.abi", # test cprj_update_lvl options, forces computed during SCF iterations
+
 # Spin dynamics in multibinit
 "t81.abi", # set initial spin using rotation q-modulation
 "t82.abi", # damping
@@ -86,6 +96,7 @@ inp_files = [
 "t85.abi", # Velocity Verlet NVE
 "t86.abi", # Spin lattice coupling, Only Oiju term activated.
 "t87.abi", # Spin lattice coupling, Oiju and Tijuv.
+
 # GS Coulomb cut-off
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
 "t91.abi", # occopt 9 tests on Si
@@ -95,11 +106,6 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
-"t100.abi",  # optic (same as t14 but prtlincompmatrixelements = 1)
-"t101.abi", # test nloc_alg options, istwfk=1
-"t102.abi", # test nloc_alg options, istwfk>=2
-"t103.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
-"t104.abi", # test cprj_update_lvl options, forces computed during SCF iterations
 "t105.abi", # test usepawu options (including negative ones), nsppol=nspinor=nspden=1
 "t106.abi", # test usepawu options (including negative ones), nsppol=2,nspden=2
 "t107.abi", # test usepawu options (including negative ones), nspinor=2,nspden=4
