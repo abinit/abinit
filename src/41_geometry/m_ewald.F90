@@ -748,6 +748,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ! Deactivate real space sums for quadrupolar fields or for dipdip = -1
  ewald_option = 0; if (present(option)) ewald_option = option
  if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
+ !ewald_option = 0
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five

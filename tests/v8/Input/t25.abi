@@ -6,7 +6,7 @@
  constraint_kind2   1   # Dataset 2 is constrained DFT for the collinear magnetization
  constraint_kind3  11   # Dataset 3 is constrained DFT for the collinear magnetization and charge
  constraint_kind4   3   # Dataset 4 is constrained DFT for the collinear magnetization amplitude
- constraint_kind5   2   # Dataset 5 is constrained DFT for the collinear magnetization direction (actually not useful !)
+ constraint_kind5   2   # Dataset 5 is constrained DFT for the collinear magnetization axis (actually not useful !)
 
 #Constrained DFT data
  magcon_lambda      2   
@@ -52,7 +52,8 @@
 #%% references = 
 #%% keywords = 
 #%% description = H2 diatomic molecule, static, to check the constrained DFT implementation in case nspden=2
-#%%  DS2 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
-#%%  DS3 Constrain the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
-#%%  DS4 Constrain the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
+#%%  DS2 Constrains the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08
+#%%  DS3 Constrains the collinear magnetization around atom 1 to be +0.08 and around atom 2 to be -0.08, and the total charge of both to be 0.69.
+#%%  DS4 Constrains the collinear magnetization amplitude around atom 1 to be +0.08 and around atom 2 to be -0.08. Same result as DS2.
+#%%  DS5 Constrains the collinear magnetization along axis z - not really useful simple sanity check
 #%%<END TEST_INFO>
