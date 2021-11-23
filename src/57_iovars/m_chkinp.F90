@@ -1068,7 +1068,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! RT-TDDFT
    if (dt%optdriver == RUNL_RTTDDFT) then
      ! getwfk / getwfk_filepath / irdwfk
-     if (dt%getwfk == 0 .and. dt%irdwfk == 0 .and. dt%getwfk_filepath==ABI_NOFILE) then
+     if (dt%getwfk == 0 .and. dt%irdwfk == 0 .and. dt%getwfk_filepath==ABI_NOFILE .and. dt%td_restart==0) then
        write(msg, '(3a)' ) &
        & 'Initial KS orbitals need to be read in WFK file for RT-TDDFT runs!',ch10,&
        & 'Action: set irdwfk or getwfk /= 0 or specify the WFK filename using getwfk_filepath.'

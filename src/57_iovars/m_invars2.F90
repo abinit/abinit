@@ -2108,6 +2108,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_prtstr',tread,'INT')
  if(tread==1) dtset%td_prtstr=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_restart',tread,'INT')
+ if(tread==1) dtset%td_restart=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_propagator',tread,'INT')
  if(tread==1) dtset%td_propagator=intarr(1)
 

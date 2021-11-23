@@ -51,6 +51,7 @@ module m_rttddft_types
  use m_hdr,              only: hdr_type, hdr_init
  use m_initylmg,         only: initylmg
  use m_invovl,           only: init_invovl, destroy_invovl
+ use m_io_tools,         only: open_file
  use m_inwffil,          only: inwffil
  use m_kg,               only: kpgio, getph, getcut
  use m_mkrho,            only: mkrho
@@ -96,6 +97,7 @@ module m_rttddft_types
 
   !scalars
    integer                          :: bantot      !total number of bands
+   integer                          :: first_step  !start propagation form first_step (for restart)
    integer                          :: mband_cprj  !nb of band per proc (for cprj?)
    integer                          :: mcg         !nb of WFs (cg) coeffs
    integer                          :: mcprj       !nb of cprj (projectors applied to WF)
@@ -106,6 +108,7 @@ module m_rttddft_types
    integer                          :: ngrvdw      !dimension of grvdw array
    integer                          :: ntime       !max nb of time steps
    integer                          :: tdener_unit !unit nb of the energy file
+   integer                          :: tdrestart_unit !unit nb of the restart file
    integer                          :: unpaw       !paw data tmp file unit
    integer                          :: usexcnhat   !use nhat in the computation of the XC term
    real(dp)                         :: boxcut      !boxcut ratio (gcut(box)/gcut(sphere))
@@ -125,6 +128,8 @@ module m_rttddft_types
    type(pawang_type),pointer        :: pawang => NULL() !angular grid in PAW sphere
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
+   character(len=fnlen)             :: fname_tdener!Name of the TDENER file
+   character(len=fnlen)             :: fname_wfk   !Name of the input WFK file to use
    !arrays
    integer,allocatable              :: atindx(:)   !index table of atom ordered by type
    integer,allocatable              :: atindx1(:)  !nb of the atom for each index in atindx
@@ -141,6 +146,7 @@ module m_rttddft_types
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: eigen(:)    !eigen-energies
+   real(dp),allocatable             :: eigen0(:)   !Initial eigen-energies (at t=0)
    real(dp),allocatable             :: grvdw(:,:)  !Gradient of the total energy coming
                                                    !from VDW dispersion correction  !FB: Needed?
    real(dp),allocatable             :: occ(:)      !occupation numbers
@@ -238,6 +244,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  integer                     :: my_natom
  integer                     :: psp_gencond
  real(dp)                    :: entropy, ecut_eff
+ character(len=500)          :: msg
  type(extfpmd_type),pointer  :: extfpmd => null()
  !arrays
  real(dp),allocatable        :: doccde(:)
@@ -249,6 +256,30 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !1) Various initializations & checks (MPI, PW, FFT, PSP, Symmetry ...)
  call first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad, &
                 & pawtab,psps,psp_gencond,tdks)
+
+ !2) Deals with restart
+ !FB: @MT Is this the proper way to read a file in abinit..?
+ tdks%first_step = 1
+ tdks%fname_tdener = dtfil%fnameabo_td_ener
+ tdks%fname_wfk = dtfil%fnamewffk
+ if (mpi_enreg%me == 0) then
+   if (dtset%td_restart > 0) then
+      if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
+         write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART needed for restarting the calculation.'
+         ABI_ERROR(msg)
+      end if 
+      read(tdks%tdrestart_unit,*) tdks%first_step
+      tdks%first_step = tdks%first_step + 1
+      read(tdks%tdrestart_unit,*) tdks%fname_tdener
+      read(tdks%tdrestart_unit,*) tdks%fname_wfk
+   else
+      if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
+         write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
+         ABI_ERROR(msg)
+      end if 
+   end if
+   !FB TODO Send first_step and filenames to all procs
+ end if
 
  !2) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
@@ -268,7 +299,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  end if
 
  !4) Some further initialization (Mainly for PAW)
- call second_setup(dtset,dtfil,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
+ call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !5) Compute charge density from WFs
  call calc_density(dtfil,dtset,mpi_enreg,pawang,pawtab,psps,tdks)
@@ -351,6 +382,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(allocated(tdks%cg))          ABI_FREE(tdks%cg)
    if(allocated(tdks%dimcprj))     ABI_FREE(tdks%dimcprj)
    if(allocated(tdks%eigen))       ABI_FREE(tdks%eigen)
+   if(allocated(tdks%eigen0))      ABI_FREE(tdks%eigen0)
    if(allocated(tdks%grvdw))       ABI_FREE(tdks%grvdw)
    if(allocated(tdks%indsym))      ABI_FREE(tdks%indsym)
    if(allocated(tdks%irrzon))      ABI_FREE(tdks%irrzon)
@@ -695,7 +727,6 @@ end subroutine first_setup
 !!
 !! INPUTS
 !! dtset <type(dataset_type)> = all input variables for this dataset
-!! dtfil <type datafiles_type> = infos about file names, file unit numbers
 !! mpi_enreg <MPI_type> = MPI-parallelisation information
 !! pawang <type(pawang_type)> = paw angular mesh and related data
 !! pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
@@ -714,7 +745,7 @@ end subroutine first_setup
 !! CHILDREN
 !!
 !! SOURCE
-subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond, tdks)
+subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_gencond, tdks)
 
  implicit none
 
@@ -723,7 +754,6 @@ subroutine second_setup(dtset, dtfil, mpi_enreg, pawang, pawrad, pawtab, psps, p
  integer,                    intent(in)    :: psp_gencond
  type(pawang_type),          intent(inout) :: pawang
  type(dataset_type),         intent(inout) :: dtset
- type(datafiles_type),       intent(in)    :: dtfil
  type(pseudopotential_type), intent(inout) :: psps
  type(MPI_type),             intent(inout) :: mpi_enreg
  !arrays
@@ -1049,6 +1079,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  ! Alloc size for wfk and bands
  ABI_MALLOC_OR_DIE(tdks%cg,(2,tdks%mcg),ierr)
  ABI_MALLOC(tdks%eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(tdks%eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
  tdks%eigen(:) = zero
  ask_accurate=0
@@ -1059,15 +1090,18 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  tdks%hdr%rprimd=tdks%rprimd
  tdks%cg=0._dp
  call inwffil(ask_accurate,tdks%cg,dtset,dtset%ecut,ecut_eff,tdks%eigen,     &
-            & dtset%exchn2n3d,formeig,tdks%hdr,dtfil%ireadwf,dtset%istwfk,   &
-            & tdks%kg,dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,      &
-            & dtset%mkmem,mpi_enreg,dtset%mpw,dtset%nband,tdks%pawfgr%ngfft, &
-            & dtset%nkpt,tdks%npwarr,dtset%nsppol,dtset%nsym,dtset%occ_orig, &
-            & optorth,dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1, &
-            & wffnow,dtfil%unwff1,dtfil%fnamewffk,tdks%wvl)
+            & dtset%exchn2n3d,formeig,tdks%hdr,1,dtset%istwfk,tdks%kg,       &
+            & dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,dtset%mkmem,  &
+            & mpi_enreg,dtset%mpw,dtset%nband,tdks%pawfgr%ngfft,dtset%nkpt,  &
+            & tdks%npwarr,dtset%nsppol,dtset%nsym,dtset%occ_orig,optorth,    &
+            & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
+            & dtfil%unwff1,tdks%fname_wfk,tdks%wvl)
 
  !Close wff1
  call WffClose(wff1,ierr)
+
+ !Keep initial eigenvalues in memory
+ tdks%eigen0(:) = tdks%eigen(:)
 
 end subroutine read_wfk
 

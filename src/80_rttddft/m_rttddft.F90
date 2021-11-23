@@ -287,7 +287,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  ABI_MALLOC(grewtn,(3,dtset%natom))
  ABI_MALLOC(kxc,(tdks%pawfgr%nfft,nkxc))
  calc_ewald = .false.
- if (dtset%ionmov/=0 .or. istep <= 1) calc_ewald=.true.
+ if (dtset%ionmov/=0 .or. istep == tdks%first_step) calc_ewald=.true.
  !FB: Should we also add an option to avoid recomputing xccc3d?
  call setvtr(tdks%atindx1,dtset,energies,tdks%gmet,tdks%gprimd,grchempottn,  &
           & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,            &
@@ -322,7 +322,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
       istep_mix=1; initialized0=0
       call setrhoijpbe0(dtset,initialized0,istep,istep_mix, &
                      & comm,my_natom,dtset%natom,dtset%ntypat,tdks%pawrhoij,tdks%pawtab, &
-                    & dtset%typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+                     & dtset%typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
    
    !** Computation of on-site densities/potentials/energies
