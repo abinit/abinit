@@ -1761,6 +1761,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        end if
      end if
 
+     ! Note that the size along the (n, m) axis does not depend on the kcalc index.
      ABI_CALLOC(sr_p%vals, (sr_p%nq_ibzk_eff, bmin:bmax, bmin:bmax, ntemp))
      ABI_MALLOC(sr_p%kq_symtab, (6, sr_p%nq_ibzk_eff))
      ABI_MALLOC(sr_p%lgk_sym2glob, (2, sr_p%lgk_nsym))
