@@ -3618,6 +3618,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  ! Compute long-range part of the coupling potential.
  if (my_add_lr > 0) then
+   call wrtout(std_out, "dvdb_ftinterp_qpt: Computing long-range part of the coupling potential.")
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3656,10 +3657,13 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
                 zero_sp, ov1r_sp(2,1), 2)
 
-
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
+
      ! Add the long-range part of the potential
-     if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
+     if (my_add_lr > 0) then
+       call wrtout(std_out, "Adding the long-range part of the potential")
+       ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
+     end if
 
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
@@ -4072,6 +4076,8 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  if (db%ft_qcache%maxnq == 0) return
  qcnt = count(ineed_qpt /= 0)
 
+ ABI_ERROR("Legacy code!")
+
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  if (qcnt /= 0) then
@@ -4172,6 +4178,8 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
 
 ! *************************************************************************
+
+ ABI_ERROR("Legacy code!")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
@@ -4510,6 +4518,8 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:)
 
 ! *************************************************************************
+
+ ABI_ERROR("Legacy code!")
 
  ABI_UNUSED(cryst%natom)
  ABI_UNUSED(nspden)
