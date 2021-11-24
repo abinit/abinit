@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 22 Nov 2021.
-- ( at 09h34 )
+.Starting date : Wed 24 Nov 2021.
+- ( at 14h37 )
   
 - input  file    -> /home/mroyo/Flexoelectrics/Src/abinit/tests/Test_suite/v9_t75/t75.abi
 - output file    -> t75.abo
@@ -121,8 +121,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.18561
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/H.psp8
+- pspini: atom type   1  psp file is /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -135,8 +135,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.275071
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Li.psp8
-- pspatm: opening atomic psp file    /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Li.psp8
+- pspini: atom type   2  psp file is /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
 - Li    ONCVPSP-3.3.0  r_core=   1.20595   1.00838
 -  3.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
