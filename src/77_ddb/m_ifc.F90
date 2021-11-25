@@ -139,7 +139,7 @@ MODULE m_ifc
 
    integer,allocatable :: cell(:,:)
      ! cell(nrpt,3)
-     ! Give the index of the the cell and irpt
+     ! Give the index of the cell and irpt
 
    real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:)
      ! Ewald_atmfrc(3,natom,3,natom,nrpt)
@@ -431,6 +431,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
  call chkrp9(Ifc%brav,rprim)
 
+ ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997). 
  dyewq0 = zero
  if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
    ! Calculation of the non-analytical part for q=0
@@ -548,6 +549,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      end if
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
+     ! Implement Eq.(76) of Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], possibly generalized for quadrupoles
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
    end do
 
