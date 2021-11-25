@@ -246,11 +246,11 @@ program anaddb
  write(msg, '(a,a)' )' read the DDB information and perform some checks',ch10
  call wrtout([std_out, ab_out], msg)
 
- call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc, ddb_hdr, crystal, comm, prtvol=inp%prtvol)
+ call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc, ddb_hdr, Crystal, comm, prtvol=inp%prtvol)
  call ddb_hdr%free()
  nsym = Crystal%nsym
 
- ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  if (mtyp==33) then
    call ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
@@ -294,7 +294,7 @@ program anaddb
 #endif
  end if
 
- ! Calculation of Grunesein parameters.
+ ! Calculation of Gruneisen parameters.
  if (inp%gruns_nddbs /= 0) then
    call gruns_anaddb(inp, filnam(2), comm)
    goto 50
@@ -653,7 +653,7 @@ program anaddb
   ! Generates the dynamical matrix at Gamma
   ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue
   ! it is already done before in this routine. (EB)
-  ! The problem is that it is done through mkphbs, which has only printing and does not retrun anything as out... (EB)
+  ! The problem is that it is done through mkphbs, which has only printing and does not return anything as out... (EB)
 
   qphon(:,1)=zero; qphnrm(1)=zero
   ! Generation of the dynamical matrix in cartesian coordinates
