@@ -86,6 +86,7 @@ inp_files = [
 "t72.abi", # test cprj_update_lvl and nloc_alg options, istwfk>=2
 "t73.abi", # test cprj_update_lvl options, forces and stress computed at the end of the run
 "t74.abi", # test cprj_update_lvl options, forces computed during SCF iterations
+"t75.abi", # test useylm=1 for NCPP with all KB energies being negative
 
 # Spin dynamics in multibinit
 "t81.abi", # set initial spin using rotation q-modulation
@@ -106,4 +107,7 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
+
+# Longwave
+"t100.abi", # test quadrupole calculation with all negative KB energies As PSP 
 ]
