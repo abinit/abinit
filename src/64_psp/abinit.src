@@ -29,11 +29,6 @@ sources = [
  "m_psp8.F90",
  "m_psp9.F90",
  "m_upf2abinit.F90",
-"pseudo_types.F90",
-"read_upf_new.F90",
-"upf_kinds.F90",
-"xmltools.F90",
-"upf_utils.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
