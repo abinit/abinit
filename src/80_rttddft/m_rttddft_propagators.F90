@@ -88,8 +88,8 @@ contains
 !!  propagator should be prefered over this one since the ER propagator 
 !!  violates time reversal symmetry. Using this propagator with the 
 !!  exponential approximated by Taylor expansion of order 2 leads to 
-!!  the famous Euler method which is fast and simple but extremely 
-!!  unstable and thus usually insufficient for RT-TDDFT.
+!!  the famous Euler method which is fast and simple but unstable
+!!  and usually insufficient for RT-TDDFT.
 !!  
 !!
 !! PARENTS
