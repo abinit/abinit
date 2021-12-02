@@ -106,9 +106,6 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  ! Init/Update various quantities before performing propagating KS orbitals
  call rttddft_setup_ele_step(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
 
- !write(97,*) tdks%cg(1,:)
- !write(98,*) tdks%cg(2,:)
-
  ! Propagate cg
  select case (dtset%td_propagator) 
    case(0)

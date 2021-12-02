@@ -129,13 +129,13 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  if (istep == 1 .or. dtset%ionmov /= 0) then
    !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
    !FB: @MT Probably not needed? The box didn't change only nuclear pos..
-   if (psps%usepaw==1) then
-     call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
-               & std_out,k0,tdks%pawfgr%ngfft)
-   else
-     call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
-               & std_out,k0,tdks%pawfgr%ngfft)
-   end if
+   !if (psps%usepaw==1) then
+   !   call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+   !             & std_out,k0,tdks%pawfgr%ngfft)
+   !else
+   !   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+   !             & std_out,k0,tdks%pawfgr%ngfft)
+   !end if
    
    !Compute structure factor phases (exp(2Pi i G.xred)) on coarse and fine grid
    call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
@@ -317,8 +317,6 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
       else
          comm=mpi_enreg%comm_cell
       end if
-      !FB: I changed the values of istep_mix and initialized here for our purpose
-      !FB: compared to GS. Hope this is correct..
       istep_mix=1; initialized0=0
       call setrhoijpbe0(dtset,initialized0,istep,istep_mix, &
                      & comm,my_natom,dtset%natom,dtset%ntypat,tdks%pawrhoij,tdks%pawtab, &
@@ -381,7 +379,8 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
 
  !** Initialize most of the Hamiltonian
  !** Allocate all arrays and initialize quantities that do not depend on k and spin.
- usecprj_local=0; if (psps%usepaw==1) usecprj_local=1
+ !FB: Should recompute cprj if ions have moved right?
+ usecprj_local=0; if (psps%usepaw==1 .and. dtset%ionmov==0) usecprj_local=1
  call init_hamiltonian(gs_hamk,psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,    &
                      & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
                      & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
@@ -462,8 +461,6 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    ! transfer density from the coarse to the fine FFT grid
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
-
-   !write(99,*) tdks%rhor
 
    ! 3-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &

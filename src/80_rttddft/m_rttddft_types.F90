@@ -281,10 +281,10 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    !FB TODO Send first_step and filenames to all procs
  end if
 
- !2) Reads initial KS orbitals from file (calls inwffil)
+ !3) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
  
- !3) Init occupation numbers
+ !4) Init occupation numbers
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
  tdks%occ(:)=dtset%occ_orig(:,1)
  !calc occupation number with metallic occupation using the previously read WF
@@ -298,10 +298,10 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    ABI_FREE(doccde)
  end if
 
- !4) Some further initialization (Mainly for PAW)
+ !5) Some further initialization (Mainly for PAW)
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
- !5) Compute charge density from WFs
+ !6) Compute electronic density from WFs
  call calc_density(dtfil,dtset,mpi_enreg,pawang,pawtab,psps,tdks)
 
  !TODO FB: That should be all for now but there were a few more initialization in
@@ -317,6 +317,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%pawrad => pawrad
  tdks%pawtab => pawtab
 
+ !FB TODO: Check that all proc have what they need from here first
 end subroutine tdks_init
 
 !!****f* m_rttddft_types/tdks_free
@@ -791,7 +792,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
                      & mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
- !FB: Needed because paw_dmft is needed in mkrho
+ !FB: Needed because paw_dmft is required in mkrho
  !PAW related operations
  !Initialize paw_dmft, even if neither dmft not paw are used
  call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,                &
@@ -860,9 +861,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    ABI_MALLOC(tdks%paw_an,(my_natom))
    call paw_an_nullify(tdks%paw_an)
    call paw_ij_nullify(tdks%paw_ij)
-   !has_dijhat=0; if (dtset%iscf==22) has_dijhat=1
-   !FB check if value of has_dijhat is correct
-   has_dijhat=1
+   has_dijhat=0; if (dtset%iscf==22) has_dijhat=1
    has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_dijfock=0
@@ -1272,9 +1271,9 @@ subroutine calc_density(dtfil, dtset, mpi_enreg, pawang, pawtab, psps, tdks)
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
    end if
 
- endif
+ end if
 
- end subroutine calc_density
+end subroutine calc_density
 
 end module m_rttddft_types
 !!***
