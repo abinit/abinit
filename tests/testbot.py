@@ -88,7 +88,7 @@ class TestBot(object):
       "with_tdirs"       : ("", _str2list),   # List of abinit test subsuites to include
       "without_tdirs"    : ("", _str2list),   # List of abinit test subsuites to exclude
       "timeout_time"     : (900, float),      # Timeout time in seconds.
-      "cygwin_dir"       : (None, str),
+      "cygwin_dir"       : ("", str),
       "runmode"          : ("static", str),
       "keywords"         : ("", _str2list),   # String with the keywords that should be selected/ignored
       "etsf_check"       : ("no", _yesno2bool),  # yes to activate validation of netcdf files produced by Abinit.

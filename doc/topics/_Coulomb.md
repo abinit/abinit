@@ -14,11 +14,13 @@ a supercell), using the [[cellcharge]] input variable. A careful convergence stu
 with respect to the cell size must however be done.
 
 Depending on the dimension, different treatment of the Coulomb interaction can
-be enforced, governed by [[icoulomb]] for grouns-state calculations, and by
-[[icutcoul]] for GW calculations. Some development effort is needed in ABINIT
-to rationalize the situation.
+be enforced, governed by [[icutcoul]] for ground-state calculations (possibly alternatively [[icoulomb]]
+if the Coulomb interaction is to be computed in real space using wavelets), by
+[[gw_icutcoul]] for GW calculations, and [[fock_icutcoul]] for the specific evaluation 
+of the Fock exchange energy in ground-state calculations with hybrid functionals. 
 
-Additional information concerning [[usepotzero]]. It is well known that the
+For charged systems, we provide now 
+additional information concerning [[usepotzero]]. It is well known that the
 electrostatic potential (arising from ion-ion, ion-electron, and electron-
 electron interactions) is ill-defined within periodic boundary conditions.
 However, it is less well known that the total energy of a charged cell is also
