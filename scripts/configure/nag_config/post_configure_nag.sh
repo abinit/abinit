@@ -7,4 +7,4 @@
 # distribution.
 #
 
-sed -i -e 's/\t\$.FCFLAGS. \\//' src/98_main/Makefile
+#sed -i -e 's/\t\$.FCFLAGS. \\//' src/98_main/Makefile

@@ -22,7 +22,7 @@ module m_tdep_constraints
   public :: tdep_calc_constraints
   public :: tdep_check_constraints
 
-contains 
+contains
 
 !====================================================================================================
 subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vectin,vectout)
@@ -40,7 +40,7 @@ subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vectin,vectout)
     if (sum(abs(vectin(:,kk))).gt.tol8) then
       ii=ii+1
       vectout(:,ii)=vectin(:,kk)
-    end if 
+    end if
   end do
   nindep=ii
   return
@@ -51,7 +51,7 @@ subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vectin,vectout)
       prod_scal=sum(vectin(:,jj)*vectin(:,jj))
       if (abs(prod_scal).gt.tol8) then
         vectin(:,kk)=vectin(:,kk)-sum(vectin(:,kk)*vectin(:,jj))/prod_scal*vectin(:,jj)
-      end if  
+      end if
     end do
   end do
 
@@ -62,15 +62,15 @@ subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vectin,vectout)
     if (abs(prod_scal).gt.tol8) then
       ii=ii+1
       vectout(:,ii)=vectin(:,kk)/dsqrt(prod_scal)
-    end if  
-  end do  
+    end if
+  end do
   nindep=ii
 
 end subroutine tdep_calc_orthonorm
 !====================================================================================================
 subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,nshell3at,Sym,&
 &                                proj1st,Shell1at,&!optional
-&                                proj2nd,Shell2at,&!optional 
+&                                proj2nd,Shell2at,&!optional
 &                                proj3rd,Shell3at) !optional
 
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
@@ -125,8 +125,8 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
           end do
         end do
       end do
-    end do  
-  end if 
+    end do
+  end if
 ! For each couple of atoms, transform the Psij (3x3x3) ifc matrix using the symetry operation (S)
   if (present(proj3rd)) then
     ABI_MALLOC(SSS_ref,(3,27,3,3,Sym%nsym,6)); SSS_ref(:,:,:,:,:,:)=zero
@@ -150,9 +150,9 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
           end do
         end do
       end do
-    end do  
-  end if 
-        
+    end do
+  end if
+
 ! Compute the invariance under an arbitrary rotation of the system
   ABI_MALLOC(dlevi,(natom,natom,3,3)) ; dlevi(:,:,:,:)=zero
   Levi_Civita(:,:,:)=zero
@@ -181,7 +181,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     ABI_MALLOC(const_rot2nd,(3,3,               natom_unitcell,ntotcoeff)); const_rot2nd(:,:,:,:)    =zero
     ABI_MALLOC(const_dynmat,(3,3,natom_unitcell,natom_unitcell,ntotcoeff)); const_dynmat(:,:,:,:,:)  =zero
     ABI_MALLOC(const_huang ,(3,3,3,3                          ,ntotcoeff)); const_huang(:,:,:,:,:)   =zero
-  end if  
+  end if
 !  if (present(proj3rd)) then
 !!FB    ABI_MALLOC(const_rot3rd,(3,3,3,       natom_unitcell,natom,ntotcoeff)); const_rot3rd(:,:,:,:,:,:)  =zero
 !    ABI_MALLOC(const_rot3rd,(3,3,3,3,3,     natom_unitcell,natom,ntotcoeff)); const_rot3rd(:,:,:,:,:,:,:,:)=zero
@@ -193,7 +193,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     write(16,*) ' Compute the 1st order'
     if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
     do iatshell=1,Shell1at%neighbours(1,ishell)%n_interactions
-      iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell) 
+      iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell)
       if (iatom.gt.natom_unitcell) exit
       if (iatom.eq.1) cycle
       isym=Shell1at%neighbours(1,ishell)%sym_in_shell(iatshell)
@@ -211,13 +211,13 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
             do beta=1,3
               terme=sum(Sym%S_ref(beta,:,isym,1)*proj1st(:,icoeff,ishell))*Levi_Civita(beta,alpha,nu)
               const_rot2nd(alpha,nu,iatom,icoeff+ncoeff_prev)=&
-&             const_rot2nd(alpha,nu,iatom,icoeff+ncoeff_prev)+terme                   
+&             const_rot2nd(alpha,nu,iatom,icoeff+ncoeff_prev)+terme
               const_rot2nd(alpha,nu,1,icoeff+ncoeff_prev)=&
-&             const_rot2nd(alpha,nu,1,icoeff+ncoeff_prev)-terme                   
+&             const_rot2nd(alpha,nu,1,icoeff+ncoeff_prev)-terme
             end do
-          end do    
-        end do    
-      end do  
+          end do
+        end do
+      end do
     end do !iatshell
   end do !ishell
 
@@ -228,7 +228,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
       do iatom=1,natom_unitcell
         if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
         do iatshell=1,Shell2at%neighbours(iatom,ishell)%n_interactions
-          jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell) 
+          jatom=Shell2at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
           if (iatom==jatom) cycle
           isym=Shell2at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           trans=Shell2at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
@@ -242,11 +242,11 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
                 do icoeff=1,ncoeff
                   terme=sum(SS_ref(alpha,:,beta,isym,trans)*proj2nd(:,icoeff,ishell))*dlevi(iatom,jatom,beta,nu)
                   const_rot2nd(alpha,nu,iatom,icoeff+ncoeff_prev)=&
-&                 const_rot2nd(alpha,nu,iatom,icoeff+ncoeff_prev)+terme                   
+&                 const_rot2nd(alpha,nu,iatom,icoeff+ncoeff_prev)+terme
                 end do
               end do
-            end do    
-          end do  
+            end do
+          end do
 !         2/ Enforce the symetry of the dynamical matrix. Number of constraints = (3*natom_unitcell)**2
 !            Note that we are unable to enforce the symetry when iatom=jatom (We have to write the quations)
           do alpha=1,3
@@ -255,10 +255,10 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
                 terme=sum(SS_ref(alpha,:,beta,isym,trans)*proj2nd(:,icoeff,ishell))-&
 &                     sum(SS_ref(beta,:,alpha,isym,trans)*proj2nd(:,icoeff,ishell))
                 const_dynmat(alpha,beta,iatom,iat_mod,icoeff+ncoeff_prev)=&
-&               const_dynmat(alpha,beta,iatom,iat_mod,icoeff+ncoeff_prev)+terme                   
+&               const_dynmat(alpha,beta,iatom,iat_mod,icoeff+ncoeff_prev)+terme
               end do
-            end do    
-          end do  
+            end do
+          end do
 !         3/ Huang invariances. Number of constraints = 3**4
           do alpha=1,3
             do beta=1,3
@@ -272,7 +272,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 &                             distance(iatom,jatom,alpha+1)*&
 &                             distance(iatom,jatom,beta+1)
                     const_huang(alpha,beta,gama,lambda,icoeff+ncoeff_prev)=&
-&                   const_huang(alpha,beta,gama,lambda,icoeff+ncoeff_prev)+terme                   
+&                   const_huang(alpha,beta,gama,lambda,icoeff+ncoeff_prev)+terme
                   end do
                 end do
               end do
@@ -300,8 +300,8 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !                    end do
 !                  end do
 !                end do
-!              end do    
-!            end do  
+!              end do
+!            end do
 !!FB            do nu=1,3
 !!FB              do alpha=1,3
 !!FB                do beta=1,3
@@ -311,16 +311,16 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !!FB                      terme2=sum(SS_ref(alpha,:,gama,isym,trans)*proj2nd(:,icoeff,ishell))*Levi_Civita(gama,beta,nu)
 !!FB!FB                      if (iatom.ne.jatom) then
 !!FB                        const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)=&
-!!FB&                       const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)+terme1+terme2                   
+!!FB&                       const_rot3rd(alpha,beta,gama,nu,iatom,jatom,icoeff+ncoeff_prev)+terme1+terme2
 !!FB!FB                      else if (iatom.eq.jatom) then
 !!FB!FB                        const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)=&
-!!FB!FB&                       const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme1-terme2                   
+!!FB!FB&                       const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme1-terme2
 !!FB!FB                      end if
 !!FB                    end do
 !!FB                  end do
 !!FB                end do
-!!FB              end do    
-!!FB            end do  
+!!FB              end do
+!!FB            end do
 !          end if
         end do !iatshell
       end do !iatom
@@ -421,8 +421,8 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !                    end do
 !                  end do
 !                end do
-!              end do    
-!            end do  
+!              end do
+!            end do
 !!FB          do nu=1,3
 !!FB            do alpha=1,3
 !!FB              do beta=1,3
@@ -435,18 +435,20 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !!FB!FB                    else if (iatom.eq.jatom) then
 !!FB!FB                      const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)=&
 !!FB!FB&                     const_rot3rd(alpha,beta,nu,iatom,iatom,icoeff+ncoeff_prev)-terme
-!!FB                    end if 
+!!FB                    end if
 !!FB                  end do
 !!FB                end do
 !!FB              end do
-!!FB            end do    
-!!FB          end do  
+!!FB            end do
+!!FB          end do
 !        end do !iatshell
-!      end do !iatom   
-!    end do !ishell   
+!      end do !iatom
+!    end do !ishell
 !  end if
 
-  if (present(proj2nd)) ABI_FREE(SS_ref)
+  if (present(proj2nd)) then
+    ABI_FREE(SS_ref)
+  end if
   !if (present(proj3rd)) ABI_FREE(SSS_ref)
   ABI_FREE(dlevi)
 
@@ -459,7 +461,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     ABI_MALLOC(vectin ,(ntotcoeff,CoeffMoore%nconst_1st)) ; vectin(:,:)=zero
     ABI_MALLOC(vectout,(ntotcoeff,CoeffMoore%nconst_1st)) ; vectout(:,:)=zero
     do nu=1,3
-      iconst=iconst+1 
+      iconst=iconst+1
       vectin(:,iconst)=const_rot1st(nu,:)
     end do
     call tdep_calc_orthonorm(ntotcoeff,CoeffMoore%nconst_1st,nconst_loc,vectin,vectout)
@@ -471,7 +473,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
       end do
-    end if 
+    end if
     ABI_FREE(vectin)
     ABI_FREE(vectout)
     write(16,*) ' Number of constraints for the 1st order (Rotational Invariances)=',nconst_loc
@@ -484,7 +486,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
     do iatom=1,natom_unitcell
       do alpha=1,3
         do nu=1,3
-          iconst=iconst+1  
+          iconst=iconst+1
           vectin(:,iconst)=const_rot2nd(alpha,nu,iatom,:)
         end do
       end do
@@ -497,7 +499,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-      end do  
+      end do
     end if
     ABI_FREE(vectin)
     ABI_FREE(vectout)
@@ -526,13 +528,13 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-      end do  
+      end do
     end if
     ABI_FREE(vectin)
     ABI_FREE(vectout)
     write(16,*) ' Number of constraints at the 2nd order (Dynamical Matrix)=',nconst_loc
 
-!   4/ For Huang invariances 
+!   4/ For Huang invariances
     write(16,*) ' ======== Constraints at the 2nd order (Huang) ='
     iconst=0
     ABI_MALLOC(vectin ,(ntotcoeff,CoeffMoore%nconst_huang)) ; vectin(:,:)=zero
@@ -555,12 +557,12 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
         CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 &       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 &       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-      end do  
+      end do
     end if
     ABI_FREE(vectin)
     ABI_FREE(vectout)
     write(16,*) ' Number of constraints at the 2nd order (Huang)=',nconst_loc
-  end if  
+  end if
 
 !  if (present(proj3rd)) then
 !!   1/ For acoustic sum rules (3rd order)
@@ -572,11 +574,11 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !      do jatom=1,natom
 !        do alpha=1,3
 !          do beta=1,3
-!            do gama=1,3 
+!            do gama=1,3
 !              do ii=1,8
 !                iconst=iconst+1
 !                vectin(:,iconst)=const_asr3rd(ii,alpha,beta,gama,iatom,jatom,:)
-!              end do 
+!              end do
 !            end do
 !          end do
 !        end do
@@ -590,7 +592,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !        CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 !&       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 !&       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-!      end do  
+!      end do
 !    end if
 !    ABI_FREE(vectin)
 !    ABI_FREE(vectout)
@@ -610,14 +612,14 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !                do ii=1,3
 !                  iconst=iconst+1
 !                  vectin(:,iconst)=const_rot3rd(ii,alpha,beta,gama,lambda,iatom,jatom,:)
-!                end do  
+!                end do
 !              end do
 !            end do
 !          end do
 !        end do
 !!FB        do alpha=1,3
 !!FB          do beta=1,3
-!!FB            do nu=1,3 
+!!FB            do nu=1,3
 !!FB              iconst=iconst+1
 !!FB              vectin(:,iconst)=const_rot3rd(alpha,beta,nu,iatom,jatom,:)
 !!FB            end do
@@ -633,7 +635,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 !        CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)= &
 !&       CoeffMoore%fcoeff(3*natom*InVar%nstep+iconst_new,:)+ &
 !&       (3*natom*InVar%nstep)*vectout(:,iconst_loc)
-!      end do  
+!      end do
 !    end if
 !    ABI_FREE(vectin)
 !    ABI_FREE(vectout)
@@ -643,25 +645,25 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
   write(16,*) '================================================================='
   write(16,*) ' Total number of constraints =',iconst_new
 
-! Deallocate constraints  
+! Deallocate constraints
   CoeffMoore%ntotconst=iconst_new
   if (present(proj2nd)) then
     ABI_FREE(const_rot1st)
     ABI_FREE(const_rot2nd)
     ABI_FREE(const_dynmat)
     ABI_FREE(const_huang)
-  end if  
+  end if
 !  if (present(proj3rd)) then
 !    ABI_FREE(const_rot3rd)
 !    ABI_FREE(const_asr3rd)
-!  end if  
+!  end if
   close(16)
 
 end subroutine tdep_calc_constraints
 
 !====================================================================================================
  subroutine tdep_check_constraints(distance,InVar,Phij_NN,Pij_N,nshell3at,&
-&                 ftot3,Psij_ref,Shell3at,Sym,ucart) !optional 
+&                 ftot3,Psij_ref,Shell3at,Sym,ucart) !optional
 
   type(Input_Variables_type),intent(in) :: InVar
   integer, intent(in)  :: nshell3at
@@ -673,7 +675,7 @@ end subroutine tdep_calc_constraints
   double precision, intent(in), optional  :: Psij_ref(3,3,3,nshell3at)
   double precision, intent(inout), optional :: ftot3(3*InVar%natom,InVar%nstep)
   double precision, intent(in), optional  :: ucart(3,InVar%natom,InVar%nstep)
-  
+
   integer :: ii,jj,kk,iatom,jatom,katom,isym,trans
   integer :: alpha,beta,gama,lambda
   integer :: ishell,iatshell,istep
@@ -687,7 +689,7 @@ end subroutine tdep_calc_constraints
 !!!!!!!!!!!!!!! Compute the invariance under an arbitrary rotation of the system !!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   Kroenecker(:,:)=zero
-  Kroenecker(1,1)=1 ; Kroenecker(2,2)=1 ; Kroenecker(3,3)=1 
+  Kroenecker(1,1)=1 ; Kroenecker(2,2)=1 ; Kroenecker(3,3)=1
 
 ! Invariance under an arbitrary rotation (first order)'
   do alpha=1,3
@@ -700,7 +702,7 @@ end subroutine tdep_calc_constraints
       if (abs(norm1).gt.tol8) then
         write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 1)'
         write(std_out,'(a,2(i3,1x),1(e17.10,1x))') 'alpha,beta,Sum=',alpha,beta,norm1
-      end if 
+      end if
     end do !beta
   end do !alpha
 
@@ -719,11 +721,11 @@ end subroutine tdep_calc_constraints
           if (abs(norm1).gt.tol8) then
             write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
             write(std_out,'(a,4(i3,1x),1(e17.10,1x))') 'iatom,alpha,beta,gama,Sum =',iatom,alpha,beta,gama,norm1
-          end if 
+          end if
         end do !gama
       end do !beta
     end do !alpha
-  end do !iatom  
+  end do !iatom
 
 ! THIRD ORDER
   if (present(Psij_ref)) then
@@ -752,20 +754,20 @@ end subroutine tdep_calc_constraints
 !FB&                    Phij_NN(3*(iatom-1)+lambda,3*(jatom-1)+beta)*Kroenecker(alpha,gama)-&
 !FB&                    Phij_NN(3*(iatom-1)+alpha ,3*(jatom-1)+lambda)*Kroenecker(beta,gama)
              end if
-              end do !lambda  
+              end do !lambda
             end do !gama
           end do !beta
         end do !alpha
       end do !jatom
       do ishell=1,nshell3at
-!       Build the 3x3x3 IFC of an atom in this shell    
+!       Build the 3x3x3 IFC of an atom in this shell
         if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
         do iatshell=1,Shell3at%neighbours(iatom,ishell)%n_interactions
           jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
           katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
           isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
           trans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-          call tdep_build_psij333(isym,InVar,Psij_ref(:,:,:,ishell),Psij_333,Sym,trans) 
+          call tdep_build_psij333(isym,InVar,Psij_ref(:,:,:,ishell),Psij_333,Sym,trans)
 !         Calculation of the force components (third order)
           do istep=1,InVar%nstep
             do ii=1,3
@@ -773,15 +775,15 @@ end subroutine tdep_calc_constraints
                 do kk=1,3
                   ftot3(3*(iatom-1)+ii,istep)=ftot3(3*(iatom-1)+ii,istep)+&
 &                      Psij_333(ii,jj,kk)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)
-                end do  
-              end do  
-            end do  
+                end do
+              end do
+            end do
           end do
-!         Compute the first ASR : sum_k Psi_ijk=0 
+!         Compute the first ASR : sum_k Psi_ijk=0
 !              --> Psi_iji+sum_{k.ne.i} Psi_ijk=0
 !              --> if i.eq.j Psi_iii+sum_{k.ne.i} Psi_iik
           asr3(1,jatom,:,:,:)=asr3(1,jatom,:,:,:)+Psij_333(:,:,:)
-!         Compute the second ASR : sum_j Psi_ijk=0 
+!         Compute the second ASR : sum_j Psi_ijk=0
           asr3(2,katom,:,:,:)=asr3(2,katom,:,:,:)+Psij_333(:,:,:)
 !         Compute the rotational invariance (third order)
       if (iatom.eq.1.and.jatom.eq.7) then
@@ -807,12 +809,12 @@ end subroutine tdep_calc_constraints
 !FB&                    Psij_333(alpha,beta,gama  ),distance(iatom,katom,lambda+1),&
 !FB&                    Psij_333(alpha,beta,lambda),distance(iatom,katom,gama+1  )
                end if
-                end do  
-              end do  
-            end do  
-          end do  
+                end do
+              end do
+            end do
+          end do
         end do !iatshell
-      end do !ishell  
+      end do !ishell
 !     Check the acoustic sum rules (third order)
       do ii=1,3
         do jj=1,3
@@ -823,17 +825,17 @@ end subroutine tdep_calc_constraints
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') ' BUG --->',ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
                 ABI_ERROR('The acoustic sum rule is not fulfilled at the 3rd order (3rd dim)')
               end if
-            end do !jatom  
+            end do !jatom
 !           Check the second acoustic sum rule
             do katom=1,InVar%natom
               if (abs(asr3(2,katom,ii,jj,kk)).gt.tol8) then
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') ' BUG --->',ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
                 ABI_ERROR('The acoustic sum rule is not fulfilled at the 3rd order (2nd dim)')
               end if
-            end do !jatom  
+            end do !jatom
           end do !kk
         end do !jj
-      end do !ii  
+      end do !ii
 !     Check the rotational invariance (third order)
       do jatom=1,InVar%natom
         do alpha=1,3
@@ -844,13 +846,13 @@ end subroutine tdep_calc_constraints
                   write(std_out,'(a,6(i3,1x),1(e17.10,1x))') ' BUG ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 &                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
                   ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 3)')
-                end if  
-              end do !lambda 
-            end do !gama 
-          end do !beta 
-        end do !alpha 
+                end if
+              end do !lambda
+            end do !gama
+          end do !beta
+        end do !alpha
       end do !jatom
-    end do !iatom  
+    end do !iatom
     ABI_FREE(asr3)
     ABI_FREE(rot3)
   end if !Psij_ref
