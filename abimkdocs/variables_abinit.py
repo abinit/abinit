@@ -18433,13 +18433,15 @@ Indeed in the first case, it is supposed that the magnetization vector is not af
 (so-called black and white symmetry groups).
 By contrast, in the second case, the real space symmetry operations act on the magnetization vector.
 The rationale for such different treatment comes from the fact that the treatment of spin-orbit coupling is incompatible with collinear magnetism [[nspden]]=2,
-so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=2
+so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=4
 will include spin-orbit coupling. The symmetry operations should thus act coherently on the spin-orbit coupling, which implies
 that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with
 [[nspden]]=4, even with [[symafm]]=1,
 symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
 Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
 is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case.
+Note that real-space operations act on the magnetization as an axial vector, not as a normal vector. For example, the inversion symmetry 
+does not change the magnetization vector.
 
 Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
 The electron on the first H atom might be 1s spin up, and the electron on the second atom might be 1s spin down.
