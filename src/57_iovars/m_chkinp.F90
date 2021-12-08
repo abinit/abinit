@@ -476,7 +476,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg,'COLL')
          if(fixed_mismatch==1)then
-           write(msg, '(a)' ) '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above.'
+           call flush_unit(std_out)
+           write(msg, '(a)' )&
+&          '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above (or in output or log file).'
            call wrtout(std_out,msg,'COLL')
          endif
          ierr=ierr+1 ! Previously a warning: for slab geometries arbitrary tnons can appear along the vacuum direction.
@@ -3982,13 +3984,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call wrtout(iout,msg,'COLL')
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
-   'The details of the problem can be found above.'
+   'The details of the problem can be found above (or in output or log file).'
+   call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
  if (ierr>1) then
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
-   'The details of the problems can be found above, in an earlier WARNING.'
+   'The details of the problems can be found above (or in output or log file), in an earlier WARNING.'
+   call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
 
