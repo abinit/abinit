@@ -3982,12 +3982,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    write(msg,'(6a)')ch10,&
    ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
    ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
-   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.
+   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call wrtout(iout,msg,'COLL')
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
-   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.
+   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
@@ -3995,7 +3995,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    write(msg,'(a,i0,3a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
    'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
-   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.
+   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
