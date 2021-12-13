@@ -81,7 +81,7 @@ contains
 !!  vel(3,natom,trotter)=velocies of atoms for all images
 !!    at input,  values at time t
 !!    at output, values at time t+dt
-!!  vel_cell(3,3,trotter)=time derivative of cell parameters
+!!  vel_cell(3,3)=time derivative of cell parameters
 !!    at input,  values at time t
 !!    at output, values at time t+dt
 !!
@@ -112,7 +112,7 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  real(dp),intent(in) :: etotal(trotter),rprimd(3,3),rprimd_prev(3,3),stressin(3,3,trotter)
  real(dp),intent(in),target :: xred(3,natom,trotter),xred_prev(3,natom,trotter)
  real(dp),intent(out) :: rprimd_next(3,3),xred_next(3,natom,trotter)
- real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter),vel_cell(3,3,trotter)
+ real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter),vel_cell(3,3)
 
 !Local variables-------------------------------
 !Options
@@ -177,7 +177,7 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
    call pimd_initvel(idum,masseff,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 !vel_cell does not depend on Trotter...
- ddh=vel_cell(:,:,1);if (irestart<10) ddh=zero
+ ddh=vel_cell(:,:);if (irestart<10) ddh=zero
 
 !Compute temperature at t
  temperature1=pimd_temperature(masseff,vel)
@@ -212,9 +212,7 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  end do
 
 !Return cell velocities (does not depend on Trotter)
- do iimage=1,trotter
-   vel_cell(:,:,iimage)=ddh(:,:)
- end do
+ vel_cell(:,:)=ddh(:,:)
 
 !Free memory
  ABI_FREE(xcart)

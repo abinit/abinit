@@ -72,7 +72,7 @@ type="application/pdf" width="100%" height="480px">
     Fortunately, the internet provides lots of resources.
     Search engines and stackoverflow are your best friends and in some cases one can find the solution
     by just **copying the error message in the search bar**.
-    For more complicated issues, you can ask for help on the [Abinit forum](https://forum.abinit.org)
+    For more complicated issues, you can ask for help on the [ABINIT discourse forum](https://discourse.abinit.org)
     or contact the sysadmin of your cluster but remember to provide enough information about your system
     and the problem you are encountering.
 
