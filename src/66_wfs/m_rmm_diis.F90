@@ -1302,7 +1302,7 @@ end subroutine my_pack_matrix
 !!  The main difference with respect to other similar routines is that this implementation does not require
 !!  the <i|H|j> matrix elements as input so it can be used before starting the wavefunction optimation
 !!  as required e.g. by the RMM-DIIS method.
-!!  Moreover, the routine computes the new rediduals after the subspace rotation by rotating the
+!!  Moreover, the routine computes the new residuals after the subspace rotation by rotating the
 !!  matrix elements of the Hamiltonian in the new basis (requires more memory but client code
 !!  can avoid calling getghc after subspace_rotation.
 !!
@@ -1468,7 +1468,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  ! ========================
  ! Subspace diagonalization
  ! =======================
- ! Rotate cg, gsc and compute new eigevalues.
+ ! Rotate cg, gsc and compute new eigenvalues.
  ABI_MALLOC(evec, (2, nband, nband))
  mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  call subdiago(cg, eig, evec, gsc, 0, 0, istwf_k, mcg, mgsc, nband, npw, my_nspinor, paral_kgb, &

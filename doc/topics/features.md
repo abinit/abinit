@@ -36,7 +36,7 @@ Care is taken not to duplicate existing more complete documentation in ABINIT,
 but to point to it if appropriate. Not all the ABINIT documentation is covered
 by the Web-accessible documents, there are still a few unlinked documents in
 the subdirectories of ~abinit/doc (work is in progress to make it all available).
-Discussions on the [ABINIT forum](https://forum.abinit.org) might also allow to get information.
+Discussions on the [ABINIT discourse forum](https://discourse.abinit.org) might also allow to get information.
 
 ## 2 ABINIT specifications for static DFT calculations
   

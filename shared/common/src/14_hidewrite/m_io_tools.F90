@@ -233,7 +233,7 @@ end function file_exists
 !!
 !! SOURCE
 
-subroutine delete_file(fname,ierr)
+subroutine delete_file(fname, ierr)
 
  integer,intent(out) :: ierr
  character(len=*),intent(in) :: fname
@@ -249,14 +249,14 @@ subroutine delete_file(fname,ierr)
 
  if (.not.exists) then
    ierr = 111
-   write(std_out,*)" Asked to delete non existent file: ",TRIM(fname)
+   !write(std_out,*)" Asked to delete non existent file: ",TRIM(fname)
    return
  end if
 
  if (is_open_fname(fname)) then
    tmp_unt = get_unit_from_fname(fname)
    if (tmp_unt == IO_FILE_NOT_ASSOCIATED) then
-    write(std_out,*) "File is opened but no associated unit found!"
+    !write(std_out,*) "File is opened but no associated unit found!"
     ierr = 112; return
    end if
    close(tmp_unt)
