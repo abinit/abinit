@@ -531,7 +531,9 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
     end do !ishell   
   end if !order=4
 
-  if (order2.or.order3) ABI_FREE(SS_ref)
+  if (order2.or.order3) then
+    ABI_FREE(SS_ref)
+  end if  
   if (order3.or.order4) then
     do isym=1,Sym%nsym
       do itrans=1,6
