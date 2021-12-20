@@ -818,6 +818,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1007)='initberry(PAW on-site)          '
  names(1008)='initberry(pwind)                '
  names(1009)='initberry(MPI stuff)            '
+ names(1021)='listkk                          '
 
  names(1021)='listkk                          '; basic(1021) = 1
 
@@ -1080,7 +1081,24 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1750)='gtdyn9'; basic(1750) = 1
  !names(1751)='dfpt_phfrq'; basic(1751) = 1
 
- names(1780)='cgtk_rotate'; basic(1780) = 1
+ ! chebfi2
+ names(1750) = 'chebfiwf2                     '; basic(1750) = 1
+ names(1751) = 'chebfi2_init                  '
+ names(1752) = 'chebfi2_free                  '
+ names(1753) = 'chebfi2_run                   '
+ names(1754) = 'chebfi2_getAX_BX              '
+ names(1755) = 'chebfi2_invovl                '
+ names(1756) = 'chebfi2_residu                '
+ names(1757) = 'chebfi2_RayleighRitz          '
+ names(1758) = 'chebfi2_pcond                 '
+ names(1759) = 'chebfi2_RR_q                  '
+ names(1760) = 'chebfi2_next_p                '
+ names(1761) = 'chebfi2_swap                  '
+ names(1762) = 'chebfi2_amp_f                 '
+ names(1763) = 'chebfi2_alltoall              '
+
+ names(1780)='ctk_rotate'; basic(1780) = 1
+
 
  ! DVDB object
  names(1800)='dvdb_new'; basic(1800) = 1
@@ -1730,22 +1748,29 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:5)=(/1690,1691,1692,1693,1694/)
          msg='low-level xgScalapack type '
        case(78)
-         list(:8)=(/ (ii,ii=1662,1669,1) /)                          ; msg='low-level xgTransposer type '
+         list(:8)=(/ (ii,ii=1662,1669,1) /)
+         msg='low-level xgTransposer type '
        case(79)
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
+         message='low-level xgTransposer type '
+       case(80)
          list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
          msg='cgwf_cprj'
-       case(80)
+       case(81)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
          msg='nonlop_ylm'
-       case(81)
+       case(82)
          list(:5)=(/1290,1293,1294,1295,1299/)
          msg='getcprj'
-       case(82)
+       case(83)
          list(:4)=(/1360,1363,1364,1362/)
          msg='getcsc'
-       case(83)
+       case(84)
          list(:5)=(/1370,235,1371,1372,1375/)
          msg='getchc'
+       case(85)
+         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/)
+         message='chebfiwf2 core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

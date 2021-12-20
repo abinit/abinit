@@ -169,6 +169,7 @@ contains
 !!
 !! PARENTS
 !!      m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear,m_pead_nl_loop
+!!      m_respfn_driver
 !!
 !! CHILDREN
 !!      timab,xmpi_bcast,xmpi_sum
@@ -252,7 +253,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  headform0=0 !Default value for headform0 (will be needed later, to read wf blocks)
 
 !Chebyshev is more sensitive to the quality of input random numbers, so use a new algorithm
- if(dtset%wfoptalg == 1) then
+ if(dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) then
    randalg = 1
  else
    ! Otherwise, use compatibility mode
@@ -679,7 +680,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &     mband_eff,mcg,mcg_disk,mpi_enreg,mpi_enreg0,mpw,mpw0,&
 &     nband_eff,nband0_rd,ngfft,nkassoc,nkpt,nkpt0,npwarr,npwarr0,nspinor_eff,nspinor0,&
 &     nsppol_eff,nsppol0,nsym,occ,optorth,dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,squeeze,&
-&     symrel,tnons,wff1)
+&     symrel,tnons,wff1,dtset%wfoptalg)
      if (nsppol2nspinor/=0)  then
        ABI_FREE(indkk_eff)
        ABI_FREE(nband_eff)
@@ -972,7 +973,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &   mband,mcg,mkmem0,mkmem,mpi_enreg0,mpi_enreg,&
 &   mpw0,mpw,my_nkpt,nband_eff,nband,ngfft0,ngfft,nkpt0,nkpt,npwarr0,npwarr,&
 &   nspinor_eff,dtset%nspinor,nsppol_eff,nsppol,nsym,occ,optorth,&
-&   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
+&   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow,&
+&   dtset%wfoptalg)
 
    if (nsppol2nspinor/=0)  then
      ABI_FREE(nband_eff)
@@ -1114,7 +1116,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  mcg,mcg_disk,mpi_enreg,mpi_enreg0,mpw,mpw0,nband,nban_dp_rd,&
 &                  ngfft,nkassoc,nkpt,nkpt0,npwarr,npwarr0,nspinor,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
-&                  sppoldbl,squeeze,symrel,tnons,wff1)
+&                  sppoldbl,squeeze,symrel,tnons,wff1,wfoptalg)
 
 !Arguments ------------------------------------
  integer, intent(in) :: exchn2n3d,formeig,headform0,localrdwf,mband,mcg,mcg_disk
@@ -1123,6 +1125,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  real(dp), intent(in) :: ecut,ecut0,ecut_eff
  type(MPI_type), intent(inout) :: mpi_enreg,mpi_enreg0
  type(wffile_type), intent(inout) :: wff1
+ integer, intent(in) :: wfoptalg
  integer, intent(in) :: indkk(nkpt*sppoldbl,6),indkk0(nkpt0,nkassoc),istwfk(nkpt)
  integer, intent(in) :: istwfk0(nkpt0),nband(nkpt*nsppol),nban_dp_rd(nkpt0*nsppol0)
  integer, intent(in) :: ngfft(18),npwarr(nkpt),npwarr0(nkpt0),symrel(3,3,nsym)
@@ -1654,7 +1657,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 !                  Note that this routine also convert eig and occ
 !                  even if the conversion had already been done
 
-
+                 print *, "CALL WFCONV 1"
                  call wfconv(ceksp,cg_disk,cg,debug,ecut0,ecut,ecut_eff,&
 &                 eig0_k,eig_k,exchn2n3d,formeig,gmet0,gmet,&
 &                 icg_disk,icg_trial,ikpt0,ikpt10,ikpt_trial,indkk,&
@@ -1664,7 +1667,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                 nban_dp_rdk,nband_trial,ngfft,ngfft,nkpt0,nkpt,&
 &                 npw0_k,npw_ktrial,nspinor0,nspinor,nsym,&
 &                 occ0_k,occ_k,optorth,randalg,restart,rprimd,&
-&                 sppoldbl,symrel,tnons)
+&                 sppoldbl,symrel,tnons,wfoptalg)
 
 !                  DEBUG
 !                  write(std_out,*)' wfsinp: ikpt_trial=',ikpt_trial
@@ -2057,6 +2060,7 @@ end subroutine initwf
 !!
 !! CHILDREN
 !!      timab,xmpi_bcast,xmpi_sum
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2066,7 +2070,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  mpi_enreg1,mpi_enreg2,mpw1,mpw2,my_nkpt2,nband1,nband2,&
 &                  ngfft1,ngfft2,nkpt1,nkpt2,npwarr1,npwarr2,nspinor1,nspinor2,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
-&                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
+&                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout,wfoptalg)
 
 !Arguments ------------------------------------
 !scalars
@@ -2077,6 +2081,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  real(dp),intent(in) :: ecut1,ecut2,ecut2_eff
  type(MPI_type),intent(inout) :: mpi_enreg1,mpi_enreg2
  type(wffile_type),intent(inout) :: wffinp,wffout
+ integer,intent(in) :: wfoptalg
 !arrays
  integer,intent(in) :: indkk(nkpt2*sppoldbl,6),istwfk1(nkpt1),istwfk2(nkpt2)
  integer,intent(in) :: kg2(3,mpw2*mkmem2),nband1(nkpt1*nsppol1)
@@ -2448,6 +2453,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    Note the use of mband2, while mband is used inside
 !    write(std_out,*) 'in newkpt,before wfconv,npw1,npw2',npw1,npw2
      inplace=1
+     print *, "CALL WFCONV 2"
      if(aux_stor==0)then
        call wfconv(ceksp2,cg,cg,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg,icg,&
@@ -2455,7 +2461,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       kg1,kg2_k,kptns1,kptns2,mband_rw,mband_rw,mcg,mcg,&
 &       mpi_enreg1,mpi_enreg2,mpw1,mpw2,nbd1_rd,nbd2,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
-&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
+&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,&
+&       tnons,wfoptalg)
      else
        call wfconv(ceksp2,cg_aux,cg_aux,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg_aux,icg_aux,&
@@ -2463,7 +2470,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       kg1,kg2_k,kptns1,kptns2,mband_rw,mband_rw,mcg,mcg,&
 &       mpi_enreg1,mpi_enreg2,mpw1,mpw2,nbd1_rd,nbd2,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
-&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
+&       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,&
+&       tnons,wfoptalg)
      end if
 
      call timab(784,2,tsec)
@@ -2659,7 +2667,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & ikpt1,ikpt10,ikpt2,indkk,inplace,isppol2,istwfk1,istwfk2,&
 & kg1,kg2,kptns1,kptns2,mband1,mband2,mcg1,mcg2,mpi_enreg1,mpi_enreg2,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
-& nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
+& nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons,&
+& wfoptalg)
 
 !Arguments ------------------------------------
 !scalars
@@ -2676,6 +2685,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer,intent(inout) :: kg1(3,mpw1),kg2(3,mpw2)
  real(dp),intent(in) :: gmet1(3,3),gmet2(3,3),kptns1(3,nkpt1),kptns2(3,nkpt2)
  real(dp),intent(in) :: rprimd2(3,3),tnons(3,nsym)
+ integer, intent(in) :: wfoptalg
  real(dp),intent(inout) :: cg1(2,mcg1),cg2(2,mcg2)
  real(dp),intent(inout) :: eig_k1(mband1*(2*mband1)**formeig)
  real(dp),intent(inout) :: eig_k2(mband2*(2*mband2)**formeig),occ_k1(mband1)
@@ -3234,11 +3244,13 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    end if ! End of initialisation to 0
  end if
 
+
 !Orthogonalize GS wfs
  if (optorth==1.and.formeig==0.and.(mpi_enreg2%paral_kgb/=1.or.mpi_enreg2%nproc_cell==1)) then
  !if (.True.) then
    ABI_MALLOC(dum,(2,0))
    ortalgo=0 !;ortalgo=3
+   print *, "CALL ORTHO 2"
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&
 &   mpi_enreg2%me_g0,mpi_enreg2%comm_bandspinorfft)
    ABI_FREE(dum)

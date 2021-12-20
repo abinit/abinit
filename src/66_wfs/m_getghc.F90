@@ -603,7 +603,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
    ABI_FREE(work)
-
 !  Retrieve eventually original FFT distrib
    if(have_to_reequilibrate) then
      if(ndat > 1 ) then
@@ -703,7 +702,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (gs_ham%usepaw==1) gsc_ptr => gsc
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
-
      if (gs_ham%usepaw==1 .and. has_fock)then
        if (fock_get_getghc_call(fock)==1) then
          ABI_MALLOC(gvnlc,(2,npw_k2*my_nspinor*ndat))
@@ -1672,7 +1670,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
 
  spacedim = size(cwavef,dim=2)/ndat
-
     !$omp parallel default (none) private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt, is_nested), &
     !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
     !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default)
@@ -1698,7 +1695,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    firstband = (nthreads-residuchunk)*chunk + ( ithread -(nthreads-residuchunk) )*(chunk+1) +1
    lastband = firstband+chunk
  end if
-
+ 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
    lastelt = lastband*spacedim

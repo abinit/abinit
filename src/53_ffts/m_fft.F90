@@ -2345,7 +2345,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !if (option == 0 .and. fftalgc == 0) then
  !  ABI_ERROR("Option 0 is buggy when fftalgc ==0 is used!")
  !end if
-
+  !print *, "CUDA FFT"
 !Cuda version of fourwf
  luse_gpu_cuda=PRESENT(use_gpu_cuda)
  if (luse_gpu_cuda) luse_gpu_cuda=(luse_gpu_cuda.and.(use_gpu_cuda==1))
@@ -2852,10 +2852,12 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    ! Here, call more specialized 3-dimensional fft
    ! (zero padding as well as maximize cache reuse) based on S Goedecker routines.
    ! Specially tuned for cache architectures.
+   !print *, "BEFORE FFT INTRINSINC"
    if (fftalga==FFT_SG .and. fftalgc==2 .and. option/=3) then
      call sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
        istwf_k,kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
    end if
+   !print *, "AFTER FFT INTRINSINC"
 
    ! Here, call new FFT from S Goedecker, also sophisticated specialized 3-dimensional fft
    ! (zero padding as well as maximize cache reuse)

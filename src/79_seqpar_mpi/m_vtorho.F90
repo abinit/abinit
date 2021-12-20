@@ -399,6 +399,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: occopt_bigdft
 #endif
 
+
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -894,8 +895,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      Build inverse of overlap matrix for chebfi
-       if(psps%usepaw == 1 .and. dtset%wfoptalg == 1 .and. istep <= 1) then
+       if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
+         !print *, "MAKE INVOVL START"
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+         !print *, "MAKE INVOVL END"
        end if
 
        ! Setup gemm_nonlop
@@ -934,7 +937,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
-
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
@@ -1053,7 +1055,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      call timab(986,2,tsec)
-
    end do ! End loop over spins
 
    call timab(988,1,tsec)
@@ -2539,6 +2540,5 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
 
 end subroutine cgq_builder
 !!***
-
 end module m_vtorho
 !!***

@@ -33,7 +33,7 @@ module m_chebfi
  use m_rayleigh_ritz
  use m_invovl
  use m_dtset
-
+ 
  use defs_abitypes, only : mpi_type
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g
@@ -158,11 +158,13 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer :: ikpt_this_proc, npw_filter, nband_filter
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
  ! integer :: nline_total
+  
 
  ! timers
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603
  integer, parameter :: timer_subdiago = 1604, timer_subham = 1605, timer_ortho = 1606, timer_getghc = 1607
  integer, parameter :: timer_residuals = 1608, timer_update_eigen = 1609, timer_sync = 1610
+  
 
 ! *************************************************************************
 
@@ -204,7 +206,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
    ! Load balancing, so that each processor has approximately the same number of converged and non-converged bands
    ! for two procs, rearrange 1 2 3 4 5 6 as 1 4 2 5 3 6
-   !
+   ! 
+  
    ! trick to save memory: ghc has the necessary size, and will be overwritten afterwards anyway
 #define cg_loadbalanced ghc
    shift = 0
@@ -269,13 +272,12 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    cpopt = -1
  end if
 
-
-
  !======================================================================================================
  ! Data in npfft x npband distribution. First getghc, update eigenvalues and residuals
  !======================================================================================================
- write(message, *) 'First getghc'
- call wrtout(std_out,message,'COLL')
+ !write(message, *) 'First getghc'
+ !call wrtout(std_out,message,'COLL')
+
 
  ! get_ghc on cg
  call timab(timer_getghc, 1, tsec)
@@ -287,14 +289,14 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 &   prtvol,sij_opt,cpopt,cwaveprj,already_transposed=.true.)
  end if
  call timab(timer_getghc, 2, tsec)
-
+ 
  ! Debug barrier: should be invisible
  call timab(timer_sync, 1, tsec)
  call xmpi_barrier(mpi_enreg%comm_band)
  call timab(timer_sync, 2, tsec)
 
- write(message, *) 'Computing residuals'
- call wrtout(std_out,message,'COLL')
+ !write(message, *) 'Computing residuals'
+ !call wrtout(std_out,message,'COLL')
  ! update eigenvalues and residuals
  call timab(timer_update_eigen, 1, tsec)
  ABI_MALLOC(resids_filter, (nband_filter))
@@ -319,12 +321,13 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    end if
    resids_filter(iband) = SUM(residvec_filter**2)
  end do
- call xmpi_sum(resids_filter,mpi_enreg%comm_fft,ierr)
+  
  call xmpi_max(MAXVAL(eig(1:nband_filter)),maxeig,mpi_enreg%comm_band,ierr)
  call xmpi_min(MINVAL(eig(1:nband_filter)),mineig,mpi_enreg%comm_band,ierr)
  filter_low = maxeig
+ 
  call timab(timer_update_eigen, 2, tsec)
-
+ 
  ! Decide how many iterations per band are needed
  ! don't go above this, or face bad conditioning of the Gram matrix.
  nline_max = cheb_oracle(mineig, filter_low, dtset%ecut, 1e-16_dp, 40)
@@ -356,7 +359,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  !======================================================================================================
  ! Chebyshev polynomial application
  !======================================================================================================
- ! Filter by a chebyshev polynomial of degree nline
+ ! Filter by a chebyshev polynomial of degree nline 
  do iline=1,dtset%nline
    ! Filter only on [iactive, iactive+nactive-1]
    iactive = nband_filter
@@ -375,7 +378,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    ! Define the filter position
    filter_center = (dtset%ecut+filter_low)/2
    filter_radius = (dtset%ecut-filter_low)/2
-
+   
    ! write(message, *) 'Applying invovl, iteration', iline
    ! call wrtout(std_out,message,'COLL')
 
@@ -435,8 +438,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
      cpopt = -1
    end if
 
-   write(message, *) 'Getghc, iteration', iline
-   call wrtout(std_out,message,'COLL')
+   !write(message, *) 'Getghc, iteration', iline
+   !call wrtout(std_out,message,'COLL')
 
    call timab(timer_getghc, 1, tsec)
    if (dtset%paral_kgb == 0) then
@@ -454,7 +457,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
    call timab(timer_getghc, 2, tsec)
  end do ! end loop on nline
-
+ 
  ! normalize according to the previously computed rayleigh quotients (inaccurate, but cheap)
  do iband = 1, nband_filter
    ampfactor = cheb_poly(eig(iband), nline_bands(iband), filter_low, dtset%ecut)
@@ -469,6 +472,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
      gvnlxc_filter(:, shift+1:shift+npw_filter*nspinor) = gvnlxc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
    end if
  end do
+
 
  ! Cleanup
  if(paw) then
@@ -490,8 +494,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! Filtering done, tranpose back
  !======================================================================================================
 
- write(message, *) 'Filtering done, transposing back'
- call wrtout(std_out,message,'COLL')
+ !write(message, *) 'Filtering done, transposing back'
+ !call wrtout(std_out,message,'COLL')
 
  ! transpose back
  if(dtset%paral_kgb == 1) then
@@ -553,6 +557,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  call rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
 #endif
 
+
  ! Build residuals
  call timab(timer_residuals, 1, tsec)
  do iband=1,nband
@@ -564,10 +569,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    end if
 
    ! precondition resid_vec
-   do ispinor = 1,nspinor
-     resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) * pcon
-     resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) * pcon
-   end do
+!   do ispinor = 1,nspinor
+!     resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) * pcon
+!     resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) * pcon
+!   end do
 
    call dotprod_g(resid(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,resid_vec,&
 &   resid_vec,mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
@@ -577,6 +582,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 &     gvnlxc(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
  end do
+  
  call timab(timer_residuals, 2, tsec)
 
  ! write(message, '(a,4e10.2)') 'Resids (1, N, min, max) ', resid(1), resid(nband), MINVAL(resid), MAXVAL(resid)
