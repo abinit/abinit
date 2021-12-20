@@ -432,7 +432,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -1798,7 +1798,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
    call destroy_invovl(dtset%nkpt)
  end if
 

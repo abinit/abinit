@@ -233,6 +233,7 @@ program abinit
 
  call timab(41,3,tsec)
  call iofn1(args%input_path, filnam, filstat, xmpi_world)
+ !stop
 
 !------------------------------------------------------------------------------
 

@@ -22,6 +22,7 @@
 #endif
 
 #include "abi_common.h"
+!#define HAVE_OPENMP
 
 MODULE m_xomp
 

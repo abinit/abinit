@@ -270,6 +270,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !##
 
  intarr(1,:)=dtsets(:)%bandpp
+ !print *, "BANDPP: ", dtsets(:)%bandpp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'bandpp','INT',0)
 
  intarr(1,:)=dtsets(:)%bdberry(1)

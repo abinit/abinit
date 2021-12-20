@@ -160,7 +160,7 @@ module m_lobpcg2
     lobpcg%nline       = nline
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
-
+    
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
@@ -209,7 +209,7 @@ module m_lobpcg2
 
     spacedim = lobpcg%spacedim
     blockdim = lobpcg%blockdim
-
+    
     call lobpcg_free(lobpcg) ! Make sure everything is not allocated and
     ! pointer point to null()
 
@@ -380,7 +380,7 @@ module m_lobpcg2
     call xgBlock_reshape(residu,(/ blockdim, nblock /))
 
     lobpcg%AllX0 = X0
-
+    
     !! Start big loop over blocks
     do iblock = 1, nblock
       if ( prtvol == 4 ) write(std_out,*) "  -- Block ", iblock
@@ -395,7 +395,7 @@ module m_lobpcg2
         ! Orthogonalize current iblock X block With Respect To previous Blocks in B-basis
         call lobpcg_orthoXwrtBlocks(lobpcg,lobpcg%X,iblock)
       end if
-
+      
       ! Initialize some quantitites (AX and BX)
       call timab(tim_ax_bx,1,tsec)
       call getAX_BX(lobpcg%X,lobpcg%AX,lobpcg%BX)
