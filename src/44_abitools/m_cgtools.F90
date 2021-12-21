@@ -135,8 +135,6 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!****f* m_cgtools/cg_tocplx
 !! NAME
 !!  cg_tocplx

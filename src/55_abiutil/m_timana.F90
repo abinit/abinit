@@ -818,7 +818,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1007)='initberry(PAW on-site)          '
  names(1008)='initberry(pwind)                '
  names(1009)='initberry(MPI stuff)            '
- names(1021)='listkk                          '
 
  names(1021)='listkk                          '; basic(1021) = 1
 
@@ -1726,8 +1725,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(50)
          list(:3)=(/1501,1502,1515/)                                 ; msg='hartreefock '
        case(60)
-         list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
-         msg = 'chebfi'
+         list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
        case(61)
          list(:3) = (/1620,1621,1622/)                               ; msg = 'mkinvovl'
        case(70)
@@ -1745,32 +1743,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(76)
          list(:18)=(/ (ii,ii=1670,1687,1) /)                         ; msg='low-level xgBlock type '
        case(77)
-         list(:5)=(/1690,1691,1692,1693,1694/)
-         msg='low-level xgScalapack type '
+         list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
-         list(:8)=(/ (ii,ii=1662,1669,1) /)
-         msg='low-level xgTransposer type '
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
-         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
-         message='low-level xgTransposer type '
+         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/) ; msg='cgwf_cprj'
        case(80)
-         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/)
-         msg='cgwf_cprj'
+         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(81)
-         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/)
-         msg='nonlop_ylm'
+         list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
        case(82)
-         list(:5)=(/1290,1293,1294,1295,1299/)
-         msg='getcprj'
+         list(:4)=(/1360,1363,1364,1362/)      ; msg='getcsc'
        case(83)
-         list(:4)=(/1360,1363,1364,1362/)
-         msg='getcsc'
+         list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(84)
-         list(:5)=(/1370,235,1371,1372,1375/)
-         msg='getchc'
-       case(85)
-         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/)
-         message='chebfiwf2 core engine '
+         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

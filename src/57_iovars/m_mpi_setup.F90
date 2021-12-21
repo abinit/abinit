@@ -1327,7 +1327,7 @@ end subroutine mpi_setup
    if (wf_algo_global==ALGO_CHEBFI) bpp_max=1
    if (wf_algo_global==ALGO_CHEBFI_NEW) bpp_min=1 ! bandpp not used with ChebFi
    if (wf_algo_global==ALGO_CHEBFI_NEW) bpp_max=1 ! bandpp not used with ChebFi
-   
+
  end if ! RUNL_GSTATE
 
 !Disable KGB parallelisation in some cases:
