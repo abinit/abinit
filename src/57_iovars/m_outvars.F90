@@ -146,7 +146,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !Set up a 'global' prtvol value
  prtvol_glob=1
  if(sum((dtsets(:)%prtvol)**2)==0)prtvol_glob=0
- !print *, "outvar_a_h BGGGGGGGG DTSETS: ", dtsets(:)%bandpp  
+
 !###########################################################
 !### 00. Echo of selected default values
 
@@ -366,7 +366,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 
 !###########################################################
 !### 08. Print variables, for different ranges of names
- !print *, "outvar_a_h DTSETS: ", dtsets(:)%bandpp  
+
  call outvar_a_h(choice,dmatpuflag,dtsets,iout,jdtset_,marr,multivals,mxvals,&
 & ncid,ndtset,ndtset_alloc,results_out,strimg)
 

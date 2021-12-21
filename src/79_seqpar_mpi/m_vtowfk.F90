@@ -58,8 +58,6 @@ module m_vtowfk
  use m_cgprj,       only : cprj_rotate
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
- 
-
 
  implicit none
 
@@ -205,7 +203,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: has_cprj_in_memory,has_fock,newchebfi,newlobpcg,update_cprj
- logical :: do_subdiago,do_ortho, rotate_subvnlx,use_rmm_diis
+ logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -230,7 +228,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),pointer :: cwavef_iband(:,:)
  type(pawcprj_type),pointer :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:),cprj_cwavef(:,:)
- 
 
 ! **********************************************************************
 
@@ -366,9 +363,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !nnsclo_now=number of non-self-consistent loops for the current vtrial
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
-
- !print *, "nnsclo_now", nnsclo_now
- !stop
 
  do inonsc=1,nnsclo_now
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
@@ -595,9 +589,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    ! DEBUG seq==par comment next block
    ! Fix phases of all bands
-   if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
+   if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
      !call wrtout(std_out, "Calling cgtk_fixphase")
-      if ( .not. newlobpcg .and. .and. .not. newchebfi .and. .not. has_cprj_in_memory ) then
+      if ( (.not.newlobpcg) .and. (.not.newchebfi) .and. (.not.has_cprj_in_memory) ) then
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else if (newlobpcg .or. newchebfi) then
        ! GSC is local to vtowfk and is completely useless since everything

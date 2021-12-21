@@ -39,7 +39,7 @@ module m_prep_kgb
  use m_nonlop,      only : nonlop
  use m_getghc,      only : multithreaded_getghc
  use m_fft,         only : fourwf
- 
+
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
@@ -139,7 +139,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  real(dp),pointer :: ewavef_alltoall_sym(:,:),gvnlxc_alltoall_sym(:,:)
  real(dp),pointer :: gwavef_alltoall_sym(:,:)
  real(dp),pointer :: swavef_alltoall_sym(:,:)
- 
 
 ! *************************************************************************
 
@@ -167,7 +166,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !Check sizes
  mcg=2*gs_hamk%npw_fft_k*my_nspinor*bandpp
  if (do_transpose) mcg=2*gs_hamk%npw_k*my_nspinor*blocksize
- 
  if (size(cwavef)<mcg) then
    ABI_BUG('wrong size for cwavef!')
  end if
@@ -302,6 +300,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
+
    if(do_transpose) then
      call timab(632,3,tsec)
      call prep_index_wavef_bandpp(nproc_band,bandpp,&
@@ -312,6 +311,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
      call timab(632,2,tsec)
    end if
+
 !  ----------------------
 !  Fourier transformation
 !  ----------------------
@@ -319,6 +319,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlxc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
    call timab(636,2,tsec)
+
 !  -----------------------------------------------------
 !  Sorting of waves functions below the processors
 !  -----------------------------------------------------
@@ -331,7 +332,9 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call timab(634,2,tsec)
    end if
 
+
  else if (flag_inv_sym) then
+
 !  -------------------------------------------------------------
 !  Computation of the index to class the waves functions below bandpp
 !  -------------------------------------------------------------
@@ -635,7 +638,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  if(present(already_transposed)) then
    if(already_transposed) do_transpose = .false.
  end if
- 
+
  nproc_band = mpi_enreg%nproc_band
  bandpp     = mpi_enreg%bandpp
  spaceComm=mpi_enreg%comm_fft
@@ -645,11 +648,9 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
 !Check sizes
  npw=hamk%npw_k;if (.not.do_transpose) npw=hamk%npw_fft_k
-  
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
    ABI_BUG('Incorrect size for cwavef!')
  end if
-
  if(choice/=0.and.signs==2) then
    if (paw_opt/=3) then
      if (size(gvnlc)/=2*npw*my_nspinor*blocksize) then
@@ -662,7 +663,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      end if
    end if
  end if
-
  if(cpopt>=0) then
    if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
      ABI_BUG('Incorrect size for cwaveprj!')
@@ -734,6 +734,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !=====================================================================
  if (bandpp==1) then
 
+
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.nspinortot==2) then !Sort WF by spin
      call prep_sort_wavef_spin(nproc_band,my_nspinor,ndatarecv,recvcounts,rdispls,index_wavef_band)
      cwavef_alltoall2(:, :)=cwavef_alltoall1(:,index_wavef_band)
@@ -787,7 +788,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  if (allocated(index_wavef_band)) then
    ABI_FREE(index_wavef_band)
  end if
- 
+
 !Transpose the gsc_alltoall or gvlnc_alltoall tabs
 !according to the paw_opt and signs values
  if(do_transpose) then
@@ -844,6 +845,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
 
  call timab(570,2,tsec)
+
  DBG_EXIT('COLL')
 
 end subroutine prep_nonlop

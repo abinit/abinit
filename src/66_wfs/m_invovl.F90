@@ -353,7 +353,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        ABI_MALLOC(gram_proj, (cplx, nlmn, nlmn))
        call abi_xgemm(blas_transpose,'N', nlmn, nlmn, (3-cplx)*ham%npw_k, cone, atom_projs(:,:,1), (3-cplx)*ham%npw_k, &
 &                     atom_projs(:,:,1), (3-cplx)*ham%npw_k, czero, gram_proj(:,:,1), nlmn,x_cplx=cplx)
-       
        call xmpi_sum(gram_proj,mpi_enreg%comm_bandspinorfft,ierr)
        invovl%inv_s_approx(:,1:nlmn,1:nlmn,itypat) = invovl%inv_s_approx(:,1:nlmn,1:nlmn,itypat) + gram_proj(:,:,:)
        ABI_FREE(gram_proj)
@@ -405,14 +404,12 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 &                      projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
    shift = shift + slice_size
    ! reduce on proc i
-   
    call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
    if(iproc == mpi_enreg%me_fft+1) then
      invovl%gram_projs = gramwork
    end if
    ABI_FREE(gramwork)
  end do
- 
  call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 
  call timab(timer_mkinvovl_build_ptp, 2, tsec)
@@ -420,7 +417,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  ABI_FREE(projs)
 
- 
  write(message,*) 'Invovl built'
  call wrtout(std_out,message,'COLL')
 
@@ -479,7 +475,7 @@ end subroutine make_invovl
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
  invovl => invovl_kpt(ikpt_this_proc)
- 
+
  if(ham%istwf_k == 1) then
    cplx = 2
    blas_transpose = 'c'
@@ -487,32 +483,30 @@ end subroutine make_invovl
    cplx = 1
    blas_transpose = 't'
  end if
- 
+
  ABI_MALLOC(proj, (cplx,invovl%nprojs,nspinor*ndat))
  ABI_MALLOC(sm1proj, (cplx,invovl%nprojs,nspinor*ndat))
  ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
  proj = zero
  sm1proj = zero
  PtPsm1proj = zero
- 
+
  call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
- 
+
  ! get the cprj
  choice = 0 ! only compute cprj, nothing else
  cpopt = 0 ! compute and save cprj
  paw_opt = 3 ! S nonlocal operator
- 
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.) !already_transposed = true (previous)
-  else
+&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
+ else
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
 &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
- 
- 
+
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
  call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
 
@@ -525,12 +519,12 @@ end subroutine make_invovl
      shift = shift + nlmn
    end do
  end do
-  
+
  !multiply by S^1
  call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
  sm1proj = - sm1proj
  PtPsm1proj = - PtPsm1proj
- 
+
  ! copy sm1proj to cwaveprj(:,:)
  do idat=1, ndat*nspinor
    shift = 0
@@ -549,7 +543,7 @@ end subroutine make_invovl
  paw_opt = 3
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)  !already_transposed = true (previous)
+&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
 &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)

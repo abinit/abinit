@@ -188,7 +188,6 @@ program testTransposer
   end subroutine test1
 !!***
 
-
 !!****f* testTransposer/test2
 !!
 !! NAME
@@ -286,6 +285,35 @@ program testTransposer
     ABI_FREE(ghc)
 
   end subroutine test2
+!!***
+
+!!****f* testTransposer/initVectors
+!!
+!! NAME
+!! initVectors
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! NOTES
+!!
+!! INPUTS
+!!  (main routine)
+!!
+!! OUTPUT
+!!  (main routine)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
   subroutine initVectors()
     integer, allocatable :: seed(:)
@@ -306,6 +334,7 @@ program testTransposer
     end do
     ABI_FREE(seed)
   end subroutine initVectors
+!!***
 
 !!****f* testTransposer/backAndForth
 !!

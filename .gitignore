@@ -301,7 +301,6 @@ scripts/*/*/dist
 /tests/built-in/Input/*out*
 /tests/built-in/Input/*STATUS*
 /tests/built-in/Input/*prc
-/tests/tutorial/Input/*/*out*
 src/tags
 build2-debug-s
 .prev_run.pickle
