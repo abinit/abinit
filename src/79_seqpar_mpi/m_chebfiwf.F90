@@ -85,8 +85,6 @@ module m_chebfiwf
  integer, parameter :: DEBUG_ROWS = 5
  integer, parameter :: DEBUG_COLUMNS = 5
 
- type(c_ptr) :: cptr
-
  public :: chebfiwf2
 
  CONTAINS  !========================================================================================
@@ -146,12 +144,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer, parameter :: tim_chebfiwf2 = 1750
- integer :: ipw,space,blockdim,nline,pw,total_spacedim,partial_nband,ierr,nthreads
+ integer :: ipw,space,blockdim,nline,total_spacedim,ierr,nthreads
  real(dp) :: cputime,walltime,localmem
  type(c_ptr) :: cptr
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
- type(xgBlock_t) :: HELPER
 !arrays
  real(dp) :: tsec(2),chebfiMem(2)
  real(dp),pointer :: eig_ptr(:,:) => NULL()
@@ -159,7 +156,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  !Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
- integer :: iband,shift
  real(dp) :: gsc_dummy(0,0)
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
 
@@ -431,7 +427,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
        if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
      else
        if (cpuRow == 0) then
-	 gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+         gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
        end if
      end if
    end if
@@ -456,9 +452,6 @@ end subroutine getghc_gsc1
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  Bm1X <type(xgBlock_t)>= memory block containing S^-1|C>
 !!  transposer <type(xgTransposer_t)>= data used for array transpositions
-!!  iline_t=
-!!  xXColsRows=
-!!  X1=
 !!
 !! PARENTS
 !!
@@ -468,22 +461,19 @@ end subroutine getghc_gsc1
 !!
 !! SOURCE
 
-subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
+subroutine getBm1X(X,Bm1X,transposer)
 
  implicit none
 
 !Arguments ------------------------------------
- integer, intent(inout) :: iline_t
  type(xgBlock_t), intent(inout) :: X
  type(xgBlock_t), intent(inout) :: Bm1X
- type(xgBlock_t), intent(inout) :: xXColsRows
- type(xgBlock_t), intent(inout) :: X1
  type(xgTransposer_t), optional, intent(inout) :: transposer
 
 !Local variables-------------------------------
 !scalars
- integer         :: blockdim
- integer         :: spacedim
+ integer :: blockdim
+ integer :: spacedim
  integer :: cpuRow
 !arrays
  real(dp), pointer :: ghc_filter(:,:)
@@ -514,10 +504,11 @@ subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
    if(l_paw) then
      call xgBlock_scale(Bm1X,inv_sqrt2,1)
      if (l_paral_kgb == 0) then
-       if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+       if(l_mpi_enreg%me_g0 == 1) &
+&        gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
      else
        if (cpuRow == 0) then
-	 gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) = gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) * sqrt2
+         gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) = gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) * sqrt2
        end if
      end if
    end if
@@ -547,10 +538,11 @@ subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
    if(l_paw) then
      call xgBlock_scale(Bm1X,sqrt2,1)
      if (l_paral_kgb == 0) then
-       if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+       if(l_mpi_enreg%me_g0 == 1) &
+&        gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
      else
        if (cpuRow == 0) then
-	 gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) = gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+         gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) = gsm1hc_filter(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
        end if
      end if
    end if

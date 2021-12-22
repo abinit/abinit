@@ -263,7 +263,6 @@ subroutine chebfi_allocateAll(chebfi)
 
 !Local variables-------------------------------
 !scalars
- integer :: row, col
  integer :: neigenpairs
  integer :: space
  integer :: spacedim
@@ -390,8 +389,6 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: memX_Re
- real(dp) :: memX_Im
  real(dp) :: memX
  real(dp) :: memX_next
  real(dp) :: memX_prev
@@ -444,7 +441,7 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
  memEigenvalues = kind(1.d0) * neigenpairs
 
  arraymem(1) = memX + memX_next + memX_prev + &
-	       memAX + memBX + memX_CR + memAX_CR + memBX_CR
+               memAX + memBX + memX_CR + memAX_CR + memBX_CR
  arraymem(2) = memA_und_X + memB_und_X + memEigenvalues
 
 end function chebfi_memInfo
@@ -506,14 +503,11 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    end subroutine getAX_BX
  end interface
  interface
-   subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
+   subroutine getBm1X(X,Bm1X,transposer)
      use m_xg, only : xgBlock_t
      use m_xgTransposer !, only: xgTransposer_t
      type(xgBlock_t), intent(inout) :: X
      type(xgBlock_t), intent(inout) :: Bm1X
-     type(integer), intent(inout) :: iline_t
-     type(xgBlock_t), intent(inout) :: xXColsRows
-     type(xgBlock_t), intent(inout) :: X1
      type(xgTransposer_t), optional, intent(inout) :: transposer
    end subroutine getBm1X
  end interface
@@ -528,8 +522,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 !scalars
  integer :: spacedim
  integer :: neigenpairs
- integer :: nline,nline_max,nline_decrease,nline_tolwfr
- integer :: shift
+ integer :: nline,nline_max
  integer :: iline, iband, ierr
  integer :: nCpuCols,nCpuRows
  integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of ABinit, to be saved
@@ -543,7 +536,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  real(dp) :: two_over_r
  real(dp) :: center
  real(dp) :: radius
- character(len=15) :: str
  type(xg_t) :: DivResults
 !arrays
  real(dp) :: tsec(2)
@@ -561,10 +553,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  chebfi%eigenvalues = eigen
 
  if (chebfi%paral_kgb == 0) then
-   allocate(nline_bands(neigenpairs))
+   ABI_MALLOC(nline_bands,(neigenpairs))
    call xg_init(DivResults, chebfi%space, neigenpairs, 1)
  else
-   allocate(nline_bands(chebfi%bandpp))
+   ABI_MALLOC(nline_bands,(chebfi%bandpp))
    call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1)
  end if
 
@@ -579,7 +571,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
 
-   !save existing ABinit communicatochebfi_computeNextOrderChebfiPolynomrs
+   !save existing ABinit communicators
    comm_fft_save = mpi_enreg%comm_fft
    comm_band_save = mpi_enreg%comm_band
 
@@ -608,7 +600,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    call xmpi_barrier(chebfi%spacecom)
  end if
 
-!********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
+!********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
  call timab(tim_RR_q, 1, tsec)
  call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
  call timab(tim_RR_q, 2, tsec)
@@ -662,7 +654,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    end if
    call timab(tim_swap,2,tsec)
 
-   !A * ψ
+   !A * Psi
    call timab(tim_getAX_BX,1,tsec)
    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
    call timab(tim_getAX_BX,2,tsec)
@@ -702,7 +694,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  maximum =  chebfi_computeResidue(chebfi, residu, pcond)
  call timab(tim_residu, 2, tsec)
 
- deallocate(nline_bands)
+ ABI_FREE(nline_bands)
 
  if (xmpi_comm_size(chebfi%spacecom) > 1) then
    call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1)    !copy cannot be avoided :(
@@ -763,7 +755,6 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 
 !Local variables-------------------------------
 !scalars
-integer :: info
  type(xg_t)::Results1
  type(xg_t)::Results2
 !arrays
@@ -834,23 +825,16 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  type(real(dp) ) , intent(in) :: two_over_r
  type(chebfi_t) , intent(inout) :: chebfi
  interface
-   subroutine getBm1X(X,Bm1X,iline_t,xXColsRows,X1,transposer)
+   subroutine getBm1X(X,Bm1X,transposer)
      use m_xg, only : xgBlock_t
      use m_xgTransposer !, only: xgTransposer_t
      type(xgBlock_t), intent(inout) :: X
      type(xgBlock_t), intent(inout) :: Bm1X
-     type(integer), intent(inout) :: iline_t
-     type(xgBlock_t), intent(inout) :: xXColsRows
-     type(xgBlock_t), intent(inout) :: X1
      type(xgTransposer_t), optional, intent(inout) :: transposer
    end subroutine getBm1X
  end interface
 
 !Local variables-------------------------------
-!scalars
- integer :: iline_t
- character(15) :: str
-!arrays
  real(dp) :: tsec(2)
 
 ! *********************************************************************
@@ -858,8 +842,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
 
-   iline_t = iline
-   call getBm1X(chebfi%xAXColsRows, chebfi%X_next, iline_t, chebfi%xXColsRows, chebfi%X, chebfi%xgTransposerX)
+   call getBm1X(chebfi%xAXColsRows, chebfi%X_next, chebfi%xgTransposerX)
    call timab(tim_invovl, 2, tsec)
  else
    call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1)
@@ -867,10 +850,10 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
 
  call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by c
 
- !(B-1 * A * ψi-1 - c * ψi-1)
+ !(B-1 * A * Psi^i-1 - c * Psi^i-1)
  call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)
 
- !ψi-1  = 1/c * ψi-1
+ !Psi^i-1  = 1/c * Psi^i-1
  call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by c
 
  if (iline == 0) then
@@ -961,17 +944,13 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
  type(chebfi_t) , intent(inout) :: chebfi
 !Local variables-------------------------------
 !scalars
- integer :: X_NP_TEST = 1
  integer :: eigenProblem
- integer :: ierr
  integer :: info
  integer :: me_g0
  integer :: neigenpairs
  integer :: space
  integer :: spacedim
  integer :: remainder
- integer :: multiply,size_remainder
- character(len=15) :: str
  type(xg_t) :: A_und_X !H_UND_PSI
  type(xg_t) :: B_und_X !S_UND_PSI
  type(xgBlock_t) :: X_first_row
@@ -979,9 +958,6 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
  type(xgBlock_t) :: BX_first_row
 !arrays
  real(dp) :: tsec(2)
- real(dp), pointer :: evec(:,:)
- real(dp), pointer :: sub_pointer(:,:)
- real(dp), allocatable :: edummy(:,:)
 
 ! *********************************************************************
 
@@ -1020,8 +996,8 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     if (chebfi%paw) then
       call xgBlock_scale(chebfi%BX%self, 1/sqrt2, 1)
       if (me_g0 == 1)  then
-	call xgBlock_setBlock(chebfi%BX%self, BX_first_row, 1, 2, neigenpairs)
-	call xgBlock_scale(BX_first_row, sqrt2, 1)
+        call xgBlock_setBlock(chebfi%BX%self, BX_first_row, 1, 2, neigenpairs)
+        call xgBlock_scale(BX_first_row, sqrt2, 1)
       end if
     end if
  end if
@@ -1202,7 +1178,7 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
 
 !Local variables-------------------------------
 !scalars
- integer :: iband,shift,nbands
+ integer :: iband,nbands
  real(dp) :: ampfactor
  real(dp) eig_per_band
  type(xgBlock_t) :: X_part

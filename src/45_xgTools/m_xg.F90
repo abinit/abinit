@@ -39,10 +39,9 @@ module m_xg
 
   use m_errors
   use m_abicore
-
-  use defs_basis, only : std_err, std_out, zero
-  use m_time,     only : timab
-  use m_xmpi,     only : xmpi_sum
+  use defs_basis
+  use m_time, only : timab
+  use m_xmpi, only : xmpi_sum
 
 
   implicit none
@@ -514,8 +513,8 @@ module m_xg
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
-          write(std_err,*) xgBlock%cols,xgBlock%Ldim,cols,rows
-          write(std_err,*) xgBlock%cols*xgBlock%Ldim,cols*rows
+          write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
+          write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
           ABI_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
@@ -2106,7 +2105,7 @@ module m_xg
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt 
-    integer :: icol, irow
+    integer :: icol
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
 
@@ -2172,7 +2171,7 @@ module m_xg
     integer, dimension(2)      , intent(inout), optional :: max_elt
     double precision, intent(inout), optional :: min_val
     integer, dimension(2)      , intent(inout), optional :: min_elt 
-    integer :: icol, irow
+    integer :: irow
     
     select case(xgBlockA%space)
     case(SPACE_R,SPACE_CR)
@@ -2321,12 +2320,12 @@ module m_xg
     type(c_ptr) :: cptr
 
     if ( xgBLock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
-      write(std_err,*) "xgBLock%rows", xgBLock%rows
-      write(std_err,*) "xgBlock%cols", xgBlock%cols
-      write(std_err,*) "newShape(1)", newShape(1)
-      write(std_err,*) "newShape(2)", newShape(2)
-      write(std_err,*) "xgBLock%rows*xgBlock%cols", xgBLock%rows*xgBlock%cols
-      write(std_err,*) "newShape(1)*newShape(2)", newShape(1)*newShape(2)
+      write(std_out,*) "xgBLock%rows", xgBLock%rows
+      write(std_out,*) "xgBlock%cols", xgBlock%cols
+      write(std_out,*) "newShape(1)", newShape(1)
+      write(std_out,*) "newShape(2)", newShape(2)
+      write(std_out,*) "xgBLock%rows*xgBlock%cols", xgBLock%rows*xgBlock%cols
+      write(std_out,*) "newShape(1)*newShape(2)", newShape(1)*newShape(2)
       ABI_ERROR("Bad shape")
     end if
 
@@ -2598,11 +2597,9 @@ module m_xg
 !! NAME
 !! xg_getPointer
 
-  subroutine xg_getPointer(xgBlock, outunit) 
+  subroutine xg_getPointer(xgBlock) 
     use iso_c_binding
     type(xgBlock_t), intent(in) :: xgBlock
-    type(integer), intent(in) :: outunit
-    character(15) :: str
     integer :: cptr
 
     select case (xgBlock%space)

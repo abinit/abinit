@@ -192,7 +192,7 @@ configurations:
      nband=   636 using     48 CPUs =    48 MPI x  1 threads (npband=   12)
      nband=   627 using     44 CPUs =    44 MPI x  1 threads (npband=   11)
      nband=   649 using     44 CPUs =    44 MPI x  1 threads (npband=   11)
- >>> The present nband value (   640) seems to be the best choice!
+ >>> The present nband value (   640) seems to be a good choice!
 
  Launch a parallel version of ABINIT with a distribution of processors among the above list,
  and the associated input variables (np_spkpt, npband, npfft, bandpp, etc.).
