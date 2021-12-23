@@ -137,7 +137,7 @@ module m_xc_vdw
     integer :: nsmooth = 12
     ! Saturation level to smoothen q0 near qcut
 
-    real(dp) :: tolerance = 1.0e-13_dp
+    real(dp) :: tolerance = 1.0e-15_dp
     ! Global numerical tolerance for the boundary values of the kernel
 
     integer :: tweaks = 0
