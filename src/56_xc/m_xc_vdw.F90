@@ -288,29 +288,31 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   real(dp),intent(in) :: volume,gprimd(3,3)
   real(dp),intent(in) :: rho_grho(npts_rho,nspden,ngrad)
   real(dp),intent(out) :: exc_vdw,deltae_vdw
-  real(dp),intent(out) :: decdrho_vdw(nspden),decdgrho_vdw(3,nspden)
+  real(dp),intent(out) :: decdrho_vdw(npts_rho,nspden),decdgrho_vdw(npts_rho,3,nspden)
   real(dp),intent(out),optional :: stress_vdw(3,3)
 
 !Local variables ------------------------------
   character(len=512) :: msg
-  integer :: ig,ip1,ip2,iq1,iq2,ir1,ir2,ir3,is1,is2,ngpts,nqpts
+  integer :: ig,ip1,ip2,iq1,iq2,ir,ir1,ir2,ir3,is1,is2,ix,ngpts,nqpts,nrpts
   integer(kind=SIZEOF_PTRDIFF_T) :: fftw3_plan
-  real(dp) :: a1,a2,a3,b1,b2,b3,gtmp,gcut,sg
+  real(dp) :: a1,a2,a3,b1,b2,b3,gtmp,gcut,sg,dr
   real(dp) :: ex,ec,vx,vc
   real(dp) :: exc_nl,eps_vdw,deltae_uns,dexc,dexcg(3)
-  real(dp) :: dg,dvol,rho_tmp,gtol
+  real(dp) :: dg,dvol,rho_tmp,gtol,grho_tmp(3),ngrho !last two for debug
+  real(dp) :: ztmp(my_vdw_params%nqpts,my_vdw_params%nqpts)
   real(dp) :: exc_tmp,decdrho_tmp(nspden),decdgrho_tmp(3,nspden)
   real(dp),allocatable :: exc_lda(:,:),vxc_lda(:,:),vxcg_lda(:,:,:)
   real(dp),allocatable :: gvec(:,:),theta(:,:,:)
   real(dp),allocatable :: t3dr(:,:,:,:)
-  complex(dp),allocatable :: t3dg(:,:,:,:)
-  real(dp),allocatable :: ptmp(:,:,:),ttmp(:,:),utmp(:),wtmp(:)
+  complex(dp),allocatable :: t3dg(:,:,:,:),ttmp(:,:),utmp(:)
+  real(dp),allocatable :: ptmp(:,:,:),wtmp(:),ttmp2(:,:) !,utmp(:)
 
 ! *************************************************************************
 
   DBG_ENTER("COLL")
 
   ! Init
+  nrpts = my_vdw_params%nrpts
   ngpts = my_vdw_params%ngpts
   nqpts = my_vdw_params%nqpts
   gcut = my_vdw_params%gcut
@@ -319,6 +321,8 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   deltae_uns = zero
   deltae_vdw = zero
   if ( present(stress_vdw) ) stress_vdw(:,:) = zero
+  dr = my_vdw_params%rcut / nrpts
+  ztmp(:,:) = zero
   decdgrho_tmp(:,:) = zero
   decdrho_tmp(:) = zero
   dvol = volume / npts_rho
@@ -334,6 +338,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ABI_MALLOC(t3dr,(nr1,nr2,nr3,nqpts))
   ABI_MALLOC(t3dg,(nr1,nr2,nr3,nqpts))
   ABI_MALLOC(ttmp,(nqpts,nr1*nr2*nr3))
+  ABI_MALLOC(ttmp2,(nqpts,nr1*nr2*nr3)) 
   ABI_MALLOC(ptmp,(nqpts,nqpts,2))
   ABI_MALLOC(utmp,(nqpts))
   ABI_MALLOC(wtmp,(nqpts))
@@ -341,6 +346,34 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ! Calculate XC energy density from LDA / GGA
   call vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho,exc_lda,vxc_lda,vxcg_lda)
 
+  ! Pre-compute integrand for vdW energy correction
+  
+  ztmp(:,:) = zero
+  do ir=1,nrpts
+    do iq1=1,nqpts
+      do iq2=1,iq1
+        ztmp(iq1,iq2) = ztmp(iq1,iq2) - &
+&       two * pi * dr * phir(ir,iq1,iq2) * (ir*dr)**2 
+!&       two * pi * ( phir_u(ir,iq1,iq2) - phir(ir,iq1,iq2) ) * dr
+      end do
+    end do
+  end do
+  do iq1=2,nqpts
+    do iq2=1,iq1-1
+       ztmp(iq2,iq1) = ztmp(iq1,iq2)
+    end do
+  end do
+
+!---------my debug----------------------------------
+!    open(34,file='table-localcorr.dat',status='replace')
+!    do iq2=1,nqpts
+!       do iq1=1,nqpts
+!         write(34,*) iq1, iq2, ztmp(iq1,iq2)
+!       enddo
+!    enddo
+!    close(34)
+!--------end my debug------------------------------  
+ 
   ! Build theta in 3D and g-vectors
   if ( npts_rho /= nr1*nr2*nr3 ) then
     ABI_WARNING('The 3D reconstruction of the density might be wrong (npts /= nr1*nr2*nr3)')
@@ -350,13 +383,18 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 &   nr1 * nr2 * nr3,"times"
   ABI_COMMENT(msg)
 #endif
-
+!---my debug----------------------
+! write(*,*) 'gprimd(i,1)=',(gprimd(ix,1),ix=1,3)
+! write(*,*) 'gprimd(i,2)=',(gprimd(ix,2),ix=1,3)
+! write(*,*) 'gprimd(i,3)=',(gprimd(ix,3),ix=1,3)
+!----end my debug----------------  
   ip1 = 1
   ip2 = 1
   do ir3=1,nr3
     do ir2=1,nr2
       do ir1=1,nr1
-        gvec(:,ip1) = gprimd(:,1) * ir1 + gprimd(:,2) * ir2 + gprimd(:,3) * ir3
+        gvec(:,ip1) = two * pi * (gprimd(:,1) * ir1 + gprimd(:,2)&
+&                     * ir2 + gprimd(:,3) * ir3)
         ex = exc_lda(1,ip1)
         ec = exc_lda(2,ip1)
         vx = vxc_lda(1,ip1)
@@ -364,10 +402,10 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
         theta(:,:,:) = zero
         call xc_vdw_energy(nspden,rho_grho(ip1,1:nspden,1), &
 &         rho_grho(ip1,1:nspden,2:ngrad), &
-&         ex,ec,vx,vc,theta,eps_vdw)
+&         ex,ec,vx,vc,theta)
         t3dr(ir1,ir2,ir3,1:nqpts) = theta(1:nqpts,1,1)
-        rho_tmp = sum(rho_grho(ip1,1:nspden,1))
-        deltae_uns = deltae_uns + rho_tmp * eps_vdw * dvol
+!       rho_tmp = sum(rho_grho(ip1,1:nspden,1))
+!       deltae_uns = deltae_uns + rho_tmp * eps_vdw * dvol
         ip1 = ip1 + 1
       end do
     end do
@@ -428,8 +466,8 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
       !       to a call of the 'splint' routine)
       ptmp(:,:,:) = zero
       dg = pi / my_vdw_params%rcut
-      ig = int(gtmp * ngpts / gcut)
-      a1 = ((ig + 1) * dg - gtmp) / dg
+      ig = int(gtmp / dg) + 1
+      a1 = ig  - gtmp / dg
       b1 = one - a1
       a2 = (3 * a1**2 - one) * dg / six
       b2 = (3 * b1**2 - one) * dg / six
@@ -437,10 +475,10 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
       b3 = (b1**3 - b1) * dg**2 / six
       do iq2 = 1,nqpts
         do iq1 = 1,iq2
-          ptmp(iq1,iq2,1) = a1 * phig(ig,iq1,iq2) + b1 * phig(ig+1,iq1,iq2) &
-&           + a3 * d2phidg2(ig,iq1,iq2) + b3 * d2phidg2(ig+1,iq1,iq2)
-          ptmp(iq1,iq2,2) = (phig(ig+1,iq1,iq2) - phig(ig,iq1,iq2)) / dg &
-&           - a2 * d2phidg2(ig,iq1,iq2) + b2 * d2phidg2(ig+1,iq1,iq2)
+          ptmp(iq1,iq2,1) = a1 * phig(ig-1,iq1,iq2) + b1 * phig(ig,iq1,iq2) &
+&           + a3 * d2phidg2(ig-1,iq1,iq2) + b3 * d2phidg2(ig,iq1,iq2)
+          ptmp(iq1,iq2,2) = (phig(ig,iq1,iq2) - phig(ig-1,iq1,iq2)) / dg &
+&           - a2 * d2phidg2(ig-1,iq1,iq2) + b2 * d2phidg2(ig,iq1,iq2)
         end do
       end do
 
@@ -451,7 +489,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
       end do
 
       ! Calculate contributions to integral in Fourier space:
-      ! FIXME: find back # of integral in paper
+      ! Eq(12) from RS09.
       utmp(:) = matmul(ttmp(:,ip1),ptmp(:,:,1))
 
       ! Calculate contribution to stress in reciprocal space
@@ -471,7 +509,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
     else
 
-      utmp(:) = zero
+      utmp(:) = (zero,zero)
 
     end if ! gtmp < gcut
 
@@ -513,11 +551,13 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   do ir3=1,nr3
     do ir2=1,nr2
       do ir1=1,nr1
-        ttmp(:,ip1) = t3dr(ir1,ir2,ir3,1:nqpts)
+        ttmp2(:,ip1) = t3dr(ir1,ir2,ir3,1:nqpts)
         ip1 = ip1 + 1
       end do
     end do
   end do
+  ! ttmp2(:,ip1) corresponds to u_alpha,i at eq(11)
+  ! from RS09.
 !$OMP END PARALLEL DO
 
 #if defined DEBUG_VERBOSE
