@@ -1926,11 +1926,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 #ifdef HAVE_OPENMP
    if (dt%wfoptalg==114) then
-     if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
-       write(msg,'(4a,i4,a,i4,a)') "When compiled with OpenMP, the FFT parallelization is not ",&
-        "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
-        dt%npfft, ") or export OMP_NUM_THREADS=1 (currently: ",xomp_get_num_threads(.true.),")"
-       ABI_ERROR_NOSTOP(msg, ierr)
+     if ( xomp_get_num_threads(.true.) > 1 ) then
+       if ( dt%npfft > 1 ) then
+         write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
+          "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",dt%npfft,&
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+       if ( dt%npspinor > 1 ) then
+         write(msg,'(4a,i1,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the parallelization on spinorial components is not",&
+          " compatible with multiple threads.",ch10,"Please set npspinor to 1 (currently npspinor=",dt%npspinor,&
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
      end if
    end if
 #endif
