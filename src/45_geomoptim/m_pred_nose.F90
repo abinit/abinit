@@ -134,12 +134,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(fcart_m))     then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_FREE(fcart_mold)
-   end if
+    ABI_SFREE(fcart_m)
+    ABI_SFREE(fcart_mold)
    return
  end if
 
@@ -148,12 +144,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !### 01. Allocate the arrays fcart_m and fcart_mold
 
  if(itime==1)then
-   if (allocated(fcart_m))     then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_FREE(fcart_mold)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(fcart_mold)
  end if
 
  if(.not.allocated(fcart_m))     then

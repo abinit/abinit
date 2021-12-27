@@ -357,13 +357,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=111,tim_mkrho=2
- integer,save :: nwarning=0
+ !integer,save :: nwarning=0
  integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert,iplex
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
- integer :: mwarning,my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff
+ integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
@@ -440,7 +440,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  me_distrb=xmpi_comm_rank(spaceComm_distrb)
  mpi_comm_sphgrid=mpi_enreg%comm_fft
  if(dtset%usewvl==1) mpi_comm_sphgrid=mpi_enreg%comm_wvl
- if (mpi_enreg%me_img/=0) nwarning=nwarning+1
+ !if (mpi_enreg%me_img/=0) nwarning=nwarning+1
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
@@ -1703,10 +1703,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !===================================================================
 
 !In the self-consistent case, diagnose lack of unoccupied state (for each spin and k-point).
+
 !Print a warning if the number of such messages already written does not exceed mwarning.
- mwarning=5
- if(nwarning<mwarning .and. iscf>=0)then
-   nwarning=nwarning+1
+! MG: This is not a good idea as this is a typical mistake done by beginners and we should
+! keep on spamming this warning message in the log file.
+ !mwarning=5
+ !if(nwarning<mwarning .and. iscf>=0)then
+   !nwarning=nwarning+1
+
+ if(iscf>=0)then
    bdtot_index=1
    do isppol=1,dtset%nsppol
      do ikpt=1,dtset%nkpt

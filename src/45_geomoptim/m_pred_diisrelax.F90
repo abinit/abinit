@@ -133,27 +133,13 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(ipiv))         then
-     ABI_FREE(ipiv)
-   end if
-   if (allocated(error))        then
-     ABI_FREE(error)
-   end if
-   if (allocated(diisMatrix))   then
-     ABI_FREE(diisMatrix)
-   end if
-   if (allocated(diisCoeff))    then
-     ABI_FREE(diisCoeff)
-   end if
-   if (allocated(workArray))    then
-     ABI_FREE(workArray)
-   end if
-   if (allocated(workMatrix))   then
-     ABI_FREE(workMatrix)
-   end if
-   if (allocated(hessin))       then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(ipiv)
+   ABI_SFREE(error)
+   ABI_SFREE(diisMatrix)
+   ABI_SFREE(diisCoeff)
+   ABI_SFREE(workArray)
+   ABI_SFREE(workMatrix)
+   ABI_SFREE(hessin)
    return
  end if
 
@@ -184,12 +170,8 @@ subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Notice that the arrays could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(error))  then
-     ABI_FREE(error)
-   end if
-   if (allocated(hessin))  then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(error)
+   ABI_SFREE(hessin)
 
    ABI_MALLOC(error,(3, ab_mover%natom, nhist))
    ABI_MALLOC(hessin,(ndim,ndim))
