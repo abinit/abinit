@@ -374,9 +374,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
  ncycle=specs%ncycle
 
  if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
-   ncycle=scfcv_args%dtset%hmctt   
+   ncycle=scfcv_args%dtset%hmctt
    if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
-      ncycle=ncycle+scfcv_args%dtset%hmcsst 
+      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
 
@@ -620,7 +620,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            endif
 
 !DEBUG
- write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
+! write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
 !ENDDEBUG
            call scfcv_run(scfcv_args, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then

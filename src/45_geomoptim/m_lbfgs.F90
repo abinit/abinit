@@ -139,12 +139,8 @@ end subroutine lbfgs_init
 
 subroutine lbfgs_destroy()
 
- if(allocated (lbfgs_plan%work)) then
-   ABI_FREE(lbfgs_plan%work)
- end if
- if(allocated (lbfgs_plan%diag)) then
-   ABI_FREE(lbfgs_plan%diag)
- end if
+ ABI_SFREE(lbfgs_plan%work)
+ ABI_SFREE(lbfgs_plan%diag)
 
 end subroutine lbfgs_destroy
 !!***
