@@ -725,14 +725,15 @@ end subroutine xc_vdw_aggregate
 !! SOURCE
 
 subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
-& theta,eps,dexc,dexcg)
+& theta,eps,dexc,dexcg,ztmp)
 
 !Arguments ------------------------------------
   integer,intent(in) :: nspden
   real(dp),intent(in) :: ex_lda,ec_lda,vx_lda,vc_lda
   real(dp),intent(in) :: rho(nspden),grho(nspden,3)
   real(dp),intent(inout) :: theta(my_vdw_params%nqpts,nspden,5)
-  real(dp),intent(out),optional :: eps,dexc(2),dexcg(3,nspden)
+  real(dp),intent(in),optional :: ztmp(my_vdw_params%nqpts,my_vdw_params%nqpts)
+  real(dp),intent(out),optional :: eps,dexc(nspden),dexcg(3,nspden)
 
 !Local variables ------------------------------
   character(len=512) :: msg
@@ -741,14 +742,14 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
   real(dp) :: decdrho,dexdrho,dvcdrho,dvxdrho,ec,ex,vc,vx
   real(dp) :: dr,kappa,rho_tmp,grho_tmp(3),grho2_tmp,rtol,qcut,zab
   real(dp) :: dq(3),ptmp(2),q0(5),qtmp(2)
-  real(dp) :: ztmp(my_vdw_params%nqpts,my_vdw_params%nqpts)
+!  real(dp) :: ztmp(my_vdw_params%nqpts,my_vdw_params%nqpts)
   real(dp) :: qpoly(my_vdw_params%nqpts,3)
 
 ! *************************************************************************
 
   ! Init
   nqpts = my_vdw_params%nqpts
-  nrpts = my_vdw_params%nrpts
+!  nrpts = my_vdw_params%nrpts
   ns = my_vdw_params%nsmooth
   qcut = my_vdw_params%qcut
   rtol = my_vdw_params%tolerance
@@ -760,7 +761,14 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
   end if
 
   ! Sum density over spin
-  rho_tmp = sum(rho(1:nspden))
+  !rho_tmp = sum(rho(1:nspden))
+  ! Get total density
+  if (nspden==1) then
+    rho_tmp = rho(nspden)
+  else
+    rho_tmp = rho(1)
+  end if
+
   kappa = (three * pi**2 * rho_tmp)**third
   forall(ix=1:3) grho_tmp(ix) = sum(grho(1:nspden,ix))
   grho2_tmp = sum(grho_tmp**2)
@@ -768,15 +776,17 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
   ! Calculate local wavevector q0 of eqs. 11-12 from DRSLL04
   !   * q0(1)   = q0
   !   * q0(2)   = dq0 / drho
-  !   * q0(3:5) = dq0 / dgrho2
+  !   * q0(3:5) = dq0 / dgrho
   ! Notes:
   !   * treating rho->0 separately (divide by 0)
   !   * treating ex_lda->0 separately (divide by 0)
   q0(:) = zero
-  if ( (rho_tmp < rtol) .or. (ex_lda < rtol) ) then
+!  if ( rho_tmp < rtol ) then
+  if ( rho_tmp < rtol ) then ! .or. (ex_lda < rtol) ) then
     q0(1) = qcut
+    q0(2:5) = zero
   else
-    q0(1) = kappa * (one + ec_lda / ex_lda - zab / nine * grho2_tmp / &
+    q0(1) = kappa * (one + ec_lda/ex_lda - zab/nine * grho2_tmp / &
 &     (two * kappa * rho_tmp)**2)
 
     if ( calc_corrections ) then
@@ -784,30 +794,33 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
 &      (vx_lda - ex_lda) / &
 &      (rho_tmp * ex_lda**2) + two * zab / nine * grho2_tmp / &
 &      (two * kappa * rho_tmp)**3 * &
-&      eight * kappa / three ) * kappa + q0(1) / three * rho_tmp
-     q0(3:5) = -two * (zab / nine) / (two * kappa * rho_tmp)**2 * &
-&      grho_tmp(:)
+&      eight * kappa / three ) * kappa + q0(1) / (three * rho_tmp)
+     q0(3:5) = -two * kappa * (zab / nine) / (two * kappa * rho_tmp)**2 * &
+&      grho_tmp(1:3)
     end if
+    ! Smoothen q0 near qcut exponentially  eq. 5 RS09. (Saturation)
+    !   * q0s(1) = q0c * (1 - exp(-Sum_i=1,ns 1/i (q0/q0c)**i)) 
+    !   * q0s(2) = dq0s / dq |q=q0
+    call vdw_df_saturation(q0(1),qcut,qtmp)
+    q0(1) = qtmp(1)
+    q0(2:5) = q0(2:5) * qtmp(2)
   end if
 
-  if ( q0(1) > qcut ) then
-    q0(1) = qcut
-    q0(2:5)= zero
-  end if
+  !if ( q0(1) > qcut ) then
+  !  q0(1) = qcut
+  !  q0(2:5)= zero
+  !end if
 
-  ! Smoothen q0 near qcut exponentially  eq. 5 RS09. (Saturation)
-  !   * qtmp(1) = qs = qcut * (1 - exp(-Sum_i=1,ns 1/i (x/xc)**i))
-  !   * qtmp(2) = dqs / dq |q=q0
-  qtmp(1) = (q0(1) / qcut) / ns
-  qtmp(2) = one / qcut
-  do is=ns-1,1,-1
-    qtmp(1) = (qtmp(1) + one / is) * q0(1) / qcut
-    qtmp(2) = (qtmp(2) * q0(1) + one) / qcut
-  end do
-  qtmp(2) = qtmp(2) * qcut * exp(-qtmp(1))
+!!qtmp(1) = (q0(1) / qcut) / ns
+!!qtmp(2) = one / qcut
+!!do is=ns-1,1,-1
+!!  qtmp(1) = (qtmp(1) + one / is) * q0(1) / qcut
+!!  qtmp(2) = (qtmp(2) * q0(1) + one) / qcut
+!!end do
+!!qtmp(2) = qtmp(2) * qcut * exp(-qtmp(1))
 
-  q0(1) = qcut * (one - exp(-qtmp(1)))
-  q0(2:5) = q0(2:5) * qtmp(2)
+!!q0(1) = qcut * (one - exp(-qtmp(1)))
+!!q0(2:5) = q0(2:5) * qtmp(2)
 
   ! Calculate polynomial coefficients for cubic-spline interpolation at q0
   !   * qpoly(:,1) = coefficients
@@ -836,64 +849,77 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
   ! qpoly(:,3). This is done twice: one for the
   ! unsoftened kernel and other one for the
   ! softened kernel
-  dr = my_vdw_params%rcut / nrpts
-  ztmp(:,:) = zero
+  !dr = my_vdw_params%rcut / nrpts
+  !ztmp(:,:) = zero
 
-  if ( calc_corrections ) then
-   do ir=1,nrpts
-     do iq1=1,nqpts
-       do iq2=1,iq1
-         ztmp(iq1,iq2) = ztmp(iq1,iq2) - two * pi * phir(ir,iq1,iq2) * dr
-       end do
-     end do
-   end do
-  else
-   do ir=1,nrpts
-     do iq1=1,nqpts
-       do iq2=1,iq1
-         ztmp(iq1,iq2) = ztmp(iq1,iq2) + two * pi * phir_u(ir,iq1,iq2) * dr
-       end do
-     end do
-   end do
-  end if ! calc_corrections
+! if ( calc_corrections ) then
+!  do ir=1,nrpts
+!    do iq1=1,nqpts
+!      do iq2=1,iq1
+!        ztmp(iq1,iq2) = ztmp(iq1,iq2) - two * pi * phir(ir,iq1,iq2) * dr
+!      end do
+!    end do
+!  end do
+! else
+!  do ir=1,nrpts
+!    do iq1=1,nqpts
+!      do iq2=1,iq1
+!        ztmp(iq1,iq2) = ztmp(iq1,iq2) + two * pi * phir_u(ir,iq1,iq2) * dr
+!      end do
+!    end do
+!  end do
+! end if ! calc_corrections
 
-
-  do iq1=1,nqpts
-    do iq2=1,iq1-1
-      ztmp(iq2,iq1) = ztmp(iq1,iq2)
-    end do
-  end do
-  qpoly(:,3) = matmul(qpoly(:,1),ztmp(:,:))
+! do iq1=1,nqpts
+!   do iq2=1,iq1-1
+!     ztmp(iq2,iq1) = ztmp(iq1,iq2)
+!   end do
+! end do
+! qpoly(:,3) = matmul(qpoly(:,1),ztmp(:,:))
 
   ! Calculate theta and its derivatives (see RS09)
   !   * theta(:,:,1)   = theta
   !   * theta(:,:,2)   = dtheta / drho
-  !   * theta(:,:,3:5) = dtheta / dgrho2
+  !   * theta(:,:,3:5) = dtheta / dgrho
   ! Note: trick to go from Abinit to LibXC conventions
 
   do is=1,nspden
-    theta(:,is,1) = qpoly(:,1) * (2 - nspden) * rho(is)
+    !theta(:,is,1) = qpoly(:,1) * (2 - nspden) * rho(is)
+    theta(:,is,1) = qpoly(:,1) * rho(1)  !CHECK THIS!
   end do
-
-  ! Calculate theta derivatives
+!-------my debug--------------------------------------------------
+!  write(59,*) rho_tmp, grho2_tmp, q0(1),(qpoly(iq1,1),iq1=1,nqpts) 
+!-------end my debug----------------------------------------------
+  ! Calculate theta derivatives 
   if ( calc_corrections ) then
     do is=1,nspden
-      theta(:,is,2) = qpoly(:,1) + qpoly(:,2) * q0(2) * rho(is)
+!      theta(:,is,2) = qpoly(:,1) + qpoly(:,2) * q0(2) * rho(is) 
+      theta(:,is,2) = qpoly(:,1) + qpoly(:,2) * q0(2) * rho(1)
+!      theta(:,is,2) = qpoly(:,1) + qpoly(:,2) * q0(2) * rho(is) 
       do ix=3,5
-        theta(:,is,ix) = qpoly(:,2) * q0(ix) * (2 - nspden) * rho(is)
+!        theta(:,is,ix) = qpoly(:,2) * q0(ix) * (2 - nspden) * rho(is)
+        theta(:,is,ix) = qpoly(:,2) * q0(ix) * rho(1)
       end do
     end do
   end if
 
   ! Calculate energy corrections
-    eps = zero
-    ptmp(1) = sum(qpoly(:,3) * qpoly(:,1))
-    eps = ptmp(1) * rho_tmp
+
   if ( calc_corrections ) then
+!-------my debug----------------------------------------------
+!  write(58,*) rho_tmp, grho2_tmp, q0(1),(qpoly(iq1,1),iq1=1,nqpts) 
+     write(59,*) rho_tmp, grho2_tmp, q0(1),(qpoly(iq1,1),iq1=1,nqpts)
+     write(60,*) rho_tmp, grho2_tmp, (theta(iq1,1,1),iq1=1,nqpts)
+     write(61,*) rho_tmp, grho2_tmp, (theta(iq1,1,2),iq1=1,nqpts)
+!-------end my debug-----------------------------------------
+     qpoly(:,3) = matmul(qpoly(:,1),ztmp(:,:))
+     eps = zero
+     ptmp(1) = sum(qpoly(:,3) * qpoly(:,1))
+     eps = ptmp(1) * rho_tmp
      dexc(:) = zero
      dexcg(:,:) = zero
      ptmp(2) = two * sum(qpoly(:,2) * qpoly(:,3))
-     dexc(:) = two * ptmp(1) * rho_tmp + ptmp(2) * qtmp(2) * rho_tmp**2
+     dexc(:) = two * ptmp(1) * rho_tmp + ptmp(2) * q0(2) * rho_tmp**2
     do ix=3,5
       dexcg(ix-2,:) = ptmp(2) * q0(ix) * rho_tmp**2
     end do
