@@ -960,8 +960,9 @@ subroutine xc_vdw_done(vdw_params)
 
   DBG_ENTER("COLL")
 
-  call libxc_functionals_end(xc_functionals=vdw_funcs)
-
+!--------my debug----------------------------
+  !call libxc_functionals_end(xc_functionals=vdw_funcs)
+!--------end my debug------------------------
   ABI_FREE(dmesh)
   ABI_FREE(qmesh)
   ABI_FREE(qpoly_basis)
@@ -1062,6 +1063,7 @@ subroutine xc_vdw_init(vdw_params)
 
   character(len=512) :: msg
   integer :: id1,id2,iq1,iq2,ir,ir0,ixc,jd1,jd2,ndpts,ngpts,nqpts,nrpts,ntest,sofswt
+  integer :: ii,jj ! DEBUG
   real(dp) :: d1,d2,dcut,dd,delta_test,dsoft,phisoft,acutmin,aratio,damax
   real(dp) :: phimm,phimp,phipm,phipp,phipn,phi_tmp,ptmp(2)
   real(dp),allocatable :: deltd(:),kern_spline_der(:,:,:)
@@ -1086,7 +1088,7 @@ subroutine xc_vdw_init(vdw_params)
   phisoft = my_vdw_params%phisoft
 
   ! Create d-mesh
-  ! Note: avoid zero and make sure the last point is exactly dcut
+  ! Note: Not avoid zero and make sure the last point is exactly dcut
   ABI_MALLOC(dmesh,(ndpts))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Generating D-mesh"
@@ -1095,8 +1097,13 @@ subroutine xc_vdw_init(vdw_params)
   call vdw_df_create_mesh(dmesh,ndpts,my_vdw_tweaks%dmesh_type, &
 &   my_vdw_params%dcut,mesh_ratio=my_vdw_params%dratio, &
 &   mesh_tolerance=my_vdw_params%tolerance,mesh_file=dmesh_file, &
-&   avoid_zero=.true.,exact_max=.true.)
-
+&   avoid_zero=.false.,exact_max=.true.)
+!DEBUG
+  write(*,*) '-----D-mesh:-------'
+  do id1 = 1,ndpts
+    write(*,*) id1, dmesh(id1)
+  end do
+!END DEBUG
   ! Create q-mesh
   ABI_MALLOC(qmesh,(nqpts))
 #if defined DEBUG_VERBOSE
@@ -1111,40 +1118,58 @@ subroutine xc_vdw_init(vdw_params)
   !   * qpoly_basis(:,1) = polynomial basis
   !   * qpoly_basis(:,2) = second derivative
   ABI_MALLOC(qpoly_basis,(nqpts,nqpts,2))
-  ABI_MALLOC(btmp,(nqpts,nqpts))
+!  ABI_MALLOC(btmp,(nqpts,nqpts))
   ABI_MALLOC(utmp,(nqpts))
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Generating polynomial basis"
   call wrtout(std_out,msg,'COLL')
 #endif
-  btmp(:,:) = zero
-  forall(iq1=1:nqpts) btmp(iq1,iq1) = one
+!  btmp(:,:) = zero
+!  forall(iq1=1:nqpts) btmp(iq1,iq1) = one
   utmp(:) = zero
   qpoly_basis(:,:,:) = zero
   do iq1=1,nqpts
     qpoly_basis(iq1,iq1,1) = one
-    qpoly_basis(iq1,1,2) = zero
+    qpoly_basis(1,iq1,2) = zero
     utmp(1) = zero
     do iq2=2,nqpts-1
-      ptmp(1) = (qmesh(iq2) - qmesh(iq2-1)) / &
-&     (qmesh(iq2+1) - qmesh(iq2-1))
-      ptmp(2) = ptmp(1) * qpoly_basis(iq1,iq2-1,2) + two
-      qpoly_basis(iq1,iq2,2) = (ptmp(1) - one) / ptmp(2)
-      utmp(iq2) = ( six * ((btmp(iq1,iq2+1) - btmp(iq1,iq2)) / &
-&     (qmesh(iq2+1) - qmesh(iq2)) - (btmp(iq1,iq2) - &
-&     btmp(iq1,iq2-1)) / (qmesh(iq2) - qmesh(iq2-1))) / &
-&     (qmesh(iq2+1) - qmesh(iq2-1)) - ptmp(1) * utmp(iq2-1)) / &
-&     ptmp(2)
+      ptmp(1) = (qmesh(iq2)-qmesh(iq2-1)) / (qmesh(iq2+1)-qmesh(iq2-1))
+      ptmp(2) = ptmp(1) * qpoly_basis(iq2-1,iq1,2) + two
+      qpoly_basis(iq2,iq1,2) = (ptmp(1) - one) / ptmp(2)
+      utmp(iq2) = ( 6*( (qpoly_basis(iq2+1,iq1,1)-qpoly_basis(iq2,iq1,1))&
+&     /(qmesh(iq2+1)-qmesh(iq2)) - (qpoly_basis(iq2,iq1,1)-&
+&     qpoly_basis(iq2-1,iq1,1))/(qmesh(iq2)-qmesh(iq2-1)) ) /&
+&      (qmesh(iq2+1)-qmesh(iq2-1)) - ptmp(1)*utmp(iq2-1) ) / ptmp(2)
+
+!      ptmp(1) = (qmesh(iq2) - qmesh(iq2-1)) / &
+!&     (qmesh(iq2+1) - qmesh(iq2-1))
+!      ptmp(2) = ptmp(1) * qpoly_basis(iq1,iq2-1,2) + two
+!      qpoly_basis(iq1,iq2,2) = (ptmp(1) - one) / ptmp(2)
+!      utmp(iq2) = ( six * ((btmp(iq1,iq2+1) - btmp(iq1,iq2)) / &
+!&     (qmesh(iq2+1) - qmesh(iq2)) - (btmp(iq1,iq2) - &
+!&     btmp(iq1,iq2-1)) / (qmesh(iq2) - qmesh(iq2-1))) / &
+!&     (qmesh(iq2+1) - qmesh(iq2-1)) - ptmp(1) * utmp(iq2-1)) / &
+!&     ptmp(2)
     end do
-    utmp(nqpts) = zero
-    qpoly_basis(iq1,nqpts,2) = zero
+!    utmp(nqpts) = zero
+    qpoly_basis(nqpts,iq1,2) = zero
     do iq2=nqpts-1,1,-1
-      qpoly_basis(iq1,iq2,2) = qpoly_basis(iq1,iq2,2) * &
-&       qpoly_basis(iq1,iq2+1,2) + utmp(iq2)
+      qpoly_basis(iq2,iq1,2) = qpoly_basis(iq2,iq1,2) * &
+&       qpoly_basis(iq2+1,iq1,2) + utmp(iq2)
     end do
   end do
-  ABI_FREE(btmp)
+!  ABI_DEALLOCATE(btmp)
   ABI_FREE(utmp)
+
+!DEBUG-----------------------
+  open(37,file='qmesh-pofq-d2pdq2-check.dat',status='replace')
+  do iq1=1,nqpts
+    do iq2=1,nqpts
+     write(37,'(4e15.6)') qmesh(iq1), qmesh(iq2), qpoly_basis(iq1,iq2,1) &
+&    , qpoly_basis(iq1,iq2,2)
+    end do
+  end do
+!END DEBUG------------------
 
   ! Create kernel and its derivatives
   ! Note: using 4 neighbours for derivatives
@@ -1155,7 +1180,7 @@ subroutine xc_vdw_init(vdw_params)
 #endif
 
   if ( phisoft < zero ) then
-    phisoft = three * half * exp(-dsoft * two / sqrt(two))
+    phisoft = 0.4_dp  !three * half * exp(-dsoft * two / sqrt(two))
     my_vdw_params%phisoft = phisoft
   end if
 
@@ -1168,7 +1193,7 @@ subroutine xc_vdw_init(vdw_params)
 
     ! Delta(d) should be at least 10^-6
     ! WARNING: changed tol3 to tol6 and changed max to min
-    dd = min(my_vdw_params%dratio*d1,tol6)
+    dd = max(0.01_dp*d1,tol3)   !min(my_vdw_params%dratio*d1,tol6)
 
       phimm = vdw_df_kernel(d1-dd,d1-dd,dsoft,phisoft,acutmin,aratio,damax)
       phipm = vdw_df_kernel(d1+dd,d1-dd,dsoft,phisoft,acutmin,aratio,damax)
@@ -1195,8 +1220,8 @@ subroutine xc_vdw_init(vdw_params)
       phi(id1,id2,3) = (phipp - phipm + phimp - phimm) / (four * dd)
       phi(id1,id2,4) = (phipp - phipm - phimp + phimm) / ((two * dd)**2)
 
-      phi(id2,id1,2) = phi(id1,id2,2)
-      phi(id2,id1,3) = phi(id1,id2,3)
+      phi(id2,id1,2) = phi(id1,id2,3)
+      phi(id2,id1,3) = phi(id1,id2,2)
       phi(id2,id1,4) = phi(id1,id2,4)
     end do
 
@@ -1213,12 +1238,32 @@ subroutine xc_vdw_init(vdw_params)
   ! Set boundary conditions
   ! Note: will have to check that the borders are smooth enough
   ! These boundary conditions produce large discontinuities, now testing its removal
-  ! phi(ndpts,:,:) = zero
-  ! phi(:,ndpts,:) = zero
-  ! phi(1,:,2:4)   = zero
-  ! phi(:,1,2:4)   = zero
+  phi(ndpts,:,:) = zero
+  phi(:,ndpts,:) = zero
+  phi(1,:,2) = zero
+  phi(:,1,3) = zero
+  phi(1,:,4) = zero
+  phi(:,1,4) = zero
+  
+  
+! Make dphi(d1,d2)/dd1=0 for d1=0 and dphi(d1,d2)/dd2=0 for d2=0
+! dphidd1(1,:) = 0
+! dphidd2(:,1) = 0
+! d2phidd1dd2(:,1) = 0
+! d2phidd1dd2(1,:) = 0
+!DEBUG------
+  write(*,*) 'd1 -- d2 -- phi -- dphi/dd1 -- dphi/dd2 -- d2phi/dd1dd2'
+  do id1 = 1,ndpts
+    do id2 = 1,ndpts
+      d1 = dmesh(id1)
+      d2 = dmesh(id2)
+      write(*,'(2f10.6,4e15.6)'), d1, d2, phi(id1,id2,1), &
+        phi(id1,id2,2), phi(id1,id2,3), phi(id1,id2,4)
+    end do
+  end do
+!END DEBUG-------
   ! Ar2 results show better convergence of E_vdW than when boundary conditions were used.
-  ! Kernel plot show that there are not dicontinuities as well.
+  ! Kernel plot show that there are not dicontinuities as well. 
 
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Build] Building filtered kernel"
