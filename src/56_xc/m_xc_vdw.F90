@@ -564,7 +564,11 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   write(msg,'(a,1x,i8.8,1x,a)') "Will now call xc_vdw_energy",npts_rho,"times"
   ABI_COMMENT(msg)
 #endif
-
+!--------my debug------------------------------------------
+  open(unit=56,file='rho-LDA-xc.dat',status='replace')
+  open(unit=57,file='rho-eps.dat',status='replace')
+  open(unit=58,file='rho-grho-qpoly.dat',status='replace')
+!--------end debug----------------------------------------
   ! Calculate and integrate vdW corrections at each point
   do ip1=1,npts_rho
 
@@ -576,24 +580,49 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
     theta(:,:,:) = zero
     call xc_vdw_energy(nspden,rho_grho(ip1,1:nspden,1), &
 &     rho_grho(ip1,1:nspden,2:ngrad), &
-&     ex,ec,vx,vc,theta,exc_tmp,decdrho_tmp,decdgrho_tmp)
+&     ex,ec,vx,vc,theta,exc_tmp,decdrho_tmp,decdgrho_tmp,ztmp)
 
     ! Get nonlocal contributons
     ! Note: is2 represents cartesian coordinates here.
-    rho_tmp = sum(rho_grho(ip1,1:nspden,1))
+    if (nspden==1) then
+      rho_tmp = rho_grho(ip1,nspden,1)
+    else
+      rho_tmp = rho_grho(ip1,1,1)
+    end if
+    !rho_tmp = sum(rho_grho(ip1,1:nspden,1))
     deltae_vdw = deltae_vdw + rho_tmp * exc_tmp * dvol
     exc_vdw = exc_vdw + rho_tmp * &
-&     ( half * ( sum(ttmp(:,ip1) * theta(:,1,1)) / &
-&       (rho_tmp + tiny(rho_tmp)) ) * dvol ) * dvol
+&     ( half * ( sum(ttmp2(:,ip1) * theta(:,1,1)) / &
+&       (rho_tmp + tiny(rho_tmp)) ) * dvol )
+
+!----------------my debug--------------------------------------------------
+
+!    write(*.'(5e15.6)') rho_tmp, exc_tmp, rho_tmp * exc_tmp * dvol, half*(sum(ttmp(:,ip1) * theta(:,1,1))/(rho_tmp + tiny(rho_tmp))), &
+!&   half*(sum(ttmp(:,ip1) * theta(:,1,1))/(rho_tmp + tiny(rho_tmp)))*rho_tmp*dvol 
+!    forall(ix=1:3) grho_tmp(ix) = sum(rho_grho(ip1,1:nspden,1+ix))    
+!    ngrho = sqrt( sum(grho_tmp**2) )
+!
+!    write(*,'(3e15.6)') rho_tmp, ngrho, theta(15,1,1) 
+
+     write(56,'(5e15.6)') rho_tmp, ex, ec, vx, vc
+     write(57,'(2e15.6)') rho_tmp, exc_tmp !ex, ec, vx, vc
+
+!---------------end my debug-----------------------------------------------
+
     !Correctness of multiplication by dvol above depends on how fftw3 deals
     !with the volume element in direct or inverse FFT. Here it was assumed
     !that fftw3 does not multiply by the volume upon FFT^-1
     do is1=1,nspden
-      decdrho_vdw(is1) = decdrho_vdw(is1) + decdrho_tmp(is1) + &
-&       sum(ttmp(:,ip1) * theta(:,is1,2))
+      decdrho_vdw(ip1,is1) = decdrho_tmp(is1) + &
+&       sum(ttmp2(:,ip1) * theta(:,is1,2))  !CHECK how it is defined
+                                            !array decdrho_tmp(is1)                                             
+!      decdrho_vdw(is1) = decdrho_vdw(is1) + decdrho_tmp(is1) + &
+!&       sum(ttmp(:,ip1) * theta(:,is1,2))
       do is2=1,3
-        decdgrho_vdw(is2,is1) = decdgrho_vdw(is2,is1) + decdgrho_tmp(is2,is1) + &
-&         sum(ttmp(:,ip1) * theta(:,is1,is2+2))
+        decdgrho_vdw(ip1,is2,is1) = decdgrho_tmp(is2,is1) + &
+&         sum(ttmp2(:,ip1) * theta(:,is1,is2+2))
+!        decdgrho_vdw(is2,is1) = decdgrho_vdw(is2,is1) + decdgrho_tmp(is2,is1) + &
+!&         sum(ttmp(:,ip1) * theta(:,is1,is2+2))
       end do
     end do
 
@@ -606,9 +635,13 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 #endif
 
   end do ! Loop on npts_rho
+!------my debug--------------------------------------------
+  close (unit=56)
+  close (unit=57)
+  close (unit=58)
+!------end debug-------------------------------------------
 
-
-  deltae_vdw = deltae_uns + deltae_vdw
+!  deltae_vdw = deltae_uns + deltae_vdw
 
 #if defined DEBUG_VERBOSE
   write(msg,'(1x,a)') "[vdW-DF Enrgy] 100% complete"
@@ -616,13 +649,13 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
   ! Display results
   write(msg,'(a,1x,3a,2(3x,a,1x,e12.5,a),3x,a,1(1x,e12.5),a, &
-&   3x,a,3(1x,e12.5),a)') &
+&   3x,a,1(1x,e12.5),a)') &
 &   ch10,"[vdW-DF] xc_vdw_aggregate: reporting vdW-DF contributions", &
 &   ch10,ch10, &
 &   "DeltaE_vdw = ",deltae_vdw,ch10, &
-&   "Exc_vdw = ",exc_vdw,ch10, &
-&   "dExc_vdw/drho = ",decdrho_vdw(:),ch10, &
-&   "dExc_vdw/dgrho = ",decdgrho_vdw(:,:),ch10
+&   "Exc_vdw = ",exc_vdw,ch10 !, & 
+!&   "dExc_vdw/drho = ",decdrho_vdw(:,:),ch10, &
+!&   "dExc_vdw/dgrho = ",decdgrho_vdw(:,:,:),ch10
   call wrtout(std_out,msg,'COLL')
 
   ! Final adjustments of stress
@@ -647,6 +680,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ABI_FREE(t3dg)
   ABI_FREE(ptmp)
   ABI_FREE(ttmp)
+  ABI_FREE(ttmp2)
   ABI_FREE(utmp)
   ABI_FREE(wtmp)
 
