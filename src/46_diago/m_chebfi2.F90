@@ -619,14 +619,14 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
  if (chebfi%paral_kgb == 0) then
    call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
-     do iband=1, neigenpairs !TODO TODO
-  !   !nline necessary to converge to tolerance
-  !   !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
-  !   !nline necessary to decrease residual by a constant factor
-  !   !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
-  !   !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
-       nline_bands(iband) = nline ! fiddle with this to use locking
-    end do
+   do iband=1, neigenpairs !TODO TODO
+  ! !nline necessary to converge to tolerance
+  ! !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
+  ! !nline necessary to decrease residual by a constant factor
+  ! !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
+  ! !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
+     nline_bands(iband) = nline ! fiddle with this to use locking
+   end do
  else
    call xgBlock_reverseMap(DivResults%self,eig,1,chebfi%bandpp)
    do iband=1, chebfi%bandpp !TODO TODO
@@ -763,6 +763,8 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 
 ! *********************************************************************
 
+!Doesnt work with npfft (ncols=1 in the formula below) ???
+
  if (chebfi%paral_kgb == 0) then
    call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1)
    call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1)
@@ -776,7 +778,6 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 !PAW
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xBXColsRows,Results2%self)
 
-!PAW
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, maxeig, maxeig_pos, mineig, mineig_pos)
 
  call xg_free(Results1)
@@ -1180,7 +1181,7 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
 !scalars
  integer :: iband,nbands
  real(dp) :: ampfactor
- real(dp) eig_per_band
+ real(dp) :: eig_per_band
  type(xgBlock_t) :: X_part
  type(xgBlock_t) :: AX_part
  type(xgBlock_t) :: BX_part
@@ -1195,11 +1196,8 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
 
  do iband = 1, nbands
 
-   if(chebfi%istwf_k == 2) then
-     eig_per_band = dble(eig(iband,1))
-   else
-     eig_per_band = dble(eig(iband*2-1,1))
-   end if
+   eig_per_band = eig(1,iband)
+
    !cheb_poly1(x, n, a, b)
    ampfactor = cheb_poly1(eig_per_band, nline_bands(iband), lambda_minus, lambda_plus)
 
