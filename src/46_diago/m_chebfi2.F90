@@ -820,10 +820,10 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  implicit none
 
 !Arguments ------------------------------------
- type(real(dp) ) , intent(in) :: center
- type(integer) , intent(in) :: iline
- type(real(dp) ) , intent(in) :: one_over_r
- type(real(dp) ) , intent(in) :: two_over_r
+ real(dp)       , intent(in) :: center
+ integer        , intent(in) :: iline
+ real(dp)       , intent(in) :: one_over_r
+ real(dp)       , intent(in) :: two_over_r
  type(chebfi_t) , intent(inout) :: chebfi
  interface
    subroutine getBm1X(X,Bm1X,transposer)
@@ -898,8 +898,8 @@ subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
  implicit none
 
 !Arguments ------------------------------------
- type(integer) , intent(in) :: spacedim
- type(integer) , intent(in) :: neigenpairs
+ integer        , intent(in) :: spacedim
+ integer        , intent(in) :: neigenpairs
  type(chebfi_t) , intent(inout) :: chebfi
 
 ! *********************************************************************
@@ -941,7 +941,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
  implicit none
 
 !Arguments ------------------------------------
- type(integer) , intent(in) :: nline
+ integer        , intent(in) :: nline
  type(chebfi_t) , intent(inout) :: chebfi
 !Local variables-------------------------------
 !scalars
