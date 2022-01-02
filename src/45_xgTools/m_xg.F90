@@ -199,8 +199,6 @@ module m_xg
   public :: xgBlock_print
   public :: xg_finalize
 
-  public :: xg_getPointer
-
   contains
 !!***
 
@@ -2267,7 +2265,7 @@ module m_xg
 
     type(xgBlock_t), intent(inout) :: xgBlock
     complex(kind=8), intent(in   ) :: val
-    integer         , intent(in   ) :: inc
+    integer        , intent(in   ) :: inc
     integer :: i
 
     if ( xgBlock%ldim .eq. xgBlock%rows ) then
@@ -2590,28 +2588,6 @@ module m_xg
     lrwork = 0
     lcwork = 0
   end subroutine xg_finalize
-!!***
-
-!!****f* m_xg/xg_getPointer
-!!
-!! NAME
-!! xg_getPointer
-
-  subroutine xg_getPointer(xgBlock) 
-    use iso_c_binding
-    type(xgBlock_t), intent(in) :: xgBlock
-    integer :: cptr
-
-    select case (xgBlock%space)
-      case ( SPACE_R,SPACE_CR )
-        !cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
-        cptr = loc(xgBlock%vecR(:,:))
-      case ( SPACE_C )
-        !cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
-        cptr = loc(xgBlock%vecC(:,:))
-    end select
-
-  end subroutine xg_getPointer
 !!***
 
 !!****f* m_xg/xg_associated
