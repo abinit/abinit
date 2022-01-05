@@ -894,7 +894,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      Build inverse of overlap matrix for chebfi
-       if(psps%usepaw == 1 .and. dtset%wfoptalg == 1 .and. istep <= 1) then
+       if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
        end if
 
