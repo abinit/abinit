@@ -1750,6 +1750,13 @@ subroutine xc_vdw_read(filename)
   NETCDF_VDWXC_CHECK(nf90_inq_varid(ncid,'d2phidg2',varids(12)))
   NETCDF_VDWXC_CHECK(nf90_inq_varid(ncid,'qpoly_basis',varids(13)))
 
+! DEBUG
+  write(*,*) ch10,'Inside xc_vdw_read routine',ch10
+  write(*,*) 'nrpts before =',nrpts,ch10
+  write(*,*) 'varids(8)=',varids(8)
+  write(*,*) 'ndpts before =',ndpts,ch10
+!  nrpts = nrpts + 1 
+! ENDDEBUG
   ! Get dimensions
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,nderivs_id,len=nderivs))
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,npoly_id,len=npoly))
@@ -1757,6 +1764,12 @@ subroutine xc_vdw_read(filename)
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,ngpts_id,len=ngpts))
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,nqpts_id,len=nqpts))
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,nrpts_id,len=nrpts))
+
+! DEBUG
+  write(*,*) 'nrpts after =',nrpts,ch10
+  write(*,*) 'ndpts after =',ndpts,ch10
+!  nrpts = nrpts + 1 
+! ENDDEBUG
 
   ! Get qmesh
   ABI_MALLOC(qmesh,(nqpts))
@@ -1783,23 +1796,23 @@ subroutine xc_vdw_read(filename)
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(7),phi_u_bicubic))
 
   ! Get phir
-  ABI_MALLOC(phir,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir,(0:nrpts-1,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(8),phir))
 
   ! Get phir_u
-  ABI_MALLOC(phir_u,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir_u,(0:nrpts-1,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(9),phir_u))
 
   ! Get d2phidr2
-  ABI_MALLOC(d2phidr2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidr2,(0:nrpts-1,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(10),d2phidr2))
 
   ! Get phig
-  ABI_MALLOC(phig,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phig,(0:nrpts-1,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(11),phig))
 
   ! Get d2phidg2
-  ABI_MALLOC(d2phidg2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidg2,(0:nrpts-1,nqpts,nqpts))
   NETCDF_VDWXC_CHECK(nf90_get_var(ncid,varids(12),d2phidg2))
 
   ! Get qpoly_basis
@@ -1813,7 +1826,13 @@ subroutine xc_vdw_read(filename)
   my_vdw_params%ndpts = ndpts
   my_vdw_params%ngpts = ngpts
   my_vdw_params%nqpts = nqpts
-  my_vdw_params%nrpts = nrpts
+  my_vdw_params%nrpts = nrpts-1
+
+! DEBUG 
+  write(*,*) ch10,'At the end of xc_vdw_read',ch10
+  write(*,*) 'nrpts= ',nrpts
+! END DEBUG
+
 #else
   ABI_ERROR('reading vdW-DF variables requires NetCDF')
 #endif
