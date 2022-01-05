@@ -1503,8 +1503,8 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
   integer,intent(in) :: ixc_vdw
 
 !Local variables ------------------------------
-  character(len=*),parameter :: c_vdw1 = "GGA_C_PBE"
-  character(len=*),parameter :: x_vdw1 = "GGA_X_PBE_R"
+  character(len=*),parameter :: c_vdw1 = "LDA_C_PW"
+  character(len=*),parameter :: x_vdw1 = "LDA_X" !"GGA_X_PBE_R"
   character(len=*),parameter :: x_vdw2 = "GGA_X_PW86"
   character(len=*),parameter :: x_vdw3 = "GGA_X_C09X"
   integer :: i,ii,ic,ix,ixc
@@ -1535,10 +1535,15 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
   ixc = -(ix * 1000 + ic)
 
   ! Propagate to internal parameters
-  my_vdw_params%functional = ixc_vdw
+  my_vdw_params%functional = ixc_vdw !explore what happens with this variable
 
   ! XC functional init
   call libxc_functionals_init(ixc,1,xc_functionals=vdw_funcs)
+
+!------------my debug------------
+  write(*,*) 'vdw_funcs=', vdw_funcs(1)%id, vdw_funcs(2)%id
+  call libxc_functionals_end(xc_functionals=vdw_funcs)
+!-----------end my debug-------
 
   DBG_EXIT("COLL")
 
