@@ -4076,7 +4076,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
  if (db%ft_qcache%maxnq == 0) return
  qcnt = count(ineed_qpt /= 0)
 
- ABI_ERROR("Legacy code!")
+ !ABI_ERROR("Legacy code!")
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
@@ -4179,7 +4179,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
 ! *************************************************************************
 
- ABI_ERROR("Legacy code!")
+ !ABI_ERROR("Legacy code!")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
@@ -4519,7 +4519,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
 ! *************************************************************************
 
- ABI_ERROR("Legacy code!")
+ !ABI_ERROR("Legacy code!")
 
  ABI_UNUSED(cryst%natom)
  ABI_UNUSED(nspden)
