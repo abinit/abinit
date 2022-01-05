@@ -770,7 +770,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
 
  ! Set default energy range for DOS
  ! If sigma_erange is set, get emin and emax from this variable
- ! MG: TODO This value should be read from SIGPEH
+ ! MG: TODO This value should be read from SIGEPH
  ! Recheck metals
  if (self%assume_gap) then
    emin = huge(one); emax = -huge(one)

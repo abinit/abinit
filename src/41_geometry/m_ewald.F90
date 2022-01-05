@@ -636,7 +636,9 @@ end subroutine ewald2
 !! FUNCTION
 !! Compute ewald contribution to the dynamical matrix, at a given
 !! q wavevector, including anisotropic dielectric tensor and effective charges
-!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (71) to (75).
+!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (72) to (75).
+!! This has been generalized to quadrupoles.
+!! Delivers the left hand side of Eq.(72), possibly generalized.
 !!
 !! INPUTS
 !! acell = lengths by which lattice vectors are multiplied
@@ -748,6 +750,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ! Deactivate real space sums for quadrupolar fields or for dipdip = -1
  ewald_option = 0; if (present(option)) ewald_option = option
  if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
+ !ewald_option = 0
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five

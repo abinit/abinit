@@ -3,7 +3,7 @@
 !! m_lobpcgwf
 !!
 !! FUNCTION
-!! this routine updates the whole wave functions at a given k-point,
+!! This routine updates the whole wave functions at a given k-point,
 !! using the lobpcg method
 !! for a given spin-polarization, from a fixed hamiltonian
 !! but might also simply compute eigenvectors and eigenvalues at this k point.
@@ -49,12 +49,16 @@ module m_lobpcgwf
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_getghc,      only : multithreaded_getghc
+ use m_cgtools,     only : dotprod_g
+
+ use iso_c_binding
 
  private
 
  integer, parameter :: l_tim_getghc=5
  double precision, parameter :: inv_sqrt2 = 1/sqrt2
- ! Use in getghc_gsc
+
+ ! For use in getghc_gsc1
  integer,save  :: l_cpopt
  integer,save  :: l_icplx
  integer,save  :: l_istwf
@@ -75,9 +79,6 @@ module m_lobpcgwf
 subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid)
 
-
- use m_cgtools, only : dotprod_g
- use iso_c_binding
  implicit none
 
 !Arguments ------------------------------------

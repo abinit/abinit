@@ -252,7 +252,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  headform0=0 !Default value for headform0 (will be needed later, to read wf blocks)
 
 !Chebyshev is more sensitive to the quality of input random numbers, so use a new algorithm
- if(dtset%wfoptalg == 1) then
+ if(dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) then
    randalg = 1
  else
    ! Otherwise, use compatibility mode

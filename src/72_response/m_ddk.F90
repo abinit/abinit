@@ -266,7 +266,10 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
  cryst = hdr%get_crystal()
 
- ! Extract important dimensions from hdr%
+ ! Extract important dimensions from the header of the WFK file
+ ! so that we avoid depending on the values stored in dtset%.
+ ! For instance, the number of k-points in the header may differ from dtset%nkpt
+ ! if we have used wfk_tofullbz to generate a WFK in the full BZ
  nkpt    = hdr%nkpt
  nsppol  = hdr%nsppol
  nspinor = hdr%nspinor
@@ -315,7 +318,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  keep_ur = .false.; bks_mask = .false.; nband = mband
 
  if (ds%only_diago) then
-   ! Distribute k-points, spin and (b, b) diagonal over MPIR processors.
+   ! Distribute k-points, spin and (b, b) diagonal over MPI processors.
    ABI_MALLOC(distrib_diago, (bmin:bmax, nkpt, nsppol))
    distrib_diago = -1
 
