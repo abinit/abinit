@@ -607,7 +607,11 @@ class AbinitProject(NotebookWriter):
             1. new files/directories have been added
             2. source files have been changed
         """
-        if set(self.dirpaths) != set(self.get_dirpaths()): return True
+        try:
+            if set(self.dirpaths) != set(self.get_dirpaths()): return True
+        except RuntimeError:
+            return True
+
         # FIXME: Return immediately if new files have been added...
 
         # Compare time of most recent content modification.
