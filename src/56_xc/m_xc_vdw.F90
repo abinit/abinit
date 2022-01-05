@@ -1275,50 +1275,59 @@ subroutine xc_vdw_init(vdw_params)
   call spline_bicubic(ndpts,ndpts,dmesh,dmesh,phi(:,:,1),phi(:,:,2),&
 &   phi(:,:,3),phi(:,:,4),phi_bicubic)
 
+!DEBUG------------------------------
+  open (unit=41, file='phi-bicubic-check.dat',status='replace')
+  do id1=1,ndpts
+    do id2=1,ndpts
+      write(41,*) id1, id2, ((phi_bicubic(ii,jj,id1,id2),ii=1,4),jj=1,4)
+    end do
+  end do
+  close(unit=41)
+!END DEBUG------------------------
   ! Build filtered kernel
-  ABI_MALLOC(phir,(nrpts,nqpts,nqpts))
-  ABI_MALLOC(d2phidr2,(nrpts,nqpts,nqpts))
-  ABI_MALLOC(phig,(nrpts,nqpts,nqpts))
-  ABI_MALLOC(d2phidg2,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir,(0:nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidr2,(0:nrpts,nqpts,nqpts))
+  ABI_MALLOC(phig,(0:nrpts,nqpts,nqpts))
+  ABI_MALLOC(d2phidg2,(0:nrpts,nqpts,nqpts))
   call vdw_df_filter(nqpts,nrpts,my_vdw_params%rcut,my_vdw_params%gcut,ngpts,sofswt)
   my_vdw_params%ngpts = ngpts
 
   ! Find closest indices in dmesh
   ! FIXME: something is missing or should be removed here
-  ABI_MALLOC(kern_spline_der,(ndpts,ndpts,3))
-  ABI_MALLOC(deltd,(2))
-  ABI_MALLOC(xde,(2))
+! ABI_MALLOC(kern_spline_der,(ndpts,ndpts,3))
+! ABI_MALLOC(deltd,(2))
+! ABI_MALLOC(xde,(2))
 
-  kern_spline_der(:,:,:) = zero
+! kern_spline_der(:,:,:) = zero
 
-  do jd1=1,ndpts
-    do jd2=1,ndpts
+! do jd1=1,ndpts
+!   do jd2=1,ndpts
 
-      d1 = dmesh(jd1)
-      d2 = dmesh(jd2)
+!     d1 = dmesh(jd1)
+!     d2 = dmesh(jd2)
 
-      if ( (d1 < dcut) .or. (d2 < dcut) ) then
-        id1 = vdw_df_indexof(dmesh,ndpts,d1)
-        id2 = vdw_df_indexof(dmesh,ndpts,d2)
+!     if ( (d1 < dcut) .or. (d2 < dcut) ) then
+!       id1 = vdw_df_indexof(dmesh,ndpts,d1)
+!       id2 = vdw_df_indexof(dmesh,ndpts,d2)
 
-        deltd(1) = dmesh(id1+1) - dmesh(id1)
-        deltd(2) = dmesh(id2+1) - dmesh(id2)
+!       deltd(1) = dmesh(id1+1) - dmesh(id1)
+!       deltd(2) = dmesh(id2+1) - dmesh(id2)
 
-        xde(1) = (d1 - dmesh(id1)) / deltd(1)
-        xde(2) = (d2 - dmesh(id2)) / deltd(2)
+!       xde(1) = (d1 - dmesh(id1)) / deltd(1)
+!       xde(2) = (d2 - dmesh(id2)) / deltd(2)
 
-        kern_spline_der(jd1,jd2,1) = phi_bicubic(2,1,id1,id2) / deltd(1)
-        kern_spline_der(jd1,jd2,2) = phi_bicubic(1,2,id1,id2) / deltd(2)
-        kern_spline_der(jd1,jd2,3) = &
-&         phi_bicubic(2,2,id1,id2) / ( deltd(1)*deltd(2) )
-      end if
+!       kern_spline_der(jd1,jd2,1) = phi_bicubic(2,1,id1,id2) / deltd(1)
+!       kern_spline_der(jd1,jd2,2) = phi_bicubic(1,2,id1,id2) / deltd(2)
+!       kern_spline_der(jd1,jd2,3) = &
+!         phi_bicubic(2,2,id1,id2) / ( deltd(1)*deltd(2) )
+!     end if
 
-    end do
-  end do
+!   end do
+! end do
 
-  ABI_FREE(kern_spline_der)
-  ABI_FREE(deltd)
-  ABI_FREE(xde)
+! ABI_FREE(kern_spline_der)
+! ABI_FREE(deltd)
+! ABI_FREE(xde)
 
   ! Building of the unsoftened kernel
 
@@ -1329,67 +1338,73 @@ subroutine xc_vdw_init(vdw_params)
   write(msg,'(1x,a)') "[vdW-DF Build] Building unsoftened kernel and its derivatives"
   call wrtout(std_out,msg,'COLL')
 #endif
+!------my debug--------------------------------------------------------
+  phi_u(:,:,:) = zero
 
-  do id1=1,ndpts
-    d1 = dmesh(id1)
-    phi_u(id1,id1,1) = vdw_df_kernel_value(d1,d1,acutmin,aratio,damax)
-
-    ! Delta(d) should be at least 10^-6
-    ! WARNING: changed tol3 to tol6 and changed max to min
-    dd = min(my_vdw_params%dratio*d1,tol6)
-
-      phimm = vdw_df_kernel_value(d1-dd,d1-dd,acutmin,aratio,damax)
-      phipm = vdw_df_kernel_value(d1+dd,d1-dd,acutmin,aratio,damax)
-      phipp = vdw_df_kernel_value(d1+dd,d1+dd,acutmin,aratio,damax)
-      phimp = vdw_df_kernel_value(d1-dd,d1+dd,acutmin,aratio,damax)
-
-      ! Using five point stencil formula for crossed derivative phi(id1,id2,4)
-      phi_u(id1,id1,2) = (phipp + phipm - phimp - phimm) / (four * dd)
-      phi_u(id1,id1,3) = (phipp - phipm + phimp - phimm) / (four * dd)
-      phi_u(id1,id1,4) = (phipp - phipm - phimp + phimm) / ((two * dd)**2)
-
-    do id2=1,id1-1
-      d2 = dmesh(id2)
-      phi_u(id1,id2,1) = vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
-      phi_u(id2,id1,1) = phi_u(id1,id2,1)
-
-      phimm = vdw_df_kernel_value(d1-dd,d2-dd,acutmin,aratio,damax)
-      phipm = vdw_df_kernel_value(d1+dd,d2-dd,acutmin,aratio,damax)
-      phipp = vdw_df_kernel_value(d1+dd,d2+dd,acutmin,aratio,damax)
-      phimp = vdw_df_kernel_value(d1-dd,d2+dd,acutmin,aratio,damax)
-
-      ! Using five point stencil formula for crossed derivative phi(id1,id2,4)
-      phi_u(id1,id2,2) = (phipp + phipm - phimp - phimm) / (four * dd)
-      phi_u(id1,id2,3) = (phipp - phipm + phimp - phimm) / (four * dd)
-      phi_u(id1,id2,4) = (phipp - phipm - phimp + phimm) / ((two * dd)**2)
-
-      phi_u(id2,id1,2) = phi_u(id1,id2,2)
-      phi_u(id2,id1,3) = phi_u(id1,id2,3)
-      phi_u(id2,id1,4) = phi_u(id1,id2,4)
-    end do
-
-    write(msg,'(1x,a,1x,i3,"% complete")') &
-&     '[vdW-DF-Uns Build]',int(id1*100.0/ndpts)
-    call wrtout(std_out,msg,'COLL')
+!   do id1=1,ndpts                                                                          
+!     d1 = dmesh(id1)                                                                       
+!     phi_u(id1,id1,1) = vdw_df_kernel_value(d1,d1,acutmin,aratio,damax)                    
+!                                                                                           
+!     ! Delta(d) should be at least 10^-6                                                   
+!     ! WARNING: changed tol3 to tol6 and changed max to min                                
+!     dd = max(0.01_dp*d1,tol3) !min(my_vdw_params%dratio*d1,tol6)                                                
+!                                                                                           
+!       phimm = vdw_df_kernel_value(d1-dd,d1-dd,acutmin,aratio,damax)                       
+!       phipm = vdw_df_kernel_value(d1+dd,d1-dd,acutmin,aratio,damax)                       
+!       phipp = vdw_df_kernel_value(d1+dd,d1+dd,acutmin,aratio,damax)                       
+!       phimp = vdw_df_kernel_value(d1-dd,d1+dd,acutmin,aratio,damax)                       
+!                                                                                           
+!       ! Using five point stencil formula for crossed derivative phi(id1,id2,4)            
+!       phi_u(id1,id1,2) = (phipp + phipm - phimp - phimm) / (four * dd)                    
+!       phi_u(id1,id1,3) = (phipp - phipm + phimp - phimm) / (four * dd)                    
+!       phi_u(id1,id1,4) = (phipp - phipm - phimp + phimm) / ((two * dd)**2)                
+!                                                                                           
+!     do id2=1,id1-1                                                                        
+!       d2 = dmesh(id2)                                                                     
+!       phi_u(id1,id2,1) = vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)                  
+!       phi_u(id2,id1,1) = phi_u(id1,id2,1)                                                 
+!                                                                                           
+!       phimm = vdw_df_kernel_value(d1-dd,d2-dd,acutmin,aratio,damax)                       
+!       phipm = vdw_df_kernel_value(d1+dd,d2-dd,acutmin,aratio,damax)                       
+!       phipp = vdw_df_kernel_value(d1+dd,d2+dd,acutmin,aratio,damax)                       
+!       phimp = vdw_df_kernel_value(d1-dd,d2+dd,acutmin,aratio,damax)                       
+!                                                                                           
+!       ! Using five point stencil formula for crossed derivative phi(id1,id2,4)            
+!       phi_u(id1,id2,2) = (phipp + phipm - phimp - phimm) / (four * dd)                    
+!       phi_u(id1,id2,3) = (phipp - phipm + phimp - phimm) / (four * dd)                    
+!       phi_u(id1,id2,4) = (phipp - phipm - phimp + phimm) / ((two * dd)**2)                
+!                                                                                           
+!       phi_u(id2,id1,2) = phi_u(id1,id2,2)                                                 
+!       phi_u(id2,id1,3) = phi_u(id1,id2,3)                                                 
+!       phi_u(id2,id1,4) = phi_u(id1,id2,4)                                                 
+!     end do                                                                                
+!                                                                                           
+!     write(msg,'(1x,a,1x,i3,"% complete")') &                                              
+! &     '[vdW-DF-Uns Build]',int(id1*100.0/ndpts)                                           
+!     call wrtout(std_out,msg,'COLL')                                                       
+! #if defined DEBUG_VERBOSE                                                                 
+!     call flush_unit(std_out)                                                              
+! #endif                                                                                    
+!   end do                                                                                  
+!   write(msg,'(a)') " "                                                                    
+!   call wrtout(std_out,msg,'COLL')                                                         
+!                                                                                           
+!   ! Set boundary conditions                                                               
+!   ! Note: will have to check that the borders are smooth enough                           
+!   ! These boundary conditions produce large discontinuities, now testing its removal      
+!   phi_u(ndpts,:,:) = zero
+!   phi_u(:,ndpts,:) = zero
+!   phi_u(1,:,2) = zero
+!   phi_u(:,1,3) = zero
+!   phi_u(1,:,4) = zero
+!   phi_u(:,1,4) = zero
+! 
+! 
+!   ! Ar2 results show better convergence of E_vdW than when boundary conditions were used. 
+!   ! Kernel plot show that there are not dicontinuities as well.                           
+!-------end my debug-------------------------------------------------------
 #if defined DEBUG_VERBOSE
-    call flush_unit(std_out)
-#endif
-  end do
-  write(msg,'(a)') " "
-  call wrtout(std_out,msg,'COLL')
-
-  ! Set boundary conditions
-  ! Note: will have to check that the borders are smooth enough
-  ! These boundary conditions produce large discontinuities, now testing its removal
-  ! phi(ndpts,:,:) = zero
-  ! phi(:,ndpts,:) = zero
-  ! phi(1,:,2:4)   = zero
-  ! phi(:,1,2:4)   = zero
-  ! Ar2 results show better convergence of E_vdW than when boundary conditions were used.
-  ! Kernel plot show that there are not dicontinuities as well.
-
-#if defined DEBUG_VERBOSE
-  write(msg,'(1x,a)') "[vdW-DF Build] Building filtered kernel"
+  write(msg,'(1x,a)') "[vdW-DF Build] Building filtered unsoftened kernel"
   call wrtout(std_out,msg,'COLL')
 #endif
 
@@ -1399,7 +1414,7 @@ subroutine xc_vdw_init(vdw_params)
 &   phi_u(:,:,3),phi_u(:,:,4),phi_u_bicubic)
 
   ! Build filtered kernel
-  ABI_MALLOC(phir_u,(nrpts,nqpts,nqpts))
+  ABI_MALLOC(phir_u,(0:nrpts,nqpts,nqpts))
   ! For the local correction we just need the kernel not its
   ! derivatives.
   sofswt = 0
