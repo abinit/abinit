@@ -2065,9 +2065,16 @@ subroutine xc_vdw_trigger(condition)
 ! *************************************************************************
 
   if ( my_vdw_params%functional /= 0 ) then
+
     if ( vdw_switch ) then
+      if (.not. condition) then
+        write (msg,'(1x,a,a)') &
+&         "[vdW-DF] xc_vdw_trigger: disabling xc_vdw_aggregate",ch10
+        vdw_switch = condition
+      else
       write (msg,'(1x,a,a)') &
 &       "[vdW-DF] xc_vdw_trigger: keeping xc_vdw_aggregate enabled",ch10
+      end if
     else
       if ( condition ) then
         write (msg,'(1x,a,a)') &
@@ -2080,7 +2087,7 @@ subroutine xc_vdw_trigger(condition)
       vdw_switch = condition
     end if
 
-    call wrtout(std_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')     
   end if
 
 end subroutine xc_vdw_trigger
