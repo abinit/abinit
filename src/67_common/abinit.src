@@ -40,6 +40,7 @@ sources = [
  "m_eprenorms.F90",
  "m_sigtk.F90",
  "m_odamix.F90",
+ "m_optic_tools.F90",
  "m_optics_vloc.F90",
  "m_rot_cg.F90",
  "m_orbmag.F90",
