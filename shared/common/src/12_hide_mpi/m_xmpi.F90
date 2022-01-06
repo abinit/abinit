@@ -3661,7 +3661,11 @@ subroutine xmpio_create_fstripes(ncount,sizes,types,new_type,my_offpad,mpierr)
  stride = nx*bsize_x + 2*bsize_frm  + ny*bsize_y + 2*bsize_frm
 
  ! ncount colum_type separated by stride bytes
- call MPI_Type_create_hvector(ncount,1,stride,column_type,new_type,mpierr)
+ if (ncount>0) then
+   call MPI_Type_create_hvector(ncount,1,stride,column_type,new_type,mpierr)
+ else
+   call MPI_Type_create_hvector(1,1,stride,column_type,new_type,mpierr)
+ end if
  ABI_HANDLE_MPIERR(mpierr)
 
  call MPI_TYPE_COMMIT(new_type,mpierr)
