@@ -86,6 +86,9 @@ program vdw_kernelgen
 !for doing that !!
  call xmpi_init()
 
+!Default for sequential use
+ call initmpi_seq(mpi_enreg)
+
 !Signal MPI I/O compilation has been activated
 #if defined HAVE_MPI_IO
  if(xmpi_paral==0)then
@@ -103,8 +106,14 @@ program vdw_kernelgen
  call abimem_init(0)
 #endif
 
- write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
- ABI_ERROR(message)
+!Other values of mpi_enreg are dataset dependent, and should NOT be initialized
+!inside vdw_kernelgen.F90.
+
+!* Init fake MPI type with values for sequential case.
+ call initmpi_seq(MPI_enreg_seq)
+
+! write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
+! ABI_ERROR(message)
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)
@@ -161,9 +170,18 @@ program vdw_kernelgen
  call wrtout(std_out,message,'COLL')
  call flush_unit(std_out)
 
+ call destroy_mpi_enreg(mpi_enreg)
+
  call abinit_doctor("__vdw_kernelgen")
 
  call xmpi_end()
+
+#else
+
+! write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
+!& ch10
+! MSG_ERROR(message)
+
 #endif
 
  end program vdw_kernelgen
