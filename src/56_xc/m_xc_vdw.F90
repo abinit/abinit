@@ -2591,7 +2591,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 
     vdw_df_kernel = phisoft
 
-    if ( dtmp >= dtol ) then
+    if ( dtmp >= zero ) then
       deltad = dsoft / 100.0_dp
       d1m = (dsoft - deltad) * d1 / dtmp
       d1p = (dsoft + deltad) * d1 / dtmp
@@ -2846,18 +2846,19 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 !Local variables ------------------------------
   integer :: ii
   logical :: is_gga
-  real(dp),allocatable :: rho_tmp(:,:),grho2(:,:)
+  type(libxc_functional_type) :: aux_funcx(2),aux_funcc(2)
+  real(dp),allocatable :: rho_tmp(:,:)!,grho2(:,:)
 
 ! *************************************************************************
 
   DBG_ENTER("COLL")
 
-  is_gga=libxc_functionals_isgga(vdw_funcs)
+! is_gga=libxc_functionals_isgga(vdw_funcs)
 
   ABI_MALLOC(rho_tmp,(npts_rho,nspden))
-  if (is_gga) then
-    ABI_MALLOC(grho2,(npts_rho,2*min(nspden,2)-1))
-  end if
+! if (is_gga) then
+!   ABI_MALLOC(grho2,(npts_rho,2*min(nspden,2)-1))
+! end if
 
   ! Convert the quantities provided by ABINIT to the ones needed by LibXC
   !
@@ -2878,38 +2879,68 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
   !     directly.
   !
   ! See ~abinit/src/56_xc/rhotoxc.F90 for details.
+  ! However in routine libxc_functionals_getvxc of m_libxc_functionals the transformation
+  ! to libxc input takes place, this means that we do not need to provide here the
+  ! quatities for libxc.   
+
   if (nspden==1) then
     do ii=1,npts_rho
       rho_tmp(ii,1)=half*rho_grho(ii,1,1)
-      if (is_gga) grho2(ii,1)=quarter*(rho_grho(ii,1,2)**2+rho_grho(ii,1,3)**2 &
-&                                     +rho_grho(ii,1,4)**2)
+!     if (is_gga) grho2(ii,1)=quarter*(rho_grho(ii,1,2)**2+rho_grho(ii,1,3)**2 &
+!&                                     +rho_grho(ii,1,4)**2)
     end do
   else
     do ii=1,npts_rho
       rho_tmp(ii,1)=rho_grho(ii,2,1)
       rho_tmp(ii,2)=rho_grho(ii,1,1)-rho_grho(ii,2,1)
-      if (is_gga) then
-        grho2(ii,1)=rho_grho(ii,2,2)**2+rho_grho(ii,2,3)**2+rho_grho(ii,2,4)**2
-        grho2(ii,2)=(rho_grho(ii,1,2)-rho_grho(ii,2,2))**2 &
-&                  +(rho_grho(ii,1,3)-rho_grho(ii,2,3))**2 &
-&                  +(rho_grho(ii,1,4)-rho_grho(ii,2,4))**2
-        grho2(ii,3)=rho_grho(ii,1,2)**2+rho_grho(ii,1,3)**2+rho_grho(ii,1,4)**2
-      end if
+!     if (is_gga) then
+!       grho2(ii,1)=rho_grho(ii,2,2)**2+rho_grho(ii,2,3)**2+rho_grho(ii,2,4)**2
+!       grho2(ii,2)=(rho_grho(ii,1,2)-rho_grho(ii,2,2))**2 &
+!                  +(rho_grho(ii,1,3)-rho_grho(ii,2,3))**2 &
+!                  +(rho_grho(ii,1,4)-rho_grho(ii,2,4))**2
+!       grho2(ii,3)=rho_grho(ii,1,2)**2+rho_grho(ii,1,3)**2+rho_grho(ii,1,4)**2
+!     end if
     end do
   end if
 
-  if (is_gga) then
-    call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp,exc_lda,vxc_lda,&
-&                                 grho2=grho2,vxcgr=vxcg_lda,xc_functionals=vdw_funcs)
-  else
-    call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp,exc_lda,vxc_lda,&
-&                                 xc_functionals=vdw_funcs)
-  end if
+!  if (is_gga) then
+!    call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp,exc_lda,vxc_lda,&
+!&                                 grho2=grho2,vxcgr=vxcg_lda,xc_functionals=vdw_funcs)
+!  else
+
+!  Get LDA exchange energy and potential
+
+    call libxc_functionals_init(-001000,1,xc_functionals=aux_funcx)
+
+    write(*,*) 'aux_funcx=', aux_funcx(1)%id, aux_funcx(2)%id
+    is_gga=libxc_functionals_isgga(aux_funcx)
+    write(*,*) 'LDA exchange is GGA?', is_gga
+
+    call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp(:,nspden),exc_lda(1,:),vxc_lda(1,:,nspden),&
+&                                 xc_functionals=aux_funcx)
+
+    call libxc_functionals_end(xc_functionals=aux_funcx)
+
+!  Get LDA correlation energy and potential
+
+    call libxc_functionals_init(-000012,1,xc_functionals=aux_funcc)
+
+    write(*,*) 'aux_funcc=', aux_funcc(1)%id, aux_funcc(2)%id
+    is_gga=libxc_functionals_isgga(aux_funcc)
+    write(*,*) 'LDA correlation is GGA?', is_gga
+
+    call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp(:,nspden),exc_lda(2,:),vxc_lda(2,:,nspden),&
+&                                 xc_functionals=aux_funcc)
+
+
+    call libxc_functionals_end(xc_functionals=aux_funcc)
+
+!  end if
 
   ABI_FREE(rho_tmp)
-  if (is_gga) then
-    ABI_FREE(grho2)
-  end if
+!  if (is_gga) then
+!    ABI_FREE(grho2)
+!  end if
 
   DBG_EXIT("COLL")
 
