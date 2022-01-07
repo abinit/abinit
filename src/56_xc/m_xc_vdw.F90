@@ -2165,7 +2165,7 @@ subroutine xc_vdw_write(filename)
   NETCDF_VDWXC_CHECK(nf90_def_dim(ncid,'ndpts',my_vdw_params%ndpts,ndpts_id))
   NETCDF_VDWXC_CHECK(nf90_def_dim(ncid,'ngpts',my_vdw_params%ngpts,ngpts_id))
   NETCDF_VDWXC_CHECK(nf90_def_dim(ncid,'nqpts',my_vdw_params%nqpts,nqpts_id))
-  NETCDF_VDWXC_CHECK(nf90_def_dim(ncid,'nrpts',my_vdw_params%nrpts,nrpts_id))
+  NETCDF_VDWXC_CHECK(nf90_def_dim(ncid,'nrpts',my_vdw_params%nrpts+1,nrpts_id))
 
   ! Define qmesh
   dimids(1) = nqpts_id
@@ -2310,24 +2310,29 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
   integer :: ig,iq1,iq2,ir,rfftt,id1,ndpts,ng
   real(dp) :: dg,dr,lstep,ptmp,q1,q2,qcut,qtol,un,xr
   real(dp) :: x1,x2,yq1,yqn,yr1,yrn,gmax
-  real(dp),allocatable :: gmesh(:),rmesh(:),utmp(:)
+  real(dp),allocatable :: gmesh(:),rmesh(:),utmp(:),phiraux(:,:,:)
   real(dp),allocatable :: q1sat(:),q2sat(:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
 
   ! Init
-
-
+  qtol = my_vdw_params%tolerance
+  qcut = my_vdw_params%qcut
+  write(std_out,*) 'gcut before =', gcut  
   dr = rcut / nrpts
   ngpts = nrpts
   dg = pi / rcut
   gcut =  pi / dr  !kmax in siesta
   gmax = 10.639734883681651 !kcut in siesta for a particular 
 ! system (Ar). This should be computed each time in terms of 
-! the FFT and BZ parameters, not hard wired like now. 
+! the FFT and BZ parameters, not hard wired like here. 
   ng = 1 + int(gmax/dg) ! nk in siesta
   rfftt = 2 !Type of radial sin transform
+  write(std_out,*) 'gmax from siesta value for kmax=', gmax
+  write(std_out,*) 'ng from siesta gmax=', ng
+  write(std_out,*) 'gcut after =', gcut
+  write(std_out,*) 'ngpts after =', ngpts
 
   ABI_MALLOC(utmp,(0:nrpts))
 
@@ -2339,6 +2344,9 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
   if ( sofswt == 1 ) then
   ! Create reciprocal radial mesh
    ABI_MALLOC(gmesh,(0:ngpts))
+!----my debug-------------------------------   
+   ABI_ALLOCATE(phiraux,(0:nrpts,nqpts,nqpts))
+!----end my debug---------------------------
    forall(ig=0:ngpts) gmesh(ig) = dg * dble(ig)
   end if
 
@@ -2388,6 +2396,9 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
          phir(ir,iq1,iq2) = vdw_df_interpolate(q1*xr,q2*xr,sofswt) * &
 &          (one - ( xr / rmesh(nrpts))**8)**4
        end do
+!-----debug-------------------------------------     
+       phiraux(:,iq1,iq2) = phir(:,iq1,iq2)
+!-----end debug---------------------------------
 
       ! Obtain kernel in reciprocal space
        call radsintr(phir(:,iq1,iq2),phig(:,iq1,iq2),ngpts,nrpts,gmesh,rmesh,yq1,yqn,rfftt)
@@ -2445,6 +2456,9 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
        phig(:,iq2,iq1) = phig(:,iq1,iq2)
        d2phidr2(:,iq2,iq1) = d2phidr2(:,iq1,iq2)
        d2phidg2(:,iq2,iq1) = d2phidg2(:,iq1,iq2)
+!---------my debug----------------------
+       phiraux(:,iq2,iq1) = phiraux(:,iq1,iq2)
+!----end my debug----------------
       else! sofswt == 1
 
       ! Build unsoftened kernel in real space
@@ -2462,6 +2476,45 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
     end do !loop on iq2
   end do !loop on iq1
+
+!---------my debug----------------------
+   if ( sofswt == 1 ) then  
+     open(unit=68,file='phir-gfil-RADSINTR-A.dat')
+     open(unit=67,file='d2phidr2-gfil-RADSINTR-A.dat')
+     do ir=0,nrpts
+       write(68,*) dble(ir)*dr, ((phiraux(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+       write(67,*) dble(ir)*dr, ((d2phidr2(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts) 
+     end do                                                                  
+     close(unit=67)
+     close(unit=68)
+
+     open(unit=78,file='phig-gfil-RADSINTR-A.dat')                                 
+     open(unit=77,file='d2phidg2-gfil-RADSINTR-A.dat')
+     do ir=0,nrpts
+       write(78,*) dble(ir)*dg, ((phig(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+       write(77,*) dble(ir)*dg, ((d2phidg2(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+     end do
+     close(unit=77)
+     close(unit=78)
+
+     open(unit=87,file='phirfil-gfil-RADSINTR-A.dat')
+     do ir=0,nrpts
+       write(87,*) dble(ir)*dr, ((phir(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+     end do
+     close(unit=87)
+     
+     ABI_DEALLOCATE(phiraux)     
+
+   end if
+   
+   if (sofswt == 0 ) then 
+     open(unit=88,file='phir-uns-gfil-RADSINTR-A.dat')
+     do ir=0,nrpts
+        write(88,*) dble(ir)*dr, ((phir_u(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+     end do
+     close(unit=88)
+   end if
+!----end my debug----------------
 
   ABI_FREE(utmp)
   ABI_FREE(q1sat)
