@@ -2345,7 +2345,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
   ! Create reciprocal radial mesh
    ABI_MALLOC(gmesh,(0:ngpts))
 !----my debug-------------------------------   
-   ABI_ALLOCATE(phiraux,(0:nrpts,nqpts,nqpts))
+   ABI_MALLOC(phiraux,(0:nrpts,nqpts,nqpts))
 !----end my debug---------------------------
    forall(ig=0:ngpts) gmesh(ig) = dg * dble(ig)
   end if
@@ -2503,7 +2503,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
      end do
      close(unit=87)
      
-     ABI_DEALLOCATE(phiraux)     
+     ABI_FREE(phiraux)     
 
    end if
    
@@ -3746,7 +3746,7 @@ subroutine vdw_df_internal_checks(test_mode)
 !      write(*,*) 'FFTW3 call number', iq1
 !fftw_plan_r2r_3d
 #else
-    MSG_ERROR('vdW-DF calculations require FFTW3 support')
+    ABI_ERROR('vdW-DF calculations require FFTW3 support')
 #endif
     ! Repack theta
     ip1 = 1
@@ -3864,7 +3864,7 @@ subroutine vdw_df_internal_checks(test_mode)
       call dfftw_destroy_plan(plan)
     end do
 #else
-    MSG_ERROR('vdW-DF calculations require FFTW3 support')
+    ABI_ERROR('vdW-DF calculations require FFTW3 support')
 #endif
    ! Write u for comparison
     open (unit=80, file='ureal1d-check.dat', status='replace')
