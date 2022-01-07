@@ -3281,8 +3281,8 @@ function vdw_df_interpolate(d1,d2,sofswt)
   select case ( sofswt )
 
     case (1)
-      do ix1=1,4
-        do ix2=1,4
+      do ix2=1,4
+        do ix1=1,4
           vdw_df_interpolate = vdw_df_interpolate + &
 &           phi_bicubic(ix1,ix2,id1,id2) * xd(ix1,1) * xd(ix2,2)
         end do
@@ -3324,17 +3324,30 @@ end function vdw_df_interpolate
 
 subroutine vdw_df_internal_checks(test_mode)
 
+#if defined HAVE_FFT_FFTW3
+  include "fftw3.f03"
+#endif
+
 !Arguments ------------------------------------
   integer,intent(in) :: test_mode
 
 !Local variables ------------------------------
   character(len=512) :: msg
-  integer :: ndpts,ntest,id1
+  integer :: ndpts,ngpts,nqpts,nrpts,ntest,id1,ig,iq1,iq2,jj,ir,nn,ii
+  integer :: iostatus,ip1,ir1,ir2,ir3,nr1,nr2,nr3,i1,i2,i3 
+  integer(kind=SIZEOF_PTRDIFF_T) :: plan 
   real(dp) :: acutmin,aratio,damax,dsoft,phisoft
-  real(dp) :: delta_test,d1,d2
-  real(dp),allocatable :: kern_test_c(:),kern_test_i(:)
-  real(dp),allocatable :: intg_calc(:),intg_int(:)
-
+  real(dp) :: a1,a2,a3,delta_test,d1,d2i,gcut,gtmp,grho2,grhotmp2(3)
+  real(dp) :: b1,b2,b3,dg,dr,rcut,rtmp,dvol,exc_tmp,deltae_vdw
+  real(dp),allocatable :: gprimdt(:,:),kern_test_c(:),kern_test_i(:)
+  real(dp),allocatable :: intg_calc(:),intg_int(:),ptmp(:,:,:) 
+  real(dp),allocatable :: extin(:,:), grhotmp(:,:),ztmp(:,:) 
+  real(dp),allocatable :: decdrho_tmp(:),decdgrho_tmp(:,:)
+  real(dp),allocatable :: t3dr(:,:,:,:),t3dr1d(:,:),gvecs(:,:),t3dr2(:,:,:,:)
+  real(dp),allocatable :: u1dtmp(:,:)
+  real(dp) :: theta(my_vdw_params%nqpts,1,5),dummyv 
+  complex(dp),allocatable :: t3dg(:,:,:,:),t3dg1d(:,:),utmp(:) 
+! real(dp),allocatable :: t3dg(:,:,:,:),t3dg1d(:,:),utmp(:),u1dtmp(:,:)
 ! *************************************************************************
 
   DBG_ENTER("COLL")
@@ -3401,6 +3414,501 @@ subroutine vdw_df_internal_checks(test_mode)
     ABI_FREE(kern_test_i)
     ABI_FREE(intg_calc)
     ABI_FREE(intg_int)
+
+!   The following test aims at checking the interpolation in both 
+!   real and reciprocal space of the radial representation of the
+!   Kernel
+
+    write(msg,'(1x,a)') "[vdW-DF Check] Test #02: Interpolation &
+&   of radial reciprocal space representation of the Kernel"   
+    call wrtout(std_out,msg,'COLL')
+
+!   Interpolate phi in reciprocal space:
+!    * ptmp(:,:,1) = phi(g)
+!    * ptmp(:,:,2) = dphi(g)/dg
+!   The interolation will be performed in a three times 
+!   finer mesh than that used for the spline, and for 
+!   iq1=1q2=1,2 only.
+
+    rcut = my_vdw_params%rcut
+    nrpts = my_vdw_params%nrpts
+    gcut = my_vdw_params%gcut 
+    ngpts = my_vdw_params%ngpts
+!   begin my debug
+    write(*,*) 'ngpts after init: ',ngpts
+!   end my debug
+    ABI_MALLOC(ptmp,(2,2,2))
+
+    dg = pi / rcut !gcut / (ngpts-one)
+#if defined DEBUG_VERBOSE
+    write(msg,'(a,5x,5(1x,a10),a)') ch10, "g","ig","phi(g,1,1)","phi(g,1,2)" &
+&     ,"phi(g,2,2)", ch10
+    call wrtout(std_out,msg,'COLL')
+#endif
+    do jj = 0,3*ngpts-1 !3*(ngpts-1)
+      ptmp(:,:,:) = zero
+      gtmp = jj * dg / three
+      ig = int(gtmp / dg) + 1
+      a1 = ig - gtmp / dg  !((ig + 1) * dg - gtmp) / dg
+      b1 = one - a1
+      a2 = (3 * a1**2 - one) * dg / six
+      b2 = (3 * b1**2 - one) * dg / six
+      a3 = (a1**3 - a1) * dg**2 / six
+      b3 = (b1**3 - b1) * dg**2 / six
+      do iq2 = 1,2
+        do iq1 = 1,iq2
+!          ptmp(iq1,iq2,1) = a1 * phig(ig,iq1,iq2) + b1 * phig(ig+1,iq1,iq2) &
+!&           + a3 * d2phidg2(ig,iq1,iq2) + b3 * d2phidg2(ig+1,iq1,iq2)
+!          ptmp(iq1,iq2,2) = (phig(ig+1,iq1,iq2) - phig(ig,iq1,iq2)) / dg &
+!&           - a2 * d2phidg2(ig,iq1,iq2) + b2 * d2phidg2(ig+1,iq1,iq2)
+          ptmp(iq1,iq2,1) = a1 * phig(ig-1,iq1,iq2) + b1 * phig(ig,iq1,iq2) &
+&           + a3 * d2phidg2(ig-1,iq1,iq2) + b3 * d2phidg2(ig,iq1,iq2)
+          ptmp(iq1,iq2,2) = (phig(ig,iq1,iq2) - phig(ig-1,iq1,iq2)) / dg &
+&           - a2 * d2phidg2(ig-1,iq1,iq2) + b2 * d2phidg2(ig,iq1,iq2)
+        end do
+      end do
+  
+      do iq2 = 1,2
+        do iq1 = 1,iq2-1
+          ptmp(iq2,iq1,:) = ptmp(iq1,iq2,:)
+        end do
+      end do
+#if defined DEBUG_VERBOSE
+      write(msg,'(5x,5(1x,f16.8))') gtmp, real(ig), &
+&       ptmp(1,1,1), ptmp(1,2,1), ptmp(2,2,1)
+      call wrtout(std_out,msg,'COLL')
+#endif
+    end do
+
+    write(msg,'(1x,a)') "[vdW-DF Check] Test #02: Interpolation &
+&   of radial real space representation of the Kernel"   
+    call wrtout(std_out,msg,'COLL')
+
+!     Interpolate phi in real space:
+!       * ptmp(:,:,1) = phi(r)
+!       * ptmp(:,:,2) = dphi(r)/dr
+!     The interolation will be performed in a ten times 
+!     finer mesh than that used for the spline and for 
+!     iq1=1q2=1,2.
+
+    dr = rcut / nrpts !(nrpts-one)
+#if defined DEBUG_VERBOSE
+    write(msg,'(a,4x,4(1x,a10),a)') ch10, "r","phi(r,1,1)","phi(r,1,2)" &
+&     ,"phi(r,2,2)", ch10
+    call wrtout(std_out,msg,'COLL')
+#endif
+    do jj = 0,3*nrpts-1 !-1
+      ptmp(:,:,:) = zero
+      rtmp = jj * dr / three
+      ir = int(rtmp / dr) + 1
+      a1 = ir  - ( rtmp / dr ) 
+      b1 = one - a1
+      a2 = (3 * a1**2 - one) * dr / six
+      b2 = (3 * b1**2 - one) * dr / six
+      a3 = (a1**3 - a1) * dr**2 / six
+      b3 = (b1**3 - b1) * dr**2 / six
+      do iq2 = 1,2
+        do iq1 = 1,iq2
+!          ptmp(iq1,iq2,1) = a1 * phir(ir,iq1,iq2) + b1 * phir(ir+1,iq1,iq2) &
+!&           + a3 * d2phidr2(ir,iq1,iq2) + b3 * d2phidr2(ir+1,iq1,iq2)
+!          ptmp(iq1,iq2,2) = (phir(ir+1,iq1,iq2) - phir(ir,iq1,iq2)) / dr &
+!&           - a2 * d2phidr2(ir,iq1,iq2) + b2 * d2phidr2(ir+1,iq1,iq2)
+          ptmp(iq1,iq2,1) = a1 * phir(ir-1,iq1,iq2) + b1 * phir(ir,iq1,iq2) &
+&           + a3 * d2phidr2(ir-1,iq1,iq2) + b3 * d2phidr2(ir,iq1,iq2)
+          ptmp(iq1,iq2,2) = (phir(ir,iq1,iq2) - phir(ir-1,iq1,iq2)) / dr &
+&           - a2 * d2phidr2(ir-1,iq1,iq2) + b2 * d2phidr2(ir,iq1,iq2)
+        end do
+      end do
+  
+      do iq2 = 1,2
+        do iq1 = 1,iq2-1
+          ptmp(iq2,iq1,:) = ptmp(iq1,iq2,:)
+        end do
+      end do
+#if defined DEBUG_VERBOSE
+      write(msg,'(4x,4(1x,f16.8))') rtmp, &
+&       ptmp(1,1,1), ptmp(1,2,1), ptmp(2,2,1)
+      call wrtout(std_out,msg,'COLL')
+#endif
+    end do
+
+    ABI_FREE(ptmp)
+
+!-------my debug------------------------------------------------
+!   The following test aims at checking the calculation of q0, 
+!   the interpolation  polynomials at q0, and the local cusp 
+!   correction from precomputed electronic density and its 
+!   gradient. Also theta and the nonlocal correction is
+!   computed. 
+
+    write(msg,'(1x,a)') "[vdW-DF Check] Test #03: q0 and &
+&   interpolation polynomials from external rho and grho"   
+    call wrtout(std_out,msg,'COLL')
+
+    nqpts = my_vdw_params%nqpts
+
+    open (unit=98, file='rhogrhoext.dat', status='old',action='read')
+    open (unit=59, file='rho-grho2-q0-qpoly-check.dat',status='replace')
+    open (unit=55, file='rho-epscusp-check.dat',status='replace')
+    open (unit=60, file='rho-grho2-theta-check.dat',status='replace')
+    open (unit=61, file='rho-grho2-dtdd-check.dat',status='replace')
+!    open (unit=62, file='rho-grho2-dtdgd-check.dat',status='replace')
+ 
+    nn=0
+    do
+      read(98,*, iostat=iostatus) dummyv
+      if(iostatus/=0) then ! to avoid end of file error.
+        exit
+      else
+        nn=nn+1
+      end if
+    end do
+    write(*,*) 'Number of lines in rhogrhoext.dat:', nn
+
+    ABI_MALLOC(extin,(nn,9))
+    ABI_MALLOC(grhotmp,(1,3))
+    ABI_MALLOC(ztmp,(nqpts,nqpts)) 
+    ABI_MALLOC(decdrho_tmp,(1))
+    ABI_MALLOC(decdgrho_tmp,(3,1))
+    ABI_MALLOC(gprimdt,(3,3))
+
+    write(*,*) 'Allocated arrays...'
+
+    ! extin contains rho, grho(1), grho(2), grho(3), ex, ec, vx, vc, q0
+    rewind(98)
+
+    write(*,*) 'Rewinded file'
+
+    do ii=1,nn
+      read(98,*) (extin(ii,jj),jj=1,9)
+    end do
+
+    write(*,*) 'Readed external file...'
+    
+    ! Pre-compute integrand for vdW energy correction 
+    ztmp(:,:) = zero
+    do ir=1,nrpts
+      do iq1=1,nqpts
+        do iq2=1,iq1
+          ztmp(iq1,iq2) = ztmp(iq1,iq2) - &
+  &       two * pi * dr * phir(ir,iq1,iq2) * (ir*dr)**2 
+  !&       two * pi * ( phir_u(ir,iq1,iq2) - phir(ir,iq1,iq2) ) * dr
+        end do
+      end do
+    end do
+    do iq1=2,nqpts
+      do iq2=1,iq1-1
+         ztmp(iq2,iq1) = ztmp(iq1,iq2)
+      end do
+    end do
+!---------my debug----------------------------------
+    open(34,file='table-localcorr.dat',status='replace')
+    do iq2=1,nqpts
+       do iq1=1,nqpts
+         write(34,*) iq1, iq2, ztmp(iq1,iq2)
+       enddo
+    enddo
+    close(34)
+    write(*,*) 'Table file written...'
+
+!--------end my debug------------------------------  
+
+    ! Compute q0, polynomials, theta from Abinit routines
+    ! Also get nonlocal correction to the energy
+    open(unit=81,file='gvecs.dat',status='replace')
+    theta(:,:,:) = zero
+    deltae_vdw = zero
+    dvol = 0.025742973 ! this is a particular value for the 
+                       ! precomputed density. Same for gprimd
+    
+    gprimdt(1,1)= 0.22166114341982476
+    gprimdt(2,1)= 0.0d0
+    gprimdt(3,1)= 0.0d0
+    gprimdt(1,2)= 0.0d0
+    gprimdt(2,2)= 0.33249171512973713
+    gprimdt(3,2)= 0.0d0
+    gprimdt(1,3)= 0.0d0
+    gprimdt(2,3)= 0.0d0
+    gprimdt(3,3)= 0.33249171512973713
+
+    nr1=96  !particular values for this precomputed density
+    nr2=64
+    nr3=64
+    
+    ABI_MALLOC(t3dr,(0:nr1-1,0:nr2-1,0:nr3-1,nqpts))
+    ABI_MALLOC(t3dr2,(0:nr1-1,0:nr2-1,0:nr3-1,nqpts))
+    ABI_MALLOC(t3dg,(0:nr1-1,0:nr2-1,0:nr3-1,nqpts)) 
+    ABI_MALLOC(t3dr1d,(nqpts,nr1*nr2*nr3))
+    ABI_MALLOC(t3dg1d,(nqpts,nr1*nr2*nr3))
+    ABI_MALLOC(gvecs,(3,nr1*nr2*nr3))
+    ABI_MALLOC(utmp,(nqpts))
+    ABI_MALLOC(u1dtmp,(nqpts,nr1*nr2*nr3))
+     
+    ip1 = 1 
+    do ir3=0,nr3-1 !1,nr3
+      do ir2=0,nr2-1 !1,nr2
+        do ir1=0,nr1-1 !1,nr1        
+          decdrho_tmp(:) = zero                                    
+          decdgrho_tmp(:,:) = zero
+          grhotmp(1,1:3) = extin(ip1,2:4)
+          forall(ii=1:3) grhotmp2(ii) = grhotmp(1,ii) 
+          grho2 = sum(grhotmp2**2) 
+          !write(*,*) 'Call to xc_vdw_energy number:', ip1
+          call xc_vdw_energy(1,extin(ip1,1),grhotmp,extin(ip1,5),&
+   &      extin(ip1,6),extin(ip1,7),extin(ip1,8),theta,&
+   &      exc_tmp,decdrho_tmp,decdgrho_tmp,ztmp)
+          t3dr(ir1,ir2,ir3,1:nqpts) = theta(1:nqpts,1,1)
+          deltae_vdw = deltae_vdw + extin(ip1,1) * exc_tmp * dvol
+!          forall(ii=1:3) grhotmp2(ii) = grhotmp(1,ii) 
+!          grho2 = sum(grhotmp2**2) 
+!      exc_vdw = exc_vdw + rho_tmp * &
+!&     ( half * ( sum(ttmp2(:,ip1) * theta(:,1,1)) / &
+!&       (rho_tmp + tiny(rho_tmp)) ) * dvol )  
+          if (ir1 > nr1/2) then 
+            i1 = ir1 - nr1
+          else
+            i1 = ir1 
+          end if
+          if (ir2 > nr2/2) then
+            i2 = ir2 - nr2
+          else
+            i2 = ir2
+          end if  
+          if (ir3 > nr3/2) then
+            i3 = ir3 - nr3
+          else
+            i3 = ir3
+          end if 
+          gvecs(:,ip1) =  gprimdt(:,1) * i1 + gprimdt(:,2)&
+&                         * i2 + gprimdt(:,3) * i3
+          write(81,*) ip1, gvecs(:,ip1)
+          write(55,*) extin(ip1,1), exc_tmp
+!          write(60,*) extin(ip1,1), grho2, (theta(iq1,1,1),iq1=1,nqpts)
+!          write(61,*) extin(ip1,1), grho2, (theta(iq1,1,2),iq1=1,nqpts)
+!          write(62,*) extin(ip1,1), grho2, &
+!&         (theta(iq1,1,3),theta(iq1,1,4),theta(iq1,1,5),iq1=1,nqpts)
+          ip1 = ip1 +1
+        end do 
+      end do
+    end do
+    write(*,*) 'Cusp correction for this density:'
+    write(*,*) 'deltae_vdw=',deltae_vdw
+    close(unit=81)
+    close(unit=98)
+    close(unit=59)
+    close(unit=55) 
+    close(unit=60)
+    close(unit=61) 
+!    close(unit=62)
+!   Evaluation of 3D FFT of a component of theta
+!   open (unit=63, file='thetar-3D-iq20.dat', status='old',action='read')
+!   open (unit=63, file='R-thetag-1D-check.dat', status='replace')
+!   open (unit=64, file='I-thetag-1D-check.dat', status='replace')
+    open (unit=65, file='thetar-1D-check.dat', status='replace')
+!    open (unit=66, file='thetar-1D-after-check.dat', status='replace')
+!   nn=0
+!   do
+!     read(63,*, iostat=iostatus) dummyv
+!     if(iostatus/=0) then ! to avoid end of file error.
+!       exit
+!     else
+!       nn=nn+1
+!     end if
+!   end do
+!   rewind(63)
+!   write(*,*) 'Rewinded file'
+
+!   write(*,*) 'Number of lines in thetar-3D-iq20.dat:', nn
+!   nr1=96  !particular values for this precomputed density
+!   nr2=64
+!   nr3=64
+!   ABI_MALLOC(t3dr,(nr1,nr2,nr3,1))
+!   ABI_MALLOC(t3dg,(nr1,nr2,nr3,1)) 
+!   ABI_MALLOC(t3dg1d,(nr1*nr2*nr3))
+!   ABI_MALLOC(gvecs,(3,nr1*nr2*nr3))
+!   do ir3=1,nr3
+!     do ir2=1,nr2
+!       do ir1=1,nr1
+!        read(63,*) t3dr(ir1,ir2,ir3,1)
+!       end do 
+!     end do 
+!   end do
+
+  ! Fourier-transform theta
+#if defined HAVE_FFT_FFTW3
+    do iq1 = 1,nqpts
+      call dfftw_plan_dft_r2c_3d(plan,nr1,nr2,nr3, &
+  &   t3dr(:,:,:,iq1),t3dg(:,:,:,iq1),FFTW_ESTIMATE)
+      call dfftw_execute(plan)
+      call dfftw_destroy_plan(plan)
+      t3dg(:,:,:,iq1) = t3dg(:,:,:,iq1) / (nr1 * nr2 * nr3)
+    end do
+!      write(*,*) 'FFTW3 call number', iq1
+!fftw_plan_r2r_3d
+#else
+    MSG_ERROR('vdW-DF calculations require FFTW3 support')
+#endif
+    ! Repack theta
+    ip1 = 1
+    do ir3=0,nr3-1 !1,nr3
+      do ir2=0,nr2-1 !1,nr2
+        do ir1=0,nr1-1 !1,nr1
+          t3dg1d(1:nqpts,ip1) = t3dg(ir1,ir2,ir3,1:nqpts)
+          t3dr1d(1:nqpts,ip1) = t3dr(ir1,ir2,ir3,1:nqpts) 
+!          write(63,*) ip1, (real(t3dg1d(iq1,ip1)),iq1=1,nqpts)
+!          write(64,*) ip1, (aimag(t3dg1d(iq1,ip1)),iq1=1,nqpts)
+!         write(65,*) ip1, (t3dr1d(iq1,ip1),iq1=1,nqpts)
+          ip1 = ip1 + 1
+        end do
+      end do
+    end do
+    write(*,*) 'Finished 1D repack of theta.'
+
+    ! Fourier-transform back theta just to check fftw3
+!#if defined HAVE_FFT_FFTW3
+!    write(*,*) "Backward FFT of theta - test"
+!    do iq1=1,nqpts
+!     call dfftw_plan_dft_c2r_3d(plan,nr1,nr2,nr3, &
+!&        t3dg(:,:,:,iq1),t3dr2(:,:,:,iq1),FFTW_ESTIMATE)
+!     call dfftw_execute(plan)
+!     call dfftw_destroy_plan(plan)
+!    end do
+!    ip1 = 1
+!    do ir3=0,nr3-1 !1,nr3
+!      do ir2=0,nr2-1 !1,nr2
+!        do ir1=0,nr1-1 !1,nr1
+!          write(66,*) ip1, (t3dr2(ir1,ir2,ir3,iq1),iq1=1,nqpts)
+!          ip1 = ip1 + 1
+!        end do
+!      end do
+!    end do
+!#else
+!    MSG_ERROR('vdW-DF calculations require FFTW3 support')
+!#endif
+
+    open(unit=82,file='Interp-phi-check.dat',status='replace') 
+   ! Reset 3D counters, since theta will be reconstructed in 3D on the fly
+    ir1 = 0 !1
+    ir2 = 0 !1
+    ir3 = 0 !1
+    ! Go through reciprocal vectors to build u
+    ABI_MALLOC(ptmp,(nqpts,nqpts,2))
+    do ip1=1,nr1*nr2*nr3
+      gtmp = sqrt(sum(gvecs(:,ip1)**2))  
+    ! Interpolate kernel in reciprocal space
+      if ( gtmp < gcut ) then
+
+      ! Interpolate phi in reciprocal space:
+      !   * ptmp(:,:,1) = phi(g)
+      !   * ptmp(:,:,2) = dphi(g)/dg
+      ! Note: do this on the fly, to go as fast as possible (this is equivalent
+      !       to a call of the 'splint' routine)
+        ptmp(:,:,:) = zero
+        dg = pi / my_vdw_params%rcut
+        ig = int(gtmp / dg) + 1
+        a1 = ig  - gtmp / dg
+        b1 = one - a1
+        a2 = (3 * a1**2 - one) * dg / six
+        b2 = (3 * b1**2 - one) * dg / six
+        a3 = (a1**3 - a1) * dg**2 / six
+        b3 = (b1**3 - b1) * dg**2 / six
+        do iq2 = 1,nqpts
+          do iq1 = 1,iq2
+            ptmp(iq1,iq2,1) = a1 * phig(ig-1,iq1,iq2) + b1 * phig(ig,iq1,iq2) &
+&           + a3 * d2phidg2(ig-1,iq1,iq2) + b3 * d2phidg2(ig,iq1,iq2)
+            ptmp(iq1,iq2,2) = (phig(ig,iq1,iq2) - phig(ig-1,iq1,iq2)) / dg &
+&           - a2 * d2phidg2(ig-1,iq1,iq2) + b2 * d2phidg2(ig,iq1,iq2)
+          end do
+        end do
+
+        do iq2 = 1,nqpts
+          do iq1 = 1,iq2-1
+            ptmp(iq2,iq1,:) = ptmp(iq1,iq2,:)
+          end do
+        end do
+!---------my debug------------------------------------------------------------
+! write diagonal components of interpolated kernel at each point
+        write(82,*) ip1, (ptmp(iq1,iq1,1),iq1=1,nqpts)
+!--------end my debug--------------------------------------------------------
+        ! Calculate contributions to integral in Fourier space:
+        ! Eq(12) from RS09 
+        utmp(:) = matmul(t3dg1d(:,ip1),ptmp(:,:,1))                      
+      else       
+
+        write(*,*) 'WARNING: gtmp > gcut!!! This is at'
+        write(*,*) 'ip1=',ip1
+        utmp(:) = (zero,zero)
+
+      end if ! gtmp < gcut
+
+      ! Reconstruct the integrand in 3D
+      t3dg(ir1,ir2,ir3,:) = utmp(:)
+                                        
+      ir1 = ir1 + 1
+      if ( ir1 > nr1 ) then
+        ir2 = ir2 + 1
+        ir1 = 1
+      end if
+      if ( ir2 > nr2 ) then
+        ir3 = ir3 + 1
+        ir2 = 1
+      end if
+    end do !ip1=1,npts_rho
+
+    ! Fourier-transform back the integrand
+#if defined HAVE_FFT_FFTW3
+    do iq1=1,nqpts
+      call dfftw_plan_dft_c2r_3d(plan,nr1,nr2,nr3, &
+       t3dg(:,:,:,iq1),t3dr(:,:,:,iq1),FFTW_ESTIMATE)
+      call dfftw_execute(plan)
+      call dfftw_destroy_plan(plan)
+    end do
+#else
+    MSG_ERROR('vdW-DF calculations require FFTW3 support')
+#endif
+   ! Write u for comparison
+    open (unit=80, file='ureal1d-check.dat', status='replace')
+   ! Repack the integrand
+    ip1 = 1
+!$OMP  PARALLEL DO COLLAPSE(3) &
+!$OMP& DEFAULT(SHARED) PRIVATE(ir1,ir2,ir3)
+    do ir3=0,nr3-1
+      do ir2=0,nr2-1
+        do ir1=0,nr1-1
+          u1dtmp(:,ip1) = t3dr(ir1,ir2,ir3,1:nqpts) !real space u
+          write(80,*) ip1, (u1dtmp(iq1,ip1),iq1=1,nqpts)
+          ip1 = ip1 + 1
+        end do
+      end do
+    end do
+   ! ttmp2(:,ip1) corresponds to u_alpha,i at eq(11)
+   ! from RS09. 
+!$OMP END PARALLEL DO
+
+
+
+!  close(unit=63)
+!  close(unit=64)
+   close(unit=65)
+!    close(unit=66)
+    close(unit=80)
+    close(unit=82)
+    ABI_FREE(extin) 
+    ABI_FREE(grhotmp) 
+    ABI_FREE(ztmp)
+    ABI_FREE(ptmp)
+    ABI_FREE(decdrho_tmp)
+    ABI_FREE(decdgrho_tmp)
+    ABI_FREE(t3dr)
+    ABI_FREE(t3dr2)
+    ABI_FREE(t3dg)
+    ABI_FREE(t3dr1d)
+    ABI_FREE(t3dg1d)
+    ABI_FREE(gprimdt) 
+    ABI_FREE(gvecs)
+    ABI_FREE(utmp)
+    ABI_FREE(u1dtmp)
+!--------end my debug--------------------------------------------
 
   end if
 
