@@ -122,7 +122,7 @@ AC_DEFUN([SD_GPU_INIT], [
 
   # Detect use of environment variables
   if test "${sd_gpu_enable}" = "yes" -o "${sd_gpu_enable}" = "auto"; then
-    tmp_gpu_vars="${GPU_CPPFLAGS}${GPU_CFLAGS${GPU_CXXFLAGS}}${GPU_FCFLAGS}${GPU_LDFLAGS}${GPU_LIBS}"
+    tmp_gpu_vars="${GPU_CPPFLAGS}${GPU_CFLAGS}${GPU_CXXFLAGS}${GPU_FCFLAGS}${GPU_LDFLAGS}${GPU_LIBS}"
     if test "${sd_gpu_init}" = "def" -a ! -z "${tmp_gpu_vars}"; then
       sd_gpu_enable="yes"
       sd_gpu_init="env"
