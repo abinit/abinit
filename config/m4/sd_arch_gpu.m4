@@ -96,8 +96,10 @@ AC_DEFUN([SD_GPU_INIT], [
         *)
           tmp_gpu_flavor_ok="no"
           for tmp_gpu_flavor in ${sd_gpu_flavors_supported}; do
-            test "${withval}" = "${tmp_gpu_flavor}" && tmp_gpu_flavor_ok="yes"
-            break
+            if test "${withval}" = "${tmp_gpu_flavor}"; then
+              tmp_gpu_flavor_ok="yes"
+              break
+            fi
           done
           if test "${tmp_gpu_flavor_ok}" = "yes"; then
             sd_gpu_flavor="${withval}"
