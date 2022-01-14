@@ -40,13 +40,17 @@
 
 program vdw_kernelgen
 
-#if defined DEV_YP_VDWXC
  use defs_basis
+ use iso_c_binding
+ use m_abicore
  use m_build_info
  use m_errors
  use m_xc_vdw
  use m_mpinfo
  use m_xmpi
+
+#if defined DEV_YP_VDWXC
+
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -177,11 +181,7 @@ program vdw_kernelgen
  call xmpi_end()
 
 #else
-
-! write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
-!& ch10
-! MSG_ERROR(message)
-
+  ABI_ERROR('vdW-DF functionals are not fully operational yet.')
 #endif
 
  end program vdw_kernelgen
