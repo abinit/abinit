@@ -7,7 +7,7 @@
 !!  part of the propagator using various approximations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
