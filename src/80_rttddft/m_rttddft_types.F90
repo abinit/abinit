@@ -7,7 +7,7 @@
 !!  the time-dependent Kohn-Sham equations in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -243,7 +243,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !scalars
  integer                     :: my_natom
  integer                     :: psp_gencond
- real(dp)                    :: entropy, ecut_eff
+ real(dp)                    :: ecut_eff
  character(len=500)          :: msg
  type(extfpmd_type),pointer  :: extfpmd => null()
  !arrays
@@ -290,7 +290,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !calc occupation number with metallic occupation using the previously read WF
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   call newocc(doccde,tdks%eigen,entropy,tdks%energies%e_fermie,               &
+   call newocc(doccde,tdks%eigen,tdks%energies%entropy,tdks%energies%e_fermie, &
              & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
              & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
              & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ,dtset%occopt,    &

@@ -7,7 +7,7 @@
 !!  and the nuclei (Ehrenfest) if required
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,6 +39,7 @@ module m_rttddft_propagate
  use m_rttddft,             only: rttddft_setup_ele_step
  use m_rttddft_propagators, only: rttddft_propagator_er, &
                                 & rttddft_propagator_emr
+ use m_time,                only: timab
  use m_rttddft_types,       only: tdks_type 
  use m_specialmsg,          only: wrtout
  use m_symtk,               only: symmetrize_xred
@@ -93,11 +94,14 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
- character(len=500)             :: msg
- type(gs_hamiltonian_type)      :: gs_hamk
+ character(len=500)        :: msg
+ type(gs_hamiltonian_type) :: gs_hamk
  !arrays
+ real(dp)                  :: tsec(2)
  
 ! ***********************************************************************
+
+ call timab(1600,1,tsec)
 
  write(msg,'(a,a,i5,a)') ch10,'--- Iteration',istep,ch10
  call wrtout(ab_out,msg)
@@ -116,6 +120,14 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
       write(msg,"(a)") "Unknown Propagator - check the value of td_propagator"
       ABI_ERROR(msg)
  end select
+
+ call timab(1600,2,tsec)
+
+ if (mpi_enreg%me == 0) then 
+   write(msg,'(a,a,f8.2,a)') ch10,'Time (sec)',tsec(1),ch10
+   call wrtout(ab_out,msg)
+   if (do_write_log) call wrtout(std_out,msg)
+ end if
 
  end subroutine rttddft_propagate_ele
 

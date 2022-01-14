@@ -6,7 +6,7 @@
 !!  Contains various propagators for the KS orbitals
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,6 +154,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 
  !Init to zero different energies
  call energies_init(energies)
+ energies%entropy=tdks%energies%entropy !FB: Is that right?
  energies%e_corepsp=tdks%energies%e_corepsp
  energies%e_ewald=tdks%energies%e_ewald
 
@@ -429,15 +430,17 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  ! .. and evolve psi(t) using the EMR propagator with the estimated density at t+dt/2
  call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
  
+ ! check convergence
+ conv(1) = 100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
+ conv(2) = 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
+ lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
  ics = 0
- print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
-         & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
- ! Check convergence
- if (100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1) < dtset%td_scthr .and. &
-   & 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2) < dtset%td_scthr) then
-   lconv = .true.
- else
-   lconv = .false.
+ if (mpi_enreg%me == 0) then 
+   write(msg,'(a,a,i3,a,3(es8.2,x),l,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
+                                            & dtset%td_scthr, lconv, ch10
+   if (do_write_log) call wrtout(std_out,msg)
+ end if
+ if (.not. lconv) then
    !** Corrector steps
    do ics = 1, dtset%td_scnmax
       conv(1) = sum(abs(tdks%cg(1,:))); conv(2) = sum(abs(tdks%cg(2,:)))
@@ -450,18 +453,15 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
       ! evolve psi(t) using estimated density at t+dt/2
       call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
       ! check convergence
-      if (100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1) < dtset%td_scthr .and. &
-        & 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2) < dtset%td_scthr) then
-         lconv = .true.
-         print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
-               & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
-         exit
-     else
-         print*, "SC Step", ics, " - ", 100*(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1), &
-               & 100*(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2), dtset%td_scthr, lconv
-        conv(1) = sum(abs(tdks%cg(1,:)))
-        conv(2) = sum(abs(tdks%cg(2,:)))
-     end if
+      conv(1) = 100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
+      conv(2) = 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
+      lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
+      if (mpi_enreg%me == 0) then 
+         write(msg,'(a,a,i3,a,3(es8.2,x),l,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
+                                            & dtset%td_scthr, lconv, ch10
+         if (do_write_log) call wrtout(std_out,msg)
+      end if
+      if (lconv) exit
    end do
  end if
 
