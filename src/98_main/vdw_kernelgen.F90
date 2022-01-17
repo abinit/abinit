@@ -71,10 +71,10 @@ program vdw_kernelgen
  character(len=500) :: message
  integer :: ierr
  type(MPI_type) :: mpi_enreg,mpi_enreg_seq
-
+#if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_params
  character(len=fnlen) :: vdw_filnam
-
+#endif
 
 !******************************************************************
 !BEGIN EXECUTABLE SECTION
