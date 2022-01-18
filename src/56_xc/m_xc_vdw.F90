@@ -2591,7 +2591,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 
     vdw_df_kernel = phisoft
 
-    if ( dtmp >= zero ) then
+    if ( dtmp > zero ) then
       deltad = dsoft / 100.0_dp
       d1m = (dsoft - deltad) * d1 / dtmp
       d1p = (dsoft + deltad) * d1 / dtmp
