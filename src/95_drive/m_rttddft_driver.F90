@@ -42,6 +42,7 @@ module m_rttddft_driver
  use m_rttddft_types,     only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
  use m_specialmsg,        only: wrtout
+ use m_time,              only: timab
 
  implicit none
 
@@ -115,6 +116,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  integer              :: istep
  type(tdks_type)      :: tdks
  !arrays
+ real(dp)             :: tsec(2)
 
 ! ***********************************************************************
 
@@ -138,6 +140,8 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
+   call timab(1600,1,tsec)
+
    !FB TODO: If Ehrenfest perform nuclear step here
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
@@ -153,6 +157,11 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
 
    !Outputs useful values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+
+   call timab(1600,2,tsec)
+   write(msg,'(a,f8.2,a)') 'Time (sec):',tsec(1), ch10
+   call wrtout(ab_out,msg)
+   if (do_write_log) call wrtout(std_out,msg)
 
  end do
 

@@ -143,7 +143,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 !                   & mpi_atmtab=mpi_enreg%my_atmtab)
 
  !Write in output file
- write(msg,'(a,f14.6,a)') 'Total energy = ', tdks%etot,' Ha'
+ write(msg,'(a,a,f14.6,a)') ch10, 'Total energy = ', tdks%etot,' Ha'
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
