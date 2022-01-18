@@ -566,7 +566,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_etot(dtset, energies, etotal)
+subroutine rttddft_calc_etot(dtset, energies, etotal, mpi_enreg)
 
  implicit none
 
@@ -575,6 +575,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
  real(dp),                   intent(out)   :: etotal
  type(dataset_type),         intent(inout) :: dtset
  type(energies_type),        intent(inout) :: energies
+ type(MPI_type),             intent(inout) :: mpi_enreg
 
  !Local variables-------------------------------
  !scalars

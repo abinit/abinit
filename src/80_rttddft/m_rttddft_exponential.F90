@@ -128,7 +128,7 @@ contains
  
 ! ***********************************************************************
 
- !FB: cwaveprj probably just need to point to the right part of the tdks%cpjr array
+ !FB: cwaveprj probably just need to point to the right part of the tdks%cprj array
  !and we should use cptopt=2 option in getghc to avoid recomputing cprj all the time
  paw = (gs_hamk%usepaw == 1)
  if(paw) then
