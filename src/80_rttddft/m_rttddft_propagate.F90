@@ -39,7 +39,6 @@ module m_rttddft_propagate
  use m_rttddft,             only: rttddft_setup_ele_step
  use m_rttddft_propagators, only: rttddft_propagator_er, &
                                 & rttddft_propagator_emr
- use m_time,                only: timab
  use m_rttddft_types,       only: tdks_type 
  use m_specialmsg,          only: wrtout
  use m_symtk,               only: symmetrize_xred
@@ -67,7 +66,7 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
@@ -97,13 +96,10 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  character(len=500)        :: msg
  type(gs_hamiltonian_type) :: gs_hamk
  !arrays
- real(dp)                  :: tsec(2)
  
 ! ***********************************************************************
 
- call timab(1600,1,tsec)
-
- write(msg,'(a,a,i5,a)') ch10,'--- Iteration',istep,ch10
+ write(msg,'(a,a,i5)') ch10,'--- Iteration',istep
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
@@ -121,14 +117,6 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
       ABI_ERROR(msg)
  end select
 
- call timab(1600,2,tsec)
-
- if (mpi_enreg%me == 0) then 
-   write(msg,'(a,a,f8.2,a)') ch10,'Time (sec)',tsec(1),ch10
-   call wrtout(ab_out,msg)
-   if (do_write_log) call wrtout(std_out,msg)
- end if
-
  end subroutine rttddft_propagate_ele
 
 !!****f* m_rttddft/rttddft_propagate_nuc
@@ -143,7 +131,7 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
