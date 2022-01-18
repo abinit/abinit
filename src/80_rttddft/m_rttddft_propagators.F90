@@ -49,7 +49,7 @@ module m_rttddft_propagators
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_types,       only: tdks_type 
  use m_specialmsg,          only: wrtout
- use m_xmpi,                only: xmpi_comm_rank
+ use m_xmpi,                only: xmpi_comm_rank, xmpi_sum
 
  implicit none
 
@@ -85,7 +85,7 @@ contains
 !!
 !! NOTES
 !!  Other propagators such as the Exponential Midpoint Rule (EMR) 
-!!  propagator should be prefered over this one since the ER propagator 
+!!  should be prefered over this one since the ER propagator alone
 !!  violates time reversal symmetry. Using this propagator with the 
 !!  exponential approximated by Taylor expansion of order 2 leads to 
 !!  the famous Euler method which is fast and simple but unstable
@@ -119,7 +119,8 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  integer                        :: dimffnl
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: ibg, icg
- integer                        :: ider, idir, ilm
+ integer                        :: ider, idir
+ integer                        :: ierr, ilm
  integer                        :: ikpt, ikpt_loc, ikg
  integer                        :: ikpt_this_proc
  integer                        :: istwf_k
@@ -152,15 +153,18 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  spaceComm_distrb=mpi_enreg%comm_cell
  me_distrb=xmpi_comm_rank(spaceComm_distrb)
 
- !Init to zero different energies
- call energies_init(energies)
- energies%entropy=tdks%energies%entropy !FB: Is that right?
- energies%e_corepsp=tdks%energies%e_corepsp
- energies%e_ewald=tdks%energies%e_ewald
 
  !Do we store resulting energies in tdks?
  lstore_ene = .false.
  if (present(store_energies)) lstore_ene = store_energies
+ if (lstore_ene) then
+   !Init to zero different energies
+   call energies_init(energies)
+   tdks%eigen(:) = zero
+   energies%entropy=tdks%energies%entropy !FB: Is that right?
+   energies%e_corepsp=tdks%energies%e_corepsp
+   energies%e_ewald=tdks%energies%e_ewald
+ end if
 
  !Set "vtrial" and intialize the Hamiltonian
  call rttddft_init_hamiltonian(dtset,energies,gs_hamk,istep,mpi_enreg,psps,tdks)
@@ -233,10 +237,10 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       istwf_k=dtset%istwfk(ikpt)
       npw_k=tdks%npwarr(ikpt)
 
-      !if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
-      !   bdtot_index=bdtot_index+nband_k
-      !   cycle
-      !end if
+      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
+         bdtot_index=bdtot_index+nband_k
+         cycle
+      end if
 
       if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
       call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
@@ -317,7 +321,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          nband = nband_k
       end if
 
-      !** Compute the exp[(S^{-1})H]*cg using taylor expansion to approximate the exponential
+      !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
       if (lstore_ene) then
          !Also gather some contribution to the energy if needed
          call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
@@ -353,9 +357,14 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  end if
 
  !Keep the computed energies in memory
- if (lstore_ene) call energies_copy(energies,tdks%energies)
-
- !FB: There should be some MPI reduce here I think.. ?!
+ if (lstore_ene) then
+   !FB: There should be some MPI reduce here I think
+   !FB: Is this the right communicator to use here?
+   call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kpt,ierr)
+   call energies_copy(energies,tdks%energies)
+   call xmpi_sum(tdks%eigen,mpi_enreg%comm_kpt,ierr)
+ end if
 
  end subroutine rttddft_propagator_er
 

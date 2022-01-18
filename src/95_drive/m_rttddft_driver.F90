@@ -146,7 +146,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
    !Computes total energy at time t-dt
-   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot)
+   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot,mpi_enreg)
 
    !Computes new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
