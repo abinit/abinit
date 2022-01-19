@@ -142,6 +142,7 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.032 Mbytes.
             acell31    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
             acell32    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
   constraint_kind        1
              ecut      5.00000000E+00 Hartree
 -          fftalg         312
@@ -1811,6 +1812,7 @@ band_energy         : -1.56911499991411E+00
             acell31    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
             acell32    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
   constraint_kind        1
              ecut      5.00000000E+00 Hartree
            etotal11   -1.0109173313E+00
