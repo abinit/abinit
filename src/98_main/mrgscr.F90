@@ -610,8 +610,8 @@ program mrgscr
      boxcutmin=two; igmax=Gsphere%shlim(Gsphere%nsh)
      ecut=Er%Hscr%Hdr%ecutdg
 
-     call getng(boxcutmin,ecut,Gsphere%gmet,k0,MPI_enreg%me_fft,&
-       mgfft,nfft,ngfft,MPI_enreg%nproc_fft,Cryst%nsym,paral_kgb0,Cryst%symrel)
+     call getng(boxcutmin,1,ecut,Gsphere%gmet,k0,MPI_enreg%me_fft,&
+       mgfft,nfft,ngfft,MPI_enreg%nproc_fft,Cryst%nsym,paral_kgb0,Cryst%symrel,Cryst%tnons)
 
      ! I am using standard valued, it would be better to call indefo
      ! ngfft(1:3)=Er%Hscr%Hdr%ngfft(1:3)
