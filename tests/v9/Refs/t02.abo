@@ -131,12 +131,12 @@ _ WF disk file :      0.717 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
           chkprim           0
+      chksymtnons           3
            chrgat1     0.00000000E+00  0.00000000E+00
            chrgat2     0.00000000E+00  0.00000000E+00
            chrgat3     0.00000000E+00  0.00000000E+00
            chrgat4     1.68000000E+00  1.80000000E+00
            chrgat5     1.68000000E+00  1.80000000E+00
-      chksymtnons           3
   constraint_kind1       0
   constraint_kind2       1
   constraint_kind3       1
@@ -2469,12 +2469,12 @@ total_energy_dc_eV  : -6.73344492111472E+03
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
           chkprim           0
+      chksymtnons           3
            chrgat1     0.00000000E+00  0.00000000E+00
            chrgat2     0.00000000E+00  0.00000000E+00
            chrgat3     0.00000000E+00  0.00000000E+00
            chrgat4     1.68000000E+00  1.80000000E+00
            chrgat5     1.68000000E+00  1.80000000E+00
-      chksymtnons           3
   constraint_kind1       0
   constraint_kind2       1
   constraint_kind3       1

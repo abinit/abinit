@@ -1093,6 +1093,26 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
        endif
      end do
    end do
+!  This gives a tentative symetric triplet
+   ngcurrent(1:3)=ngmax(1:3)
+   prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
+!  However, it is perhaps possible to do better, by assymetric triplets, still giving lower prodcurrent !
+   ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
+   ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
+   ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
+   do ii=1,3
+     do isrch=1,msrch(ii)
+       index=srch(isrch,ii)
+!      One cannot suppose that ngmax belongs to the allowed list,
+!      so must use <= instead of == , to determine largest index
+       if(index<=ngmax(ii))imax(ii)=isrch
+     end do
+   end do
+
+!DEBUG
+!write(std_out,*)' ngmin(1:3)=',srch(imin(1),1),srch(imin(2),2),srch(imin(3),3)
+!write(std_out,*)' ngmax(1:3)=',ngmax(1:3)
+!ENDDEBUG
 
    ngcurrent(1:3)=ngmax(1:3)
    prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
