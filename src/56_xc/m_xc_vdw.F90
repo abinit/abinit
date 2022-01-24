@@ -1257,7 +1257,7 @@ subroutine xc_vdw_init(vdw_params)
     do id2 = 1,ndpts
       d1 = dmesh(id1)
       d2 = dmesh(id2)
-      write(*,'(2f10.6,4e15.6)'), d1, d2, phi(id1,id2,1), &
+      write(*,'(2f10.6,4e15.6)') d1, d2, phi(id1,id2,1), &
         phi(id1,id2,2), phi(id1,id2,3), phi(id1,id2,4)
     end do
   end do
@@ -3845,13 +3845,13 @@ subroutine vdw_df_internal_checks(test_mode)
       t3dg(ir1,ir2,ir3,:) = utmp(:)
                                         
       ir1 = ir1 + 1
-      if ( ir1 > nr1 ) then
+      if ( ir1 > nr1-1 ) then
         ir2 = ir2 + 1
-        ir1 = 1
+        ir1 = 0
       end if
-      if ( ir2 > nr2 ) then
+      if ( ir2 > nr2-1 ) then
         ir3 = ir3 + 1
-        ir2 = 1
+        ir2 = 0
       end if
     end do !ip1=1,npts_rho
 

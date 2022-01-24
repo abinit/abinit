@@ -71,10 +71,10 @@ program vdw_kernelgen
  character(len=500) :: message
  integer :: ierr
  type(MPI_type) :: mpi_enreg,mpi_enreg_seq
-#if defined DEV_YP_VDWXC
+!#if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_params
  character(len=fnlen) :: vdw_filnam
-#endif
+!#endif
 
 !******************************************************************
 !BEGIN EXECUTABLE SECTION
@@ -112,7 +112,7 @@ program vdw_kernelgen
  call initmpi_seq(MPI_enreg_seq)
 
 
-#if defined DEV_YP_VDWXC
+!#if defined DEV_YP_VDWXC
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)
@@ -175,10 +175,10 @@ program vdw_kernelgen
 
  call xmpi_end()
 
-#else
+!#else
  write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
  ABI_ERROR(message)
-#endif
+!#endif
 
  end program vdw_kernelgen
 !!***
