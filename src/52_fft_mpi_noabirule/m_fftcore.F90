@@ -772,7 +772,7 @@ subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
 !scalars
  integer,save :: first=1,msrch(3),previous_paral_mode=0
  integer :: element,ifactor,ii,index,ipower,isrch,isrch1,isrch2,isrch3,isym,jj,mu,paral_fft_
- integer :: plane,testok,tobechecked,ount,fftalga,sumisrch,nn,ngdiv,valpow
+ integer :: plane,testok,tobechecked,ount,fftalga,nn,ngdiv,valpow
  real(dp),parameter :: minbox=0.75_dp
  real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,tnscaled,xx,yy
  logical :: testdiv
