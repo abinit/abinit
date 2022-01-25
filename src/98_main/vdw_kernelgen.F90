@@ -69,7 +69,7 @@ program vdw_kernelgen
 !
  character(len=24) :: codename
  character(len=500) :: message
- integer :: ierr
+ 
  type(MPI_type) :: mpi_enreg,mpi_enreg_seq
 !#if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_params
