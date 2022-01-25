@@ -3324,7 +3324,7 @@ end function vdw_df_interpolate
 
 subroutine vdw_df_internal_checks(test_mode)
 
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   include "fftw3.f03"
 #endif
 
@@ -3735,7 +3735,7 @@ subroutine vdw_df_internal_checks(test_mode)
 !   end do
 
   ! Fourier-transform theta
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
     do iq1 = 1,nqpts
       call dfftw_plan_dft_r2c_3d(plan,nr1,nr2,nr3, &
   &   t3dr(:,:,:,iq1),t3dg(:,:,:,iq1),FFTW_ESTIMATE)
@@ -3856,7 +3856,7 @@ subroutine vdw_df_internal_checks(test_mode)
     end do !ip1=1,npts_rho
 
     ! Fourier-transform back the integrand
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
     do iq1=1,nqpts
       call dfftw_plan_dft_c2r_3d(plan,nr1,nr2,nr3, &
        t3dg(:,:,:,iq1),t3dr(:,:,:,iq1),FFTW_ESTIMATE)
