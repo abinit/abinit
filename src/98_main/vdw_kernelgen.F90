@@ -67,11 +67,11 @@ program vdw_kernelgen
 !Local variables-------------------------------
 !no_abirules
 !
- character(len=24) :: codename
  character(len=500) :: message
  
  type(MPI_type) :: mpi_enreg,mpi_enreg_seq
 #if defined DEV_YP_VDWXC
+ character(len=24) :: codename
  type(xc_vdw_type) :: vdw_params
  character(len=fnlen) :: vdw_filnam
 #endif
