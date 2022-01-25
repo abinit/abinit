@@ -597,15 +597,8 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
 !----------------my debug--------------------------------------------------
 
-!    write(*.'(5e15.6)') rho_tmp, exc_tmp, rho_tmp * exc_tmp * dvol, half*(sum(ttmp(:,ip1) * theta(:,1,1))/(rho_tmp + tiny(rho_tmp))), &
-!&   half*(sum(ttmp(:,ip1) * theta(:,1,1))/(rho_tmp + tiny(rho_tmp)))*rho_tmp*dvol 
-!    forall(ix=1:3) grho_tmp(ix) = sum(rho_grho(ip1,1:nspden,1+ix))    
-!    ngrho = sqrt( sum(grho_tmp**2) )
-!
-!    write(*,'(3e15.6)') rho_tmp, ngrho, theta(15,1,1) 
-
-     write(56,'(5e15.6)') rho_tmp, ex, ec, vx, vc
-     write(57,'(2e15.6)') rho_tmp, exc_tmp !ex, ec, vx, vc
+!     write(56,'(5e15.6)') rho_tmp, ex, ec, vx, vc
+!     write(57,'(2e15.6)') rho_tmp, exc_tmp !ex, ec, vx, vc
 
 !---------------end my debug-----------------------------------------------
 
@@ -908,9 +901,9 @@ subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
   if ( calc_corrections ) then
 !-------my debug----------------------------------------------
 !  write(58,*) rho_tmp, grho2_tmp, q0(1),(qpoly(iq1,1),iq1=1,nqpts) 
-     write(59,*) rho_tmp, grho2_tmp, q0(1),(qpoly(iq1,1),iq1=1,nqpts)
-     write(60,*) rho_tmp, grho2_tmp, (theta(iq1,1,1),iq1=1,nqpts)
-     write(61,*) rho_tmp, grho2_tmp, (theta(iq1,1,2),iq1=1,nqpts)
+!!     write(59,*) rho_tmp, grho2_tmp, q0(1),(qpoly(iq1,1),iq1=1,nqpts)
+!!     write(60,*) rho_tmp, grho2_tmp, (theta(iq1,1,1),iq1=1,nqpts)
+!!     write(61,*) rho_tmp, grho2_tmp, (theta(iq1,1,2),iq1=1,nqpts)
 !-------end my debug-----------------------------------------
      qpoly(:,3) = matmul(qpoly(:,1),ztmp(:,:))
      eps = zero
@@ -1099,10 +1092,10 @@ subroutine xc_vdw_init(vdw_params)
 &   mesh_tolerance=my_vdw_params%tolerance,mesh_file=dmesh_file, &
 &   avoid_zero=.false.,exact_max=.true.)
 !DEBUG
-  write(*,*) '-----D-mesh:-------'
-  do id1 = 1,ndpts
-    write(*,*) id1, dmesh(id1)
-  end do
+!  write(*,*) '-----D-mesh:-------'
+!  do id1 = 1,ndpts
+!    write(*,*) id1, dmesh(id1)
+!  end do
 !END DEBUG
   ! Create q-mesh
   ABI_MALLOC(qmesh,(nqpts))
@@ -1162,13 +1155,13 @@ subroutine xc_vdw_init(vdw_params)
   ABI_FREE(utmp)
 
 !DEBUG-----------------------
-  open(37,file='qmesh-pofq-d2pdq2-check.dat',status='replace')
-  do iq1=1,nqpts
-    do iq2=1,nqpts
-     write(37,'(4e15.6)') qmesh(iq1), qmesh(iq2), qpoly_basis(iq1,iq2,1) &
-&    , qpoly_basis(iq1,iq2,2)
-    end do
-  end do
+! open(37,file='qmesh-pofq-d2pdq2-check.dat',status='replace')
+! do iq1=1,nqpts
+!   do iq2=1,nqpts
+!    write(37,'(4e15.6)') qmesh(iq1), qmesh(iq2), qpoly_basis(iq1,iq2,1) &
+!    , qpoly_basis(iq1,iq2,2)
+!   end do
+! end do
 !END DEBUG------------------
 
   ! Create kernel and its derivatives
@@ -1245,22 +1238,16 @@ subroutine xc_vdw_init(vdw_params)
   phi(1,:,4) = zero
   phi(:,1,4) = zero
   
-  
-! Make dphi(d1,d2)/dd1=0 for d1=0 and dphi(d1,d2)/dd2=0 for d2=0
-! dphidd1(1,:) = 0
-! dphidd2(:,1) = 0
-! d2phidd1dd2(:,1) = 0
-! d2phidd1dd2(1,:) = 0
 !DEBUG------
-  write(*,*) 'd1 -- d2 -- phi -- dphi/dd1 -- dphi/dd2 -- d2phi/dd1dd2'
-  do id1 = 1,ndpts
-    do id2 = 1,ndpts
-      d1 = dmesh(id1)
-      d2 = dmesh(id2)
-      write(*,'(2f10.6,4e15.6)') d1, d2, phi(id1,id2,1), &
-        phi(id1,id2,2), phi(id1,id2,3), phi(id1,id2,4)
-    end do
-  end do
+! write(*,*) 'd1 -- d2 -- phi -- dphi/dd1 -- dphi/dd2 -- d2phi/dd1dd2'
+! do id1 = 1,ndpts
+!   do id2 = 1,ndpts
+!     d1 = dmesh(id1)
+!     d2 = dmesh(id2)
+!     write(*,'(2f10.6,4e15.6)') d1, d2, phi(id1,id2,1), &
+!       phi(id1,id2,2), phi(id1,id2,3), phi(id1,id2,4)
+!   end do
+! end do
 !END DEBUG-------
   ! Ar2 results show better convergence of E_vdW than when boundary conditions were used.
   ! Kernel plot show that there are not dicontinuities as well. 
@@ -1276,13 +1263,13 @@ subroutine xc_vdw_init(vdw_params)
 &   phi(:,:,3),phi(:,:,4),phi_bicubic)
 
 !DEBUG------------------------------
-  open (unit=41, file='phi-bicubic-check.dat',status='replace')
-  do id1=1,ndpts
-    do id2=1,ndpts
-      write(41,*) id1, id2, ((phi_bicubic(ii,jj,id1,id2),ii=1,4),jj=1,4)
-    end do
-  end do
-  close(unit=41)
+! open (unit=41, file='phi-bicubic-check.dat',status='replace')
+! do id1=1,ndpts
+!   do id2=1,ndpts
+!     write(41,*) id1, id2, ((phi_bicubic(ii,jj,id1,id2),ii=1,4),jj=1,4)
+!   end do
+! end do
+! close(unit=41)
 !END DEBUG------------------------
   ! Build filtered kernel
   ABI_MALLOC(phir,(0:nrpts,nqpts,nqpts))
@@ -1541,8 +1528,8 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
   call libxc_functionals_init(ixc,1,xc_functionals=vdw_funcs)
 
 !------------my debug------------
-  write(*,*) 'vdw_funcs=', vdw_funcs(1)%id, vdw_funcs(2)%id
-  call libxc_functionals_end(xc_functionals=vdw_funcs)
+! write(*,*) 'vdw_funcs=', vdw_funcs(1)%id, vdw_funcs(2)%id
+! call libxc_functionals_end(xc_functionals=vdw_funcs)
 !-----------end my debug-------
 
   DBG_EXIT("COLL")
@@ -1751,10 +1738,10 @@ subroutine xc_vdw_read(filename)
   NETCDF_VDWXC_CHECK(nf90_inq_varid(ncid,'qpoly_basis',varids(13)))
 
 ! DEBUG
-  write(*,*) ch10,'Inside xc_vdw_read routine',ch10
-  write(*,*) 'nrpts before =',nrpts,ch10
-  write(*,*) 'varids(8)=',varids(8)
-  write(*,*) 'ndpts before =',ndpts,ch10
+! write(*,*) ch10,'Inside xc_vdw_read routine',ch10
+! write(*,*) 'nrpts before =',nrpts,ch10
+! write(*,*) 'varids(8)=',varids(8)
+! write(*,*) 'ndpts before =',ndpts,ch10
 !  nrpts = nrpts + 1 
 ! ENDDEBUG
   ! Get dimensions
@@ -1766,8 +1753,8 @@ subroutine xc_vdw_read(filename)
   NETCDF_VDWXC_CHECK(nf90_inquire_dimension(ncid,nrpts_id,len=nrpts))
 
 ! DEBUG
-  write(*,*) 'nrpts after =',nrpts,ch10
-  write(*,*) 'ndpts after =',ndpts,ch10
+! write(*,*) 'nrpts after =',nrpts,ch10
+! write(*,*) 'ndpts after =',ndpts,ch10
 !  nrpts = nrpts + 1 
 ! ENDDEBUG
 
@@ -1829,8 +1816,8 @@ subroutine xc_vdw_read(filename)
   my_vdw_params%nrpts = nrpts-1
 
 ! DEBUG 
-  write(*,*) ch10,'At the end of xc_vdw_read',ch10
-  write(*,*) 'nrpts= ',nrpts
+! write(*,*) ch10,'At the end of xc_vdw_read',ch10
+! write(*,*) 'nrpts= ',nrpts
 ! END DEBUG
 
 #else
@@ -2479,41 +2466,41 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
 !---------my debug----------------------
    if ( sofswt == 1 ) then  
-     open(unit=68,file='phir-gfil-RADSINTR-A.dat')
-     open(unit=67,file='d2phidr2-gfil-RADSINTR-A.dat')
-     do ir=0,nrpts
-       write(68,*) dble(ir)*dr, ((phiraux(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
-       write(67,*) dble(ir)*dr, ((d2phidr2(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts) 
-     end do                                                                  
-     close(unit=67)
-     close(unit=68)
+!    open(unit=68,file='phir-gfil-RADSINTR-A.dat')
+!    open(unit=67,file='d2phidr2-gfil-RADSINTR-A.dat')
+!    do ir=0,nrpts
+!      write(68,*) dble(ir)*dr, ((phiraux(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+!      write(67,*) dble(ir)*dr, ((d2phidr2(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts) 
+!    end do                                                                  
+!    close(unit=67)
+!    close(unit=68)
 
-     open(unit=78,file='phig-gfil-RADSINTR-A.dat')                                 
-     open(unit=77,file='d2phidg2-gfil-RADSINTR-A.dat')
-     do ir=0,nrpts
-       write(78,*) dble(ir)*dg, ((phig(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
-       write(77,*) dble(ir)*dg, ((d2phidg2(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
-     end do
-     close(unit=77)
-     close(unit=78)
+!    open(unit=78,file='phig-gfil-RADSINTR-A.dat')                                 
+!    open(unit=77,file='d2phidg2-gfil-RADSINTR-A.dat')
+!    do ir=0,nrpts
+!      write(78,*) dble(ir)*dg, ((phig(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+!      write(77,*) dble(ir)*dg, ((d2phidg2(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+!    end do
+!    close(unit=77)
+!    close(unit=78)
 
-     open(unit=87,file='phirfil-gfil-RADSINTR-A.dat')
-     do ir=0,nrpts
-       write(87,*) dble(ir)*dr, ((phir(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
-     end do
-     close(unit=87)
+!    open(unit=87,file='phirfil-gfil-RADSINTR-A.dat')
+!    do ir=0,nrpts
+!      write(87,*) dble(ir)*dr, ((phir(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+!    end do
+!    close(unit=87)
      
      ABI_FREE(phiraux)     
 
    end if
    
-   if (sofswt == 0 ) then 
-     open(unit=88,file='phir-uns-gfil-RADSINTR-A.dat')
-     do ir=0,nrpts
-        write(88,*) dble(ir)*dr, ((phir_u(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
-     end do
-     close(unit=88)
-   end if
+!  if (sofswt == 0 ) then 
+!    open(unit=88,file='phir-uns-gfil-RADSINTR-A.dat')
+!    do ir=0,nrpts
+!       write(88,*) dble(ir)*dr, ((phir_u(ir,iq1,iq2),iq1=1,iq2),iq2=1,nqpts)
+!    end do
+!    close(unit=88)
+!  end if
 !----end my debug----------------
 
   ABI_FREE(utmp)
@@ -2912,9 +2899,9 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 
     call libxc_functionals_init(-001000,1,xc_functionals=aux_funcx)
 
-    write(*,*) 'aux_funcx=', aux_funcx(1)%id, aux_funcx(2)%id
+    write(std_out,*) 'aux_funcx=', aux_funcx(1)%id, aux_funcx(2)%id
     is_gga=libxc_functionals_isgga(aux_funcx)
-    write(*,*) 'LDA exchange is GGA?', is_gga
+    write(std_out,*) 'LDA exchange is GGA?', is_gga
 
     call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp(:,nspden),exc_lda(1,:),vxc_lda(1,:,nspden),&
 &                                 xc_functionals=aux_funcx)
@@ -2925,9 +2912,9 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 
     call libxc_functionals_init(-000012,1,xc_functionals=aux_funcc)
 
-    write(*,*) 'aux_funcc=', aux_funcc(1)%id, aux_funcc(2)%id
+    write(std_out,*) 'aux_funcc=', aux_funcc(1)%id, aux_funcc(2)%id
     is_gga=libxc_functionals_isgga(aux_funcc)
-    write(*,*) 'LDA correlation is GGA?', is_gga
+    write(std_out,*) 'LDA correlation is GGA?', is_gga
 
     call libxc_functionals_getvxc(1,1,npts_rho,nspden,1,rho_tmp(:,nspden),exc_lda(2,:),vxc_lda(2,:,nspden),&
 &                                 xc_functionals=aux_funcc)
