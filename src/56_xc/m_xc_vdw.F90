@@ -3422,7 +3422,7 @@ subroutine vdw_df_internal_checks(test_mode)
     gcut = my_vdw_params%gcut 
     ngpts = my_vdw_params%ngpts
 !   begin my debug
-    write(*,*) 'ngpts after init: ',ngpts
+    write(std_out,*) 'ngpts after init: ',ngpts
 !   end my debug
     ABI_MALLOC(ptmp,(2,2,2))
 
@@ -3550,7 +3550,7 @@ subroutine vdw_df_internal_checks(test_mode)
         nn=nn+1
       end if
     end do
-    write(*,*) 'Number of lines in rhogrhoext.dat:', nn
+    write(std_out,*) 'Number of lines in rhogrhoext.dat:', nn
 
     ABI_MALLOC(extin,(nn,9))
     ABI_MALLOC(grhotmp,(1,3))
@@ -3559,18 +3559,18 @@ subroutine vdw_df_internal_checks(test_mode)
     ABI_MALLOC(decdgrho_tmp,(3,1))
     ABI_MALLOC(gprimdt,(3,3))
 
-    write(*,*) 'Allocated arrays...'
+    write(std_out,*) 'Allocated arrays...'
 
     ! extin contains rho, grho(1), grho(2), grho(3), ex, ec, vx, vc, q0
     rewind(98)
 
-    write(*,*) 'Rewinded file'
+    write(std_out,*) 'Rewinded file'
 
     do ii=1,nn
       read(98,*) (extin(ii,jj),jj=1,9)
     end do
 
-    write(*,*) 'Readed external file...'
+    write(std_out,*) 'Readed external file...'
     
     ! Pre-compute integrand for vdW energy correction 
     ztmp(:,:) = zero
@@ -3596,7 +3596,7 @@ subroutine vdw_df_internal_checks(test_mode)
        enddo
     enddo
     close(34)
-    write(*,*) 'Table file written...'
+    write(std_out,*) 'Table file written...'
 
 !--------end my debug------------------------------  
 
@@ -3678,8 +3678,8 @@ subroutine vdw_df_internal_checks(test_mode)
         end do 
       end do
     end do
-    write(*,*) 'Cusp correction for this density:'
-    write(*,*) 'deltae_vdw=',deltae_vdw
+    write(std_out,*) 'Cusp correction for this density:'
+    write(std_out,*) 'deltae_vdw=',deltae_vdw
     close(unit=81)
     close(unit=98)
     close(unit=59)
@@ -3749,7 +3749,7 @@ subroutine vdw_df_internal_checks(test_mode)
         end do
       end do
     end do
-    write(*,*) 'Finished 1D repack of theta.'
+    write(std_out,*) 'Finished 1D repack of theta.'
 
     ! Fourier-transform back theta just to check fftw3
 !#if defined HAVE_FFT_FFTW3
@@ -3822,8 +3822,8 @@ subroutine vdw_df_internal_checks(test_mode)
         utmp(:) = matmul(t3dg1d(:,ip1),ptmp(:,:,1))                      
       else       
 
-        write(*,*) 'WARNING: gtmp > gcut!!! This is at'
-        write(*,*) 'ip1=',ip1
+        write(std_out,*) 'WARNING: gtmp > gcut!!! This is at'
+        write(std_out,*) 'ip1=',ip1
         utmp(:) = (zero,zero)
 
       end if ! gtmp < gcut
