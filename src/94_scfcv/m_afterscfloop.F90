@@ -558,8 +558,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if
 
  if(dtset%userid.EQ.1) then
-   call testprj(atindx,atindx1,cg,cprj,dtset,kg,mcg,mcprj,mpi_enreg,&
-     & nattyp,npwarr,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
+   call testprj(atindx,atindx1,cg,cprj,dtset,gsqcut,kg,mcg,mcprj,mpi_enreg,&
+     & nattyp,nfftf,ngfftf,npwarr,pawfgr,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
  end if
 
  call timab(252,2,tsec)
