@@ -566,7 +566,7 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
       if test "${sd_mpi_fc}" != ""; then
         sd_mpi_fc_set="yes"
       else
-        AC_CHECK_PROGS([sd_mpi_fc], [mpifort mpif90 mpif95])
+        AC_CHECK_PROGS([sd_mpi_fc], [mpiifort mpifort mpif90 mpif95])
         if test "${sd_mpi_fc}" != ""; then
           AC_MSG_NOTICE([setting FC to '${sd_mpi_fc}'])
           FC="${sd_mpi_fc}"
