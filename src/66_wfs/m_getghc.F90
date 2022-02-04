@@ -1653,14 +1653,14 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
 !Local variables-------------------------------
 !scalars
- integer :: firstelt, lastelt
+ integer :: firstelt, firstprj, lastelt, lastprj
  integer :: nthreads
  integer :: ithread
  integer :: chunk
  integer :: residuchunk
  integer :: firstband
  integer :: lastband
- integer :: spacedim
+ integer :: spacedim, spacedim_prj
 #ifdef HAVE_OPENMP
  logical :: is_nested
 #endif
@@ -1671,10 +1671,12 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
  select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
 
- spacedim = size(cwavef,dim=2)/ndat
+ spacedim     = size(cwavef  ,dim=2)/ndat
+ spacedim_prj = size(cwaveprj,dim=2)/ndat
 
-    !$omp parallel default (none) private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt, is_nested), &
-    !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
+    !$omp parallel default (none) &
+    !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested), &
+    !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
     !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default)
 #ifdef HAVE_OPENMP
  ithread = omp_get_thread_num()
@@ -1701,27 +1703,37 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
+   firstprj = (firstband-1)*spacedim_prj+1
    lastelt = lastband*spacedim
+   lastprj = lastband*spacedim_prj
       ! Don't know how to manage optional arguments .... :(
    if ( present(kg_fft_k) ) then
      if (present(kg_fft_kp)) then
-       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
-       select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,&
+&      prtvol,sij_opt,tim_getghc,type_calc,&
+&      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
      else
-       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
-       select_k=select_k_default,kg_fft_k=kg_fft_k)
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,&
+&      prtvol,sij_opt,tim_getghc,type_calc,&
+&      select_k=select_k_default,kg_fft_k=kg_fft_k)
      end if
    else
      if (present(kg_fft_kp)) then
-       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
-       select_k=select_k_default,kg_fft_kp=kg_fft_kp)
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,&
+&      prtvol,sij_opt,tim_getghc,type_calc,&
+&      select_k=select_k_default,kg_fft_kp=kg_fft_kp)
      else
-       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
-       gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
-       select_K=select_k_default)
+       call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj(:,firstprj:lastprj),&
+&      ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
+&      gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,&
+&      prtvol,sij_opt,tim_getghc,type_calc,&
+&      select_K=select_k_default)
      end if
    end if
  end if

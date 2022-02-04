@@ -413,6 +413,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! to be generated from the original simulation cell
  rprimd_for_kg=rprimd
  if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
+ if (dtset%optcell/=0.and.dtset%imgmov/=0) rprimd_for_kg=args_gs%rprimd_orig
  call matr3inv(rprimd_for_kg,gprimd_for_kg)
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
@@ -431,7 +432,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -1797,7 +1798,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
    call destroy_invovl(dtset%nkpt)
  end if
 

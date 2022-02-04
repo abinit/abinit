@@ -49,6 +49,7 @@ module m_vtowfk
  use m_cgwf_cprj,   only : cgwf_cprj,mksubovl,cprj_update,cprj_update_oneband
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
+ use m_chebfiwf,    only : chebfiwf2
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
@@ -201,7 +202,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: has_cprj_in_memory,has_fock,newlobpcg,update_cprj,do_subdiago,do_ortho, rotate_subvnlx,use_rmm_diis
+ logical :: has_cprj_in_memory,has_fock,newchebfi,newlobpcg,update_cprj
+ logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -247,6 +249,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
+ newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) 
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
@@ -370,7 +373,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
 
    ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
-   if(wfopta10 /= 1 .and. .not. newlobpcg) then
+   if(wfopta10 /= 1 .and. .not. newlobpcg .and. .not. newchebfi) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
@@ -456,8 +459,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
        else if (wfopta10 == 1) then
-         call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
-&         mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+         if ( .not. newchebfi) then
+           call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+         else          
+           call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)          
+         end if            
        end if
 
 !      =========================================================================
@@ -562,7 +570,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo = mpi_enreg%paral_kgb
    ! The orthogonalization is completely disabled with ortalg<=-10.
    ! This option is usefull for testing only and is not documented.
-   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
+   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
    if (use_rmm_diis) do_ortho = .False.
 
    if (do_ortho) then
@@ -583,9 +591,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ! Fix phases of all bands
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
      !call wrtout(std_out, "Calling cgtk_fixphase")
-      if ( .not. newlobpcg .and. .not. has_cprj_in_memory ) then
+      if ( (.not.newlobpcg) .and. (.not.newchebfi) .and. (.not.has_cprj_in_memory) ) then
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
-     else if (newlobpcg) then
+     else if (newlobpcg .or. newchebfi) then
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calculated in my lobpcg, we don't care about the phase of gsc !
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
