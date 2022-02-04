@@ -40,13 +40,15 @@
 
 program vdw_kernelgen
 
-#if defined DEV_YP_VDWXC
  use defs_basis
+ use defs_abitypes
  use m_build_info
  use m_errors
  use m_xc_vdw
  use m_mpinfo
  use m_xmpi
+
+
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -65,26 +67,26 @@ program vdw_kernelgen
 !Local variables-------------------------------
 !no_abirules
 !
- character(len=24) :: codename
  character(len=500) :: message
- integer :: ierr
-
+ 
+ type(MPI_type) :: mpi_enreg,mpi_enreg_seq
+#if defined DEV_YP_VDWXC
+ character(len=24) :: codename
  type(xc_vdw_type) :: vdw_params
  character(len=fnlen) :: vdw_filnam
-
 #endif
 
 !******************************************************************
 !BEGIN EXECUTABLE SECTION
 
-#if defined DEV_YP_VDWXC
-
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
-
 !Initialize MPI : one should write a separate routine -init_mpi_enreg-
 !for doing that !!
  call xmpi_init()
+
+!Default for sequential use
+ call initmpi_seq(mpi_enreg)
 
 !Signal MPI I/O compilation has been activated
 #if defined HAVE_MPI_IO
@@ -103,8 +105,14 @@ program vdw_kernelgen
  call abimem_init(0)
 #endif
 
- write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
- ABI_ERROR(message)
+!Other values of mpi_enreg are dataset dependent, and should NOT be initialized
+!inside vdw_kernelgen.F90.
+
+!* Init fake MPI type with values for sequential case.
+ call initmpi_seq(MPI_enreg_seq)
+
+
+#if defined DEV_YP_VDWXC
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)
@@ -161,9 +169,15 @@ program vdw_kernelgen
  call wrtout(std_out,message,'COLL')
  call flush_unit(std_out)
 
+ call destroy_mpi_enreg(mpi_enreg)
+
  call abinit_doctor("__vdw_kernelgen")
 
  call xmpi_end()
+
+#else
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
+ ABI_ERROR(message)
 #endif
 
  end program vdw_kernelgen
