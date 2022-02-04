@@ -617,10 +617,10 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  mbandc=oper%mbandc
  nspinor=oper%nspinor
 
-
  do iatom=1,natom
    oper%matlu(iatom)%mat=czero
  enddo
+
  do isppol=1,nsppol
   do ikpt=1,nkpt
    ikpt1=ikpt
