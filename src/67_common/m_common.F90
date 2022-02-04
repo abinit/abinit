@@ -1318,8 +1318,8 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
            call wrtout(iout,msg,'COLL')
            if (prteig > 0) call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/8
-!            write(msg, '(8f15.10)' ) (convrt*eigen(iband+band_index),&
              write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index), iband=1+ii*8,min(nband_k,8+ii*8))
+!            write(msg, '(8(f13.8,1x))' ) (convrt*eigen(iband+band_index), iband=1+ii*8,min(nband_k,8+ii*8))
              call wrtout(iout,msg,'COLL')
              if (prteig > 0) call wrtout(temp_unit,msg)
            end do
@@ -1328,6 +1328,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
              call wrtout(iout,msg)
              do ii=0,(nband_k-1)/8
                write(msg, '(8(f10.5,1x))' ) (occ(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+!              write(msg, '(8(f13.8,1x))' ) (occ(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
                call wrtout(iout,msg)
              end do
            end if
@@ -1344,6 +1345,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
              call wrtout(temp_unit,msg)
              do ii=0,(nband_k-1)/8
                write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+!              write(msg, '(8(f13.8,1x))' ) (convrt*eigen(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
                call wrtout(temp_unit,msg)
              end do
            end if

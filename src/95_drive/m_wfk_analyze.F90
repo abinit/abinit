@@ -325,13 +325,22 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  select case (dtset%wfk_task)
 
- case (WFK_TASK_FULLBZ)
+ case (WFK_TASK_FULLBZ, WFK_TASK_OPTICS_FULLBZ)
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
    end if
    call xmpi_barrier(comm)
+
+   if (dtset%wfk_task == WFK_TASK_OPTICS_FULLBZ) then
+     ! Calculate the DDK matrix elements from the WFK file in the full BZ.
+     ! This is needed fo computing non-linear properties in optics as symmetries are not
+     ! implemented correctly.
+     ds%only_diago = .False.
+     call ds%compute_ddk(wfkfull_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+     call ds%free()
+   end if
 
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)

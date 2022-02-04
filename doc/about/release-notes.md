@@ -2,12 +2,12 @@
 
 Version 9.6, released on October 4, 2021.
 List of changes with respect to version 9.4.
-<!-- Release notes updated on October 2, 2021. -->
+<!-- Release notes updated on November 9, 2021. -->
 
 Many thanks to the contributors to the ABINIT project between
 February 2021 and September 2021. These release notes
 are relative to modifications/improvements of ABINIT v9.6 with respect to v9.4.
-<!-- Merge requests up to and including MR808 except MR805 are taken into account. -->
+<!-- Merge requests up to and including MR814 except MR812, then also MR818, 819, 820 and 822 are taken into account. -->
 
 The list of contributors includes:
 L. Baguet, J.-M. Beuken, J. Bieder, A. Blanchet,
@@ -107,6 +107,8 @@ By A. Blanchet, J. Clérouin, M. Torrent, F. Soubiran. (MR788).
 **C.1** Supported compilers
 
 * gfort (GNU) compiler: v11 newly supported.
+* ifort (Intel) compiler: v21.4 newly supported.
+Two new bots introduced in the test farm : alps_intel_21.4_elpa and graphene_gnu_11.2_macports .
 
 By JM Beuken
 
