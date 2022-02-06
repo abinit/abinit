@@ -124,6 +124,8 @@
  toldff   5.00000000E-06
  znucl   13.000 8.000
 
+ chksymtnons 3
+
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosGTH_pwteter/13al.pspgth, PseudosTM_pwteter/8o.pspnc"
 
