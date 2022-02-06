@@ -27,6 +27,7 @@
  so_psp 0 0
  natom 2
  typat  1 2
+ chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
 
  nspden 4  nspinor 2   # Non-collinear case
  nband 2
