@@ -120,7 +120,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  integer :: bandpp,bandpp_sym,idatarecv0,ier,ikpt_this_proc,iscalc,mcg,my_nspinor
  integer :: nbval,ndatarecv,ndatarecv_tot,ndatasend_sym,nproc_band,nproc_fft
  integer :: old_me_g0,spaceComm
- logical :: flag_inv_sym, do_transpose
+ logical :: flag_inv_sym, do_transpose, local_gvnlxc
  !character(len=500) :: msg
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
@@ -172,7 +172,11 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  if (size(gwavef)<mcg) then
    ABI_BUG('wrong size for gwavef!')
  end if
- if (size(gvnlxc)<mcg) then
+ local_gvnlxc = .false.
+ if (size(gvnlxc)==0) then
+   local_gvnlxc = .true.
+ end if
+ if ((.not.local_gvnlxc).and.size(gvnlxc)<mcg) then
    ABI_BUG('wrong size for gvnlxc!')
  end if
  if (sij_opt==1) then
@@ -474,7 +478,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
        call xmpi_alltoallv(swavef_alltoall1,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
      end if
-     call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
+     if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
      call xmpi_alltoallv(gwavef_alltoall1,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
@@ -483,7 +487,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
        call xmpi_alltoallv(swavef_alltoall2,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
      end if
-     call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
+     if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
      call xmpi_alltoallv(gwavef_alltoall2,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
@@ -494,7 +498,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    if(sij_opt == 1) then
      call DCOPY(2*ndatarecv*my_nspinor*bandpp, swavef_alltoall2, 1, swavef, 1)
    end if
-   call DCOPY(2*ndatarecv*my_nspinor*bandpp, gvnlxc_alltoall2, 1, gvnlxc, 1)
+   if (.not.local_gvnlxc) call DCOPY(2*ndatarecv*my_nspinor*bandpp, gvnlxc_alltoall2, 1, gvnlxc, 1)
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, gwavef_alltoall2, 1, gwavef, 1)
  end if
 
