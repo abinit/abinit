@@ -229,20 +229,28 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_MALLOC(gwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_MALLOC(swavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   ABI_MALLOC(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   if (local_gvnlxc) then
+     ABI_MALLOC(gvnlxc_alltoall1,(0,0))
+   else
+     ABI_MALLOC(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   end if
    swavef_alltoall1(:,:)=zero
-   gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
+   if (.not.local_gvnlxc) gvnlxc_alltoall1(:,:)=zero
  end if
  ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_MALLOC(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_MALLOC(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ if (local_gvnlxc) then
+   ABI_MALLOC(gvnlxc_alltoall2,(0,0))
+ else
+   ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ end if
  swavef_alltoall2(:,:)=zero
- gvnlxc_alltoall2(:,:)=zero
  cwavef_alltoall2(:,:)=zero
  gwavef_alltoall2(:,:)=zero
+ if (.not.local_gvnlxc) gvnlxc_alltoall2(:,:)=zero
 
  recvcountsloc(:)=recvcounts(:)*2*my_nspinor*bandpp
  rdisplsloc(:)=rdispls(:)*2*my_nspinor*bandpp
@@ -295,7 +303,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call timab(634,3,tsec)
      gwavef_alltoall1(:,index_wavef_spband)=gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_spband)=swavef_alltoall2(:,:)
-     gvnlxc_alltoall1(:,index_wavef_spband)=gvnlxc_alltoall2(:,:)
+     if (.not.local_gvnlxc) gvnlxc_alltoall1(:,index_wavef_spband)=gvnlxc_alltoall2(:,:)
      ABI_FREE(index_wavef_spband)
      call timab(634,2,tsec)
    end if
@@ -331,7 +339,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call timab(634,3,tsec)
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-     gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
+     if (.not.local_gvnlxc) gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
      ABI_FREE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -372,11 +380,14 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !  ------------------------------------------------------------
    ABI_MALLOC(gwavef_alltoall_sym,(2,ndatarecv_tot*bandpp_sym))
    ABI_MALLOC(swavef_alltoall_sym,(2,(ndatarecv_tot*bandpp_sym)*iscalc))
-   ABI_MALLOC(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
-
+   if (local_gvnlxc) then
+     ABI_MALLOC(gvnlxc_alltoall_sym ,(0,0))
+   else
+     ABI_MALLOC(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
+   end if
    gwavef_alltoall_sym(:,:)=zero
    swavef_alltoall_sym(:,:)=zero
-   gvnlxc_alltoall_sym(:,:)=zero
+   if (.not.local_gvnlxc) gvnlxc_alltoall_sym(:,:)=zero
 
    call timab(632,2,tsec)
 
@@ -413,7 +424,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 &     swavef_alltoall_sym,&
 &     index_wavef_send)
    end if
-   call prep_wavef_sym_undo(mpi_enreg,bandpp,my_nspinor,&
+   if (.not.local_gvnlxc) call prep_wavef_sym_undo(mpi_enreg,bandpp,my_nspinor,&
 &   ndatarecv,&
 &   ndatarecv_tot,ndatasend_sym,idatarecv0,&
 &   gvnlxc_alltoall2,&
@@ -459,7 +470,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-     gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
+     if (.not.local_gvnlxc) gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
      ABI_FREE(index_wavef_band)
      call timab(634,2,tsec)
    end if
