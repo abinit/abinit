@@ -860,8 +860,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (usepaw==1) call wrtout(std_out,'getng is called for the coarse grid:')
    kpt=k0; if (response==1.and.usepaw==1) kpt=qphon ! this is temporary
 
-   call getng(dtsets(idtset)%boxcutmin,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
-&   ngfft,nproc_fft,nsym,paral_fft,symrel,&
+   call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
+&   ngfft,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
 &   use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
 
    dtsets(idtset)%ngfft(:)=ngfft(:)
@@ -916,8 +916,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ngfftc(:) = ngfft(1:3)
      kpt=k0; if (response==1.and.usepaw==1) kpt=qphon  ! this is temporary
 
-     call getng(dtsets(idtset)%bxctmindg,ecutdg_eff,gmet,kpt,me_fft,mgfftdg,&
-&     nfftdg,ngfftdg,nproc_fft,nsym,paral_fft,symrel,ngfftc,&
+     call getng(dtsets(idtset)%bxctmindg,dtsets(idtset)%chksymtnons,&
+&     ecutdg_eff,gmet,kpt,me_fft,mgfftdg,&
+&     nfftdg,ngfftdg,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,ngfftc,&
 &     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
 
      dtsets(idtset)%ngfftdg(:)=ngfftdg(:)

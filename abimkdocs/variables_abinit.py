@@ -1672,13 +1672,22 @@ to bypass the problem are made in the output file.
 When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
 in the output file suggestions to bypass the problem.
 
+When **chksymtnons** = 3, the code acts as with **chksymtnons** = 1, but then generates a FFT grid which is
+left invariant under the action of the spatial symmetry operations, which might enlarge it.
+In case of Constrained DFT calculations (see [[constraint_kind]]), only **chksymtnons** = 3 or **chksymtnons** = 0 are allowed.
+
 When **chksymtnons** = 0, the code skips the check.
 
 Explanation:
 In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
-However, for a GW or BSE calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault).
-In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+However, for a GW, BSE or cDFT calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault, or lack of convergence).
+
+For cDFT calculations, the local integral of magnetization or charge is evaluated in real space, on the FFT grid. So, if 
+the grids are locally different for two atoms related by symmetry (so in principle equivalent), there is a incoherency, that might induce
+lack of convergence.
+
+In the GW or BSE parts of ABINIT, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
@@ -1693,7 +1702,7 @@ the level of the ground-state calculations, although such warning might be irrel
 
 If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0 (only the latter for cDFT)..
 If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation,
 and corresponding translated atomic positions.
 """,
@@ -1778,6 +1787,10 @@ Atoms of the same type are supposed to incur the same constraint.
 If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+Similarly, ABINIT is more careful about the control of symmetry: supposing that two atoms are related by some symmetry, then ABINIT
+generates a FFT grid that is invariant under that symmetry, unless this additional constraint on the FFT grid is explicitly suppressed by the user.
+In this respect, the default value of [[chksymtnons]] is not allowed, but [[chksymtnons]] must be equal to 3 (with the generation of a symmetric FFT grid) or 0.
 
 The difference between [[constraint_kind]]=4 or 14 and [[constraint_kind]]=2 or 12 lies in the fact that [[constraint_kind]]=2 or 12 will consider similarly
 a magnetization vector and its opposite, as this constraint is just alignment on an axis, while [[constraint_kind]]=4 or 14 enforces that
