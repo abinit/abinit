@@ -1,6 +1,6 @@
 
-.Version 9.3.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 18h38 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h30 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/wannier90_t03/t03.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/wannier90_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.346 Mbytes of memory.
+P This job should need less than                       2.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.299 Mbytes of memory.
+P This job should need less than                       2.468 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
        mpw =         150          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.921 Mbytes of memory.
+P This job should need less than                       2.039 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
        mpw =         150          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.921 Mbytes of memory.
+P This job should need less than                       2.039 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
        mpw =         150          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.921 Mbytes of memory.
+P This job should need less than                       2.039 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           8
        mpw =         150          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.921 Mbytes of memory.
+P This job should need less than                       2.039 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          64
        mpw =         200          nfft =        5832          nkpt =          64
 ================================================================================
-P This job should need less than                       3.688 Mbytes of memory.
+P This job should need less than                       3.857 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.955 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -574,8 +574,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -776,16 +776,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.2361E-01  6.2361E-01  7.6334E-01  1.0830E+00  1.0830E+00  1.0830E+00
   1.1360E+00  1.1360E+00  1.1480E+00  1.1480E+00  1.1480E+00  1.2963E+00
   1.2963E+00  1.2963E+00  1.5042E+00  1.5535E+00  1.5535E+00  1.5535E+00
-  prteigrs : nnsclo,ikpt=  100    1 max resid (incl. the buffer)=  2.28077E-09
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  100    2 max resid (incl. the buffer)=  1.93530E-07
-  prteigrs : nnsclo,ikpt=  100    3 max resid (incl. the buffer)=  5.24036E-09
-  prteigrs : nnsclo,ikpt=  100    4 max resid (incl. the buffer)=  5.58029E-07
-  prteigrs : nnsclo,ikpt=  100    5 max resid (incl. the buffer)=  7.80477E-06
-  prteigrs : nnsclo,ikpt=  100    6 max resid (incl. the buffer)=  7.73771E-05
-  prteigrs : nnsclo,ikpt=  100    7 max resid (incl. the buffer)=  6.69975E-10
-  prteigrs : nnsclo,ikpt=  100    8 max resid (incl. the buffer)=  1.36013E-07
 
 
 --- !ResultsGS
@@ -882,8 +874,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2126,8 +2118,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2668,57 +2660,10 @@ P           mkmem7         64
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         12.3        0.20      0.003
-- Total wall clock time (s,m,h):         12.3        0.21      0.003
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           12.3, wall_time =           12.3
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  6.688  54.4      6.705  54.3              2      -1.00        1.00       1.00
-- fourwf%(pot)                   1.671  13.6      1.667  13.5           7072      -1.00        1.00       1.00
-- invars2                        0.551   4.5      0.552   4.5              7      -1.00        1.00       1.00
-- pspini                         0.501   4.1      0.502   4.1              7      -1.00        1.00       1.00
-- mkresi                         0.176   1.4      0.174   1.4             64      -1.00        1.01       1.01
-- abinit(2)                      0.145   1.2      0.145   1.2              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.135   1.1      0.131   1.1             -1      -1.00        1.03       1.03
-- projbd                         0.117   1.0      0.107   0.9           8624      -1.00        1.09       1.09
-- nonlop(apply)                  0.107   0.9      0.119   1.0           7328      -1.00        0.90       0.90
-- ewald                          0.105   0.9      0.104   0.8              9      -1.00        1.01       1.01
-- timing timab                   0.103   0.8      0.104   0.8             10      -1.00        0.99       0.99
-- getghc-other                   0.062   0.5      0.064   0.5             -1      -1.00        0.97       0.97
-- others (117)                   0.159   1.3      0.171   1.4             -1      -1.00        0.93       0.93
--<END_TIMER>
--
-- subtotal                      10.520  85.5     10.545  85.4                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          12.3, wall_time =          12.3
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  6.688  54.4      6.705  54.3              2      -1.00        1.00       1.00
-- fourwf%(pot)                   1.671  13.6      1.667  13.5           7072      -1.00        1.00       1.00
-- invars2                        0.551   4.5      0.552   4.5              7      -1.00        1.00       1.00
-- pspini                         0.501   4.1      0.502   4.1              7      -1.00        1.00       1.00
-- mkresi                         0.176   1.4      0.174   1.4             64      -1.00        1.01       1.01
-- abinit(2)                      0.145   1.2      0.145   1.2              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.135   1.1      0.131   1.1             -1      -1.00        1.03       1.03
-- projbd                         0.117   1.0      0.107   0.9           8624      -1.00        1.09       1.09
-- nonlop(apply)                  0.107   0.9      0.119   1.0           7328      -1.00        0.90       0.90
-- ewald                          0.105   0.9      0.104   0.8              9      -1.00        1.01       1.01
-- timing timab                   0.103   0.8      0.104   0.8             10      -1.00        0.99       0.99
-- getghc-other                   0.062   0.5      0.064   0.5             -1      -1.00        0.97       0.97
-- others (117)                   0.159   1.3      0.171   1.4             -1      -1.00        0.93       0.93
--<END_TIMER>
 
-- subtotal                      10.520  85.5     10.545  85.4                                  1.00       1.00
 
 ================================================================================
 
@@ -2807,10 +2752,10 @@ P           mkmem7         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.3  wall=         12.3
+- Proc.   0 individual time (sec): cpu=         13.1  wall=         13.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  46 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.3  wall=         12.3
+.Delivered  45 WARNINGs and  27 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.1  wall=         13.3
