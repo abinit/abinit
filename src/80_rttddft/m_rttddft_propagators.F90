@@ -126,7 +126,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  integer                        :: istwf_k
  integer                        :: me_distrb
  integer                        :: my_ikpt, my_nspinor
- integer                        :: nband_k, nband_cprj_k
+ integer                        :: nband_k
  integer                        :: npw_k, nkpg
  integer                        :: npw, nband
  integer                        :: spaceComm_distrb
@@ -233,7 +233,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       my_ikpt = mpi_enreg%my_kpttab(ikpt)
 
       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-      nband_cprj_k=nband_k/mpi_enreg%nproc_band
       istwf_k=dtset%istwfk(ikpt)
       npw_k=tdks%npwarr(ikpt)
 
@@ -342,7 +341,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 
       !** Also shift array memory if dtset%mkmem/=0
       if (dtset%mkmem/=0) then
-         ibg=ibg+my_nspinor*nband_cprj_k
          icg=icg+npw_k*my_nspinor*nband_k
          ikg=ikg+npw_k
       end if
