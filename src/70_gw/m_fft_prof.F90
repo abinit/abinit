@@ -191,6 +191,7 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
  logical,allocatable :: mask(:)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
@@ -225,8 +226,11 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
  Ftest%ngfft(8) = fftcache
 
  ! Fill part of ngfft
- call getng(boxcutmin,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
-&  Ftest%MPI_enreg%paral_kgb,symrel, unit=dev_null)
+ ABI_MALLOC(tnons,(3,nsym))
+ tnons=zero
+ call getng(boxcutmin,0,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
+&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null)
+ ABI_FREE(tnons)
 
  call init_distribfft(Ftest%MPI_enreg%distribfft,'c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
 
