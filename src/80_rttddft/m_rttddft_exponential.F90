@@ -147,7 +147,7 @@ contains
  ABI_MALLOC(ghc,    (2, npw_k*nspinor*nband_k))
  ABI_MALLOC(gsc,    (2, npw_k*nspinor*nband_k))
  ABI_MALLOC(gsm1hc, (2, npw_k*nspinor*nband_k))
- ABI_MALLOC(gvnlxc, (2, npw_k*nspinor*nband_k))
+ ABI_MALLOC(gvnlxc, (2, npw_k*nspinor*nband_k)) ! @MT: gvnlxc not needed according to Lucas?
       
  !*** Taylor expansion ***
  if (method == 1) then 

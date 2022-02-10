@@ -623,3 +623,104 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, mpi_enreg)
 
 end module m_rttddft
 !!***
+
+!!****f* m_rttddft/rttddft_calc_occ
+!!
+!! NAME
+!!  rttddft_calc_occ
+!!
+!! FUNCTION
+!!  Compute occupation numbers at time t
+!!
+!! INPUTS
+!!  cg <real(npw*nspinor*nband)> = the wavefunction coefficients
+!!  cg0 <real(npw*nspinor*nband)> = the intial wavefunction coefficients
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  occ0 <real(nkpt*nspinor*nband)> = initial occupation numbers at t = 0
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!
+!! OUTPUT
+!!  occ <real(nkpt*nspinor*nband)> = occupation numbers
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!  m_rttddft_driver/rttddft
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!subroutine rttddft_calc_occ(cg, cg0, dtset, occ, occ0, mpi_enreg)
+!
+! implicit none
+!
+! !Arguments ------------------------------------
+! !scalars
+! type(dataset_type),         intent(inout) :: dtset
+! type(MPI_type),             intent(inout) :: mpi_enreg
+! !arrays
+! real(dp),                   intent(in)    :: cg(:)
+! real(dp),                   intent(in)    :: cg0(:)
+! real(dp),                   intent(out)   :: occ(:)
+! real(dp),                   intent(in)    :: occ0(:)
+!
+! !Local variables-------------------------------
+! !scalars
+! !arrays
+!! ***********************************************************************
+!
+! my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+!
+! icg=0
+! bdtot_index=0
+!
+! !*** LOOP OVER SPINS
+! do isppol=1,dtset%nsppol
+!
+!   ikpt_loc=0
+!   ikg=0
+!
+!   !*** BIG FAT k POINT LOOP
+!   ikpt = 0
+!   do while (ikpt_loc < dtset%nkpt)
+!
+!      ikpt_loc = ikpt_loc + 1
+!      ikpt = ikpt_loc
+!      my_ikpt = mpi_enreg%my_kpttab(ikpt)
+!
+!      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+!      istwf_k=dtset%istwfk(ikpt)
+!      npw_k=tdks%npwarr(ikpt)
+!
+!      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
+!         bdtot_index=bdtot_index+nband_k
+!         cycle
+!      end if
+!
+!      !Calc occupation number at point k
+!      do iband=1,nband_k
+!         shift_i = npw_k*nspinor*(iband-1)
+!         do jband=1,nband_k
+!            shift_j = npw_k*nspinor*(jband-1)
+!            call dotprod_g(dprod_r,dprod_i,istwf_k,npw_k*my_nspinor,2,cg0(:, shift_i+1:shift_i+npw_k*my_nspinor),&
+!                         & cg(:, shift_j+1:shift_j+npw_k*my_nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!            dot_prod = dprod_r**2 + d_prod_i**2
+!            occ(1+bdtot_index:nband_k+bdtot_index) = occ0(1+bdtot_index:nband_k+bdtot_index)
+!
+!         end do
+!      end do
+!
+!      !** Also shift array memory if dtset%mkmem/=0
+!      if (dtset%mkmem/=0) then
+!         icg=icg+npw_k*my_nspinor*nband_k
+!         ikg=ikg+npw_k
+!      end if
+!
+!   end do !nkpt
+!
+! end do !nsppol
+!
+! end subroutine rttddft_calc_occ
+!
+!end module m_rttddft
+!!***
