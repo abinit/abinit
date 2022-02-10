@@ -1148,7 +1148,7 @@ end subroutine setup1
 
 !CP added fermih to argument list
 subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,mband,nband,&
-&  bdbuf,nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
+&  nbdbuf,nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
 
