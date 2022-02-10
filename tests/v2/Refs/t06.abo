@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h16 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t06/t06.in
-- output file    -> t06.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v2_t06/t06.abi
+- output file    -> t06.abo
 - root for input  files -> t06i
 - root for output files -> t06o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.599 Mbytes of memory.
+P This job should need less than                       1.716 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
        mpw =         188          nfft =        4096          nkpt =          16
 ================================================================================
-P This job should need less than                       1.299 Mbytes of memory.
+P This job should need less than                       1.415 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.186 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -348,8 +348,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00008
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -539,23 +539,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt    2 (  0.00000  0.00000  0.25000), residuals and eigenvalues=
   3.05E-29  7.97E-29  5.77E-27  2.03E-27
  -3.9411E-01 -1.2904E-01 -1.3224E-02 -1.3224E-02
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  5.77448E-27
  Non-SCF case, kpt    3 (  0.00000  0.25000  0.00000), residuals and eigenvalues=
   7.78E-30  4.15E-29  8.29E-27  8.27E-27
  -3.9411E-01 -1.2904E-01 -1.3224E-02 -1.3224E-02
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  8.29287E-27
  Non-SCF case, kpt    4 (  0.25000  0.00000  0.00000), residuals and eigenvalues=
   3.99E-29  8.00E-29  2.03E-27  5.75E-27
  -3.9411E-01 -1.2904E-01 -1.3224E-02 -1.3224E-02
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  5.75384E-27
  Non-SCF case, kpt    5 (  0.50000  0.50000  0.25000), residuals and eigenvalues=
   8.04E-29  5.38E-29  1.90E-28  9.63E-30
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.90298E-28
  Non-SCF case, kpt    6 (  0.50000  0.25000  0.50000), residuals and eigenvalues=
   6.11E-29  8.93E-30  8.08E-29  1.35E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  1.35087E-28
  Non-SCF case, kpt    7 (  0.25000  0.50000  0.50000), residuals and eigenvalues=
   2.18E-29  2.27E-29  2.31E-29  2.66E-29
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
@@ -565,35 +560,27 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt    9 (  0.25000  0.00000  0.50000), residuals and eigenvalues=
   4.29E-29  9.92E-29  4.06E-29  9.11E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30    9 max resid (incl. the buffer)=  9.11331E-28
  Non-SCF case, kpt   10 (  0.00000  0.50000  0.25000), residuals and eigenvalues=
   9.17E-29  2.30E-29  1.70E-28  8.79E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  8.78616E-28
  Non-SCF case, kpt   11 (  0.00000  0.25000  0.50000), residuals and eigenvalues=
   2.80E-29  4.70E-29  1.11E-28  1.90E-29
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   11 max resid (incl. the buffer)=  1.10974E-28
  Non-SCF case, kpt   12 (  0.25000  0.50000  0.00000), residuals and eigenvalues=
   6.91E-29  2.06E-29  1.01E-28  5.33E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   12 max resid (incl. the buffer)=  5.32591E-28
  Non-SCF case, kpt   13 (  0.50000  0.00000  0.25000), residuals and eigenvalues=
   8.75E-29  1.37E-29  1.82E-28  9.52E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   13 max resid (incl. the buffer)=  9.52248E-28
  Non-SCF case, kpt   14 (  0.25000  0.25000 -0.25000), residuals and eigenvalues=
   1.72E-29  1.82E-29  5.59E-29  6.29E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   14 max resid (incl. the buffer)=  6.29459E-28
  Non-SCF case, kpt   15 (  0.25000 -0.25000  0.25000), residuals and eigenvalues=
   2.39E-29  4.45E-29  5.67E-29  2.11E-27
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   15 max resid (incl. the buffer)=  2.10644E-27
  Non-SCF case, kpt   16 ( -0.25000  0.25000  0.25000), residuals and eigenvalues=
   4.74E-29  8.47E-29  4.83E-29  7.20E-28
  -3.2315E-01 -2.1870E-01 -1.1618E-01 -6.6831E-02
-  prteigrs : nnsclo,ikpt=   30   16 max resid (incl. the buffer)=  7.20403E-28
 
 
 --- !ResultsGS
@@ -706,7 +693,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00008
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -723,7 +709,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -836,7 +821,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00008
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -890,7 +874,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -910,7 +893,7 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  5   7.3652530533007     -7.166E-05 3.730E-07 9.381E-05
  ETOT  6   7.3652526385762     -4.147E-07 1.776E-09 1.776E-05
  ETOT  7   7.3652525569510     -8.163E-08 7.952E-11 1.183E-07
- ETOT  8   7.3652525564840     -4.670E-10 9.310E-13 2.567E-10
+ ETOT  8   7.3652525564841     -4.670E-10 9.310E-13 2.567E-10
 
  At SCF step    8   max residual=  9.31E-13 < tolwfr=  1.00E-12 =>converged.
 -open ddk wf file :t06o_DS3_1WF7
@@ -948,7 +931,6 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -970,7 +952,7 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  6  -525.02901186770     -6.385E-06 1.268E-08 3.778E-05
  ETOT  7  -525.02901199396     -1.263E-07 1.020E-10 1.736E-06
  ETOT  8  -525.02901200033     -6.366E-09 4.698E-12 7.192E-08
- ETOT  9  -525.02901200060     -2.708E-10 9.613E-13 9.550E-10
+ ETOT  9  -525.02901200060     -2.709E-10 9.613E-13 9.550E-10
 
  At SCF step    9   max residual=  9.61E-13 < tolwfr=  1.00E-12 =>converged.
 -open ddk wf file :t06o_DS3_1WF7
@@ -1561,10 +1543,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  27 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.0  wall=          3.0
+.Delivered  11 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.0  wall=          3.2
