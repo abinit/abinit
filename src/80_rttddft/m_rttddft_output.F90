@@ -49,7 +49,7 @@ module m_rttddft_output
 #endif
  use m_nctk,          only: nctk_open_create
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
- use m_rttddft_types, only: tdks_type
+ use m_rttddft_tdks,  only: tdks_type
  use m_specialmsg,    only: wrtout
  use m_xmpi,          only: xmpi_comm_rank, xmpi_comm_self
    

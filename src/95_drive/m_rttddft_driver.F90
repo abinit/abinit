@@ -39,7 +39,7 @@ module m_rttddft_driver
  use m_rttddft,           only: rttddft_calc_density, &
                               & rttddft_calc_etot 
  use m_rttddft_output,    only: rttddft_output
- use m_rttddft_types,     only: tdks_type
+ use m_rttddft_tdks,      only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
  use m_specialmsg,        only: wrtout
  use m_time,              only: timab
@@ -62,14 +62,14 @@ contains
 !!  Primary routine that drives real-time TDDFT calculations.
 !!  1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
 !!    - intialize various important parameters
-!!    - read KS orbitals in WFK file
+!!    - read intial KS orbitals in WFK file
 !!    - compute initial density from KS orbitals
 !!  2) Propagation loop (rttddft_propagate):
 !!    for i = 1, nstep
 !!       - propagate KS orbitals
-!!       - propagate nuclei if requested (RTDDFT+Erhenfest dynamics)
-!!       - compute new density and occupation
-!!       - print requested quantities
+!!       - propagate nuclei if requested (Erhenfest dynamics)
+!!       - compute new density
+!!       - Compute and print requested properties
 !!  3) Final printout and finalize
 !!
 !! INPUTS
@@ -134,19 +134,20 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  !TODO: Add calculation of eigenvalues and energy contributions in init
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
- !** 2) Propagation loop (rttddft_propagate):
+ !TODO: If not restart then output properties at t = 0
+ !Compute electronic properties at time t
+ !call rttddft_properties(dtset,mpi_enreg,psps,tdks)
+
+ !** 2) Propagation loop
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
  
+ !TODO: Change ntime to nstep?
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
    call timab(1600,1,tsec)
  
-   !TODO
-   !Compute electronic properties at time t
-   !call rttddft_properties(dtset,mpi_enreg,psps,tdks)
-
    !FB TODO: If Ehrenfest perform nuclear step here
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 

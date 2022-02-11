@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_rttddft_types
+!!****m* ABINIT/m_rttddft_tdks
 !! NAME
-!!  m_rttddft_types
+!!  m_rttddft_tdks
 !!
 !! FUNCTION
 !!  Contains the main object (tdks) to propagate
@@ -27,7 +27,7 @@
 
 #include "abi_common.h"
 
-module m_rttddft_types
+module m_rttddft_tdks
 
  use defs_basis
  use defs_abitypes,      only: MPI_type
@@ -98,7 +98,7 @@ module m_rttddft_types
   !scalars
    integer                          :: bantot      !total number of bands
    integer                          :: first_step  !start propagation from first_step (for restart)
-   integer                          :: mband_cprj  !nb of band per proc (for cprj?)
+   integer                          :: mband_cprj  !nb of band per proc (for cprj)
    integer                          :: mcg         !nb of WFs (cg) coeffs
    integer                          :: mcprj       !nb of cprj (projectors applied to WF)
    integer                          :: my_nspinor  !nb of spinors treated by proc
@@ -193,7 +193,7 @@ module m_rttddft_types
 
 contains
 
-!!****f* m_rttddft_types/tdks_init
+!!****f* m_rttddft_tdks/tdks_init
 !!
 !! NAME
 !!  tdks_init
@@ -320,7 +320,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !FB TODO: Check that all proc have what they need from here first
 end subroutine tdks_init
 
-!!****f* m_rttddft_types/tdks_free
+!!****f* m_rttddft_tdks/tdks_free
 !!
 !! NAME
 !!  tdks_free
@@ -432,14 +432,14 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
 
 end subroutine tdks_free
 
-!!****f* m_rttddft_types/first_setup
+!!****f* m_rttddft_tdks/first_setup
 !!
 !! NAME
 !!  first_setup
 !!
 !! FUNCTION
 !!  Intialize many important quantities before running RT-TDDFT
-!!  in particular PW, FFT, PSP, Symmetry etc.
+!!  (PW, FFT, PSP, Symmetry etc.)
 !!
 !! INPUTS
 !!  codvsn = code version
@@ -457,8 +457,31 @@ end subroutine tdks_free
 !!
 !! SIDE EFFECTS
 !!
+!! NOTES
+!! It is worth to explain THE USE OF FFT GRIDS:
+!! ============================================
+!! In case of PAW:
+!! ---------------
+!!    Two FFT grids are used:
+!!    - A "coarse" FFT grid (defined by ecut)
+!!      for the application of the Hamiltonian on the plane waves basis.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      Hamiltonian, wave-functions, density related to WFs (rhor here), ...
+!!      are expressed on this grid.
+!!    - A "fine" FFT grid (defined) by ecutdg)
+!!      for the computation of the density inside PAW spheres.
+!!      It is defined by nfftf, ngfftf, mgfftf, ...
+!!      Total density, potentials, ...
+!!      are expressed on this grid.
+!! In case of norm-conserving:
+!! ---------------------------
+!!    - Only the usual FFT grid (defined by ecut) is used.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
+!!      are set equal to (nfft,ngfft,mgfft) in that case.
+!!
 !! PARENTS
-!!  m_rttddft_types/rttddft_init
+!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -501,7 +524,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
 ! ***********************************************************************
 
- !Init MPI data
  my_natom=mpi_enreg%my_natom
 
  !** Init FFT grid(s) sizes (be careful !)
@@ -717,7 +739,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
 end subroutine first_setup
 
-!!****f* m_rttddft_types/second_setup
+!!****f* m_rttddft_tdks/second_setup
 !!
 !! NAME
 !! second_setup
@@ -741,7 +763,7 @@ end subroutine first_setup
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_types/rttddft_init
+!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -984,7 +1006,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
 
 end subroutine second_setup
 
-!!****f* m_rttddft_types/read_wfk
+!!****f* m_rttddft_tdks/read_wfk
 !!
 !! NAME
 !! read_wfk
@@ -1004,7 +1026,7 @@ end subroutine second_setup
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_types/rttddft_init
+!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -1104,7 +1126,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
 
 end subroutine read_wfk
 
-!!****f* m_rttddft_types/calc_density
+!!****f* m_rttddft_tdks/calc_density
 !!
 !! NAME
 !!  calc_density
@@ -1125,7 +1147,7 @@ end subroutine read_wfk
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_types/rttddft_init
+!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -1273,5 +1295,5 @@ subroutine calc_density(dtfil, dtset, mpi_enreg, pawang, pawtab, psps, tdks)
 
 end subroutine calc_density
 
-end module m_rttddft_types
+end module m_rttddft_tdks
 !!***

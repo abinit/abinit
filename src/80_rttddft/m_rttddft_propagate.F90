@@ -39,7 +39,7 @@ module m_rttddft_propagate
  use m_rttddft,             only: rttddft_setup_ele_step
  use m_rttddft_propagators, only: rttddft_propagator_er, &
                                 & rttddft_propagator_emr
- use m_rttddft_types,       only: tdks_type 
+ use m_rttddft_tdks,        only: tdks_type
  use m_specialmsg,          only: wrtout
  use m_symtk,               only: symmetrize_xred
 
