@@ -166,7 +166,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
    energies%e_ewald=tdks%energies%e_ewald
  end if
 
- !Set "vtrial" and intialize the Hamiltonian
+ !Set "vtrial" and initialize the Hamiltonian
  call rttddft_init_hamiltonian(dtset,energies,gs_hamk,istep,mpi_enreg,psps,tdks)
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)

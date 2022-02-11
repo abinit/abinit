@@ -97,7 +97,7 @@ module m_rttddft_types
 
   !scalars
    integer                          :: bantot      !total number of bands
-   integer                          :: first_step  !start propagation form first_step (for restart)
+   integer                          :: first_step  !start propagation from first_step (for restart)
    integer                          :: mband_cprj  !nb of band per proc (for cprj?)
    integer                          :: mcg         !nb of WFs (cg) coeffs
    integer                          :: mcprj       !nb of cprj (projectors applied to WF)
@@ -160,7 +160,7 @@ module m_rttddft_types
    real(dp),allocatable             :: rhog(:,:)   !charge density in recip space
    real(dp),allocatable             :: rhor(:,:)   !charge density in direct space
    real(dp),allocatable             :: taug(:,:)   !kin ener density in recip space            !FB: Needed?
-   real(dp),allocatable             :: taur(:,:)   !kin ener density in direct space                !FB: Needed?
+   real(dp),allocatable             :: taur(:,:)   !kin ener density in direct space           !FB: Needed?
    real(dp),allocatable             :: vhartr(:)   !Hartree part of the potential
    real(dp),allocatable             :: vpsp(:)     !PSP part of the potential
    real(dp),allocatable             :: vtrial(:,:) !"Trial" potential
@@ -174,14 +174,14 @@ module m_rttddft_types
    real(dp),allocatable             :: xcctau3d(:) !3D core electron kin ener density
                                                    !for XC core correction
    real(dp),allocatable             :: ylm(:,:)    !real spherical harmonics for each k+G
-   real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients                    !FB: Needed?
+   real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients          !FB: Needed?
    type(pawcprj_type),allocatable   :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
    type(paw_an_type),allocatable    :: paw_an(:)   !various arrays on angular mesh
    type(pawfgrtab_type),allocatable :: pawfgrtab(:) !PAW atomic data on fine grid
    type(paw_ij_type),allocatable    :: paw_ij(:)   !various arrays on partial waves (i,j channels)
-   type(pawrad_type),pointer        :: pawrad(:) => NULL()   !radial grid in PAW sphere
+   type(pawrad_type),pointer        :: pawrad(:) => NULL() !radial grid in PAW sphere
    type(pawrhoij_type),pointer      :: pawrhoij(:) !operator rho_ij= <psi|p_i><p_j|psi>
-   type(pawtab_type),pointer        :: pawtab(:) => NULL()   !tabulated PAW atomic data
+   type(pawtab_type),pointer        :: pawtab(:) => NULL() !tabulated PAW atomic data
 
     contains
 
@@ -1191,8 +1191,6 @@ subroutine calc_density(dtfil, dtset, mpi_enreg, pawang, pawtab, psps, tdks)
    ! transfer density from the coarse to the fine FFT grid
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
-
-   !write(99,*) tdks%rhor
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,      &
