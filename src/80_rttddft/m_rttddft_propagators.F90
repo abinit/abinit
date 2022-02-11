@@ -47,7 +47,7 @@ module m_rttddft_propagators
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
- use m_rttddft_types,       only: tdks_type 
+ use m_rttddft_tdks,        only: tdks_type
  use m_specialmsg,          only: wrtout
  use m_xmpi,                only: xmpi_comm_rank, xmpi_sum
 

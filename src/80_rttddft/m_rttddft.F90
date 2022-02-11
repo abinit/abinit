@@ -53,7 +53,7 @@ module m_rttddft
  use m_pawrhoij,         only: pawrhoij_type, pawrhoij_free, &
                                pawrhoij_alloc, pawrhoij_inquire_dim
  use m_paw_tools,        only: chkpawovlp
- use m_rttddft_types,    only: tdks_type
+ use m_rttddft_tdks,     only: tdks_type
  use m_specialmsg,       only: wrtout
  use m_setvtr,           only: setvtr
  use m_xmpi,             only: xmpi_paral
