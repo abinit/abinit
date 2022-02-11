@@ -240,14 +240,16 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_BUG('wrong size for cwaveprj!')
    end if
  end if
- local_gvnlxc = size(gvnlxc)==0
- if (local_gvnlxc) then
-   ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
- else
-   gvnlxc_ => gvnlxc
- end if
- if (size(gvnlxc_)<2*npw_k2*my_nspinor*ndat) then
-   ABI_BUG('wrong size for gvnlxc!')
+ if (any(type_calc == [0, 2, 3])) then
+   local_gvnlxc = size(gvnlxc)==0
+   if (local_gvnlxc) then
+     ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
+   else
+     gvnlxc_ => gvnlxc
+   end if
+   if (size(gvnlxc_)<2*npw_k2*my_nspinor*ndat) then
+     ABI_BUG('wrong size for gvnlxc!')
+   end if
  end if
  use_cwavef_r=present(cwavef_r)
  n4=gs_ham%n4 ; n5=gs_ham%n5 ; n6=gs_ham%n6
