@@ -131,6 +131,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
+ !TODO: Add calculation of eigenvalues and energy contributions in init
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  !** 2) Propagation loop (rttddft_propagate):
@@ -141,6 +142,10 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
    call timab(1600,1,tsec)
+ 
+   !TODO
+   !Compute electronic properties at time t
+   !call rttddft_properties(dtset,mpi_enreg,psps,tdks)
 
    !FB TODO: If Ehrenfest perform nuclear step here
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
