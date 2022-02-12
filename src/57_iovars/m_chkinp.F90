@@ -1946,6 +1946,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
           ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
          ABI_ERROR_NOSTOP(msg, ierr)
        end if
+     end if
    end if
 #endif
    !Not yet implemented
