@@ -134,9 +134,11 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  !TODO: Add calculation of eigenvalues and energy contributions in init
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
- !TODO: If not restart then output properties at t = 0
- !Compute electronic properties at time t
- !call rttddft_properties(dtset,mpi_enreg,psps,tdks)
+ !Compute initial electronic density
+ call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
+
+ !TODO: If not restart then compute and output properties at t = 0
+ !call rttddft_output(dtset,mpi_enreg,psps,tdks)
 
  !** 2) Propagation loop
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
@@ -148,21 +150,21 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
 
    call timab(1600,1,tsec)
  
-   !FB TODO: If Ehrenfest perform nuclear step here
-   !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
-
    !Perform electronic step
-   !Computes new WF at time t and energy contribution at time t-dt
+   !Compute new WF at time t and energy contribution at time t-dt
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
-   !Computes total energy at time t-dt
-   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot,mpi_enreg)
+   !Compute total energy at time t-dt
+   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot)
 
-   !Computes new electronic density at t
+   !Compute new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
-   !Outputs useful values
+   !Compute and output useful electronic values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+
+   !FB TODO: If Ehrenfest dynamics perform nuclear step
+   !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    call timab(1600,2,tsec)
    write(msg,'(a,f8.2,a)') 'Time (sec):',tsec(1), ch10

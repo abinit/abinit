@@ -103,8 +103,8 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- ! Init/Update various quantities before performing propagating KS orbitals
- call rttddft_setup_ele_step(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
+ ! Update various quantities after a nuclear step
+ if (dtset%ionmov /= 0) call rttddft_setup_ele_step(dtset,mpi_enreg,psps,tdks)
 
  ! Propagate cg
  select case (dtset%td_propagator) 
@@ -166,10 +166,6 @@ subroutine rttddft_propagate_nuc(dtset, istep, mpi_enreg, psps, tdks)
  write(msg,'(2a,i5,a)') ch10,'--- Iteration',istep,ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
-
- ! FB: Should we do this? 
- ! Eventually symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,tdks%xred,indsym=tdks%indsym)
 
  end subroutine rttddft_propagate_nuc
 
