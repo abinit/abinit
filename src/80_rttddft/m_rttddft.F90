@@ -82,8 +82,6 @@ contains
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)> = all input variables for this dataset
-!!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
-!!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = Main RT-TDDFT object
@@ -98,15 +96,13 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
+subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- integer,                    intent(in)    :: istep
  type(dataset_type),         intent(inout) :: dtset
- type(gs_hamiltonian_type),  intent(out)   :: gs_hamk
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),            intent(inout) :: tdks
@@ -118,58 +114,58 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  integer                   :: optcut, optgr0, optgr1, optgr2, optrad
  integer                   :: stress_needed
  !arrays
- real(dp),parameter        :: k0(3)=(/zero,zero,zero/)
+ !real(dp),parameter        :: k0(3)=(/zero,zero,zero/)
 
 ! ***********************************************************************
 
  my_natom=mpi_enreg%my_natom
 
- !** Initialize / Update various quantities that needs to be changed 
+ !** Update various quantities that needs to be changed 
  !** after a change of xred during the nuclear step
- if (istep == 1 .or. dtset%ionmov /= 0) then
-   !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
-   !FB: @MT Probably not needed? The box didn't change only nuclear pos..
-   !if (psps%usepaw==1) then
-   !   call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
-   !             & std_out,k0,tdks%pawfgr%ngfft)
-   !else
-   !   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
-   !             & std_out,k0,tdks%pawfgr%ngfft)
-   !end if
-   
-   !Compute structure factor phases (exp(2Pi i G.xred)) on coarse and fine grid
-   call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
-            & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
-   if (psps%usepaw==1.and.tdks%pawfgr%usefinegrid==1) then
-      call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfft(1),tdks%pawfgr%ngfft(2), &
-               & tdks%pawfgr%ngfft(3),tdks%ph1df,tdks%xred)
-   else
-      tdks%ph1df(:,:)=tdks%ph1d(:,:)
-   end if
-   
-   !PAW specific
-   if (psps%usepaw==1) then
-      !Check for non-overlapping PAW spheres
-      call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,tdks%pawtab,tdks%rmet, &
-                    & dtset%typat,tdks%xred)
-   
-      !Identify parts of the rectangular grid where the density has to be calculated
-      !FB: Needed?
-      optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
-      forces_needed=0 !FB TODO needs to be changed if Ehrenfest?
-      stress_needed=0
-      if ((forces_needed==1).or. &
-        & (dtset%xclevel==2.and.dtset%pawnhatxc>0.and.tdks%usexcnhat>0).or. &
-        & (dtset%positron/=0.and.forces_needed==2)) then
-         optgr1=dtset%pawstgylm; if (stress_needed==1) optrad=1; if (dtset%pawprtwf==1) optrad=1
-      end if
-      call nhatgrid(tdks%atindx1,tdks%gmet,my_natom,dtset%natom,tdks%nattyp,         &
-                  & tdks%pawfgr%ngfft,psps%ntypat,optcut,optgr0,optgr1,              &
-                  & optgr2,optrad,tdks%pawfgrtab,tdks%pawtab,tdks%rprimd,            &
-                  & dtset%typat, tdks%ucvol,tdks%xred,comm_atom=mpi_enreg%comm_atom, &
-                  & mpi_atmtab=mpi_enreg%my_atmtab,comm_fft=mpi_enreg%comm_fft,      &
-                  & distribfft=mpi_enreg%distribfft)
-   endif
+
+ !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
+ !FB: @MT Probably not needed? The box didn't change only nuclear pos..
+ !if (psps%usepaw==1) then
+ !   call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+ !             & std_out,k0,tdks%pawfgr%ngfft)
+ !else
+ !   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+ !             & std_out,k0,tdks%pawfgr%ngfft)
+ !end if
+ 
+ !Compute structure factor phases (exp(2Pi i G.xred)) on coarse and fine grid
+ call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
+          & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
+ if (psps%usepaw==1.and.tdks%pawfgr%usefinegrid==1) then
+    call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfft(1),tdks%pawfgr%ngfft(2), &
+             & tdks%pawfgr%ngfft(3),tdks%ph1df,tdks%xred)
+ else
+    tdks%ph1df(:,:)=tdks%ph1d(:,:)
+ end if
+ 
+ !PAW specific
+ if (psps%usepaw==1) then
+    !Check for non-overlapping PAW spheres
+    call chkpawovlp(dtset%natom,psps%ntypat,dtset%pawovlp,tdks%pawtab,tdks%rmet, &
+                  & dtset%typat,tdks%xred)
+ 
+    !Identify parts of the rectangular grid where the density has to be calculated
+    !FB: Needed?
+    optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
+    forces_needed=0 !FB TODO needs to be changed if Ehrenfest?
+    stress_needed=0
+    if ((forces_needed==1).or. &
+      & (dtset%xclevel==2.and.dtset%pawnhatxc>0.and.tdks%usexcnhat>0).or. &
+      & (dtset%positron/=0.and.forces_needed==2)) then
+       optgr1=dtset%pawstgylm; if (stress_needed==1) optrad=1; if (dtset%pawprtwf==1) optrad=1
+    end if
+    call nhatgrid(tdks%atindx1,tdks%gmet,my_natom,dtset%natom,tdks%nattyp,         &
+                & tdks%pawfgr%ngfft,psps%ntypat,optcut,optgr0,optgr1,              &
+                & optgr2,optrad,tdks%pawfgrtab,tdks%pawtab,tdks%rprimd,            &
+                & dtset%typat, tdks%ucvol,tdks%xred,comm_atom=mpi_enreg%comm_atom, &
+                & mpi_atmtab=mpi_enreg%my_atmtab,comm_fft=mpi_enreg%comm_fft,      &
+                & distribfft=mpi_enreg%distribfft)
+ endif
 
 !!FB: @MT Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
 !!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
@@ -187,8 +183,6 @@ subroutine rttddft_setup_ele_step(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
 !if(with_vectornd .EQ. 1) then
 !   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
 !        & rprimd,vectornd,xred)
-
- end if
 
 end subroutine rttddft_setup_ele_step
 
@@ -329,7 +323,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert, &
+   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,           &
                 & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,    &
                 & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,     &
                 & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,        &
@@ -449,12 +443,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    ABI_MALLOC(rhowfg,(2,dtset%nfft))
    ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 
-   !FB: Only needed if xred changed so if ionmov /= 1
-   ! 1-Compute structure factor phases for current atomic pos
-   call getph(tdks%atindx,dtset%natom,tdks%pawfgr%ngfftc(1),tdks%pawfgr%ngfftc(2), &
-            & tdks%pawfgr%ngfftc(3),tdks%ph1d,tdks%xred)
-
-   ! 2-Compute density from WFs (without compensation charge density nhat)
+   ! 1-Compute density from WFs (without compensation charge density nhat)
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
             & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
@@ -462,7 +451,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                 & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
 
-   ! 3-Compute cprj = <\psi_{n,k}|p_{i,j}>
+   ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &
               & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
@@ -483,14 +472,14 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
        pawrhoij_unsym => tdks%pawrhoij
    end if
 
-   ! 4-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
+   ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
    call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
                  & dtset%nsppol,tdks%occ,dtset%paral_kgb,tdks%paw_dmft,             &
                  & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
-   ! 5-Symetrize rhoij, compute nhat and add it to rhor
+   ! 4-Symetrize rhoij, compute nhat and add it to rhor
    ! Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij
    ! cannot be distributed over different atomic sites.
    ipert=0; idir=0; qpt(:)=zero; compch_fft=-1e-5_dp
@@ -545,15 +534,11 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 !!  rttddft_calc_energy
 !!
 !! FUNCTION
-!!  Compute total energy and various part of it 
+!!  Computes total energy
 !!
 !! INPUTS
-!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  energies <energies_type> = contains the different contribution ot the total energy
-!!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
-!!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!
 !! OUTPUT
 !!  etotal <real(dp)> = the total energy
@@ -566,7 +551,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_etot(dtset, energies, etotal, mpi_enreg)
+subroutine rttddft_calc_etot(dtset, energies, etotal)
 
  implicit none
 
@@ -575,7 +560,6 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, mpi_enreg)
  real(dp),                   intent(out)   :: etotal
  type(dataset_type),         intent(inout) :: dtset
  type(energies_type),        intent(inout) :: energies
- type(MPI_type),             intent(inout) :: mpi_enreg
 
  !Local variables-------------------------------
  !scalars

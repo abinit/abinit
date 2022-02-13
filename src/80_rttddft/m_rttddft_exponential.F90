@@ -167,7 +167,7 @@ contains
       end if
 
       !** Also apply S^-1 in PAW case
-      if(paw) then 
+      if (paw) then 
          call apply_invovl(gs_hamk, ghc, gsm1hc, cwaveprj, npw_k, nband_k, mpi_enreg, nspinor)
          tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
          tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
@@ -185,7 +185,7 @@ contains
                               & cg(:,shift+1:shift+npw_k*nspinor),cg(:,shift+1:shift+npw_k*nspinor),0)
                energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*occ_k(iband)*ar
                !Compute non local psp energy contribution
-               if (gs_hamk%usepaw /= 1) then
+               if (.not. paw) then
                   call dotprod_g(enlx,dprod_i,gs_hamk%istwf_k,npw_k*nspinor,1, &
                                & cg(:,shift+1:shift+npw_k*nspinor),            &
                                & gvnlxc(:,shift+1:shift+npw_k*nspinor),        &
@@ -195,7 +195,7 @@ contains
                !Compute eigenvalues
                call dotprod_g(eig(iband),dprod_i,gs_hamk%istwf_k,npw_k*nspinor,1,ghc(:, shift+1:shift+npw_k*nspinor),&
                             & cg(:, shift+1:shift+npw_k*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-               if(gs_hamk%usepaw == 1) then
+               if(paw) then
                   call dotprod_g(dprod_r,dprod_i,gs_hamk%istwf_k,npw_k*nspinor,1,gsc(:, shift+1:shift+npw_k*nspinor),&
                                & cg(:, shift+1:shift+npw_k*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                   eig(iband) = eig(iband)/dprod_r

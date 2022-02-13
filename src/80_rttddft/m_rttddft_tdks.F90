@@ -80,7 +80,7 @@ module m_rttddft_tdks
  use m_spacepar,         only: setsym
  use m_symtk,            only: symmetrize_xred
  use m_wffile,           only: wffile_type, WffClose
- use m_xmpi,             only: xmpi_sum
+ use m_xmpi,             only: xmpi_bcast!, xmpi_sum
 
  implicit none
 
@@ -101,7 +101,7 @@ module m_rttddft_tdks
    integer                          :: mband_cprj  !nb of band per proc (for cprj)
    integer                          :: mcg         !nb of WFs (cg) coeffs
    integer                          :: mcprj       !nb of cprj (projectors applied to WF)
-   integer                          :: my_nspinor  !nb of spinors treated by proc
+!  integer                          :: my_nspinor  !nb of spinors treated by proc              !FB: Needed?
    integer                          :: nfftf       !nb of FFT grid pts (fine grid)
    integer                          :: nfft        !nb of FFT grid pts (coarse grid)
    integer                          :: nhatgrdim   !dimension of nhatgr array
@@ -148,7 +148,7 @@ module m_rttddft_tdks
    real(dp),allocatable             :: eigen(:)    !eigen-energies
    real(dp),allocatable             :: eigen0(:)   !Initial eigen-energies (at t=0)
    real(dp),allocatable             :: grvdw(:,:)  !Gradient of the total energy coming
-                                                   !from VDW dispersion correction  !FB: Needed?
+                                                   !from VDW dispersion correction             !FB: Needed?
    real(dp),allocatable             :: occ(:)      !occupation numbers
    real(dp),allocatable             :: nhat(:,:)   !compensation charge density
    real(dp),allocatable             :: nhatgr(:,:,:) !gradient of nhat
@@ -165,16 +165,16 @@ module m_rttddft_tdks
    real(dp),allocatable             :: vpsp(:)     !PSP part of the potential
    real(dp),allocatable             :: vtrial(:,:) !"Trial" potential
    real(dp),allocatable             :: vxc(:,:)    !XC part of the potential
-   real(dp),allocatable             :: vxc_hybcomp(:,:) !Hybrid part of the xc potential
+   real(dp),allocatable             :: vxc_hybcomp(:,:) !Hybrid part of the xc potential       !FB:Needed?
    real(dp),allocatable             :: vxctau(:,:,:) !dV_{XC}/dtau (tau = kin. ener density)
-                                                   !for mGGAs    !FB: Needed?
+                                                   !for mGGAs                                  !FB: Needed?
    real(dp),allocatable             :: xred(:,:,:) !red. coord. of atoms
    real(dp),allocatable             :: xccc3d(:)   !3D core electron density
                                                    !for XC core correction
    real(dp),allocatable             :: xcctau3d(:) !3D core electron kin ener density
                                                    !for XC core correction
    real(dp),allocatable             :: ylm(:,:)    !real spherical harmonics for each k+G
-   real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients          !FB: Needed?
+   real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients         !FB: Needed?
    type(pawcprj_type),allocatable   :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
    type(paw_an_type),allocatable    :: paw_an(:)   !various arrays on angular mesh
    type(pawfgrtab_type),allocatable :: pawfgrtab(:) !PAW atomic data on fine grid
@@ -241,6 +241,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
 
  !Local variables-------------------------------
  !scalars
+ integer                     :: ierr
  integer                     :: my_natom
  integer                     :: psp_gencond
  real(dp)                    :: ecut_eff
@@ -250,6 +251,24 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  real(dp),allocatable        :: doccde(:)
 
 ! ***********************************************************************
+
+ !** First some tests to avoid the user to use the method in untested cases
+ if (dtset%usepawu /= 0) then 
+   write (msg,'(a)') "RT-TDDFT with DFT+U has not yet been tested."
+   ABI_ERROR(msg)
+ end if
+ if (mod(dtset%fockoptmix,100)==11) then 
+   write (msg,'(a)') "RT-TDDFT with hybrid functionals has not yet been tested."
+   ABI_ERROR(msg)
+ end if
+ if (dtset%usekden /= 0) then 
+   write (msg,'(a)') "RT-TDDFT with meta-GGA functionals has not yet been tested."
+   ABI_ERROR(msg)
+ end if
+ if (dtset%vdw_xc /= 0) then
+   write (msg,'(a)') "RT-TDDFT with VDW corrected functionals has not yet been tested."
+   ABI_ERROR(msg)
+ end if
 
  my_natom=mpi_enreg%my_natom
 
@@ -262,8 +281,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%first_step = 1
  tdks%fname_tdener = dtfil%fnameabo_td_ener
  tdks%fname_wfk = dtfil%fnamewffk
- if (mpi_enreg%me == 0) then
-   if (dtset%td_restart > 0) then
+ if (dtset%td_restart > 0) then
+   if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
          write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART needed for restarting the calculation.'
          ABI_ERROR(msg)
@@ -272,19 +291,26 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       tdks%first_step = tdks%first_step + 1
       read(tdks%tdrestart_unit,*) tdks%fname_tdener
       read(tdks%tdrestart_unit,*) tdks%fname_wfk
-   else
+   end if
+   !Send to all procs
+   call xmpi_bcast(tdks%first_step,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_tdener,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_wfk,0,mpi_enreg%comm_world,ierr)
+ else
+   if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
          write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
          ABI_ERROR(msg)
       end if 
    end if
-   !FB TODO Send first_step and filenames to all procs
  end if
 
  !3) Reads initial KS orbitals from file (calls inwffil)
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
  
  !4) Init occupation numbers
+ !FB: TODO read occupation numbers from file if required
+ !FB: TODO and generalize to all possible occopt
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
  tdks%occ(:)=dtset%occ_orig(:,1)
  !calc occupation number with metallic occupation using the previously read WF
@@ -301,10 +327,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !5) Some further initialization (Mainly for PAW)
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
- !6) Compute electronic density from WFs
- call calc_density(dtfil,dtset,mpi_enreg,pawang,pawtab,psps,tdks)
-
- !TODO FB: That should be all for now but there were a few more initialization in
+ !FB: That should be all for now but there were a few more initialization in
  !g_state.F90 in particular related to electric field, might want to check that out
  !once we reach the point of including external electric field
 
@@ -317,7 +340,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%pawrad => pawrad
  tdks%pawtab => pawtab
 
- !FB TODO: Check that all proc have what they need from here first
 end subroutine tdks_init
 
 !!****f* m_rttddft_tdks/tdks_free
@@ -537,7 +559,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  tdks%ecore = zero
  tdks%etot = zero
 
- !** various additional setup
+ !** various additional setup mostly related to fft grids and the box (rprimd, metric..)
  call setup1(dtset%acell_orig,tdks%bantot,dtset,ecutdg_eff,ecut_eff,tdks%gmet, &
            & tdks%gprimd,gsqcut_eff,gsqcutc_eff,ngfftf,ngfft,dtset%nkpt,       &
            & dtset%nsppol,response,tdks%rmet,dtset%rprim_orig,tdks%rprimd,     &
@@ -593,7 +615,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  call pspini(dtset,dtfil,tdks%ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad, &
            & pawtab,psps,tdks%rprimd,comm_mpi=comm_psp)
 
- !In case of isolated computations, ecore must set to zero
+ !In case of isolated computations, ecore must be set to zero
  !because its contribution is counted in the ewald energy as the ion-ion interaction.
  if (dtset%icoulomb == 1) tdks%ecore = zero
 
@@ -685,7 +707,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  tdks%indsym(:,:,:)=0
  tdks%symrec(:,:,:)=0
 
- !TODO FB: I think symmetry should not be used when ions are moving. Modify for Ehrenfest dynamics
+ !TODO FB: Should symmetry be used when ions are moving? Modify if Ehrenfest dynamics
  !Do symmetry stuff if nsym>1
  if (dtset%nsym>1) then
    call setsym(tdks%indsym,tdks%irrzon,dtset%iscf,dtset%natom, &
@@ -921,6 +943,22 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
                & tdks%ucvol,tdks%xred,comm_atom=mpi_enreg%comm_atom,             &
                & mpi_atmtab=mpi_enreg%my_atmtab,comm_fft=mpi_enreg%comm_fft,     &
                & distribfft=mpi_enreg%distribfft)
+
+   tdks%nhatgrdim=0;if (dtset%xclevel==2) tdks%nhatgrdim=tdks%usexcnhat*dtset%pawnhatxc
+   if (tdks%nhatgrdim>0)   then
+      ABI_MALLOC(tdks%nhatgr,(cplex*tdks%nfftf,dtset%nspden,3*tdks%nhatgrdim))
+   else
+      ABI_MALLOC(tdks%nhatgr,(0,0,0))
+   end if
+
+   ABI_MALLOC(tdks%nhat,(tdks%nfftf,dtset%nspden*psps%usepaw))
+
+   !Required in the PAW case to compute the inverse of the overlap (invovl) operator
+   call init_invovl(dtset%nkpt)
+ else
+   ABI_MALLOC(tdks%nhat,(0,0))
+   ABI_MALLOC(tdks%nhatgr,(0,0,0))
+   tdks%nhatgrdim=0
  end if
 
  !Allocate various required arrays for calculation of the Hamiltonian
@@ -999,10 +1037,11 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
 !        & rprimd,vectornd,xred)
 !endif
 
- !Required in the PAW case to compute the inverse of the overlap (invovl) operator
- if (psps%usepaw == 1) then 
-   call init_invovl(dtset%nkpt)
- end if
+ !Allocate memory for density
+ ABI_MALLOC(tdks%rhor,(tdks%nfftf,dtset%nspden))
+ ABI_MALLOC(tdks%taur,(tdks%nfftf,dtset%nspden*dtset%usekden))
+ ABI_MALLOC(tdks%rhog,(2,tdks%nfftf))
+ ABI_MALLOC(tdks%taug,(2,tdks%nfftf*dtset%usekden))
 
 end subroutine second_setup
 
@@ -1125,175 +1164,6 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  tdks%eigen0(:) = tdks%eigen(:)
 
 end subroutine read_wfk
-
-!!****f* m_rttddft_tdks/calc_density
-!!
-!! NAME
-!!  calc_density
-!!
-!! FUNCTION
-!!  Compute electronic density (in 1/bohr^3) from the WF (cg coefficients)
-!!
-!! INPUTS
-!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
-!!  dtset <type(dataset_type)> = all input variables for this dataset
-!!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  pawang <type(pawang_type)> = paw angular mesh and related data
-!!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
-!!  tdks <type(tdks_type)> = the tdks object to initialize
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!  m_rttddft_tdks/rttddft_init
-!!
-!! CHILDREN
-!!
-!! SOURCE
-subroutine calc_density(dtfil, dtset, mpi_enreg, pawang, pawtab, psps, tdks)
-
- implicit none
-
- !Arguments ------------------------------------
- !scalars
- type(datafiles_type),       intent(in)    :: dtfil
- type(dataset_type),         intent(inout) :: dtset
- type(MPI_type),             intent(inout) :: mpi_enreg
- type(pawang_type),          intent(inout) :: pawang
- type(pseudopotential_type), intent(inout) :: psps
- type(tdks_type),            intent(inout) :: tdks
- !arrays
- type(pawtab_type),          intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
-
- !Local variables-------------------------------
- !scalars
- integer, parameter          :: cplex=1
- integer                     :: cplex_rhoij
- integer                     :: ipert, idir, ider, izero
- integer                     :: my_natom
- integer                     :: nspden_rhoij
- integer                     :: tim_mkrho
- real(dp)                    :: compch_fft
- !arrays
- real(dp)                    :: qpt(3)
- real(dp),allocatable        :: rhowfg(:,:), rhowfr(:,:)
- type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
-
-! ***********************************************************************
-
- my_natom=mpi_enreg%my_natom
-
- ABI_MALLOC(tdks%rhor,(tdks%nfftf,dtset%nspden))
- ABI_MALLOC(tdks%taur,(tdks%nfftf,dtset%nspden*dtset%usekden))
- ABI_MALLOC(tdks%rhog,(2,tdks%nfftf))
- ABI_MALLOC(tdks%taug,(2,tdks%nfftf*dtset%usekden))
-
- tim_mkrho=1
-
- if (psps%usepaw==1) then
-
-   ABI_MALLOC(rhowfg,(2,dtset%nfft))
-   ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-   ABI_MALLOC(tdks%nhat,(tdks%nfftf,dtset%nspden*psps%usepaw))
-
-   tdks%nhatgrdim=0;if (dtset%xclevel==2) tdks%nhatgrdim=tdks%usexcnhat*dtset%pawnhatxc
-   ider=2*tdks%nhatgrdim;izero=0
-   if (tdks%nhatgrdim>0)   then
-      ABI_MALLOC(tdks%nhatgr,(cplex*tdks%nfftf,dtset%nspden,3*tdks%nhatgrdim))
-   else
-      ABI_MALLOC(tdks%nhatgr,(0,0,0))
-   end if
-
-   ! 1-Compute density from WFs (without compensation charge density nhat)
-   call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
-            & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
-            & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
-   ! transfer density from the coarse to the fine FFT grid
-   call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
-                & rhowfg,tdks%rhog,rhowfr,tdks%rhor)
-
-   ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
-   call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,      &
-              & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft, &
-              & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,          &
-              & tdks%nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,       &
-              & dtset%nloalg,tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,  &
-              & dtset%paral_kgb,tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,  &
-              & dtfil%unpaw,tdks%xred,tdks%ylm,tdks%ylmgr)
-
-   !paral atom
-   if (my_natom/=dtset%natom) then
-      ABI_MALLOC(pawrhoij_unsym,(dtset%natom))
-      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij, &
-                              & nspden=dtset%nspden,spnorb=dtset%pawspnorb,        &
-                              & cpxocc=dtset%pawcpxocc)
-      call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor, &
-                        & dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0)
-   else
-      pawrhoij_unsym => tdks%pawrhoij
-   end if
-
-   ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
-   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
-                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
-                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
-                 & dtset%nsppol,tdks%occ,dtset%paral_kgb,tdks%paw_dmft,             &
-                 & pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
-
-   ! 4-Symetrize rhoij, compute nhat and add it to rhor
-   ! Note pawrhoij_unsym and pawrhoij are the same, which means that pawrhoij
-   ! cannot be distributed over different atomic sites.
-   ipert=0; idir=0; qpt(:)=zero; compch_fft=-1e-5_dp
-   tdks%nhat = zero
-   call pawmkrho(1,compch_fft,cplex,tdks%gprimd,idir,tdks%indsym,ipert,mpi_enreg, &
-               & my_natom,dtset%natom,dtset%nspden,dtset%nsym,dtset%ntypat,       &
-               & dtset%paral_kgb,pawang,tdks%pawfgr,tdks%pawfgrtab,               &
-               & dtset%pawprtvol,tdks%pawrhoij,pawrhoij_unsym,pawtab,qpt,         &
-               & rhowfg,rhowfr,tdks%rhor,tdks%rprimd,dtset%symafm,tdks%symrec,    &
-               & dtset%typat,tdks%ucvol,dtset%usewvl,tdks%xred,pawnhat=tdks%nhat, &
-               & pawnhatgr=tdks%nhatgr,rhog=tdks%rhog)
-
-   ! 5-Take care of kinetic energy density
-   if(dtset%usekden==1)then
-     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
-              & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
-              & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
-     call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
-                  & rhowfg,tdks%taug,rhowfr,tdks%taur)
-   end if
-
-   ABI_FREE(rhowfg)
-   ABI_FREE(rhowfr)
-
-   if (my_natom/=dtset%natom) then
-      call pawrhoij_free(pawrhoij_unsym)
-      ABI_FREE(pawrhoij_unsym)
-   else
-      pawrhoij_unsym => NULL()
-   end if
-
- else
-
-   ABI_MALLOC(tdks%nhat,(0,0))
-   ABI_MALLOC(tdks%nhatgr,(0,0,0))
-   tdks%nhatgrdim=0
-
-   ! 1-Compute density from WFs
-   call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
-            & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,tdks%rhog,tdks%rhor, &
-            & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
-   ! 2-Take care of kinetic energy density
-   if(dtset%usekden==1)then
-     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
-              & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,tdks%taug,tdks%taur, &
-              & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
-   end if
-
- end if
-
-end subroutine calc_density
 
 end module m_rttddft_tdks
 !!***

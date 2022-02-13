@@ -118,7 +118,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  integer                        :: calc_forces
  integer                        :: dimffnl
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
- integer                        :: ibg, icg
+ integer                        :: icg
  integer                        :: ider, idir
  integer                        :: ierr, ilm
  integer                        :: ikpt, ikpt_loc, ikg
@@ -152,7 +152,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
  me_distrb=xmpi_comm_rank(spaceComm_distrb)
-
 
  !Do we store resulting energies in tdks?
  lstore_ene = .false.
@@ -266,6 +265,9 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       ! Compute nonlocal form factors ffnl at all (k+G):
       ider=0;idir=0;dimffnl=1
       ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+      !FB: This seems wrong even if one does not need to recompute 
+      !at every step it is not stored and would not be computed even once 
+      !in case of a restart with first_step > 1 - HERE!!
       if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
                    & ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,     &
@@ -305,7 +307,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= 1) then
             !Init the arrays
-            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,        &
+            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,       &
                                & gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
                                & gs_hamk%ffnl_k,gs_hamk%ph3d_k)
          end if
@@ -356,7 +358,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 
  !Keep the computed energies in memory
  if (lstore_ene) then
-   !FB: There should be some MPI reduce here I think
    !FB: Is this the right communicator to use here?
    call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kpt,ierr)
    call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kpt,ierr)
