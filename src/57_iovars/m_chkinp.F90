@@ -426,7 +426,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,2,(/0,1/),iout)
 
 !  chksymtnons
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymtnons',dt%chksymtnons,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymtnons',dt%chksymtnons,4,(/0,1,2,3/),iout)
 
    if(dt%chksymtnons>0)then
 !    Check the values of tnons
@@ -461,18 +461,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          call wrtout(std_out,' ','COLL')
        endif
 
-       if(dt%chksymtnons==1)then
-         write(msg, '(8a,i4,2a,9i3,2a,3es20.10,10a)' ) ch10,&
+       if(dt%chksymtnons==1 .or. dt%chksymtnons==3)then
+         write(msg, '(8a,i4,2a,9i3,2a,3es20.10,11a)' ) ch10,&
 &          ' chkinp: ERROR -',ch10,&
-&          '   Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&          '   Chksymtnons=1 or 3 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
 &          '   for the symmetry number ',mismatch_fft_tnons,ch10,&
 &          '   symrel is ',dt%symrel(1:3,1:3,mismatch_fft_tnons),ch10,&
 &          '   tnons is ',dt%tnons(1:3,mismatch_fft_tnons),ch10,&
 &          '   So, your atomic positions are not aligned with the FFT grid.',ch10,&
 &          '   Please, read the description of the input variable chksymtnons.',ch10,&
-&          '   If you are planning GW or BSE calculations, such tnons value is very problematic.',ch10,&
-&          '   Otherwise, you might set chksymtnons=0. But do not be surprised if ABINIT crashes for GW or BSE.',ch10,&
+&          '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
+&          '   Otherwise, you might set chksymtnons=0.',&
+&          '   But do not be surprised if ABINIT do not converge for cDFT, or crashes for GW or BSE.',ch10,&
 &          '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg,'COLL')
          if(fixed_mismatch==1)then
@@ -507,6 +508,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(2)='nspden';cond_values(2)=dt%nspden
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
      endif
+     if (dt%chksymtnons==1 .or. dt%chksymtnons==2) then
+       cond_string(1)='itypat';cond_values(1)=itypat
+       cond_string(2)='chksymtnons';cond_values(2)=dt%chksymtnons
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
+     endif
+
    enddo
 
 !  densfor_pred
@@ -1925,12 +1932,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
 #ifdef HAVE_OPENMP
-   if (dt%wfoptalg==114.or.dt%wfoptalg==1.or.dt%wfoptalg==111) then
-     if ( xomp_get_num_threads(.true.) > 1 .and. dt%npfft > 1 ) then
-       write(msg,'(4a,i4,a,i4,a)') "When compiled with OpenMP, the FFT parallelization is not ",&
-&       "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",&
-&       dt%npfft, ") or export OMP_NUM_THREADS=1 (currently: ",xomp_get_num_threads(.true.),")"
-       ABI_ERROR_NOSTOP(msg, ierr)
+   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111) then
+     if ( xomp_get_num_threads(.true.) > 1 ) then
+       if ( dt%npfft > 1 ) then
+         write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
+          "compatible with multiple threads.",ch10,"Please set npfft to 1 (currently npfft=",dt%npfft,&
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
+       if ( dt%npspinor > 1 ) then
+         write(msg,'(4a,i1,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the parallelization on spinorial components is not",&
+          " compatible with multiple threads.",ch10,"Please set npspinor to 1 (currently npspinor=",dt%npspinor,&
+          ") or export OMP_NUM_THREADS=1 (currently: the number of threads is ",xomp_get_num_threads(.true.),")"
+         ABI_ERROR_NOSTOP(msg, ierr)
+       end if
      end if
    end if
 #endif

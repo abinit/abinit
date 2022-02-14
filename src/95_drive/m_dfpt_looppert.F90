@@ -2172,14 +2172,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call eigen_meandege(eigen0,eigen1,eigen1_mean,dtset%mband,nband_rbz,nkpt_rbz,dtset%nsppol,1)
      option=4
      if (me == master) then
-       ! CP modified
-       !call prteigrs(eigen1_mean,dtset%enunit,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
-!&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
-!&       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
        call prteigrs(eigen1_mean,dtset%enunit,fermie,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
-&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
+&       dtset%mband,nband_rbz,dtset%nbdbuf,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
 &       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
-       ! End CP modified
      end if
      ABI_FREE(eigen1_mean)
    end if
