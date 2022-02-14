@@ -590,10 +590,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tollc',dt%dmft_tollc,-1,tol5,iout)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,-1,tol4,iout)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,1,tol20,iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,3,(/1,2,5/),iout)
        if(dt%usepawu==14) then
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/5/),iout)
        endif
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,4,(/0,1,2,5/),iout)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
@@ -2035,8 +2035,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(2)='pawxcdev' ; cond_values(2)=dt%pawxcdev
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
-!  When usepawu is not 0, 1 or 4, nspden must be 1 or 2
-   if( dt%usepawu/=0 .and. dt%usepawu/=1 .and. dt%usepawu/=4)then
+!  When abs(usepawu) is not 0, 1, 4, 10 or 14, nspden must be 1 or 2
+   if( abs(dt%usepawu)/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4 .and. &
+&      abs(dt%usepawu)/=10 .and. abs(dt%usepawu)/=14 )then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
@@ -3388,9 +3389,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  usekden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usekden',dt%usekden,2,(/0,1/),iout)
-   if(dt%nspden==4)then
+!  The following test is only a way to practically prevent the usage of mGGA with nspden=4 (not allowed yet),
+!  while allowing to have usekden=1 with nspden=4. Indeed, while mGGA is not allowed for the non-collinear case,
+!  the computation of the kinetic energy density in the non-collinear spin case is working, and there are tests of this ...
+!  What should be done : modify the definition of xclevel, to index differently GGAs and mGGAs, etc, and test on xclevel instead of usekden.
+   if(dt%nspden==4 .and. dt%prtkden==0)then
      cond_string(1)='nspden' ; cond_values(1)=dt%nspden
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usekden',dt%usekden,1,(/0/),iout)
+     cond_string(1)='prtkden' ; cond_values(2)=dt%prtkden
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'usekden',dt%usekden,1,(/0/),iout)
    endif
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
@@ -3422,6 +3428,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  usepawu and lpawu
 !  PAW+U and restrictions
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
+   if(dt%usedmft==1)then
+     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',usepawu,2,(/10,14/),iout)
+   end if
+   if(dt%usedmft==0)then
+     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',usepawu,9,(/-4,-3,-2,-1,0,1,2,3,4/),iout)
+   end if
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',usepaw,1,(/1/),iout)
