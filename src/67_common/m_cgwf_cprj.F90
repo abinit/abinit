@@ -185,7 +185,7 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
  ABI_MALLOC(scprod,(2,nband))
  ABI_MALLOC(scprod_csc,(2*nband))
  ABI_MALLOC(direc_tmp,(2,npw*nspinor))
- ABI_MALLOC(gvnlxc,(2,npw*nspinor))
+ ABI_MALLOC(gvnlxc,(0,0))
 
  ABI_MALLOC(cprj_direc ,(natom,nspinor))
  ABI_MALLOC(cprj_conjgr ,(natom,nspinor))
