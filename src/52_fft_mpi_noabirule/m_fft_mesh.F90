@@ -314,7 +314,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  end if
 
  tnons_warn = "Check your fractional translations tnons. "//ch10//&
-   "Components should be a rational fraction in 1/8th nor in 1/12th."//ch10//&
+   "Components should be a rational fraction in 1/8th or in 1/12th."//ch10//&
    "You may need to polish the structure by running AbiPy `abistruct.py abisanitize` on the input file."//ch10//&
    "to get rid of spurious tnons"
 
