@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer)
+.Version 9.7.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group .
+.Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Dec 2020.
-- ( at 02h53 )
-
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/TestBot_MPI1/tutoplugs_tw90_4/tw90_4.abi
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h08 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutoplugs_tw90_4/tw90_4.abi
 - output file    -> tw90_4.abo
 - root for input  files -> tw90_4i
 - root for output files -> tw90_4o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +38,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       6.376 Mbytes of memory.
+P This job should need less than                       6.386 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -57,7 +57,7 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       5.209 Mbytes of memory.
+P This job should need less than                       5.237 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.258 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -76,7 +76,7 @@ _ WF disk file :      0.258 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                       7.512 Mbytes of memory.
+P This job should need less than                       7.593 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.053 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -85,10 +85,10 @@ _ WF disk file :      2.053 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                     
+- outvars: echo of selected default values                                      
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file             
+- outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -330,9 +330,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05572
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -643,10 +643,6 @@ P newkpt: treating     14 bands with npw=     144 for ikpt=   8 by node    0
   6.0756E-01  6.0756E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  200    2 max resid (incl. the buffer)=  2.04145E-09
-  prteigrs : nnsclo,ikpt=  200    5 max resid (incl. the buffer)=  1.34090E-06
-  prteigrs : nnsclo,ikpt=  200    6 max resid (incl. the buffer)=  1.25729E-05
-  prteigrs : nnsclo,ikpt=  200    8 max resid (incl. the buffer)=  7.14859E-09
 
 
 --- !ResultsGS
@@ -876,8 +872,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-  Calculation of overlap and call to wannier90 library
-  to obtain maximally localized wannier functions
+  Calculation of overlap and call to wannier90 library 
+  to obtain maximally localized wannier functions 
 
   - tw90_4o_DS3_w90.win is a mandatory secondary input
   - tw90_4o_DS3_w90.wout is the output for the library
@@ -888,7 +884,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-   mlwfovlp:  you should give k-point in the full brillouin zone
+   mlwfovlp:  you should give k-point in the full brillouin zone 
    with explicit k-points (or kptopt=3) and istwfk 1
 
    mlwfovlp :  mlwfovlp_setup done -
@@ -1017,7 +1013,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0263000000E+01  1.0263000000E+01  1.0263000000E+01 Bohr
               amu      2.80855000E+01
@@ -1276,7 +1272,7 @@ P           mkmem3         64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1288,12 +1284,12 @@ P           mkmem3         64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1311,15 +1307,15 @@ P           mkmem3         64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         19.0  wall=         19.1
+- Proc.   0 individual time (sec): cpu=         20.8  wall=         20.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  39 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.0  wall=         19.1
+.Delivered  42 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.8  wall=         20.9
