@@ -55,7 +55,6 @@ inp_files = [
 "t42.abi",
 "t43.abi",
 "t44.abi", # test orbital magnetism with DDK wavefunctions
-"t45.abi", # test orbital magnetism with finite difference wavefunctions
 "t46.abi", # longwave GGA
 "t47.abi", # metallic iron GGA-PBE PAW nsppol=2
 "t48.abi", # optic
