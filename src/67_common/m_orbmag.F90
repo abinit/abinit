@@ -1172,7 +1172,7 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
  if(dtset%orbmag .GE. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')' Orbital magnetic moment, Term-by-term breakdown : '
+   write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '  <du/dk|H+ES|du/dk> : ',(orbmag_trace(1,adir,iom1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
@@ -1183,9 +1183,9 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
    write(message,'(a,3es16.8)') '       <u|p>L_R<p|u> : ',(orbmag_trace(1,adir,iom4),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
-   write(message,'(a)')' Berry curvature, Term-by-term breakdown : '
+   write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '       <du/dk|du/dk> : ',(orbmag_trace(1,adir,ibc1),adir=1,3)
+   write(message,'(a,3es16.8)') '     <du/dk|S|du/dk> : ',(orbmag_trace(1,adir,ibc1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     <du/dk|dS/dk|u> : ',(orbmag_trace(1,adir,ibc2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
@@ -1214,7 +1214,7 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
      write(message,'(a)')ch10
      write(message,'(a,3es16.8)') '         Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '           <du/dk|du/dk> : ',(orbmag_terms(1,iband,adir,ibc1),adir=1,3)
+     write(message,'(a,3es16.8)') '         <du/dk|S|du/dk> : ',(orbmag_terms(1,iband,adir,ibc1),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         <du/dk|dS/dk|u> : ',(orbmag_terms(1,iband,adir,ibc2),adir=1,3)
      call wrtout(ab_out,message,'COLL')
