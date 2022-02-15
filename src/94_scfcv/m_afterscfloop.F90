@@ -60,7 +60,6 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : orbmag_type, orbmag_wf, testprj
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -282,7 +281,7 @@ contains
 !!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
 !!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
 !!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      orbmag_wf,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
+!!      pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
 !!      scprqt,setnoccmmp,spin_current,timab,total_energies,transgrid
 !!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
 !!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
@@ -291,7 +290,7 @@ contains
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
@@ -317,7 +316,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(efield_type),intent(inout) :: dtefield
- type(orbmag_type),intent(inout) :: dtorbmag
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
@@ -545,21 +543,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
 &   psps,pwind,pwind_alloc,pwnsfac,rprimd,ucvol,usecprj,xred)
- end if
-
-!----------------------------------------------------------------------
-! Orbital magnetization calculation: discretized wavefunction variant
-!----------------------------------------------------------------------
- if(dtset%orbmag.LT.0) then
-   call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
-        & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-        & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
-        & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
- end if
-
- if(dtset%userid.EQ.1) then
-   call testprj(atindx,atindx1,cg,cprj,dtset,gsqcut,kg,mcg,mcprj,mpi_enreg,&
-     & nattyp,nfftf,ngfftf,npwarr,pawfgr,pawrad,pawtab,psps,rprimd,xred,ylm,ylmgr)
  end if
 
  call timab(252,2,tsec)
