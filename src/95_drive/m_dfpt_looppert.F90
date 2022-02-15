@@ -2194,19 +2194,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     !if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 3)) then
-     !  !this version uses the modern theory or orbital magnetism directly
-     !  call orbmag_modmag(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-     !    & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
-     !    & vtrial_local,xred,ylm,ylmgr)
-     !end if 
-     !if((dtset%orbmag .GE. 11) .AND. (dtset%orbmag .LE. 13)) then
-     !  !this version uses magnetic translation symmetry to compute \partial E/\partial B
-     !  call orbmag_magsym(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-     !    & nfftf,ngfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
-     !    & vtrial_local,xred,ylm,ylmgr)
-     !end if 
-     if((dtset%orbmag .GE. 21) .AND. (dtset%orbmag .LE. 23)) then
+     if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 3)) then
        !this version uses the GIPAW energy expansion
        call orbmag_gipaw(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
          & nfftf,ngfftf,npwarr,occ,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
