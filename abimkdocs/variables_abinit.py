@@ -13381,8 +13381,9 @@ Compute quantities related to orbital magnetic moment. The
     insulators have orbital magnetization zero, except in the presence
     of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Gonze2011a]] extended to the PAW case;
-    see also [[cite:Ceresoli2006]]. The computed results are returned in the
+    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]], 
+    and [[cite:Gonze2011a]] extended to the PAW case.
+    The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
     both the ground state and DDK wavefunctions, and is triggered at the end of a
     DDK calculation.
