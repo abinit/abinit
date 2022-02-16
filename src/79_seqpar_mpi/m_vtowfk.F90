@@ -250,7 +250,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
- newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) 
+ newchebfi = (dtset%wfoptalg == 111)
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
