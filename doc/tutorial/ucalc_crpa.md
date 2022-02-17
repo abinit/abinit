@@ -1,5 +1,5 @@
 ---
-authors: BAmadon
+authors: BAmadon, ROuterovitch
 ---
 
 # Calculation of U and J using cRPA
@@ -51,12 +51,12 @@ Several parameters (both physical and technical) are important for the cRPA calc
   * **The definition of correlated orbitals.** The first part of the tutorial is similar to the DMFT tutorial
     and explains the electronic structure of SrVO<sub>3</sub> and will be used to understand the definition of
     Wannier orbitals with various extensions. Wannier functions are unitarily related to a selected
-    set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index [[dmftbandi]], and [[dmftbandf]].
+    set of Kohn Sham (KS) wavefunctions, specified in ABINIT by band index [[plowan_bandi]], and [[plowan_bandf]].
     Thus, as empty bands are necessary to build Wannier functions, it is required in DMFT or cRPA calculations
     that the KS Hamiltonian is correctly diagonalized: use high values for [[nnsclo]], and [[nline]]
     for cRPA and DMFT calculations and preceding DFT calculations. Another solution used in the present tutorial
-    is to use a specific non self-consistent calculation to diagonalize the hamiltonian, as in _GW_ calculations.
-    Concerning the localization or correlated orbitals, generally, the larger [[dmftbandf]]-[[dmftbandi]] is,
+		is to use a specific non self-consistent calculation to diagonalize the hamiltonian, as in _GW_ calculations.
+    Concerning the localization or correlated orbitals, generally, the larger [[plowan_bandf]]-[[plowan_bandi]] is,
     the more localized is the radial part of the Wannier orbital. Finally, note that Wannier orbitals
     are used in DMFT and cRPA implementations but this is not the most usual choice of correlated orbitals
     in the DFT+_U_ implementation in particular in ABINIT (see [[cite:Amadon2008a]]).
