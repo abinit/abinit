@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h22 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t07/t07.in
-- output file    -> t07.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v7_t07/t07.abi
+- output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
 
@@ -34,7 +34,7 @@
 -    mband =          30        mffmem =           1         mkmem =          10
        mpw =         441          nfft =       13824          nkpt =          10
 ================================================================================
-P This job should need less than                      10.260 Mbytes of memory.
+P This job should need less than                      11.063 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.021 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      2.021 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           3
        mpw =         444          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       5.693 Mbytes of memory.
+P This job should need less than                       6.496 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.612 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -245,8 +245,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
 - Au    NOPTPSP  r_core=  2.21  2.52  2.40  3.02
 - 78.00000  18.00000    140202                znucl, zion, pspdat
     8    2    3    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -447,7 +447,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.0454E-02  9.0454E-02  1.2662E-01  1.2662E-01  1.9458E-01  1.9458E-01
   1.9458E-01  1.9458E-01  7.8340E-01  7.8340E-01  9.4192E-01  9.4192E-01
   9.6933E-01  9.6933E-01  9.6933E-01  9.6933E-01  1.1677E+00  1.1677E+00
-  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  2.28551E-08
  Non-SCF case, kpt    2 (  0.00000  0.50000  0.50000), residuals and eigenvalues=
   8.36E-11  1.28E-11  1.75E-11  3.35E-11  1.75E-11  2.78E-11  9.05E-12  1.92E-11
   3.04E-11  7.54E-11  2.12E-11  7.01E-11  7.40E-12  1.87E-11  6.75E-12  1.93E-11
@@ -458,7 +457,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.4179E-01  2.4179E-01  2.5336E-01  2.5336E-01  2.8928E-01  2.8928E-01
   3.0089E-01  3.0089E-01  5.7110E-01  5.7110E-01  6.3461E-01  6.3461E-01
   6.8820E-01  6.8820E-01  9.8706E-01  9.8706E-01  1.1095E+00  1.1095E+00
-  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  2.54178E-07
  Non-SCF case, kpt    3 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
   6.60E-11  3.79E-11  2.63E-11  7.25E-11  3.17E-11  6.22E-11  1.43E-11  3.11E-11
   3.14E-11  1.00E-10  5.43E-11  8.34E-11  9.89E-12  2.89E-11  2.24E-11  6.70E-12
@@ -469,7 +467,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.2150E-01  1.2150E-01  2.2238E-01  2.2238E-01  2.3910E-01  2.3910E-01
   2.6336E-01  2.6336E-01  4.6258E-01  4.6258E-01  7.6672E-01  7.6672E-01
   9.1049E-01  9.1049E-01  9.6068E-01  9.6068E-01  1.2765E+00  1.2797E+00
-  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  7.84854E-04
 
 
 --- !ResultsGS
@@ -766,10 +763,10 @@ P           mkmem2          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         37.0  wall=         37.1
+- Proc.   0 individual time (sec): cpu=         36.2  wall=         36.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.0  wall=         37.1
+.Delivered   2 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         36.2  wall=         36.3
