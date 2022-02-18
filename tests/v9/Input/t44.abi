@@ -17,9 +17,11 @@ iscf2 -3
 prtwf2 0
 orbmag2 3
 
+# nuclear magnetic dipole of strength 1 (atomic units)
+# on aluminum, in z direction
 nucdipmom
 3*0.0
-1.0 0.0 0.0
+0.0 0.0 1.0
 
 # this ecut is severly underconverged
 ecut 5
