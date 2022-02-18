@@ -140,11 +140,11 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  !Local
  !scalars
- integer :: adir,buff_size,dimffnl,exchn2n3d,iat,iatom,ibc1,ibc2,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,indx,iom1,iom2,iom3,iom4,iom5,isppol,istwf_k,iterm,itypat
+ integer :: adir,buff_size,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
+ integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,nn,nkpg,npw_k
- integer :: nproc,nterms,spaceComm,with_vectornd
+ integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
+ integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,nterms=7
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
@@ -254,14 +254,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ikg = 0
  icprj = 0
 
- nterms = 7
- iom1 = 1
- iom2 = 2
- iom3 = 3
- iom4 = 4
- iom5 = 5
- ibc1 = 6
- ibc2 = 7
  ABI_MALLOC(orbmag_terms,(2,nband_k,3,nterms))
  orbmag_terms = zero 
 
@@ -351,13 +343,13 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    call orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
     & gs_hamk,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw_k)
 
-   orbmag_terms(1:2,1:nband_k,1:3,iom1) = orbmag_terms(1:2,1:nband_k,1:3,iom1) + &
+   orbmag_terms(1:2,1:nband_k,1:3,iompwb) = orbmag_terms(1:2,1:nband_k,1:3,iompwb) + &
      & trnrm*ompw_k(1:2,1:nband_k,1:3)
-   orbmag_terms(1:2,1:nband_k,1:3,iom2) = orbmag_terms(1:2,1:nband_k,1:3,iom2) + &
+   orbmag_terms(1:2,1:nband_k,1:3,iompws) = orbmag_terms(1:2,1:nband_k,1:3,iompws) + &
      & trnrm*ompw_k(1:2,1:nband_k,4:6)
-   orbmag_terms(1:2,1:nband_k,1:3,ibc1) = orbmag_terms(1:2,1:nband_k,1:3,ibc1) + &
+   orbmag_terms(1:2,1:nband_k,1:3,ibcpwb) = orbmag_terms(1:2,1:nband_k,1:3,ibcpwb) + &
      & trnrm*bcpw_k(1:2,1:nband_k,1:3)
-   orbmag_terms(1:2,1:nband_k,1:3,ibc2) = orbmag_terms(1:2,1:nband_k,1:3,ibc2) + &
+   orbmag_terms(1:2,1:nband_k,1:3,ibcpws) = orbmag_terms(1:2,1:nband_k,1:3,ibcpws) + &
      & trnrm*bcpw_k(1:2,1:nband_k,4:6)
 
    do nn = 1, nband_k
@@ -374,17 +366,17 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_MALLOC(omdp_k,(2,nband_k,3))
    call orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,dtset%natom,nband_k,dtset%ntypat,&
      & omdp_k,paw_ij,pawtab,dtset%typat)
-   orbmag_terms(1:2,1:nband_k,1:3,iom3) = orbmag_terms(1:2,1:nband_k,1:3,iom3) + &
+   orbmag_terms(1:2,1:nband_k,1:3,iomdp) = orbmag_terms(1:2,1:nband_k,1:3,iomdp) + &
      & trnrm*omdp_k(1:2,1:nband_k,1:3)
 
    ABI_MALLOC(oml_k,(2,nband_k,3))
    call orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,oml_k,pawrad,pawtab)
-   orbmag_terms(1:2,1:nband_k,1:3,iom4) = orbmag_terms(1:2,1:nband_k,1:3,iom4) + &
+   orbmag_terms(1:2,1:nband_k,1:3,iomlr) = orbmag_terms(1:2,1:nband_k,1:3,iomlr) + &
      & trnrm*oml_k(1:2,1:nband_k,1:3)
 
    ABI_MALLOC(ombm_k,(2,nband_k,3))
    call orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombm_k,pawang,pawrad,pawtab)
-   orbmag_terms(1:2,1:nband_k,1:3,iom5) = orbmag_terms(1:2,1:nband_k,1:3,iom5) + &
+   orbmag_terms(1:2,1:nband_k,1:3,iombm) = orbmag_terms(1:2,1:nband_k,1:3,iombm) + &
      & trnrm*ombm_k(1:2,1:nband_k,1:3)
 
 
@@ -434,11 +426,10 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  end if
 
  !! convert to cartesian frame from reduced triclinic
- ! iom4, due to onsite L_R, is already Cartesian
- ! iom, due to onsite A_0.A_N is already Cartesian
+ ! iomlr, due to onsite L_R, is already Cartesian
+ ! iombm, due to onsite A_0.A_N is already Cartesian
  do iterm = 1, nterms
-   if (iterm .EQ. iom4) cycle
-   if (iterm .EQ. iom5) cycle
+   if ((iterm .EQ. iomlr) .OR. (iterm .EQ. iombm)) cycle
    do nn = 1, nband_k
      do icmplx = 1, 2
        orbmag_terms(icmplx,nn,1:3,iterm) = ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,1:3,iterm))
@@ -447,10 +438,10 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  end do
 
  ! convert orbmag magnetization to orbital moment
+ ! Berry curvature terms are ignored
+ orbmag_terms(1:2,1:nband_k,1:3,iompwb:nterms) = ucvol*orbmag_terms(1:2,1:nband_k,1:3,iompwb:nterms)
 
- orbmag_terms(1:2,1:nband_k,1:3,iom1:iom5) = ucvol*orbmag_terms(1:2,1:nband_k,1:3,iom1:iom5)
-
- ! compute trace of each term
+ ! compute trace over filled states of each term
  ABI_MALLOC(orbmag_trace,(2,3,nterms))
  orbmag_trace = zero
  do nn = 1, nband_k
@@ -588,7 +579,7 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
  ABI_MALLOC(scg_k,(2,mcgk))
  ABI_MALLOC(s1cg_k,(2,mcgk,3))
  ABI_MALLOC(dcg_k,(2,mcgk,3))
- cpopt=4;lambda=zero
+ cpopt=4;lambda=zero ! use cprj in memory, not using lambda
  sij_opt = 1 ! save gsc as well
  type_calc = 0 ! use all of Hamiltonian: kinetic, local, nonlocal
 
@@ -606,6 +597,7 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
    nend = nn*npw_k
    cwavef(1:2,1:npw_k) = cg_k(1:2,nbeg:nend)
 
+   ! compute Enk and S|u_nk>
    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
         &           dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
    call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,my_ndat,&
@@ -621,6 +613,7 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
      s1cg_k(1:2,nbeg:nend,adir) = gsc(1:2,1:npw_k)
 
      ! now compute dcg_k = -1/2 \sum_np |u_np k><u_np k|dS/dk|u_nk> 
+     ! see Audouze et al PRB 78, 035105 (2008) Eq. 40
      do nnp = 1, nband_k
        bbeg = (nnp-1)*npw_k+1
        bend = nnp*npw_k
@@ -663,11 +656,14 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
        gwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,gdir)
        bwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,bdir)
 
-      ! update gwavef and bwavef to restore Pc psi(1)
+       ! gwavef and bwavef are the full first-order ddk wavefunctions, but
+       ! we want the projection on the conduction states, Pc\psi(1). 
+       ! Obtain this by subtracting dcg_k computed above, see
+       ! Audouze et al PRB 78, 035105 (2008) Eq. 40
        gwavef(1:2,1:npw_k) = gwavef(1:2,1:npw_k) - dcg_k(1:2,nbeg:nend,gdir)
        bwavef(1:2,1:npw_k) = bwavef(1:2,1:npw_k) - dcg_k(1:2,nbeg:nend,bdir)
 
-       ! compute H0(gwavef), S0(gwavef)
+       ! compute H0(Pc gwavef), S0(Pc gwavef)
        cpopt = -1 ! need to compute but not save cprj
        call getghc(cpopt,gwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,my_ndat,&
          & prtvol,sij_opt,my_timer,type_calc)
@@ -675,12 +671,12 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
        ! update gwavef as (H0 + En*S0)gwavef from ghc and gsc output of getghc
        gwavef(1:2,1:npw_k) = ghc(1:2,1:npw_k) + Enk(nn)*gsc(1:2,1:npw_k)
 
-       ! store <du|H+ES|du> in terms 1:3
+       ! store <du|P(H+ES)P|du> in terms 1:3
        ompw_k(1,nn,adir) = ompw_k(1,nn,adir) + half*epsabg*c2*&
          & (DOT_PRODUCT(bwavef(1,:),gwavef(2,:)) - DOT_PRODUCT(bwavef(2,:),gwavef(1,:)))
        ompw_k(2,nn,adir) = ompw_k(2,nn,adir) - half*epsabg*c2*&
          & (DOT_PRODUCT(bwavef(1,:),gwavef(1,:)) + DOT_PRODUCT(bwavef(2,:),gwavef(2,:)))
-       ! store <du|E dS|u> in terms 4:6
+       ! store <du|P(E dS)|u> in terms 4:6
        ompw_k(1,nn,adir+3) = ompw_k(1,nn,adir+3) + half*epsabg*c2*Enk(nn)*&
          & (DOT_PRODUCT(bwavef(1,:),s1cg_k(2,nbeg:nend,gdir)) - DOT_PRODUCT(bwavef(2,:),s1cg_k(1,nbeg:nend,gdir)))
        ompw_k(2,nn,adir+3) = ompw_k(2,nn,adir+3) - half*epsabg*c2*Enk(nn)*&
@@ -1145,7 +1141,7 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,ikpt,iterms
- integer,parameter :: iom1=1,iom2=2,iom3=3,iom4=4,iom5=5,ibc1=6,ibc2=7
+ integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7
  character(len=500) :: message
 
  !arrays
@@ -1154,14 +1150,14 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- do iterms = 1, nterms-2
+ do iterms = iompwb, nterms
    orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
    end do
  end do
  berry_bb=zero;berry_total=zero
- do iterms = nterms-1,nterms
+ do iterms = ibcpwb,ibcpws
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
      berry_bb(1:2,iband,1:3) = berry_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
@@ -1190,22 +1186,22 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '  <du/dk|H+ES|du/dk> : ',(orbmag_trace(1,adir,iom1),adir=1,3)
+   write(message,'(a,3es16.8)') '  <du/dk|H+ES|du/dk> : ',(orbmag_trace(1,adir,iompwb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   <du/dk|E dS/dk|u> : ',(orbmag_trace(1,adir,iom2),adir=1,3)
+   write(message,'(a,3es16.8)') '   <du/dk|E dS/dk|u> : ',(orbmag_trace(1,adir,iompws),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <u|dp/dk>D<dp/dk|u> : ',(orbmag_trace(1,adir,iom3),adir=1,3)
+   write(message,'(a,3es16.8)') ' <u|dp/dk>D<dp/dk|u> : ',(orbmag_trace(1,adir,iomdp),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '   <u|p>1/2 L_R<p|u> : ',(orbmag_trace(1,adir,iom4),adir=1,3)
+   write(message,'(a,3es16.8)') '   <u|p>1/2 L_R<p|u> : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     <u|p>A0.AN<p|u> : ',(orbmag_trace(1,adir,iom5),adir=1,3)
+   write(message,'(a,3es16.8)') '     <u|p>A0.AN<p|u> : ',(orbmag_trace(1,adir,iombm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     <du/dk|S|du/dk> : ',(orbmag_trace(1,adir,ibc1),adir=1,3)
+   write(message,'(a,3es16.8)') '     <du/dk|S|du/dk> : ',(orbmag_trace(1,adir,ibcpwb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '     <du/dk|dS/dk|u> : ',(orbmag_trace(1,adir,ibc2),adir=1,3)
+   write(message,'(a,3es16.8)') '     <du/dk|dS/dk|u> : ',(orbmag_trace(1,adir,ibcpws),adir=1,3)
    call wrtout(ab_out,message,'COLL')
  end if
 
@@ -1221,22 +1217,22 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '      <du/dk|H+ES|du/dk> : ',(orbmag_terms(1,iband,adir,iom1),adir=1,3)
+     write(message,'(a,3es16.8)') '      <du/dk|H+ES|du/dk> : ',(orbmag_terms(1,iband,adir,iompwb),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '       <du/dk|E dS/dk|u> : ',(orbmag_terms(1,iband,adir,iom2),adir=1,3)
+     write(message,'(a,3es16.8)') '       <du/dk|E dS/dk|u> : ',(orbmag_terms(1,iband,adir,iompws),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     <u|dp/dk>D<dp/dk|u> : ',(orbmag_terms(1,iband,adir,iom3),adir=1,3)
+     write(message,'(a,3es16.8)') '     <u|dp/dk>D<dp/dk|u> : ',(orbmag_terms(1,iband,adir,iomdp),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '       <u|p>1/2 L_R<p|u> : ',(orbmag_terms(1,iband,adir,iom4),adir=1,3)
+     write(message,'(a,3es16.8)') '       <u|p>1/2 L_R<p|u> : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '         <u|p>A0.AN<p|u> : ',(orbmag_terms(1,iband,adir,iom5),adir=1,3)
+     write(message,'(a,3es16.8)') '         <u|p>A0.AN<p|u> : ',(orbmag_terms(1,iband,adir,iombm),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a)')ch10
      write(message,'(a,3es16.8)') '         Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '         <du/dk|S|du/dk> : ',(orbmag_terms(1,iband,adir,ibc1),adir=1,3)
+     write(message,'(a,3es16.8)') '         <du/dk|S|du/dk> : ',(orbmag_terms(1,iband,adir,ibcpwb),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '         <du/dk|dS/dk|u> : ',(orbmag_terms(1,iband,adir,ibc2),adir=1,3)
+     write(message,'(a,3es16.8)') '         <du/dk|dS/dk|u> : ',(orbmag_terms(1,iband,adir,ibcpws),adir=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end if
