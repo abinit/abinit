@@ -12,6 +12,7 @@
 #include "cuda_common.h"
 #include "cuda_header.h"
 #include "cuda_rec_head.h"
+#include "cuda_api_error_check.h"
 //#include "rec_kernels.cu"
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -66,8 +67,8 @@ recursion_cut_no_bth(
  
  /*-------------- Time setting -----------*/
  float* timing = (float*)calloc(DEBUGLEN,sizeof(float));
- cudaEvent_t start; cudaEventCreate(&start);
- cudaEvent_t stop;  cudaEventCreate(&stop);
+ cudaEvent_t start; CHECK_CUDA_ERROR( cudaEventCreate(&start) );
+ cudaEvent_t stop;  CHECK_CUDA_ERROR( cudaEventCreate(&stop) );
 
  starttime(&start);//-Start timing: memory allocation+setting
 
@@ -93,45 +94,46 @@ recursion_cut_no_bth(
 
  /*--------------------- FFT Planes ------------------------------*/
  cufftHandle plan_dir;
- cufftPlan3d(&plan_dir,ngfftrec[0],ngfftrec[1],ngfftrec[2],FFT_C2C);	  
+ CHECK_CUDA_ERROR( cufftPlan3d(&plan_dir,ngfftrec[0],ngfftrec[1],ngfftrec[2],FFT_C2C) );
   
  /*----------------- FFT of the Green Kernel ---------------------*/ 
  //-Get the green kernel  from host 
  cureal *T_p_gpu = NULL;
- cudaMalloc((void**)&T_p_gpu,largeur);
- cudaMemcpy(T_p_gpu,T_p,largeur,cudaMemcpyHostToDevice);
+ CHECK_CUDA_ERROR( cudaMalloc((void**)&T_p_gpu,largeur) );
+ CHECK_CUDA_ERROR( cudaMemcpy(T_p_gpu,T_p,largeur,cudaMemcpyHostToDevice) );
  //-Compute the FFT 
  cucmplx *ZT_p_gpu = NULL;
- cudaMalloc((void**)&ZT_p_gpu,clargeur);
+ CHECK_CUDA_ERROR( cudaMalloc((void**)&ZT_p_gpu,clargeur) );
  /*Obtain the FFT of the Green Kernel on device */ 
  realtocmplx <<< ((size_t)nfftrec+320-1)/320,320 >>>(T_p_gpu, ZT_p_gpu,nfftrec);
- cudaFree(T_p_gpu);
- FFTEXECC2C(plan_dir,ZT_p_gpu ,ZT_p_gpu,CUFFT_FORWARD);
+ CUDA_KERNEL_CHECK("realtocmplx");
+ CHECK_CUDA_ERROR( cudaFree(T_p_gpu) );
+ CHECK_CUDA_ERROR( FFTEXECC2C(plan_dir,ZT_p_gpu ,ZT_p_gpu,CUFFT_FORWARD) );
 
  /*------------- Allocation of Matrices on Device ----------------*/
  cureal* vn_gpu    = NULL;
- cudaMallocPitch((void**) &vn_gpu,&un_pitch,largeur,height_max);  
+ CHECK_CUDA_ERROR( cudaMallocPitch((void**) &vn_gpu,&un_pitch,largeur,height_max) );  
 
  cureal* un_gpu    = NULL;
- cudaMallocPitch((void**) &un_gpu,&un_pitch,largeur,height_max);
+ CHECK_CUDA_ERROR( cudaMallocPitch((void**) &un_gpu,&un_pitch,largeur,height_max) );
 
  cureal* unold_gpu = NULL;
- cudaMallocPitch((void**) &unold_gpu,&un_pitch,largeur,height_max);
+ CHECK_CUDA_ERROR( cudaMallocPitch((void**) &unold_gpu,&un_pitch,largeur,height_max) );
 
  cureal* an_gpu    = NULL;
- cudaMalloc((void**)&an_gpu,height_max*sizeof(cureal));
+ CHECK_CUDA_ERROR( cudaMalloc((void**)&an_gpu,height_max*sizeof(cureal)) );
 
  cureal* bn2_gpu   = NULL;
- cudaMalloc((void**)&bn2_gpu,height_max*sizeof(cureal));
+ CHECK_CUDA_ERROR( cudaMalloc((void**)&bn2_gpu,height_max*sizeof(cureal)) );
 
  /*----------------- Get the Potential from Host -----------------*/
  cureal* pot_gpu   = NULL;
- cudaMalloc((void**)&pot_gpu,totallarg);
- cudaMemcpy(pot_gpu,pot,totallarg,cudaMemcpyHostToDevice);
+ CHECK_CUDA_ERROR( cudaMalloc((void**)&pot_gpu,totallarg) );
+ CHECK_CUDA_ERROR( cudaMemcpy(pot_gpu,pot,totallarg,cudaMemcpyHostToDevice) );
 
  /*----------------- Local Potential -----------------*/
  cureal* locpot_gpu   = NULL;
- cudaMallocPitch((void**) &locpot_gpu,&un_pitch,largeur,height_max);
+ CHECK_CUDA_ERROR( cudaMallocPitch((void**) &locpot_gpu,&un_pitch,largeur,height_max) );
 
   
  /*------------ Local coordinates of points to calculate ---------------------*/
@@ -142,7 +144,7 @@ recursion_cut_no_bth(
 
  /*------------ Auxiliary Complex Vector -----------*/
  cucmplx* cvn_gpu  = NULL;
- cudaMallocPitch((void**) &cvn_gpu,&un_pitch,clargeur,height_max);
+ CHECK_CUDA_ERROR( cudaMallocPitch((void**) &cvn_gpu,&un_pitch,clargeur,height_max) );
  int cvpthsz = int(un_pitch/sizeof(cucmplx)); //-Pitched size of complex auxiliar vec.
  printf("CUFFT PITCHED SIZES %d %d\n",pth_size,cvpthsz);
 
@@ -192,6 +194,7 @@ recursion_cut_no_bth(
 	 int ipoint = ii+ngfft[0]*(jj+kk*ngfft[1]);
 	 if(ipoint<npoint) continue;
 	 get_loc_potent <<< grid_pot,block_pot >>> (pot_gpu, locpot_gpu, trasl,ipt, ngfftrec[0],ngfft[0]);
+	 CUDA_KERNEL_CHECK("get_loc_potent");
 	 //prt_dbg_arr(&(locpot_gpu[ipt*pth_size]),largeur,6,target-3,"potloc");
 	 ipt++;
 	 if(ipt==loctranc || ipoint == final) {npoint = ipoint+1; goto end_3_loop;}
@@ -202,6 +205,7 @@ recursion_cut_no_bth(
    /*--------- Setting arrays Un,Unold on the Device --------------*/  
    starttime(&start);
    setting_un_cut <<< grid, block >>>(un_gpu,unold_gpu,vn_gpu,an_gpu, bn2_gpu,rsqrt(inf_vol),target);
+   CUDA_KERNEL_CHECK("setting_un_cut");
    calctime(&stop,start,timing,1);
    //prt_dbg_arr(un_gpu,largeur,10,0,"un0");
    check_err(0);
@@ -216,6 +220,7 @@ recursion_cut_no_bth(
      starttime(&start);
      //prt_dbg_arr(un_gpu,largeur,6,target-3+pth_size,"un_gpu");
      un_x_pot_cut <<< grid, block >>> (cvn_gpu,un_gpu, locpot_gpu, loctranc);
+     CUDA_KERNEL_CHECK("un_x_pot_cut");
      calctime(&stop,start,timing,2);
      //prt_dbg_arr(vn_gpu,largeur,6,target-3+pth_size,"vn=un*pot");
 
@@ -226,34 +231,37 @@ recursion_cut_no_bth(
      for( int ii=0; ii<loctranc; ii++)
      {
        cucmplx* a=&(cvn_gpu[ii*cvpthsz]);      
-       FFTEXECC2C(plan_dir,a,a,CUFFT_FORWARD);
+       CHECK_CUDA_ERROR( FFTEXECC2C(plan_dir,a,a,CUFFT_FORWARD) );
      };     
      calctime(&stop,start,timing,3);
 
      /*---- Moltiplication of the FFT with the Green Kernel ------*/
      starttime(&start); 
      complex_prod_tot <<< grid, block >>> (cvn_gpu, ZT_p_gpu,loctranc,nfftrec);
+     CUDA_KERNEL_CHECK("complex_prod_tot");
      calctime(&stop,start,timing,4);
 
      /*---- Inverse FFT -----*/
      starttime(&start); 
      for( int ii=0; ii<loctranc; ii++){
        cucmplx* a=&(cvn_gpu[ii*cvpthsz]);      
-       FFTEXECC2C(plan_dir,a,a,CUFFT_INVERSE);
+       CHECK_CUDA_ERROR( FFTEXECC2C(plan_dir,a,a,CUFFT_INVERSE) );
      }//-end loop:loctranc
      calctime(&stop,start,timing,3);
 
      /*-------------- Compute Vn = Pot*Vn -------------*/
      starttime(&start);
      vn_x_pot_dv_cut <<< grid, block >>>(cvn_gpu,vn_gpu, locpot_gpu,inf_vol/cureal(nfftrec), loctranc);
+     CUDA_KERNEL_CHECK("vn_x_pot_dv_cut");
      calctime(&stop,start,timing,5);   
      //prt_dbg_arr(vn_gpu,largeur,6,target-3,"vn=vn*pot*infvol2");
 
      /*-------------- Compute An = Un*Vn -------------*/
      starttime(&start);
      scalarProdGPU<<< 128,256 >>>(an_gpu, vn_gpu, un_gpu, inf_vol);
+     CUDA_KERNEL_CHECK("scalarProdGPU");
      //-Copying An on the host
-     cudaMemcpy(&(an[(irec)*npt+pos0]),an_gpu,(size_t)loctranc*sizeof(cureal),cudaMemcpyDeviceToHost);
+     CHECK_CUDA_ERROR( cudaMemcpy(&(an[(irec)*npt+pos0]),an_gpu,(size_t)loctranc*sizeof(cureal),cudaMemcpyDeviceToHost) );
      calctime(&stop,start,timing,6);
      //prt_dbg_arr(an_gpu,(height_max)*sizeof(cureal),10,0,"an");
 
@@ -263,19 +271,22 @@ recursion_cut_no_bth(
        /*---------- Compute Un,Vn,Unold: Old to New -------*/
        starttime(&start);
        oldtonew <<< grid,block >>> (un_gpu,vn_gpu,unold_gpu,an_gpu,bn2_gpu,loctranc);
+       CUDA_KERNEL_CHECK("oldtonew");
        calctime(&stop,start,timing,7);
 
        /*---------- Compute Bn = Un*Un ---------------*/
        starttime(&start);
        scalarProdGPU <<< 128,256 >>> (bn2_gpu, un_gpu, un_gpu, inf_vol);
+       CUDA_KERNEL_CHECK("scalarProdGPU");
        //-Copying An on the host
-       cudaMemcpy(&(bn2[(irec+1)*npt+pos0]),bn2_gpu,loctranc*sizeof(cureal),cudaMemcpyDeviceToHost);
+       CHECK_CUDA_ERROR( cudaMemcpy(&(bn2[(irec+1)*npt+pos0]),bn2_gpu,loctranc*sizeof(cureal),cudaMemcpyDeviceToHost) );
        calctime(&stop,start,timing,8);
        //prt_dbg_arr(bn2_gpu,(height_max)*sizeof(cureal),10,0,"bn2");
 	
        /*---------- Compute Un = Un/Sqrt(Bn) ---------------*/
        starttime(&start);
        un_invsqrt_scale <<< grid,block >>> (un_gpu, bn2_gpu, loctranc);
+       CUDA_KERNEL_CHECK("un_invsqrt_scale");
        calctime(&stop,start,timing,9);
        //prt_dbg_arr(un_gpu,largeur,6,target-3+pth_size,"unnew rescaled");
 
@@ -301,9 +312,9 @@ recursion_cut_no_bth(
  }while(pos0 <pos1);
 
 #if defined HAVE_GPU_CUDA3
- cudaThreadSynchronize();
+ CHECK_CUDA_ERROR( cudaThreadSynchronize() );
 #else
- cudaDeviceSynchronize();
+ CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
 #endif   
 
  /*--------------Free Memory on Device and Host----------*/
@@ -314,22 +325,22 @@ recursion_cut_no_bth(
  free(erreur);
  free(prod_b2);
 
- cufftDestroy(plan_dir);
- cudaFree(cvn_gpu);
- cudaFree(ZT_p_gpu);
- cudaFree(pot_gpu);
- cudaFree(locpot_gpu);
- cudaFree(vn_gpu);
- cudaFree(unold_gpu);
- cudaFree(un_gpu);
- cudaFree(an_gpu);
- cudaFree(bn2_gpu);
+ CHECK_CUDA_ERROR( cufftDestroy(plan_dir) );
+ CHECK_CUDA_ERROR( cudaFree(cvn_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(ZT_p_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(pot_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(locpot_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(vn_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(unold_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(un_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(an_gpu) );
+ CHECK_CUDA_ERROR( cudaFree(bn2_gpu) );
 
  /*____________________Printing Time_____________________*/
  prt_device_timing(timing,DEBUGLEN);
  free(timing);
- cudaEventDestroy(start);
- cudaEventDestroy(stop);
+ CHECK_CUDA_ERROR( cudaEventDestroy(start) );
+ CHECK_CUDA_ERROR( cudaEventDestroy(stop) );
  
  printf("\n--end--cudarec cut------ \n"); 
  return;
