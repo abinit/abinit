@@ -64,162 +64,19 @@ module m_orbmag
   implicit none
 
   ! Bound methods:
+
   public :: orbmag_gipaw
 
   private :: orbmag_gipaw_pw_k
   private :: orbmag_gipaw_dpdk_k
-  private :: orbmag_gipaw_output
   private :: orbmag_gipaw_onsite_l_k
-  private :: orbmag_gipaw_onsite_l
   private :: orbmag_gipaw_onsite_bm_k
+  private :: orbmag_gipaw_onsite_vh1_k
   private :: orbmag_gipaw_rhoij
+  private :: orbmag_gipaw_output
   
 CONTAINS  !========================================================================================
 !!***
-
-!****f* ABINIT/orbmag_gipaw_rhoj
-!!! NAME
-!! orbmag_gipaw_rhoij
-!!
-!! FUNCTION
-!! make local rhoij and more importantly rhoij(1) due to B field
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine orbmag_gipaw_rhoij(atindx,cprj,dtset,mcprj,mpi_enreg,pawtab,psps,rhoij,rhoij1,ucvol)
-
- !Arguments ------------------------------------
- !scalars
- integer,intent(in) :: mcprj
- real(dp),intent(in) :: ucvol
- type(dataset_type),intent(in) :: dtset
- type(MPI_type), intent(inout) :: mpi_enreg
- type(pseudopotential_type), intent(inout) :: psps
-
- !arrays
- integer,intent(in) :: atindx(dtset%natom)
- real(dp),intent(out) :: rhoij(2,psps%lmnmax,psps%lmnmax,dtset%natom)
- real(dp),intent(out) :: rhoij1(2,psps%lmnmax,psps%lmnmax,dtset%natom,3)
- type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
- type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
-
- !Local
- !scalars
- integer :: adir,bdir,buff_size,epsabg,gdir,iat,iatom,icprj,ierr,ikpt,ilmn,jlmn,itypat
- integer :: me,nband_k,nn,nproc,spaceComm
- real(dp) :: trnrm
- complex(dpc) :: c2,cpi,cpj,cterm
-
- !arrays
- real(dp),allocatable :: buffer1(:),buffer2(:)
-
- !----------------------------------------------
-
- spaceComm=mpi_enreg%comm_cell
- nproc=xmpi_comm_size(spaceComm)
- me = mpi_enreg%me_kpt
- nband_k = dtset%mband
- icprj = 0 
- 
- ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
- ! term arises to properly normalize the derivatives (there are two in rhoij1,
- ! one for each projector derivative)
- c2=1.0d0/(two_pi*two_pi)
-
-
- rhoij = zero
- rhoij1 = zero
-
- do ikpt = 1, dtset%nkpt
-
-   ! if the current kpt is not on the current processor, cycle
-   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
-
-   ! trace norm: assume occupation of two for each band and weight by kpts.
-   ! division by ucvol arises from integration over BZ (so multiplication by 
-   ! \Omega_{BZ} or division by \Omega
-   trnrm = two*dtset%wtk(ikpt)/ucvol
-
-   do iat=1,dtset%natom
-     iatom=atindx(iat)
-     itypat=dtset%typat(iat)
-     do nn = 1, nband_k
-       do ilmn=1,pawtab(itypat)%lmn_size
-         do jlmn=1,pawtab(itypat)%lmn_size
-           cpi = cmplx(cprj(iatom,icprj+nn)%cp(1,ilmn),cprj(iatom,icprj+nn)%cp(2,ilmn),KIND=dpc)
-           cpj = cmplx(cprj(iatom,icprj+nn)%cp(1,jlmn),cprj(iatom,icprj+nn)%cp(2,jlmn),KIND=dpc)     
-           cterm = trnrm*conjg(cpi)*cpj
-           rhoij(1,ilmn,jlmn,iatom) = rhoij(1,ilmn,jlmn,iatom) + real(cterm)
-           rhoij(2,ilmn,jlmn,iatom) = rhoij(2,ilmn,jlmn,iatom) + aimag(cterm)
-           do adir = 1, 3
-             do epsabg = 1, -1, -2
-               if (epsabg .EQ. 1) then
-                 bdir = modulo(adir,3)+1
-                 gdir = modulo(adir+1,3)+1
-               else
-                 bdir = modulo(adir+1,3)+1
-                 gdir = modulo(adir,3)+1
-               end if
-               cpi = cmplx(cprj(iatom,icprj+nn)%dcp(1,bdir,ilmn),cprj(iatom,icprj+nn)%dcp(2,bdir,ilmn),KIND=dpc)
-               cpj = cmplx(cprj(iatom,icprj+nn)%dcp(1,gdir,jlmn),cprj(iatom,icprj+nn)%dcp(2,gdir,jlmn),KIND=dpc)     
-               cterm = -trnrm*c2*half*j_dpc*epsabg*conjg(cpi)*cpj
-               rhoij1(1,ilmn,jlmn,iatom,adir) = rhoij1(1,ilmn,jlmn,iatom,adir) + real(cterm)
-               rhoij1(2,ilmn,jlmn,iatom,adir) = rhoij1(2,ilmn,jlmn,iatom,adir) + aimag(cterm)
-             end do ! end loop over epsabg
-           end do ! end loop over adir
-         end do ! end loop over jlmn
-       end do ! end loop over ilmn
-     end do ! end loop over nn
-   end do ! end loop over atoms
-   
-   icprj = icprj + nband_k
-
- end do ! end loop over k points
-
- if (nproc > 1) then
-   buff_size=size(rhoij)
-   ABI_MALLOC(buffer1,(buff_size))
-   ABI_MALLOC(buffer2,(buff_size))
-   buffer1=zero;buffer2=zero
-   buffer1(1:buff_size) = reshape(rhoij,(/2*psps%lmnmax*psps%lmnmax*dtset%natom/))
-   call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   rhoij(1:2,1:psps%lmnmax,1:psps%lmnmax,1:dtset%natom)=reshape(buffer2,(/2,psps%lmnmax,psps%lmnmax,dtset%natom/))
-   ABI_FREE(buffer1)
-   ABI_FREE(buffer2)
-
-   buff_size=size(rhoij1)
-   ABI_MALLOC(buffer1,(buff_size))
-   ABI_MALLOC(buffer2,(buff_size))
-   buffer1=zero;buffer2=zero
-   buffer1(1:buff_size) = reshape(rhoij1,(/2*psps%lmnmax*psps%lmnmax*dtset%natom*3/))
-   call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   rhoij1(1:2,1:psps%lmnmax,1:psps%lmnmax,1:dtset%natom,1:3)=reshape(buffer2,(/2,psps%lmnmax,psps%lmnmax,dtset%natom,3/))
-   ABI_FREE(buffer1)
-   ABI_FREE(buffer2)
- end if
-
-end subroutine orbmag_gipaw_rhoij
 
 !!****f* ABINIT/orbmag_gipaw
 !! NAME
@@ -290,7 +147,8 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
- integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,nterms=7
+ integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8
+ integer,parameter :: nterms=8
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
@@ -302,7 +160,7 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:)
  real(dp),allocatable :: Enk(:),ffnl_k(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: omdp_k(:,:,:),ompw_k(:,:,:),ombm_k(:,:,:),oml_k(:,:,:)
+ real(dp),allocatable :: omdp_k(:,:,:),ompw_k(:,:,:),ombm_k(:,:,:),oml_k(:,:,:),omvh1_k(:,:,:)
  real(dp),allocatable :: orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
  real(dp),allocatable :: rhoij(:,:,:,:),rhoij1(:,:,:,:,:)
@@ -532,6 +390,11 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(1:2,1:nband_k,1:3,iombm) = orbmag_terms(1:2,1:nband_k,1:3,iombm) + &
      & trnrm*ombm_k(1:2,1:nband_k,1:3)
 
+   ABI_MALLOC(omvh1_k,(2,nband_k,3))
+   call orbmag_gipaw_onsite_vh1_k(atindx,cprj_k,dtset,nband_k,omvh1_k,pawtab,psps,rhoij1)
+   orbmag_terms(1:2,1:nband_k,1:3,iomvh1) = orbmag_terms(1:2,1:nband_k,1:3,iomvh1) + &
+     & trnrm*omvh1_k(1:2,1:nband_k,1:3)
+
 
    ABI_FREE(Enk)
    ABI_FREE(ompw_k)
@@ -539,6 +402,7 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_FREE(bcpw_k)
    ABI_FREE(oml_k)
    ABI_FREE(ombm_k)
+   ABI_FREE(omvh1_k)
 
    icg = icg + npw_k*nband_k
    ikg = ikg + npw_k
@@ -987,200 +851,6 @@ subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,natom,nband_k,&
 end subroutine orbmag_gipaw_dpdk_k
 !!***
 
-!!****f* ABINIT/orbmag_gipaw_dpdk
-!! NAME
-!! orbmag_gipaw_dpdk
-!!
-!! FUNCTION
-!! Compute the orbital magnetization due to <u|dp/dk><dp/dk|u> 
-!! uses the precomputed rhoij1.
-!! Uses the DDK wavefunctions
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!! This version uses rhoij1 and so does not give out information band-by-band and also
-!! does not do the sum over Enk*S0, because of the k-dependence of Enk. It exists here
-!! mainly so that rhoij1 can be tested if necessary and compared to orbmag_gipaw_dpdk_k.
-!! The routine orbmag_gipaw_l serves the same purpose for rhoij itself.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine orbmag_gipaw_dpdk(atindx,natom,ntypat,omdp,paw_ij,pawtab,psps,rhoij1,typat)
-
- !Arguments ------------------------------------
- !scalars
- integer,intent(in) :: natom,ntypat
- type(pseudopotential_type), intent(inout) :: psps
-
- !arrays
- integer,intent(in) :: atindx(natom),typat(natom)
- real(dp),intent(in) :: rhoij1(2,psps%lmnmax,psps%lmnmax,natom,3)
- real(dp),intent(out) :: omdp(2,3)
- type(paw_ij_type),intent(inout) :: paw_ij(natom)
- type(pawtab_type),intent(in) :: pawtab(ntypat)
-
- !Local variables -------------------------
- !scalars
- integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
- real(dp) :: c2,qij
- complex(dpc) :: cterm,dij,udp_b,udp_g
- logical :: cplex_dij
-
- !arrays
-
- !-----------------------------------------------------------------------
-
- cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
-
- omdp = czero
- do adir = 1, 3
-
-   do iat=1,natom
-     iatom=atindx(iat)
-     itypat=typat(iat)
-     ! paw_ij(iatom) seems be sorted in input atom order, not type order
-     if (paw_ij(iat)%lmn2_size .NE. pawtab(itypat)%lmn2_size ) then
-       ABI_BUG('lmn2_size mismatch in orbmag_gipaw_dpdk_k')
-     end if
-     do ilmn=1,pawtab(itypat)%lmn_size
-       do jlmn=1,pawtab(itypat)%lmn_size
-         klmn=MATPACK(jlmn,ilmn)
-
-         if (cplex_dij) then
-           dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
-           if (jlmn .GT. ilmn) dij=conjg(dij)
-         else
-           dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
-         end if
-
-         cterm = dij*cmplx(rhoij1(1,ilmn,jlmn,iatom,adir),rhoij1(2,ilmn,jlmn,iatom,adir))
-         omdp(1,adir) = omdp(1,adir) + REAL(cterm)
-         omdp(2,adir) = omdp(2,adir) + AIMAG(cterm)
-
-       end do ! end loop over jlmn
-     end do ! end loop over ilmn
-   end do ! end loop over atoms
- 
- end do ! end loop over adir
-
-end subroutine orbmag_gipaw_dpdk
-!!***
-
-
-!!****f* ABINIT/orbmag_gipaw_onsite_l
-!! NAME
-!! orbmag_gipaw_onsite_l
-!!
-!! FUNCTION
-!! Compute 1/2 <L_R> onsite contribution to orbital magnetization 
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!! This function returns <L_R> summed over bands and k points, as such it is useful for testing
-!! some things but is not used in general because it is of more interest to give the output
-!! band-by-band. In that case, orbmag_gipaw_l_k is used instead, in the main loop over k points.
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine orbmag_gipaw_onsite_l(atindx,dtset,oml,pawrad,pawtab,psps,rhoij)
-
-  !Arguments ------------------------------------
-  !scalars
-  type(dataset_type),intent(in) :: dtset
-  type(pseudopotential_type), intent(inout) :: psps
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in) :: rhoij(2,psps%lmnmax,psps%lmnmax,dtset%natom)
-  real(dp),intent(out) :: oml(2,3)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size,nn
-  real(dp) :: intg
-  complex(dpc) :: cpb,cpk,cterm,orbl_me
-
-  !arrays
-  real(dp),allocatable :: ff(:)
-
-!--------------------------------------------------------------------
-
-  oml = zero 
-    do adir = 1, 3
-      do iat=1,dtset%natom
-        iatom = atindx(iat)
-        itypat = dtset%typat(iat)
-        mesh_size=pawtab(itypat)%mesh_size
-        ABI_MALLOC(ff,(mesh_size))
-        do jlmn=1,pawtab(itypat)%lmn_size
-           jl=pawtab(itypat)%indlmn(1,jlmn)
-           jm=pawtab(itypat)%indlmn(2,jlmn)
-           do ilmn=1,pawtab(itypat)%lmn_size
-              il=pawtab(itypat)%indlmn(1,ilmn)
-              im=pawtab(itypat)%indlmn(2,ilmn)
-              klmn=MATPACK(jlmn,ilmn)
-              kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
-              ! compute <L_dir>
-              call slxyzs(il,im,adir,jl,jm,orbl_me)
-              ! compute radial integral of phi_i*phi_j - tphi_i*tphi_j
-              ! this is necessary because pawtab%sij contains the full integral (radial and angular)
-              ! but our angular integral is different and done in the slxyzs call
-              if (abs(orbl_me) > tol8) then
-                 ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
-                 call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-                 call simp_gen(intg,ff,pawrad(itypat))
-                 cterm = half*cmplx(rhoij(1,ilmn,jlmn,iatom),rhoij(2,ilmn,jlmn,iatom))*orbl_me*intg
-                 oml(1,adir)=oml(1,adir) - real(cterm)
-                 oml(2,adir)=oml(2,adir) - aimag(cterm)
-              end if ! end check that |L_dir| > 0, otherwise ignore term
-           end do ! end loop over ilmn
-        end do ! end loop over jlmn
-        ABI_FREE(ff)
-      end do ! end loop over atoms
-    end do ! end loop over adir
- 
-end subroutine orbmag_gipaw_onsite_l
-!!***
-
 !!****f* ABINIT/orbmag_gipaw_onsite_l_k
 !! NAME
 !! orbmag_gipaw_onsite_l_k
@@ -1442,6 +1112,234 @@ subroutine orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombk,pawang,pawr
 end subroutine orbmag_gipaw_onsite_bm_k
 !!***
 
+!!****f* ABINIT/orbmag_gipaw_onsite_vh1_k
+!! NAME
+!! orbmag_gipaw_onsite_vh1_k
+!!
+!! FUNCTION
+!! Compute first order Hartree contribution to orbital magnetization at given k point
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine orbmag_gipaw_onsite_vh1_k(atindx,cprj_k,dtset,nband_k,omvh1k,pawtab,psps,rhoij1)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nband_k
+  type(dataset_type),intent(in) :: dtset
+  type(pseudopotential_type), intent(inout) :: psps
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in) :: rhoij1(2,psps%lmnmax,psps%lmnmax,dtset%natom,3)
+  real(dp),intent(out) :: omvh1k(2,nband_k,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,ijlmn,ilmn,itypat,jlmn,kllmn,klmn,llmn,nn
+  complex(dpc) :: cpi,cpj,cterm,pij,pkl
+  !arrays
+
+!--------------------------------------------------------------------
+
+  omvh1k = zero 
+  do nn = 1, nband_k
+    do adir = 1, 3
+      do iat=1,dtset%natom
+        iatom = atindx(iat)
+        itypat = dtset%typat(iat)
+        do ilmn=1,pawtab(itypat)%lmn_size
+           do jlmn=1,pawtab(itypat)%lmn_size
+              ijlmn=MATPACK(jlmn,ilmn)
+              cpi = cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+              cpj = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)     
+              pij = conjg(cpi)*cpj
+              do klmn = 1, pawtab(itypat)%lmn_size
+                do llmn = 1, pawtab(itypat)%lmn_size
+                  kllmn=MATPACK(klmn,llmn)
+                  pkl = cmplx(rhoij1(1,klmn,llmn,iatom,adir),rhoij1(2,klmn,llmn,iatom,adir))
+                  cterm = pij*pkl*pawtab(itypat)%eijkl(ijlmn,kllmn)
+                  omvh1k(1,nn,adir) = omvh1k(1,nn,adir)-real(cterm)
+                  omvh1k(2,nn,adir) = omvh1k(2,nn,adir)-aimag(cterm)
+                end do ! end loop over llmn
+              end do ! end loop over klmn
+           end do ! end loop over jlmn
+        end do ! end loop over ilmn
+      end do ! end loop over atoms
+    end do ! end loop over adir
+  end do ! end loop over nn
+ 
+end subroutine orbmag_gipaw_onsite_vh1_k
+!!***
+
+!****f* ABINIT/orbmag_gipaw_rhoj
+!!! NAME
+!! orbmag_gipaw_rhoij
+!!
+!! FUNCTION
+!! make local rhoij and more importantly rhoij(1) due to B field
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine orbmag_gipaw_rhoij(atindx,cprj,dtset,mcprj,mpi_enreg,pawtab,psps,rhoij,rhoij1,ucvol)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: mcprj
+ real(dp),intent(in) :: ucvol
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type), intent(inout) :: mpi_enreg
+ type(pseudopotential_type), intent(inout) :: psps
+
+ !arrays
+ integer,intent(in) :: atindx(dtset%natom)
+ real(dp),intent(out) :: rhoij(2,psps%lmnmax,psps%lmnmax,dtset%natom)
+ real(dp),intent(out) :: rhoij1(2,psps%lmnmax,psps%lmnmax,dtset%natom,3)
+ type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+
+ !Local
+ !scalars
+ integer :: adir,bdir,buff_size,epsabg,gdir,iat,iatom,icprj,ierr,ikpt,ilmn,jlmn,itypat
+ integer :: me,nband_k,nn,nproc,spaceComm
+ real(dp) :: trnrm
+ complex(dpc) :: c2,cpi,cpj,cterm
+
+ !arrays
+ real(dp),allocatable :: buffer1(:),buffer2(:)
+
+ !----------------------------------------------
+
+ spaceComm=mpi_enreg%comm_cell
+ nproc=xmpi_comm_size(spaceComm)
+ me = mpi_enreg%me_kpt
+ nband_k = dtset%mband
+ icprj = 0 
+ 
+ ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
+ ! term arises to properly normalize the derivatives (there are two in rhoij1,
+ ! one for each projector derivative)
+ c2=1.0d0/(two_pi*two_pi)
+
+
+ rhoij = zero
+ rhoij1 = zero
+
+ do ikpt = 1, dtset%nkpt
+
+   ! if the current kpt is not on the current processor, cycle
+   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+
+   ! trace norm: assume occupation of two for each band and weight by kpts.
+   ! division by ucvol arises from integration over BZ (so multiplication by 
+   ! \Omega_{BZ} or division by \Omega
+   trnrm = two*dtset%wtk(ikpt)/ucvol
+
+   do iat=1,dtset%natom
+     iatom=atindx(iat)
+     itypat=dtset%typat(iat)
+     do nn = 1, nband_k
+       do ilmn=1,pawtab(itypat)%lmn_size
+         do jlmn=1,pawtab(itypat)%lmn_size
+           cpi = cmplx(cprj(iatom,icprj+nn)%cp(1,ilmn),cprj(iatom,icprj+nn)%cp(2,ilmn),KIND=dpc)
+           cpj = cmplx(cprj(iatom,icprj+nn)%cp(1,jlmn),cprj(iatom,icprj+nn)%cp(2,jlmn),KIND=dpc)     
+           cterm = trnrm*conjg(cpi)*cpj
+           rhoij(1,ilmn,jlmn,iatom) = rhoij(1,ilmn,jlmn,iatom) + real(cterm)
+           rhoij(2,ilmn,jlmn,iatom) = rhoij(2,ilmn,jlmn,iatom) + aimag(cterm)
+           do adir = 1, 3
+             do epsabg = 1, -1, -2
+               if (epsabg .EQ. 1) then
+                 bdir = modulo(adir,3)+1
+                 gdir = modulo(adir+1,3)+1
+               else
+                 bdir = modulo(adir+1,3)+1
+                 gdir = modulo(adir,3)+1
+               end if
+               cpi = cmplx(cprj(iatom,icprj+nn)%dcp(1,bdir,ilmn),cprj(iatom,icprj+nn)%dcp(2,bdir,ilmn),KIND=dpc)
+               cpj = cmplx(cprj(iatom,icprj+nn)%dcp(1,gdir,jlmn),cprj(iatom,icprj+nn)%dcp(2,gdir,jlmn),KIND=dpc)     
+               cterm = -trnrm*c2*half*j_dpc*epsabg*conjg(cpi)*cpj
+               rhoij1(1,ilmn,jlmn,iatom,adir) = rhoij1(1,ilmn,jlmn,iatom,adir) + real(cterm)
+               rhoij1(2,ilmn,jlmn,iatom,adir) = rhoij1(2,ilmn,jlmn,iatom,adir) + aimag(cterm)
+             end do ! end loop over epsabg
+           end do ! end loop over adir
+         end do ! end loop over jlmn
+       end do ! end loop over ilmn
+     end do ! end loop over nn
+   end do ! end loop over atoms
+   
+   icprj = icprj + nband_k
+
+ end do ! end loop over k points
+
+ if (nproc > 1) then
+   buff_size=size(rhoij)
+   ABI_MALLOC(buffer1,(buff_size))
+   ABI_MALLOC(buffer2,(buff_size))
+   buffer1=zero;buffer2=zero
+   buffer1(1:buff_size) = reshape(rhoij,(/2*psps%lmnmax*psps%lmnmax*dtset%natom/))
+   call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+   rhoij(1:2,1:psps%lmnmax,1:psps%lmnmax,1:dtset%natom)=reshape(buffer2,(/2,psps%lmnmax,psps%lmnmax,dtset%natom/))
+   ABI_FREE(buffer1)
+   ABI_FREE(buffer2)
+
+   buff_size=size(rhoij1)
+   ABI_MALLOC(buffer1,(buff_size))
+   ABI_MALLOC(buffer2,(buff_size))
+   buffer1=zero;buffer2=zero
+   buffer1(1:buff_size) = reshape(rhoij1,(/2*psps%lmnmax*psps%lmnmax*dtset%natom*3/))
+   call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+   rhoij1(1:2,1:psps%lmnmax,1:psps%lmnmax,1:dtset%natom,1:3)=reshape(buffer2,(/2,psps%lmnmax,psps%lmnmax,dtset%natom,3/))
+   ABI_FREE(buffer1)
+   ABI_FREE(buffer2)
+ end if
+
+end subroutine orbmag_gipaw_rhoij
+
 !!****f* ABINIT/orbmag_gipaw_output
 !! NAME
 !! orbmag_gipaw_output
@@ -1490,7 +1388,7 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,ikpt,iterms
- integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7
+ integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8
  character(len=500) :: message
 
  !arrays
@@ -1535,6 +1433,8 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '  <du/dk|H+ES|du/dk> : ',(orbmag_trace(1,adir,iompwb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '   <du/dk|E dS/dk|u> : ',(orbmag_trace(1,adir,iompws),adir=1,3)
@@ -1545,7 +1445,10 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     <u|p>A0.AN<p|u> : ',(orbmag_trace(1,adir,iombm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '    <u|p>v_H(1)<p|u> : ',(orbmag_trace(1,adir,iomvh1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     <du/dk|S|du/dk> : ',(orbmag_trace(1,adir,ibcpwb),adir=1,3)
@@ -1576,7 +1479,10 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         <u|p>A0.AN<p|u> : ',(orbmag_terms(1,iband,adir,iombm),adir=1,3)
      call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '        <u|p>v_H(1)<p|u> : ',(orbmag_terms(1,iband,adir,iomvh1),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
      write(message,'(a)')ch10
+     call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         <du/dk|S|du/dk> : ',(orbmag_terms(1,iband,adir,ibcpwb),adir=1,3)
