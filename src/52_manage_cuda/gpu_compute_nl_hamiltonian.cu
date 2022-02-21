@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "cuda_api_error_check.h"
 
 /*******************************************************************/
 /**********                                      *******************/
@@ -753,6 +754,7 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
                                              *choice,
                                              *signs,
                                              *lambda);
+  CUDA_KERNEL_CHECK("kernel_compute_proj_factor");
 
 
   /************* Compute output needed with signs ***********************/
@@ -783,6 +785,7 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
                                                                                   *four_pi_by_ucvol,
                                                                                   *lambda,
                                                                                   *choice);
+      CUDA_KERNEL_CHECK("kernel_compute_nl_hamiltonian_64");
 
     } //End choice==1 or 7,signs==2
 
@@ -804,6 +807,7 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
         kernel_compute_forces<<<grid,block,block.x*sizeof(double),0>>>(rdlmn_gpu,enlout_gpu,
                                                                        decalage_enlout_gpu,
                                                                        *natoms,*lmnmax);
+        CUDA_KERNEL_CHECK("kernel_compute_forces");
       } //End choice2 / signs1 or choice 23
 
     //Compute stress tensor
@@ -818,8 +822,10 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
         block.x=64;
 
         kernel_reduce_stress<<<grid,block,block.x*sizeof(double),0>>>(rdproj_gpu,d_enlk_gpu,*nb_projections);
+        CUDA_KERNEL_CHECK("kernel_reduce_stress");
 
         kernel_stress_convert<<<6,9>>>(gprimd_gpu,d_enlk_gpu,enlout_gpu);
+        CUDA_KERNEL_CHECK("kernel_stress_convert");
 
     }
 

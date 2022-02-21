@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cuda_api_error_check.h"
+
 //Constant conversion indices
 __constant__ unsigned char indalpha_c3[]={0,1,2,3,2,1,1};
 __constant__ unsigned char  indbeta_c3[]={0,1,2,3,3,3,2};
@@ -559,6 +561,7 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,
                                                                                *lmnmax,
                                                                                *cplex,
                                                                                four_pi_by_squcvol);
+      CUDA_KERNEL_CHECK("kernel_compute_nl_projections");
     }
   }
 
@@ -586,6 +589,7 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,
                                                                                                    *lmnmax,*cplex,
                                                                                                    four_pi_by_squcvol,
                                                                                                    height_pi2_by_squcvol);
+    CUDA_KERNEL_CHECK("kernel_compute_nl_projections_and_derivates_choice2");
   }
 
   else if( ((*choice)==3) || ((*choice)==23) ){
@@ -618,5 +622,6 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,
                                                                                                *choice,
                                                                                                four_pi_by_squcvol,
                                                                                                two_pi);
+    CUDA_KERNEL_CHECK("kernel_compute_nl_projections_and_derivates_all");
   }
 } //end of routine gpu_compute_nl_projections_
