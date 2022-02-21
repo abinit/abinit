@@ -69,6 +69,10 @@ extern "C" {
  *
  * It may help in case of debugging to define ALWAYS_SYNC_GPU, but for a 
  * regular run, it should remains to 0.
+ *
+ * Note: you can also enforce syncing CPU/GPU by set environment variable CUDA_LAUNCH_BLOCKING to 1
+ *
+ * See also: https://www.olcf.ornl.gov/wp-content/uploads/2021/06/cuda_training_series_cuda_debugging.pdf
  */
 #ifdef ALWAYS_SYNC_GPU
 #define FORCE_SYNC_GPU 1
@@ -426,12 +430,12 @@ static void cuda_kernel_check(const char* errstr,
                               const int   sync)
 {
 
+  auto status = cudaGetLastError();
+
   if (sync or FORCE_SYNC_GPU) {
     //fprintf(stderr, "syncing device\n");
     cudaDeviceSynchronize();
   }
-
-  auto status = cudaGetLastError();
 
   if (status != cudaSuccess) {
     fprintf(stderr,
