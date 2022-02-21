@@ -268,8 +268,10 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_MALLOC(orbmag_terms,(2,nband_k,3,nterms))
  orbmag_terms = zero 
 
- ABI_MALLOC(bc_tensor,(2,nband_k,dtset%nkpt,3)) 
- bc_tensor=zero
+ if(dtset%orbmag .EQ. 4) then
+   ABI_MALLOC(bc_tensor,(2,nband_k,dtset%nkpt,3)) 
+   bc_tensor=zero
+ end if
  
  !============= BIG FAT KPT LOOP :) ===========================
  do ikpt = 1, dtset%nkpt
@@ -281,7 +283,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! division by ucvol arises from integration over BZ (so multiplication by 
    ! \Omega_{BZ} or division by \Omega
    trnrm = two*dtset%wtk(ikpt)/ucvol
-   !trnrm = one ! for testing
 
    kpoint(:)=dtset%kptns(:,ikpt)
    npw_k = npwarr(ikpt)
@@ -363,16 +364,18 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(1:2,1:nband_k,1:3,ibcpws) = orbmag_terms(1:2,1:nband_k,1:3,ibcpws) + &
      & trnrm*bcpw_k(1:2,1:nband_k,4:6)
 
-   do nn = 1, nband_k
-     do adir = 1, 3
+   if (dtset%orbmag .EQ. 4) then
+     do nn = 1, nband_k
+       do adir = 1, 3
 
-       bc_tensor(1,nn,ikpt,adir) = bcpw_k(1,nn,adir)+bcpw_k(1,nn,adir+3)
-       bc_tensor(2,nn,ikpt,adir) = bcpw_k(2,nn,adir)+bcpw_k(2,nn,adir+3)
-       
+         bc_tensor(1,nn,ikpt,adir) = bcpw_k(1,nn,adir)+bcpw_k(1,nn,adir+3)
+         bc_tensor(2,nn,ikpt,adir) = bcpw_k(2,nn,adir)+bcpw_k(2,nn,adir+3)
+         
+       end do
+       bc_tensor(1,nn,ikpt,1:3) = ucvol*MATMUL(gprimd,bc_tensor(1,nn,ikpt,1:3))
+       bc_tensor(2,nn,ikpt,1:3) = ucvol*MATMUL(gprimd,bc_tensor(2,nn,ikpt,1:3))
      end do
-     bc_tensor(1,nn,ikpt,1:3) = ucvol*MATMUL(gprimd,bc_tensor(1,nn,ikpt,1:3))
-     bc_tensor(2,nn,ikpt,1:3) = ucvol*MATMUL(gprimd,bc_tensor(2,nn,ikpt,1:3))
-   end do
+   end if
 
    ABI_MALLOC(omdp_k,(2,nband_k,3))
    call orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,dtset%natom,nband_k,dtset%ntypat,&
@@ -431,15 +434,17 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
 
-   buff_size=size(bc_tensor)
-   ABI_MALLOC(buffer1,(buff_size))
-   ABI_MALLOC(buffer2,(buff_size))
-   buffer1=zero;buffer2=zero
-   buffer1(1:buff_size) = reshape(bc_tensor,(/2*nband_k*dtset%nkpt*3/))
-   call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-   bc_tensor(1:2,1:nband_k,1:dtset%nkpt,1:3)=reshape(buffer2,(/2,nband_k,dtset%nkpt,3/))
-   ABI_FREE(buffer1)
-   ABI_FREE(buffer2)
+   if (dtset%orbmag .EQ. 4) then
+     buff_size=size(bc_tensor)
+     ABI_MALLOC(buffer1,(buff_size))
+     ABI_MALLOC(buffer2,(buff_size))
+     buffer1=zero;buffer2=zero
+     buffer1(1:buff_size) = reshape(bc_tensor,(/2*nband_k*dtset%nkpt*3/))
+     call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+     bc_tensor(1:2,1:nband_k,1:dtset%nkpt,1:3)=reshape(buffer2,(/2,nband_k,dtset%nkpt,3/))
+     ABI_FREE(buffer1)
+     ABI_FREE(buffer2)
+   end if
  end if
 
  !! convert to cartesian frame from reduced triclinic
@@ -465,7 +470,11 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_trace(1:2,1:3,1:nterms) = orbmag_trace(1:2,1:3,1:nterms) + orbmag_terms(1:2,nn,1:3,1:nterms)
  end do
 
- call orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
+ if (dtset%orbmag .EQ. 4) then
+   call orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc_tensor)
+ else
+   call orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
+ end if
 
 !---------------------------------------------------
 ! deallocate memory
@@ -492,7 +501,9 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
- ABI_FREE(bc_tensor)
+ if (allocated(bc_tensor)) then
+   ABI_FREE(bc_tensor) 
+ end if
 
  ABI_FREE(rhoij)
  ABI_FREE(rhoij1)
@@ -1373,7 +1384,8 @@ end subroutine orbmag_gipaw_rhoij
 !!
 !! SOURCE
 
-subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc_tensor)
+subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
+    &,bc_tensor) ! bc_tensor is optional
 
 
  !Arguments ------------------------------------
@@ -1432,8 +1444,6 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '  <du/dk|H+ES|du/dk> : ',(orbmag_trace(1,adir,iompwb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
