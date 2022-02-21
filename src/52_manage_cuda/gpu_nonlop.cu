@@ -227,6 +227,7 @@
 #include <assert.h>
 
 #include "abi_gpu_header.h"
+#include "cuda_api_error_check.h"
 
 
 //GPU memory areas
@@ -305,7 +306,6 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   //arrays
   //  real(dp) :: tsec(2)
 
-  cudaError_t cuda_state;
   double2 vectin_0={0.,0.};
 
 
@@ -397,26 +397,20 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   }
 
   //Memcopies
-  cuda_state=cudaMemcpy(vectin_gpu,vectin,(*npwin)*sizeof(double2),cudaMemcpyHostToDevice);
+  CHECK_CUDA_ERROR( cudaMemcpy(vectin_gpu,vectin,(*npwin)*sizeof(double2),cudaMemcpyHostToDevice) );
 
   if(ffnl_ph3d_updated!=1){
-    cuda_state=cudaMemcpy(ph3din_gpu,ph3din,(*natom)*(*npwin)*sizeof(double2),cudaMemcpyHostToDevice);
-    cuda_state=cudaMemcpy(ffnlin_gpu,ffnlin,(*npwin)*(*dimffnlin)*(*lmnmax)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice);
+    CHECK_CUDA_ERROR( cudaMemcpy(ph3din_gpu,ph3din,(*natom)*(*npwin)*sizeof(double2),cudaMemcpyHostToDevice) );
+    CHECK_CUDA_ERROR( cudaMemcpy(ffnlin_gpu,ffnlin,(*npwin)*(*dimffnlin)*(*lmnmax)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice) );
   }
 
-  if( ((*choice)==2) || ((*choice)==3) || ((*choice)==23) ){
-    if((*nkpgin)>0)
-      cuda_state=cudaMemcpy(kpgin_gpu,kpgin,(*npwin)*(*nkpgin)*sizeof(double),cudaMemcpyHostToDevice);
-    else{
-      cuda_state=cudaMemcpy(kgin_gpu,kgin,3*(*npwin)*sizeof(int),cudaMemcpyHostToDevice);
+  if( ((*choice)==2) || ((*choice)==3) || ((*choice)==23) ) {
+    if((*nkpgin)>0){
+      CHECK_CUDA_ERROR( cudaMemcpy(kpgin_gpu,kpgin,(*npwin)*(*nkpgin)*sizeof(double),cudaMemcpyHostToDevice) );
+    }else{
+      CHECK_CUDA_ERROR( cudaMemcpy(kgin_gpu,kgin,3*(*npwin)*sizeof(int),cudaMemcpyHostToDevice) );
       gpu_mkkpg_(kgin_gpu,kpgin_gpu,kptin,npwin);
     }
-  }
-
-  if(cuda_state!=cudaSuccess){
-    printf("gpu_nonlop: Error while copying data to gpu : %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
   }
 
   //Compute Projections
@@ -453,8 +447,9 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   }
 
   //Copy back projections if wanted
-  if(((*cpopt)==0)||((*cpopt)==1))
-    cudaMemcpy(proj , proj_gpu,nb_proj_to_compute*sizeof(double2),cudaMemcpyDeviceToHost);
+  if(((*cpopt)==0)||((*cpopt)==1)){
+    CHECK_CUDA_ERROR( cudaMemcpy(proj , proj_gpu,nb_proj_to_compute*sizeof(double2),cudaMemcpyDeviceToHost) );
+  }
 
   if((*choice)>0){
     const double four_pi_by_ucvol=4*(*pi)/sqrt(*ucvol);
@@ -462,24 +457,27 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
     //Memcopies
     //No need since ffnlout=ffnlin and ph3dout=ph3din
     //     if((*choice)==1){
-    //       cuda_state=cudaMemcpy(ph3dout_gpu,ph3dout,(*natom)*(*npwout)*sizeof(double2),cudaMemcpyHostToDevice);
-    //       cuda_state=cudaMemcpy(ffnlout_gpu,ffnlout,(*npwout)*(*dimffnlout)*(*lmnmax)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice);
+    //       CHECK_CUDA_ERROR( cudaMemcpy(ph3dout_gpu,ph3dout,(*natom)*(*npwout)*sizeof(double2),cudaMemcpyHostToDevice) );
+    //       CHECK_CUDA_ERROR( cudaMemcpy(ffnlout_gpu,ffnlout,(*npwout)*(*dimffnlout)*(*lmnmax)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice) );
     //     }
 
     if(m_ham_used != 1) {
       if((*paw_opt)!=3)
-        cuda_state=cudaMemcpy(enl_gpu, enl, (*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double),cudaMemcpyHostToDevice);
+        CHECK_CUDA_ERROR( cudaMemcpy(enl_gpu, enl, (*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double),cudaMemcpyHostToDevice) );
       if((*paw_opt)>1)
-        cuda_state=cudaMemcpy(sij_gpu, sij, (*dimenl1)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice);
+        CHECK_CUDA_ERROR( cudaMemcpy(sij_gpu, sij, (*dimenl1)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice) );
 
       if((*choice==3)||((*choice==23)))
-        cuda_state=cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice);
+        CHECK_CUDA_ERROR( cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice) );
 
-      if(cuda_state!=cudaSuccess){
-        printf("gpu_nonlop: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-        fflush(stdout);
-        abi_cabort();
+      if((*paw_opt)>1){
+        CHECK_CUDA_ERROR( cudaMemcpy(sij_gpu, sij, (*dimenl1)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice) );
       }
+
+      if((*choice==3)||((*choice==23))){
+	CHECK_CUDA_ERROR( cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice) );
+      }
+
     }
 
     gpu_compute_nl_hamiltonian_(proj_gpu,dproj_gpu,
@@ -499,26 +497,23 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
 				&four_pi_by_ucvol,lambda);
 
     //We copy back results
-    if((*choice)==1){
-        if((*paw_opt)!=3)
-            cuda_state=cudaMemcpy(vectout,vectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
-        if((*paw_opt)>2)
-            cuda_state=cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
+    if ((*choice)==1) {
+      if ((*paw_opt)!=3)
+        CHECK_CUDA_ERROR( cudaMemcpy(vectout,vectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost) );
+      if ((*paw_opt)>2)
+        CHECK_CUDA_ERROR( cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost) );
     }
-    else if(((*choice)==2) && ((*signs)==1))
-        cuda_state=cudaMemcpy(enlout,enlout_gpu,3*(*natom)*sizeof(double),cudaMemcpyDeviceToHost);
-    else if(((*choice)==3) && ((*signs)==1))
-        cuda_state=cudaMemcpy(enlout,enlout_gpu,6*sizeof(double),cudaMemcpyDeviceToHost);
-    else if(((*choice)==23) && ((*signs)==1))
-        cuda_state=cudaMemcpy(enlout,enlout_gpu,(6+3*(*natom))*sizeof(double),cudaMemcpyDeviceToHost);
-    else if(((*choice)==7) && ((*signs)==2))
-        cuda_state=cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
+    else if (((*choice)==2) && ((*signs)==1))
+      CHECK_CUDA_ERROR( cudaMemcpy(enlout,enlout_gpu,3*(*natom)*sizeof(double),cudaMemcpyDeviceToHost) );
+    else if (((*choice)==3) && ((*signs)==1))
+      CHECK_CUDA_ERROR( cudaMemcpy(enlout,enlout_gpu,6*sizeof(double),cudaMemcpyDeviceToHost) );
+    else if (((*choice)==23) && ((*signs)==1))
+      CHECK_CUDA_ERROR( cudaMemcpy(enlout,enlout_gpu,(6+3*(*natom))*sizeof(double),cudaMemcpyDeviceToHost) );
+    else if( ((*choice)==7) && ((*signs)==2))
+      CHECK_CUDA_ERROR( cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost) );
 
-    if(cuda_state!=cudaSuccess){
-        printf("gpu_nonlop: Error while retrieving results from gpu :\n %s \n",cudaGetErrorString(cuda_state));
-        fflush(stdout);
-        abi_cabort();
     }
+
   }
 
   //We put back the correct value of vectin and correct svectout if needed
@@ -558,9 +553,8 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
 
   nb_proj_to_compute=0;
 
-  cudaError_t cuda_state;
+  CHECK_CUDA_ERROR( cudaMallocHost(&nlmn,(*ntypat)*sizeof(char)) );
 
-  cudaMallocHost(&nlmn,(*ntypat)*sizeof(char));
   //Calcul du nombre de projections
   for(int itypat=0;itypat<(*ntypat);itypat++){
     int count_ilmn=0;
@@ -572,46 +566,39 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
     nb_proj_to_compute+=count_ilmn*nattyp[itypat];
   }
 
-  cuda_state=cudaMalloc(&vectin_gpu, (*npwin)*sizeof(double2));
-  cuda_state=cudaMalloc(&vectout_gpu, (*npwout)*sizeof(double2));
-  cuda_state=cudaMalloc(&svectout_gpu, (*npwout)*sizeof(double2));
-  cuda_state=cudaMalloc(&ph3din_gpu, (*natom)*(*npwin)*sizeof(double2));
-  cuda_state=cudaMalloc(&ffnlin_gpu, (*npwin)*(*dimffnlin)*(*lmnmax)*(*ntypat)*sizeof(double));
-  cuda_state=cudaMalloc(&kpgin_gpu, (*npwin)*3*sizeof(double));
-  cuda_state=cudaMalloc(&kgin_gpu, (*npwin)*3*sizeof(int));
-  cuda_state=cudaMalloc(&ph3dout_gpu, (*npwout)*(*natom)*sizeof(double2));
-  cuda_state=cudaMalloc(&ffnlout_gpu, (*npwout)*(*dimffnlout)*(*lmnmax)*(*ntypat)*sizeof(double));
-  cuda_state=cudaMalloc(&enl_gpu,(*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double));
-  cuda_state=cudaMalloc(&sij_gpu,(*dimenl1)*(*ntypat)*sizeof(double));
+  CHECK_CUDA_ERROR( cudaMalloc(&vectin_gpu, (*npwin)*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&vectout_gpu, (*npwout)*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&svectout_gpu, (*npwout)*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&ph3din_gpu, (*natom)*(*npwin)*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&ffnlin_gpu, (*npwin)*(*dimffnlin)*(*lmnmax)*(*ntypat)*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&kpgin_gpu, (*npwin)*3*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&kgin_gpu, (*npwin)*3*sizeof(int)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&ph3dout_gpu, (*npwout)*(*natom)*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&ffnlout_gpu, (*npwout)*(*dimffnlout)*(*lmnmax)*(*ntypat)*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&enl_gpu,(*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&sij_gpu,(*dimenl1)*(*ntypat)*sizeof(double)) );
 
-  cuda_state=cudaMalloc(&indlmn_gpu, 6*(*lmnmax)*(*ntypat)*sizeof(int));
-  cuda_state=cudaMalloc(&atindx1_gpu, (*natom)*sizeof(int));
-  cuda_state=cudaMalloc(&typat_gpu, nb_proj_to_compute*sizeof(char));
-  cuda_state=cudaMalloc(&nlmn_gpu,(*ntypat)*sizeof(char));
-  cuda_state=cudaMalloc(&lmn_gpu, nb_proj_to_compute*sizeof(char));
-  cuda_state=cudaMalloc(&atoms_gpu, nb_proj_to_compute*sizeof(short int));
+  CHECK_CUDA_ERROR( cudaMalloc(&indlmn_gpu, 6*(*lmnmax)*(*ntypat)*sizeof(int)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&atindx1_gpu, (*natom)*sizeof(int)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&typat_gpu, nb_proj_to_compute*sizeof(char)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&nlmn_gpu,(*ntypat)*sizeof(char)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&lmn_gpu, nb_proj_to_compute*sizeof(char)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&atoms_gpu, nb_proj_to_compute*sizeof(short int)) );
 
-  cuda_state=cudaMalloc(&proj_gpu, nb_proj_to_compute*sizeof(double2));
-  cuda_state=cudaMalloc(&dproj_gpu, 10*nb_proj_to_compute*sizeof(double2));
-  cuda_state=cudaMalloc(&rdproj_gpu, 7*nb_proj_to_compute*sizeof(double));
-  cuda_state=cudaMalloc(&rdlmn_gpu, 3*(*natom)*(*lmnmax)*sizeof(double));
+  CHECK_CUDA_ERROR( cudaMalloc(&proj_gpu, nb_proj_to_compute*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&dproj_gpu, 10*nb_proj_to_compute*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&rdproj_gpu, 7*nb_proj_to_compute*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&rdlmn_gpu, 3*(*natom)*(*lmnmax)*sizeof(double)) );
 
-  cuda_state=cudaMalloc(&d_enlk_gpu, 7*sizeof(double));
-  cuda_state=cudaMalloc(&gprimd_gpu, 9*sizeof(double));
-  cuda_state=cudaMalloc(&enlout_gpu, (6+3*(*natom))*sizeof(double));
-  cuda_state=cudaMalloc(&val_ajlmn_gpu, nb_proj_to_compute*sizeof(double2));
-  cuda_state=cudaMalloc(&val_sajlmn_gpu, nb_proj_to_compute*sizeof(double2));
+  CHECK_CUDA_ERROR( cudaMalloc(&d_enlk_gpu, 7*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&gprimd_gpu, 9*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&enlout_gpu, (6+3*(*natom))*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&val_ajlmn_gpu, nb_proj_to_compute*sizeof(double2)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&val_sajlmn_gpu, nb_proj_to_compute*sizeof(double2)) );
 
-
-  cuda_state=cudaMallocHost(&typat, nb_proj_to_compute*sizeof(char));
-  cuda_state=cudaMallocHost(&lmn, nb_proj_to_compute*sizeof(char));
-  cuda_state=cudaMallocHost(&atoms, nb_proj_to_compute*sizeof(short int));
-
-  if(cuda_state!=cudaSuccess){
-    printf("alloc_nonlop_gpu: Error during gpu memory allocation :\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cudaMallocHost(&typat, nb_proj_to_compute*sizeof(char)) );
+  CHECK_CUDA_ERROR( cudaMallocHost(&lmn, nb_proj_to_compute*sizeof(char)) );
+  CHECK_CUDA_ERROR( cudaMallocHost(&atoms, nb_proj_to_compute*sizeof(short int)) );
 
   //Precompute couple (atom,lmn) for each projection
   int iproj=0;
@@ -629,25 +616,16 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
   }
   assert(iproj==nb_proj_to_compute);
 
-  cuda_state=cudaMemcpy(indlmn_gpu,indlmn, 6*(*lmnmax)*(*ntypat)*sizeof(int),cudaMemcpyHostToDevice);
-  cuda_state=cudaMemcpy(typat_gpu,typat, nb_proj_to_compute*sizeof(char),cudaMemcpyHostToDevice);
-  cuda_state=cudaMemcpy(lmn_gpu,lmn, nb_proj_to_compute*sizeof(char),cudaMemcpyHostToDevice);
-  cuda_state=cudaMemcpy(atoms_gpu,atoms,nb_proj_to_compute*sizeof(short int),cudaMemcpyHostToDevice);
-  cuda_state=cudaMemcpy(atindx1_gpu, atindx1, (*natom)*sizeof(int),cudaMemcpyHostToDevice);
-  cuda_state=cudaMemcpy(nlmn_gpu, nlmn, (*ntypat)*sizeof(char),cudaMemcpyHostToDevice);
-  cuda_state=cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice);
-  if(cuda_state!=cudaSuccess){
-    printf("alloc_nonlop_gpu: Error while copying data to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
-  cuda_state=cudaMemset(rdlmn_gpu,0,3*(*natom)*(*lmnmax)*sizeof(double));
-  if(cuda_state!=cudaSuccess){
-    printf("alloc_nonlop_gpu: Error while set tabs to 0:\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
-}
+  CHECK_CUDA_ERROR( cudaMemcpy(indlmn_gpu,indlmn, 6*(*lmnmax)*(*ntypat)*sizeof(int),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(typat_gpu,typat, nb_proj_to_compute*sizeof(char),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(lmn_gpu,lmn, nb_proj_to_compute*sizeof(char),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(atoms_gpu,atoms,nb_proj_to_compute*sizeof(short int),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(atindx1_gpu, atindx1, (*natom)*sizeof(int),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(nlmn_gpu, nlmn, (*ntypat)*sizeof(char),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice) );
+
+  CHECK_CUDA_ERROR( cudaMemset(rdlmn_gpu,0,3*(*natom)*(*lmnmax)*sizeof(double)) );
+} // alloc_nonlop_gpu_
 
 
 //Deallocation routine
@@ -655,51 +633,44 @@ extern "C" void free_nonlop_gpu_(){
 
   gpu_initialization=0;
 
-  cudaError_t cuda_state;
-
   //Free Memory
-  cuda_state=cudaFreeHost(nlmn);
+  CHECK_CUDA_ERROR( cudaFreeHost(nlmn) );
 
-  cuda_state=cudaFree(vectin_gpu);
-  cuda_state=cudaFree(vectout_gpu);
-  cuda_state=cudaFree(svectout_gpu);
-  cuda_state=cudaFree(ph3din_gpu);
-  cuda_state=cudaFree(ffnlin_gpu);
-  cuda_state=cudaFree(kpgin_gpu);
-  cuda_state=cudaFree(kgin_gpu);
-  cuda_state=cudaFree(ph3dout_gpu);
-  cuda_state=cudaFree(ffnlout_gpu);
-  cuda_state=cudaFree(enl_gpu);
-  cuda_state=cudaFree(sij_gpu);
+  CHECK_CUDA_ERROR( cudaFree(vectin_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(vectout_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(svectout_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(ph3din_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(ffnlin_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(kpgin_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(kgin_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(ph3dout_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(ffnlout_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(enl_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(sij_gpu) );
 
-  cuda_state=cudaFree(indlmn_gpu);
-  cuda_state=cudaFree(atindx1_gpu);
-  cuda_state=cudaFree(typat_gpu);
-  cuda_state=cudaFree(nlmn_gpu);
-  cuda_state=cudaFree(lmn_gpu);
-  cuda_state=cudaFree(atoms_gpu);
+  CHECK_CUDA_ERROR( cudaFree(indlmn_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(atindx1_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(typat_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(nlmn_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(lmn_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(atoms_gpu) );
 
-  cuda_state=cudaFree(proj_gpu);
-  cuda_state=cudaFree(dproj_gpu);
-  cuda_state=cudaFree(rdproj_gpu);
-  cuda_state=cudaFree(rdlmn_gpu);
+  CHECK_CUDA_ERROR( cudaFree(proj_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(dproj_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(rdproj_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(rdlmn_gpu) );
 
-  cuda_state=cudaFree(d_enlk_gpu);
-  cuda_state=cudaFree(gprimd_gpu);
-  cuda_state=cudaFree(enlout_gpu);
-  cuda_state=cudaFree(val_ajlmn_gpu);
-  cuda_state=cudaFree(val_sajlmn_gpu);
+  CHECK_CUDA_ERROR( cudaFree(d_enlk_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(gprimd_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(enlout_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(val_ajlmn_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(val_sajlmn_gpu) );
 
-  cuda_state=cudaFreeHost(typat);
-  cuda_state=cudaFreeHost(lmn);
-  cuda_state=cudaFreeHost(atoms);
+  CHECK_CUDA_ERROR( cudaFreeHost(typat) );
+  CHECK_CUDA_ERROR( cudaFreeHost(lmn) );
+  CHECK_CUDA_ERROR( cudaFreeHost(atoms) );
 
-  if(cuda_state!=cudaSuccess){
-    printf("free_nonlop_gpu: Error while freeing gpu data:\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
-}
+} // free_nonlop_gpu_
 
 /**
  *
@@ -709,53 +680,26 @@ extern "C" void gpu_update_ham_data_(double *enl,    int *size_enl,
                                      double *gprimd, int *size_gprimd)
 {
 
-  cudaError_t cuda_state;
+  CHECK_CUDA_ERROR( cudaMemcpy(enl_gpu, enl, (*size_enl)*sizeof(double),cudaMemcpyHostToDevice) );
 
-  cuda_state=cudaMemcpy(enl_gpu, enl, (*size_enl)*sizeof(double),cudaMemcpyHostToDevice);
-  if(cuda_state!=cudaSuccess){
-    printf("gpu_update_ham_data: Error while copying data 1 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
   if((*size_sij)>0){
-    cuda_state=cudaMemcpy(sij_gpu, sij, (*size_sij)*sizeof(double),cudaMemcpyHostToDevice);
-    if(cuda_state!=cudaSuccess){
-      printf("gpu_update_ham_data: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( cudaMemcpy(sij_gpu, sij, (*size_sij)*sizeof(double),cudaMemcpyHostToDevice) );
   }
 
-  cuda_state=cudaMemcpy(gprimd_gpu,gprimd,(*size_gprimd)*sizeof(double),cudaMemcpyHostToDevice);
-  if(cuda_state!=cudaSuccess){
-    printf("gpu_update_ham_data: Error while copying data 3 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cudaMemcpy(gprimd_gpu,gprimd,(*size_gprimd)*sizeof(double),cudaMemcpyHostToDevice) );
   m_ham_used = 1;
-}
+
+} // gpu_update_ham_data_
 
 extern "C" void gpu_update_ffnl_ph3d_(double *ph3din, int *dimph3din,
                                       double *ffnlin, int *dimffnlin)
 {
 
-  cudaError_t cuda_state;
-
-  cuda_state=cudaMemcpy(ffnlin_gpu,ffnlin,(*dimffnlin)*sizeof(double),cudaMemcpyHostToDevice);
-  if(cuda_state!=cudaSuccess){
-    printf("gpu_update_ffnl_ph3d: Error while copying data 1 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
-  cuda_state=cudaMemcpy(ph3din_gpu,ph3din,(*dimph3din)*sizeof(double),cudaMemcpyHostToDevice);
-  if(cuda_state!=cudaSuccess){
-    printf("gpu_update_ffnl_ph3d: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-    fflush(stdout);
-    abi_cabort();
-  }
-
+  CHECK_CUDA_ERROR( cudaMemcpy(ffnlin_gpu,ffnlin,(*dimffnlin)*sizeof(double),cudaMemcpyHostToDevice) );
+  CHECK_CUDA_ERROR( cudaMemcpy(ph3din_gpu,ph3din,(*dimph3din)*sizeof(double),cudaMemcpyHostToDevice) );
   ffnl_ph3d_updated = 1;
-}
+
+} // gpu_update_ffnl_ph3d_
 
 extern "C" void gpu_finalize_ffnl_ph3d_()
 {
