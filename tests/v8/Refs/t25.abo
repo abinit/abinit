@@ -130,6 +130,7 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
            chrgat      6.90000000E-01  6.90000000E-01
   constraint_kind1       0
   constraint_kind2       1
@@ -1052,6 +1053,7 @@ band_energy         : -6.19509458432588E-01
  -outvars: echo values of variables after computation  --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
            chrgat      6.90000000E-01  6.90000000E-01
   constraint_kind1       0
   constraint_kind2       1

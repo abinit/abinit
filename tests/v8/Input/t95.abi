@@ -64,6 +64,7 @@ occopt1? 7
                       # On the other hand, the trigonal symmetry is correctly respected at the level of the eigenvalues, but
                       # allowing nsym=3 yield non-sense in CDFT
                       # At least with nsym=1, CDFT is behaving properly.
+ chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
   
  spinat22   0 0 0      0.04 0.04 0.04    -0.04 -0.04 -0.04
 
