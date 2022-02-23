@@ -53,9 +53,6 @@ contains
 !!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree)
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
-!!  gsqcut=Fourier cutoff on G^2 for "large sphere" of radius double
-!!   that of the basis sphere--appropriate for charge density rho(G),
-!!   Hartree potential, and pseudopotentials
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  kxc(nfftf,nkxc)=exchange-correlation kernel
 !!  mband = maximum number of bands
@@ -108,7 +105,7 @@ contains
 !! SOURCE
 
     
-subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut, &
+subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 & hdr,kg,kxc,mband,mgfft,mgfftf,mkmem,mk1mem,&
 & mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,occ,&
@@ -162,7 +159,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !scalars
  integer,intent(in) :: mband,mgfft,mgfftf,mk1mem,mkmem,mpert,mpw,natom,nfftf
  integer,intent(in) :: nkpt,nkxc,nspinor,nsppol
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
