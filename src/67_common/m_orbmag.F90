@@ -847,7 +847,7 @@ subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,natom,nband_k,&
              end if
 
              ! the sign on cterm (+ or -) needs to be carefully checked
-             cterm = -c2*half*j_dpc*epsabg*(dij-Enk(nn)*pawtab(itypat)%sij(klmn))*conjg(udp_b)*udp_g
+             cterm = c2*half*j_dpc*epsabg*(dij-Enk(nn)*pawtab(itypat)%sij(klmn))*conjg(udp_b)*udp_g
              omdp_k(1,nn,adir) = omdp_k(1,nn,adir) + REAL(cterm)
              omdp_k(2,nn,adir) = omdp_k(2,nn,adir) + AIMAG(cterm)
 
@@ -910,7 +910,7 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size,nn
+  integer :: adir,iat,iatom,ilmn,il,iln,im,itypat,jlmn,jl,jln,jm,klmn,kln,mesh_size,nn
   real(dp) :: intg
   complex(dpc) :: cpb,cpk,cterm,orbl_me
 
@@ -928,29 +928,29 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
         mesh_size=pawtab(itypat)%mesh_size
         ABI_MALLOC(ff,(mesh_size))
         do jlmn=1,pawtab(itypat)%lmn_size
-           jl=pawtab(itypat)%indlmn(1,jlmn)
-           jm=pawtab(itypat)%indlmn(2,jlmn)
-           do ilmn=1,pawtab(itypat)%lmn_size
-              il=pawtab(itypat)%indlmn(1,ilmn)
-              im=pawtab(itypat)%indlmn(2,ilmn)
-              klmn=MATPACK(jlmn,ilmn)
-              kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
-              ! compute <L_dir>
-              call slxyzs(il,im,adir,jl,jm,orbl_me)
-              ! compute radial integral of phi_i*phi_j - tphi_i*tphi_j
-              ! this is necessary because pawtab%sij contains the full integral (radial and angular)
-              ! but our angular integral is different and done in the slxyzs call
-              if (abs(orbl_me) > tol8) then
-                 ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
-                 call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-                 call simp_gen(intg,ff,pawrad(itypat))
-                 cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
-                 cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
-                 cterm = half*conjg(cpb)*orbl_me*intg*cpk
-                 omlk(1,nn,adir)=omlk(1,nn,adir) - real(cterm)
-                 omlk(2,nn,adir)=omlk(2,nn,adir) - aimag(cterm)
-              end if ! end check that |L_dir| > 0, otherwise ignore term
-           end do ! end loop over ilmn
+          jl=pawtab(itypat)%indlmn(1,jlmn)
+          jm=pawtab(itypat)%indlmn(2,jlmn)
+          jln=pawtab(itypat)%indlmn(5,jlmn)
+          do ilmn=1,pawtab(itypat)%lmn_size
+            il=pawtab(itypat)%indlmn(1,ilmn)
+            im=pawtab(itypat)%indlmn(2,ilmn)
+            iln=pawtab(itypat)%indlmn(5,ilmn)
+            klmn=MATPACK(jlmn,ilmn)
+            kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+            ! compute <L_dir>
+            call slxyzs(il,im,adir,jl,jm,orbl_me)
+            if(abs(orbl_me).GT.tol8)then
+              ff(1:mesh_size) = pawtab(itypat)%phiphj(1:mesh_size,kln)-pawtab(itypat)%tphitphj(1:mesh_size,kln)
+              call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+              call simp_gen(intg,ff,pawrad(itypat))
+              write(std_out,'(a,2es16.8)')'JWZ debug lij sij ',intg,pawtab(itypat)%sij(klmn)
+              cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+              cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+              cterm = half*conjg(cpb)*orbl_me*intg*cpk
+              omlk(1,nn,adir)=omlk(1,nn,adir) - real(cterm)
+              omlk(2,nn,adir)=omlk(2,nn,adir) - aimag(cterm)
+            end if ! end check that |L_dir| > 0, otherwise ignore term
+          end do ! end loop over ilmn
         end do ! end loop over jlmn
         ABI_FREE(ff)
       end do ! end loop over atoms
