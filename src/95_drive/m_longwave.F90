@@ -142,6 +142,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
  integer :: ask_accurate,bantot,coredens_method,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
@@ -166,6 +167,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
  integer,allocatable :: blkflg(:,:,:,:,:,:)
+ integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
  integer,allocatable :: rfpert(:,:,:,:,:,:)
@@ -232,9 +234,43 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3e_pert1,(mpert))
+ ABI_MALLOC(d3e_pert2,(mpert))
+ ABI_MALLOC(d3e_pert3,(mpert))
+ blkflg(:,:,:,:,:,:) = 0
+ d3etot(:,:,:,:,:,:,:) = 0_dp
+ rfpert(:,:,:,:,:,:) = 0
+ d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
 
- blkflg=0
- d3etot=zero
+ d3e_pert3(natom+8)=1
+ if (dtset%lw_qdrpl==1) then
+   d3e_pert1(natom+2)=1
+   d3e_pert2(1:natom)=1
+ end if
+
+ if (dtset%lw_flexo==2.or.dtset%lw_flexo==1) then
+   d3e_pert1(natom+2)=1
+   d3e_pert2(natom+3:natom+4)=1
+ end if
+
+ if (dtset%lw_flexo==3.or.dtset%lw_flexo==1) then
+   d3e_pert1(natom+2)=1 ; d3e_pert1(1:natom)=1
+   d3e_pert2(1:natom)=1
+ end if
+
+ if (dtset%lw_flexo==4.or.dtset%lw_flexo==1) then
+   d3e_pert1(1:natom)=1
+   d3e_pert2(natom+3:natom+4)=1
+ end if
+
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+       if ( d3e_pert1(i1pert)*d3e_pert2(i2pert)*d3e_pert3(i3pert) > 0 ) &
+     & rfpert(:,i1pert,:,i2pert,:,i3pert)=1
+     end do
+   end do
+ end do 
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
