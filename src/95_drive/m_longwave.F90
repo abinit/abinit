@@ -61,6 +61,7 @@ module m_longwave
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
  use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_mkcore,      only : mkcore
+ use m_dfptlw_loop, only : dfptlw_loop
 
  implicit none
 
@@ -167,7 +168,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer,allocatable :: blkflg(:,:,:,:,:,:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
-!integer,allocatable :: rfpert(:)
+ integer,allocatable :: rfpert(:,:,:,:,:,:)
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:)
  real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
@@ -230,6 +231,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  mpert=natom+8
  ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
+
  blkflg=0
  d3etot=zero
 
@@ -382,7 +385,7 @@ ecore=zero
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
  end if ! getden
- ABI_FREE(cg)
+! ABI_FREE(cg)
 
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
@@ -493,7 +496,7 @@ ecore=zero
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
 !Calculate the nonvariational terms
-!1st q-gradient of Ewald contribution to the dynamical matrix
+!1st q-gradient of Ewald contribution to the IFCs
  if (dtset%lw_flexo/=0) then
    ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
    dyewdq(:,:,:,:,:,:)=zero
@@ -504,7 +507,7 @@ ecore=zero
    end if
  end if
 
-!2nd q-gradient of Ewald contribution to the dynamical matrix
+!2nd q-gradient of Ewald contribution to the IFCs
  if (dtset%lw_flexo/=0) then
    ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
    dyewdqdq(:,:,:,:,:,:)=zero
@@ -514,6 +517,15 @@ ecore=zero
    & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    end if
  end if
+
+!Main loop over the perturbations
+   call dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
+&   hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
+&   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
+&   dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
+&   pawfgr,pawrad,pawrhoij,pawtab,&
+&   psps,rfpert,rhog,rhor,rprimd,ucvol,vxc,xred)
+
 
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
