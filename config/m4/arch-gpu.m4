@@ -63,7 +63,7 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
 #endif
     ]],
     [[
-      cudaDeviceReset();
+        cudaDeviceReset();
     ]])], [abi_gpu_cuda_old="no"], [abi_gpu_cuda_old="yes"])
   AC_MSG_RESULT([${abi_gpu_cuda_old}])
 
@@ -72,12 +72,31 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
-  # Restore build environment
   AC_LANG_POP([C])
+
+  #
+  # check if we are using CUDA runtime version at least 10
+  #
+  AC_LANG_PUSH([C++])
+  # Do we have at least version 10 of Cuda ? Version 10 of CUDA is nice for NVTX (header only)
+  AC_MSG_CHECKING([whether we have Cuda >= 10])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+    [[
+      #include <cuda_runtime_api.h>
+    ]],
+    [[
+      #if CUDART_VERSION < 10000
+      #error
+      #endif
+    ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
+  AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
+  
+  AC_LANG_POP([C++])
+
+  # Restore build environment
   LIBS="${abi_saved_LIBS}"
   ABI_ENV_RESTORE
 ]) # _ABI_GPU_CHECK_CUDA
-
 
 
                     ########################################
