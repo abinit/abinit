@@ -757,8 +757,7 @@ subroutine ys(l2,m2,l1,m1,ys_val)
 
 !Local variables ---------------------------------------
  !scalars
- integer :: am1
- real(dp) :: pam1,pm1
+ integer :: mp1
 
 ! *********************************************************************
 
@@ -766,20 +765,38 @@ subroutine ys(l2,m2,l1,m1,ys_val)
  ys_val = czero
 
  if ( l2 /= l1 ) return
+ if ( abs(m2) /= abs(m1) ) return
 
- pm1=(-one)**m1
- am1=abs(m1)
- pam1=(-one)**am1
-
- if (m1 > 0) then
-   if (m2 ==  m1) ys_val=pm1*sqrthalf
-   if (m2 == -m1) ys_val=sqrthalf
- else if (m1 == 0) then
-   if (m2 == m1) ys_val = cone
+ mp1=(-1)**abs(m1)
+ 
+ if(m1.EQ.0) then
+   ys_val=cone
+ else if((m1.GT.0).AND.(m2.GT.0)) then
+   ys_val=mp1*sqrthalf
+ else if((m1.GT.0).AND.(m2.LT.0)) then
+   ys_val=sqrthalf
+ else if((m1.LT.0).AND.(m2.GT.0)) then
+   ys_val=-j_dpc*mp1*sqrthalf
+ else if((m1.LT.0).AND.(m2.LT.0)) then
+   ys_val=j_dpc*sqrthalf
  else
-   if (m2 ==  am1) ys_val=-j_dpc*pm1*sqrthalf
-   if (m2 == -am1) ys_val = j_dpc*pm1*sqrthalf*pam1
+   ys_val=czero
  end if
+
+ 
+ !pm1=(-one)**m1
+ !am1=abs(m1)
+ !pam1=(-one)**am1
+
+ !if (m1 > 0) then
+ !  if (m2 ==  m1) ys_val=pm1*sqrthalf
+ !  if (m2 == -m1) ys_val=sqrthalf
+ !else if (m1 == 0) then
+ !  if (m2 == m1) ys_val = cone
+ !else
+ !  if (m2 ==  am1) ys_val=-j_dpc*pm1*sqrthalf
+ !  if (m2 == -am1) ys_val = j_dpc*pm1*sqrthalf*pam1
+ !end if
 
 end subroutine ys
 !!***

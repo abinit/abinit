@@ -2504,8 +2504,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
    ! Matrix elements of interest are <S_l'm'|L_i|S_lm>
    ! these are zero if l' /= l and also if l' == l == 0
-   if ( il .NE. jl ) cycle
-   if ( il .EQ. 0  ) cycle
+   if ( il /= jl ) cycle
+   if ( il == 0  ) cycle
 
    do idir = 1, 3
 
@@ -2514,10 +2514,13 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
-       & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
+     ! the lms matrix element from the last call always has zero real part
+     ! thus the real part of dijnd is always zero
+     dijnd(2*klmn-1,1) = zero
+
+     ! removed dltij(klmn) in the following, don't think it should be there
      dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
+       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
 
    end do ! end loop over idir
 
