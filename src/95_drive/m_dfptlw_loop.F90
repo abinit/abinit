@@ -187,13 +187,17 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ask_accurate,comm_cell,cplex,formeig,ireadwf,me,mpsang
+ integer :: ask_accurate,comm_cell,cplex,formeig
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,ierr,ireadwf,mcg,me,mpsang
  integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc
- integer :: optorth,pawread,timrev,usexcnhat                                      
+ integer :: optorth,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,ecut,ecut_eff,gsqcut                                    
- type(gs_hamiltonian_type) :: gs_hamkq
  logical :: non_magnetic_xc
-!character(len=500) :: msg                   
+ character(len=500) :: msg                   
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk
+ type(gs_hamiltonian_type) :: gs_hamkq
+ type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
+ type(wvl_data) :: wvl
 !arrays
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
@@ -268,9 +272,37 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  pawread=0
  nhat1grdim=0
  ABI_MALLOC(nhat1gr,(0,0,0))
+ nhat1gr(:,:,:) = zero
  ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
  nhat1=zero
 
+ mcg=mpw*nspinor*mband*mkmem*nsppol
+
+ pert1case = 0 ; pert2case = 0 ; pert3case = 0
+
+ do i1pert = 1, mpert
+   do i1dir = 1, 3
+
+     if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
+
+       pert1case = i1dir + (i1pert-1)*3
+       call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
+
+       call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
+&       formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&       dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+&       dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+&       dtset%nsppol,dtset%nsym,&
+&       occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+&       dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
+
+       if (ireadwf==1) then
+         call WffClose (wff1,ierr)
+       end if
+
+     end if   ! rfpert
+   end do    ! i1dir
+ end do     ! i1pert
 
  DBG_EXIT("COLL")
 
