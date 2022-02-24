@@ -127,7 +127,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists
- use m_kg,          only : getph
+ use m_kg,          only : getcut,getph
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -186,27 +186,91 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
-! integer ::                                      
-! real(dp) ::                                     
+!scalars
+ integer :: ask_accurate,comm_cell,cplex,formeig,ireadwf,me,mpsang
+ integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc
+ integer :: optorth,pawread,timrev,usexcnhat                                      
+ real(dp) :: boxcut,ecut,ecut_eff,gsqcut                                    
+ type(gs_hamiltonian_type) :: gs_hamkq
+ logical :: non_magnetic_xc
 !character(len=500) :: msg                   
+!arrays
+ real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
+ real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
+ real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
+ real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
+ real(dp),allocatable :: vhartr1(:),vpsp1(:),vresid_dum(:,:)
+ real(dp),allocatable,target :: vtrial1_i2pert(:,:),vtrial1_i1pert(:,:)
+ real(dp),allocatable :: vxc1(:,:),xccc3d1(:)
+ type(pawrhoij_type),allocatable :: pawrhoij_read(:)
+ 
  
 ! *************************************************************************
 
  DBG_ENTER("COLL")
  
-! if (option/=1 .and. option/=2 ) then
-!  write(msg,'(3a,i0)')&
-!&  'The argument option should be 1 or 2,',ch10,&
-!&  'however, option=',option
-!  MSG_BUG(msg)
-! end if
-!
-! if (sizein<1) then
-!  write(msg,'(3a,i0)')&
-!&  '  The argument sizein should be a positive number,',ch10,&
-!&  '  however, sizein=',sizein
-!  MSG_ERROR(msg)
-! end if
+!Init parallelism
+ comm_cell=mpi_enreg%comm_cell
+ me=mpi_enreg%me_kpt
+
+!Various initializations
+ timrev = 1 ! as q=0
+ cplex = 2 - timrev
+ nspden = dtset%nspden
+ ecut=dtset%ecut
+ ecut_eff = ecut*(dtset%dilatmx)**2
+ mpsang = psps%mpsang
+ optorth=1;if (psps%usepaw==1) optorth=0
+ non_magnetic_xc=.true.
+
+ ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_MALLOC(cg3,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(rho2r1,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(rho1g1,(2,nfftf))
+ ABI_MALLOC(rho2g1,(2,nfftf))
+
+ ask_accurate=1 ; formeig = 1 ; ireadwf = 1
+ n1=ngfftf(1) ; n2=ngfftf(2) ; n3=ngfftf(3)
+ nfftotf=n1*n2*n3
+
+!Compute large sphere cut-off gsqcut
+ call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
+
+!Generate the 1-dimensional phases
+ ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
+
+!==== Initialize most of the Hamiltonian (and derivative) ====
+!1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+!2) Perform the setup needed for the non-local factors:
+!3) Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,nspden,dtset%natom,&
+& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& use_gpu_cuda=dtset%use_gpu_cuda)
+
+ ABI_MALLOC(vpsp1,(cplex*nfftf))
+ ABI_MALLOC(xccc3d1,(cplex*nfftf))
+ ABI_MALLOC(vhartr1,(cplex*nfftf))
+ ABI_MALLOC(vxc1,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(vtrial1_i1pert,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
+ ABI_MALLOC(vresid_dum,(0,0))
+
+!This is necessary to deactivate paw options in the dfpt_rhotov routine
+ ABI_MALLOC(pawrhoij_read,(0))
+ usexcnhat=0
+ n3xccc=0
+ pawread=0
+ nhat1grdim=0
+ ABI_MALLOC(nhat1gr,(0,0,0))
+ ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
+ nhat1=zero
+
 
  DBG_EXIT("COLL")
 
