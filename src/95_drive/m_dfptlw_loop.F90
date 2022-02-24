@@ -198,6 +198,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
  type(wvl_data) :: wvl
+ type(hdr_type) :: hdr_den
 !arrays
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
@@ -299,6 +300,16 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        if (ireadwf==1) then
          call WffClose (wff1,ierr)
        end if
+
+       rho1r1(:,:) = zero
+       if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+         call appdig(pert1case,dtfil%fildens1in,fiden1i)
+
+         call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho1r1, &
+         hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
+         call hdr_den%free()
+       end if
+       xccc3d1(:) = zero
 
      end if   ! rfpert
    end do    ! i1dir
