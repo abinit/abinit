@@ -189,9 +189,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 !scalars
  integer :: ask_accurate,comm_cell,cplex,formeig
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,ierr,ireadwf,mcg,me,mpsang
- integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc
- integer :: optorth,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
- real(dp) :: boxcut,ecut,ecut_eff,gsqcut                                    
+ integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc,optene
+ integer :: optorth,optres,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
+ real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
  logical :: non_magnetic_xc
  character(len=500) :: msg                   
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk
@@ -205,8 +205,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
  real(dp),allocatable :: vhartr1(:),vpsp1(:),vresid_dum(:,:)
- real(dp),allocatable,target :: vtrial1_i2pert(:,:),vtrial1_i1pert(:,:)
- real(dp),allocatable :: vxc1(:,:),xccc3d1(:)
+ real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
+ real(dp),allocatable :: vxc1(:,:),work(:),xccc3d1(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -301,7 +301,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
          call WffClose (wff1,ierr)
        end if
 
-       rho1r1(:,:) = zero
+       rho1r1(:,:) = zero; rho1g1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
          call appdig(pert1case,dtfil%fildens1in,fiden1i)
 
@@ -309,7 +309,22 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
          hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
          call hdr_den%free()
        end if
-       xccc3d1(:) = zero
+
+       !Perform FFT rhor1 to rhog1
+       ABI_MALLOC(work,(cplex*nfftf))
+       work(:)=rho1r1(:,1)
+       call fourdp(cplex,rho1g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
+       ABI_FREE(work)
+
+       !Calculate first order SCF potential
+       xccc3d1(:)=zero; vpsp1(:)=zero
+       optene=0; optres=1
+       call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+       & gsqcut,i1dir,i1pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
+       & dtset%ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
+       & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho1g1,rhor,rho1r1,&
+       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
+       & vtrial1_i1pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
      end if   ! rfpert
    end do    ! i1dir
