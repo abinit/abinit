@@ -252,24 +252,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
 
 ! ***********************************************************************
 
- !** First some tests to avoid the user to use the method in untested cases
- if (dtset%usepawu /= 0) then 
-   write (msg,'(a)') "RT-TDDFT with DFT+U has not yet been tested."
-   ABI_ERROR(msg)
- end if
- if (mod(dtset%fockoptmix,100)==11) then 
-   write (msg,'(a)') "RT-TDDFT with hybrid functionals has not yet been tested."
-   ABI_ERROR(msg)
- end if
- if (dtset%usekden /= 0) then 
-   write (msg,'(a)') "RT-TDDFT with meta-GGA functionals has not yet been tested."
-   ABI_ERROR(msg)
- end if
- if (dtset%vdw_xc /= 0) then
-   write (msg,'(a)') "RT-TDDFT with VDW corrected functionals has not yet been tested."
-   ABI_ERROR(msg)
- end if
-
  my_natom=mpi_enreg%my_natom
 
  !1) Various initializations & checks (MPI, PW, FFT, PSP, Symmetry ...)

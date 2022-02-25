@@ -42,7 +42,7 @@ module m_rttddft_driver
  use m_rttddft_tdks,      only: tdks_type
  use m_rttddft_propagate, only: rttddft_propagate_ele
  use m_specialmsg,        only: wrtout
- use m_time,              only: timab
+ use m_time,              only: cwtime
 
  implicit none
 
@@ -116,7 +116,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  integer              :: istep
  type(tdks_type)      :: tdks
  !arrays
- real(dp)             :: tsec(2)
+ real(dp)             :: cpu, wall, gflops
 
 ! ***********************************************************************
 
@@ -145,10 +145,9 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
  
- !TODO: Change ntime to nstep?
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
-   call timab(1600,1,tsec)
+   call cwtime(cpu, wall, gflops, "start")
  
    !Perform electronic step
    !Compute new WF at time t and energy contribution at time t-dt
@@ -166,8 +165,8 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
    !FB TODO: If Ehrenfest dynamics perform nuclear step
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
-   call timab(1600,2,tsec)
-   write(msg,'(a,f8.2,a)') 'Time (sec):',tsec(1), ch10
+   call cwtime(cpu,wall,gflops,"stop")
+   write(msg,'(a,2f8.2,a)') 'Time - cpu, wall (sec):', cpu, wall, ch10
    call wrtout(ab_out,msg)
    if (do_write_log) call wrtout(std_out,msg)
 

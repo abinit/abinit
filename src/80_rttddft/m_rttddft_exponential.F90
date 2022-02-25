@@ -132,6 +132,7 @@ contains
  !and we should use cptopt=2 option in getghc to avoid recomputing cprj all the time
  paw = (gs_hamk%usepaw == 1)
  if(paw) then
+    !fb: TODO Probably not needed to save cprj here
    ABI_MALLOC(cwaveprj, (gs_hamk%natom,nspinor*nband_k))
    call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
    !FB: Not sure about the values of sij_opt and cpopt
