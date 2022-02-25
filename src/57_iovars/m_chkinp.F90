@@ -1102,29 +1102,40 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          & are not compatible, set tfkinfunc /= 2.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
-     ! usepawu
-     if (dt%usepawu /= 0) then
-        write(msg,'(a)') 'RT-TDDFT and DFT+U are not compatible, set usepawu to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
-     endif
-     ! usedmft
-     if (dt%usedmft /= 0) then
-        write(msg,'(a)') 'RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.'
-        ABI_ERROR_NOSTOP(msg, ierr)
-     endif
      ! positron
      if (dt%positron /= 0) then
         write(msg,'(a)') 'RT-TDDFT and Positron are not compatible, set positron to 0.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
-     if (dt%usefock==1) then 
+     ! usefock
+     if (dt%usefock==1) then
         write(msg,'(a)') 'RT-TDDFT and Exact exchange are not compatible, set usefock to 0.'
         ABI_ERROR_NOSTOP(msg, ierr)
      end if
+     ! usedmft
+     if (dt%usedmft /= 0) then
+        write(msg,'(a)') 'RT-TDDFT and DFT+DMFT are not compatible, set usedmft to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usepawu
+     if (dt%usepawu /= 0) then
+        write(msg,'(a)') 'RT-TDDFT with DFT+U has not been tested yet, set usepawu to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
+     ! usekden
+     if (dt%usekden==1) then
+        write(msg,'(a)') 'RT-TDDFT with mGGA has not been tested yet, set usekden to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     ! vdw_xc
+     if (dt%vdw_xc /= 0) then
+        write(msg,'(a)') 'RT-TDDFT with VDW corrected functionals has not been tested yet, set vdw_xc to 0.'
+        ABI_ERROR_NOSTOP(msg, ierr)
+     endif
      !TODO FB: Should probably be made possible later
      ! useextfpmd
      if (dt%useextfpmd /= 0) then
-        write(msg,'(a)') 'RT-TDDFT and extFPMD are not compatible, set useextfpmd to 0.'
+        write(msg,'(a)') 'RT-TDDFT and extFPMD has not been tested yet, set useextfpmd to 0.'
         ABI_ERROR_NOSTOP(msg, ierr)
      endif
    endif

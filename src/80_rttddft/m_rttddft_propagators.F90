@@ -261,18 +261,15 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       ! Compute (k+G) vectors (only if useylm=1)
       nkpg=3*calc_forces*dtset%nloalg(3)
       ABI_MALLOC(kpg_k,(npw_k,nkpg))
-      if ((mpi_enreg%paral_kgb/=1.or.istep<=1).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+      if ((mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
       ! Compute nonlocal form factors ffnl at all (k+G):
       ider=0;idir=0;dimffnl=1
       ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
-      !FB: This seems wrong even if one does not need to recompute 
-      !at every step it is not stored and would not be computed even once 
-      !in case of a restart with first_step > 1 - HERE!!
-      if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
-         call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
-                   & ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,     &
-                   & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
-                   & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
+      if (mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step) then
+        call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
+                  & ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,     &
+                  & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
+                  & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
       end if
 
       !** Load k-dependent part in the Hamiltonian datastructure
@@ -280,13 +277,13 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       !**  - Prepare various tabs in case of band-FFT parallelism
       !**  - Load k-dependent quantities in the Hamiltonian
       ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
-      call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,         &
-                        & kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), &
+      call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k, &
+                        & ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step),   &
                         & compute_gbound=(mpi_enreg%paral_kgb/=1))
 
       !** Load band-FFT tabs (transposed k-dependent arrays)
       if (mpi_enreg%paral_kgb==1) then
-         if (istep<=1) call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
+         if (istep<=tdks%first_step) call prep_bandfft_tabs(gs_hamk,ikpt,dtset%mkmem,mpi_enreg)
          call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv,    &
                            & gbound_k =my_bandfft_kpt%gbound,       &
                            & kinpw_k  =my_bandfft_kpt%kinpw_gather, &
@@ -297,7 +294,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       end if
    
       !** Build inverse of overlap matrix
-      if(psps%usepaw == 1) then
+      if(psps%usepaw == 1 .and. istep <= tdks%first_step) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
       end if
 
@@ -305,7 +302,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       if (tdks%gemm_nonlop_use_gemm) then
          !set the global variable indicating to gemm_nonlop where to get its data from
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-         if (istep <= 1) then
+         if (istep <= tdks%first_step) then
             !Init the arrays
             call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat,       &
                                & gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
@@ -439,8 +436,8 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
  
  ! check convergence
- conv(1) = 100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
- conv(2) = 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
+ conv(1) = abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
+ conv(2) = abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
  lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
  ics = 0
  if (mpi_enreg%me == 0) then 
@@ -456,13 +453,13 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
       tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
       ! calc associated density at t+dt/2
       call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
-      ! start back from time t
+      ! Go back to time t ..
       tdks%cg(:,:) = cg(:,:)
-      ! evolve psi(t) using estimated density at t+dt/2
+      ! .. and evolve psi(t) using estimated density at t+dt/2
       call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)
       ! check convergence
-      conv(1) = 100*abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
-      conv(2) = 100*abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
+      conv(1) = abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
+      conv(2) = abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
       lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
       if (mpi_enreg%me == 0) then 
          write(msg,'(a,a,i3,a,3(es8.2,x),l,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
