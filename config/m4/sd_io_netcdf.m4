@@ -266,13 +266,12 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   AC_MSG_RESULT([${sd_netcdf_ok}])
 
   # Check if we can do parallel I/O
-  echo
-  echo "netcdf-c : Check if we can do parallel I/O"
+  #echo "netcdf-c : Check if we can do parallel I/O"
   if test "${sd_netcdf_ok}" = "yes" -a "${sd_mpi_ok}" = "yes"; then
-    echo "JMB Check // IO netcdf-c"
+    #echo -e "\r JMB Check // IO netcdf-c"
     if test "${sd_hdf5_mpi_ok}" = "yes"; then
-      echo " sd_hdf5_mpi_ok = yes"
-      echo " whether NetCDF has parallel I/O"
+      #echo " sd_hdf5_mpi_ok = yes"
+      #echo " whether NetCDF has parallel I/O"
       AC_MSG_CHECKING([whether NetCDF has parallel I/O])
       AC_LANG_PUSH([C])
       AC_RUN_IFELSE([AC_LANG_PROGRAM(

@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t45/t45.in
-- output file    -> t45.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v3_t45/t45.abi
+- output file    -> t45.abo
 - root for input  files -> t45i
 - root for output files -> t45o
 
@@ -34,7 +34,7 @@
 -    mband =          24        mffmem =           1         mkmem =           1
        mpw =         272          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       2.201 Mbytes of memory.
+P This job should need less than                       2.314 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          24        mffmem =           1         mkmem =           4
        mpw =         140          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       1.791 Mbytes of memory.
+P This job should need less than                       1.910 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.207 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -68,19 +68,19 @@ _ WF disk file :      0.207 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           6        mffmem =           1         mkmem =           5
        mpw =         140          nfft =        4096          nkpt =           5
 ================================================================================
-P This job should need less than                       1.613 Mbytes of memory.
+P This job should need less than                       1.732 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           18 blocks of mpw  integer numbers, for      0.010 Mbytes.
-P           99 blocks of mpw  real(dp)  numbers, for      0.106 Mbytes.
+P           93 blocks of mpw  real(dp)  numbers, for      0.099 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.031 Mbytes.
-P           19 blocks of nfft real(dp)  numbers, for      0.594 Mbytes.
+P           23 blocks of nfft real(dp)  numbers, for      0.719 Mbytes.
 P              Additional     integer numbers, for      0.003 Mbytes.
 P              Additional     real(dp)  numbers, for      0.591 Mbytes.
 P              With residue estimated to be             0.278 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.613 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.546 Mbytes.
+P Main chain + fourwf.f                 1.732 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.664 Mbytes.
 P XC chain                              1.355 Mbytes.
 P mkrho chain                           1.261 Mbytes.
 P fourdp chain                          1.261 Mbytes.
@@ -102,19 +102,19 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           1
        mpw =         126          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.534 Mbytes of memory.
+P This job should need less than                       1.653 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            6 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           45 blocks of mpw  real(dp)  numbers, for      0.043 Mbytes.
+P           39 blocks of mpw  real(dp)  numbers, for      0.037 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.031 Mbytes.
-P           19 blocks of nfft real(dp)  numbers, for      0.594 Mbytes.
+P           23 blocks of nfft real(dp)  numbers, for      0.719 Mbytes.
 P              Additional     integer numbers, for      0.003 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.278 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.534 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.467 Mbytes.
+P Main chain + fourwf.f                 1.653 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.586 Mbytes.
 P XC chain                              1.290 Mbytes.
 P mkrho chain                           1.196 Mbytes.
 P fourdp chain                          1.196 Mbytes.
@@ -314,8 +314,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.990   => boxcut(ratio)=   2.00281
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -332,8 +332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -577,7 +577,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -3.6669E-02  1.1415E-01  1.1415E-01  1.1415E-01  1.3659E-01  1.3659E-01
   1.3659E-01  2.3754E-01  2.3754E-01  2.3754E-01  2.3960E-01  2.6207E-01
   2.6207E-01  2.6207E-01  2.6994E-01  2.6994E-01  3.2732E-01  3.2732E-01
-  prteigrs : nnsclo,ikpt=   15    1 max resid (incl. the buffer)=  1.06805E-10
  Non-SCF case, kpt    2 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   2.68E-12  2.59E-12  7.97E-12  8.17E-12  8.01E-12  6.33E-12  2.75E-12  1.28E-12
   1.49E-12  8.08E-12  1.38E-12  2.35E-12  1.22E-12  7.04E-12  2.72E-12  8.22E-12
@@ -586,7 +585,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.3193E-02  8.4934E-02  8.4934E-02  9.7531E-02  1.1244E-01  1.1418E-01
   1.6245E-01  1.6245E-01  1.6768E-01  1.6768E-01  2.7347E-01  2.7430E-01
   3.4355E-01  3.5757E-01  3.9158E-01  3.9215E-01  3.9215E-01  4.0515E-01
-  prteigrs : nnsclo,ikpt=   15    2 max resid (incl. the buffer)=  1.47497E-07
  Non-SCF case, kpt    3 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
   2.15E-12  1.22E-12  3.76E-12  6.77E-12  2.52E-12  7.54E-12  1.89E-12  6.96E-12
   1.54E-12  3.64E-12  7.30E-13  4.04E-12  4.82E-12  1.21E-12  3.07E-12  1.98E-12
@@ -595,7 +593,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.4734E-02  4.4734E-02  7.9416E-02  9.1400E-02  9.6770E-02  9.6770E-02
   1.8172E-01  1.8302E-01  1.8302E-01  1.9531E-01  3.2423E-01  3.2447E-01
   3.2447E-01  3.2590E-01  4.0641E-01  4.0641E-01  4.0891E-01  4.2181E-01
-  prteigrs : nnsclo,ikpt=   15    3 max resid (incl. the buffer)=  9.39813E-08
  Non-SCF case, kpt    4 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
   7.05E-12  1.06E-12  2.75E-12  8.12E-12  1.12E-12  3.31E-12  7.23E-12  8.63E-12
   1.17E-12  2.13E-12  3.24E-12  2.54E-12  7.39E-12  2.81E-12  6.17E-12  7.73E-12
@@ -604,7 +601,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -1.6214E-02 -1.6214E-02  1.8191E-01  1.8191E-01  1.8191E-01  1.8389E-01
   1.8389E-01  1.9941E-01  1.9941E-01  1.9941E-01  2.9371E-01  2.9641E-01
   2.9641E-01  2.9641E-01  3.4141E-01  3.4141E-01  3.4141E-01  3.5721E-01
-  prteigrs : nnsclo,ikpt=   15    4 max resid (incl. the buffer)=  3.10886E-10
 
 
 --- !ResultsGS
@@ -738,23 +734,21 @@ P newkpt: treating      4 bands with npw=     140 for ikpt=   5 by node    0
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.18E-07  2.71E-06  2.23E-06  1.92E-06  8.61E-07  5.72E-08
   2.3956E-01  2.6199E-01  2.6200E-01  2.6200E-01  2.6992E-01  2.6994E-01
-  prteigrs : nnsclo,ikpt=   10    1 max resid (incl. the buffer)=  2.70970E-06
+  prteigrs : nnsclo,ikpt=   10    1 max resid (excl. the buffer)=  2.70970E-06
  Non-SCF case, kpt    2 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   4.35E-06  1.36E-06  4.73E-07  8.61E-07  6.60E-08
   2.6203E-01  2.6204E-01  2.6205E-01  2.6992E-01  2.6994E-01
-  prteigrs : nnsclo,ikpt=   10    2 max resid (incl. the buffer)=  4.34970E-06
+  prteigrs : nnsclo,ikpt=   10    2 max resid (excl. the buffer)=  4.34970E-06
  Non-SCF case, kpt    3 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   1.56E-11  7.72E-12
   2.7347E-01  2.7430E-01
-  prteigrs : nnsclo,ikpt=   10    3 max resid (incl. the buffer)=  1.56255E-11
  Non-SCF case, kpt    4 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
   2.82E-08  3.76E-08  2.01E-10  2.14E-07
   3.2423E-01  3.2447E-01  3.2447E-01  3.2590E-01
-  prteigrs : nnsclo,ikpt=   10    4 max resid (incl. the buffer)=  2.13534E-07
+  prteigrs : nnsclo,ikpt=   10    4 max resid (excl. the buffer)=  3.76330E-08
  Non-SCF case, kpt    5 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
   9.75E-12  8.47E-12  6.91E-12  1.30E-11
   2.9371E-01  2.9641E-01  2.9641E-01  2.9641E-01
-  prteigrs : nnsclo,ikpt=   10    5 max resid (incl. the buffer)=  1.29556E-11
 
 
  scprqt:  WARNING -
@@ -810,15 +804,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   11.016E-07; max=  43.497E-07
    0.0000  0.0000  0.0000    1  2.70970E-06 kpt; spin; max resid(k); each band:
-   1.18E-07  2.71E-06  2.23E-06  1.92E-06  8.61E-07  5.72E-08
+  1.18E-07 2.71E-06 2.23E-06 1.92E-06 8.61E-07 5.72E-08
    0.0000  0.0000  0.0000    1  4.34970E-06 kpt; spin; max resid(k); each band:
-   4.35E-06  1.36E-06  4.73E-07  8.61E-07  6.60E-08
+  4.35E-06 1.36E-06 4.73E-07 8.61E-07 6.60E-08
    0.5000  0.0000  0.0000    1  1.56255E-11 kpt; spin; max resid(k); each band:
-   1.56E-11  7.72E-12
+  1.56E-11 7.72E-12
    0.5000  0.5000  0.0000    1  2.13534E-07 kpt; spin; max resid(k); each band:
-   2.82E-08  3.76E-08  2.01E-10  2.14E-07
+  2.82E-08 3.76E-08 2.01E-10 2.14E-07
    0.5000  0.5000  0.5000    1  1.29556E-11 kpt; spin; max resid(k); each band:
-   9.75E-12  8.47E-12  6.91E-12  1.30E-11
+  9.75E-12 8.47E-12 6.91E-12 1.30E-11
  reduced coordinates (array xred) for    9 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.243302629360      0.243302629360      0.243302629360
@@ -899,7 +893,7 @@ P newkpt: treating      3 bands with npw=     126 for ikpt=   1 by node    0
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   8.71E-11  2.81E-07  1.85E-05
   2.6207E-01  2.6209E-01  2.6549E-01
-  prteigrs : nnsclo,ikpt=   10    1 max resid (incl. the buffer)=  1.84605E-05
+  prteigrs : nnsclo,ikpt=   10    1 max resid (excl. the buffer)=  8.70866E-11
 
 
  scprqt:  WARNING -
@@ -955,7 +949,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   87.087E-12; max=  87.087E-12
    0.0000  0.0000  0.0000    1  1.84605E-05 kpt; spin; max resid(k); each band:
-   8.71E-11  2.81E-07  1.85E-05
+  8.71E-11 2.81E-07 1.85E-05
  reduced coordinates (array xred) for    9 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.243302629360      0.243302629360      0.243302629360
@@ -1235,10 +1229,10 @@ P           mkmem4          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  12 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
+.Delivered  14 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.2  wall=          3.3
