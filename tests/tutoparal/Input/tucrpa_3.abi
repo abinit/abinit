@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------------
 #   Tutorial on cRPA: convergence studies (symmetry is not used)
-#   B. Amadon
+#   B. Amadon, R. Outerovitch
 # ----------------------------------------------------------------------------------
 ndtset 16
 udtset  4 4
@@ -80,8 +80,6 @@ tolvrs?1   1.0d-13
 getden?2        -1
 # == Compute empty bands precisely
 iscf?2          -2
-nbandkss?2 -1         # Number of bands in KSS file (-1 means the maximum possible)
-kssform?2 3
 
 tolwfr?2   1.0d-18     # Will stop when this tolerance is achieved
 
@@ -92,9 +90,9 @@ plowan_bandi 21 # First band for Wannier functions
 plowan_bandf 25 # Last band for Wannier functions
 plowan_natom 1 # Number of atoms
 plowan_iatom 1  # Index of atoms
-plowan_nbl 1  # Number of the orbitals
+plowan_nbl 1  # Number of orbitals per atom
 plowan_lcalc 2  # Index of the orbitals (2 -> d)
-plowan_projcalc 5  # Projector for the orbitals ( Usually 2l+1, see pseudos)
+plowan_projcalc 5  # Projector for the orbitals (see pseudo-potential file)
 
 #==================================================================================
 ############ SECOND DATASET:  Calculation of the screening (epsilon^-1 matrix)
@@ -163,6 +161,6 @@ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Ps
 #%% max_nprocs = 32
 #%% [extra_info]
 #%% keywords = LDA, CRPA
-#%% authors = B. Amadon
+#%% authors = B. Amadon, R. Outerovitch
 #%% description = For SrVO3, compute U, convergence study on ecuteps
 #%%<END TEST_INFO>
