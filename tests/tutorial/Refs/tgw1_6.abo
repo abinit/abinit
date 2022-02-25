@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.Version 9.7.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 14 Dec 2020.
-- ( at 14h11 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 16h37 )
   
-- input  file    -> tgw1_6.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorial_tgw1_6/tgw1_6.abi
 - output file    -> tgw1_6.abo
 - root for input  files -> tgw1_6i
 - root for output files -> tgw1_6o
@@ -51,7 +51,7 @@ _ WF disk file :      0.168 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =         120        mffmem =           1         mkmem =           6
        mpw =         303          nfft =        8000          nkpt =           6
 ================================================================================
-P This job should need less than                       5.853 Mbytes of memory.
+P This job should need less than                       6.083 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.331 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      3.331 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          50        mffmem =           1         mkmem =           6
        mpw =         303          nfft =        8000          nkpt =           6
 ================================================================================
-P This job should need less than                       4.714 Mbytes of memory.
+P This job should need less than                       4.770 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.389 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      1.389 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =         100        mffmem =           1         mkmem =           6
        mpw =         303          nfft =        8000          nkpt =           6
 ================================================================================
-P This job should need less than                       6.152 Mbytes of memory.
+P This job should need less than                       6.382 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.776 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -95,7 +95,7 @@ _ WF disk file :      2.776 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -118,7 +118,7 @@ _ WF disk file :      2.776 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           ecutwfn2     0.00000000E+00 Hartree
           ecutwfn3     8.00000000E+00 Hartree
           ecutwfn4     8.00000000E+00 Hartree
--          fftalg         512
+-          fftalg         312
            getden1          0
            getden2         -1
            getden3          0
@@ -323,8 +323,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.16515
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/bruneval/devel/abinit/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/bruneval/devel/abinit/tests//Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -357,8 +357,8 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  3  -8.4508905681654    -2.559E-05 4.495E-04 3.880E-04
  ETOT  4  -8.4508907628105    -1.946E-07 3.877E-04 1.445E-05
  ETOT  5  -8.4508907674908    -4.680E-09 6.981E-05 4.700E-07
- ETOT  6  -8.4508907676239    -1.331E-10 8.334E-05 2.407E-09
- ETOT  7  -8.4508907676242    -3.464E-13 1.045E-05 1.231E-11
+ ETOT  6  -8.4508907676238    -1.330E-10 8.334E-05 2.407E-09
+ ETOT  7  -8.4508907676242    -3.588E-13 1.045E-05 1.231E-11
 
  At SCF step    7       vres2   =  1.23E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -378,7 +378,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -3.464E-13, res2:  1.231E-11, residm:  1.045E-05, diffor: null, }
+convergence: {deltae: -3.588E-13, res2:  1.231E-11, residm:  1.045E-05, diffor: null, }
 etotal    :  -8.45089077E+00
 entropy   :   0.00000000E+00
 fermie    :   1.62353054E-01
@@ -391,9 +391,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.31220527E-29,   1.31220527E-29,  -1.31220527E-29, ]
-- [  1.31220527E-29,  -1.31220527E-29,   1.31220527E-29, ]
-force_length_stats: {min:   2.27280621E-29, max:   2.27280621E-29, mean:   2.27280621E-29, }
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -409,23 +409,23 @@ force_length_stats: {min:   2.27280621E-29, max:   2.27280621E-29, mean:   2.272
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.0993E-28; max dE/dt=  2.6926E-28; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  2.1985E-28; max dE/dt=  2.6926E-28; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000     -0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35733954003335     1.35733954003335     1.35733954003335
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.3122053E-29 1.3122053E-29   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 6.7476303E-28 6.7476303E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
               =  5.429358160133  5.429358160133  5.429358160133 angstroms
  prteigrs : about to open file tgw1_6o_DS1_EIG
@@ -439,16 +439,16 @@ force_length_stats: {min:   2.27280621E-29, max:   2.27280621E-29, mean:   2.272
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.08753412466339E+00
-hartree             :  5.59850380435308E-01
-xc                  : -3.09781415724428E+00
+kinetic             :  3.08753412466338E+00
+hartree             :  5.59850380435293E-01
+xc                  : -3.09781415724427E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  5.53648753925927E-01
-local_psp           : -2.30656115212580E+00
-non_local_psp       :  1.15291606890736E+00
-total_energy        : -8.45089076762420E+00
+local_psp           : -2.30656115212577E+00
+non_local_psp       :  1.15291606890733E+00
+total_energy        : -8.45089076762421E+00
 total_energy_eV     : -2.29960432636752E+02
-band_energy         : -1.88175119850894E-01
+band_energy         : -1.88175119850873E-01
 ...
 
 
@@ -497,18 +497,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file tgw1_6o_DS2_EIG
  Non-SCF case, kpt    1 ( -0.25000 -0.25000  0.00000), residuals and eigenvalues=
-  4.17E-13  1.08E-13  4.90E-14  1.29E-13  1.56E-14  3.27E-13  1.56E-13  6.63E-14
+  4.17E-13  1.08E-13  4.91E-14  1.29E-13  1.56E-14  3.27E-13  1.56E-13  6.63E-14
   9.36E-13  1.95E-13  3.11E-13  4.72E-13  1.61E-13  4.73E-13  3.19E-13  9.69E-14
   1.42E-13  2.13E-14  8.72E-13  6.83E-13  1.10E-14  1.56E-13  2.08E-13  2.29E-13
   8.53E-14  6.50E-13  6.11E-13  2.51E-13  1.01E-14  7.77E-14  1.78E-13  4.84E-13
   3.45E-13  9.38E-14  2.04E-13  2.66E-13  1.37E-14  3.09E-14  2.08E-14  1.82E-13
   1.94E-13  5.59E-13  7.11E-13  1.88E-13  5.18E-13  5.56E-15  6.12E-14  1.31E-13
-  2.63E-13  1.41E-13  3.98E-14  2.41E-13  2.32E-14  3.48E-13  9.34E-14  3.88E-13
+  2.63E-13  1.41E-13  3.98E-14  2.41E-13  2.32E-14  3.47E-13  9.35E-14  3.88E-13
   7.15E-14  1.29E-13  1.49E-13  6.77E-14  2.02E-13  1.74E-13  2.86E-13  7.53E-14
   7.07E-13  4.79E-13  2.95E-13  9.97E-14  8.79E-13  8.37E-14  1.73E-13  8.21E-13
   1.42E-13  9.70E-13  8.08E-13  4.16E-13  9.32E-13  3.89E-13  6.68E-13  5.57E-13
   1.85E-13  1.60E-13  1.63E-13  2.80E-13  1.66E-13  7.30E-13  7.92E-13  1.55E-13
-  9.91E-13  4.85E-13  9.04E-14  1.89E-13  6.27E-13  3.80E-13  7.39E-13  1.36E-13
+  9.91E-13  4.85E-13  9.04E-14  1.89E-13  6.28E-13  3.80E-13  7.39E-13  1.36E-13
   6.95E-13  5.36E-13  2.78E-13  1.61E-13  4.08E-13  4.30E-13  3.53E-13  3.24E-13
   2.61E-12  1.95E-12  8.60E-12  3.70E-11  5.49E-11  5.58E-09  1.42E-09  1.48E-08
   1.32E-08  8.91E-08  2.64E-07  1.46E-06  6.52E-07  5.84E-06  1.83E-06  1.84E-05
@@ -532,14 +532,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.6826E+00  3.6826E+00  3.7162E+00  3.7459E+00  3.7459E+00  3.7555E+00
   3.7749E+00  3.8617E+00  3.8624E+00  3.8624E+00  3.8629E+00  3.8996E+00
   3.9364E+00  3.9364E+00  3.9507E+00  3.9538E+00  3.9633E+00  3.9633E+00
-  prteigrs : nnsclo,ikpt=   10    1 max resid (incl. the buffer)=  1.83869E-05
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   10    2 max resid (incl. the buffer)=  9.47093E-04
-  prteigrs : nnsclo,ikpt=   10    3 max resid (incl. the buffer)=  4.16185E-04
-  prteigrs : nnsclo,ikpt=   10    4 max resid (incl. the buffer)=  2.45965E-06
-  prteigrs : nnsclo,ikpt=   10    5 max resid (incl. the buffer)=  1.53033E-05
-  prteigrs : nnsclo,ikpt=   10    6 max resid (incl. the buffer)=  3.31469E-05
 
 
 --- !ResultsGS
@@ -574,7 +568,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.686E-14; max=  99.989E-14
+ Mean square residual over all n,k,spin=   31.686E-14; max=  99.990E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -695,7 +689,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -18.743   0.000  -0.073   0.000  -0.073   0.000  -0.073  -0.000
        -0.000   0.000  -5.063  -0.000  -0.281  -0.000  -0.281   0.000  -0.281
@@ -718,10 +712,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.045   0.004  -0.004  -0.012   0.012   0.012  -0.012  -0.004   0.004
-     -0.000   0.004   0.004  -0.012  -0.012   0.012   0.012  -0.004  -0.004
+      0.000   0.004   0.004  -0.012  -0.012   0.012   0.012  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.045   0.004  -0.004  -0.012   0.012   0.012  -0.012  -0.004   0.004
-     -0.000  -0.004  -0.004   0.012   0.012  -0.012  -0.012   0.004   0.004
+      0.000  -0.004  -0.004   0.012   0.012  -0.012  -0.012   0.004   0.004
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -999,13 +993,13 @@ data: !SigmaeeData |
            etotal1    -8.4508907676E+00
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
-            fcart1    -1.3122052744E-29  1.3122052744E-29 -1.3122052744E-29
-                       1.3122052744E-29 -1.3122052744E-29  1.3122052744E-29
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         512
+-          fftalg         312
            getden1          0
            getden2         -1
            getden3          0
@@ -1271,10 +1265,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.2  wall=         13.2
+- Proc.   0 individual time (sec): cpu=         17.9  wall=         18.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.2  wall=         13.2
+.Delivered   1 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.9  wall=         18.0
