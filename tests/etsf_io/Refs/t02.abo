@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/etsf_io_t02/t02.in
-- output file    -> t02.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/etsf_io_t02/t02.abi
+- output file    -> t02.abo
 - root for input  files -> t02i
 - root for output files -> t02o
 
@@ -34,7 +34,7 @@
 -    mband =          10        mffmem =           1         mkmem =          10
        mpw =        1392          nfft =       32768          nkpt =          10
 ================================================================================
-P This job should need less than                      12.308 Mbytes of memory.
+P This job should need less than                      13.244 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.126 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      2.126 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          10
        mpw =        1392          nfft =       32768          nkpt =          10
 ================================================================================
-P This job should need less than                       8.308 Mbytes of memory.
+P This job should need less than                       9.244 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.126 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -184,8 +184,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.06340
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -199,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -375,18 +375,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.57E-11  2.24E-07
  -1.3575E+00 -6.4882E-01 -6.4652E-01 -6.4652E-01  2.3775E-01  7.0351E-01
   7.8434E-01  7.8434E-01  8.9888E-01  8.9888E-01
-  prteigrs : nnsclo,ikpt= 3000    1 max resid (incl. the buffer)=  2.24082E-07
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt= 3000    2 max resid (incl. the buffer)=  3.15974E-12
-  prteigrs : nnsclo,ikpt= 3000    3 max resid (incl. the buffer)=  2.60435E-09
-  prteigrs : nnsclo,ikpt= 3000    4 max resid (incl. the buffer)=  1.26489E-05
-  prteigrs : nnsclo,ikpt= 3000    5 max resid (incl. the buffer)=  5.16292E-08
-  prteigrs : nnsclo,ikpt= 3000    6 max resid (incl. the buffer)=  2.02162E-09
-  prteigrs : nnsclo,ikpt= 3000    7 max resid (incl. the buffer)=  9.71992E-12
-  prteigrs : nnsclo,ikpt= 3000    8 max resid (incl. the buffer)=  2.86599E-14
-  prteigrs : nnsclo,ikpt= 3000    9 max resid (incl. the buffer)=  4.62203E-10
-  prteigrs : nnsclo,ikpt= 3000   10 max resid (incl. the buffer)=  3.15951E-09
 
 
 --- !ResultsGS
@@ -662,10 +652,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.6
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.4  wall=          3.6
+.Delivered   3 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.8

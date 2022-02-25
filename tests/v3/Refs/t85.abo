@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t85/t85.in
-- output file    -> t85.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v3_t85/t85.abi
+- output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
 
@@ -34,19 +34,19 @@
 -    mband =          18        mffmem =           1         mkmem =           8
        mpw =          69          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       2.215 Mbytes of memory.
+P This job should need less than                       2.265 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           27 blocks of mpw  integer numbers, for      0.007 Mbytes.
-P          313 blocks of mpw  real(dp)  numbers, for      0.165 Mbytes.
+P          307 blocks of mpw  real(dp)  numbers, for      0.162 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           31 blocks of nfft real(dp)  numbers, for      0.409 Mbytes.
+P           35 blocks of nfft real(dp)  numbers, for      0.461 Mbytes.
 P              Additional     integer numbers, for      0.001 Mbytes.
 P              Additional     real(dp)  numbers, for      0.650 Mbytes.
 P              With residue estimated to be             0.970 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 2.211 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.215 Mbytes.
+P Main chain + fourwf.f                 2.260 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.265 Mbytes.
 P XC chain                              2.093 Mbytes.
 P mkrho chain                           2.120 Mbytes.
 P fourdp chain                          2.103 Mbytes.
@@ -68,19 +68,19 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          18        mffmem =           1         mkmem =           8
        mpw =          73          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       2.014 Mbytes of memory.
+P This job should need less than                       2.063 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           27 blocks of mpw  integer numbers, for      0.008 Mbytes.
-P          313 blocks of mpw  real(dp)  numbers, for      0.174 Mbytes.
+P          307 blocks of mpw  real(dp)  numbers, for      0.171 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           15 blocks of nfft real(dp)  numbers, for      0.198 Mbytes.
+P           19 blocks of nfft real(dp)  numbers, for      0.250 Mbytes.
 P              Additional     integer numbers, for      0.001 Mbytes.
 P              Additional     real(dp)  numbers, for      0.650 Mbytes.
 P              With residue estimated to be             0.970 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 2.010 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.014 Mbytes.
+P Main chain + fourwf.f                 2.059 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.063 Mbytes.
 P XC chain                              1.878 Mbytes.
 P mkrho chain                           1.918 Mbytes.
 P fourdp chain                          1.839 Mbytes.
@@ -305,8 +305,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -323,8 +323,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
 -  Troullier-Martins psp for element  Ni        Thu Oct 27 17:35:45 EDT 1994
 - 28.00000  10.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1601,37 +1601,37 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   46.354E-21; max=  17.017E-19
    0.2500  0.2500  0.2500    1  1.90856E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.48E-22  1.48E-22  4.66E-23  4.25E-23  9.18E-23  1.39E-22
-   1.66E-22  1.70E-22  1.51E-22  1.49E-22  7.64E-24  1.97E-22  4.54E-23  4.51E-23
-   1.47E-24  1.91E-19
+  5.56E-23 1.78E-22 1.48E-22 1.48E-22 4.66E-23 4.25E-23 9.18E-23 1.39E-22
+  1.66E-22 1.70E-22 1.51E-22 1.49E-22 7.64E-24 1.97E-22 4.54E-23 4.51E-23
+  1.47E-24 1.91E-19
   -0.2500  0.2500  0.2500    1  1.70174E-18 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.48E-22  1.48E-22  4.37E-23  4.48E-23  9.18E-23  1.39E-22
-   1.67E-22  1.66E-22  1.50E-22  1.50E-22  7.63E-24  1.97E-22  4.59E-23  4.59E-23
-   2.30E-25  1.70E-18
+  5.56E-23 1.78E-22 1.48E-22 1.48E-22 4.37E-23 4.48E-23 9.18E-23 1.39E-22
+  1.67E-22 1.66E-22 1.50E-22 1.50E-22 7.63E-24 1.97E-22 4.59E-23 4.59E-23
+  2.30E-25 1.70E-18
    0.2500 -0.2500  0.2500    1  7.38446E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.48E-22  1.48E-22  4.34E-23  4.53E-23  9.18E-23  1.39E-22
-   1.67E-22  1.66E-22  1.49E-22  1.51E-22  7.64E-24  1.97E-22  4.54E-23  4.56E-23
-   3.82E-25  7.38E-19
+  5.56E-23 1.78E-22 1.48E-22 1.48E-22 4.34E-23 4.53E-23 9.18E-23 1.39E-22
+  1.67E-22 1.66E-22 1.49E-22 1.51E-22 7.64E-24 1.97E-22 4.54E-23 4.56E-23
+  3.82E-25 7.38E-19
   -0.2500 -0.2500  0.2500    1  7.15437E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.48E-22  1.49E-22  4.56E-23  4.32E-23  9.18E-23  1.39E-22
-   1.66E-22  1.67E-22  1.51E-22  1.49E-22  7.63E-24  1.97E-22  4.55E-23  4.54E-23
-   2.08E-24  7.15E-19
+  5.56E-23 1.78E-22 1.48E-22 1.49E-22 4.56E-23 4.32E-23 9.18E-23 1.39E-22
+  1.66E-22 1.67E-22 1.51E-22 1.49E-22 7.63E-24 1.97E-22 4.55E-23 4.54E-23
+  2.08E-24 7.15E-19
    0.2500  0.2500 -0.2500    1  7.39737E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.47E-22  1.48E-22  4.52E-23  4.33E-23  9.18E-23  1.39E-22
-   1.66E-22  1.67E-22  1.51E-22  1.50E-22  7.64E-24  1.97E-22  4.53E-23  4.54E-23
-   2.84E-25  7.40E-19
+  5.56E-23 1.78E-22 1.47E-22 1.48E-22 4.52E-23 4.33E-23 9.18E-23 1.39E-22
+  1.66E-22 1.67E-22 1.51E-22 1.50E-22 7.64E-24 1.97E-22 4.53E-23 4.54E-23
+  2.84E-25 7.40E-19
   -0.2500  0.2500 -0.2500    1  9.06222E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.49E-22  1.48E-22  4.34E-23  4.54E-23  9.18E-23  1.39E-22
-   1.67E-22  1.66E-22  1.49E-22  1.51E-22  7.63E-24  1.97E-22  4.55E-23  4.52E-23
-   7.84E-25  9.06E-19
+  5.56E-23 1.78E-22 1.49E-22 1.48E-22 4.34E-23 4.54E-23 9.18E-23 1.39E-22
+  1.67E-22 1.66E-22 1.49E-22 1.51E-22 7.63E-24 1.97E-22 4.55E-23 4.52E-23
+  7.84E-25 9.06E-19
    0.2500 -0.2500 -0.2500    1  7.91847E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.47E-22  1.48E-22  4.25E-23  4.66E-23  9.18E-23  1.39E-22
-   1.70E-22  1.66E-22  1.49E-22  1.51E-22  7.63E-24  1.97E-22  4.51E-23  4.57E-23
-   7.83E-25  7.92E-19
+  5.56E-23 1.78E-22 1.47E-22 1.48E-22 4.25E-23 4.66E-23 9.18E-23 1.39E-22
+  1.70E-22 1.66E-22 1.49E-22 1.51E-22 7.63E-24 1.97E-22 4.51E-23 4.57E-23
+  7.83E-25 7.92E-19
   -0.2500 -0.2500 -0.2500    1  8.76486E-19 kpt; spin; max resid(k); each band:
-   5.56E-23  1.78E-22  1.48E-22  1.48E-22  4.25E-23  4.65E-23  9.18E-23  1.39E-22
-   1.70E-22  1.66E-22  1.49E-22  1.51E-22  7.64E-24  1.97E-22  4.52E-23  4.55E-23
-   2.66E-25  8.76E-19
+  5.56E-23 1.78E-22 1.48E-22 1.48E-22 4.25E-23 4.65E-23 9.18E-23 1.39E-22
+  1.70E-22 1.66E-22 1.49E-22 1.51E-22 7.64E-24 1.97E-22 4.52E-23 4.55E-23
+  2.66E-25 8.76E-19
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1832,7 +1832,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.7600E-01 -2.8591E-01 -2.3787E-01 -2.2270E-01  1.0428E-01  1.0996E-01
   1.4242E-01  2.4102E-01  3.0631E-01  3.4219E-01  5.7533E-01  5.9506E-01
   6.0754E-01  6.6893E-01  7.7103E-01  7.8023E-01  8.3866E-01  9.9864E-01
-  prteigrs : nnsclo,ikpt=   20    1 max resid (incl. the buffer)=  3.52894E-06
  Non-SCF case, kpt    2 ( -0.25000  0.25000  0.29167), residuals and eigenvalues=
   9.62E-19  2.76E-19  2.55E-19  2.20E-19  1.65E-19  1.26E-19  1.16E-19  1.29E-19
   3.97E-19  9.28E-19  5.82E-19  2.27E-19  5.75E-19  5.66E-19  3.55E-19  5.43E-19
@@ -1840,7 +1839,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.7600E-01 -2.8591E-01 -2.3787E-01 -2.2270E-01  1.0428E-01  1.0996E-01
   1.4242E-01  2.4102E-01  3.0631E-01  3.4219E-01  5.7533E-01  5.9506E-01
   6.0754E-01  6.6893E-01  7.7103E-01  7.8023E-01  8.3866E-01  9.9995E-01
-  prteigrs : nnsclo,ikpt=   20    2 max resid (incl. the buffer)=  3.23292E-05
  Non-SCF case, kpt    3 (  0.25000 -0.25000  0.29167), residuals and eigenvalues=
   2.19E-20  4.00E-20  6.58E-19  2.33E-19  1.23E-19  1.28E-19  1.72E-19  1.34E-19
   4.76E-19  3.29E-19  5.99E-19  3.40E-19  8.63E-19  5.73E-19  6.69E-19  4.15E-19
@@ -1848,7 +1846,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.7600E-01 -2.8591E-01 -2.3787E-01 -2.2270E-01  1.0428E-01  1.0996E-01
   1.4242E-01  2.4102E-01  3.0631E-01  3.4219E-01  5.7533E-01  5.9506E-01
   6.0754E-01  6.6893E-01  7.7103E-01  7.8023E-01  8.3866E-01  9.9954E-01
-  prteigrs : nnsclo,ikpt=   20    3 max resid (incl. the buffer)=  2.91402E-05
  Non-SCF case, kpt    4 ( -0.25000 -0.25000  0.29167), residuals and eigenvalues=
   2.43E-20  8.40E-19  1.03E-19  1.19E-19  2.33E-19  4.80E-20  5.69E-19  9.85E-19
   3.11E-19  5.28E-19  3.11E-19  5.28E-19  2.81E-19  6.12E-19  5.63E-19  7.22E-19
@@ -1856,7 +1853,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.7600E-01 -2.8591E-01 -2.3787E-01 -2.2270E-01  1.0428E-01  1.0996E-01
   1.4242E-01  2.4102E-01  3.0631E-01  3.4219E-01  5.7533E-01  5.9506E-01
   6.0754E-01  6.6893E-01  7.7103E-01  7.8023E-01  8.3866E-01  9.9863E-01
-  prteigrs : nnsclo,ikpt=   20    4 max resid (incl. the buffer)=  3.47972E-06
  Non-SCF case, kpt    5 (  0.25000  0.25000 -0.20833), residuals and eigenvalues=
   2.58E-19  2.37E-19  3.23E-19  3.60E-19  9.32E-20  8.58E-20  5.37E-19  1.91E-19
   1.41E-19  8.64E-20  1.90E-19  7.89E-19  9.36E-19  3.49E-19  2.82E-19  7.69E-19
@@ -1864,7 +1860,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.8147E-01 -2.8273E-01 -2.3286E-01 -2.0879E-01  1.2705E-01  1.5205E-01
   1.6794E-01  1.9412E-01  2.6758E-01  2.8507E-01  5.7615E-01  5.8036E-01
   6.2179E-01  6.5303E-01  7.5576E-01  7.6421E-01  8.1239E-01  9.8871E-01
-  prteigrs : nnsclo,ikpt=   20    5 max resid (incl. the buffer)=  4.03120E-05
  Non-SCF case, kpt    6 ( -0.25000  0.25000 -0.20833), residuals and eigenvalues=
   3.53E-19  6.43E-20  1.18E-20  1.47E-19  2.08E-19  6.89E-20  1.17E-19  4.05E-19
   2.10E-19  3.42E-19  2.05E-19  2.86E-19  2.23E-19  3.32E-19  7.10E-19  7.46E-19
@@ -1872,7 +1867,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.8147E-01 -2.8273E-01 -2.3286E-01 -2.0879E-01  1.2705E-01  1.5205E-01
   1.6794E-01  1.9412E-01  2.6758E-01  2.8507E-01  5.7615E-01  5.8036E-01
   6.2179E-01  6.5303E-01  7.5576E-01  7.6421E-01  8.1239E-01  9.8807E-01
-  prteigrs : nnsclo,ikpt=   20    6 max resid (incl. the buffer)=  5.23910E-06
  Non-SCF case, kpt    7 (  0.25000 -0.25000 -0.20833), residuals and eigenvalues=
   2.91E-19  1.36E-19  4.18E-19  1.49E-19  7.70E-20  9.87E-20  6.75E-20  4.45E-19
   9.27E-19  4.54E-19  2.99E-19  7.47E-19  2.91E-19  5.05E-19  9.05E-19  6.20E-19
@@ -1880,7 +1874,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.8147E-01 -2.8273E-01 -2.3286E-01 -2.0879E-01  1.2705E-01  1.5205E-01
   1.6794E-01  1.9412E-01  2.6758E-01  2.8507E-01  5.7615E-01  5.8036E-01
   6.2179E-01  6.5303E-01  7.5576E-01  7.6421E-01  8.1239E-01  9.8820E-01
-  prteigrs : nnsclo,ikpt=   20    7 max resid (incl. the buffer)=  1.35537E-05
  Non-SCF case, kpt    8 ( -0.25000 -0.25000 -0.20833), residuals and eigenvalues=
   3.53E-19  6.12E-20  3.85E-19  2.37E-19  5.93E-20  4.79E-20  1.24E-19  4.96E-19
   1.73E-19  1.88E-19  3.37E-19  6.46E-19  2.42E-19  4.08E-19  8.25E-19  4.63E-19
@@ -1888,7 +1881,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -8.8147E-01 -2.8273E-01 -2.3286E-01 -2.0879E-01  1.2705E-01  1.5205E-01
   1.6794E-01  1.9412E-01  2.6758E-01  2.8507E-01  5.7615E-01  5.8036E-01
   6.2179E-01  6.5303E-01  7.5576E-01  7.6421E-01  8.1239E-01  9.8806E-01
-  prteigrs : nnsclo,ikpt=   20    8 max resid (incl. the buffer)=  4.37681E-06
 
 
 --- !ResultsGS
@@ -1925,37 +1917,37 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   37.186E-20; max=  98.499E-20
    0.2500  0.2500  0.2917    1  3.52894E-06 kpt; spin; max resid(k); each band:
-   2.47E-20  8.05E-19  1.43E-19  7.98E-20  3.03E-19  4.52E-20  5.59E-19  4.10E-19
-   8.20E-19  4.70E-19  3.40E-19  1.72E-19  9.23E-19  5.88E-19  5.86E-19  8.24E-19
-   6.01E-19  3.53E-06
+  2.47E-20 8.05E-19 1.43E-19 7.98E-20 3.03E-19 4.52E-20 5.59E-19 4.10E-19
+  8.20E-19 4.70E-19 3.40E-19 1.72E-19 9.23E-19 5.88E-19 5.86E-19 8.24E-19
+  6.01E-19 3.53E-06
   -0.2500  0.2500  0.2917    1  3.23292E-05 kpt; spin; max resid(k); each band:
-   9.62E-19  2.76E-19  2.55E-19  2.20E-19  1.65E-19  1.26E-19  1.16E-19  1.29E-19
-   3.97E-19  9.28E-19  5.82E-19  2.27E-19  5.75E-19  5.66E-19  3.55E-19  5.43E-19
-   7.98E-19  3.23E-05
+  9.62E-19 2.76E-19 2.55E-19 2.20E-19 1.65E-19 1.26E-19 1.16E-19 1.29E-19
+  3.97E-19 9.28E-19 5.82E-19 2.27E-19 5.75E-19 5.66E-19 3.55E-19 5.43E-19
+  7.98E-19 3.23E-05
    0.2500 -0.2500  0.2917    1  2.91402E-05 kpt; spin; max resid(k); each band:
-   2.19E-20  4.00E-20  6.58E-19  2.33E-19  1.23E-19  1.28E-19  1.72E-19  1.34E-19
-   4.76E-19  3.29E-19  5.99E-19  3.40E-19  8.63E-19  5.73E-19  6.69E-19  4.15E-19
-   1.33E-18  2.91E-05
+  2.19E-20 4.00E-20 6.58E-19 2.33E-19 1.23E-19 1.28E-19 1.72E-19 1.34E-19
+  4.76E-19 3.29E-19 5.99E-19 3.40E-19 8.63E-19 5.73E-19 6.69E-19 4.15E-19
+  1.33E-18 2.91E-05
   -0.2500 -0.2500  0.2917    1  3.47972E-06 kpt; spin; max resid(k); each band:
-   2.43E-20  8.40E-19  1.03E-19  1.19E-19  2.33E-19  4.80E-20  5.69E-19  9.85E-19
-   3.11E-19  5.28E-19  3.11E-19  5.28E-19  2.81E-19  6.12E-19  5.63E-19  7.22E-19
-   3.75E-17  3.48E-06
+  2.43E-20 8.40E-19 1.03E-19 1.19E-19 2.33E-19 4.80E-20 5.69E-19 9.85E-19
+  3.11E-19 5.28E-19 3.11E-19 5.28E-19 2.81E-19 6.12E-19 5.63E-19 7.22E-19
+  3.75E-17 3.48E-06
    0.2500  0.2500 -0.2083    1  4.03120E-05 kpt; spin; max resid(k); each band:
-   2.58E-19  2.37E-19  3.23E-19  3.60E-19  9.32E-20  8.58E-20  5.37E-19  1.91E-19
-   1.41E-19  8.64E-20  1.90E-19  7.89E-19  9.36E-19  3.49E-19  2.82E-19  7.69E-19
-   4.83E-17  4.03E-05
+  2.58E-19 2.37E-19 3.23E-19 3.60E-19 9.32E-20 8.58E-20 5.37E-19 1.91E-19
+  1.41E-19 8.64E-20 1.90E-19 7.89E-19 9.36E-19 3.49E-19 2.82E-19 7.69E-19
+  4.83E-17 4.03E-05
   -0.2500  0.2500 -0.2083    1  5.23910E-06 kpt; spin; max resid(k); each band:
-   3.53E-19  6.43E-20  1.18E-20  1.47E-19  2.08E-19  6.89E-20  1.17E-19  4.05E-19
-   2.10E-19  3.42E-19  2.05E-19  2.86E-19  2.23E-19  3.32E-19  7.10E-19  7.46E-19
-   1.01E-17  5.24E-06
+  3.53E-19 6.43E-20 1.18E-20 1.47E-19 2.08E-19 6.89E-20 1.17E-19 4.05E-19
+  2.10E-19 3.42E-19 2.05E-19 2.86E-19 2.23E-19 3.32E-19 7.10E-19 7.46E-19
+  1.01E-17 5.24E-06
    0.2500 -0.2500 -0.2083    1  1.35537E-05 kpt; spin; max resid(k); each band:
-   2.91E-19  1.36E-19  4.18E-19  1.49E-19  7.70E-20  9.87E-20  6.75E-20  4.45E-19
-   9.27E-19  4.54E-19  2.99E-19  7.47E-19  2.91E-19  5.05E-19  9.05E-19  6.20E-19
-   4.07E-17  1.36E-05
+  2.91E-19 1.36E-19 4.18E-19 1.49E-19 7.70E-20 9.87E-20 6.75E-20 4.45E-19
+  9.27E-19 4.54E-19 2.99E-19 7.47E-19 2.91E-19 5.05E-19 9.05E-19 6.20E-19
+  4.07E-17 1.36E-05
   -0.2500 -0.2500 -0.2083    1  4.37681E-06 kpt; spin; max resid(k); each band:
-   3.53E-19  6.12E-20  3.85E-19  2.37E-19  5.93E-20  4.79E-20  1.24E-19  4.96E-19
-   1.73E-19  1.88E-19  3.37E-19  6.46E-19  2.42E-19  4.08E-19  8.25E-19  4.63E-19
-   1.85E-17  4.38E-06
+  3.53E-19 6.12E-20 3.85E-19 2.37E-19 5.93E-20 4.79E-20 1.24E-19 4.96E-19
+  1.73E-19 1.88E-19 3.37E-19 6.46E-19 2.42E-19 4.08E-19 8.25E-19 4.63E-19
+  1.85E-17 4.38E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -2047,15 +2039,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
-P newkpt: treating     18 bands with npw=      69 for ikpt=   1 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   2 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   3 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   4 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   5 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   6 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   7 by node    0
-P newkpt: treating     18 bands with npw=      69 for ikpt=   8 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -2086,26 +2069,12 @@ P newkpt: treating     18 bands with npw=      69 for ikpt=   8 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1      69, make ikpt,npw=   1      69
-- newkpt: read input wf with ikpt,npw=   2      69, make ikpt,npw=   2      69
-- newkpt: read input wf with ikpt,npw=   5      69, make ikpt,npw=   3      69
-- newkpt: read input wf with ikpt,npw=   6      69, make ikpt,npw=   4      69
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFQ
-- newkpt: read input wf with ikpt,npw=   1      71, make ikpt,npw=   1      71
-- newkpt: read input wf with ikpt,npw=   2      71, make ikpt,npw=   2      71
-- newkpt: read input wf with ikpt,npw=   5      73, make ikpt,npw=   3      73
-- newkpt: read input wf with ikpt,npw=   6      73, make ikpt,npw=   4      73
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.400000E+01 and    1.358770E+01.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     18 bands with npw=      71 for ikpt=   1 by node    0
-P newkpt: treating     18 bands with npw=      71 for ikpt=   2 by node    0
-P newkpt: treating     18 bands with npw=      73 for ikpt=   3 by node    0
-P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -2131,11 +2100,11 @@ tolerances: {tolvrs: 1.00E-08, }
 
  ETOT  8   11.350264044325     -1.812E-06 9.892E-10 1.832E-05
 
- ETOT  9   11.350264043668     -6.562E-10 3.197E-12 4.198E-05
+ ETOT  9   11.350264043668     -6.563E-10 3.197E-12 4.198E-05
 
  ETOT 10   11.350264042230     -1.438E-09 2.553E-13 6.121E-07
 
- ETOT 11   11.350264042241      1.064E-11 2.164E-15 1.245E-06
+ ETOT 11   11.350264042241      1.065E-11 2.164E-15 1.245E-06
 
  ETOT 12   11.350264042231     -9.841E-12 4.031E-17 7.041E-07
 
@@ -2148,21 +2117,21 @@ tolerances: {tolvrs: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   95.064E-19; max=  43.441E-18
    0.2500  0.2500  0.2500    1  3.08001E-17 kpt; spin; max resid(k); each band:
-   6.31E-18  7.21E-18  4.46E-18  5.32E-18  5.77E-18  9.87E-18  9.03E-18  4.64E-18
-   9.66E-18  2.49E-18  2.83E-18  6.39E-18  5.48E-18  6.49E-18  3.08E-17  2.80E-17
-  -1.00E-01 -1.00E-01
+  6.31E-18 7.21E-18 4.46E-18 5.32E-18 5.77E-18 9.87E-18 9.03E-18 4.64E-18
+  9.66E-18 2.49E-18 2.83E-18 6.39E-18 5.48E-18 6.49E-18 3.08E-17 2.80E-17
+ -1.00E-01-1.00E-01
   -0.2500  0.2500  0.2500    1  3.73089E-17 kpt; spin; max resid(k); each band:
-   3.88E-18  3.05E-18  4.60E-18  5.75E-18  7.23E-18  1.06E-17  1.14E-17  5.34E-18
-   8.98E-18  3.52E-18  4.80E-18  5.51E-18  4.82E-18  8.54E-18  3.73E-17  2.17E-17
-  -1.00E-01 -1.00E-01
+  3.88E-18 3.05E-18 4.60E-18 5.75E-18 7.23E-18 1.06E-17 1.14E-17 5.34E-18
+  8.98E-18 3.52E-18 4.80E-18 5.51E-18 4.82E-18 8.54E-18 3.73E-17 2.17E-17
+ -1.00E-01-1.00E-01
    0.2500  0.2500 -0.2500    1  4.34412E-17 kpt; spin; max resid(k); each band:
-   1.92E-17  2.33E-18  2.84E-18  5.23E-18  6.51E-18  1.46E-17  4.43E-18  1.24E-17
-   7.35E-18  4.99E-18  3.99E-18  4.88E-18  1.47E-17  1.17E-17  4.34E-17  6.48E-18
-  -1.00E-01 -1.00E-01
+  1.92E-17 2.33E-18 2.84E-18 5.23E-18 6.51E-18 1.46E-17 4.43E-18 1.24E-17
+  7.35E-18 4.99E-18 3.99E-18 4.88E-18 1.47E-17 1.17E-17 4.34E-17 6.48E-18
+ -1.00E-01-1.00E-01
   -0.2500  0.2500 -0.2500    1  3.69693E-17 kpt; spin; max resid(k); each band:
-   1.44E-17  3.48E-18  2.14E-18  6.05E-18  7.94E-18  1.17E-17  5.57E-18  9.27E-18
-   4.82E-18  5.53E-19  3.73E-18  3.40E-18  1.67E-17  9.80E-18  3.70E-17  1.49E-17
-  -1.00E-01 -1.00E-01
+  1.44E-17 3.48E-18 2.14E-18 6.05E-18 7.94E-18 1.17E-17 5.57E-18 9.27E-18
+  4.82E-18 5.53E-19 3.73E-18 3.40E-18 1.67E-17 9.80E-18 3.70E-17 1.49E-17
+ -1.00E-01-1.00E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2193,20 +2162,12 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1      69, make ikpt,npw=   1      69
-- newkpt: read input wf with ikpt,npw=   5      69, make ikpt,npw=   2      69
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFQ
-- newkpt: read input wf with ikpt,npw=   1      71, make ikpt,npw=   1      71
-- newkpt: read input wf with ikpt,npw=   5      73, make ikpt,npw=   2      73
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.400000E+01 and    1.358770E+01.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     18 bands with npw=      71 for ikpt=   1 by node    0
-P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -2220,23 +2181,23 @@ tolerances: {tolvrs: 1.00E-08, }
 
  ETOT  2   29749926.024723     -9.620E+07 1.042E+00 1.648E+12
 
- ETOT  3   40305.983449315     -2.971E+07 1.849E-01 2.223E+09
+ ETOT  3   40305.983449314     -2.971E+07 1.849E-01 2.223E+09
 
- ETOT  4   388.66848939840     -3.992E+04 6.697E-02 2.060E+07
+ ETOT  4   388.66848939398     -3.992E+04 6.697E-02 2.060E+07
 
- ETOT  5   11.224398873951     -3.774E+02 3.959E-03 5.446E+03
+ ETOT  5   11.224398875542     -3.774E+02 3.959E-03 5.446E+03
 
- ETOT  6   11.108461688745     -1.159E-01 1.176E-05 1.617E+03
+ ETOT  6   11.108461689243     -1.159E-01 1.176E-05 1.617E+03
 
- ETOT  7   11.052572049042     -5.589E-02 1.813E-05 2.020E+02
+ ETOT  7   11.052572049190     -5.589E-02 1.813E-05 2.020E+02
 
- ETOT  8   11.048249295544     -4.323E-03 2.427E-07 3.042E+01
+ ETOT  8   11.048249295557     -4.323E-03 2.427E-07 3.042E+01
 
- ETOT  9   11.047972758533     -2.765E-04 1.292E-08 1.829E+01
+ ETOT  9   11.047972758520     -2.765E-04 1.292E-08 1.829E+01
 
- ETOT 10   11.047637036843     -3.357E-04 4.833E-09 8.520E-01
+ ETOT 10   11.047637036844     -3.357E-04 4.833E-09 8.520E-01
 
- ETOT 11   11.047617647884     -1.939E-05 4.418E-09 7.898E-04
+ ETOT 11   11.047617647885     -1.939E-05 4.418E-09 7.898E-04
 
  ETOT 12   11.047618285307      6.374E-07 1.170E-11 3.690E-02
 
@@ -2246,13 +2207,13 @@ tolerances: {tolvrs: 1.00E-08, }
 
  ETOT 15   11.047617614630     -2.408E-10 6.832E-15 2.971E-05
 
- ETOT 16   11.047617614173     -4.571E-10 7.525E-16 4.458E-06
+ ETOT 16   11.047617614173     -4.568E-10 7.525E-16 4.458E-06
 
- ETOT 17   11.047617614093     -8.044E-11 8.034E-17 5.403E-08
+ ETOT 17   11.047617614093     -7.997E-11 8.034E-17 5.403E-08
 
- ETOT 18   11.047617614093     -1.279E-13 5.781E-18 3.795E-08
+ ETOT 18   11.047617614093     -4.547E-13 5.781E-18 3.795E-08
 
- ETOT 19   11.047617614092     -6.324E-13 1.197E-18 3.205E-09
+ ETOT 19   11.047617614092     -9.237E-13 1.197E-18 3.205E-09
 
  At SCF step   19       vres2   =  3.20E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2261,13 +2222,13 @@ tolerances: {tolvrs: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   30.782E-20; max=  11.966E-19
    0.2500  0.2500  0.2500    1  1.19656E-18 kpt; spin; max resid(k); each band:
-   2.14E-19  4.33E-19  3.21E-19  1.06E-19  2.11E-19  2.52E-19  3.94E-19  6.86E-20
-   3.81E-19  1.42E-19  4.73E-20  4.81E-20  6.34E-19  4.17E-19  1.20E-18  3.98E-19
-  -1.00E-01 -1.00E-01
-   0.2500  0.2500 -0.2500    1  6.27378E-19 kpt; spin; max resid(k); each band:
-   1.41E-19  1.96E-20  3.59E-19  9.28E-20  1.85E-19  1.63E-19  2.86E-19  4.05E-19
-   5.34E-19  2.62E-19  1.32E-19  5.97E-20  5.08E-19  2.54E-19  6.27E-19  5.57E-19
-  -1.00E-01 -1.00E-01
+  2.14E-19 4.33E-19 3.21E-19 1.06E-19 2.11E-19 2.52E-19 3.94E-19 6.86E-20
+  3.81E-19 1.42E-19 4.73E-20 4.81E-20 6.34E-19 4.17E-19 1.20E-18 3.98E-19
+ -1.00E-01-1.00E-01
+   0.2500  0.2500 -0.2500    1  6.27379E-19 kpt; spin; max resid(k); each band:
+  1.41E-19 1.96E-20 3.59E-19 9.28E-20 1.85E-19 1.63E-19 2.86E-19 4.05E-19
+  5.34E-19 2.62E-19 1.32E-19 5.97E-20 5.08E-19 2.54E-19 6.27E-19 5.57E-19
+ -1.00E-01-1.00E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2298,26 +2259,12 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1      69, make ikpt,npw=   1      69
-- newkpt: read input wf with ikpt,npw=   2      69, make ikpt,npw=   2      69
-- newkpt: read input wf with ikpt,npw=   5      69, make ikpt,npw=   3      69
-- newkpt: read input wf with ikpt,npw=   6      69, make ikpt,npw=   4      69
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFQ
-- newkpt: read input wf with ikpt,npw=   1      71, make ikpt,npw=   1      71
-- newkpt: read input wf with ikpt,npw=   2      71, make ikpt,npw=   2      71
-- newkpt: read input wf with ikpt,npw=   5      73, make ikpt,npw=   3      73
-- newkpt: read input wf with ikpt,npw=   6      73, make ikpt,npw=   4      73
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.400000E+01 and    1.358770E+01.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     18 bands with npw=      71 for ikpt=   1 by node    0
-P newkpt: treating     18 bands with npw=      71 for ikpt=   2 by node    0
-P newkpt: treating     18 bands with npw=      73 for ikpt=   3 by node    0
-P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -2331,29 +2278,29 @@ tolerances: {tolvrs: 1.00E-08, }
 
  ETOT  2   65.394159836392     -1.062E+02 5.168E-03 7.935E+03
 
- ETOT  3   7.7341842795847     -5.766E+01 1.198E-02 5.348E+01
+ ETOT  3   7.7341842795846     -5.766E+01 1.198E-02 5.348E+01
 
- ETOT  4   7.3067315975215     -4.275E-01 3.535E-04 1.014E+01
+ ETOT  4   7.3067315975209     -4.275E-01 3.535E-04 1.014E+01
 
- ETOT  5   7.2938568060009     -1.287E-02 7.487E-06 5.599E+01
+ ETOT  5   7.2938568060003     -1.287E-02 7.487E-06 5.599E+01
 
- ETOT  6   7.2935383400013     -3.185E-04 2.533E-07 6.583E+01
+ ETOT  6   7.2935383399974     -3.185E-04 2.533E-07 6.583E+01
 
- ETOT  7   7.2923890743327     -1.149E-03 6.341E-09 1.505E+00
+ ETOT  7   7.2923890743335     -1.149E-03 6.341E-09 1.505E+00
 
- ETOT  8   7.2922958695830     -9.320E-05 1.347E-08 4.579E-04
+ ETOT  8   7.2922958695833     -9.320E-05 1.347E-08 4.579E-04
 
- ETOT  9   7.2922956880581     -1.815E-07 8.322E-11 9.564E-05
+ ETOT  9   7.2922956880582     -1.815E-07 8.322E-11 9.564E-05
 
- ETOT 10   7.2922956844390     -3.619E-09 2.026E-12 2.214E-06
+ ETOT 10   7.2922956844386     -3.620E-09 2.026E-12 2.214E-06
 
- ETOT 11   7.2922956847761      3.372E-10 2.458E-14 2.375E-05
+ ETOT 11   7.2922956847756      3.370E-10 2.458E-14 2.375E-05
 
- ETOT 12   7.2922956844693     -3.068E-10 7.740E-16 6.805E-06
+ ETOT 12   7.2922956844694     -3.062E-10 7.740E-16 6.805E-06
 
- ETOT 13   7.2922956843493     -1.200E-10 3.859E-17 3.343E-08
+ ETOT 13   7.2922956843494     -1.201E-10 3.859E-17 3.343E-08
 
- ETOT 14   7.2922956843468     -2.444E-12 4.301E-17 2.724E-09
+ ETOT 14   7.2922956843465     -2.842E-12 4.301E-17 2.724E-09
 
  At SCF step   14       vres2   =  2.72E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2362,21 +2309,21 @@ tolerances: {tolvrs: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   10.999E-18; max=  43.013E-18
    0.2500  0.2500  0.2500    1  1.93171E-17 kpt; spin; max resid(k); each band:
-   4.68E-18  1.73E-17  9.33E-18  6.18E-18  7.85E-18  1.23E-17  1.75E-17  1.07E-17
-   6.26E-18  5.29E-18  2.49E-18  5.96E-18  3.16E-18  3.97E-18  1.93E-17  1.36E-17
-  -1.00E-01 -1.00E-01
+  4.68E-18 1.73E-17 9.33E-18 6.18E-18 7.85E-18 1.23E-17 1.75E-17 1.07E-17
+  6.26E-18 5.29E-18 2.49E-18 5.96E-18 3.16E-18 3.97E-18 1.93E-17 1.36E-17
+ -1.00E-01-1.00E-01
   -0.2500  0.2500  0.2500    1  3.57375E-17 kpt; spin; max resid(k); each band:
-   7.53E-18  6.77E-18  6.82E-18  5.57E-18  1.33E-17  1.40E-17  1.37E-17  1.21E-17
-   4.55E-18  2.16E-18  2.79E-18  3.52E-18  2.80E-18  1.09E-17  3.57E-17  2.14E-17
-  -1.00E-01 -1.00E-01
+  7.53E-18 6.77E-18 6.82E-18 5.57E-18 1.33E-17 1.40E-17 1.37E-17 1.21E-17
+  4.55E-18 2.16E-18 2.79E-18 3.52E-18 2.80E-18 1.09E-17 3.57E-17 2.14E-17
+ -1.00E-01-1.00E-01
    0.2500  0.2500 -0.2500    1  4.30134E-17 kpt; spin; max resid(k); each band:
-   6.78E-18  6.90E-18  3.75E-18  8.21E-18  1.41E-17  7.15E-18  9.55E-18  2.91E-17
-   8.73E-18  2.48E-17  5.94E-18  6.46E-18  6.23E-18  1.07E-17  4.30E-17  2.57E-17
-  -1.00E-01 -1.00E-01
+  6.78E-18 6.90E-18 3.75E-18 8.21E-18 1.41E-17 7.15E-18 9.55E-18 2.91E-17
+  8.73E-18 2.48E-17 5.94E-18 6.46E-18 6.23E-18 1.07E-17 4.30E-17 2.57E-17
+ -1.00E-01-1.00E-01
   -0.2500  0.2500 -0.2500    1  3.15719E-17 kpt; spin; max resid(k); each band:
-   3.38E-18  4.26E-18  3.99E-18  5.82E-18  7.98E-18  7.98E-18  6.01E-18  2.40E-17
-   1.80E-17  1.78E-18  1.04E-17  2.38E-17  3.69E-18  4.53E-18  2.01E-17  3.16E-17
-  -1.00E-01 -1.00E-01
+  3.38E-18 4.26E-18 3.99E-18 5.82E-18 7.98E-18 7.98E-18 6.01E-18 2.40E-17
+  1.80E-17 1.78E-18 1.04E-17 2.38E-17 3.69E-18 4.53E-18 2.01E-17 3.16E-17
+ -1.00E-01-1.00E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2407,20 +2354,12 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1      69, make ikpt,npw=   1      69
-- newkpt: read input wf with ikpt,npw=   5      69, make ikpt,npw=   2      69
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFQ
-- newkpt: read input wf with ikpt,npw=   1      71, make ikpt,npw=   1      71
-- newkpt: read input wf with ikpt,npw=   5      73, make ikpt,npw=   2      73
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.400000E+01 and    1.358770E+01.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     18 bands with npw=      71 for ikpt=   1 by node    0
-P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -2434,41 +2373,41 @@ tolerances: {tolvrs: 1.00E-08, }
 
  ETOT  2   187760237.60460     -6.062E+08 6.594E+00 1.040E+13
 
- ETOT  3   247845.69229843     -1.875E+08 1.198E+00 1.367E+10
+ ETOT  3   247845.69229839     -1.875E+08 1.198E+00 1.367E+10
 
- ETOT  4   3185.0907434722     -2.447E+05 3.984E-01 1.740E+08
+ ETOT  4   3185.0907434585     -2.447E+05 3.984E-01 1.740E+08
 
- ETOT  5   5.3390234179700     -3.180E+03 2.107E-02 1.251E+03
+ ETOT  5   5.3390234170137     -3.180E+03 2.107E-02 1.251E+03
 
- ETOT  6   4.4365936739480     -9.024E-01 2.570E-04 1.676E+02
+ ETOT  6   4.4365936727065     -9.024E-01 2.570E-04 1.676E+02
 
- ETOT  7   4.3005732676195     -1.360E-01 8.132E-05 2.925E+03
+ ETOT  7   4.3005732686955     -1.360E-01 8.132E-05 2.925E+03
 
- ETOT  8   4.2284412324676     -7.213E-02 5.877E-06 3.685E+01
+ ETOT  8   4.2284412326425     -7.213E-02 5.877E-06 3.685E+01
 
- ETOT  9   4.2293288346896      8.876E-04 6.598E-08 1.038E+02
+ ETOT  9   4.2293288347817      8.876E-04 6.598E-08 1.038E+02
 
- ETOT 10   4.2274268971564     -1.902E-03 4.298E-08 3.931E+00
+ ETOT 10   4.2274268971524     -1.902E-03 4.298E-08 3.931E+00
 
- ETOT 11   4.2273425376522     -8.436E-05 1.248E-08 5.384E-03
+ ETOT 11   4.2273425376524     -8.436E-05 1.248E-08 5.384E-03
 
- ETOT 12   4.2273429160114      3.784E-07 5.987E-11 3.262E-02
+ ETOT 12   4.2273429160078      3.784E-07 5.987E-11 3.262E-02
 
- ETOT 13   4.2273424445156     -4.715E-07 1.010E-12 6.659E-03
+ ETOT 13   4.2273424445144     -4.715E-07 1.010E-12 6.659E-03
 
- ETOT 14   4.2273423268716     -1.176E-07 4.358E-14 1.447E-04
+ ETOT 14   4.2273423268718     -1.176E-07 4.358E-14 1.447E-04
 
- ETOT 15   4.2273423271773      3.058E-10 1.923E-14 1.649E-04
+ ETOT 15   4.2273423271819      3.101E-10 1.923E-14 1.649E-04
 
- ETOT 16   4.2273423243229     -2.854E-09 4.600E-15 7.398E-06
+ ETOT 16   4.2273423243279     -2.854E-09 4.600E-15 7.398E-06
 
- ETOT 17   4.2273423242245     -9.840E-11 6.142E-16 1.948E-06
+ ETOT 17   4.2273423242208     -1.071E-10 6.142E-16 1.948E-06
 
- ETOT 18   4.2273423242285      4.036E-12 9.200E-16 2.370E-06
+ ETOT 18   4.2273423242340      1.319E-11 9.200E-16 2.370E-06
 
- ETOT 19   4.2273423241887     -3.985E-11 4.636E-17 1.709E-07
+ ETOT 19   4.2273423241902     -4.377E-11 4.636E-17 1.709E-07
 
- ETOT 20   4.2273423241794     -9.265E-12 1.878E-17 1.085E-10
+ ETOT 20   4.2273423241793     -1.091E-11 1.878E-17 1.085E-10
 
  At SCF step   20       vres2   =  1.09E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2477,13 +2416,13 @@ tolerances: {tolvrs: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   48.832E-19; max=  18.776E-18
    0.2500  0.2500  0.2500    1  1.87761E-17 kpt; spin; max resid(k); each band:
-   1.53E-18  4.65E-19  3.40E-18  6.68E-19  3.12E-18  8.05E-18  1.78E-18  2.45E-18
-   1.81E-18  4.97E-19  1.01E-18  5.95E-18  1.56E-17  1.88E-17  4.77E-18  4.61E-18
-  -1.00E-01 -1.00E-01
+  1.53E-18 4.65E-19 3.40E-18 6.68E-19 3.12E-18 8.05E-18 1.78E-18 2.45E-18
+  1.81E-18 4.97E-19 1.01E-18 5.95E-18 1.56E-17 1.88E-17 4.77E-18 4.61E-18
+ -1.00E-01-1.00E-01
    0.2500  0.2500 -0.2500    1  1.70321E-17 kpt; spin; max resid(k); each band:
-   1.29E-18  7.81E-18  1.25E-18  9.69E-19  6.83E-18  4.78E-18  1.70E-17  3.93E-18
-   4.95E-18  4.67E-18  6.58E-18  4.39E-18  3.72E-18  3.99E-18  6.37E-18  3.24E-18
-  -1.00E-01 -1.00E-01
+  1.29E-18 7.81E-18 1.25E-18 9.69E-19 6.83E-18 4.78E-18 1.70E-17 3.93E-18
+  4.95E-18 4.67E-18 6.58E-18 4.39E-18 3.72E-18 3.99E-18 6.37E-18 3.24E-18
+ -1.00E-01-1.00E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2752,10 +2691,10 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000000        -0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
   
@@ -2773,10 +2712,10 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000000         0.0000000000
+   2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0000000000         0.0000000000
-   2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000        -0.0000000000
+   2    2   3    1         0.0000000000         0.0000000000
+   2    2   1    2        -0.0000000000        -0.0000000000
    2    2   2    2         0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
   
@@ -3166,10 +3105,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.9
+- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  28 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          4.9
+.Delivered  23 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.9  wall=          5.1
