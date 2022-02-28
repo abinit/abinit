@@ -1126,7 +1126,7 @@ lattice_vectors:
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
-convergence: {deltae: -1.437E+02, res2:  5.056E-19, residm:  1.630E-15, diffor:  0.000E+00, }
+convergence: {deltae: -1.437E+02, res2:  5.056E-19, residm:  1.630E-15, diffor: null, }
 etotal    :  -1.43715660E+02
 entropy   :   0.00000000E+00
 fermie    :   4.40910389E-01
