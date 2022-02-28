@@ -9684,6 +9684,26 @@ variables [[optdriver]] and [[nbandkss]].
 ),
 
 Variable(
+    abivarname="lambsig",
+    varset="paw",
+    vartype="real",
+    topics=['MagField_expert'],
+    dimensions=['[[ntypat]]'],
+    defaultval=MultipleValue(number=None, value=0),
+    mnemonics="LAMB shielding SIGma",
+    text=r"""
+Chemical shielding at each nucleus due to the core electrons. This quantity is
+input as an array of values, one for each type, see [[ntypat]]. In calculations
+where the orbital magnetic moment is requested in the presence of a nuclear magnetic
+dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
+will be included. Because the PAW input files do not include the core orbitals,
+the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]], 
+and input it here. 
+""",
+),
+
+
+Variable(
     abivarname="ldaminushalf",
     varset="paw",
     vartype="integer",
@@ -16463,7 +16483,17 @@ Variable(
     requires="[[usepaw]] == 1 and [[prtefg]]>=3",
     added_in_version="before_v9",
     text=r"""
-  * Array of point charges, in atomic units, of the nuclei. In the normal computation of electric field gradients (see [[prtefg]]) the ionic contribution is calculated from the core charges of the atomic sites. Thus for example in a PAW data set for oxygen where the core is $1s^{2}$, the core charge is +6 (total nuclear charge minus core electron charge). In point charge models, which are much less accurate than PAW calculations, all atomic sites are treated as ions with charges determined by their valence states. In such a case oxygen almost always would have a point charge of -2. The present variable taken together with [[prtefg]] performs a full PAW computation of the electric field gradient and also a simple point charge computation. The user inputs whatever point charges he/she wishes for each atom type.
+  Array of point charges, in atomic units, of the nuclei. In the normal
+  computation of electric field gradients (see [[prtefg]]) the ionic
+  contribution is calculated from the core charges of the atomic sites. Thus
+  for example in a PAW data set for oxygen where the core is $1s^{2}$, the core
+  charge is +6 (total nuclear charge minus core electron charge). In point
+  charge models, which are much less accurate than PAW calculations, all atomic
+  sites are treated as ions with charges determined by their valence states. In
+  such a case oxygen almost always would have a point charge of -2. The present
+  variable taken together with [[prtefg]] performs a full PAW computation of
+  the electric field gradient and also a simple point charge computation. The
+  user inputs whatever point charges he/she wishes for each atom type.  
 """,
 ),
 
