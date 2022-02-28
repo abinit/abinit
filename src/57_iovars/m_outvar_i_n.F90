@@ -671,6 +671,14 @@ subroutine outvar_i_n (dtsets,iout,&
 !### 03. Print all the input variables (L)
 !##
 
+!lambsig
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%lambsig(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'lambsig','DPR',0)
+
 !lexexch
  narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
