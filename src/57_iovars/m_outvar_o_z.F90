@@ -651,6 +651,7 @@ contains
  intarr(1,:)=dtsets(:)%prt1dm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1dm','INT',0)
 
+ !ptcharge
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
      dprarr(ii,idtset) = dtsets(idtset)%ptcharge(ii)
