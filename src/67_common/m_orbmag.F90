@@ -910,7 +910,7 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,iatom,ilmn,il,iln,im,itypat,jlmn,jl,jln,jm,klmn,kln,mesh_size,nn
+  integer :: adir,iat,iatom,ilmn,il,im,inn,itypat,jlmn,jl,jm,jn,klmn,kln,mesh_size,nn
   real(dp) :: intg
   complex(dpc) :: cpb,cpk,cterm,orbl_me
 
@@ -930,11 +930,11 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
         do jlmn=1,pawtab(itypat)%lmn_size
           jl=pawtab(itypat)%indlmn(1,jlmn)
           jm=pawtab(itypat)%indlmn(2,jlmn)
-          jln=pawtab(itypat)%indlmn(5,jlmn)
+          jn=pawtab(itypat)%indlmn(3,jlmn)
           do ilmn=1,pawtab(itypat)%lmn_size
             il=pawtab(itypat)%indlmn(1,ilmn)
+            if ( il /= jl ) cycle
             im=pawtab(itypat)%indlmn(2,ilmn)
-            iln=pawtab(itypat)%indlmn(5,ilmn)
             klmn=MATPACK(jlmn,ilmn)
             kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
             ! compute <L_dir>
@@ -943,7 +943,6 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
               ff(1:mesh_size) = pawtab(itypat)%phiphj(1:mesh_size,kln)-pawtab(itypat)%tphitphj(1:mesh_size,kln)
               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
               call simp_gen(intg,ff,pawrad(itypat))
-              write(std_out,'(a,2es16.8)')'JWZ debug lij sij ',intg,pawtab(itypat)%sij(klmn)
               cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
               cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
               cterm = half*conjg(cpb)*orbl_me*intg*cpk

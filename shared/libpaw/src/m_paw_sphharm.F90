@@ -761,6 +761,9 @@ subroutine ys(l2,m2,l1,m1,ys_val)
 
 ! *********************************************************************
 
+! See Blanco et al., J. Mol Struct. 419, 19-27 (1997) Eq. 19
+! <Y_l2,m2|S_l1,m1> is given by C^l_{m1,m2} where
+! l1 == l2 and |m1| == |m2|, 0 otherwise
 
  ys_val = czero
 
@@ -782,21 +785,6 @@ subroutine ys(l2,m2,l1,m1,ys_val)
  else
    ys_val=czero
  end if
-
- 
- !pm1=(-one)**m1
- !am1=abs(m1)
- !pam1=(-one)**am1
-
- !if (m1 > 0) then
- !  if (m2 ==  m1) ys_val=pm1*sqrthalf
- !  if (m2 == -m1) ys_val=sqrthalf
- !else if (m1 == 0) then
- !  if (m2 == m1) ys_val = cone
- !else
- !  if (m2 ==  am1) ys_val=-j_dpc*pm1*sqrthalf
- !  if (m2 == -am1) ys_val = j_dpc*pm1*sqrthalf*pam1
- !end if
 
 end subroutine ys
 !!***
@@ -844,9 +832,13 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
  if ( lp /= ll ) return
 
  jpme=czero; jmme=czero; jme=czero
- if (mp==mm+1) jpme=-cone*sqrt(half*((ll*(ll+1))-mm*(mm+1)))
- if (mp==mm-1) jmme= cone*sqrt(half*((ll*(ll+1))-mm*(mm-1)))
- if (mp==mm) jme=cone*mm
+ if (mp==mm) then 
+   jme=cone*mm
+ else if (mp==mm+1) then
+   jpme=-cone*sqrt(half*((ll*(ll+1))-mm*(mm+1)))
+ else if (mp==mm-1) then
+   jmme= cone*sqrt(half*((ll*(ll+1))-mm*(mm-1)))
+ end if
 
  select case (idir)
    case (1) ! Lx
