@@ -320,8 +320,10 @@ module m_xgTransposer
     logical :: periodic(2), selectDim(2), reorder
     integer :: ierr
 
-    sizeGrid(1) = ncpuRows
-    sizeGrid(2) = ncpuCols
+    sizeGrid(1) = ncpuCols
+    sizeGrid(2) = ncpuRows
+    !sizeGrid(1) = ncpuRows
+    !sizeGrid(2) = ncpuCols
     periodic = (/ .false., .false. /)
     reorder  = .false.
     call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
@@ -329,12 +331,14 @@ module m_xgTransposer
       ABI_ERROR("xgTransposer failed to creat cartesian grid")
     end if
 
-    selectDim = (/ .true., .false. /)
+    selectDim = (/ .false., .true. /)
+    !selectDim = (/ .true., .false. /)
     call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
     if ( ierr /= xmpi_success ) then
       ABI_ERROR("xgTransposer failed to creat rows communicator")
     end if
-    selectDim = (/ .false., .true. /)
+    selectDim = (/ .true., .false. /)
+    !selectDim = (/ .false., .true. /)
     call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
     if ( ierr /= xmpi_success ) then
       ABI_ERROR("xgTransposer failed to creat columns communicator")
@@ -349,7 +353,6 @@ module m_xgTransposer
 
     xgTransposer%mpiData(MPI_ROWS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_ROWS)%comm)
     xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
-
     xgTransposer%mpiData(MPI_COLS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_COLS)%comm)
     xgTransposer%mpiData(MPI_COLS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_COLS)%comm)
 
@@ -368,8 +371,8 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer :: nRealPairs
     integer :: ierr
-    integer :: icpu
-    integer :: ncpuCols
+    integer :: icpu_cols,icpu_rows
+    integer :: ncpuCols,ncpuRows
 
     ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
     nRealPairs = rows(xgTransposer%xgBlock_linalg)/xgTransposer%perPair !number of pair of reals
@@ -380,8 +383,12 @@ module m_xgTransposer
     end if
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
-    icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpuCols
-    xgTransposer%nrowsColsRows = sum(xgTransposer%nrowsLinalg(icpu+1:icpu+ncpuCols))
+    ncpuRows = xgTransposer%mpiData(MPI_ROWS)%size
+    icpu_rows = xgTransposer%mpiData(MPI_ROWS)%rank
+    xgTransposer%nrowsColsRows = 0
+    do icpu_cols=0,ncpuCols-1
+      xgTransposer%nrowsColsRows = xgTransposer%nrowsColsRows + xgTransposer%nrowsLinalg(1+icpu_rows+icpu_cols*ncpuRows)
+    end do
     xgTransposer%ncolsColsRows = cols(xgTransposer%xgBlock_linalg)/ncpuCols
 
     !write(*,*) "In linalg, # of real pairs:", xgTransposer%nrowsLinalg
@@ -482,7 +489,7 @@ module m_xgTransposer
    !double precision, pointer :: buffer(:,:)
    integer, allocatable :: sendcounts(:), recvcounts(:)
    integer, allocatable :: sdispls(:), rdispls(:)
-   integer :: ncpu, comm, me
+   integer :: ncpu_cols, ncpu_rows, comm, me_rows, me_cols
    integer :: nrowsColsRows
    integer :: ncolsColsRows
    integer :: nrowsLinalgMe
@@ -493,11 +500,13 @@ module m_xgTransposer
    integer, pointer :: nrowsLinalg(:)
    double precision :: tsec(2)
 
-    call timab(tim_toLinalg,1,tsec)
+   call timab(tim_toLinalg,1,tsec)
 
-   ncpu = xgTransposer%mpiData(MPI_COLS)%size
+   ncpu_cols = xgTransposer%mpiData(MPI_COLS)%size
+   ncpu_rows = xgTransposer%mpiData(MPI_ROWS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
-   me = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+!   me = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+   me_rows = xgTransposer%mpiData(MPI_ROWS)%rank
 
    nrowsColsRows = xgTransposer%nrowsColsRows
    ncolsColsRows = xgTransposer%ncolsColsRows
@@ -508,21 +517,24 @@ module m_xgTransposer
    ABI_MALLOC(sendbuf,(2,nrowsColsRows*ncolsColsRows))
    call xgTransposer_reorganizeData(xgTransposer,sendbuf)
 
-   ABI_MALLOC(recvcounts,(ncpu))
-   ABI_MALLOC(rdispls,(ncpu))
+   ABI_MALLOC(recvcounts,(ncpu_cols))
+   ABI_MALLOC(rdispls,(ncpu_cols))
    recvcounts(:) = 2*nrowsLinalgMe*ncolsColsRows !! Thank you fortran for not starting at 0 !
    rdispls(1) = 0
-   do icpu = 2, ncpu
+   do icpu = 2, ncpu_cols
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
    end do
 
    call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
 
-   ABI_MALLOC(sendcounts,(ncpu))
-   ABI_MALLOC(sdispls,(ncpu))
-   sendcounts(:) = 2*nrowsLinalg(me+1:me+ncpu)*ncolsColsRows
+   ABI_MALLOC(sendcounts,(ncpu_cols))
+   ABI_MALLOC(sdispls,(ncpu_cols))
+   !sendcounts(:) = 2*nrowsLinalg(me+1:me+ncpu)*ncolsColsRows
+   do icpu=0,ncpu_cols-1
+     sendcounts(icpu+1) = 2*nrowsLinalg(me_rows+1+icpu*ncpu_rows)*ncolsColsRows
+   end do
    sdispls(1) = 0
-   do icpu = 2, ncpu
+   do icpu = 2, ncpu_cols
    sdispls(icpu) = sdispls(icpu-1)+sendcounts(icpu-1)
    end do
 
@@ -540,15 +552,18 @@ module m_xgTransposer
      !                    recvbuf, recvcounts, rdispls, &
      !                    comm, request(myrequest))
    case (TRANS_GATHER)
+     !TO DO
+     ABI_BUG("This algo is not implemented yet")
+
      !ABI_MALLOC(request,(ncpu))
-     me = xgTransposer%mpiData(MPI_COLS)%rank
+     me_cols = xgTransposer%mpiData(MPI_COLS)%rank
      !myrequest = me+1
 
-     ABI_MALLOC(sendptrbuf,(1:ncpu))
-     do icpu = 1, ncpu
-       sendptrbuf(me+1)%ptr => sendbuf(:,sdispls(icpu)/2+1:sdispls(icpu)/2+sendcounts(icpu))
+     ABI_MALLOC(sendptrbuf,(1:ncpu_cols))
+     do icpu = 1, ncpu_cols
+       sendptrbuf(me_cols+1)%ptr => sendbuf(:,sdispls(icpu)/2+1:sdispls(icpu)/2+sendcounts(icpu))
        call timab(tim_gatherv,1,tsec)
-       call xmpi_gatherv(sendptrbuf(me+1)%ptr,sendcounts(icpu),recvbuf,recvcounts,rdispls,icpu-1,comm,ierr)
+       call xmpi_gatherv(sendptrbuf(me_cols+1)%ptr,sendcounts(icpu),recvbuf,recvcounts,rdispls,icpu-1,comm,ierr)
        call timab(tim_gatherv,2,tsec)
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,sendcounts(icpu),MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu-1,comm,request(icpu),ierr)
@@ -611,7 +626,7 @@ module m_xgTransposer
    !double precision, allocatable :: buffer(:,:)
    integer, allocatable :: sendcounts(:), recvcounts(:)
    integer, allocatable :: sdispls(:), rdispls(:)
-   integer :: ncpu, comm, me
+   integer :: ncpu_rows, ncpu_cols, comm, me_rows, me_cols
    integer :: nrowsColsRows
    integer :: ncolsColsRows
    integer :: nrowsLinalgMe
@@ -625,9 +640,10 @@ module m_xgTransposer
 
     call timab(tim_toColsRows,1,tsec)
 
-   ncpu = xgTransposer%mpiData(MPI_COLS)%size
+   ncpu_cols = xgTransposer%mpiData(MPI_COLS)%size
+   ncpu_rows = xgTransposer%mpiData(MPI_ROWS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
-   me = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
+   me_rows = xgTransposer%mpiData(MPI_ROWS)%rank
 
    nrowsColsRows = xgTransposer%nrowsColsRows
    ncolsColsRows = xgTransposer%ncolsColsRows
@@ -636,25 +652,30 @@ module m_xgTransposer
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
 
    ABI_MALLOC(recvbuf,(2,nrowsColsRows*ncolsColsRows))
-   ABI_MALLOC(recvcounts,(ncpu))
-   ABI_MALLOC(rdispls,(ncpu))
+   ABI_MALLOC(recvcounts,(ncpu_cols))
+   ABI_MALLOC(rdispls,(ncpu_cols))
 
-   recvcounts(:) = 2*nrowsLinalg(me+1:me+ncpu)*ncolsColsRows
+   recvcounts(:) = 2*ncolsColsRows*nrowsLinalg(1+me_rows:1+me_rows+(ncpu_cols-1)*ncpu_rows:ncpu_rows)
    rdispls(1) = 0
-   do icpu = 2, ncpu
+   do icpu = 2, ncpu_cols
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
    end do
+   !recvcounts(:) = 2*nrowsLinalg(me+1:me+ncpu)*ncolsColsRows
+   !rdispls(1) = 0
+   !do icpu = 2, ncpu
+   !  rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
+   !end do
 
    select case(xgTransposer%mpiAlgo)
    case (TRANS_ALL2ALL)
-     ABI_MALLOC(sendcounts,(ncpu))
-     ABI_MALLOC(sdispls,(ncpu))
+     ABI_MALLOC(sendcounts,(ncpu_cols))
+     ABI_MALLOC(sdispls,(ncpu_cols))
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
      sendcounts(:) = 2*nrowsLinalgMe*ncolsColsRows !! Thank you fortran for not starting at 0 !
      sdispls(1) = 0
-     do icpu = 2, ncpu
+     do icpu = 2, ncpu_cols
        sdispls(icpu) = sdispls(icpu-1)+sendcounts(icpu-1)
      end do
 
@@ -672,19 +693,22 @@ module m_xgTransposer
      !write(*,*) "After ialltoall"
 
    case (TRANS_GATHER)
+     !TO DO
+     ABI_BUG("This algo is not implemented yet")
+
      !ABI_MALLOC(request,(ncpu))
-     me = xgTransposer%mpiData(MPI_COLS)%rank
+     me_cols = xgTransposer%mpiData(MPI_COLS)%rank
      !myrequest = me+1
 
-     ABI_MALLOC(sendptrbuf,(1:ncpu))
+     ABI_MALLOC(sendptrbuf,(1:ncpu_cols))
      !call flush(6)
      !call xmpi_barrier(xgTransposer%mpiData(MPI_LINALG)%comm)
-     do icpu = 0, ncpu-1
+     do icpu = 0, ncpu_cols-1
        !write(*,*) me, "->", icpu, "from col ",icpu*ncolsColsRows+1, " number of rows:", nrowsLinalgMe
        call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsColsRows+1,nrowsLinalgMe,ncolsColsRows)
-       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(me+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
+       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(me_cols+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
        call timab(tim_gatherv,1,tsec)
-       call xmpi_gatherv(sendptrbuf(me+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
+       call xmpi_gatherv(sendptrbuf(me_cols+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
        call timab(tim_gatherv,2,tsec)
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu,comm,request(icpu+1),ierr)
@@ -756,14 +780,17 @@ module m_xgTransposer
     integer :: ncolsColsRows
     integer :: tos,toe,froms,frome
     integer :: col, icpu
-    integer :: me
+    integer :: me_rows,ncpu_cols,ncpu_rows
     integer :: nPair
     integer, pointer :: nrowsLinalg(:)
     double precision :: tsec(2)
 
     call timab(tim_reorganize,1,tsec)
 
-    me = xgTransposer%mpiData(MPI_ROWS)%rank*xgTransposer%mpiData(MPI_COLS)%size
+    me_rows = xgTransposer%mpiData(MPI_ROWS)%rank!*xgTransposer%mpiData(MPI_COLS)%size
+    ncpu_rows = xgTransposer%mpiData(MPI_ROWS)%size
+    ncpu_cols = xgTransposer%mpiData(MPI_COLS)%size
+
     nrowsColsRows = xgTransposer%nrowsColsRows
     ncolsColsRows = xgTransposer%ncolsColsRows
     nPair = nrowsColsRows*ncolsColsRows
@@ -776,12 +803,17 @@ module m_xgTransposer
       ! We are going to STATE_COLSROWS so we are after all2all
       !$omp parallel do private(shiftCpu,toe,tos,frome,froms), collapse(2)
       do col = 1, ncolsColsRows
-        do icpu = 1, xgTransposer%mpiData(MPI_COLS)%size
-          shiftCpu = ncolsColsRows*sum(nrowsLinalg(me+1:me+icpu-1))
-          tos=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu-1))+1)
-          toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
-          froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
-          frome=(shiftCpu+col*nrowsLinalg(me+icpu))
+        do icpu = 0, ncpu_cols-1
+          shiftCpu =    ncolsColsRows*sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+          tos=(col-1)*nrowsColsRows+1+sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+          toe=(col-1)*nrowsColsRows+  sum(nrowsLinalg(1+me_rows:1+me_rows+    icpu*ncpu_rows:ncpu_rows))
+          froms=shiftCpu+1+(col-1)*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+          frome=shiftCpu+      col*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+          !shiftCpu = ncolsColsRows*sum(nrowsLinalg(me+1:me+icpu-1))
+          !tos=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu-1))+1)
+          !toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
+          !froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
+          !frome=(shiftCpu+col*nrowsLinalg(me+icpu))
           bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
         end do
       end do
@@ -789,12 +821,17 @@ module m_xgTransposer
       ! We are going to STATE_LINALG so we are before all2all
       !$omp parallel do private(shiftCpu,toe,tos,frome,froms), collapse(2)
       do col = 1, ncolsColsRows
-        do icpu = 1, xgTransposer%mpiData(MPI_COLS)%size
-          shiftCpu = ncolsColsRows*sum(nrowsLinalg(me+1:me+icpu-1))
-          tos=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu-1))+1)
-          toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
-          froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
-          frome=(shiftCpu+col*nrowsLinalg(me+icpu))
+        do icpu = 0, ncpu_cols-1
+          shiftCpu =    ncolsColsRows*sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+          tos=(col-1)*nrowsColsRows+1+sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+          toe=(col-1)*nrowsColsRows+  sum(nrowsLinalg(1+me_rows:1+me_rows+    icpu*ncpu_rows:ncpu_rows))
+          froms=shiftCpu+1+(col-1)*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+          frome=shiftCpu+      col*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+          !shiftCpu = ncolsColsRows*sum(nrowsLinalg(1+me_rows:1+me_rows+icpu*ncpu_rows:ncpu_rows))
+          !tos=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu-1))+1)
+          !toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
+          !froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
+          !frome=(shiftCpu+col*nrowsLinalg(me+icpu))
           bufferMess(:,froms:frome) = bufferOrdered(:,tos:toe)
         end do
       end do
@@ -820,7 +857,7 @@ module m_xgTransposer
     rank = xgTransposer%mpiData(comm)%rank
   end function xgTransposer_getRank
 !!***
- 
+
 !!****f* m_xgTransposer/xgTransposer_getComm
 !!
 !! NAME
