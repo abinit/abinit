@@ -524,10 +524,6 @@ ecore=zero
  ABI_MALLOC(pertsy,(3,natom+6))
  pertsy(:,:)=1
 
-!Deallocate global proc_distrib
- if(xmpi_paral==1) then
-   ABI_FREE(mpi_enreg%proc_distrb)
- end if
 
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
@@ -562,6 +558,10 @@ ecore=zero
 &   pawfgr,pawrad,pawrhoij,pawtab,&
 &   psps,rfpert,rhog,rhor,rprimd,ucvol,vxc,xred)
 
+!Deallocate global proc_distrib
+ if(xmpi_paral==1) then
+   ABI_FREE(mpi_enreg%proc_distrb)
+ end if
 
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
