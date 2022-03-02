@@ -265,6 +265,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  ABI_MALLOC(vtrial1_i1pert,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(vresid_dum,(0,0))
+ xccc3d1(:)=zero
 
 !This is necessary to deactivate paw options in the dfpt_rhotov routine
  ABI_MALLOC(pawrhoij_read,(0))
@@ -333,7 +334,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
          vpsp1(:)=zero
        end if     
 
-       xccc3d1(:)=zero
        optene=0; optres=1
        call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
        & gsqcut,i1dir,i1pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
@@ -362,6 +362,46 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                call WffClose (wff2,ierr)
              end if
 
+             rho2r1(:,:) = zero; rho2g1(:,:) = zero
+             if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+               call appdig(pert2case,dtfil%fildens1in,fiden1i)
+      
+               call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, psps%usepaw, mpi_enreg, rho2r1, &
+               hdr_den, pawrhoij_read, comm_cell, check_hdr=hdr)
+               call hdr_den%free()
+             end if
+
+             !Perform FFT rhor1 to rhog1
+             ABI_MALLOC(work,(cplex*nfftf))
+             work(:)=rho2r1(:,1)
+             call fourdp(cplex,rho2g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
+             ABI_FREE(work)
+
+             !Calculate first-order local and SCF potential
+             if (i2pert<=natom) then
+               call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+             & nattyp,dtset%nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
+             & dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+             else if (i2pert==natom+3.or.i2pert==natom+4) then
+               istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
+               g0term=0
+               call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
+             & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
+             & ucvol,psps%vlspl,vpsp1,g0term=g0term)
+             !TODO: the electric field  perturbation is not used as ipert2 
+             !for the implemented quantities.
+             else
+               vpsp1(:)=zero
+             end if     
+
+             optene=0; optres=1
+             call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+             & gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
+             & dtset%ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
+             & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho2g1,rhor,rho2r1,&
+             & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
+             & vtrial1_i2pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
+      
            end if   ! rfpert
          end do    ! i2dir
        end do     ! i2pert
