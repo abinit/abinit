@@ -204,7 +204,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
- real(dp),allocatable :: vhartr1(:),vpsp1_i1pert(:),vpsp1_i2pert(:),vresid_dum(:,:)
+ real(dp),allocatable :: vhartr1(:),vpsp1(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
  real(dp),allocatable :: vxc1(:,:),work(:),xccc3d1(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
@@ -258,8 +258,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & use_gpu_cuda=dtset%use_gpu_cuda)
 
- ABI_MALLOC(vpsp1_i1pert,(cplex*nfftf))
- ABI_MALLOC(vpsp1_i2pert,(cplex*nfftf))
+ ABI_MALLOC(vpsp1,(cplex*nfftf))
  ABI_MALLOC(xccc3d1,(cplex*nfftf))
  ABI_MALLOC(vhartr1,(cplex*nfftf))
  ABI_MALLOC(vxc1,(cplex*nfftf,dtset%nspden))
@@ -291,12 +290,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
 
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-&       formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
-&       dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
-&       dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
-&       dtset%nsppol,dtset%nsym,&
-&       occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
-&       dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
+       & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+       & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+       & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+       & dtset%nsppol,dtset%nsym,&
+       & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+       & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
 
        if (ireadwf==1) then
          call WffClose (wff1,ierr)
@@ -321,7 +320,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        if (i1pert<=natom) then
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i1dir,i1pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
        & nattyp,dtset%nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
-       & dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pert,xred)
+       & dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
        !TODO: the strain perturbation is not used as ipert1 for the implemented
        !quantities.
        else if (i1pert==natom+3.or.i1pert==natom+4) then
@@ -329,9 +328,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
          g0term=0
          call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
        & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
-       & ucvol,psps%vlspl,vpsp1_i1pert,g0term=g0term)
+       & ucvol,psps%vlspl,vpsp1,g0term=g0term)
        else
-         vpsp1_i1pert(:)=zero
+         vpsp1(:)=zero
        end if     
 
        xccc3d1(:)=zero
@@ -340,8 +339,32 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        & gsqcut,i1dir,i1pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
        & dtset%ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
        & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho1g1,rhor,rho1r1,&
-       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1_i1pert,vresid_dum,dum_scl,&
+       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
        & vtrial1_i1pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
+
+       do i2pert = 1, mpert
+         do i2dir = 1, 3
+       
+           if ((maxval(rfpert(i2dir,i2pert,:,:,:,:))==1)) then
+       
+             pert2case = i2dir + (i2pert-1)*3
+             call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
+
+             call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
+             & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+             & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+             & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+             & dtset%nsppol,dtset%nsym,&
+             & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+             & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i,wvl)
+ 
+             if (ireadwf==1) then
+               call WffClose (wff2,ierr)
+             end if
+
+           end if   ! rfpert
+         end do    ! i2dir
+       end do     ! i2pert
 
      end if   ! rfpert
    end do    ! i1dir
