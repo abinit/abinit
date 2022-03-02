@@ -187,17 +187,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ask_accurate,comm_cell,cplex,formeig,g0term
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,ierr,ireadwf,istr,mcg,me,mpsang
+ integer :: ask_accurate,comm_cell,cplex,dkdk_index,formeig,g0term
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
+ integer :: ierr,ireadwf,istr,mcg,me,mpsang
  integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc,optene
  integer :: optorth,optres,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
  logical :: non_magnetic_xc
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
- type(wfk_t) :: ddk_f
+ type(wfk_t) :: ddk_f,d2_dkdk_f
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
@@ -426,13 +427,43 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                        ABI_ERROR('Missing file: '//TRIM(fiwfddk))
                      end if
                    end if
-                   write(message,'(2a)')'-dfptlw_loop : read the wavefunctions from file: ',trim(fiwfddk)
+                   write(message,'(2a)')'-dfptlw_loop : read the ddk wavefunctions from file: ',trim(fiwfddk)
                    call wrtout(std_out,message,'COLL')
                    call wrtout(ab_out,message,'COLL')
 !                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
                    call wfk_open_read(ddk_f,fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
 
+                   !Prepare d2_dkdk wf file
+                   if (i1pert==natom+2) then
+                     call rf2_getidir(i1dir,i3dir,idir_dkdk)
+                     if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
+                     dkdk_index=idir_dkdk+(dtset%natom+6)*3
+                     call appdig(dkdk_index,dtfil%fnamewffdkdk,fiwfdkdk)
+                     !Check that d2_ddk file exists and open it
+                     if (.not. file_exists(fiwfdkdk)) then
+                       ! Trick needed to run Abinit test suite in netcdf mode. 
+                       if (file_exists(nctk_ncify(fiwfdkdk))) then             
+                         write(message,"(3a)")"- File: ",trim(fiwfdkdk),& 
+                         " does not exist but found netcdf file with similar name."
+                         call wrtout(std_out,message,'COLL')
+                         fiwfdkdk = nctk_ncify(fiwfdkdk)
+                       end if
+                       if (.not. file_exists(fiwfdkdk)) then
+                         ABI_ERROR('Missing file: '//TRIM(fiwfdkdk))
+                       end if
+                     end if
+                     write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
+                     call wrtout(std_out,message,'COLL')
+                     call wrtout(ab_out,message,'COLL') 
+                     call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
+
+                   end if
+
+                   !close ddk file
                    call ddk_f%close()
+
+                   !close d2_dkdk file
+                   if (i1pert==natom+2) call d2_dkdk_f%close()
 
                  end if   ! rfpert
                end do    ! ir3dir
