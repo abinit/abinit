@@ -73,6 +73,7 @@ module m_orbmag
   private :: orbmag_gipaw_onsite_bm_k
   private :: orbmag_gipaw_onsite_vh1_k
   private :: orbmag_gipaw_rhoij
+  private :: orbmag_gipaw_lamb_core
   private :: orbmag_gipaw_output
   
 CONTAINS  !========================================================================================
@@ -147,15 +148,15 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
- integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8
- integer,parameter :: nterms=8
+ integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8,iomlmb=9
+ integer,parameter :: nterms=9
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),kg_k(:,:),nattyp(:)
- real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),oml(2,3),omdp(2,3),rhodum(1),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),oml(2,3),omlamb(2,3),omdp(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: bcpw_k(:,:,:),bc_tensor(:,:,:,:),buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:)
  real(dp),allocatable :: Enk(:),ffnl_k(:,:,:,:)
@@ -450,8 +451,9 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !! convert to cartesian frame from reduced triclinic
  ! iomlr, due to onsite L_R, is already Cartesian
  ! iombm, due to onsite A_0.A_N is already Cartesian
+ ! iomlmb, due to core electrons, is already Cartesian (but not added yet)
  do iterm = 1, nterms
-   if ((iterm .EQ. iomlr) .OR. (iterm .EQ. iombm)) cycle
+   if ((iterm .EQ. iomlr) .OR. (iterm .EQ. iombm) .OR. (iterm .EQ. iomlmb)) cycle
    do nn = 1, nband_k
      do icmplx = 1, 2
        orbmag_terms(icmplx,nn,1:3,iterm) = ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,1:3,iterm))
@@ -461,7 +463,11 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  ! convert orbmag magnetization to orbital moment
  ! Berry curvature terms are ignored
- orbmag_terms(1:2,1:nband_k,1:3,iompwb:nterms) = ucvol*orbmag_terms(1:2,1:nband_k,1:3,iompwb:nterms)
+ ! Lamb term ignored
+ do iterm = 1, nterms
+   if ((iterm.EQ.ibcpwb).OR.(iterm.EQ.ibcpws).OR.(iterm.EQ.iomlmb)) cycle
+    orbmag_terms(1:2,1:nband_k,1:3,iterm) = ucvol*orbmag_terms(1:2,1:nband_k,1:3,iterm)
+  end do
 
  ! compute trace over filled states of each term
  ABI_MALLOC(orbmag_trace,(2,3,nterms))
@@ -469,6 +475,10 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  do nn = 1, nband_k
    orbmag_trace(1:2,1:3,1:nterms) = orbmag_trace(1:2,1:3,1:nterms) + orbmag_terms(1:2,nn,1:3,1:nterms)
  end do
+
+ ! get the Lamb term
+ call orbmag_gipaw_lamb_core(atindx,dtset,omlamb,pawtab)
+ orbmag_trace(1:2,1:3,iomlmb) = omlamb(1:2,1:3)
 
  if (dtset%orbmag .EQ. 4) then
    call orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc_tensor)
@@ -847,7 +857,7 @@ subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,natom,nband_k,&
              end if
 
              ! the sign on cterm (+ or -) needs to be carefully checked
-             cterm = c2*half*j_dpc*epsabg*(dij-Enk(nn)*pawtab(itypat)%sij(klmn))*conjg(udp_b)*udp_g
+             cterm = -c2*half*j_dpc*epsabg*(dij-Enk(nn)*pawtab(itypat)%sij(klmn))*conjg(udp_b)*udp_g
              omdp_k(1,nn,adir) = omdp_k(1,nn,adir) + REAL(cterm)
              omdp_k(2,nn,adir) = omdp_k(2,nn,adir) + AIMAG(cterm)
 
@@ -1350,6 +1360,68 @@ subroutine orbmag_gipaw_rhoij(atindx,cprj,dtset,mcprj,mpi_enreg,pawtab,psps,rhoi
 
 end subroutine orbmag_gipaw_rhoij
 
+!!****f* ABINIT/orbmag_gipaw_lamb_core
+!! NAME
+!! orbmag_gipaw_onsite_lamb_core
+!!
+!! FUNCTION
+!! add core electron contribution to the orbital magnetic moment
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine orbmag_gipaw_lamb_core(atindx,dtset,omlamb,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: omlamb(2,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,itypat
+
+!--------------------------------------------------------------------
+
+  omlamb = zero 
+  do adir = 1, 3
+    do iat=1,dtset%natom
+      iatom = atindx(iat)
+      itypat = dtset%typat(iat)
+      omlamb(1,adir) = omlamb(1,adir) - dtset%lambsig(itypat)*dtset%nucdipmom(adir,iat)
+    end do ! end loop over atoms
+  end do ! end loop over adir
+ 
+end subroutine orbmag_gipaw_lamb_core
+!!***
+
+
 !!****f* ABINIT/orbmag_gipaw_output
 !! NAME
 !! orbmag_gipaw_output
@@ -1399,7 +1471,7 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,ikpt,iterms
- integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8
+ integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8,iomlmb=9
  character(len=500) :: message
 
  !arrays
@@ -1411,6 +1483,7 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
  do iterms = iompwb, nterms
    orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
    do iband=1, nband_k
+     if (iterms == iomlmb) cycle
      orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
    end do
  end do
@@ -1455,6 +1528,8 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
    write(message,'(a,3es16.8)') '     <u|p>A0.AN<p|u> : ',(orbmag_trace(1,adir,iombm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    <u|p>v_H(1)<p|u> : ',(orbmag_trace(1,adir,iomvh1),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '           Lamb core : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
