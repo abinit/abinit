@@ -193,10 +193,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  integer :: optorth,optres,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
  logical :: non_magnetic_xc
- character(len=500) :: msg                   
+ character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
+ type(wfk_t) :: ddk_f
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
@@ -345,7 +346,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        do i2pert = 1, mpert
          do i2dir = 1, 3
        
-           if ((maxval(rfpert(i2dir,i2pert,:,:,:,:))==1)) then
+           if ((maxval(rfpert(i1dir,i1pert,i2dir,i2pert,:,:))==1)) then
        
              pert2case = i2dir + (i2pert-1)*3
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
@@ -401,6 +402,41 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
              & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho2g1,rhor,rho2r1,&
              & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
              & vtrial1_i2pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
+
+             do i3pert = 1, mpert
+               do i3dir = 1, 3
+
+                 if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+
+                   blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+
+                   !Prepare ddk wf file
+                   pert3case = i3dir + natom*3
+                   call appdig(pert3case,dtfil%fnamewffddk,fiwfddk)
+                   ! Checking the existence of data file
+                   if (.not. file_exists(fiwfddk)) then
+                     ! Trick needed to run Abinit test suite in netcdf mode.
+                     if (file_exists(nctk_ncify(fiwfddk))) then
+                       write(message,"(3a)")"- File: ",trim(fiwfddk),&
+                       " does not exist but found netcdf file with similar name."
+                       call wrtout(std_out,message,'COLL')
+                       fiwfddk = nctk_ncify(fiwfddk)
+                     end if
+                     if (.not. file_exists(fiwfddk)) then
+                       ABI_ERROR('Missing file: '//TRIM(fiwfddk))
+                     end if
+                   end if
+                   write(message,'(2a)')'-dfptlw_loop : read the wavefunctions from file: ',trim(fiwfddk)
+                   call wrtout(std_out,message,'COLL')
+                   call wrtout(ab_out,message,'COLL')
+!                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
+                   call wfk_open_read(ddk_f,fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
+
+                   call ddk_f%close()
+
+                 end if   ! rfpert
+               end do    ! ir3dir
+             end do     ! ir3pert
       
            end if   ! rfpert
          end do    ! i2dir
