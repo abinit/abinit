@@ -150,7 +150,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  use m_dfpt_mkvxc,  only : dfpt_mkvxc
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
- use m_mklocl,      only : dfpt_vlocal
+ use m_mklocl,      only : dfpt_vlocal, vlocalstr
  use m_dfptnl_pert, only : dfptnl_pert
 
  implicit none
@@ -187,8 +187,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ask_accurate,comm_cell,cplex,formeig
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,ierr,ireadwf,mcg,me,mpsang
+ integer :: ask_accurate,comm_cell,cplex,formeig,g0term
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,ierr,ireadwf,istr,mcg,me,mpsang
  integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc,optene
  integer :: optorth,optres,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
@@ -204,7 +204,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
- real(dp),allocatable :: vhartr1(:),vpsp1(:),vresid_dum(:,:)
+ real(dp),allocatable :: vhartr1(:),vpsp1_i1pert(:),vpsp1_i2pert(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
  real(dp),allocatable :: vxc1(:,:),work(:),xccc3d1(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
@@ -258,7 +258,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & use_gpu_cuda=dtset%use_gpu_cuda)
 
- ABI_MALLOC(vpsp1,(cplex*nfftf))
+ ABI_MALLOC(vpsp1_i1pert,(cplex*nfftf))
+ ABI_MALLOC(vpsp1_i2pert,(cplex*nfftf))
  ABI_MALLOC(xccc3d1,(cplex*nfftf))
  ABI_MALLOC(vhartr1,(cplex*nfftf))
  ABI_MALLOC(vxc1,(cplex*nfftf,dtset%nspden))
@@ -316,14 +317,30 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        call fourdp(cplex,rho1g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
        ABI_FREE(work)
 
-       !Calculate first order SCF potential
-       xccc3d1(:)=zero; vpsp1(:)=zero
+       !Calculate first-order local and SCF potential
+       if (i1pert<=natom) then
+         call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i1dir,i1pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+       & nattyp,dtset%nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
+       & dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pert,xred)
+       !TODO: the strain perturbation is not used as ipert1 for the implemented
+       !quantities.
+       else if (i1pert==natom+3.or.i1pert==natom+4) then
+         istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
+         g0term=0
+         call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
+       & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
+       & ucvol,psps%vlspl,vpsp1_i1pert,g0term=g0term)
+       else
+         vpsp1_i1pert(:)=zero
+       end if     
+
+       xccc3d1(:)=zero
        optene=0; optres=1
        call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
        & gsqcut,i1dir,i1pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
        & dtset%ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
        & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho1g1,rhor,rho1r1,&
-       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
+       & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1_i1pert,vresid_dum,dum_scl,&
        & vtrial1_i1pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
      end if   ! rfpert
