@@ -332,7 +332,7 @@ module m_lobpcg2
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol, mpi_enreg)
+  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol, mpi_enreg, nspinor)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(mpi_type) , intent(inout) :: mpi_enreg
@@ -340,6 +340,7 @@ module m_lobpcg2
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
     type(xgBlock_t), intent(inout) :: residu
     integer        , intent(in   ) :: prtvol
+    integer        , intent(in   ) :: nspinor
 
     type(xg_t) :: eigenvalues3N   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
@@ -414,7 +415,7 @@ module m_lobpcg2
     lobpcg%AllX0 = X0
 
     if ( lobpcg%paral_kgb == 1 ) then
-      call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,&
+      call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         lobpcg%nproc_fft,lobpcg%nproc_band,STATE_LINALG,TRANS_ALL2ALL)
 
       !save existing Abinit communicators

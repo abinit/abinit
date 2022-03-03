@@ -158,13 +158,13 @@ program testTransposer
     call xgBlock_map(xcgLinalg,cg,SPACE_C,npw,nband,xmpi_world)
   
     write(std_out,*) " Complex all2all"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
   
     write(std_out,*) " Complex gatherv"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_GATHER)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,nCpuRows,nCpuCols,STATE_LINALG,TRANS_GATHER)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
@@ -172,13 +172,13 @@ program testTransposer
     call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
   
     write(std_out,*) " Real all2all"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
   
     write(std_out,*) " Real gatherv"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_GATHER)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,nCpuRows,nCpuCols,STATE_LINALG,TRANS_GATHER)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
@@ -233,7 +233,7 @@ program testTransposer
     call xgBlock_map(xghcLinalg,ghc,SPACE_C,npw,nband,xmpi_world)
 
     write(std_out,*) "Transposer constructor"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
     call xgTransposer_copyConstructor(xgTransposerGh,xgTransposer,xghLinalg,xghColsRows,STATE_LINALG)
     call xgTransposer_copyConstructor(xgTransposerGhc,xgTransposer,xghcLinalg,xghcColsRows,STATE_LINALG)
     

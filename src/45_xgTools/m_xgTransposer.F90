@@ -85,6 +85,7 @@ module m_xgTransposer
     type(mpiData_t), private :: mpiData(4)
     integer, allocatable, private :: lookup(:)
     integer, pointer, private :: nrowsLinalg(:) => null()
+    integer :: nspinor
     integer :: nrowsColsRows
     integer :: ncolsColsRows
     integer :: mpiAlgo
@@ -109,11 +110,12 @@ module m_xgTransposer
 !! NAME
 !! xgTransposer_constructor
 
-  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo)
+  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,ncpuRows,ncpuCols,state,algo)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
     type(xgBlock_t), target, intent(in   ) :: xgBlock_colsrows
+    integer                , intent(in   ) :: nspinor
     integer                , intent(in   ) :: ncpuRows
     integer                , intent(in   ) :: ncpuCols
     integer                , intent(in   ) :: state
@@ -133,6 +135,7 @@ module m_xgTransposer
     xgTransposer%xgBlock_linalg => xgBlock_linalg
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
+    xgTransposer%nspinor = nspinor
     commLinalg = comm(xgBlock_linalg)
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
@@ -250,6 +253,7 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
 
     xgTransposer%mpiAlgo = xgTransposerInitialized%mpiAlgo
+    xgTransposer%nspinor = xgTransposerInitialized%nspinor
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
     ncpuRows = xgTransposer%mpiData(MPI_ROWS)%size
@@ -775,14 +779,14 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision    , intent(inout) :: bufferMess(:,:)
     double precision, pointer :: bufferOrdered(:,:) => null()
-    integer :: shiftCpu
     integer :: nrowsColsRows
     integer :: ncolsColsRows
     integer :: tos,toe,froms,frome
     integer :: col, icpu
     integer :: me_rows,ncpu_cols,ncpu_rows
-    integer :: nPair
-    integer, pointer :: nrowsLinalg(:)
+    integer :: nPair,ispinor,nspinor
+    integer :: nrowsLinalgMe,nrowsLinalgMeSum
+    integer,pointer :: nrowsLinalg(:)
     double precision :: tsec(2)
 
     call timab(tim_reorganize,1,tsec)
@@ -796,43 +800,41 @@ module m_xgTransposer
     nPair = nrowsColsRows*ncolsColsRows
 
     call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,xgTransposer%perPair,nPair)
+
+    nspinor = xgTransposer%nspinor
     nrowsLinalg => xgTransposer%nrowsLinalg
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
       ! We are going to STATE_COLSROWS so we are after all2all
-      !$omp parallel do private(shiftCpu,toe,tos,frome,froms), collapse(2)
+      !$omp parallel do private(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms), collapse(3)
       do col = 1, ncolsColsRows
         do icpu = 0, ncpu_cols-1
-          shiftCpu =    ncolsColsRows*sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
-          tos=(col-1)*nrowsColsRows+1+sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
-          toe=(col-1)*nrowsColsRows+  sum(nrowsLinalg(1+me_rows:1+me_rows+    icpu*ncpu_rows:ncpu_rows))
-          froms=shiftCpu+1+(col-1)*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
-          frome=shiftCpu+      col*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
-          !shiftCpu = ncolsColsRows*sum(nrowsLinalg(me+1:me+icpu-1))
-          !tos=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu-1))+1)
-          !toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
-          !froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
-          !frome=(shiftCpu+col*nrowsLinalg(me+icpu))
-          bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
+          do ispinor = 1, nspinor
+            nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+            nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+            froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
+            frome=froms-1+nrowsLinalgMe/nspinor
+            tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
+            toe=tos-1+nrowsLinalgMe/nspinor
+            bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
+          end do
         end do
       end do
     case (STATE_COLSROWS)
       ! We are going to STATE_LINALG so we are before all2all
-      !$omp parallel do private(shiftCpu,toe,tos,frome,froms), collapse(2)
+      !$omp parallel do private(nrowsLinalgMe,nrowsLinalgMeSum,toe,tos,frome,froms), collapse(3)
       do col = 1, ncolsColsRows
         do icpu = 0, ncpu_cols-1
-          shiftCpu =    ncolsColsRows*sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
-          tos=(col-1)*nrowsColsRows+1+sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
-          toe=(col-1)*nrowsColsRows+  sum(nrowsLinalg(1+me_rows:1+me_rows+    icpu*ncpu_rows:ncpu_rows))
-          froms=shiftCpu+1+(col-1)*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
-          frome=shiftCpu+      col*nrowsLinalg(1+me_rows+icpu*ncpu_rows)
-          !shiftCpu = ncolsColsRows*sum(nrowsLinalg(1+me_rows:1+me_rows+icpu*ncpu_rows:ncpu_rows))
-          !tos=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu-1))+1)
-          !toe=((col-1)*nrowsColsRows+sum(nrowsLinalg(me+1:me+icpu)))
-          !froms=(shiftCpu+(col-1)*nrowsLinalg(me+icpu)+1)
-          !frome=(shiftCpu+col*nrowsLinalg(me+icpu))
-          bufferMess(:,froms:frome) = bufferOrdered(:,tos:toe)
+          do ispinor = 1, nspinor
+            nrowsLinalgMe = nrowsLinalg(1+me_rows+icpu*ncpu_rows)
+            nrowsLinalgMeSum = sum(nrowsLinalg(1+me_rows:1+me_rows+(icpu-1)*ncpu_rows:ncpu_rows))
+            froms=1+(ispinor-1)*nrowsLinalgMe/nspinor+(col-1)*nrowsLinalgMe+nrowsLinalgMeSum*ncolsColsRows
+            frome=froms-1+nrowsLinalgMe/nspinor
+            tos=1+nrowsLinalgMeSum/nspinor+(ispinor-1)*nrowsColsRows/nspinor+(col-1)*nrowsColsRows
+            toe=tos-1+nrowsLinalgMe/nspinor
+            bufferMess(:,froms:frome) = bufferOrdered(:,tos:toe)
+          end do
         end do
       end do
     end select
