@@ -2726,7 +2726,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
      if(optene==0) etotal=etotal+energies%e_extfpmd
-     if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+     if(optene==1) etotal=etotal+energies%edc_extfpmd
    end if
 
 !  Compute energy residual
