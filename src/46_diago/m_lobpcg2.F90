@@ -417,6 +417,8 @@ module m_lobpcg2
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         lobpcg%nproc_fft,lobpcg%nproc_band,STATE_LINALG,TRANS_ALL2ALL)
+      !call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
+      !  lobpcg%nproc_fft,lobpcg%nproc_band,STATE_LINALG,TRANS_GATHER)
 
       !save existing Abinit communicators
       comm_fft_save = mpi_enreg%comm_fft
