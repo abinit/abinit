@@ -151,7 +151,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal, vlocalstr
- use m_dfptnl_pert, only : dfptnl_pert
+ use m_dfptlw_pert, only : dfptlw_pert
 
  implicit none
 
@@ -459,8 +459,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    !Perform the longwave DFPT part of the 3dte calculation
                    call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
-                   & mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
-                   & pawfgr,ph1d,psps,rho1r1,rho1g1,rho2r1,rprimd,ucvol,vtrial1_i1pert,vtrial1_i2pert,&
+                   & mpsang,mpw,natom,nattyp,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
+                   & pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,ucvol,vtrial1_i1pert,vtrial1_i2pert,&
                    & ddk_f,d2_dkdk_f,xccc3d1,xred)
 
                    !close ddk file
