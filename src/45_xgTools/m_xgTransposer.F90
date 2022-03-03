@@ -380,6 +380,9 @@ module m_xgTransposer
 
     ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
     nRealPairs = rows(xgTransposer%xgBlock_linalg)/xgTransposer%perPair !number of pair of reals
+    if (MOD(nRealPairs,xgTransposer%nspinor)/=0) then
+      ABI_ERROR('nspinor should divide nRealPairs!')
+    end if
 
     call xmpi_allgather(nRealPairs,xgTransposer%nrowsLinalg,xgTransposer%mpiData(MPI_LINALG)%comm,ierr)
     if ( ierr /= xmpi_success ) then
@@ -556,8 +559,6 @@ module m_xgTransposer
      !                    recvbuf, recvcounts, rdispls, &
      !                    comm, request(myrequest))
    case (TRANS_GATHER)
-     !TO DO
-     ABI_BUG("This algo is not implemented yet")
 
      !ABI_MALLOC(request,(ncpu))
      me_cols = xgTransposer%mpiData(MPI_COLS)%rank
@@ -697,8 +698,6 @@ module m_xgTransposer
      !write(*,*) "After ialltoall"
 
    case (TRANS_GATHER)
-     !TO DO
-     ABI_BUG("This algo is not implemented yet")
 
      !ABI_MALLOC(request,(ncpu))
      me_cols = xgTransposer%mpiData(MPI_COLS)%rank
