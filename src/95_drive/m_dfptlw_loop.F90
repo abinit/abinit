@@ -202,7 +202,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
- real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
+ real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
@@ -234,8 +234,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_MALLOC(cg3,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_MALLOC(eigen3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho2r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho1g1,(2,nfftf))
@@ -352,7 +350,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
              pert2case = i2dir + (i2pert-1)*3
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
-             call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
+             call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
              & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
              & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
              & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
@@ -476,6 +474,30 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
      end if   ! rfpert
    end do    ! i1dir
  end do     ! i1pert
+
+!More memory cleaning
+ call gs_hamkq%free()
+
+ ABI_FREE(cg1)
+ ABI_FREE(cg2)
+ ABI_FREE(cg3)
+ ABI_FREE(eigen1)
+ ABI_FREE(rho1r1)
+ ABI_FREE(rho2r1)
+ ABI_FREE(rho1g1)
+ ABI_FREE(rho2g1)
+ ABI_FREE(nhat1gr)
+ ABI_FREE(nhat1)
+ ABI_FREE(vresid_dum)
+ ABI_FREE(vtrial1_i1pert)
+ ABI_FREE(vtrial1_i2pert)
+ ABI_FREE(vxc1)
+ ABI_FREE(vhartr1)
+ ABI_FREE(vpsp1)
+ ABI_FREE(xccc3d1)
+ ABI_FREE(pawrhoij_read)
+ ABI_FREE(ph1d)
+
 
  DBG_EXIT("COLL")
 
