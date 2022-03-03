@@ -171,10 +171,58 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
 
+!Variables ------------------------------------
+!scalars
+ integer :: ii,me,spaceworld
+ character(len=1000) :: msg
+!arrays
+ type(rf_hamiltonian_type) :: rf_hamkq_i1pert, rf_hamkq_i2pert
+ 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
+
+!Anounce start of spatial-dispersion calculation
+ write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+&   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+!Init parallelism
+ spaceworld=mpi_enreg%comm_cell
+ me=mpi_enreg%me_kpt 
+
+!Initialize rf_hamiltonians (the k-dependent part is prepared in getgh1c_setup)
+ call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq_i1pert,& 
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& mpi_spintab=mpi_enreg%my_isppoltab)
+
+ call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,& 
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& mpi_spintab=mpi_enreg%my_isppoltab)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ call rf_hamkq_i1pert%free()
+ call rf_hamkq_i2pert%free()
+
  DBG_EXIT("COLL")
 
 end subroutine dfptlw_pert
