@@ -482,13 +482,14 @@ end function chebfi_memInfo
 !!
 !! SOURCE
 
-subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
+subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg,nspinor)
 
  implicit none
 
 !Arguments ------------------------------------
  type(chebfi_t) , intent(inout) :: chebfi
  type(mpi_type),  intent(inout) :: mpi_enreg
+ integer,         intent(in)    :: nspinor
  type(xgBlock_t), intent(inout) :: X0
  type(xgBlock_t), intent(inout) :: eigen
  type(xgBlock_t), intent(inout) :: residu
@@ -569,7 +570,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    nCpuRows = chebfi%nproc_fft
    nCpuCols = chebfi%nproc_band
 
-   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
+     nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
 
    !save existing ABinit communicators
    comm_fft_save = mpi_enreg%comm_fft
