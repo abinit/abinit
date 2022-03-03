@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 23 Feb 2022.
-- ( at 17h13 )
+.Starting date : Thu  3 Mar 2022.
+- ( at 09h30 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/debug/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -119,6 +119,7 @@ _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
            kptopt           3
          kptrlatt        2   -2    2     -2    2    2     -2   -2    2
           kptrlen      2.06017939E+01
+          lambsig      0.00000000E+00  7.66000000E-04
 P           mkmem          32
 P          mkqmem          32
 P          mk1mem          32
@@ -700,7 +701,7 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
- -1.71622991E-14  7.04840877E-14  4.32239394E-04
+ -1.85189002E-14  8.95070502E-14 -2.00479560E-04
  
  
  Integral of Berry curvature, Cartesian directions :
@@ -710,10 +711,11 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment, term-by-term breakdown :
   <du/dk|H+ES|du/dk> :  -1.69923492E-14  7.81630436E-14  5.04042034E-04
    <du/dk|E dS/dk|u> :  -3.51446200E-16 -2.54250128E-16  9.37674233E-07
- <u|dp/dk>D<dp/dk|u> :   6.78300553E-16 -9.51148127E-15 -6.66405229E-05
+ <u|dp/dk>D<dp/dk|u> :  -6.78300553E-16  9.51148127E-15  6.66405229E-05
    <u|p>1/2 L_R<p|u> :  -5.21000649E-16  2.13283600E-15 -3.66910188E-06
      <u|p>A0.AN<p|u> :   2.40986970E-17 -4.56929465E-17 -2.43222818E-06
     <u|p>v_H(1)<p|u> :   9.76948539E-20 -3.67572127E-19  1.53877035E-09
+           Lamb core :   0.00000000E+00  0.00000000E+00 -7.66000000E-04
  
  
  Berry curvature, term-by-term breakdown :
@@ -725,10 +727,10 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  1 of  4
- Orbital magnetic moment :   5.24290085E-16 -9.49549078E-15 -1.60678847E-05
+ Orbital magnetic moment :  -4.88256953E-16 -2.45979870E-15  2.51620667E-05
       <du/dk|H+ES|du/dk> :   1.22908592E-16 -6.49669670E-15  5.42553214E-06
        <du/dk|E dS/dk|u> :  -5.69957877E-17  6.10667867E-17 -4.58298399E-07
-     <u|dp/dk>D<dp/dk|u> :   5.06273519E-16 -3.51784604E-15 -2.06149757E-05
+     <u|dp/dk>D<dp/dk|u> :  -5.06273519E-16  3.51784604E-15  2.06149757E-05
        <u|p>1/2 L_R<p|u> :  -4.53029895E-17  4.31223674E-16 -1.15913656E-07
          <u|p>A0.AN<p|u> :  -2.64170973E-18  2.69214195E-17 -3.04606620E-07
         <u|p>v_H(1)<p|u> :   4.84607049E-20 -1.59919048E-19  3.77536164E-10
@@ -740,10 +742,10 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  2 of  4
- Orbital magnetic moment :   1.59206001E-14  5.67638272E-15 -6.76423931E-05
+ Orbital magnetic moment :   1.66462097E-14  1.18632593E-14  1.07015211E-04
       <du/dk|H+ES|du/dk> :   1.61765324E-14  8.53657581E-15  1.82811237E-05
        <du/dk|E dS/dk|u> :  -1.51243530E-17  1.24315870E-17  2.46442065E-07
-     <u|dp/dk>D<dp/dk|u> :  -3.62804785E-16 -3.09343831E-15 -8.73288019E-05
+     <u|dp/dk>D<dp/dk|u> :   3.62804785E-16  3.09343831E-15  8.73288019E-05
        <u|p>1/2 L_R<p|u> :   1.18214332E-16  2.20419893E-16  1.83303511E-06
          <u|p>A0.AN<p|u> :   3.80595323E-18  4.94805917E-19 -6.75166260E-07
         <u|p>v_H(1)<p|u> :  -2.33919462E-20 -1.01067665E-19  9.74174409E-10
@@ -755,10 +757,10 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  3 of  4
- Orbital magnetic moment :  -1.03845372E-10  5.54202451E-11 -4.78671756E-01
+ Orbital magnetic moment :  -1.14425029E-10  6.80627496E-11 -5.33856951E-01
       <du/dk|H+ES|du/dk> :  -1.08925441E-10  6.13527518E-11 -5.04645839E-01
        <du/dk|E dS/dk|u> :   6.15803367E-13 -6.80575096E-13  3.25691164E-03
-     <u|dp/dk>D<dp/dk|u> :   5.28982874E-12 -6.32125225E-12  2.75925973E-02
+     <u|dp/dk>D<dp/dk|u> :  -5.28982874E-12  6.32125225E-12 -2.75925973E-02
        <u|p>1/2 L_R<p|u> :  -8.11991916E-13  1.05242258E-12 -4.87473304E-03
          <u|p>A0.AN<p|u> :  -1.35705656E-14  1.68980405E-14 -6.93414254E-07
         <u|p>v_H(1)<p|u> :  -4.05204794E-20  3.04385750E-20  1.82613321E-10
@@ -770,10 +772,10 @@ tolerances: {tolwfr: 1.00E-20, }
  
  
  band  4 of  4
- Orbital magnetic moment :   1.03811765E-10 -5.53459419E-11  4.79187706E-01
+ Orbital magnetic moment :   1.14390352E-10 -6.79826460E-11  5.34290294E-01
       <du/dk|H+ES|du/dk> :   1.08892150E-10 -6.12766286E-11  5.05126174E-01
        <du/dk|E dS/dk|u> :  -6.16082694E-13  6.80247347E-13 -3.25576211E-03
-     <u|dp/dk>D<dp/dk|u> :  -5.28929390E-12  6.31835205E-12 -2.75512940E-02
+     <u|dp/dk>D<dp/dk|u> :   5.28929390E-12 -6.31835205E-12  2.75512940E-02
        <u|p>1/2 L_R<p|u> :   8.11398004E-13 -1.05094139E-12  4.86934682E-03
          <u|p>A0.AN<p|u> :   1.35935000E-14 -1.69711497E-14 -7.59041051E-07
         <u|p>v_H(1)<p|u> :   1.13146575E-19 -1.37023989E-19  4.44645179E-12
@@ -845,6 +847,7 @@ tolerances: {tolwfr: 1.00E-20, }
            kptopt           3
          kptrlatt        2   -2    2     -2    2    2     -2   -2    2
           kptrlen      2.06017939E+01
+          lambsig      0.00000000E+00  7.66000000E-04
 P           mkmem          32
 P          mkqmem          32
 P          mk1mem          32
@@ -1005,15 +1008,15 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.5  wall=         26.7
+- Proc.   0 individual time (sec): cpu=         26.0  wall=         26.2
  
 ================================================================================
  
  Calculation completed.
 .Delivered   5 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.5  wall=         26.7
++Overall time at end (sec) : cpu=         26.0  wall=         26.2
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 141 allocations and 141 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 1526424 allocations and 1526424 deallocations in Fortran
+-   There were 1526431 allocations and 1526431 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
