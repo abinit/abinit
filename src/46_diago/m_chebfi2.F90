@@ -586,8 +586,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg,ns
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
 
    call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
-   call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)
-   call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
+   chebfi%xgTransposerAX%state = STATE_COLSROWS
+   chebfi%xgTransposerBX%state = STATE_COLSROWS
+   !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)
+   !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
  else
    call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
    call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
