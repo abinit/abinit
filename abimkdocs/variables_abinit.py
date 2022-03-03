@@ -22793,16 +22793,16 @@ Enables the calculation of contributions to the energy, entropy, stresses,
 number of electrons and chemical potential using the extended first principle
 molecular dynamics model for high temperature simulations.
 
-  * **useextfpmd** = 1 *(Recommanded)*, the energy shift factor will be evaluated
+  * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
 
-  * **useextfpmd** = 2, the energy shift factor will be evaluated by making
+  * **useextfpmd** = 2, the energy shift will be evaluated by making
 the average between the eigenvalues and the Fermi gas energy over the last
 [[extfpmd_nbcut]] bands, and the contributions will be computed with integrals
 over the band number.
 
-  * **useextfpmd** = 3, the energy shift factor will be evaluated by making the
+  * **useextfpmd** = 3, the energy shift will be evaluated by making the
 average between the eigenvalues and the kinetic energies over the last
 [[extfpmd_nbcut]] bands, and the contributions will be computed using the
 density of states of the Fermi gas.
@@ -22819,8 +22819,8 @@ Variable(
     mnemonics="EXTended FPMD: Number of Bands at CUT",
     added_in_version="9.5.2",
     text=r"""
-Specify the number of bands to use when averaging over last bands to get the
-energy shift factor when [[useextfpmd]] = 2 or 3.
+Specifies the number of bands to use when averaging over last bands to get the
+energy shift when [[useextfpmd]] = 2 or 3.
 
 **extfpmd_nbcut** must be less than [[nband]].
 """,
