@@ -271,13 +271,14 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
-&                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
-&                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw)
+&                 l_mpi_enreg%nproc_fft*l_mpi_enreg%nproc_spinor,nline, space,1,l_gs_hamk%istwf_k, &
+&                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw,&
+&                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band)
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,l_mpi_enreg,nspinor)
+ call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,nspinor)
 
 !Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)

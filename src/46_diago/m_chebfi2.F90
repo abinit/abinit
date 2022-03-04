@@ -96,9 +96,11 @@ module m_chebfi2
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
 
    integer :: paral_kgb                     ! MPI parallelization variables
-   integer :: nproc_band
+   integer :: nproc_cols
    integer :: bandpp
-   integer :: nproc_fft
+   integer :: nproc_rows
+   integer :: comm_cols
+   integer :: comm_rows
 
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
@@ -178,8 +180,8 @@ module m_chebfi2
 !!
 !! SOURCE
 
-subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,nproc_band,bandpp,nproc_fft, &
-                       nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw)
+subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,nproc_cols,bandpp,nproc_rows, &
+                       nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,comm_rows,comm_cols)
 
  implicit none
 
@@ -190,8 +192,10 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  integer       , intent(in   ) :: me_g0
  integer       , intent(in   ) :: neigenpairs
  integer       , intent(in   ) :: nline
- integer       , intent(in   ) :: nproc_band
- integer       , intent(in   ) :: nproc_fft
+ integer       , intent(in   ) :: nproc_cols
+ integer       , intent(in   ) :: nproc_rows
+ integer       , intent(in   ) :: comm_cols
+ integer       , intent(in   ) :: comm_rows
  integer       , intent(in   ) :: paral_kgb
  integer       , intent(in   ) :: space
  integer       , intent(in   ) :: spacecom
@@ -214,9 +218,11 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  chebfi%tolerance   = tolerance
  chebfi%ecut        = ecut
  chebfi%paral_kgb   = paral_kgb
- chebfi%nproc_band  = nproc_band
+ chebfi%nproc_cols  = nproc_cols
+ chebfi%comm_cols   = comm_cols
  chebfi%bandpp      = bandpp
- chebfi%nproc_fft   = nproc_fft
+ chebfi%nproc_rows  = nproc_rows
+ chebfi%comm_rows   = comm_rows
  chebfi%nline       = nline
  chebfi%spacecom    = spacecom
  chebfi%eigenProblem = eigenProblem
@@ -482,13 +488,12 @@ end function chebfi_memInfo
 !!
 !! SOURCE
 
-subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg,nspinor)
+subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  implicit none
 
 !Arguments ------------------------------------
  type(chebfi_t) , intent(inout) :: chebfi
- type(mpi_type),  intent(inout) :: mpi_enreg
  integer,         intent(in)    :: nspinor
  type(xgBlock_t), intent(inout) :: X0
  type(xgBlock_t), intent(inout) :: eigen
@@ -526,7 +531,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg,ns
  integer :: nline,nline_max
  integer :: iline, iband, ierr
  integer :: nCpuCols,nCpuRows
- integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of ABinit, to be saved
+! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of ABinit, to be saved
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
@@ -567,20 +572,20 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg,ns
 
  ! Transpose
  if (chebfi%paral_kgb == 1) then
-   nCpuRows = chebfi%nproc_fft
-   nCpuCols = chebfi%nproc_band
+   nCpuRows = chebfi%nproc_rows
+   nCpuCols = chebfi%nproc_cols
 
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+     nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols)
 
-   !save existing ABinit communicators
-   comm_fft_save = mpi_enreg%comm_fft
-   comm_band_save = mpi_enreg%comm_band
+!   !save existing ABinit communicators
+!   comm_fft_save = mpi_enreg%comm_fft
+!   comm_band_save = mpi_enreg%comm_band
 
-   !set new communicators from Transposer so it can interact with getghc
-   !transpose correctly
-   mpi_enreg%comm_fft = xgTransposer_getComm(chebfi%xgTransposerX, 2)
-   mpi_enreg%comm_band = xgTransposer_getComm(chebfi%xgTransposerX, 3)
+!   !set new communicators from Transposer so it can interact with getghc
+!   !transpose correctly
+!   mpi_enreg%comm_fft = xgTransposer_getComm(chebfi%xgTransposerX, 2)
+!   mpi_enreg%comm_band = xgTransposer_getComm(chebfi%xgTransposerX, 3)
 
    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
@@ -711,9 +716,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg,ns
    call xgTransposer_free(chebfi%xgTransposerAX)
    call xgTransposer_free(chebfi%xgTransposerBX)
 
-   !Reset communicators to original ABinit values for rest of ABinit
-   mpi_enreg%comm_fft = comm_fft_save
-   mpi_enreg%comm_band = comm_band_save
+!   !Reset communicators to original ABinit values for rest of ABinit
+!   mpi_enreg%comm_fft = comm_fft_save
+!   mpi_enreg%comm_band = comm_band_save
  end if
 
  call timab(tim_run,2,tsec)
