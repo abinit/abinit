@@ -204,6 +204,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%isVused=isVUsed
  hist%isARused=isARUsed
 
+
 !Allocate all the histories
  ABI_MALLOC(hist%acell,(3,mxhist))
  ABI_MALLOC(hist%rprimd,(3,3,mxhist))

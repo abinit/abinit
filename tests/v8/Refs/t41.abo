@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h26 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t41.in
-- output file    -> t41.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t41.abi
+- output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       2.969 Mbytes of memory.
+P This job should need less than                       3.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       4.130 Mbytes of memory.
+P This job should need less than                       4.359 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -536,8 +536,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -729,16 +729,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.3226E+00  4.3700E+00  4.3700E+00  4.3700E+00  4.5337E+00  4.5337E+00
   4.5337E+00  4.5853E+00  4.5853E+00  4.5853E+00  4.5968E+00  4.6223E+00
   4.6223E+00  4.6223E+00  4.7471E+00  4.9477E+00  4.9478E+00  4.9487E+00
-  prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  2.86138E-04
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  5.04510E-04
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  3.86323E-06
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  9.69997E-05
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  5.25404E-05
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  3.41035E-04
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  1.70626E-06
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  1.66004E-13
 
 
 --- !ResultsGS
@@ -828,7 +820,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -871,7 +862,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -887,7 +877,7 @@ tolerances: {tolvrs: 1.00E-10, }
 -ETOT  1   18.325579771881     -2.293E+02 6.547E-01 1.038E+04
  ETOT  2   9.5003426486168     -8.825E+00 2.701E-02 1.657E+02
  ETOT  3   9.3083131379041     -1.920E-01 1.867E-03 1.245E+00
- ETOT  4   9.3074372015509     -8.759E-04 9.181E-05 3.561E-01
+ ETOT  4   9.3074372015510     -8.759E-04 9.181E-05 3.561E-01
  ETOT  5   9.3068706731321     -5.665E-04 3.485E-06 1.561E-02
  ETOT  6   9.3068450369293     -2.564E-05 5.979E-08 3.982E-06
  ETOT  7   9.3068450329160     -4.013E-09 3.331E-11 4.483E-08
@@ -1089,8 +1079,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1106,7 +1096,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1145,10 +1134,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1167,9 +1154,9 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  6   12.474756594326     -6.143E-04 7.978E-07 1.810E-02
  ETOT  7   12.474748682256     -7.912E-06 1.290E-08 2.291E-04
  ETOT  8   12.474748555373     -1.269E-07 2.639E-10 1.400E-06
- ETOT  9   12.474748554852     -5.210E-10 2.822E-12 3.207E-07
- ETOT 10   12.474748554638     -2.145E-10 4.796E-13 9.371E-09
- ETOT 11   12.474748554630     -8.129E-12 1.321E-14 4.044E-11
+ ETOT  9   12.474748554852     -5.209E-10 2.822E-12 3.207E-07
+ ETOT 10   12.474748554638     -2.144E-10 4.796E-13 9.371E-09
+ ETOT 11   12.474748554630     -8.185E-12 1.321E-14 4.044E-11
 
  At SCF step   11       vres2   =  4.04E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1206,10 +1193,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1225,11 +1210,11 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  3   9.4540329968114     -3.878E-01 1.554E-03 7.277E-01
  ETOT  4   9.4534889695674     -5.440E-04 7.238E-06 8.140E-02
  ETOT  5   9.4534365912163     -5.238E-05 1.403E-07 7.067E-03
- ETOT  6   9.4534316997557     -4.891E-06 1.021E-08 1.918E-05
+ ETOT  6   9.4534316997558     -4.891E-06 1.021E-08 1.918E-05
  ETOT  7   9.4534316904747     -9.281E-09 3.167E-11 1.657E-06
  ETOT  8   9.4534316896912     -7.834E-10 7.788E-13 5.961E-09
- ETOT  9   9.4534316896881     -3.126E-12 1.292E-14 1.264E-10
- ETOT 10   9.4534316896868     -1.307E-12 5.575E-16 2.450E-12
+ ETOT  9   9.4534316896881     -3.183E-12 1.292E-14 1.264E-10
+ ETOT 10   9.4534316896868     -1.279E-12 5.575E-16 2.450E-12
 
  At SCF step   10       vres2   =  2.45E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1399,8 +1384,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1416,7 +1401,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1458,10 +1442,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t41o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1481,7 +1463,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  7   12.215472494213     -3.475E-07 8.565E-10 4.786E-05
  ETOT  8   12.215472462311     -3.190E-08 4.380E-11 3.234E-07
  ETOT  9   12.215472462087     -2.241E-10 5.196E-13 4.797E-10
- ETOT 10   12.215472462086     -1.421E-12 3.869E-15 8.090E-12
+ ETOT 10   12.215472462086     -1.364E-12 3.869E-15 8.090E-12
 
  At SCF step   10       vres2   =  8.09E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2102,10 +2084,10 @@ P          mk1mem5         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         16.9  wall=         17.0
+- Proc.   0 individual time (sec): cpu=         16.6  wall=         16.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and  35 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.9  wall=         17.0
+.Delivered   6 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.6  wall=         16.9

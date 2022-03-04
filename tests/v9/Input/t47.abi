@@ -87,10 +87,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t13.abi, t14.abi, t100.abi
+#%% test_chain = t47.abi, t48.abi, t49.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t13.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%%   t47.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]

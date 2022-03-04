@@ -271,7 +271,7 @@ type, public :: dataset_type
  integer :: hmcsst
  integer :: hmctt
 !I
- real(dp) :: ibte_abs_tol = tol4
+ real(dp) :: ibte_abs_tol = -one
  real(dp) :: ibte_alpha_mix = 0.7_dp
  integer :: ibte_niter = 100
  integer :: ibte_prep = 0
@@ -2620,33 +2620,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_FREE(pertsy)
  ABI_FREE(rfpert)
 
-! Write YAML doc with the list of irreducible perturbations. Example.
-!
-!--- !IrredPerts
-!# List of irreducible perturbations
-!irred_perts:
-!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
-!    ipert : 1
-!    idir  : 1
-!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
-!    ipert : 2
-!    idir  : 1
-!..
- write(std_out,'(a)')"--- !IrredPerts"
- write(std_out,'(a)')'# List of irreducible perturbations'
- write(std_out,'(a)')'irred_perts:'
-
- do icase=1,npert
-   ipert = pert_calc(1,icase)
-   idir = pert_calc(2,icase)
-
-   write(std_out,'(a,3(f20.16,a))')"   - qpt: [ ",dtset%qptn(1),", ", dtset%qptn(2),", ", dtset%qptn(3),"]"
-   write(std_out,'(a,i0)')"     ipert: ",ipert
-   write(std_out,'(a,i0)')"     idir: ",idir
- end do
-
- write(std_out,'(a)')"..."
-
 ! ABI_MALLOC(pert_calc,(npert))
 ! do icase=1,npert
 !   pert_calc(icase) = pert_tmp(icase)
@@ -2733,6 +2706,35 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
    end do
 
  end do
+
+
+! Write YAML doc with the list of irreducible perturbations. Example.
+!
+!--- !IrredPerts
+!# List of irreducible perturbations
+!irred_perts:
+!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
+!    ipert: 1
+!    idir: 1
+!  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
+!    ipert: 2
+!    idir: 1
+!..
+ write(std_out,'(a)')"--- !IrredPerts"
+ write(std_out,'(a)')'# List of irreducible perturbations'
+ write(std_out,'(a)')'irred_perts:'
+
+ do icase=1,npert
+   ipert = pert_calc(1,icase)
+   idir = pert_calc(2,icase)
+
+   write(std_out,'(a,3(f20.16,a))')"   - qpt: [ ",dtset%qptn(1),", ", dtset%qptn(2),", ", dtset%qptn(3),"]"
+   write(std_out,'(a,i0)')"     ipert: ",ipert
+   write(std_out,'(a,i0)')"     idir: ",idir
+   write(std_out,'(a,i0)')"     nkpt_rbz: ",nkpt_rbz(icase)
+ end do
+
+ write(std_out,'(a)')"..."
 
  ABI_FREE(indkpt1)
  ABI_FREE(symq)
@@ -3209,8 +3211,8 @@ subroutine chkvars(string)
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brav brvltt builtintest'
- list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff'
- list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_rangePower bound_step bound_temp'
+ list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff bound_EFS bound_factors'
+ list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_penalty bound_rangePower bound_step bound_temp'
  list_vars=trim(list_vars)//' bs_algorithm bs_calctype bs_coulomb_term bs_coupling'
  list_vars=trim(list_vars)//' bs_interp_kmult bs_interp_m3_width bs_interp_method bs_interp_mode bs_interp_prep'
  list_vars=trim(list_vars)//' bs_interp_rl_nb bs_eh_cutoff bs_exchange_term bs_freq_mesh'
@@ -3265,10 +3267,11 @@ subroutine chkvars(string)
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
- list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_fixcoeff'
- list_vars=trim(list_vars)//' fit_EFS'
- list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
- list_vars=trim(list_vars)//' fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
+ list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_dispterms fit_fixcoeff'
+ list_vars=trim(list_vars)//' fit_EFS fit_factors'
+ list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_ncoeff_per_iatom'
+ list_vars=trim(list_vars)//' fit_nfixcoeff fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS'
+ list_vars=trim(list_vars)//' fit_nimposecoeff fit_imposecoeff fit_tolMSDS fit_tolGF'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
@@ -3364,7 +3367,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
