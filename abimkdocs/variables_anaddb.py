@@ -231,7 +231,7 @@ Frequency-dependent dielectric tensor flag.
   Set [[rfstrs]] = 1, 2, or 3 (preferably 3). Set [[rfatpol]] and [[rfdir]] to do a full calculation of phonons at Q=0.
   The frequencies are defined by the [[anaddb:nfreq]], [[anaddb:frmin]], [[anaddb:frmax]] variables.
   Also, the generalized Lyddane-Sachs-Teller relation will be used as an independent check of the dielectric tensor
-  at zero frequency (this for the directions defined in the phonon list 2. See [[anaddb:nph2l]].
+  at zero frequency (this for the directions defined in the phonon list 2, see [[anaddb:nph2l]]).
 
   * 2 --> Only the electronic dielectric tensor is calculated. It corresponds to a zero-frequency homogeneous field,
    with quenched atomic positions. For large band gap materials, this quantity is measurable because the
@@ -278,7 +278,7 @@ Variable(
     when the phonon spectrum is interpolated, or if the interatomic force constants have to be analysed in real space.
     Note that the Ewald contribution to the dynamical matrix consists of two terms: a G-space sum and
     and another (expensive) sum in R-space.
-    See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (71) to (75).
+    See [[cite:Gonze1997a]], equations (71) to (75).
     This approach is very accurate but the computation of the R-space sum is rather expensive, especially
     when one has to interpolate many q-points e.g. for PHDOS computations.
     See dipdip -1 option below for a faster algorithm.
@@ -740,11 +740,13 @@ file will be created containing a supercell of atoms with the corresponding
 phonon displacements frozen in. This is typically useful to freeze a soft
 phonon mode, then let it relax in abinit afterwards.
 
-**freeze_displ** is unitless, but has a physical meaning: it is related to the
+**freeze_displ** is unitless (for abinit), but has a physical meaning: it is related to the
 Bose distribution $n_B$ and the frequency $\omega_{qs}$ of the phonon mode. At a given
-temperature T, **freeze_displ** will give the mean square displacement of
-atoms (along with the displacement vectors, which are in Bohr). In atomic
-units **freeze_displ** = $\sqrt{(0.5 + n_B(\omega_{qs}/kT) / \omega_{qs}}$.
+temperature $T$, **freeze_displ** will give the root mean square displacement of
+atoms (along with the displacement vectors, which are in *Bohr*). In atomic
+units **freeze_displ** = $\sqrt{< \hat{x}^2 >} = \sqrt{(0.5 + n_B(\omega_{qs}/kT))/ \omega_{qs}}$
+where $\hat{x}\propto \hat{a} + \hat{a}^\dagger$ is the
+displacement operator and $a^\dagger$ and $a$ are the phonon creation and annihilation operators respectively.
 Typical values are 50-200 for a frequency of a few hundred cm$^{-1}$ and room temperature.
 If all you want is to break the symmetry in the right direction, any reasonable value
 (10-50) should be ok.
@@ -884,7 +886,7 @@ express the interatomic force constant matrix between pairs of atoms in that
 local coordinate reference (the first vector is along the bond; the second
 vector is along the perpendicular force exerted on the generic atom by a
 longitudinal displacement of the neighbouring atom - in case it does not
-vanish; the third vector is perpendicular to the two other) also calculate
+vanish; the third vector is perpendicular to the two others). Also calculate
 ratios with respect to the longitudinal force constant ( the (1,1) element of
 the matrix in local coordinates).
 """,
@@ -1026,7 +1028,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Unnormalized lattice vectors for the k-point grid in reciprocal space (see
-[[kptrlatt]] abinit variable definitionas well). Input needed in electron-phonon
+[[kptrlatt]] abinit variable definition as well). Input needed in electron-phonon
 calculations using nesting functions or tetrahedron integration.
 """,
 ),
@@ -1133,7 +1135,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable defines the number of divisions used to sample the smallest
-segment of the q-path used for the phonon band structure. If ndivsm is
+segment of the q-path used for the phonon band structure. If [[anaddb:ndivsm]] is
 specified in the input file, the code will automatically generate the points
 along the path using the coordinates given in the array [[anaddb:qpath]].
 """,
@@ -1198,7 +1200,8 @@ Variable(
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
 one described by [[anaddb:ng2qpt]]. The intermediate grids are defined for
-igrid=1... **ngrids**, by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/**ngrids**
+igrid=1... [[anaddb:ngrids]], by the numbers 
+ngqpt_igrid(ii)=(igrid ng2qpt(ii))/[[anaddb:ngrids]]s
 """,
 ),
 
@@ -1697,7 +1700,7 @@ Only if [[anaddb:ifcflag]]=1. The available options are:
   * 1 --> write out the SR/LR decomposition of the square of phonon frequencies at each q-point specified in [[anaddb:qph1l]].
 
 For details see [[cite:Ghosez1996]].
-See also [[anaddb:ifcflag]], [[anaddb:ifcflag]] and [[anaddb:dipdip]].
+See also [[anaddb:ifcflag]] and [[anaddb:dipdip]].
 """,
 ),
 
@@ -2361,7 +2364,7 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable specifies the name of the input file from which the list of 3 files containing the matrix
-elements of the velocity operator are obained
+elements of the velocity operator are obtained.
 
 This option is needed when anaddb is invoked with the new syntax:
 
@@ -2417,7 +2420,7 @@ Variable(
 This variable specifies the maximum phonon mode index (up to 3*natom)
 included in the computation of the phonon DOS
 
-Default is 0 i.e. all modes are included in the DOS.
+If set to 0, which is the default value, all modes are included in the DOS.
 """,
 ),
 

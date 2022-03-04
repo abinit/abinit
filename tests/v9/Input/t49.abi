@@ -1,8 +1,8 @@
 &FILES
- ddkfile_1 = 't13o_DS4_1WF4',
- ddkfile_2 = 't13o_DS5_1WF5',
- ddkfile_3 = 't13o_DS6_1WF6',
- wfkfile = 't13o_DS3_WFK'
+ ddkfile_1 = 't47o_DS4_1WF4',
+ ddkfile_2 = 't47o_DS5_1WF5',
+ ddkfile_3 = 't47o_DS6_1WF6',
+ wfkfile = 't47o_DS3_WFK'
 /
 &PARAMETERS
  broadening = 0.001,
@@ -11,6 +11,7 @@
  scissor = 0.000,
  tolerance = 0.001,
  do_antiresonant = .FALSE.,
+ prtlincompmatrixelements = 1,
 /
 &COMPUTATIONS
  num_lin_comp = 2,
@@ -23,18 +24,19 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = t13.abi, t14.abi, t100.abi
+#%% test_chain = t47.abi, t48.abi, t49.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t14_0001_0001-linopt.out          , tolnlines = 34,  tolabs = 7.0e-03, tolrel = 2.0e-02, fld_options = -easy;
-#%%   t14_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
+#%%   t49_0001_0001-linopt.out          , tolnlines = 34,  tolabs = 7.0e-03, tolrel = 2.0e-02, fld_options = -easy;
+#%%   t49_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
 #%%
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = M. Giantomassi
+#%% authors = F. Goudreault
 #%% keywords = 
 #%% description = 
 #%%  Iron BCC, ferromagnetic. PAW. GGA-PBE. nsppol=2. Code optic. Use DDK files in netcdf format. 
+#%%  Same as t48 but with 'prtlincompmatrixelements = 1'.
 #%% topics = Optic
 #%%<END TEST_INFO>
