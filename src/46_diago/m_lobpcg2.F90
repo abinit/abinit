@@ -11,7 +11,6 @@ module m_lobpcg2
   use m_xgTransposer
   use m_xgScalapack
   use defs_basis, only : std_err, std_out
-  use defs_abitypes, only : mpi_type
   use m_abicore
   use m_errors
   use m_xomp
@@ -78,8 +77,10 @@ module m_lobpcg2
     integer :: nline                         ! Number of line to perform
     integer :: spacecom                      ! Communicator for MPI
     integer :: paral_kgb                     ! paral_kgb formalism or not
-    integer :: nproc_fft                     ! number of proc for fft parallelization
-    integer :: nproc_band                    ! number oc proc for band parallelization
+    integer :: nproc_rows                    ! number of proc for rows
+    integer :: nproc_cols                    ! number oc proc for cols
+    integer :: comm_rows                     ! communicator for rows
+    integer :: comm_cols                     ! communicator for cols
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
     type(xgBlock_t) :: AllX0 ! Block of initial and final solution.
@@ -153,8 +154,8 @@ module m_lobpcg2
   contains
 
 
-  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, nproc_fft, nproc_band,&
-&      space, spacecom, paral_kgb)
+  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, nproc_rows, nproc_cols,&
+&      space, spacecom, paral_kgb, comm_rows, comm_cols)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -162,8 +163,9 @@ module m_lobpcg2
     integer         , intent(in   ) :: blockdim
     double precision, intent(in   ) :: tolerance
     integer         , intent(in   ) :: nline
-    integer         , intent(in   ) :: nproc_fft
-    integer         , intent(in   ) :: nproc_band
+    integer         , intent(in   ) :: nproc_rows
+    integer         , intent(in   ) :: nproc_cols
+    integer         , intent(in   ) :: comm_rows,comm_cols
     integer         , intent(in   ) :: space
     integer         , intent(in   ) :: spacecom
     integer         , intent(in   ) :: paral_kgb
@@ -186,8 +188,10 @@ module m_lobpcg2
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
     lobpcg%paral_kgb   = paral_kgb
-    lobpcg%nproc_fft   = nproc_fft
-    lobpcg%nproc_band  = nproc_band
+    lobpcg%nproc_rows  = nproc_rows
+    lobpcg%nproc_cols  = nproc_cols
+    lobpcg%comm_rows  = comm_rows
+    lobpcg%comm_cols  = comm_cols
 
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
@@ -332,10 +336,9 @@ module m_lobpcg2
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol, mpi_enreg, nspinor)
+  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol, nspinor)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
-    type(mpi_type) , intent(inout) :: mpi_enreg
     type(xgBlock_t), intent(inout) :: X0   ! Full initial vectors
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
     type(xgBlock_t), intent(inout) :: residu
@@ -346,7 +349,7 @@ module m_lobpcg2
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvalues2N   ! eigen values for Rayleight-Ritz
     integer :: blockdim, blockdim3, blockdim2
-    integer :: comm_fft_save,comm_band_save
+!    integer :: comm_fft_save,comm_band_save
     integer :: spacedim
     integer :: iblock, nblock
     integer :: iline, nline
@@ -416,18 +419,9 @@ module m_lobpcg2
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-        lobpcg%nproc_fft,lobpcg%nproc_band,STATE_LINALG,TRANS_ALL2ALL)
+        lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols)
       !call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-      !  lobpcg%nproc_fft,lobpcg%nproc_band,STATE_LINALG,TRANS_GATHER)
-
-      !save existing Abinit communicators
-      comm_fft_save = mpi_enreg%comm_fft
-      comm_band_save = mpi_enreg%comm_band
-
-      !set new communicators from Transposer so it can interact with getghc
-      !transpose correctly
-      mpi_enreg%comm_fft  = xgTransposer_getComm(lobpcg%xgTransposerX, 2)
-      mpi_enreg%comm_band = xgTransposer_getComm(lobpcg%xgTransposerX, 3)
+      !  lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_GATHER)
 
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
@@ -644,10 +638,6 @@ module m_lobpcg2
       call xgTransposer_free(lobpcg%xgTransposerW)
       call xgTransposer_free(lobpcg%xgTransposerAW)
       call xgTransposer_free(lobpcg%xgTransposerBW)
-
-      !Reset communicators to original Abinit values for rest of Abinit
-      mpi_enreg%comm_fft = comm_fft_save
-      mpi_enreg%comm_band = comm_band_save
     end if
 
     call timab(tim_run,2,tsec)

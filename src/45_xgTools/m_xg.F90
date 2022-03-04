@@ -475,7 +475,7 @@ module m_xg
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
-    xgBlock%trans = 't'
+      xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
         ABI_ERROR("Bad size for complex array")

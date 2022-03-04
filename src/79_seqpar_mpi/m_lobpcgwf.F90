@@ -216,15 +216,15 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
- call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,l_mpi_enreg%nproc_fft,&
-   l_mpi_enreg%nproc_band,space, l_mpi_enreg%comm_bandspinorfft,l_paral_kgb)
+ call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,l_mpi_enreg%nproc_fft*l_mpi_enreg%nproc_spinor,&
+   l_mpi_enreg%nproc_band,space, l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################
 
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu,prtvol,mpi_enreg,nspinor)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu,prtvol,nspinor)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)
@@ -255,14 +255,14 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    else
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
-      call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&       enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
-&       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
-&       gsc_dummy,l_tim_getghc, &
-&       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&       l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&       l_gvnlxc(:,:),&
-&       already_transposed=.false.)
+       call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&        gsc_dummy,l_tim_getghc, &
+&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&        l_gvnlxc(:,:),&
+&        already_transposed=.false.)
      end do
    end if
    !Compute enlout

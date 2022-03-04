@@ -110,11 +110,13 @@ module m_xgTransposer
 !! NAME
 !! xgTransposer_constructor
 
-  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,ncpuRows,ncpuCols,state,algo)
+  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,ncpuRows,ncpuCols,&
+      state,algo,comm_rows,comm_cols)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
     type(xgBlock_t), target, intent(in   ) :: xgBlock_colsrows
+    integer                , intent(in   ) :: comm_rows,comm_cols
     integer                , intent(in   ) :: nspinor
     integer                , intent(in   ) :: ncpuRows
     integer                , intent(in   ) :: ncpuCols
@@ -196,7 +198,7 @@ module m_xgTransposer
         xgTransposer%lookup(icol+1) = MOD(icol,ncpuCols)
       end do
 
-      call xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols)
+      call xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols,comm_rows,comm_cols)
       call xgTransposer_computeDistribution(xgTransposer)
       call xgTransposer_makeXgBlock(xgTransposer)
 
@@ -313,39 +315,55 @@ module m_xgTransposer
 !! NAME
 !! xgTransposer_makeComm
 
-  subroutine xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols)
+  subroutine xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols,comm_rows,comm_cols)
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer             , intent(in   ) :: ncpuRows
     integer             , intent(in   ) :: ncpuCols
+    integer             , intent(in   ) :: comm_rows,comm_cols
     integer :: commColsRows
 #if defined HAVE_MPI
     integer :: sizeGrid(2) !coordInGrid(2),
     logical :: periodic(2), selectDim(2), reorder
     integer :: ierr
 
-    sizeGrid(1) = ncpuCols
-    sizeGrid(2) = ncpuRows
-    !sizeGrid(1) = ncpuRows
-    !sizeGrid(2) = ncpuCols
-    periodic = (/ .false., .false. /)
-    reorder  = .false.
-    call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
-    if ( ierr /= xmpi_success ) then
-      ABI_ERROR("xgTransposer failed to creat cartesian grid")
-    end if
+    if (comm_cols /= xmpi_comm_null .and. comm_rows /= xmpi_comm_null) then
+      if ( ncpuRows /= xmpi_comm_size(comm_rows) ) then
+        ABI_ERROR("ncpuRows is not equal to the size of comm_rows!")
+      end if
+      if ( ncpuCols /= xmpi_comm_size(comm_cols) ) then
+        ABI_ERROR("ncpuCols is not equal to the size of comm_cols!")
+      end if
+      commColsRows = xgTransposer%mpiData(MPI_LINALG)%comm
+      if ( ncpuCols*ncpuRows /= xmpi_comm_size(commColsRows) ) then
+        ABI_ERROR("ncpuCols*ncpuRows is not equal to the size of comm_Cols!")
+      end if
+      xgTransposer%mpiData(MPI_ROWS)%comm = comm_rows
+      xgTransposer%mpiData(MPI_COLS)%comm = comm_cols
+    else
+      sizeGrid(1) = ncpuCols
+      sizeGrid(2) = ncpuRows
+      !sizeGrid(1) = ncpuRows
+      !sizeGrid(2) = ncpuCols
+      periodic = (/ .false., .false. /)
+      reorder  = .false.
+      call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
+      if ( ierr /= xmpi_success ) then
+        ABI_ERROR("xgTransposer failed to creat cartesian grid")
+      end if
 
-    selectDim = (/ .false., .true. /)
-    !selectDim = (/ .true., .false. /)
-    call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
-    if ( ierr /= xmpi_success ) then
-      ABI_ERROR("xgTransposer failed to creat rows communicator")
-    end if
-    selectDim = (/ .true., .false. /)
-    !selectDim = (/ .false., .true. /)
-    call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
-    if ( ierr /= xmpi_success ) then
-      ABI_ERROR("xgTransposer failed to creat columns communicator")
+      selectDim = (/ .false., .true. /)
+      !selectDim = (/ .true., .false. /)
+      call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
+      if ( ierr /= xmpi_success ) then
+        ABI_ERROR("xgTransposer failed to creat rows communicator")
+      end if
+      selectDim = (/ .true., .false. /)
+      !selectDim = (/ .false., .true. /)
+      call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
+      if ( ierr /= xmpi_success ) then
+        ABI_ERROR("xgTransposer failed to creat columns communicator")
+      end if
     end if
 #else
     commColsRows = xmpi_comm_null
@@ -884,18 +902,18 @@ module m_xgTransposer
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision :: tsec(2)
-    integer :: i
+!    integer :: i
 
     call timab(tim_free,1,tsec)
-#ifdef HAVE_MPI
-    if ( xgTransposer%type == TRANS_TYPE_CONSTRUCTED ) then
-      call mpi_comm_free(xgTransposer%mpiData(MPI_ROWS)%comm,i)
-      call mpi_comm_free(xgTransposer%mpiData(MPI_COLS)%comm,i)
-      call mpi_comm_free(xgTransposer%mpiData(MPI_2DCART)%comm,i)
-    end if
-#else
-    ABI_UNUSED(i)
-#endif
+!#ifdef HAVE_MPI
+!!    if ( xgTransposer%type == TRANS_TYPE_CONSTRUCTED ) then
+!!      call mpi_comm_free(xgTransposer%mpiData(MPI_ROWS)%comm,i)
+!!      call mpi_comm_free(xgTransposer%mpiData(MPI_COLS)%comm,i)
+!!      call mpi_comm_free(xgTransposer%mpiData(MPI_2DCART)%comm,i)
+!!    end if
+!#else
+!    ABI_UNUSED(i)
+!#endif
 
     if ( allocated(xgTransposer%lookup) ) then
       ABI_FREE(xgTransposer%lookup)
