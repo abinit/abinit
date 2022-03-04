@@ -103,6 +103,8 @@ contains
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
 !!  nattyp(ntypat)= # atoms of each type.
+!!  n1dq= third dimension of vlocal1_i1pertdq
+!!  n2dq= third dimension of vlocal1_i2pertdq
 !!  nfft= number of FFT grid points (for this proc) 
 !!  ngfft(1:18)=integer array with FFT box dimensions and other 
 !!  nkpt = number of k points
@@ -118,6 +120,10 @@ contains
 !!  rho2r1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3 (i2pert)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  ucvol=volume of the unit cell
+!!  vlocal1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
+!!          gradient Hamiltonian for i1pert
+!!  vlocal1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
+!!          gradient Hamiltonian for i2pert
 !!  vtrial1_i1pert(cplex*nfft,nspden)=firs-order local potential
 !!  vtrial1_i2pert(cplex*nfft,nspden)=firs-order local potential
 !!  ddk_f = wf files
@@ -140,14 +146,15 @@ contains
 !! SOURCE
 
 subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir,i2dir,i3dir,&
-& i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,nfft,ngfft,nkpt,&
+& i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
+& n1dq,n2dq,nfft,ngfft,nkpt,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,&
-& ucvol,vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
+& ucvol,vtrial1_i1pert,vlocal1_i1pertdq,vlocal1_i2pertdq,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
- integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,nfft,nkpt,nspden
+ integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nspden
  integer,intent(in) :: nspinor,nsppol
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -167,6 +174,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),intent(in) :: rho1g1(2,nfft),rho2r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: xccc3d1(cplex*nfft),xred(3,natom)
+ real(dp),intent(in) :: vlocal1_i1pertdq(2*nfft,nspden,n1dq)
+ real(dp),intent(in) :: vlocal1_i2pertdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: vtrial1_i1pert(cplex*nfft,nspden)
  real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
