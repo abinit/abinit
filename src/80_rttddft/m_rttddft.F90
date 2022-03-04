@@ -247,7 +247,6 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  logical                   :: tfw_activated
  real(dp)                  :: compch_sph
  real(dp)                  :: vxcavg
- real(dp)                  :: hyb_mixing,hyb_mixing_sr
  !arrays
  real(dp),allocatable      :: grchempottn(:,:)
  real(dp),allocatable      :: grewtn(:,:)
@@ -330,8 +329,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,   &
                 & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,tdks%ucvol,   &
                 & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,                &
-                & mpi_atmtab=mpi_enreg%my_atmtab,hyb_mixing=hyb_mixing,       &
-                & hyb_mixing_sr=hyb_mixing_sr,vpotzero=vpotzero)
+                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly
    !vpotzero(1) = -beta/ucvol
@@ -361,7 +359,6 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & tdks%vxc,tdks%xred,natvshift=dtset%natvshift,atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
-             & hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,                    &
              & nucdipmom=dtset%nucdipmom)
    
    !Symetrize Dij

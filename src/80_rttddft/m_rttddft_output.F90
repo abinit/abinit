@@ -32,6 +32,7 @@ module m_rttddft_output
  use defs_abitypes,   only: MPI_type
  use defs_datatypes,  only: pseudopotential_type, ebands_t
 
+ use m_common,        only: prteigrs
  use m_crystal,       only: crystal_init, crystal_t
  use m_dtfil,         only: datafiles_type
  use m_dtset,         only: dataset_type
@@ -128,8 +129,8 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
       else
          write(msg,'(a)') "# RT-TDDFT -- Energy file. All quantities are in Hartree atomic units."
          call wrtout(tdks%tdener_unit,msg)
-         write(msg,'(a)') "#   step    time      E_total      E_kinetic    E_hartree      E_xc        E_ewald   &
-                         & E_corepsp   E_localpsp   E_nonlocalpsp   E_paw       E_entropy     E_vdw"
+         write(msg,'(a)') "# step  time  E_total  E_kinetic  E_hartree  E_xc  E_ewald  &
+                         & E_corepsp  E_localpsp  E_nonlocalpsp  E_paw  E_entropy  E_vdw"
          call wrtout(tdks%tdener_unit,msg)
       end if
    end if
@@ -153,33 +154,123 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (do_write_log) call wrtout(std_out,msg)
 
  !Writes in energy file
- write(msg,'(i8,f10.5,11(f12.6,X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
+ write(msg,'(i8,f10.5,11(f14.8,X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
                                    & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
                                    & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
                                    & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
- !Special case of last step
- !prints last WF for restart and close TD_ENER file
- if (istep == tdks%first_step+tdks%ntime-1) then
-    if (mod(istep,dtset%td_prtstr) == 0) call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-    call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-    call prt_restart(dtfil,istep,mpi_enreg,tdks)
-    close(tdks%tdener_unit)
- else if (mod(istep,dtset%td_prtstr) == 0) then
+!!Special case of last step
+!!prints last WF for restart and close TD_ENER file
+!if (istep == tdks%first_step+tdks%ntime-1) then
+!   if (mod(istep,dtset%td_prtstr) == 0) then 
+!      call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+!      call prt_eig(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+!   end if
+!   call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+!   call prt_restart(dtfil,istep,mpi_enreg,tdks)
+!   close(tdks%tdener_unit)
+!else if (mod(istep,dtset%td_prtstr) == 0) then
+!   call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+!   if (dtset%prtwf > 0) then
+!      call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+!      call prt_restart(dtfil,istep,mpi_enreg,tdks)
+!   end if
+!end if
+
+ if (mod(istep,dtset%td_prtstr) == 0) then
     call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+    call prt_eig(dtfil,dtset,istep,mpi_enreg,tdks)
     if (dtset%prtwf > 0) then
        call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
        call prt_restart(dtfil,istep,mpi_enreg,tdks)
     end if
  end if
 
+ ! Special case of last step
+ if (istep == tdks%first_step+tdks%ntime-1) then
+    if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then 
+      call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+      call prt_restart(dtfil,istep,mpi_enreg,tdks)
+    end if
+    close(tdks%tdener_unit)
+ end if
+
 end subroutine rttddft_output
+
+!!****f* m_rttddft_output/prt_eig
+!!
+!! NAME
+!!  prt_eig
+!!
+!! FUNCTION
+!!  Outputs the eigenvalues
+!!
+!! INPUTS
+!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  istep <integer> = step number
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = the tdks object to initialize
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,                    intent(in)    :: istep
+ type(datafiles_type),       intent(inout) :: dtfil
+ type(dataset_type),         intent(inout) :: dtset
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(tdks_type),            intent(inout) :: tdks
+ !arrays
+ 
+ !Local variables-------------------------------
+ !scalars
+ integer,parameter     :: enunit=1, option=2
+ integer               :: me
+ integer               :: spacecomm
+ real(dp)              :: vxcavg_dum
+ character(len=fnlen)  :: fname
+ character(len=24)     :: step_nb
+ !arrays
+ real(dp)              :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
+
+! *************************************************************************
+
+ spacecomm = mpi_enreg%comm_cell
+ me = xmpi_comm_rank(spacecomm)
+
+ write(step_nb,*) istep
+ fname = trim(dtfil%filnam_ds(4))//'_EIG_'//trim(adjustl(step_nb))
+ resid = zero
+ vxcavg_dum=zero
+
+ if(me==0)then
+   call prteigrs(tdks%eigen,enunit,tdks%energies%e_fermie,tdks%energies%e_fermih,  & 
+               & fname,ab_out,dtset%iscf,dtset%kptns,dtset%kptopt,dtset%mband,     &
+               & dtset%nband,dtset%nbdbuf,dtset%nkpt,0,dtset%nsppol,tdks%occ,      &
+               & dtset%occopt, option,dtset%prteig,dtset%prtvol,resid,dtset%tolwfr, &
+               & vxcavg_dum,dtset%wtk)
+ end if
+
+end subroutine prt_eig
 
 !!****f* m_rttddft_output/prt_den
 !!
 !! NAME
-!!  prt_dens
+!!  prt_den
 !!
 !! FUNCTION
 !!  Computes and outputs the electronic density and/or DOS

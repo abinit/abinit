@@ -34,7 +34,6 @@ module m_rttddft_propagators
  
  use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
                                 & bandfft_kpt_set_ikpt, &
-                                & bandfft_kpt_get_ikpt, &
                                 & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
@@ -44,10 +43,13 @@ module m_rttddft_propagators
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
+ use m_nonlop,              only: nonlop
+ use m_pawcprj,             only: pawcprj_type
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_tdks,        only: tdks_type
+ use m_spacepar,            only: meanvalue_g
  use m_specialmsg,          only: wrtout
  use m_xmpi,                only: xmpi_comm_rank, xmpi_sum
 
@@ -116,36 +118,46 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  !scalars
  integer                        :: bdtot_index
  integer                        :: calc_forces
+ integer                        :: choice
+ integer                        :: cpopt
  integer                        :: dimffnl
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
+ integer                        :: iband
  integer                        :: icg
  integer                        :: ider, idir
  integer                        :: ierr, ilm
  integer                        :: ikpt, ikpt_loc, ikg
- integer                        :: ikpt_this_proc
+ integer                        :: isppol
  integer                        :: istwf_k
  integer                        :: me_distrb
  integer                        :: my_ikpt, my_nspinor
  integer                        :: nband_k
  integer                        :: npw_k, nkpg
- integer                        :: npw, nband
+ integer                        :: paw_opt
+ integer                        :: shift
+ integer                        :: signs
  integer                        :: spaceComm_distrb
- integer                        :: isppol
+ integer                        :: tim_getghc
  integer                        :: n4, n5, n6
  logical                        :: with_vxctau
  logical                        :: lstore_ene
+ real(dp)                       :: ar
  type(energies_type)            :: energies
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  !arrays
- integer,allocatable            :: kg_k(:,:)
- real(dp),allocatable           :: ffnl(:,:,:,:)
- real(dp),allocatable           :: kpg_k(:,:)
+ integer,  allocatable          :: kg_k(:,:)
+ real(dp), allocatable          :: enl(:)
+ real(dp), allocatable          :: ffnl(:,:,:,:)
+ real(dp)                       :: gvnlxc_dummy(0,0)
+ real(dp)                       :: gsc_dummy(0,0)
+ real(dp), allocatable          :: kpg_k(:,:)
  real(dp)                       :: kpoint(3)
- real(dp),allocatable           :: kinpw(:)
- real(dp),allocatable           :: ph3d(:,:,:)
- real(dp),allocatable           :: vlocal(:,:,:,:)
- real(dp),allocatable           :: vxctaulocal(:,:,:,:,:)
- real(dp),allocatable           :: ylm_k(:,:)
+ real(dp), allocatable          :: kinpw(:)
+ real(dp), allocatable          :: ph3d(:,:,:)
+ real(dp), allocatable          :: vlocal(:,:,:,:)
+ real(dp), allocatable          :: vxctaulocal(:,:,:,:,:)
+ real(dp), allocatable          :: ylm_k(:,:)
+ type(pawcprj_type)             :: cprj_dummy(gs_hamk%natom,0)
  
 ! ***********************************************************************
 
@@ -240,6 +252,8 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          cycle
       end if
 
+      write(400+me_distrb,*) 'proc ', me_distrb, 'kpt ', ikpt
+
       if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
       call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 
@@ -310,23 +324,38 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          end if
       end if
      
-      if (dtset%paral_kgb == 1) then
-         ikpt_this_proc = bandfft_kpt_get_ikpt()
-         npw = bandfft_kpt(ikpt_this_proc)%ndatarecv
-         nband = mpi_enreg%bandpp
-      else
-         npw = npw_k
-         nband = nband_k
+      if (lstore_ene) then
+         ! Compute energy components if required
+         ! Kinetic energy
+         do iband=1, nband_k
+            if (abs(tdks%occ(bdtot_index+iband))>tol8) then 
+               shift = icg+npw_k*my_nspinor*(iband-1)
+               call meanvalue_g(ar,gs_hamk%kinpw_k,0,gs_hamk%istwf_k,mpi_enreg,npw_k,my_nspinor, &
+                              & tdks%cg(:,shift+1:shift+npw_k*my_nspinor),tdks%cg(:,shift+1:shift+npw_k*my_nspinor),0)
+               energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*ar
+            end if
+         end do
+         ! Non local part for NC PSP
+         if (psps%usepaw == 0) then
+            choice=1; paw_opt=0; tim_getghc=5; cpopt=-1; signs=1
+            ABI_MALLOC(enl,(nband_k))
+            call nonlop(choice,cpopt,cprj_dummy,enl,gs_hamk,0,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
+                      & mpi_enreg,nband_k,1,paw_opt,signs,gsc_dummy,tim_getghc,tdks%cg(:,1+icg:),gvnlxc_dummy)
+            do iband=1, nband_k
+               energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*enl(iband)
+            end do
+            ABI_FREE(enl)
+         end if
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
       if (lstore_ene) then
-         !Also gather some contribution to the energy if needed
-         call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
-                               & gs_hamk,ikpt,1,mpi_enreg,nband,npw,my_nspinor,tdks%occ(1+bdtot_index:nband_k+bdtot_index),energies)
+         !Propagate cg and compute eigenvalues
+         call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor, &
+                               & eig=tdks%eigen(1+bdtot_index:nband_k+bdtot_index))
       else
-         call rttddft_exp_taylor(tdks%cg(:,icg+1:),dtset%dtele,dtset,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
-                               & gs_hamk,ikpt,1,mpi_enreg,nband,npw,my_nspinor,tdks%occ(1+bdtot_index:nband_k+bdtot_index))
+         !Propagate cg only
+         call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor)
       end if
 
       ABI_FREE(kg_k)
@@ -355,7 +384,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 
  !Keep the computed energies in memory
  if (lstore_ene) then
-   !FB: Is this the right communicator to use here?
+   !FB: Is this the right communicator to use here or should we ue spaceComm = comm_cell?
    call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kpt,ierr)
    call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kpt,ierr)
    call energies_copy(energies,tdks%energies)
@@ -441,7 +470,7 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
  lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
  ics = 0
  if (mpi_enreg%me == 0) then 
-   write(msg,'(a,a,i3,a,3(es8.2,x),l,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
+   write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
                                             & dtset%td_scthr, lconv, ch10
    if (do_write_log) call wrtout(std_out,msg)
  end if
@@ -462,7 +491,7 @@ subroutine rttddft_propagator_emr(dtset, gs_hamk, istep, mpi_enreg, psps, tdks)
       conv(2) = abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
       lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
       if (mpi_enreg%me == 0) then 
-         write(msg,'(a,a,i3,a,3(es8.2,x),l,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
+         write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
                                             & dtset%td_scthr, lconv, ch10
          if (do_write_log) call wrtout(std_out,msg)
       end if
