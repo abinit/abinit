@@ -425,7 +425,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
     & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
     & xccc3d1,dtset%ixcrot)
 
-
    !Accumulate the potential in meaningful arrays
    vhxc1_efield(iq2grad,:)=vtrial1(:,nspden)
 
