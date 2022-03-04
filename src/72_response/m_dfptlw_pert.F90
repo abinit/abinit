@@ -173,10 +173,16 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 !Variables ------------------------------------
 !scalars
- integer :: ii,me,spaceworld
+ integer :: ii,me,spaceworld,tim_getgh1c
  character(len=1000) :: msg
 !arrays
+ real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:)
+ real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
+ real(dp),allocatable :: vpsp1(:)
+ type(rf_hamiltonian_type) :: rf_hamkq_ddk
  type(rf_hamiltonian_type) :: rf_hamkq_i1pert, rf_hamkq_i2pert
+ type(rf_hamiltonian_type) :: rf_hamkq_i1pertdq, rf_hamkq_i2pertdq
+ type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
 ! *************************************************************************
 
@@ -192,7 +198,21 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  spaceworld=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt 
 
+!Additional definitions
+ tim_getgh1c=0
+
+!Additional allocations
+ ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_vpsp,(nfft))
+ ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(vpsp1,(cplex*nfft))
+ ABI_MALLOC(dum_cwaveprj,(0,0))
+
 !Initialize rf_hamiltonians (the k-dependent part is prepared in getgh1c_setup)
+ call init_rf_hamiltonian(cplex,gs_hamkq,natom+1,rf_hamkq_ddk,& 
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& mpi_spintab=mpi_enreg%my_isppoltab)
+
  call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq_i1pert,& 
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & mpi_spintab=mpi_enreg%my_isppoltab)
@@ -201,6 +221,17 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & mpi_spintab=mpi_enreg%my_isppoltab)
 
+ if (i1pert /= natom+2) then
+   call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq_i1pertdq,& 
+ & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+ & mpi_spintab=mpi_enreg%my_isppoltab)
+ end if
+
+ if (i2pert /= natom+2) then
+   call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pertdq,& 
+ & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+ & mpi_spintab=mpi_enreg%my_isppoltab)
+ end if
 
 
 
@@ -219,9 +250,11 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 
 
-
+ call rf_hamkq_ddk%free()
  call rf_hamkq_i1pert%free()
  call rf_hamkq_i2pert%free()
+ if (i1pert /= natom+2) call rf_hamkq_i1pertdq%free()
+ if (i2pert /= natom+2) call rf_hamkq_i2pertdq%free()
 
  DBG_EXIT("COLL")
 

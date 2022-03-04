@@ -150,7 +150,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  use m_dfpt_mkvxc,  only : dfpt_mkvxc
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
- use m_mklocl,      only : dfpt_vlocal, vlocalstr
+ use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vmetdqdq 
  use m_dfptlw_pert, only : dfptlw_pert
 
  implicit none
@@ -190,8 +190,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  integer :: ask_accurate,comm_cell,cplex,dkdk_index,formeig,g0term
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
  integer :: ierr,ireadwf,istr,mcg,me,mpsang
- integer :: n1,n2,n3,nhat1grdim,nfftotf,nspden,n3xccc,optene
- integer :: optorth,optres,pawread,pert1case,pert2case,pert3case,timrev,usexcnhat 
+ integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
+ integer :: opthartdqdq,optorth,optres,pawread
+ integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
  logical :: non_magnetic_xc
  character(len=500) :: message
@@ -206,9 +207,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
- real(dp),allocatable :: vhartr1(:),vpsp1(:),vresid_dum(:,:)
+ real(dp),allocatable :: vhartr1(:),vhart1dqdq(:),vpsp1(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
- real(dp),allocatable :: vxc1(:,:),work(:),xccc3d1(:)
+ real(dp),allocatable :: vlocal1_i1pertdq(:,:,:),vlocal1_i2pertdq(:,:,:)
+ real(dp),allocatable :: vxc1(:,:),vxc1dqdq(:),work(:),xccc3d1(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -229,6 +231,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  mpsang = psps%mpsang
  optorth=1;if (psps%usepaw==1) optorth=0
  non_magnetic_xc=.true.
+ opthartdqdq=1
 
  ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
@@ -265,6 +268,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  ABI_MALLOC(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(vresid_dum,(0,0))
  xccc3d1(:)=zero
+
+!Specific allocations for strain-gradient perturbation
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
+  ABI_MALLOC(vhart1dqdq,(2*nfftf))
+  ABI_MALLOC(vpsp1dqdq,(2*nfftf))
+  ABI_MALLOC(vxc1dqdq,(2*nfftf))
+ end if
 
 !This is necessary to deactivate paw options in the dfpt_rhotov routine
  ABI_MALLOC(pawrhoij_read,(0))
@@ -341,6 +351,17 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
        & vtrial1_i1pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
+       !Allocate the first-order gradient local potential
+       if (i1pert <= natom .or. i1pert <= natom+3) then
+         n1dq=1
+         ABI_MALLOC(vlocal1_i1pertdq,(cplex*nfftf,dtset%nspden,n1dq))
+       else if (i1pert <= natom+4) then
+         n1dq=2
+         ABI_MALLOC(vlocal1_i1pertdq,(cplex*nfftf,dtset%nspden,n1dq))
+       else
+         n1dq=1
+       end if
+
        do i2pert = 1, mpert
          do i2dir = 1, 3
        
@@ -401,12 +422,54 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
              & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
              & vtrial1_i2pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
+             !Allocate the first-order gradient local potential
+             if (i2pert <= natom .or. i2pert <= natom+3) then
+               n2dq=1
+               ABI_MALLOC(vlocal1_i2pertdq,(cplex*nfftf,dtset%nspden,n2dq))
+             else if (i2pert <= natom+4) then
+               n2dq=2
+               ABI_MALLOC(vlocal1_i2pertdq,(cplex*nfftf,dtset%nspden,n2dq))
+             else
+               n2dq=1
+             end if
+
              do i3pert = 1, mpert
                do i3dir = 1, 3
 
                  if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
 
                    blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+
+                   !Calculate local potentials for first-order gradient Hamiltonians
+                   !gradient of i1pert:
+                   if (i1pert<=natom) then
+                     !Get q-gradient of first-order local part of the pseudopotential
+                     call dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+                     & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vlocal1_i1pertdq(:,:,1))
+                   else if (i1pert==natom+3) then
+                     istr=i1dir
+                     !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
+                     !(and XC if GGA) contribution from ground state density
+                     call dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
+                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                     vlocal1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                   else if (i1pert==natom+4) then
+                     istr=3+i1dir
+                     call dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
+                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                     vlocal1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     istr=6+i1dir
+                     call dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
+                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                     vlocal1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                   end if
 
                    !Prepare ddk wf file
                    pert3case = i3dir + natom*3
@@ -472,10 +535,14 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                  end if   ! rfpert
                end do    ! ir3dir
              end do     ! ir3pert
+             
+             ABI_FREE(vlocal1_i2pertdq)
       
            end if   ! rfpert
          end do    ! i2dir
        end do     ! i2pert
+
+       ABI_FREE(vlocal1_i1pertdq)
 
      end if   ! rfpert
    end do    ! i1dir
@@ -503,6 +570,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  ABI_FREE(pawrhoij_read)
  ABI_FREE(ph1d)
 
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
+  ABI_FREE(vhart1dqdq)
+  ABI_FREE(vpsp1dqdq)
+  ABI_FREE(vxc1dqdq)
+ end if
 
  DBG_EXIT("COLL")
 
