@@ -188,18 +188,6 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
         dmatpuopt           1
-        dmftbandf1          0
-        dmftbandf2         25
-        dmftbandf3          0
-        dmftbandf4          0
-        dmftbandi1          0
-        dmftbandi2         21
-        dmftbandi3          0
-        dmftbandi4          0
-        dmft_solv1          5
-        dmft_solv2          0
-        dmft_solv3          5
-        dmft_solv4          5
              ecut      1.20000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
@@ -282,7 +270,6 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
                       -1.25000000E-01 -1.25000000E-01  3.75000000E-01
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.90420000E+01
-          kssform           3
             lpawu           2      -1      -1
 P           mkmem           2
            mqgrid1          0
@@ -295,12 +282,8 @@ P           mkmem           2
          mqgriddg4        300
             natom           5
             nband          50
-         nbandkss1          0
-         nbandkss2         -1
-         nbandkss3          0
-         nbandkss4          0
            nbdbuf1          0
-           nbdbuf2          4
+           nbdbuf2          2
            nbdbuf3          0
            nbdbuf4          0
            ndtset           4
@@ -629,10 +612,6 @@ P           mkmem           2
         optdriver2          0
         optdriver3          3
         optdriver4          4
-        optforces1          2
-        optforces2          0
-        optforces3          2
-        optforces4          2
 -      paral_atom1          1
 -      paral_atom2          1
 -      paral_atom3          0
@@ -640,14 +619,8 @@ P           mkmem           2
         pawecutdg      2.00000000E+01 Hartree
         pawoptosc           1
         pawprtvol           3
-     plowan_bandi1          0
-     plowan_bandi2         21
-     plowan_bandi3          0
-     plowan_bandi4          0
-     plowan_bandf1          0
-     plowan_bandf2         25
-     plowan_bandf3          0
-     plowan_bandf4          0
+     plowan_bandi          21
+     plowan_bandf          25
    plowan_compute1          0
    plowan_compute2          1
    plowan_compute3         10
@@ -671,10 +644,10 @@ P           mkmem           2
      plowan_lcalc2       2
      plowan_lcalc3       2
      plowan_lcalc4       2
-  plowan_projcalc1      -2
-  plowan_projcalc2      -2
-  plowan_projcalc3      -2
-  plowan_projcalc4      -2
+  plowan_projcalc1       5
+  plowan_projcalc2       5
+  plowan_projcalc3       5
+  plowan_projcalc4       5
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
@@ -695,10 +668,7 @@ P           mkmem           2
       ucrpa_bands2         -1      -1
       ucrpa_bands3         21      25
       ucrpa_bands4         -1      -1
-          usepawu1          1
-          usepawu2         10
-          usepawu3          1
-          usepawu4          1
+          usepawu           1
            useylm           1
               wtk        0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
                          0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
@@ -10288,6 +10258,11 @@ P newkpt: treating     50 bands with npw=     753 for ikpt=  30 by node   14
 P newkpt: treating     50 bands with npw=     753 for ikpt=  31 by node   15
 P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
+
+ ******************************************
+ DFT+U Method used: FLL
+ ******************************************
+
  =======================================================================
   == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
      (it is assumed that the wavefunction for the first reference 
@@ -10968,8 +10943,6 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
-  (This is PAW atomic orbital occupations)
-  (For Wannier orbital occupations, refer to DFT+DMFT occupations above)
 
  == Occupation matrix for correlated orbitals:
 
@@ -10985,14 +10958,14 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ======================================================================================
 
- == Start computation of Projected Local Orbitals Wannier functions ==  -1
+ == Start computation of Projected Local Orbitals Wannier functions ==   0
 
  == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
  
  Print the occupation levels (not normalized) for 1 atom, 1 orbitals
   Atom =           1 orbital =           2
@@ -11057,13 +11030,6 @@ force_length_stats: {min: null, max: null, mean: null, }
  32      -0.038       0.989       1.009       2.297       3.960
 
  Print the psichi coefficients in data.plowann
-
-======================================================================
- Calculating and writing out Kohn-Sham electronic Structure file
- Using conjugate gradient wavefunctions and energies (kssform=3)
- outkss: Not allowed options found !
- Program does not stop but _KSS file will not be created...
- outkss: see the log file for more information.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -12009,19 +11975,19 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
 
- == Lower and upper values of the selected bands    0    0
+ == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
 
  == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
 Reading of the Wannier weights from data.plowann
 
  == Lower and upper values of the selected bands   21   25
@@ -12029,7 +11995,7 @@ Reading of the Wannier weights from data.plowann
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
 
 
@@ -13011,19 +12977,19 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  cRPA calculations using wannier weights from data.plowann
 
- == Lower and upper values of the selected bands    0    0
+ == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
 
  == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
 Reading of the Wannier weights from data.plowann
 
  == Lower and upper values of the selected bands   21   25
@@ -13031,7 +12997,7 @@ Reading of the Wannier weights from data.plowann
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  5
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
@@ -13149,18 +13115,6 @@ Reading of the Wannier weights from data.plowann
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
         dmatpuopt           1
-        dmftbandf1          0
-        dmftbandf2         25
-        dmftbandf3          0
-        dmftbandf4          0
-        dmftbandi1          0
-        dmftbandi2         21
-        dmftbandi3          0
-        dmftbandi4          0
-        dmft_solv1          5
-        dmft_solv2          0
-        dmft_solv3          5
-        dmft_solv4          5
              ecut      1.20000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     0.00000000E+00 Hartree
@@ -13261,7 +13215,6 @@ Reading of the Wannier weights from data.plowann
                       -1.25000000E-01 -1.25000000E-01  3.75000000E-01
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.90420000E+01
-          kssform           3
             lpawu           2      -1      -1
 P           mkmem           2
            mqgrid1          0
@@ -13274,10 +13227,6 @@ P           mkmem           2
          mqgriddg4        300
             natom           5
             nband          50
-         nbandkss1          0
-         nbandkss2         -1
-         nbandkss3          0
-         nbandkss4          0
            nbdbuf1          0
            nbdbuf2          4
            nbdbuf3          0
@@ -14184,10 +14133,6 @@ P           mkmem           2
         optdriver2          0
         optdriver3          3
         optdriver4          4
-        optforces1          2
-        optforces2          0
-        optforces3          2
-        optforces4          2
 -      paral_atom1          1
 -      paral_atom2          1
 -      paral_atom3          0
@@ -14195,14 +14140,8 @@ P           mkmem           2
         pawecutdg      2.00000000E+01 Hartree
         pawoptosc           1
         pawprtvol           3
-     plowan_bandi1          0
-     plowan_bandi2         21
-     plowan_bandi3          0
-     plowan_bandi4          0
-     plowan_bandf1          0
-     plowan_bandf2         25
-     plowan_bandf3          0
-     plowan_bandf4          0
+     plowan_bandi          21
+     plowan_bandf          25
    plowan_compute1          0
    plowan_compute2          1
    plowan_compute3         10
@@ -14226,10 +14165,10 @@ P           mkmem           2
      plowan_lcalc2       2
      plowan_lcalc3       2
      plowan_lcalc4       2
-  plowan_projcalc1      -2
-  plowan_projcalc2      -2
-  plowan_projcalc3      -2
-  plowan_projcalc4      -2
+  plowan_projcalc1       5
+  plowan_projcalc2       5
+  plowan_projcalc3       5
+  plowan_projcalc4       5
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
@@ -14256,10 +14195,7 @@ P           mkmem           2
       ucrpa_bands2         -1      -1
       ucrpa_bands3         21      25
       ucrpa_bands4         -1      -1
-          usepawu1          1
-          usepawu2         10
-          usepawu3          1
-          usepawu4          1
+          usepawu           1
            useylm           1
               wtk        0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
                          0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
