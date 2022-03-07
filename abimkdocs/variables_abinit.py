@@ -1672,13 +1672,22 @@ to bypass the problem are made in the output file.
 When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
 in the output file suggestions to bypass the problem.
 
+When **chksymtnons** = 3, the code acts as with **chksymtnons** = 1, but then generates a FFT grid which is
+left invariant under the action of the spatial symmetry operations, which might enlarge it.
+In case of Constrained DFT calculations (see [[constraint_kind]]), only **chksymtnons** = 3 or **chksymtnons** = 0 are allowed.
+
 When **chksymtnons** = 0, the code skips the check.
 
 Explanation:
 In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
-However, for a GW or BSE calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault).
-In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+However, for a GW, BSE or cDFT calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault, or lack of convergence).
+
+For cDFT calculations, the local integral of magnetization or charge is evaluated in real space, on the FFT grid. So, if 
+the grids are locally different for two atoms related by symmetry (so in principle equivalent), there is a incoherency, that might induce
+lack of convergence.
+
+In the GW or BSE parts of ABINIT, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
@@ -1693,7 +1702,7 @@ the level of the ground-state calculations, although such warning might be irrel
 
 If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0 (only the latter for cDFT)..
 If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation,
 and corresponding translated atomic positions.
 """,
@@ -1760,8 +1769,9 @@ magnetization.
 When [[constraint_kind]] is 10 or above, the charge constraint will be imposed.
 
 When [[constraint_kind]]=1 or 11, the exact value (vector in the non-collinear case, amplitude and sign in the collinear case) of the magnetization is constrained;
-When [[constraint_kind]]=2 or 12, only the direction is constrained (only meaningful in the non-collinear case);
-When [[constraint_kind]]=3 or 13, only the magnitude is constrained.
+When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (only meaningful in the non-collinear case, albeit allowed);
+When [[constraint_kind]]=3 or 13, only the magnetization magnitude is constrained.
+When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case, not allowed in the collinear case);
 
 For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
 so the algorithm works only with [[iscf]] between 2 and 9.
@@ -1777,6 +1787,14 @@ Atoms of the same type are supposed to incur the same constraint.
 If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+Similarly, ABINIT is more careful about the control of symmetry: supposing that two atoms are related by some symmetry, then ABINIT
+generates a FFT grid that is invariant under that symmetry, unless this additional constraint on the FFT grid is explicitly suppressed by the user.
+In this respect, the default value of [[chksymtnons]] is not allowed, but [[chksymtnons]] must be equal to 3 (with the generation of a symmetric FFT grid) or 0.
+
+The difference between [[constraint_kind]]=4 or 14 and [[constraint_kind]]=2 or 12 lies in the fact that [[constraint_kind]]=2 or 12 will consider similarly
+a magnetization vector and its opposite, as this constraint is just alignment on an axis, while [[constraint_kind]]=4 or 14 enforces that
+the scalar product of the target magnetization direction (normalized vector) and the actual optimized magnetization direction (normalized vector) is positive.
 
 Incidentally, [[ionmov]]==4 is not allowed in the present implementation of constrained DFT because the motion of atoms and simultaneous computation of constraints would be difficult to handle.
 """,
@@ -3673,7 +3691,7 @@ Variable(
     abivarname="ecutwfn",
     varset="gw",
     vartype="real",
-    topics=['Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Susceptibility_expert', 'SelfEnergy_expert'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[optdriver]] in [3, 4]': '[[ecut]]', 'defaultval': 0.0}),
     mnemonics="Energy CUT-off for WaveFunctioNs",
@@ -3685,10 +3703,15 @@ Variable(
 represent the wavefunctions in the formula that generates the independent-
 particle susceptibility $\chi^{0}_{KS}$ (for [[optdriver]] = 3), or the self-
 energy (for [[optdriver]] = 4).
-Usually, [[ecutwfn]] is smaller than [[ecut]], so that the wavefunctions are
+
+Although this is not recommended, one is allowed to set [[ecutwfn]] smaller than [[ecut]], so that the wavefunctions are
 filtered, and some components are ignored. As a side effect, the wavefunctions
-are no more normalized, and also, no more orthogonal. Also, the set of plane
-waves can be much smaller for [[optdriver]] = 3, than for [[optdriver]] = 4,
+are no more normalized, and also, no more orthogonal. This also means
+that the q=0, Q=0 or q=0, Q'=0 matrix elements of the susceptibility are not zero
+as they should, which might be a problem in some cases depending on the intended usage of the
+susceptibility matrix beyond standard GW and BSE calculations.
+
+Anyhow, the set of plane waves can be much smaller for [[optdriver]] = 3, than for [[optdriver]] = 4,
 although a convergence study is needed to choose correctly both values.
 
 The size of this set of planewaves is [[npwwfn]].
@@ -4217,7 +4240,10 @@ The choice is among:
 * 6 --> Estimate correction to the ZPR in polar materials using the generalized Frohlich model. Requires EFMAS.nc file. See [[cite:Miglio2020]].
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
-        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task == -4.
+        Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
+* 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirement than for [[eph_task]]=6.
+         Reference B. Guster et al to be published (2021) or (2022).
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
@@ -4677,17 +4703,22 @@ convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[fock_icutcoul]] defines the particular expression to be used for the Fock
-operator in reciprocal space. The choice of [[fock_icutcoul]] depends on the
+operator in reciprocal space (see [[icutcoul]] for the Hartree contributions to ground state calculations,
+and [[gw_icutcoul]] for the corresponding treatment in GW calculations).
+
+The choice of [[fock_icutcoul]] depends on the
 dimensionality and the character of the XC functional used (or otherwise the
 presence of the exclusive treatment of the short-range exchange interaction).
 Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are available
 options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
-The corresponding influential variables are [[vcutgeo]] and [[rcut]].
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
-  * 2 --> (W.I.P.) surface.
-  * 3 --> 3D crystal (Coulomb interaction without cut-off).
+Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[rcut]].
+  * 3 --> (W.I.P) 3D crystal (Coulomb interaction without cut-off).
   * 4 --> (W.I.P.)ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
 
@@ -6110,13 +6141,15 @@ the convergence with respect to the number of q-points used to sample the
 Brillouin zone. The convergence can be accelerated by integrating accurately
 the zone in the neighborhood of $\mathbf{G}=0$.
 
-[[gw_icutcoul]] defines the particular expression to be used for such integration.
-It can be used in conjunction with its equivalent for the ground state electronic
-structure cut-off [[icutcoul]].
+[[gw_icutcoul]] defines the particular expression to be used for such integration
+in GW calculations. See [[icutcoul]] and [[fock_icutcoul]] for ground-state calculations.
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> cylinder (nanowires, nanotubes).
-  * 2 --> surface.
+Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
   * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
@@ -6125,6 +6158,11 @@ structure cut-off [[icutcoul]].
   * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
   * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
   * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+
+It was shown in [[cite:Rangel2020]] that the Monte-Carlo approach [[gw_icutcoul]]=16 converges somewhat
+faster as a function of the k-point sampling than the auxiliary function integration technique [[gw_icutcoul]]=6
+which is the current default.
+However, the initialization might take time.
 """,
 ),
 
@@ -6166,8 +6204,7 @@ the particular run-level (see discussion below).
 [[gw_nqlwl]] defines the number of directions in reciprocal space used to
 describe the non-analytical behaviour of the heads ($G = G'=0$) and the wings
 ($G=0$ or $G'=0$) of the dielectric matrix in the optical limit (i.e. for $q$
-tending to zero). The number of directions is specified by the additional
-variable [[gw_qlwl]].
+tending to zero). The number of directions is specified by the additional variable [[gw_qlwl]].
 
 When [[optdriver]] = 3, [[gw_nqlwl]] and **gw_qlwl** define the set of "small" $q$
 that will be calculated and stored in the final SCR file. Therefore, the two
@@ -6240,14 +6277,14 @@ value). This variable simplifies the specification of the list of kpoints and
 of the bands to be used for the computation of the quasi-particle corrections.
 The possible values are:
 
-  * 0 --> Compute the QP corrections only for the fundamental and the optical gap
+  * 0 --> Compute the QP corrections only for the fundamental and the direct gap
   * +num --> Compute the QP corrections for all the k-points in the irreducible zone,
      and include `num` bands above and below the Fermi level.
   * -num --> Compute the QP corrections for all the k-points in the irreducible zone.
      Include all occupied states and `num` empty states.
 
 The default value is 0 and is very handy for one-shot calculations. It is
-important to stress, however, that the position of the optical/fundamental
+important to stress, however, that the position of the direct/fundamental
 gaps is deduced from the energies computed on the k-mesh used for the WFK
 file. Therefore the computed gaps might differ from the correct ones that can
 only be obtained with an appropriate sampling of the irreducible zone.
@@ -7242,19 +7279,20 @@ Variable(
     abivarname="icoulomb",
     varset="gstate",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Index for the COULOMB treatment",
     added_in_version="before_v9",
     text=r"""
-Defines the type of computation used for Hartree potential, local part of
+Defines the type of computation (reciprocal space or real space) used for Hartree potential, local part of
 pseudo-potential and ion-ion interaction:
 
-  * [[icoulomb]] = 0: usual reciprocal space computation, using $1/\GG^2$ for the Hartree potential and using Ewald correction.
+  * [[icoulomb]] = 0: usual reciprocal space computation, using [[icutcoul]], [[gw_icutcoul]] and [[fock_icutcoul]]
+to define the Hartree potential, and using Ewald correction.
   * [[icoulomb]] = 1: free boundary conditions are used when the Hartree potential is computed,
     real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials)
-    and simple coulomb interaction gives the ion-ion energy.
+    and simple coulomb interaction gives the ion-ion energy. The wavelet Coulomb solver is used in this case.
 """,
 ),
 
@@ -7262,7 +7300,7 @@ Variable(
     abivarname="icutcoul",
     varset="gstate",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_basic'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
@@ -7277,13 +7315,17 @@ convergence, or even can make convergence happen. Also, even in the ground-state
 case, a cut-off Coulomb interaction might prove useful.
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
-in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
-of the system. Possible values of [[icutcoul]] are from 0 to 5. The
-corresponding influential variables are [[vcutgeo]] and [[rcut]].
+in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
+and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
+.
+The choice of [[icutcoul]] depends on the dimensionality
+of the system. Possible values of [[icutcoul]] are from 0 to 5.
+For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
 
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes).
-  * 2 --> surface.
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
+  * 2 --> Surface. See [[vcutgeo]] and [[rcut]].
   * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional). (W.I.P.)
@@ -9920,7 +9962,7 @@ Variable(
 Turns on the imposition of a constraint on the magnetization, using a penalty function. For
 each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and
 a penalty function is applied to bring it to the input values of [[spinat]].
-The constraint can be either on the direction only ([[magconon]] = 1) or on the full
+The constraint can be either on the direction/axis only ([[magconon]] = 1) or on the full
 vector ([[magconon]] = 2). The penalty function has an amplitude
 [[magcon_lambda]] that should be neither too big (bad or impossible convergence) nor too small (no effect).
 The penalty function is documented in [[cite:Ma2015]] as being a Lagrange
@@ -9928,6 +9970,10 @@ approach, which is a misnomer for the algorithm that they describe. It has the d
 the exact sought value for the magnetization. So, the true Lagrange approach has to be preferred, except for testing purposes.
 This is provided by the algorithm governed by the input variable [[constraint_kind]], which is actually also much more flexible
 than the implementation corresponding to [[magconon]].
+
+Final subtlety: when [[magconon]] = 1, if [[nspden]]==2 (collinear case), then the direction of magnetization is constraint (positive or negative along z),
+while if [[nspden]]==4, then the axis of magnetization is constraint (the actual direction is not imposed, both directions are equivalent). This might be
+confusing.
 """,
 ),
 
@@ -10657,6 +10703,17 @@ Variable(
 [[nbdbuf]] gives the number of bands, the highest in energy, that, among the
 [[nband]] bands, are to be considered as part of a buffer.
 A negative value is interpreted as percentage of [[nband]] (added in v9).
+
+
+!!! important
+
+    The default value is usually too small, especially when performing GS NSCF calculations.
+    In this case, it is strongly recommended to specify nbdbuf in the input and increase [[nband]] accordingly.
+    For small systems (e.g. Silicon), nbdbuf = 4 is OK so using `nband 12 and nbdbuf = 4`
+    will give a band structure with the first 8 bands converged within [[tolwfr]].
+    For more complex systems and/or GS NSCF calculations with many empty states, one usually needs
+    to increase [[nbdbuf]], let's say 10% of [[nband]].
+
 
 This concept is useful in three situations: in non-self-consistent calculations, for the
 determination of the convergence tolerance; for response functions of metals,
@@ -12028,8 +12085,7 @@ Variable(
 This parameter is used in connection to the parallelization over
 perturbations (see [[paral_rf]] ), for a linear response calculation.
 [[nppert]] gives the number of processors among which the work load over the
-perturbation level is shared. It can even be specified separately for each
-dataset.
+perturbation level is shared. It can even be specified separately for each dataset.
 """,
 ),
 
@@ -16812,16 +16868,16 @@ Radius for extra spheres the DOS is projected into. See [[natsph_extra]] and
 
 Variable(
     abivarname="rcut",
-    varset="gw",
+    varset="gstate",
     vartype="real",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Radius of the CUT-off for coulomb interaction",
     added_in_version="before_v9",
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
-is governed by the cutoff shape option [[icutcoul]].
+is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the primitive cell.
@@ -17396,7 +17452,7 @@ Variable(
     mnemonics="Response Function with respect to STRainS with the energy REFerence at the average electrostatic potential",
     added_in_version="v9",
     text=r"""
-If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the reference energy placed at the average electrostatic potential. The later is the reference adopted in the longwave driver. First-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, in the calculation of absolute deformation potentials [[cite:Stengel2015]].   
+If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the reference energy placed at the average electrostatic potential. The later is the reference adopted in the longwave driver. First-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, in the calculation of absolute deformation potentials [[cite:Stengel2015]].
 """,
 ),
 
@@ -18399,13 +18455,15 @@ Indeed in the first case, it is supposed that the magnetization vector is not af
 (so-called black and white symmetry groups).
 By contrast, in the second case, the real space symmetry operations act on the magnetization vector.
 The rationale for such different treatment comes from the fact that the treatment of spin-orbit coupling is incompatible with collinear magnetism [[nspden]]=2,
-so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=2
+so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=4
 will include spin-orbit coupling. The symmetry operations should thus act coherently on the spin-orbit coupling, which implies
 that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with
 [[nspden]]=4, even with [[symafm]]=1,
 symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
 Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
 is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case.
+Note that real-space operations act on the magnetization as an axial vector, not as a normal vector. For example, the inversion symmetry 
+does not change the magnetization vector.
 
 Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
 The electron on the first H atom might be 1s spin up, and the electron on the second atom might be 1s spin down.
@@ -20032,22 +20090,22 @@ planes of constant reduced coordinates in the investigated direction, must be em
 
 Variable(
     abivarname="vcutgeo",
-    varset="gw",
+    varset="gstate",
     vartype="real",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
+    topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions=[3],
     defaultval=MultipleValue(number=3, value=0.0),
     mnemonics="V (potential) CUT-off GEOmetry",
     requires="[[icutcoul]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
-[[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
-used to truncate the Coulomb interaction, as well as the particular approach
-to be used. It has a meaning only for a periodic one-dimensional system, typically
+[[vcutgeo]] is used in conjunction with [[icutcoul]], [[fock_icutcoul]] and/or [[gw_icutcoul]]
+to specify the geometry used to truncate the Coulomb interaction, as well as the particular approach
+to be used. It has a meaning either for a periodic one-dimensional system, typically
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells (([[icutcoul]] = 2). For each
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
 of the methods)
@@ -21366,7 +21424,8 @@ produced at the end of the ground-state calculation. Remember to set [[iomode]] 
 
 The form factors are needed to compute the matrix elements of the commutator [Vnl, r]
 of the non-local part of the (NC) pseudopotentials.
-This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo.
+This WFK file can therefore be used to perform optical and/or many-body calculations with external
+codes such as DP/EXC and Yambo.
 The option is ignored if PAW.
 
 !!! important
@@ -21399,7 +21458,7 @@ The set of bands can be specified either with [[sigma_erange]] or [[gw_qprange]]
 
 !!! important
 
-    sigma_ngkpt and [[nkptgw]] and are mutually exclusive.
+    sigma_ngkpt and [[nkptgw]] are mutually exclusive.
 """,
 ),
 
@@ -21452,25 +21511,44 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 
-This variable defines the quantity to compute starting from a previously generated WFK file.
+This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 
-  * "wfk_full" --> Read WFK file and produce new WFK file with k-points in the full BZ.
-        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-        This option can be used to interface Abinit with external tools requiring k-points in the full BZ.
+  * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
+     Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
+     This option can be used to interface Abinit with external tools (e.g. lobster)
+     requiring $\kk$-points in the full BZ.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate band structure using the parameters specified by [[einterp]].
+  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
+     using the parameters specified by [[einterp]].
 
-  * "wfk_ddk" --> Compute DDK matrix elements for all bands and k-points in the WFK file.
-     The contribution due to the non-local part of the pseudopotential can be ignored
-     by setting [[inclvkb]] = 0 (not recommended unless you know what you are doing).
+  * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
+     The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
+     operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
+     These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
+     without having to call the DFPT part that is much more expensive at the level of memory.
 
-  * "wfk_kpts_erange" --> Read WFK file,
-        use star-function and [[einterp]] parameters to interpolate electron energies onto fine k-mesh
-        defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
-        Find k-points inside (electron/hole) pockets according to the values specified in [[sigma_erange]].
-        Write KERANGE.nc file with the tables required by the code to automate NSCF band structure calculations
-        inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+     Please note that, at present, the computation of non-linear optical properties in optic requires
+     [[kptopt]] = 3 i.e. $\kk$-points in the full BZ whereas the computation of linear optical properties
+     can take advantage of spatial and time-reversal symmetries.
+     If you use **wfk_ddk** to generate input files for optics, please make sure that your input WFK file
+     has the correct value of [[kptopt]] according to the physical properties you want to compute.
+
+     In other words, don't use a WFK with [[kptopt]] != 3 if you plan to compute non-linear optical properties.
+     To work around the limitation of the non-linear part of optics, one can use "wfk_optics_fullbz"
+     to generate WKF and EVK files in the full BZ starting from a WFK defined in the IBZ.
+
+  * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
+     and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
+     This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
+     in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
+     less memory demanding.
+
+  * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
+     electron energies onto fine k-mesh defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+     Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
+     Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
+     inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 """,
 ),
 
@@ -21606,12 +21684,26 @@ Variable(
     varset="eph",
     topics=['ElPhonInt_expert'],
     vartype="real",
-    defaultval="1e-4",
+    defaultval=-1.0,
     dimensions="scalar",
-    mnemonics="Iterative Boltzmann Equation: ALPHA TOLerance for convergence",
+    mnemonics="Iterative Boltzmann Equation: ABSolute TOLerance for convergence",
     added_in_version="9.3.0",
     text=r"""
-This variable is still under development.
+This variable defines the absolute tolerance used to stop the iterative solution of the Boltzmann equation.
+The code stops the iterations when $$ \max_\kk |{\bm F}_\kk^i - {\bm F}_\kk^{i-1}| $$
+is less than [[ibte_abs_tol]] where $${\bm F}_\kk^i$$ is the solution at iteration step i.
+
+Note, however, that the absolute value of $${\bm F}$$ strongly depends on the position of the Fermi level
+that in turns defines the free carrier density.
+As a consequence, the value of [[ibte_abs_tol]] should be adjusted according to the system
+under investigation.
+
+Since this procedure is not very practical, it's much easier to use a negative value
+for [[ibte_abs_tol]] (default behaviour) and let the code
+automatically define the convergence threshold from the free carrier density computed at runtime.
+
+According to numerical tests, a reasonable value of [[ibte_abs_tol]] can be estimated using
+1e-20 * carrier_density in cm^-3.
 """,
 ),
 
@@ -21798,6 +21890,7 @@ Other options (again for testing purposes):
     1: --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
            This is the standard approach for polar materials.
     -1:  --> Remove LR model when building W(R,r). DO NOT reintroduce it after the Fourier interpolation.
+    2:   --> Similar to 1 but include only the dipole part. Q* are set to zero even if the DDB file contains them.
     4, 5, 6: --> Use model for the LR part only:
 
            4: --> Use dipole + quadrupole part
@@ -22680,7 +22773,7 @@ Variable(
 This variable allows one to save memory in the RMM-DIIS eigensolver when [[rmm_diis]] /= 0.
 By default, the RMM-DIIS routine allocates two extra arrays to reduce the number of applications of the Hamiltonian.
 The size of these arrays depends on the number of plane-waves treated by each processor and [[nband]].
-The amount of memory scales with [[npband]] and [[npfft] yet this extra memory is not negligible and the code
+The amount of memory scales with [[npband]] and [[npfft]] yet this extra memory is not negligible and the code
 may go out of memory for large systems.
 In this case, one can use [[rmm_diis_savemem]] = 1 to activate a version of RMM-DIIS that avoids these extra allocations.
 """,
@@ -22762,6 +22855,30 @@ Variable(
     text=r"""
 
 Same meaning as [[quadquad@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="use_oldchi",
+    varset="gw",
+    vartype="integer",
+    topics=['Susceptibility_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics=r"USE OLD CHI implementation for evaluating $\chi^{0}$ with eigenvalues taken from a QPS file",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[optdriver]] == 3",
+    added_in_version="9.5.2",
+    text=r"""
+This input variable defines whether to keep the old implementation in which the polarizability
+$\chi^{0}$ is evaluated when the eigenvalues are read from an existing QPS file (e.g. in quasiparticle
+self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting point.)
+
+* 0 --> Do not use the old implementation.
+
+* 1 --> Keep the old implementation.
+
+See line 743 in src/95_drive/screening.F90 .
 """,
 ),
 

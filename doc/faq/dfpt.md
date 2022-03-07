@@ -10,14 +10,17 @@ This page collects FAQs related to the DFPT part of Abinit.
 
 No, the DFPT code uses a completely different parallel algorithm in which
 the workload and memory is automatically distributed at runtime depending on the
-number of MPI processes and the perburbation to be computed.
+number of MPI processes and the perburbation to be computed. The parallelism is over the
+k points and the bands, so whatever the size of the system, one can use several dozen processors efficiently.
 
-In principle it is possible to parallelize over the perturbations
+In principle it is also possible to parallelize over the perturbations
 (see [[paral_rf]] and [[nppert]]) but keep in mind that this approach is not optimal
 from the point of view of the worload distribution as each perturbation has its own list of irreducible k-points
 (see discussion below).
 Moreover if one perturbation does not converge withing [[nstep]] iterations,
 ABINIT will abort and we may end up with zero DDB files produced!
+Finally, it is also possible to run different d points concurrently (with different ABINIT runs), and to merge their DDB files.
+The workflows with Abipy can do the launch of many concurrent jobs for you.
 
 ## How to get the irreducible q-points for phonon calculations
 
@@ -33,7 +36,8 @@ Also, don't forget to set [[shiftk]] to 0 0 0, in order to get a non-shifted gri
 From the header of the log or output file, the [[kpt]] points can be copied directly to the phonon input file, as q-points.
 
 One can also use this one, but one should change the output format
-abistruct.py abikmesh si.cif --ngkpt 2 2 2 --shiftk 0 0 0
+
+    abistruct.py abikmesh si.cif --ngkpt 2 2 2 --shiftk 0 0 0
 
 ## warning The dynamical matrix was incomplete
 
@@ -55,13 +59,13 @@ Follow out the whole of the rf tutorials and you will see the phonon frequencies
 
 Each perturbation breaks the initial symmetry of the crystal thus only a subset of the
 crystalline symmetries can be used to define the irreducible set of wavevectors used in the DFPT equations.
-For instance, phonon calculations at $Gamma$ are much faster that calculations done at non-zero $\qq$-points
+For instance, phonon calculations at $\Gamma$ are much faster that calculations done at non-zero $\qq$-points
 since more symmetries can be exploited.
-Note, however, that even perturbations with the same $\qq$-point may have a different workload
+Note, however, that even perturbations with the same $\qq$-point may have a different workload.
 For best performance, each perturbation should be in principle computed in a different run and with a different
 number of MPI procs.
 
-## What do I do if a perturbation does not converge?
+## What to do if a perturbation does not converge?
 
 Firs of all, try to restart from the first-order WFK file using [[ird1wf]], [[get1wf]].
 In principle, it is also possible to restart from the first-order density via [[get1den]]
@@ -69,19 +73,16 @@ but use this approach only if the first-order WFK file is not available.
 You may want to use [[prtwf]] = -1 in the DFPT part to produce the first-order WFK file only
 when the DFPT SCF cycle does not converge in order to reduce the amount of data written to disk.
 
-You may also try to increase [[nline]]
+You may also try to increase [[nline]].
 
-## Is it a good idea to compute all the perturbations with a single input file?
+## Is it a good idea to compute all the perturbations in parallel with a single input file?
 
-If you care about perfomance, the answer is **definitely NO!"**
+If you care about perfomance, the answer is **definitely NO!**
 As already mentioned, each perturbation has a different workload so it is much better
-the compute the different perturbations with separated input file and use more MPI processes
+the compute the different perturbations with separate input file and use more MPI processes
 for the heaviest perturbations.
-Note also that ...
 
 ## Is there an easy way to compute the phonon band structure from the DDB file?
-
-|abiview|
 
 ```
 abiview.py ddb DDB_FILE

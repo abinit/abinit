@@ -295,7 +295,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr,hdr_den
  type(extfpmd_type),pointer :: extfpmd => null()
- type(macro_uj_type) :: dtpawuj(0)
+ type(macro_uj_type) :: dtpawuj(1)
  type(orbmag_type) :: dtorbmag
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
@@ -413,6 +413,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! to be generated from the original simulation cell
  rprimd_for_kg=rprimd
  if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
+ if (dtset%optcell/=0.and.dtset%imgmov/=0) rprimd_for_kg=args_gs%rprimd_orig
  call matr3inv(rprimd_for_kg,gprimd_for_kg)
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
@@ -431,7 +432,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -1031,7 +1032,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
+&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
  end if
 
@@ -1797,7 +1798,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
    call destroy_invovl(dtset%nkpt)
  end if
 
@@ -2086,28 +2087,16 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 
  if(dtset%tfkinfunc==0)then
    if (me == master) then
-     ! CP modified
-     !call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
-!     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,ab_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,std_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
-      ! End CP modified
    end if
 
 #if defined HAVE_NETCDF
