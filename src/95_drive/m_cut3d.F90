@@ -52,7 +52,6 @@ MODULE m_cut3d
  use m_fftcore,          only : sphereboundary
  use m_initylmg,         only : initylmg
  use m_fft,              only : fourwf
- use m_extfpmd,          only : extfpmd_prt_cg
 
  implicit none
 
@@ -1906,11 +1905,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self)
      call wfk%read_band_block([1,nband(ckpt)],ckpt,csppol,xmpio_single,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
      call wfk%close()
-
-!    Blanchet - Print planewaves coefficients in a custom format.
-     call extfpmd_prt_cg(cg_k,ckpt,cspinor,ecut,exchn2n3d,gmet,gprimd,istwfk,&
-     & kpt,mcg,mpi_enreg,mpw,nband,nkpt,npwarr,nspinor,nsppol,wfk_fname)
-
    end if
 
    if (csppol/=oldcsppol .or. ckpt/=oldckpt .or. cband/=oldcband .or. cspinor/=oldcspinor ) then
