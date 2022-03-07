@@ -94,9 +94,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-!!
+  !!
   !! CHILDREN
-!!
+  !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nfftf,nspden,rprimd,version)
     ! Arguments -------------------------------
@@ -143,9 +143,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-!!
+  !!
   !! CHILDREN
-!!
+  !!
   !! SOURCE
   subroutine destroy(this)
 
@@ -194,9 +194,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-!!
+  !!
   !! CHILDREN
-!!
+  !!
   !! SOURCE
   subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
     ! Arguments -------------------------------
@@ -312,9 +312,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-!!
+  !!
   !! CHILDREN
-!!
+  !!
   !! SOURCE
   subroutine compute_nelect(this,fermie,nelect,tsmear)
     ! Arguments -------------------------------
@@ -377,24 +377,21 @@ contains
   !! INPUTS
   !!  this=extfpmd_type object concerned
   !!  fermie=chemical potential (Hartree)
-  !!  nfftf=number of points in the fine FFT mesh (for this processor)
-  !!  nspden=number of spin-density components
   !!  tsmear=smearing width (or temperature)
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-!!
+  !!
   !! CHILDREN
-!!
+  !!
   !! SOURCE
-  subroutine compute_e_kinetic(this,fermie,nfftf,nspden,tsmear)
+  subroutine compute_e_kinetic(this,fermie,tsmear)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     real(dp),intent(in) :: fermie,tsmear
-    integer,intent(in) :: nfftf,nspden
 
     ! Local variables -------------------------
     ! Scalars
@@ -463,9 +460,9 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! PARENTS
-!!
+  !!
   !! CHILDREN
-!!
+  !!
   !! SOURCE
   subroutine compute_entropy(this,fermie,tsmear)
     ! Arguments -------------------------------

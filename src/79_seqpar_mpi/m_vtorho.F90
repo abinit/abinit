@@ -1208,8 +1208,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,nfftf,dtset%nspden,&
-&       dtset%tsmear)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
      end if
 
