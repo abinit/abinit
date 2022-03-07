@@ -130,7 +130,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  integer :: my_rank,ncell_alone,ncell,nproc
  integer :: npcell,nprpt,virt_rank
  integer :: master = 0
- logical :: iam_master = .false.
+ logical :: iam_master
  character(len=500) :: msg
 !array
  integer :: cell_atom2(3)
@@ -149,6 +149,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 
 !MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = .false.
  iam_master = (my_rank == master)
 
 

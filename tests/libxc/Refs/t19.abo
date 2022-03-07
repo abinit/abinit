@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2021 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t19/t19.in
-- output file    -> t19.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/libxc_t19/t19.abi
+- output file    -> t19.abo
 - root for input  files -> t19i
 - root for output files -> t19o
 
@@ -34,7 +34,7 @@
 -    mband =           8        mffmem =           1         mkmem =           6
        mpw =        1049          nfft =       27000          nkpt =           6
 ================================================================================
-P This job should need less than                       8.713 Mbytes of memory.
+P This job should need less than                       9.489 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.770 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.770 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           1
        mpw =         519          nfft =       27000          nkpt =           1
 ================================================================================
-P This job should need less than                       5.253 Mbytes of memory.
+P This job should need less than                       5.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -226,8 +226,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12417
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -391,8 +391,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12417
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -574,7 +574,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.97E-17  1.81E-17  1.86E-17  1.27E-17  5.16E-17  9.14E-17  9.68E-17  1.18E-16
  -7.0412E-01 -1.9882E-01 -1.9882E-01 -1.9882E-01  3.4098E-01  5.7570E-01
   5.7570E-01  5.7570E-01
-  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.17875E-16
 
 
 Result for kinetic energy density :
@@ -796,7 +795,7 @@ P           mkmem3          1
 -
 - [3] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -835,10 +834,10 @@ P           mkmem3          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         12.3  wall=         14.6
+- Proc.   0 individual time (sec): cpu=         12.8  wall=         12.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.3  wall=         14.6
+.Delivered   8 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.8  wall=         12.9

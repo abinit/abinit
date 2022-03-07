@@ -1815,7 +1815,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          ABI_MALLOC(rho1wfg,(2,dtset%nfft))
          ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
            occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
@@ -1824,7 +1824,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          !SPr: need to modify dfpt_mkrho to taken into account q,-q and set proper formulas when +q and -q spinors are related
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
            occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
        end if
@@ -2172,14 +2172,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call eigen_meandege(eigen0,eigen1,eigen1_mean,dtset%mband,nband_rbz,nkpt_rbz,dtset%nsppol,1)
      option=4
      if (me == master) then
-       ! CP modified
-       !call prteigrs(eigen1_mean,dtset%enunit,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
-!&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
-!&       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
        call prteigrs(eigen1_mean,dtset%enunit,fermie,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
-&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
+&       dtset%mband,nband_rbz,dtset%nbdbuf,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
 &       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
-       ! End CP modified
      end if
      ABI_FREE(eigen1_mean)
    end if

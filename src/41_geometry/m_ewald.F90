@@ -98,8 +98,8 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term,zcut
- !character(len=500) :: msg
+ real(dp) :: t1,term ,zcut
+ !character(len=500) :: message
 !arrays
  real(dp),allocatable :: gcutoff(:)
 
@@ -126,11 +126,21 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
+zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
 if(icutcoul.eq.1) then
    eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
- else if (icutcoul.eq.2) then
-   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
-   eta=SQRT(8.0_dp/zcut)
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=217.6_dp/zcut**2.0_dp
+!   eta=1.0_dp/zcut**2.0_dp
+!   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=SQRT(8.0_dp/zcut)
+!   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
+! else if (icutcoul.eq.2) then
+!   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+!   eta=SQRT(8.0_dp/zcut)
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
@@ -183,6 +193,9 @@ if(icutcoul.eq.1) then
                  &(abs(ig3).lt.ngfft(3))) then
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
+                  !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp )/gsq
+                  !term=exp(-arg)/gsq*gcutoff(ii)
+                  !term= ( exp(-arg) + gcutoff(ii) - 1.0_dp)/gsq
                   term=exp(-arg)/gsq*gcutoff(ii)
                else if (icutcoul.ne.3) then
                   term=zero !exp(-arg)/gsq
@@ -347,7 +360,8 @@ if(icutcoul.eq.1) then
 
 !Finally assemble Ewald energy, eew
  if(icutcoul.ne.3) then
-   eew=sumg+sumr-chsq*reta/sqrt(pi)
+    !eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+    eew=sumg+sumr-chsq*reta/sqrt(pi)
  else
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
@@ -622,7 +636,9 @@ end subroutine ewald2
 !! FUNCTION
 !! Compute ewald contribution to the dynamical matrix, at a given
 !! q wavevector, including anisotropic dielectric tensor and effective charges
-!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (71) to (75).
+!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (72) to (75).
+!! This has been generalized to quadrupoles.
+!! Delivers the left hand side of Eq.(72), possibly generalized.
 !!
 !! INPUTS
 !! acell = lengths by which lattice vectors are multiplied
@@ -734,6 +750,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ! Deactivate real space sums for quadrupolar fields or for dipdip = -1
  ewald_option = 0; if (present(option)) ewald_option = option
  if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
+ !ewald_option = 0
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
