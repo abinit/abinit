@@ -380,7 +380,6 @@ contains
   !!  nfftf=number of points in the fine FFT mesh (for this processor)
   !!  nspden=number of spin-density components
   !!  tsmear=smearing width (or temperature)
-  !!  vtrial(nfft,nspden)= trial potential (Hartree)
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
@@ -390,14 +389,12 @@ contains
   !! CHILDREN
 !!
   !! SOURCE
-  subroutine compute_e_kinetic(this,fermie,nfftf,nspden,tsmear,vtrial)
+  subroutine compute_e_kinetic(this,fermie,nfftf,nspden,tsmear)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     real(dp),intent(in) :: fermie,tsmear
     integer,intent(in) :: nfftf,nspden
-    ! Arrays
-    real(dp),intent(in) :: vtrial(nfftf,nspden)
 
     ! Local variables -------------------------
     ! Scalars
