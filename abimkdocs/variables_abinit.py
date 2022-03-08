@@ -3167,6 +3167,25 @@ that this variable is not required.
 ),
 
 Variable(
+    abivarname="dmft_wanorthnorm",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="Dynamical Mean Field Theory: WANnier OrthoNormalization",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.4.0",
+    text=r"""
+Definition of Wannier orthormalization in DMFT.
+Default value is 3 (Normalization of the overlap of Wannier functions summed
+over k-point) if [[natom]]=1, or 2 (Normalization of the overlap for each k-point) if
+[[natom]]>1.
+""",
+),
+
+
+Variable(
     abivarname="dmftbandf",
     varset="dmft",
     vartype="integer",
@@ -3278,6 +3297,24 @@ simulation. Slow down the simulation.
 
   * 0 --> Nothing done
   * 1 --> Calculations performed and written in "Correlation.dat" file
+""",
+),
+
+Variable(
+    abivarname="dmftctqmc_config",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of weight of CONFIGurations",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[dmft_solv]] in [5, 8]",
+    added_in_version="9.5.0",
+    text=r"""
+Compute weight of configuration computed during CTQMC calculations.
+For example, for a calculation on $d$ orbitals, the calculations
+gives the weight of 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
 """,
 ),
 
