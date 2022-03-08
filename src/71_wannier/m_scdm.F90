@@ -1,3 +1,27 @@
+!!****m* ABINIT/m_scdm
+!! NAME
+!!  m_scdm
+!!
+!! FUNCTION
+!!  SCDM (select columns of density matrix method) for getting wannier functions.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2005-2022 ABINIT group (hexu)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #include "abi_common.h"
 
 
@@ -8,6 +32,7 @@
 !===============================================================
 module m_scdm
     use defs_basis, only: dp, PI
+    use m_errors
     use m_scdm_math, only: complex_QRCP_piv_only, complex_svd, tpi_im, &
         & gaussian, fermi, insertion_sort_double, eigensolver
     use m_wann_netcdf, only: IOWannNC
@@ -497,3 +522,5 @@ contains
 
 end module m_scdm
 
+
+!!***

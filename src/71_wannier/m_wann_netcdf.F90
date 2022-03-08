@@ -1,9 +1,39 @@
+!!****m* ABINIT/m_wann_netcdf
+!! NAME
+!!  m_wann_math
+!!
+!! FUNCTION
+!! Writting Wannier function information to netcdf file. 
+!! 
+!! COPYRIGHT
+!!  Copyright (C) 2005-2022 ABINIT group (hexu)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+
+
 #include "abi_common.h"
 
 module m_wann_netcdf
   use defs_basis
-  use m_nctk, only: ab_define_var, netcdf_check
+  use m_abicore
+  use m_errors
+  use m_nctk
+#if defined HAVE_NETCDF
   use netcdf
+#endif
   implicit none
   private
 
@@ -34,6 +64,8 @@ module m_wann_netcdf
     complex(dp) , intent(in) :: WannR(:,:,:), HwannR(:,:,:)
     ! id of variables
     integer :: ncerr
+
+#ifdef HAVE_NETCDF
 
     ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when creating wannier netcdf  file")
@@ -93,13 +125,22 @@ module m_wann_netcdf
          & start=[1,1], count=[nwann, nwann, nR])
     NCF_CHECK_MSG(ncerr, "Error when writting HwannR_imag in wannier netcdf file.")
 
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
+
   end subroutine write_wann
 
   subroutine close_file(self)
     class(IOwannNC), intent(inout) :: self
     integer :: ncerr
+#if defined HAVE_NETCDF
     ncerr = nf90_close(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error close wannier netcdf file.")
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
+
   end subroutine close_file
 
   subroutine write_Amnk(self, nkpt, nband, nwann, kpoints, eigvals, Amnk)
@@ -109,7 +150,7 @@ module m_wann_netcdf
     real(dp),  intent(in) :: eigvals(:,:)
     complex(dp),  intent(in) :: Amnk(:,:, :)
     integer :: ncerr
-
+#if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error starting redef in wannier netcdf file")
 
@@ -151,6 +192,10 @@ module m_wann_netcdf
     ncerr = nf90_put_var(self%ncid, self%i_Amnk_imag, real(aimag(Amnk)), &
          & start=[1,1], count=[nband, nwann, nkpt])
     NCF_CHECK_MSG(ncerr, "Error when writting Amnk_imag in wannier netcdf file.")
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
+
 
   end subroutine write_Amnk
 
@@ -161,6 +206,7 @@ module m_wann_netcdf
     real(dp), intent(in):: cell(:,:), masses(:), xred(:, :), xcart(:,:)
     integer :: ncerr
 
+#if defined_HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error starting redef in wannier netcdf file")
     ncerr=nf90_def_dim(self%ncid, "three", 3, self%d_three)
@@ -209,7 +255,13 @@ module m_wann_netcdf
 
     ncerr = nf90_put_var(self%ncid, self%i_xcart, xcart, start=[1, 1], count=[3, natom])
     NCF_CHECK_MSG(ncerr, "Error when writting atomic_xred in wannier netcdf file.")
+#else
+    NETCDF_NOTENABLED_ERROR()
+#endif
+
 
   end subroutine write_atoms
 
 end module m_wann_netcdf
+
+!!***
