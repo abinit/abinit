@@ -308,16 +308,13 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   IF ( PRESENT(hybri_limit)) &
     CALL Ctqmcoffdiag_sethybri_limit(op%Hybrid, hybri_limit)
 
-     call xmpi_barrier(op%Hybrid%MY_COMM)
-    !write(6,*) "jjjjj2"
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
   CALL Ctqmcoffdiag_setG0wTab(op%Hybrid, G0omega,op%opt_fk)
-    !write(6,*) "jjjjj3"
-     call xmpi_barrier(op%Hybrid%MY_COMM)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   IF ( PRESENT(matU) ) &
     CALL Ctqmcoffdiag_setU(op%Hybrid, matU)
-    !write(6,*) "jjjjj"
-     call xmpi_barrier(op%Hybrid%MY_COMM)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   CALL Ctqmcoffdiag_run(op%Hybrid,opt_order=op%opt_order, &
                            opt_histo=op%opt_histo, &
@@ -327,8 +324,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
                            opt_noise=op%opt_noise, &
                            opt_spectra=op%opt_spectra, &
                            opt_gMove=op%opt_gMove)
-    !write(6,*) "jjjjkj"
-     call xmpi_barrier(op%Hybrid%MY_COMM)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
  ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
  ! write(6,*) "opt_gMove",op%opt_gMove
