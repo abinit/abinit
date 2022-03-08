@@ -1,12 +1,40 @@
+!!****m* ABINIT/m_scdm_math
+!! NAME
+!!  m_scdm_math
+!!
+!! FUNCTION
+!!  Math functions used by SCDM
+!! (select columns of density matrix method) for getting wannier functions.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2005-2022 ABINIT group (hexu)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+
 #include "abi_common.h"
 
 module m_scdm_math
   use defs_basis
+  use m_abicore
+  use m_errors
   implicit none
   real(dp), parameter, public :: tpi=2*PI
   complex(dp), parameter, public :: tpi_im = cmplx(0.0_dp, tpi, kind=dp)
 
-  type eigensolver
+  type, public:: eigensolver
      integer :: ndim=-1, lwork=0
      complex(dp), allocatable  :: work(:)
      real(dp), allocatable :: rwork(:)
@@ -219,10 +247,12 @@ contains
        a(j+1)=v
        if(present(order)) order(j+1)=i
     end do
-  
+
   end subroutine insertion_sort_double
-  
+
 
 
 
 end module m_scdm_math
+
+!!***
