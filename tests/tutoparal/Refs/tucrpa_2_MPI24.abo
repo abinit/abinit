@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue  8 Mar 2022.
-- ( at 14h19 )
+- ( at 15h48 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Test_suite/tutoparal_tucrpa_2_MPI24/tucrpa_2.abi
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.abi
 - output file    -> tucrpa_2_MPI24.abo
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
@@ -270,10 +270,6 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
                       -1.25000000E-01 -1.25000000E-01  3.75000000E-01
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.90420000E+01
-          kssform1          1
-          kssform2          3
-          kssform3          1
-          kssform4          1
             lpawu           2      -1      -1
 P           mkmem           2
            mqgrid1          0
@@ -286,10 +282,6 @@ P           mkmem           2
          mqgriddg4        300
             natom           5
             nband          50
-         nbandkss1          0
-         nbandkss2         -1
-         nbandkss3          0
-         nbandkss4          0
            nbdbuf1          0
            nbdbuf2          2
            nbdbuf3          0
@@ -863,8 +855,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.0038 eV
-     The bare interaction (for a renorm. wfn ) =     22.5848 eV
+     The bare interaction (no renormalization) =     16.3156 eV
+     The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
 
@@ -10966,7 +10958,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ======================================================================================
 
- == Start computation of Projected Local Orbitals Wannier functions ==  -1
+ == Start computation of Projected Local Orbitals Wannier functions ==   0
 
  == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
@@ -11038,13 +11030,6 @@ force_length_stats: {min: null, max: null, mean: null, }
  32      -0.038       0.989       1.009       2.297       3.960
 
  Print the psichi coefficients in data.plowann
-
-======================================================================
- Calculating and writing out Kohn-Sham electronic Structure file
- Using conjugate gradient wavefunctions and energies (kssform=3)
- outkss: Not allowed options found !
- Program does not stop but _KSS file will not be created...
- outkss: see the log file for more information.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -12741,8 +12726,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.0038 eV
-     The bare interaction (for a renorm. wfn ) =     22.5848 eV
+     The bare interaction (no renormalization) =     16.3156 eV
+     The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
  ==================================== 
@@ -13230,10 +13215,6 @@ Reading of the Wannier weights from data.plowann
                       -1.25000000E-01 -1.25000000E-01  3.75000000E-01
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.90420000E+01
-          kssform1          1
-          kssform2          3
-          kssform3          1
-          kssform4          1
             lpawu           2      -1      -1
 P           mkmem           2
            mqgrid1          0
@@ -13246,10 +13227,6 @@ P           mkmem           2
          mqgriddg4        300
             natom           5
             nband          50
-         nbandkss1          0
-         nbandkss2         -1
-         nbandkss3          0
-         nbandkss4          0
            nbdbuf1          0
            nbdbuf2          2
            nbdbuf3          0
@@ -14345,10 +14322,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        151.2  wall=        151.3
+- Proc.   0 individual time (sec): cpu=        149.5  wall=        149.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       3628.1  wall=       3628.5
++Overall time at end (sec) : cpu=       3588.8  wall=       3589.8
