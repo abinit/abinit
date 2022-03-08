@@ -855,8 +855,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.0038 eV
-     The bare interaction (for a renorm. wfn ) =     22.5848 eV
+     The bare interaction (no renormalization) =     16.3156 eV
+     The bare interaction (for a renorm. wfn ) =     23.0248 eV
  =======================================================================
 
 
@@ -7086,7 +7086,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 13  -151.92840909773    -6.253E-13 4.905E-10 6.158E-11
+ ETOT 13  -151.92840909773    -9.379E-13 4.905E-10 6.158E-11
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -7604,7 +7604,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 14  -151.92840909773    -1.990E-13 8.788E-11 1.573E-11
+ ETOT 14  -151.92840909773     2.842E-14 8.788E-11 1.573E-11
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -8122,7 +8122,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 15  -151.92840909773     1.990E-13 1.981E-11 2.834E-13
+ ETOT 15  -151.92840909773     2.558E-13 1.981E-11 2.834E-13
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -8640,7 +8640,7 @@ tolerances: {tolvrs: 1.00E-13, }
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
 
- ETOT 16  -151.92840909773    -3.979E-13 4.088E-12 2.954E-14
+ ETOT 16  -151.92840909773    -8.527E-14 4.088E-12 2.953E-14
 
  prteigrs : about to open file tucrpa_2_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.28542   Average Vxc (hartree)=  -0.43944
@@ -9161,9 +9161,9 @@ tolerances: {tolvrs: 1.00E-13, }
  At SCF step   16       nres2   =  2.95E-14 < tolvrs=  1.00E-13 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60124278E-13
-  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12335650E-12
-  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07545063E-12
+  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60126825E-13
+  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12336230E-12
+  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07541853E-12
 
 
 --- !ResultsGS
@@ -9176,14 +9176,14 @@ lattice_vectors:
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
-convergence: {deltae: -3.979E-13, res2:  2.954E-14, residm:  4.088E-12, diffor: null, }
+convergence: {deltae: -8.527E-14, res2:  2.953E-14, residm:  4.088E-12, diffor: null, }
 etotal    :  -1.51928409E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85423679E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.09030263E-03,  -4.07545063E-12,  -1.12335650E-12, ]
-- [ -4.07545063E-12,   2.09030261E-03,  -9.60124278E-13, ]
-- [ -1.12335650E-12,  -9.60124278E-13,   2.09030259E-03, ]
+- [  2.09030263E-03,  -4.07541853E-12,  -1.12336230E-12, ]
+- [ -4.07541853E-12,   2.09030261E-03,  -9.60126825E-13, ]
+- [ -1.12336230E-12,  -9.60126825E-13,   2.09030259E-03, ]
 pressure_GPa:  -6.1499E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
@@ -9192,12 +9192,12 @@ xred      :
 - [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
 - [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
 cartesian_forces: # hartree/bohr
-- [ -1.72877966E-11,  -2.77031167E-10,  -1.42197071E-10, ]
-- [  3.20800954E-10,   3.13269084E-10,  -2.28526275E-10, ]
-- [  2.62454235E-10,  -1.04301902E-10,  -2.10512350E-10, ]
-- [ -1.17560592E-10,   1.66110248E-10,   1.35752891E-10, ]
-- [ -4.48406801E-10,  -9.80462638E-11,   4.45482805E-10, ]
-force_length_stats: {min:   2.44626153E-10, max:   6.39637912E-10, mean:   4.10329414E-10, }
+- [ -1.72804447E-11,  -2.77018482E-10,  -1.42204133E-10, ]
+- [  3.20786878E-10,   3.13250626E-10,  -2.28521995E-10, ]
+- [  2.62445993E-10,  -1.04294016E-10,  -2.10505921E-10, ]
+- [ -1.17557107E-10,   1.66101568E-10,   1.35752794E-10, ]
+- [ -4.48395321E-10,  -9.80396963E-11,   4.45479256E-10, ]
+force_length_stats: {min:   2.44618531E-10, max:   6.39626386E-10, mean:   4.10316948E-10, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -9212,8 +9212,8 @@ force_length_stats: {min:   2.44626153E-10, max:   6.39637912E-10, mean:   4.103
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      5.992978840244294
- Compensation charge over fine fft grid    =      5.993710080164860
+ Compensation charge over spherical meshes =      5.992978840243296
+ Compensation charge over fine fft grid    =      5.993710080166722
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -10120,30 +10120,30 @@ force_length_stats: {min:   2.44626153E-10, max:   6.39637912E-10, mean:   4.103
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.22101101655934E+01
-hartree             :  3.42934572736317E+01
-xc                  : -1.94923345610349E+01
+kinetic             :  4.22101101655859E+01
+hartree             :  3.42934572736338E+01
+xc                  : -1.94923345610361E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
-local_psp           : -1.09494290735315E+02
-spherical_terms     :  8.43864081978184E+00
-internal            : -1.51925010102899E+02
-'-kT*entropy'       : -3.39894393248974E-03
-total_energy        : -1.51928409046831E+02
-total_energy_eV     : -4.13418225781243E+03
+local_psp           : -1.09494290735321E+02
+spherical_terms     :  8.43864081978133E+00
+internal            : -1.51925010102913E+02
+'-kT*entropy'       : -3.39894393248975E-03
+total_energy        : -1.51928409046845E+02
+total_energy_eV     : -4.13418225781280E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.47235864829409E+01
+band_energy         : -1.47235864829345E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
-xc_dc               : -3.05329761331900E+01
-spherical_terms     :  1.21214552788516E+00
-internal            : -1.51925010153802E+02
-'-kT*entropy'       : -3.39894393248974E-03
+xc_dc               : -3.05329761331916E+01
+spherical_terms     :  1.21214552788069E+00
+internal            : -1.51925010153801E+02
+'-kT*entropy'       : -3.39894393248975E-03
 total_energy_dc     : -1.51928409097734E+02
 total_energy_dc_eV  : -4.13418225919756E+03
 ...
@@ -10182,14 +10182,14 @@ total_energy_dc_eV  : -4.13418225919756E+03
     5      -0.000000001109     -0.000000000264      0.000000000863
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60124278E-13
-  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12335650E-12
-  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07545063E-12
+  sigma(1 1)=  2.09030263E-03  sigma(3 2)= -9.60126825E-13
+  sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12336230E-12
+  sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07541853E-12
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.1499E+01 GPa]
-- sigma(1 1)=  6.14988163E+01  sigma(3 2)= -2.82478267E-08
-- sigma(2 2)=  6.14988156E+01  sigma(3 1)= -3.30502838E-08
-- sigma(3 3)=  6.14988152E+01  sigma(2 1)= -1.19903877E-07
+- sigma(1 1)=  6.14988163E+01  sigma(3 2)= -2.82479017E-08
+- sigma(2 2)=  6.14988156E+01  sigma(3 1)= -3.30504543E-08
+- sigma(3 3)=  6.14988152E+01  sigma(2 1)= -1.19902933E-07
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -10871,7 +10871,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      5.992978802995083
+ Compensation charge over spherical meshes =      5.992978802996941
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -10974,7 +10974,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  
  For one spin :
         0.2088139238        0.0000000000       -0.0000000000        0.0000000000        0.0000000000
-        0.0000000000        0.2088142385        0.0000000000        0.0000000002       -0.0000000000
+        0.0000000000        0.2088142384        0.0000000000        0.0000000002       -0.0000000000
        -0.0000000000        0.0000000000        0.0006148090        0.0000000000       -0.0000000000
         0.0000000000        0.0000000002        0.0000000000        0.2088139084        0.0000000000
         0.0000000000       -0.0000000000       -0.0000000000        0.0000000000        0.0006148091
@@ -10986,7 +10986,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  
  For one spin :
         0.3328418734        0.0000000001       -0.0000000000        0.0000000001       -0.0000000000
-        0.0000000001        0.3328423770        0.0000000000        0.0000000003       -0.0000000000
+        0.0000000001        0.3328423769        0.0000000000        0.0000000003       -0.0000000000
        -0.0000000000        0.0000000000        0.0007369504        0.0000000000       -0.0000000001
         0.0000000001        0.0000000003        0.0000000000        0.3328418487        0.0000000000
        -0.0000000000       -0.0000000000       -0.0000000001        0.0000000000        0.0007369505
@@ -11879,8 +11879,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978802995083
- Compensation charge over fine fft grid    =      5.993710080164860
+ Compensation charge over spherical meshes =      5.992978802996941
+ Compensation charge over fine fft grid    =      5.993710080166722
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -12883,8 +12883,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close...
- Compensation charge over spherical meshes =      5.992978802995083
- Compensation charge over fine fft grid    =      5.993710080164860
+ Compensation charge over spherical meshes =      5.992978802996941
+ Compensation charge over fine fft grid    =      5.993710080166722
 
 
  Total number of electrons per unit cell =   41.0000 (Spherical mesh),   41.0007 (FFT mesh)
@@ -13027,9 +13027,9 @@ Reading of the Wannier weights from data.plowann
    4 14.898 14.898 15.508 16.041 15.092
    5 15.715 15.092 15.114 15.092 16.567
 
-  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   15.3789   -0.0000
+  Hubbard bare interaction U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=   15.3789    0.0000
 
- (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   16.2514    0.0000)
+ (Hubbard bare interaction U=1/(2l+1) \sum U(m1,m1,m1,m1)=   16.2514   -0.0000)
 
   Hund coupling J=U(m1,m1,m2,m2) for the bare interaction
  -      1      2      3      4      5
@@ -13039,7 +13039,7 @@ Reading of the Wannier weights from data.plowann
    4  0.478  0.478  0.400 16.041  0.482
    5  0.249  0.478  0.555  0.482 16.567
 
-   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667    0.0000
+   bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667   -0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
@@ -13076,7 +13076,7 @@ Reading of the Wannier weights from data.plowann
 
   Hubbard cRPA interaction for w =  1, U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=    2.7546    0.0000
 
-  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.5167    0.0000)
+  (Hubbard cRPA interaction for w =   1, U=1/(2l+1) \sum U(m1,m1,m1,m1)=    3.5167   -0.0000)
 
   Hund coupling J=U(m1,m1,m2,m2) for the cRPA interaction
  -      1      2      3      4      5
@@ -13086,7 +13086,7 @@ Reading of the Wannier weights from data.plowann
    4  0.435  0.436  0.378  3.434  0.446
    5  0.247  0.442  0.444  0.446  3.641
 
-   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
+   cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997   -0.0000
 
  
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
@@ -13105,7 +13105,7 @@ Reading of the Wannier weights from data.plowann
             Average U and J as a function of frequency
    -------------------------------------------------------------
          omega           U(omega)            J(omega)
-        0.000      2.7546    0.0000      0.5997    0.0000
+        0.000      2.7546    0.0000      0.5997   -0.0000
    -------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -13131,11 +13131,11 @@ Reading of the Wannier weights from data.plowann
            etotal1    -1.5192840910E+02
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
-            fcart1    -1.7287796562E-11 -2.7703116661E-10 -1.4219707113E-10
-                       3.2080095414E-10  3.1326908447E-10 -2.2852627474E-10
-                       2.6245423533E-10 -1.0430190170E-10 -2.1051235024E-10
-                      -1.1756059186E-10  1.6611024761E-10  1.3575289116E-10
-                      -4.4840680105E-10 -9.8046263765E-11  4.4548280494E-10
+            fcart1    -1.7280444670E-11 -2.7701848192E-10 -1.4220413342E-10
+                       3.2078687838E-10  3.1325062600E-10 -2.2852199545E-10
+                       2.6244599336E-10 -1.0429401628E-10 -2.1050592145E-10
+                      -1.1755710656E-10  1.6610156848E-10  1.3575279427E-10
+                      -4.4839532051E-10 -9.8039696271E-11  4.4547925604E-10
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -14173,7 +14173,7 @@ P           mkmem           2
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
            strten1     2.0903026309E-03  2.0903026065E-03  2.0903025948E-03
-                      -9.6012427772E-13 -1.1233565035E-12 -4.0754506289E-12
+                      -9.6012682524E-13 -1.1233622974E-12 -4.0754185282E-12
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
