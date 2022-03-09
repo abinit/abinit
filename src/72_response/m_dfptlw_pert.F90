@@ -183,12 +183,14 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,icg,idq,ii,ikg,ikpt,isppol,me,n1,n2,n3,n4,n5,n6 
- integer :: nylmgr,option,spaceworld,tim_getgh1c
+ integer :: bandtot,icg,idq,ii,ikg,ikpt,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
+ integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
+ real(dp) :: wtk_k
  character(len=1000) :: msg
  logical :: with_nonlocal_i1pert, with_nonlocal_i2pert
 !arrays
+ integer,allocatable :: kg_k(:,:)
  real(dp) :: d3etot_k(2)
  real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
  real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
@@ -196,12 +198,15 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp) :: d3etot_t4(2),d3etot_t4_k(2)
  real(dp) :: d3etot_t5(2),d3etot_t5_k(2)
  real(dp) :: d3etot_telec(2),d3etot_telec_k(2)
- real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:)
+ real(dp) :: kpt(3)
+ real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
+ real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:),occ_k(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vlocal1dq(:,:,:,:)
  real(dp),allocatable :: vlocal1(:,:,:,:)
  real(dp),allocatable :: vpsp1(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
+ real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  type(rf_hamiltonian_type) :: rf_hamkq_ddk
  type(rf_hamiltonian_type) :: rf_hamkq_i1pert, rf_hamkq_i2pert
  type(rf_hamiltonian_type),allocatable :: rf_hamkq_i1pertdq(:), rf_hamkq_i2pertdq(:)
@@ -325,6 +330,10 @@ d3etot_telec=zero
      end do 
    end if
 
+   vlocal1=zero
+   call rf_hamkq_ddk%load_spin(isppol,vlocal1=vlocal1,& 
+   & with_nonlocal=.true.)
+
 !  Loop over k-points
    ikg = 0
    do ikpt = 1, nkpt
@@ -332,6 +341,39 @@ d3etot_telec=zero
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,isppol,mpi_enreg%me)) then
        cycle ! Skip the rest of the k-point loop
      end if
+
+     nband_k = dtset%nband(ikpt+(isppol-1)*nkpt)
+     npw_k = npwarr(ikpt)
+     istwf_k = dtset%istwfk(ikpt)
+     ABI_MALLOC(occ_k,(nband_k))
+     occ_k(:) = occ(1+bandtot:nband_k+bandtot)
+     wtk_k    = dtset%wtk(ikpt)
+     kpt(:) = dtset%kptns(:,ikpt)
+
+     ABI_MALLOC(cwavef1,(2,npw_k*nspinor))
+     ABI_MALLOC(cwavef2,(2,npw_k*nspinor))
+
+     ABI_MALLOC(kg_k,(3,npw_k))
+     ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
+     ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+
+
+
+
+
+!    Keep track of total number of bands
+     bandtot = bandtot + nband_k
+
+!    Shift arrays memory
+     icg=icg+npw_k*dtset%nspinor*nband_k
+     ikg=ikg+npw_k
+
+     ABI_FREE(occ_k)
+     ABI_FREE(cwavef1)
+     ABI_FREE(cwavef2)
+     ABI_FREE(kg_k)
+     ABI_FREE(ylm_k)
+     ABI_FREE(ylmgr_k)
 
    end do !ikpt
 
