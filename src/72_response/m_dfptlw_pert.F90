@@ -120,9 +120,9 @@ contains
 !!  rho2r1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3 (i2pert)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  ucvol=volume of the unit cell
-!!  vlocal1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
+!!  vpsp1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
 !!          gradient Hamiltonian for i1pert
-!!  vlocal1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
+!!  vpsp1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
 !!          gradient Hamiltonian for i2pert
 !!  vtrial1_i1pert(cplex*nfft,nspden)=firs-order local potential
 !!  vtrial1_i2pert(cplex*nfft,nspden)=firs-order local potential
@@ -149,7 +149,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 & i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,&
-& ucvol,vtrial1_i1pert,vlocal1_i1pertdq,vlocal1_i2pertdq,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
+& ucvol,vtrial1_i1pert,vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -174,15 +174,15 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),intent(in) :: rho1g1(2,nfft),rho2r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: xccc3d1(cplex*nfft),xred(3,natom)
- real(dp),intent(in) :: vlocal1_i1pertdq(2*nfft,nspden,n1dq)
- real(dp),intent(in) :: vlocal1_i2pertdq(2*nfft,nspden,n2dq)
+ real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
+ real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: vtrial1_i1pert(cplex*nfft,nspden)
  real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,icg,ii,isppol,me,n1,n2,n3,n4,n5,n6 
+ integer :: bandtot,icg,idq,ii,isppol,me,n1,n2,n3,n4,n5,n6 
  integer :: nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
  character(len=1000) :: msg
@@ -196,7 +196,9 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp) :: d3etot_telec(2),d3etot_telec_k(2)
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
+ real(dp),allocatable :: vlocal1dq(:,:,:,:)
  real(dp),allocatable :: vlocal1_i1pert(:,:,:,:),vlocal1_i2pert(:,:,:,:) 
+ real(dp),allocatable :: vlocal1_i1pertdq(:,:,:,:,:),vlocal1_i2pertdq(:,:,:,:,:) 
  real(dp),allocatable :: vpsp1(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(rf_hamiltonian_type) :: rf_hamkq_ddk
@@ -229,6 +231,9 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  ABI_MALLOC(dum_vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1_i1pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1_i2pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1dq,(2*n4,n5,n6,gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1_i1pertdq,(2*n4,n5,n6,gs_hamkq%nvloc,n1dq))
+ ABI_MALLOC(vlocal1_i2pertdq,(2*n4,n5,n6,gs_hamkq%nvloc,n2dq))
  ABI_MALLOC(vpsp1,(cplex*nfft))
  ABI_MALLOC(dum_cwaveprj,(0,0))
 
@@ -275,22 +280,35 @@ d3etot_t4=zero
 d3etot_t5=zero
 d3etot_telec=zero
 
-
 !Loop over spins
  bandtot = 0
  icg=0
  do isppol = 1, nsppol
 
- !Set up local potentials with proper dimensioning
- vpsp1=vtrial1_i1pert(:,1)
- call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,dtset%nfft,dtset%ngfft,&
-&   gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1_i1pert)
+   !Set up local potentials with proper dimensioning
+   vpsp1=vtrial1_i1pert(:,1)
+   call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,dtset%nfft,dtset%ngfft,&
+   & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1_i1pert)
+  
+   vpsp1=vtrial1_i2pert(:,1)
+   call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,dtset%nfft,dtset%ngfft,&
+   & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1_i2pert)
+   
+   do idq=1,n1dq
+     vpsp1=vpsp1_i1pertdq(:,1,idq)
+     call rf_transgrid_and_pack(isppol,nspden,usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
+     & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1dq)
+     vlocal1_i1pertdq(:,:,:,:,idq)=vlocal1dq(:,:,:,:)
+   end do 
 
+   do idq=1,n2dq
+     vpsp1=vpsp1_i2pertdq(:,1,idq)
+     call rf_transgrid_and_pack(isppol,nspden,usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
+     & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1dq)
+     vlocal1_i2pertdq(:,:,:,:,idq)=vlocal1dq(:,:,:,:)
+   end do 
 
  end do !isppol
-
-
-
 
 
 
