@@ -209,7 +209,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
  real(dp),allocatable :: vhartr1(:),vhart1dqdq(:),vpsp1(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
- real(dp),allocatable :: vlocal1_i1pertdq(:,:,:),vlocal1_i2pertdq(:,:,:)
+ real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
  real(dp),allocatable :: vxc1(:,:),vxc1dqdq(:),work(:),xccc3d1(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
@@ -354,10 +354,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        !Allocate the first-order gradient local potential
        if (i1pert <= natom .or. i1pert <= natom+3) then
          n1dq=1
-         ABI_MALLOC(vlocal1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
+         ABI_MALLOC(vpsp1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
        else if (i1pert <= natom+4) then
          n1dq=2
-         ABI_MALLOC(vlocal1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
+         ABI_MALLOC(vpsp1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
        else
          n1dq=1
        end if
@@ -425,10 +425,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
              !Allocate the first-order gradient local potential
              if (i2pert <= natom .or. i2pert <= natom+3) then
                n2dq=1
-               ABI_MALLOC(vlocal1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
+               ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
              else if (i2pert <= natom+4) then
                n2dq=2
-               ABI_MALLOC(vlocal1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
+               ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
              else
                n2dq=1
              end if
@@ -446,7 +446,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      !Get q-gradient of first-order local part of the pseudopotential
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vlocal1_i1pertdq(:,:,1))
+                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,:,1))
                    else if (i1pert==natom+3) then
                      istr=i1dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
@@ -455,7 +455,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vlocal1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     vpsp1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                    else if (i1pert==natom+4) then
                      !Here we need to calculate both extradiagonal shear-strains
                      !because the second gradient of the metric perturbation is
@@ -466,13 +466,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vlocal1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     vpsp1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                      istr=6+i1dir
                      call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
                      & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vlocal1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     vpsp1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                    end if
 
                    !gradient of i2pert:
@@ -480,7 +480,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      !Get q-gradient of first-order local part of the pseudopotential
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vlocal1_i2pertdq(:,:,1))
+                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,:,1))
                    else if (i2pert==natom+3) then
                      istr=i2dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
@@ -489,7 +489,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vlocal1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                    else if (i2pert==natom+4) then
                      !Here we need to calculate both extradiagonal shear-strains
                      !because the second gradient of the metric perturbation is
@@ -500,13 +500,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vlocal1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                      istr=6+i2dir
                      call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
                      & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vlocal1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                    end if
 
                    !Prepare ddk wf file
@@ -561,7 +561,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
-                   & pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,ucvol,vlocal1_i1pertdq,vlocal1_i2pertdq,&
+                   & pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
                    & vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
                    !close ddk file
@@ -574,13 +574,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                end do    ! ir3dir
              end do     ! ir3pert
              
-             ABI_FREE(vlocal1_i2pertdq)
+             ABI_FREE(vpsp1_i2pertdq)
       
            end if   ! rfpert
          end do    ! i2dir
        end do     ! i2pert
 
-       ABI_FREE(vlocal1_i1pertdq)
+       ABI_FREE(vpsp1_i1pertdq)
 
      end if   ! rfpert
    end do    ! i1dir
