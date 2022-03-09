@@ -45,6 +45,7 @@ module m_dfptlw_pert
  use m_io_tools, only : file_exists
  use m_time, only : cwtime
  use m_kg, only : mkkpg
+ use m_mpinfo, only : proc_distrb_cycle
 
 
  implicit none
@@ -182,7 +183,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,icg,idq,ii,isppol,me,n1,n2,n3,n4,n5,n6 
+ integer :: bandtot,icg,idq,ii,ikg,ikpt,isppol,me,n1,n2,n3,n4,n5,n6 
  integer :: nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
  character(len=1000) :: msg
@@ -198,8 +199,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vlocal1dq(:,:,:,:)
- real(dp),allocatable :: vlocal1_i1pert(:,:,:,:),vlocal1_i2pert(:,:,:,:) 
- real(dp),allocatable :: vlocal1_i1pertdq(:,:,:,:,:),vlocal1_i2pertdq(:,:,:,:,:) 
+ real(dp),allocatable :: vlocal1(:,:,:,:)
  real(dp),allocatable :: vpsp1(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(rf_hamiltonian_type) :: rf_hamkq_ddk
@@ -232,11 +232,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 !Additional allocations
  ABI_MALLOC(dum_vpsp,(nfft))
  ABI_MALLOC(dum_vlocal,(n4,n5,n6,gs_hamkq%nvloc))
- ABI_MALLOC(vlocal1_i1pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
- ABI_MALLOC(vlocal1_i2pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1dq,(2*n4,n5,n6,gs_hamkq%nvloc))
- ABI_MALLOC(vlocal1_i1pertdq,(2*n4,n5,n6,gs_hamkq%nvloc,n1dq))
- ABI_MALLOC(vlocal1_i2pertdq,(2*n4,n5,n6,gs_hamkq%nvloc,n2dq))
  ABI_MALLOC(vpsp1,(cplex*nfft))
  ABI_MALLOC(dum_cwaveprj,(0,0))
 
@@ -256,7 +253,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  if (i1pert /= natom+2) then
    ABI_MALLOC(rf_hamkq_i1pertdq,(n1dq))
    do idq=1,n1dq
-     call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq_i1pertdq(idq),& 
+     call init_rf_hamiltonian(2,gs_hamkq,i1pert,rf_hamkq_i1pertdq(idq),& 
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
    & mpi_spintab=mpi_enreg%my_isppoltab)
    end do
@@ -265,7 +262,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  if (i2pert /= natom+2) then
    ABI_MALLOC(rf_hamkq_i2pertdq,(n2dq))
    do idq=1,n2dq
-     call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pertdq(idq),& 
+     call init_rf_hamiltonian(2,gs_hamkq,i2pert,rf_hamkq_i2pertdq(idq),& 
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
    & mpi_spintab=mpi_enreg%my_isppoltab)
    end do
@@ -296,17 +293,16 @@ d3etot_telec=zero
 
    !Set up local potentials with proper dimensioning
    !and load the spin-dependent part of the Hamiltonians
-
    vpsp1=vtrial1_i1pert(:,1)
    call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,dtset%nfft,dtset%ngfft,&
-   & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1_i1pert)
-   call rf_hamkq_i1pert%load_spin(isppol,vlocal1=vlocal1_i1pert,& 
+   & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
+   call rf_hamkq_i1pert%load_spin(isppol,vlocal1=vlocal1,& 
    & with_nonlocal=with_nonlocal_i1pert)
   
    vpsp1=vtrial1_i2pert(:,1)
    call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,dtset%nfft,dtset%ngfft,&
-   & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1_i2pert)
-   call rf_hamkq_i2pert%load_spin(isppol,vlocal1=vlocal1_i2pert,& 
+   & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
+   call rf_hamkq_i2pert%load_spin(isppol,vlocal1=vlocal1,& 
    & with_nonlocal=with_nonlocal_i2pert)
    
    if (i1pert /= natom+2) then
@@ -314,7 +310,8 @@ d3etot_telec=zero
         vpsp1=vpsp1_i1pertdq(:,1,idq)
         call rf_transgrid_and_pack(isppol,nspden,usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
         & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1dq)
-        vlocal1_i1pertdq(:,:,:,:,idq)=vlocal1dq(:,:,:,:)
+        call rf_hamkq_i1pertdq(idq)%load_spin(isppol,vlocal1=vlocal1dq,& 
+        & with_nonlocal=with_nonlocal_i1pert)
      end do
    end if 
 
@@ -323,9 +320,20 @@ d3etot_telec=zero
        vpsp1=vpsp1_i2pertdq(:,1,idq)
        call rf_transgrid_and_pack(isppol,nspden,usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
        & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1dq)
-       vlocal1_i2pertdq(:,:,:,:,idq)=vlocal1dq(:,:,:,:)
+        call rf_hamkq_i2pertdq(idq)%load_spin(isppol,vlocal1=vlocal1dq,& 
+        & with_nonlocal=with_nonlocal_i2pert)
      end do 
    end if
+
+!  Loop over k-points
+   ikg = 0
+   do ikpt = 1, nkpt
+
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,isppol,mpi_enreg%me)) then
+       cycle ! Skip the rest of the k-point loop
+     end if
+
+   end do !ikpt
 
  end do !isppol
 
