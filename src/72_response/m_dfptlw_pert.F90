@@ -40,7 +40,7 @@ module m_dfptlw_pert
  use m_xmpi
  use m_getgh1c
  use m_mklocl
-
+ use m_initylmg,   only : initylmg
  use m_fstrings, only : itoa, sjoin
  use m_io_tools, only : file_exists
  use m_time, only : cwtime
@@ -182,12 +182,23 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 !Variables ------------------------------------
 !scalars
- integer :: ii,me,spaceworld,tim_getgh1c
+ integer :: bandtot,icg,ii,isppol,me,n1,n2,n3,n4,n5,n6 
+ integer :: nylmgr,option,spaceworld,tim_getgh1c
+ integer :: usepaw,useylmgr
  character(len=1000) :: msg
 !arrays
+ real(dp) :: d3etot_k(2)
+ real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
+ real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
+ real(dp) :: d3etot_t3(2),d3etot_t3_k(2)
+ real(dp) :: d3etot_t4(2),d3etot_t4_k(2)
+ real(dp) :: d3etot_t5(2),d3etot_t5_k(2)
+ real(dp) :: d3etot_telec(2),d3etot_telec_k(2)
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:)
- real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
+ real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
+ real(dp),allocatable :: vlocal1_i1pert(:,:,:,:),vlocal1_i2pert(:,:,:,:) 
  real(dp),allocatable :: vpsp1(:)
+ real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(rf_hamiltonian_type) :: rf_hamkq_ddk
  type(rf_hamiltonian_type) :: rf_hamkq_i1pert, rf_hamkq_i2pert
  type(rf_hamiltonian_type) :: rf_hamkq_i1pertdq, rf_hamkq_i2pertdq
@@ -209,11 +220,15 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 !Additional definitions
  tim_getgh1c=0
+ usepaw=dtset%usepaw
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+ n4=ngfft(4) ; n5=ngfft(5) ; n6=ngfft(6)
 
 !Additional allocations
- ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(dum_vpsp,(nfft))
- ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+ ABI_MALLOC(dum_vlocal,(n4,n5,n6,gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1_i1pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
+ ABI_MALLOC(vlocal1_i2pert,(cplex*n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vpsp1,(cplex*nfft))
  ABI_MALLOC(dum_cwaveprj,(0,0))
 
@@ -242,12 +257,37 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  & mpi_spintab=mpi_enreg%my_isppoltab)
  end if
 
+!Set up the spherical harmonics (Ylm) and gradients at each k point 
+ useylmgr=1; option=2 ; nylmgr=9
+ ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))               
+ ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ if (psps%useylm==1) then
+   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,mkmem_rbz,mpi_enreg,&
+ & psps%mpsang,mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+ & rprimd,ylm,ylmgr)                                   
+ end if
+
+!Initialize d3etot parts
+d3etot_t1=zero
+d3etot_t2=zero
+d3etot_t3=zero
+d3etot_t4=zero
+d3etot_t5=zero
+d3etot_telec=zero
 
 
+!Loop over spins
+ bandtot = 0
+ icg=0
+ do isppol = 1, nsppol
+
+ !Set up local potentials with proper dimensioning
+ vpsp1=vtrial1_i1pert(:,1)
+ call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,dtset%nfft,dtset%ngfft,&
+&   gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1_i1pert)
 
 
-
-
+ end do !isppol
 
 
 
