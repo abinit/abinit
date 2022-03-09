@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+includedir=@includedir@
+libdir=@libdir@
+
+Name: abinit
+Description: Atomic-scale simulation software
+Version: @VERSION@
+URL: https://www.abinit.org/
+Requires:
+Libs: -L${libdir} -labinit
+Cflags: -I${includedir}
