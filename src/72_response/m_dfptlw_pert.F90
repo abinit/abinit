@@ -204,7 +204,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(rf_hamiltonian_type) :: rf_hamkq_ddk
  type(rf_hamiltonian_type) :: rf_hamkq_i1pert, rf_hamkq_i2pert
- type(rf_hamiltonian_type) :: rf_hamkq_i1pertdq, rf_hamkq_i2pertdq
+ type(rf_hamiltonian_type),allocatable :: rf_hamkq_i1pertdq(:), rf_hamkq_i2pertdq(:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
 ! *************************************************************************
@@ -254,15 +254,21 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 & mpi_spintab=mpi_enreg%my_isppoltab)
 
  if (i1pert /= natom+2) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq_i1pertdq,& 
- & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
- & mpi_spintab=mpi_enreg%my_isppoltab)
+   ABI_MALLOC(rf_hamkq_i1pertdq,(n1dq))
+   do idq=1,n1dq
+     call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq_i1pertdq(idq),& 
+   & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+   & mpi_spintab=mpi_enreg%my_isppoltab)
+   end do
  end if
 
  if (i2pert /= natom+2) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pertdq,& 
- & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
- & mpi_spintab=mpi_enreg%my_isppoltab)
+   ABI_MALLOC(rf_hamkq_i2pertdq,(n2dq))
+   do idq=1,n2dq
+     call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pertdq(idq),& 
+   & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+   & mpi_spintab=mpi_enreg%my_isppoltab)
+   end do
  end if
 
 !Set up the spherical harmonics (Ylm) and gradients at each k point 
@@ -333,8 +339,16 @@ d3etot_telec=zero
  call rf_hamkq_ddk%free()
  call rf_hamkq_i1pert%free()
  call rf_hamkq_i2pert%free()
- if (i1pert /= natom+2) call rf_hamkq_i1pertdq%free()
- if (i2pert /= natom+2) call rf_hamkq_i2pertdq%free()
+ if (i1pert /= natom+2) then
+   do idq=1,n1dq
+     call rf_hamkq_i1pertdq(idq)%free()
+   end do
+ end if
+ if (i2pert /= natom+2) then
+   do idq=1,n2dq
+     call rf_hamkq_i2pertdq(idq)%free()
+   end do
+ end if
 
  DBG_EXIT("COLL")
 
