@@ -1639,14 +1639,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
 
-         ! CP modified
-         !call prteigrs(eigen0,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
-!&         eigen0,zero,zero,dtset%wtk)
          call prteigrs(eigen0,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
+&         dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
-         ! Emd CP modified
 
          write(message, '(a)' ) ch10
          call wrtout(ab_out,message,'COLL')
@@ -1658,18 +1653,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
          call elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_fan,gprimd,&
 &         dtset%mband,natom,dtset%nkpt,dtset%nsppol,1,phfrq,dtset%prtvol)
          call eigen_meandege(eigen0,eigen_fan,eigen_fan_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
-         ! CP modified
-         !call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
-!&         eigen0,zero,zero,dtset%wtk)
          call prteigrs(eigen_fan_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
+&         dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
-         ! End CP modified
-         !call prteigrs(eigen_fan_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&         dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,5,0,dtset%prtvol,&
-!&         eigen0,zero,zero,dtset%wtk)
-          ! End CP modified
 
          if(qeq0 .or. dtset%getgam_eig2nkq>0)then
 
@@ -1703,14 +1689,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
              end if
            end if
            call eigen_meandege(eigen0,eigen_ddw,eigen_ddw_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
-           ! CP modified
-           !call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
-!&           eigen0,zero,zero,dtset%wtk)
            call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
+&           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
-           ! End CP modified
            write(message, '(a)' ) ch10
            call wrtout(ab_out,message,'COLL')
            call wrtout(std_out,message,'COLL')
@@ -1718,12 +1699,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !          Print sum of mean Fan and DDW
            ABI_MALLOC(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
            eigen_fanddw=eigen_fan_mean+eigen_ddw_mean
-           ! CP modified
-           !call prteigrs(eigen_fanddw,dtset%enunit,fermie,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-!&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
-!&           eigen0,zero,zero,dtset%wtk)
            call prteigrs(eigen_fanddw,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
-&           dtset%mband,dtset%nband,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
+&           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,7,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
            ! End CP modified
 

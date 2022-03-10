@@ -370,7 +370,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
  ref(29)= ' Parallel eigensolvers in plane-wave Density Functional Theory'//ch10//&
   ' A. Levitt and M. Torrent, Computer Phys. Comm. 187, 98-105 (2015).'
- comment(29)=' Comment: in case Chebyshev Filtering algorithm is used (wfoptalg=1).'//ch10//&
+ comment(29)=' Comment: in case Chebyshev Filtering algorithm is used (wfoptalg=1/111).'//ch10//&
   ' Strong suggestion to cite this paper in your publications.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#levitt2015'
  priority(29)=16
@@ -560,8 +560,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If positron/=0 + PAW, cite Wiktor2015
    if(dtsets(idtset)%positron/=0.and.dtsets(idtset)%usepaw==1)cite(28)=1
 
-!  If Chebyshev filtering (wfoptalg=1), cite Levitt2015
-   if(dtsets(idtset)%wfoptalg==1)cite(29)=1
+!  If Chebyshev filtering (wfoptalg=1/111), cite Levitt2015
+   if(dtsets(idtset)%wfoptalg==1.or.dtsets(idtset)%wfoptalg==111)cite(29)=1
 
 !  If vdw_xc==5, 6 or 7 and rfphon/=0 or rfstrs/=0, cite Van Troeye 2016
    if(dtsets(idtset)%vdw_xc >=5 .and. dtsets(idtset)%vdw_xc <8)then
