@@ -894,7 +894,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      Build inverse of overlap matrix for chebfi
-       if(psps%usepaw == 1 .and. dtset%wfoptalg == 1 .and. istep <= 1) then
+       if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
        end if
 
@@ -1208,8 +1208,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,nfftf,dtset%nspden,&
-&       dtset%tsmear,vtrial)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
      end if
 
@@ -1672,16 +1671,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0 .and. me_distrb==0)then
      option=2 ; enunit=1 ; vxcavg_dum=zero
-     ! CP modified
-     !call prteigrs(eigen,enunit,energies%e_fermie,dtfil%fnameabo_app_eig,&
-!&     ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,dtset%nband,&
-!&     dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
-!&     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
      call prteigrs(eigen,enunit,energies%e_fermie,energies%e_fermih,&
 &     dtfil%fnameabo_app_eig,ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
-     ! End CP modified
    end if
 
 !  Find largest residual over bands, k points, and spins, except for nbdbuf highest bands

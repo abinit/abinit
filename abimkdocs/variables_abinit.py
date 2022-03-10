@@ -1672,13 +1672,22 @@ to bypass the problem are made in the output file.
 When **chksymtnons** = 2, the code makes similar check, but does not stop after providing
 in the output file suggestions to bypass the problem.
 
+When **chksymtnons** = 3, the code acts as with **chksymtnons** = 1, but then generates a FFT grid which is
+left invariant under the action of the spatial symmetry operations, which might enlarge it.
+In case of Constrained DFT calculations (see [[constraint_kind]]), only **chksymtnons** = 3 or **chksymtnons** = 0 are allowed.
+
 When **chksymtnons** = 0, the code skips the check.
 
 Explanation:
 In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
-However, for a GW or BSE calculation, the presence of non-symmorphic translations
-that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault).
-In the GW or BSE parts, indeed, one needs to reconstruct the wavefunctions in the full Brillouin zone
+However, for a GW, BSE or cDFT calculation, the presence of non-symmorphic translations
+that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault, or lack of convergence).
+
+For cDFT calculations, the local integral of magnetization or charge is evaluated in real space, on the FFT grid. So, if 
+the grids are locally different for two atoms related by symmetry (so in principle equivalent), there is a incoherency, that might induce
+lack of convergence.
+
+In the GW or BSE parts of ABINIT, one needs to reconstruct the wavefunctions in the full Brillouin zone
 for calculating both the polarizability and the self-energy. The wavefunctions
 in the full Brillouin zone are obtained from the irreducible wedge by applying
 the symmetry operations of the space group of the crystal. In the present
@@ -1693,7 +1702,7 @@ the level of the ground-state calculations, although such warning might be irrel
 
 If you encounter the problem outlined above, you have two choices: change your
 atomic positions (translate them) such that the origin appears as the most
-symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0.
+symmetric point; or ignore the problem, and set **chksymtnons** = 2 or 0 (only the latter for cDFT)..
 If **chksymtnons** = 2, ABINIT makes a suggestion of a possible global translation,
 and corresponding translated atomic positions.
 """,
@@ -1778,6 +1787,10 @@ Atoms of the same type are supposed to incur the same constraint.
 If the user wants to impose different constraints on atoms of the same type (in principle), it is possible (and easy) to pretend
 that they belong to different types, even if the same pseudopotential file is used for these atoms. There is an example
 in test [[test:v8_24]], the hydrogen dimer, where the charge around the first atom is constrained, and the charge around the second atom is left free.
+
+Similarly, ABINIT is more careful about the control of symmetry: supposing that two atoms are related by some symmetry, then ABINIT
+generates a FFT grid that is invariant under that symmetry, unless this additional constraint on the FFT grid is explicitly suppressed by the user.
+In this respect, the default value of [[chksymtnons]] is not allowed, but [[chksymtnons]] must be equal to 3 (with the generation of a symmetric FFT grid) or 0.
 
 The difference between [[constraint_kind]]=4 or 14 and [[constraint_kind]]=2 or 12 lies in the fact that [[constraint_kind]]=2 or 12 will consider similarly
 a magnetization vector and its opposite, as this constraint is just alignment on an axis, while [[constraint_kind]]=4 or 14 enforces that
@@ -3154,6 +3167,25 @@ that this variable is not required.
 ),
 
 Variable(
+    abivarname="dmft_wanorthnorm",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="Dynamical Mean Field Theory: WANnier OrthoNormalization",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.4.0",
+    text=r"""
+Definition of Wannier orthormalization in DMFT.
+Default value is 3 (Normalization of the overlap of Wannier functions summed
+over k-point) if [[natom]]=1, or 2 (Normalization of the overlap for each k-point) if
+[[natom]]>1.
+""",
+),
+
+
+Variable(
     abivarname="dmftbandf",
     varset="dmft",
     vartype="integer",
@@ -3265,6 +3297,24 @@ simulation. Slow down the simulation.
 
   * 0 --> Nothing done
   * 1 --> Calculations performed and written in "Correlation.dat" file
+""",
+),
+
+Variable(
+    abivarname="dmftctqmc_config",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of weight of CONFIGurations",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[dmft_solv]] in [5, 8]",
+    added_in_version="9.5.0",
+    text=r"""
+Compute weight of configuration computed during CTQMC calculations.
+For example, for a calculation on $d$ orbitals, the calculations
+gives the weight of 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
 """,
 ),
 
@@ -18442,13 +18492,15 @@ Indeed in the first case, it is supposed that the magnetization vector is not af
 (so-called black and white symmetry groups).
 By contrast, in the second case, the real space symmetry operations act on the magnetization vector.
 The rationale for such different treatment comes from the fact that the treatment of spin-orbit coupling is incompatible with collinear magnetism [[nspden]]=2,
-so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=2
+so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=4
 will include spin-orbit coupling. The symmetry operations should thus act coherently on the spin-orbit coupling, which implies
 that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with
 [[nspden]]=4, even with [[symafm]]=1,
 symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
 Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
 is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case.
+Note that real-space operations act on the magnetization as an axial vector, not as a normal vector. For example, the inversion symmetry 
+does not change the magnetization vector.
 
 Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
 The electron on the first H atom might be 1s spin up, and the electron on the second atom might be 1s spin down.
@@ -22778,16 +22830,16 @@ Enables the calculation of contributions to the energy, entropy, stresses,
 number of electrons and chemical potential using the extended first principle
 molecular dynamics model for high temperature simulations.
 
-  * **useextfpmd** = 1 *(Recommanded)*, the energy shift factor will be evaluated
+  * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
 
-  * **useextfpmd** = 2, the energy shift factor will be evaluated by making
+  * **useextfpmd** = 2, the energy shift will be evaluated by making
 the average between the eigenvalues and the Fermi gas energy over the last
 [[extfpmd_nbcut]] bands, and the contributions will be computed with integrals
 over the band number.
 
-  * **useextfpmd** = 3, the energy shift factor will be evaluated by making the
+  * **useextfpmd** = 3, the energy shift will be evaluated by making the
 average between the eigenvalues and the kinetic energies over the last
 [[extfpmd_nbcut]] bands, and the contributions will be computed using the
 density of states of the Fermi gas.
@@ -22804,8 +22856,8 @@ Variable(
     mnemonics="EXTended FPMD: Number of Bands at CUT",
     added_in_version="9.5.2",
     text=r"""
-Specify the number of bands to use when averaging over last bands to get the
-energy shift factor when [[useextfpmd]] = 2 or 3.
+Specifies the number of bands to use when averaging over last bands to get the
+energy shift when [[useextfpmd]] = 2 or 3.
 
 **extfpmd_nbcut** must be less than [[nband]].
 """,
