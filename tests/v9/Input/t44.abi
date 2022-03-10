@@ -20,8 +20,16 @@ orbmag2 3
 # nuclear magnetic dipole of strength 1 (atomic units)
 # on aluminum, in z direction
 nucdipmom
-3*0.0
+0.0 0.0 0.0
 0.0 0.0 1.0
+
+# Lamb core shielding, by atom type. No nuclear dipole moment on 
+# P so don't bother to add a shift; 
+# Al shielding is the for Al PAW set used here.
+# User must compute and use the proper Lamb shielding for their PAW set.
+# This calculation is done outside of abinit.
+lambsig
+0.0 766.0D-6 
 
 # this ecut is severly underconverged
 ecut 5
