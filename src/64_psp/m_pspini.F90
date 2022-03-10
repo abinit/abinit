@@ -250,9 +250,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    paw_options(3) = 1
    paw_options(4) = 1
    !end if
-
-   ! JWZ debug added for development of testcprj routine in m_orbmag
-   if(dtset%userid .EQ. 1) paw_options(8) = 1
  
  end if
 
