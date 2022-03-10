@@ -47,7 +47,6 @@ module m_orbmag
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type
-  use m_initylmg,         only : initylmg
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle
@@ -150,13 +149,13 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,buff_size,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,ilmn,indx,isppol,istwf_k,iterm,itypat,l_max
+ integer :: ikg,ikg1,ikpt,ilm,ilmn,indx,isppol,istwf_k,iterm,itypat
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd,ylm_optder
+ integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8,iomlmb=9
  integer,parameter :: nterms=9
  real(dp) :: arg,ecut_eff,trnrm,ucvol
- real(dp) :: cdiff,cp_err,dcp_err
+ real(dp) :: cdiff,max_cdprj_err
  complex(dpc) :: cpp,cdpp
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
@@ -168,7 +167,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:)
  real(dp),allocatable :: Enk(:),ffnl_k(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
- real(dp),allocatable :: local_ylm(:,:),local_ylm_k(:,:),local_ylm_gr(:,:,:)
  real(dp),allocatable :: omdp_k(:,:,:),ompw_k(:,:,:),ombm_k(:,:,:),oml_k(:,:,:),omvh1_k(:,:,:)
  real(dp),allocatable :: orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
@@ -260,20 +258,8 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
  end if
 
- !-----------------------------------------------------------
- ! make ylm for cdprj below (need larger angular momentum than
- ! mpsang supplies
- ! eventually, don't pass ylm into this routine but keep both for now
- !l_max=psps%mpsang + 1
- !ylm_optder = 0
- !ABI_MALLOC(local_ylm,(dtset%mpw*dtset%mkmem,l_max*l_max))
- !ABI_MALLOC(local_ylm_gr,(dtset%mpw*dtset%mkmem,3+6*(ylm_optder/2),l_max*l_max))
- !call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,l_max,dtset%mpw,dtset%nband,dtset%nkpt,&
- !  & npwarr,dtset%nsppol,ylm_optder,rprimd,local_ylm,local_ylm_gr)
-
  !------------------------------------------------------------
  ! make rhoij from input cprj
- ! rhoij1 will need to be updated with cdprj :(
  ABI_MALLOC(rhoij,(2,psps%lmnmax,psps%lmnmax,dtset%natom))
  ABI_MALLOC(rhoij1,(2,psps%lmnmax,psps%lmnmax,dtset%natom,3))
  call orbmag_gipaw_rhoij(atindx,cprj,dtset,mcprj,mpi_enreg,pawtab,psps,rhoij,rhoij1,ucvol)
@@ -320,10 +306,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
      ylmgr_k(1:npw_k,1:3,ilm)=ylmgr(1+ikg:npw_k+ikg,1:3,ilm)
    end do
-   !ABI_MALLOC(local_ylm_k,(npw_k,l_max*l_max))
-   !do ilm=1,l_max*l_max
-   !  local_ylm_k(1:npw_k,ilm)=local_ylm(1+ikg:npw_k+ikg,ilm)
-   !end do
 
    ! Compute kinetic energy at kpt
    kinpw(:) = zero
@@ -377,40 +359,27 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
    ! compute <dp|u>
-   !call mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,l_max,nband_k,npw_k,&
-   ! & pawrad,pawtab,ph3d,psps,ucvol,local_ylm_k)
+   call mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,nband_k,npw_k,&
+    & pawrad,pawtab,ph3d,psps,ucvol,ylm_k)
 
-   !cp_err=zero
-   !dcp_err = zero
-   !do iat=1,dtset%natom
-   !  iatom=atindx(iat)
-   !  itypat=dtset%typat(iat)
-   !  do nn=1,nband_k
-   !    do ilmn = 1,pawtab(itypat)%lmn_size
-   !      cpp=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
-   !      cdpp=cmplx(cdprj_k(iatom,nn)%cp(1,ilmn),cdprj_k(iatom,nn)%cp(2,ilmn))
-   !      cdiff=abs(cdpp-cpp)
-   !      if(cdiff .GT. cp_err) cp_err=cdiff
-   !      do adir = 1, 3
-   !        cpp=cmplx(cprj_k(iatom,nn)%dcp(1,adir,ilmn),cprj_k(iatom,nn)%dcp(2,adir,ilmn))
-   !        cdpp=cmplx(cdprj_k(iatom,nn)%dcp(1,adir,ilmn),cdprj_k(iatom,nn)%dcp(2,adir,ilmn))
-   !        write(std_out,'(a,4i4,4es16.8)')'JWZ debug iatom nn adir ilmn ',iatom,nn,adir,ilmn,real(cpp),aimag(cpp),real(cdpp),aimag(cdpp)
-   !        cdiff=abs(cdpp-cpp)
-   !        if(cdiff .GT. dcp_err) then
-   !          dcp_err=cdiff
-   !        end if
-   !      end do
-   !    end do
-   !  end do
-   !end do
-   !write(std_out,'(a,2es16.8)')'JWZ debug cp_err, dcp_err ',cp_err,dcp_err
+   max_cdprj_err=zero
+   do iat=1,dtset%natom
+     iatom=atindx(iat)
+     itypat=dtset%typat(iat)
+     do nn=1,nband_k
+       do ilmn = 1,pawtab(itypat)%lmn_size
+         cpp=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
+         cdpp=cmplx(cdprj_k(iatom,nn)%cp(1,ilmn),cdprj_k(iatom,nn)%cp(2,ilmn))
+         cdiff=abs(cdpp-cpp)
+         if(cdiff .GT. max_cdprj_err) max_cdprj_err=cdiff
+       end do
+     end do
+   end do
+   write(std_out,'(a,es16.8)')'JWZ debug max_cdprj_err : ',max_cdprj_err
 
    ABI_MALLOC(Enk,(nband_k))
    ABI_MALLOC(ompw_k,(2,nband_k,6))
    ABI_MALLOC(bcpw_k,(2,nband_k,6))
-   ompw_k=zero
-   bcpw_k=zero
-   !write(std_out,'(a)')'JWZ debug calling orbmag_gipaw_pw_k'
    call orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
     & gs_hamk,ikpt,mcgk,mpi_enreg,nband_k,npw_k,ompw_k)
 
@@ -437,35 +406,22 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    end if
 
    ABI_MALLOC(omdp_k,(2,nband_k,3))
-   omdp_k=zero
-   write(std_out,'(a)')'JWZ debug calling orbmag_gipaw_dpdk_k'
-   call orbmag_gipaw_dpdk_k(atindx,cprj_k,dtset,Enk,nband_k,omdp_k,paw_ij,pawtab)
-   !if(dtset%userid .EQ. 61) then
-   !  call orbmag_gipaw_dpdk_k(atindx,cdprj_k,dtset,Enk,nband_k,omdp_k,paw_ij,pawtab)
-   !else
-   !  call orbmag_gipaw_dpdk_k(atindx,cprj_k,dtset,Enk,nband_k,omdp_k,paw_ij,pawtab)
-   !end if
+   call orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,dtset%natom,nband_k,dtset%ntypat,&
+     & omdp_k,paw_ij,pawtab,dtset%typat)
    orbmag_terms(1:2,1:nband_k,1:3,iomdp) = orbmag_terms(1:2,1:nband_k,1:3,iomdp) + &
      & trnrm*omdp_k(1:2,1:nband_k,1:3)
 
    ABI_MALLOC(oml_k,(2,nband_k,3))
-   oml_k=zero
-   write(std_out,'(a)')'JWZ debug calling orbmag_gipaw_onsite_l_k'
    call orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,oml_k,pawrad,pawtab)
    orbmag_terms(1:2,1:nband_k,1:3,iomlr) = orbmag_terms(1:2,1:nband_k,1:3,iomlr) + &
      & trnrm*oml_k(1:2,1:nband_k,1:3)
 
    ABI_MALLOC(ombm_k,(2,nband_k,3))
-   ombm_k=zero
-   !write(std_out,'(a)')'JWZ debug calling orbmag_gipaw_onsite_bm_k'
-   !call orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombm_k,pawang,pawrad,pawtab)
+   call orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombm_k,pawang,pawrad,pawtab)
    orbmag_terms(1:2,1:nband_k,1:3,iombm) = orbmag_terms(1:2,1:nband_k,1:3,iombm) + &
      & trnrm*ombm_k(1:2,1:nband_k,1:3)
 
-   ! to do: update rhoij1
    ABI_MALLOC(omvh1_k,(2,nband_k,3))
-   omvh1_k=zero
-   write(std_out,'(a)')'JWZ debug calling orbmag_gipaw_onsite_vh1_k'
    call orbmag_gipaw_onsite_vh1_k(atindx,cprj_k,dtset,nband_k,omvh1_k,pawtab,psps,rhoij1)
    orbmag_terms(1:2,1:nband_k,1:3,iomvh1) = orbmag_terms(1:2,1:nband_k,1:3,iomvh1) + &
      & trnrm*omvh1_k(1:2,1:nband_k,1:3)
@@ -486,7 +442,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_FREE(cg_k)
    ABI_FREE(cg1_k)
    ABI_FREE(ylm_k)
-   !ABI_FREE(local_ylm_k)
    ABI_FREE(ylmgr_k)
    ABI_FREE(kpg_k)
    ABI_FREE(ffnl_k)
@@ -526,7 +481,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! iomlmb, due to core electrons, is already Cartesian (but not added yet)
  do iterm = 1, nterms
    if ((iterm .EQ. iomlr) .OR. (iterm .EQ. iombm) .OR. (iterm .EQ. iomlmb)) cycle
-   if ((iterm .EQ. iomdp) .AND. (dtset%userid .EQ. 61)) cycle
    do nn = 1, nband_k
      do icmplx = 1, 2
        orbmag_terms(icmplx,nn,1:3,iterm) = ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,1:3,iterm))
@@ -592,8 +546,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  ABI_FREE(rhoij)
  ABI_FREE(rhoij1)
- !ABI_FREE(local_ylm)
- !ABI_FREE(local_ylm_gr)
 
  write(std_out,'(a)')' JWZ debug: exiting orbmag_gipaw '
 
@@ -865,20 +817,20 @@ end subroutine orbmag_gipaw_pw_k
 !!
 !! SOURCE
 
-subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,dtset,Enk,nband_k,omdp_k,paw_ij,pawtab)
+subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,Enk,natom,nband_k,&
+    & ntypat,omdp_k,paw_ij,pawtab,typat)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: nband_k
- type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: natom,nband_k,ntypat
 
  !arrays
- integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(in) :: atindx(natom),typat(natom)
  real(dp),intent(in) :: Enk(nband_k)
  real(dp),intent(out) :: omdp_k(2,nband_k,3)
- type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
- type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+ type(pawcprj_type),intent(in) :: cprj_k(natom,nband_k)
+ type(paw_ij_type),intent(inout) :: paw_ij(natom)
+ type(pawtab_type),intent(in) :: pawtab(ntypat)
 
  !Local variables -------------------------
  !scalars
@@ -890,19 +842,13 @@ subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,dtset,Enk,nband_k,omdp_k,paw_ij,paw
  !arrays
 
  !-----------------------------------------------------------------------
- 
- write(std_out,'(a,i4))')'JWZ debug enter orbmag_gipaw_dpdk, userid = ',dtset%userid
 
  cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
 
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in the Chern number,
  ! one for each wavefunction derivative) 
- if (dtset%userid.EQ.61) then
-   c2=one
- else
-   c2=1.0d0/(two_pi*two_pi)
- end if
+ c2=1.0d0/(two_pi*two_pi)
 
  omdp_k = czero
  do nn = 1, nband_k
@@ -918,9 +864,9 @@ subroutine orbmag_gipaw_dpdk_k(atindx,cprj_k,dtset,Enk,nband_k,omdp_k,paw_ij,paw
          gdir = modulo(adir,3)+1
        end if
 
-       do iat=1,dtset%natom
+       do iat=1,natom
          iatom=atindx(iat)
-         itypat=dtset%typat(iat)
+         itypat=typat(iat)
          ! paw_ij(iatom) seems be sorted in input atom order, not type order
          if (paw_ij(iat)%lmn2_size .NE. pawtab(itypat)%lmn2_size ) then
            ABI_BUG('lmn2_size mismatch in orbmag_gipaw_dpdk_k')
@@ -1095,10 +1041,10 @@ subroutine orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombk,pawang,pawr
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(inout) :: ombk(2,nband_k,3)
+  real(dp),intent(out) :: ombk(2,nband_k,3)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -1711,12 +1657,12 @@ end subroutine orbmag_gipaw_output
 !!
 !! SOURCE
 
-subroutine mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,lylm,nband_k,npw_k,&
+subroutine mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,nband_k,npw_k,&
     & pawrad,pawtab,ph3d,psps,ucvol,ylm_k)
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: lylm,nband_k,npw_k
+ integer,intent(in) :: nband_k,npw_k
  real(dp),intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type), intent(inout) :: psps
@@ -1724,37 +1670,34 @@ subroutine mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,lylm,nband_k,npw_k,&
  !arrays
  integer,intent(in) :: atindx(dtset%natom)
  real(dp),intent(in) :: cg_k(2,npw_k*nband_k),gmet(3,3),kpg_k(npw_k,3)
- real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom),ylm_k(npw_k,lylm*lylm)
+ real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom),ylm_k(npw_k,psps%mpsang*psps%mpsang)
  type(pawcprj_type),intent(inout) ::  cdprj_k(dtset%natom,nband_k)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bigl,bigm
- integer :: iat,iatom,ibiglm,il,ilm,ilmn,ilmr,iln,im,ipw,itypat
- integer :: klmlmr,l_max,lr,mr,ngnt,nn,splder
- real(dp) :: c1,c2,ffnlfac,gntfac
- complex(dpc) :: cgk,cibigl,cil,cp,phfac
+ integer :: iat,iatom,il,ilm,ilmn,iln,ipw,itypat,l_max,ngnt,nn,splder
+ real(dp) :: c1,ffnlfac
+ complex(dpc) :: cgk,cil,cp,phfac
 
  !arrays
  integer,allocatable :: gntselect(:,:)
- real(dp),allocatable :: ffspl(:,:),kpgnorm(:),realgnt(:)
- real(dp),allocatable :: wk_ffnl1(:,:,:,:),wk_ffnl2(:,:,:,:)
+ real(dp),allocatable :: ffspl(:,:),kpgnorm(:),realgnt(:),wk_ffnl1(:,:,:,:),wk_ffnl2(:,:,:,:)
  complex(dpc),dimension(0:3) :: ipowl = (/cone,j_dpc,-cone,-j_dpc/)
- logical,allocatable :: have_ffnl(:,:,:)
+ logical,allocatable :: have_iln(:,:,:)
  
  ! ***********************************************************************
 
  write(std_out,'(a)')'JWZ debug enter mkcdprj_k'
- call pawcprj_set_zero(cdprj_k)
  c1 = four_pi/sqrt(ucvol)
- c2 = sqrt(four_pi/three)
-
  l_max=MAX(psps%mpsang-1,1)+1
  ABI_MALLOC(gntselect,((2*l_max-1)**2,l_max**2*(l_max**2+1)/2))
  ABI_MALLOC(realgnt,((2*l_max-1)**2*(l_max)**4))
  call realgaunt(l_max,ngnt,gntselect,realgnt)
+ 
+
+ call pawcprj_set_zero(cdprj_k)
 
  ABI_MALLOC(kpgnorm,(npw_k))
  do ipw = 1, npw_k
@@ -1766,32 +1709,28 @@ subroutine mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,lylm,nband_k,npw_k,&
 
    ABI_MALLOC(wk_ffnl1,(npw_k,pawtab(itypat)%basis_size,l_max,2))
    ABI_MALLOC(wk_ffnl2,(npw_k,pawtab(itypat)%basis_size,l_max,2))
-   ABI_MALLOC(have_ffnl,(pawtab(itypat)%basis_size,l_max,2))
-   have_ffnl=.FALSE.
+   ABI_MALLOC(have_iln,(pawtab(itypat)%basis_size,l_max,2))
+   have_iln=.FALSE.
 
    do ilmn=1, pawtab(itypat)%lmn_size
      il = pawtab(itypat)%indlmn(1,ilmn)
-     im = pawtab(itypat)%indlmn(2,ilmn)
      ilm = pawtab(itypat)%indlmn(4,ilmn)
      iln = pawtab(itypat)%indlmn(5,ilmn)
      cil = ipowl(mod(il,4))
 
-     ! for cprj, need spline fit with ll=il, nn=1 (normal case)
-     if(.NOT. have_ffnl(iln,il+1,1)) then
+     if(.NOT. have_iln(iln,il+1,1)) then
        ABI_MALLOC(ffspl,(psps%mqgrid_ff,2))
        call mkffspl(ffspl,il,pawrad(itypat),psps%mqgrid_ff,1,psps%qgrid_ff,pawtab(itypat)%tproj(:,iln))
        call splfit(psps%qgrid_ff,wk_ffnl2(:,iln,il+1,1),ffspl,splder,kpgnorm,wk_ffnl1(:,iln,il+1,1),psps%mqgrid_ff,npw_k)
-       have_ffnl(iln,il+1,1) = .TRUE.
+       have_iln(iln,il+1,1) = .TRUE.
        ABI_FREE(ffspl)
      end if
 
-     ! accumulate cprj = <p|u>
      do iat = 1, dtset%natom
        if (dtset%typat(iat) .NE. itypat) cycle
        iatom = atindx(iat)
        do ipw = 1, npw_k
          ffnlfac = ylm_k(ipw,ilm)*wk_ffnl1(ipw,iln,il+1,1)
-!         ffnlfac = wk_ffnl1(ipw,iln,il+1,1)
          phfac=cmplx(ph3d(1,ipw,iatom),ph3d(2,ipw,iatom))
          do nn = 1, nband_k
            cgk=cmplx(cg_k(1,(nn-1)*npw_k+ipw),cg_k(2,(nn-1)*npw_k+ipw))
@@ -1802,64 +1741,8 @@ subroutine mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,lylm,nband_k,npw_k,&
        end do ! end loop over npw_k
      end do ! end loop over natom
 
-     ! cartesian x, y, z directions for <dp|u>
-     ! r_i factor for integration described by r S where S is a real spherical harmonic of rank 1
-     lr = 1
-     do adir = 1, 3 
-       select case (adir)
-       case (1)
-         ! x corresponds to S_{1,1}
-         mr = 1
-       case (2)
-         ! y corresponds to S_{1,-1}
-         mr = -1
-       case (3)
-         ! z corresponds to S_{1,0}
-         mr = 0
-       end select
-       ilmr = 1+lr**2+lr+mr
-       klmlmr = MATPACK(ilm,ilmr)
-
-       ! now loop over possible L values
-       ! only L values possible to give nonzero Gaunt for il,1
-       do bigl = abs(il-1),il+1
-         cibigl = ipowl(mod(bigl,4))
-         do bigm = -bigl,bigl
-           ibiglm = 1+bigl**2+bigl+bigm
-           if (gntselect(ibiglm,klmlmr) .NE. 0) then
-             gntfac = realgnt(gntselect(ibiglm,klmlmr))
-
-             ! for cdprj = <dp|u>, need spline fit with ll=bigl, nn=2 
-             if(.NOT. have_ffnl(iln,bigl+1,2)) then
-               ABI_MALLOC(ffspl,(psps%mqgrid_ff,2))
-               call mkffspl(ffspl,bigl,pawrad(itypat),psps%mqgrid_ff,2,psps%qgrid_ff,pawtab(itypat)%tproj(:,iln))
-               call splfit(psps%qgrid_ff,wk_ffnl2(:,iln,bigl+1,2),ffspl,splder,kpgnorm,wk_ffnl1(:,iln,bigl+1,2),psps%mqgrid_ff,npw_k)
-               have_ffnl(iln,bigl+1,2) = .TRUE.
-               ABI_FREE(ffspl)
-             end if
-
-             ! accumulate cdprj = <dp|u>
-             do iat = 1, dtset%natom
-               if (dtset%typat(iat) .NE. itypat) cycle
-               iatom = atindx(iat)
-               do ipw = 1, npw_k
-                 ffnlfac = ylm_k(ipw,ibiglm)*wk_ffnl1(ipw,iln,bigl+1,2)
-                 phfac=cmplx(ph3d(1,ipw,iatom),ph3d(2,ipw,iatom))
-                 do nn = 1, nband_k
-                   cgk=cmplx(cg_k(1,(nn-1)*npw_k+ipw),cg_k(2,(nn-1)*npw_k+ipw))
-                   cp = c1*c2*cibigl*cgk*phfac*gntfac*ffnlfac
-                   cdprj_k(iatom,nn)%dcp(1,adir,ilmn) = cdprj_k(iatom,nn)%dcp(1,adir,ilmn)+real(cp)
-                   cdprj_k(iatom,nn)%dcp(2,adir,ilmn) = cdprj_k(iatom,nn)%dcp(2,adir,ilmn)+aimag(cp)
-                 end do ! end loop over nband_k
-               end do ! end loop over npw_k
-             end do ! end loop over natom
-           end if ! end check on nonzero gaunt integral
-         end do ! end loop over bigm
-       end do ! end loop over bigl
-     end do ! end loop over adir
-
    end do ! end loop over lmn_size
-   ABI_FREE(have_ffnl)
+   ABI_FREE(have_iln)
    ABI_FREE(wk_ffnl1)
    ABI_FREE(wk_ffnl2)
  

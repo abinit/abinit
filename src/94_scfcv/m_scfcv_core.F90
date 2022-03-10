@@ -2120,7 +2120,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%berryopt /=0  .or. &
 & dtset%kssform  ==3  .or. &
 & dtset%pawfatbnd> 0  .or. &
-& dtset%pawprtwf > 0 ) 
+& dtset%pawprtwf > 0  .or. &
+& dtset%userid .EQ. 1 )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
  if (recompute_cprj) then
