@@ -33,7 +33,8 @@ module m_rttddft_propagators
  use defs_datatypes,        only: pseudopotential_type
  
  use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
-                                & bandfft_kpt_set_ikpt, &
+                                & bandfft_kpt_set_ikpt,          &
+                                & bandfft_kpt_get_ikpt,          &
                                 & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
@@ -121,6 +122,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  integer                        :: choice
  integer                        :: cpopt
  integer                        :: dimffnl
+ integer                        :: displ
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: iband
  integer                        :: icg
@@ -130,6 +132,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
  integer                        :: isppol
  integer                        :: istwf_k
  integer                        :: me_distrb
+ integer                        :: me_bandfft
  integer                        :: my_ikpt, my_nspinor
  integer                        :: nband_k
  integer                        :: npw_k, nkpg
@@ -163,6 +166,7 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 
  !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
+ if (mpi_enreg%paral_kgb==1) spaceComm_distrb=mpi_enreg%comm_kpt
  me_distrb=xmpi_comm_rank(spaceComm_distrb)
 
  !Do we store resulting energies in tdks?
@@ -252,8 +256,6 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
          cycle
       end if
 
-      write(400+me_distrb,*) 'proc ', me_distrb, 'kpt ', ikpt
-
       if (mpi_enreg%paral_kgb==1) my_bandfft_kpt => bandfft_kpt(my_ikpt)
       call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 
@@ -327,32 +329,48 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
       if (lstore_ene) then
          ! Compute energy components if required
          ! Kinetic energy
+         if (dtset%paral_kgb /= 1) then 
+            displ = 0
+         else
+            me_bandfft = xmpi_comm_rank(mpi_enreg%comm_bandspinorfft) 
+            displ = my_bandfft_kpt%rdispls(me_bandfft+1)
+         end if
          do iband=1, nband_k
             if (abs(tdks%occ(bdtot_index+iband))>tol8) then 
                shift = icg+npw_k*my_nspinor*(iband-1)
-               call meanvalue_g(ar,gs_hamk%kinpw_k,0,gs_hamk%istwf_k,mpi_enreg,npw_k,my_nspinor, &
-                              & tdks%cg(:,shift+1:shift+npw_k*my_nspinor),tdks%cg(:,shift+1:shift+npw_k*my_nspinor),0)
+               !FB: meanvalue_g does the mpi_sum over the bands inside, that's not very efficient since 
+               !FB: we could do it only once at the end
+               call meanvalue_g(ar,gs_hamk%kinpw_k(1+displ:displ+npw_k*my_nspinor),0,gs_hamk%istwf_k,mpi_enreg,npw_k,my_nspinor, &
+                              & tdks%cg(:,1+shift:shift+npw_k*my_nspinor),tdks%cg(:,1+shift:shift+npw_k*my_nspinor),0)
                energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*ar
             end if
          end do
-         ! Non local part for NC PSP
-         if (psps%usepaw == 0) then
-            choice=1; paw_opt=0; tim_getghc=5; cpopt=-1; signs=1
-            ABI_MALLOC(enl,(nband_k))
-            call nonlop(choice,cpopt,cprj_dummy,enl,gs_hamk,0,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
-                      & mpi_enreg,nband_k,1,paw_opt,signs,gsc_dummy,tim_getghc,tdks%cg(:,1+icg:),gvnlxc_dummy)
-            do iband=1, nband_k
-               energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*enl(iband)
-            end do
-            ABI_FREE(enl)
-         end if
+        ! Non local part for NC PSP
+        if (psps%usepaw == 0) then
+           choice=1; paw_opt=0; tim_getghc=5; cpopt=-1; signs=1
+           ABI_MALLOC(enl,(nband_k))
+           call nonlop(choice,cpopt,cprj_dummy,enl,gs_hamk,0,tdks%eigen(1+bdtot_index:nband_k+bdtot_index), &
+                     & mpi_enreg,nband_k,1,paw_opt,signs,gsc_dummy,tim_getghc,tdks%cg(:,1+icg:),gvnlxc_dummy)
+           call xmpi_sum(enl,mpi_enreg%comm_band,ierr)
+           do iband=1, nband_k
+              energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*enl(iband)
+           end do
+           ABI_FREE(enl)
+        end if
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
       if (lstore_ene) then
          !Propagate cg and compute eigenvalues
-         call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor, &
-                               & eig=tdks%eigen(1+bdtot_index:nband_k+bdtot_index))
+         if (dtset%paral_kgb /= 1) then 
+            call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor, &
+                                  & eig=tdks%eigen(1+bdtot_index:nband_k+bdtot_index))
+         else
+            me_bandfft = xmpi_comm_rank(mpi_enreg%comm_band) 
+            shift = me_bandfft*mpi_enreg%bandpp
+            call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor, &
+                                  & eig=tdks%eigen(1+bdtot_index+shift:bdtot_index+mpi_enreg%bandpp))
+         end if
       else
          !Propagate cg only
          call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,gs_hamk,1,mpi_enreg,nband_k,npw_k,my_nspinor)
@@ -384,11 +402,12 @@ subroutine rttddft_propagator_er(dtset, gs_hamk, istep, mpi_enreg, psps, tdks, s
 
  !Keep the computed energies in memory
  if (lstore_ene) then
-   !FB: Is this the right communicator to use here or should we ue spaceComm = comm_cell?
    call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kpt,ierr)
+   !call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kptband,ierr)
    call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kpt,ierr)
    call energies_copy(energies,tdks%energies)
-   call xmpi_sum(tdks%eigen,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(tdks%eigen,mpi_enreg%comm_kptband,ierr)
+   print*, tdks%eigen
  end if
 
  end subroutine rttddft_propagator_er

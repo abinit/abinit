@@ -33,7 +33,6 @@ module m_rttddft_exponential
  use defs_abitypes,   only: MPI_type
 
  use m_bandfft_kpt,   only: bandfft_kpt,          &
-                          & bandfft_kpt_set_ikpt, &
                           & bandfft_kpt_get_ikpt
  use m_cgtools,       only: dotprod_g
  use m_dtset,         only: dataset_type
@@ -42,8 +41,8 @@ module m_rttddft_exponential
  use m_hamiltonian,   only: gs_hamiltonian_type
  use m_invovl,        only: apply_invovl
  use m_pawcprj,       only: pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_prep_kgb,      only: prep_getghc
- use m_xmpi,          only: xmpi_alltoallv, xmpi_comm_rank
+ use m_prep_kgb,      only: prep_getghc, prep_index_wavef_bandpp
+ use m_xmpi,          only: xmpi_alltoallv
 
  implicit none
 
@@ -118,6 +117,7 @@ contains
  logical                         :: paw
  real(dp)                        :: dprod_r, dprod_i
  !arrays
+ integer,            allocatable :: index_wavef_band(:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
  real(dp), pointer               :: cg_t(:,:)
  real(dp),           allocatable :: cg_work(:,:)
@@ -131,10 +131,8 @@ contains
 
  !Transpose if paral_kgb
  if (dtset%paral_kgb == 1) then
-   call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t,npw_k,npw_t,nspinor,1)
-   npw_t = npw_k
-   nband_t = nband_k
-   cg_t => cg
+   call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t,npw_k,npw_t, &
+                          & nspinor,1,index_wavef_band)
  else
    npw_t = npw_k
    nband_t = nband_k
@@ -224,9 +222,8 @@ contains
  ABI_FREE(cwaveprj)
 
  !Transpose back if paral_kgb
- !if (dtset%paral_kgb == 1) call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t, &
- !                                                & npw_k,npw_t,nspinor,-1)
- ABI_FREE(cg_work)
+ if (dtset%paral_kgb == 1) call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t, &
+                                                  & npw_k,npw_t,nspinor,-1, index_wavef_band)
 
  end subroutine rttddft_exp_taylor
 
@@ -268,7 +265,7 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine paral_kgb_transpose(cg_in,cg_out,cg_work,mpi_enreg,nband_in,nband_out,npw_in,npw_out,nspinor,option)
+ subroutine paral_kgb_transpose(cg_in,cg_out,cg_work,mpi_enreg,nband_in,nband_out,npw_in,npw_out,nspinor,option,index_wavef_band)
 
  implicit none
 
@@ -288,66 +285,61 @@ contains
  
  !Local variables-------------------------------
  !scalars
- integer :: bandpp
- integer :: ierr
- integer :: ikpt_this_proc
+ integer               :: bandpp
+ integer               :: ierr
+ integer               :: ikpt_this_proc
  !arrays
- integer :: recvcountsloc(mpi_enreg%nproc_band)
- integer :: rdisplsloc(mpi_enreg%nproc_band)
- integer :: sendcountsloc(mpi_enreg%nproc_band)
- integer :: sdisplsloc(mpi_enreg%nproc_band)
+ integer               :: recvcountsloc(mpi_enreg%nproc_band)
+ integer               :: rdisplsloc(mpi_enreg%nproc_band)
+ integer               :: sendcountsloc(mpi_enreg%nproc_band)
+ integer               :: sdisplsloc(mpi_enreg%nproc_band)
+ integer,  allocatable :: index_wavef_band(:)
+ real(dp), allocatable :: cg_work1(:,:)
  
 ! ***********************************************************************
 
- ! Init useful MPI variables
- bandpp = nband_in / mpi_enreg%nproc_band
- !bandpp = mpi_enreg%bandpp
+ !Init useful MPI variables
+ bandpp = mpi_enreg%bandpp
  ikpt_this_proc = bandfft_kpt_get_ikpt()
  recvcountsloc = bandfft_kpt(ikpt_this_proc)%recvcounts*2*nspinor*bandpp
- sendcountsloc = bandfft_kpt(ikpt_this_proc)%sendcounts*2*nspinor*bandpp
  rdisplsloc = bandfft_kpt(ikpt_this_proc)%rdispls*2*nspinor*bandpp
+ sendcountsloc = bandfft_kpt(ikpt_this_proc)%sendcounts*2*nspinor
  sdisplsloc = bandfft_kpt(ikpt_this_proc)%sdispls*2*nspinor
- print*, 'FB-test: ikpt_this_proc =', ikpt_this_proc
- print*, 'FB-test: recvcountsloc =', recvcountsloc
- print*, 'FB-test: rdisplsloc =', rdisplsloc
- print*, 'FB-test: sendcountsloc =', sendcountsloc
- print*, 'FB-test: sdisplsloc =', sdisplsloc
 
  !Transpose: cg_in -> cg_out => cg_work
  if (option == 1) then 
-
-   write(400+xmpi_comm_rank(mpi_enreg%comm_cell),*) 'Transposing..'
    nband_out = bandpp
-   !nband_out = nband_in/mpi_enreg%nproc_band
    npw_out = bandfft_kpt(ikpt_this_proc)%ndatarecv
-   print*, 'FB-test: nband_out, npw_out, nproc_band =', nband_out, npw_out, mpi_enreg%nproc_band
-   
    ABI_MALLOC(cg_work, (2, npw_out*nspinor*nband_out))
-   
-   print*, 'FB-test: dim cg_work, cg_in=', 2*npw_out*nspinor*nband_out, 2*npw_in*nspinor*nband_in
-   
-   ! Transpose input cg_in into cg_work
-   call xmpi_alltoallv(cg_in,sendcountsloc,sdisplsloc,cg_work, &
+   ABI_MALLOC(cg_work1, (2, npw_out*nspinor*nband_out))
+   !Transpose input cg_in into cg_work
+   call xmpi_alltoallv(cg_in,sendcountsloc,sdisplsloc,cg_work1, &
                      & recvcountsloc,rdisplsloc,mpi_enreg%comm_band,ierr)
-   
-   cg_out => cg_work
 
-   write(400+xmpi_comm_rank(mpi_enreg%comm_cell),*) 'Transposed'
+   !properly sort array according to bandd after alltoall
+   call prep_index_wavef_bandpp(mpi_enreg%nproc_band,mpi_enreg%bandpp,          &
+                              & nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv , &
+                              & bandfft_kpt(ikpt_this_proc)%recvcounts,         &
+                              & bandfft_kpt(ikpt_this_proc)%rdispls, index_wavef_band)
+   cg_work(:,:) = cg_work1(:,index_wavef_band)
+   cg_out => cg_work
+   ABI_FREE(cg_work1)
  end if
  
  !Transpose back: cg_work -> cg_in
  if (option == -1) then
-   write(400+xmpi_comm_rank(mpi_enreg%comm_cell),*) 'Transposing back..'
-
+   ABI_MALLOC(cg_work1, (2, npw_out*nspinor*nband_out))
+   cg_work1(:,index_wavef_band) = cg_work(:,:)
    !Transpose cg_work to input cg_in
-   call xmpi_alltoallv(cg_work,recvcountsloc,rdisplsloc,cg_in, &
+   call xmpi_alltoallv(cg_work1,recvcountsloc,rdisplsloc,cg_in, &
                      & sendcountsloc,sdisplsloc,mpi_enreg%comm_band,ierr)
    !Free memory
    ABI_FREE(cg_work)
-   write(400+xmpi_comm_rank(mpi_enreg%comm_cell),*) 'Transposed back'
+   ABI_FREE(cg_work1)
+   ABI_FREE(index_wavef_band)
  end if
 
-end subroutine paral_kgb_transpose
+ end subroutine paral_kgb_transpose
 
 end module m_rttddft_exponential
 !!***

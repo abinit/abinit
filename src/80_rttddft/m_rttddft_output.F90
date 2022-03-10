@@ -154,10 +154,10 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (do_write_log) call wrtout(std_out,msg)
 
  !Writes in energy file
- write(msg,'(i8,f10.5,11(f14.8,X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
-                                   & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
-                                   & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
-                                   & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
+ write(msg,'(i8,f10.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
+                                    & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
+                                    & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
+                                    & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
 !!Special case of last step
