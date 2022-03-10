@@ -943,7 +943,8 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
           jn=pawtab(itypat)%indlmn(3,jlmn)
           do ilmn=1,pawtab(itypat)%lmn_size
             il=pawtab(itypat)%indlmn(1,ilmn)
-            if ( il /= jl ) cycle
+            if ( il /= jl ) cycle ! <l'm'|L|lm> = 0 if l' /= l
+            if ( il == 0 ) cycle ! <00|L|00> = 0
             im=pawtab(itypat)%indlmn(2,ilmn)
             klmn=MATPACK(jlmn,ilmn)
             kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
@@ -1070,49 +1071,52 @@ subroutine orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombk,pawang,pawr
               lpmp=1
               gint = pawang%gntselect(lpmp,klm)
               if (gint > 0) then
-                 bm2=bm2+scale_conversion*dtset%nucdipmom(adir,iat)*d00*pawang%realgnt(gint)*intg
+                bm2=bm2+scale_conversion*dtset%nucdipmom(adir,iat)*d00*pawang%realgnt(gint)*intg
               end if
               ! all other contributions involve Gaunt integrals of S_{2m}
               do lpmp = 5, 9
-                 gint = pawang%gntselect(lpmp,klm)
-                 if (gint > 0) then
-                    select case (lpmp)
-                    case (5) ! S_{2,-2} contributes to xy term
-                       select case (adir)
-                       case (1)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
-                       case (2)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
-                       end select
+                ! if the basis is very small (only s waves) there can't be any Gaunt coupling to d functions
+                ! and asking for it would crash the code
+                if (size(pawang%gntselect(:,klm)) .LT. 5) exit
+                gint = pawang%gntselect(lpmp,klm)
+                if (gint > 0) then
+                  select case (lpmp)
+                  case (5) ! S_{2,-2} contributes to xy term
+                    select case (adir)
+                      case (1)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
+                      case (2)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
                     case (6) ! S_{2,-1} contributes to yz term
-                       select case (adir)
-                       case (2)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
-                       case (3)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
-                       end select
+                      select case (adir)
+                      case (2)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
+                      case (3)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
                     case (7) ! S_{2,0} contributes to xx, yy, and zz terms
-                       select case (adir)
-                          case (1)
-                             bm2=bm2-scale_conversion*dtset%nucdipmom(1,iat)*d20*pawang%realgnt(gint)*intg
-                          case (2)
-                             bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d20*pawang%realgnt(gint)*intg
-                          case (3)
-                             bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*2.0*d20*pawang%realgnt(gint)*intg
-                          end select
+                      select case (adir)
+                        case (1)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(1,iat)*d20*pawang%realgnt(gint)*intg
+                        case (2)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d20*pawang%realgnt(gint)*intg
+                        case (3)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*2.0*d20*pawang%realgnt(gint)*intg
+                      end select
                     case (8) ! S_{2,+1} contributes to xz term
-                       select case (adir)
-                       case (1)
+                      select case (adir)
+                        case (1)
                           bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
-                       case (3)
+                        case (3)
                           bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
-                       end select
+                      end select
                     case (9) ! S_{2,2} contributes to xx, yy terms
                        select case (adir)
-                       case (1)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*d22*pawang%realgnt(gint)*intg
-                       case (2)
-                          bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d22*pawang%realgnt(gint)*intg
+                         case (1)
+                           bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*d22*pawang%realgnt(gint)*intg
+                         case (2)
+                           bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d22*pawang%realgnt(gint)*intg
                        end select
                     end select
                  end if ! end check on nonzero gaunt integral
