@@ -499,6 +499,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
 
+   !For RTTDDFT ensure that bandpp = nband / npband
+   if (optdriver == RUNL_RTTDDFT) then
+      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+   end if
+
 !  Set mpi_enreg
    mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
    if(dtsets(idtset)%paral_kgb/=0)then
