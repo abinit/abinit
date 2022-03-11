@@ -2245,9 +2245,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
-   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
+   if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
      write(msg, '(a,a,a)' )&
-      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 ',ch10,&
+      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
       'imposing dmft_dc = 5'
      ABI_WARNING(msg)
      dtset%dmft_dc=5
@@ -2356,6 +2356,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_gmove  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_grnns',tread,'INT')
        if(tread==1) dtset%dmftctqmc_grnns  =intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_config',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_config  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_meas',tread,'INT')
        if(tread==1) dtset%dmftctqmc_meas   =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_mrka',tread,'INT')
