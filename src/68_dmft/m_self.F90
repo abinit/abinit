@@ -421,8 +421,8 @@ subroutine dc_self(charge_loc,cryst_struc,hu,self,dmft_dc,prtopt)
 !&     -  hu(cryst_struc%typat(iatom))%jpawu * ( charge_loc(iatom,2-nsppol+1) - one)
 &                 -  jpawu_dc * ( charge_loc(iatom,isppol) - one / two )
              endif
-           else if(dmft_dc==2) then  ! AMF
-             if(nspinor==2) then
+           else if(dmft_dc==2.or.dmft_dc==6) then  ! AMF
+             if(nspinor==2.or.dmft_dc==6) then
                !write(message,'(a,i4,i4,2x,e20.10)') " AMF Double counting not implemented for SO"
                !ABI_ERROR(message)
                self%hdc%matlu(iatom)%mat(m1,m1,isppol,ispinor,ispinor)= &
