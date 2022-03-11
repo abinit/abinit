@@ -556,7 +556,7 @@ ecore=zero
 &   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
 &   dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
 &   pawfgr,pawrad,pawrhoij,pawtab,&
-&   psps,rfpert,rhog,rhor,rprimd,ucvol,vxc,xred)
+&   psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,vxc,xred)
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then

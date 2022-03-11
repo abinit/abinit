@@ -120,8 +120,11 @@ contains
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  rhog(2,nfft)=array for Fourier transform of GS electron density
 !!  rho1g1(2,nfft)=G-space RF electron density in electrons/bohr**3 (i1pert)
+!!  rhor(nfft,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rho2r1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3 (i2pert)
+!!  rmet(3,3)=real space metric tensor in bohr**2
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  ucvol=volume of the unit cell
 !!  vpsp1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
@@ -149,10 +152,10 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir,i2dir,i3dir,&
+subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
-& n1dq,n2dq,nfft,ngfft,nkpt,nkxc&
-& nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,&
+& n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
+& nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,&
 & ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
 !Arguments ------------------------------------
@@ -176,8 +179,9 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
  real(dp),intent(in) :: rho1g1(2,nfft),rho2r1(cplex*nfft,dtset%nspden)
- real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xccc3d1(cplex*nfft),xred(3,natom)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
@@ -302,7 +306,7 @@ d3etot_telec=zero
      !Compute the stationary terms of d3etot depending on response functions
      call dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
      & d3etot_t4_k,d3etot_t5_k,dtset,gs_hamkq,gsqcut,icg,&
-     & i1dir,i2dir,i3dir,i1pert,i2pert,i3per,ikpt,isppol,istwf_k,&
+     & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
      & ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
