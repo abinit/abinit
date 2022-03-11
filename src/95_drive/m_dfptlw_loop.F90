@@ -84,6 +84,7 @@ contains
 !!      -1   ->   use symmetry operations to obtain the corresponding element
 !!  rhog(2,nfftf)=array for Fourier transform of GS electron density
 !!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
+!!  rmet(3,3)=real space metric tensor in bohr**2
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!  ucvol = unit cell volume (bohr^3)
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
@@ -110,7 +111,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 & mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,occ,&
 & pawfgr,pawrad,pawrhoij,pawtab,&
-& psps,rfpert,rhog,rhor,rprimd,ucvol,vxc,xred)
+& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,vxc,xred)
 
  use defs_basis
  use defs_wvltypes
@@ -176,7 +177,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
  real(dp),intent(in) :: nhat(nfftf,dtset%nspden)
- real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(in) :: vxc(nfftf,dtset%nspden)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
@@ -561,7 +562,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,occ,&
-                   & pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
+                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
                    & vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
                    !close ddk file
