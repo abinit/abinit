@@ -2115,14 +2115,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !PAW: if cprj=<p_lmn|Cnk> are not in memory,need to compute them in some cases
  recompute_cprj = psps%usepaw ==1 .and. usecprj==0 .and. &
-& (dtset%prtwant  ==2 .or. &
-& dtset%prtwant  ==3  .or. &
-& dtset%prtnabla > 0  .or. &
-& dtset%prtdos   ==3  .or. &
-& dtset%berryopt /=0  .or. &
-& dtset%orbmag < 0    .or. &
-& dtset%kssform  ==3  .or. &
-& dtset%pawfatbnd> 0  .or. &
+& (dtset%prtwant  ==2      .or. &
+& dtset%prtwant  ==3       .or. &
+& dtset%prtnabla > 0       .or. &
+& dtset%prtdos   ==3       .or. &
+& dtset%berryopt /=0       .or. &
+& dtset%orbmag < 0         .or. &
+& dtset%kssform  ==3       .or. &
+& dtset%plowan_compute ==1 .or. &
+& dtset%pawfatbnd> 0       .or. &
 & dtset%pawprtwf > 0  )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
