@@ -46,7 +46,7 @@ module m_dfptlw_pert
  use m_time, only : cwtime
  use m_kg, only : mkkpg
  use m_mpinfo, only : proc_distrb_cycle
-
+ use m_dfptlw_wf
 
  implicit none
 
@@ -90,9 +90,11 @@ contains
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
+!!  gsqcut=large sphere cut-off
 !!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
 !!  i1pert,i2pert,i3pert = type of perturbation that has to be computed
 !!  kg(3,mpw*mkmem_rbz)=reduced planewave coordinates
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mband = maximum number of bands
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem_rbz = maximum number of k points which can fit in core memory
@@ -109,6 +111,7 @@ contains
 !!  nfft= number of FFT grid points (for this proc) 
 !!  ngfft(1:18)=integer array with FFT box dimensions and other 
 !!  nkpt = number of k points
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
 !!  nspden = number of spin-density components
 !!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol = number of channels for spin-polarization (1 or 2)
@@ -147,17 +150,17 @@ contains
 !! SOURCE
 
 subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir,i2dir,i3dir,&
-& i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
-& n1dq,n2dq,nfft,ngfft,nkpt,&
+& i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
+& n1dq,n2dq,nfft,ngfft,nkpt,nkxc&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rho1g1,rho2r1,rprimd,&
-& ucvol,vtrial1_i1pert,vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
+& ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
- integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nspden
+ integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nkxc,nspden
  integer,intent(in) :: nspinor,nsppol
- real(dp),intent(in) :: ucvol
+ real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -171,6 +174,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rho1g1(2,nfft),rho2r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rprimd(3,3)
@@ -183,7 +187,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,icg,idq,ii,ikg,ikpt,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
+ integer :: bandtot,icg,idq,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
  integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
  real(dp) :: wtk_k
@@ -195,12 +199,11 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,i1dir
  real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
  real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
  real(dp) :: d3etot_t3(2),d3etot_t3_k(2)
- real(dp) :: d3etot_t4(2),d3etot_t4_k(2)
- real(dp) :: d3etot_t5(2),d3etot_t5_k(2)
+ real(dp) :: d3etot_t4(2,n2dq),d3etot_t4_k(2,n2dq)
+ real(dp) :: d3etot_t5(2,n1dq),d3etot_t5_k(2,n1dq)
  real(dp) :: d3etot_telec(2),d3etot_telec_k(2)
  real(dp) :: kpt(3)
- real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
- real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:),gv1c(:,:),occ_k(:)
+ real(dp),allocatable :: occ_k(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vlocal1dq(:,:,:,:)
  real(dp),allocatable :: vlocal1(:,:,:,:)
@@ -278,16 +281,33 @@ d3etot_telec=zero
      wtk_k    = dtset%wtk(ikpt)
      kpt(:) = dtset%kptns(:,ikpt)
 
-     ABI_MALLOC(cwavef1,(2,npw_k*nspinor))
-     ABI_MALLOC(cwavef2,(2,npw_k*nspinor))
-
      ABI_MALLOC(kg_k,(3,npw_k))
      ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
      ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     !Get plane-wave vectors and related data at k
+     kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+     if (psps%useylm==1) then
+       do ilm=1,psps%mpsang*psps%mpsang
+         ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+       end do
+       if (useylmgr==1) then
+         do ilm=1,psps%mpsang*psps%mpsang
+           do ii=1,nylmgr
+             ylmgr_k(1:npw_k,ii,ilm)=ylmgr(1+ikg:npw_k+ikg,ii,ilm)
+           end do
+         end do
+       end if
+     end if
 
-
-
-
+     !Compute the stationary terms of d3etot depending on response functions
+     call dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
+     & d3etot_t4_k,d3etot_t5_k,dtset,gs_hamkq,gsqcut,icg,&
+     & i1dir,i2dir,i3dir,i1pert,i2pert,i3per,ikpt,isppol,istwf_k,&
+     & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
+     & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
+     & ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
+     & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
+     & xred,ylm_k,ylmgr_k)
 
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
@@ -297,8 +317,6 @@ d3etot_telec=zero
      ikg=ikg+npw_k
 
      ABI_FREE(occ_k)
-     ABI_FREE(cwavef1)
-     ABI_FREE(cwavef2)
      ABI_FREE(kg_k)
      ABI_FREE(ylm_k)
      ABI_FREE(ylmgr_k)
