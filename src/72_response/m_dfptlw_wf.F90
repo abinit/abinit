@@ -162,7 +162,7 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f
 
 !arrays
- integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(in) :: atindx(natom)
  integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(out) :: d3etot_t1_k(2)
@@ -171,27 +171,29 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  real(dp),intent(out) :: d3etot_t4_k(2,n2dq)
  real(dp),intent(out) :: d3etot_t5_k(2,n1dq)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k),kxc(nfft,nkxc)
- real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
+ real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: vtrial1_i1pert(cplex*nfft,nspden)
  real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
- real(dp),intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iband,jband
+ integer :: berryopt,iband,jband,nkpg,nkpg1
  integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: dum_lambda
 
 !arrays
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
- real(dp),allocatable :: gv1c(:,:)
- real(dp),allocatable :: part_ylmgr_k(:,:,:)
+ real(dp),allocatable :: dkinpw(:),gv1c(:,:)
+ real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
+ real(dp),allocatable :: part_ylmgr_k(:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
@@ -216,6 +218,8 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(vpsp1,(cplex*nfft))
  ABI_MALLOC(dum_cwaveprj,(0,0))
+ ABI_MALLOC(part_ylmgr_k,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3,:)
 
 !------------------------------------T1------------------------------------------------
 !q1-gradient of gs Hamiltonian:
@@ -236,12 +240,25 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
 
  call rf_hamkq(1)%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
+ !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+ call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
+ kpt,kpt,i3dir,natom+1,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,& ! In
+ npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
+ dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
 
 
 !Clean rf_hamiltonian
  call rf_hamkq(1)%free()
  ABI_FREE(rf_hamkq)
 
+ !Deallocations
+ ABI_FREE(kpg_k)
+ ABI_FREE(kpg1_k)
+ ABI_FREE(dkinpw)
+ ABI_FREE(kinpw1)
+ ABI_FREE(ffnlk)
+ ABI_FREE(ffnl1)
+ ABI_FREE(ph3d)
 
 
 !Deallocations
@@ -255,6 +272,7 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(dum_vlocal)
  ABI_FREE(vpsp1)
  ABI_FREE(dum_cwaveprj)
+ ABI_FREE(part_ylmgr_k)
 
 
  DBG_EXIT("COLL")
