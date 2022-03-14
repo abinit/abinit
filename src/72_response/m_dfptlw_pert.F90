@@ -191,7 +191,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,icg,idq,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
+ integer :: bandtot,icg,idq,ierr,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
  integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
  real(dp) :: wtk_k
@@ -199,6 +199,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
  logical :: with_nonlocal_i1pert, with_nonlocal_i2pert
 !arrays
  integer,allocatable :: kg_k(:,:)
+ real(dp) :: buffer(10)
  real(dp) :: d3etot_k(2)
  real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
  real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
@@ -206,7 +207,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
  real(dp) :: d3etot_t4(2,n2dq),d3etot_t4_k(2,n2dq)
  real(dp) :: d3etot_t5(2,n1dq),d3etot_t5_k(2,n1dq)
  real(dp) :: d3etot_telec(2),d3etot_telec_k(2)
- real(dp) :: kpt(3)
+ real(dp) :: e3tot(2),kpt(3)
  real(dp),allocatable :: occ_k(:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vlocal1dq(:,:,:,:)
@@ -304,15 +305,18 @@ d3etot_telec=zero
      end if
 
      !Compute the stationary terms of d3etot depending on response functions
-     call dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
+     call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
      & d3etot_t4_k,d3etot_t5_k,dtset,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
      & ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
-     & xred,ylm_k,ylmgr_k)
+     & wtk_k,xred,ylm_k,ylmgr_k)
 
+!    Add the contribution from each k-point. 
+     d3etot_t1=d3etot_t1 + d3etot_t1_k
+ 
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
 
@@ -329,10 +333,57 @@ d3etot_telec=zero
 
  end do !isppol
 
+!=== MPI communications ==================
+ if (xmpi_paral==1) then
 
+ ! Real parts
+   buffer(1)=d3etot_t1(1)
 
+ ! Imaginary parts
+   buffer(6)=d3etot_t1(2)
 
+   call xmpi_sum(buffer,spaceworld,ierr)
 
+ ! Real parts
+   d3etot_t1(1)=buffer(1)
+
+ ! Imaginary parts
+   d3etot_t1(2)=buffer(6)
+
+ end if
+
+!Join all the contributions in e3tot. Apply here the two factor to 
+!the stationary wf1 contributions (see PRB 105, 064101 (2022))
+ d3etot_t1(:)=two*d3etot_t1(:)
+ e3tot(:)=d3etot_t1(:)
+
+!Before printing, set small contributions to zero
+ if (dtset%kptopt==3) then
+
+   !Real parts
+   if (abs(d3etot_t1(1))<tol8) d3etot_t1(1)= zero
+   if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
+   !Imaginary parts
+   if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
+   if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
+
+ else if (dtset%kptopt==2) then
+
+   !Real parts
+   d3etot_t1(1)= zero
+   e3tot(1)   = zero
+   !Imaginary parts
+   if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
+   if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
+
+ else
+
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for the longwave calculation'
+   ABI_BUG(msg)
+
+ end if
+
+ d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=e3tot(:)
 
  DBG_EXIT("COLL")
 
