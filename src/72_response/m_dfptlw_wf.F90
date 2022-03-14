@@ -76,6 +76,8 @@ contains
 !!  d2_dkdk_f = wf files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
+!!  cg1 = first derivative of cg with respect the perturbation i1pert
+!!  cg2 = first derivative of cg with respect the perturbation i2pert
 !!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
 !!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
@@ -114,6 +116,7 @@ contains
 !!          gradient Hamiltonian for i2pert
 !!  vtrial1_i1pert(cplex*nfft,nspden)=firs-order local potential
 !!  vtrial1_i2pert(cplex*nfft,nspden)=firs-order local potential
+!!  wtk_k=weight assigned to the k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics for the k point
 !!  ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical
@@ -133,7 +136,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
+subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      & d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,&
      & d3etot_t4_k,d3etot_t5_k,dtset,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
@@ -141,7 +144,7 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
      & ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
-     & xred,ylm_k,ylmgr_k)
+     & wtk_k,xred,ylm_k,ylmgr_k)
     
  use defs_basis
 
@@ -154,7 +157,7 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  integer,intent(in) :: mkmem,mpw,natom,nband_k,n1dq,n2dq,nfft
  integer,intent(in) :: nkxc,npw_k,nspden,nsppol,nylmgr
  integer,intent(in) :: useylmgr
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: gsqcut,ucvol,wtk_k
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
@@ -165,6 +168,8 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  integer,intent(in) :: atindx(natom)
  integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
+ real(dp),intent(in) :: cg2(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(out) :: d3etot_t1_k(2)
  real(dp),intent(out) :: d3etot_t2_k(2)
  real(dp),intent(out) :: d3etot_t3_k(2)
@@ -184,14 +189,16 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
 !Local variables-------------------------------
 !scalars
  integer :: berryopt,iband,jband,nkpg,nkpg1
- integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
- real(dp) :: dum_lambda
+ integer :: offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
+ integer :: size_wf,tim_getgh1c,usevnl,useylmgr1
+ real(dp) :: doti,dotr,dum_lambda
 
 !arrays
  real(dp),allocatable :: cwave0i(:,:),cwave0j(:,:)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: dkinpw(:),gv1c(:,:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp) :: dum_grad_berry(1,1),dum_gs1(1,1),dum_gvnl1(1,1)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: part_ylmgr_k(:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
@@ -206,13 +213,15 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  
 !Additional definitions
  tim_getgh1c=0
+ useylmgr1=1
+ size_wf= dtset%nspinor*npw_k
 
 !Additional allocations
- ABI_MALLOC(cwave0i,(2,npw_k*dtset%nspinor))
- ABI_MALLOC(cwave0j,(2,npw_k*dtset%nspinor))
- ABI_MALLOC(cwavef1,(2,npw_k*dtset%nspinor))
- ABI_MALLOC(cwavef2,(2,npw_k*dtset%nspinor))
- ABI_MALLOC(gv1c,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(cwave0i,(2,size_wf))
+ ABI_MALLOC(cwave0j,(2,size_wf))
+ ABI_MALLOC(cwavef1,(2,size_wf))
+ ABI_MALLOC(cwavef2,(2,size_wf))
+ ABI_MALLOC(gv1c,(2,size_wf))
  ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(dum_vpsp,(nfft))
  ABI_MALLOC(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
@@ -227,8 +236,8 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
 !--------------------------------------------------------------------------------------
 
 !Specific definitions
+ d3etot_t1_k=zero
  vlocal1=zero
- useylmgr1=1
  dum_lambda=zero
  berryopt=0;optlocal=0;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
@@ -246,6 +255,28 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
  dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
 
+ !LOOP OVER BANDS
+ do iband=1,nband_k
+   
+   !Select bks wf1
+   offset_cgj = (iband-1)*size_wf+icg
+   cwavef1(:,:)= cg1(:,1+offset_cgj:size_wf+offset_cgj)
+   cwavef2(:,:)= cg2(:,1+offset_cgj:size_wf+offset_cgj)
+   
+   !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\lambda2} >
+   call getgh1c(berryopt,cwavef2,dum_cwaveprj,gv1c,dum_grad_berry,&
+ & dum_gs1,gs_hamkq,dum_gvnl1,i3dir,natom+1,dum_lambda,mpi_enreg,optlocal,&
+ & optnl,opt_gvnl1,rf_hamkq(1),sij_opt,tim_getgh1c,usevnl)
+    
+   !Apply the dot product with the ket wf (take into account occupation here)
+   ! < u_{i,k}^{\lambda1}} | \partial_{gamma} H^{(0)} | u_{i,k}^{lambda2}} >
+   call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwavef1,gv1c, &
+ & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+   d3etot_t1_k(1)=d3etot_t1_k(1)+occ_k(iband)*dotr
+   d3etot_t1_k(2)=d3etot_t1_k(2)+occ_k(iband)*doti
+
+ end do !iband
 
 !Clean rf_hamiltonian
  call rf_hamkq(1)%free()
@@ -260,6 +291,9 @@ subroutine dfpt_1wf(atindx,cg,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ffnl1)
  ABI_FREE(ph3d)
 
+
+!Scale d3etot_k contributions by the kpt weight
+d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
 
 !Deallocations
  ABI_FREE(cwave0i)

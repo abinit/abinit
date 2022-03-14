@@ -564,22 +564,22 @@ ecore=zero
  end if
 
 !Calculate the quadrupole tensor
- if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-   call dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
-&   gmet,gprimd,kxc,mpert,&
-&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-&   timrev,ucvol,xred)
- end if
+! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
+!   call dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
+!&   gmet,gprimd,kxc,mpert,&
+!&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+!&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+!&   timrev,ucvol,xred)
+! end if
 
 !Calculate the flexoelectric tensor
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyewdqdq, &
-&   gmet,gprimd,kxc,mpert,&
-&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-&   timrev,ucvol,xred)
- end if
+! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
+!   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyewdqdq, &
+!&   gmet,gprimd,kxc,mpert,&
+!&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+!&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+!&   timrev,ucvol,xred)
+! end if
 
 !Open the formatted derivative database file, and write the
 !preliminary information
