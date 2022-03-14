@@ -221,9 +221,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
 
  DBG_ENTER("COLL")
 
-!Anounce start of spatial-dispersion calculation
- write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
-&   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
+write(msg,'(2a,3(a,i2,a,i1))') ch10,'LONGWAVE : ',&
+ ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 

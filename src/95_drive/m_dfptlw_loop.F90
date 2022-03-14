@@ -190,7 +190,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 !scalars
  integer :: ask_accurate,comm_cell,cplex,dkdk_index,formeig,g0term
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
- integer :: ierr,ireadwf,istr,mcg,me,mpsang
+ integer :: ierr,ii,ireadwf,istr,mcg,me,mpsang
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
  integer :: opthartdqdq,optorth,optres,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
@@ -218,6 +218,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+!Anounce start of spatial-dispersion calculation
+ write(message, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+&   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
  
 !Init parallelism
  comm_cell=mpi_enreg%comm_cell
@@ -614,6 +620,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
   ABI_FREE(vpsp1dqdq)
   ABI_FREE(vxc1dqdq)
  end if
+
+!Anounce end of spatial-dispersion calculation
+ write(message, '(a,a,a,a)' ) ch10,ch10,&
+&   ' -- Spatial-dispersion 3rd-order derivatives completed -- ',ch10
+ call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,message,'COLL')
+ 
 
  DBG_EXIT("COLL")
 
