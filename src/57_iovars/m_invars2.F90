@@ -2266,9 +2266,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
-   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
+   if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
      write(msg, '(a,a,a)' )&
-      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 ',ch10,&
+      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
       'imposing dmft_dc = 5'
      ABI_WARNING(msg)
      dtset%dmft_dc=5
@@ -2377,6 +2377,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_gmove  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_grnns',tread,'INT')
        if(tread==1) dtset%dmftctqmc_grnns  =intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_config',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_config  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_meas',tread,'INT')
        if(tread==1) dtset%dmftctqmc_meas   =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_mrka',tread,'INT')
@@ -3595,32 +3597,32 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 ! end if
 
 
-   if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%nbandkss /= 0 .and. dtset%usedmft/=0)) then
-     dtset%plowan_natom=1
-     dtset%plowan_nbl(:)=1
+   if ((dtset%ucrpa > 0 .and. dtset%plowan_compute >=0 )) then
+   !   dtset%plowan_natom=1
+   !   dtset%plowan_nbl(:)=1
      dtset%plowan_nt=1
      dtset%plowan_it(:)=0
      dtset%plowan_realspace=1
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
-     if(tread==1) dtset%dmft_t2g=intarr(1)
-     do iatom=1,dtset%natom
-       lpawu=dtset%lpawu(dtset%typat(iatom))
-       if (lpawu/=-1) then
-         dtset%plowan_lcalc(:)=lpawu
-         dtset%plowan_iatom(:)=iatom
-         dtset%plowan_projcalc(:)=-2
-       end if
-     end do
-     dtset%plowan_bandi=dtset%dmftbandi
-     dtset%plowan_bandf=dtset%dmftbandf
-     if (dtset%nbandkss /= 0 .and. dtset%usedmft/=0) then
-       dtset%plowan_compute=1
-       dtset%usedmft=0
-     else if (dtset%optdriver==3) then
-       dtset%plowan_compute=10
-     else if(dtset%optdriver==4) then
-       dtset%plowan_compute=10
-     end if
+   !   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
+   !   if(tread==1) dtset%dmft_t2g=intarr(1)
+   !   do iatom=1,dtset%natom
+   !     lpawu=dtset%lpawu(dtset%typat(iatom))
+   !     if (lpawu/=-1) then
+   !       dtset%plowan_lcalc(:)=lpawu
+   !       dtset%plowan_iatom(:)=iatom
+   !       dtset%plowan_projcalc(:)=-2
+   !     end if
+   !   end do
+   !   dtset%plowan_bandi=dtset%dmftbandi
+   !   dtset%plowan_bandf=dtset%dmftbandf
+   !   if (dtset%nbandkss /= 0 .and. dtset%usedmft/=0) then
+   !     dtset%plowan_compute=1
+   !     dtset%usedmft=0
+   !   else if (dtset%optdriver==3) then
+   !     dtset%plowan_compute=10
+   !   else if(dtset%optdriver==4) then
+   !     dtset%plowan_compute=10
+   !   end if
    end if
 
  ! band range for self-energy sum

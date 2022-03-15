@@ -93,21 +93,6 @@ _ WF disk file :      0.503 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
         dmatpuopt           1
-        dmftbandf1          0
-        dmftbandf2          0
-        dmftbandf3         25
-        dmftbandi1          0
-        dmftbandi2          0
-        dmftbandi3         21
-        dmft_nwli1          0
-        dmft_nwli2          0
-        dmft_nwli3     200000
-        dmft_nwlo1          0
-        dmft_nwlo2          0
-        dmft_nwlo3        100
-        dmft_solv1          5
-        dmft_solv2          5
-        dmft_solv3          2
              ecut      4.00000000E+00 Hartree
 -          fftalg         312
         f4of2_sla      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -274,33 +259,25 @@ P           mkmem3          8
                        2.000000  2.000000  1.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000
            occopt           3
-        optforces1          2
-        optforces2          2
-        optforces3          0
         pawecutdg      5.00000000E+00 Hartree
-     plowan_bandi1          0
-     plowan_bandi2          0
-     plowan_bandi3         21
-     plowan_bandf1          0
-     plowan_bandf2          0
-     plowan_bandf3         25
+     plowan_bandi          21
+     plowan_bandf          25
    plowan_compute1          0
    plowan_compute2          0
    plowan_compute3          1
-     plowan_natom1          0
-     plowan_natom2          0
-     plowan_natom3          1
-        plowan_nt1          0
-        plowan_nt2          0
-        plowan_nt3          1
- plowan_realspace1          0
- plowan_realspace2          0
- plowan_realspace3          1
-        plowan_it3       0    0    0
+     plowan_natom           1
+     plowan_iatom1       1
+     plowan_iatom2       1
      plowan_iatom3       1
+       plowan_nbl1       1
+       plowan_nbl2       1
        plowan_nbl3       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
      plowan_lcalc3       2
-  plowan_projcalc3      -2
+  plowan_projcalc1       7
+  plowan_projcalc2       7
+  plowan_projcalc3       7
           ppmodel           3
           spgroup1        221
           spgroup2          1
@@ -1149,7 +1126,7 @@ lattice_vectors:
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
-convergence: {deltae: -1.437E+02, res2:  5.056E-19, residm:  1.630E-15, diffor:  0.000E+00, }
+convergence: {deltae: -1.437E+02, res2:  5.056E-19, residm:  1.630E-15, diffor: null, }
 etotal    :  -1.43715660E+02
 entropy   :   0.00000000E+00
 fermie    :   4.40910389E-01
@@ -1164,8 +1141,13 @@ xred      :
 - [  5.0000E-01,   0.0000E+00,   0.0000E+00,  O]
 - [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
 - [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
-cartesian_forces: null
-force_length_stats: {min: null, max: null, mean: null, }
+cartesian_forces: # hartree/bohr
+- [ -3.97646126E-11,  -1.01850396E-09,  -2.23166508E-10, ]
+- [  7.56186224E-11,   1.14944667E-09,   2.21555818E-10, ]
+- [  3.02768510E-11,  -4.74355978E-10,  -1.00845329E-10, ]
+- [ -3.32162662E-11,   7.00621496E-10,  -3.80971749E-11, ]
+- [ -3.29145946E-11,  -3.57208234E-10,   1.40553193E-10, ]
+force_length_stats: {min:   3.85274309E-10, max:   1.17304425E-09, mean:   7.58017345E-10, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1275,21 +1257,21 @@ force_length_stats: {min: null, max: null, mean: null, }
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 
  == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
 
    (The band structure is shifted by fermie =      11.9976 eV )
 
  Wannier band structure for atom  1
- 1      -0.000       0.000       0.000       0.318       0.318
- 2      -0.241       0.000       0.000       0.630       2.002
+ 1      -0.000      -0.000       0.000       0.318       0.318
+ 2      -0.241      -0.000      -0.000       0.630       2.002
  3      -0.241      -0.000       0.000       0.630       2.002
  4       0.644       2.243       3.560       3.888       3.888
  5      -0.241      -0.000       0.000       0.630       2.002
  6       0.644       2.243       3.560       3.888       3.888
  7       0.644       2.243       3.560       3.888       3.888
- 8      -0.000      -0.000       0.000       6.066       6.066
+ 8      -0.000       0.000       0.000       6.066       6.066
 
  Print the psichi coefficients in data.plowann
 
@@ -1357,6 +1339,22 @@ force_length_stats: {min: null, max: null, mean: null, }
     3      1.92104556148385     0.00000000000000     0.00000000000000
     4      0.00000000000000     1.92104556148385     0.00000000000000
     5      0.00000000000000     0.00000000000000     1.92104556148385
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000003976    -0.00000000101850    -0.00000000022317
+    2      0.00000000007562     0.00000000114945     0.00000000022156
+    3      0.00000000003028    -0.00000000047436    -0.00000000010085
+    4     -0.00000000003322     0.00000000070062    -0.00000000003810
+    5     -0.00000000003291    -0.00000000035721     0.00000000014055
+ frms,max,avg= 4.7206844E-10 1.1494467E-09   1.470E-13 -8.812E-12 -4.614E-13 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000204478    -0.00000005237357    -0.00000001147568
+    2      0.00000000388847     0.00000005910692     0.00000001139286
+    3      0.00000000155690    -0.00000002439236    -0.00000000518567
+    4     -0.00000000170805     0.00000003602740    -0.00000000195904
+    5     -0.00000000169254    -0.00000001836838     0.00000000722754
+ frms,max,avg= 2.4274733E-08 5.9106920E-08   7.560E-12 -4.531E-10 -2.373E-11 e/A
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
  prteigrs : about to open file t23o_DS3_EIG
@@ -1424,21 +1422,6 @@ total_energy_dc_eV  : -3.91070197752141E+03
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
         dmatpuopt           1
-        dmftbandf1          0
-        dmftbandf2          0
-        dmftbandf3         25
-        dmftbandi1          0
-        dmftbandi2          0
-        dmftbandi3         21
-        dmft_nwli1          0
-        dmft_nwli2          0
-        dmft_nwli3     200000
-        dmft_nwlo1          0
-        dmft_nwlo2          0
-        dmft_nwlo3        100
-        dmft_solv1          5
-        dmft_solv2          5
-        dmft_solv3          2
              ecut      4.00000000E+00 Hartree
            etotal1    -1.4371565951E+02
            etotal2    -1.4371565951E+02
@@ -1448,17 +1431,17 @@ total_energy_dc_eV  : -3.91070197752141E+03
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     1.6518252211E-11  8.6222978422E-10  2.3456103956E-10
-                      -3.9141535916E-11 -9.0913241281E-10 -1.1949944235E-10
-                      -1.5127850950E-11  3.8081035037E-10  5.5530207601E-11
-                       1.9899260109E-11 -5.1772918686E-10 -8.4098305448E-11
-                       1.7851874545E-11  1.8382146509E-10 -8.6493499361E-11
-            fcart3     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
--          fftalg         312
+            fcart2     1.4466931005E-11  8.6130696459E-10  2.3876977924E-10
+                      -3.6174053623E-11 -9.0645895430E-10 -1.2284483057E-10
+                      -1.3435406399E-11  3.8145265138E-10  5.5917608801E-11
+                       1.9343290605E-11 -5.2224124793E-10 -8.2827618285E-11
+                       1.5799238412E-11  1.8594058626E-10 -8.9014939188E-11
+            fcart3    -3.9764612554E-11 -1.0185039583E-09 -2.2316650783E-10
+                       7.5618622445E-11  1.1494466743E-09  2.2155581808E-10
+                       3.0276850985E-11 -4.7435597800E-10 -1.0084532864E-10
+                      -3.3216266235E-11  7.0062149621E-10 -3.8097174935E-11
+                      -3.2914594641E-11 -3.5720823416E-10  1.4055319333E-10
+-          fftalg         512
         f4of2_sla      0.00000000E+00  0.00000000E+00  0.00000000E+00
            getden1          0
            getden2         -1
@@ -1623,33 +1606,25 @@ P           mkmem3          8
                        1.999999  1.999999  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000
            occopt           3
-        optforces1          2
-        optforces2          2
-        optforces3          0
         pawecutdg      5.00000000E+00 Hartree
-     plowan_bandi1          0
-     plowan_bandi2          0
-     plowan_bandi3         21
-     plowan_bandf1          0
-     plowan_bandf2          0
-     plowan_bandf3         25
+     plowan_bandi          21
+     plowan_bandf          25
    plowan_compute1          0
    plowan_compute2          0
    plowan_compute3          1
-     plowan_natom1          0
-     plowan_natom2          0
-     plowan_natom3          1
-        plowan_nt1          0
-        plowan_nt2          0
-        plowan_nt3          1
- plowan_realspace1          0
- plowan_realspace2          0
- plowan_realspace3          1
-        plowan_it3       0    0    0
+     plowan_natom           1
+     plowan_iatom1       1
+     plowan_iatom2       1
      plowan_iatom3       1
+       plowan_nbl1       1
+       plowan_nbl2       1
        plowan_nbl3       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
      plowan_lcalc3       2
-  plowan_projcalc3      -2
+  plowan_projcalc1       7
+  plowan_projcalc2       7
+  plowan_projcalc3       7
           ppmodel           3
           spgroup1        221
           spgroup2          1

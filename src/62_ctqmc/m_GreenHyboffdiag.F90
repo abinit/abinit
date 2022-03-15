@@ -554,6 +554,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
     ! FIXME SHOULD be much more faster
     
 
+   ! write(6,*) "LKLLL2b"
     SELECT CASE(op%iTech)
     CASE (GREENHYB_TAU)
       argument = DBLE(op%factor)
@@ -609,6 +610,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
   
       ! This is new measurement, thus op%factor should be put to one
       op%factor = 1
+   ! write(6,*) "LKLLL2C"
 
 
       ! initialized index idx_old for the doubles loops over flavors and segments.
@@ -776,6 +778,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
        iC_m_add=iC_m_add+tail
       END DO ! iflavor
       op%signvalueold = signvalue
+   ! write(6,*) "LKLLL2D"
     CASE (GREENHYB_OMEGA)
     !  argument = DBLE(op%factor)
     !  DO iomega = 1, omegaSamples
