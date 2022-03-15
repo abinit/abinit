@@ -309,7 +309,7 @@ d3etot_telec=zero
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
-     & ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
+     & pawfgr,ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
      & wtk_k,xred,ylm_k,ylmgr_k)
 
