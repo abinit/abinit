@@ -315,6 +315,7 @@ d3etot_telec=zero
 
 !    Add the contribution from each k-point. 
      d3etot_t1=d3etot_t1 + d3etot_t1_k
+     d3etot_t2=d3etot_t2 + d3etot_t2_k
  
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
@@ -337,42 +338,51 @@ d3etot_telec=zero
 
  ! Real parts
    buffer(1)=d3etot_t1(1)
+   buffer(2)=d3etot_t2(1)
 
  ! Imaginary parts
    buffer(6)=d3etot_t1(2)
+   buffer(7)=d3etot_t2(2)
 
    call xmpi_sum(buffer,spaceworld,ierr)
 
  ! Real parts
    d3etot_t1(1)=buffer(1)
+   d3etot_t2(1)=buffer(2)
 
  ! Imaginary parts
    d3etot_t1(2)=buffer(6)
+   d3etot_t2(2)=buffer(7)
 
  end if
 
 !Join all the contributions in e3tot. Apply here the two factor to 
 !the stationary wf1 contributions (see PRB 105, 064101 (2022))
  d3etot_t1(:)=two*d3etot_t1(:)
- e3tot(:)=d3etot_t1(:)
+ d3etot_t2(:)=two*d3etot_t2(:)
+ e3tot(:)=d3etot_t1(:)+d3etot_t2(:)
 
 !Before printing, set small contributions to zero
  if (dtset%kptopt==3) then
 
    !Real parts
    if (abs(d3etot_t1(1))<tol8) d3etot_t1(1)= zero
+   if (abs(d3etot_t2(1))<tol8) d3etot_t2(1)= zero
    if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
    !Imaginary parts
    if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
+   if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
    if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
  else if (dtset%kptopt==2) then
 
    !Real parts
    d3etot_t1(1)= zero
+   d3etot_t2(1)= zero
    e3tot(1)   = zero
    !Imaginary parts
    if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
+   if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
    if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
  else
@@ -383,8 +393,9 @@ d3etot_telec=zero
  end if
 
  if (dtset%prtvol>=10) then
-   write(msg,'(2(a,2(a,f18.8)),a)') &
+   write(msg,'(3(a,2(a,f18.8)),a)') &
    ch10,'        d3etot_t1 = ',d3etot_t1(1),  ',',d3etot_t1(2),&
+   ch10,'        d3etot_t2 = ',d3etot_t2(1),  ',',d3etot_t2(2),&
    ch10,'           d3etot = ',e3tot(1),      ',',e3tot(2), ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
