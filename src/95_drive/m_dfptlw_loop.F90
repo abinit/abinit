@@ -534,7 +534,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    end if
                    write(message,'(2a)')'-dfptlw_loop : read the ddk wavefunctions from file: ',trim(fiwfddk)
                    call wrtout(std_out,message,'COLL')
-                   call wrtout(ab_out,message,'COLL')
+                   !call wrtout(ab_out,message,'COLL')
 !                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
                    call wfk_open_read(ddk_f,fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
 
@@ -559,7 +559,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      end if
                      write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                      call wrtout(std_out,message,'COLL')
-                     call wrtout(ab_out,message,'COLL') 
+                     !call wrtout(ab_out,message,'COLL') 
                      call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
 
                    end if

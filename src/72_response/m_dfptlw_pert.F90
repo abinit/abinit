@@ -382,6 +382,14 @@ d3etot_telec=zero
 
  end if
 
+ if (dtset%prtvol>=10) then
+   write(msg,'(2(a,2(a,f18.8)),a)') &
+   ch10,'        d3etot_t1 = ',d3etot_t1(1),  ',',d3etot_t1(2),&
+   ch10,'           d3etot = ',e3tot(1),      ',',e3tot(2), ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
+
  d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=e3tot(:)
 
  DBG_EXIT("COLL")
