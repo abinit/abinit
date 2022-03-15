@@ -502,6 +502,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
       ! check convergence
       conv(1) = abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
       conv(2) = abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
+      call xmpi_sum(conv,mpi_enreg%comm_world,ierr)
       lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
       if (mpi_enreg%me == 0) then 
          write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
