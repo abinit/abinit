@@ -32,7 +32,7 @@ module m_rttddft_exponential
  use defs_basis
  use defs_abitypes,   only: MPI_type
 
- use m_bandfft_kpt,   only: bandfft_kpt,          &
+ use m_bandfft_kpt,   only: bandfft_kpt, &
                           & bandfft_kpt_get_ikpt
  use m_cgtools,       only: dotprod_g
  use m_dtset,         only: dataset_type

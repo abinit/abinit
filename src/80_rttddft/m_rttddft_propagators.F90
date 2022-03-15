@@ -449,13 +449,13 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
- character(len=500)   :: msg
- integer              :: ics
- integer              :: ierr
- logical              :: lconv
+ character(len=500) :: msg
+ integer            :: ics
+ integer            :: ierr
+ logical            :: lconv
  !arrays
- real(dp)             :: conv(2)
- real(dp)             :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
+ real(dp)           :: conv(2)
+ real(dp)           :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
  
 ! ***********************************************************************
 
@@ -484,7 +484,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  ics = 0
  if (mpi_enreg%me == 0) then 
    write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
-                                            & dtset%td_scthr, lconv, ch10
+                                          & dtset%td_scthr, lconv, ch10
    if (do_write_log) call wrtout(std_out,msg)
  end if
  if (.not. lconv) then
@@ -505,7 +505,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
       lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
       if (mpi_enreg%me == 0) then 
          write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
-                                            & dtset%td_scthr, lconv, ch10
+                                                & dtset%td_scthr, lconv, ch10
          if (do_write_log) call wrtout(std_out,msg)
       end if
       if (lconv) exit
