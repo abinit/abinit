@@ -2114,14 +2114,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !PAW: if cprj=<p_lmn|Cnk> are not in memory,need to compute them in some cases
  recompute_cprj = psps%usepaw ==1 .and. usecprj==0 .and. &
-& (dtset%prtwant  ==2 .or. &
-& dtset%prtwant  ==3  .or. &
-& dtset%prtnabla > 0  .or. &
-& dtset%prtdos   ==3  .or. &
-& dtset%berryopt /=0  .or. &
-& dtset%orbmag < 0    .or. &
-& dtset%kssform  ==3  .or. &
-& dtset%pawfatbnd> 0  .or. &
+& (dtset%prtwant  ==2      .or. &
+& dtset%prtwant  ==3       .or. &
+& dtset%prtnabla > 0       .or. &
+& dtset%prtdos   ==3       .or. &
+& dtset%berryopt /=0       .or. &
+& dtset%orbmag < 0         .or. &
+& dtset%kssform  ==3       .or. &
+& dtset%plowan_compute ==1 .or. &
+& dtset%pawfatbnd> 0       .or. &
 & dtset%pawprtwf > 0  )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
@@ -2725,7 +2726,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
      if(optene==0) etotal=etotal+energies%e_extfpmd
-     if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+     if(optene==1) etotal=etotal+energies%edc_extfpmd
    end if
 
 !  Compute energy residual
