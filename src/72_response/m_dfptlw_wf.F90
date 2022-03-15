@@ -393,6 +393,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
+d3etot_t2_k(:)=d3etot_t2_k(:)*wtk_k
 
 !Deallocations
  ABI_FREE(cwave0i)
