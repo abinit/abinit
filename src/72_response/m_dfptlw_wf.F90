@@ -190,11 +190,12 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iband,jband,nkpg,nkpg1
+ integer :: berryopt,iband,idq,jband,nkpg,nkpg1
  integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda
  logical :: with_nonlocal_i1pert,with_nonlocal_i2pert
+ type(rf_hamiltonian_type) :: rf_hamkq
 
 !arrays
  real(dp),allocatable :: cg1_aux(:,:),cg1_ddk(:,:,:),cwave0i(:,:),cwave0j(:,:)
@@ -207,7 +208,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
- type(rf_hamiltonian_type),allocatable :: rf_hamkq(:)
 
  
 ! *************************************************************************
@@ -249,15 +249,14 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  berryopt=0;optlocal=0;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
 
 !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
- ABI_MALLOC(rf_hamkq,(1))
- call init_rf_hamiltonian(cplex,gs_hamkq,natom+1,rf_hamkq(1),& 
+ call init_rf_hamiltonian(cplex,gs_hamkq,natom+1,rf_hamkq,& 
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
  & mpi_spintab=mpi_enreg%my_isppoltab)
 
- call rf_hamkq(1)%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+ call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
  !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
- call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
+ call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                     ! In
  kpt,kpt,i3dir,natom+1,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,& ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
  dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
@@ -275,7 +274,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    !Compute < g |\partial_{gamma} H^{(0)} | u_{i,k}^{\lambda2} >
    call getgh1c(berryopt,cwavef2,dum_cwaveprj,gv1c,dum_grad_berry,&
  & dum_gs1,gs_hamkq,dum_gvnl1,i3dir,natom+1,dum_lambda,mpi_enreg,optlocal,&
- & optnl,opt_gvnl1,rf_hamkq(1),sij_opt,tim_getgh1c,usevnl)
+ & optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
     
    !Apply the dot product with the ket wf (take into account occupation here)
    ! < u_{i,k}^{\lambda1}} | \partial_{gamma} H^{(0)} | u_{i,k}^{lambda2}} >
@@ -288,8 +287,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  end do !iband
 
 !Clean rf_hamiltonian
- call rf_hamkq(1)%free()
- ABI_FREE(rf_hamkq)
+ call rf_hamkq%free()
 
  !Deallocations
  ABI_FREE(kpg_k)
@@ -301,7 +299,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ph3d)
 
 !------------------------------------T2------------------------------------------------
-!q1-gradient of CB projector x rf Hamiltonian lambda 2:
+!q-gradient of CB projector x rf Hamiltonian lambda 2:
 ! < u_{i,k}^{\lambda1}} | \partial_{gamma} Q_k H^{\lambda2} | u_{i,k}^{(0)} >
 !--------------------------------------------------------------------------------------
 !Create array for ddk 1wf from file
@@ -319,21 +317,20 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  opt_gvnl1=0; if (i2pert==natom+2) opt_gvnl1=1
 
 !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
- ABI_MALLOC(rf_hamkq,(1))
- call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq(1),& 
+ call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,& 
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & mpi_spintab=mpi_enreg%my_isppoltab)
 
 !Set up local potentials with proper dimensioning
 !and load the spin-dependent part of the Hamiltonians
- vpsp1=vtrial1_i2pert(:,1)
+ vpsp1=vtrial1_i2pert(:,isppol)
  call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,nfft,ngfft,&
  & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
- call rf_hamkq(1)%load_spin(isppol,vlocal1=vlocal1,& 
+ call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,& 
  & with_nonlocal=with_nonlocal_i2pert)
 
 !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
- call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
+ call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                     ! In
  kpt,kpt,i2dir,i2pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&  ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
  dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
@@ -351,7 +348,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    !Compute < g | H^{\lambda2}+V^{\lambda2}} | u_{i,k}^{(0)} >
    call getgh1c(berryopt,cwave0i,dum_cwaveprj,gv1c,dum_grad_berry,&
  & dum_gs1,gs_hamkq,dum_gvnl1,i2dir,i2pert,dum_lambda,mpi_enreg,optlocal,&
- & optnl,opt_gvnl1,rf_hamkq(1),sij_opt,tim_getgh1c,usevnl)
+ & optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    !LOOP OVER BANDS
    do jband=1,nband_k
@@ -384,8 +381,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  end do !iband
 
 !Clean rf_hamiltonian
- call rf_hamkq(1)%free()
- ABI_FREE(rf_hamkq)
+ call rf_hamkq%free()
 
  !Deallocations
  ABI_FREE(kpg_k)
@@ -397,7 +393,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ph3d)
 
 !------------------------------------T3------------------------------------------------
-!rf Hamiltonian lambda 1 x q1-gradient of CB projector
+!rf Hamiltonian lambda 1 x q-gradient of CB projector
 ! < u_{i,k}^{(0) | (H^{\lambda1})^{\dagger} \partial_{gamma} Q_k | u_{i,k}^{\lambda2}}  >
 !--------------------------------------------------------------------------------------
 
@@ -409,21 +405,20 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  opt_gvnl1=0; if (i1pert==natom+2) opt_gvnl1=1
 
 !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
- ABI_MALLOC(rf_hamkq,(1))
- call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq(1),& 
+ call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq,& 
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & mpi_spintab=mpi_enreg%my_isppoltab)
 
 !Set up local potentials with proper dimensioning
 !and load the spin-dependent part of the Hamiltonians
- vpsp1=vtrial1_i1pert(:,1)
+ vpsp1=vtrial1_i1pert(:,isppol)
  call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,nfft,ngfft,&
  & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
- call rf_hamkq(1)%load_spin(isppol,vlocal1=vlocal1,& 
+ call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,& 
  & with_nonlocal=with_nonlocal_i1pert)
 
 !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
- call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
+ call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                     ! In
  kpt,kpt,i1dir,i1pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&  ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
  dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
@@ -441,7 +436,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    !Compute < g | H^{\lambda1}+V^{\lambda1}} | u_{i,k}^{(0)} >
    call getgh1c(berryopt,cwave0i,dum_cwaveprj,gv1c,dum_grad_berry,&
  & dum_gs1,gs_hamkq,dum_gvnl1,i1dir,i1pert,dum_lambda,mpi_enreg,optlocal,&
- & optnl,opt_gvnl1,rf_hamkq(1),sij_opt,tim_getgh1c,usevnl)
+ & optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    !LOOP OVER BANDS
    do jband=1,nband_k
@@ -474,8 +469,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  end do !iband
 
 !Clean rf_hamiltonian
- call rf_hamkq(1)%free()
- ABI_FREE(rf_hamkq)
+ call rf_hamkq%free()
 
  !Deallocations
  ABI_FREE(kpg_k)
@@ -487,6 +481,82 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ph3d)
  
  ABI_FREE(cg1_ddk)
+
+!------------------------------------T4------------------------------------------------
+!q-gradient of rf Hamiltonian lambda 2 
+! < u_{i,k}^{\lambda1} | (H^{\lambda2})_{gamma} | u_{i,k}^{(0)} >
+!--------------------------------------------------------------------------------------
+
+!Specific definitions
+ optlocal=1;optnl=1
+
+!Do loop to compute both extradiagonal shear-strain components
+ do idq=1,n2dq
+
+   if (i2pert/=natom+2) then
+
+     !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+     call init_rf_hamiltonian(2,gs_hamkq,i2pert,rf_hamkq,& 
+     & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+     & mpi_spintab=mpi_enreg%my_isppoltab)
+
+     !Set up local potentials with proper dimensioning
+     !and load the spin-dependent part of the Hamiltonians
+     vpsp1=vpsp1_i2pertdq(:,isppol,idq)
+     call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,nfft,ngfft,&
+     & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,& 
+     & with_nonlocal=with_nonlocal_i2pert)
+
+     !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i2dir,i2pert,i3dir, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
+
+   end if
+
+   !LOOP OVER BANDS
+   do iband=1,nband_k
+
+     if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+     !Select bks wfs
+     offset_cgi = (iband-1)*size_wf+icg
+     cwavef1(:,:)= cg1(:,1+offset_cgi:size_wf+offset_cgi)
+
+     !Perturbation-specific part
+     if (i2pert==natom+2) then
+       call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=cg1_aux)
+     else
+       cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
+
+       !Compute < g |H^{\lambda2}}_{\gamma} | u_{i,k}^{(0)} >
+!       call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+!       & idir,ipert,mpi_enreg,optlocal,optnl,q1grad(2,iq1grad),rf_hamkq)
+     end if
+
+   end do !iband
+
+
+
+
+   if (i2pert/=natom+2) then
+
+     !Clean the rf_hamiltonian
+     call rf_hamkq%free()
+
+     !Deallocations
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
+
+   end if
+
+ end do !idq
 
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
