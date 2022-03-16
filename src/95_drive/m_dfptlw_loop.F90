@@ -342,7 +342,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        !quantities.
        else if (i1pert==natom+3.or.i1pert==natom+4) then
          istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
-         g0term=0
+         g0term=1
          call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
        & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
        & ucvol,psps%vlspl,vpsp1,g0term=g0term)
@@ -411,7 +411,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
              & dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
              else if (i2pert==natom+3.or.i2pert==natom+4) then
                istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
-               g0term=0
+               g0term=1
                call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
              & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
              & ucvol,psps%vlspl,vpsp1,g0term=g0term)
