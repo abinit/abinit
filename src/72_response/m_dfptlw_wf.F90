@@ -197,7 +197,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  logical :: with_nonlocal_i1pert,with_nonlocal_i2pert
 
 !arrays
- real(dp),allocatable :: cg1_ddk(:,:),cwave0i(:,:),cwave0j(:,:)
+ real(dp),allocatable :: cg1_aux(:,:),cg1_ddk(:,:,:),cwave0i(:,:),cwave0j(:,:)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: dkinpw(:),gv1c(:,:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
@@ -227,7 +227,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_MALLOC(cwave0j,(2,size_wf))
  ABI_MALLOC(cwavef1,(2,size_wf))
  ABI_MALLOC(cwavef2,(2,size_wf))
- ABI_MALLOC(cg1_ddk,(2,size_wf))
+ ABI_MALLOC(cg1_aux,(2,size_wf))
  ABI_MALLOC(gv1c,(2,size_wf))
  ABI_MALLOC(vlocal1,(cplex*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
  ABI_MALLOC(dum_vpsp,(nfft))
@@ -304,6 +304,12 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 !q1-gradient of CB projector x rf Hamiltonian lambda 2:
 ! < u_{i,k}^{\lambda1}} | \partial_{gamma} Q_k H^{\lambda2} | u_{i,k}^{(0)} >
 !--------------------------------------------------------------------------------------
+!Create array for ddk 1wf from file
+ ABI_MALLOC(cg1_ddk,(2,size_wf,nband_k))
+ do iband=1,nband_k
+   call ddk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=cg1_aux)
+   cg1_ddk(:,:,iband)=cg1_aux(:,:)
+ end do
 
 !Specific definitions
  d3etot_t2_k=zero
@@ -324,7 +330,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  call rf_hamkq(1)%load_spin(isppol,vlocal1=vlocal1,& 
  & with_nonlocal=with_nonlocal_i2pert)
 
- !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+!Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
  call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
  kpt,kpt,i2dir,i2pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&  ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
@@ -352,8 +358,8 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      offset_cgj = (jband-1)*size_wf+icg
      cwave0j(:,:)= cg(:,1+offset_cgj:size_wf+offset_cgj)
 
-     !Read ddk wf1
-     call ddk_f%read_bks(jband,ikpt,isppol,xmpio_single,cg_bks=cg1_ddk)
+     !Select ddk wf1
+     cg1_aux(:,:)=cg1_ddk(:,:,jband)
 
      !Compute < u_{j,k}^{(0) | H^{\lambda2}+V^{\lambda2}} | u_{i,k}^{(0)} >
      call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwave0j,gv1c, &
@@ -362,7 +368,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      cj_h1_ci(2)=doti
      
      !Calculate: < u_{i,k}^{lambda1}} | u_{j,k}^{k_{\gamma}} >
-     call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,cg1_ddk, &
+     call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,cg1_aux, &
    & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
      !Calculate the contribution to T2
@@ -388,7 +394,95 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ffnl1)
  ABI_FREE(ph3d)
 
+!------------------------------------T3------------------------------------------------
+!rf Hamiltonian lambda 1 x q1-gradient of CB projector
+! < u_{i,k}^{(0) | (H^{\lambda1})^{\dagger} \partial_{gamma} Q_k | u_{i,k}^{\lambda2}}  >
+!--------------------------------------------------------------------------------------
 
+!Specific definitions
+ d3etot_t3_k=zero
+ dum_lambda=zero
+ berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
+
+!Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+ ABI_MALLOC(rf_hamkq,(1))
+ call init_rf_hamiltonian(cplex,gs_hamkq,i1pert,rf_hamkq(1),& 
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& mpi_spintab=mpi_enreg%my_isppoltab)
+
+!Set up local potentials with proper dimensioning
+!and load the spin-dependent part of the Hamiltonians
+ vpsp1=vtrial1_i1pert(:,1)
+ call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,nfft,ngfft,&
+ & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
+ call rf_hamkq(1)%load_spin(isppol,vlocal1=vlocal1,& 
+ & with_nonlocal=with_nonlocal_i1pert)
+
+!Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+ call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
+ kpt,kpt,i1dir,i1pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&  ! In
+ npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
+ dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
+
+ !LOOP OVER BANDS
+ do iband=1,nband_k
+
+   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+   !Select bks wfs
+   offset_cgi = (iband-1)*size_wf+icg
+   cwavef2(:,:)= cg2(:,1+offset_cgi:size_wf+offset_cgi)
+   cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
+
+   !Compute < g | H^{\lambda1}+V^{\lambda1}} | u_{i,k}^{(0)} >
+   call getgh1c(berryopt,cwave0i,dum_cwaveprj,gv1c,dum_grad_berry,&
+ & dum_gs1,gs_hamkq,dum_gvnl1,i1dir,i1pert,dum_lambda,mpi_enreg,optlocal,&
+ & optnl,opt_gvnl1,rf_hamkq(1),sij_opt,tim_getgh1c,usevnl)
+
+   !LOOP OVER BANDS
+   do jband=1,nband_k
+
+     !Select bks wfs
+     offset_cgj = (jband-1)*size_wf+icg
+     cwave0j(:,:)= cg(:,1+offset_cgj:size_wf+offset_cgj)
+
+     !Select ddk wf1
+     cg1_aux(:,:)=cg1_ddk(:,:,jband)
+
+     !Compute (< u_{j,k}^{(0) | H^{\lambda1}+V^{\lambda1}} | u_{i,k}^{(0)} >)^*
+     call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwave0j,gv1c, &
+   & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     cj_h1_ci(1)=dotr
+     cj_h1_ci(2)=-doti
+
+     !Calculate: < u_{j,k}^{k_{\gamma}} | u_{i,k}^{lambda2}} >
+     call dotprod_g(dotr,doti,istwf_k,size_wf,2,cg1_aux,cwavef2, &
+   & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+     !Calculate the contribution to T3
+     cprodr=dotr*cj_h1_ci(1)-doti*cj_h1_ci(2)
+     cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
+     d3etot_t3_k(1)=d3etot_t3_k(1)-cprodr*occ_k(iband)
+     d3etot_t3_k(2)=d3etot_t3_k(2)-cprodi*occ_k(iband)
+
+   end do !jband
+
+ end do !iband
+
+!Clean rf_hamiltonian
+ call rf_hamkq(1)%free()
+ ABI_FREE(rf_hamkq)
+
+ !Deallocations
+ ABI_FREE(kpg_k)
+ ABI_FREE(kpg1_k)
+ ABI_FREE(dkinpw)
+ ABI_FREE(kinpw1)
+ ABI_FREE(ffnlk)
+ ABI_FREE(ffnl1)
+ ABI_FREE(ph3d)
+ 
+ ABI_FREE(cg1_ddk)
 
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
@@ -399,7 +493,7 @@ d3etot_t2_k(:)=d3etot_t2_k(:)*wtk_k
  ABI_FREE(cwave0j)
  ABI_FREE(cwavef1)
  ABI_FREE(cwavef2)
- ABI_FREE(cg1_ddk)
+ ABI_FREE(cg1_aux)
  ABI_FREE(gv1c)
  ABI_FREE(vlocal1)
  ABI_FREE(dum_vpsp)
