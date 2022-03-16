@@ -314,7 +314,9 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 !Specific definitions
  d3etot_t2_k=zero
  dum_lambda=zero
- berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
+ berryopt=0;optlocal=1;usevnl=0;sij_opt=0
+ optnl=1; if (i2pert==natom+2) optnl=0
+ opt_gvnl1=0; if (i2pert==natom+2) opt_gvnl1=1
 
 !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
  ABI_MALLOC(rf_hamkq,(1))
@@ -402,7 +404,9 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 !Specific definitions
  d3etot_t3_k=zero
  dum_lambda=zero
- berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
+ berryopt=0;optlocal=1;optnl=1;usevnl=0;sij_opt=0
+ optnl=1; if (i1pert==natom+2) optnl=0
+ opt_gvnl1=0; if (i1pert==natom+2) opt_gvnl1=1
 
 !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
  ABI_MALLOC(rf_hamkq,(1))
@@ -487,6 +491,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
 d3etot_t2_k(:)=d3etot_t2_k(:)*wtk_k
+d3etot_t3_k(:)=d3etot_t3_k(:)*wtk_k
 
 !Deallocations
  ABI_FREE(cwave0i)
