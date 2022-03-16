@@ -190,7 +190,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iband,jband,g0term,nkpg,nkpg1
+ integer :: berryopt,iband,jband,nkpg,nkpg1
  integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda
@@ -309,7 +309,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  d3etot_t2_k=zero
  dum_lambda=zero
  berryopt=0;optlocal=1;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
- g0term=1
 
 !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
  ABI_MALLOC(rf_hamkq,(1))
@@ -327,7 +326,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
  !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
  call getgh1c_setup(gs_hamkq,rf_hamkq(1),dtset,psps,&                     ! In
- kpt,kpt,i2dir,i2pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,& ! In
+ kpt,kpt,i2dir,i2pert,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&  ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
  dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
 
@@ -369,8 +368,8 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      !Calculate the contribution to T2
      cprodr=dotr*cj_h1_ci(1)-doti*cj_h1_ci(2)
      cprodi=dotr*cj_h1_ci(2)+doti*cj_h1_ci(1)
-     d3etot_t2_k(1)=d3etot_t2_k(1)-cprodr
-     d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi
+     d3etot_t2_k(1)=d3etot_t2_k(1)-cprodr*occ_k(iband)
+     d3etot_t2_k(2)=d3etot_t2_k(2)-cprodi*occ_k(iband)
 
    end do !jband 
 
