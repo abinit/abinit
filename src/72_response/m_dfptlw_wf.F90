@@ -193,7 +193,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  integer :: berryopt,iband,idq,jband,nkpg,nkpg1
  integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
- real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda
+ real(dp) :: im,cprodi,cprodr,doti,dotr,dum_lambda,fac,re
  logical :: with_nonlocal_i1pert,with_nonlocal_i2pert
  type(rf_hamiltonian_type) :: rf_hamkq
 
@@ -202,6 +202,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: dkinpw(:),gv1c(:,:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable :: gvloc1dqc(:,:),gvnl1dqc(:,:)
  real(dp) :: cj_h1_ci(2),dum_grad_berry(1,1),dum_gs1(1,1),dum_gvnl1(1,1)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: part_ylmgr_k(:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -481,14 +482,27 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ph3d)
  
  ABI_FREE(cg1_ddk)
+ ABI_FREE(cg1_aux)
+ ABI_FREE(vpsp1)
+ ABI_FREE(vlocal1)
 
 !------------------------------------T4------------------------------------------------
 !q-gradient of rf Hamiltonian lambda 2 
 ! < u_{i,k}^{\lambda1} | (H^{\lambda2})_{gamma} | u_{i,k}^{(0)} >
 !--------------------------------------------------------------------------------------
 
-!Specific definitions
+!Specific definitions and allocations
+ d3etot_t4_k=zero
  optlocal=1;optnl=1
+ if (i2pert/=natom+2) then
+   ABI_MALLOC(vlocal1,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+   ABI_MALLOC(vpsp1,(2*nfft))
+   ABI_MALLOC(gvloc1dqc,(2,size_wf))
+   ABI_MALLOC(gvnl1dqc,(2,size_wf))
+ end if
+ if (i2pert<=natom) fac=one
+ if (i2pert==natom+2) fac=half
+ if (i2pert==natom+3.or.i2pert==natom+4) fac=-half
 
 !Do loop to compute both extradiagonal shear-strain components
  do idq=1,n2dq
@@ -503,7 +517,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      !Set up local potentials with proper dimensioning
      !and load the spin-dependent part of the Hamiltonians
      vpsp1=vpsp1_i2pertdq(:,isppol,idq)
-     call rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfft,nfft,ngfft,&
+     call rf_transgrid_and_pack(isppol,nspden,usepaw,2,nfft,nfft,ngfft,&
      & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,& 
      & with_nonlocal=with_nonlocal_i2pert)
@@ -526,19 +540,24 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
      !Perturbation-specific part
      if (i2pert==natom+2) then
-       call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=cg1_aux)
+       call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
      else
        cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
 
        !Compute < g |H^{\lambda2}}_{\gamma} | u_{i,k}^{(0)} >
-!       call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
-!       & idir,ipert,mpi_enreg,optlocal,optnl,q1grad(2,iq1grad),rf_hamkq)
+       call getgh1dqc(cwave0i,dum_cwaveprj,gv1c,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+       & i2dir,i2pert,mpi_enreg,optlocal,optnl,i3dir,rf_hamkq)
      end if
+     
+     !Calculate: < u_{j,k}^{\lambda1} | |H^{\lambda2}}_{\gamma} | u_{i,k}^{(0)} >
+     call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,gv1c, &
+   & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+     !Calculate the contribution to T3
+     d3etot_t4_k(1,idq)=d3etot_t4_k(1,idq)+dotr*occ_k(iband)
+     d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
 
    end do !iband
-
-
-
 
    if (i2pert/=natom+2) then
 
@@ -556,19 +575,32 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
    end if
 
+   !Apply the perturbation-dependent prefactors on T4
+   re=d3etot_t4_k(1,idq); im=d3etot_t4_k(2,idq)
+   if (i2pert==natom+2.or.i2pert==natom+3.or.i2pert==natom+4) then
+     d3etot_t4_k(1,idq)=-im
+     d3etot_t4_k(2,idq)=re
+   end if 
+   d3etot_t4_k(:,idq)=d3etot_t4_k(:,idq)*fac
+
  end do !idq
+
+ if (i2pert/=natom+2) then
+   ABI_FREE(gvloc1dqc)
+   ABI_FREE(gvnl1dqc)
+ end if
 
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
 d3etot_t2_k(:)=d3etot_t2_k(:)*wtk_k
 d3etot_t3_k(:)=d3etot_t3_k(:)*wtk_k
+d3etot_t4_k(:,:)=d3etot_t4_k(:,:)*wtk_k
 
 !Deallocations
  ABI_FREE(cwave0i)
  ABI_FREE(cwave0j)
  ABI_FREE(cwavef1)
  ABI_FREE(cwavef2)
- ABI_FREE(cg1_aux)
  ABI_FREE(gv1c)
  ABI_FREE(vlocal1)
  ABI_FREE(dum_vpsp)
