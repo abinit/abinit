@@ -190,10 +190,10 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iband,idq,jband,nkpg,nkpg1
+ integer :: berryopt,iband,idir,idq,jband,nkpg,nkpg1
  integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
- real(dp) :: im,cprodi,cprodr,doti,dotr,dum_lambda,fac,re
+ real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda,fac,tmpim,tmpre
  logical :: with_nonlocal_i1pert,with_nonlocal_i2pert
  type(rf_hamiltonian_type) :: rf_hamkq
 
@@ -508,7 +508,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  do idq=1,n2dq
 
    if (i2pert/=natom+2) then
-
+     idir=i2dir; if (i2pert==natom+4) idir=idq*3+i2dir
      !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,i2pert,rf_hamkq,& 
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
@@ -523,7 +523,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      & with_nonlocal=with_nonlocal_i2pert)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
-     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i2dir,i2pert,i3dir, &
+     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i2pert,i3dir, &
    & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
 
@@ -546,14 +546,14 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
        !Compute < g |H^{\lambda2}}_{\gamma} | u_{i,k}^{(0)} >
        call getgh1dqc(cwave0i,dum_cwaveprj,gv1c,gvloc1dqc,gvnl1dqc,gs_hamkq, &
-       & i2dir,i2pert,mpi_enreg,optlocal,optnl,i3dir,rf_hamkq)
+       & idir,i2pert,mpi_enreg,optlocal,optnl,i3dir,rf_hamkq)
      end if
      
      !Calculate: < u_{j,k}^{\lambda1} | |H^{\lambda2}}_{\gamma} | u_{i,k}^{(0)} >
      call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,gv1c, &
    & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-     !Calculate the contribution to T3
+     !Calculate the contribution to T4
      d3etot_t4_k(1,idq)=d3etot_t4_k(1,idq)+dotr*occ_k(iband)
      d3etot_t4_k(2,idq)=d3etot_t4_k(2,idq)+doti*occ_k(iband)
 
@@ -576,10 +576,10 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    end if
 
    !Apply the perturbation-dependent prefactors on T4
-   re=d3etot_t4_k(1,idq); im=d3etot_t4_k(2,idq)
-   if (i2pert==natom+2.or.i2pert==natom+3.or.i2pert==natom+4) then
-     d3etot_t4_k(1,idq)=-im
-     d3etot_t4_k(2,idq)=re
+   tmpre=d3etot_t4_k(1,idq); tmpim=d3etot_t4_k(2,idq)
+   if (i2pert==natom+2) then
+     d3etot_t4_k(1,idq)=-tmpim
+     d3etot_t4_k(2,idq)=tmpre
    end if 
    d3etot_t4_k(:,idq)=d3etot_t4_k(:,idq)*fac
 

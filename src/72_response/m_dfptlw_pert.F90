@@ -192,14 +192,14 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
 !Variables ------------------------------------
 !scalars
  integer :: bandtot,icg,idq,ierr,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
- integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
+ integer :: nband_k,n1dqb2,n2dqb2,npw_k,nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
  real(dp) :: wtk_k
  character(len=1000) :: msg
  logical :: with_nonlocal_i1pert, with_nonlocal_i2pert
 !arrays
  integer,allocatable :: kg_k(:,:)
- real(dp) :: buffer(10)
+ real(dp) :: buffer(6),buffer_t4(2*n2dq),buffer_t5(2*n1dq)
  real(dp) :: d3etot_k(2)
  real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
  real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
@@ -317,6 +317,7 @@ d3etot_telec=zero
      d3etot_t1=d3etot_t1 + d3etot_t1_k
      d3etot_t2=d3etot_t2 + d3etot_t2_k
      d3etot_t3=d3etot_t3 + d3etot_t3_k
+     d3etot_t4=d3etot_t4 + d3etot_t4_k
  
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
@@ -341,11 +342,18 @@ d3etot_telec=zero
    buffer(1)=d3etot_t1(1)
    buffer(2)=d3etot_t2(1)
    buffer(3)=d3etot_t3(1)
+   do idq=1,n2dq
+     buffer_t4(idq)=d3etot_t4(1,idq)
+   end do
 
  ! Imaginary parts
-   buffer(6)=d3etot_t1(2)
-   buffer(7)=d3etot_t2(2)
-   buffer(8)=d3etot_t3(2)
+   buffer(4)=d3etot_t1(2)
+   buffer(5)=d3etot_t2(2)
+   buffer(6)=d3etot_t3(2)
+   n2dqb2=n2dq/2 
+   do idq=1,n2dq
+     buffer_t4(n2dqb2+idq)=d3etot_t4(2,idq)
+   end do
 
    call xmpi_sum(buffer,spaceworld,ierr)
 
@@ -353,19 +361,28 @@ d3etot_telec=zero
    d3etot_t1(1)=buffer(1)
    d3etot_t2(1)=buffer(2)
    d3etot_t3(1)=buffer(3)
+   do idq=1,n2dq
+     d3etot_t4(1,idq)=buffer_t4(idq)
+   end do
 
  ! Imaginary parts
-   d3etot_t1(2)=buffer(6)
-   d3etot_t2(2)=buffer(7)
-   d3etot_t3(2)=buffer(8)
+   d3etot_t1(2)=buffer(4)
+   d3etot_t2(2)=buffer(5)
+   d3etot_t3(2)=buffer(6)
+   do idq=1,n2dq
+    d3etot_t4(2,idq)=buffer_t4(n2dqb2+idq)
+   end do
 
  end if
 
-!Join all the contributions in e3tot. Apply here the two factor to 
-!the stationary wf1 contributions (see PRB 105, 064101 (2022))
+!Join all the contributions in e3tot except t4 and t5 which may need to be
+!converted to type-II in the case of strain perturbation. 
+!Apply here the two factor to the stationary wf1 contributions 
+!(see PRB 105, 064101 (2022))
  d3etot_t1(:)=two*d3etot_t1(:)
  d3etot_t2(:)=two*d3etot_t2(:)
  d3etot_t3(:)=two*d3etot_t3(:)
+ d3etot_t4(:,:)=two*d3etot_t4(:,:)
  e3tot(:)=d3etot_t1(:)+d3etot_t2(:)+d3etot_t3(:)
 
 !Before printing, set small contributions to zero
@@ -375,11 +392,17 @@ d3etot_telec=zero
    if (abs(d3etot_t1(1))<tol8) d3etot_t1(1)= zero
    if (abs(d3etot_t2(1))<tol8) d3etot_t2(1)= zero
    if (abs(d3etot_t3(1))<tol8) d3etot_t3(1)= zero
+   do idq=1,n2dq
+     if (abs(d3etot_t4(1,idq))<tol8) d3etot_t4(1,idq)= zero
+   end do 
    if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
    !Imaginary parts
    if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
    if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
    if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
+   do idq=1,n2dq
+     if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
+   end do
    if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
  else if (dtset%kptopt==2) then
@@ -388,10 +411,15 @@ d3etot_telec=zero
    d3etot_t1(1)= zero
    d3etot_t2(1)= zero
    d3etot_t3(1)= zero
+   d3etot_t4(1,:)= zero
    e3tot(1)   = zero
    !Imaginary parts
    if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
+   if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
    if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
+   do idq=1,n2dq
+     if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
+   end do
    if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
  else
@@ -402,11 +430,20 @@ d3etot_telec=zero
  end if
 
  if (dtset%prtvol>=10) then
-   write(msg,'(4(a,2(a,f18.8)),a)') &
-   ch10,'        d3etot_t1 = ',d3etot_t1(1),  ',',d3etot_t1(2),&
-   ch10,'        d3etot_t2 = ',d3etot_t2(1),  ',',d3etot_t2(2),&
-   ch10,'        d3etot_t3 = ',d3etot_t3(1),  ',',d3etot_t3(2),&
-   ch10,'           d3etot = ',e3tot(1),      ',',e3tot(2), ch10
+   write(msg,'(3(a,2(a,f18.8)),a)') &
+   ch10,'          d3etot_t1 = ',d3etot_t1(1),  ',',d3etot_t1(2),&
+   ch10,'          d3etot_t2 = ',d3etot_t2(1),  ',',d3etot_t2(2),&
+   ch10,'          d3etot_t3 = ',d3etot_t3(1),  ',',d3etot_t3(2)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   if (n2dq==1) then
+     write(msg,'(1(a,2(a,f18.8)),a)') &
+     ch10,'           d3etot_t4= ',d3etot_t4(1,1),  ',',d3etot_t4(2,1)
+   else if (n2dq==2) then
+     write(msg,'(2(a,2(a,f18.8)),a)') &
+     ch10,' d3etot_t4(dw shear)= ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),&
+     ch10,' d3etot_t4(up shear)= ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
+   end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
