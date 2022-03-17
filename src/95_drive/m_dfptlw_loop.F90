@@ -454,8 +454,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                      & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,:,1))
-                   else if (i1pert==natom+3) then
-                     istr=i1dir
+                   else if (i1pert==natom+3.or.i1pert==natom+4) then
+                     istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
                      !(and XC if GGA) contribution from ground state density
                      call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
@@ -463,23 +463,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
                      vpsp1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                   else if (i1pert==natom+4) then
-                     !Here we need to calculate both extradiagonal shear-strains
-                     !because the second gradient of the metric perturbation is
-                     !type-I, i.e., non symmetric with respect to the
-                     !permutation of the strain indexes. 
-                     istr=3+i1dir
-                     call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
-                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vpsp1_i1pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                     istr=6+i1dir
-                     call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
-                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vpsp1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     if (i1pert==natom+4) then
+                       !Here we need to calculate both extradiagonal shear-strains
+                       !because the second gradient of the metric perturbation is
+                       !type-I, i.e., non symmetric with respect to the
+                       !permutation of the strain indexes. 
+                       istr=6+i1dir
+                       call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i1pert,kxc,mpi_enreg, &
+                       & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                       & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                       & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                       vpsp1_i1pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     end if
                    end if
 
                    !gradient of i2pert:
@@ -488,8 +483,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                      & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,:,1))
-                   else if (i2pert==natom+3) then
-                     istr=i2dir
+                   else if (i2pert==natom+3.or.i2pert==natom+4) then
+                     istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
                      !(and XC if GGA) contribution from ground state density
                      call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
@@ -497,23 +492,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                      & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
                      vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                   else if (i2pert==natom+4) then
-                     !Here we need to calculate both extradiagonal shear-strains
-                     !because the second gradient of the metric perturbation is
-                     !type-I, i.e., non symmetric with respect to the
-                     !permutation of the strain indexes. 
-                     istr=3+i2dir
-                     call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                     istr=6+i2dir
-                     call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     if (i2pert==natom+4) then
+                       !Here we need to calculate both extradiagonal shear-strains
+                       !because the second gradient of the metric perturbation is
+                       !type-I, i.e., non symmetric with respect to the
+                       !permutation of the strain indexes. 
+                       istr=6+i2dir
+                       call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
+                       & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                       & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                       & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                       vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                     end if
                    end if
 
                    !Prepare ddk wf file
