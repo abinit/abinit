@@ -453,7 +453,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      !Get q-gradient of first-order local part of the pseudopotential
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,:,1))
+                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,1,1))
                    else if (i1pert==natom+3.or.i1pert==natom+4) then
                      istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
@@ -482,7 +482,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      !Get q-gradient of first-order local part of the pseudopotential
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,:,1))
+                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1))
                    else if (i2pert==natom+3.or.i2pert==natom+4) then
                      istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree

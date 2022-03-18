@@ -356,6 +356,7 @@ d3etot_telec=zero
    end do
 
    call xmpi_sum(buffer,spaceworld,ierr)
+   call xmpi_sum(buffer_t4,spaceworld,ierr)
 
  ! Real parts
    d3etot_t1(1)=buffer(1)
