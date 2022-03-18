@@ -85,6 +85,7 @@ program anaddb
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
  use m_ddb_flexo
+ use m_lwf,            only : run_lattice_wannier
 
  implicit none
 
@@ -606,6 +607,22 @@ program anaddb
      call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(8),comm,thmflag=inp%thmflag)
    end if
  end if
+
+!***************************************************************************
+! Lattice Wannier function section.
+! Compute the Dynamical matrix for a dense Q-mesh
+! Input the eigenvectors and eigenvalues to the Lattcie Wannier module
+!***************************************************************************
+ if (inp%ifcflag==1 .and. inp%lwfflag>0 ) then
+   write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of lattice Wannier functions ',ch10
+   call wrtout([std_out, ab_out], msg)
+   ! TODO check prefix
+   call run_lattice_wannier(ifc=Ifc, crystal=Crystal, dtset=inp, &
+        & prefix=filnam(8), comm=comm)
+
+ endif
+
+
 
 !**********************************************************************
 ! Treat the first list of vectors (without non-analyticities)

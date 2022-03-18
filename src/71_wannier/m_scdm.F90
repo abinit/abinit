@@ -113,7 +113,7 @@ contains
         real(dp), intent(in) :: kweights(:)  !(ikpt)
         integer, intent(in) :: Rlist(:, :)  !(idim, iRpt)
         integer, optional, intent(in) :: disentangle_func_type
-        real, optional, intent(in) :: mu, sigma
+        real(dp), optional, intent(in) :: mu, sigma
         integer, optional, intent(in) :: exclude_bands(:)
         logical, optional, intent(in) :: project_to_anchor
         integer :: nR
@@ -198,7 +198,6 @@ contains
         ! automatically set the anchor points using the weight functions.
         ! The bands with the largest weights are selected as the anchor points. 
         subroutine auto_find_anchors(self, anchor_kpt)
-            ! TODO: currently using the first N. 
             class(scdmk_t), intent(inout) :: self
             real(dp), intent(in) ::  anchor_kpt(:)
             integer :: i, ikpt
@@ -209,6 +208,7 @@ contains
 
 
             ikpt = self%find_kpoint(anchor_kpt)
+            print *, "found ikpt=", ikpt
             call self%get_weight(ikpt, self%disentangle_func_type, &
                 & self%mu, self%sigma, weights, project_to_anchor=.False.)
            call insertion_sort_double(weights, order)
@@ -253,11 +253,14 @@ contains
             real(dp) :: evals(self%nwann)
             complex(dp) :: evecs(self%nwann, self%nwann)
             ! find anchor points, by default gamma
+            print *, "fining anchor k"
             self%anchor_ikpt = self%find_kpoint(self%anchor_kpt)
+            print *, "Found", self%anchor_ikpt
             !if (size(self%anchor_ibands) /= 0) then
             !
             !end if
             ! calculate weight matrix for each kpoint
+            print *, "weight function"
             do ikpt = 1, self%nkpt
                 call self%get_weight(ikpt, self%disentangle_func_type, self%mu, self%sigma, self%weight(:, ikpt), &
                   &project_to_anchor=self%project_to_anchor)
@@ -265,11 +268,14 @@ contains
 
             ! at anchor-kpoint, find cols
             ! psi: (ibasis, iband)
+
+            print *, "mixing weight function"
             psi_dagger = transpose(conjg(self%psi(:, :, self%anchor_ikpt)))
             do iband = 1, self%nband
                 psi_dagger(iband, :) = psi_dagger(iband, :)*self%weight(iband, self%anchor_ikpt)
             end do
 
+            print *, "select columns"
             call self%get_columns(psi_dagger, self%cols)
 
             ! For each kpoint, calculate Amn matrix, wannier function, and Hk at k
@@ -282,18 +288,26 @@ contains
                 ! psik * Amnk
                 self%psi_wann_k(:, :, ikpt) = matmul(self%psi(:, :, ikpt), self%Amnk(:, :, ikpt))
 
+                print *, "Getting Amnk"
                 call Amn_to_H_from_evals(self%Amnk(:, :, ikpt), self%evals(:, ikpt), &
                         & self%nbasis, self%nwann, self%nband, self%Hwannk(:, :, ikpt))
 
+                print *, "Getting Hwann"
                 ! solve the eigens for the Hwannk
                 evecs=self%Hwannk(:,:, ikpt)
                 call esolver%run(evals, evecs)
 
+                print *, "Solving evecs Hwann"
             end do
             ! Fourier transform of wannier function to real space
+
+            print *, "Hwannk -> HwannR"
             call self%get_wannR_and_HwannR(self%Rlist)
+            print *, "Writting netcdf"
             call self%write_wann_netcdf("wann.nc")
+            print *, "Writting Amnk"
             call self%write_Amnk_w90("Amnk.dat")
+            print *, "Amnk written.  "
         end subroutine run_all
 
         !subroutine remove_phase(self, psip)
@@ -321,10 +335,16 @@ contains
             integer :: i
             real(dp) :: a(size(self%kpts, 2))
             ! should transfer back to 1st BZ?
+            print *, size(self%kpts, 2)
+            print *, size(a)
+            print *, kpoint
             do i = 1, size(self%kpts, 2)
                 a(i) = sum((self%kpts(:, i) - kpoint)**2)
             end do
+            print *, a(i)
             ik = minloc(a, dim=1)
+            print *, ik
+            print *, a(ik)
             if (a(ik) > 0.001) then
                 ABI_ERROR("Error in finding kpoint from kpoint list. ")
             end if
