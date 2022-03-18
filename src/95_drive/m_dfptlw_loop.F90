@@ -155,6 +155,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vmetdqdq 
  use m_dfptlw_pert, only : dfptlw_pert
+ use m_dynmat,      only : cart39
 
  implicit none
 
@@ -197,7 +198,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
  integer :: opthartdqdq,optorth,optres,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
- real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
+ real(dp) :: boxcut,dum_scl,ecut,ecut_eff,fac,gsqcut   
  logical :: non_magnetic_xc,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
@@ -208,6 +209,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
  type(hdr_type) :: hdr_den
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: flg1(3),flg2(3)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:)
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),eigen1(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
@@ -219,6 +221,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
  real(dp),allocatable :: vxc1(:,:),vxc1dqdq(:),work(:),xccc3d1(:)
+ real(dp) :: vec1(3),vec2(3)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -676,27 +679,63 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation
  if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
+   fac=two_pi ** 2
+   i3pert= natom+8
    do i1pert = 1, mpert
      do i1dir = 1, 3
        if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
          do i2pert = natom+3, natom+4
            do i2dir = 1, 3
-              istr=(i2pert-natom-3)*3+i2dir
-              beta=idx(2*istr-1); delta=idx(2*istr)
-              i3pert= natom+8
-              do i3dir=1,3
-                gamma=i3dir
-                t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
-              & t4_typeI(:,i1dir,i1pert,beta,delta,gamma) + &
-              & t4_typeI(:,i1dir,i1pert,delta,gamma,beta) - &
-              & t4_typeI(:,i1dir,i1pert,gamma,beta,delta)
-              end do ! i3dir
+             istr=(i2pert-natom-3)*3+i2dir
+             beta=idx(2*istr-1); delta=idx(2*istr)
+             do ii=1,2
+
+               !Transform i3dir into reduced coordinates
+               do i3dir=1,3
+                 vec1(i3dir)=t4_typeI(ii,i1dir,i1pert,beta,delta,i3dir)
+                 flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
+               end do
+               call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+               do i3dir=1,3
+                 t4_typeI(ii,i1dir,i1pert,beta,delta,i3dir)=vec2(i3dir)*fac
+               end do
+
+               !Transform into type-II
+               do i3dir=1,3
+                 gamma=i3dir
+                 t4_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
+               & t4_typeI(ii,i1dir,i1pert,beta,delta,gamma) + &
+               & t4_typeI(ii,i1dir,i1pert,delta,gamma,beta) - &
+               & t4_typeI(ii,i1dir,i1pert,gamma,beta,delta)
+               end do ! i3dir
+             end do ! ii
            end do ! i2dir
          end do ! i2pert
        end if ! rfpert
      end do ! i1dir
    end do ! i1pert
  end if
+
+   do i1pert = 1, mpert
+     do i1dir = 1, 3
+       do i2pert = 1, mpert
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               write(message,'(2a,3(a,i2,a,i1))') ch10,'LONGWAVE : ',&
+        ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
+               write(150,*) message
+               write(150,*) t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do ! ii
+         end do ! i2dir
+       end do ! i2pert
+     end do ! i1dir
+   end do ! i1pert
+               
+
+!Incorporate T4 and T5 to d3etot
+ d3etot=d3etot+t4_typeII
 
 !Anounce end of spatial-dispersion calculation
  write(message, '(a,a,a,a)' ) ch10,ch10,&
