@@ -213,7 +213,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
- real(dp),allocatable :: t4_typeI(:,:,:,:,:,:),t5_typeI(:,:,:,:,:,:)
+ real(dp),allocatable :: t4_typeI(:,:,:,:,:,:),t4_typeII(:,:,:,:,:,:,:)
+ real(dp),allocatable :: t5_typeI(:,:,:,:,:,:),t5_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: vhartr1(:),vhart1dqdq(:),vpsp1(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
@@ -259,9 +260,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
  nfftotf=n1*n2*n3
 
 !Allocations for type-I terms
+ ABI_MALLOC(t4_typeII,(2,3,mpert,3,mpert,3,mpert))
  if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
    ABI_MALLOC(t4_typeI,(2,3,mpert,3,3,3))
  end if
+ ABI_MALLOC(t5_typeII,(2,3,mpert,3,mpert,3,mpert))
  if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
    ABI_MALLOC(t5_typeI,(2,3,mpert,3,3,3))
  end if
@@ -605,6 +608,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
                        beta=idx(2*istr-1); delta=idx(2*istr)
                        t4_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_t4(:,idq)
                      end do
+                   else 
+                     t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t4(:,1)
                    end if
       
                    if (i1pert==natom+3.or.i1pert==natom+4) then
@@ -618,6 +623,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
                        beta=idx(2*istr-1); delta=idx(2*istr)
                        t5_typeI(:,i2dir,i2pert,beta,delta,gamma)=d3etot_t5(:,idq)
                      end do
+                   else 
+                     t5_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t5(:,1)
                    end if
 
                  end if   ! rfpert
@@ -664,6 +671,31 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
   ABI_FREE(vhart1dqdq)
   ABI_FREE(vpsp1dqdq)
   ABI_FREE(vxc1dqdq)
+ end if
+
+!Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
+!they need to be converted to type-II for strain perturbation
+ if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
+   do i1pert = 1, mpert
+     do i1dir = 1, 3
+       if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
+         do i2pert = natom+3, natom+4
+           do i2dir = 1, 3
+              istr=(i2pert-natom-3)*3+i2dir
+              beta=idx(2*istr-1); delta=idx(2*istr)
+              i3pert= natom+8
+              do i3dir=1,3
+                gamma=i3dir
+                t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
+              & t4_typeI(:,i1dir,i1pert,beta,delta,gamma) + &
+              & t4_typeI(:,i1dir,i1pert,delta,gamma,beta) - &
+              & t4_typeI(:,i1dir,i1pert,gamma,beta,delta)
+              end do ! i3dir
+           end do ! i2dir
+         end do ! i2pert
+       end if ! rfpert
+     end do ! i1dir
+   end do ! i1pert
  end if
 
 !Anounce end of spatial-dispersion calculation
