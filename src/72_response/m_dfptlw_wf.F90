@@ -611,7 +611,10 @@ if (.not.samepert) then
    if (i2pert/=natom+2) then
      ABI_FREE(gvloc1dqc)
      ABI_FREE(gvnl1dqc)
+     ABI_FREE(vlocal1)
+     ABI_FREE(vpsp1)
    end if
+
 
  end if !samepert
 
@@ -627,10 +630,8 @@ d3etot_t4_k(:,:)=d3etot_t4_k(:,:)*wtk_k
  ABI_FREE(cwavef1)
  ABI_FREE(cwavef2)
  ABI_FREE(gv1c)
- ABI_FREE(vlocal1)
  ABI_FREE(dum_vpsp)
  ABI_FREE(dum_vlocal)
- ABI_FREE(vpsp1)
  ABI_FREE(dum_cwaveprj)
  ABI_FREE(part_ylmgr_k)
 
