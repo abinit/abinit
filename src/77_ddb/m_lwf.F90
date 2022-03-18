@@ -1,0 +1,262 @@
+!!****m* ABINIT/m_lwf
+!! NAME
+!! m_lwf
+!!
+!! FUNCTION
+!! Module for the lattice Wannier function
+!! Container type is defined, and destruction, print subroutines
+!! as well as the central mkphdos
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2021 ABINIT group (HeXu)
+!! This file is distributed under the terms of the
+!! GNU General Public Licence, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_lwf
+
+ use defs_basis
+ use m_errors
+ use m_xmpi
+ use m_abicore
+ use m_htetra
+ use m_numeric_tools
+ use m_cgtools
+ use m_crystal
+ use m_nctk
+ use iso_c_binding
+ use m_atprj
+ use m_sortph
+ use m_ddb
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_supercell
+ use m_dtset
+ use m_krank
+
+ use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
+ use m_symtk,           only : matr3inv
+ use m_time,            only : cwtime, cwtime_report
+ use m_io_tools,        only : open_file
+ use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec
+ use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
+ use m_ifc,             only : ifc_type
+ use m_anaddb_dataset,  only : anaddb_dataset_type
+! use m_kpts,            only : get_kpt_full_bz,
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
+
+ use m_special_funcs,   only : bose_einstein
+ use m_sort,            only : sort_dp
+ use m_symfind,         only : symanal
+ use m_scdm_math,       only : build_Rgrid
+ use m_scdm,            only : scdmk_t
+
+
+ implicit none
+
+ type LatticeWannier
+    type(scdmk_t) :: scdm
+    type(ifc_type), pointer :: ifc
+    integer :: qptrlatt(3,3)
+    real(dp) :: shiftq(3)
+    integer :: nqibz
+    real(dp), allocatable :: qibz(:, :), qweights(:)
+    integer :: nR
+    integer, allocatable :: Rlist(:, :)
+    real(dp), allocatable :: eigenvalues(:, :)         ! iband, iqpt
+    complex(dp), allocatable :: eigenvectors(:,:, :) ! ibasis, iband, iqpt
+  contains
+    procedure :: initialize
+    procedure :: finalize
+    procedure :: prepare_qpoints
+    procedure :: prepare_Rlist
+    procedure :: get_ifc_eigens
+    procedure :: run_all 
+ end type LatticeWannier
+
+ private
+
+ public :: run_lattice_wannier
+
+contains
+  subroutine initialize(self, ifc, crystal, dtset, prefix, comm)
+    class(LatticeWannier), intent(inout) :: self
+    integer,intent(in) :: comm
+    character(len=*),intent(in) :: prefix
+    type(ifc_type),intent(in) :: ifc
+    type(crystal_t),intent(in) :: crystal
+    type(anaddb_dataset_type),intent(in) :: dtset
+    real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),weights(:)
+
+    real(dp) :: symcart(3,3,crystal%nsym), syme2_xyza(3, crystal%natom)
+    integer :: isym
+    real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
+    ! TODO: add exclude_bands
+    integer :: exclude_bands(0)
+
+    do isym=1,crystal%nsym
+       call symredcart(crystal%rprimd,crystal%gprimd,symcart(:,:,isym),crystal%symrel(:,:,isym))
+    end do
+
+    ! prepare qpoints
+    call self%prepare_qpoints(crystal, dtset, comm)
+    call self%prepare_Rlist(dtset)
+    ! prepare eigen values and eigen vectors
+
+    call self%get_ifc_eigens(ifc, crystal)
+    ! set up scdm 
+    print *, "nqpt", size(self%qibz)
+    print *, "nwann",  dtset%lwf_nwann
+
+    call self%scdm%initialize(evals=self%eigenvalues ,  psi=self%eigenvectors, &
+         & kpts= self%qibz, kweights= self%qweights, Rlist=self%Rlist, &
+         & nwann = dtset%lwf_nwann, disentangle_func_type= dtset%lwf_disentangle, &
+         & mu=dtset%lwf_mu, sigma=dtset%lwf_sigma, exclude_bands=exclude_bands, &
+         & project_to_anchor = (dtset%lwf_anchor_proj >0 ))
+    call self%scdm%set_anchor(dtset%lwf_anchor_qpt, dtset%lwf_anchor_iband)
+    print *, "scdm initialization finished"
+    ! run wannierization
+    call self%scdm%run_all()
+    print *, "Finalizing scdm"
+    call self%scdm%finalize()
+  end subroutine initialize
+
+  subroutine finalize(self)
+    class(LatticeWannier), intent(inout) :: self
+    ABI_SFREE(self%qibz)
+    ABI_SFREE(self%qweights)
+    ABI_SFREE(self%eigenvalues)
+    ABI_SFREE(self%eigenvectors)
+    ABI_SFREE(self%Rlist)
+  end subroutine finalize
+
+
+  subroutine prepare_qpoints(self, crystal, dtset, comm)
+    class(LatticeWannier), intent(inout) :: self
+    type(crystal_t),intent(in) :: crystal
+    type(anaddb_dataset_type),intent(in) :: dtset
+    integer :: nqshft=1
+    real(dp) :: lwf_qshift(3,1)
+    integer, intent(in) :: comm
+    integer :: nprocs, my_rank
+    integer :: nqibz
+    real(dp), allocatable :: wtq_ibz( :)
+    integer :: nqbz
+    real(dp), allocatable :: qbz(:, :)
+    integer :: new_kptrlatt
+    integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
+    integer,allocatable :: bz2ibz_smap(:,:)!, bz2ibz(:)
+    real(dp) ,allocatable::  new_shiftq(:,:)
+    integer,parameter :: bcorr0 = 0, master = 0
+    integer :: my_qptopt
+    character(len=500) :: msg
+    integer :: iqpt
+    nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+    ! Copied from m_phonons/mkphdos
+    in_qptrlatt = 0
+    in_qptrlatt(1, 1) = dtset%lwf_ngqpt(1)
+    in_qptrlatt(2, 2) = dtset%lwf_ngqpt(2)
+    in_qptrlatt(3, 3) = dtset%lwf_ngqpt(3)
+    ! FIXME: shift is now not supported.
+    nqshft = 1
+    lwf_qshift(:, :) = 0.0_dp
+    ! FIXME: HeXu: Do not use symmetry. In  m_phonons, mkphdos, there is the comment:
+    ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
+    ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
+    ! In principle there's a phase due to nonsymmorphic translations but we here need |e(Sq)_iatom|**2
+
+    my_qptopt = 3
+    call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, my_qptopt, nqshft, lwf_qshift, &
+         & self%nqibz, self%qibz, self%qweights, nqbz, qbz, new_kptrlatt=new_qptrlatt, &
+         & new_shiftk=new_shiftq, bz2ibz=bz2ibz_smap)
+
+    ABI_FREE(bz2ibz_smap)
+    !ABI_FREE(bz2ibz)
+
+    self%qptrlatt = new_qptrlatt
+    self%shiftq(:) = new_shiftq(:, 1) ! only one shift in output
+    if (my_rank == master) then
+       write(msg, "(3a, i0)")" LWF ngqpt: ", trim(ltoa(dtset%lwf_ngqpt)), ", qptopt: ", my_qptopt
+       call wrtout(std_out, msg)
+       write(msg, "(2(a, i0))")" Number of q-points in the IBZ: ", self%nqibz, ", number of MPI processes: ", nprocs
+
+       do iqpt = 1, self%nqibz
+          !print *, self%qibz(:, iqpt)
+       end do
+
+       call wrtout(std_out, msg)
+    end if
+  end subroutine prepare_qpoints
+
+
+
+  subroutine prepare_Rlist(self, dtset)
+    class(LatticeWannier), intent(inout) :: self
+    type(anaddb_dataset_type),intent(in) :: dtset
+    integer :: qptrlatt(3), i
+    do i =1, 3
+       qptrlatt(i) = self%qptrlatt(i, i)
+    end do
+    call build_Rgrid(qptrlatt, self%Rlist)
+  end subroutine prepare_Rlist
+
+  subroutine get_ifc_eigens(self, ifc, crystal)
+    class(LatticeWannier), intent(inout) :: self
+    type(ifc_type),intent(in) :: ifc
+    type(crystal_t),intent(in) :: crystal
+    real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
+    real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
+    integer :: iq_ibz
+    integer :: natom, natom3
+    integer :: ii, jj, i3
+    natom = crystal%natom
+    natom3 = natom*3
+    ABI_MALLOC(self%eigenvalues, (natom3, self%nqibz))
+    ABI_MALLOC(self%eigenvectors, (natom3, natom3, self%nqibz))
+    do iq_ibz=1,self%nqibz
+       call ifc%fourq(crystal, self%qibz(:,iq_ibz), phfrq, displ, out_eigvec=eigvec)
+       !call ifc%fourq(crystal, self%qibz(:,iq_ibz), self%eigenvalues(:, iq_ibz), displ, out_eigvec=self%eigenvectors(:, :, iq_ibz))
+       self%eigenvalues(:, iq_ibz) = phfrq
+       do jj=1, natom3
+          do ii = 0, natom-1
+             do i3=1, 3
+                self%eigenvectors(ii*3+i3, jj, iq_ibz ) =  COMPLEX(eigvec(1, i3 , ii+1, jj), eigvec(2, i3, ii+1, jj) )
+             end do
+          end do
+       end do
+    end do
+    print *, "eigens generated"
+  end subroutine get_ifc_eigens
+
+
+  subroutine run_all(self)
+    class(LatticeWannier), intent(inout) :: self
+  end subroutine run_all
+
+  subroutine run_lattice_wannier(ifc, crystal, dtset, prefix, comm)
+    integer,intent(in) :: comm
+    character(len=*),intent(in) :: prefix
+    type(ifc_type),intent(in) :: ifc
+    type(crystal_t),intent(in) :: crystal
+    type(anaddb_dataset_type),intent(in) :: dtset
+    type(LatticeWannier) :: lwf
+    call lwf%initialize(ifc, crystal, dtset, prefix, comm)
+    call lwf%run_all()
+    print *, "Finalizing lwf"
+    call lwf%finalize()
+    print *, "LWF finalized"
+  end subroutine run_lattice_wannier
+
+end module m_lwf
+!!***

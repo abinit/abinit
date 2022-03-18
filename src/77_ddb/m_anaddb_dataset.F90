@@ -86,6 +86,10 @@ module m_anaddb_dataset
   integer :: ifcout
   integer :: ifltransport
   integer :: instrflag
+  integer :: lwf_anchor_proj
+  integer :: lwf_disentangle
+  integer :: lwf_nwann
+  integer :: lwfflag
   integer :: natfix
   integer :: natifc
   integer :: natom
@@ -138,6 +142,7 @@ module m_anaddb_dataset
 
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: istrfix(6)
+  integer :: lwf_ngqpt(3)
   integer :: ng2qpt(3)
   integer :: qrefine(3)
   integer :: kptrlatt(3,3)
@@ -156,6 +161,10 @@ module m_anaddb_dataset
   real(dp) :: freeze_displ
   real(dp) :: frmax
   real(dp) :: frmin
+
+  real(dp):: lwf_anchor_qpt(3)
+  real(dp) :: lwf_mu
+  real(dp) :: lwf_sigma
   real(dp) :: temperinc
   real(dp) :: tempermin
   real(dp) :: thmtol
@@ -176,6 +185,8 @@ module m_anaddb_dataset
   ! iatfix(natom)
 
   integer, allocatable :: iatprj_bs(:)
+  
+  integer, allocatable :: lwf_anchor_iband(:)
 
 ! Real arrays
   real(dp), allocatable :: qnrml1(:)
@@ -244,6 +255,7 @@ subroutine anaddb_dtset_free(anaddb_dtset)
  ABI_SFREE(anaddb_dtset%qph2l)
  ABI_SFREE(anaddb_dtset%ep_qptlist)
  ABI_SFREE(anaddb_dtset%gruns_ddbs)
+ ABI_SFREE(anaddb_dtset%lwf_anchor_iband)
 
 end subroutine anaddb_dtset_free
 !!***
@@ -793,6 +805,82 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !L
+
+! lwf_*: lattic wannier function
+anaddb_dtset%lwf_anchor_qpt(:) = 0.0_dp
+call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'lwf_anchor_qpt',tread,'DPR')
+if(tread==1) anaddb_dtset%lwf_anchor_qpt(1:3) = dprarr(1:3)
+
+anaddb_dtset%lwf_disentangle=0
+call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_disentangle',tread,'INT')
+if(tread==1) anaddb_dtset%lwf_disentangle=intarr(1)
+if(anaddb_dtset%lwf_disentangle<0.or.anaddb_dtset%lwf_disentangle>3)then
+   write(message, '(a,i0,5a)' )&
+        'lwf_disentangle is ',anaddb_dtset%lwf_disentangle,', but the only allowed values',ch10,&
+        'are 0, 1.',ch10,'Action: correct lwf_disentangle in your input file.'
+   ABI_ERROR(message)
+end if
+
+anaddb_dtset%lwf_anchor_proj=0
+call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_anchor_proj',tread,'INT')
+if(tread==1) anaddb_dtset%lwf_anchor_proj=intarr(1)
+if(anaddb_dtset%lwf_anchor_proj<0.or.anaddb_dtset%lwf_anchor_proj>2)then
+   write(message, '(a,i0,5a)' )&
+        'lwf_anchor_proj is ',anaddb_dtset%lwf_anchor_proj,', but the only allowed values',ch10,&
+        'are 0, 1, 2.',ch10,'Action: correct lwf_anchor_proj in your input file.'
+   ABI_ERROR(message)
+end if
+
+
+anaddb_dtset%lwf_ngqpt(:)=0
+call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'lwf_ngqpt',tread,'INT')
+if(tread==1) anaddb_dtset%lwf_ngqpt(1:3)=intarr(1:3)
+do ii=1,3
+   if(anaddb_dtset%lwf_ngqpt(ii)<0)then
+      write(message, '(a,i0,a,i0,3a,i0,a)' )&
+           'lwf_ngqpt(',ii,') is ',anaddb_dtset%lwf_ngqpt(ii),', which is lower than 0 .',ch10,&
+           'Action: correct lwf_ngqpt(',ii,') in your input file.'
+      ABI_ERROR(message)
+   end if
+end do
+
+
+anaddb_dtset%lwfflag=0
+call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwfflag',tread,'INT')
+if(tread==1) anaddb_dtset%lwfflag=intarr(1)
+if(anaddb_dtset%lwfflag<0.or.anaddb_dtset%lwfflag>1)then
+   write(message, '(a,i0,5a)' )&
+        'lwfflag is ',anaddb_dtset%lwfflag,', but the only allowed values',ch10,&
+        'are 0, 1.',ch10,'Action: correct lwfflag in your input file.'
+   ABI_ERROR(message)
+end if
+
+
+anaddb_dtset%lwf_mu = 0.0_dp
+call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_mu',tread,'DPR')
+if(tread==1) anaddb_dtset%lwf_mu=dprarr(1)
+
+
+anaddb_dtset%lwf_nwann=0
+call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_nwann',tread,'INT')
+if(tread==1) anaddb_dtset%lwf_nwann=intarr(1)
+if(anaddb_dtset%lwf_nwann > natom*3)then
+   write(message, '(a,i0,2a,i0,3a)' )&
+        'lwf_nwann is ',anaddb_dtset%lwf_nwann,', which is larger than natom*3',' (=',natom*3,')',ch10,&
+        'Action: correct lwf_nwann in your input file.'
+   ABI_ERROR(message)
+end if
+
+if( anaddb_dtset%lwfflag>0 .and. anaddb_dtset%lwf_nwann .le. 0)then
+   write(message, '(a,i0,3a)' )&
+        'lwf_nwann is ',anaddb_dtset%lwf_nwann,', which is not positive',ch10,&
+        'Action: correct lwf_nwann in your input file.'
+   ABI_ERROR(message)
+end if
+
+anaddb_dtset%lwf_sigma = 0.01_dp
+call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_sigma',tread,'DPR')
+if(tread==1) anaddb_dtset%lwf_sigma=dprarr(1)
 
 !M
 
@@ -1487,6 +1575,30 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !L
 
+
+ if (anaddb_dtset%lwfflag > 0 .and. anaddb_dtset%lwf_anchor_proj .eq. 2) then
+    ABI_MALLOC(anaddb_dtset%lwf_anchor_iband, (anaddb_dtset%lwf_nwann))
+
+    if(anaddb_dtset%lwf_nwann>marr)then
+       marr=anaddb_dtset%lwf_nwann
+       ABI_FREE(intarr)
+       ABI_FREE(dprarr)
+       ABI_MALLOC(intarr,(marr))
+       ABI_MALLOC(dprarr,(marr))
+    end if
+    anaddb_dtset%lwf_anchor_iband(:)=0
+    call intagm(dprarr,intarr,jdtset,marr,anaddb_dtset%lwf_nwann,string(1:lenstr),'lwf_anchor_iband',tread,'INT')
+    if(tread==1) then
+       anaddb_dtset%lwf_anchor_iband(1:anaddb_dtset%lwf_nwann)=intarr(1:anaddb_dtset%lwf_nwann)
+    else
+       write(message,'(3a)')&
+            'lwfflag >0 and lwf_anchor_proj=2 but lwf_anchor_iband is absent ',ch10,&
+            'Action: specify lwf_anchor_iband in your input file.'
+       ABI_ERROR(message)
+    end if
+
+ end if
+
 !M
 
 !N
@@ -1711,6 +1823,16 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    ABI_ERROR(message)
  end if
 
+
+ if (anaddb_dtset%ifcflag /= 1 .and. anaddb_dtset%lwfflag>0) then
+   write(message, '(3a)' )&
+       'if you want to construct the lattice wannier functions, IFC must be computed.', ch10, &
+       'Action: set ifcflag to 1.'
+   ABI_ERROR(message)
+ end if
+
+
+
 !check that q-grid refinement is a divisor of ngqpt in each direction
  if(any(anaddb_dtset%qrefine(1:3) > 1) .and. &
     any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
@@ -1799,6 +1921,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    if(anaddb_dtset%polflag/=0)write(nunit,'(3x,a9,3i10)')'  polflag',anaddb_dtset%polflag
    if(anaddb_dtset%instrflag/=0)write(nunit,'(3x,a9,3i10)')'instrflag',anaddb_dtset%instrflag
    if(anaddb_dtset%piezoflag/=0)write(nunit,'(3x,a9,3i10)')'piezoflag',anaddb_dtset%piezoflag
+   if(anaddb_dtset%lwfflag/=0)write(nunit,'(3x,a9,3i10)')'lwfflag',anaddb_dtset%lwfflag
  end if
 
 !Write the general information
@@ -1997,6 +2120,24 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    end do
  end if
 
+! lattice wannier function Information
+ if (anaddb_dtset%lwfflag >0) then
+    write(nunit,'(a)')' Lattice Wannier function will be constructed.'
+    write(nunit,'(a20,i10)') '    lwf_disentangle', anaddb_dtset%lwf_disentangle
+    write(nunit,'(a20,i10)') '           lwf_nwann', anaddb_dtset%lwf_nwann
+    write(nunit,'(a20,i10)') '     lwf_anchor_proj', anaddb_dtset%lwf_anchor_proj
+    write(nunit,'(a20,E16.6)') '              lwf_mu', anaddb_dtset%lwf_mu
+    write(nunit,'(a20,E16.6)') '           lwf_sigma', anaddb_dtset%lwf_sigma
+    write(nunit,'(a20,E16.6)')'       lwf_anchor_qpt',(anaddb_dtset%lwf_anchor_qpt(ii),ii=1,3)
+    write(nunit,'(a20,3i10)')'            lwf_ngqpt',(anaddb_dtset%lwf_ngqpt(ii),ii=1,3)
+    !write(nunit,'(a20,8i10)')'     lwf_anchor_iband',(anaddb_dtset%lwf_anchor_iband(ii),ii=1,anaddb_dtset%lwf_nwann)
+    if (abs(anaddb_dtset%lwf_anchor_proj) > 0) then
+       write(nunit,'(a)') ' Chosen anchor iband for projection = '
+       write(nunit,'(10I6)') anaddb_dtset%lwf_anchor_iband
+    end if
+ end if
+
+
 !List of vector 1  (reduced coordinates)
  if(anaddb_dtset%nph1l/=0)then
    write(nunit,'(a)')' First list of wavevector (reduced coord.) :'
@@ -2032,6 +2173,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
  end if
 
  write(nunit,'(a,80a,a)') ch10,('=',ii=1,80),ch10
+
 
 end subroutine outvars_anaddb
 !!***
@@ -2159,6 +2301,8 @@ subroutine anaddb_init(input_path, filnam)
      write(std_out, "(2a)")'- Root name for output files: ', trim(filnam(8))
    endif
 
+
+
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
  end if
@@ -2238,6 +2382,10 @@ subroutine anaddb_chkvars(string)
 !K
  list_vars=trim(list_vars)//' kptrlatt kptrlatt_fine'
 !L
+
+ list_vars=trim(list_vars)//' lwf_anchor_iband lwf_anchor_qpt lwf_anchor_proj'
+ list_vars=trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_sigma'
+ list_vars=trim(list_vars)//' lwfflag'
 !M
  list_vars=trim(list_vars)//' mustar'
 !N

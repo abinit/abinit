@@ -50,6 +50,7 @@ module m_scdm_math
   public :: gaussian
   public :: fermi
   public :: insertion_sort_double
+  public :: build_Rgrid
   private
 
 contains
@@ -250,6 +251,39 @@ contains
 
   end subroutine insertion_sort_double
 
+
+  ! -4/2-> -1, 4/2->2. Then (-1,0,1,2)
+  pure function div2(x) result(y)
+    integer, intent(in) :: x
+    integer :: y
+    if(mod(x, 2)==0 .and. x<0) then 
+       y=x/2+1
+    else
+       y=x/2
+    endif
+  end function div2
+
+  subroutine build_Rgrid(kmesh, Rlist)
+    integer, intent(in) :: kmesh(3)
+    integer, allocatable, intent(inout) :: Rlist(:,:)
+    integer :: n, i1, i2, i3, i
+
+    n=kmesh(1) * kmesh(2) *kmesh(3)
+    ABI_MALLOC(Rlist, (3,n))
+    i=0
+    ! Note that C/Fortran integer division is "truncate towards 0" division,
+    ! whereas Python one is "floor" division.
+    ! For C/Fortran, the behavior for even and odd numbers is 
+    !  not consistent and need special treatment in div2.
+    do i3 = div2(-kmesh(3)), div2(kmesh(3))
+       do i2 = div2(-kmesh(2)), div2(kmesh(2))
+          do i1 = div2(-kmesh(1)), div2(kmesh(1))
+             i=i+1
+             Rlist(:, i) = [i1, i2, i3]
+          end do
+       end do
+    end do
+  end subroutine build_Rgrid
 
 
 
