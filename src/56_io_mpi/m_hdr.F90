@@ -3085,7 +3085,11 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  hdr%nh_qFD   = zero
  hdr%fermih   = zero
  if (hdr%occopt == 9) then
+!   This was erroneous
+!   write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   But this induced problems on bob_gnu_7.5_openmp
     read(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!
  end if
  ! End CP added
 
