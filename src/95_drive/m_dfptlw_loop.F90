@@ -195,7 +195,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  integer :: opthartdqdq,optorth,optres,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,dum_scl,ecut,ecut_eff,gsqcut   
- logical :: non_magnetic_xc
+ logical :: non_magnetic_xc,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -389,6 +389,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                call WffClose (wff2,ierr)
              end if
 
+             if (i1pert==i2pert.and.i1dir==i2dir) then
+               samepert=.true.
+             else
+               samepert=.false.
+             end if
+
              rho2r1(:,:) = zero; rho2g1(:,:) = zero
              if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
                call appdig(pert2case,dtfil%fildens1in,fiden1i)
@@ -398,36 +404,38 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                call hdr_den%free()
              end if
 
-             !Perform FFT rhor1 to rhog1
-             ABI_MALLOC(work,(cplex*nfftf))
-             work(:)=rho2r1(:,1)
-             call fourdp(cplex,rho2g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
-             ABI_FREE(work)
-
-             !Calculate first-order local and SCF potential
-             if (i2pert<=natom) then
-               call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-             & nattyp,dtset%nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
-             & dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
-             else if (i2pert==natom+3.or.i2pert==natom+4) then
-               istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
-               g0term=1
-               call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
-             & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
-             & ucvol,psps%vlspl,vpsp1,g0term=g0term)
-             !TODO: the electric field  perturbation is not used as ipert2 
-             !for the implemented quantities.
-             else
-               vpsp1(:)=zero
-             end if     
-
-             optene=0; optres=1
-             call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-             & gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
-             & dtset%ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
-             & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho2g1,rhor,rho2r1,&
-             & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
-             & vtrial1_i2pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
+             if (.not.samepert) then
+               !Perform FFT rhor1 to rhog1
+               ABI_MALLOC(work,(cplex*nfftf))
+               work(:)=rho2r1(:,1)
+               call fourdp(cplex,rho2g1,work,-1,mpi_enreg,dtset%nfft,1,dtset%ngfft,0)
+               ABI_FREE(work)
+  
+               !Calculate first-order local and SCF potential
+               if (i2pert<=natom) then
+                 call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+               & nattyp,dtset%nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
+               & dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+               else if (i2pert==natom+3.or.i2pert==natom+4) then
+                 istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
+                 g0term=1
+                 call vlocalstr(gmet,gprimd,gsqcut,istr,dtset%mgfft,mpi_enreg,&
+               & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,ph1d,psps%qgrid_vl,&
+               & ucvol,psps%vlspl,vpsp1,g0term=g0term)
+               !TODO: the electric field  perturbation is not used as ipert2 
+               !for the implemented quantities.
+               else
+                 vpsp1(:)=zero
+               end if     
+  
+               optene=0; optres=1
+               call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+               & gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,dtset%nfft,&
+               & dtset%ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
+               & non_magnetic_xc,optene,optres,dtset%qptn,rhog,rho2g1,rhor,rho2r1,&
+               & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid_dum,dum_scl,&
+               & vtrial1_i2pert,vxc,vxc1,xccc3d1,dtset%ixcrot)
+             end if !samepert  
 
              !Allocate the first-order gradient local potential
              if (i2pert <= natom .or. i2pert <= natom+3) then
@@ -477,34 +485,36 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                      end if
                    end if
 
-                   !gradient of i2pert:
-                   if (i2pert<=natom) then
-                     !Get q-gradient of first-order local part of the pseudopotential
-                     call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
-                     & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
-                     & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1))
-                   else if (i2pert==natom+3.or.i2pert==natom+4) then
-                     istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
-                     !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
-                     !(and XC if GGA) contribution from ground state density
-                     call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                     & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                     & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
-                     & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                     vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
-                     if (i2pert==natom+4) then
-                       !Here we need to calculate both extradiagonal shear-strains
-                       !because the second gradient of the metric perturbation is
-                       !type-I, i.e., non symmetric with respect to the
-                       !permutation of the strain indexes. 
-                       istr=6+i2dir
+                   if (.not.samepert) then
+                     !gradient of i2pert:
+                     if (i2pert<=natom) then
+                       !Get q-gradient of first-order local part of the pseudopotential
+                       call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
+                       & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1))
+                     else if (i2pert==natom+3.or.i2pert==natom+4) then
+                       istr=i2dir; if (i2pert==natom+4) istr=3+i2dir
+                       !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
+                       !(and XC if GGA) contribution from ground state density
                        call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
                        & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
                        & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
                        & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-                       vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                       vpsp1_i2pertdq(:,1,1)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                       if (i2pert==natom+4) then
+                         !Here we need to calculate both extradiagonal shear-strains
+                         !because the second gradient of the metric perturbation is
+                         !type-I, i.e., non symmetric with respect to the
+                         !permutation of the strain indexes. 
+                         istr=6+i2dir
+                         call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
+                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
+                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                         & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
+                         vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
+                       end if
                      end if
-                   end if
+                   end if !samepert
 
                    !Prepare ddk wf file
                    pert3case = i3dir + natom*3
@@ -558,7 +568,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,occ,&
-                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
+                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,samepert,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
                    & vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
                    !close ddk file
