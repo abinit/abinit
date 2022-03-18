@@ -126,6 +126,7 @@ contains
 !!  rho2r1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3 (i2pert)
 !!  rmet(3,3)=real space metric tensor in bohr**2
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
+!!  samepert= .true. if i1pert=i2pert and i1dir=i2dir
 !!  ucvol=volume of the unit cell
 !!  vpsp1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
 !!          gradient Hamiltonian for i1pert
@@ -155,7 +156,7 @@ contains
 subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
-& nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,&
+& nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,samepert,&
 & ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
 !Arguments ------------------------------------
@@ -164,6 +165,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
  integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nkxc,nspden
  integer,intent(in) :: nspinor,nsppol
  real(dp),intent(in) :: gsqcut,ucvol
+ logical,intent(in) :: samepert
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -309,7 +311,7 @@ d3etot_telec=zero
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
-     & pawfgr,ph1d,psps,rhog,rhor,rmet,ucvol,useylmgr,&
+     & pawfgr,ph1d,psps,rhog,rhor,rmet,samepert,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
      & wtk_k,xred,ylm_k,ylmgr_k)
 
