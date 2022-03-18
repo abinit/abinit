@@ -48,6 +48,8 @@ contains
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave coefficients of wavefunctions
+!!  d3e_pert1(mpert)=array with the i1pert cases to calculate
+!!  d3e_pert2(mpert)=array with the i2pert cases to calculate
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree)
@@ -106,7 +108,7 @@ contains
 !! SOURCE
 
     
-subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
+subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,eigen0,gmet,gprimd,&
 & hdr,kg,kxc,mband,mgfft,mgfftf,mkmem,mk1mem,&
 & mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,occ,&
@@ -169,7 +171,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  type(pseudopotential_type),intent(in) :: psps
 
 !arrays
- integer,intent(in) :: atindx(natom),kg(3,mk1mem*mpw)
+ integer,intent(in) :: atindx(natom),d3e_pert1(mpert),d3e_pert2(mpert)
+ integer,intent(in) :: kg(3,mk1mem*mpw)
  integer,intent(in) :: nattyp(psps%ntypat),ngfftf(18),npwarr(nkpt)
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert) 
@@ -188,9 +191,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ask_accurate,comm_cell,cplex,dkdk_index,formeig,g0term
+ integer :: ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma,g0term
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
- integer :: ierr,ii,ireadwf,istr,mcg,me,mpsang
+ integer :: idq,ierr,ii,ireadwf,istr,mcg,me,mpsang
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
  integer :: opthartdqdq,optorth,optres,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
@@ -204,10 +207,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
- real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:)
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:)
+ real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),eigen1(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
+ real(dp),allocatable :: t4_typeI(:,:,:,:,:,:),t5_typeI(:,:,:,:,:,:)
  real(dp),allocatable :: vhartr1(:),vhart1dqdq(:),vpsp1(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
@@ -251,6 +257,14 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
  ask_accurate=1 ; formeig = 1 ; ireadwf = 1
  n1=ngfftf(1) ; n2=ngfftf(2) ; n3=ngfftf(3)
  nfftotf=n1*n2*n3
+
+!Allocations for type-I terms
+ if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
+   ABI_MALLOC(t4_typeI,(2,3,mpert,3,3,3))
+ end if
+ if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
+   ABI_MALLOC(t5_typeI,(2,3,mpert,3,3,3))
+ end if
 
 !Compute large sphere cut-off gsqcut
  call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
@@ -368,6 +382,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
        else
          n1dq=1
        end if
+       ABI_MALLOC(d3etot_t5,(2,n1dq))
 
        do i2pert = 1, mpert
          do i2dir = 1, 3
@@ -447,6 +462,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
              else
                n2dq=1
              end if
+             ABI_MALLOC(d3etot_t4,(2,n2dq))
 
              do i3pert = 1, mpert
                do i3dir = 1, 3
@@ -565,7 +581,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    end if
 
                    !Perform the longwave DFPT part of the 3dte calculation
-                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcut,i1dir,&
+                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3etot_t5,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,occ,&
                    & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,samepert,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
@@ -577,17 +593,46 @@ subroutine dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
                    !close d2_dkdk file
                    if (i1pert==natom+2) call d2_dkdk_f%close()
 
+                   !Save the type-I terms
+                   if (i2pert==natom+3.or.i2pert==natom+4) then
+                     gamma=i3dir
+                     do idq=1,n2dq
+                       if (i2pert==natom+3) then
+                         istr=i2dir
+                       else 
+                         istr=idq*3+i2dir
+                       endif 
+                       beta=idx(2*istr-1); delta=idx(2*istr)
+                       t4_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_t4(:,idq)
+                     end do
+                   end if
+      
+                   if (i1pert==natom+3.or.i1pert==natom+4) then
+                     gamma=i3dir
+                     do idq=1,n1dq
+                       if (i1pert==natom+3) then
+                         istr=i1dir
+                       else 
+                         istr=idq*3+i1dir
+                       endif 
+                       beta=idx(2*istr-1); delta=idx(2*istr)
+                       t5_typeI(:,i2dir,i2pert,beta,delta,gamma)=d3etot_t5(:,idq)
+                     end do
+                   end if
+
                  end if   ! rfpert
                end do    ! ir3dir
              end do     ! ir3pert
              
              ABI_FREE(vpsp1_i2pertdq)
-      
+             ABI_FREE(d3etot_t4)
+
            end if   ! rfpert
          end do    ! i2dir
        end do     ! i2pert
 
        ABI_FREE(vpsp1_i1pertdq)
+       ABI_FREE(d3etot_t5)
 
      end if   ! rfpert
    end do    ! i1dir

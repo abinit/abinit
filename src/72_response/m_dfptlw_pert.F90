@@ -141,6 +141,8 @@ contains
 !!
 !! OUTPUT
 !!  d3etot(2,3,mpert,3,mpert,3,mpert) = third derivatives of the energy tensor
+!!  d3etot_t4(2,n2dq)= t4 term which might need to be converted to type-II
+!!  d3etot_t5(2,n1dq)= t5 term which might need to be converted to type-II
 !!
 !! SIDE EFFECTS
 !!  TO DO!
@@ -153,7 +155,8 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
+subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3etot_t5,&
+& gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,samepert,&
@@ -190,6 +193,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
  real(dp),intent(in) :: vtrial1_i1pert(cplex*nfft,nspden)
  real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(out) :: d3etot_t4(2,n2dq),d3etot_t5(2,n1dq)
 
 !Variables ------------------------------------
 !scalars
@@ -206,8 +210,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,gs_hamkq,gsqcu
  real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
  real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
  real(dp) :: d3etot_t3(2),d3etot_t3_k(2)
- real(dp) :: d3etot_t4(2,n2dq),d3etot_t4_k(2,n2dq)
- real(dp) :: d3etot_t5(2,n1dq),d3etot_t5_k(2,n1dq)
+ real(dp) :: d3etot_t4_k(2,n2dq)
+ real(dp) :: d3etot_t5_k(2,n1dq)
  real(dp) :: d3etot_telec(2),d3etot_telec_k(2)
  real(dp) :: e3tot(2),kpt(3)
  real(dp),allocatable :: occ_k(:)

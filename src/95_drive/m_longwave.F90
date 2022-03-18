@@ -279,7 +279,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
 !In some cases (e.g. getcell/=0), the plane wave vectors have
-! to be generated from the original simulation cell
+!to be generated from the original simulation cell
  rprimd_for_kg=rprimd
  if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=dtset%rprimd_orig(:,:,1)
  call matr3inv(rprimd_for_kg,gprimd_for_kg)
@@ -293,7 +293,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & dtset%nsppol)
 
 !Open and read pseudopotential files
-ecore=zero
+ ecore=zero
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
@@ -551,7 +551,7 @@ ecore=zero
  end if
 
 !Main loop over the perturbations
-   call dfptlw_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,&
+   call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,eigen0,gmet,gprimd,&
 &   hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
 &   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
 &   dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
@@ -618,6 +618,10 @@ ecore=zero
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
  ABI_FREE(pertsy)
+ ABI_FREE(rfpert)
+ ABI_FREE(d3e_pert1)
+ ABI_FREE(d3e_pert2)
+ ABI_FREE(d3e_pert3)
  if (dtset%lw_flexo/=0) then
    ABI_FREE(dyewdq)
    ABI_FREE(dyewdqdq)
