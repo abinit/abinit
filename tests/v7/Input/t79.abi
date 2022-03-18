@@ -80,8 +80,13 @@ ucrpa_window  -5.0 5.0 eV  # Exclude a large window of energy
                            #  (just because it is more stable as the convergence parameters chosen for this automatic test are low)
 
 # -- Ucrpa: Wannier functions
-dmftbandi3 12       # Precise the definition of Wannier functions (also used for DMFT calculations)
-dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+plowan_bandi 12 # First band for Wannier functions
+plowan_bandf 25 # Last band for Wannier functionsions)
+plowan_natom 1 # Number of atoms
+plowan_iatom 1  # Index of atoms
+plowan_nbl 1  # Number of the orbitals
+plowan_lcalc 2  # Index of the orbitals (2 -> d)
+plowan_projcalc 7  # Projector for the orbitals 
 
 # -- DFTU: 1st dataset and definition of correlated angular momentum
 usepawu    1        # DFT+U is used just for printing usefull quantities.
@@ -118,18 +123,14 @@ getwfk3 -1
 nbandkss3 -1         # Number of bands in KSS file (-1 means the maximum possible)
 tolvrs3   1.0d-13
 kssform 3
-# == LDA+DMFT
-usedmft3 1           # usefull to compute Wannier functions.
-dmft_nwlo3 10
-dmft_nwli3 20000
-dmft_iter3 0
-dmft_solv3 2         # usefull to avoid supplementary variables in the input file.
-
+# == Wannier Functions
+plowan_compute3 1 # Activate the computation of Wannier functionsplowan_compute3 1
 #==================================================================================
 ############ FOURTH DATASET:  Calculation of the screening (epsilon^-1 matrix)
 #==================================================================================
  optdriver4     3     # Screening calculation
  getwfk4       -1     # Obtain KSS file from previous dataset
+ plowan_compute4 10   # Read Wannier functions 
  nfreqim4       0
  gwcalctyp4 2
  upawu4 0 0 0         # necessary if upawu/=0 in the first three datasets as usepawu=1 everywhere
@@ -142,6 +143,7 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
  upawu5 0 0 0       # necessary if upawu/=0 in the first three datasets
  optdriver5  4      # Self-Energy calculation
  getwfk5     3      # Obtain KSS file from dataset 1
+ plowan_compute5 10   # Read Wannier functions	   
  getscr5     4      # Obtain SCR file from previous dataset
  ppmodel  2         # in order to use only one frequency
  nkptgw5      0     # number of k-point where to calculate the GW correction: all BZ
