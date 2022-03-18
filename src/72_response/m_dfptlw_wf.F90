@@ -190,7 +190,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iband,idir,idq,jband,nkpg,nkpg1
+ integer :: berryopt,iband,idir,idq,jband,nkpg,nkpg1,nylmgrtmp
  integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda,fac,tmpim,tmpre
@@ -500,9 +500,17 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
    ABI_MALLOC(gvloc1dqc,(2,size_wf))
    ABI_MALLOC(gvnl1dqc,(2,size_wf))
  end if
- if (i2pert<=natom) fac=one
+ if (i2pert<=natom) fac=-one
  if (i2pert==natom+2) fac=half
  if (i2pert==natom+3.or.i2pert==natom+4) fac=-half
+ if (i2pert<=natom) then
+   nylmgrtmp=3
+ else if (i2pert==natom+3.or.i2pert==natom+4) then
+   nylmgrtmp=nylmgr
+   ABI_FREE(part_ylmgr_k)
+   ABI_MALLOC(part_ylmgr_k,(npw_k,nylmgrtmp,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+   part_ylmgr_k(:,:,:)=ylmgr_k(:,:,:)
+ end if
 
 !Do loop to compute both extradiagonal shear-strain components
  do idq=1,n2dq
@@ -524,8 +532,8 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i2pert,i3dir, &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
 
    end if
 
@@ -577,7 +585,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
    !Apply the perturbation-dependent prefactors on T4
    tmpre=d3etot_t4_k(1,idq); tmpim=d3etot_t4_k(2,idq)
-   if (i2pert==natom+2) then
+   if (i2pert<=natom.or.i2pert==natom+2) then
      d3etot_t4_k(1,idq)=-tmpim
      d3etot_t4_k(2,idq)=tmpre
    end if 
