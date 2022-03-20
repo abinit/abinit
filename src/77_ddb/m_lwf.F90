@@ -124,11 +124,13 @@ contains
          & nwann = dtset%lwf_nwann, disentangle_func_type= dtset%lwf_disentangle, &
          & mu=dtset%lwf_mu, sigma=dtset%lwf_sigma, exclude_bands=exclude_bands, &
          & project_to_anchor = (dtset%lwf_anchor_proj >0 ))
-    call self%scdm%set_anchor(dtset%lwf_anchor_qpt, dtset%lwf_anchor_iband)
-    print *, "scdm initialization finished"
+    if(dtset%lwf_anchor_iband(1) > 0) then
+       call self%scdm%set_anchor(dtset%lwf_anchor_qpt, dtset%lwf_anchor_iband)
+    else
+       call self%scdm%set_anchor(dtset%lwf_anchor_qpt)
+    end if
     ! run wannierization
     call self%scdm%run_all()
-    print *, "Finalizing scdm"
     call self%scdm%finalize()
   end subroutine initialize
 
@@ -171,7 +173,7 @@ contains
     ! FIXME: shift is now not supported.
     nqshft = 1
     lwf_qshift(:, :) = 0.0_dp
-    ! FIXME: HeXu: Do not use symmetry. In  m_phonons, mkphdos, there is the comment:
+    ! TODO: HeXu: Do not use symmetry. In  m_phonons, mkphdos, there is the comment:
     ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
     ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
     ! In principle there's a phase due to nonsymmorphic translations but we here need |e(Sq)_iatom|**2
@@ -211,6 +213,28 @@ contains
     call build_Rgrid(qptrlatt, self%Rlist)
   end subroutine prepare_Rlist
 
+  elemental function freq_to_eigenval(f) result (evalue)
+    real(dp), intent(in) :: f
+    real(dp) :: evalue
+    if(f< -1d-16) then
+       evalue = - f*f
+    else if (f>1d-16) then
+       evalue = f*f
+    else
+       evalue = 0.0_dp
+    end if
+
+  end function freq_to_eigenval
+
+
+  subroutine get_ifc_q(self, crystal)
+    type(LatticeWannier) :: self
+    type(crystal_t),intent(in) :: crystal
+    real(dp) :: mass(crystal%natom), f
+    integer :: iatom,  iq, nq
+    mass = crystal%amu(crystal%typat(:)) * amu_emass
+  end subroutine get_ifc_q
+
   subroutine get_ifc_eigens(self, ifc, crystal)
     class(LatticeWannier), intent(inout) :: self
     type(ifc_type),intent(in) :: ifc
@@ -219,7 +243,8 @@ contains
     real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
     integer :: iq_ibz
     integer :: natom, natom3
-    integer :: ii, jj, i3
+    integer :: iatom, iband, i3
+    complex(dp) :: phase
     natom = crystal%natom
     natom3 = natom*3
     ABI_MALLOC(self%eigenvalues, (natom3, self%nqibz))
@@ -227,16 +252,17 @@ contains
     do iq_ibz=1,self%nqibz
        call ifc%fourq(crystal, self%qibz(:,iq_ibz), phfrq, displ, out_eigvec=eigvec)
        !call ifc%fourq(crystal, self%qibz(:,iq_ibz), self%eigenvalues(:, iq_ibz), displ, out_eigvec=self%eigenvectors(:, :, iq_ibz))
-       self%eigenvalues(:, iq_ibz) = phfrq
-       do jj=1, natom3
-          do ii = 0, natom-1
+       self%eigenvalues(:, iq_ibz) = freq_to_eigenval(phfrq)
+       do iband=1, natom3
+          do iatom = 1, natom
+             ! to remove the phase factor exp(iqr)
+             phase = exp(two_pi * dot_product(crystal%xred(:, iatom), self%qibz(:, iq_ibz) ))
              do i3=1, 3
-                self%eigenvectors(ii*3+i3, jj, iq_ibz ) =  COMPLEX(eigvec(1, i3 , ii+1, jj), eigvec(2, i3, ii+1, jj) )
+                self%eigenvectors((iatom-1)*3+i3, iband, iq_ibz ) =  COMPLEX(eigvec(1, i3 , iatom, iband), eigvec(2, i3, iatom, iband)) * phase
              end do
           end do
        end do
     end do
-    print *, "eigens generated"
   end subroutine get_ifc_eigens
 
 

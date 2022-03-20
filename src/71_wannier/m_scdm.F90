@@ -197,18 +197,18 @@ contains
 
         ! automatically set the anchor points using the weight functions.
         ! The bands with the largest weights are selected as the anchor points. 
-        subroutine auto_find_anchors(self, anchor_kpt)
+        subroutine auto_find_anchors(self, anchor_kpt, ianchors)
             class(scdmk_t), intent(inout) :: self
             real(dp), intent(in) ::  anchor_kpt(:)
+            integer, intent(out) :: ianchors(self%nwann)
             integer :: i, ikpt
             integer :: anchor_ibands(self%nwann)
             real(dp) :: weights(self%nband)
-            integer :: order(self%nband), ianchors(self%nwann)
+            integer :: order(self%nband)
 
 
 
             ikpt = self%find_kpoint(anchor_kpt)
-            print *, "found ikpt=", ikpt
             call self%get_weight(ikpt, self%disentangle_func_type, &
                 & self%mu, self%sigma, weights, project_to_anchor=.False.)
            call insertion_sort_double(weights, order)
@@ -216,9 +216,6 @@ contains
            do i = 1, self%nwann
             ianchors(i)= order(self%nband-i+1)
            end  do
-           print *, "ianchors", ianchors
-           
-            call self%set_anchor(anchor_kpt, anchor_ibands)
         end subroutine auto_find_anchors
 
         subroutine set_anchor(self, anchor_kpt, anchor_ibands)
@@ -227,20 +224,20 @@ contains
             class(scdmk_t), intent(inout) :: self
             real(dp), optional, intent(in) ::  anchor_kpt(:)
             integer, optional, intent(in) :: anchor_ibands(:)
+            ABI_MALLOC(self%anchor_ibands, (self%nwann))
 
             if (.not. present(anchor_ibands)) then
-                call self%auto_find_anchors(anchor_kpt)
+               print *, "Anchor points not specified, finding atomatically"
+                call self%auto_find_anchors(anchor_kpt, self%anchor_ibands)
             else if (.not. size(anchor_ibands) == self%nwann) then
                 ABI_ERROR("The number of anchor points should be equal to the number of Wannier functions.")
             else
                 ABI_MALLOC(self%anchor_kpt, (size(anchor_kpt)))
                 self%anchor_kpt = anchor_kpt
                 self%anchor_ikpt = self%find_kpoint(anchor_kpt)
-
-                ABI_MALLOC(self%anchor_ibands, (size(anchor_ibands)))
                 self%anchor_ibands = anchor_ibands
             end if
-
+            print *, "Anchor points set to ", self%anchor_ibands
         end subroutine set_anchor
 
         subroutine run_all(self)
@@ -277,6 +274,8 @@ contains
 
             print *, "select columns"
             call self%get_columns(psi_dagger, self%cols)
+            print *, "columns selected: ", self%cols
+
 
             ! For each kpoint, calculate Amn matrix, wannier function, and Hk at k
             do ikpt = 1, self%nkpt
@@ -292,12 +291,10 @@ contains
                 call Amn_to_H_from_evals(self%Amnk(:, :, ikpt), self%evals(:, ikpt), &
                         & self%nbasis, self%nwann, self%nband, self%Hwannk(:, :, ikpt))
 
-                print *, "Getting Hwann"
                 ! solve the eigens for the Hwannk
                 evecs=self%Hwannk(:,:, ikpt)
                 call esolver%run(evals, evecs)
 
-                print *, "Solving evecs Hwann"
             end do
             ! Fourier transform of wannier function to real space
 

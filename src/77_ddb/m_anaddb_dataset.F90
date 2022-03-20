@@ -1576,7 +1576,7 @@ if(tread==1) anaddb_dtset%lwf_sigma=dprarr(1)
 !L
 
 
- if (anaddb_dtset%lwfflag > 0 .and. anaddb_dtset%lwf_anchor_proj .eq. 2) then
+ if (anaddb_dtset%lwfflag > 0 ) then
     ABI_MALLOC(anaddb_dtset%lwf_anchor_iband, (anaddb_dtset%lwf_nwann))
 
     if(anaddb_dtset%lwf_nwann>marr)then
