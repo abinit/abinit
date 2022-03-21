@@ -2090,6 +2090,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       'Please use "nspden=1 or 2".'
      ABI_ERROR(msg)
    end if
+!  When (usepawu=1 or 2) and pawxcdev=0, nspden must be 1 or 2
+   if( (dt%usepawu==1.or.dt%usepawu==2).and.dt%pawxcdev==0)then
+     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+     cond_string(1)='pawxcdev' ; cond_values(1)=dt%pawxcdev
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
+   end if
 
 !  nspinor
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nspinor',nspinor,2,(/1,2/),iout)

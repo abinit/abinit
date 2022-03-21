@@ -14273,6 +14273,7 @@ Variable(
   * If set to 2, the exchange-correlation term in the spherical part of energy is developed onto lm-moments at order 2
 
 Be careful: Response function (DFPT) + PAW + GGA requires [[pawxcdev]] = 0. But if you plan to do DFPT calculations, it is better to use this option also in the preliminary ground state calculation.
+However, if [[nspden]] = 4 (non-collinear calculations) with GGA/mGGA and [[usepawu]]/=0, one needs to use [[pawxcdev]] = 1 or [[usepawu]] = 4. 
 """,
 ),
 
@@ -19751,6 +19752,7 @@ keeping a smaller U interaction in the GW calculation, by subtracting a
 smaller U than the one used in the DFT calculation. See the description of the
 [[upawu]] input variable.
 
+If [[nspden]] = 4 (non-collinear calculations) with GGA/mGGA and [[usepawu]]/=0, one needs to use [[pawxcdev]] = 1 or [[usepawu]] = 4. 
 
 Suggested acknowledgment:[[cite:Amadon2008a]].
 
