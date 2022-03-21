@@ -19728,7 +19728,7 @@ Three choices are allowed concerning the double counting term:
     * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
     polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
-If DFT+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
+If DFT+U is activated ([[usepawu]]/=0), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
 The implementation is done inside PAW augmentation regions only (cf [[cite:Bengone2000]]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
