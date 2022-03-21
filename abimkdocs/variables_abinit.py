@@ -5093,13 +5093,17 @@ phonon matrix elements) or for non linear RF calculations (to get mixed higher
 order derivatives you need several perturbed densities and wave functions).
 Indicate the files from which first-order densities must be obtained, in
 multi-dataset mode (in single dataset mode, use [[ird1den]]).
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
 
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+  * If [[get1den]]=0, no previously computed values are used.
+  * If [[get1den]]>0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
+computed in the SAME run.
+  * If [[get1den]]=-1, the output data of the previous dataset must be taken, which
+is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[get1den]]=another negative number, it indicates the number of datasets to go backward
+to find the needed data (once again, going back beyond the first dataset is
+equivalent to using a zero get variable).
 """,
 ),
 
@@ -5116,9 +5120,21 @@ Variable(
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[ird1wf]].
 One should first read the explanations given for these latter variables.
-This variable is  typically used to chain the calculations in the multi-dataset mode, since they
+This variable is  typically used to chain the calculations in the multi-dataset mode, since it
 describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
 wavefunctions of the present dataset.
+
+  * If [[get1wf]]=0, no previously computed values are used.
+  * If [[get1wf]]>0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
+computed in the SAME run.
+  * If [[get1wf]]=-1, the output data of the previous dataset must be taken, which
+is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[get1wf]]=another negative number, it indicates the number of datasets to go backward
+to find the needed data (once again, going back beyond the first dataset is
+equivalent to using a zero get variable).
+
 See also discussion in [[getwfk]].
 """,
 ),
@@ -5133,19 +5149,22 @@ Variable(
     mnemonics="GET the Bethe-Salpeter COUPling block from...",
     added_in_version="before_v9",
     text=r"""
-Eventually used when [[ndtset]] > 0 (multi-dataset mode) and, in the case of a
-Bethe-Salpeter calculation to indicate that the starting coupling block of the
+Eventually used when [[ndtset]] > 0 (multi-dataset mode), in the case of a
+Bethe-Salpeter calculation, to indicate that the starting coupling block of the
 excitonic Hamiltonian will be taken from the output of a previous dataset. It
 is used to chain the calculations, since it describes from which dataset the
 OUTPUT coupling block is to be taken, as INPUT of the present dataset.
-If [[getbscoup]] == 0, no such use of previously computed coupling block file is done.
-If [[getbscoup]] is positive, its value gives the index of the dataset to be used as input.
-If [[getbscoup]] is -1, the output of the previous dataset must be taken,
-which is a frequently occurring case.
-If [[getbscoup]] is a negative number, it indicates the number of datasets to
-go backward to find the needed file. In this case, if one refers to a non
-existent data set (prior to the first), the coupling block is not initialised
-from a disk file, so that it is as if [[getbscoup]] = 0 for that initialisation.
+
+  * If [[getbscoup]]=0, no previously computed values are used.
+  * If [[getbscoup]]>0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
+computed in the SAME run.
+  * If [[getbscoup]]=-1, the output data of the previous dataset must be taken, which
+is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getbscoup]]=another negative number, it indicates the number of datasets to go backward
+to find the needed data (once again, going back beyond the first dataset is
+equivalent to using a zero get variable).
 """,
 ),
 
@@ -5159,20 +5178,22 @@ Variable(
     mnemonics="GET the Bethe-Salpeter EIGenstates from...",
     added_in_version="before_v9",
     text=r"""
-Eventually used when [[ndtset]] > 0 (multi-dataset mode) and, in the case of a
-Bethe-Salpeter calculation to indicate that the starting excitonic eigenstates
+Eventually used when [[ndtset]] > 0 (multi-dataset mode), in the case of a
+Bethe-Salpeter calculation, to indicate that the starting excitonic eigenstates
 are to be taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT eigenstates are
 to be taken, as INPUT eigenstates of the present dataset.
-If [[getbseig]] == 0, no such use of previously computed output eigenstates file is done.
-If [[getbseig]] is positive, its value gives the index of the dataset from
-which the output states is to be used as input.
-If [[getbseig]] is -1, the output eigenstates of the previous dataset must be
-taken, which is a frequently occurring case.
-If [[getbseig]] is a negative number, it indicates the number of datasets to
-go backward to find the needed file. In this case, if one refers to a non
-existent data set (prior to the first), the eigenstates are not initialised
-from a disk file, so that it is as if [[getbseig]] = 0 for that initialisation.
+
+  * If [[getbseig]]=0, no previously computed values are used.
+  * If [[getbseig]]>0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
+computed in the SAME run.
+  * If [[getbseig]]=-1, the output data of the previous dataset must be taken, which
+is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getbseig]]=another negative number, it indicates the number of datasets to go backward
+to find the needed data (once again, going back beyond the first dataset is
+equivalent to using a zero get variable).
 """,
 ),
 
@@ -5186,19 +5207,22 @@ Variable(
     mnemonics="GET the Bethe-Salpeter RESOnant block from...",
     added_in_version="before_v9",
     text=r"""
-Eventually used when [[ndtset]] > 0 (multi-dataset mode) and, in the case of a
-Bethe-Salpeter calculation to indicate that the starting resonant block of the
+Eventually used when [[ndtset]] > 0 (multi-dataset mode), in the case of a
+Bethe-Salpeter calculation, to indicate that the starting resonant block of the
 excitonic Hamiltonian will be taken from the output of a previous dataset. It
 is used to chain the calculations, since it describes from which dataset the
 OUTPUT resonant block is to be taken, as INPUT of the present dataset.
-If [[getbsreso]] == 0, no such use of previously computed resonant block file is done.
-If [[getbsreso]] is positive, its value gives the index of the dataset to be used as input.
-If [[getbsreso]] is -1, the output of the previous dataset must be taken,
-which is a frequently occurring case.
-If [[getbsreso]] is a negative number, it indicates the number of datasets to
-go backward to find the needed file. In this case, if one refers to a non
-existent data set (prior to the first), the resonant block is not initialised
-from a disk file, so that it is as if [[getbsreso]] = 0 for that initialisation.
+
+  * If [[getbsreso]]=0, no previously computed values are used.
+  * If [[getbsreso]]>0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
+computed in the SAME run.
+  * If [[getbsreso]]=-1, the output data of the previous dataset must be taken, which
+is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getbsreso]]=another negative number, it indicates the number of datasets to go backward
+to find the needed data (once again, going back beyond the first dataset is
+equivalent to using a zero get variable).
 """,
 ),
 
@@ -5213,19 +5237,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is typically used to chain the calculations, in the multi-
-dataset mode ([[ndtset]] > 0), since it describes from which dataset the output [[acell]]
+dataset mode ([[ndtset]] > 0). It describes from which dataset the output [[acell]]
 and [[rprim]] are to be taken (implicitly also [[scalecart]]), as input of the present dataset.
 The cell parameters are [[EVOLVING]] variables, for which such a chain of calculations is useful.
-If 0, no previously computed values are used.
-If >0, the value must be the index of the dataset from which the
+
+  * If [[getcell]]=0, no previously computed values are used.
+  * If [[getcell]]>0, the value must be the index of the dataset from which the
 cell data is to be used as input data. It must be the index of a dataset already
 computed in the SAME run.
-If equal to -1, the output data of the previous dataset must be taken, which
+  * If [[getcell]]=-1, the output data of the previous dataset must be taken, which
 is a frequently occurring case. However, if the first dataset is treated, -1
 is equivalent to 0, since no dataset has been computed in the same run.
-If another negative number, it indicates the number of datasets to go backward
+  * If [[getcell]]=another negative number, it indicates the number of datasets to go backward
 to find the needed data (once again, going back beyond the first dataset is
-equivalent to using a null get variable).
+equivalent to using a zero get variable).
 """,
 ),
 
@@ -5252,18 +5277,17 @@ dipole that leads to an unphysical divergence of the GKK with vanishing
 q-points. The use of this variable greatly improves the k-point convergence
 speed as the density of the k-point grid required to obtain the fulfillment of
 the charge neutrality sum rule is usually prohibitively large.
-If [[getddb]] == 0, no such use of previously computed Born effective charge and dielectric tensor is done.
-If [[getddb]] is positive, its value gives the index of the dataset from which the output density is to be used as input.
-If [[getddb]] is -1, the output density of the previous dataset must be taken, which is a frequently occurring case.
-If [[getddb]] is a negative number, it indicates the number of datasets to go backward to find the needed file.
 
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+  * If [[getddb]]=0, no previously computed values are used.
+  * If [[getddb]]>0, the value must be the index of the dataset from which the
+cell data is to be used as input data. It must be the index of a dataset already
+computed in the SAME run.
+  * If [[getddb]]=-1, the output data of the previous dataset must be taken, which
+is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getddb]]=another negative number, it indicates the number of datasets to go backward
+to find the needed data (once again, going back beyond the first dataset is
+equivalent to using a zero get variable).
 
 Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the file directly.
 """,
@@ -5283,7 +5307,7 @@ Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
 [[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
 explanations given for these latter variables.
-The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
+The [[getwfk]], [[getwfq]], [[get1wf]] and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
 describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
 wavefunctions of the present dataset.
@@ -5333,32 +5357,30 @@ Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to
 [[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
 explanations given for these latter variables.
-The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
+The [[getwfk]], [[getwfq]], [[get1wf]] and [[getddk]] variables are
 typically used to chain the calculations in the multi-dataset mode, since they
 describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
 wavefunctions of the present dataset.
 
-We now focus on the **getwfk** input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and **get1wf** are similar,
+We now focus on the [[getwfk]] input variable (the only one used in ground-
+state calculations), but the rules for [[getwfq]] and [[get1wf]] are similar,
 with _WFK replaced by _WFQ or _1WF.
-If **getwfk** ==0, no use of previously computed output wavefunction file
+
+ * If [[getwfk]] ==0, no use of previously computed output wavefunction file
 appended with _DSx_WFK is done.
-If **getwfk** is positive, its value gives the index of the dataset for which
+ * If [[getwfk]] >0, its value gives the index of the dataset for which
 the output wavefunction file appended with _WFK must be used.
-If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
+ * If [[getwfk]]=-1, the output wf file with _WFK of the previous dataset must
 be taken, which is a frequently occurring case.
-If **getwfk** is a negative number, it indicates the number of datasets to go
+ * If [[getwfk]] is a negative number, it indicates the number of datasets to go
 backward to find the needed wavefunction file. In this case, if one refers to
 a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if **getwfk** =0 for that
-initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
+initialised from a disk file, so that it is as if [[getwfk]] =0 for that
+initialisation. Thanks to this rule, the use of [[getwfk]] -1 is rather
 straightforward: except for the first wavefunctions, that are not initialized
 by reading a disk file, the output wavefunction of one dataset is input of the
 next one.
-In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to declare give getddk the
-value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
-should be changed in the future.
+
 NOTE: a negative value of a "get" variable indicates the number of datasets
 to go backwards; it is not the number to be subtracted from the current
 dataset to find the proper dataset. As an example:
@@ -5776,8 +5798,47 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to [[irdwfk]],.
+starting wavefunctions, as an alternative to [[irdwfk]].
 Note also that, starting Abinit v9, one can also use [[getwfk_filepath]] to specify the path of the file directly.
+
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
+starting wavefunctions, as an alternative to
+[[irdwfk]]. One should first read the
+explanations given for these latter variables.
+The [[getwfk]] variable is
+typically used to chain the calculations in the multi-dataset mode, since they
+describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+wavefunctions of the present dataset.
+
+We now focus on the [[getwfk]] input variable (the only one used in ground-
+state calculations), but the rules for [[getwfq]], [[get1wf]], [[getddk]] are similar,
+with _WFK replaced by _WFQ,  _1WF or _DDK.
+
+ * If [[getwfk]] ==0, no use of previously computed output wavefunction file
+appended with _DSx_WFK is done.
+ * If [[getwfk]] >0, its value gives the index of the dataset for which
+the output wavefunction file appended with _WFK must be used.
+ * If [[getwfk]]=-1, the output wf file with _WFK of the previous dataset must
+be taken, which is a frequently occurring case.
+ * If [[getwfk]] is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file. In this case, if one refers to
+a non existent data set (prior to the first), the wavefunctions are not
+initialised from a disk file, so that it is as if [[getwfk]] =0 for that
+initialisation. Thanks to this rule, the use of [[getwfk]] -1 is rather
+straightforward: except for the first wavefunctions, that are not initialized
+by reading a disk file, the output wavefunction of one dataset is input of the
+next one.
+
+NOTE: a negative value of a "get" variable indicates the number of datasets
+to go backwards; it is not the number to be subtracted from the current
+dataset to find the proper dataset. As an example:
+
+      ndtset 3   jdtset 1 2 4  getXXX -1
+
+refers to dataset 2 when dataset 4 is initialized.
+
+
+
 
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -19287,11 +19348,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 When equal to one or two, this variable allows one to calculate U with
-the cRPA method. An explicit test is shown in automatic tests
-[[test:v7_23]], [[test:v7_24]], [[test:v7_25]], [[test:v7_68]], and [[test:v7_69]].
+the cRPA method. 
 The present implementation is parallelized (as for usual GW
 calculations), use symmetry over k points only for calculations involving one
-correlated atom, and can be use when correlated bands are entangled or not.
+correlated atom, and can be used when correlated bands are entangled or not.
 The constrained calculation of the polarisability can be done by eliminating
 transition betweens correlated bands (and not orbitals) with the variable
 [[ucrpa_bands]].
