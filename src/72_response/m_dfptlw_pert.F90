@@ -198,15 +198,13 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3et
 !Variables ------------------------------------
 !scalars
  integer :: bandtot,icg,idq,ierr,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
- integer :: nband_k,n1dqb2,n2dqb2,npw_k,nylmgr,option,spaceworld,tim_getgh1c
+ integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
  real(dp) :: wtk_k
  character(len=1000) :: msg
  logical :: with_nonlocal_i1pert, with_nonlocal_i2pert
 !arrays
  integer,allocatable :: kg_k(:,:)
- real(dp) :: buffer(6),buffer_t4(2*n2dq),buffer_t5(2*n1dq)
- real(dp) :: d3etot_k(2)
  real(dp) :: d3etot_t1(2),d3etot_t1_k(2)
  real(dp) :: d3etot_t2(2),d3etot_t2_k(2)
  real(dp) :: d3etot_t3(2),d3etot_t3_k(2)
@@ -309,6 +307,7 @@ d3etot_telec=zero
        end if
      end if
 
+
      !Compute the stationary terms of d3etot depending on response functions
      call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
      & d3etot_t4_k,d3etot_t5_k,dtset,gs_hamkq,gsqcut,icg,&
@@ -344,57 +343,11 @@ d3etot_telec=zero
 
 !=== MPI communications ==================
  if (xmpi_paral==1) then
-
- ! Real parts
-   buffer(1)=d3etot_t1(1)
-   buffer(2)=d3etot_t2(1)
-   buffer(3)=d3etot_t3(1)
-   do idq=1,n2dq
-     buffer_t4(idq)=d3etot_t4(1,idq)
-   end do
-   do idq=1,n1dq
-     buffer_t5(idq)=d3etot_t5(1,idq)
-   end do
-
- ! Imaginary parts
-   buffer(4)=d3etot_t1(2)
-   buffer(5)=d3etot_t2(2)
-   buffer(6)=d3etot_t3(2)
-   n2dqb2=n2dq/2 
-   do idq=1,n2dq
-     buffer_t4(n2dqb2+idq)=d3etot_t4(2,idq)
-   end do
-   n1dqb2=n1dq/2 
-   do idq=1,n1dq
-     buffer_t5(n1dqb2+idq)=d3etot_t5(2,idq)
-   end do
-
-   call xmpi_sum(buffer,spaceworld,ierr)
-   call xmpi_sum(buffer_t4,spaceworld,ierr)
-   call xmpi_sum(buffer_t5,spaceworld,ierr)
-
- ! Real parts
-   d3etot_t1(1)=buffer(1)
-   d3etot_t2(1)=buffer(2)
-   d3etot_t3(1)=buffer(3)
-   do idq=1,n2dq
-     d3etot_t4(1,idq)=buffer_t4(idq)
-   end do
-   do idq=1,n1dq
-     d3etot_t5(1,idq)=buffer_t5(idq)
-   end do
-
- ! Imaginary parts
-   d3etot_t1(2)=buffer(4)
-   d3etot_t2(2)=buffer(5)
-   d3etot_t3(2)=buffer(6)
-   do idq=1,n2dq
-    d3etot_t4(2,idq)=buffer_t4(n2dqb2+idq)
-   end do
-   do idq=1,n1dq
-    d3etot_t5(2,idq)=buffer_t5(n1dqb2+idq)
-   end do
-
+   call xmpi_sum(d3etot_t1,spaceworld,ierr)
+   call xmpi_sum(d3etot_t2,spaceworld,ierr)
+   call xmpi_sum(d3etot_t3,spaceworld,ierr)
+   call xmpi_sum(d3etot_t4,spaceworld,ierr)
+   call xmpi_sum(d3etot_t5,spaceworld,ierr)
  end if
 
 !Join all the contributions in e3tot except t4 and t5 which may need to be
@@ -471,22 +424,22 @@ d3etot_telec=zero
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    if (n2dq==1) then
-     write(msg,'(1(a,2(a,f18.8)),a)') &
-     ch10,'           d3etot_t4= ',d3etot_t4(1,1),  ',',d3etot_t4(2,1)
+     write(msg,'(2(a,f18.8))') &
+     '          d3etot_t4 = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1)
    else if (n2dq==2) then
-     write(msg,'(2(a,2(a,f18.8)),a)') &
-     ch10,' d3etot_t4(dw shear)= ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),&
-     ch10,' d3etot_t4(up shear)= ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
+     write(msg,'(2(2(a,f18.8)))') &
+     'd3etot_t4(dw shear) = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),&
+     'd3etot_t4(up shear) = ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    if (n1dq==1) then
-     write(msg,'(1(a,2(a,f18.8)),a)') &
-     ch10,'           d3etot_t5= ',d3etot_t5(1,1),  ',',d3etot_t5(2,1)
+     write(msg,'(2(a,f18.8))') &
+     '          d3etot_t5 = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1)
    else if (n1dq==2) then
-     write(msg,'(2(a,2(a,f18.8)),a)') &
-     ch10,' d3etot_t5(dw shear)= ',d3etot_t5(1,1),  ',',d3etot_t5(2,1),&
-     ch10,' d3etot_t5(up shear)= ',d3etot_t5(1,2),  ',',d3etot_t5(2,2)
+     write(msg,'(2(2(a,f18.8)))') &
+     'd3etot_t5(dw shear) = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1),&
+     'd3etot_t5(up shear) = ',d3etot_t5(1,2),  ',',d3etot_t5(2,2)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')

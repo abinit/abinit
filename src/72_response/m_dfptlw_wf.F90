@@ -516,8 +516,8 @@ if (.not.samepert) then
      ABI_MALLOC(gvnl1dqc,(2,size_wf))
    end if
    if (i2pert<=natom) fac=-one
-   if (i2pert==natom+2) fac=half
-   if (i2pert==natom+3.or.i2pert==natom+4) fac=-half
+   if (i2pert==natom+2) fac=-half
+   if (i2pert==natom+3.or.i2pert==natom+4) fac=half
    if (i2pert<=natom) then
      nylmgrtmp=3
    else if (i2pert==natom+3.or.i2pert==natom+4) then
@@ -632,8 +632,8 @@ if (.not.samepert) then
    ABI_MALLOC(gvnl1dqc,(2,size_wf))
  end if
  if (i1pert<=natom) fac=-one
- if (i1pert==natom+2) fac=half
- if (i1pert==natom+3.or.i1pert==natom+4) fac=-half
+ if (i1pert==natom+2) fac=-half
+ if (i1pert==natom+3.or.i1pert==natom+4) fac=half
  if (i1pert<=natom) then
    nylmgrtmp=3
  else if (i1pert==natom+3.or.i1pert==natom+4) then
@@ -644,7 +644,7 @@ if (.not.samepert) then
  end if
 
 !Do loop to compute both extradiagonal shear-strain components
- do idq=1,n2dq
+ do idq=1,n1dq
 
    if (i1pert/=natom+2) then
      idir=i1dir; if (i1pert==natom+4) idir=idq*3+i1dir
@@ -715,7 +715,7 @@ if (.not.samepert) then
 
    end if
 
-   !Apply the perturbation-dependent prefactors on T4
+   !Apply the perturbation-dependent prefactors on T5
    tmpre=d3etot_t5_k(1,idq); tmpim=d3etot_t5_k(2,idq)
    if (i1pert<=natom.or.i1pert==natom+2) then
      d3etot_t5_k(1,idq)=-tmpim
@@ -725,12 +725,18 @@ if (.not.samepert) then
 
  end do !idq
 
+
  if (i1pert/=natom+2) then
    ABI_FREE(gvloc1dqc)
    ABI_FREE(gvnl1dqc)
    ABI_FREE(vlocal1)
    ABI_FREE(vpsp1)
  end if
+
+if (samepert) then
+  d3etot_t4_k(1,:)=d3etot_t5_k(1,:)
+  d3etot_t4_k(2,:)=-d3etot_t5_k(2,:)
+end if
 
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
