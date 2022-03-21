@@ -690,16 +690,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
              beta=idx(2*istr-1); delta=idx(2*istr)
              do ii=1,2
 
-               !Transform i3dir into reduced coordinates
-               do i3dir=1,3
-                 vec1(i3dir)=t4_typeI(ii,i1dir,i1pert,beta,delta,i3dir)
-                 flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
-               end do
-               call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
-               do i3dir=1,3
-                 t4_typeI(ii,i1dir,i1pert,beta,delta,i3dir)=vec2(i3dir)*fac
-               end do
-
                !Transform into type-II
                do i3dir=1,3
                  gamma=i3dir
@@ -708,6 +698,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
                & t4_typeI(ii,i1dir,i1pert,delta,gamma,beta) - &
                & t4_typeI(ii,i1dir,i1pert,gamma,beta,delta)
                end do ! i3dir
+
+
+               !Transform i3dir into reduced coordinates
+               do i3dir=1,3
+                 vec1(i3dir)=t4_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+                 flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
+               end do
+               call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+               do i3dir=1,3
+                 t4_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
+               end do
+
              end do ! ii
            end do ! i2dir
          end do ! i2pert
@@ -716,26 +718,48 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
    end do ! i1pert
  end if
 
-   do i1pert = 1, mpert
-     do i1dir = 1, 3
-       do i2pert = 1, mpert
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-               write(message,'(2a,3(a,i2,a,i1))') ch10,'LONGWAVE : ',&
-        ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
-               write(150,*) message
-               write(150,*) t4_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-             end if
-           end do ! ii
-         end do ! i2dir
-       end do ! i2pert
+ if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
+   fac=two_pi ** 2
+   i3pert= natom+8
+   do i2pert = 1, mpert
+     do i2dir = 1, 3
+       if ((maxval(rfpert(:,:,i2dir,i2pert,:,:))==1)) then
+         do i1pert = natom+3, natom+4
+           do i1dir = 1, 3
+             istr=(i1pert-natom-3)*3+i1dir
+             beta=idx(2*istr-1); delta=idx(2*istr)
+             do ii=1,2
+
+               !Transform into type-II
+               do i3dir=1,3
+                 gamma=i3dir
+                 t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
+               & t5_typeI(ii,i2dir,i2pert,beta,delta,gamma) + &
+               & t5_typeI(ii,i2dir,i2pert,delta,gamma,beta) - &
+               & t5_typeI(ii,i2dir,i2pert,gamma,beta,delta)
+               end do ! i3dir
+
+
+               !Transform i3dir into reduced coordinates
+               do i3dir=1,3
+                 vec1(i3dir)=t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+                 flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
+               end do
+               call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+               do i3dir=1,3
+                 t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
+               end do
+
+             end do ! ii
+           end do ! i2dir
+         end do ! i2pert
+       end if ! rfpert
      end do ! i1dir
    end do ! i1pert
-               
+ end if
 
 !Incorporate T4 and T5 to d3etot
- d3etot=d3etot+t4_typeII
+ d3etot=d3etot+t4_typeII+t5_typeII
 
 !Anounce end of spatial-dispersion calculation
  write(message, '(a,a,a,a)' ) ch10,ch10,&
