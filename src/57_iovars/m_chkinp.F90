@@ -2063,7 +2063,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When usepawu is not 0, 1 or 4, nspden must be 1 or 2
-   if( dt%usepawu/=0 .and. dt%usepawu/=1 .and. dt%usepawu/=4 .and. dt%usepawu/=10)then
+   if( dt%usepawu/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4 .and. dt%usepawu/=10)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
@@ -3415,9 +3415,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  usekden
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usekden',dt%usekden,2,(/0,1/),iout)
-   if(dt%nspden==4)then
+!  The following test is only a way to practically prevent the usage of mGGA with nspden=4 (not allowed yet),
+!  while allowing to have usekden=1 with nspden=4. Indeed, while mGGA is not allowed for the non-collinear case,
+!  the computation of the kinetic energy density in the non-collinear spin case is working, and there are tests of this ...
+!  What should be done : modify the definition of xclevel, to index differently GGAs and mGGAs, etc, and test on xclevel instead of usekden.
+   if(dt%nspden==4 .and. dt%prtkden==0)then
      cond_string(1)='nspden' ; cond_values(1)=dt%nspden
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usekden',dt%usekden,1,(/0/),iout)
+     cond_string(1)='prtkden' ; cond_values(2)=dt%prtkden
+     call chkint_eq(1,2,cond_string,cond_values,ierr,'usekden',dt%usekden,1,(/0/),iout)
    endif
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
