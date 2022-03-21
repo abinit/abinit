@@ -19,7 +19,7 @@ ndtset 2
  #constraint_kind 1
  #
  shiftk 0.0 0.0 0.0
- pp_dirpath "/home/bs544/.abinit/pseudos"
+# pp_dirpath "/home/bs544/.abinit/pseudos"
  pseudos "26fe.lda2.paw"
  prtebands 0
  prtden 1
