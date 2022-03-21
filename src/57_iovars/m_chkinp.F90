@@ -2063,7 +2063,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When usepawu is not 0, 1 or 4, nspden must be 1 or 2
-   if( dt%usepawu/=0 .and. dt%usepawu/=1 .and. dt%usepawu/=4)then
+   if( dt%usepawu/=0 .and. dt%usepawu/=1 .and. dt%usepawu/=4 .and. dt%usepawu/=10)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
