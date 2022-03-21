@@ -12458,7 +12458,7 @@ allowed x, y and z magnetization (useful only with [[nspinor]] = 2 and
 [[nsppol]] = 1, either because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
 allows for spontaneous non-collinear magnetism). Available for
-response functions [[cite:Ricci2019]]. Also note that, with [[nspden]] = 4, time-reversal symmetry
+response functions [[cite:Ricci2019]]. Not yest available for mGGA. Also note that, with [[nspden]] = 4, time-reversal symmetry
 is not taken into account (at present; this has to be checked) and thus
 [[kptopt]] has to be different from 1 or 2.
 
@@ -14273,7 +14273,7 @@ Variable(
   * If set to 2, the exchange-correlation term in the spherical part of energy is developed onto lm-moments at order 2
 
 Be careful: Response function (DFPT) + PAW + GGA requires [[pawxcdev]] = 0. But if you plan to do DFPT calculations, it is better to use this option also in the preliminary ground state calculation.
-However, if [[nspden]] = 4 (non-collinear calculations) with GGA/mGGA and [[usepawu]]/=0, one needs to use [[pawxcdev]] = 1 or [[usepawu]] = 4. 
+However, if [[nspden]] = 4 (non-collinear calculations) with GGA and [[usepawu]]/=0, one needs to use [[pawxcdev]] = 1.
 """,
 ),
 
@@ -19679,7 +19679,7 @@ If [[usekden]] = 1 the kinetic energy density will be computed during
 the self-consistent loop, in a way similar to the computation of the density.
 This is needed if a meta-GGA is to be used as XC functional. By default
 ([[usekden]] = 0), the kinetic energy density is not computed during the self-
-consistent loop.
+consistent loop. [[usekden]] = 1 is not yet allowed with [[nspden]]=4 (non-collinear magnetism).
 """,
 ),
 
@@ -19752,7 +19752,8 @@ keeping a smaller U interaction in the GW calculation, by subtracting a
 smaller U than the one used in the DFT calculation. See the description of the
 [[upawu]] input variable.
 
-If [[nspden]] = 4 (non-collinear calculations) with GGA/mGGA and [[usepawu]]/=0, one needs to use [[pawxcdev]] = 1 or [[usepawu]] = 4. 
+However, if [[nspden]] = 4 (non-collinear calculations) with GGA, one needs to use [[pawxcdev]] = 1,
+and either [[usepawu]]=0,1 or 4..
 
 Suggested acknowledgment:[[cite:Amadon2008a]].
 
