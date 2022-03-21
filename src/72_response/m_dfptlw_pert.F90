@@ -324,6 +324,7 @@ d3etot_telec=zero
      d3etot_t2=d3etot_t2 + d3etot_t2_k
      d3etot_t3=d3etot_t3 + d3etot_t3_k
      d3etot_t4=d3etot_t4 + d3etot_t4_k
+     d3etot_t5=d3etot_t5 + d3etot_t5_k
  
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
@@ -351,6 +352,9 @@ d3etot_telec=zero
    do idq=1,n2dq
      buffer_t4(idq)=d3etot_t4(1,idq)
    end do
+   do idq=1,n1dq
+     buffer_t5(idq)=d3etot_t5(1,idq)
+   end do
 
  ! Imaginary parts
    buffer(4)=d3etot_t1(2)
@@ -360,9 +364,14 @@ d3etot_telec=zero
    do idq=1,n2dq
      buffer_t4(n2dqb2+idq)=d3etot_t4(2,idq)
    end do
+   n1dqb2=n1dq/2 
+   do idq=1,n1dq
+     buffer_t5(n1dqb2+idq)=d3etot_t5(2,idq)
+   end do
 
    call xmpi_sum(buffer,spaceworld,ierr)
    call xmpi_sum(buffer_t4,spaceworld,ierr)
+   call xmpi_sum(buffer_t5,spaceworld,ierr)
 
  ! Real parts
    d3etot_t1(1)=buffer(1)
@@ -370,6 +379,9 @@ d3etot_telec=zero
    d3etot_t3(1)=buffer(3)
    do idq=1,n2dq
      d3etot_t4(1,idq)=buffer_t4(idq)
+   end do
+   do idq=1,n1dq
+     d3etot_t5(1,idq)=buffer_t5(idq)
    end do
 
  ! Imaginary parts
@@ -379,17 +391,21 @@ d3etot_telec=zero
    do idq=1,n2dq
     d3etot_t4(2,idq)=buffer_t4(n2dqb2+idq)
    end do
+   do idq=1,n1dq
+    d3etot_t5(2,idq)=buffer_t5(n1dqb2+idq)
+   end do
 
  end if
 
 !Join all the contributions in e3tot except t4 and t5 which may need to be
-!converted to type-II in the case of strain perturbation. 
+!converted to type-II in case of strain perturbation. 
 !Apply here the two factor to the stationary wf1 contributions 
 !(see PRB 105, 064101 (2022))
  d3etot_t1(:)=two*d3etot_t1(:)
  d3etot_t2(:)=two*d3etot_t2(:)
  d3etot_t3(:)=two*d3etot_t3(:)
  d3etot_t4(:,:)=two*d3etot_t4(:,:)
+ d3etot_t5(:,:)=two*d3etot_t5(:,:)
  e3tot(:)=d3etot_t1(:)+d3etot_t2(:)+d3etot_t3(:)
 
 !Before printing, set small contributions to zero
@@ -402,13 +418,20 @@ d3etot_telec=zero
    do idq=1,n2dq
      if (abs(d3etot_t4(1,idq))<tol8) d3etot_t4(1,idq)= zero
    end do 
+   do idq=1,n1dq
+     if (abs(d3etot_t5(1,idq))<tol8) d3etot_t5(1,idq)= zero
+   end do 
    if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
+
    !Imaginary parts
    if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
    if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
    if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
    do idq=1,n2dq
      if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
+   end do
+   do idq=1,n1dq
+     if (abs(d3etot_t5(2,idq))<tol8) d3etot_t5(2,idq)= zero
    end do
    if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
@@ -419,6 +442,7 @@ d3etot_telec=zero
    d3etot_t2(1)= zero
    d3etot_t3(1)= zero
    d3etot_t4(1,:)= zero
+   d3etot_t5(1,:)= zero
    e3tot(1)   = zero
    !Imaginary parts
    if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
@@ -426,6 +450,9 @@ d3etot_telec=zero
    if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
    do idq=1,n2dq
      if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
+   end do
+   do idq=1,n1dq
+     if (abs(d3etot_t5(2,idq))<tol8) d3etot_t5(2,idq)= zero
    end do
    if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
@@ -450,6 +477,16 @@ d3etot_telec=zero
      write(msg,'(2(a,2(a,f18.8)),a)') &
      ch10,' d3etot_t4(dw shear)= ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),&
      ch10,' d3etot_t4(up shear)= ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
+   end if
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   if (n1dq==1) then
+     write(msg,'(1(a,2(a,f18.8)),a)') &
+     ch10,'           d3etot_t5= ',d3etot_t5(1,1),  ',',d3etot_t5(2,1)
+   else if (n1dq==2) then
+     write(msg,'(2(a,2(a,f18.8)),a)') &
+     ch10,' d3etot_t5(dw shear)= ',d3etot_t5(1,1),  ',',d3etot_t5(2,1),&
+     ch10,' d3etot_t5(up shear)= ',d3etot_t5(1,2),  ',',d3etot_t5(2,2)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')

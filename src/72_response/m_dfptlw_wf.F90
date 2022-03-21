@@ -500,7 +500,7 @@ end if
 
 !------------------------------------T4------------------------------------------------
 !q-gradient of rf Hamiltonian lambda 2 
-! < u_{i,k}^{\lambda1} | (H^{\lambda2})_{gamma} | u_{i,k}^{(0)} >
+! < u_{i,k}^{\lambda1} | H^{\lambda2}_{gamma} | u_{i,k}^{(0)} >
 !--------------------------------------------------------------------------------------
 
 !For \lambda1=\lambda2 T4 is inferred from the cc of T5
@@ -615,14 +615,129 @@ if (.not.samepert) then
      ABI_FREE(vpsp1)
    end if
 
-
  end if !samepert
+
+!------------------------------------T5------------------------------------------------
+!q-gradient of rf Hamiltonian lambda 1 
+! < u_{i,k}^{(0)} | (H^{\lambda1}_{gamma})^{\dagger} | u_{i,k}^{\lambda2} >
+!--------------------------------------------------------------------------------------
+
+!Specific definitions and allocations
+ d3etot_t5_k=zero
+ optlocal=1;optnl=1
+ if (i1pert/=natom+2) then
+   ABI_MALLOC(vlocal1,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
+   ABI_MALLOC(vpsp1,(2*nfft))
+   ABI_MALLOC(gvloc1dqc,(2,size_wf))
+   ABI_MALLOC(gvnl1dqc,(2,size_wf))
+ end if
+ if (i1pert<=natom) fac=-one
+ if (i1pert==natom+2) fac=half
+ if (i1pert==natom+3.or.i1pert==natom+4) fac=-half
+ if (i1pert<=natom) then
+   nylmgrtmp=3
+ else if (i1pert==natom+3.or.i1pert==natom+4) then
+   nylmgrtmp=nylmgr
+   ABI_FREE(part_ylmgr_k)
+   ABI_MALLOC(part_ylmgr_k,(npw_k,nylmgrtmp,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+   part_ylmgr_k(:,:,:)=ylmgr_k(:,:,:)
+ end if
+
+!Do loop to compute both extradiagonal shear-strain components
+ do idq=1,n2dq
+
+   if (i1pert/=natom+2) then
+     idir=i1dir; if (i1pert==natom+4) idir=idq*3+i1dir
+     !Initialize rf Hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+     call init_rf_hamiltonian(2,gs_hamkq,i1pert,rf_hamkq,& 
+     & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+     & mpi_spintab=mpi_enreg%my_isppoltab)
+
+     !Set up local potentials with proper dimensioning
+     !and load the spin-dependent part of the Hamiltonians
+     vpsp1=vpsp1_i1pertdq(:,isppol,idq)
+     call rf_transgrid_and_pack(isppol,nspden,usepaw,2,nfft,nfft,ngfft,&
+     & gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1,dum_vlocal,vlocal1)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,& 
+     & with_nonlocal=with_nonlocal_i1pert)
+
+     !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+     call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i1pert,i3dir, &
+   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
+
+   end if
+
+   !LOOP OVER BANDS
+   do iband=1,nband_k
+
+     if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+     !Select bks wfs
+     offset_cgi = (iband-1)*size_wf+icg
+     cwavef2(:,:)= cg2(:,1+offset_cgi:size_wf+offset_cgi)
+
+     !Perturbation-specific part
+     if (i1pert==natom+2) then
+       call d2_dkdk_f%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=gv1c)
+     else
+       cwave0i(:,:)= cg(:,1+offset_cgi:size_wf+offset_cgi)
+
+       !Compute < g |H^{\lambda1}}_{\gamma} | u_{i,k}^{(0)} >
+       call getgh1dqc(cwave0i,dum_cwaveprj,gv1c,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+       & idir,i1pert,mpi_enreg,optlocal,optnl,i3dir,rf_hamkq)
+     end if
+     
+     !Calculate: < u_{j,k}^{\lambda2} | |H^{\lambda1}}_{\gamma} | u_{i,k}^{(0)} >
+     call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef2,gv1c, &
+   & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+     !Calculate the contribution to T5:
+     !(< u_{j,k}^{\lambda2} | |H^{\lambda1}}_{\gamma} | u_{i,k}^{(0)} >)* 
+     d3etot_t5_k(1,idq)=d3etot_t5_k(1,idq)+dotr*occ_k(iband)
+     d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)-doti*occ_k(iband)
+
+   end do !iband
+
+   if (i1pert/=natom+2) then
+
+     !Clean the rf_hamiltonian
+     call rf_hamkq%free()
+
+     !Deallocations
+     ABI_FREE(kpg_k)
+     ABI_FREE(kpg1_k)
+     ABI_FREE(dkinpw)
+     ABI_FREE(kinpw1)
+     ABI_FREE(ffnlk)
+     ABI_FREE(ffnl1)
+     ABI_FREE(ph3d)
+
+   end if
+
+   !Apply the perturbation-dependent prefactors on T4
+   tmpre=d3etot_t5_k(1,idq); tmpim=d3etot_t5_k(2,idq)
+   if (i1pert<=natom.or.i1pert==natom+2) then
+     d3etot_t5_k(1,idq)=-tmpim
+     d3etot_t5_k(2,idq)=tmpre
+   end if 
+   d3etot_t5_k(:,idq)=d3etot_t5_k(:,idq)*fac
+
+ end do !idq
+
+ if (i1pert/=natom+2) then
+   ABI_FREE(gvloc1dqc)
+   ABI_FREE(gvnl1dqc)
+   ABI_FREE(vlocal1)
+   ABI_FREE(vpsp1)
+ end if
 
 !Scale d3etot_k contributions by the kpt weight
 d3etot_t1_k(:)=d3etot_t1_k(:)*wtk_k
 d3etot_t2_k(:)=d3etot_t2_k(:)*wtk_k
 d3etot_t3_k(:)=d3etot_t3_k(:)*wtk_k
 d3etot_t4_k(:,:)=d3etot_t4_k(:,:)*wtk_k
+d3etot_t5_k(:,:)=d3etot_t5_k(:,:)*wtk_k
 
 !Deallocations
  ABI_FREE(cwave0i)
