@@ -657,13 +657,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_order',dt%dmftctqmc_order,0,iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,2*dt%dmftqmc_l,iout)
        end if
-<<<<<<< HEAD
        cond_string(1)='dmft_solv' ; cond_values(1)=5
        cond_string(2)='dmft_solv' ; cond_values(2)=8
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_config',dt%dmftctqmc_config,2,(/0,1/),iout)
-=======
-
->>>>>>> fd86612b5
        if (dt%dmft_entropy>=1) then
          cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,3,iout)
@@ -3671,14 +3667,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,0,iout)
 !  wfoptalg==0,1,4,10,14 or 114 if PAW
    if (usepaw==1) then
-<<<<<<< HEAD
-     write(cond_string(1), "(A)") 'usepaw'
-     cond_values(1)=1
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,7,(/0,1,4,10,14,111,114/),iout)
-=======
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,6,(/0,1,4,10,14,114/),iout)
->>>>>>> fd86612b5
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,7,(/0,1,4,10,14,111,114/),iout)
    end if
 !  wfoptalg/=114 if PAW+Fock
    if (usepaw==1 .and. dt%usefock==1) then
