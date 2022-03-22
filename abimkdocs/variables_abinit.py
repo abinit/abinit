@@ -5304,42 +5304,27 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]],[[ird1wf]],[[irdddk]]. One should first read the
-explanations given for these latter variables.
-The [[getwfk]], [[getwfq]], [[get1wf]] and [[getddk]] variables are
-typically used to chain the calculations in the multi-dataset mode, since they
-describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
-wavefunctions of the present dataset.
+starting DDK wavefunctions, as an alternative to [[irdddk]]. One should first read the
+explanations given for the latter variable.
+This variable is typically used to chain the calculations in the multi-dataset mode, since it
+describes from which dataset the OUTPUT DDK wavefunctions are to be taken, as INPUT
+DDK wavefunctions of the present dataset.
 
-We now focus on the **getwfk** input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and **get1wf** are similar,
-with _WFK replaced by _WFQ or _1WF.
-If **getwfk** ==0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
-If **getwfk** is positive, its value gives the index of the dataset for which
-the output wavefunction file appended with _WFK must be used.
-If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
-be taken, which is a frequently occurring case.
-If **getwfk** is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. In this case, if one refers to
-a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if **getwfk** =0 for that
-initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
-straightforward: except for the first wavefunctions, that are not initialized
-by reading a disk file, the output wavefunction of one dataset is input of the
-next one.
+  * If [[getddk]]=0, no use of previously computed output DDK wavefunction file
+appended with _DSx_1WF is done.
+  * If [[getddk]] is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _1WF must be used.
+  * If [[getddk]] is -1, the output 1wf file with _1WF of the previous dataset must
+be taken, which is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getddk]] is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file. 
+Going back beyond the first dataset is equivalent to using zero for the get variable.
+
 In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to declare give getddk the
+correctly the localisation tensor, it is mandatory to declare give [[getddk]] the
 value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
 should be changed in the future.
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
 """,
 ),
 
@@ -5354,40 +5339,22 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
-explanations given for these latter variables.
-The [[getwfk]], [[getwfq]], [[get1wf]] and [[getddk]] variables are
-typically used to chain the calculations in the multi-dataset mode, since they
-describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+starting wavefunctions for the 1st derivative of wavefunctions with respect to ELectric FielD, from _1WF file.
+The [[getdelfd]] variable is
+typically used to chain the calculations in the multi-dataset mode, since it
+describes from which dataset the OUTPUT wavefunctions is to be taken, as INPUT
 wavefunctions of the present dataset.
 
-We now focus on the [[getwfk]] input variable (the only one used in ground-
-state calculations), but the rules for [[getwfq]] and [[get1wf]] are similar,
-with _WFK replaced by _WFQ or _1WF.
-
- * If [[getwfk]] ==0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
- * If [[getwfk]] >0, its value gives the index of the dataset for which
-the output wavefunction file appended with _WFK must be used.
- * If [[getwfk]]=-1, the output wf file with _WFK of the previous dataset must
-be taken, which is a frequently occurring case.
- * If [[getwfk]] is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. In this case, if one refers to
-a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if [[getwfk]] =0 for that
-initialisation. Thanks to this rule, the use of [[getwfk]] -1 is rather
-straightforward: except for the first wavefunctions, that are not initialized
-by reading a disk file, the output wavefunction of one dataset is input of the
-next one.
-
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+  * If [[getdelfd]]=0, no use of previously computed output wavefunction file
+appended with _DSx_1WF is done.
+  * If [[getdelfd]] is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _1WF must be used.
+  * If [[getdelfd]] is -1, the output 1wf file with _1WF of the previous dataset must
+be taken, which is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getdelfd]] is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file.
+Going back beyond the first dataset is equivalent to using zero for the get variable.
 """,
 ),
 
@@ -5402,42 +5369,22 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
-explanations given for these latter variables.
-The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
-typically used to chain the calculations in the multi-dataset mode, since they
-describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+starting DKDK wavefunctions. 
+The [[getdkdk]] variable is
+typically used to chain the calculations in the multi-dataset mode, since it
+describes from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
 wavefunctions of the present dataset.
 
-We now focus on the **getwfk** input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and **get1wf** are similar,
-with _WFK replaced by _WFQ or _1WF.
-If **getwfk** ==0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
-If **getwfk** is positive, its value gives the index of the dataset for which
-the output wavefunction file appended with _WFK must be used.
-If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
-be taken, which is a frequently occurring case.
-If **getwfk** is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. In this case, if one refers to
-a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if **getwfk** =0 for that
-initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
-straightforward: except for the first wavefunctions, that are not initialized
-by reading a disk file, the output wavefunction of one dataset is input of the
-next one.
-In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to declare give getddk the
-value of the current dataset (i.e. getddk3 3) - this is a bit strange and
-should be changed in the future.
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+  * If [[getdkdk]]=0, no use of previously computed output DKDK wavefunction file
+appended with _DSx_1WF is done.
+  * If [[getdkdk]] is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _1WF must be used.
+  * If [[getdkdk]] is -1, the output 1wf file with _1WF of the previous dataset must
+be taken, which is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getdkdk]] is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file.
+Going back beyond the first dataset is equivalent to using zero for the get variable.
 """,
 ),
 
@@ -5452,42 +5399,22 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
-starting wavefunctions, as an alternative to
-[[irdwfk]],[[irdwfq]], [[ird1wf]], [[irdddk]]. One should first read the
-explanations given for these latter variables.
-The **getwfk**, **getwfq**, **get1wf** and [[getddk]] variables are
-typically used to chain the calculations in the multi-dataset mode, since they
-describe from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
+starting DKDE wavefunctions.
+The [[getdkde]] variable is
+typically used to chain the calculations in the multi-dataset mode, since it
+describes from which dataset the OUTPUT wavefunctions are to be taken, as INPUT
 wavefunctions of the present dataset.
 
-We now focus on the **getwfk** input variable (the only one used in ground-
-state calculations), but the rules for **getwfq** and **get1wf** are similar,
-with _WFK replaced by _WFQ or _1WF.
-If **getwfk** ==0, no use of previously computed output wavefunction file
-appended with _DSx_WFK is done.
-If **getwfk** is positive, its value gives the index of the dataset for which
-the output wavefunction file appended with _WFK must be used.
-If **getwfk** is -1, the output wf file with _WFK of the previous dataset must
-be taken, which is a frequently occurring case.
-If **getwfk** is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. In this case, if one refers to
-a non existent data set (prior to the first), the wavefunctions are not
-initialised from a disk file, so that it is as if **getwfk** =0 for that
-initialisation. Thanks to this rule, the use of **getwfk** -1 is rather
-straightforward: except for the first wavefunctions, that are not initialized
-by reading a disk file, the output wavefunction of one dataset is input of the
-next one.
-In the case of a ddk calculation in a multi dataset run, in order to compute
-correctly the localisation tensor, it is mandatory to declare give getddk the
-value of the current dataset (i.e. getddk3 3 ) - this is a bit strange and
-should be changed in the future.
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
+  * If [[getdkde]]=0, no use of previously computed output DKDE wavefunction file
+appended with _DSx_1WF is done.
+  * If [[getdkde]] is positive, its value gives the index of the dataset for which
+the output wavefunction file appended with _1WF must be used.
+  * If [[getdkde]] is -1, the output 1wf file with _1WF of the previous dataset must
+be taken, which is a frequently occurring case. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+  * If [[getdkde]] is a negative number, it indicates the number of datasets to go
+backward to find the needed wavefunction file.
+Going back beyond the first dataset is equivalent to using zero for the get variable.
 """,
 ),
 
@@ -5507,31 +5434,21 @@ that the starting density is to be taken from the output of a previous
 dataset. It is used to chain the calculations, since it describes from which
 dataset the OUTPUT density are to be taken, as INPUT density of the present dataset.
 
-If [[getden]] == 0, no such use of previously computed output density file is done.
+  * If [[getden]] == 0, no such use of previously computed output density file is done.
 
-If [[getden]] is positive, its value gives the index of the dataset from which
-the output density is to be used as input.
+  * If [[getden]] is positive, its value gives the index of the dataset from which
+the output density is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
 
-If [[getden]] is -1, the output density of the previous dataset must be taken,
+  * If [[getden]] is -1, the output density of the previous dataset must be taken,
 which is a frequently occurring case.
 
-If [[getden]] is a negative number, it indicates the number of datasets to go
-backward to find the needed file. In this case, if one refers to a non
-existent data set (prior to the first), the density is not initialised from a
-disk file, so that it is as if [[getden]] = 0 for that initialisation. Thanks to
-this rule, the use of [[getden]] -1 is rather straightforward: except for the
-first density, that is not initialized by reading a disk file, the output
-density of one dataset is input of the next one.
+  * If [[getden]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+
 Be careful: the output density file of a run with non-zero [[ionmov]] does
 not have the proper name (it has a "TIM" indication) for use as an input of an [[iscf]]<0 calculation.
 One should use the output density of a [[ionmov]] == 0 run.
-NOTE: a negative value of a "get" variable indicates the number of datasets
-to go backwards; it is not the number to be subtracted from the current
-dataset to find the proper dataset. As an example:
-
-      ndtset 3   jdtset 1 2 4  getXXX -1
-
-refers to dataset 2 when dataset 4 is initialized.
 """,
 ),
 
