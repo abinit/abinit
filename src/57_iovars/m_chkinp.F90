@@ -267,7 +267,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (any(dt%berryopt== [4,6,7,14,16,17] ) ) then
      cond_string(1)='berryopt' ; cond_values(1)=dt%berryopt
      call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs)',&
-&      max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs),1,tol8,iout)
+&      max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs),1,tol16*tol16,iout)
    endif
 !  Non-zero berryopt and usepaw==1 cannot be done unless response==0
    if (usepaw==1.and.dt%berryopt/=0) then
@@ -4022,7 +4022,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call wrtout(iout,msg,'COLL')
-   write(msg,'(a,i0,3a)')&
+   write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
@@ -4030,7 +4030,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ABI_ERROR(msg)
  end if
  if (ierr>1) then
-   write(msg,'(a,i0,3a)')&
+   write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
    'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
