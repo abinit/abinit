@@ -3053,6 +3053,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
  real(dp) :: dakk(3),gpq(3),rq(3)
  real(dp) :: tsec(2)
  real(dp),allocatable :: work(:,:,:,:,:,:,:)
+ real(dp),allocatable :: dyewdqdq_tI(:,:,:,:,:,:)
 
 ! *************************************************************************
 
@@ -3352,16 +3353,17 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
  end do
 
 !Perform the summation over the second atomic sublattice
- dyewdqdq(:,:,:,:,:,:)=zero
+ ABI_MALLOC(dyewdqdq_tI,(2,3,natom,3,3,3))
+ dyewdqdq_tI(:,:,:,:,:,:)=zero
  do ia=1,natom
    do iq2=1,3
      do iq1=1,3
        do nu=1,3
          do mu=1,3
            do ib=1,natom
-             dyewdqdq(re,mu,ia,nu,iq1,iq2)=dyewdqdq(re,mu,ia,nu,iq1,iq2) + &
+             dyewdqdq_tI(re,mu,ia,nu,iq1,iq2)=dyewdqdq_tI(re,mu,ia,nu,iq1,iq2) + &
            & work(re,mu,ia,nu,ib,iq1,iq2)
-             dyewdqdq(im,mu,ia,nu,iq1,iq2)=dyewdqdq(im,mu,ia,nu,iq1,iq2) + &
+             dyewdqdq_tI(im,mu,ia,nu,iq1,iq2)=dyewdqdq_tI(im,mu,ia,nu,iq1,iq2) + &
            & work(im,mu,ia,nu,ib,iq1,iq2)
            end do
          end do
@@ -3370,7 +3372,24 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
    end do
  end do
  ABI_FREE(work)
- 
+
+!Convert to type-II quantity
+ dyewdqdq(:,:,:,:,:,:)=zero
+ do ia=1,natom
+   do iq2=1,3
+     do iq1=1,3
+       do nu=1,3
+         do mu=1,3
+           dyewdqdq(:,mu,ia,iq2,nu,iq1)= dyewdqdq_tI(:,mu,ia,nu,iq1,iq2) + &
+                                       & dyewdqdq_tI(:,mu,ia,iq1,iq2,nu) - &
+                                       & dyewdqdq_tI(:,mu,ia,iq2,nu,iq1)
+         end do
+       end do
+     end do
+   end do
+ end do
+ ABI_FREE(dyewdqdq_tI)
+
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
