@@ -636,6 +636,9 @@ if (.not.samepert) then
  if (i1pert==natom+3.or.i1pert==natom+4) fac=half
  if (i1pert<=natom) then
    nylmgrtmp=3
+   ABI_FREE(part_ylmgr_k)
+   ABI_MALLOC(part_ylmgr_k,(npw_k,nylmgrtmp,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+   part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3,:)
  else if (i1pert==natom+3.or.i1pert==natom+4) then
    nylmgrtmp=nylmgr
    ABI_FREE(part_ylmgr_k)
@@ -693,9 +696,8 @@ if (.not.samepert) then
    & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
      !Calculate the contribution to T5:
-     !(< u_{j,k}^{\lambda2} | |H^{\lambda1}}_{\gamma} | u_{i,k}^{(0)} >)* 
      d3etot_t5_k(1,idq)=d3etot_t5_k(1,idq)+dotr*occ_k(iband)
-     d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)-doti*occ_k(iband)
+     d3etot_t5_k(2,idq)=d3etot_t5_k(2,idq)+doti*occ_k(iband)
 
    end do !iband
 
@@ -722,6 +724,11 @@ if (.not.samepert) then
      d3etot_t5_k(2,idq)=tmpre
    end if 
    d3etot_t5_k(:,idq)=d3etot_t5_k(:,idq)*fac
+
+   !Apply now the conjugate complex:
+   !(< u_{j,k}^{\lambda2} | |H^{\lambda1}}_{\gamma} | u_{i,k}^{(0)} >)* 
+   tmpim=d3etot_t5_k(2,idq)
+   d3etot_t5_k(2,idq)=-tmpim
 
  end do !idq
 
