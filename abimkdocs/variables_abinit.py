@@ -2889,8 +2889,11 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-Value of double counting used for DMFT. Only value 1 is currently activated.
-It corresponds to the "Full Localized Limit" double counting.
+Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1).. 
+
+   * 1 : corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
+   * 2 : corresponds to the "Around Mean Field" double counting (this is not yet in production).
+   * 5 : the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
 """,
 ),
 
@@ -19714,20 +19717,26 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Must be non-zero if a DFT+U calculation is done, or if a GW calculation
-following a DFT+U calculation is done (important!).
+following a DFT+U calculation is done (important!), or if a DMFT calculation is done..
 
   * If set to 0, the DFT+U method is not used.
 
-  * If set to 1, 2 or 4, the DFT+U method (cf [[cite:Anisimov1991a]]) is used.
+  * If the absolute value is set to 1, 2 or 4, the DFT+U method (cf [[cite:Anisimov1991a]]) is used.
 The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy.
 Three choices are allowed concerning the double counting term:
 
-    * If [[usepawu]] = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
+    * If abs([[usepawu]]) = 1 or 10, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
-    * If [[usepawu]] = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
+    * If abs([[usepawu]]) = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
 
-    * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
+    * If abs([[usepawu]]) = 4 or 14, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
     polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
+
+For DMFT calculations [[usedmft]]=1, only [[usepawu]]=10 or 14 is permitted. For other types of calculations, abs([[usepawu]])=10 or 14 cannot be used.
+Positive and negative values of [[usedmft]], only differ by their internal implementation. At some stage, only positive values will be used again.
+
+If [[nspden]] = 4 (non-collinear calculations) with GGA, one needs to use [[pawxcdev]] = 1,
+and either abs([[usepawu]])=0, 1, 4, 10 or 14.
 
 If DFT+U is activated ([[usepawu]]/=0), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
@@ -19752,10 +19761,7 @@ keeping a smaller U interaction in the GW calculation, by subtracting a
 smaller U than the one used in the DFT calculation. See the description of the
 [[upawu]] input variable.
 
-However, if [[nspden]] = 4 (non-collinear calculations) with GGA, one needs to use [[pawxcdev]] = 1,
-and either [[usepawu]]=0,1 or 4..
-
-Suggested acknowledgment:[[cite:Amadon2008a]].
+Suggested acknowledgment [[cite:Amadon2008a]].
 
 """,
 ),
