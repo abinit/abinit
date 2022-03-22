@@ -2750,6 +2750,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! w90prtunk
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'w90prtunk',tread,'INT')
+ if(tread==1) then
+   dtset%w90prtunk=intarr(1)
+!  if ( dtset%w90prtunk < 0 ) then
+!    write(msg, '(4a)' )&
+!     'w90prtunk should be greater or equal to zero, however, it was ',dtset%w90prtunk,ch10,&
+!     'Action: check the values of w90prtunk.'
+!    ABI_ERROR(msg)
+!  end if
+ end if
 
  ! Wannier90 - GW quasiparticle interface
  if(dtset%prtwant==3) then
