@@ -92,6 +92,8 @@ contains
 !!          if 2, COMPLEX
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the IFCs 
+!!  dyewdqdq(2,3,natom,3,3,3)= Second q-gradient of Ewald part of the IFCs, summed over the second sublattice index
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  gsqcut=large sphere cut-off
@@ -161,7 +163,7 @@ contains
 !! SOURCE
 
 subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3etot_t5,&
-& gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
+& dyewdq,dyewdqdq,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
@@ -187,6 +189,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3et
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: dyewdq(2,3,natom,3,natom,3)
+ real(dp),intent(in) :: dyewdqdq(2,3,natom,3,3,3)
  real(dp),intent(in) :: gmet(3,3),kxc(nfft,nkxc)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)

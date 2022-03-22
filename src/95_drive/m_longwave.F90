@@ -529,9 +529,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Calculate the nonvariational terms
 !1st q-gradient of Ewald contribution to the IFCs
+ ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
+ dyewdq(:,:,:,:,:,:)=zero
  if (dtset%lw_flexo/=0) then
-   ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
-   dyewdq(:,:,:,:,:,:)=zero
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
      sumg0=0;qphon(:)=zero
      call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
@@ -540,9 +540,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !2nd q-gradient of Ewald contribution to the IFCs
+ ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
+ dyewdqdq(:,:,:,:,:,:)=zero
  if (dtset%lw_flexo/=0) then
-   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
-   dyewdqdq(:,:,:,:,:,:)=zero
    if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
      sumg0=1;qphon(:)=zero
      call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
@@ -551,7 +551,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Main loop over the perturbations
-   call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,eigen0,gmet,gprimd,&
+   call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
+&   dyewdq,dyewdqdq,eigen0,gmet,gprimd,&
 &   hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
 &   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
 &   dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
