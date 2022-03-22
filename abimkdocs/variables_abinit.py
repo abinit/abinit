@@ -7544,15 +7544,13 @@ Variable(
     requires="[[optdriver]] in [3,99]",
     added_in_version="before_v9",
     text=r"""
-Possible values of [[inclvkb]] are 0,1,2. If [[inclvkb]] is 1 or 2, the
+Possible values of [[inclvkb]] are 0,2. If [[inclvkb]] is 2, the
 commutator of the non-local part of the pseudopotential with the position
-operator is correctly included in the q --> 0 contribution. This is
-unfortunately time-consuming and in particular when the old algorithm
-implemented by [[inclvkb]] = 1 is used ([[inclvkb]] = 2 is the recommended option). When
-[[inclvkb]] is 0, this contribution is incorrectly omitted, but the computation is much faster.
+operator is correctly included in the q --> 0 contribution. This is unfortunately time-consuming.
+When [[inclvkb]] is 0, this contribution is incorrectly omitted, but the computation is much faster.
 
 The importance of this contribution depends on the number of k points. Turning
-off [[inclvkb]] is to let to the choice of the user.
+off [[inclvkb]] is let to the choice of the user.
 
 In general, the use of [[inclvkb]] = 0 is fine for GW calculations in
 crystalline systems provided that the k-point sampling is sufficiently converged.
@@ -16394,6 +16392,8 @@ only matrix elements are needed [so, no wavefunction], but possibly a large
 number of conduction bands, so that the DDK file might be huge if it contains
 the wavefunctions.
 
+If [[tfkinfunc]]=2, [[prtwf]]=0 is enforced.
+
 Further explanation for the [[prtwf]] = 2 case. To produce a wave function
 suitable for use as a CASINO trial wave function, certain ABINIT parameters
 must be set correctly. Primarily, CASINO (and QMC methods generally) can only
@@ -17151,22 +17151,6 @@ Variable(
     text=r"""
 Control the restart of a molecular dynamics or structural optimization job.
 
-**restartxf > 0 (Deprecated) **: The code reads from the input WFK file, the
-previous history of atomic coordinates and corresponding forces, in order to
-continue the work done by the job that produced this wf file. If
-[[optcell]] /= 0, the history of [[acell]] and [[rprim]] variables is also taken
-into account. The code will take into consideration the whole history (if
-**restartxf** = 1), or discard the few first (x,f) pairs, and begin only at the
-pair whose number corresponds to **restartxf**.
-Works only for [[ionmov]] = 2 or 22 (Broyden) and when an input wavefunction file is
-specified, thanks to the appropriate values of [[irdwfk]] or [[getwfk]].
-
-NOTES:
-* The input WFK file must have been produced by a run that exited cleanly.
-  It cannot be one of the temporary wf files that exist when a job crashed.
-* One cannot restart a calculation with a non-zero [[optcell]] value from the (x,f) history of another run with a different non-zero [[optcell]] value. Starting a non-zero [[optcell]] run from a zero [[optcell]] run should work.
-* Deprecated, the use of the new options (-1 and -2) is preferred.
-
 **restartxf = 0 (Default)**: No restart procedure is enabled and the code will start a
 Molecular dynamics or structural optimization from scratch.
 
@@ -17192,6 +17176,8 @@ NOTES:
 * You can use **restartxf=-1, -2 or -3** for all predictors that make no use of random numbers.
 * You can use **restartxf=-1, -2 or -3** to restart a calculation that was not completed. The HIST.nc file is written on each iteration. So you always have something to recover from.
 * You can take advantage of the appropriate values of [[irdwfk]] or [[getwfk]] to get a good wave function to continue your job.
+
+Previously, positive values of restartxf were allowed, but these are deprecated since ABINITv8.
 """,
 ),
 
