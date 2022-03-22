@@ -7978,7 +7978,7 @@ is described in the following.
 
 
   * one and only one of [[irdwfk]] or [[getwfk]] MUST be non-zero
-  * if [[irdwfkw]] = 1: read ground state k -wavefunctions from a disk file appended with _WFK,
+  * if [[irdwfk]] = 1: read ground state k -wavefunctions from a disk file appended with _WFK,
     produced in a previous ground state calculation.
   * only one of [[irdwfq]] or [[getwfq]] can be non-zero, if both of them are non-zero,
      use as k + q file the one defined by [[irdwfk]] and/or [[getwfk]]
