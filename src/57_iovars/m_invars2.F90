@@ -2230,13 +2230,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
 ! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
-   if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
-     write(msg, '(a,a,a)' )&
-      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
-      'imposing dmft_dc = 5'
-     ABI_WARNING(msg)
-     dtset%dmft_dc=5
-   end if
+!  if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
+!    write(msg, '(a,a,a)' )&
+!     'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
+!     'imposing dmft_dc = 5'
+!    ABI_WARNING(msg)
+!    dtset%dmft_dc=5
+!  end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')

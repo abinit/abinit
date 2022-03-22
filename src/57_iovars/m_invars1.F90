@@ -1965,11 +1965,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
-    dtset%usepawu=14
- else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
-    dtset%usepawu=1
- endif
+!if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
+!   dtset%usepawu=14
+!else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
+!   dtset%usepawu=1
+!endif
 
 
  dtset%usedmatpu=0
