@@ -587,10 +587,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,e
                    end if
 
                    !Perform the longwave DFPT part of the 3dte calculation
-                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3etot_t5,gs_hamkq,gsqcut,i1dir,&
+                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3etot_t5,gmet,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,occ,&
-                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho2r1,rmet,rprimd,samepert,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
+                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
                    & vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
                    !close ddk file
