@@ -263,20 +263,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ge(1,1,cond_string,cond_values,ierr,'berryopt',dt%berryopt,0,iout)
    end if
-!  berryopt cannot be 4,6,7,14,16,17 when toldfe, tolvrs, toldff and tolrff are zero or negative
-   if ((dt%toldfe < tiny(one)).and.(dt%tolvrs < tiny(one)).and.&
-       (dt%toldff < tiny(one)).and.(dt%tolrff < tiny(one))) then
-     cond_string(1)='toldfe' ; cond_values(1)=dt%toldfe
-     cond_string(2)='toldff' ; cond_values(2)=dt%toldff
-     cond_string(3)='tolrff' ; cond_values(3)=dt%tolrff
-     cond_string(4)='tolvrs' ; cond_values(4)=dt%tolvrs
-     call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/4/),iout)
-     call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/6/),iout)
-     call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/7/),iout)
-     call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/14/),iout)
-     call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/16/),iout)
-     call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/17/),iout)
-   end if
+!  berryopt cannot be 4,6,7,14,16,17 when toldfe, tolvrs, toldff and tolrff are zero (or negative)
+   if (any(dt%berryopt== [4,6,7,14,16,17] ) ) then
+     cond_string(1)='berryopt' ; cond_values(1)=dt%berryopt
+     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs)',&
+&      max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs),1,tol16*tol16,iout)
+   endif
 !  Non-zero berryopt and usepaw==1 cannot be done unless response==0
    if (usepaw==1.and.dt%berryopt/=0) then
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
@@ -529,9 +521,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  diecut
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
-     cond_string(2)='4*ecut' ; cond_values(1)=4*dt%ecut
+     cond_string(2)='4*ecut==diecut' ; cond_values(2)=0
 !    Checks that presently diecut is 4*ecut
-     call chkdpr(1,1,cond_string,cond_values,ierr,'diecut',dt%diecut,0,4*dt%ecut,iout)
+     call chkdpr(1,2,cond_string,cond_values,ierr,'diecut',dt%diecut,0,4*dt%ecut,iout)
    end if
 
 !  diemac
@@ -584,7 +576,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        endif
 
        if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
-         cond_string(1)='usedmft' ; cond_values(1)=1
+         cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
        end if
@@ -657,8 +649,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_order',dt%dmftctqmc_order,0,iout)
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,2*dt%dmftqmc_l,iout)
        end if
-       cond_string(1)='dmft_solv' ; cond_values(1)=5
-       cond_string(2)='dmft_solv' ; cond_values(2)=8
+       cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_config',dt%dmftctqmc_config,2,(/0,1/),iout)
        if (dt%dmft_entropy>=1) then
          cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
@@ -712,10 +703,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (usepaw==1) then
      if(usewvl==0) then
        call chkdpr(1,0,cond_string,cond_values,ierr,'pawecutdg',dt%pawecutdg,1,tol8,iout)
-       cond_string(1)='ecut' ; cond_values(1)=dt%ecut
+       cond_string(1)='pawecutdg>=ecut' ; cond_values(1)=0
        call chkdpr(1,1,cond_string,cond_values,ierr,'pawecutdg',dt%pawecutdg,1,dt%ecut,iout)
      else
-       if(dt%pawecutdg > 0.d0) then
+       if(dt%pawecutdg > tol8) then
          ABI_ERROR('In PAW+WVL do not use pawecutdg')
        end if
      end if
@@ -832,13 +823,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    ! Check variables used to specify k-points in self-energy.
-   if (dt%nkptgw /= 0 .and. (any(dt%sigma_erange > zero .or. dt%gw_qprange /= 0))) then
+   if (dt%nkptgw /= 0 .and. (any(dt%sigma_erange > tol8 .or. dt%gw_qprange /= 0))) then
      ABI_ERROR_NOSTOP("nkptw cannot be used with sigma_erange or gw_qprange", ierr)
    end if
-   if (any(dt%sigma_erange > zero) .and. dt%gw_qprange /= 0) then
+   if (any(dt%sigma_erange > tol8) .and. dt%gw_qprange /= 0) then
      ABI_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
-   if (any(dt%sigma_erange < zero) .and. any(dt%sigma_erange > zero)) then
+   if (any(dt%sigma_erange < -tol8) .and. any(dt%sigma_erange > tol8)) then
      ABI_ERROR_NOSTOP("Found negative sigma_erange entry (metals) with another positive entry (semiconductors)!", ierr)
    end if
 
@@ -857,7 +848,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(2)='usepaw'    ; cond_values(2)=dt%usepaw !usepaw
      cond_string(3)='ieig2rf'   ; cond_values(3)=dt%ieig2rf
      cond_string(4)='nsym'      ; cond_values(4)=dt%nsym
-     !cond_string(5)='useylm'    ; cond_values(5)=dt%useylm1
      call chkint_eq(1,4,cond_string,cond_values,ierr,'efmas',dt%efmas,2,(/0,1/),iout)
      if (dt%paral_rf==1) then
        cond_string(1)='paral_rf' ; cond_values(1)=dt%paral_rf
@@ -1430,17 +1420,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ixcrot
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
    if(dt%rfmagn/=0)then
-     if(abs(dt%qptn(1))>tol8)then
-       cond_string(1)='qptn(1)' ; cond_values(1)=dt%qptn(1)
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
-     end if
-     if(abs(dt%qptn(2))>tol8)then
-       cond_string(1)='qptn(2)' ; cond_values(1)=dt%qptn(2)
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
-     end if
-     if(abs(dt%qptn(3))>tol8)then
-       cond_string(1)='qptn(3)' ; cond_values(1)=dt%qptn(3)
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     if(dt%ixcrot/=3)then
+       cond_string(1)='rfmagn' ; cond_values(1)=dt%rfmagn
+       cond_string(2)='ixcrot' ; cond_values(2)=dt%ixcrot
+       call chkdpr(1,2,cond_string,cond_values,ierr,'qptn(1)',dt%qptn(1),0,zero,iout)
+       call chkdpr(1,2,cond_string,cond_values,ierr,'qptn(2)',dt%qptn(2),0,zero,iout)
+       call chkdpr(1,2,cond_string,cond_values,ierr,'qptn(3)',dt%qptn(3),0,zero,iout)
      end if
    endif
 
@@ -3044,8 +3029,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 !  tolwfr must be 0 to make a problem (another tol variable is used). Here, check that it is very very small.
    if(abs(dt%tolwfr)<tol16*tol16)then
-     cond_string(1)='tolwfr' ; cond_values(1)=dt%tolwfr
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
+     cond_string(1)='prtstm' ; cond_values(1)=dt%prtstm
+     call chkdpr(1,1,cond_string,cond_values,ierr,'tolwfr',dt%tolwfr,1,tol16*tol16,iout)
    end if
    if(dt%prtden/=0)then
      cond_string(1)='prtden' ; cond_values(1)=dt%prtden
@@ -4037,7 +4022,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call wrtout(iout,msg,'COLL')
-   write(msg,'(a,i0,3a)')&
+   write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
@@ -4045,7 +4030,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ABI_ERROR(msg)
  end if
  if (ierr>1) then
-   write(msg,'(a,i0,3a)')&
+   write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
    'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
    ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
