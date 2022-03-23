@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  8 Mar 2022.
-- ( at 15h48 )
+.Starting date : Wed 23 Mar 2022.
+- ( at 01h07 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.abi
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/TestBot_MPI24/tutoparal_tucrpa_2_MPI24/tucrpa_2.abi
 - output file    -> tucrpa_2_MPI24.abo
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -735,9 +735,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -755,9 +755,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -775,9 +775,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12551,9 +12551,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12571,9 +12571,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12591,9 +12591,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/routerov_tutos/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__gonze/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12726,8 +12726,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  For an atomic wfn truncated at rmax =      2.2000
      The norm of the wfn is                    =      0.8418
-     The bare interaction (no renormalization) =     16.3156 eV
-     The bare interaction (for a renorm. wfn ) =     23.0248 eV
+     The bare interaction (no renormalization) =     16.0038 eV
+     The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
  ==================================== 
@@ -14322,10 +14322,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        149.5  wall=        149.7
+- Proc.   0 individual time (sec): cpu=        146.6  wall=        146.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       3588.8  wall=       3589.8
++Overall time at end (sec) : cpu=       3516.9  wall=       3517.6

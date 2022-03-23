@@ -67,7 +67,8 @@ dmftctqmc_config 1
 
 
 # == DFT+U
-usepawu     1  #  For density matrix printout.
+usepawu1    1  
+usepawu     10 
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 
 upawu1  0.0  eV
