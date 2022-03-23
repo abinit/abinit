@@ -537,17 +537,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,psps%ziontypat, & 
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
-!1st q-gradient of Ewald contribution to the IFCs
-! if (dtset%lw_flexo/=0) then
-!   ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
-!   dyewdq(:,:,:,:,:,:)=zero
-!   if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-!     sumg0=0;qphon(:)=zero
-!     call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-!   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-!   end if
-! end if
-
 !2nd q-gradient of Ewald contribution to the IFCs
 ! if (dtset%lw_flexo/=0) then
 !   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
@@ -559,37 +548,22 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !   end if
 ! end if
 
-!Main loop over the perturbations
-   call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
-&   eigen0,gmet,gprimd,&
-&   hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
-&   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
-&   dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
-&   pawfgr,pawrad,pawrhoij,pawtab,&
-&   psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,vxc,xred)
+!Main loop over the perturbations to calculate the stationary part
+ call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
+& eigen0,gmet,gprimd,&
+& hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
+& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
+& dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
+& pawfgr,pawrad,pawrhoij,pawtab,&
+& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,vxc,xred)
+
+!Merge stationay and nonvariational contributions
+ d3etot=d3etot+d3etot_nv
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
    ABI_FREE(mpi_enreg%proc_distrb)
  end if
-
-!Calculate the quadrupole tensor
-! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-!   call dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
-!&   gmet,gprimd,kxc,mpert,&
-!&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-!&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-!&   timrev,ucvol,xred)
-! end if
-
-!Calculate the flexoelectric tensor
-! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-!   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyewdqdq, &
-!&   gmet,gprimd,kxc,mpert,&
-!&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-!&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-!&   timrev,ucvol,xred)
-! end if
 
 !Open the formatted derivative database file, and write the
 !preliminary information
