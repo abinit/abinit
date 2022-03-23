@@ -108,22 +108,18 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
 
 !Local variables-------------------------------
 !scalars
- integer :: i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,natom,sumg0 
+ integer :: beta,delta,i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,istr,natom,sumg0 
  real(dp) :: tmpim,tmpre
  character(len=500) :: msg
 
 !arrays
- real(dp),allocatable :: dyewdq(:,:,:,:,:,:)
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
  real(dp) :: qphon(3)
  
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
-!Anounce start of calculation
- write(msg, '(a,a)' ) ' -- Compute nonvariational contributions -- ',ch10
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
 
 !Initialiations
  natom=dtset%natom
@@ -135,7 +131,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
    ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
    sumg0=0;qphon(:)=zero
    call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,zion,&
-& mpi_atmtab=mpi_atmtab,comm_atom=comm_atom)
+ & mpi_atmtab=mpi_atmtab,comm_atom=comm_atom)
 
    i3pert=natom+8
    do i1pert=1,natom
@@ -152,38 +148,68 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
        end do
      end do
    end do 
+   ABI_FREE(dyewdq)
 
  end if
 
- !Print results
- if (dtset%prtvol>=10) then
-   write(msg,'(3a)') ch10,'LONGWAVE NONVARIATIONAL D3ETOT: ',ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   do i1pert=1,mpert
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
+
+   !2nd q-gradient of Ewald contribution to the IFCs
+   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
+   sumg0=0;qphon(:)=zero
+   call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,zion,&
+& mpi_atmtab=mpi_atmtab,comm_atom=comm_atom)
+
+   i3pert=natom+8
+   do i1pert=1,natom
      do i1dir=1,3
-       do i2pert=1,mpert
+       do i2pert=natom+3,natom+4
          do i2dir=1,3
-           do i3pert=1,mpert
-             do i3dir=1,3
-               if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then 
-                 write(msg,'(3(a,i2,a,i1),2f18.8)') &
-         ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
-                 d3etot_nv(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
-                 d3etot_nv(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                 call wrtout(std_out,msg,'COLL')
-                 call wrtout(ab_out,msg,'COLL')
-               end if
-             end do
+           istr=(i2pert-natom-3)*3+i2dir
+           beta=idx(2*istr-1); delta=idx(2*istr)
+           do i3dir=1,3
+             tmpre=dyewdqdq(1,i1dir,i1pert,i3dir,beta,delta)
+             tmpim=dyewdqdq(2,i1dir,i1pert,i3dir,beta,delta)
+             if (abs(tmpre)>=tol8) d3etot_nv(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= half*tmpre
+             if (abs(tmpim)>=tol8) d3etot_nv(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= half*tmpim
            end do
          end do
        end do
      end do
    end do 
-   write(msg,'(a)') ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   
+
+ end if
+
+ !Print results
+ if (dtset%prtvol>=10) then
+   if (any(d3etot_nv(:,:,:,:,:,:,:)/=zero)) then
+     write(msg,'(3a)') ch10,'LONGWAVE NONVARIATIONAL D3ETOT: ',ch10
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     do i1pert=1,mpert
+       do i1dir=1,3
+         do i2pert=1,mpert
+           do i2dir=1,3
+             do i3pert=1,mpert
+               do i3dir=1,3
+                 if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then 
+                   write(msg,'(3(a,i2,a,i1),2f18.8)') &
+           ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
+                   d3etot_nv(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+                   d3etot_nv(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+                   call wrtout(std_out,msg,'COLL')
+                   call wrtout(ab_out,msg,'COLL')
+                 end if
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do 
+     write(msg,'(a)') ch10
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   end if
  end if
 
  DBG_EXIT("COLL")
