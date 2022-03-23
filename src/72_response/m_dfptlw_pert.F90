@@ -90,6 +90,8 @@ contains
 !!  cg2 = first derivative of cg with respect the perturbation i2pert
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!          if 2, COMPLEX
+!!  d3e_pert1(mpert)=array with the i1pert cases to calculate
+!!  d3e_pert2(mpert)=array with the i2pert cases to calculate
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
@@ -160,7 +162,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3etot_t5,&
+subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,dtfil,dtset,&
 & gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
@@ -184,6 +186,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3et
 
 !arrays
  integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfft(18),npwarr(nkpt)
+ integer,intent(in) :: d3e_pert1(mpert),d3e_pert2(mpert)
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
@@ -206,7 +209,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3et
  integer :: bandtot,icg,idq,ierr,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
  integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
  integer :: usepaw,useylmgr
- real(dp) :: wtk_k
+ real(dp) :: tmpim,tmpre,wtk_k
  character(len=1000) :: msg
  logical :: with_nonlocal_i1pert, with_nonlocal_i2pert
 !arrays
@@ -361,6 +364,32 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3et
    call xmpi_sum(d3etot_t5,spaceworld,ierr)
  end if
 
+!Apply +i or -i in case of strain perturbation.
+ if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
+   tmpre=d3etot_telec(1);tmpim=d3etot_telec(2) ; d3etot_telec(1)=tmpim;d3etot_telec(2)=-tmpre
+   tmpre=d3etot_t1(1);tmpim=d3etot_t1(2) ; d3etot_t1(1)=tmpim;d3etot_t1(2)=-tmpre
+   tmpre=d3etot_t2(1);tmpim=d3etot_t2(2) ; d3etot_t2(1)=tmpim;d3etot_t2(2)=-tmpre
+   tmpre=d3etot_t3(1);tmpim=d3etot_t3(2) ; d3etot_t3(1)=tmpim;d3etot_t3(2)=-tmpre
+   do idq=1,n2dq
+     tmpre=d3etot_t4(1,idq);tmpim=d3etot_t4(2,idq) ; d3etot_t4(1,idq)=tmpim;d3etot_t4(2,idq)=-tmpre
+   end do
+   do idq=1,n1dq
+     tmpre=d3etot_t5(1,idq);tmpim=d3etot_t5(2,idq) ; d3etot_t5(1,idq)=tmpim;d3etot_t5(2,idq)=-tmpre
+   end do
+ end if
+ if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
+   tmpre=d3etot_telec(1);tmpim=d3etot_telec(2) ; d3etot_telec(1)=-tmpim;d3etot_telec(2)=tmpre
+   tmpre=d3etot_t1(1);tmpim=d3etot_t1(2) ; d3etot_t1(1)=-tmpim;d3etot_t1(2)=tmpre
+   tmpre=d3etot_t2(1);tmpim=d3etot_t2(2) ; d3etot_t2(1)=-tmpim;d3etot_t2(2)=tmpre
+   tmpre=d3etot_t3(1);tmpim=d3etot_t3(2) ; d3etot_t3(1)=-tmpim;d3etot_t3(2)=tmpre
+   do idq=1,n2dq
+     tmpre=d3etot_t4(1,idq);tmpim=d3etot_t4(2,idq) ; d3etot_t4(1,idq)=-tmpim;d3etot_t4(2,idq)=tmpre
+   end do
+   do idq=1,n1dq
+     tmpre=d3etot_t5(1,idq);tmpim=d3etot_t5(2,idq) ; d3etot_t5(1,idq)=-tmpim;d3etot_t5(2,idq)=tmpre
+   end do
+ end if
+
 !Join all the contributions in e3tot except t4 and t5 which may need to be
 !converted to type-II in case of strain perturbation. 
 !Apply here the two factor to the stationary wf1 contributions 
@@ -373,64 +402,31 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,dtfil,dtset,d3etot,d3etot_t4,d3et
  e3tot(:)=d3etot_t1(:)+d3etot_t2(:)+d3etot_t3(:)+d3etot_telec(:)
 
 !Before printing, set small contributions to zero
- if (dtset%kptopt==3) then
+ !Real parts
+ if (abs(d3etot_t1(1))<tol8) d3etot_t1(1)= zero
+ if (abs(d3etot_t2(1))<tol8) d3etot_t2(1)= zero
+ if (abs(d3etot_t3(1))<tol8) d3etot_t3(1)= zero
+ do idq=1,n2dq
+   if (abs(d3etot_t4(1,idq))<tol8) d3etot_t4(1,idq)= zero
+ end do 
+ do idq=1,n1dq
+   if (abs(d3etot_t5(1,idq))<tol8) d3etot_t5(1,idq)= zero
+ end do 
+ if (abs(d3etot_telec(1))<tol8) d3etot_telec(1)= zero
+ if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
 
-   !Real parts
-   if (abs(d3etot_t1(1))<tol8) d3etot_t1(1)= zero
-   if (abs(d3etot_t2(1))<tol8) d3etot_t2(1)= zero
-   if (abs(d3etot_t3(1))<tol8) d3etot_t3(1)= zero
-   do idq=1,n2dq
-     if (abs(d3etot_t4(1,idq))<tol8) d3etot_t4(1,idq)= zero
-   end do 
-   do idq=1,n1dq
-     if (abs(d3etot_t5(1,idq))<tol8) d3etot_t5(1,idq)= zero
-   end do 
-   if (abs(d3etot_telec(1))<tol8) d3etot_telec(1)= zero
-   if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
-
-   !Imaginary parts
-   if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
-   if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
-   if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
-   do idq=1,n2dq
-     if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
-   end do
-   do idq=1,n1dq
-     if (abs(d3etot_t5(2,idq))<tol8) d3etot_t5(2,idq)= zero
-   end do
-   if (abs(d3etot_telec(2))<tol8) d3etot_telec(2)= zero
-   if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
-
- else if (dtset%kptopt==2) then
-
-   !Real parts
-   d3etot_t1(1)= zero
-   d3etot_t2(1)= zero
-   d3etot_t3(1)= zero
-   d3etot_t4(1,:)= zero
-   d3etot_t5(1,:)= zero
-   d3etot_telec(1)= zero
-   e3tot(1)   = zero
-
-   !Imaginary parts
-   if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
-   if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
-   if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
-   do idq=1,n2dq
-     if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
-   end do
-   do idq=1,n1dq
-     if (abs(d3etot_t5(2,idq))<tol8) d3etot_t5(2,idq)= zero
-   end do
-   if (abs(d3etot_telec(2))<tol8) d3etot_telec(2)= zero
-   if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
-
- else
-
-   write(msg,"(1a)") 'kptopt must be 2 or 3 for the longwave calculation'
-   ABI_BUG(msg)
-
- end if
+ !Imaginary parts
+ if (abs(d3etot_t1(2))<tol8) d3etot_t1(2)= zero
+ if (abs(d3etot_t2(2))<tol8) d3etot_t2(2)= zero
+ if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
+ do idq=1,n2dq
+   if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
+ end do
+ do idq=1,n1dq
+   if (abs(d3etot_t5(2,idq))<tol8) d3etot_t5(2,idq)= zero
+ end do
+ if (abs(d3etot_telec(2))<tol8) d3etot_telec(2)= zero
+ if (abs(e3tot(2))    <tol8)     e3tot(2)= zero
 
  if (dtset%prtvol>=10) then
    write(msg,'(4(a,2(a,f18.8)),a)') &
