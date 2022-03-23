@@ -517,7 +517,7 @@ if (.not.samepert) then
    end if
    if (i2pert<=natom) fac=-one
    if (i2pert==natom+2) fac=half
-   if (i2pert==natom+3.or.i2pert==natom+4) fac=half
+   if (i2pert==natom+3.or.i2pert==natom+4) fac=-half
    if (i2pert<=natom) then
      nylmgrtmp=3
    else if (i2pert==natom+3.or.i2pert==natom+4) then
@@ -633,7 +633,7 @@ if (.not.samepert) then
  end if
  if (i1pert<=natom) fac=-one
  if (i1pert==natom+2) fac=half
- if (i1pert==natom+3.or.i1pert==natom+4) fac=half
+ if (i1pert==natom+3.or.i1pert==natom+4) fac=-half
  if (i1pert<=natom) then
    nylmgrtmp=3
    ABI_FREE(part_ylmgr_k)
