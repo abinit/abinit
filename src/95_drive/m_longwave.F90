@@ -41,7 +41,6 @@ module m_longwave
  use m_wffile
 
  use m_pspini,      only : pspini
- use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
  use m_common,      only : setup1
  use m_pawfgr,      only : pawfgr_type, pawfgr_init
  use m_pawrhoij,    only : pawrhoij_type
@@ -59,9 +58,9 @@ module m_longwave
  use m_fft,         only : fourdp
  use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
- use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_mkcore,      only : mkcore
  use m_dfptlw_loop, only : dfptlw_loop
+ use m_dfptlw_nv,   only : dfptlw_nv
 
  implicit none
 
@@ -106,8 +105,8 @@ contains
 !!      m_driver
 !!
 !! CHILDREN
-!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,dfpt_ewalddq
-!!      dfpt_ewalddqdq,dfpt_flexo,dfpt_lw_doutput,dfpt_qdrpole,ebands_free
+!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,
+!!      dfpt_lw_doutput,ebands_free
 !!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
 !!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
 !!      wffclose,xcdata_init
@@ -142,10 +141,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
  integer :: ask_accurate,bantot,coredens_method,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
- integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
+ integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho,usexcnhat
 ! integer :: idir,ipert,
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
@@ -162,7 +161,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  type(wffile_type) :: wffgs,wfftgs
  !arrays
  integer :: ngfft(18),ngfftf(18)
- real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),qphon(3),gprimd_for_kg(3,3)
+ real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
@@ -172,8 +171,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
  integer,allocatable :: rfpert(:,:,:,:,:,:)
  real(dp),allocatable :: cg(:,:)
- real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:)
- real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
+ real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_nv(:,:,:,:,:,:,:),doccde(:)
  real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
@@ -233,12 +231,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  mpert=natom+8
  ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3etot_nv,(2,3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3e_pert1,(mpert))
  ABI_MALLOC(d3e_pert2,(mpert))
  ABI_MALLOC(d3e_pert3,(mpert))
  blkflg(:,:,:,:,:,:) = 0
- d3etot(:,:,:,:,:,:,:) = 0_dp
+ d3etot(:,:,:,:,:,:,:) = zero
+ d3etot_nv(:,:,:,:,:,:,:) = zero
  rfpert(:,:,:,:,:,:) = 0
  d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
 
@@ -527,32 +527,41 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
+!Anounce start of spatial-dispersion calculation
+ write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+&   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ 
 !Calculate the nonvariational terms
+ call dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,psps%ziontypat, & 
+& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+
 !1st q-gradient of Ewald contribution to the IFCs
- ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
- dyewdq(:,:,:,:,:,:)=zero
- if (dtset%lw_flexo/=0) then
-   if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-     sumg0=0;qphon(:)=zero
-     call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   end if
- end if
+! if (dtset%lw_flexo/=0) then
+!   ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
+!   dyewdq(:,:,:,:,:,:)=zero
+!   if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
+!     sumg0=0;qphon(:)=zero
+!     call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+!   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+!   end if
+! end if
 
 !2nd q-gradient of Ewald contribution to the IFCs
- ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
- dyewdqdq(:,:,:,:,:,:)=zero
- if (dtset%lw_flexo/=0) then
-   if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
-     sumg0=1;qphon(:)=zero
-     call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   end if
- end if
+! if (dtset%lw_flexo/=0) then
+!   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
+!   dyewdqdq(:,:,:,:,:,:)=zero
+!   if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
+!     sumg0=1;qphon(:)=zero
+!     call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+!   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+!   end if
+! end if
 
 !Main loop over the perturbations
    call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
-&   dyewdq,dyewdqdq,eigen0,gmet,gprimd,&
+&   eigen0,gmet,gprimd,&
 &   hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
 &   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
 &   dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
@@ -623,10 +632,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(d3e_pert1)
  ABI_FREE(d3e_pert2)
  ABI_FREE(d3e_pert3)
- if (dtset%lw_flexo/=0) then
-   ABI_FREE(dyewdq)
-   ABI_FREE(dyewdqdq)
- end if
 
  ! Clean the header
  call hdr%free()
