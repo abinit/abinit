@@ -1070,9 +1070,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
- if (dtset%inclvkb == 1) then
-   ABI_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 2.")
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
  if(tread==1) dtset%nomegasf=intarr(1)
@@ -1088,6 +1085,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getscr_filepath = key_value
 
@@ -1138,12 +1136,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zcut',tread,'ENE')
  if(tread==1) dtset%zcut = dprarr(1)
- !else
- !  ! Change default value in EPH calculations
- !  !if (dtset%optdriver == RUNL_EPH) then
- !  !  dtset%zcut = 0.001_dp * eV_Ha
- !  !end if
- !end if
 
  ! q-points for long wave-length limit.
  if (dtset%gw_nqlwl>0) then
@@ -1321,7 +1313,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  !----------------------------------------------------------------------------
  ! Read other parameters
- ! All checking should be done in chkinp.f
+ ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90 
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
@@ -1992,9 +1984,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restartxf',tread,'INT')
  if(tread==1) dtset%restartxf=intarr(1)
- if (dtset%restartxf == 1) then
-   ABI_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2-3")
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) dtset%optcell=intarr(1)
@@ -2054,12 +2043,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
  if(tread==1) dtset%optforces=intarr(1)
- if(dtset%usedmft>0.and.dtset%optforces/=0) then
-   write(msg, '(3a,i0)' )&
-    'When DFT+DMFT is activated ', ch10, &
-    'optforces must be equal to 0 instead of ',dtset%optforces
-   ABI_ERROR(msg)
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optstress',tread,'INT')
  if(tread==1) dtset%optstress=intarr(1)
@@ -2092,6 +2075,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
+!This overloading of usepawu should be replaced by something cleaner ...
  if ( dtset%usedmft > 0  .and. (dtset%nbandkss==0.or.dtset%iscf<0)) then
    if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
    if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
@@ -2266,6 +2250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
+! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
    if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
      write(msg, '(a,a,a)' )&
       'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
@@ -2331,40 +2316,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_entropy=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_nlambda',tread,'INT')
    if(tread==1) dtset%dmft_nlambda=intarr(1)
-   if(dtset%dmft_solv>=4) then
+
+   if(dtset%dmft_solv>=5) then
+
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_n',tread,'DPR')
-     if(tread==1) then
-       dtset%dmftqmc_n=dprarr(1)
-     else if(dtset%ucrpa==0) then
-     else
-       write(msg, '(5a)' )&
-        'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
-        'dmftqmc_n MUST be defined.',ch10,&
-        'Action: add dmftqmc_n keyword in input file.'
-       ABI_ERROR(msg)
-     end if
+     if(tread==1) dtset%dmftqmc_n=dprarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_l',tread,'INT')
-     if(tread==1) then
-       dtset%dmftqmc_l=intarr(1)
-     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
-       write(msg, '(5a)' )&
-        'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
-        'dmftqmc_l MUST be defined.',ch10,&
-        'Action: add dmftqmc_l keyword in input file.'
-       ABI_ERROR(msg)
-     end if
+     if(tread==1) dtset%dmftqmc_l=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_seed',tread,'INT')
      if(tread==1) dtset%dmftqmc_seed=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
-     if(tread==1) then
-       dtset%dmftqmc_therm=intarr(1)
-     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
-       write(msg, '(5a)' )&
-        'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
-        'dmftqmc_therm MUST be defined.',ch10,&
-        'Action: add dmftqmc_therm keyword in input file.'
-       ABI_ERROR(msg)
-     end if
+     if(tread==1) dtset%dmftqmc_therm=intarr(1)
      if(dtset%dmft_solv==5.or.dtset%dmft_solv==8.or.dtset%dmft_solv==9) then
     ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
@@ -2438,44 +2400,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
- if(tread==1) then
-   dtset%useylm=intarr(1)
-   if (usepaw==1.and.dtset%useylm==0) then
-     write(msg, '(5a)' )&
-      'Pseudopotential file is PAW format (pspcod=7 or 17) while',ch10,&
-      'input variable "useylm" has the incompatible value 0 !',ch10,&
-      'Action: change psp format or "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%tfkinfunc==2.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'You are using recursion method (tfkinfunc=2)  while',ch10,&
-      'input variable "useylm" has the incompatible value 0 !',ch10,&
-      'Action: change  "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%efmas==1.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'The calculation of effective masses requires the input variable, ',ch10,&
-      '"useylm" to be 1, while in your input file, useylm=0',ch10,&
-      'Action: change "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%rf2_dkdk/=0.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'The calculation of 2nd order k perturbation requires the input variable, ',ch10,&
-      '"useylm" to be 1, while in your input file, useylm=0',ch10,&
-      'Action: change "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%rf2_dkde/=0.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'The calculation of the 2nd order k/Efield perturbation requires the input variable, ',ch10,&
-      '"useylm" to be 1, while in your input file, useylm=0',ch10,&
-      'Action: change "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
- end if
+ if(tread==1) dtset%useylm=intarr(1)
 
  ! Here we set useylm automatically to 1
  if (dtset%use_gemm_nonlop == 1) dtset%useylm = 1
@@ -2767,25 +2692,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf',tread,'INT')
  if(tread==1) then
    dtset%prtwf=intarr(1)
-   if ((dtset%tfkinfunc==2).and.(dtset%prtwf==1)) then
-     write(msg, '(5a)' )&
-      'You are using recursion method (tfkinfunc=2)  while',ch10,&
-      'input variable "prtwf" has the incompatible value 1 !',ch10,&
-      'Action: change  "prtwf=0" value in your input file.'
-     ABI_ERROR(msg)
-   end if
- end if
- if (dtset%tfkinfunc==2) dtset%prtwf=0
+ else if (dtset%tfkinfunc==2)then 
+   dtset%prtwf=0
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf_full',tread,'INT')
  if (tread==1) dtset%prtwf_full=intarr(1)
-
- if (dtset%prtwf_full == 1 .and. dtset%prtwf == 0) then
-   write(msg, '(3a)' )&
-   'You are using prtwf_full=1 while prtwf=0',ch10,&
-   'Action: set "prtwf=0" in your input file.'
-   ABI_ERROR(msg)
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtxml',tread,'INT')
  if(tread==1) dtset%prtxml=intarr(1)
@@ -2840,12 +2752,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'w90iniprj',tread,'INT')
  if(tread==1) then
    dtset%w90iniprj=intarr(1)
+!  These checks should be moved to m_chkinp.F90
    if ( usepaw == 0 .and. ( dtset%w90iniprj /= 2  .and. dtset%w90iniprj/=0 .and. dtset%w90iniprj /= 1 )) then
      write(msg, '(a,i0,2a)' )&
       'w90iniprj should be set to 0, 1 or 2, however, it was ',dtset%w90iniprj,ch10,&
       'Action: check the values of w90iniprj.'
      ABI_ERROR(msg)
    end if
+!  These checks should be moved to m_chkinp.F90
    if ( usepaw == 1 .and. ( dtset%w90iniprj < 2 .or. dtset%w90iniprj>6 ) &
       .and. ( dtset%w90iniprj /= 1 .and. dtset%w90iniprj/=0 )) then
      write(msg, '(a,i0,2a)' )&
@@ -2859,12 +2773,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'w90prtunk',tread,'INT')
  if(tread==1) then
    dtset%w90prtunk=intarr(1)
-   if ( dtset%w90prtunk < 0 ) then
-     write(msg, '(4a)' )&
-      'w90prtunk should be greater or equal to zero, however, it was ',dtset%w90prtunk,ch10,&
-      'Action: check the values of w90prtunk.'
-     ABI_ERROR(msg)
-   end if
+!  if ( dtset%w90prtunk < 0 ) then
+!    write(msg, '(4a)' )&
+!     'w90prtunk should be greater or equal to zero, however, it was ',dtset%w90prtunk,ch10,&
+!     'Action: check the values of w90prtunk.'
+!    ABI_ERROR(msg)
+!  end if
  end if
 
  ! Wannier90 - GW quasiparticle interface
@@ -2893,6 +2807,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,dtset%natom,string(1:lenstr),'vdw_typfrag',tread,'INT')
    if(tread==1)then
      dtset%vdw_typfrag(1:dtset%natom)=intarr(1:dtset%natom)
+!    These checks should be moved to m_chkinp.F90
      do ii=1,dtset%natom
        if(dtset%vdw_typfrag(ii)<0)then
          write(msg, '(a,a,a,i0,a,i0,a,a)' )&
@@ -2908,6 +2823,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'vdw_supercell',tread,'INT')
    if(tread==1)then
      dtset%vdw_supercell(1:3)=intarr(1:3)
+!    These checks should be moved to m_chkinp.F90
      if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(2)<zero) then
        write(msg, '(7a)' )&
         ' only one component of vdw_supercell could be < 0, however, it was ',ch10,&
