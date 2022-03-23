@@ -592,12 +592,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tollc',dt%dmft_tollc,-1,tol5,iout)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,-1,tol4,iout)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_charge_prec',dt%dmft_charge_prec,1,tol20,iout)
-!      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,5,(/0,1,2,5,6/),iout)
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/1/),iout)
-!      if(dt%usepawu==14) then
-!        cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-!        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,2,(/5,6/),iout)
-!      endif
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,5,(/0,1,2,5,6/),iout)
+       if(dt%usepawu==14) then
+         cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,2,(/5,6/),iout)
+       endif
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_wanorthnorm',dt%dmft_wanorthnorm,2,(/2,3/),iout)
        if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
@@ -656,7 +655,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,3,iout)
          call chkint_le(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,dt%dmft_nlambda,iout)
-!        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/1/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,1,(/1/),iout)
          if (dt%dmft_solv /= 5 ) then
            write(msg,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
            'When dmft_entropy>=1, the impurity solver has to be currently  dmft_solv=5:',ch10, &
@@ -2053,9 +2052,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When abs(usepawu) is not 0, 1, 4, 10 or 14, nspden must be 1 or 2
-!  if( abs(dt%usepawu)/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4 .and. &
-!&      abs(dt%usepawu)/=10 .and. abs(dt%usepawu)/=14 )then
-   if( abs(dt%usepawu)/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4) then
+   if( abs(dt%usepawu)/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4 .and. &
+&      abs(dt%usepawu)/=10 .and. abs(dt%usepawu)/=14 )then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
@@ -3475,19 +3473,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  usepawu and lpawu
 !  PAW+U and restrictions
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,7,(/-4,-2,-1,0,1,2,4/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
    if(dt%usedmft==1)then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,2,(/0,1/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,2,(/10,14/),iout)
    end if
-!!  if(dt%usedmft==1)then
-!!    cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-!!    call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,2,(/10,14/),iout)
-!!  end if
-!!  if(dt%usedmft==0)then
-!!    cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-!!    call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/-4,-3,-2,-1,0,1,2,3,4/),iout)
-!!  end if
+   if(dt%usedmft==0)then
+     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/-4,-3,-2,-1,0,1,2,3,4/),iout)
+   end if
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
