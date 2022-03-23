@@ -3474,14 +3474,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  usepawu and lpawu
 !  PAW+U and restrictions
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usepawu',dt%usepawu,11,(/-4,-3,-2,-1,0,1,2,3,4,10,14/),iout)
-!  if(dt%usedmft==1)then
-!    cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-!    call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,2,(/10,14/),iout)
-!  end if
-!  if(dt%usedmft==0)then
-!    cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-!    call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/-4,-3,-2,-1,0,1,2,3,4/),iout)
-!  end if
+   if(dt%usedmft==1)then
+     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,2,(/10,14/),iout)
+   end if
+   if(dt%usedmft==0)then
+     cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepawu',dt%usepawu,9,(/-4,-3,-2,-1,0,1,2,3,4/),iout)
+   end if
    if(dt%usepawu/=0)then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
