@@ -6,8 +6,8 @@ authors: FBottin, JBouchet
 
 This page gives hints on how to perform thermodynamic, elastic and transport properties calculations including explicit temperature effects with the ABINIT package.  
 
-* User guide: [[pdf:aTDEP_Guide| aTDEP guide]]  
-* Theory: [[pdf:aTDEP_Paper|aTDEP paper]] corresponding to the article [[cite:Bottin2020]]
+* User guide: [[pdf:aTDEP_Guide|aTDEP_Guide]]  
+* Theory: [[pdf:aTDEP_Paper|aTDEP_Paper]] corresponding to the article [[cite:Bottin2020]]
 
 ## Introduction
 
