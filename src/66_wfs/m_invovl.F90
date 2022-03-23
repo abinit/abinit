@@ -417,9 +417,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  ABI_FREE(projs)
 
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
-
 end subroutine make_invovl
 !!***
 

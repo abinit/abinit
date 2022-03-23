@@ -52,7 +52,7 @@ module m_rttddft_propagators
  use m_rttddft_tdks,        only: tdks_type
  use m_spacepar,            only: meanvalue_g
  use m_specialmsg,          only: wrtout
- use m_xmpi,                only: xmpi_comm_rank, xmpi_sum, xmpi_barrier
+ use m_xmpi,                only: xmpi_comm_rank, xmpi_sum, xmpi_max
 
  implicit none
 
@@ -88,11 +88,11 @@ contains
 !!
 !! NOTES
 !!  Other propagators such as the Exponential Midpoint Rule (EMR) 
-!!  should be prefered over this one since the ER propagator alone
-!!  violates time reversal symmetry. Using this propagator with the 
-!!  exponential approximated by Taylor expansion of order 2 leads to 
-!!  the famous Euler method which is fast and simple but unstable
-!!  and usually insufficient for RT-TDDFT.
+!!  should usually be prefered over this one since the ER propagator 
+!!  alone violates time reversal symmetry. Using this propagator with 
+!!  the exponential approximated by Taylor expansion of order 1 leads 
+!!  to the famous Euler method which is fast and simple but unstable
+!!  and thus insufficient for RT-TDDFT.
 !!  
 !!
 !! PARENTS
@@ -448,14 +448,16 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  type(tdks_type),            intent(inout) :: tdks
  
  !Local variables-------------------------------
+ integer :: me
  !scalars
  character(len=500) :: msg
  integer            :: ics
  integer            :: ierr
  logical            :: lconv
  !arrays
- real(dp)           :: conv(2)
  real(dp)           :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
+ real(dp)           :: diff(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
+ real(dp)           :: max_diff(2)
  
 ! ***********************************************************************
 
@@ -465,9 +467,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  ! predict psi(t+dt) using ER propagator
  call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks,store_energies=.true.)
  ! for convergence check
- conv(1) = sum(abs(tdks%cg(1,:))); conv(2) = sum(abs(tdks%cg(2,:)))
- call xmpi_sum(conv,mpi_enreg%comm_world,ierr)
- !FB: Some mpi communications are needed here or different proc have different convergence criterion value
+ diff = tdks%cg
  ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
  tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
  ! calc associated density at t+dt/2
@@ -478,19 +478,22 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks)
  
  ! check convergence
- conv(1) = abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
- conv(2) = abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
- lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
+ diff = abs(diff-tdks%cg)
+ me = xmpi_comm_rank(mpi_enreg%comm_world)
+ call xmpi_max(maxval(diff(1,:)),max_diff(1),mpi_enreg%comm_world,ierr)
+ call xmpi_max(maxval(diff(2,:)),max_diff(2),mpi_enreg%comm_world,ierr)
+ lconv = (max_diff(1) < dtset%td_scthr .and. max_diff(2) < dtset%td_scthr)
  ics = 0
  if (mpi_enreg%me == 0) then 
-   write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
+   write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', max_diff(1), max_diff(2), & 
                                           & dtset%td_scthr, lconv, ch10
    if (do_write_log) call wrtout(std_out,msg)
  end if
  if (.not. lconv) then
    !** Corrector steps
    do ics = 1, dtset%td_scnmax
-      conv(1) = sum(abs(tdks%cg(1,:))); conv(2) = sum(abs(tdks%cg(2,:)))
+      ! for convergence check
+      diff = tdks%cg
       ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
       tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
       ! calc associated density at t+dt/2
@@ -500,12 +503,13 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
       ! .. and evolve psi(t) using estimated density at t+dt/2
       call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks)
       ! check convergence
-      conv(1) = abs(conv(1)-sum(abs(tdks%cg(1,:))))/conv(1)
-      conv(2) = abs(conv(2)-sum(abs(tdks%cg(2,:))))/conv(2)
-      call xmpi_sum(conv,mpi_enreg%comm_world,ierr)
-      lconv = (conv(1) < dtset%td_scthr .and. conv(2) < dtset%td_scthr)
+      diff = abs(diff-tdks%cg)
+      me = xmpi_comm_rank(mpi_enreg%comm_world)
+      call xmpi_max(maxval(diff(1,:)),max_diff(1),mpi_enreg%comm_world,ierr)
+      call xmpi_max(maxval(diff(2,:)),max_diff(2),mpi_enreg%comm_world,ierr)
+      lconv = (max_diff(1) < dtset%td_scthr .and. max_diff(2) < dtset%td_scthr)
       if (mpi_enreg%me == 0) then 
-         write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', conv(1), conv(2), & 
+         write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', max_diff(1), max_diff(2), & 
                                                 & dtset%td_scthr, lconv, ch10
          if (do_write_log) call wrtout(std_out,msg)
       end if
