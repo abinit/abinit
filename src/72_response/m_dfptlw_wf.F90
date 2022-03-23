@@ -516,7 +516,7 @@ if (.not.samepert) then
      ABI_MALLOC(gvnl1dqc,(2,size_wf))
    end if
    if (i2pert<=natom) fac=-one
-   if (i2pert==natom+2) fac=-half
+   if (i2pert==natom+2) fac=half
    if (i2pert==natom+3.or.i2pert==natom+4) fac=half
    if (i2pert<=natom) then
      nylmgrtmp=3
@@ -632,7 +632,7 @@ if (.not.samepert) then
    ABI_MALLOC(gvnl1dqc,(2,size_wf))
  end if
  if (i1pert<=natom) fac=-one
- if (i1pert==natom+2) fac=-half
+ if (i1pert==natom+2) fac=half
  if (i1pert==natom+3.or.i1pert==natom+4) fac=half
  if (i1pert<=natom) then
    nylmgrtmp=3
