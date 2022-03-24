@@ -52,15 +52,13 @@ module m_orbmag
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
   use m_pawang,           only : pawang_type
-  use m_pawfgr,           only : pawfgr_type
+ use m_pawfgr,            only : pawfgr_type
   use m_paw_ij,           only : paw_ij_type
-  use m_paw_numeric,      only : paw_jbessel_4spline,paw_spline
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen
   use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt
   use m_pawtab,           only : pawtab_type
-  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get,pawcprj_set_zero
+  use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get
   use m_spacepar,         only : make_vectornd
-  use m_splines,          only : splfit
   use m_time,             only : timab
 
   implicit none
@@ -69,8 +67,6 @@ module m_orbmag
 
   public :: orbmag_gipaw
 
-  private :: mkcdprj_k
-  private :: mkffspl
   private :: orbmag_gipaw_pw_k
   private :: orbmag_gipaw_dpdk_k
   private :: orbmag_gipaw_onsite_l_k
@@ -149,14 +145,12 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,buff_size,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,ilmn,indx,isppol,istwf_k,iterm,itypat
+ integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  integer,parameter :: ibcpwb=1,ibcpws=2,iompwb=3,iompws=4,iomdp=5,iomlr=6,iombm=7,iomvh1=8,iomlmb=9
  integer,parameter :: nterms=9
  real(dp) :: arg,ecut_eff,trnrm,ucvol
- real(dp) :: cdiff,max_cdprj_err
- complex(dpc) :: cpp,cdpp
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
@@ -173,7 +167,7 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: rhoij(:,:,:,:),rhoij1(:,:,:,:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- type(pawcprj_type),allocatable :: cprj_k(:,:),cdprj_k(:,:)
+ type(pawcprj_type),allocatable :: cprj_k(:,:)
 
  !----------------------------------------------
 
@@ -216,8 +210,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
  ABI_MALLOC(cprj_k,(dtset%natom,dtset%mband))
  call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
- ABI_MALLOC(cdprj_k,(dtset%natom,dtset%mband))
- call pawcprj_alloc(cdprj_k,ncpgr,dimlmn)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -357,25 +349,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! retrieve cprj_k
    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
-
-   ! compute <dp|u>
-   call mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,nband_k,npw_k,&
-    & pawrad,pawtab,ph3d,psps,ucvol,ylm_k)
-
-   max_cdprj_err=zero
-   do iat=1,dtset%natom
-     iatom=atindx(iat)
-     itypat=dtset%typat(iat)
-     do nn=1,nband_k
-       do ilmn = 1,pawtab(itypat)%lmn_size
-         cpp=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
-         cdpp=cmplx(cdprj_k(iatom,nn)%cp(1,ilmn),cdprj_k(iatom,nn)%cp(2,ilmn))
-         cdiff=abs(cdpp-cpp)/abs(cpp)
-         if(cdiff .GT. max_cdprj_err) max_cdprj_err=cdiff
-       end do
-     end do
-   end do
-   write(std_out,'(a,es16.8)')'JWZ debug max_cdprj_err : ',max_cdprj_err
 
    ABI_MALLOC(Enk,(nband_k))
    ABI_MALLOC(ompw_k,(2,nband_k,6))
@@ -535,8 +508,6 @@ subroutine orbmag_gipaw(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_FREE(dimlmn)
  call pawcprj_free(cprj_k)
  ABI_FREE(cprj_k)
- call pawcprj_free(cdprj_k)
- ABI_FREE(cdprj_k)
 
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
@@ -739,13 +710,14 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
          & prtvol,sij_opt,my_timer,type_calc)
 
        ! update gwavef as (H0 + En*S0)gwavef from ghc and gsc output of getghc
-       gwavef(1:2,1:npw_k) = ghc(1:2,1:npw_k) + Enk(nn)*gsc(1:2,1:npw_k)
+       !gwavef(1:2,1:npw_k) = ghc(1:2,1:npw_k) + Enk(nn)*gsc(1:2,1:npw_k)
 
        ! store <du|P(H+ES)P|du> in terms 1:3
        ompw_k(1,nn,adir) = ompw_k(1,nn,adir) + half*epsabg*c2*&
-         & (DOT_PRODUCT(bwavef(1,:),gwavef(2,:)) - DOT_PRODUCT(bwavef(2,:),gwavef(1,:)))
+         & (DOT_PRODUCT(bwavef(1,:),(ghc(2,:)+Enk(nn)*gsc(2,:))) - DOT_PRODUCT(bwavef(2,:),(ghc(1,:)+Enk(nn)*gsc(1,:))))
        ompw_k(2,nn,adir) = ompw_k(2,nn,adir) - half*epsabg*c2*&
-         & (DOT_PRODUCT(bwavef(1,:),gwavef(1,:)) + DOT_PRODUCT(bwavef(2,:),gwavef(2,:)))
+         & (DOT_PRODUCT(bwavef(1,:),(ghc(1,:)+Enk(nn)*gsc(1,:))) + DOT_PRODUCT(bwavef(2,:),(ghc(2,:)+Enk(nn)*gsc(2,:))))
+
        ! store <du|P(E dS)|u> in terms 4:6
        ompw_k(1,nn,adir+3) = ompw_k(1,nn,adir+3) + half*epsabg*c2*Enk(nn)*&
          & (DOT_PRODUCT(bwavef(1,:),s1cg_k(2,nbeg:nend,gdir)) - DOT_PRODUCT(bwavef(2,:),s1cg_k(1,nbeg:nend,gdir)))
@@ -972,7 +944,8 @@ subroutine orbmag_gipaw_onsite_l_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawta
           jn=pawtab(itypat)%indlmn(3,jlmn)
           do ilmn=1,pawtab(itypat)%lmn_size
             il=pawtab(itypat)%indlmn(1,ilmn)
-            if ( il /= jl ) cycle
+            if ( il /= jl ) cycle ! <l'm'|L|lm> = 0 if l' /= l
+            if ( il == 0 ) cycle ! <00|L|00> = 0
             im=pawtab(itypat)%indlmn(2,ilmn)
             klmn=MATPACK(jlmn,ilmn)
             kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
@@ -1099,49 +1072,52 @@ subroutine orbmag_gipaw_onsite_bm_k(atindx,cprj_k,dtset,nband_k,ombk,pawang,pawr
               lpmp=1
               gint = pawang%gntselect(lpmp,klm)
               if (gint > 0) then
-                 bm2=bm2+scale_conversion*dtset%nucdipmom(adir,iat)*d00*pawang%realgnt(gint)*intg
+                bm2=bm2+scale_conversion*dtset%nucdipmom(adir,iat)*d00*pawang%realgnt(gint)*intg
               end if
               ! all other contributions involve Gaunt integrals of S_{2m}
               do lpmp = 5, 9
-                 gint = pawang%gntselect(lpmp,klm)
-                 if (gint > 0) then
-                    select case (lpmp)
-                    case (5) ! S_{2,-2} contributes to xy term
-                       select case (adir)
-                       case (1)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
-                       case (2)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
-                       end select
+                ! if the basis is very small (only s waves) there can't be any Gaunt coupling to d functions
+                ! and asking for it would crash the code
+                if (size(pawang%gntselect(:,klm)) .LT. 5) exit
+                gint = pawang%gntselect(lpmp,klm)
+                if (gint > 0) then
+                  select case (lpmp)
+                  case (5) ! S_{2,-2} contributes to xy term
+                    select case (adir)
+                      case (1)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
+                      case (2)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
                     case (6) ! S_{2,-1} contributes to yz term
-                       select case (adir)
-                       case (2)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
-                       case (3)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
-                       end select
+                      select case (adir)
+                      case (2)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
+                      case (3)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
                     case (7) ! S_{2,0} contributes to xx, yy, and zz terms
-                       select case (adir)
-                          case (1)
-                             bm2=bm2-scale_conversion*dtset%nucdipmom(1,iat)*d20*pawang%realgnt(gint)*intg
-                          case (2)
-                             bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d20*pawang%realgnt(gint)*intg
-                          case (3)
-                             bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*2.0*d20*pawang%realgnt(gint)*intg
-                          end select
+                      select case (adir)
+                        case (1)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(1,iat)*d20*pawang%realgnt(gint)*intg
+                        case (2)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d20*pawang%realgnt(gint)*intg
+                        case (3)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*2.0*d20*pawang%realgnt(gint)*intg
+                      end select
                     case (8) ! S_{2,+1} contributes to xz term
-                       select case (adir)
-                       case (1)
+                      select case (adir)
+                        case (1)
                           bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
-                       case (3)
+                        case (3)
                           bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
-                       end select
+                      end select
                     case (9) ! S_{2,2} contributes to xx, yy terms
                        select case (adir)
-                       case (1)
-                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*d22*pawang%realgnt(gint)*intg
-                       case (2)
-                          bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d22*pawang%realgnt(gint)*intg
+                         case (1)
+                           bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*d22*pawang%realgnt(gint)*intg
+                         case (2)
+                           bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d22*pawang%realgnt(gint)*intg
                        end select
                     end select
                  end if ! end check on nonzero gaunt integral
@@ -1624,244 +1600,5 @@ subroutine orbmag_gipaw_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
 
 end subroutine orbmag_gipaw_output
 !!***
-
-!!****f* ABINIT/mkcdprj_k
-!! NAME
-!! mkcdprj_k
-!!
-!! FUNCTION
-!! compute cprj_k (that is, <p_k|u_k>, mainly for testing) and <dp_k|u_k>. 
-!! Notice that the normal cprj contains cprj%dcp, but this is d(<p_k|u_k>). 
-!! Here, <p|r_i|u>, which is effectively <dp/dk_i|u_k>, is computed and saved.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine mkcdprj_k(atindx,cg_k,cdprj_k,dtset,gmet,kpg_k,nband_k,npw_k,&
-    & pawrad,pawtab,ph3d,psps,ucvol,ylm_k)
-
- !Arguments ------------------------------------
- !scalars
- integer,intent(in) :: nband_k,npw_k
- real(dp),intent(in) :: ucvol
- type(dataset_type),intent(in) :: dtset
- type(pseudopotential_type), intent(inout) :: psps
-
- !arrays
- integer,intent(in) :: atindx(dtset%natom)
- real(dp),intent(in) :: cg_k(2,npw_k*nband_k),gmet(3,3),kpg_k(npw_k,3)
- real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom),ylm_k(npw_k,psps%mpsang*psps%mpsang)
- type(pawcprj_type),intent(inout) ::  cdprj_k(dtset%natom,nband_k)
- type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
-
- !Local variables -------------------------
- !scalars
- integer :: iat,iatom,il,ilm,ilmn,iln,ipw,itypat,lmax,nn,splder
- real(dp) :: c1,ffnlfac
- complex(dpc) :: cgk,cil,cp,phfac
-
- !arrays
- real(dp),allocatable :: ffspl(:,:),kpgnorm(:),wk_ffnl1(:,:),wk_ffnl2(:,:)
- complex(dpc),dimension(0:3) :: ipowl = (/cone,j_dpc,-cone,-j_dpc/)
- logical,allocatable :: have_iln(:)
- 
- ! ***********************************************************************
-
- write(std_out,'(a)')'JWZ debug enter mkcdprj_k'
- c1 = four_pi/sqrt(ucvol)
- ! lmax exceeds mpsang because of Gaunt integral in <dp|u>
- lmax=psps%mpsang + 1
- call pawcprj_set_zero(cdprj_k)
-
- ABI_MALLOC(kpgnorm,(npw_k))
- do ipw = 1, npw_k
-   kpgnorm(ipw) = SQRT(DOT_PRODUCT(kpg_k(ipw,1:3),MATMUL(gmet(1:3,1:3),kpg_k(ipw,1:3))))
- end do
-
- splder = 0
- do itypat = 1, dtset%ntypat
-
-   ABI_MALLOC(wk_ffnl1,(npw_k,pawtab(itypat)%basis_size))
-   ABI_MALLOC(wk_ffnl2,(npw_k,pawtab(itypat)%basis_size))
-   ABI_MALLOC(have_iln,(pawtab(itypat)%basis_size))
-   have_iln=.FALSE.
-
-   do ilmn=1, pawtab(itypat)%lmn_size
-     il = pawtab(itypat)%indlmn(1,ilmn)
-     ilm = pawtab(itypat)%indlmn(4,ilmn)
-     iln = pawtab(itypat)%indlmn(5,ilmn)
-     cil = ipowl(mod(il,4))
-
-     if(.NOT. have_iln(iln)) then
-       ABI_MALLOC(ffspl,(psps%mqgrid_ff,2))
-       call mkffspl(ffspl,il,pawrad(itypat),psps%mqgrid_ff,1,psps%qgrid_ff,pawtab(itypat)%tproj(:,iln))
-       call splfit(psps%qgrid_ff,wk_ffnl2(:,iln),ffspl,splder,kpgnorm,wk_ffnl1(:,iln),psps%mqgrid_ff,npw_k)
-       have_iln(iln) = .TRUE.
-       ABI_FREE(ffspl)
-     end if
-
-     do iat = 1, dtset%natom
-       if (dtset%typat(iat) .NE. itypat) cycle
-       iatom = atindx(iat)
-       do ipw = 1, npw_k
-         ffnlfac = ylm_k(ipw,ilm)*wk_ffnl1(ipw,iln)
-         phfac=cmplx(ph3d(1,ipw,iatom),ph3d(2,ipw,iatom))
-         do nn = 1, nband_k
-           cgk=cmplx(cg_k(1,(nn-1)*npw_k+ipw),cg_k(2,(nn-1)*npw_k+ipw))
-           cp = c1*cil*cgk*phfac*ffnlfac
-           cdprj_k(iatom,nn)%cp(1,ilmn) = cdprj_k(iatom,nn)%cp(1,ilmn)+real(cp)
-           cdprj_k(iatom,nn)%cp(2,ilmn) = cdprj_k(iatom,nn)%cp(2,ilmn)+aimag(cp)
-         end do ! end loop over nband_k
-       end do ! end loop over npw_k
-     end do ! end loop over natom
-
-   end do ! end loop over lmn_size
-   ABI_FREE(have_iln)
-   ABI_FREE(wk_ffnl1)
-   ABI_FREE(wk_ffnl2)
- 
- end do ! end loop over ntypat
-
- ABI_FREE(kpgnorm)
-
- write(std_out,'(a)')'JWZ debug leave mkcdprj_k'
-              
-end subroutine mkcdprj_k
-!!***
-
-!!****f* ABINIT/mkffspl
-!! NAME
-!! mkffspl
-!!
-!! FUNCTION
-!! compute spline ffspl, more generally than is done in the basic PAW routines.
-!! spline fit to \int r^n \tilde{p}_i(r) j_L(k r) dr
-!! In the normal case, n = 1 and L = the il for the projector. Here we are more general.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine mkffspl(ffspl,ll,meshdata,mqgrid,nn,qgrid,wf)
-
- !Arguments ------------------------------------
- !scalars
- integer,intent(in) :: ll,mqgrid,nn
- type(pawrad_type),intent(in) :: meshdata
-
- !arrays
- real(dp),intent(in) :: qgrid(mqgrid),wf(meshdata%mesh_size)
- real(dp),intent(out) :: ffspl(mqgrid,2)
-
- !Local variables -------------------------
- !scalars
- integer :: ir,iq,meshsz
- real(dp) :: arg,argn,bes,besp,qr,yp1,ypn
- real(dp),parameter :: TOLJ=0.001_dp
-
- !arrays
- real(dp),allocatable :: ff(:),gg(:),rr(:),rrn(:),rrnwf(:),rrn1(:),rrn1wf(:)
- 
- ! ***********************************************************************
-
- meshsz = meshdata%mesh_size
- ABI_MALLOC(ff,(meshsz))
- ABI_MALLOC(gg,(meshsz))
- ABI_MALLOC(rr,(meshsz))
- ABI_MALLOC(rrn,(meshsz))
- ABI_MALLOC(rrn1,(meshsz))
- ABI_MALLOC(rrnwf,(meshsz))
- ABI_MALLOC(rrn1wf,(meshsz))
- rr(1:meshsz) = meshdata%rad(1:meshsz)
- rrn(1:meshsz) = rr(1:meshsz)
- do iq = 2,nn
-   rrn(1:meshsz) = rrn(1:meshsz)*rr(1:meshsz)
- end do
- rrn1(1:meshsz)=rrn(1:meshsz)*rr(1:meshsz)
- rrnwf(1:meshsz)=rrn(1:meshsz)*wf(1:meshsz)
- rrn1wf(1:meshsz)=rrn1(1:meshsz)*wf(1:meshsz)
-
- do iq=2, mqgrid-1
-   arg=two_pi*qgrid(iq)
-   do ir = 1, meshsz
-     qr = arg*rr(ir)
-     call paw_jbessel_4spline(bes,besp,ll,0,qr,TOLJ)
-     ff(ir) = bes*rrnwf(ir)
-   end do
-   call simp_gen(ffspl(iq,1),ff,meshdata)
- end do
-
- ffspl(1,1)=zero;yp1=zero
- if (ll==0) then
-   call simp_gen(ffspl(1,1),rrnwf,meshdata)
- end if
- if (ll==1) then
-   call simp_gen(yp1,rrn1wf,meshdata)
-   yp1=yp1*two_pi*third
- end if
-
- argn=two_pi*qgrid(mqgrid)
- do ir=1,meshsz
-   qr=argn*rr(ir)
-   call paw_jbessel_4spline(bes,besp,ll,1,qr,TOLJ)
-   ff(ir)=bes*rrnwf(ir)
-   gg(ir)=two_pi*besp*rrn1wf(ir)
- end do
- call simp_gen(ffspl(mqgrid,1),ff,meshdata)
- call simp_gen(ypn,gg,meshdata)
- 
- call paw_spline(qgrid,ffspl(:,1),mqgrid,yp1,ypn,ffspl(:,2))
-
- ABI_FREE(ff)
- ABI_FREE(gg)
- ABI_FREE(rr)
- ABI_FREE(rrn)
- ABI_FREE(rrn1)
- ABI_FREE(rrnwf)
- ABI_FREE(rrn1wf)
-              
-end subroutine mkffspl
-!!***
-
 
 end module m_orbmag
