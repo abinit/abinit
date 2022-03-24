@@ -2894,6 +2894,7 @@ Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1)..
    * 1 : corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
    * 2 : corresponds to the "Around Mean Field" double counting (this is not yet in production).
    * 5 : the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
+   * 6 : this option is in development.
 """,
 ),
 
