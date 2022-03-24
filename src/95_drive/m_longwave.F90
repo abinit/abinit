@@ -534,8 +534,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call wrtout(ab_out,msg,'COLL')
  
 !Calculate the nonvariational terms
- call dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,psps%ziontypat, & 
-& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
+   call dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,psps%ziontypat, & 
+  & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+ end if
 
 !2nd q-gradient of Ewald contribution to the IFCs
 ! if (dtset%lw_flexo/=0) then
