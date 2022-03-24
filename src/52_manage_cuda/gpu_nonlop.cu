@@ -310,8 +310,8 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
 
 
   //We check for functionality
-  if(((*choice)!=0)&&((*choice)!=1)&&((*choice)!=2)&&((*choice)!=3)&&((*choice)!=23)){
-    printf("gpu_nonlop: Error:\n choice %d was used but only choice 0,1,2,3 and 23 are available on GPU\n",(*choice));
+  if(((*choice)!=0)&&((*choice)!=1)&&((*choice)!=2)&&((*choice)!=3)&&((*choice)!=7)&&((*choice)!=23)){
+    printf("gpu_nonlop: Error:\n choice %d was used but only choice 0,1,2,3,7 and 23 are available on GPU\n",(*choice));
     printf(" Try to change your input files with correct optforces & optstress ...\n");
     fflush(stdout);
     abi_cabort();
@@ -330,6 +330,11 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   }
   if((((*choice)==2)||((*choice)==3)||((*choice)==23))&&((*signs)!=1)){
     printf("gpu_nonlop: Error:\n when choice is 2,3 or 23 only signs=1 is implemented. ( %d was used) \n",(*signs));
+    fflush(stdout);
+    abi_cabort();
+  }
+  if(((*choice)==7)&&((*signs)!=2)){
+    printf("gpu_nonlop: Error:\n when choice is 7 only signs=2 is implemented. ( %d was used) \n",(*signs));
     fflush(stdout);
     abi_cabort();
   }
@@ -399,7 +404,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
     cuda_state=cudaMemcpy(ffnlin_gpu,ffnlin,(*npwin)*(*dimffnlin)*(*lmnmax)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice);
   }
 
-  if((*choice)>=2){
+  if( ((*choice)==2) || ((*choice)==3) || ((*choice)==23) ){
     if((*nkpgin)>0)
       cuda_state=cudaMemcpy(kpgin_gpu,kpgin,(*npwin)*(*nkpgin)*sizeof(double),cudaMemcpyHostToDevice);
     else{
@@ -414,19 +419,25 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
     abi_cabort();
   }
 
-  //Compute Projection
+  //Compute Projections
   char cplex;
   if((*istwf_k)>1)
     cplex=1;
   else
     cplex=2;
 
-  gpu_compute_nl_projections_(proj_gpu,dproj_gpu,
+  //if cpot==2, the projections are already in memory
+  if((*cpopt)==2){
+    cudaMemcpy(proj,proj_gpu,nb_proj_to_compute*sizeof(double2),cudaMemcpyDeviceToHost);
+  }
+  else {
+    gpu_compute_nl_projections_(proj_gpu,dproj_gpu,
 			      vectin_gpu,ph3din_gpu,
 			      ffnlin_gpu,kpgin_gpu,
 			      indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
-			      &nb_proj_to_compute,npwin,choice,
+			      &nb_proj_to_compute,npwin,choice,cpopt,
 			      dimffnlin,lmnmax,&cplex,pi,ucvol);
+  }
 
   //Copy back projections if wanted
   if(((*cpopt)==0)||((*cpopt)==1))

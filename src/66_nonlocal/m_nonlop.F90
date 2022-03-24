@@ -1012,7 +1012,7 @@ end subroutine nonlop
  DBG_ENTER("COLL")
 
 !Error on bad choice
- if ((choice<0 .or. choice>3).and. choice/=23 .and. choice/=24) then
+ if ((choice<0 .or. (choice>3.and.choice/=7)).and. choice/=23 .and. choice/=24) then
    write(msg,'(a,i0,a)')'Does not presently support this choice=',choice,'.'
    ABI_BUG(msg)
  end if
@@ -1025,7 +1025,7 @@ end subroutine nonlop
    ABI_ERROR(msg)
  end if
 
- if ((cpopt==0).or.(cpopt==1))  then
+ if ((cpopt==0).or.(cpopt==1).or.(cpopt==2))  then
    ABI_MALLOC(proj,(2,lmnmax*natom))
    proj=zero;
  end if
@@ -1037,6 +1037,23 @@ end subroutine nonlop
    ABI_MALLOC(svectout_,(2,npwin*nspinor*(paw_opt/3)))
  else
    signs_=signs;vectout_=>vectout;svectout_=>svectout
+ end if
+
+!if cpot==2, the projections are already in memory
+ if (cpopt>=2) then
+   iproj=0
+   do ispinor=1,nspinor
+     iatom=0
+     do itypat=1,ntypat
+       do ia=1,nattyp(itypat)
+         iatom=iatom+1
+         do ilmn=1,cprjin(iatom,1)%nlmn
+           iproj=iproj+1
+           proj(:,iproj)=cprjin(iatom,1)%cp(:,ilmn)
+         end do
+       end do
+     end do
+   end do
  end if
 
 #if defined HAVE_GPU_CUDA
@@ -1075,9 +1092,12 @@ end subroutine nonlop
        end do
      end do
    end do
-   ABI_FREE(proj)
  end if
 
+ if (allocated(proj)) then
+   ABI_FREE(proj)
+ end if
+   
  DBG_EXIT("COLL")
 
 !Fake statements to satisfy ABI rules

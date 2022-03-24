@@ -109,33 +109,52 @@ __global__ void kernel_compute_proj_factor(double2 *proj,double2 *dproj,
     //Norm Conserving Pseudo Potential
     if(paw_opt==0){
       double2 proj_ilmn_R;
-      double val_enl; //enl is real when norm conserving
-      int iln=indlmn[ 4 + 6*(jlmn + lmnmax*itypat)]; // iln=indlmn(5,ilmn) (pour un type fixe)
-      val_enl = enl[(iln-1) + dimenl1*itypat]; //enl_(1)=enl(iln,itypat,ispinor)
       proj_ilmn_R = proj[iproj];
-      a_jlmn.x = val_enl * proj_ilmn_R.x ;//gxfac(1:cplex,ilmn,ia,ispinor)=enl_(1)*gx(1:cplex,ilmn,ia,ispinor)
-      a_jlmn.y = val_enl * proj_ilmn_R.y ;
+      if (choice!=7) {
+        double val_enl; //enl is real when norm conserving
+        int iln=indlmn[ 4 + 6*(jlmn + lmnmax*itypat)]; // iln=indlmn(5,ilmn) (pour un type fixe)
+        val_enl = enl[(iln-1) + dimenl1*itypat]; //enl_(1)=enl(iln,itypat,ispinor)
+        a_jlmn.x = val_enl * proj_ilmn_R.x ;//gxfac(1:cplex,ilmn,ia,ispinor)=enl_(1)*gx(1:cplex,ilmn,ia,ispinor)
+        a_jlmn.y = val_enl * proj_ilmn_R.y ;
+        }
+      else {
+        a_jlmn.x = proj_ilmn_R.x ;
+        a_jlmn.y = proj_ilmn_R.y ;
+      }      
     }
     else{ //PAW
-      a_jlmn.x=0.;
-      a_jlmn.y=0.;
-      sa_jlmn.x=0.;
-      sa_jlmn.y=0.;
-      //Accumulate projection;
-      for(int ilmn=0;ilmn<nlmn[itypat];ilmn++){
-	int ijlmn= (ilmn<jlmn? ilmn +  jlmn*(jlmn+1)/2 : jlmn +  ilmn*(ilmn+1)/2 );
-	double val_enl = enl[ijlmn + dimenl1*jatom];
-	double2 proj_ilmn_R = proj[ iproj + ilmn - jlmn];
-	a_jlmn.x +=  val_enl*proj_ilmn_R.x;
-	a_jlmn.y +=  val_enl*proj_ilmn_R.y;
-	double val_sij= sij[ijlmn + dimenl1*itypat];
-	sa_jlmn.x +=  val_sij*proj_ilmn_R.x;
-	sa_jlmn.y +=  val_sij*proj_ilmn_R.y;
+      if (choice!=7) {
+        a_jlmn.x=0.;
+        a_jlmn.y=0.;
+        sa_jlmn.x=0.;
+        sa_jlmn.y=0.;
+        //Accumulate projection;
+        for(int ilmn=0;ilmn<nlmn[itypat];ilmn++){
+	  int ijlmn= (ilmn<jlmn? ilmn +  jlmn*(jlmn+1)/2 : jlmn +  ilmn*(ilmn+1)/2 );
+	  double val_enl = enl[ijlmn + dimenl1*jatom];
+	  double2 proj_ilmn_R = proj[ iproj + ilmn - jlmn];
+	  a_jlmn.x +=  val_enl*proj_ilmn_R.x;
+	  a_jlmn.y +=  val_enl*proj_ilmn_R.y;
+	  double val_sij= sij[ijlmn + dimenl1*itypat];
+	  sa_jlmn.x +=  val_sij*proj_ilmn_R.x;
+	  sa_jlmn.y +=  val_sij*proj_ilmn_R.y;
+        }
+        if(paw_opt==2){
+          a_jlmn.x -= lambda*sa_jlmn.x;
+          a_jlmn.y -= lambda*sa_jlmn.y;
+        }
       }
-    }
-    if(paw_opt==2){
-      a_jlmn.x -= lambda*sa_jlmn.x;
-      a_jlmn.y -= lambda*sa_jlmn.y;
+      else {
+        double2 proj_ilmn_R = proj[iproj];
+        if(paw_opt!=3){
+          a_jlmn.x = proj_ilmn_R.x;
+          a_jlmn.y = proj_ilmn_R.y;
+        }
+        if(paw_opt==3 || paw_opt==4){
+          sa_jlmn.x = proj_ilmn_R.x;
+          sa_jlmn.y = proj_ilmn_R.y;
+	}
+      }
     }
 
     //Cas choice==1 && signs==2 :  a_jlmn = a_jlmn*i^(-l)
@@ -588,7 +607,7 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,double2 *dproj_gpu
 
   /************* Compute output needed with signs ***********************/
 
-  if( ((*choice)==1) && (*signs==2)) {
+  if( ((*choice)==1 || (*choice)==7) && (*signs==2)) {
     //One thread in block by projection and plane waves split amongs blocks
     block.x = 64;
     grid.x = 1;
