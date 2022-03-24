@@ -710,13 +710,14 @@ subroutine orbmag_gipaw_pw_k(atindx,bcpw_k,cg_k,cg1_k,cprj_k,dimlmn,dtset,Enk,&
          & prtvol,sij_opt,my_timer,type_calc)
 
        ! update gwavef as (H0 + En*S0)gwavef from ghc and gsc output of getghc
-       gwavef(1:2,1:npw_k) = ghc(1:2,1:npw_k) + Enk(nn)*gsc(1:2,1:npw_k)
+       !gwavef(1:2,1:npw_k) = ghc(1:2,1:npw_k) + Enk(nn)*gsc(1:2,1:npw_k)
 
        ! store <du|P(H+ES)P|du> in terms 1:3
        ompw_k(1,nn,adir) = ompw_k(1,nn,adir) + half*epsabg*c2*&
-         & (DOT_PRODUCT(bwavef(1,:),gwavef(2,:)) - DOT_PRODUCT(bwavef(2,:),gwavef(1,:)))
+         & (DOT_PRODUCT(bwavef(1,:),(ghc(2,:)+Enk(nn)*gsc(2,:))) - DOT_PRODUCT(bwavef(2,:),(ghc(1,:)+Enk(nn)*gsc(1,:))))
        ompw_k(2,nn,adir) = ompw_k(2,nn,adir) - half*epsabg*c2*&
-         & (DOT_PRODUCT(bwavef(1,:),gwavef(1,:)) + DOT_PRODUCT(bwavef(2,:),gwavef(2,:)))
+         & (DOT_PRODUCT(bwavef(1,:),(ghc(1,:)+Enk(nn)*gsc(1,:))) + DOT_PRODUCT(bwavef(2,:),(ghc(2,:)+Enk(nn)*gsc(2,:))))
+
        ! store <du|P(E dS)|u> in terms 4:6
        ompw_k(1,nn,adir+3) = ompw_k(1,nn,adir+3) + half*epsabg*c2*Enk(nn)*&
          & (DOT_PRODUCT(bwavef(1,:),s1cg_k(2,nbeg:nend,gdir)) - DOT_PRODUCT(bwavef(2,:),s1cg_k(1,nbeg:nend,gdir)))
