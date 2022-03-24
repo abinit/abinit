@@ -70,7 +70,8 @@ dmft_entropy 3
 dmft_nlambda 4  # previous run (t30) was 3 -> should restart at lambda number 2
 
 # == DFT+U
-usepawu     1  #  For density matrix printout.
+usepawu1    1
+usepawu     10
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1
 upawu1  0.00  0.0  0.0  eV

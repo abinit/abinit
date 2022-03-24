@@ -2124,6 +2124,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%userid .EQ. 1 )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
+
  if (recompute_cprj) then
    usecprj=1
    mband_cprj=dtset%mband/mpi_enreg%nproc_band
@@ -2721,7 +2722,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
      if(optene==0) etotal=etotal+energies%e_extfpmd
-     if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+     if(optene==1) etotal=etotal+energies%edc_extfpmd
    end if
 
 !  Compute energy residual

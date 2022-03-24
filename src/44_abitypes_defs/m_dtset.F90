@@ -147,6 +147,7 @@ type, public :: dataset_type
  integer :: dmftctqmc_correl
  integer :: dmftctqmc_gmove
  integer :: dmftctqmc_grnns
+ integer :: dmftctqmc_config
  integer :: dmftctqmc_meas
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
@@ -1423,6 +1424,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_correl   = dtin%dmftctqmc_correl
  dtout%dmftctqmc_gmove    = dtin%dmftctqmc_gmove
  dtout%dmftctqmc_grnns    = dtin%dmftctqmc_grnns
+ dtout%dmftctqmc_config   = dtin%dmftctqmc_config
  dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
@@ -3234,14 +3236,15 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
- list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
+ list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_config dmftctqmc_meas dmftctqmc_mrka'
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_nleg'
  list_vars=trim(list_vars)//' dmftcheck dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm'
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
+! list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+ list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
-!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d dmft_wanorthnorm' ! dmft_x2my2d is not tested neither documented.
  list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
