@@ -41,13 +41,14 @@ module m_dfptlw_pert
  use m_getgh1c
  use m_mklocl
  use m_initylmg,   only : initylmg
- use m_fstrings, only : itoa, sjoin
- use m_io_tools, only : file_exists
- use m_time, only : cwtime
- use m_kg, only : mkkpg
- use m_mpinfo, only : proc_distrb_cycle
+ use m_fstrings,   only : itoa, sjoin
+ use m_io_tools,   only : file_exists
+ use m_time,       only : cwtime
+ use m_kg,         only : mkkpg
+ use m_mpinfo,     only : proc_distrb_cycle
  use m_dfptlw_wf
  use m_dfpt_mkvxc, only : dfpt_mkvxcggadq
+ use m_dfptlw_nv,  only : dfptlw_geom
  use m_spacepar,   only : hartredq
  use m_cgtools,    only : dotprod_vn
 
@@ -150,6 +151,7 @@ contains
 !!  d3etot(2,3,mpert,3,mpert,3,mpert) = third derivatives of the energy tensor
 !!  d3etot_t4(2,n2dq)= t4 term which might need to be converted to type-II
 !!  d3etot_t5(2,n1dq)= t5 term which might need to be converted to type-II
+!!  d3etot_tgeom(2,2)= Geometric term which needs to be converted to type-II
 !!
 !! SIDE EFFECTS
 !!  TO DO!
@@ -162,8 +164,8 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,dtfil,dtset,&
-& gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
+subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
+& dtfil,dtset,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
@@ -203,6 +205,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(out) :: d3etot_t4(2,n2dq),d3etot_t5(2,n1dq)
+ real(dp),intent(out) :: d3etot_tgeom(2,n2dq)
 
 !Variables ------------------------------------
 !scalars
@@ -219,6 +222,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp) :: d3etot_t3(2),d3etot_t3_k(2)
  real(dp) :: d3etot_t4_k(2,n2dq)
  real(dp) :: d3etot_t5_k(2,n1dq)
+ real(dp) :: d3etot_tgeom_k(2,n2dq)
  real(dp) :: d3etot_telec(2)
  real(dp) :: e3tot(2),kpt(3)
  real(dp),allocatable :: occ_k(:)
@@ -276,6 +280,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  d3etot_t4=zero
  d3etot_t5=zero
  d3etot_telec=zero
+ d3etot_tgeom=zero
 
 !Calculate the electrostatic contribution 
  call lw_elecstic(cplex,d3etot_telec,gmet,gs_hamkq%gprimd,gsqcut,&
@@ -331,6 +336,16 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      & pawfgr,ph1d,psps,rhog,rhor,rmet,samepert,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
      & wtk_k,xred,ylm_k,ylmgr_k)
+
+     !Compute the nonvariational geometric term
+     if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
+       call dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
+       &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
+       &  isppol,istwf_k,kg_k,kpt,mkmem_rbz,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
+       &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
+       &  ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
+
+     end if
 
 !    Add the contribution from each k-point. 
      d3etot_t1=d3etot_t1 + d3etot_t1_k
