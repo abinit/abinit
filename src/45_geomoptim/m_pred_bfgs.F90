@@ -182,12 +182,9 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !### 02. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
- if(ab_mover%optcell==2 .or.&
-& ab_mover%optcell==3) ndim=ndim+6
+ if(ab_mover%optcell==1) ndim=ndim+1
+ if(ab_mover%optcell>=2 .and.&
+& ab_mover%optcell<=6) ndim=ndim+6
  if(ab_mover%optcell==7 .or.&
 & ab_mover%optcell==8 .or.&
 & ab_mover%optcell==9) ndim=ndim+3
@@ -680,12 +677,9 @@ real(dp) :: strten(6)
 !### 02. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
- if(ab_mover%optcell==2 .or.&
-& ab_mover%optcell==3) ndim=ndim+6
+ if(ab_mover%optcell==1) ndim=ndim+1
+ if(ab_mover%optcell>=2 .and.&
+& ab_mover%optcell<=6) ndim=ndim+6
  if(ab_mover%optcell==7 .or.&
 & ab_mover%optcell==8 .or.&
 & ab_mover%optcell==9) ndim=ndim+3
