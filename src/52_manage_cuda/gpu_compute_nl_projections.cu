@@ -177,7 +177,8 @@ __global__ void kernel_compute_nl_projections_and_derivates_choice2(double2 *pro
     if( threadIdx.x <  decalage) 
       sh_proj_x[threadIdx.x] += sh_proj_x[threadIdx.x + decalage];
     else if(threadIdx.x >= (blockDim.x - decalage))
-      sh_proj_y[threadIdx.x] += sh_proj_y[threadIdx.x - decalage];
+      sh_proj_y
+      [threadIdx.x] += sh_proj_y[threadIdx.x - decalage];
   }
   __syncthreads();
   //Store locally the sum pro projection
@@ -483,7 +484,7 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu
 					    double *ffnlin_gpu,double *kpgin_gpu,
 					    int *indlmn_gpu,unsigned short int *atoms_gpu,
 					    unsigned char *lmn_gpu, unsigned char *typat_gpu,
-					    int *nb_proj_to_compute,int *npw,int *choice,
+					    int *nb_proj_to_compute,int *npw,int *choice,int *cpopt,
 					    int *dimffnlin,int *lmnmax,
 					    const char *cplex,const double *pi,const double *ucvol
 					    ){
@@ -491,17 +492,19 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu
   //Configuration of the cuda grid
   dim3 grid,block;
   double four_pi_by_squcvol = 4*(*pi)/sqrt(*ucvol);
-  if((*choice)<2){
-    //One block by projection to compute and plane waves split among a batch of threads by block   
-    block.x=64;
-    grid.x=1;
-    grid.y=*nb_proj_to_compute;
+  if((*choice)<2 || (*choice)==7){
+    if (*cpopt<2) {
+      //One block by projection to compute and plane waves split among a batch of threads by block   
+      block.x=64;
+      grid.x=1;
+      grid.y=*nb_proj_to_compute;
     
-    kernel_compute_nl_projections<<<grid,block,block.x*2*sizeof(double),0>>>(proj_gpu,vectin_gpu,ph3din_gpu,ffnlin_gpu,
+      kernel_compute_nl_projections<<<grid,block,block.x*2*sizeof(double),0>>>(proj_gpu,vectin_gpu,ph3din_gpu,ffnlin_gpu,
 									     indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
 									     *dimffnlin,*npw,*lmnmax,
 									     *cplex,four_pi_by_squcvol);
-  }
+      }
+    }
   else if((*choice)==2){
     
     block.x=64;
