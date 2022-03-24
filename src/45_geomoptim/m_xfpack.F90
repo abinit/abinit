@@ -311,7 +311,7 @@ end subroutine xfpack_vin2x
 !!
 !! SOURCE
 
-subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
+subroutine xfpack_x2vin(acell,natom,ndim,nsym,optcell,&
   & rprim,rprimd0,symrel,ucvol,ucvol0,vin,xred)
 
 !Arguments ------------------------------------
@@ -321,7 +321,7 @@ subroutine xfpack_x2vin(acell,acell0,natom,ndim,nsym,optcell,&
  real(dp),intent(inout) :: ucvol !vz_i
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
- real(dp),intent(in) :: acell0(3),rprimd0(3,3)
+ real(dp),intent(in) :: rprimd0(3,3)
  real(dp),intent(in) :: acell(3),rprim(3,3)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: vin(ndim)

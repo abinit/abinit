@@ -295,7 +295,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !The values of vin from the previous iteration
 !should be the same
 !if (itime==1)then
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
