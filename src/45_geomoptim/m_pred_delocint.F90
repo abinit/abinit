@@ -396,7 +396,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !Initialize input vectors : first vin, then vout
 !The values of vin from the previous iteration
 !should be the same
- call xfpack_x2vin(acell, acell0, ab_mover%natom-1, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom-1, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprimd, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, deloc_int)
 !end if
@@ -1836,7 +1836,7 @@ real(dp) :: xcart(3,ab_mover%natom)
      call gred2gdeloc(btinv,deloc_gred,gred,ab_mover%natom,gprimd)
 
 !    Transfer it in vin, vout
-     call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+     call xfpack_x2vin(acell,ab_mover%natom-1,&
 &     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &     ab_mover%symrel,ucvol,ucvol0,vin,deloc_int)
      call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&
@@ -1862,7 +1862,7 @@ real(dp) :: xcart(3,ab_mover%natom)
        call gred2gdeloc(btinv,deloc_gred,gred,ab_mover%natom,gprimd)
 
 !      Tranfer it in vin_prev, vout_prev
-       call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+       call xfpack_x2vin(acell,ab_mover%natom-1,&
 &       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &       ab_mover%symrel,ucvol,ucvol0,vin_prev,deloc_int)
        call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&

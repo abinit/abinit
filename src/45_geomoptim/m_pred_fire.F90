@@ -289,7 +289,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
 
 !Initialize input vectors : first vin, then vout
 ! transfer xred, acell, and rprim to vin
-call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if

@@ -257,7 +257,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
  call xfpack_f2vout(gred_corrected, ab_mover%natom, ndim,&
@@ -376,7 +376,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
    rprimd_next(:,:)=rprimd(:,:)
    write(std_out,*) 'ucvol',ucvol
 !  Store all these next values in vin_next
-   call xfpack_x2vin(acell_next,acell0,ab_mover%natom,&
+   call xfpack_x2vin(acell_next,ab_mover%natom,&
 &   ndim,ab_mover%nsym,ab_mover%optcell,rprim_next,&
 &   rprimd,ab_mover%symrel,ucvol_next,ucvol0,&
 &   vin_next,xred_next)
@@ -492,7 +492,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !    Generate xred_next from xcart_next
      call xcart2xred(ab_mover%natom,rprimd_next,xcart_next,xred_next)
 !    Store xred_next, and eventual acell_next and rprim_next in vin
-     call xfpack_x2vin(acell_next,acell0,&
+     call xfpack_x2vin(acell_next,&
 &     ab_mover%natom,ndim,ab_mover%nsym,ab_mover%optcell,&
 &     rprim_next,rprimd,&
 &     ab_mover%symrel,ucvol_next,ucvol0,vin_next,xred_next)
