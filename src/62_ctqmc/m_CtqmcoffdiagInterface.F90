@@ -53,6 +53,7 @@ TYPE CtqmcoffdiagInterface
   TYPE(Ctqmcoffdiag) :: Hybrid
   INTEGER :: opt_fk       = 0
   INTEGER :: opt_order    = 0
+  INTEGER :: opt_histo    = 0
   INTEGER :: opt_movie    = 0
   INTEGER :: opt_analysis = 0
   INTEGER :: opt_check    = 0
@@ -149,6 +150,7 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
   END IF
   op%opt_fk       = 0
   op%opt_order    = 0
+  op%opt_histo    = 0
   op%opt_movie    = 0
   op%opt_analysis = 0
   op%opt_check    = 0
@@ -199,12 +201,14 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_histo
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_movie
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_analysis
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_check
@@ -216,6 +220,8 @@ SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_movie,opt_analy
     op%opt_Fk = opt_fk
   IF ( PRESENT(opt_order) ) &
     op%opt_order = opt_order
+  IF ( PRESENT(opt_histo) ) &
+    op%opt_histo = opt_histo
   IF ( PRESENT(opt_analysis) ) &
     op%opt_analysis = opt_analysis
   IF ( PRESENT(opt_check) ) &
@@ -302,18 +308,23 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   IF ( PRESENT(hybri_limit)) &
     CALL Ctqmcoffdiag_sethybri_limit(op%Hybrid, hybri_limit)
 
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
   CALL Ctqmcoffdiag_setG0wTab(op%Hybrid, G0omega,op%opt_fk)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   IF ( PRESENT(matU) ) &
     CALL Ctqmcoffdiag_setU(op%Hybrid, matU)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
   CALL Ctqmcoffdiag_run(op%Hybrid,opt_order=op%opt_order, &
+                           opt_histo=op%opt_histo, &
                            opt_movie=op%opt_movie, &
                            opt_analysis=op%opt_analysis, &
                            opt_check=op%opt_check, &
                            opt_noise=op%opt_noise, &
                            opt_spectra=op%opt_spectra, &
                            opt_gMove=op%opt_gMove)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
 
  ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
  ! write(6,*) "opt_gMove",op%opt_gMove
