@@ -631,7 +631,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          bdtot_index=bdtot_index+nband_k
 
          if (dtset%mkmem/=0) then
-           icg=icg+npw_k*my_nspinor*nband_k
+           icg=icg+npw_k*my_nspinor*iband_me
            ikg=ikg+npw_k
          end if
 
