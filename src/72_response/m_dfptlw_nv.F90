@@ -47,6 +47,7 @@ module m_dfptlw_nv
 
  use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_kg,          only : mkkpg
+ use m_dynmat,      only : cart39
 
  implicit none
 
@@ -73,9 +74,11 @@ contains
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2 
+!!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  mpert=maximum number of ipert
 !!  my_natom=number of atoms treated by current processor
 !!  rmet(3,3)=metric tensor in real space (length units squared)
+!!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
 !!       that have to be computed
 !!       1   ->   element has to be computed explicitely
@@ -100,7 +103,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,zion, &
+subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
     
  implicit none
@@ -117,17 +120,20 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  real(dp), intent(out) :: d3etot_nv(2,3,mpert,3,mpert,3,mpert)
  real(dp), intent(in) :: gmet(3,3),rmet(3,3),xred(3,dtset%natom),zion(*)
+ real(dp), intent(in) :: gprimd(3,3),rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
- integer :: beta,delta,i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,istr,natom,sumg0 
+ integer :: alpha,beta,delta,gamma,i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,istr,natom,sumg0 
  real(dp) :: tmpim,tmpre
  character(len=500) :: msg
 
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: flg1(3),flg2(3)
  real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
- real(dp) :: qphon(3)
+ real(dp),allocatable :: dyewdqdq_tII(:,:,:,:,:,:)
+ real(dp) :: qphon(3),vec1(3),vec2(3)
  
 ! *************************************************************************
 
@@ -168,9 +174,70 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
 
    !2nd q-gradient of Ewald contribution to the IFCs
    ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
+   ABI_MALLOC(dyewdqdq_tII,(2,3,natom,3,3,3))
    sumg0=1;qphon(:)=zero
    call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,zion,&
 & mpi_atmtab=mpi_atmtab,comm_atom=comm_atom)
+
+   !Convert the indexes labelling the strain perturbation into cartesian coordinates
+   !Transform the metric perturbation direction 
+   !(treat it as an atomic displacement)
+   flg1(:)=1
+   do i1pert=1,natom
+     do i1dir=1,3
+       do gamma=1,3
+         do ii=1,2
+           do delta=1,3
+             do beta=1,3
+               vec1(beta)=dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
+             do beta=1,3
+               dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)=vec2(beta)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+               
+   !Transform the second q-gradient direction 
+   !(treat it as an electric field)
+   do i1pert=1,natom
+     do i1dir=1,3
+       do gamma=1,3
+         do ii=1,2
+           do beta=1,3
+             do delta=1,3
+               vec1(delta)=dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             do delta=1,3
+               dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)=vec2(delta)
+             end do
+           end do
+
+         end do
+       end do
+     end do
+   end do
+
+   !Convert to type-II quantity
+   dyewdqdq_tII(:,:,:,:,:,:)=zero
+   do i1pert=1,natom
+     do alpha=1,3
+       do gamma=1,3
+         do beta=1,3
+           do delta=1,3
+             dyewdqdq_tII(:,alpha,i1pert,gamma,beta,delta)= &
+           & dyewdqdq(:,alpha,i1pert,beta,delta,gamma) + &
+           & dyewdqdq(:,alpha,i1pert,delta,gamma,beta) - &
+           & dyewdqdq(:,alpha,i1pert,gamma,beta,delta)
+           end do
+         end do
+       end do
+     end do
+   end do
 
    i3pert=natom+8
    do i1pert=1,natom
@@ -180,8 +247,8 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
            istr=(i2pert-natom-3)*3+i2dir
            beta=idx(2*istr-1); delta=idx(2*istr)
            do i3dir=1,3
-             tmpre=dyewdqdq(1,i1dir,i1pert,i3dir,beta,delta)
-             tmpim=dyewdqdq(2,i1dir,i1pert,i3dir,beta,delta)
+             tmpre=dyewdqdq_tII(1,i1dir,i1pert,i3dir,beta,delta)
+             tmpim=dyewdqdq_tII(2,i1dir,i1pert,i3dir,beta,delta)
              if (abs(tmpre)>=tol8) d3etot_nv(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= half*tmpre
              if (abs(tmpim)>=tol8) d3etot_nv(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= half*tmpim
            end do

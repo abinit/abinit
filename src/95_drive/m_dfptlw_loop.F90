@@ -818,7 +818,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  end if
 
 !Incorporate T4, T5 and Tgeom to d3etot
- d3etot=d3etot+t4_typeII+t5_typeII!+tgeom_typeII
+ d3etot=d3etot+t4_typeII+t5_typeII+tgeom_typeII
 
 !Anounce end of spatial-dispersion calculation
  write(message, '(a,a,a,a)' ) ch10,ch10,&

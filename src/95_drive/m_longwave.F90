@@ -535,7 +535,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  
 !Calculate the nonvariational Ewald terms
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-   call dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,psps%ziontypat, & 
+   call dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,psps%ziontypat, & 
   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  end if
 
