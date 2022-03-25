@@ -193,13 +193,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma,g0term
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
- integer :: idq,ierr,ii,ireadwf,istr,mcg,me,mpsang
+ integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma,g0term
+ integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
+ integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
  integer :: opthartdqdq,optorth,optres,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
- real(dp) :: boxcut,dum_scl,ecut,ecut_eff,fac,gsqcut   
+ real(dp) :: boxcut,delad,delag,delbd,delbg,dum_scl,ecut,ecut_eff,fac,gsqcut   
  logical :: non_magnetic_xc,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
@@ -218,6 +218,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
  real(dp),allocatable :: t4_typeI(:,:,:,:,:,:),t4_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: t5_typeI(:,:,:,:,:,:),t5_typeII(:,:,:,:,:,:,:)
+ real(dp),allocatable :: tgeom_typeI(:,:,:,:,:,:),tgeom_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: vhartr1(:),vhart1dqdq(:),vpsp1(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vtrial1_i1pert(:,:),vtrial1_i2pert(:,:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
@@ -265,6 +266,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  ABI_MALLOC(t5_typeII,(2,3,mpert,3,mpert,3,mpert))
  if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
    ABI_MALLOC(t5_typeI,(2,3,mpert,3,3,3))
+ end if
+ ABI_MALLOC(tgeom_typeII,(2,3,mpert,3,mpert,3,mpert))
+ if (any(d3e_pert1(1:natom)==1).and.(d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1)) then
+   ABI_MALLOC(tgeom_typeI,(2,3,mpert,3,3,3))
  end if
 
 !Compute large sphere cut-off gsqcut
@@ -627,6 +632,37 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
                      t5_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t5(:,1)
                    end if
 
+                   if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
+                     alpha=i1dir
+                     gamma=i3dir
+                     do idq=1,n2dq
+                       if (i2pert==natom+3) then
+                         istr=i2dir
+                       else 
+                         istr=idq*3+i2dir
+                       endif 
+                       beta=idx(2*istr-1); delta=idx(2*istr)
+                       tgeom_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_tgeom(:,idq)
+                       !Incorporate here the G=0 contribution of the geometric term
+                       ia1=0
+                       itypat=0
+                       do ii=1,dtset%ntypat
+                         ia1=ia1+nattyp(ii)
+                         if (atindx(i1pert)<=ia1.and.itypat==0) itypat=ii
+                       end do
+                       delad=zero ; if (alpha==delta) delad=one
+                       delbd=zero ; if (beta==delta)  delbd=one
+                       delag=zero ; if (alpha==gamma) delag=one
+                       delbg=zero ; if (beta==gamma)  delbg=one
+                       
+                       tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma)= &
+                     & tgeom_typeI(1,i1dir,i1pert,beta,delta,gamma) + &
+                     & pi*pi*rhog(1,1)*psps%vlspl(1,2,itypat)*(delag*delbd+delad*delbg)
+                     end do
+                   else 
+                     tgeom_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_tgeom(:,1)
+                   end if
+
                  end if   ! rfpert
                end do    ! ir3dir
              end do     ! ir3pert
@@ -754,6 +790,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
        end if ! rfpert
      end do ! i1dir
    end do ! i1pert
+ end if
+
+!Tgeom needs to be converted to type-II
+ if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
+ 
  end if
 
 !Incorporate T4 and T5 to d3etot

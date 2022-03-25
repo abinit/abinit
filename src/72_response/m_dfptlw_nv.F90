@@ -46,6 +46,7 @@ module m_dfptlw_nv
  use m_pawfgr
 
  use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
+ use m_kg,          only : mkkpg
 
  implicit none
 
@@ -193,7 +194,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
 
  !Print results
  if (dtset%prtvol>=10) then
-   write(msg,'(3a)') ch10,'LONGWAVE NONVARIATIONAL D3ETOT: ',ch10
+   write(msg,'(3a)') ch10,'LONGWAVE NONVARIATIONAL EWALD D3ETOT: ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    do i1pert=1,mpert
@@ -327,7 +328,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
 
 !Local variables-------------------------------
 !scalars
- integer :: beta,delta,gamma,iband,idq,ii,istr,nkpg,nkpg1,nylmgrpart
+ integer :: beta,delta,gamma,iband,idq,ii,ipw,istr,ka,nkpg,nkpg1,nylmgrpart
  integer :: optlocal,optnl,q1dir,q2dir,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
@@ -353,6 +354,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
  tim_getgh1c=0
  useylmgr1=1;optlocal=1;optnl=1
  nylmgrpart=3
+ nkpg=3
  d3etot_tgeom_k(:,:)=zero
 
 !Allocations
@@ -367,6 +369,11 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
  ABI_MALLOC(gvnl1dqc,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(part_ylmgr_k,(npw_k,3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
  part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3,:)
+ ABI_MALLOC(gh1dqpkc,(2,npw_k*dtset%nspinor))
+ ABI_MALLOC(kpg_pk,(npw_k,nkpg))
+
+!Generate k+G vectors
+ call mkkpg(kg_k,kpg_pk,kpt,nkpg,npw_k)
 
 !Since this is a type-I term, it has to be done for both up and down
 !extradiagonal shear strains
@@ -429,9 +436,11 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         d3etot_tgeom_k(1,idq)=d3etot_tgeom_k(1,idq)+occ_k(iband)*dotr
-         d3etot_tgeom_k(2,idq)=d3etot_tgeom_k(2,idq)+occ_k(iband)*doti
-
+         !Take into account the two pi factor from the term
+         !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
+         !Take also into account here the -i factor and the complex conjugate
+         d3etot_tgeom_k(1,idq)=d3etot_tgeom_k(1,idq)-occ_k(iband)*half*doti*two_pi
+         d3etot_tgeom_k(2,idq)=d3etot_tgeom_k(2,idq)-occ_k(iband)*half*dotr*two_pi
 
        end do !iband
 
@@ -451,19 +460,91 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
 
    end do !ii
 
+   !-----------------------------------------------------------------------------------------------
+   !  2nd q-gradient of atomic displacement 1st order hamiltonian * momentum operator :
+   !  <u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma\delta} (k+G)_{\beta} | u_{i,k}^{(0)} >
+   !-----------------------------------------------------------------------------------------------
+
+   !Get q-gradient of first-order local part of the pseudopotential
+   call dfpt_vlocaldqdq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+   &  psps%mqgrid_vl,dtset%natom,&
+   &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
+   &  ph1d,gamma,delta,psps%qgrid_vl,&
+   &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
+
+   !Set up q-gradient of local potential vlocal1dq with proper dimensioning
+   call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
+   &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
+
+   !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
+   call init_rf_hamiltonian(2,gs_hamkq,i1pert,rf_hamkq,&
+   & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+
+   !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+   call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,gamma, &
+ & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+ & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
+ & qdir2=delta)
+
+   !LOOP OVER BANDS
+   do iband=1,nband_k
+
+     if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+
+     !Read ket ground-state wavefunctions
+     cwave0i(:,:)=cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+
+     !Compute < g |H^{\tau_{\kappa\alpha}}_{\gamma\delta} | u_{i,k}^{(0)} >
+     call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
+     & i1dir,i1pert,mpi_enreg,optlocal,optnl,gamma,rf_hamkq,qdir2=delta)
+
+     !LOOP OVER ONE OF THE STRAIN DIRECTIONS
+     do ka=1,3
+       do ipw=1,npw_k
+         gh1dqpkc(:,ipw)=gh1dqc(:,ipw)*kpg_pk(ipw,ka)
+       end do
+
+       call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqpkc, &
+     & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+         !Take into account the two pi factor from the term
+         !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
+       d3etot_tgeom_k(1,idq)=d3etot_tgeom_k(1,idq)-occ_k(iband)*doti*two_pi
+       d3etot_tgeom_k(2,idq)=d3etot_tgeom_k(2,idq)-occ_k(iband)*dotr*two_pi
+
+     end do
+
+   end do !iband
+
+   !Clean the rf_hamiltonian
+   call rf_hamkq%free()
+
+   !Deallocations
+   ABI_FREE(kpg_k)
+   ABI_FREE(kpg1_k)
+   ABI_FREE(dkinpw)
+   ABI_FREE(kinpw1)
+   ABI_FREE(ffnlk)
+   ABI_FREE(ffnl1)
+   ABI_FREE(ph3d)
+
  end do !idq
+
+!scale by the k-point weight
+ d3etot_tgeom_k(:,:)=d3etot_tgeom_k(:,:)*wtk_k
 
 !Deallocations
  ABI_FREE(dum_cwaveprj)
  ABI_FREE(gh1dqc)
-! ABI_FREE(gh1dqpkc)
+ ABI_FREE(gh1dqpkc)
  ABI_FREE(gvloc1dqc)
  ABI_FREE(gvnl1dqc)
  ABI_FREE(vpsp1dq)
  ABI_FREE(vlocal1dq)
  ABI_FREE(dum_vpsp)
  ABI_FREE(dum_vlocal)
-! ABI_FREE(kpg_pk)
+ ABI_FREE(kpg_pk)
  ABI_FREE(cwave0i)
  ABI_FREE(part_ylmgr_k)
 
