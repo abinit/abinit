@@ -487,22 +487,24 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
 
     //We copy back results
     if((*choice)==1){
-      if((*paw_opt)!=3)
-	cuda_state=cudaMemcpy(vectout,vectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
-      if((*paw_opt)>2)
-	cuda_state=cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
+        if((*paw_opt)!=3)
+            cuda_state=cudaMemcpy(vectout,vectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
+        if((*paw_opt)>2)
+            cuda_state=cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
     }
     else if(((*choice)==2) && ((*signs)==1))
-      cuda_state=cudaMemcpy(enlout,enlout_gpu,3*(*natom)*sizeof(double),cudaMemcpyDeviceToHost);
+        cuda_state=cudaMemcpy(enlout,enlout_gpu,3*(*natom)*sizeof(double),cudaMemcpyDeviceToHost);
     else if(((*choice)==3) && ((*signs)==1))
-      cuda_state=cudaMemcpy(enlout,enlout_gpu,6*sizeof(double),cudaMemcpyDeviceToHost);
+        cuda_state=cudaMemcpy(enlout,enlout_gpu,6*sizeof(double),cudaMemcpyDeviceToHost);
     else if(((*choice)==23) && ((*signs)==1))
-      cuda_state=cudaMemcpy(enlout,enlout_gpu,(6+3*(*natom))*sizeof(double),cudaMemcpyDeviceToHost);
+        cuda_state=cudaMemcpy(enlout,enlout_gpu,(6+3*(*natom))*sizeof(double),cudaMemcpyDeviceToHost);
+    else if(((*choice)==7) && ((*signs)==2))
+        cuda_state=cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost);
 
     if(cuda_state!=cudaSuccess){
-      printf("gpu_nonlop: Error while retrieving results from gpu :\n %s \n",cudaGetErrorString(cuda_state));
-      fflush(stdout);
-      abi_cabort();
+        printf("gpu_nonlop: Error while retrieving results from gpu :\n %s \n",cudaGetErrorString(cuda_state));
+        fflush(stdout);
+        abi_cabort();
     }
   }
 
