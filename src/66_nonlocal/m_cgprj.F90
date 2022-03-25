@@ -41,6 +41,7 @@ module m_cgprj
  use m_opernla_ylm, only : opernla_ylm
  use m_opernla_ylm_mv, only : opernla_ylm_mv
  use m_time,           only : timab
+ use m_io_tools,       only : flush_unit
 
  implicit none
 
@@ -426,7 +427,6 @@ contains
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)= # atoms of each type
 !!  nband(nkpt*nsppol)=number of bands at this k point for that spin polarization
-!TODO : distribute cprj over bands as well
 !!  mband_mem=max number of bands for this processor (in case of band parallelism)
 !!  ncprj=1st dim. of cprj array (natom if iatom<=0, 1 if iatom>0)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~ABINIT/Infos/vargs.htm#ngfft
@@ -461,7 +461,7 @@ contains
 !! SOURCE
 
  subroutine ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
-& iorder_cprj,istwfk,kg,kpt,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
+& iorder_cprj,istwfk,kg,kpt,mband_mem,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
 & nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
 
@@ -470,7 +470,7 @@ contains
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mcg,mcprj,mgfft,mkmem,mpsang,mpw
  integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
 !TODO : distribute cprj over bands as well
-! integer,intent(in) :: mband_mem
+ integer,intent(in) :: mband_mem
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
@@ -491,6 +491,7 @@ contains
  integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
  integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1,kk,nlmn
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
+ integer :: nband_cg_k
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
  integer :: spaceComm,spaceComm_band,spaceComm_fft,useylmgr
  logical :: cg_band_distributed,cprj_band_distributed,one_atom
@@ -561,10 +562,11 @@ contains
    cg_band_distributed=.false.
    cprj_band_distributed=.false.
    spaceComm_band=xmpi_comm_self
+
    if (mpi_enreg%paralbd==1) then
      cg_band_distributed=.true.
      cprj_band_distributed=.true.
-     spaceComm_band=mpi_enreg%comm_band
+     spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then
@@ -832,6 +834,7 @@ contains
      blocksz=npband_bandfft*cg_bandpp
      nblockbd=nband_k/blocksz
      nband_cprj_k=merge(nband_k/npband_bandfft,nband_k,cprj_band_distributed)
+     nband_cg_k=merge(nband_k/npband_bandfft,nband_k,cg_band_distributed)
      do iblockbd=1,nblockbd
        iband_min=1+(iblockbd-1)*blocksz
        iband_max=iblockbd*blocksz
@@ -907,7 +910,7 @@ contains
 !    Shift array memory (if mkmem/=0)
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k
-       icg=icg+my_nspinor*nband_k*npw_k
+       icg=icg+my_nspinor*nband_cg_k*npw_k
        ikg=ikg+npw_k
      end if
 

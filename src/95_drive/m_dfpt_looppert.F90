@@ -74,7 +74,7 @@ module m_dfpt_loopert
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_bcast, pawrhoij_copy, &
                           pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_inquire_dim
- use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
+ use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim , pawcprj_output
  use m_pawfgr,     only : pawfgr_type
  use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
@@ -1131,7 +1131,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
-!TODO : distribute cprj by band as well?
+! distribute cprj by band as well
+! NB: currently nsppol=2 is distributed in data (0s saved for other spin) 
+!   but not in memory: all procs have nsppol 2 below
        mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
        ABI_FREE(cprj)
@@ -1155,7 +1157,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          choice=1; iorder_cprj=0; idir0=0
        end if
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
-&       kg,kpt_rbz,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
+&       kg,kpt_rbz,mband_mem_rbz,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
 &       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
 &       rmet,dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
@@ -1334,7 +1336,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (ipert<=dtset%natom.and.(sum(dtset%qptn(1:3)**2)>=1.d-14)) then ! phonons at non-zero q
          choice=1 ; iorder_cprj=0 ; idir0=0
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
-&         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
+&         kg1,kpq_rbz,mband_mem_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
 &         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)

@@ -2259,13 +2259,13 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 !     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
 
-     if (nrank*nkpt < nproc) then
+     if (nrank*nkpt*nsppol < nproc) then
        write(unit=msg,fmt='(a,i6,2a,i6,a,i6,4a)') &
         'The number of processors nproc = ', nproc, ch10,&
         ' is not equal to nrank (=',nrank,&
-        ') times nkpt (',nkpt,&
+        ') times nkpt*nsppol (',nkpt*nsppol,&
         ' , which may change with perturbation) !',ch10,&
-        ' This is inefficient (load unbalancing). Adjust nband to have a divisor <= nproc/nkpt',ch10
+        ' This is inefficient (load unbalancing). Adjust nband to have a divisor <= nproc/nkpt/nsppol',ch10
        ABI_WARNING(msg)
      end if
 ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
@@ -2273,7 +2273,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(3(a,i6))') 'Present parallel dimensions: nkpt= ',nkpt,' nband per processor= ', nb_per_proc, ' npband= ',nrank
+     write(msg,'(4(a,i6))') 'Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,' nband per processor= ', nb_per_proc, ' npband= ',nrank
      call wrtout(std_out,msg,'COLL')
 
      ABI_FREE(ranks)
@@ -2633,7 +2633,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
 !TODO : could end up with 0 bands on certain procs with this configuration and nband(k) /= constant
            if (nsppol==2 .and. iiband <= nband_k_sp2) then
-             mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+             mpi_enreg%proc_distrb(iikpt,iiband,2)=ind+nkpt*nproc_band
            end if
            !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
