@@ -222,7 +222,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp) :: residk,weight,cpu,wall,gflops
  character(len=500) :: msg
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
- real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
+ real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
+ real(dp),allocatable,target :: cwavef(:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),gsc(:,:),ghc_vectornd(:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  real(dp),pointer :: cwavef_iband(:,:)
@@ -734,66 +735,71 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if(iscf>0)then
      ! In case of fixed occupation numbers, accumulates the partial density
      if (fixed_occ .and. mpi_enreg%paral_kgb/=1) then
-       if (abs(occ_k(iblock))>=tol8) then
-         weight=occ_k(iblock)*wtk/gs_hamk%ucvol
-!        Accumulate charge density in real space in array rhoaug
+       do iblocksize=1,blocksize
+         iband=(iblock-1)*blocksize+iblocksize
+         cwavef_iband => cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor)
 
-!        The same section of code is also found in mkrho.F90 : should be rationalized !
-         call fourwf(1,rhoaug(:,:,:,1),cwavef,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-&         istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&         gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&         tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+         if (abs(occ_k(iband))>=tol8) then
+           weight=occ_k(iband)*wtk/gs_hamk%ucvol
+!          Accumulate charge density in real space in array rhoaug
 
-         if(dtset%nspinor==2)then
-           ABI_MALLOC(cwavef1,(2,npw_k))
-           cwavef1(:,:)=cwavef(:,1+npw_k:2*npw_k) ! EB FR spin dn part and used for m_z component (cwavef_z)
+!          The same section of code is also found in mkrho.F90 : should be rationalized !
+           call fourwf(1,rhoaug(:,:,:,1),cwavef_iband,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
+&           istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+&           gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+&           tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
-           if(dtset%nspden==1) then
+           if(dtset%nspinor==2)then
+             ABI_MALLOC(cwavef1,(2,npw_k))
+             cwavef1(:,:)=cwavef_iband(:,1+npw_k:2*npw_k) ! EB FR spin dn part and used for m_z component (cwavef_z)
 
-             call fourwf(1,rhoaug(:,:,:,1),cwavef1,dummy,wfraug,&
-&             gs_hamk%gbound_k,gs_hamk%gbound_k,&
+             if(dtset%nspden==1) then
+
+               call fourwf(1,rhoaug(:,:,:,1),cwavef1,dummy,wfraug,&
+&               gs_hamk%gbound_k,gs_hamk%gbound_k,&
+&               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+&               tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+
+             else if(dtset%nspden==4) then
+               ! Build the four components of rho. We use only norm quantities and, so fourwf.
+               ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+               ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+               ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+               ABI_MALLOC(cwavef_x,(2,npw_k))
+               ABI_MALLOC(cwavef_y,(2,npw_k))
+               !$(\Psi^{1}+\Psi^{2})$
+               cwavef_x(:,:)=cwavef_iband(:,1:npw_k)+cwavef1(:,1:npw_k)
+               !$(\Psi^{1}-i \Psi^{2})$
+               cwavef_y(1,:)=cwavef_iband(1,1:npw_k)+cwavef1(2,1:npw_k)
+               cwavef_y(2,:)=cwavef_iband(2,1:npw_k)-cwavef1(1,1:npw_k)
+               ! z component
+              call fourwf(1,rhoaug(:,:,:,4),cwavef1,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+&               tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+               ! x component
+               call fourwf(1,rhoaug(:,:,:,2),cwavef_x,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
+&               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+&               tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+               ! y component
+               call fourwf(1,rhoaug(:,:,:,3),cwavef_y,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
+&               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
+&               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
+&               tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
-           else if(dtset%nspden==4) then
-             ! Build the four components of rho. We use only norm quantities and, so fourwf.
-             ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-             ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-             ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
-             ABI_MALLOC(cwavef_x,(2,npw_k))
-             ABI_MALLOC(cwavef_y,(2,npw_k))
-             !$(\Psi^{1}+\Psi^{2})$
-             cwavef_x(:,:)=cwavef(:,1:npw_k)+cwavef1(:,1:npw_k)
-             !$(\Psi^{1}-i \Psi^{2})$
-             cwavef_y(1,:)=cwavef(1,1:npw_k)+cwavef1(2,1:npw_k)
-             cwavef_y(2,:)=cwavef(2,1:npw_k)-cwavef1(1,1:npw_k)
-             ! z component
-             call fourwf(1,rhoaug(:,:,:,4),cwavef1,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-&             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-             ! x component
-             call fourwf(1,rhoaug(:,:,:,2),cwavef_x,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-&             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-             ! y component
-             call fourwf(1,rhoaug(:,:,:,3),cwavef_y,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
-&             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+               ABI_FREE(cwavef_x)
+               ABI_FREE(cwavef_y)
 
-             ABI_FREE(cwavef_x)
-             ABI_FREE(cwavef_y)
-
-           end if ! dtset%nspden/=4
-           ABI_FREE(cwavef1)
+             end if ! dtset%nspden/=4
+             ABI_FREE(cwavef1)
+           end if
+         else
+           nskip=nskip+1
          end if
-       else
-         nskip=nskip+1
-       end if
-
+       end do  ! Loop inside a block of bands
+       
 !      In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
      else if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
 
