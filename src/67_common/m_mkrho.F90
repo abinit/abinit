@@ -174,6 +174,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
  integer :: iband_me
+ integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
@@ -212,6 +213,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbandc1=1
  end if
  use_nondiag_occup_dmft=0
+
 
 !if(dtset%nspinor==2.and.paw_dmft%use_sc_dmft==1) then
 !write(message, '(a,a,a,a)' )ch10,&
@@ -313,6 +315,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        do ikpt=1,dtset%nkpt
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         mband_mem = nband_k
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
 
@@ -331,6 +334,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !        Shoulb be changed to treat bands by batch always
 
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
+           mband_mem = dtset%mband/mpi_enreg%nproc_band
            iband_me = 0
            do iband=1,nband_k
 !            if(paw_dmft%use_sc_dmft==1) then
@@ -631,7 +635,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          bdtot_index=bdtot_index+nband_k
 
          if (dtset%mkmem/=0) then
-           icg=icg+npw_k*my_nspinor*iband_me
+           icg=icg+npw_k*my_nspinor*mband_mem !iband_me
            ikg=ikg+npw_k
          end if
 
