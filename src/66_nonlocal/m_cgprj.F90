@@ -569,7 +569,6 @@ contains
      cprj_band_distributed=.true.
      spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
      npband_dfpt=mpi_enreg%nproc_band
-print *, 'mpi_enreg%nproc_band ',mpi_enreg%nproc_band
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then

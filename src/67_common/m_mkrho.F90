@@ -334,7 +334,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !        Shoulb be changed to treat bands by batch always
 
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
-           mband_mem = dtset%mband/mpi_enreg%nproc_band
+           mband_mem = nband_k/mpi_enreg%nproc_band
            iband_me = 0
            do iband=1,nband_k
 !            if(paw_dmft%use_sc_dmft==1) then
