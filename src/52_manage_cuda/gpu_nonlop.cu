@@ -426,9 +426,9 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   else
     cplex=2;
 
-  //if cpot==2, the projections are already in memory
+  // if cpot==2, the projections are already in memory, so we just upload them on device
   if((*cpopt)==2){
-    cudaMemcpy(proj,proj_gpu,nb_proj_to_compute*sizeof(double2),cudaMemcpyDeviceToHost);
+      cudaMemcpy(proj_gpu,proj,nb_proj_to_compute*sizeof(double2),cudaMemcpyHostToDevice);
   }
   else {
     gpu_compute_nl_projections_(proj_gpu,dproj_gpu,
