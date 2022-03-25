@@ -3041,6 +3041,7 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 !scalars
  integer,parameter :: im=2,nng=10,nnr=6,re=1
  integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ integer :: alpha,beta,gamma,delta
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: arg,arga,argb,c1i,c1r,delad,delag,delbd,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
@@ -3376,18 +3377,20 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 !Convert to type-II quantity
  dyewdqdq(:,:,:,:,:,:)=zero
  do ia=1,natom
-   do iq2=1,3
-     do iq1=1,3
-       do nu=1,3
-         do mu=1,3
-           dyewdqdq(:,mu,ia,iq2,nu,iq1)= dyewdqdq_tI(:,mu,ia,nu,iq1,iq2) + &
-                                       & dyewdqdq_tI(:,mu,ia,iq1,iq2,nu) - &
-                                       & dyewdqdq_tI(:,mu,ia,iq2,nu,iq1)
+   do alpha=1,3
+     do gamma=1,3
+       do beta=1,3
+         do delta=1,3
+           dyewdqdq(:,alpha,ia,gamma,beta,delta)= &
+         & dyewdqdq_tI(:,alpha,ia,beta,delta,gamma) + &
+         & dyewdqdq_tI(:,alpha,ia,delta,gamma,beta) - &
+         & dyewdqdq_tI(:,alpha,ia,gamma,beta,delta)
          end do
        end do
      end do
    end do
  end do
+
  ABI_FREE(dyewdqdq_tI)
 
 !Destroy atom table used for parallelism
