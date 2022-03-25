@@ -52,7 +52,7 @@ module m_rttddft_output
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
  use m_rttddft_tdks,  only: tdks_type
  use m_specialmsg,    only: wrtout
- use m_xmpi,          only: xmpi_comm_rank, xmpi_comm_self
+ use m_xmpi,          only: xmpi_comm_rank
    
  implicit none
 
@@ -105,6 +105,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  !arrays
  
  !Local variables-------------------------------
+ integer :: me
  !scalars
  character            :: tmp
  character(len=500)   :: msg
@@ -188,9 +189,10 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  end if
 
  ! Special case of last step
+ me = xmpi_comm_rank(mpi_enreg%comm_world)
  if (istep == tdks%first_step+tdks%ntime-1) then
     if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then 
-      call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+      call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks,force_write=.TRUE.)
       call prt_restart(dtfil,istep,mpi_enreg,tdks)
     end if
     close(tdks%tdener_unit)
@@ -452,7 +454,7 @@ end subroutine prt_den
 !! CHILDREN
 !!
 !! SOURCE
-subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks)
+subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks, force_write)
 
  implicit none
 
@@ -464,6 +466,7 @@ subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),            intent(inout) :: tdks
+ logical,  optional,         intent(in)    :: force_write
  !arrays
 
  !Local variables-------------------------------
@@ -471,18 +474,30 @@ subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  integer,parameter     :: response=0
  character(len=fnlen)  :: fname
  character(len=24)     :: step_nb
+ logical               :: lforce_write = .FALSE.
  !arrays
 
 ! *************************************************************************
 
  write(step_nb,*) istep
-
  !Use initial eigenvalues to ensure that we get the same occupation upon restart
  fname = trim(dtfil%filnam_ds(4))//'_WFK_'//trim(adjustl(step_nb))
- call outwf(tdks%cg,dtset,psps,tdks%eigen0,fname,tdks%hdr,tdks%kg,dtset%kptns, &
-          & dtset%mband,tdks%mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,  &
-          & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ,response, &
-          & dtfil%unwff2,tdks%wvl%wfs,tdks%wvl%descr)
+
+ if (present(force_write)) then
+    if (force_write) lforce_write = .TRUE.
+ end if
+
+ if (lforce_write) then
+   call outwf(tdks%cg,dtset,psps,tdks%eigen0,fname,tdks%hdr,tdks%kg,dtset%kptns, &
+             & dtset%mband,tdks%mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,  &
+             & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ,response, &
+             & dtfil%unwff2,tdks%wvl%wfs,tdks%wvl%descr, force_write=.TRUE.)
+ else
+   call outwf(tdks%cg,dtset,psps,tdks%eigen0,fname,tdks%hdr,tdks%kg,dtset%kptns, &
+             & dtset%mband,tdks%mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,  &
+             & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ,response, &
+             & dtfil%unwff2,tdks%wvl%wfs,tdks%wvl%descr)
+ end if
 
 end subroutine prt_wfk
 

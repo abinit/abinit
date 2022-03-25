@@ -2251,7 +2251,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
    dtsets(idtset)%dosdeltae=zero
    dtsets(idtset)%dtion=100.0_dp
-   dtsets(idtset)%dtele=1.0_dp
+   dtsets(idtset)%dtele=0.1_dp
    dtsets(idtset)%d3e_pert1_atpol(1:2)=1
    dtsets(idtset)%d3e_pert1_dir(1:3)=0
    dtsets(idtset)%d3e_pert1_elfd=0
@@ -2620,11 +2620,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
-   dtsets(idtset)%td_scnmax=0
+   dtsets(idtset)%td_scnmax=3
    dtsets(idtset)%td_prtstr=10
    dtsets(idtset)%td_restart=0
    dtsets(idtset)%td_propagator=1
-   dtsets(idtset)%td_scthr=0.0001_dp
+   dtsets(idtset)%td_scthr=1e-7_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
