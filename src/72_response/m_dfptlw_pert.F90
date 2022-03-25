@@ -337,6 +337,13 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
      & wtk_k,xred,ylm_k,ylmgr_k)
 
+!    Add the contribution from each k-point. 
+     d3etot_t1=d3etot_t1 + d3etot_t1_k
+     d3etot_t2=d3etot_t2 + d3etot_t2_k
+     d3etot_t3=d3etot_t3 + d3etot_t3_k
+     d3etot_t4=d3etot_t4 + d3etot_t4_k
+     d3etot_t5=d3etot_t5 + d3etot_t5_k
+ 
      !Compute the nonvariational geometric term
      if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
        call dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
@@ -345,15 +352,10 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
        &  ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
 
+       !Add the contribution from each k-point
+       d3etot_tgeom=d3etot_tgeom + d3etot_tgeom_k
      end if
 
-!    Add the contribution from each k-point. 
-     d3etot_t1=d3etot_t1 + d3etot_t1_k
-     d3etot_t2=d3etot_t2 + d3etot_t2_k
-     d3etot_t3=d3etot_t3 + d3etot_t3_k
-     d3etot_t4=d3etot_t4 + d3etot_t4_k
-     d3etot_t5=d3etot_t5 + d3etot_t5_k
- 
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
 
@@ -377,6 +379,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
    call xmpi_sum(d3etot_t3,spaceworld,ierr)
    call xmpi_sum(d3etot_t4,spaceworld,ierr)
    call xmpi_sum(d3etot_t5,spaceworld,ierr)
+   call xmpi_sum(d3etot_tgeom,spaceworld,ierr)
  end if
 
 !Apply +i or -i in case of strain perturbation.
@@ -399,6 +402,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
    tmpre=d3etot_t3(1);tmpim=d3etot_t3(2) ; d3etot_t3(1)=-tmpim;d3etot_t3(2)=tmpre
    do idq=1,n2dq
      tmpre=d3etot_t4(1,idq);tmpim=d3etot_t4(2,idq) ; d3etot_t4(1,idq)=-tmpim;d3etot_t4(2,idq)=tmpre
+     tmpre=d3etot_tgeom(1,idq);tmpim=d3etot_tgeom(2,idq) ; d3etot_tgeom(1,idq)=-tmpim;d3etot_tgeom(2,idq)=tmpre
    end do
    do idq=1,n1dq
      tmpre=d3etot_t5(1,idq);tmpim=d3etot_t5(2,idq) ; d3etot_t5(1,idq)=-tmpim;d3etot_t5(2,idq)=tmpre
@@ -423,6 +427,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  if (abs(d3etot_t3(1))<tol8) d3etot_t3(1)= zero
  do idq=1,n2dq
    if (abs(d3etot_t4(1,idq))<tol8) d3etot_t4(1,idq)= zero
+   if (abs(d3etot_tgeom(1,idq))<tol8) d3etot_tgeom(1,idq)= zero
  end do 
  do idq=1,n1dq
    if (abs(d3etot_t5(1,idq))<tol8) d3etot_t5(1,idq)= zero
@@ -436,6 +441,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  if (abs(d3etot_t3(2))<tol8) d3etot_t3(2)= zero
  do idq=1,n2dq
    if (abs(d3etot_t4(2,idq))<tol8) d3etot_t4(2,idq)= zero
+   if (abs(d3etot_tgeom(2,idq))<tol8) d3etot_tgeom(2,idq)= zero
  end do
  do idq=1,n1dq
    if (abs(d3etot_t5(2,idq))<tol8) d3etot_t5(2,idq)= zero
@@ -445,32 +451,44 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
  if (dtset%prtvol>=10) then
    write(msg,'(4(a,2(a,f18.8)),a)') &
-   ch10,'       d3etot_telec = ',d3etot_telec(1),  ',',d3etot_telec(2),&
-   ch10,'          d3etot_t1 = ',d3etot_t1(1),  ',',d3etot_t1(2),&
-   ch10,'          d3etot_t2 = ',d3etot_t2(1),  ',',d3etot_t2(2),&
-   ch10,'          d3etot_t3 = ',d3etot_t3(1),  ',',d3etot_t3(2)
+   ch10,'          d3etot_telec = ',d3etot_telec(1),  ',',d3etot_telec(2),&
+   ch10,'             d3etot_t1 = ',d3etot_t1(1),  ',',d3etot_t1(2),&
+   ch10,'             d3etot_t2 = ',d3etot_t2(1),  ',',d3etot_t2(2),&
+   ch10,'             d3etot_t3 = ',d3etot_t3(1),  ',',d3etot_t3(2)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    if (n2dq==1) then
      write(msg,'(2(a,f18.8))') &
-     '          d3etot_t4 = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1)
+     '             d3etot_t4 = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1)
    else if (n2dq==2) then
      write(msg,'(2(2(a,f18.8)a))') &
-     'd3etot_t4(dw shear) = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),ch10,&
-     'd3etot_t4(up shear) = ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
+     '   d3etot_t4(dw shear) = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),ch10,&
+     '   d3etot_t4(up shear) = ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    if (n1dq==1) then
      write(msg,'(2(a,f18.8))') &
-     '          d3etot_t5 = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1)
+     '             d3etot_t5 = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1)
    else if (n1dq==2) then
      write(msg,'(2(2(a,f18.8)a))') &
-     'd3etot_t5(dw shear) = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1),ch10,&
-     'd3etot_t5(up shear) = ',d3etot_t5(1,2),  ',',d3etot_t5(2,2)
+     '   d3etot_t5(dw shear) = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1),ch10,&
+     '   d3etot_t5(up shear) = ',d3etot_t5(1,2),  ',',d3etot_t5(2,2)
    end if
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
+   if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
+     if (n2dq==1) then
+       write(msg,'(2(a,f18.8))') &
+       '          d3etot_tgeom = ',d3etot_tgeom(1,1),  ',',d3etot_tgeom(2,1)
+     else if (n2dq==2) then
+       write(msg,'(2(2(a,f18.8)a))') &
+       'd3etot_tgeom(dw shear) = ',d3etot_tgeom(1,1),  ',',d3etot_tgeom(2,1),ch10,&
+       'd3etot_tgeom(up shear) = ',d3etot_tgeom(1,2),  ',',d3etot_tgeom(2,2)
+     end if
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   end if
  end if
 
  d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=e3tot(:)
