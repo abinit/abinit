@@ -1754,7 +1754,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_MALLOC(cprj_tmp,(natom,mcprj_tmp))
        call pawcprj_alloc(cprj_tmp,0,gs_hamk%dimcprj)
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
-&       dtset%mband,mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
+&       mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
 &       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)

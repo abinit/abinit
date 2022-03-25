@@ -461,7 +461,7 @@ contains
 !! SOURCE
 
  subroutine ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
-& iorder_cprj,istwfk,kg,kpt,mband_mem,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
+& iorder_cprj,istwfk,kg,kpt,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
 & nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
 
@@ -470,7 +470,6 @@ contains
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mcg,mcprj,mgfft,mkmem,mpsang,mpw
  integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
 !TODO : distribute cprj over bands as well
- integer,intent(in) :: mband_mem
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
@@ -490,6 +489,7 @@ contains
  integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
  integer :: ider,idir0,iend,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istart,istwf_k,itypat,iwf1,iwf2,jdir
  integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1,kk,nlmn
+ integer :: mband_cg, npband_dfpt
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: nband_cg_k
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
@@ -542,6 +542,7 @@ contains
  end if
 
 !Init parallelism
+ npband_dfpt = 1
  if (paral_kgb==1) then
    me_distrb=mpi_enreg%me_kpt
    spaceComm=mpi_enreg%comm_kpt
@@ -567,6 +568,8 @@ contains
      cg_band_distributed=.true.
      cprj_band_distributed=.true.
      spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
+     npband_dfpt=mpi_enreg%nproc_band
+print *, 'mpi_enreg%nproc_band ',mpi_enreg%nproc_band
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then
@@ -586,6 +589,7 @@ contains
 
 !Initialize some variables
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
+ mband_cg=mcg/(mpw*my_nspinor*mkmem*nsppol)
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
  n1_2p1=2*n1+1;n2_2p1=2*n2+1;n3_2p1=2*n3+1
  ibg=0;icg=0;cpopt=0
@@ -833,8 +837,8 @@ contains
      icgb=icg ; ibgb=ibg ; iband_start=1
      blocksz=npband_bandfft*cg_bandpp
      nblockbd=nband_k/blocksz
-     nband_cprj_k=merge(nband_k/npband_bandfft,nband_k,cprj_band_distributed)
-     nband_cg_k=merge(nband_k/npband_bandfft,nband_k,cg_band_distributed)
+     nband_cprj_k=merge(nband_k/npband_bandfft/npband_dfpt,nband_k,cprj_band_distributed)
+     nband_cg_k=merge(nband_k/npband_bandfft/npband_dfpt,nband_k,cg_band_distributed)
      do iblockbd=1,nblockbd
        iband_min=1+(iblockbd-1)*blocksz
        iband_max=iblockbd*blocksz

@@ -603,7 +603,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
      call pawcprj_alloc(scf_history%cprj(:,:,ind2),0,dimcprj)
      ABI_MALLOC(ylmgr_k,(dtset%mpw,3,0))
      call ctocprj(atindx,cg,1,scf_history%cprj(:,:,ind1),gmet,gprimd,&
-&     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,&
+&     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,&
 &     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &     dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,&
 &     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
@@ -651,7 +651,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
      iatom=0 ; iorder_cprj=0
      ABI_MALLOC(ylmgr_k,(dtset%mpw,3,0))
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,iorder_cprj,&
-&     dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,dtset%mgfft,&
+&     dtset%istwfk,kg,dtset%kptns,mcg,scf_history%mcprj,dtset%mgfft,&
 &     dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,&
 &     nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,&
 &     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,&

@@ -1159,7 +1159,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
          iorder_cprj=0
          call wrtout(std_out,' Computing cprj from wavefunctions (scfcv_core)')
          call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,idir,&
-&          iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&          iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &          dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &          dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &          xred,ylm,ylmgr)
@@ -1203,7 +1203,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &         rprimd,dtset%typat,ucvol,xred,typord=1)
          iatom=-1;idir=0
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
-&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&         iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         xred,ylm,ylmgr)
@@ -2149,7 +2149,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    cprj=> cprj_local
    iatom=0 ; iorder_cprj=1 ! cprj are not ordered
    call ctocprj(atindx,cg,ctocprj_choice,cprj_local,gmet,gprimd,&
-&   iatom,idir,iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,&
+&   iatom,idir,iorder_cprj,dtset%istwfk,kg,dtset%kptns,&
 &   mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
