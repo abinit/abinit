@@ -34,6 +34,8 @@
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
 
+    use m_fstrings,     only : sjoin, itoa
+
 !Arguments ------------------------------------
  integer :: itype
  character(len=1), intent(in) :: jobz
@@ -96,6 +98,19 @@
    else
      call dspgv(itype,jobz,uplo,n,a,b,w,z,ldz,eigen_d_work,info)
    endif
+ end if
+
+  if (info < 0) then
+    ABI_COMMENT(sjoin("argument #", itoa(-info), "had an illegal value"))
+ end if
+
+ if (info > 0) then
+    ABI_COMMENT("DSPEV failed to converge")
+    if (info <= n) then
+       ABI_COMMENT(sjoin("DSPEV failed to converge;", itoa(info), " off-diagonal elements of an intermediate tridiagonal form did not converge to zero."))
+    else
+       ABI_COMMENT("The factorization of B could not be completed and no eigenvalues or eigenvectors were computed.")
+    endif
  end if
 
  ABI_CHECK(info==0,"abi_dhpgv returned info!=0!")
