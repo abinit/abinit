@@ -96,9 +96,7 @@ module m_chebfi2
    real(dp) :: ecut                 ! Ecut for Chebfi oracle
 
    integer :: paral_kgb                     ! MPI parallelization variables
-   integer :: nproc_cols
    integer :: bandpp
-   integer :: nproc_rows
    integer :: comm_cols
    integer :: comm_rows
 
@@ -158,8 +156,8 @@ module m_chebfi2
 !!  me_g0= 1 if this processors treats G=0, 0 otherwise
 !!  neigenpairs= number of requested eigenvectors/eigenvalues
 !!  nline= Chebyshev polynomial level (.i.e. number of H applications)
-!!  nproc_band= size of "band" communicator
-!!  nproc_fft= size of "FFT" communicator
+!!  comm_rows= "rows" communicator
+!!  comm_cols= "cols" communicator
 !!  paral_kgb= flag controlling (k,g,bands) parallelization
 !!  space= defines in which space we are (columns, rows, etc.)
 !!  spacecom= MPI communicator
@@ -180,7 +178,7 @@ module m_chebfi2
 !!
 !! SOURCE
 
-subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,nproc_cols,bandpp,nproc_rows, &
+subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
                        nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,comm_rows,comm_cols)
 
  implicit none
@@ -192,8 +190,6 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  integer       , intent(in   ) :: me_g0
  integer       , intent(in   ) :: neigenpairs
  integer       , intent(in   ) :: nline
- integer       , intent(in   ) :: nproc_cols
- integer       , intent(in   ) :: nproc_rows
  integer       , intent(in   ) :: comm_cols
  integer       , intent(in   ) :: comm_rows
  integer       , intent(in   ) :: paral_kgb
@@ -218,10 +214,8 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,npro
  chebfi%tolerance   = tolerance
  chebfi%ecut        = ecut
  chebfi%paral_kgb   = paral_kgb
- chebfi%nproc_cols  = nproc_cols
  chebfi%comm_cols   = comm_cols
  chebfi%bandpp      = bandpp
- chebfi%nproc_rows  = nproc_rows
  chebfi%comm_rows   = comm_rows
  chebfi%nline       = nline
  chebfi%spacecom    = spacecom
@@ -530,7 +524,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  integer :: neigenpairs
  integer :: nline,nline_max
  integer :: iline, iband, ierr
- integer :: nCpuCols,nCpuRows
 ! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of ABinit, to be saved
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
@@ -572,11 +565,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  ! Transpose
  if (chebfi%paral_kgb == 1) then
-   nCpuRows = chebfi%nproc_rows
-   nCpuCols = chebfi%nproc_cols
 
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols)
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0)
 
 !   !save existing ABinit communicators
 !   comm_fft_save = mpi_enreg%comm_fft
