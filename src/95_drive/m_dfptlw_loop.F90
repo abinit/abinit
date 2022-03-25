@@ -643,6 +643,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
                        endif 
                        beta=idx(2*istr-1); delta=idx(2*istr)
                        tgeom_typeI(:,i1dir,i1pert,beta,delta,gamma)=d3etot_tgeom(:,idq)
+
                        !Incorporate here the G=0 contribution of the geometric term
                        ia1=0
                        itypat=0
@@ -773,7 +774,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
                & t5_typeI(ii,i2dir,i2pert,gamma,beta,delta)
                end do ! i3dir
 
-
                !Transform i3dir into reduced coordinates
                do i3dir=1,3
                  vec1(i3dir)=t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
@@ -793,12 +793,32 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  end if
 
 !Tgeom needs to be converted to type-II
- if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
- 
+ if (any(d3e_pert1(1:natom)==1).and.(d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1)) then
+   fac=two_pi ** 2
+   i3pert= natom+8
+   do i1pert = 1, natom
+     do i1dir = 1, 3
+       do i2pert = natom+3, natom+4
+         do i2dir = 1, 3
+           istr=(i2pert-natom-3)*3+i2dir
+           beta=idx(2*istr-1); delta=idx(2*istr)
+           do ii=1,2
+             do i3dir=1,3
+               gamma=i3dir
+               tgeom_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
+             & tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma) + &
+             & tgeom_typeI(ii,i1dir,i1pert,delta,gamma,beta) - &
+             & tgeom_typeI(ii,i1dir,i1pert,gamma,beta,delta)
+             end do ! i3dir
+           end do ! ii
+         end do ! i2dir
+       end do ! i2pert
+     end do ! i1dir
+   end do ! i1pert
  end if
 
-!Incorporate T4 and T5 to d3etot
- d3etot=d3etot+t4_typeII+t5_typeII
+!Incorporate T4, T5 and Tgeom to d3etot
+ d3etot=d3etot+t4_typeII+t5_typeII!+tgeom_typeII
 
 !Anounce end of spatial-dispersion calculation
  write(message, '(a,a,a,a)' ) ch10,ch10,&

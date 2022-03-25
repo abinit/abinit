@@ -168,7 +168,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
 
    !2nd q-gradient of Ewald contribution to the IFCs
    ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
-   sumg0=0;qphon(:)=zero
+   sumg0=1;qphon(:)=zero
    call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,zion,&
 & mpi_atmtab=mpi_atmtab,comm_atom=comm_atom)
 
@@ -206,7 +206,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,
                if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then 
                  tmpre=d3etot_nv(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                  tmpim=d3etot_nv(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                 if (tmpre>zero.or.tmpim>zero) then 
+                 if (abs(tmpre)>zero.or.abs(tmpim)>zero) then 
                    write(msg,'(3(a,i2,a,i1),2f18.8)') &
            ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
                  & tmpre, tmpim

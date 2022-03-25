@@ -533,22 +533,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  
-!Calculate the nonvariational terms
+!Calculate the nonvariational Ewald terms
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
    call dfptlw_nv(d3etot_nv,dtset,gmet,mpert,my_natom,rfpert,rmet,ucvol,xred,psps%ziontypat, & 
   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  end if
-
-!2nd q-gradient of Ewald contribution to the IFCs
-! if (dtset%lw_flexo/=0) then
-!   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
-!   dyewdqdq(:,:,:,:,:,:)=zero
-!   if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
-!     sumg0=1;qphon(:)=zero
-!     call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-!   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-!   end if
-! end if
 
 !Main loop over the perturbations to calculate the stationary part
  call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
