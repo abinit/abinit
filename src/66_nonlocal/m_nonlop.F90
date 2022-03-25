@@ -758,7 +758,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &         ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
 &         svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir,&
           cprjin_left=cprjin_left,enlout_im=enlout_im,ndat_left=ndat_left_)
-       else 
+       else
          call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
 &         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &         indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
@@ -1016,7 +1016,7 @@ end subroutine nonlop
    write(msg,'(a,i0,a)')'Does not presently support this choice=',choice,'.'
    ABI_BUG(msg)
  end if
- if (cpopt<-1.or.cpopt>1) then
+ if (cpopt<-1.or.cpopt>2) then
    msg='  Bad value for cpopt !'
    ABI_BUG(msg)
  end if
@@ -1097,7 +1097,7 @@ end subroutine nonlop
  if (allocated(proj)) then
    ABI_FREE(proj)
  end if
-   
+
  DBG_EXIT("COLL")
 
 !Fake statements to satisfy ABI rules
