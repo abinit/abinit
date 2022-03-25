@@ -57,7 +57,8 @@ module m_xgTransposer
   integer, parameter, public :: TRANS_ALL2ALL = 1
   integer, parameter, public :: TRANS_GATHER = 2
   integer, parameter         :: TRANS_TYPE_CONSTRUCTED = 1
-  integer, parameter         :: TRANS_TYPE_COPIED = 2
+  integer, parameter         :: TRANS_TYPE_CONSTRUCTED_NULL_COMM = 2
+  integer, parameter         :: TRANS_TYPE_COPIED = 3
 
   integer, parameter :: tim_toColsRows  = 1662
   integer, parameter :: tim_toLinalg    = 1663
@@ -101,7 +102,6 @@ module m_xgTransposer
   public :: xgTransposer_getComm
   public :: xgTransposer_free
 
-
   contains
 !!***
 
@@ -110,16 +110,15 @@ module m_xgTransposer
 !! NAME
 !! xgTransposer_constructor
 
-  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,ncpuRows,ncpuCols,&
-      state,algo,comm_rows,comm_cols)
+  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,&
+      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
     type(xgBlock_t), target, intent(in   ) :: xgBlock_colsrows
     integer                , intent(in   ) :: comm_rows,comm_cols
+    integer                , intent(in   ) :: ncpu_rows,ncpu_cols
     integer                , intent(in   ) :: nspinor
-    integer                , intent(in   ) :: ncpuRows
-    integer                , intent(in   ) :: ncpuCols
     integer                , intent(in   ) :: state
     integer                , intent(in   ) :: algo
     integer :: commLinalg
@@ -127,6 +126,11 @@ module m_xgTransposer
     integer :: nrows
     integer :: ierr
     integer :: icol
+    integer :: ncpuRows
+    integer :: ncpuCols
+#if defined HAVE_MPI
+    integer :: comm_rows_,comm_cols_
+#endif
     character(len=500) :: message
     double precision :: tsec(2)
 
@@ -143,6 +147,24 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
     xgTransposer%mpiData(MPI_LINALG)%size = xmpi_comm_size(commLinalg)
 
+#if defined HAVE_MPI
+    if (comm_rows==xmpi_comm_null.and.comm_cols==xmpi_comm_null) then
+      xgTransposer%type = TRANS_TYPE_CONSTRUCTED_NULL_COMM
+      ncpuCols = ncpu_cols
+      ncpuRows = ncpu_rows
+    else if (comm_rows==xmpi_comm_null) then
+      ABI_ERROR("Comm_rows and comm_cols should have the same status : null or defined. Here only comm_rows is null.")
+    else if (comm_cols==xmpi_comm_null) then
+      ABI_ERROR("Comm_rows and comm_cols should have the same status : null or defined. Here only comm_cols is null.")
+    else
+      xgTransposer%mpiData(MPI_2DCART)%comm = xgTransposer%mpiData(MPI_LINALG)%comm
+      ncpuRows = xmpi_comm_size(comm_rows)
+      ncpuCols = xmpi_comm_size(comm_cols)
+    end if
+#else
+    ncpuRows = 1
+    ncpuCols = 1
+#endif
     if ( xgTransposer%mpiData(MPI_LINALG)%size < ncpuCols*ncpuRows ) then
       write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communcation (", &
         xgTransposer%mpiData(MPI_LINALG)%size, "). Need at least ", ncpuCols*ncpuRows, " processes"
@@ -198,7 +220,20 @@ module m_xgTransposer
         xgTransposer%lookup(icol+1) = MOD(icol,ncpuCols)
       end do
 
-      call xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols,comm_rows,comm_cols)
+#if defined HAVE_MPI
+      if (comm_rows==xmpi_comm_null.and.comm_cols==xmpi_comm_null) then
+        call xgTransposer_makeComm(xgTransposer,nCpuRows,nCpuCols,comm_rows_,comm_cols_)
+      else
+        comm_rows_=comm_rows
+        comm_cols_=comm_cols
+      end if
+      xgTransposer%mpiData(MPI_ROWS)%comm = comm_rows_
+      xgTransposer%mpiData(MPI_COLS)%comm = comm_cols_
+#else
+      xgTransposer%mpiData(MPI_ROWS)%comm = xmpi_comm_null
+      xgTransposer%mpiData(MPI_COLS)%comm = xmpi_comm_null
+#endif
+      call xgTransposer_setComm(xgTransposer)
       call xgTransposer_computeDistribution(xgTransposer)
       call xgTransposer_makeXgBlock(xgTransposer)
 
@@ -310,6 +345,25 @@ module m_xgTransposer
   end subroutine xgTransposer_copyConstructor
 !!***
 
+!!****f* m_xgTransposer/xgTransposer_setComm
+!!
+!! NAME
+!! xgTransposer_setComm
+
+  subroutine xgTransposer_setComm(xgTransposer)
+
+    type(xgTransposer_t), intent(inout) :: xgTransposer
+
+    xgTransposer%mpiData(MPI_ROWS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_ROWS)%comm)
+    xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
+    xgTransposer%mpiData(MPI_COLS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_COLS)%comm)
+    xgTransposer%mpiData(MPI_COLS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_COLS)%comm)
+
+    call xgBlock_setComm(xgTransposer%xgBlock_colsrows,xgTransposer%mpiData(MPI_ROWS)%comm)
+
+  end subroutine xgTransposer_setComm
+!!***
+
 !!****f* m_xgTransposer/xgTransposer_makeComm
 !!
 !! NAME
@@ -320,65 +374,45 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer             , intent(in   ) :: ncpuRows
     integer             , intent(in   ) :: ncpuCols
-    integer             , intent(in   ) :: comm_rows,comm_cols
+    integer             , intent(out  ) :: comm_rows
+    integer             , intent(out  ) :: comm_cols
     integer :: commColsRows
 #if defined HAVE_MPI
     integer :: sizeGrid(2) !coordInGrid(2),
     logical :: periodic(2), selectDim(2), reorder
     integer :: ierr
 
-    if (comm_cols /= xmpi_comm_null .and. comm_rows /= xmpi_comm_null) then
-      if ( ncpuRows /= xmpi_comm_size(comm_rows) ) then
-        ABI_ERROR("ncpuRows is not equal to the size of comm_rows!")
-      end if
-      if ( ncpuCols /= xmpi_comm_size(comm_cols) ) then
-        ABI_ERROR("ncpuCols is not equal to the size of comm_cols!")
-      end if
-      commColsRows = xgTransposer%mpiData(MPI_LINALG)%comm
-      if ( ncpuCols*ncpuRows /= xmpi_comm_size(commColsRows) ) then
-        ABI_ERROR("ncpuCols*ncpuRows is not equal to the size of comm_Cols!")
-      end if
-      xgTransposer%mpiData(MPI_ROWS)%comm = comm_rows
-      xgTransposer%mpiData(MPI_COLS)%comm = comm_cols
-    else
-      sizeGrid(1) = ncpuCols
-      sizeGrid(2) = ncpuRows
-      !sizeGrid(1) = ncpuRows
-      !sizeGrid(2) = ncpuCols
-      periodic = (/ .false., .false. /)
-      reorder  = .false.
-      call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
-      if ( ierr /= xmpi_success ) then
-        ABI_ERROR("xgTransposer failed to creat cartesian grid")
-      end if
+    sizeGrid(1) = ncpuCols
+    sizeGrid(2) = ncpuRows
+    !sizeGrid(1) = ncpuRows
+    !sizeGrid(2) = ncpuCols
+    periodic = (/ .false., .false. /)
+    reorder  = .false.
+    call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
+    if ( ierr /= xmpi_success ) then
+      ABI_ERROR("xgTransposer failed to creat cartesian grid")
+    end if
+    xgTransposer%mpiData(MPI_2DCART)%comm = commColsRows
 
-      selectDim = (/ .false., .true. /)
-      !selectDim = (/ .true., .false. /)
-      call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
-      if ( ierr /= xmpi_success ) then
-        ABI_ERROR("xgTransposer failed to creat rows communicator")
-      end if
-      selectDim = (/ .true., .false. /)
-      !selectDim = (/ .false., .true. /)
-      call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
-      if ( ierr /= xmpi_success ) then
-        ABI_ERROR("xgTransposer failed to creat columns communicator")
-      end if
+    selectDim = (/ .false., .true. /)
+    !selectDim = (/ .true., .false. /)
+    call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
+    if ( ierr /= xmpi_success ) then
+      ABI_ERROR("xgTransposer failed to creat rows communicator")
+    end if
+    selectDim = (/ .true., .false. /)
+    !selectDim = (/ .false., .true. /)
+    call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
+    if ( ierr /= xmpi_success ) then
+      ABI_ERROR("xgTransposer failed to creat columns communicator")
     end if
 #else
     commColsRows = xmpi_comm_null
     xgTransposer%mpiData(MPI_ROWS)%comm = xmpi_comm_null
     xgTransposer%mpiData(MPI_COLS)%comm = xmpi_comm_null
 #endif
-
-    xgTransposer%mpiData(MPI_2DCART)%comm = commColsRows
-
-    xgTransposer%mpiData(MPI_ROWS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_ROWS)%comm)
-    xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
-    xgTransposer%mpiData(MPI_COLS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_COLS)%comm)
-    xgTransposer%mpiData(MPI_COLS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_COLS)%comm)
-
-    call xgBlock_setComm(xgTransposer%xgBlock_colsrows,xgTransposer%mpiData(MPI_ROWS)%comm)
+    comm_rows = xgTransposer%mpiData(MPI_ROWS)%comm
+    comm_cols = xgTransposer%mpiData(MPI_COLS)%comm
 
   end subroutine xgTransposer_makeComm
 !!***
@@ -902,18 +936,18 @@ module m_xgTransposer
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision :: tsec(2)
-!    integer :: i
+    integer :: i
 
     call timab(tim_free,1,tsec)
-!#ifdef HAVE_MPI
-!!    if ( xgTransposer%type == TRANS_TYPE_CONSTRUCTED ) then
-!!      call mpi_comm_free(xgTransposer%mpiData(MPI_ROWS)%comm,i)
-!!      call mpi_comm_free(xgTransposer%mpiData(MPI_COLS)%comm,i)
-!!      call mpi_comm_free(xgTransposer%mpiData(MPI_2DCART)%comm,i)
-!!    end if
-!#else
-!    ABI_UNUSED(i)
-!#endif
+#ifdef HAVE_MPI
+    if ( xgTransposer%type == TRANS_TYPE_CONSTRUCTED_NULL_COMM ) then
+      call mpi_comm_free(xgTransposer%mpiData(MPI_ROWS)%comm,i)
+      call mpi_comm_free(xgTransposer%mpiData(MPI_COLS)%comm,i)
+      call mpi_comm_free(xgTransposer%mpiData(MPI_2DCART)%comm,i)
+    end if
+#else
+    ABI_UNUSED(i)
+#endif
 
     if ( allocated(xgTransposer%lookup) ) then
       ABI_FREE(xgTransposer%lookup)

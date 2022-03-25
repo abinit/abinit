@@ -216,8 +216,8 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
- call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,l_mpi_enreg%nproc_fft*l_mpi_enreg%nproc_spinor,&
-   l_mpi_enreg%nproc_band,space, l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band)
+ call lobpcg_init(lobpcg,nband,l_icplx*l_npw*l_nspinor,blockdim,dtset%tolwfr,nline,&
+   space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################

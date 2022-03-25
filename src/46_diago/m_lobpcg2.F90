@@ -77,8 +77,6 @@ module m_lobpcg2
     integer :: nline                         ! Number of line to perform
     integer :: spacecom                      ! Communicator for MPI
     integer :: paral_kgb                     ! paral_kgb formalism or not
-    integer :: nproc_rows                    ! number of proc for rows
-    integer :: nproc_cols                    ! number oc proc for cols
     integer :: comm_rows                     ! communicator for rows
     integer :: comm_cols                     ! communicator for cols
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
@@ -154,7 +152,7 @@ module m_lobpcg2
   contains
 
 
-  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, nproc_rows, nproc_cols,&
+  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, &
 &      space, spacecom, paral_kgb, comm_rows, comm_cols)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
@@ -163,8 +161,6 @@ module m_lobpcg2
     integer         , intent(in   ) :: blockdim
     double precision, intent(in   ) :: tolerance
     integer         , intent(in   ) :: nline
-    integer         , intent(in   ) :: nproc_rows
-    integer         , intent(in   ) :: nproc_cols
     integer         , intent(in   ) :: comm_rows,comm_cols
     integer         , intent(in   ) :: space
     integer         , intent(in   ) :: spacecom
@@ -188,8 +184,6 @@ module m_lobpcg2
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
     lobpcg%paral_kgb   = paral_kgb
-    lobpcg%nproc_rows  = nproc_rows
-    lobpcg%nproc_cols  = nproc_cols
     lobpcg%comm_rows  = comm_rows
     lobpcg%comm_cols  = comm_cols
 
@@ -419,7 +413,7 @@ module m_lobpcg2
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-        lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols)
+        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
       !call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
       !  lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_GATHER)
 
