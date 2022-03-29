@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
