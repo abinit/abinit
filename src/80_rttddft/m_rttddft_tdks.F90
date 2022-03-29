@@ -291,8 +291,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
  
  !4) Init occupation numbers
- !FB: TODO read occupation numbers from file if required
- !FB: TODO and generalize to all possible occopt
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
  tdks%occ(:)=dtset%occ_orig(:,1)
  !calc occupation number with metallic occupation using the previously read WF
