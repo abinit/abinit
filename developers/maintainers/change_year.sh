@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2021 ABINIT group (XG)
+# Copyright (C) 1998-2022 ABINIT group (XG)
 # 
 # The purpose of this script is to change the copyright year
 # in nearly all files in the ABINIT package. 
 # First you should reapply the present script without changing it, because it has been seen that some people bring
 # routines with erroneous date during a few months after the beginning of a new one ... !
 #
-# Then one should update the present script to put the current year (at present, valid for going from 2020 to 2021 !) !
+# Then one should update the present script to put the current year (at present, valid for going from 2021 to 2022 !) !
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*/*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
@@ -20,7 +20,7 @@
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command  ! DOES NOT WORK ON MY MAC ?!
-# sed -iTMP 's!2020 ABINIT!2021 ABINIT!' */*.py */*/*.py */*/*/*.py
+# sed -iTMP 's!2021 ABINIT!2022 ABINIT!' */*.py */*/*.py */*/*/*.py
 # followed by
 # rm */*pyTMP */*/*pyTMP */*/*/*pyTMP
 #
@@ -52,10 +52,12 @@ do
 #sed 's&(C) 2019-2020 ABINIT&(C) 2019-2021 ABINIT&' $file
 #for different values replacing 2019 
 #The following uses a regexp. This change the two last digits of the year.
- sed -e 's&\(([cC]) ....-20\)20\( ABINIT\)&\121\2&' $file > $file.tmp
+#sed -e 's&\(([cC]) ....-20\)20\( ABINIT\)&\121\2&' $file > $file.tmp
+ sed -e 's&\(([cC]) ....-20\)21\( ABINIT\)&\122\2&' $file > $file.tmp
  rm $file
 #The next line is also needed, as some developers decide to use this syntax, and some the other ...
- sed -e 's&\(([cC]) 20\)20\( ABINIT\)&\120-2021\2&' $file.tmp > $file
+#sed -e 's&\(([cC]) 20\)20\( ABINIT\)&\120-2021\2&' $file.tmp > $file
+ sed -e 's&\(([cC]) 20\)21\( ABINIT\)&\121-2022\2&' $file.tmp > $file
  rm $file.tmp
  echo "file $file treated "
 done
