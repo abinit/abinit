@@ -19,7 +19,7 @@
 # developers/maintainers/change_year.sh */*/*/*.out */*/*/*.output
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
-# Simply issue the in-place command  ! DOES NOT WORK ON MY MAC ?!
+# Simply issue the in-place command  
 # sed -iTMP 's!2021 ABINIT!2022 ABINIT!' */*.py */*/*.py */*/*/*.py
 # followed by
 # rm */*pyTMP */*/*pyTMP */*/*/*pyTMP
