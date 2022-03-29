@@ -45,7 +45,6 @@ module m_rttddft_propagators
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
  use m_nonlop,              only: nonlop
- use m_pawcprj,             only: pawcprj_type
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density
  use m_rttddft_exponential, only: rttddft_exp_taylor
