@@ -7,7 +7,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (JWZ)
+!! Copyright (C) 2011-2022 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -514,7 +514,7 @@ end subroutine orbmag_tt
 !! Uses the DDK wavefunctions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
+!! Copyright (C) 2003-2022 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
