@@ -68,7 +68,12 @@ module m_orbmag
 
   public :: orbmag_tt
 
-  private :: orbmag_tt_chern_k
+  private :: gs_eigenvalues
+  private :: nonlocal_b_k
+  private :: berry_curvature_k
+  private :: onsite_LR_k
+  private :: onsite_a0an_k
+  private :: lamb_core
   private :: orbmag_tt_output
   
 CONTAINS  !========================================================================================
@@ -143,19 +148,20 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
- integer,parameter :: ibcpw=1,ibcq=2,ibcd=3
- integer,parameter :: nterms=3
+ integer,parameter :: ibcpw=1,ibcq=2,ibcd=3,iombm=4,iomlmb=5,iomlr=6,iomnlb=7
+ integer,parameter :: nterms=7
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),kg_k(:,:),nattyp(:)
- real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),rhodum(1),rmet(3,3)
- real(dp),allocatable :: bcpw_k(:,:,:),bc_tensor(:,:,:,:),buffer1(:),buffer2(:)
+ real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
+ real(dp),allocatable :: bcd_k(:,:,:),bcpw_k(:,:,:),bcq_k(:,:,:),buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
  real(dp),allocatable :: Enk(:),ffnl_k(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kpg_k(:,:)
+ real(dp),allocatable :: ombm_k(:,:,:),oml_k(:,:,:),omnlb_k(:,:,:)
  real(dp),allocatable :: orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
@@ -163,8 +169,6 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
  !----------------------------------------------
-
- write(std_out,'(a)')' JWZ debug: entered orbmag_tt '
 
  ! set up basic FFT parameters
  ! TODO: generalize to nsppol > 1
@@ -262,11 +266,6 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_MALLOC(orbmag_terms,(2,nband_k,3,nterms))
  orbmag_terms = zero 
 
- if(dtset%orbmag .EQ. 4) then
-   ABI_MALLOC(bc_tensor,(2,nband_k,dtset%nkpt,3)) 
-   bc_tensor=zero
- end if
- 
  !============= BIG FAT KPT LOOP :) ===========================
  do ikpt = 1, dtset%nkpt
 
@@ -360,30 +359,54 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    end do
    ABI_FREE(cwavef)
 
-   ABI_MALLOC(bcpw_k,(2,nband_k,9))
-   call orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcgk,nband_k,npw_k,pawtab,rprimd)
+   ! compute GS eigenvalues
+   ABI_MALLOC(Enk,(nband_k))
+   call gs_eigenvalues(atindx,cg_k,cprj_k,dimlmn,dtset,Enk,gs_hamk,ikpt,mcgk,mpi_enreg,nband_k,npw_k)
 
-   orbmag_terms(1:2,1:nband_k,1:3,ibcpw) = orbmag_terms(1:2,1:nband_k,1:3,ibcpw) + &
-     & trnrm*bcpw_k(1:2,1:nband_k,1:3)
-   orbmag_terms(1:2,1:nband_k,1:3,ibcq) = orbmag_terms(1:2,1:nband_k,1:3,ibcq) + &
-     & trnrm*bcpw_k(1:2,1:nband_k,4:6)
-   orbmag_terms(1:2,1:nband_k,1:3,ibcd) = orbmag_terms(1:2,1:nband_k,1:3,ibcd) + &
-     & trnrm*bcpw_k(1:2,1:nband_k,7:9)
+   !--------------------------------------------------------------------------------
+   ! Finally ready to compute contributions to orbital magnetism and Berry curvature
+   !--------------------------------------------------------------------------------
+   
+   !--------------------------------------------------------------------------------
+   ! Berry curvature
+   !--------------------------------------------------------------------------------
+   ABI_MALLOC(bcpw_k,(2,nband_k,3))
+   ABI_MALLOC(bcq_k,(2,nband_k,3))
+   ABI_MALLOC(bcd_k,(2,nband_k,3))
+   call berry_curvature_k(atindx,bcd_k,bcpw_k,bcq_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,&
+     & mcgk,nband_k,npw_k,pawtab,rprimd)
 
-   if (dtset%orbmag .EQ. 4) then
-     do nn = 1, nband_k
-       do adir = 1, 3
-
-         bc_tensor(1,nn,ikpt,adir) = bcpw_k(1,nn,adir)+bcpw_k(1,nn,adir+3)
-         bc_tensor(2,nn,ikpt,adir) = bcpw_k(2,nn,adir)+bcpw_k(2,nn,adir+3)
-         
-       end do
-       bc_tensor(1,nn,ikpt,1:3) = ucvol*MATMUL(gprimd,bc_tensor(1,nn,ikpt,1:3))
-       bc_tensor(2,nn,ikpt,1:3) = ucvol*MATMUL(gprimd,bc_tensor(2,nn,ikpt,1:3))
-     end do
-   end if
+   orbmag_terms(:,:,:,ibcpw) = orbmag_terms(:,:,:,ibcpw) + trnrm*bcpw_k
+   orbmag_terms(:,:,:,ibcq) = orbmag_terms(:,:,:,ibcq) + trnrm*bcq_k
+   orbmag_terms(:,:,:,ibcd) = orbmag_terms(:,:,:,ibcd) + trnrm*bcd_k
 
    ABI_FREE(bcpw_k)
+   ABI_FREE(bcq_k)
+   ABI_FREE(bcd_k)
+
+   !--------------------------------------------------------------------------------
+   ! nonlocal contribution arising from GIPAW expansion
+   !--------------------------------------------------------------------------------
+   ABI_MALLOC(omnlb_k,(2,nband_k,3))
+   call nonlocal_b_k(atindx,cprj_k,Enk,dtset%natom,nband_k,dtset%ntypat,omnlb_k,paw_ij,pawtab,dtset%typat)
+   orbmag_terms(:,:,:,iomnlb) = orbmag_terms(:,:,:,iomnlb) + trnrm*omnlb_k
+   ABI_FREE(omnlb_k)
+
+   !--------------------------------------------------------------------------------
+   ! onsite LR magnetic moment 
+   !--------------------------------------------------------------------------------
+   ABI_MALLOC(oml_k,(2,nband_k,3))
+   call onsite_LR_k(atindx,cprj_k,dtset,nband_k,oml_k,pawrad,pawtab)
+   orbmag_terms(:,:,:,iomlr) = orbmag_terms(:,:,:,iomlr) + trnrm*oml_k
+   ABI_FREE(oml_k)
+
+   !--------------------------------------------------------------------------------
+   ! onsite A0.An magnetic moment 
+   !--------------------------------------------------------------------------------
+   ABI_MALLOC(ombm_k,(2,nband_k,3))
+   call onsite_a0an_k(atindx,cprj_k,dtset,nband_k,ombm_k,pawang,pawrad,pawtab)
+   orbmag_terms(:,:,:,iombm) = orbmag_terms(:,:,:,iombm) + trnrm*ombm_k
+   ABI_FREE(ombm_k)
 
    icg = icg + npw_k*nband_k
    ikg = ikg + npw_k
@@ -391,6 +414,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
    ABI_FREE(cg_k)
    ABI_FREE(cg1_k)
+   ABI_FREE(Enk)
    ABI_FREE(ylm_k)
    ABI_FREE(ylmgr_k)
    ABI_FREE(kpg_k)
@@ -411,18 +435,6 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(1:2,1:nband_k,1:3,1:nterms)=reshape(buffer2,(/2,nband_k,3,nterms/))
    ABI_FREE(buffer1)
    ABI_FREE(buffer2)
-
-   if (dtset%orbmag .EQ. 4) then
-     buff_size=size(bc_tensor)
-     ABI_MALLOC(buffer1,(buff_size))
-     ABI_MALLOC(buffer2,(buff_size))
-     buffer1=zero;buffer2=zero
-     buffer1(1:buff_size) = reshape(bc_tensor,(/2*nband_k*dtset%nkpt*3/))
-     call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-     bc_tensor(1:2,1:nband_k,1:dtset%nkpt,1:3)=reshape(buffer2,(/2,nband_k,dtset%nkpt,3/))
-     ABI_FREE(buffer1)
-     ABI_FREE(buffer2)
-   end if
  end if
 
  !! convert to cartesian frame from reduced triclinic
@@ -434,7 +446,11 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! \grad_(k_cart) x \grad_(k_cart) but are calculated in reduced k
  ! so [rprimd]*grad_(k_red) x [rprimd]*grad_(k_red) = det[rprimd]*[rprimd]^{-1,T} grad_(k_red) x grad_(k_red)
  ! 
+ ! iombm, due to onsite A_0.A_N is already Cartesian
+ ! iomlr, due to onsite LR is already Cartesian
+ ! iomlmb, due to core electrons, is already Cartesian (but not added yet)
  do iterm = 1, nterms
+   if ((iterm .EQ. iombm).OR.(iterm .EQ. iomlmb).OR.(iterm .EQ. iomlr)) cycle
    do nn = 1, nband_k
      do icmplx = 1, 2
        orbmag_terms(icmplx,nn,1:3,iterm) = ucvol*MATMUL(gprimd,orbmag_terms(icmplx,nn,1:3,iterm))
@@ -445,25 +461,23 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! convert orbmag magnetization to orbital moment
  ! Berry curvature terms are ignored
  ! Lamb term ignored
- !do iterm = 1, nterms
- !  if ((iterm.EQ.ibcpwb).OR.(iterm.EQ.ibcpws).OR.(iterm.EQ.iomlmb)) cycle
- !  orbmag_terms(1:2,1:nband_k,1:3,iterm) = ucvol*orbmag_terms(1:2,1:nband_k,1:3,iterm)
- !end do
+ do iterm = 1, nterms
+   if ((iterm.EQ.ibcpw).OR.(iterm.EQ.ibcq).OR.(iterm.EQ.ibcd).OR.(iterm.EQ.iomlmb)) cycle
+   orbmag_terms(:,:,:,iterm) = ucvol*orbmag_terms(:,:,:,iterm)
+ end do
 
  ! compute trace over filled states of each term
  ABI_MALLOC(orbmag_trace,(2,3,nterms))
  orbmag_trace = zero
  do nn = 1, nband_k
-   orbmag_trace(1:2,1:3,1:nterms) = orbmag_trace(1:2,1:3,1:nterms) + orbmag_terms(1:2,nn,1:3,1:nterms)
+   orbmag_trace = orbmag_trace + orbmag_terms(:,nn,:,:)
  end do
 
  ! get the Lamb term
+ call lamb_core(atindx,dtset,omlamb,pawtab)
+ orbmag_trace(:,:,iomlmb) = omlamb
 
- if (dtset%orbmag .EQ. 4) then
-   call orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace,bc_tensor)
- else
-   call orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
- end if
+ call orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
 !---------------------------------------------------
 ! deallocate memory
@@ -496,18 +510,13 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
- if (allocated(bc_tensor)) then
-   ABI_FREE(bc_tensor) 
- end if
-
- write(std_out,'(a)')' JWZ debug: exiting orbmag_tt '
 
 end subroutine orbmag_tt
 !!***
 
-!!****f* ABINIT/orbmag_tt_chern_k
+!!****f* ABINIT/berry_curvature_k
 !! NAME
-!! orbmag_tt_chern_k
+!! berry_curvature_k
 !!
 !! FUNCTION
 !! Compute the planewave contribution to the berry curvature at one kpt
@@ -537,7 +546,8 @@ end subroutine orbmag_tt
 !!
 !! SOURCE
 
-subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcgk,nband_k,npw_k,pawtab,rprimd)
+subroutine berry_curvature_k(atindx,bcd_k,bcpw_k,bcq_k,cg1_k,cprj_k,cprj1_k,&
+    & dtset,gprimd,mcgk,nband_k,npw_k,pawtab,rprimd)
 
  !Arguments ------------------------------------
  !scalars
@@ -547,7 +557,7 @@ subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcg
  !arrays
  integer,intent(in) :: atindx(dtset%natom)
  real(dp),intent(in) :: cg1_k(2,mcgk,3),gprimd(3,3),rprimd(3,3)
- real(dp),intent(out) :: bcpw_k(2,nband_k,9)
+ real(dp),intent(out) :: bcd_k(2,nband_k,3),bcpw_k(2,nband_k,3),bcq_k(2,nband_k,3)
  type(pawcprj_type),intent(inout) :: cprj_k(dtset%natom,dtset%mband)
  type(pawcprj_type),intent(inout) :: cprj1_k(dtset%natom,dtset%mband,3)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -565,24 +575,21 @@ subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcg
 
  !-----------------------------------------------------------------------
 
- write(std_out,'(a)')' JWZ debug: entering orbmag_tt_chern_k '
-
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in 
  ! the following terms, either <du|S|du> or <du|dS|u>
  c2=1.0d0/(two_pi*two_pi)
 
- ! Chern prefactor = i/2\pi
- cpre = j_dpc/two_pi
+ ! Berry curvature prefactor 
+ cpre = j_dpc
 
  ! dij prefactor
  ! the pawtab%qijl moments do not have the sqrt(4\pi/3) factor we need here for
  ! normalization 
  cdij = sqrt(four_pi/three)
 
- bcpw_k = zero
- 
  ! the <du/dk| x |du/dk> term
+ bcpw_k = zero
  ABI_MALLOC(gwavef,(2,npw_k))
  ABI_MALLOC(bwavef,(2,npw_k))
  do nn = 1, nband_k
@@ -602,7 +609,6 @@ subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcg
        bwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,bdir)
 
        ! gwavef and bwavef are the full first-order ddk wavefunctions
-       ! store <du|du> in terms 1:3
        dotr = DOT_PRODUCT(bwavef(1,:),gwavef(1,:)) + DOT_PRODUCT(bwavef(2,:),gwavef(2,:))
        doti = DOT_PRODUCT(bwavef(1,:),gwavef(2,:)) - DOT_PRODUCT(bwavef(2,:),gwavef(1,:))
        cme = cmplx(dotr,doti,KIND=dpc)
@@ -616,7 +622,8 @@ subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcg
  ABI_FREE(gwavef)
  ABI_FREE(bwavef)
 
- ! the on-site Qij terms
+ ! the on-site Qij terms and (r-R)_\alpha terms
+ bcd_k = zero; bcq_k = zero
  do nn = 1, nband_k
   do iat=1,dtset%natom
      iatom=atindx(iat)
@@ -649,16 +656,16 @@ subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcg
              qij = pawtab(itypat)%sij(klmn)
              
              cme = conjg(dup_b + udp_b)*qij*(dup_g + udp_g)
-             bcpw_k(1,nn,adir+3) = bcpw_k(1,nn,adir+3) + real(cpre*epsabg*c2*cme)
-             bcpw_k(2,nn,adir+3) = bcpw_k(2,nn,adir+3) + aimag(cpre*epsabg*c2*cme)
+             bcq_k(1,nn,adir) = bcq_k(1,nn,adir) + real(cpre*epsabg*c2*cme)
+             bcq_k(2,nn,adir) = bcq_k(2,nn,adir) + aimag(cpre*epsabg*c2*cme)
            
              cpi = cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
              cpj = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
 
              cme = conjg(dup_b+udp_b)*dij_red(gdir)*cpj + conjg(cpi*dij_red(bdir))*(dup_g+udp_g)
 
-             bcpw_k(1,nn,adir+6)=bcpw_k(1,nn,adir+6) + real(cpre*epsabg*c2*cme)
-             bcpw_k(2,nn,adir+6)=bcpw_k(2,nn,adir+6) + aimag(cpre*epsabg*c2*cme)
+             bcd_k(1,nn,adir)=bcd_k(1,nn,adir) + real(cpre*epsabg*c2*cme)
+             bcd_k(2,nn,adir)=bcd_k(2,nn,adir) + aimag(cpre*epsabg*c2*cme)
 
            end do !end loop over epsabg
          end do ! end loop over adir
@@ -667,9 +674,545 @@ subroutine orbmag_tt_chern_k(atindx,bcpw_k,cg1_k,cprj_k,cprj1_k,dtset,gprimd,mcg
    end do ! end loop over atoms
  end do ! end loop over nn
  
- write(std_out,'(a)')' JWZ debug: leaving orbmag_tt_chern_k '
+end subroutine berry_curvature_k
+!!***
 
-end subroutine orbmag_tt_chern_k
+!!****f* ABINIT/onsite_a0an_k
+!! NAME
+!! onsite_aoan_k
+!!
+!! FUNCTION
+!! Compute A_0.A_N onsite magnetic moment for magnetic field + nuclear magnetic dipole moment
+!! for kpt
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine onsite_a0an_k(atindx,cprj_k,dtset,nband_k,ombk,pawang,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nband_k
+  type(pawang_type),intent(in) :: pawang
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: ombk(2,nband_k,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,gint,iat,iatom,il,im,ilmn,itypat
+  integer :: jl,jm,jlmn,klmn,klm,kln,lpmp,mesh_size,nn
+  real(dp) :: bm1,bm2,d00,d20,d22,dij,intg,scale_conversion
+  complex(dpc) :: cpb,cpk,cterm
+
+  !arrays
+  real(dp),allocatable :: ff(:)
+
+  ! ***********************************************************************
+
+  ! this term can only be non-zero if some nucdipmom is nonzero
+  scale_conversion = half*FineStructureConstant2
+  d00 = sqrt(4.0*pi)/3.0
+  dij = sqrt(4.0*pi/15.0)
+  d20 = sqrt(16.0*pi/5.0)/6.0
+  d22 = sqrt(16.0*pi/15.0)/2.0
+
+  ombk = zero
+
+  do nn = 1, nband_k
+    do adir = 1, 3
+      do iat=1,dtset%natom
+        iatom=atindx(iat)
+        itypat=dtset%typat(iat)
+        mesh_size=pawtab(itypat)%mesh_size
+        ABI_MALLOC(ff,(mesh_size))
+        do jlmn=1,pawtab(itypat)%lmn_size
+           jl=pawtab(itypat)%indlmn(1,jlmn)
+           jm=pawtab(itypat)%indlmn(2,jlmn)
+           do ilmn=1,pawtab(itypat)%lmn_size
+              il=pawtab(itypat)%indlmn(1,ilmn)
+              im=pawtab(itypat)%indlmn(2,ilmn)
+              klmn=MATPACK(jlmn,ilmn)
+              kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+              klm = pawtab(itypat)%indklmn(1,klmn) ! need this for bm2 gaunt integral selection
+              ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r
+              ff(2:mesh_size)=(pawtab(itypat)%phiphj(2:mesh_size,kln) - &
+                   &           pawtab(itypat)%tphitphj(2:mesh_size,kln)) / &
+                   &           pawrad(itypat)%rad(2:mesh_size)
+              call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+              call simp_gen(intg,ff,pawrad(itypat))
+              ! term B.m r^2/r^3
+              bm1=zero
+              if ( (jl .EQ. il) .AND. (jm .EQ. im) .AND. (abs(dtset%nucdipmom(adir,iat)) .GT. tol8) ) then
+                 bm1 = scale_conversion*dtset%nucdipmom(adir,iat)*intg
+              end if
+              bm2 = zero
+              ! xx, yy, zz cases all have the same contribution from S00
+              lpmp=1
+              gint = pawang%gntselect(lpmp,klm)
+              if (gint > 0) then
+                bm2=bm2+scale_conversion*dtset%nucdipmom(adir,iat)*d00*pawang%realgnt(gint)*intg
+              end if
+              ! all other contributions involve Gaunt integrals of S_{2m}
+              do lpmp = 5, 9
+                ! if the basis is very small (only s waves) there can't be any Gaunt coupling to d functions
+                ! and asking for it would crash the code
+                if (size(pawang%gntselect(:,klm)) .LT. 5) exit
+                gint = pawang%gntselect(lpmp,klm)
+                if (gint > 0) then
+                  select case (lpmp)
+                  case (5) ! S_{2,-2} contributes to xy term
+                    select case (adir)
+                      case (1)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
+                      case (2)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
+                    case (6) ! S_{2,-1} contributes to yz term
+                      select case (adir)
+                      case (2)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
+                      case (3)
+                        bm2=bm2+scale_conversion*dtset%nucdipmom(2,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
+                    case (7) ! S_{2,0} contributes to xx, yy, and zz terms
+                      select case (adir)
+                        case (1)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(1,iat)*d20*pawang%realgnt(gint)*intg
+                        case (2)
+                          bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d20*pawang%realgnt(gint)*intg
+                        case (3)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*2.0*d20*pawang%realgnt(gint)*intg
+                      end select
+                    case (8) ! S_{2,+1} contributes to xz term
+                      select case (adir)
+                        case (1)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(3,iat)*dij*pawang%realgnt(gint)*intg
+                        case (3)
+                          bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*dij*pawang%realgnt(gint)*intg
+                      end select
+                    case (9) ! S_{2,2} contributes to xx, yy terms
+                       select case (adir)
+                         case (1)
+                           bm2=bm2+scale_conversion*dtset%nucdipmom(1,iat)*d22*pawang%realgnt(gint)*intg
+                         case (2)
+                           bm2=bm2-scale_conversion*dtset%nucdipmom(2,iat)*d22*pawang%realgnt(gint)*intg
+                       end select
+                    end select
+                 end if ! end check on nonzero gaunt integral
+              end do ! end loop over lp,mp
+              cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+              cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+              cterm = conjg(cpb)*(bm1-bm2)*cpk
+              ombk(1,nn,adir)=ombk(1,nn,adir)-real(cterm)
+              ombk(2,nn,adir)=ombk(2,nn,adir)-aimag(cterm)
+           end do ! end loop over ilmn
+        end do ! end loop over jlmn
+        ABI_FREE(ff)
+      end do ! end loop over atoms
+    end do ! end loop over adir
+  end do ! end loop over bands
+
+end subroutine onsite_a0an_k
+!!***
+
+!!****f* ABINIT/gs_eigenvalues
+!! NAME
+!! gs_eigenvalues
+!!
+!! FUNCTION
+!! compute GS eigenvalues from GS wavefunctions
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gs_eigenvalues(atindx,cg_k,cprj_k,dimlmn,dtset,Enk,&
+    & gs_hamk,ikpt,mcgk,mpi_enreg,nband_k,npw_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,mcgk,nband_k,npw_k
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk)
+  real(dp),intent(out) :: Enk(nband_k)
+  type(pawcprj_type),intent(inout) :: cprj_k(dtset%natom,dtset%mband)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: cpopt,isppol,my_ndat,my_nspinor,my_timer,nn,prtvol,sij_opt,type_calc
+  real(dp) :: lambda
+  !arrays
+  real(dp),allocatable :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+!--------------------------------------------------------------------
+
+  ABI_MALLOC(cwaveprj,(dtset%natom,1))
+  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
+  ABI_MALLOC(cwavef,(2,npw_k))
+  ABI_MALLOC(ghc,(2,npw_k))
+  ABI_MALLOC(gsc,(2,npw_k))
+  ABI_MALLOC(gvnlc,(2,npw_k))
+
+  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+  isppol = 1
+  cpopt=4 ! use cprj in memory, not using lambda
+  lambda=zero 
+  sij_opt = 0 ! no gsc saved
+  type_calc = 0 ! use all of Hamiltonian: kinetic, local, nonlocal
+  my_timer = 0
+  my_ndat = 1
+  prtvol=0
+
+  do nn = 1, nband_k
+    cwavef(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
+
+    ! compute Enk and S|u_nk>
+    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+         &           dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
+    call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,my_ndat,&
+       &           prtvol,sij_opt,my_timer,type_calc)
+    Enk(nn) = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
+
+  end do
+
+  ABI_FREE(cwavef)
+  ABI_FREE(ghc)
+  ABI_FREE(gsc)
+  ABI_FREE(gvnlc)
+  call pawcprj_free(cwaveprj)
+  ABI_FREE(cwaveprj)
+ 
+end subroutine gs_eigenvalues
+!!***
+
+
+!!****f* ABINIT/lamb_core
+!! NAME
+!! lamb_core
+!!
+!! FUNCTION
+!! add core electron contribution to the orbital magnetic moment
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine lamb_core(atindx,dtset,omlamb,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: omlamb(2,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,itypat
+
+!--------------------------------------------------------------------
+
+  omlamb = zero 
+  do adir = 1, 3
+    do iat=1,dtset%natom
+      iatom = atindx(iat)
+      itypat = dtset%typat(iat)
+      omlamb(1,adir) = omlamb(1,adir) - dtset%lambsig(itypat)*dtset%nucdipmom(adir,iat)
+    end do ! end loop over atoms
+  end do ! end loop over adir
+ 
+end subroutine lamb_core
+!!***
+
+!!****f* ABINIT/onsite_LR_k
+!! NAME
+!! onsite_LR_k 
+!!
+!! FUNCTION
+!! Compute 1/2 <L_R> onsite contribution to orbital magnetization at given k point
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine onsite_LR_k(atindx,cprj_k,dtset,nband_k,omlk,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: nband_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: omlk(2,nband_k,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,ilmn,il,im,inn,itypat,jlmn,jl,jm,jn,klmn,kln,mesh_size,nn
+  real(dp) :: intg
+  complex(dpc) :: cpb,cpk,cterm,orbl_me
+
+  !arrays
+  real(dp),allocatable :: ff(:)
+
+!--------------------------------------------------------------------
+
+  omlk = zero 
+  do nn = 1, nband_k
+    do adir = 1, 3
+      do iat=1,dtset%natom
+        iatom = atindx(iat)
+        itypat = dtset%typat(iat)
+        mesh_size=pawtab(itypat)%mesh_size
+        ABI_MALLOC(ff,(mesh_size))
+        do jlmn=1,pawtab(itypat)%lmn_size
+          jl=pawtab(itypat)%indlmn(1,jlmn)
+          jm=pawtab(itypat)%indlmn(2,jlmn)
+          jn=pawtab(itypat)%indlmn(3,jlmn)
+          do ilmn=1,pawtab(itypat)%lmn_size
+            il=pawtab(itypat)%indlmn(1,ilmn)
+            if ( il /= jl ) cycle ! <l'm'|L|lm> = 0 if l' /= l
+            if ( il == 0 ) cycle ! <00|L|00> = 0
+            im=pawtab(itypat)%indlmn(2,ilmn)
+            klmn=MATPACK(jlmn,ilmn)
+            kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+            ! compute <L_dir>
+            call slxyzs(il,im,adir,jl,jm,orbl_me)
+            if(abs(orbl_me).GT.tol8)then
+              ff(1:mesh_size) = pawtab(itypat)%phiphj(1:mesh_size,kln)-pawtab(itypat)%tphitphj(1:mesh_size,kln)
+              call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+              call simp_gen(intg,ff,pawrad(itypat))
+              cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+              cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+              cterm = half*conjg(cpb)*orbl_me*intg*cpk
+              omlk(1,nn,adir)=omlk(1,nn,adir) - real(cterm)
+              omlk(2,nn,adir)=omlk(2,nn,adir) - aimag(cterm)
+            end if ! end check that |L_dir| > 0, otherwise ignore term
+          end do ! end loop over ilmn
+        end do ! end loop over jlmn
+        ABI_FREE(ff)
+      end do ! end loop over atoms
+    end do ! end loop over adir
+  end do ! end loop over nn
+ 
+end subroutine onsite_LR_k
+!!***
+
+!!****f* ABINIT/nonlocal_b_k
+!! NAME
+!! nonlocal_b_k
+!!
+!! FUNCTION
+!! Compute the orbital magnetization due to <u|dp/dk><dp/dk|u> at one k point
+!! arising from the GIPAW expansion, so arising from B dependence
+!! Uses the DDK wavefunctions
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2020 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!! Direct questions and comments to J Zwanziger
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nonlocal_b_k(atindx,cprj_k,Enk,natom,nband_k,ntypat,omdp_k,paw_ij,pawtab,typat)
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: natom,nband_k,ntypat
+
+ !arrays
+ integer,intent(in) :: atindx(natom),typat(natom)
+ real(dp),intent(in) :: Enk(nband_k)
+ real(dp),intent(out) :: omdp_k(2,nband_k,3)
+ type(pawcprj_type),intent(in) :: cprj_k(natom,nband_k)
+ type(paw_ij_type),intent(inout) :: paw_ij(natom)
+ type(pawtab_type),intent(in) :: pawtab(ntypat)
+
+ !Local variables -------------------------
+ !scalars
+ integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
+ real(dp) :: c2,qij
+ complex(dpc) :: cterm,dij,udp_b,udp_g
+ logical :: cplex_dij
+
+ !arrays
+
+ !-----------------------------------------------------------------------
+
+ cplex_dij = (paw_ij(1)%cplex_dij .EQ. 2)
+
+ ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
+ ! term arises to properly normalize the derivatives (there are two in the Chern number,
+ ! one for each wavefunction derivative) 
+ c2=1.0d0/(two_pi*two_pi)
+
+ omdp_k = czero
+ do nn = 1, nband_k
+   do adir = 1, 3
+
+     do epsabg = 1, -1, -2
+
+       if (epsabg .EQ. 1) then
+         bdir = modulo(adir,3)+1
+         gdir = modulo(adir+1,3)+1
+       else
+         bdir = modulo(adir+1,3)+1
+         gdir = modulo(adir,3)+1
+       end if
+
+       do iat=1,natom
+         iatom=atindx(iat)
+         itypat=typat(iat)
+         ! paw_ij(iatom) seems be sorted in input atom order, not type order
+         if (paw_ij(iat)%lmn2_size .NE. pawtab(itypat)%lmn2_size ) then
+           ABI_BUG('lmn2_size mismatch in orbmag_gipaw_dpdk_k')
+         end if
+         do ilmn=1,pawtab(itypat)%lmn_size
+           do jlmn=1,pawtab(itypat)%lmn_size
+             klmn=MATPACK(jlmn,ilmn)
+
+             udp_b = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+             udp_g = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
+
+             if (cplex_dij) then
+               dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+               if (jlmn .GT. ilmn) dij=conjg(dij)
+             else
+               dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
+             end if
+
+             ! the sign on cterm (+ or -) needs to be carefully checked
+             cterm = c2*half*j_dpc*epsabg*(dij-Enk(nn)*pawtab(itypat)%sij(klmn))*conjg(udp_b)*udp_g
+             omdp_k(1,nn,adir) = omdp_k(1,nn,adir) + REAL(cterm)
+             omdp_k(2,nn,adir) = omdp_k(2,nn,adir) + AIMAG(cterm)
+
+           end do ! end loop over jlmn
+         end do ! end loop over ilmn
+       end do ! end loop over atoms
+     end do ! end loop over epsabg
+   
+   end do ! end loop over adir
+ end do ! end loop over nn
+
+end subroutine nonlocal_b_k
 !!***
 
 !!****f* ABINIT/orbmag_tt_output
@@ -705,8 +1248,7 @@ end subroutine orbmag_tt_chern_k
 !!
 !! SOURCE
 
-subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
-    &,bc_tensor) ! bc_tensor is optional
+subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
 
  !Arguments ------------------------------------
@@ -716,12 +1258,11 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
 
  !arrays
  real(dp),intent(in) :: orbmag_terms(2,nband_k,3,nterms),orbmag_trace(2,3,nterms)
- real(dp),optional,intent(in) :: bc_tensor(2,nband_k,dtset%nkpt,3)
 
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,ikpt,iterms
- integer,parameter :: ibcpw=1,ibcq=2,ibcd=3
+ integer,parameter :: ibcpw=1,ibcq=2,ibcd=3,iombm=4,iomlmb=5,iomlr=6,iomnlb=7
  character(len=500) :: message
 
  !arrays
@@ -730,13 +1271,13 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
  ! ***********************************************************************
 
  orbmag_bb=zero;orbmag_total=zero
- !do iterms = iompwb, nterms
- !  orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
- !  do iband=1, nband_k
- !    if (iterms == iomlmb) cycle
- !    orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
- !  end do
- !end do
+ do iterms = ibcd+1, nterms
+   orbmag_total(1:2,1:3)=orbmag_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
+   do iband=1, nband_k
+     if (iterms == iomlmb) cycle
+     orbmag_bb(1:2,iband,1:3) = orbmag_bb(1:2,iband,1:3) + orbmag_terms(1:2,iband,1:3,iterms)
+   end do
+ end do
  berry_bb=zero;berry_total=zero
  do iterms = ibcpw,ibcd
    berry_total(1:2,1:3)=berry_total(1:2,1:3) + orbmag_trace(1:2,1:3,iterms)
@@ -751,12 +1292,12 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
  write(message,'(a,a)')' Orbital magnetic moment computed with DFPT derivative wavefunctions ',ch10
  call wrtout(ab_out,message,'COLL')
 
- !write(message,'(a)')' Orbital magnetic moment, Cartesian directions : '
- !call wrtout(ab_out,message,'COLL')
- !write(message,'(3es16.8)') (orbmag_total(1,adir),adir=1,3)
- !call wrtout(ab_out,message,'COLL')
- !write(message,'(a)')ch10
- !call wrtout(ab_out,message,'COLL')
+ write(message,'(a)')' Orbital magnetic moment, Cartesian directions : '
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(3es16.8)') (orbmag_total(1,adir),adir=1,3)
+ call wrtout(ab_out,message,'COLL')
+ write(message,'(a)')ch10
+ call wrtout(ab_out,message,'COLL')
  write(message,'(a)')' Integral of Berry curvature, Cartesian directions : '
  call wrtout(ab_out,message,'COLL')
  write(message,'(3es16.8)') (berry_total(1,adir),adir=1,3)
@@ -765,24 +1306,24 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
  if(dtset%orbmag .GE. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
-   !write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
-   !call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
+   call wrtout(ab_out,message,'COLL')
    !write(message,'(a,3es16.8)') '  <du/dk|H+ES|du/dk> : ',(orbmag_trace(1,adir,iompwb),adir=1,3)
    !call wrtout(ab_out,message,'COLL')
    !write(message,'(a,3es16.8)') '   <du/dk|E dS/dk|u> : ',(orbmag_trace(1,adir,iompws),adir=1,3)
    !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') ' <u|dp/dk>D<dp/dk|u> : ',(orbmag_trace(1,adir,iomdp),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '   <u|p>1/2 L_R<p|u> : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '     <u|p>A0.AN<p|u> : ',(orbmag_trace(1,adir,iombm),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '   M_NL (from GIPAW) : ',(orbmag_trace(1,adir,iomnlb),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '   <u|p>1/2 L_R<p|u> : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '     <u|p>A0.AN<p|u> : ',(orbmag_trace(1,adir,iombm),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    !write(message,'(a,3es16.8)') '    <u|p>v_H(1)<p|u> : ',(orbmag_trace(1,adir,iomvh1),adir=1,3)
    !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a,3es16.8)') '           Lamb core : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
-   !call wrtout(ab_out,message,'COLL')
-   !write(message,'(a)')ch10
-   !call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '           Lamb core : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a)')ch10
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Berry curvature, term-by-term breakdown : '
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    <du/dk|du/dk> : ',(orbmag_trace(1,adir,ibcpw),adir=1,3)
@@ -803,22 +1344,22 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,i2,a,i2)') ' band ',iband,' of ',nband_k
      call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
      !write(message,'(a,3es16.8)') '      <du/dk|H+ES|du/dk> : ',(orbmag_terms(1,iband,adir,iompwb),adir=1,3)
      !call wrtout(ab_out,message,'COLL')
      !write(message,'(a,3es16.8)') '       <du/dk|E dS/dk|u> : ',(orbmag_terms(1,iband,adir,iompws),adir=1,3)
      !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '     <u|dp/dk>D<dp/dk|u> : ',(orbmag_terms(1,iband,adir,iomdp),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '       <u|p>1/2 L_R<p|u> : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a,3es16.8)') '         <u|p>A0.AN<p|u> : ',(orbmag_terms(1,iband,adir,iombm),adir=1,3)
-     !call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '       M_NL (from GIPAW) : ',(orbmag_terms(1,iband,adir,iomnlb),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '       <u|p>1/2 L_R<p|u> : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '         <u|p>A0.AN<p|u> : ',(orbmag_terms(1,iband,adir,iombm),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
      !write(message,'(a,3es16.8)') '        <u|p>v_H(1)<p|u> : ',(orbmag_terms(1,iband,adir,iomvh1),adir=1,3)
      !call wrtout(ab_out,message,'COLL')
-     !write(message,'(a)')ch10
-     !call wrtout(ab_out,message,'COLL')
+     write(message,'(a)')ch10
+     call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '         Berry curvature : ',(berry_bb(1,iband,adir),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '    <du/dk|du/dk> : ',(orbmag_terms(1,iband,adir,ibcpw),adir=1,3)
@@ -832,20 +1373,6 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace&
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
-
- if(present(bc_tensor)) then
-   write(std_out,'(a)') '# JWZ debug output full bc tensor '
-   write(std_out,'(a)') '# iband kx ky kz Ox Oy Oz '
-   do iband = 1, nband_k
-     do ikpt = 1, dtset%nkpt
-       write(std_out,'(i4,3f8.4,6es16.8)')iband,dtset%kptns(1,ikpt),dtset%kptns(2,ikpt),dtset%kptns(3,ikpt),&
-         & bc_tensor(1,iband,ikpt,1),bc_tensor(2,iband,ikpt,1),&
-         & bc_tensor(1,iband,ikpt,2),bc_tensor(2,iband,ikpt,2),&
-         & bc_tensor(1,iband,ikpt,3),bc_tensor(2,iband,ikpt,3)
-     end do
-   end do
-   write(std_out,'(a)') '# JWZ debug finished output full bc tensor '
- end if
 
 end subroutine orbmag_tt_output
 !!***
