@@ -436,10 +436,10 @@ program testTransposer
         call xmpi_max(walltime,maxt,xmpi_world,ierr)
       end do
       call xmpi_max(cputime,maxt,xmpi_world,ierr)
-      write(std_out,"(a,f20.4)") ".Mean time: ", maxt/ncycle
-      errmax = (sum(cg0-cg))/nband
+      write(std_out,"(a,f20.5)") " Mean time:  ", maxt/ncycle
+      errmax = (sum(abs(cg0-cg)))/nband
       call xmpi_sum(errmax,xmpi_world,ierr)
-      write(std_out,"(a,f20.4)") " Difference: ",errmax
+      write(std_out,"(a,f20.14)") " Difference: ",errmax
       call xmpi_barrier(xmpi_world)
     end subroutine backAndForth
 !!***
