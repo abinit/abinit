@@ -1,0 +1,87 @@
+ ndtset 1
+ getwfk -1
+
+ ngkpt 8 8 8
+ tsmear 0.001
+ ecut 30
+ pawecutdg 30
+
+##############################################
+####                SECTION: basic
+##############################################
+
+ kptopt 4
+ nspinor 2
+ nspden 4
+
+ nstep 75
+ pawspnorb 0
+ so_psp 0
+ occopt 7
+ nband 60
+ nbdbuf 4
+ nline 6
+ nshiftk 1
+ shiftk 0.0 0.0 0.0
+
+ magcon_lambda 0.015
+ constraint_kind 4
+
+##############################################
+####                SECTION: files
+##############################################
+ pp_dirpath ".."
+ pseudos "26fe.lda2.paw" 
+
+##############################################
+####               SECTION: gstate
+##############################################
+ prtebands 0
+ prtden 1
+ prteig 0
+ prtwf 1
+ prtgsr 1
+
+ chkprim 0
+ tolvrs 1e-12
+ getden 0
+# autoparal 1
+ iscf 7
+
+##############################################
+####                  STRUCTURE
+##############################################
+ natom 2
+ ntypat 1
+ typat
+ 1 1
+ znucl 26
+ xred
+    0.0000000000    0.0000000000    0.0000000000
+    0.5000000000    0.5000000000    0.5000000000
+
+acell  3*2.83 Angstrom
+
+ spinat:
+    1.16   0.0  0.116  -1.16    0.0  0.116
+ spinat+
+    0.0    0.0  0.1   0.0    0.0  0.1
+
+#<JSON>
+#{
+#    "pseudos": [
+#        {
+#            "basename": "26fe.lda2.paw",
+#            "type": "PawAbinitPseudo",
+#            "symbol": "Fe",
+#            "Z": 26,
+#            "Z_val": 16.0,
+#            "l_max": 2,
+#            "md5": "e13a3715e02659efe180ee451578612e",
+#            "filepath": "/home/bs544/.abinit/ironpsps/LDA/26fe.lda2.paw",
+#            "@module": "pymatgen.io.abinit.pseudos",
+#            "@class": "PawAbinitPseudo"
+#        }
+#    ]
+#}
+#</JSON>

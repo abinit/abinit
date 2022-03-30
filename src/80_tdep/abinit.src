@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -22,8 +22,9 @@ sources = [
  "m_tdep_constraints.F90",
  "m_tdep_latt.F90",
  "m_tdep_phdos.F90",
- "m_tdep_phij.F90",
- "m_tdep_psij.F90",
+ "m_tdep_phi2.F90",
+ "m_tdep_phi3.F90",
+ "m_tdep_phi4.F90",
  "m_tdep_qpt.F90",
  "m_tdep_readwrite.F90",
  "m_tdep_shell.F90",

@@ -1,0 +1,3853 @@
+  
+.Version    3.0 of PHONONS
+.Copyright (C) 1998-2022 ABINIT group (FB,JB).
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+  
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see
+ ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : 14 May 2021.
+  
+ #############################################################################
+ ######################### ECHO OF INPUT FILE ################################
+ #############################################################################
+ ======================= Define the unitcell =================================
+ brav                    7    0
+ natom_unitcell          2
+ xred_unitcell       
+                         0.0000000000    0.0000000000    0.0000000000
+                         0.5000000000    0.5000000000    0.5000000000
+ typat_unitcell          1    2
+ ntypat                  2
+ amu                    24.3050000000   15.9994000000
+ ======================= Define the supercell ================================
+ rprimd              
+                        16.4446695000    0.0000000000    0.0000000000
+                         0.0000000000   16.4446695000    0.0000000000
+                         0.0000000000    0.0000000000   16.4446695000
+ multiplicity        
+                         4.0000000000    0.0000000000    0.0000000000
+                         0.0000000000    4.0000000000    0.0000000000
+                         0.0000000000    0.0000000000    4.0000000000
+ natom                 128
+ typat               
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    2    2    2    2    2    2
+                         2    2    2    2    2    2    2    2    2    2
+                         2    2    2    2    2    2    2    2    2    2
+                         2    2    2    2    2    2    2    2    2    2
+                         2    2    2    2    2    2    2    2    2    2
+                         2    2    2    2    2    2    2    2    2    2
+                         2    2    2    2    2    2    2    2
+ temperature          2000.0000000000
+ ======================= Define computational details ========================
+ nstep_max               20
+ nstep_min                1
+ rcut                    7.5000000000
+ ======================= Optional input variables ============================
+ order                   3    5.0000000000
+ bzpath                  6
+ Special q-points:  X -G -M -R -G -X -
+ use_ideal_positions     1
+ dielec_constant         3.0000000000
+ born_charge             1.7500000000   -1.7500000000
+ ngqpt1                  6    6    6
+ ngqpt2                 12   12   12
+ enunit                  1 (Phonon frequencies in cm-1)
+ USE IDEAL POSITIONS TO COMPUTE SPECTRUM
+ USE NON-ANALYTICAL CORRECTIONS (LO-TO)
+-Number of processors    1    1
+ 
+ All quantities are computed from nstep_min=    1
+                               to nstep_max=   20
+ So, the real number of time steps is nstep=   20
+ 
+ The positions, forces and energies are extracted from the ASCII files: xred.dat, fcart.dat & etot.dat
+  
+ #############################################################################
+ ########################## Computed quantities ##############################
+ #############################################################################
+ acell_unitcell=     4.1111673750     4.1111673750     4.1111673750
+ rprimd_md=    16.4446695000     0.0000000000     0.0000000000
+ rprimd_md=     0.0000000000    16.4446695000     0.0000000000
+ rprimd_md=     0.0000000000     0.0000000000    16.4446695000
+ bravais=    7    0    1    0    0    0    1    0    0    0    1
+ See the sym.dat file
+  
+ #############################################################################
+ ########################## Q points generation  #############################
+ #############################################################################
+ Generate the BZ path using the Q points given in the input file
+ See the qpt.dat file
+  
+ #############################################################################
+ ###### Find the matching between ideal and average positions  ###############
+ #############################################################################
+  Determine ideal positions and distances...
+  Compute average positions...
+  Search the unitcell basis of atoms in the MD trajectory...
+  Compare ideal and average positions using PBC...
+  Write the xred_average.xyz file with ideal and average positions...
+  Compute cartesian coordinates and forces...
+  
+ #############################################################################
+ ###################### Find the symetry operations ##########################
+ #################### (connecting the atoms together) ########################
+ #############################################################################
+ Search the matrix transformation going from (k) to (i)...
+ Search the matrix transformation going from (k,l) to (i,j)...
+ See the Indsym*.dat files (if debug)
+  
+ #############################################################################
+ ####### FIRST ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref1at and Isym1at tables...
+  Build the Shell1at datatype...
+  Number of shells=           2
+ ============================================================================
+ Shell number:           1
+  For atom    1:
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           0
+ ============================================================================
+ Shell number:           2
+  For atom    2:
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           0
+ ============================================================================
+   >>>>>> Total number of coefficients at the first order=           0
+  
+ #############################################################################
+ ###### SECOND ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref2at and Isym2at tables...
+  Build the Shell2at datatype...
+  Number of shells=          10
+ ============================================================================
+ Shell number:           1
+  Between atom    1 and     1 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           2
+  Between atom    1 and     2 the distance is=    3.5603753860
+   Number of independant coefficients in this shell=           2
+   Number of interactions in this shell=           8
+ ============================================================================
+ Shell number:           3
+  Between atom    1 and     3 the distance is=    4.1111673750
+   Number of independant coefficients in this shell=           2
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           4
+  Between atom    1 and     4 the distance is=    6.8175998166
+   Number of independant coefficients in this shell=           5
+   Number of interactions in this shell=          24
+ ============================================================================
+ Shell number:           5
+  Between atom    1 and    11 the distance is=    5.8140686589
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:           6
+  Between atom    1 and    43 the distance is=    7.1207507719
+   Number of independant coefficients in this shell=           2
+   Number of interactions in this shell=           8
+ ============================================================================
+ Shell number:           7
+  Between atom    2 and     2 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           8
+  Between atom    2 and     4 the distance is=    4.1111673750
+   Number of independant coefficients in this shell=           2
+   Number of interactions in this shell=           6
+ ============================================================================
+ Shell number:           9
+  Between atom    2 and    12 the distance is=    5.8140686589
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=          12
+ ============================================================================
+ Shell number:          10
+  Between atom    2 and    44 the distance is=    7.1207507719
+   Number of independant coefficients in this shell=           2
+   Number of interactions in this shell=           8
+ ============================================================================
+   >>>>>> Total number of coefficients at the second order=          21
+  
+ #############################################################################
+ ###### THIRD ORDER : find the number of coefficients ########################
+ #############################################################################
+ Number of shells=           8
+ ============================================================================
+ Shell number:           1
+  Between atom    1 and     1 the distance is=    0.0000000000
+  Between atom    1 and     1 the distance is=    0.0000000000
+  Between atom    1 and     1 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           2
+  Between atom    1 and     1 the distance is=    0.0000000000
+  Between atom    1 and     2 the distance is=    3.5603753860
+  Between atom    2 and     1 the distance is=    3.5603753860
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=          16
+ ============================================================================
+ Shell number:           3
+  Between atom    1 and     1 the distance is=    0.0000000000
+  Between atom    1 and     3 the distance is=    4.1111673750
+  Between atom    3 and     1 the distance is=    4.1111673750
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=          18
+ ============================================================================
+ Shell number:           4
+  Between atom    1 and     2 the distance is=    3.5603753860
+  Between atom    2 and     2 the distance is=    0.0000000000
+  Between atom    2 and     1 the distance is=    3.5603753860
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           8
+ ============================================================================
+ Shell number:           5
+  Between atom    1 and     2 the distance is=    3.5603753860
+  Between atom    2 and     3 the distance is=    3.5603753860
+  Between atom    3 and     1 the distance is=    4.1111673750
+   Number of independant coefficients in this shell=           7
+   Number of interactions in this shell=          48
+ ============================================================================
+ Shell number:           6
+  Between atom    1 and     2 the distance is=    3.5603753860
+  Between atom    2 and     8 the distance is=    4.1111673750
+  Between atom    8 and     1 the distance is=    3.5603753860
+   Number of independant coefficients in this shell=           7
+   Number of interactions in this shell=          24
+ ============================================================================
+ Shell number:           7
+  Between atom    2 and     2 the distance is=    0.0000000000
+  Between atom    2 and     2 the distance is=    0.0000000000
+  Between atom    2 and     2 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           8
+  Between atom    2 and     2 the distance is=    0.0000000000
+  Between atom    2 and     4 the distance is=    4.1111673750
+  Between atom    4 and     2 the distance is=    4.1111673750
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=          18
+ ============================================================================
+   >>>>>> Total number of coefficients at the third order=          28
+  
+ #############################################################################
+ ############## Fill the matrices used in the pseudo-inverse #################
+ #############################################################################
+  Compute the coefficients (at the 1st order) used in the Moore-Penrose...
+  ------- achieved
+  Compute the coefficients (at the 2nd order) used in the Moore-Penrose...
+  ------- achieved
+  Compute the coefficients (at the 3rd order) used in the Moore-Penrose...
+  ------- achieved
+  
+ #############################################################################
+ ###################### Compute the constraints ##############################
+ ########################## At the 1st order #################################
+ ########################## At the 2nd order #################################
+ ########################## At the 3rd order #################################
+ ################## Reduce the number of constraints #########################
+ ############### (Solve simultaneously all the orders) #######################
+ ################### And compute the pseudo-inverse ##########################
+ #############################################################################
+  The problem is solved
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (first order) IFC for the reference atom=   1
+   0.000000  0.000000  0.000000
+  
+ ############# List of (first order) IFC for the reference atom=   2
+   0.000000  0.000000  0.000000
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (second order) IFC for the reference atom=   1
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   1 ,with type=   1
+   0.398322  0.000000  0.000000
+   0.000000  0.398322  0.000000
+   0.000000  0.000000  0.398322
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  1.194966
+  
+ ======== NEW SHELL (ishell=   2): There are   8 atoms on this shell at distance= 3.560375
+  For jatom=   2 ,with type=   2
+  -0.036756 -0.026325 -0.026325
+  -0.026325 -0.036756 -0.026325
+  -0.026325 -0.026325 -0.036756
+  The components of the vector are:    2.055584    2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom=   8 ,with type=   2
+  -0.036756 -0.026325  0.026325
+  -0.026325 -0.036756  0.026325
+   0.026325  0.026325 -0.036756
+  The components of the vector are:    2.055584    2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom=  26 ,with type=   2
+  -0.036756  0.026325 -0.026325
+   0.026325 -0.036756  0.026325
+  -0.026325  0.026325 -0.036756
+  The components of the vector are:    2.055584   -2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom=  32 ,with type=   2
+  -0.036756  0.026325  0.026325
+   0.026325 -0.036756 -0.026325
+   0.026325 -0.026325 -0.036756
+  The components of the vector are:    2.055584   -2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom=  98 ,with type=   2
+  -0.036756  0.026325  0.026325
+   0.026325 -0.036756 -0.026325
+   0.026325 -0.026325 -0.036756
+  The components of the vector are:   -2.055584    2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom= 104 ,with type=   2
+  -0.036756  0.026325 -0.026325
+   0.026325 -0.036756  0.026325
+  -0.026325  0.026325 -0.036756
+  The components of the vector are:   -2.055584    2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom= 122 ,with type=   2
+  -0.036756 -0.026325  0.026325
+  -0.026325 -0.036756  0.026325
+   0.026325  0.026325 -0.036756
+  The components of the vector are:   -2.055584   -2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom= 128 ,with type=   2
+  -0.036756 -0.026325 -0.026325
+  -0.026325 -0.036756 -0.026325
+  -0.026325 -0.026325 -0.036756
+  The components of the vector are:   -2.055584   -2.055584   -2.055584
+  Trace= -0.110267
+  
+ ======== NEW SHELL (ishell=   3): There are   6 atoms on this shell at distance= 4.111167
+  For jatom=   3 ,with type=   1
+   0.024079  0.000000  0.000000
+   0.000000  0.024079  0.000000
+   0.000000  0.000000 -0.093398
+  The components of the vector are:    0.000000    0.000000    4.111167
+  Trace= -0.045239
+  
+  For jatom=   7 ,with type=   1
+   0.024079  0.000000  0.000000
+   0.000000  0.024079  0.000000
+   0.000000  0.000000 -0.093398
+  The components of the vector are:    0.000000    0.000000   -4.111167
+  Trace= -0.045239
+  
+  For jatom=   9 ,with type=   1
+   0.024079  0.000000  0.000000
+   0.000000 -0.093398  0.000000
+   0.000000  0.000000  0.024079
+  The components of the vector are:    0.000000    4.111167    0.000000
+  Trace= -0.045239
+  
+  For jatom=  25 ,with type=   1
+   0.024079  0.000000  0.000000
+   0.000000 -0.093398  0.000000
+   0.000000  0.000000  0.024079
+  The components of the vector are:    0.000000   -4.111167    0.000000
+  Trace= -0.045239
+  
+  For jatom=  33 ,with type=   1
+  -0.093398  0.000000  0.000000
+   0.000000  0.024079  0.000000
+   0.000000  0.000000  0.024079
+  The components of the vector are:    4.111167    0.000000    0.000000
+  Trace= -0.045239
+  
+  For jatom=  97 ,with type=   1
+  -0.093398  0.000000  0.000000
+   0.000000  0.024079  0.000000
+   0.000000  0.000000  0.024079
+  The components of the vector are:   -4.111167    0.000000    0.000000
+  Trace= -0.045239
+  
+ ======== NEW SHELL (ishell=   5): There are  12 atoms on this shell at distance= 5.814069
+  For jatom=  11 ,with type=   1
+   0.007039  0.000000  0.000000
+   0.000000 -0.005681 -0.008370
+   0.000000 -0.008370 -0.005681
+  The components of the vector are:    0.000000    4.111167    4.111167
+  Trace= -0.004323
+  
+  For jatom=  15 ,with type=   1
+   0.007039  0.000000  0.000000
+   0.000000 -0.005681  0.008370
+   0.000000  0.008370 -0.005681
+  The components of the vector are:    0.000000    4.111167   -4.111167
+  Trace= -0.004323
+  
+  For jatom=  27 ,with type=   1
+   0.007039  0.000000  0.000000
+   0.000000 -0.005681  0.008370
+   0.000000  0.008370 -0.005681
+  The components of the vector are:    0.000000   -4.111167    4.111167
+  Trace= -0.004323
+  
+  For jatom=  31 ,with type=   1
+   0.007039  0.000000  0.000000
+   0.000000 -0.005681 -0.008370
+   0.000000 -0.008370 -0.005681
+  The components of the vector are:    0.000000   -4.111167   -4.111167
+  Trace= -0.004323
+  
+  For jatom=  35 ,with type=   1
+  -0.005681  0.000000 -0.008370
+   0.000000  0.007039  0.000000
+  -0.008370  0.000000 -0.005681
+  The components of the vector are:    4.111167    0.000000    4.111167
+  Trace= -0.004323
+  
+  For jatom=  39 ,with type=   1
+  -0.005681  0.000000  0.008370
+   0.000000  0.007039  0.000000
+   0.008370  0.000000 -0.005681
+  The components of the vector are:    4.111167    0.000000   -4.111167
+  Trace= -0.004323
+  
+  For jatom=  41 ,with type=   1
+  -0.005681 -0.008370  0.000000
+  -0.008370 -0.005681  0.000000
+   0.000000  0.000000  0.007039
+  The components of the vector are:    4.111167    4.111167    0.000000
+  Trace= -0.004323
+  
+  For jatom=  57 ,with type=   1
+  -0.005681  0.008370  0.000000
+   0.008370 -0.005681  0.000000
+   0.000000  0.000000  0.007039
+  The components of the vector are:    4.111167   -4.111167    0.000000
+  Trace= -0.004323
+  
+  For jatom=  99 ,with type=   1
+  -0.005681  0.000000  0.008370
+   0.000000  0.007039  0.000000
+   0.008370  0.000000 -0.005681
+  The components of the vector are:   -4.111167    0.000000    4.111167
+  Trace= -0.004323
+  
+  For jatom= 103 ,with type=   1
+  -0.005681  0.000000 -0.008370
+   0.000000  0.007039  0.000000
+  -0.008370  0.000000 -0.005681
+  The components of the vector are:   -4.111167    0.000000   -4.111167
+  Trace= -0.004323
+  
+  For jatom= 105 ,with type=   1
+  -0.005681  0.008370  0.000000
+   0.008370 -0.005681  0.000000
+   0.000000  0.000000  0.007039
+  The components of the vector are:   -4.111167    4.111167    0.000000
+  Trace= -0.004323
+  
+  For jatom= 121 ,with type=   1
+  -0.005681 -0.008370  0.000000
+  -0.008370 -0.005681  0.000000
+   0.000000  0.000000  0.007039
+  The components of the vector are:   -4.111167   -4.111167    0.000000
+  Trace= -0.004323
+  
+ ======== NEW SHELL (ishell=   4): There are  24 atoms on this shell at distance= 6.817600
+  For jatom=   4 ,with type=   2
+  -0.000545  0.000962  0.005609
+   0.000962 -0.000545  0.005609
+   0.001662  0.001662  0.003640
+  The components of the vector are:    2.055584    2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom=   6 ,with type=   2
+  -0.000545  0.000962 -0.005609
+   0.000962 -0.000545 -0.005609
+  -0.001662 -0.001662  0.003640
+  The components of the vector are:    2.055584    2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom=  10 ,with type=   2
+  -0.000545  0.005609  0.000962
+   0.001662  0.003640  0.001662
+   0.000962  0.005609 -0.000545
+  The components of the vector are:    2.055584    6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom=  16 ,with type=   2
+  -0.000545  0.005609 -0.000962
+   0.001662  0.003640 -0.001662
+  -0.000962 -0.005609 -0.000545
+  The components of the vector are:    2.055584    6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  18 ,with type=   2
+  -0.000545 -0.005609  0.000962
+  -0.001662  0.003640 -0.001662
+   0.000962 -0.005609 -0.000545
+  The components of the vector are:    2.055584   -6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom=  24 ,with type=   2
+  -0.000545 -0.005609 -0.000962
+  -0.001662  0.003640  0.001662
+  -0.000962  0.005609 -0.000545
+  The components of the vector are:    2.055584   -6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  28 ,with type=   2
+  -0.000545 -0.000962  0.005609
+  -0.000962 -0.000545 -0.005609
+   0.001662 -0.001662  0.003640
+  The components of the vector are:    2.055584   -2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom=  30 ,with type=   2
+  -0.000545 -0.000962 -0.005609
+  -0.000962 -0.000545  0.005609
+  -0.001662  0.001662  0.003640
+  The components of the vector are:    2.055584   -2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom=  34 ,with type=   2
+   0.003640  0.001662  0.001662
+   0.005609 -0.000545  0.000962
+   0.005609  0.000962 -0.000545
+  The components of the vector are:    6.166751    2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom=  40 ,with type=   2
+   0.003640  0.001662 -0.001662
+   0.005609 -0.000545 -0.000962
+  -0.005609 -0.000962 -0.000545
+  The components of the vector are:    6.166751    2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  58 ,with type=   2
+   0.003640 -0.001662  0.001662
+  -0.005609 -0.000545 -0.000962
+   0.005609 -0.000962 -0.000545
+  The components of the vector are:    6.166751   -2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom=  64 ,with type=   2
+   0.003640 -0.001662 -0.001662
+  -0.005609 -0.000545  0.000962
+  -0.005609  0.000962 -0.000545
+  The components of the vector are:    6.166751   -2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  66 ,with type=   2
+   0.003640 -0.001662 -0.001662
+  -0.005609 -0.000545  0.000962
+  -0.005609  0.000962 -0.000545
+  The components of the vector are:   -6.166751    2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom=  72 ,with type=   2
+   0.003640 -0.001662  0.001662
+  -0.005609 -0.000545 -0.000962
+   0.005609 -0.000962 -0.000545
+  The components of the vector are:   -6.166751    2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  90 ,with type=   2
+   0.003640  0.001662 -0.001662
+   0.005609 -0.000545 -0.000962
+  -0.005609 -0.000962 -0.000545
+  The components of the vector are:   -6.166751   -2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom=  96 ,with type=   2
+   0.003640  0.001662  0.001662
+   0.005609 -0.000545  0.000962
+   0.005609  0.000962 -0.000545
+  The components of the vector are:   -6.166751   -2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom= 100 ,with type=   2
+  -0.000545 -0.000962 -0.005609
+  -0.000962 -0.000545  0.005609
+  -0.001662  0.001662  0.003640
+  The components of the vector are:   -2.055584    2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom= 102 ,with type=   2
+  -0.000545 -0.000962  0.005609
+  -0.000962 -0.000545 -0.005609
+   0.001662 -0.001662  0.003640
+  The components of the vector are:   -2.055584    2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom= 106 ,with type=   2
+  -0.000545 -0.005609 -0.000962
+  -0.001662  0.003640  0.001662
+  -0.000962  0.005609 -0.000545
+  The components of the vector are:   -2.055584    6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom= 112 ,with type=   2
+  -0.000545 -0.005609  0.000962
+  -0.001662  0.003640 -0.001662
+   0.000962 -0.005609 -0.000545
+  The components of the vector are:   -2.055584    6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom= 114 ,with type=   2
+  -0.000545  0.005609 -0.000962
+   0.001662  0.003640 -0.001662
+  -0.000962 -0.005609 -0.000545
+  The components of the vector are:   -2.055584   -6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom= 120 ,with type=   2
+  -0.000545  0.005609  0.000962
+   0.001662  0.003640  0.001662
+   0.000962  0.005609 -0.000545
+  The components of the vector are:   -2.055584   -6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom= 124 ,with type=   2
+  -0.000545  0.000962 -0.005609
+   0.000962 -0.000545 -0.005609
+  -0.001662 -0.001662  0.003640
+  The components of the vector are:   -2.055584   -2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom= 126 ,with type=   2
+  -0.000545  0.000962  0.005609
+   0.000962 -0.000545  0.005609
+   0.001662  0.001662  0.003640
+  The components of the vector are:   -2.055584   -2.055584   -6.166751
+  Trace=  0.002550
+  
+ ======== NEW SHELL (ishell=   6): There are   8 atoms on this shell at distance= 7.120751
+  For jatom=  43 ,with type=   1
+  -0.002113 -0.002442 -0.002442
+  -0.002442 -0.002113 -0.002442
+  -0.002442 -0.002442 -0.002113
+  The components of the vector are:    4.111167    4.111167    4.111167
+  Trace= -0.006340
+  
+  For jatom=  47 ,with type=   1
+  -0.002113 -0.002442  0.002442
+  -0.002442 -0.002113  0.002442
+   0.002442  0.002442 -0.002113
+  The components of the vector are:    4.111167    4.111167   -4.111167
+  Trace= -0.006340
+  
+  For jatom=  59 ,with type=   1
+  -0.002113  0.002442 -0.002442
+   0.002442 -0.002113  0.002442
+  -0.002442  0.002442 -0.002113
+  The components of the vector are:    4.111167   -4.111167    4.111167
+  Trace= -0.006340
+  
+  For jatom=  63 ,with type=   1
+  -0.002113  0.002442  0.002442
+   0.002442 -0.002113 -0.002442
+   0.002442 -0.002442 -0.002113
+  The components of the vector are:    4.111167   -4.111167   -4.111167
+  Trace= -0.006340
+  
+  For jatom= 107 ,with type=   1
+  -0.002113  0.002442  0.002442
+   0.002442 -0.002113 -0.002442
+   0.002442 -0.002442 -0.002113
+  The components of the vector are:   -4.111167    4.111167    4.111167
+  Trace= -0.006340
+  
+  For jatom= 111 ,with type=   1
+  -0.002113  0.002442 -0.002442
+   0.002442 -0.002113  0.002442
+  -0.002442  0.002442 -0.002113
+  The components of the vector are:   -4.111167    4.111167   -4.111167
+  Trace= -0.006340
+  
+  For jatom= 123 ,with type=   1
+  -0.002113 -0.002442  0.002442
+  -0.002442 -0.002113  0.002442
+   0.002442  0.002442 -0.002113
+  The components of the vector are:   -4.111167   -4.111167    4.111167
+  Trace= -0.006340
+  
+  For jatom= 127 ,with type=   1
+  -0.002113 -0.002442 -0.002442
+  -0.002442 -0.002113 -0.002442
+  -0.002442 -0.002442 -0.002113
+  The components of the vector are:   -4.111167   -4.111167   -4.111167
+  Trace= -0.006340
+  
+ ############# List of (second order) IFC for the reference atom=   2
+ ======== NEW SHELL (ishell=   7): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   2 ,with type=   2
+   0.435834  0.000000  0.000000
+   0.000000  0.435834  0.000000
+   0.000000  0.000000  0.435834
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  1.307502
+  
+ ======== NEW SHELL (ishell=   2): There are   8 atoms on this shell at distance= 3.560375
+  For jatom=   1 ,with type=   1
+  -0.036756 -0.026325 -0.026325
+  -0.026325 -0.036756 -0.026325
+  -0.026325 -0.026325 -0.036756
+  The components of the vector are:   -2.055584   -2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom=   3 ,with type=   1
+  -0.036756 -0.026325  0.026325
+  -0.026325 -0.036756  0.026325
+   0.026325  0.026325 -0.036756
+  The components of the vector are:   -2.055584   -2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom=   9 ,with type=   1
+  -0.036756  0.026325 -0.026325
+   0.026325 -0.036756  0.026325
+  -0.026325  0.026325 -0.036756
+  The components of the vector are:   -2.055584    2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom=  11 ,with type=   1
+  -0.036756  0.026325  0.026325
+   0.026325 -0.036756 -0.026325
+   0.026325 -0.026325 -0.036756
+  The components of the vector are:   -2.055584    2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom=  33 ,with type=   1
+  -0.036756  0.026325  0.026325
+   0.026325 -0.036756 -0.026325
+   0.026325 -0.026325 -0.036756
+  The components of the vector are:    2.055584   -2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom=  35 ,with type=   1
+  -0.036756  0.026325 -0.026325
+   0.026325 -0.036756  0.026325
+  -0.026325  0.026325 -0.036756
+  The components of the vector are:    2.055584   -2.055584    2.055584
+  Trace= -0.110267
+  
+  For jatom=  41 ,with type=   1
+  -0.036756 -0.026325  0.026325
+  -0.026325 -0.036756  0.026325
+   0.026325  0.026325 -0.036756
+  The components of the vector are:    2.055584    2.055584   -2.055584
+  Trace= -0.110267
+  
+  For jatom=  43 ,with type=   1
+  -0.036756 -0.026325 -0.026325
+  -0.026325 -0.036756 -0.026325
+  -0.026325 -0.026325 -0.036756
+  The components of the vector are:    2.055584    2.055584    2.055584
+  Trace= -0.110267
+  
+ ======== NEW SHELL (ishell=   8): There are   6 atoms on this shell at distance= 4.111167
+  For jatom=   4 ,with type=   2
+   0.020999  0.000000  0.000000
+   0.000000  0.020999  0.000000
+   0.000000  0.000000 -0.126332
+  The components of the vector are:    0.000000    0.000000    4.111167
+  Trace= -0.084335
+  
+  For jatom=   8 ,with type=   2
+   0.020999  0.000000  0.000000
+   0.000000  0.020999  0.000000
+   0.000000  0.000000 -0.126332
+  The components of the vector are:    0.000000    0.000000   -4.111167
+  Trace= -0.084335
+  
+  For jatom=  10 ,with type=   2
+   0.020999  0.000000  0.000000
+   0.000000 -0.126332  0.000000
+   0.000000  0.000000  0.020999
+  The components of the vector are:    0.000000    4.111167    0.000000
+  Trace= -0.084335
+  
+  For jatom=  26 ,with type=   2
+   0.020999  0.000000  0.000000
+   0.000000 -0.126332  0.000000
+   0.000000  0.000000  0.020999
+  The components of the vector are:    0.000000   -4.111167    0.000000
+  Trace= -0.084335
+  
+  For jatom=  34 ,with type=   2
+  -0.126332  0.000000  0.000000
+   0.000000  0.020999  0.000000
+   0.000000  0.000000  0.020999
+  The components of the vector are:    4.111167    0.000000    0.000000
+  Trace= -0.084335
+  
+  For jatom=  98 ,with type=   2
+  -0.126332  0.000000  0.000000
+   0.000000  0.020999  0.000000
+   0.000000  0.000000  0.020999
+  The components of the vector are:   -4.111167    0.000000    0.000000
+  Trace= -0.084335
+  
+ ======== NEW SHELL (ishell=   9): There are  12 atoms on this shell at distance= 5.814069
+  For jatom=  12 ,with type=   2
+   0.000997  0.000000  0.000000
+   0.000000 -0.000123 -0.006078
+   0.000000 -0.006078 -0.000123
+  The components of the vector are:    0.000000    4.111167    4.111167
+  Trace=  0.000751
+  
+  For jatom=  16 ,with type=   2
+   0.000997  0.000000  0.000000
+   0.000000 -0.000123  0.006078
+   0.000000  0.006078 -0.000123
+  The components of the vector are:    0.000000    4.111167   -4.111167
+  Trace=  0.000751
+  
+  For jatom=  28 ,with type=   2
+   0.000997  0.000000  0.000000
+   0.000000 -0.000123  0.006078
+   0.000000  0.006078 -0.000123
+  The components of the vector are:    0.000000   -4.111167    4.111167
+  Trace=  0.000751
+  
+  For jatom=  32 ,with type=   2
+   0.000997  0.000000  0.000000
+   0.000000 -0.000123 -0.006078
+   0.000000 -0.006078 -0.000123
+  The components of the vector are:    0.000000   -4.111167   -4.111167
+  Trace=  0.000751
+  
+  For jatom=  36 ,with type=   2
+  -0.000123  0.000000 -0.006078
+   0.000000  0.000997  0.000000
+  -0.006078  0.000000 -0.000123
+  The components of the vector are:    4.111167    0.000000    4.111167
+  Trace=  0.000751
+  
+  For jatom=  40 ,with type=   2
+  -0.000123  0.000000  0.006078
+   0.000000  0.000997  0.000000
+   0.006078  0.000000 -0.000123
+  The components of the vector are:    4.111167    0.000000   -4.111167
+  Trace=  0.000751
+  
+  For jatom=  42 ,with type=   2
+  -0.000123 -0.006078  0.000000
+  -0.006078 -0.000123  0.000000
+   0.000000  0.000000  0.000997
+  The components of the vector are:    4.111167    4.111167    0.000000
+  Trace=  0.000751
+  
+  For jatom=  58 ,with type=   2
+  -0.000123  0.006078  0.000000
+   0.006078 -0.000123  0.000000
+   0.000000  0.000000  0.000997
+  The components of the vector are:    4.111167   -4.111167    0.000000
+  Trace=  0.000751
+  
+  For jatom= 100 ,with type=   2
+  -0.000123  0.000000  0.006078
+   0.000000  0.000997  0.000000
+   0.006078  0.000000 -0.000123
+  The components of the vector are:   -4.111167    0.000000    4.111167
+  Trace=  0.000751
+  
+  For jatom= 104 ,with type=   2
+  -0.000123  0.000000 -0.006078
+   0.000000  0.000997  0.000000
+  -0.006078  0.000000 -0.000123
+  The components of the vector are:   -4.111167    0.000000   -4.111167
+  Trace=  0.000751
+  
+  For jatom= 106 ,with type=   2
+  -0.000123  0.006078  0.000000
+   0.006078 -0.000123  0.000000
+   0.000000  0.000000  0.000997
+  The components of the vector are:   -4.111167    4.111167    0.000000
+  Trace=  0.000751
+  
+  For jatom= 122 ,with type=   2
+  -0.000123 -0.006078  0.000000
+  -0.006078 -0.000123  0.000000
+   0.000000  0.000000  0.000997
+  The components of the vector are:   -4.111167   -4.111167    0.000000
+  Trace=  0.000751
+  
+ ======== NEW SHELL (ishell=   4): There are  24 atoms on this shell at distance= 6.817600
+  For jatom=   5 ,with type=   1
+  -0.000545  0.000962 -0.001662
+   0.000962 -0.000545 -0.001662
+  -0.005609 -0.005609  0.003640
+  The components of the vector are:   -2.055584   -2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom=   7 ,with type=   1
+  -0.000545  0.000962  0.001662
+   0.000962 -0.000545  0.001662
+   0.005609  0.005609  0.003640
+  The components of the vector are:   -2.055584   -2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom=  13 ,with type=   1
+  -0.000545 -0.000962 -0.001662
+  -0.000962 -0.000545  0.001662
+  -0.005609  0.005609  0.003640
+  The components of the vector are:   -2.055584    2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom=  15 ,with type=   1
+  -0.000545 -0.000962  0.001662
+  -0.000962 -0.000545 -0.001662
+   0.005609 -0.005609  0.003640
+  The components of the vector are:   -2.055584    2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom=  17 ,with type=   1
+  -0.000545 -0.001662  0.000962
+  -0.005609  0.003640 -0.005609
+   0.000962 -0.001662 -0.000545
+  The components of the vector are:   -2.055584    6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  19 ,with type=   1
+  -0.000545 -0.001662 -0.000962
+  -0.005609  0.003640  0.005609
+  -0.000962  0.001662 -0.000545
+  The components of the vector are:   -2.055584    6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom=  25 ,with type=   1
+  -0.000545  0.001662  0.000962
+   0.005609  0.003640  0.005609
+   0.000962  0.001662 -0.000545
+  The components of the vector are:   -2.055584   -6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  27 ,with type=   1
+  -0.000545  0.001662 -0.000962
+   0.005609  0.003640 -0.005609
+  -0.000962 -0.001662 -0.000545
+  The components of the vector are:   -2.055584   -6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom=  37 ,with type=   1
+  -0.000545 -0.000962  0.001662
+  -0.000962 -0.000545 -0.001662
+   0.005609 -0.005609  0.003640
+  The components of the vector are:    2.055584   -2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom=  39 ,with type=   1
+  -0.000545 -0.000962 -0.001662
+  -0.000962 -0.000545  0.001662
+  -0.005609  0.005609  0.003640
+  The components of the vector are:    2.055584   -2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom=  45 ,with type=   1
+  -0.000545  0.000962  0.001662
+   0.000962 -0.000545  0.001662
+   0.005609  0.005609  0.003640
+  The components of the vector are:    2.055584    2.055584    6.166751
+  Trace=  0.002550
+  
+  For jatom=  47 ,with type=   1
+  -0.000545  0.000962 -0.001662
+   0.000962 -0.000545 -0.001662
+  -0.005609 -0.005609  0.003640
+  The components of the vector are:    2.055584    2.055584   -6.166751
+  Trace=  0.002550
+  
+  For jatom=  49 ,with type=   1
+  -0.000545  0.001662 -0.000962
+   0.005609  0.003640 -0.005609
+  -0.000962 -0.001662 -0.000545
+  The components of the vector are:    2.055584    6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  51 ,with type=   1
+  -0.000545  0.001662  0.000962
+   0.005609  0.003640  0.005609
+   0.000962  0.001662 -0.000545
+  The components of the vector are:    2.055584    6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom=  57 ,with type=   1
+  -0.000545 -0.001662 -0.000962
+  -0.005609  0.003640  0.005609
+  -0.000962  0.001662 -0.000545
+  The components of the vector are:    2.055584   -6.166751   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  59 ,with type=   1
+  -0.000545 -0.001662  0.000962
+  -0.005609  0.003640 -0.005609
+   0.000962 -0.001662 -0.000545
+  The components of the vector are:    2.055584   -6.166751    2.055584
+  Trace=  0.002550
+  
+  For jatom=  65 ,with type=   1
+   0.003640 -0.005609 -0.005609
+  -0.001662 -0.000545  0.000962
+  -0.001662  0.000962 -0.000545
+  The components of the vector are:    6.166751   -2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  67 ,with type=   1
+   0.003640 -0.005609  0.005609
+  -0.001662 -0.000545 -0.000962
+   0.001662 -0.000962 -0.000545
+  The components of the vector are:    6.166751   -2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom=  73 ,with type=   1
+   0.003640  0.005609 -0.005609
+   0.001662 -0.000545 -0.000962
+  -0.001662 -0.000962 -0.000545
+  The components of the vector are:    6.166751    2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  75 ,with type=   1
+   0.003640  0.005609  0.005609
+   0.001662 -0.000545  0.000962
+   0.001662  0.000962 -0.000545
+  The components of the vector are:    6.166751    2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom=  97 ,with type=   1
+   0.003640  0.005609  0.005609
+   0.001662 -0.000545  0.000962
+   0.001662  0.000962 -0.000545
+  The components of the vector are:   -6.166751   -2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom=  99 ,with type=   1
+   0.003640  0.005609 -0.005609
+   0.001662 -0.000545 -0.000962
+  -0.001662 -0.000962 -0.000545
+  The components of the vector are:   -6.166751   -2.055584    2.055584
+  Trace=  0.002550
+  
+  For jatom= 105 ,with type=   1
+   0.003640 -0.005609  0.005609
+  -0.001662 -0.000545 -0.000962
+   0.001662 -0.000962 -0.000545
+  The components of the vector are:   -6.166751    2.055584   -2.055584
+  Trace=  0.002550
+  
+  For jatom= 107 ,with type=   1
+   0.003640 -0.005609 -0.005609
+  -0.001662 -0.000545  0.000962
+  -0.001662  0.000962 -0.000545
+  The components of the vector are:   -6.166751    2.055584    2.055584
+  Trace=  0.002550
+  
+ ======== NEW SHELL (ishell=  10): There are   8 atoms on this shell at distance= 7.120751
+  For jatom=  44 ,with type=   2
+   0.000435 -0.001695 -0.001695
+  -0.001695  0.000435 -0.001695
+  -0.001695 -0.001695  0.000435
+  The components of the vector are:    4.111167    4.111167    4.111167
+  Trace=  0.001305
+  
+  For jatom=  48 ,with type=   2
+   0.000435 -0.001695  0.001695
+  -0.001695  0.000435  0.001695
+   0.001695  0.001695  0.000435
+  The components of the vector are:    4.111167    4.111167   -4.111167
+  Trace=  0.001305
+  
+  For jatom=  60 ,with type=   2
+   0.000435  0.001695 -0.001695
+   0.001695  0.000435  0.001695
+  -0.001695  0.001695  0.000435
+  The components of the vector are:    4.111167   -4.111167    4.111167
+  Trace=  0.001305
+  
+  For jatom=  64 ,with type=   2
+   0.000435  0.001695  0.001695
+   0.001695  0.000435 -0.001695
+   0.001695 -0.001695  0.000435
+  The components of the vector are:    4.111167   -4.111167   -4.111167
+  Trace=  0.001305
+  
+  For jatom= 108 ,with type=   2
+   0.000435  0.001695  0.001695
+   0.001695  0.000435 -0.001695
+   0.001695 -0.001695  0.000435
+  The components of the vector are:   -4.111167    4.111167    4.111167
+  Trace=  0.001305
+  
+  For jatom= 112 ,with type=   2
+   0.000435  0.001695 -0.001695
+   0.001695  0.000435  0.001695
+  -0.001695  0.001695  0.000435
+  The components of the vector are:   -4.111167    4.111167   -4.111167
+  Trace=  0.001305
+  
+  For jatom= 124 ,with type=   2
+   0.000435 -0.001695  0.001695
+  -0.001695  0.000435  0.001695
+   0.001695  0.001695  0.000435
+  The components of the vector are:   -4.111167   -4.111167    4.111167
+  Trace=  0.001305
+  
+  For jatom= 128 ,with type=   2
+   0.000435 -0.001695 -0.001695
+  -0.001695  0.000435 -0.001695
+  -0.001695 -0.001695  0.000435
+  The components of the vector are:   -4.111167   -4.111167   -4.111167
+  Trace=  0.001305
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+ ======== NEW SHELL (ishell=   2): There are  16 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.026327 -0.049145 -0.049145
+  -0.049145 -0.039431 -0.058052
+  -0.049145 -0.058052 -0.039431
+  \Phi3^{\alpha\beta y}=
+  -0.039431 -0.049145 -0.058052
+  -0.049145 -0.026327 -0.049145
+  -0.058052 -0.049145 -0.039431
+  \Phi3^{\alpha\beta z}=
+  -0.039431 -0.058052 -0.049145
+  -0.058052 -0.039431 -0.049145
+  -0.049145 -0.049145 -0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.026327 -0.039431 -0.039431
+  -0.049145 -0.049145 -0.058052
+  -0.049145 -0.058052 -0.049145
+  \Phi3^{\alpha\beta y}=
+  -0.049145 -0.049145 -0.058052
+  -0.039431 -0.026327 -0.039431
+  -0.058052 -0.049145 -0.049145
+  \Phi3^{\alpha\beta z}=
+  -0.049145 -0.058052 -0.049145
+  -0.058052 -0.049145 -0.049145
+  -0.039431 -0.039431 -0.026327
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.026327 -0.049145  0.049145
+  -0.049145 -0.039431  0.058052
+   0.049145  0.058052 -0.039431
+  \Phi3^{\alpha\beta y}=
+  -0.039431 -0.049145  0.058052
+  -0.049145 -0.026327  0.049145
+   0.058052  0.049145 -0.039431
+  \Phi3^{\alpha\beta z}=
+   0.039431  0.058052 -0.049145
+   0.058052  0.039431 -0.049145
+  -0.049145 -0.049145  0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.026327 -0.039431  0.039431
+  -0.049145 -0.049145  0.058052
+   0.049145  0.058052 -0.049145
+  \Phi3^{\alpha\beta y}=
+  -0.049145 -0.049145  0.058052
+  -0.039431 -0.026327  0.039431
+   0.058052  0.049145 -0.049145
+  \Phi3^{\alpha\beta z}=
+   0.049145  0.058052 -0.049145
+   0.058052  0.049145 -0.049145
+  -0.039431 -0.039431  0.026327
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.026327  0.049145 -0.049145
+   0.049145 -0.039431  0.058052
+  -0.049145  0.058052 -0.039431
+  \Phi3^{\alpha\beta y}=
+   0.039431 -0.049145  0.058052
+  -0.049145  0.026327 -0.049145
+   0.058052 -0.049145  0.039431
+  \Phi3^{\alpha\beta z}=
+  -0.039431  0.058052 -0.049145
+   0.058052 -0.039431  0.049145
+  -0.049145  0.049145 -0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.026327  0.039431 -0.039431
+   0.049145 -0.049145  0.058052
+  -0.049145  0.058052 -0.049145
+  \Phi3^{\alpha\beta y}=
+   0.049145 -0.049145  0.058052
+  -0.039431  0.026327 -0.039431
+   0.058052 -0.049145  0.049145
+  \Phi3^{\alpha\beta z}=
+  -0.049145  0.058052 -0.049145
+   0.058052 -0.049145  0.049145
+  -0.039431  0.039431 -0.026327
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.026327  0.049145  0.049145
+   0.049145 -0.039431 -0.058052
+   0.049145 -0.058052 -0.039431
+  \Phi3^{\alpha\beta y}=
+   0.039431 -0.049145 -0.058052
+  -0.049145  0.026327  0.049145
+  -0.058052  0.049145  0.039431
+  \Phi3^{\alpha\beta z}=
+   0.039431 -0.058052 -0.049145
+  -0.058052  0.039431  0.049145
+  -0.049145  0.049145  0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.026327  0.039431  0.039431
+   0.049145 -0.049145 -0.058052
+   0.049145 -0.058052 -0.049145
+  \Phi3^{\alpha\beta y}=
+   0.049145 -0.049145 -0.058052
+  -0.039431  0.026327  0.039431
+  -0.058052  0.049145  0.049145
+  \Phi3^{\alpha\beta z}=
+   0.049145 -0.058052 -0.049145
+  -0.058052  0.049145  0.049145
+  -0.039431  0.039431  0.026327
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.026327 -0.049145 -0.049145
+  -0.049145  0.039431  0.058052
+  -0.049145  0.058052  0.039431
+  \Phi3^{\alpha\beta y}=
+  -0.039431  0.049145  0.058052
+   0.049145 -0.026327 -0.049145
+   0.058052 -0.049145 -0.039431
+  \Phi3^{\alpha\beta z}=
+  -0.039431  0.058052  0.049145
+   0.058052 -0.039431 -0.049145
+   0.049145 -0.049145 -0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.026327 -0.039431 -0.039431
+  -0.049145  0.049145  0.058052
+  -0.049145  0.058052  0.049145
+  \Phi3^{\alpha\beta y}=
+  -0.049145  0.049145  0.058052
+   0.039431 -0.026327 -0.039431
+   0.058052 -0.049145 -0.049145
+  \Phi3^{\alpha\beta z}=
+  -0.049145  0.058052  0.049145
+   0.058052 -0.049145 -0.049145
+   0.039431 -0.039431 -0.026327
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.026327 -0.049145  0.049145
+  -0.049145  0.039431 -0.058052
+   0.049145 -0.058052  0.039431
+  \Phi3^{\alpha\beta y}=
+  -0.039431  0.049145 -0.058052
+   0.049145 -0.026327  0.049145
+  -0.058052  0.049145 -0.039431
+  \Phi3^{\alpha\beta z}=
+   0.039431 -0.058052  0.049145
+  -0.058052  0.039431 -0.049145
+   0.049145 -0.049145  0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.026327 -0.039431  0.039431
+  -0.049145  0.049145 -0.058052
+   0.049145 -0.058052  0.049145
+  \Phi3^{\alpha\beta y}=
+  -0.049145  0.049145 -0.058052
+   0.039431 -0.026327  0.039431
+  -0.058052  0.049145 -0.049145
+  \Phi3^{\alpha\beta z}=
+   0.049145 -0.058052  0.049145
+  -0.058052  0.049145 -0.049145
+   0.039431 -0.039431  0.026327
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.026327  0.049145 -0.049145
+   0.049145  0.039431 -0.058052
+  -0.049145 -0.058052  0.039431
+  \Phi3^{\alpha\beta y}=
+   0.039431  0.049145 -0.058052
+   0.049145  0.026327 -0.049145
+  -0.058052 -0.049145  0.039431
+  \Phi3^{\alpha\beta z}=
+  -0.039431 -0.058052  0.049145
+  -0.058052 -0.039431  0.049145
+   0.049145  0.049145 -0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.026327  0.039431 -0.039431
+   0.049145  0.049145 -0.058052
+  -0.049145 -0.058052  0.049145
+  \Phi3^{\alpha\beta y}=
+   0.049145  0.049145 -0.058052
+   0.039431  0.026327 -0.039431
+  -0.058052 -0.049145  0.049145
+  \Phi3^{\alpha\beta z}=
+  -0.049145 -0.058052  0.049145
+  -0.058052 -0.049145  0.049145
+   0.039431  0.039431 -0.026327
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.026327  0.049145  0.049145
+   0.049145  0.039431  0.058052
+   0.049145  0.058052  0.039431
+  \Phi3^{\alpha\beta y}=
+   0.039431  0.049145  0.058052
+   0.049145  0.026327  0.049145
+   0.058052  0.049145  0.039431
+  \Phi3^{\alpha\beta z}=
+   0.039431  0.058052  0.049145
+   0.058052  0.039431  0.049145
+   0.049145  0.049145  0.026327
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.026327  0.039431  0.039431
+   0.049145  0.049145  0.058052
+   0.049145  0.058052  0.049145
+  \Phi3^{\alpha\beta y}=
+   0.049145  0.049145  0.058052
+   0.039431  0.026327  0.039431
+   0.058052  0.049145  0.049145
+  \Phi3^{\alpha\beta z}=
+   0.049145  0.058052  0.049145
+   0.058052  0.049145  0.049145
+   0.039431  0.039431  0.026327
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+ ======== NEW SHELL (ishell=   3): There are  18 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   3 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.022776
+   0.000000  0.000000  0.000000
+   0.022776  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.022776
+   0.000000  0.022776  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.023571  0.000000  0.000000
+   0.000000  0.023571  0.000000
+   0.000000  0.000000 -0.089087
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   3 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.023571
+   0.000000  0.000000  0.000000
+   0.022776  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.023571
+   0.000000  0.022776  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.022776  0.000000  0.000000
+   0.000000  0.022776  0.000000
+   0.000000  0.000000 -0.089087
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   7 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000 -0.022776
+   0.000000  0.000000  0.000000
+  -0.022776  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.022776
+   0.000000 -0.022776  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.023571  0.000000  0.000000
+   0.000000 -0.023571  0.000000
+   0.000000  0.000000  0.089087
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   7 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000 -0.023571
+   0.000000  0.000000  0.000000
+  -0.022776  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.023571
+   0.000000 -0.022776  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.022776  0.000000  0.000000
+   0.000000 -0.022776  0.000000
+   0.000000  0.000000  0.089087
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   9 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.022776  0.000000
+   0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.023571  0.000000  0.000000
+   0.000000 -0.089087  0.000000
+   0.000000  0.000000  0.023571
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.022776
+   0.000000  0.022776  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   9 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.023571  0.000000
+   0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.022776  0.000000  0.000000
+   0.000000 -0.089087  0.000000
+   0.000000  0.000000  0.022776
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.022776
+   0.000000  0.023571  0.000000
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =  25 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.022776  0.000000
+  -0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.023571  0.000000  0.000000
+   0.000000  0.089087  0.000000
+   0.000000  0.000000 -0.023571
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.022776
+   0.000000 -0.022776  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  25 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.023571  0.000000
+  -0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.022776  0.000000  0.000000
+   0.000000  0.089087  0.000000
+   0.000000  0.000000 -0.022776
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.022776
+   0.000000 -0.023571  0.000000
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =  33 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.089087  0.000000  0.000000
+   0.000000  0.023571  0.000000
+   0.000000  0.000000  0.023571
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.022776  0.000000
+   0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.022776
+   0.000000  0.000000  0.000000
+   0.022776  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  33 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.089087  0.000000  0.000000
+   0.000000  0.022776  0.000000
+   0.000000  0.000000  0.022776
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.022776  0.000000
+   0.023571  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.022776
+   0.000000  0.000000  0.000000
+   0.023571  0.000000  0.000000
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =  97 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.089087  0.000000  0.000000
+   0.000000 -0.023571  0.000000
+   0.000000  0.000000 -0.023571
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.022776  0.000000
+  -0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.022776
+   0.000000  0.000000  0.000000
+  -0.022776  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  97 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.089087  0.000000  0.000000
+   0.000000 -0.022776  0.000000
+   0.000000  0.000000 -0.022776
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.022776  0.000000
+  -0.023571  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.022776
+   0.000000  0.000000  0.000000
+  -0.023571  0.000000  0.000000
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   3 ,with type=   1
+  For katom  =   3 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000 -0.022776
+   0.000000  0.000000  0.000000
+  -0.023571  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.022776
+   0.000000 -0.023571  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.022776  0.000000  0.000000
+   0.000000 -0.022776  0.000000
+   0.000000  0.000000  0.089087
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   7 ,with type=   1
+  For katom  =   7 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.022776
+   0.000000  0.000000  0.000000
+   0.023571  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.022776
+   0.000000  0.023571  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.022776  0.000000  0.000000
+   0.000000  0.022776  0.000000
+   0.000000  0.000000 -0.089087
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   9 ,with type=   1
+  For katom  =   9 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.022776  0.000000
+  -0.023571  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.022776  0.000000  0.000000
+   0.000000  0.089087  0.000000
+   0.000000  0.000000 -0.022776
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.023571
+   0.000000 -0.022776  0.000000
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  25 ,with type=   1
+  For katom  =  25 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.022776  0.000000
+   0.023571  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.022776  0.000000  0.000000
+   0.000000 -0.089087  0.000000
+   0.000000  0.000000  0.022776
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.023571
+   0.000000  0.022776  0.000000
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  33 ,with type=   1
+  For katom  =  33 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.089087  0.000000  0.000000
+   0.000000 -0.022776  0.000000
+   0.000000  0.000000 -0.022776
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.023571  0.000000
+  -0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.023571
+   0.000000  0.000000  0.000000
+  -0.022776  0.000000  0.000000
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  97 ,with type=   1
+  For katom  =  97 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.089087  0.000000  0.000000
+   0.000000  0.022776  0.000000
+   0.000000  0.000000  0.022776
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.023571  0.000000
+   0.022776  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.023571
+   0.000000  0.000000  0.000000
+   0.022776  0.000000  0.000000
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+ ======== NEW SHELL (ishell=   4): There are   8 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.031085  0.044763  0.044763
+   0.048758  0.044763  0.058052
+   0.048758  0.058052  0.044763
+  \Phi3^{\alpha\beta y}=
+   0.044763  0.048758  0.058052
+   0.044763  0.031085  0.044763
+   0.058052  0.048758  0.044763
+  \Phi3^{\alpha\beta z}=
+   0.044763  0.058052  0.048758
+   0.058052  0.044763  0.048758
+   0.044763  0.044763  0.031085
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.031085  0.044763 -0.044763
+   0.048758  0.044763 -0.058052
+  -0.048758 -0.058052  0.044763
+  \Phi3^{\alpha\beta y}=
+   0.044763  0.048758 -0.058052
+   0.044763  0.031085 -0.044763
+  -0.058052 -0.048758  0.044763
+  \Phi3^{\alpha\beta z}=
+  -0.044763 -0.058052  0.048758
+  -0.058052 -0.044763  0.048758
+   0.044763  0.044763 -0.031085
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.031085 -0.044763  0.044763
+  -0.048758  0.044763 -0.058052
+   0.048758 -0.058052  0.044763
+  \Phi3^{\alpha\beta y}=
+  -0.044763  0.048758 -0.058052
+   0.044763 -0.031085  0.044763
+  -0.058052  0.048758 -0.044763
+  \Phi3^{\alpha\beta z}=
+   0.044763 -0.058052  0.048758
+  -0.058052  0.044763 -0.048758
+   0.044763 -0.044763  0.031085
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.031085 -0.044763 -0.044763
+  -0.048758  0.044763  0.058052
+  -0.048758  0.058052  0.044763
+  \Phi3^{\alpha\beta y}=
+  -0.044763  0.048758  0.058052
+   0.044763 -0.031085 -0.044763
+   0.058052 -0.048758 -0.044763
+  \Phi3^{\alpha\beta z}=
+  -0.044763  0.058052  0.048758
+   0.058052 -0.044763 -0.048758
+   0.044763 -0.044763 -0.031085
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.031085  0.044763  0.044763
+   0.048758 -0.044763 -0.058052
+   0.048758 -0.058052 -0.044763
+  \Phi3^{\alpha\beta y}=
+   0.044763 -0.048758 -0.058052
+  -0.044763  0.031085  0.044763
+  -0.058052  0.048758  0.044763
+  \Phi3^{\alpha\beta z}=
+   0.044763 -0.058052 -0.048758
+  -0.058052  0.044763  0.048758
+  -0.044763  0.044763  0.031085
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.031085  0.044763 -0.044763
+   0.048758 -0.044763  0.058052
+  -0.048758  0.058052 -0.044763
+  \Phi3^{\alpha\beta y}=
+   0.044763 -0.048758  0.058052
+  -0.044763  0.031085 -0.044763
+   0.058052 -0.048758  0.044763
+  \Phi3^{\alpha\beta z}=
+  -0.044763  0.058052 -0.048758
+   0.058052 -0.044763  0.048758
+  -0.044763  0.044763 -0.031085
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.031085 -0.044763  0.044763
+  -0.048758 -0.044763  0.058052
+   0.048758  0.058052 -0.044763
+  \Phi3^{\alpha\beta y}=
+  -0.044763 -0.048758  0.058052
+  -0.044763 -0.031085  0.044763
+   0.058052  0.048758 -0.044763
+  \Phi3^{\alpha\beta z}=
+   0.044763  0.058052 -0.048758
+   0.058052  0.044763 -0.048758
+  -0.044763 -0.044763  0.031085
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.031085 -0.044763 -0.044763
+  -0.048758 -0.044763 -0.058052
+  -0.048758 -0.058052 -0.044763
+  \Phi3^{\alpha\beta y}=
+  -0.044763 -0.048758 -0.058052
+  -0.044763 -0.031085 -0.044763
+  -0.058052 -0.048758 -0.044763
+  \Phi3^{\alpha\beta z}=
+  -0.044763 -0.058052 -0.048758
+  -0.058052 -0.044763 -0.048758
+  -0.044763 -0.044763 -0.031085
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+ ======== NEW SHELL (ishell=   5): There are  48 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =   3 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000451  0.000000
+  -0.000147 -0.000147  0.000000
+   0.000199 -0.000358  0.002701
+  \Phi3^{\alpha\beta y}=
+  -0.000147 -0.000147  0.000000
+   0.000451 -0.002698  0.000000
+  -0.000358  0.000199  0.002701
+  \Phi3^{\alpha\beta z}=
+  -0.000199  0.000358  0.002701
+   0.000358 -0.000199  0.002701
+  -0.000533 -0.000533  0.000000
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   3 ,with type=   1
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698 -0.000147 -0.000199
+  -0.000147  0.000451  0.000358
+   0.000199 -0.000358 -0.000533
+  \Phi3^{\alpha\beta y}=
+   0.000451 -0.000147  0.000358
+  -0.000147 -0.002698 -0.000199
+  -0.000358  0.000199 -0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.002701
+   0.000000  0.000000  0.002701
+   0.002701  0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =   9 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000000  0.000451
+   0.000199  0.002701 -0.000358
+  -0.000147  0.000000 -0.000147
+  \Phi3^{\alpha\beta y}=
+  -0.000199  0.002701  0.000358
+  -0.000533  0.000000 -0.000533
+   0.000358  0.002701 -0.000199
+  \Phi3^{\alpha\beta z}=
+  -0.000147  0.000000 -0.000147
+  -0.000358  0.002701  0.000199
+   0.000451  0.000000 -0.002698
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   9 ,with type=   1
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698 -0.000199 -0.000147
+   0.000199 -0.000533 -0.000358
+  -0.000147  0.000358  0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.002701  0.000000
+   0.002701  0.000000  0.002701
+   0.000000  0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000451  0.000358 -0.000147
+  -0.000358 -0.000533  0.000199
+  -0.000147 -0.000199 -0.002698
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =  33 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000533 -0.000533
+   0.002701 -0.000199  0.000358
+   0.002701  0.000358 -0.000199
+  \Phi3^{\alpha\beta y}=
+   0.002701  0.000199 -0.000358
+   0.000000 -0.002698  0.000451
+   0.000000 -0.000147 -0.000147
+  \Phi3^{\alpha\beta z}=
+   0.002701 -0.000358  0.000199
+   0.000000 -0.000147 -0.000147
+   0.000000  0.000451 -0.002698
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  33 ,with type=   1
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.002701  0.002701
+   0.002701  0.000000  0.000000
+   0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.000533  0.000199 -0.000358
+  -0.000199 -0.002698 -0.000147
+   0.000358 -0.000147  0.000451
+  \Phi3^{\alpha\beta z}=
+  -0.000533 -0.000358  0.000199
+   0.000358  0.000451 -0.000147
+  -0.000199 -0.000147 -0.002698
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =   3 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698 -0.000451  0.000000
+   0.000147 -0.000147  0.000000
+   0.000199  0.000358  0.002701
+  \Phi3^{\alpha\beta y}=
+   0.000147 -0.000147  0.000000
+   0.000451  0.002698  0.000000
+   0.000358  0.000199 -0.002701
+  \Phi3^{\alpha\beta z}=
+  -0.000199 -0.000358  0.002701
+  -0.000358 -0.000199 -0.002701
+  -0.000533  0.000533  0.000000
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   3 ,with type=   1
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000147 -0.000199
+   0.000147  0.000451 -0.000358
+   0.000199  0.000358 -0.000533
+  \Phi3^{\alpha\beta y}=
+  -0.000451 -0.000147 -0.000358
+  -0.000147  0.002698 -0.000199
+   0.000358  0.000199  0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.002701
+   0.000000  0.000000 -0.002701
+   0.002701 -0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  =   3 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000451  0.000000
+  -0.000147  0.000147  0.000000
+   0.000199  0.000358 -0.002701
+  \Phi3^{\alpha\beta y}=
+  -0.000147  0.000147  0.000000
+  -0.000451 -0.002698  0.000000
+   0.000358  0.000199  0.002701
+  \Phi3^{\alpha\beta z}=
+  -0.000199 -0.000358 -0.002701
+  -0.000358 -0.000199  0.002701
+   0.000533 -0.000533  0.000000
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   3 ,with type=   1
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698 -0.000147 -0.000199
+  -0.000147 -0.000451 -0.000358
+   0.000199  0.000358  0.000533
+  \Phi3^{\alpha\beta y}=
+   0.000451  0.000147 -0.000358
+   0.000147 -0.002698 -0.000199
+   0.000358  0.000199 -0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.002701
+   0.000000  0.000000  0.002701
+  -0.002701  0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  =   3 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698 -0.000451  0.000000
+   0.000147  0.000147  0.000000
+   0.000199 -0.000358 -0.002701
+  \Phi3^{\alpha\beta y}=
+   0.000147  0.000147  0.000000
+  -0.000451  0.002698  0.000000
+  -0.000358  0.000199 -0.002701
+  \Phi3^{\alpha\beta z}=
+  -0.000199  0.000358 -0.002701
+   0.000358 -0.000199 -0.002701
+   0.000533  0.000533  0.000000
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   3 ,with type=   1
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000147 -0.000199
+   0.000147 -0.000451  0.000358
+   0.000199 -0.000358  0.000533
+  \Phi3^{\alpha\beta y}=
+  -0.000451  0.000147  0.000358
+   0.000147  0.002698 -0.000199
+  -0.000358  0.000199  0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.002701
+   0.000000  0.000000 -0.002701
+  -0.002701 -0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =   7 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000451  0.000000
+  -0.000147 -0.000147  0.000000
+  -0.000199  0.000358  0.002701
+  \Phi3^{\alpha\beta y}=
+  -0.000147 -0.000147  0.000000
+   0.000451 -0.002698  0.000000
+   0.000358 -0.000199  0.002701
+  \Phi3^{\alpha\beta z}=
+   0.000199 -0.000358  0.002701
+  -0.000358  0.000199  0.002701
+  -0.000533 -0.000533  0.000000
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   7 ,with type=   1
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698 -0.000147  0.000199
+  -0.000147  0.000451 -0.000358
+  -0.000199  0.000358 -0.000533
+  \Phi3^{\alpha\beta y}=
+   0.000451 -0.000147 -0.000358
+  -0.000147 -0.002698  0.000199
+   0.000358 -0.000199 -0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.002701
+   0.000000  0.000000  0.002701
+   0.002701  0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =   7 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698 -0.000451  0.000000
+   0.000147 -0.000147  0.000000
+  -0.000199 -0.000358  0.002701
+  \Phi3^{\alpha\beta y}=
+   0.000147 -0.000147  0.000000
+   0.000451  0.002698  0.000000
+  -0.000358 -0.000199 -0.002701
+  \Phi3^{\alpha\beta z}=
+   0.000199  0.000358  0.002701
+   0.000358  0.000199 -0.002701
+  -0.000533  0.000533  0.000000
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   7 ,with type=   1
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000147  0.000199
+   0.000147  0.000451  0.000358
+  -0.000199 -0.000358 -0.000533
+  \Phi3^{\alpha\beta y}=
+  -0.000451 -0.000147  0.000358
+  -0.000147  0.002698  0.000199
+  -0.000358 -0.000199  0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.002701
+   0.000000  0.000000 -0.002701
+   0.002701 -0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  =   7 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000451  0.000000
+  -0.000147  0.000147  0.000000
+  -0.000199 -0.000358 -0.002701
+  \Phi3^{\alpha\beta y}=
+  -0.000147  0.000147  0.000000
+  -0.000451 -0.002698  0.000000
+  -0.000358 -0.000199  0.002701
+  \Phi3^{\alpha\beta z}=
+   0.000199  0.000358 -0.002701
+   0.000358  0.000199  0.002701
+   0.000533 -0.000533  0.000000
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   7 ,with type=   1
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698 -0.000147  0.000199
+  -0.000147 -0.000451  0.000358
+  -0.000199 -0.000358  0.000533
+  \Phi3^{\alpha\beta y}=
+   0.000451  0.000147  0.000358
+   0.000147 -0.002698  0.000199
+  -0.000358 -0.000199 -0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.002701
+   0.000000  0.000000  0.002701
+  -0.002701  0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  =   7 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698 -0.000451  0.000000
+   0.000147  0.000147  0.000000
+  -0.000199  0.000358 -0.002701
+  \Phi3^{\alpha\beta y}=
+   0.000147  0.000147  0.000000
+  -0.000451  0.002698  0.000000
+   0.000358 -0.000199 -0.002701
+  \Phi3^{\alpha\beta z}=
+   0.000199 -0.000358 -0.002701
+  -0.000358  0.000199 -0.002701
+   0.000533  0.000533  0.000000
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   7 ,with type=   1
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000147  0.000199
+   0.000147 -0.000451 -0.000358
+  -0.000199  0.000358  0.000533
+  \Phi3^{\alpha\beta y}=
+  -0.000451  0.000147 -0.000358
+   0.000147  0.002698  0.000199
+   0.000358 -0.000199  0.000533
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.002701
+   0.000000  0.000000 -0.002701
+  -0.002701 -0.002701  0.000000
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =   9 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000000 -0.000451
+   0.000199  0.002701  0.000358
+   0.000147  0.000000 -0.000147
+  \Phi3^{\alpha\beta y}=
+  -0.000199  0.002701 -0.000358
+  -0.000533  0.000000  0.000533
+  -0.000358 -0.002701 -0.000199
+  \Phi3^{\alpha\beta z}=
+   0.000147  0.000000 -0.000147
+   0.000358 -0.002701  0.000199
+   0.000451  0.000000  0.002698
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   9 ,with type=   1
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698 -0.000199  0.000147
+   0.000199 -0.000533  0.000358
+   0.000147 -0.000358  0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.002701  0.000000
+   0.002701  0.000000 -0.002701
+   0.000000 -0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.000451 -0.000358 -0.000147
+   0.000358  0.000533  0.000199
+  -0.000147 -0.000199  0.002698
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =  33 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000533  0.000533
+   0.002701 -0.000199 -0.000358
+  -0.002701 -0.000358 -0.000199
+  \Phi3^{\alpha\beta y}=
+   0.002701  0.000199  0.000358
+   0.000000 -0.002698 -0.000451
+   0.000000  0.000147 -0.000147
+  \Phi3^{\alpha\beta z}=
+  -0.002701  0.000358  0.000199
+   0.000000  0.000147 -0.000147
+   0.000000  0.000451  0.002698
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  33 ,with type=   1
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.002701 -0.002701
+   0.002701  0.000000  0.000000
+  -0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.000533  0.000199  0.000358
+  -0.000199 -0.002698  0.000147
+  -0.000358  0.000147  0.000451
+  \Phi3^{\alpha\beta z}=
+   0.000533  0.000358  0.000199
+  -0.000358 -0.000451 -0.000147
+  -0.000199 -0.000147  0.002698
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  =   9 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000000  0.000451
+   0.000199 -0.002701  0.000358
+  -0.000147  0.000000  0.000147
+  \Phi3^{\alpha\beta y}=
+  -0.000199 -0.002701 -0.000358
+   0.000533  0.000000 -0.000533
+  -0.000358  0.002701 -0.000199
+  \Phi3^{\alpha\beta z}=
+  -0.000147  0.000000  0.000147
+   0.000358  0.002701  0.000199
+  -0.000451  0.000000 -0.002698
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   9 ,with type=   1
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698 -0.000199 -0.000147
+   0.000199  0.000533  0.000358
+  -0.000147 -0.000358 -0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.002701  0.000000
+  -0.002701  0.000000  0.002701
+   0.000000  0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000451 -0.000358  0.000147
+   0.000358 -0.000533  0.000199
+   0.000147 -0.000199 -0.002698
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  =   9 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000000 -0.000451
+   0.000199 -0.002701 -0.000358
+   0.000147  0.000000  0.000147
+  \Phi3^{\alpha\beta y}=
+  -0.000199 -0.002701  0.000358
+   0.000533  0.000000  0.000533
+   0.000358 -0.002701 -0.000199
+  \Phi3^{\alpha\beta z}=
+   0.000147  0.000000  0.000147
+  -0.000358 -0.002701  0.000199
+  -0.000451  0.000000  0.002698
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   9 ,with type=   1
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698 -0.000199  0.000147
+   0.000199  0.000533 -0.000358
+   0.000147  0.000358 -0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.002701  0.000000
+  -0.002701  0.000000 -0.002701
+   0.000000 -0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.000451  0.000358  0.000147
+  -0.000358  0.000533  0.000199
+   0.000147 -0.000199  0.002698
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =  25 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000000  0.000451
+  -0.000199  0.002701  0.000358
+  -0.000147  0.000000 -0.000147
+  \Phi3^{\alpha\beta y}=
+   0.000199  0.002701 -0.000358
+  -0.000533  0.000000 -0.000533
+  -0.000358  0.002701  0.000199
+  \Phi3^{\alpha\beta z}=
+  -0.000147  0.000000 -0.000147
+   0.000358  0.002701 -0.000199
+   0.000451  0.000000 -0.002698
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  25 ,with type=   1
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000199 -0.000147
+  -0.000199 -0.000533  0.000358
+  -0.000147 -0.000358  0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.002701  0.000000
+   0.002701  0.000000  0.002701
+   0.000000  0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000451 -0.000358 -0.000147
+   0.000358 -0.000533 -0.000199
+  -0.000147  0.000199 -0.002698
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =  25 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000000 -0.000451
+  -0.000199  0.002701 -0.000358
+   0.000147  0.000000 -0.000147
+  \Phi3^{\alpha\beta y}=
+   0.000199  0.002701  0.000358
+  -0.000533  0.000000  0.000533
+   0.000358 -0.002701  0.000199
+  \Phi3^{\alpha\beta z}=
+   0.000147  0.000000 -0.000147
+  -0.000358 -0.002701 -0.000199
+   0.000451  0.000000  0.002698
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  25 ,with type=   1
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.002698  0.000199  0.000147
+  -0.000199 -0.000533 -0.000358
+   0.000147  0.000358  0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.002701  0.000000
+   0.002701  0.000000 -0.002701
+   0.000000 -0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.000451  0.000358 -0.000147
+  -0.000358  0.000533 -0.000199
+  -0.000147  0.000199  0.002698
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  =  25 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000000  0.000451
+  -0.000199 -0.002701 -0.000358
+  -0.000147  0.000000  0.000147
+  \Phi3^{\alpha\beta y}=
+   0.000199 -0.002701  0.000358
+   0.000533  0.000000 -0.000533
+   0.000358  0.002701  0.000199
+  \Phi3^{\alpha\beta z}=
+  -0.000147  0.000000  0.000147
+  -0.000358  0.002701 -0.000199
+  -0.000451  0.000000 -0.002698
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  25 ,with type=   1
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000199 -0.000147
+  -0.000199  0.000533 -0.000358
+  -0.000147  0.000358 -0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.002701  0.000000
+  -0.002701  0.000000  0.002701
+   0.000000  0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000451  0.000358  0.000147
+  -0.000358 -0.000533 -0.000199
+   0.000147  0.000199 -0.002698
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  =  25 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000000 -0.000451
+  -0.000199 -0.002701  0.000358
+   0.000147  0.000000  0.000147
+  \Phi3^{\alpha\beta y}=
+   0.000199 -0.002701 -0.000358
+   0.000533  0.000000  0.000533
+  -0.000358 -0.002701  0.000199
+  \Phi3^{\alpha\beta z}=
+   0.000147  0.000000  0.000147
+   0.000358 -0.002701 -0.000199
+  -0.000451  0.000000  0.002698
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  25 ,with type=   1
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.002698  0.000199  0.000147
+  -0.000199  0.000533  0.000358
+   0.000147 -0.000358 -0.000451
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.002701  0.000000
+  -0.002701  0.000000 -0.002701
+   0.000000 -0.002701  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.000451 -0.000358  0.000147
+   0.000358  0.000533 -0.000199
+   0.000147  0.000199  0.002698
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =  33 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000533 -0.000533
+  -0.002701 -0.000199 -0.000358
+   0.002701 -0.000358 -0.000199
+  \Phi3^{\alpha\beta y}=
+  -0.002701  0.000199  0.000358
+   0.000000  0.002698  0.000451
+   0.000000 -0.000147  0.000147
+  \Phi3^{\alpha\beta z}=
+   0.002701  0.000358  0.000199
+   0.000000 -0.000147  0.000147
+   0.000000 -0.000451 -0.002698
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  33 ,with type=   1
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.002701  0.002701
+  -0.002701  0.000000  0.000000
+   0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000533  0.000199  0.000358
+  -0.000199  0.002698 -0.000147
+  -0.000358 -0.000147 -0.000451
+  \Phi3^{\alpha\beta z}=
+  -0.000533  0.000358  0.000199
+  -0.000358  0.000451  0.000147
+  -0.000199  0.000147 -0.002698
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =  33 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000533  0.000533
+  -0.002701 -0.000199  0.000358
+  -0.002701  0.000358 -0.000199
+  \Phi3^{\alpha\beta y}=
+  -0.002701  0.000199 -0.000358
+   0.000000  0.002698 -0.000451
+   0.000000  0.000147  0.000147
+  \Phi3^{\alpha\beta z}=
+  -0.002701 -0.000358  0.000199
+   0.000000  0.000147  0.000147
+   0.000000 -0.000451  0.002698
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  33 ,with type=   1
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.002701 -0.002701
+  -0.002701  0.000000  0.000000
+  -0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000533  0.000199 -0.000358
+  -0.000199  0.002698  0.000147
+   0.000358  0.000147 -0.000451
+  \Phi3^{\alpha\beta z}=
+   0.000533 -0.000358  0.000199
+   0.000358 -0.000451  0.000147
+  -0.000199  0.000147  0.002698
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  =  97 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000533 -0.000533
+   0.002701  0.000199 -0.000358
+   0.002701 -0.000358  0.000199
+  \Phi3^{\alpha\beta y}=
+   0.002701 -0.000199  0.000358
+   0.000000 -0.002698  0.000451
+   0.000000 -0.000147 -0.000147
+  \Phi3^{\alpha\beta z}=
+   0.002701  0.000358 -0.000199
+   0.000000 -0.000147 -0.000147
+   0.000000  0.000451 -0.002698
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components:-2.055584 -2.055584 -2.055584
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  97 ,with type=   1
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.002701  0.002701
+   0.002701  0.000000  0.000000
+   0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.000533 -0.000199  0.000358
+   0.000199 -0.002698 -0.000147
+  -0.000358 -0.000147  0.000451
+  \Phi3^{\alpha\beta z}=
+  -0.000533  0.000358 -0.000199
+  -0.000358  0.000451 -0.000147
+   0.000199 -0.000147 -0.002698
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 2.055584  2.055584  2.055584
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  =  97 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000533  0.000533
+   0.002701  0.000199  0.000358
+  -0.002701  0.000358  0.000199
+  \Phi3^{\alpha\beta y}=
+   0.002701 -0.000199 -0.000358
+   0.000000 -0.002698 -0.000451
+   0.000000  0.000147 -0.000147
+  \Phi3^{\alpha\beta z}=
+  -0.002701 -0.000358 -0.000199
+   0.000000  0.000147 -0.000147
+   0.000000  0.000451  0.002698
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components:-2.055584 -2.055584  2.055584
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  97 ,with type=   1
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.002701 -0.002701
+   0.002701  0.000000  0.000000
+  -0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.000533 -0.000199 -0.000358
+   0.000199 -0.002698  0.000147
+   0.000358  0.000147  0.000451
+  \Phi3^{\alpha\beta z}=
+   0.000533 -0.000358 -0.000199
+   0.000358 -0.000451 -0.000147
+   0.000199 -0.000147  0.002698
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 2.055584  2.055584 -2.055584
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  =  97 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000533 -0.000533
+  -0.002701  0.000199  0.000358
+   0.002701  0.000358  0.000199
+  \Phi3^{\alpha\beta y}=
+  -0.002701 -0.000199 -0.000358
+   0.000000  0.002698  0.000451
+   0.000000 -0.000147  0.000147
+  \Phi3^{\alpha\beta z}=
+   0.002701 -0.000358 -0.000199
+   0.000000 -0.000147  0.000147
+   0.000000 -0.000451 -0.002698
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components:-2.055584  2.055584 -2.055584
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  97 ,with type=   1
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.002701  0.002701
+  -0.002701  0.000000  0.000000
+   0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000533 -0.000199 -0.000358
+   0.000199  0.002698 -0.000147
+   0.000358 -0.000147 -0.000451
+  \Phi3^{\alpha\beta z}=
+  -0.000533 -0.000358 -0.000199
+   0.000358  0.000451  0.000147
+   0.000199  0.000147 -0.002698
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 2.055584 -2.055584  2.055584
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  =  97 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000533  0.000533
+  -0.002701  0.000199 -0.000358
+  -0.002701 -0.000358  0.000199
+  \Phi3^{\alpha\beta y}=
+  -0.002701 -0.000199  0.000358
+   0.000000  0.002698 -0.000451
+   0.000000  0.000147  0.000147
+  \Phi3^{\alpha\beta z}=
+  -0.002701  0.000358 -0.000199
+   0.000000  0.000147  0.000147
+   0.000000 -0.000451  0.002698
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components:-2.055584  2.055584  2.055584
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  97 ,with type=   1
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.002701 -0.002701
+  -0.002701  0.000000  0.000000
+  -0.002701  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000533 -0.000199  0.000358
+   0.000199  0.002698  0.000147
+  -0.000358  0.000147 -0.000451
+  \Phi3^{\alpha\beta z}=
+   0.000533  0.000358 -0.000199
+  -0.000358 -0.000451  0.000147
+   0.000199  0.000147  0.002698
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 2.055584 -2.055584 -2.055584
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+ ======== NEW SHELL (ishell=   6): There are  24 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319 -0.002057 -0.003638
+  -0.001426 -0.002057 -0.001852
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta y}=
+  -0.002057 -0.001426 -0.001852
+  -0.002057  0.000319 -0.003638
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta z}=
+   0.003638  0.001852 -0.000941
+   0.001852  0.003638 -0.000941
+   0.000444  0.000444  0.000000
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319 -0.002057  0.003638
+  -0.001426 -0.002057  0.001852
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta y}=
+  -0.002057 -0.001426  0.001852
+  -0.002057  0.000319  0.003638
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta z}=
+  -0.003638 -0.001852 -0.000941
+  -0.001852 -0.003638 -0.000941
+   0.000444  0.000444  0.000000
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319 -0.003638 -0.002057
+   0.000000  0.000444  0.000000
+  -0.001426 -0.001852 -0.002057
+  \Phi3^{\alpha\beta y}=
+   0.003638 -0.000941  0.001852
+   0.000444  0.000000  0.000444
+   0.001852 -0.000941  0.003638
+  \Phi3^{\alpha\beta z}=
+  -0.002057 -0.001852 -0.001426
+   0.000000  0.000444  0.000000
+  -0.002057 -0.003638  0.000319
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319  0.003638 -0.002057
+   0.000000  0.000444  0.000000
+  -0.001426  0.001852 -0.002057
+  \Phi3^{\alpha\beta y}=
+  -0.003638 -0.000941 -0.001852
+   0.000444  0.000000  0.000444
+  -0.001852 -0.000941 -0.003638
+  \Phi3^{\alpha\beta z}=
+  -0.002057  0.001852 -0.001426
+   0.000000  0.000444  0.000000
+  -0.002057  0.003638  0.000319
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   2 ,with type=   2
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000444  0.000444
+  -0.000941  0.003638  0.001852
+  -0.000941  0.001852  0.003638
+  \Phi3^{\alpha\beta y}=
+   0.000444  0.000000  0.000000
+  -0.003638  0.000319 -0.002057
+  -0.001852 -0.001426 -0.002057
+  \Phi3^{\alpha\beta z}=
+   0.000444  0.000000  0.000000
+  -0.001852 -0.002057 -0.001426
+  -0.003638 -0.002057  0.000319
+  (i,j) vector components: 2.055584  2.055584  2.055584
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000444  0.000444
+  -0.000941 -0.003638 -0.001852
+  -0.000941 -0.001852 -0.003638
+  \Phi3^{\alpha\beta y}=
+   0.000444  0.000000  0.000000
+   0.003638  0.000319 -0.002057
+   0.001852 -0.001426 -0.002057
+  \Phi3^{\alpha\beta z}=
+   0.000444  0.000000  0.000000
+   0.001852 -0.002057 -0.001426
+   0.003638 -0.002057  0.000319
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components:-2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319 -0.003638  0.002057
+   0.000000  0.000444  0.000000
+   0.001426  0.001852 -0.002057
+  \Phi3^{\alpha\beta y}=
+   0.003638 -0.000941 -0.001852
+   0.000444  0.000000 -0.000444
+  -0.001852  0.000941  0.003638
+  \Phi3^{\alpha\beta z}=
+   0.002057  0.001852 -0.001426
+   0.000000 -0.000444  0.000000
+  -0.002057 -0.003638 -0.000319
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319  0.003638  0.002057
+   0.000000  0.000444  0.000000
+   0.001426 -0.001852 -0.002057
+  \Phi3^{\alpha\beta y}=
+  -0.003638 -0.000941  0.001852
+   0.000444  0.000000 -0.000444
+   0.001852  0.000941 -0.003638
+  \Phi3^{\alpha\beta z}=
+   0.002057 -0.001852 -0.001426
+   0.000000 -0.000444  0.000000
+  -0.002057  0.003638 -0.000319
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =   8 ,with type=   2
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000444 -0.000444
+  -0.000941  0.003638 -0.001852
+   0.000941 -0.001852  0.003638
+  \Phi3^{\alpha\beta y}=
+   0.000444  0.000000  0.000000
+  -0.003638  0.000319  0.002057
+   0.001852  0.001426 -0.002057
+  \Phi3^{\alpha\beta z}=
+  -0.000444  0.000000  0.000000
+   0.001852  0.002057 -0.001426
+  -0.003638 -0.002057 -0.000319
+  (i,j) vector components: 2.055584  2.055584 -2.055584
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000444 -0.000444
+  -0.000941 -0.003638  0.001852
+   0.000941  0.001852 -0.003638
+  \Phi3^{\alpha\beta y}=
+   0.000444  0.000000  0.000000
+   0.003638  0.000319  0.002057
+  -0.001852  0.001426 -0.002057
+  \Phi3^{\alpha\beta z}=
+  -0.000444  0.000000  0.000000
+  -0.001852  0.002057 -0.001426
+   0.003638 -0.002057 -0.000319
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components:-2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319  0.002057 -0.003638
+   0.001426 -0.002057  0.001852
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta y}=
+   0.002057 -0.001426  0.001852
+  -0.002057 -0.000319 -0.003638
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta z}=
+   0.003638 -0.001852 -0.000941
+  -0.001852  0.003638  0.000941
+   0.000444 -0.000444  0.000000
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000319  0.002057  0.003638
+   0.001426 -0.002057 -0.001852
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta y}=
+   0.002057 -0.001426 -0.001852
+  -0.002057 -0.000319  0.003638
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta z}=
+  -0.003638  0.001852 -0.000941
+   0.001852 -0.003638  0.000941
+   0.000444 -0.000444  0.000000
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  26 ,with type=   2
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000444  0.000444
+   0.000941  0.003638 -0.001852
+  -0.000941 -0.001852  0.003638
+  \Phi3^{\alpha\beta y}=
+  -0.000444  0.000000  0.000000
+  -0.003638 -0.000319 -0.002057
+   0.001852 -0.001426  0.002057
+  \Phi3^{\alpha\beta z}=
+   0.000444  0.000000  0.000000
+   0.001852 -0.002057  0.001426
+  -0.003638  0.002057  0.000319
+  (i,j) vector components: 2.055584 -2.055584  2.055584
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000444  0.000444
+   0.000941 -0.003638  0.001852
+  -0.000941  0.001852 -0.003638
+  \Phi3^{\alpha\beta y}=
+  -0.000444  0.000000  0.000000
+   0.003638 -0.000319 -0.002057
+  -0.001852 -0.001426  0.002057
+  \Phi3^{\alpha\beta z}=
+   0.000444  0.000000  0.000000
+  -0.001852 -0.002057  0.001426
+   0.003638  0.002057  0.000319
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components:-2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  32 ,with type=   2
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000444 -0.000444
+   0.000941  0.003638  0.001852
+   0.000941  0.001852  0.003638
+  \Phi3^{\alpha\beta y}=
+  -0.000444  0.000000  0.000000
+  -0.003638 -0.000319  0.002057
+  -0.001852  0.001426  0.002057
+  \Phi3^{\alpha\beta z}=
+  -0.000444  0.000000  0.000000
+  -0.001852  0.002057  0.001426
+  -0.003638  0.002057 -0.000319
+  (i,j) vector components: 2.055584 -2.055584 -2.055584
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  =  32 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.000444 -0.000444
+   0.000941 -0.003638 -0.001852
+   0.000941 -0.001852 -0.003638
+  \Phi3^{\alpha\beta y}=
+  -0.000444  0.000000  0.000000
+   0.003638 -0.000319  0.002057
+   0.001852  0.001426  0.002057
+  \Phi3^{\alpha\beta z}=
+  -0.000444  0.000000  0.000000
+   0.001852  0.002057  0.001426
+   0.003638  0.002057 -0.000319
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components:-2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319 -0.002057 -0.003638
+  -0.001426  0.002057  0.001852
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta y}=
+  -0.002057  0.001426  0.001852
+   0.002057  0.000319 -0.003638
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta z}=
+   0.003638 -0.001852  0.000941
+  -0.001852  0.003638 -0.000941
+  -0.000444  0.000444  0.000000
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319 -0.002057  0.003638
+  -0.001426  0.002057 -0.001852
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta y}=
+  -0.002057  0.001426 -0.001852
+   0.002057  0.000319  0.003638
+   0.000000  0.000000  0.000444
+  \Phi3^{\alpha\beta z}=
+  -0.003638  0.001852  0.000941
+   0.001852 -0.003638 -0.000941
+  -0.000444  0.000444  0.000000
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  =  98 ,with type=   2
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319 -0.003638 -0.002057
+   0.000000 -0.000444  0.000000
+  -0.001426  0.001852  0.002057
+  \Phi3^{\alpha\beta y}=
+   0.003638  0.000941 -0.001852
+  -0.000444  0.000000  0.000444
+  -0.001852 -0.000941  0.003638
+  \Phi3^{\alpha\beta z}=
+  -0.002057  0.001852  0.001426
+   0.000000  0.000444  0.000000
+   0.002057 -0.003638  0.000319
+  (i,j) vector components:-2.055584  2.055584  2.055584
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319  0.003638 -0.002057
+   0.000000 -0.000444  0.000000
+  -0.001426 -0.001852  0.002057
+  \Phi3^{\alpha\beta y}=
+  -0.003638  0.000941  0.001852
+  -0.000444  0.000000  0.000444
+   0.001852 -0.000941 -0.003638
+  \Phi3^{\alpha\beta z}=
+  -0.002057 -0.001852  0.001426
+   0.000000  0.000444  0.000000
+   0.002057  0.003638  0.000319
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components: 2.055584 -2.055584 -2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 104 ,with type=   2
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319 -0.003638  0.002057
+   0.000000 -0.000444  0.000000
+   0.001426 -0.001852  0.002057
+  \Phi3^{\alpha\beta y}=
+   0.003638  0.000941  0.001852
+  -0.000444  0.000000 -0.000444
+   0.001852  0.000941  0.003638
+  \Phi3^{\alpha\beta z}=
+   0.002057 -0.001852  0.001426
+   0.000000 -0.000444  0.000000
+   0.002057 -0.003638 -0.000319
+  (i,j) vector components:-2.055584  2.055584 -2.055584
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  = 104 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319  0.003638  0.002057
+   0.000000 -0.000444  0.000000
+   0.001426  0.001852  0.002057
+  \Phi3^{\alpha\beta y}=
+  -0.003638  0.000941 -0.001852
+  -0.000444  0.000000 -0.000444
+  -0.001852  0.000941 -0.003638
+  \Phi3^{\alpha\beta z}=
+   0.002057  0.001852  0.001426
+   0.000000 -0.000444  0.000000
+   0.002057  0.003638 -0.000319
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components: 2.055584 -2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 122 ,with type=   2
+  For katom  = 128 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319  0.002057 -0.003638
+   0.001426  0.002057 -0.001852
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta y}=
+   0.002057  0.001426 -0.001852
+   0.002057 -0.000319 -0.003638
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta z}=
+   0.003638  0.001852  0.000941
+   0.001852  0.003638  0.000941
+  -0.000444 -0.000444  0.000000
+  (i,j) vector components:-2.055584 -2.055584  2.055584
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components: 2.055584  2.055584  2.055584
+  
+  For iatcell=   1 ,with type=   1
+  For jatom  = 128 ,with type=   2
+  For katom  = 122 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.000319  0.002057  0.003638
+   0.001426  0.002057  0.001852
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta y}=
+   0.002057  0.001426  0.001852
+   0.002057 -0.000319  0.003638
+   0.000000  0.000000 -0.000444
+  \Phi3^{\alpha\beta z}=
+  -0.003638 -0.001852  0.000941
+  -0.001852 -0.003638  0.000941
+  -0.000444 -0.000444  0.000000
+  (i,j) vector components:-2.055584 -2.055584 -2.055584
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components: 2.055584  2.055584 -2.055584
+  
+ ======== NEW SHELL (ishell=   7): There are   1 atoms on this shell
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+ ======== NEW SHELL (ishell=   8): There are  18 atoms on this shell
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =   4 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.029449
+   0.000000  0.000000  0.000000
+   0.029449  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.029449
+   0.000000  0.029449  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.044002  0.000000  0.000000
+   0.000000  0.044002  0.000000
+   0.000000  0.000000 -0.176529
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   4 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.044002
+   0.000000  0.000000  0.000000
+   0.029449  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.044002
+   0.000000  0.029449  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.029449  0.000000  0.000000
+   0.000000  0.029449  0.000000
+   0.000000  0.000000 -0.176529
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000 -0.029449
+   0.000000  0.000000  0.000000
+  -0.029449  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.029449
+   0.000000 -0.029449  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.044002  0.000000  0.000000
+   0.000000 -0.044002  0.000000
+   0.000000  0.000000  0.176529
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000 -4.111167
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   8 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000 -0.044002
+   0.000000  0.000000  0.000000
+  -0.029449  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.044002
+   0.000000 -0.029449  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.029449  0.000000  0.000000
+   0.000000 -0.029449  0.000000
+   0.000000  0.000000  0.176529
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components: 0.000000  0.000000  4.111167
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =  10 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.029449  0.000000
+   0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.044002  0.000000  0.000000
+   0.000000 -0.176529  0.000000
+   0.000000  0.000000  0.044002
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.029449
+   0.000000  0.029449  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  10 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.044002  0.000000
+   0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.029449  0.000000  0.000000
+   0.000000 -0.176529  0.000000
+   0.000000  0.000000  0.029449
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.029449
+   0.000000  0.044002  0.000000
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.029449  0.000000
+  -0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.044002  0.000000  0.000000
+   0.000000  0.176529  0.000000
+   0.000000  0.000000 -0.044002
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.029449
+   0.000000 -0.029449  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000 -4.111167  0.000000
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  26 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.044002  0.000000
+  -0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.029449  0.000000  0.000000
+   0.000000  0.176529  0.000000
+   0.000000  0.000000 -0.029449
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.029449
+   0.000000 -0.044002  0.000000
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components: 0.000000  4.111167  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =  34 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.176529  0.000000  0.000000
+   0.000000  0.044002  0.000000
+   0.000000  0.000000  0.044002
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.029449  0.000000
+   0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.029449
+   0.000000  0.000000  0.000000
+   0.029449  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  34 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.176529  0.000000  0.000000
+   0.000000  0.029449  0.000000
+   0.000000  0.000000  0.029449
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.029449  0.000000
+   0.044002  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.029449
+   0.000000  0.000000  0.000000
+   0.044002  0.000000  0.000000
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   2 ,with type=   2
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.176529  0.000000  0.000000
+   0.000000 -0.044002  0.000000
+   0.000000  0.000000 -0.044002
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.029449  0.000000
+  -0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.029449
+   0.000000  0.000000  0.000000
+  -0.029449  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components:-4.111167  0.000000  0.000000
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  98 ,with type=   2
+  For katom  =   2 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.176529  0.000000  0.000000
+   0.000000 -0.029449  0.000000
+   0.000000  0.000000 -0.029449
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.029449  0.000000
+  -0.044002  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.029449
+   0.000000  0.000000  0.000000
+  -0.044002  0.000000  0.000000
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 4.111167  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   4 ,with type=   2
+  For katom  =   4 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000 -0.029449
+   0.000000  0.000000  0.000000
+  -0.044002  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.029449
+   0.000000 -0.044002  0.000000
+  \Phi3^{\alpha\beta z}=
+  -0.029449  0.000000  0.000000
+   0.000000 -0.029449  0.000000
+   0.000000  0.000000  0.176529
+  (i,j) vector components: 0.000000  0.000000  4.111167
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000 -4.111167
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =   8 ,with type=   2
+  For katom  =   8 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.029449
+   0.000000  0.000000  0.000000
+   0.044002  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.029449
+   0.000000  0.044002  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.029449  0.000000  0.000000
+   0.000000  0.029449  0.000000
+   0.000000  0.000000 -0.176529
+  (i,j) vector components: 0.000000  0.000000 -4.111167
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  4.111167
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  10 ,with type=   2
+  For katom  =  10 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000 -0.029449  0.000000
+  -0.044002  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+  -0.029449  0.000000  0.000000
+   0.000000  0.176529  0.000000
+   0.000000  0.000000 -0.029449
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000 -0.044002
+   0.000000 -0.029449  0.000000
+  (i,j) vector components: 0.000000  4.111167  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000 -4.111167  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  26 ,with type=   2
+  For katom  =  26 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.029449  0.000000
+   0.044002  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.029449  0.000000  0.000000
+   0.000000 -0.176529  0.000000
+   0.000000  0.000000  0.029449
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.044002
+   0.000000  0.029449  0.000000
+  (i,j) vector components: 0.000000 -4.111167  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  4.111167  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  34 ,with type=   2
+  For katom  =  34 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+   0.176529  0.000000  0.000000
+   0.000000 -0.029449  0.000000
+   0.000000  0.000000 -0.029449
+  \Phi3^{\alpha\beta y}=
+   0.000000 -0.044002  0.000000
+  -0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000 -0.044002
+   0.000000  0.000000  0.000000
+  -0.029449  0.000000  0.000000
+  (i,j) vector components: 4.111167  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components:-4.111167  0.000000  0.000000
+  
+  For iatcell=   2 ,with type=   2
+  For jatom  =  98 ,with type=   2
+  For katom  =  98 ,with type=   2
+  \Phi3^{\alpha\beta x}=
+  -0.176529  0.000000  0.000000
+   0.000000  0.029449  0.000000
+   0.000000  0.000000  0.029449
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.044002  0.000000
+   0.029449  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.044002
+   0.000000  0.000000  0.000000
+   0.029449  0.000000  0.000000
+  (i,j) vector components:-4.111167  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 4.111167  0.000000  0.000000
+  
+  
+ #############################################################################
+ ############## Compute the phonon spectrum, the DOS, ########################
+ ##############  the dynamical matrix and write them  ########################
+ #############################################################################
+ 
+ #############################################################################
+ ################### vibrational Density OF States (vDOS) ####################
+ #############################################################################
+ See the vdos.dat and TDEP_PHDOS* files
+ Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)
+ ------- achieved
+ Compute the vDOS
+ ------- achieved
+ (Please, pay attention to convergency wrt the BZ mesh : the ngqpt2 input variable)
+ See the dij.dat, omega.dat and eigenvectors files
+ See also the DDB file
+ 
+ #############################################################################
+ ######################### Elastic constants #################################
+ ################ Bulk and Shear modulus--Sound velocities ###################
+ #############################################################################
+ 
+ ========== Using the formulation proposed by Wallace (using the IFC) =========
+ Cijkl [in GPa]=
+ | C11 C12 C13 C14 C15 C16 |   1859.461  506.564  506.564    0.000    0.000    0.000
+ | C21 C22 C23 C24 C25 C26 |    506.564 1859.461  506.564    0.000    0.000    0.000
+ | C31 C32 C33 C34 C35 C36 |    506.564  506.564 1859.461    0.000    0.000    0.000
+ | C41 C42 C43 C44 C45 C46 | =    0.000    0.000    0.000  245.494    0.000    0.000
+ | C51 C52 C53 C54 C55 C56 |      0.000    0.000    0.000    0.000  245.494    0.000
+ | C61 C62 C63 C64 C65 C66 |      0.000    0.000    0.000    0.000    0.000  245.494
+ 
+ ========== For an Anisotropic Material =======================================
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.001   -0.000   -0.000    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.000    0.001   -0.000    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.000   -0.000    0.001    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.004    0.000   -0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.004   -0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.004
+ 
+ ========== For an Orthotropic Material (see B. M. Lempriere (1968)) ==========
+ Young modulus E1, E2 and E3 [in GPa]=1642.551 1642.551 1642.551
+ Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=   0.214    0.214    0.214    0.214    0.214    0.214
+ Shear modulus G23, G13 and G12 [in GPa]= 245.494  245.494  245.494
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.001   -0.000   -0.000    0.000    0.000    0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.000    0.001   -0.000    0.000    0.000    0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.000   -0.000    0.001    0.000    0.000    0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.004    0.000    0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.004    0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.004
+ For density rho [in kg.m-3]= 6499.992
+ 
+ ========================= Voigt average (constant strain) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=  957.530 and Shear G=  417.876
+ Average of Young modulus E [in GPa]= 1094.421 Lame modulus Lambda [in GPa]=  678.946 and Poisson ratio Nu=    0.310
+ Velocities [in m.s-1]: compressional Vp=15265.342  shear Vs= 8018.020  and bulk Vphi=12137.235
+ Debye velocity [in m.s-1]= 8966.818  and temperature [in K]= 1546.054
+ 
+ ========================= Reuss average (constant stress) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=  957.530 and Shear G=  329.448
+ Average of Young modulus E [in GPa]=  886.657 Lame modulus Lambda [in GPa]=  737.898 and Poisson ratio Nu=    0.346
+ Velocities [in m.s-1]: compressional Vp=14659.184  shear Vs= 7119.298  and bulk Vphi=12137.235
+ Debye velocity [in m.s-1]= 7999.667  and temperature [in K]= 1379.299
+ 
+ ============================== Hill average =================================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=  957.530 and Shear G=  373.662
+ Average of Young modulus E [in GPa]=  991.954 Lame modulus Lambda [in GPa]=  708.422 and Poisson ratio Nu=    0.327
+ Velocities [in m.s-1]: compressional Vp=14965.333  shear Vs= 7581.987  and bulk Vphi=12137.235
+ Debye velocity [in m.s-1]= 8498.860  and temperature [in K]= 1465.369
+ 
+ ========================= Elastic anisotropy =================================
+ Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    1.342
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
+ Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.118
+  
+ #############################################################################
+ ######################### Energies, errors,...  #############################
+ #############################################################################
+ Thermodynamic quantities and convergence parameters of THE MODEL,
+      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :
+ <U_TDEP> = U_0 + U_1 + U_2 + U_3
+       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3 ui uj uk >
+        and U_1 = <      sum_i    Phi1 ui >
+        and U_2 = < 1/2  sum_ij   Phi2 ui uj >
+        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >
+  Delta_U =   < U_MD - U_TDEP > 
+  Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 
+  Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
+  Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
+     <U_MD>            U_0              U_1              U_2              U_3            Delta_U          Delta_U2          Delta_F2          Sigma
+ -1082.22729      -1082.50528          0.00000          0.31312         -0.03513          0.00000          0.06819          0.00799          0.15933
+ NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.25852
+ 
+ See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
+ 
+ #############################################################################
+ ################# Thermodynamic quantities: Free energy,...##################
+ #############################################################################
+ See the thermo.dat file
+  
+ #############################################################################
+ ####### Gruneisen parameter, Thermal expansion, Thermal pressure... #########
+ #############################################################################
+ See the gruneisen.dat, alpha_gamma.dat and thermo3.dat files
+ 
+ Gruneisen parameter :                 Gamma=           0.971
+                The Gruneisen matrix is  |    0.971    0.000    0.000|
+                                         |    0.000    0.971    0.000|
+                                         |    0.000    0.000    0.971|
+ Thermal expansion (K^{-1}*10^6) :   alpha_v=           7.920
+        The thermal expansion matrix is  |    2.640    0.000    0.000|
+                                         |    0.000    2.640    0.000|
+                                         |    0.000    0.000    2.640|
+ Thermal pressure (in GPa) : 
+    ------- w   intrinsic effects and w   ZPE --------
+                 P_th=sum_i Gamma_i*E_i/V   =          15.957
+           The thermal pressure matrix is|   15.957    0.000    0.000|
+                                         |    0.000   15.957    0.000|
+                                         |    0.000    0.000   15.957|
+    ------- w   intrinsic effects and w/o ZPE --------
+                 P_th=integ{Gamma*C_v/V dT} =          11.914
+    ------- w/o intrinsic effects and w/o ZPE --------
+                 P_th=Gamma*E_th/V          =          15.934
+           The thermal pressure matrix is|   15.934    0.000    0.000|
+                                         |    0.000   15.934    0.000|
+                                         |    0.000    0.000   15.934|
+ Volume (bohr^3 per unit cell):            V=          69.486
+ Thermal energy (eV) :                  E_th=           1.055
+ Heat capacity at constant V (k_B/f.u.): C_v=           5.826
+ Heat capacity at constant P (k_B/f.u.): C_p=           5.915
+ Isothermal Bulk Modulus (GPa):          B_T=         957.530
+ Isentropic Bulk Modulus (GPa):          B_S=         972.254
+ Longitudinal sound velocity (m.s-1):     Vp=       15040.824
+ Transverse sound velocity (m.s-1):       Vs=        7581.987
+  
+ #############################################################################
+ ######################### CALCULATION COMPLETED #############################
+ #############################################################################
+ Suggested references for the acknowledgment of ABINIT usage.
+ 
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+ 
+ [1] a-TDEP: Temperature Dependent Effective Potential for Abinit 
+ -- Lattice dynamic properties including anharmonicity
+ F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [2] Thermal evolution of vibrational properties of alpha-U
+ J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [3] Lattice dynamics of anharmonic solids from first principles
+ O. Hellman, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).
+ 
+ [4] Temperature dependent effective potential method for accurate free energy calculations of solids
+ O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).
