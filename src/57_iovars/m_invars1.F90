@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1965,11 +1965,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
-    dtset%usepawu=14
- else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
-    dtset%usepawu=1
- endif
+!if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
+!   dtset%usepawu=14
+!else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
+!   dtset%usepawu=1
+!endif
 
 
  dtset%usedmatpu=0

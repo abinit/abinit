@@ -6,7 +6,7 @@
 !! This module contains high-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (CS,GZ,FB,MG)
+!! Copyright (C) 2004-2022 ABINIT group (CS,GZ,FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
