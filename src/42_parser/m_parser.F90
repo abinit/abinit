@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2022 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2464,7 +2464,7 @@ end subroutine append_xyz
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkdpr.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! minimal_flag=if 0, the reference_value must be matched within 1.0d-10
@@ -2583,7 +2583,7 @@ end subroutine chkdpr
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkint.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! list_number=number of allowed values (maximum 40).
@@ -2689,7 +2689,7 @@ end subroutine chkint
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkint.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! list_number=number of allowed values (maximum 40).
@@ -2775,7 +2775,7 @@ end subroutine chkint_eq
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkint_ge.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! minmax_value=see the description of minmax_flag
@@ -2861,7 +2861,7 @@ end subroutine chkint_ge
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkint_le.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! minmax_value=see the description of minmax_flag
@@ -2948,7 +2948,7 @@ end subroutine chkint_le
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkint.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! list_number=number of NOT allowed values (maximum 40).
@@ -3034,7 +3034,7 @@ end subroutine chkint_ne
 !!  advice to change the value of the conditions.
 !! cond_number= number of conditions checked before calling chkint.
 !! cond_string(cond_number)= name of the variables associated to the conditions.
-!! cond_values(cond_number)= value of the variables associated to the conditions.
+!! cond_values(cond_number)= value of the variables associated to the conditions. WARNING : only integers are allowed !
 !! input_name=name of the input variable to be checked
 !! input_value=value of the input variable to be checked
 !! list_number=number of allowed values (maximum 40).

@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------------
 #   Tutorial on cRPA: convergence studies (symmetry is not used)
-#   B. Amadon
+#   B. Amadon, R. Outerovitch
 # ----------------------------------------------------------------------------------
 ndtset 16
 udtset  4 4
@@ -80,15 +80,19 @@ tolvrs?1   1.0d-13
 getden?2        -1
 # == Compute empty bands precisely
 iscf?2          -2
-nbandkss?2 -1         # Number of bands in KSS file (-1 means the maximum possible)
-kssform?2 3
-nbdbuf?2         4
+
 tolwfr?2   1.0d-18     # Will stop when this tolerance is achieved
 
 # == Compute Projected Wannier functions (as used in DMFT)
-usedmft?2    1       # useful to compute Wannier functions.
-dmftbandi?2 21       # Precise the definition of Wannier functions (also used for DMFT calculations)
-dmftbandf?2 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+
+plowan_compute?2 1 # Activate the computation of Wannier functions
+plowan_bandi 21 # First band for Wannier functions
+plowan_bandf 25 # Last band for Wannier functions
+plowan_natom 1 # Number of atoms
+plowan_iatom 1  # Index of atoms
+plowan_nbl 1  # Number of orbitals per atom
+plowan_lcalc 2  # Index of the orbitals (2 -> d)
+plowan_projcalc 5  # Projector for the orbitals (see pseudo-potential file)
 
 #==================================================================================
 ############ SECOND DATASET:  Calculation of the screening (epsilon^-1 matrix)
@@ -107,7 +111,7 @@ nfreqim?3   0
 
 # -- Ucrpa: screening
 ucrpa_bands?3  21 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
-
+plowan_compute?3 10 # Read Wannier functions
 # -- Parallelism
 gwpara?3 1
 
@@ -119,6 +123,7 @@ gwcalctyp?4  2      # activate HF or ucrpa
 getwfk?4     -2      # Obtain WFK file from dataset 1
 getscr?4     -1      # Obtain SCR file from previous dataset
 ecutsigx?4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
+plowan_compute?4 10 # Read Wannier functions
 # irdscr3     1
 # irdwfk3     1
 
@@ -156,6 +161,6 @@ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Ps
 #%% max_nprocs = 32
 #%% [extra_info]
 #%% keywords = LDA, CRPA
-#%% authors = B. Amadon
+#%% authors = B. Amadon, R. Outerovitch
 #%% description = For SrVO3, compute U, convergence study on ecuteps
 #%%<END TEST_INFO>
