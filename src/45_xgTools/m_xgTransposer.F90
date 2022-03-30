@@ -222,7 +222,7 @@ module m_xgTransposer
 
 #if defined HAVE_MPI
       if (comm_rows==xmpi_comm_null.and.comm_cols==xmpi_comm_null) then
-        call xgTransposer_makeComm(xgTransposer,nCpuRows,nCpuCols,comm_rows_,comm_cols_)
+        call xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols,comm_rows_,comm_cols_)
       else
         comm_rows_=comm_rows
         comm_cols_=comm_cols
@@ -553,6 +553,7 @@ module m_xgTransposer
    integer :: ncolsColsRows
    integer :: nrowsLinalgMe
    integer :: icpu, ierr
+   integer :: send_start,send_end
    !integer :: myrequest
    !integer, allocatable :: request(:), status(:)
    type(ptr_t), allocatable :: sendptrbuf(:)
@@ -618,9 +619,11 @@ module m_xgTransposer
 
      ABI_MALLOC(sendptrbuf,(1:ncpu_cols))
      do icpu = 1, ncpu_cols
-       sendptrbuf(me_cols+1)%ptr => sendbuf(:,sdispls(icpu)/2+1:sdispls(icpu)/2+sendcounts(icpu))
+       send_start = sdispls(icpu)/2+1
+       send_end   = sdispls(icpu)/2+sendcounts(icpu)/2
+       sendptrbuf(icpu)%ptr => sendbuf(:,send_start:send_end)
        call timab(tim_gatherv,1,tsec)
-       call xmpi_gatherv(sendptrbuf(me_cols+1)%ptr,sendcounts(icpu),recvbuf,recvcounts,rdispls,icpu-1,comm,ierr)
+       call xmpi_gatherv(sendptrbuf(icpu)%ptr,sendcounts(icpu),recvbuf,recvcounts,rdispls,icpu-1,comm,ierr)
        call timab(tim_gatherv,2,tsec)
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,sendcounts(icpu),MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu-1,comm,request(icpu),ierr)
@@ -761,9 +764,9 @@ module m_xgTransposer
      do icpu = 0, ncpu_cols-1
        !write(*,*) me, "->", icpu, "from col ",icpu*ncolsColsRows+1, " number of rows:", nrowsLinalgMe
        call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsColsRows+1,nrowsLinalgMe,ncolsColsRows)
-       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(me_cols+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
+       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(icpu+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
        call timab(tim_gatherv,1,tsec)
-       call xmpi_gatherv(sendptrbuf(me_cols+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
+       call xmpi_gatherv(sendptrbuf(icpu+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
        call timab(tim_gatherv,2,tsec)
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu,comm,request(icpu+1),ierr)
