@@ -85,7 +85,7 @@ CONTAINS  !=====================================================================
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2022 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -680,7 +680,7 @@ end subroutine orbmag_tt_chern_k
 !! This routine outputs orbmag terms tailored for the tt ddk routine
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2022 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
