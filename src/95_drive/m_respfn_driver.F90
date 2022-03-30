@@ -8,7 +8,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MT, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
