@@ -686,10 +686,14 @@ contains
  if (npband_bandfft>1) then
    ABI_MALLOC(npw_block,(npband_bandfft))
    ABI_MALLOC(npw_disp,(npband_bandfft))
-   ABI_MALLOC(bufsize,(npband_bandfft*cg_bandpp))
-   ABI_MALLOC(bufdisp,(npband_bandfft*cg_bandpp))
-   ABI_MALLOC(bufsize_wf,(npband_bandfft*cg_bandpp))
-   ABI_MALLOC(bufdisp_wf,(npband_bandfft*cg_bandpp))
+   !FB ABI_MALLOC(bufsize,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufsize,(npband_bandfft))
+   !FB ABI_MALLOC(bufdisp,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufdisp,(npband_bandfft))
+   !FB ABI_MALLOC(bufsize_wf,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufsize_wf,(npband_bandfft))
+   !FB ABI_MALLOC(bufdisp_wf,(npband_bandfft*cg_bandpp))
+   ABI_MALLOC(bufdisp_wf,(npband_bandfft))
  end if
 
 !Set output datastructure to zero
@@ -818,19 +822,28 @@ contains
      end if
 
 !    Allocate arrays for a wave-function (or a block of WFs)
+     print*, 'FB-test: npw_nk= ', npw_nk
+     print*, 'FB-test: cwavef-dim= ', npw_nk*my_nspinor*cg_bandpp
+     print*, 'FB-test: npw_block= ', npw_block(:)
      ABI_MALLOC(cwavef,(2,npw_nk*my_nspinor*cg_bandpp))
      if (npband_bandfft>1) then
        isize=2*my_nspinor*cg_bandpp;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
        isize=2*my_nspinor*npw_k*cg_bandpp;bufsize_wf(:)=isize
-       do ii=1,npband_bandfft*cg_bandpp
+       !FB do ii=1,npband_bandfft*cg_bandpp
+       do ii=1,npband_bandfft
          bufdisp_wf(ii)=(ii-1)*isize
        end do
      end if
+     print*, 'FB-test: bufsize =', bufsize
+     print*, 'FB-test: bufsize_wf =', bufsize_wf
 
 !    Loop over bands or blocks of bands
      icgb=icg ; ibgb=ibg ; iband_start=1
-     blocksz=npband_bandfft*cg_bandpp
-     nblockbd=nband_k/blocksz
+     !FB blocksz=npband_bandfft*cg_bandpp
+     blocksz=nband_k/npband_bandfft
+     !FB nblockbd=nband_k/blocksz
+     nblockbd=1
+     print*, 'FB-test: nband_k, blocksz, nblockbd=', nband_k, blocksz, nblockbd
      nband_cprj_k=merge(nband_k/npband_bandfft,nband_k,cprj_band_distributed)
      do iblockbd=1,nblockbd
        iband_min=1+(iblockbd-1)*blocksz

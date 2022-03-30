@@ -339,7 +339,6 @@ contains
    !Transpose input cg_in into cg_work
    call xmpi_alltoallv(cg_in,sendcountsloc,sdisplsloc,cg_work1, &
                      & recvcountsloc,rdisplsloc,mpi_enreg%comm_band,ierr)
-
    !properly sort array according to bandd after alltoall
    call prep_index_wavef_bandpp(mpi_enreg%nproc_band,mpi_enreg%bandpp,          &
                               & nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv , &
