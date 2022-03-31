@@ -337,7 +337,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,residual,&
+     call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
 &     hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
 &     vin_prev,vout,vout_prev,xred)
 
@@ -820,7 +820,7 @@ real(dp) :: strten(6)
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,residual,&
+     call xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,residual,&
 &     hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,&
 &     vin_prev,vout,vout_prev,xred)
 
