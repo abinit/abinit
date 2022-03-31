@@ -263,11 +263,6 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
           rprimd(ii,3) = rprimd(ii,3) + scaling(kk,3)*rprimd0(ii,kk)
        end do
      end do
-     !CP test
-     write(*,*) '--CP: rprimd1 = ', rprimd(1,1), rprimd(2,1), rprimd(3,1)
-     write(*,*) '--CP: rprimd2 = ', rprimd(1,2), rprimd(2,2), rprimd(3,2)
-     write(*,*) '--CP: rprimd3 = ', rprimd(1,3), rprimd(2,3), rprimd(3,3)
-     !End CP test
    end if
 
 !  Rescale if the volume must be preserved
@@ -496,9 +491,6 @@ subroutine xfpack_x2vin(acell,natom,ndim,nsym,optcell,&
        vin(3*natom+1) = scaling(3,3)
        vin(3*natom+2) = scaling(2,3)
        vin(3*natom+3) = scaling(1,3)
-       !CP test
-       write(*,*) '--CP: vin, x2vin = ', vin(3*natom+1), vin(3*natom+2), vin(3*natom+3)
-       !End CP test
      end if
 
    end if
@@ -639,9 +631,6 @@ subroutine xfpack_f2vout(gred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
      vout(3*natom+1) = dstr(3)*ucvol
      vout(3*natom+2) = dstr(4)*ucvol
      vout(3*natom+3) = dstr(5)*ucvol
-     !CP test
-     write(*,*) '--CP f2vout, vout = ', vout(3*natom+1), vout(3*natom+2), vout(3*natom+3)
-     !End CP test
    end if
 
  end if

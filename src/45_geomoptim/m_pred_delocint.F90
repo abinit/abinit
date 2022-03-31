@@ -445,7 +445,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
+     call xfh_recover_deloc(ab_xfh,ab_mover,acell,cycl_main,&
 &     residual,hessin,ndim,rprimd,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 &     vout,vout_prev,xred,deloc,deloc_int,deloc_gred,bt_inv_matrix,gprimd,prim_int,&
 &     u_matrix)
