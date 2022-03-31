@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG)
+!!  Copyright (C) 1999-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2073,10 +2073,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
 !This overloading of usepawu should be replaced by something cleaner ...
- if ( dtset%usedmft > 0  .and. (dtset%nbandkss==0.or.dtset%iscf<0)) then
-   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
- end if
+! if ( dtset%usedmft > 0  .and. (dtset%nbandkss==0.or.dtset%iscf<0)) then
+!   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+!   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+! end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -2230,13 +2230,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
 ! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
-   if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
-     write(msg, '(a,a,a)' )&
-      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
-      'imposing dmft_dc = 5'
-     ABI_WARNING(msg)
-     dtset%dmft_dc=5
-   end if
+!  if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
+!    write(msg, '(a,a,a)' )&
+!     'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
+!     'imposing dmft_dc = 5'
+!    ABI_WARNING(msg)
+!    dtset%dmft_dc=5
+!  end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')

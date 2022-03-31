@@ -146,7 +146,7 @@ This file reproduces all the steps encountered during the execution of `atdep`. 
 
 ```
   .Version    3.0 of PHONONS
-  .Copyright (C) 1998-2020 ABINIT group (FB,JB).
+  .Copyright (C) 1998-2022 ABINIT group (FB,JB).
    ABINIT comes with ABSOLUTELY NO WARRANTY.
    It is free software, and you are welcome to redistribute it
    under certain conditions (GNU General Public License,
