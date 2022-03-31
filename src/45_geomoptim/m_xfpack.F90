@@ -670,7 +670,7 @@ end subroutine xfpack_f2vout
 !! SOURCE
 
 
-subroutine xfh_recover_new(ab_xfh,ab_mover,acell,acell0,cycl_main,gred,&
+subroutine xfh_recover_new(ab_xfh,ab_mover,acell,cycl_main,gred,&
 & hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,vout,&
 & vout_prev,xred)
 
@@ -686,7 +686,6 @@ type(abimover),intent(in) :: ab_mover
 
 !arrays
 real(dp),intent(inout) :: acell(3)
-real(dp),intent(in) :: acell0(3)
 real(dp),intent(inout) :: hessin(:,:)
 real(dp),intent(inout) :: xred(3,ab_mover%natom)
 real(dp),intent(inout) :: rprim(3,3)
