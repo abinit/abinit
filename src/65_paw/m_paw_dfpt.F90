@@ -7,7 +7,7 @@
 !!    (in the DFPT approach) of PAW on-site quantities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (MT,AM,FJ,JWZ)
+!! Copyright (C) 2018-2022 ABINIT group (MT,AM,FJ,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
