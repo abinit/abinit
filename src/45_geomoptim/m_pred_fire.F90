@@ -173,7 +173,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    return
  end if
 
- !write(std_out,*) 'FIRE 01'
+write(std_out,*) 'FIRE 01'
 !##########################################################
 !### 01. Compute the dimension of vectors (ndim)
 
@@ -183,8 +183,8 @@ real(dp),allocatable,save :: vel_ioncell(:)
 & ab_mover%optcell==3) ndim=ndim+6
  if(ab_mover%optcell>=4) ndim=ndim+3
 
-!write(std_out,*) 'FIRE: ndim=', ndim
-! write(std_out,*) 'FIRE 02'
+write(std_out,*) 'FIRE: ndim=', ndim
+write(std_out,*) 'FIRE 02'
 !##########################################################
 !### 02. Allocate the vectors vin
 
@@ -211,7 +211,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    vel_ioncell(:)=0.0
  end if
 
- !write(std_out,*) 'FIRE 03'
+ write(std_out,*) 'FIRE 03'
 !##########################################################
 !### 03. Obtain the present values from the history
 
@@ -281,7 +281,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    end do
  end if
 
- !write(std_out,*) 'FIRE 04'
+ write(std_out,*) 'FIRE 04'
 !##########################################################
 !### 04. Fill the vectors vin and vout
 
@@ -302,7 +302,7 @@ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 ! Now vout -> -dE/dx
 vout(:) = -1.0*vout(:)
 
- !write(std_out,*) 'FIRE 05'
+ write(std_out,*) 'FIRE 05'
 !##########################################################
 !### 05. iniialize FIRE
 if ( itime==1 ) then
@@ -313,7 +313,7 @@ if ( itime==1 ) then
    end if
 end if
 
- !write(std_out,*) 'FIRE 06'
+ write(std_out,*) 'FIRE 06'
 !##########################################################
 !### 06. update timestep
 ! Note that vin & vout are in reduced coordinates.
@@ -336,7 +336,7 @@ else
     dtratio = dtratio*dtdec
 endif
 
- !write(std_out,*) 'FIRE 07'
+ write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
 
