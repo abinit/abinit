@@ -183,11 +183,9 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 
  ndim=3*ab_mover%natom
  if(ab_mover%optcell==1) ndim=ndim+1
- if(ab_mover%optcell>=2 .and.&
-& ab_mover%optcell<=6) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell==2 .or.&
+& ab_mover%optcell==3) ndim=ndim+6
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(zDEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -678,11 +676,9 @@ real(dp) :: strten(6)
 
  ndim=3*ab_mover%natom
  if(ab_mover%optcell==1) ndim=ndim+1
- if(ab_mover%optcell>=2 .and.&
-& ab_mover%optcell<=6) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell==2 .or.&
+& ab_mover%optcell==3) ndim=ndim+6
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(zDEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -790,7 +786,7 @@ real(dp) :: strten(6)
 !The values of vin from the previous iteration
 !should be the same
 !if (itime==1)then
- call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if

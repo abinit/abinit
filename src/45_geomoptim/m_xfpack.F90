@@ -155,7 +155,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    ABI_BUG(message)
  end if
  
- if( (optcell>=2 .and. optcell<=6) &
+ if( (optcell==2 .or. optcell==3) &
 & .and. ndim/=3*natom+6)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
@@ -163,9 +163,9 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    ABI_BUG(message)
  end if
 
- if( optcell>=7 .and. ndim/=3*natom+3)then
+ if( optcell>=4 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
-&   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
+&   '  When optcell=4,5,6,7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
    ABI_BUG(message)
  end if
@@ -186,13 +186,37 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
    scaling(:,:)=0.0_dp
    scaling(1,1)=1.0_dp ; scaling(2,2)=1.0_dp ; scaling(3,3)=1.0_dp
 
-   if(optcell>=2 .and. optcell<=6)then
+   if(optcell==2 .or. optcell==3)then
      scaling(1,1)=vin(3*natom+1)
      scaling(2,2)=vin(3*natom+2)
      scaling(3,3)=vin(3*natom+3)
      scaling(2,3)=vin(3*natom+4) ; scaling(3,2)=vin(3*natom+4)
      scaling(1,3)=vin(3*natom+5) ; scaling(3,1)=vin(3*natom+5)
      scaling(1,2)=vin(3*natom+6) ; scaling(2,1)=vin(3*natom+6)
+   else if(optcell==4)then
+     scaling(1,1)=vin(3*natom+1)
+     if (abs(scaling(1,1) - 1.0_dp) <1.E-14) scaling(1,1)=1.0_dp
+     scaling(3,1)=vin(3*natom+2)  
+     if (abs(scaling(3,1)) <1.E-14) scaling(3,1)=0.0_dp
+     scaling(1,2)=vin(3*natom+3)
+     if (abs(scaling(2,1)) <1.E-14) scaling(2,1)=0.0_dp
+   else if(optcell==5)then
+     scaling(2,2)=vin(3*natom+1)
+     if (abs(scaling(2,2) - 1.0_dp) <1.E-14) scaling(2,2)=1.0_dp
+     scaling(3,2)=vin(3*natom+2)  
+     if (abs(scaling(3,2)) <1.E-14) scaling(3,2)=0.0_dp
+     scaling(1,2)=vin(3*natom+3)
+     if (abs(scaling(1,2)) <1.E-14) scaling(1,2)=0.0_dp
+   else if(optcell==6)then
+     scaling(3,3)=vin(3*natom+1)
+     if (abs(scaling(3,3) - 1.0_dp) <1.E-14) scaling(3,3)=1.0_dp
+     scaling(2,3)=vin(3*natom+2)  
+     if (abs(scaling(2,3)) <1.E-14) scaling(2,3)=0.0_dp
+     scaling(1,3)=vin(3*natom+3)
+     if (abs(scaling(1,3)) <1.E-14) scaling(1,3)=0.0_dp
+     ! CP test
+     write(*,*) '--CP: scaling = ', scaling(1,3), scaling(2,3), scaling(3,3)
+     ! End CP test
    else if(optcell==7)then
      scaling(2,2)=vin(3*natom+2) ; scaling(3,3)=vin(3*natom+3)
      scaling(2,3)=vin(3*natom+1) ; scaling(3,2)=vin(3*natom+1)
@@ -203,45 +227,47 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
      scaling(1,1)=vin(3*natom+1) ; scaling(2,2)=vin(3*natom+2)
      scaling(1,2)=vin(3*natom+3) ; scaling(2,1)=vin(3*natom+3)
    end if
-   if (optcell==4) then
-     jj=1
+   if(optcell==2 .or. optcell==3 .or. optcell>=7)then
      do ii=1,3
-       rprimd(ii,jj)=0.0_dp
-       rprimd(ii,2) = rprimd0(ii,2)
-       rprimd(ii,3) = rprimd0(ii,3)
-       do kk=1,3
-        rprimd(ii,jj)=rprimd(ii,jj)+scaling(ii,kk)*rprimd0(kk,jj)
+       do jj=1,3
+         rprimd(ii,jj)=0.0_dp
+         do kk=1,3
+           rprimd(ii,jj)=rprimd(ii,jj)+scaling(ii,kk)*rprimd0(kk,jj)
+         end do
        end do
      end do
-   else if (optcell==5) then
-    jj=2
-    do ii=1,3
-      rprimd(ii,1) = rprimd0(ii,1)
-      rprimd(ii,3) = rprimd0(ii,3)
-      rprimd(ii,jj)=0.0_dp
-      do kk=1,3
-       rprimd(ii,jj)=rprimd(ii,jj)+scaling(ii,kk)*rprimd0(kk,jj)
-      end do
-    end do
-  else if (optcell==6) then
-    jj=3
-    do ii=1,3  
-      rprimd(ii,1) = rprimd0(ii,1)
-      rprimd(ii,2) = rprimd0(ii,2)
-      rprimd(ii,jj)=0.0_dp
-      do kk=1,3
-       rprimd(ii,jj)=rprimd(ii,jj)+scaling(ii,kk)*rprimd0(kk,jj)
-      end do
-    end do
-   else
-    do ii=1,3
-      do jj=1,3
-        rprimd(ii,jj)=0.0_dp
-        do kk=1,3
-          rprimd(ii,jj)=rprimd(ii,jj)+scaling(ii,kk)*rprimd0(kk,jj)
-        end do
-      end do
-    end do
+   else if(optcell==4)then
+     rprimd(:,2) = rprimd0(:,2)
+     rprimd(:,3) = rprimd0(:,3)
+     rprimd(:,1) = 0.0_dp
+     do ii=1,3
+       do kk=1,3
+          rprimd(ii,1) = rprimd(ii,1) + scaling(kk,1)*rprimd0(ii,kk)
+       end do
+     end do
+   else if(optcell==5)then
+     rprimd(:,1) = rprimd0(:,1)
+     rprimd(:,3) = rprimd0(:,3)
+     rprimd(:,2) = 0.0_dp
+     do ii=1,3
+       do kk=1,3
+          rprimd(ii,2) = rprimd(ii,2) + scaling(kk,2)*rprimd0(ii,kk)
+       end do
+     end do
+   else if(optcell==6)then
+     rprimd(:,1) = rprimd0(:,1)
+     rprimd(:,2) = rprimd0(:,2)
+     rprimd(:,3) = 0.0_dp
+     do ii=1,3
+       do kk=1,3
+          rprimd(ii,3) = rprimd(ii,3) + scaling(kk,3)*rprimd0(ii,kk)
+       end do
+     end do
+     !CP test
+     write(*,*) '--CP: rprimd1 = ', rprimd(1,1), rprimd(2,1), rprimd(3,1)
+     write(*,*) '--CP: rprimd2 = ', rprimd(1,2), rprimd(2,2), rprimd(3,2)
+     write(*,*) '--CP: rprimd3 = ', rprimd(1,3), rprimd(2,3), rprimd(3,3)
+     !End CP test
    end if
 
 !  Rescale if the volume must be preserved
@@ -377,7 +403,7 @@ subroutine xfpack_x2vin(acell,natom,ndim,nsym,optcell,&
    ABI_BUG(message)
  end if
 
- if( (optcell>=2 .and. optcell<=6) &
+ if( (optcell==2 .or. optcell==3) &
 & .and. ndim/=3*natom+6)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
 &   '  When optcell=2,3,4,5,6, ndim MUST be equal to 3*natom+6,',ch10,&
@@ -385,9 +411,9 @@ subroutine xfpack_x2vin(acell,natom,ndim,nsym,optcell,&
    ABI_BUG(message)
  end if
 
- if( optcell>=7 .and. ndim/=3*natom+3)then
+ if( optcell>=4 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
-&   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
+&   '  When optcell=4,5,6,7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
    ABI_BUG(message)
  end if
@@ -412,30 +438,67 @@ subroutine xfpack_x2vin(acell,natom,ndim,nsym,optcell,&
 
 !    Generates gprimd0
      call matr3inv(rprimd0,gprimd0)
-     do ii=1,3
-       do jj=1,3
-         scaling(ii,jj)=0.0_dp
-         do kk=1,3
-           scaling(ii,jj)=scaling(ii,jj)+rprimd_symm(ii,kk)*gprimd0(jj,kk)
+     if (optcell==2 .or. optcell==3 .or. optcell>=7)then
+       do ii=1,3
+         do jj=1,3
+           scaling(ii,jj)=0.0_dp
+           do kk=1,3
+             scaling(ii,jj)=scaling(ii,jj)+rprimd_symm(ii,kk)*gprimd0(jj,kk)
+           end do
          end do
        end do
-     end do
 !    Rescale if the volume must be preserved
-     if(optcell==3)then
-       scale=(ucvol0/ucvol)**third
-       scaling(:,:)=scale*scaling(:,:)
+       if(optcell==3)then
+         scale=(ucvol0/ucvol)**third
+         scaling(:,:)=scale*scaling(:,:)
+       end if
+       if(optcell==2 .or. optcell==3)then
+         vin(3*natom+1)=scaling(1,1) ; vin(3*natom+4)=(scaling(2,3)+scaling(3,2))*0.5_dp
+         vin(3*natom+2)=scaling(2,2) ; vin(3*natom+5)=(scaling(1,3)+scaling(3,1))*0.5_dp
+         vin(3*natom+3)=scaling(3,3) ; vin(3*natom+6)=(scaling(1,2)+scaling(2,1))*0.5_dp
+       else if(optcell>=7)then
+         vin(3*natom+1)=scaling(1,1)
+         vin(3*natom+2)=scaling(2,2)
+         vin(3*natom+3)=scaling(3,3)
+         if(optcell==7)vin(3*natom+1)=(scaling(2,3)+scaling(3,2))*0.5_dp
+         if(optcell==8)vin(3*natom+2)=(scaling(1,3)+scaling(3,1))*0.5_dp
+         if(optcell==9)vin(3*natom+3)=(scaling(1,2)+scaling(2,1))*0.5_dp
+       end if
      end if
-     if(optcell>=2 .and. optcell<=6)then
-       vin(3*natom+1)=scaling(1,1) ; vin(3*natom+4)=(scaling(2,3)+scaling(3,2))*0.5_dp
-       vin(3*natom+2)=scaling(2,2) ; vin(3*natom+5)=(scaling(1,3)+scaling(3,1))*0.5_dp
-       vin(3*natom+3)=scaling(3,3) ; vin(3*natom+6)=(scaling(1,2)+scaling(2,1))*0.5_dp
-     else if(optcell>=7)then
-       vin(3*natom+1)=scaling(1,1)
-       vin(3*natom+2)=scaling(2,2)
-       vin(3*natom+3)=scaling(3,3)
-       if(optcell==7)vin(3*natom+1)=(scaling(2,3)+scaling(3,2))*0.5_dp
-       if(optcell==8)vin(3*natom+2)=(scaling(1,3)+scaling(3,1))*0.5_dp
-       if(optcell==9)vin(3*natom+3)=(scaling(1,2)+scaling(2,1))*0.5_dp
+
+     if (optcell==4)then
+       scaling(:,:) = 0.0_dp
+       do ii=1,3
+          do kk=1,3
+            scaling(ii,1) = scaling(ii,1) + gprimd0(kk,ii)*rprimd_symm(kk,1)
+          end do
+       end do
+       vin(3*natom+1) = scaling(1,1)
+       vin(3*natom+2) = scaling(3,1)
+       vin(3*natom+3) = scaling(2,1)
+     else if (optcell==5)then
+       scaling(:,:) = 0.0_dp
+       do ii=1,3
+          do kk=1,3
+            scaling(ii,2) = scaling(ii,2) + gprimd0(kk,ii)*rprimd_symm(kk,2)
+          end do
+       end do
+       vin(3*natom+1) = scaling(2,2)
+       vin(3*natom+2) = scaling(3,2)
+       vin(3*natom+3) = scaling(1,2)
+     else if (optcell==6)then
+       scaling(:,:) = 0.0_dp
+       do ii=1,3
+          do kk=1,3
+            scaling(ii,3) = scaling(ii,3) + gprimd0(kk,ii)*rprimd_symm(kk,3)
+          end do
+       end do
+       vin(3*natom+1) = scaling(3,3)
+       vin(3*natom+2) = scaling(2,3)
+       vin(3*natom+3) = scaling(1,3)
+       !CP test
+       write(*,*) '--CP: vin, x2vin = ', vin(3*natom+1), vin(3*natom+2), vin(3*natom+3)
+       !End CP test
      end if
 
    end if
@@ -526,21 +589,20 @@ subroutine xfpack_f2vout(gred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
    ABI_BUG(message)
  end if
 
- if( (optcell>=2 .and. optcell<=6) &
+ if( (optcell==2 .or. optcell==3) &
 & .and. ndim/=3*natom+6)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
-&   '  When optcell=2,3,4,5 or 6, ndim MUST be equal to 3*natom+6,',ch10,&
+&   '  When optcell=2 or 3, ndim MUST be equal to 3*natom+6,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+6=',3*natom+6,'.'
    ABI_BUG(message)
  end if
 
- if( optcell>=7 .and. ndim/=3*natom+3)then
+ if( optcell>=4 .and. ndim/=3*natom+3)then
    write(message,'(a,a,a,i4,a,i4,a)' )&
-&   '  When optcell=7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
+&   '  When optcell=4,5,6,7,8 or 9, ndim MUST be equal to 3*natom+3,',ch10,&
 &   '  while ndim=',ndim,' and 3*natom+3=',3*natom+3,'.'
    ABI_BUG(message)
  end if
-
 !
 !Get vout from gred and strten
 !
@@ -551,12 +613,11 @@ subroutine xfpack_f2vout(gred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
 
    vout(3*natom+1)=( dstr(1)+dstr(2)+dstr(3))*ucvol
 
- else
-
+ else if(optcell>=2)then
 !  Eventually take away the trace
    strdiag=0.0_dp
    if(optcell==3) strdiag=(dstr(1)+dstr(2)+dstr(3))/3.0_dp
-   if(optcell>=2 .and. optcell<=6)then
+   if(optcell==2 .or. optcell==3)then
      vout(3*natom+1:3*natom+3)=(dstr(1:3)-strdiag)*ucvol
 !    For non-diagonal derivatives, must take into account
 !    that eps(i,j) AND eps(j,i) are varied at the same time. Thus, derivative
@@ -566,6 +627,21 @@ subroutine xfpack_f2vout(gred,natom,ndim,optcell,strtarget,strten,ucvol,vout)
 !    Similar to case optcell==2 or optcell==3, but in 2 dimensions.
      vout(3*natom+1:3*natom+3)=dstr(1:3)*ucvol
      vout(3*natom+optcell-6)  =dstr(optcell-3)*ucvol*2.0_dp
+   else if (optcell==4)then
+     vout(3*natom+1) = dstr(1)*ucvol
+     vout(3*natom+2) = dstr(5)*ucvol
+     vout(3*natom+3) = dstr(6)*ucvol
+   else if (optcell==5)then
+     vout(3*natom+1) = dstr(2)*ucvol
+     vout(3*natom+2) = dstr(4)*ucvol
+     vout(3*natom+3) = dstr(6)*ucvol
+   else if (optcell==6)then
+     vout(3*natom+1) = dstr(3)*ucvol
+     vout(3*natom+2) = dstr(4)*ucvol
+     vout(3*natom+3) = dstr(5)*ucvol
+     !CP test
+     write(*,*) '--CP f2vout, vout = ', vout(3*natom+1), vout(3*natom+2), vout(3*natom+3)
+     !End CP test
    end if
 
  end if
@@ -661,7 +737,7 @@ integer :: ixfh ! kk,jj
 !    !DEBUG
 
 !    Transfer it in vin, vout
-     call xfpack_x2vin(acell,acell0,ab_mover%natom,&
+     call xfpack_x2vin(acell,ab_mover%natom,&
 &     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &     ab_mover%symrel,ucvol,ucvol0,vin,xred)
      call xfpack_f2vout(gred,ab_mover%natom,&
@@ -678,7 +754,7 @@ integer :: ixfh ! kk,jj
        strten(1:3)=ab_xfh%xfhist(:,ab_mover%natom+2,2,ixfh-1)
        strten(4:6)=ab_xfh%xfhist(:,ab_mover%natom+3,2,ixfh-1)
 !      Tranfer it in vin_prev, vout_prev
-       call xfpack_x2vin(acell,acell0,ab_mover%natom,&
+       call xfpack_x2vin(acell,ab_mover%natom,&
 &       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &       ab_mover%symrel,ucvol,ucvol0,vin_prev,xred)
        call xfpack_f2vout(gred,ab_mover%natom,&

@@ -189,11 +189,9 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
  deloc_int(:)=zero
  deloc_gred(:)=zero
  if(ab_mover%optcell==1) ndim=ndim+1
- if(ab_mover%optcell>=2 .and.&
-& ab_mover%optcell<=6) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell==2 .or.&
+& ab_mover%optcell==3) ndim=ndim+6
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(DEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
