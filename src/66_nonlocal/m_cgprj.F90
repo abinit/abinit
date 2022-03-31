@@ -827,9 +827,6 @@ contains
      end if
 
 !    Allocate arrays for a wave-function (or a block of WFs)
-     print*, 'FB-test: npw_nk= ', npw_nk
-     print*, 'FB-test: cwavef-dim= ', npw_nk*my_nspinor*cg_bandpp
-     print*, 'FB-test: npw_block= ', npw_block(:)
      ABI_MALLOC(cwavef,(2,npw_nk*my_nspinor*cg_bandpp))
      if (npband_bandfft>1) then
        isize=2*my_nspinor*cg_bandpp;bufsize(:)=isize*npw_block(:);bufdisp(:)=isize*npw_disp(:)
@@ -839,8 +836,6 @@ contains
          bufdisp_wf(ii)=(ii-1)*isize
        end do
      end if
-     print*, 'FB-test: bufsize =', bufsize
-     print*, 'FB-test: bufsize_wf =', bufsize_wf
 
 !    Loop over bands or blocks of bands
      icgb=icg ; ibgb=ibg ; iband_start=1
@@ -848,7 +843,6 @@ contains
      blocksz=nband_k/npband_bandfft
      !FB nblockbd=nband_k/blocksz
      nblockbd=1
-     print*, 'FB-test: nband_k, blocksz, nblockbd=', nband_k, blocksz, nblockbd
      nband_cprj_k=merge(nband_k/npband_bandfft/npband_dfpt,nband_k,cprj_band_distributed)
      nband_cg_k=merge(nband_k/npband_bandfft/npband_dfpt,nband_k,cg_band_distributed)
      do iblockbd=1,nblockbd
@@ -893,7 +887,8 @@ contains
            ABI_FREE(cwavef_tmp)
          end if
        else
-         do ig=1,npw_k*my_nspinor*cg_bandpp
+         !FB do ig=1,npw_k*my_nspinor*cg_bandpp
+         do ig=1,npw_k*my_nspinor
            cwavef(1,ig)=cg(1,ig+icgb)
            cwavef(2,ig)=cg(2,ig+icgb)
          end do
@@ -926,7 +921,8 @@ contains
 !    Shift array memory (if mkmem/=0)
      if (mkmem/=0) then
        ibg=ibg+my_nspinor*nband_cprj_k
-       icg=icg+my_nspinor*nband_cg_k*npw_k
+       !FB icg=icg+my_nspinor*nband_cg_k*npw_k
+       icg=icg+my_nspinor*nband_k*npw_k
        ikg=ikg+npw_k
      end if
 
