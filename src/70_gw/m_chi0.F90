@@ -217,7 +217,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
- integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
+ integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c, cnt
  integer :: band1,band2,iat1,iat2,iat,ig,ig1,ig2,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
  integer :: my_nbbp,my_nbbpks,spin,nsppol
@@ -461,23 +461,29 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ! TODO this table can be calculated for each k-point
  my_nbbpks=0; allup="All"; got=0
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
+ bbp_ks_distrb = 0
  ABI_MALLOC(bbp_mask,(mband,mband))
 
+ cnt = 0
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
 
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE  ! Only IBZ_q
      end if
+     cnt = cnt + 1; if (mod(cnt, wfd%nproc) /= wfd%my_rank) cycle ! MPI parallelism.
+
      ik_ibz=Kmesh%tab(ik_bz)
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ik_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd%distribute_bbp(ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
+     call wfd%distribute_bbp(ik_ibz, spin, allup, my_nbbp, bbp_ks_distrb(:,:,ik_bz,spin), bbp_mask=bbp_mask) !, got=got,
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
 
+ call xmpi_sum(bbp_ks_distrb, comm, ierr)
+ my_nbbpks = count(bbp_ks_distrb == wfd%my_rank)
  ABI_FREE(bbp_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbbpks," (b,b',k,s) states in chi0q0."
@@ -1201,7 +1207,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp1=1,two_poles=2,one_pole=1,ndat1=1
- integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr,band1c,band2c
+ integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr,band1c,band2c, cnt
  integer :: ig1,ig2,iat1,iat2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
  integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il1,il2
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
@@ -1353,13 +1359,16 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! TODO this table can be calculated for each k-point
  my_nbbpks=0; allup="All"; got=0
  ABI_MALLOC(bbp_ks_distrb,(mband,mband,Kmesh%nbz,nsppol))
- ABI_MALLOC(bbp_mask,(mband,mband))
+ bbp_ks_distrb = 0
+ ABI_MALLOC(bbp_mask,(mband, mband))
 
+ cnt = 0
  do spin=1,nsppol
    do ik_bz=1,Kmesh%nbz
      if (Ep%symchi==1) then
        if (Ltg_q%ibzq(ik_bz)/=1) CYCLE  ! Only IBZ_q
      end if
+     cnt = cnt + 1; if (mod(cnt, wfd%nproc) /= wfd%my_rank) cycle ! MPI parallelism.
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
      call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
@@ -1373,10 +1382,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd%distribute_kb_kpbp(ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
+     call wfd%distribute_kb_kpbp(ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin), bbp_mask=bbp_mask)
+                                 ! , got=got,
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
+
+ call xmpi_sum(bbp_ks_distrb, comm, ierr)
+ my_nbbpks = count(bbp_ks_distrb == wfd%my_rank)
 
  ABI_FREE(bbp_mask)
 
