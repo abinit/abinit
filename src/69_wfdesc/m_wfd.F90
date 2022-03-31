@@ -3730,7 +3730,8 @@ end subroutine wfd_distribute_bbp
 !!
 !! SOURCE
 
-subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
+subroutine wfd_distribute_kb_kpbp(Wfd, ik_ibz, ikp_ibz, spin, allup, my_nbbp, bbp_distrb, &
+                                  got, bbp_mask) ! optional
 
 !Arguments ------------------------------------
 !scalars

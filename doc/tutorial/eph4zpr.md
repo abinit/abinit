@@ -635,7 +635,7 @@ The same trick is highly recommended when computing WFK files for $GW$ calculati
     by restricting the NSCF calculation to the $\kk$-points inside the electron (hole) pockets
     relevant for transport.
     Unfortunately, this optimization is not possible when computing the real part of the self-energy
-    as the integration must be performed in the full $\text{IBZ}_\kk$.
+    as the $\qq$-space integration must be performed in the full $\text{IBZ}_\kk$.
     On the other hand, ZPR calculations can take advange of the Sternheimer method to reduce the number
     of empty bands required to converge.
 
@@ -824,7 +824,7 @@ Number of k-points in Sigma_{nk}: 1
 sigma_ngkpt: [0 0 0], sigma_erange: [0. 0.]
 Max bstart: 5, min bstop: 9
 Initial ab-initio q-mesh:
-	ngqpt: [4 4 4], with nqibz: 8
+	ddb_ngqpt: [4 4 4]
 q-mesh for self-energy integration (eph_ngqpt_fine): [4 4 4]
 k-mesh for electrons:
 	mpdivs: [4 4 4] with shifts [0. 0. 0.] and kptopt: 1
