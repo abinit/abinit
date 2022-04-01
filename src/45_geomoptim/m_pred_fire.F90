@@ -396,7 +396,6 @@ end if
 & ab_mover%symrel, ucvol, ucvol0,&
 & vin, xred)
 
-
  if(ab_mover%optcell/=0)then
    call mkrdim(acell,rprim,rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
