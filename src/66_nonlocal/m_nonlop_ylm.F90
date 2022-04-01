@@ -643,6 +643,14 @@ contains
    end if
  end if
 
+ if (choice==7) then
+    write(std_out,fmt='(10(f9.6, 2x))') cprjin(1,1)%cp(1,1:10)
+    write(std_out,fmt='(10(f9.6, 2x))') vectin(1,1:10)
+    write(std_out,*) "===="
+ end if
+
+
+
 !Additional steps before calculation
 !==============================================================
 

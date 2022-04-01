@@ -80,179 +80,198 @@ __device__ static inline  void reduce_double_32(volatile double *sh_vect){
     sh_vect[threadIdx.x] += sh_vect[threadIdx.x + 1];
 }
 
-__global__ void kernel_compute_proj_factor(double2 *proj,double2 *dproj,
-					   double2 *val_ajlmn,double2 *val_sajlmn,
-					   double *enl,double *sij,
-					   double *rdlmn,double *rdproj,
-					   const int *atindx1,const unsigned char *nlmn,
-					   const int *indlmn,const unsigned short int* atoms,
-					   const unsigned char *lmn,const unsigned char *typat,
-					   const int paw_opt,const int dimenl1,const int lmnmax,
-					   const int nb_projections,const int natoms,
-					   const int choice, const int signs, const double lambda
-					   ){
+__global__ void kernel_compute_proj_factor(
+    double2 *proj, double2 *dproj, double2 *val_ajlmn, double2 *val_sajlmn,
+    double *enl, double *sij, double *rdlmn, double *rdproj, const int *atindx1,
+    const unsigned char *nlmn, const int *indlmn,
+    const unsigned short int *atoms, const unsigned char *lmn,
+    const unsigned char *typat, const int paw_opt, const int dimenl1,
+    const int lmnmax, const int nb_projections, const int natoms,
+    const int choice, const int signs, const double lambda) {
 
-  int iproj=threadIdx.x + blockIdx.x*blockDim.x;
-  double2 a_jlmn,sa_jlmn;
+  int iproj = threadIdx.x + blockIdx.x * blockDim.x;
+  double2 a_jlmn, sa_jlmn;
   double tmp_loc;
-  unsigned short int iatom,jatom;
-  unsigned char jlmn,itypat;
+  unsigned short int iatom, jatom;
+  unsigned char jlmn, itypat;
 
-  if(iproj<nb_projections){
+  if (iproj < nb_projections) {
 
-    //Get the couple (iatom,ilmn) of the thread's projection
-    iatom=atoms[iproj];//atoms's indice sorted by type
-    jatom=atindx1[iatom] - 1; //atoms's indice not sorted (-1 because of fortran cpu storage)
-    jlmn =lmn[iproj];
-    itypat=typat[iproj];
-    int l=indlmn[ 0 + 6*(jlmn + lmnmax*itypat)];
-    //Norm Conserving Pseudo Potential
-    if(paw_opt==0){
+    // Get the couple (iatom,ilmn) of the thread's projection
+    iatom = atoms[iproj]; // atoms's indice sorted by type
+    jatom = atindx1[iatom] -
+            1; // atoms's indice not sorted (-1 because of fortran cpu storage)
+    jlmn = lmn[iproj];
+    itypat = typat[iproj];
+    int l = indlmn[0 + 6 * (jlmn + lmnmax * itypat)];
+
+    // Norm Conserving Pseudo Potential
+    if (paw_opt == 0) {
       double2 proj_ilmn_R;
       proj_ilmn_R = proj[iproj];
-      if (choice!=7) {
-        double val_enl; //enl is real when norm conserving
-        int iln=indlmn[ 4 + 6*(jlmn + lmnmax*itypat)]; // iln=indlmn(5,ilmn) (pour un type fixe)
-        val_enl = enl[(iln-1) + dimenl1*itypat]; //enl_(1)=enl(iln,itypat,ispinor)
-        a_jlmn.x = val_enl * proj_ilmn_R.x ;//gxfac(1:cplex,ilmn,ia,ispinor)=enl_(1)*gx(1:cplex,ilmn,ia,ispinor)
-        a_jlmn.y = val_enl * proj_ilmn_R.y ;
-        }
-      else {
-        a_jlmn.x = proj_ilmn_R.x ;
-        a_jlmn.y = proj_ilmn_R.y ;
-      }      
-    }
-    else{ //PAW
-      if (choice!=7) {
-        a_jlmn.x=0.;
-        a_jlmn.y=0.;
-        sa_jlmn.x=0.;
-        sa_jlmn.y=0.;
-        //Accumulate projection;
-        for(int ilmn=0;ilmn<nlmn[itypat];ilmn++){
-	  int ijlmn= (ilmn<jlmn? ilmn +  jlmn*(jlmn+1)/2 : jlmn +  ilmn*(ilmn+1)/2 );
-	  double val_enl = enl[ijlmn + dimenl1*jatom];
-	  double2 proj_ilmn_R = proj[ iproj + ilmn - jlmn];
-	  a_jlmn.x +=  val_enl*proj_ilmn_R.x;
-	  a_jlmn.y +=  val_enl*proj_ilmn_R.y;
-	  double val_sij= sij[ijlmn + dimenl1*itypat];
-	  sa_jlmn.x +=  val_sij*proj_ilmn_R.x;
-	  sa_jlmn.y +=  val_sij*proj_ilmn_R.y;
-        }
-        if(paw_opt==2){
-          a_jlmn.x -= lambda*sa_jlmn.x;
-          a_jlmn.y -= lambda*sa_jlmn.y;
-        }
+
+      if (choice != 7) {
+        double val_enl; // enl is real when norm conserving
+        int iln =
+            indlmn[4 + 6 * (jlmn + lmnmax * itypat)]; // iln=indlmn(5,ilmn)
+                                                      // (pour un type fixe)
+        val_enl = enl[(iln - 1) + dimenl1 * itypat]; // enl_(1)=enl(iln,itypat,ispinor)
+        a_jlmn.x = val_enl * proj_ilmn_R.x; // gxfac(1:cplex,ilmn,ia,ispinor)=enl_(1)*gx(1:cplex,ilmn,ia,ispinor)
+        a_jlmn.y = val_enl * proj_ilmn_R.y;
+      } else {
+        a_jlmn.x = proj_ilmn_R.x;
+        a_jlmn.y = proj_ilmn_R.y;
       }
-      else {
+
+    } else { // PAW
+
+      if (choice != 7) {
+        a_jlmn.x = 0.;
+        a_jlmn.y = 0.;
+        sa_jlmn.x = 0.;
+        sa_jlmn.y = 0.;
+
+        // Accumulate projection;
+        for (int ilmn = 0; ilmn < nlmn[itypat]; ilmn++) {
+          int ijlmn = (ilmn < jlmn ? ilmn + jlmn * (jlmn + 1) / 2
+                                   : jlmn + ilmn * (ilmn + 1) / 2);
+          double val_enl = enl[ijlmn + dimenl1 * jatom];
+
+          double2 proj_ilmn_R = proj[iproj + ilmn - jlmn];
+          a_jlmn.x += val_enl * proj_ilmn_R.x;
+          a_jlmn.y += val_enl * proj_ilmn_R.y;
+
+          double val_sij = sij[ijlmn + dimenl1 * itypat];
+          sa_jlmn.x += val_sij * proj_ilmn_R.x;
+          sa_jlmn.y += val_sij * proj_ilmn_R.y;
+        }
+
+        if (paw_opt == 2) {
+          a_jlmn.x -= lambda * sa_jlmn.x;
+          a_jlmn.y -= lambda * sa_jlmn.y;
+        }
+      } else {
         double2 proj_ilmn_R = proj[iproj];
-        if(paw_opt!=3){
+        if (paw_opt != 3) {
           a_jlmn.x = proj_ilmn_R.x;
           a_jlmn.y = proj_ilmn_R.y;
         }
-        if(paw_opt==3 || paw_opt==4){
+        if (paw_opt == 3 || paw_opt == 4) {
           sa_jlmn.x = proj_ilmn_R.x;
           sa_jlmn.y = proj_ilmn_R.y;
-	}
+        }
       }
     }
 
-    //Cas choice==1 && signs==2 :  a_jlmn = a_jlmn*i^(-l)
-    if(choice==1){
+    // Cas choice==1 && signs==2 :  a_jlmn = a_jlmn*i^(-l)
+    if (choice == 1 or choice == 7) {
       tmp_loc = a_jlmn.x;
-      switch (l%4){
-	//case 0: //i^(-l) = 1 : Nothing to do
-      case 1: //i^(-l) = -i
-	a_jlmn.x = a_jlmn.y;
-	a_jlmn.y = -tmp_loc;
-	tmp_loc = sa_jlmn.x;
-	sa_jlmn.x = sa_jlmn.y;
-	sa_jlmn.y = -tmp_loc;
-	break;
-      case 2: //i^(-l) = -1
-	a_jlmn.x =  -a_jlmn.x ;
-	a_jlmn.y =  -a_jlmn.y ;
-	sa_jlmn.x = -sa_jlmn.x;
-	sa_jlmn.y = -sa_jlmn.y;
-	break;
-      case 3: //i^(-l) = i
-	a_jlmn.x = -a_jlmn.y;
-	a_jlmn.y = tmp_loc;
-	tmp_loc = sa_jlmn.x;
-	sa_jlmn.x = -sa_jlmn.y;
-	sa_jlmn.y = tmp_loc;
-	break;
+      switch (l % 4) {
+        // case 0: //i^(-l) = 1 : Nothing to do
+      case 1: // i^(-l) = -i
+        a_jlmn.x = a_jlmn.y;
+        a_jlmn.y = -tmp_loc;
+        tmp_loc = sa_jlmn.x;
+        sa_jlmn.x = sa_jlmn.y;
+        sa_jlmn.y = -tmp_loc;
+        break;
+      case 2: // i^(-l) = -1
+        a_jlmn.x = -a_jlmn.x;
+        a_jlmn.y = -a_jlmn.y;
+        sa_jlmn.x = -sa_jlmn.x;
+        sa_jlmn.y = -sa_jlmn.y;
+        break;
+      case 3: // i^(-l) = i
+        a_jlmn.x = -a_jlmn.y;
+        a_jlmn.y = tmp_loc;
+        tmp_loc = sa_jlmn.x;
+        sa_jlmn.x = -sa_jlmn.y;
+        sa_jlmn.y = tmp_loc;
+        break;
       default:
-	break;
+        break;
       }
-      //Store computed values
-      val_ajlmn[iproj]=a_jlmn;
-      val_sajlmn[iproj]=sa_jlmn;
-    }//End choice==1 && signs==2
+      // Store computed values
+      if (paw_opt == 3) {
+        val_ajlmn[iproj]  = sa_jlmn;
+        val_sajlmn[iproj] = sa_jlmn;
+      } else {
+        val_ajlmn[iproj] = a_jlmn;
+        val_sajlmn[iproj] = sa_jlmn;
+      }
+    } // End choice==1 && signs==2
 
-    //Case choice==2 && signs==1: a_jlmn_alpha = a_jlmn*conjuguate(dproj(jlmn,alpha))
-    else if(choice==2){
-      if(paw_opt==3){
-	a_jlmn.x = sa_jlmn.x;
-	a_jlmn.y = sa_jlmn.y;
+    // Case choice==2 && signs==1: a_jlmn_alpha =
+    // a_jlmn*conjuguate(dproj(jlmn,alpha))
+    else if (choice == 2) {
+      if (paw_opt == 3) {
+        a_jlmn.x = sa_jlmn.x;
+        a_jlmn.y = sa_jlmn.y;
       }
       double2 val_dproj;
-      //Alpha1 : ialpha=0
-      val_dproj=dproj[iproj + 0*nb_projections];
-      rdlmn[jlmn + lmnmax*(iatom + 0*natoms)] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
-      //Alpha2 : ialpha=1
-      val_dproj=dproj[iproj + 1*nb_projections];
-      rdlmn[jlmn + lmnmax*(iatom + 1*natoms)] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
-      //Alpha3 : ialpha=2
-      val_dproj=dproj[iproj + 2*nb_projections];
-      rdlmn[jlmn + lmnmax*(iatom + 2*natoms)] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
+      // Alpha1 : ialpha=0
+      val_dproj = dproj[iproj + 0 * nb_projections];
+      rdlmn[jlmn + lmnmax * (iatom + 0 * natoms)] =
+          val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
+      // Alpha2 : ialpha=1
+      val_dproj = dproj[iproj + 1 * nb_projections];
+      rdlmn[jlmn + lmnmax * (iatom + 1 * natoms)] =
+          val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
+      // Alpha3 : ialpha=2
+      val_dproj = dproj[iproj + 2 * nb_projections];
+      rdlmn[jlmn + lmnmax * (iatom + 2 * natoms)] =
+          val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
     }
 
-    //Cas choice==3 && signs==1: a_jlmn_R_alphabeta = a_jlmn_R*conjuguate(dproj(iproj,alphabeta))
-    else if(choice==3){
-      if(paw_opt==3){
-	a_jlmn.x = sa_jlmn.x;
-	a_jlmn.y = sa_jlmn.y;
+    // Cas choice==3 && signs==1: a_jlmn_R_alphabeta =
+    // a_jlmn_R*conjuguate(dproj(iproj,alphabeta))
+    else if (choice == 3) {
+      if (paw_opt == 3) {
+        a_jlmn.x = sa_jlmn.x;
+        a_jlmn.y = sa_jlmn.y;
       }
       double2 val_dproj;
-      for(int ialphabeta=0;ialphabeta<7;ialphabeta++){
-	//ialphabeta=0
-	val_dproj=dproj[iproj + ialphabeta*nb_projections];
-	rdproj[iproj + ialphabeta*nb_projections] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
+      for (int ialphabeta = 0; ialphabeta < 7; ialphabeta++) {
+        // ialphabeta=0
+        val_dproj = dproj[iproj + ialphabeta * nb_projections];
+        rdproj[iproj + ialphabeta * nb_projections] =
+            val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
       }
     }
-    //Case choice==23: both choice 2 and choice 3
-    else if(choice==23){
-      if(paw_opt==3){
-	a_jlmn.x = sa_jlmn.x;
-	a_jlmn.y = sa_jlmn.y;
+    // Case choice==23: both choice 2 and choice 3
+    else if (choice == 23) {
+      if (paw_opt == 3) {
+        a_jlmn.x = sa_jlmn.x;
+        a_jlmn.y = sa_jlmn.y;
       }
-      //Choice 2 part
+      // Choice 2 part
       double2 val_dproj;
-      //Alpha1 : ialpha=0
-      val_dproj=dproj[iproj + 1*nb_projections];
-      rdlmn[jlmn + lmnmax*(iatom + 0*natoms)] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
-      //Alpha2 : ialpha=1
-      val_dproj=dproj[iproj + 2*nb_projections];
-      rdlmn[jlmn + lmnmax*(iatom + 1*natoms)] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
-      //Alpha3 : ialpha=2
-      val_dproj=dproj[iproj + 3*nb_projections];
-      rdlmn[jlmn + lmnmax*(iatom + 2*natoms)] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
+      // Alpha1 : ialpha=0
+      val_dproj = dproj[iproj + 1 * nb_projections];
+      rdlmn[jlmn + lmnmax * (iatom + 0 * natoms)] =
+          val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
+      // Alpha2 : ialpha=1
+      val_dproj = dproj[iproj + 2 * nb_projections];
+      rdlmn[jlmn + lmnmax * (iatom + 1 * natoms)] =
+          val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
+      // Alpha3 : ialpha=2
+      val_dproj = dproj[iproj + 3 * nb_projections];
+      rdlmn[jlmn + lmnmax * (iatom + 2 * natoms)] =
+          val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
 
-
-      //choice 3 part
-      //ialphabeta =0
-      val_dproj=dproj[iproj];
-      rdproj[iproj] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
-      //others
-      for(int ialphabeta=1;ialphabeta<7;ialphabeta++){
-	val_dproj=dproj[iproj + (ialphabeta+3)*nb_projections];
-	rdproj[iproj + ialphabeta*nb_projections] = val_dproj.x*a_jlmn.x + val_dproj.y*a_jlmn.y;
+      // choice 3 part
+      // ialphabeta =0
+      val_dproj = dproj[iproj];
+      rdproj[iproj] = val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
+      // others
+      for (int ialphabeta = 1; ialphabeta < 7; ialphabeta++) {
+        val_dproj = dproj[iproj + (ialphabeta + 3) * nb_projections];
+        rdproj[iproj + ialphabeta * nb_projections] =
+            val_dproj.x * a_jlmn.x + val_dproj.y * a_jlmn.y;
       }
-    }//end choice 23
-  }//end if thread's global id < nb_projection
-}//End of kernel_compute_proj_factor
-
+    } // end choice 23
+  }   // end if thread's global id < nb_projection
+} // End of kernel_compute_proj_factor
 
 //Note that we assume in a first time we have only one block in X direction,
 // So we have gridDim.x = 1 and blockIdx.x=0
@@ -268,6 +287,7 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,double2 *vectout,d
 					      const int nb_projections,const int lmnmax,
 					      const double four_pi_by_ucvol,const double lambda
 					      ){
+
   //Definition of locals
   unsigned short int jpw,iatom;
   unsigned char jlmn,itypat;
@@ -350,9 +370,9 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,double2 *vectout,d
       //We ensure every access in shared mem is accomplished in the block
       __syncthreads();
       if( threadIdx.x <  decalage)
-	sh_vect_x[threadIdx.x] += sh_vect_x[threadIdx.x + decalage];
+        sh_vect_x[threadIdx.x] += sh_vect_x[threadIdx.x + decalage];
       else if(threadIdx.x >= (blockDim.x - decalage))
-	sh_vect_y[threadIdx.x] += sh_vect_y[threadIdx.x - decalage];
+        sh_vect_y[threadIdx.x] += sh_vect_y[threadIdx.x - decalage];
     }
     __syncthreads();
     //Step5: Thread 0 writes the results for the block (ie for the plane wave)

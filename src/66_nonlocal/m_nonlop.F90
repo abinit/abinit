@@ -33,6 +33,7 @@ module m_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
+ use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_nonlop_pl,   only : nonlop_pl
@@ -758,7 +759,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &         ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
 &         svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir,&
           cprjin_left=cprjin_left,enlout_im=enlout_im,ndat_left=ndat_left_)
-       else
+      else
          call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
 &         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &         indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
@@ -776,7 +777,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
 &       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
-     end if
+    end if
+
+    ! fffff
+    if (choice==7) then
+       !call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(2,npwout*my_nspinor*ndat) = ",ftoa(svectout(2,npwout*my_nspinor*ndat))),"COLL")
+       !call wrtout(std_out,sjoin("(b2,e2)=",itoa(b2),itoa(e2)),"COLL")
+       call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(1) = ",ftoa(svectout(1,1)),ftoa(svectout(2,1))),"COLL")
+       call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(2) = ",ftoa(svectout(1,2)),ftoa(svectout(2,2))),"COLL")
+       call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(3) = ",ftoa(svectout(1,3)),ftoa(svectout(2,3))),"COLL")
+    end if
+
    end do
    !$omp end parallel do
  end if
@@ -967,6 +978,7 @@ end subroutine nonlop
 !!
 !! SOURCE
 
+
  subroutine nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimffnlin,dimffnlout,&
 &                      enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
@@ -1057,6 +1069,11 @@ end subroutine nonlop
  end if
 
 #if defined HAVE_GPU_CUDA
+ if (choice==7) then
+    write(std_out,fmt='(10(f9.6, 2x))') proj(1,1:10)
+    write(std_out,fmt='(10(f9.6, 2x))') vectin(1,1:10)
+    write(std_out,*) "===="
+ end if
  call gpu_nonlop(atindx1,choice,cpopt,proj,dimenl1,dimenl2,dimffnlin,dimffnlout,&
 & enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
 & kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&

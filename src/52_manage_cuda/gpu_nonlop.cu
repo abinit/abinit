@@ -431,12 +431,25 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
       cudaMemcpy(proj_gpu,proj,nb_proj_to_compute*sizeof(double2),cudaMemcpyHostToDevice);
   }
   else {
-    gpu_compute_nl_projections_(proj_gpu,dproj_gpu,
-			      vectin_gpu,ph3din_gpu,
-			      ffnlin_gpu,kpgin_gpu,
-			      indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
-			      &nb_proj_to_compute,npwin,choice,cpopt,
-			      dimffnlin,lmnmax,&cplex,pi,ucvol);
+    gpu_compute_nl_projections_(proj_gpu,
+                                dproj_gpu,
+                                vectin_gpu,
+                                ph3din_gpu,
+                                ffnlin_gpu,
+                                kpgin_gpu,
+                                indlmn_gpu,
+                                atoms_gpu,
+                                lmn_gpu,
+                                typat_gpu,
+                                &nb_proj_to_compute,
+                                npwin,
+                                choice,
+                                cpopt,
+                                dimffnlin,
+                                lmnmax,
+                                &cplex,
+                                pi,
+                                ucvol);
   }
 
   //Copy back projections if wanted
