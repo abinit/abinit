@@ -70,8 +70,8 @@ contains
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5, 51, 52 and signs=2)
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  kpg(npw,nkpg)=(k+G) components (if nkpg=3).
@@ -100,7 +100,7 @@ contains
 !! SIDE EFFECTS
 !! --if (paw_opt=0)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
-!!                or one of its derivatives to the input vect.  
+!!                or one of its derivatives to the input vect.
 !!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
 !!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
 !!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
@@ -275,8 +275,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              else
                gxfac_(1,ilmn)=zero
              end if
-           end if
-         end do
+           end if! parity
+         end do ! ilmn
          if (choice>1) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -310,7 +310,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
                end if
              end if
            end do
-         end if
+         end if ! choice>1
          if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -343,9 +343,9 @@ if (choice==33) two_piinv=1.0_dp/two_pi
                  end do
                end if
              end if
-           end do
-         end if
-       end if
+           end do! ilmn
+         end if ! choice 54 or 8 or 81 or 33
+       end if ! paw_opt /= 3
 
 !      Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
        if (paw_opt>=3) then
@@ -370,7 +370,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
              scale=wt;if (il>1) scale=-scale
              if (parity) then
                if(cplex==2)then
-                 dgxdtfacs_(1:cplex,1:ndgxdtfac,ilmn)=scale*dgxdtfac_sij(1:cplex,1:ndgxdtfac,ilmn,ia,ispinor)
+                 dgxdtfacs_(1:cplex,1:ndgxdtfac,ilmn) = scale * dgxdtfac_sij(1:cplex,1:ndgxdtfac,ilmn,ia,ispinor)
                else
                  do ii=1,ndgxdtfac
                    ic = cplex_dgxdt(ii) ; jc = 3-ic
@@ -396,8 +396,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
                  end do
                end if
              end if
-           end do
-         end if
+           end do ! ilmn
+         end if ! choice>1
          if (choice==54.or.choice==8.or.choice==81) then
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -429,10 +429,10 @@ if (choice==33) two_piinv=1.0_dp/two_pi
                    end if
                  end do
                end if
-             end if
-           end do
-         end if
-       end if
+             end if ! parity
+           end do ! ilmn
+         end if ! choice == 54 or 8 or 81
+       end if ! paw_opt >= 3
 
 !      Compute <g|Vnl|c> (or derivatives) for each plane wave:
 
@@ -572,7 +572,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            fdb = ffnl_dir_dat(2*idir)
            do ilmn=1,nlmn
              ztab(:)=ztab(:) + &
-&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp) 
+&             ffnl(:,fdf,ilmn)*cmplx(dgxdtfac_(1,2,ilmn),dgxdtfac_(2,2,ilmn),kind=dp)
            end do
          end if
 
@@ -1296,7 +1296,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 !$OMP END DO
 
 !        ------
-         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir+2)|psi> 
+         else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir+2)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
 !$OMP DO
