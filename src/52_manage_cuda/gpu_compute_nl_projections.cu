@@ -17,25 +17,50 @@ __constant__ unsigned char  indbeta_c3[]={0,1,2,3,3,3,2};
 /**********                                      *******************/
 /*******************************************************************/
 
-//Note that we assume in a first time we have only one block in X direction,
-// SO we hava gridDim.x = 1 and blockIdx.x=0
-// Blocks in Y direction represente a couple (iaton,ilmn) for which we have
+// Note that we assume in a first time we have only one block in X direction,
+// SO we have gridDim.x = 1 and blockIdx.x=0
+// Blocks in Y direction represent a couple (iatom,ilmn) for which we have
 // to compute C_ilmn^iaton
-//The primary compute and the reduction are made over the threads of this block
+// The primary compute and the reduction are made over the threads of this block
 /**
- * Roughly equivalent to opernlb_ylm
+ * Roughly equivalent to opernla_ylm with choice >= 0.
  *
- * \param[out] proj the output of this kernel
+ * Compute <p_lmn|c>=4pi/sqrt(vol) (i)^l Sum_g[c(g).f_nl(g).Y_lm(g).exp(2pi.i.g.R)].
  *
+ * Notation:
+ * - c(g) is the input vector (wave function)
+ * - Compute c(g).exp(2pi.i.g.R) as in opernla (all choices)
  *
- * \note four_pi_by_squcvol is noted wt in opernlb
+ * \param[out] proj is the output (gx or cprjin, see opernla)
+ * \param[in] vectin is input wave vector (in plane wave basis representation) noted vect in opernla
+ * \param[in] ph3din is the phase factor array $e^{i 2 \pi (k+G) \cdot xred}$
+ * \param[in] ffnlin is the form factor array (computed in 66_nonlocal/m_mkffnl.F90)
+ * \param[in] indlmn
+ * \param[in] atoms
+ * \param[in] lmn
+ * \param[in] typat
+ * \param[in] dimffnlin
+ * \param[in] npw : number of plane waves (dimension)
+ * \param[in] lmnmax
+ * \param[in] cplex
+ * \param[in] four_pi_by_squcvol
+ *
+ * \note four_pi_by_squcvol is noted wt in opernla
  */
-__global__ void kernel_compute_nl_projections(double2 *proj,double2 *vectin,double2 *ph3din,double *ffnlin,
-                                              const int *indlmn,const unsigned short int* atoms,
-                                              const unsigned char *lmn,const unsigned char * typat,
-                                              const int dimffnlin,const int npw,
-                                              const int lmnmax,const char cplex,const double four_pi_by_squcvol
-                                              ){
+__global__ void kernel_compute_nl_projections(double2 *proj,
+                                              const double2 *vectin,
+                                              const double2 *ph3din,
+                                              const double *ffnlin,
+                                              const int *indlmn,
+                                              const unsigned short int* atoms,
+                                              const unsigned char *lmn,
+                                              const unsigned char * typat,
+                                              const int dimffnlin,
+                                              const int npw,
+                                              const int lmnmax,
+                                              const char cplex,
+                                              const double four_pi_by_squcvol)
+{
 
   //Definition of locals
   int ilmn,ipw,itypat;
@@ -50,14 +75,16 @@ __global__ void kernel_compute_nl_projections(double2 *proj,double2 *vectin,doub
 
   //Get the couple (iatom,ilmn) of the block
   //iatom = atoms[blockIdx.y];// we don't need it because we use it only in dec_iatom_ph3d
-  ilmn =lmn[blockIdx.y];
-  itypat=typat[blockIdx.y];
+  ilmn = lmn[blockIdx.y];
+  itypat = typat[blockIdx.y];
   dec_iatom_ph3d = npw * atoms[blockIdx.y];
-  dec_ffnl= npw*(0 + dimffnlin*(ilmn + lmnmax*itypat));
+  dec_ffnl = npw*(0 + dimffnlin*(ilmn + lmnmax*itypat));
 
   //Initialisation of Shared mem
-  sh_proj_x[threadIdx.x]=0.;
-  sh_proj_y[threadIdx.x]=0.;
+  sh_proj_x[threadIdx.x] = 0.;
+  sh_proj_y[threadIdx.x] = 0.;
+
+  // Step1 and 2 computes c(g).exp(2pi.i.g.R) => opernla (all choices)
 
   //Step 1: Compute value for each plane wave and reduce by thread in sh mem
   for(ipw=threadIdx.x ;ipw<npw; ipw+=blockDim.x){
@@ -486,14 +513,25 @@ __global__ void kernel_compute_nl_projections_and_derivates_all(double2 *dproj,
 /**********                                      *******************/
 /*******************************************************************/
 
-extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu,
-                                            double2 *vectin_gpu,double2 *ph3din_gpu,
-                                            double *ffnlin_gpu,double *kpgin_gpu,
-                                            int *indlmn_gpu,unsigned short int *atoms_gpu,
-                                            unsigned char *lmn_gpu, unsigned char *typat_gpu,
-                                            int *nb_proj_to_compute,int *npw,int *choice,int *cpopt,
-                                            int *dimffnlin,int *lmnmax,
-                                            const char *cplex,const double *pi,const double *ucvol
+extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,
+                                            double2 *dproj_gpu,
+                                            double2 *vectin_gpu,
+                                            double2 *ph3din_gpu,
+                                            double *ffnlin_gpu,
+                                            double *kpgin_gpu,
+                                            int *indlmn_gpu,
+                                            unsigned short int *atoms_gpu,
+                                            unsigned char *lmn_gpu,
+                                            unsigned char *typat_gpu,
+                                            int *nb_proj_to_compute,
+                                            int *npw,
+                                            int *choice,
+                                            int *cpopt,
+                                            int *dimffnlin,
+                                            int *lmnmax,
+                                            const char *cplex,
+                                            const double *pi,
+                                            const double *ucvol
                                             ){
 
   //Configuration of the cuda grid
@@ -506,14 +544,24 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu
       //One block by projection to compute and plane waves split among a batch of threads by block
       block.x=64;
       grid.x=1;
-      grid.y=*nb_proj_to_compute;
+      grid.y = *nb_proj_to_compute;
 
-      kernel_compute_nl_projections<<<grid,block,block.x*2*sizeof(double),0>>>(proj_gpu,vectin_gpu,ph3din_gpu,ffnlin_gpu,
-                                                                               indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
-                                                                               *dimffnlin,*npw,*lmnmax,
-                                                                               *cplex,four_pi_by_squcvol);
+      kernel_compute_nl_projections<<<grid,block,block.x*2*sizeof(double),0>>>(proj_gpu,
+                                                                               vectin_gpu,
+                                                                               ph3din_gpu,
+                                                                               ffnlin_gpu,
+                                                                               indlmn_gpu,
+                                                                               atoms_gpu,
+                                                                               lmn_gpu,
+                                                                               typat_gpu,
+                                                                               *dimffnlin,
+                                                                               *npw,
+                                                                               *lmnmax,
+                                                                               *cplex,
+                                                                               four_pi_by_squcvol);
     }
   }
+
   else if((*choice)==2){
 
     block.x=64;
@@ -522,15 +570,24 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu
 
     double height_pi2_by_squcvol  = 2*(*pi)*four_pi_by_squcvol;
 
-    kernel_compute_nl_projections_and_derivates_choice2<<<grid,block,block.x*2*sizeof(double),0>>>(proj_gpu,dproj_gpu,
-                                                                                                   vectin_gpu,ph3din_gpu,
-                                                                                                   ffnlin_gpu,kpgin_gpu,
-                                                                                                   indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
-                                                                                                   *dimffnlin,*npw,*nb_proj_to_compute,
+    kernel_compute_nl_projections_and_derivates_choice2<<<grid,block,block.x*2*sizeof(double),0>>>(proj_gpu,
+                                                                                                   dproj_gpu,
+                                                                                                   vectin_gpu,
+                                                                                                   ph3din_gpu,
+                                                                                                   ffnlin_gpu,
+                                                                                                   kpgin_gpu,
+                                                                                                   indlmn_gpu,
+                                                                                                   atoms_gpu,
+                                                                                                   lmn_gpu,
+                                                                                                   typat_gpu,
+                                                                                                   *dimffnlin,
+                                                                                                   *npw,
+                                                                                                   *nb_proj_to_compute,
                                                                                                    *lmnmax,*cplex,
-                                                                                                   four_pi_by_squcvol,height_pi2_by_squcvol
-                                                                                                   );
+                                                                                                   four_pi_by_squcvol,
+                                                                                                   height_pi2_by_squcvol);
   }
+
   else if( ((*choice)==3) || ((*choice)==23) ){
 
     double two_pi = 2*(*pi);
@@ -545,12 +602,21 @@ extern "C" void gpu_compute_nl_projections_(double2 *proj_gpu,double2 *dproj_gpu
     grid.y = *nb_proj_to_compute;
 
     kernel_compute_nl_projections_and_derivates_all<<<grid,block,block.x*2*sizeof(double),0>>>(dproj_gpu,
-                                                                                               vectin_gpu,ph3din_gpu,
-                                                                                               ffnlin_gpu,kpgin_gpu,
-                                                                                               indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
-                                                                                               *dimffnlin,*npw,*nb_proj_to_compute,
-                                                                                               *lmnmax,*cplex,*choice,
-                                                                                               four_pi_by_squcvol,two_pi
-                                                                                               );
+                                                                                               vectin_gpu,
+                                                                                               ph3din_gpu,
+                                                                                               ffnlin_gpu,
+                                                                                               kpgin_gpu,
+                                                                                               indlmn_gpu,
+                                                                                               atoms_gpu,
+                                                                                               lmn_gpu,
+                                                                                               typat_gpu,
+                                                                                               *dimffnlin,
+                                                                                               *npw,
+                                                                                               *nb_proj_to_compute,
+                                                                                               *lmnmax,
+                                                                                               *cplex,
+                                                                                               *choice,
+                                                                                               four_pi_by_squcvol,
+                                                                                               two_pi);
   }
-}//end of routine gpu_compute_nl_projections_
+} //end of routine gpu_compute_nl_projections_

@@ -31,7 +31,8 @@
 /**********                                      *******************/
 /*******************************************************************/
 
-__device__ static inline void reduce_complex_64(volatile double *sh_vect_x,volatile double *sh_vect_y){
+__device__ static inline void reduce_complex_64(volatile double *sh_vect_x,volatile double *sh_vect_y)
+{
   //We have only 2 warps, the first reduce the real part, the second the imaginary one
   //No more synchronization is needed
   if(threadIdx.x < 32)
@@ -80,14 +81,44 @@ __device__ static inline  void reduce_double_32(volatile double *sh_vect){
     sh_vect[threadIdx.x] += sh_vect[threadIdx.x + 1];
 }
 
-__global__ void kernel_compute_proj_factor(
-    double2 *proj, double2 *dproj, double2 *val_ajlmn, double2 *val_sajlmn,
-    double *enl, double *sij, double *rdlmn, double *rdproj, const int *atindx1,
-    const unsigned char *nlmn, const int *indlmn,
-    const unsigned short int *atoms, const unsigned char *lmn,
-    const unsigned char *typat, const int paw_opt, const int dimenl1,
-    const int lmnmax, const int nb_projections, const int natoms,
-    const int choice, const int signs, const double lambda) {
+/**
+ * Kind of equivalent to opernlc_ylm.
+ *
+ * For a given wave function compute gxfac, dgxdtfac
+ *
+ *
+ * \param[in] proj : gx or cprjin
+ * \param[in] dproj :
+ * \param[out] val_ajlmn  : gxfac, reduced projected scalars related to Vnl (NL operator)
+ * \param[out] val_sajlmn : gxfac_sij, reduced projected scalars related to Sij (overlap)
+ * \param[in] enl
+ * \param[in] sij
+ * \param[out] rdlmn
+ * \param[out] rdproj
+ */
+__global__ void kernel_compute_proj_factor(const double2 *proj,
+                                           const double2 *dproj,
+                                           double2 *val_ajlmn,
+                                           double2 *val_sajlmn,
+                                           const double *enl,
+                                           const double *sij,
+                                           double *rdlmn,
+                                           double *rdproj,
+                                           const int *atindx1,
+                                           const unsigned char *nlmn,
+                                           const int *indlmn,
+                                           const unsigned short int *atoms,
+                                           const unsigned char *lmn,
+                                           const unsigned char *typat,
+                                           const int paw_opt,
+                                           const int dimenl1,
+                                           const int lmnmax,
+                                           const int nb_projections,
+                                           const int natoms,
+                                           const int choice,
+                                           const int signs,
+                                           const double lambda)
+{
 
   int iproj = threadIdx.x + blockIdx.x * blockDim.x;
   double2 a_jlmn, sa_jlmn;
@@ -99,8 +130,7 @@ __global__ void kernel_compute_proj_factor(
 
     // Get the couple (iatom,ilmn) of the thread's projection
     iatom = atoms[iproj]; // atoms's indice sorted by type
-    jatom = atindx1[iatom] -
-            1; // atoms's indice not sorted (-1 because of fortran cpu storage)
+    jatom = atindx1[iatom] - 1; // atoms's indice not sorted (-1 because of fortran cpu storage)
     jlmn = lmn[iproj];
     itypat = typat[iproj];
     int l = indlmn[0 + 6 * (jlmn + lmnmax * itypat)];
@@ -164,7 +194,7 @@ __global__ void kernel_compute_proj_factor(
     }
 
     // Cas choice==1 && signs==2 :  a_jlmn = a_jlmn*i^(-l)
-    if (choice == 1 or choice == 7) {
+    if (choice == 1) {
       tmp_loc = a_jlmn.x;
       switch (l % 4) {
         // case 0: //i^(-l) = 1 : Nothing to do
@@ -279,14 +309,15 @@ __global__ void kernel_compute_proj_factor(
 // threads of the blocks take care of a couple (iaton,ilmn)
 //The primary compute and the reduction are made over the threads of this block
 __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,double2 *vectout,double2 *svectout,
-					      double2 *val_ajlmn,double2 *val_sajlmn,
-					      double2 *ph3dout,double *ffnlout,
-					      const unsigned short int* atoms,
-					      const unsigned char *lmn,const unsigned char *typat,
-					      const int paw_opt,const int dimffnlout,const int npwout,
-					      const int nb_projections,const int lmnmax,
-					      const double four_pi_by_ucvol,const double lambda
-					      ){
+                                              double2 *val_ajlmn,double2 *val_sajlmn,
+                                              double2 *ph3dout,double *ffnlout,
+                                              const unsigned short int* atoms,
+                                              const unsigned char *lmn,const unsigned char *typat,
+                                              const int paw_opt,const int dimffnlout,const int npwout,
+                                              const int nb_projections,const int lmnmax,
+                                              const double four_pi_by_ucvol,const double lambda
+                                              )
+{
 
   //Definition of locals
   unsigned short int jpw,iatom;
@@ -342,20 +373,20 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,double2 *vectout,d
       //We ensure every access in shared mem is accomplished in the block
       __syncthreads();
       if( threadIdx.x <  decalage)
-	sh_vect_x[threadIdx.x] += sh_vect_x[threadIdx.x + decalage];
+        sh_vect_x[threadIdx.x] += sh_vect_x[threadIdx.x + decalage];
       else if(threadIdx.x >= (blockDim.x - decalage))
-	sh_vect_y[threadIdx.x] += sh_vect_y[threadIdx.x - decalage];
+        sh_vect_y[threadIdx.x] += sh_vect_y[threadIdx.x - decalage];
     }
     __syncthreads();
     //Step3: Thread 0 writes the results for the block (ie for the plane wave)
     if(threadIdx.x==0){
       if(paw_opt==2){
-	vect_loc.x = -lambda*vectin[jpw].x + four_pi_by_ucvol * sh_vect_x[0];
-	vect_loc.x = -lambda*vectin[jpw].y + four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
+        vect_loc.x = -lambda*vectin[jpw].x + four_pi_by_ucvol * sh_vect_x[0];
+        vect_loc.x = -lambda*vectin[jpw].y + four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
       }
       else{
-	vect_loc.x = four_pi_by_ucvol * sh_vect_x[0];
-	vect_loc.y = four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
+        vect_loc.x = four_pi_by_ucvol * sh_vect_x[0];
+        vect_loc.y = four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
       }
       vectout[jpw] = vect_loc;
     }
@@ -387,14 +418,15 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,double2 *vectout,d
 }//end of kernel_compute_nl_hamiltonian
 
 __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,double2 *vectout,double2 *svectout,
-						 double2 *val_ajlmn,double2 *val_sajlmn,
-						 double2 *ph3dout,double *ffnlout,
-						 const unsigned short int* atoms,
-						 const unsigned char *lmn,const unsigned char *typat,
-						 const int paw_opt,const int dimffnlout,const int npwout,
-						 const int nb_projections,const int lmnmax,
-						 const double four_pi_by_ucvol,const double lambda
-						 ){
+                                                 double2 *val_ajlmn,double2 *val_sajlmn,
+                                                 double2 *ph3dout,double *ffnlout,
+                                                 const unsigned short int* atoms,
+                                                 const unsigned char *lmn,const unsigned char *typat,
+                                                 const int paw_opt,const int dimffnlout,const int npwout,
+                                                 const int nb_projections,const int lmnmax,
+                                                 const double four_pi_by_ucvol,const double lambda
+                                                 )
+{
 
   //Definition of locals
   unsigned short int jpw,iatom;
@@ -487,10 +519,13 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,double2 *vectou
 
 
 //Accumulate previously calculate factors to get forces
-__global__ void kernel_compute_forces(double *rdlmn,double *enlout,
-				      const int decalage_enlout,
-				      const int natoms,const int lmnmax
-				      ){
+__global__ void kernel_compute_forces(double *rdlmn,
+                                      double *enlout,
+                                      const int decalage_enlout,
+                                      const int natoms,
+                                      const int lmnmax
+                                      )
+{
 
   extern __shared__ double enl_sh_sum[];
   enl_sh_sum[threadIdx.x] = 0.;
@@ -586,100 +621,145 @@ __global__ void kernel_stress_convert(double *gprimd,double *d_enlk,double *enlo
 /**********                                      *******************/
 /*******************************************************************/
 
-extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,double2 *dproj_gpu,
-					    double2 *vectin_gpu,
-					    double2 *vectout_gpu,double2 *svectout_gpu,
-					    double2 *val_ajlmn_gpu,double2 *val_sajlmn_gpu,
-					    double2 *ph3dout_gpu,double *ffnlout_gpu,
-					    double *rdlmn_gpu, double *rdproj_gpu,
-					    double *enlout_gpu, double *d_enlk_gpu,
-					    double *enl_gpu,double *sij_gpu,double *gprimd_gpu,
-					    int *atindx1_gpu,unsigned char *nlmn_gpu,
-					    int *indlmn_gpu,unsigned short int *atoms_gpu,
-					    unsigned char *lmn_gpu, unsigned char *typat_gpu,
-					    int *paw_opt,int *dimffnlout,int *dimenl1,
-					    int *npw,int *nb_projections,int *lmnmax,
-					    int *natoms, int *choice, int *signs,
-					    const double *four_pi_by_ucvol,const double *lambda
-					    ){
+extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
+                                            double2 *dproj_gpu,
+                                            double2 *vectin_gpu,
+                                            double2 *vectout_gpu,
+                                            double2 *svectout_gpu,
+                                            double2 *val_ajlmn_gpu,
+                                            double2 *val_sajlmn_gpu,
+                                            double2 *ph3dout_gpu,
+                                            double *ffnlout_gpu,
+                                            double *rdlmn_gpu,
+                                            double *rdproj_gpu,
+                                            double *enlout_gpu,
+                                            double *d_enlk_gpu,
+                                            double *enl_gpu,
+                                            double *sij_gpu,
+                                            double *gprimd_gpu,
+                                            int *atindx1_gpu,
+                                            unsigned char *nlmn_gpu,
+                                            int *indlmn_gpu,
+                                            unsigned short int *atoms_gpu,
+                                            unsigned char *lmn_gpu,
+                                            unsigned char *typat_gpu,
+                                            int *paw_opt,
+                                            int *dimffnlout,
+                                            int *dimenl1,
+                                            int *npw,
+                                            int *nb_projections,
+                                            int *lmnmax,
+                                            int *natoms,
+                                            int *choice,
+                                            int *signs,
+                                            const double *four_pi_by_ucvol,
+                                            const double *lambda)
+{
 
   /************* Accumulate the projection factors ***********************/
   //Configuration of the cuda grid
   dim3 grid,block;
-  block.x= 64;
-  grid.x=((*nb_projections) + 64 - 1)/64 ;
+  block.x = 64;
+  grid.x = ((*nb_projections) + block.x - 1) / block.x ;
 
-  double2 *effective_proj_gpu=proj_gpu;
   //If choice = 3 or 23 proj is stored in dproj
-  if( ((*choice)==3) || ((*choice)==23) )
-    effective_proj_gpu=dproj_gpu;
+  // choice = 3 or 23 => compute 1st derivative with respect to strain or atomic positions and strains
+  const double2 *effective_proj_gpu = ((*choice)==3) || ((*choice)==23) ?
+    dproj_gpu :
+    proj_gpu;
 
-  kernel_compute_proj_factor<<<grid,block>>>(effective_proj_gpu,dproj_gpu,
-					     val_ajlmn_gpu,val_sajlmn_gpu,
-					     enl_gpu,sij_gpu,
-					     rdlmn_gpu,rdproj_gpu,
-					     atindx1_gpu,nlmn_gpu,
-					     indlmn_gpu,atoms_gpu,lmn_gpu,typat_gpu,
-					     *paw_opt,*dimenl1,*lmnmax,
-					     *nb_projections,*natoms,
-					     *choice,*signs,*lambda
-					     );
+  kernel_compute_proj_factor<<<grid,block>>>(effective_proj_gpu,
+                                             dproj_gpu,
+                                             val_ajlmn_gpu,
+                                             val_sajlmn_gpu,
+                                             enl_gpu,
+                                             sij_gpu,
+                                             rdlmn_gpu,
+                                             rdproj_gpu,
+                                             atindx1_gpu,
+                                             nlmn_gpu,
+                                             indlmn_gpu,
+                                             atoms_gpu,
+                                             lmn_gpu,
+                                             typat_gpu,
+                                             *paw_opt,
+                                             *dimenl1,
+                                             *lmnmax,
+                                             *nb_projections,
+                                             *natoms,
+                                             *choice,
+                                             *signs,
+                                             *lambda);
 
   /************* Compute output needed with signs ***********************/
 
-  if( ((*choice)==1 || (*choice)==7) && (*signs==2)) {
-    //One thread in block by projection and plane waves split amongs blocks
-    block.x = 64;
-    grid.x = 1;
-    grid.y=*npw;
+  if( ((*choice)==1 || (*choice)==7) && (*signs==2))
+    {
+      //One thread in block by projection and plane waves split amongs blocks
+      block.x = 64;
+      grid.x = 1;
+      grid.y=*npw;
 
-    //kernel_compute_nl_hamiltonian<<<grid,block,block.x*2*sizeof(double),0>>>(vectin_gpu,vectout_gpu,svectout_gpu,
-    kernel_compute_nl_hamiltonian_64<<<grid,block,block.x*2*sizeof(double),0>>>(vectin_gpu,vectout_gpu,svectout_gpu,
-									       val_ajlmn_gpu,val_sajlmn_gpu,
-									       ph3dout_gpu,ffnlout_gpu,
-									       atoms_gpu,lmn_gpu,typat_gpu,
-									       *paw_opt,*dimffnlout,*npw,
-									       *nb_projections,*lmnmax,
-									       *four_pi_by_ucvol,*lambda
-									       );
+      //kernel_compute_nl_hamiltonian<<<grid,block,block.x*2*sizeof(double),0>>>(vectin_gpu,vectout_gpu,svectout_gpu,
+      kernel_compute_nl_hamiltonian_64<<<grid,block,block.x*2*sizeof(double),0>>>(vectin_gpu,
+                                                                                  vectout_gpu,
+                                                                                  svectout_gpu,
+                                                                                  val_ajlmn_gpu,
+                                                                                  val_sajlmn_gpu,
+                                                                                  ph3dout_gpu,
+                                                                                  ffnlout_gpu,
+                                                                                  atoms_gpu,
+                                                                                  lmn_gpu,
+                                                                                  typat_gpu,
+                                                                                  *paw_opt,
+                                                                                  *dimffnlout,
+                                                                                  *npw,
+                                                                                  *nb_projections,
+                                                                                  *lmnmax,
+                                                                                  *four_pi_by_ucvol,
+                                                                                  *lambda);
 
-  }//End choice==1,signs==2
+    } //End choice==1,signs==2
 
-  else {
-    //Compute forces
-    if( (((*choice)==2)&&(*signs==1)) || ((*choice)==23) ) {
-      //Threads In blocks will take care of lmnmax
-      block.x= 32;
+  else
+    {
+      //Compute forces
+    if( (((*choice)==2)&&(*signs==1)) || ((*choice)==23) )
+      {
+        //Threads In blocks will take care of lmnmax
+        block.x= 32;
 
-      grid.x= 3; //Nb alpha directions
-      grid.y= *natoms ;
+        grid.x= 3; //Nb alpha directions
+        grid.y= *natoms ;
 
-      int decalage_enlout_gpu = 0;
-      if( (*choice)==23)
-	decalage_enlout_gpu = 6;
+        int decalage_enlout_gpu = 0;
+        if( (*choice)==23)
+          decalage_enlout_gpu = 6;
 
-      kernel_compute_forces<<<grid,block,block.x*sizeof(double),0>>>(rdlmn_gpu,enlout_gpu,
-								     decalage_enlout_gpu,
-								     *natoms,*lmnmax);
-    }//End choice2 / signs1 or choice 23
+        kernel_compute_forces<<<grid,block,block.x*sizeof(double),0>>>(rdlmn_gpu,enlout_gpu,
+                                                                       decalage_enlout_gpu,
+                                                                       *natoms,*lmnmax);
+      } //End choice2 / signs1 or choice 23
 
     //Compute stress tensor
-    if( (((*choice)==3) && ((*signs)==1))  || ((*choice)==23) ) {
+    if( (((*choice)==3) && ((*signs)==1))  || ((*choice)==23) )
+      {
 
-      grid.x= 7; //Nb alphabeta directions
-      block.x= 512; // Enough threads to reduce on projection
-      while(block.x > (unsigned int)(*nb_projections)){
-	block.x /= 2;
-      }
-      block.x=64;
+        grid.x= 7; //Nb alphabeta directions
+        block.x= 512; // Enough threads to reduce on projection
+        while(block.x > (unsigned int)(*nb_projections)){
+        block.x /= 2;
+        }
+        block.x=64;
 
-      kernel_reduce_stress<<<grid,block,block.x*sizeof(double),0>>>(rdproj_gpu,d_enlk_gpu,*nb_projections);
+        kernel_reduce_stress<<<grid,block,block.x*sizeof(double),0>>>(rdproj_gpu,d_enlk_gpu,*nb_projections);
 
-      kernel_stress_convert<<<6,9>>>(gprimd_gpu,d_enlk_gpu,enlout_gpu);
+        kernel_stress_convert<<<6,9>>>(gprimd_gpu,d_enlk_gpu,enlout_gpu);
 
     }
 
-  }//end choice!=1
-}//End of gpu_compute_nl_hamiltonian
+  } //end choice!=1
+
+} //End of gpu_compute_nl_hamiltonian
 
 //***
