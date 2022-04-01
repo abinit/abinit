@@ -181,7 +181,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 !  acell(:)=acell0(:)*vin(3*natom+1)/(ucvol0**third)
    acell(:)=acell0(:)*vin(3*natom+1)
 
- else 
+ else if (optcell>=2)then
 
    scaling(:,:)=0.0_dp
    scaling(1,1)=1.0_dp ; scaling(2,2)=1.0_dp ; scaling(3,3)=1.0_dp
@@ -214,9 +214,6 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
      if (abs(scaling(2,3)) <1.E-14) scaling(2,3)=0.0_dp
      scaling(1,3)=vin(3*natom+3)
      if (abs(scaling(1,3)) <1.E-14) scaling(1,3)=0.0_dp
-     ! CP test
-     write(*,*) '--CP: scaling = ', scaling(1,3), scaling(2,3), scaling(3,3)
-     ! End CP test
    else if(optcell==7)then
      scaling(2,2)=vin(3*natom+2) ; scaling(3,3)=vin(3*natom+3)
      scaling(2,3)=vin(3*natom+1) ; scaling(3,2)=vin(3*natom+1)
@@ -227,7 +224,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
      scaling(1,1)=vin(3*natom+1) ; scaling(2,2)=vin(3*natom+2)
      scaling(1,2)=vin(3*natom+3) ; scaling(2,1)=vin(3*natom+3)
    end if
-   if(optcell==2 .or. optcell==3 .or. optcell>=7)then
+   if(optcell<=3 .or. optcell>=7)then
      do ii=1,3
        do jj=1,3
          rprimd(ii,jj)=0.0_dp
