@@ -69,6 +69,9 @@ module m_orbmag
   public :: orbmag_tt
 
   private :: gs_eigenvalues
+  private :: m_p2by2
+  private :: m_Anp
+  private :: apply_m_term_k
   private :: berry_curvature_k
   private :: om_pw_k
   private :: om_onsite_d0_k
@@ -146,7 +149,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !Local
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
- integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat
+ integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  integer,parameter :: ibcpw=1,ibcq=2,ibcd=3,iompw=4,iompw0=5,iomlr=6,iomlmb=7,iomanp=8
@@ -168,6 +171,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
+ complex(dpc),allocatable :: mp2(:,:,:),mpan(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
  !----------------------------------------------
@@ -203,6 +207,11 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      end if
    end do
  end do
+ ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
+ call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
+
+ ABI_MALLOC(kg_k,(3,dtset%mpw))
+ ABI_MALLOC(kinpw,(dtset%mpw))
 
  ncpgr = 3
  ABI_MALLOC(dimlmn,(dtset%natom))
@@ -255,11 +264,14 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
  end if
 
- ABI_MALLOC(kg_k,(3,dtset%mpw))
- ABI_MALLOC(kinpw,(dtset%mpw))
+ !========  compute onsite terms ==========
 
- ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
- call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,xred)
+ lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
+ ABI_MALLOC(mp2,(lmn2max,dtset%natom,3))
+ call m_p2by2(dtset,lmn2max,mp2,pawrad,pawtab)
+
+ ABI_MALLOC(mpan,(lmn2max,dtset%natom,3))
+ call m_Anp(dtset,lmn2max,mpan,pawang,pawrad,pawtab)
 
  icg = 0
  ikg = 0
@@ -405,20 +417,18 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(:,:,:,iompw0) = orbmag_terms(:,:,:,iompw0) + trnrm*ompw_k
 
    !--------------------------------------------------------------------------------
-   ! onsite LR
+   ! onsite <phi|r_b p^2/2 r_g>
    !--------------------------------------------------------------------------------
-   call onsite_LR_k(atindx,com,cprj_k,dtset,nband_k,ompw_k,pawrad,pawtab)
+   call apply_m_term_k(atindx,com,cprj_k,dtset,lmn2max,mp2,nband_k,ompw_k,pawtab)
    orbmag_terms(:,:,:,iomlr) = orbmag_terms(:,:,:,iomlr) + trnrm*ompw_k
    
    !--------------------------------------------------------------------------------
    ! onsite <phi|r_b p.A0 r_g> 
    !--------------------------------------------------------------------------------
-   call onsite_ANp_k(atindx,com,cprj_k,dtset,nband_k,ompw_k,pawang,pawrad,pawtab)
+   call apply_m_term_k(atindx,com,cprj_k,dtset,lmn2max,mpan,nband_k,ompw_k,pawtab)
    orbmag_terms(:,:,:,iomanp) = orbmag_terms(:,:,:,iomanp) + trnrm*ompw_k
 
-
    ABI_FREE(ompw_k)
-
 
    icg = icg + npw_k*nband_k
    ikg = ikg + npw_k
@@ -516,6 +526,9 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ABI_FREE(cprj1_k)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
+
+ ABI_FREE(mp2)
+ ABI_FREE(mpan)
 
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
@@ -1100,6 +1113,184 @@ subroutine lamb_core(atindx,dtset,omlamb,pawtab)
 end subroutine lamb_core
 !!***
 
+!!****f* ABINIT/m_p2by2
+!! NAME
+!! m_p2by2
+!!
+!! FUNCTION
+!! Compute onsite r_b p^2/2 r_g - r_g p^2/2 r_b == -i <LR> 
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine m_p2by2(dtset,lmn2max,lr,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  complex(dpc),intent(out) :: lr(lmn2max,dtset%natom,3)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size
+  real(dp) :: intg
+  complex(dpc) :: cme,orbl_me
+
+  !arrays
+  real(dp),allocatable :: ff(:)
+
+!--------------------------------------------------------------------
+
+  lr=czero
+  do adir = 1, 3
+    do itypat=1,dtset%ntypat
+      mesh_size=pawtab(itypat)%mesh_size
+      ABI_MALLOC(ff,(mesh_size))
+      do klmn=1, pawtab(itypat)%lmn2_size
+        kln = pawtab(itypat)%indklmn(2,klmn) 
+
+        ilmn = pawtab(itypat)%indklmn(7,klmn)
+        il=pawtab(itypat)%indlmn(1,ilmn)
+        im=pawtab(itypat)%indlmn(2,ilmn)
+
+        jlmn = pawtab(itypat)%indklmn(8,klmn)
+        jl=pawtab(itypat)%indlmn(1,jlmn)
+        jm=pawtab(itypat)%indlmn(2,jlmn)
+
+        if ( il /= jl ) cycle ! <l'm'|L|lm> = 0 if l' /= l
+        if ( il == 0 ) cycle ! <00|L|00> = 0
+
+        ! compute <L_dir>
+        call slxyzs(il,im,adir,jl,jm,orbl_me)
+
+        if(abs(orbl_me).GT.tol8)then
+          ff(1:mesh_size) = pawtab(itypat)%phiphj(1:mesh_size,kln)-pawtab(itypat)%tphitphj(1:mesh_size,kln)
+          call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+          call simp_gen(intg,ff,pawrad(itypat))
+          ! store result in all atoms of this type
+          cme = -j_dpc*orbl_me*intg
+          do iat=1,dtset%natom
+            if(dtset%typat(iat) .EQ. itypat) then
+              lr(klmn,iat,adir) = cme
+            end if
+          end do
+        end if ! end check that |L_dir| > 0, otherwise ignore term
+      end do ! end loop over klmn
+      ABI_FREE(ff)
+    end do ! end loop over atoms
+  end do ! end loop over adir
+ 
+end subroutine m_p2by2
+
+!!****f* ABINIT/apply_m_term_k
+!! NAME
+!! apply_m_term_k
+!!
+!! FUNCTION
+!! Compute contributions due to onsite r_b H r_g - r_g H r_b to orbital magnetization at given k point
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine apply_m_term_k(atindx,cpre,cprj_k,dtset,lmn2max,mterm,nband_k,omm,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2max,nband_k
+  complex(dpc),intent(in) :: cpre
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(out) :: omm(2,nband_k,3)
+  complex(dpc),intent(in) :: mterm(lmn2max,dtset%natom,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
+  complex(dpc) :: cpb,cpk,cme
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+  omm = zero 
+  do nn = 1, nband_k
+    do adir = 1, 3
+      do iat=1,dtset%natom
+        iatom = atindx(iat)
+        itypat = dtset%typat(iat)
+        do klmn=1,pawtab(itypat)%lmn2_size
+          ilmn = pawtab(itypat)%indklmn(7,klmn)
+          jlmn = pawtab(itypat)%indklmn(8,klmn)
+          cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+          cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
+
+          cme = conjg(cpb)*mterm(klmn,iat,adir)*cpk
+          if(ilmn /= jlmn) then
+            cme = cme - cpb*conjg(mterm(klmn,iat,adir))*conjg(cpk)
+          end if
+          omm(1,nn,adir)=omm(1,nn,adir) + real(cpre*cme)
+          omm(2,nn,adir)=omm(2,nn,adir) + aimag(cpre*cme)
+
+        end do ! end loop over klmn
+      end do ! end loop over atoms
+    end do ! end loop over adir
+  end do ! end loop over nn
+ 
+end subroutine apply_m_term_k
+
 !!****f* ABINIT/onsite_LR_k
 !! NAME
 !! onsite_LR_k 
@@ -1199,6 +1390,156 @@ subroutine onsite_LR_k(atindx,cpre,cprj_k,dtset,nband_k,omlk,pawrad,pawtab)
   end do ! end loop over nn
  
 end subroutine onsite_LR_k
+
+!!****f* ABINIT/m_Anp
+!! NAME
+!! m_Anp
+!!
+!! FUNCTION
+!! Compute onsite term arising from <phi|r_b A0.p r_g|phi>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!      pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_getdim,xmpi_sum
+!!
+!! SOURCE
+
+subroutine m_Anp(dtset,lmn2_max,mpan,pawang,pawrad,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: lmn2_max
+  type(pawang_type),intent(in) :: pawang
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  complex(dpc),intent(out) :: mpan(lmn2_max,dtset%natom,3)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,gint,iat,itypat,klmn,klm,kln,lpmp,mesh_size,nn
+  real(dp) :: a2,d00,d20,dij,intg
+  complex(dpc) :: cme
+
+  !arrays
+  real(dp),allocatable :: ff(:)
+
+  ! ***********************************************************************
+
+  a2 = FineStructureConstant2
+  d00 = two_thirds*sqrt(four_pi)
+  d20 = sqrt(four_pi/45.0D0)
+  dij = sqrt(four_pi/15.0D0)
+
+  mpan= czero
+
+  do adir = 1, 3
+    do iat=1,dtset%natom
+      itypat=dtset%typat(iat)
+      mesh_size=pawtab(itypat)%mesh_size
+      ABI_MALLOC(ff,(mesh_size))
+      do klmn=1,pawtab(itypat)%lmn2_size
+        kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+        klm = pawtab(itypat)%indklmn(1,klmn) ! need this for gaunt integral selection
+        ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r
+        ff(2:mesh_size)=(pawtab(itypat)%phiphj(2:mesh_size,kln) - &
+             &           pawtab(itypat)%tphitphj(2:mesh_size,kln)) / &
+             &           pawrad(itypat)%rad(2:mesh_size)
+        call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+        call simp_gen(intg,ff,pawrad(itypat))
+
+        ! accumulate contributions to cme for this pair of basis states, atom, and direction adir
+
+        cme = czero
+
+        ! contribution from S00
+        lpmp=1
+        gint = pawang%gntselect(lpmp,klm)
+        if (gint > 0) then
+          cme = cme + (-j_dpc)*d00*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(adir,iat)
+        end if
+ 
+        ! all other contributions involve Gaunt integrals of S_{2m}
+        do lpmp = 5, 9
+          ! if the basis is very small (only s waves) there can't be any Gaunt coupling to d functions
+          ! and asking for it would crash the code
+          if (size(pawang%gntselect(:,klm)) .LT. 5) exit
+          gint = pawang%gntselect(lpmp,klm)
+          if (gint > 0) then
+            select case (lpmp)
+            case (5) ! S_{2,-2} contributes to xy term
+              select case (adir)
+              case (1)
+                cme = cme + (j_dpc)*dij*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(2,iat)
+              case (2)
+                cme = cme + (j_dpc)*dij*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(1,iat)
+              end select
+            case (6) ! S_{2,-1} contributes to yz term
+              select case (adir)
+              case (2)
+                cme = cme + (j_dpc)*dij*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(3,iat)
+              case (3)
+                cme = cme + (j_dpc)*dij*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(2,iat)
+              end select
+            case (7) ! S_{2,0} contributes to xx, yy, and zz terms
+              select case (adir)
+                case (1)
+                  cme = cme + (-j_dpc)*d20*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(1,iat)
+                case (2)
+                  cme = cme + (-j_dpc)*d20*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(2,iat)
+                case (3)
+                  cme = cme + (-j_dpc)*d20*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(3,iat)
+              end select
+            case (8) ! S_{2,+1} contributes to xz term
+              select case (adir)
+              case (1)
+                cme = cme + (j_dpc)*dij*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(3,iat)
+              case (3)
+                cme = cme + (j_dpc)*dij*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(1,iat)
+              end select
+            case (9) ! S_{2,2} contributes to xx, yy terms
+               select case (adir)
+               case (1)
+                 cme = cme + (-j_dpc)*(-dij)*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(1,iat)
+               case (2)
+                 cme = cme + (-j_dpc)*(+dij)*pawang%realgnt(gint)*intg*a2*dtset%nucdipmom(2,iat)
+               end select
+            end select
+          end if ! end check on nonzero gaunt integral
+        end do ! end loop over lp,mp
+        mpan(klmn,iat,adir) = cme
+
+      end do ! end loop over klmn
+ 
+      ABI_FREE(ff)
+    end do ! end loop over atoms
+  end do ! end loop over adir
+
+end subroutine m_Anp
+!!***
+
 
 !!****f* ABINIT/onsite_ANp_k
 !! NAME
@@ -1464,7 +1805,7 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '               onsite D0 : ',(orbmag_trace(1,adir,iompw0),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '       <u|p>1/2 L_R<p|u> : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
+   write(message,'(a,3es16.8)') ' <u|p>r_b p^2/2 r_g<p|u> : ',(orbmag_trace(1,adir,iomlr),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' <u|p>r_b A0.p r_g <p|u> : ',(orbmag_trace(1,adir,iomanp),adir=1,3)
    call wrtout(ab_out,message,'COLL')
@@ -1498,7 +1839,7 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '               onsite D0 : ',(orbmag_terms(1,iband,adir,iompw0),adir=1,3)
      call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '       <u|p>1/2 L_R<p|u> : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
+     write(message,'(a,3es16.8)') ' <u|p>r_b p^2/2 r_g<p|u> : ',(orbmag_terms(1,iband,adir,iomlr),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') ' <u|p>r_b A0.p r_g <p|u> : ',(orbmag_terms(1,iband,adir,iomanp),adir=1,3)
      call wrtout(ab_out,message,'COLL')
