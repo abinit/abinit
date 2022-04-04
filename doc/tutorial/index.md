@@ -143,6 +143,9 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
 
   * [The tutorial on cut3d](cut3d) deals with the use of the CUT3D utility to analyse wavefunctions and densities.
 
+  * [The tutorial on aTDEP (aTDEP1)](atdep1) shows how to capture anharmonicities by means of an 
+    harmonic Temperature Dependent Effective Potential (TDEP).
+
   * [The tutorial on the fold2bloch postprocessor](fold2bloch) deals with the use of the fold2Bloch utility
     to unfold band structures from supercell calculations.
 

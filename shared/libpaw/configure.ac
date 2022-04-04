@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2021 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
+# Copyright (C) 2017-2022 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # Process this file with autoconf to produce a configure script.

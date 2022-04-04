@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h20 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t14/t14.in
-- output file    -> t14.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v6_t14/t14.abi
+- output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
 
@@ -34,7 +34,7 @@
 -    mband =          11        mffmem =           1         mkmem =           2
        mpw =         302          nfft =        6480          nkpt =           2
 ================================================================================
-P This job should need less than                       3.512 Mbytes of memory.
+P This job should need less than                       3.696 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.103 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.103 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =          33
        mpw =         306          nfft =        6480          nkpt =          33
 ================================================================================
-P This job should need less than                       3.756 Mbytes of memory.
+P This job should need less than                       3.940 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.697 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      1.697 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =          50
        mpw =         304          nfft =        6480          nkpt =          50
 ================================================================================
-P This job should need less than                       5.431 Mbytes of memory.
+P This job should need less than                       5.615 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.553 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 ================================================================================
@@ -424,8 +424,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.11034
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -442,8 +442,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.853613
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/05b.soft_tm
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/05b.soft_tm
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/05b.soft_tm
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/05b.soft_tm
 -  Troullier-Martins-Fermi psp for element  B         dim jui 18 17:59:39 CEST 2004
 -  5.00000   5.00000     40425                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -634,13 +634,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.64E-09  2.07E-09  5.54E-05
  -3.2174E+00 -3.0579E+00 -9.6119E-04  1.6127E-01  2.6297E-01  2.6297E-01
   4.4712E-01  4.9213E-01  4.9213E-01  5.9431E-01  8.1848E-01
-  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  5.53712E-05
  Non-SCF case, kpt    2 (  0.07143  0.00000  0.00000), residuals and eigenvalues=
   8.28E-10  1.03E-09  8.67E-10  2.40E-09  5.37E-09  2.26E-09  2.51E-09  1.48E-09
   3.59E-09  4.53E-09  1.11E-06
  -3.1978E+00 -3.0920E+00  2.1968E-03  1.6446E-01  2.5399E-01  2.5403E-01
   4.3226E-01  5.0528E-01  5.2563E-01  5.8520E-01  7.7682E-01
-  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  1.11275E-06
  Non-SCF case, kpt    3 (  0.14286  0.00000  0.00000), residuals and eigenvalues=
   1.58E-09  7.79E-09  1.74E-09  1.23E-09  2.09E-09  8.66E-10  2.89E-09  1.52E-09
   5.42E-09  5.88E-09  3.50E-09
@@ -656,37 +654,31 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.49E-09  4.51E-07  5.02E-09
  -3.2004E+00 -3.1338E+00  2.7276E-02  1.8668E-01  1.9886E-01  2.1006E-01
   4.3765E-01  4.7524E-01  6.1202E-01  6.4411E-01  6.5668E-01
-  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  4.51353E-07
  Non-SCF case, kpt    6 (  0.35714  0.00000  0.00000), residuals and eigenvalues=
   7.10E-10  7.57E-10  8.87E-10  1.62E-09  1.59E-09  8.51E-09  2.92E-09  2.66E-09
   1.04E-09  1.29E-08  1.10E-04
  -3.2021E+00 -3.1344E+00  4.0428E-02  1.6414E-01  1.8506E-01  2.3429E-01
   4.3110E-01  4.5628E-01  5.7509E-01  6.5605E-01  7.0165E-01
-  prteigrs : nnsclo,ikpt=   50    6 max resid (incl. the buffer)=  1.10408E-04
  Non-SCF case, kpt    7 (  0.42857  0.00000  0.00000), residuals and eigenvalues=
   1.14E-09  1.64E-09  6.01E-09  8.37E-09  3.10E-09  4.88E-09  1.53E-09  3.92E-09
   4.40E-09  2.02E-08  7.59E-07
  -3.2250E+00 -3.1865E+00  4.9963E-02  1.4681E-01  1.7517E-01  2.5863E-01
   3.9275E-01  4.7342E-01  5.4724E-01  6.4476E-01  7.3933E-01
-  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  7.58801E-07
  Non-SCF case, kpt    8 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   9.80E-10  1.48E-09  2.30E-09  7.94E-10  3.52E-09  2.07E-09  2.33E-09  9.10E-09
   7.47E-09  7.67E-08  2.04E-02
  -3.1856E+00 -3.1760E+00  5.4160E-02  1.4415E-01  1.7326E-01  2.7246E-01
   3.7630E-01  4.8160E-01  5.3824E-01  6.3972E-01  7.5367E-01
-  prteigrs : nnsclo,ikpt=   50    8 max resid (incl. the buffer)=  2.04164E-02
  Non-SCF case, kpt    9 (  0.45833  0.08333  0.00000), residuals and eigenvalues=
   2.09E-09  2.77E-09  4.60E-09  8.31E-09  2.86E-09  3.66E-09  4.66E-09  3.62E-09
   2.69E-09  2.61E-08  2.06E-06
  -3.2136E+00 -3.1845E+00  5.3555E-02  1.4266E-01  1.7177E-01  2.7458E-01
   3.7356E-01  4.8573E-01  5.3226E-01  6.3171E-01  7.0194E-01
-  prteigrs : nnsclo,ikpt=   50    9 max resid (incl. the buffer)=  2.05930E-06
  Non-SCF case, kpt   10 (  0.41667  0.16667  0.00000), residuals and eigenvalues=
   8.07E-10  1.45E-09  3.86E-09  6.27E-09  3.54E-09  7.13E-09  3.52E-09  4.51E-09
   6.05E-09  2.95E-09  6.60E-08
  -3.1805E+00 -3.1714E+00  5.3998E-02  1.4639E-01  1.6768E-01  2.8689E-01
   3.6655E-01  4.9747E-01  5.2277E-01  6.1650E-01  6.5850E-01
-  prteigrs : nnsclo,ikpt=   50   10 max resid (incl. the buffer)=  6.60275E-08
  Non-SCF case, kpt   11 (  0.37500  0.25000  0.00000), residuals and eigenvalues=
   1.08E-09  1.77E-09  1.02E-09  1.76E-09  3.18E-09  9.05E-09  7.80E-09  3.98E-09
   8.15E-09  5.45E-09  5.02E-09
@@ -712,85 +704,71 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.42E-09  1.89E-08  3.65E-08
  -3.1664E+00 -3.1664E+00  6.6586E-02  1.7463E-01  1.7463E-01  2.5793E-01
   2.5793E-01  4.6653E-01  6.4206E-01  6.4206E-01  6.8447E-01
-  prteigrs : nnsclo,ikpt=   50   15 max resid (incl. the buffer)=  3.65354E-08
  Non-SCF case, kpt   16 (  0.33333  0.33333  0.40000), residuals and eigenvalues=
   2.16E-09  4.81E-09  3.08E-09  3.60E-09  2.79E-09  2.07E-09  4.39E-09  1.97E-09
   6.23E-09  2.24E-08  6.05E-07
  -3.1655E+00 -3.1655E+00  7.2277E-02  1.8971E-01  1.8971E-01  2.3158E-01
   2.3158E-01  4.3993E-01  6.9160E-01  7.0833E-01  7.0834E-01
-  prteigrs : nnsclo,ikpt=   50   16 max resid (incl. the buffer)=  6.04683E-07
  Non-SCF case, kpt   17 (  0.33333  0.33333  0.50000), residuals and eigenvalues=
   1.33E-09  7.63E-09  1.72E-09  2.24E-09  5.97E-09  2.79E-09  5.20E-09  3.99E-09
   8.38E-09  2.30E-06  1.42E-04
  -3.1289E+00 -3.1289E+00  7.4608E-02  2.1015E-01  2.1015E-01  2.1037E-01
   2.1037E-01  4.3064E-01  6.9418E-01  7.6451E-01  7.6469E-01
-  prteigrs : nnsclo,ikpt=   50   17 max resid (incl. the buffer)=  1.42116E-04
  Non-SCF case, kpt   18 (  0.37500  0.25000  0.50000), residuals and eigenvalues=
   9.87E-09  7.21E-10  3.80E-09  2.09E-09  6.25E-09  1.18E-09  6.91E-09  5.98E-09
   9.98E-09  8.82E-06  8.58E-06
  -3.1536E+00 -3.1211E+00  7.7705E-02  1.8525E-01  2.0268E-01  2.1350E-01
   2.3041E-01  4.4395E-01  6.9461E-01  7.5247E-01  7.6458E-01
-  prteigrs : nnsclo,ikpt=   50   18 max resid (incl. the buffer)=  8.82083E-06
  Non-SCF case, kpt   19 (  0.41667  0.16667  0.50000), residuals and eigenvalues=
   1.47E-09  1.07E-09  7.26E-09  9.26E-09  9.32E-09  6.19E-09  5.86E-09  8.05E-09
   3.65E-09  4.37E-07  2.84E-06
  -3.1769E+00 -3.1462E+00  8.2070E-02  1.6755E-01  1.9206E-01  2.1727E-01
   2.3802E-01  4.8304E-01  6.9501E-01  7.3974E-01  7.4265E-01
-  prteigrs : nnsclo,ikpt=   50   19 max resid (incl. the buffer)=  2.83772E-06
  Non-SCF case, kpt   20 (  0.45833  0.08333  0.50000), residuals and eigenvalues=
   2.22E-09  1.80E-09  7.02E-09  3.60E-09  1.08E-09  7.31E-09  2.61E-09  9.41E-09
   9.20E-09  4.56E-08  6.82E-07
  -3.1749E+00 -3.1475E+00  8.7087E-02  1.5711E-01  1.8476E-01  2.2287E-01
   2.3909E-01  5.4040E-01  6.8369E-01  6.9566E-01  7.3677E-01
-  prteigrs : nnsclo,ikpt=   50   20 max resid (incl. the buffer)=  6.81885E-07
  Non-SCF case, kpt   21 (  0.50000  0.00000  0.50000), residuals and eigenvalues=
   7.50E-10  7.89E-10  4.86E-09  7.49E-09  2.24E-09  5.19E-09  1.29E-09  8.13E-09
   6.10E-09  1.84E-08  9.24E-07
  -3.2000E+00 -3.1562E+00  8.7666E-02  1.5324E-01  1.8153E-01  2.2075E-01
   2.3873E-01  5.9498E-01  6.2676E-01  6.9476E-01  7.3357E-01
-  prteigrs : nnsclo,ikpt=   50   21 max resid (incl. the buffer)=  9.24210E-07
  Non-SCF case, kpt   22 (  0.42857  0.00000  0.50000), residuals and eigenvalues=
   1.95E-09  1.55E-09  1.25E-09  6.08E-09  2.23E-09  5.36E-09  7.74E-09  6.91E-09
   9.28E-09  1.45E-07  5.32E-06
  -3.1810E+00 -3.1421E+00  9.1145E-02  1.3503E-01  1.8473E-01  2.2387E-01
   2.6259E-01  5.9894E-01  6.2978E-01  6.8335E-01  7.2685E-01
-  prteigrs : nnsclo,ikpt=   50   22 max resid (incl. the buffer)=  5.31931E-06
  Non-SCF case, kpt   23 (  0.35714  0.00000  0.50000), residuals and eigenvalues=
   1.58E-09  1.10E-09  5.13E-09  4.45E-09  2.26E-09  2.57E-09  6.55E-09  7.28E-09
   7.77E-09  3.07E-08  1.16E-05
  -3.1932E+00 -3.1800E+00  9.4117E-02  1.0274E-01  1.9322E-01  2.2146E-01
   3.0936E-01  6.0854E-01  6.3880E-01  6.4683E-01  7.0939E-01
-  prteigrs : nnsclo,ikpt=   50   23 max resid (incl. the buffer)=  1.15686E-05
  Non-SCF case, kpt   24 (  0.28571  0.00000  0.50000), residuals and eigenvalues=
   8.66E-09  9.76E-10  1.59E-09  6.05E-09  6.43E-09  3.99E-09  5.78E-09  8.68E-09
   4.84E-09  4.34E-08  1.15E-07
  -3.1664E+00 -3.1407E+00  7.3140E-02  9.9464E-02  2.0889E-01  2.2686E-01
   3.6527E-01  6.1195E-01  6.2462E-01  6.5380E-01  6.5892E-01
-  prteigrs : nnsclo,ikpt=   50   24 max resid (incl. the buffer)=  1.15177E-07
  Non-SCF case, kpt   25 (  0.21429  0.00000  0.50000), residuals and eigenvalues=
   6.76E-09  1.20E-09  4.66E-10  1.59E-09  1.73E-09  1.12E-09  1.33E-09  3.11E-09
   1.41E-09  4.60E-09  4.80E-06
  -3.1655E+00 -3.1404E+00  4.8679E-02  1.0302E-01  2.2695E-01  2.3567E-01
   4.2172E-01  5.7652E-01  6.0139E-01  6.3443E-01  6.7451E-01
-  prteigrs : nnsclo,ikpt=   50   25 max resid (incl. the buffer)=  4.79926E-06
  Non-SCF case, kpt   26 (  0.14286  0.00000  0.50000), residuals and eigenvalues=
   8.99E-09  1.18E-09  3.08E-10  9.37E-10  3.50E-09  1.11E-09  5.31E-09  5.70E-09
   9.82E-09  2.75E-07  2.97E-06
  -3.1624E+00 -3.1091E+00  3.0850E-02  1.0528E-01  2.4697E-01  2.5170E-01
   4.7630E-01  5.4408E-01  5.5213E-01  6.3240E-01  7.0031E-01
-  prteigrs : nnsclo,ikpt=   50   26 max resid (incl. the buffer)=  2.96887E-06
  Non-SCF case, kpt   27 (  0.07143  0.00000  0.50000), residuals and eigenvalues=
   7.48E-10  9.48E-09  9.87E-10  1.47E-09  9.33E-10  9.40E-09  3.81E-09  5.04E-09
   1.55E-09  4.56E-09  1.21E-05
  -3.2097E+00 -3.1064E+00  1.9436E-02  1.0241E-01  2.6505E-01  2.6610E-01
   5.1241E-01  5.1585E-01  5.1812E-01  6.2555E-01  7.2851E-01
-  prteigrs : nnsclo,ikpt=   50   27 max resid (incl. the buffer)=  1.21166E-05
  Non-SCF case, kpt   28 (  0.00000  0.00000  0.50000), residuals and eigenvalues=
   7.08E-09  1.79E-09  1.87E-09  1.44E-09  6.61E-10  6.89E-09  2.63E-09  5.26E-09
   3.09E-09  2.69E-08  7.23E-09
  -3.1761E+00 -3.0604E+00  1.5684E-02  1.0638E-01  2.7502E-01  2.7502E-01
   5.0384E-01  5.0384E-01  5.3589E-01  6.2343E-01  7.4495E-01
-  prteigrs : nnsclo,ikpt=   50   28 max resid (incl. the buffer)=  2.68933E-08
  Non-SCF case, kpt   29 (  0.00000  0.00000  0.40000), residuals and eigenvalues=
   1.12E-09  8.71E-10  1.37E-09  5.92E-09  6.76E-10  6.23E-09  1.13E-09  4.44E-09
   3.24E-09  5.32E-09  7.62E-09
@@ -806,19 +784,16 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.41E-09  3.53E-09  9.89E-08
  -3.1788E+00 -3.0936E+00  5.4404E-03  1.4199E-01  2.6569E-01  2.6569E-01
   4.9580E-01  4.9580E-01  5.0045E-01  5.6589E-01  8.1589E-01
-  prteigrs : nnsclo,ikpt=   50   31 max resid (incl. the buffer)=  9.89179E-08
  Non-SCF case, kpt   32 (  0.00000  0.00000  0.10000), residuals and eigenvalues=
   1.57E-09  1.87E-09  3.69E-09  2.06E-09  1.16E-09  4.80E-09  6.32E-10  5.15E-09
   9.01E-09  8.17E-09  4.02E-05
  -3.2285E+00 -3.0938E+00 -1.2270E-04  1.5335E-01  2.6315E-01  2.6315E-01
   4.6143E-01  4.9285E-01  4.9285E-01  5.8114E-01  8.3370E-01
-  prteigrs : nnsclo,ikpt=   50   32 max resid (incl. the buffer)=  4.01982E-05
  Non-SCF case, kpt   33 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   9.87E-09  7.80E-09  2.02E-09  9.91E-10  2.23E-09  3.53E-09  2.91E-09  6.14E-10
   1.64E-09  2.07E-09  5.54E-05
  -3.2174E+00 -3.0579E+00 -9.6119E-04  1.6127E-01  2.6297E-01  2.6297E-01
   4.4712E-01  4.9213E-01  4.9213E-01  5.9431E-01  8.1848E-01
-  prteigrs : nnsclo,ikpt=   50   33 max resid (incl. the buffer)=  5.53712E-05
 
 
 --- !ResultsGS
@@ -1019,45 +994,8 @@ tolerances: {tolwfr: 1.00E-08, }
   1.77E-09  2.07E-09  3.78E-06
  -3.2174E+00 -3.0579E+00 -9.6119E-04  1.6127E-01  2.6297E-01  2.6297E-01
   4.4712E-01  4.9213E-01  4.9213E-01  5.9431E-01  8.1842E-01
-  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  3.78142E-06
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  1.27497E-08
-  prteigrs : nnsclo,ikpt=   50    4 max resid (incl. the buffer)=  2.90746E-07
-  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  8.21551E-04
-  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  3.84185E-08
-  prteigrs : nnsclo,ikpt=   50   11 max resid (incl. the buffer)=  4.47821E-06
-  prteigrs : nnsclo,ikpt=   50   12 max resid (incl. the buffer)=  3.67240E-08
-  prteigrs : nnsclo,ikpt=   50   14 max resid (incl. the buffer)=  8.45113E-06
-  prteigrs : nnsclo,ikpt=   50   15 max resid (incl. the buffer)=  2.13754E-04
-  prteigrs : nnsclo,ikpt=   50   16 max resid (incl. the buffer)=  6.11219E-06
-  prteigrs : nnsclo,ikpt=   50   17 max resid (incl. the buffer)=  8.98760E-07
-  prteigrs : nnsclo,ikpt=   50   18 max resid (incl. the buffer)=  1.49826E-08
-  prteigrs : nnsclo,ikpt=   50   19 max resid (incl. the buffer)=  1.03158E-08
-  prteigrs : nnsclo,ikpt=   50   22 max resid (incl. the buffer)=  8.82884E-05
-  prteigrs : nnsclo,ikpt=   50   23 max resid (incl. the buffer)=  2.25866E-06
-  prteigrs : nnsclo,ikpt=   50   24 max resid (incl. the buffer)=  5.46309E-06
-  prteigrs : nnsclo,ikpt=   50   25 max resid (incl. the buffer)=  2.36382E-08
-  prteigrs : nnsclo,ikpt=   50   26 max resid (incl. the buffer)=  1.36206E-06
-  prteigrs : nnsclo,ikpt=   50   27 max resid (incl. the buffer)=  7.15646E-06
-  prteigrs : nnsclo,ikpt=   50   28 max resid (incl. the buffer)=  2.13108E-07
-  prteigrs : nnsclo,ikpt=   50   29 max resid (incl. the buffer)=  1.72599E-08
-  prteigrs : nnsclo,ikpt=   50   32 max resid (incl. the buffer)=  3.36099E-08
-  prteigrs : nnsclo,ikpt=   50   33 max resid (incl. the buffer)=  6.73425E-08
-  prteigrs : nnsclo,ikpt=   50   34 max resid (incl. the buffer)=  5.31925E-06
-  prteigrs : nnsclo,ikpt=   50   35 max resid (incl. the buffer)=  3.40690E-07
-  prteigrs : nnsclo,ikpt=   50   36 max resid (incl. the buffer)=  7.36682E-08
-  prteigrs : nnsclo,ikpt=   50   37 max resid (incl. the buffer)=  2.69263E-05
-  prteigrs : nnsclo,ikpt=   50   38 max resid (incl. the buffer)=  5.01813E-07
-  prteigrs : nnsclo,ikpt=   50   39 max resid (incl. the buffer)=  2.49159E-06
-  prteigrs : nnsclo,ikpt=   50   42 max resid (incl. the buffer)=  1.61396E-08
-  prteigrs : nnsclo,ikpt=   50   43 max resid (incl. the buffer)=  1.43927E-07
-  prteigrs : nnsclo,ikpt=   50   44 max resid (incl. the buffer)=  1.45748E-05
-  prteigrs : nnsclo,ikpt=   50   45 max resid (incl. the buffer)=  5.29607E-08
-  prteigrs : nnsclo,ikpt=   50   46 max resid (incl. the buffer)=  1.08078E-08
-  prteigrs : nnsclo,ikpt=   50   47 max resid (incl. the buffer)=  1.09638E-07
-  prteigrs : nnsclo,ikpt=   50   49 max resid (incl. the buffer)=  2.38615E-07
-  prteigrs : nnsclo,ikpt=   50   50 max resid (incl. the buffer)=  5.75969E-06
 
 
 --- !ResultsGS
@@ -1549,10 +1487,10 @@ P           mkmem3         50
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          5.9  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.5
+.Delivered   6 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.9  wall=          6.0

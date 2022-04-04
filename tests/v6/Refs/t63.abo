@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h20 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t63/t63.in
-- output file    -> t63.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v6_t63/t63.abi
+- output file    -> t63.abo
 - root for input  files -> t63i
 - root for output files -> t63o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         365          nfft =        6912          nkpt =           4
 ================================================================================
-P This job should need less than                       3.617 Mbytes of memory.
+P This job should need less than                       3.811 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         365          nfft =        6912          nkpt =           4
 ================================================================================
-P This job should need less than                       1.930 Mbytes of memory.
+P This job should need less than                       2.124 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -104,7 +104,7 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         365          nfft =        6912          nkpt =           4
 ================================================================================
-P This job should need less than                       3.617 Mbytes of memory.
+P This job should need less than                       3.811 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -351,8 +351,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -557,23 +557,23 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.25000), residuals and eigenvalues=
   5.76E-23  3.34E-23  4.58E-23  1.64E-19
  -1.8934E-01 -7.9401E-02  9.0793E-02  1.0596E-01
-  prteigrs : nnsclo,ikpt=   16    1 max resid (incl. the buffer)=  1.63824E-19
+  prteigrs : nnsclo,ikpt=   16    1 max resid (excl. the buffer)=  1.63824E-19
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   16    2 max resid (incl. the buffer)=  1.62040E-19
-  prteigrs : nnsclo,ikpt=   16    3 max resid (incl. the buffer)=  1.56784E-19
-  prteigrs : nnsclo,ikpt=   16    4 max resid (incl. the buffer)=  1.65512E-19
+  prteigrs : nnsclo,ikpt=   16    2 max resid (excl. the buffer)=  1.62040E-19
+  prteigrs : nnsclo,ikpt=   16    3 max resid (excl. the buffer)=  1.56784E-19
+  prteigrs : nnsclo,ikpt=   16    4 max resid (excl. the buffer)=  1.65512E-19
 
  SPIN DOWN channel
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.25000), residuals and eigenvalues=
   5.76E-23  3.34E-23  4.58E-23  1.64E-19
  -1.8934E-01 -7.9401E-02  9.0793E-02  1.0596E-01
-  prteigrs : nnsclo,ikpt=   16    1 max resid (incl. the buffer)=  1.63824E-19
+  prteigrs : nnsclo,ikpt=   16    1 max resid (excl. the buffer)=  1.63824E-19
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   16    2 max resid (incl. the buffer)=  1.62040E-19
-  prteigrs : nnsclo,ikpt=   16    3 max resid (incl. the buffer)=  1.56784E-19
-  prteigrs : nnsclo,ikpt=   16    4 max resid (incl. the buffer)=  1.65512E-19
+  prteigrs : nnsclo,ikpt=   16    2 max resid (excl. the buffer)=  1.62040E-19
+  prteigrs : nnsclo,ikpt=   16    3 max resid (excl. the buffer)=  1.56784E-19
+  prteigrs : nnsclo,ikpt=   16    4 max resid (excl. the buffer)=  1.65512E-19
 
 
  scprqt:  WARNING -
@@ -671,7 +671,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -693,7 +692,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -769,7 +767,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -845,7 +842,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -966,7 +962,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -990,7 +985,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1015,7 +1009,7 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT 10   5.1729654671242     -9.142E-05 3.824E-07 1.023E-02
  ETOT 11   5.1729565165710     -8.951E-06 3.745E-09 2.118E-04
  ETOT 12   5.1729564739658     -4.261E-08 4.162E-09 2.094E-04
- ETOT 13   5.1729563011842     -1.728E-07 9.062E-10 1.612E-05
+ ETOT 13   5.1729563011843     -1.728E-07 9.062E-10 1.612E-05
  ETOT 14   5.1729562870775     -1.411E-08 5.173E-12 3.934E-07
  ETOT 15   5.1729562874242      3.467E-10 1.128E-12 7.381E-07
  ETOT 16   5.1729562868260     -5.982E-10 5.529E-12 9.079E-08
@@ -1060,7 +1054,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1074,11 +1067,11 @@ tolerances: {tolvrs: 1.00E-22, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3837778743045     -2.340E+01 3.796E-02 2.532E+03
- ETOT  2  0.53445794704529     -3.849E+00 4.487E-03 4.359E+02
+ ETOT  2  0.53445794704530     -3.849E+00 4.487E-03 4.359E+02
  ETOT  3 -0.21555523876437     -7.500E-01 2.017E-03 6.937E+00
  ETOT  4 -0.24351502262423     -2.796E-02 2.455E-04 8.315E-01
  ETOT  5 -0.24501455723804     -1.500E-03 5.349E-05 2.351E-01
- ETOT  6 -0.24525650098328     -2.419E-04 3.824E-06 1.105E-01
+ ETOT  6 -0.24525650098329     -2.419E-04 3.824E-06 1.105E-01
  ETOT  7 -0.24546218868636     -2.057E-04 1.992E-07 2.052E-02
  ETOT  8 -0.24548662487908     -2.444E-05 2.622E-07 8.796E-03
  ETOT  9 -0.24549126002944     -4.635E-06 9.189E-09 6.533E-03
@@ -1130,7 +1123,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1144,7 +1136,7 @@ tolerances: {tolvrs: 1.00E-22, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3789816010814     -2.341E+01 3.795E-02 2.531E+03
- ETOT  2  0.53164242444970     -3.847E+00 4.489E-03 4.358E+02
+ ETOT  2  0.53164242444971     -3.847E+00 4.489E-03 4.358E+02
  ETOT  3 -0.21799233038859     -7.496E-01 2.021E-03 6.940E+00
  ETOT  4 -0.24596381894207     -2.797E-02 2.457E-04 8.295E-01
  ETOT  5 -0.24746291299677     -1.499E-03 5.375E-05 2.347E-01
@@ -1156,7 +1148,7 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT 11 -0.24795218253957     -1.066E-06 2.997E-09 3.022E-04
  ETOT 12 -0.24795246170432     -2.792E-07 1.271E-09 1.592E-04
  ETOT 13 -0.24795276291002     -3.012E-07 1.175E-09 4.511E-05
- ETOT 14 -0.24795283585761     -7.295E-08 8.789E-10 2.677E-05
+ ETOT 14 -0.24795283585762     -7.295E-08 8.789E-10 2.677E-05
  ETOT 15 -0.24795286743709     -3.158E-08 7.232E-11 1.386E-06
  ETOT 16 -0.24795287013348     -2.696E-09 3.750E-11 6.126E-07
 -open ddk wf file :t63o_DS3_1WF7
@@ -1200,7 +1192,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1270,7 +1261,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1284,7 +1274,7 @@ tolerances: {tolvrs: 1.00E-22, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3875742773768     -2.340E+01 3.798E-02 2.531E+03
- ETOT  2  0.53955807537505     -3.848E+00 4.483E-03 4.359E+02
+ ETOT  2  0.53955807537506     -3.848E+00 4.483E-03 4.359E+02
  ETOT  3 -0.21017815790891     -7.497E-01 2.008E-03 6.935E+00
  ETOT  4 -0.23812428059727     -2.795E-02 2.459E-04 8.279E-01
  ETOT  5 -0.23961893406202     -1.495E-03 5.342E-05 2.345E-01
@@ -1293,7 +1283,7 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT  8 -0.24009642590826     -9.595E-06 1.811E-07 5.423E-03
  ETOT  9 -0.24010078586679     -4.360E-06 1.058E-09 3.307E-03
  ETOT 10 -0.24010761386561     -6.828E-06 1.202E-07 2.836E-04
- ETOT 11 -0.24010828015647     -6.663E-07 2.893E-09 5.841E-05
+ ETOT 11 -0.24010828015648     -6.663E-07 2.893E-09 5.841E-05
  ETOT 12 -0.24010839315908     -1.130E-07 6.436E-10 2.766E-05
  ETOT 13 -0.24010844269527     -4.954E-08 5.267E-10 1.012E-05
  ETOT 14 -0.24010846143511     -1.874E-08 4.069E-11 1.360E-06
@@ -1340,7 +1330,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1355,17 +1344,17 @@ tolerances: {tolvrs: 1.00E-22, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3827777930088     -2.341E+01 3.796E-02 2.530E+03
  ETOT  2  0.53673999427588     -3.846E+00 4.485E-03 4.357E+02
- ETOT  3 -0.21261784688558     -7.494E-01 2.012E-03 6.938E+00
+ ETOT  3 -0.21261784688559     -7.494E-01 2.012E-03 6.938E+00
  ETOT  4 -0.24057567879464     -2.796E-02 2.461E-04 8.260E-01
- ETOT  5 -0.24206992377585     -1.494E-03 5.368E-05 2.341E-01
+ ETOT  5 -0.24206992377586     -1.494E-03 5.368E-05 2.341E-01
  ETOT  6 -0.24230919442271     -2.393E-04 3.849E-06 1.085E-01
  ETOT  7 -0.24253618428093     -2.270E-04 1.929E-07 9.296E-03
  ETOT  8 -0.24254445821301     -8.274E-06 1.644E-07 6.200E-03
  ETOT  9 -0.24254992497463     -5.467E-06 1.632E-09 3.555E-03
  ETOT 10 -0.24255722606052     -7.301E-06 1.372E-07 3.578E-04
  ETOT 11 -0.24255800012583     -7.741E-07 2.845E-09 7.563E-05
- ETOT 12 -0.24255813335886     -1.332E-07 7.474E-10 4.229E-05
- ETOT 13 -0.24255820857118     -7.521E-08 8.592E-10 1.263E-05
+ ETOT 12 -0.24255813335887     -1.332E-07 7.474E-10 4.229E-05
+ ETOT 13 -0.24255820857119     -7.521E-08 8.592E-10 1.263E-05
  ETOT 14 -0.24255823184764     -2.328E-08 4.650E-11 2.440E-06
  ETOT 15 -0.24255823500659     -3.159E-09 3.146E-11 1.644E-07
  ETOT 16 -0.24255823509180     -8.521E-11 1.617E-12 2.620E-07
@@ -1410,7 +1399,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1474,7 +1462,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1538,7 +1525,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3452,10 +3438,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.7  wall=         14.8
+- Proc.   0 individual time (sec): cpu=         15.4  wall=         15.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  34 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.7  wall=         14.8
+.Delivered 212 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.4  wall=         15.6

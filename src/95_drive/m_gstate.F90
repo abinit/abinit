@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -921,8 +921,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,extfpmd%nelect,&
 &     dtset%tsmear)
-     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
-&     dtset%tsmear,extfpmd%vtrial)
+     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear)
    end if
 
 !  Transfer occupations to bigdft object:
@@ -2087,28 +2086,16 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 
  if(dtset%tfkinfunc==0)then
    if (me == master) then
-     ! CP modified
-     !call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
-!     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,ab_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,std_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
-      ! End CP modified
    end if
 
 #if defined HAVE_NETCDF
@@ -2691,7 +2678,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT group (MB)
+!! Copyright (C) 2003-2022 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
