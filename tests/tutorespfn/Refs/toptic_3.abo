@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 12 Dec 2020.
-- ( at 20h50 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/fgoudreault_beauty/tests/TestBot_MPI1/tutorespfn_toptic_3-toptic_4-toptic_5/toptic_3.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorespfn_toptic_3-toptic_4-toptic_5/toptic_3.abi
 - output file    -> toptic_3.abo
 - root for input  files -> toptic_3i
 - root for output files -> toptic_3o
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =          43          nfft =        1000          nkpt =          10
 ================================================================================
-P This job should need less than                       1.517 Mbytes of memory.
+P This job should need less than                       1.545 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =          10
        mpw =          43          nfft =        1000          nkpt =          10
 ================================================================================
-P This job should need less than                       1.437 Mbytes of memory.
+P This job should need less than                       1.466 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.061 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =         128
        mpw =          43          nfft =        1000          nkpt =         128
 ================================================================================
-P This job should need less than                       2.354 Mbytes of memory.
+P This job should need less than                       2.383 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -588,8 +588,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/fgoudreault_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/fgoudreault_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/Ga-low.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -603,8 +603,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    1.406259    0.234121
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/fgoudreault_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/fgoudreault_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_largecore_psp8/As.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.83037   1.80867   2.40819
 - 33.00000   5.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -783,18 +783,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.76E-14
  -2.0665E-01  8.6096E-02  1.3197E-01  1.4252E-01  3.0932E-01  3.7478E-01
   3.8478E-01  4.0321E-01  5.0802E-01
-  prteigrs : nnsclo,ikpt=   25    1 max resid (incl. the buffer)=  4.76419E-14
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   25    2 max resid (incl. the buffer)=  8.47679E-13
-  prteigrs : nnsclo,ikpt=   25    3 max resid (incl. the buffer)=  3.56435E-12
-  prteigrs : nnsclo,ikpt=   25    4 max resid (incl. the buffer)=  1.83325E-12
-  prteigrs : nnsclo,ikpt=   25    5 max resid (incl. the buffer)=  1.20155E-14
-  prteigrs : nnsclo,ikpt=   25    6 max resid (incl. the buffer)=  9.94049E-11
-  prteigrs : nnsclo,ikpt=   25    7 max resid (incl. the buffer)=  2.43623E-13
-  prteigrs : nnsclo,ikpt=   25    8 max resid (incl. the buffer)=  1.10789E-14
-  prteigrs : nnsclo,ikpt=   25    9 max resid (incl. the buffer)=  1.93352E-07
-  prteigrs : nnsclo,ikpt=   25   10 max resid (incl. the buffer)=  7.86304E-07
 
 
 --- !ResultsGS
@@ -884,136 +874,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.50E-16
  -2.0665E-01  8.6096E-02  1.3197E-01  1.4252E-01  3.0932E-01  3.7478E-01
   3.8478E-01  4.0321E-01  5.0802E-01
-  prteigrs : nnsclo,ikpt=   25    1 max resid (incl. the buffer)=  4.49875E-16
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   25    2 max resid (incl. the buffer)=  4.49948E-16
-  prteigrs : nnsclo,ikpt=   25    3 max resid (incl. the buffer)=  4.49873E-16
-  prteigrs : nnsclo,ikpt=   25    4 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25    5 max resid (incl. the buffer)=  3.35956E-13
-  prteigrs : nnsclo,ikpt=   25    6 max resid (incl. the buffer)=  3.01384E-13
-  prteigrs : nnsclo,ikpt=   25    7 max resid (incl. the buffer)=  3.35953E-13
-  prteigrs : nnsclo,ikpt=   25    8 max resid (incl. the buffer)=  3.35956E-13
-  prteigrs : nnsclo,ikpt=   25    9 max resid (incl. the buffer)=  3.01385E-13
-  prteigrs : nnsclo,ikpt=   25   10 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25   11 max resid (incl. the buffer)=  3.01385E-13
-  prteigrs : nnsclo,ikpt=   25   12 max resid (incl. the buffer)=  3.01382E-13
-  prteigrs : nnsclo,ikpt=   25   13 max resid (incl. the buffer)=  2.07219E-14
-  prteigrs : nnsclo,ikpt=   25   14 max resid (incl. the buffer)=  7.57106E-17
-  prteigrs : nnsclo,ikpt=   25   15 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   16 max resid (incl. the buffer)=  3.01380E-13
-  prteigrs : nnsclo,ikpt=   25   17 max resid (incl. the buffer)=  1.35742E-14
-  prteigrs : nnsclo,ikpt=   25   18 max resid (incl. the buffer)=  3.58817E-17
-  prteigrs : nnsclo,ikpt=   25   19 max resid (incl. the buffer)=  3.58755E-17
-  prteigrs : nnsclo,ikpt=   25   20 max resid (incl. the buffer)=  1.35740E-14
-  prteigrs : nnsclo,ikpt=   25   21 max resid (incl. the buffer)=  1.35742E-14
-  prteigrs : nnsclo,ikpt=   25   22 max resid (incl. the buffer)=  3.58791E-17
-  prteigrs : nnsclo,ikpt=   25   23 max resid (incl. the buffer)=  3.58785E-17
-  prteigrs : nnsclo,ikpt=   25   24 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   25 max resid (incl. the buffer)=  3.58904E-17
-  prteigrs : nnsclo,ikpt=   25   26 max resid (incl. the buffer)=  3.58705E-17
-  prteigrs : nnsclo,ikpt=   25   27 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   28 max resid (incl. the buffer)=  3.01385E-13
-  prteigrs : nnsclo,ikpt=   25   29 max resid (incl. the buffer)=  7.56969E-17
-  prteigrs : nnsclo,ikpt=   25   30 max resid (incl. the buffer)=  3.01383E-13
-  prteigrs : nnsclo,ikpt=   25   31 max resid (incl. the buffer)=  3.58873E-17
-  prteigrs : nnsclo,ikpt=   25   32 max resid (incl. the buffer)=  3.58729E-17
-  prteigrs : nnsclo,ikpt=   25   33 max resid (incl. the buffer)=  3.01383E-13
-  prteigrs : nnsclo,ikpt=   25   34 max resid (incl. the buffer)=  7.57106E-17
-  prteigrs : nnsclo,ikpt=   25   35 max resid (incl. the buffer)=  1.72832E-08
-  prteigrs : nnsclo,ikpt=   25   36 max resid (incl. the buffer)=  4.49874E-16
-  prteigrs : nnsclo,ikpt=   25   37 max resid (incl. the buffer)=  3.01379E-13
-  prteigrs : nnsclo,ikpt=   25   38 max resid (incl. the buffer)=  3.35956E-13
-  prteigrs : nnsclo,ikpt=   25   39 max resid (incl. the buffer)=  3.58787E-17
-  prteigrs : nnsclo,ikpt=   25   40 max resid (incl. the buffer)=  3.58781E-17
-  prteigrs : nnsclo,ikpt=   25   41 max resid (incl. the buffer)=  1.35742E-14
-  prteigrs : nnsclo,ikpt=   25   42 max resid (incl. the buffer)=  1.35739E-14
-  prteigrs : nnsclo,ikpt=   25   43 max resid (incl. the buffer)=  3.58762E-17
-  prteigrs : nnsclo,ikpt=   25   44 max resid (incl. the buffer)=  3.58810E-17
-  prteigrs : nnsclo,ikpt=   25   45 max resid (incl. the buffer)=  1.35739E-14
-  prteigrs : nnsclo,ikpt=   25   46 max resid (incl. the buffer)=  3.58731E-17
-  prteigrs : nnsclo,ikpt=   25   47 max resid (incl. the buffer)=  3.58878E-17
-  prteigrs : nnsclo,ikpt=   25   48 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   49 max resid (incl. the buffer)=  3.01384E-13
-  prteigrs : nnsclo,ikpt=   25   50 max resid (incl. the buffer)=  3.35953E-13
-  prteigrs : nnsclo,ikpt=   25   51 max resid (incl. the buffer)=  3.01379E-13
-  prteigrs : nnsclo,ikpt=   25   52 max resid (incl. the buffer)=  3.58700E-17
-  prteigrs : nnsclo,ikpt=   25   53 max resid (incl. the buffer)=  3.58903E-17
-  prteigrs : nnsclo,ikpt=   25   54 max resid (incl. the buffer)=  3.01388E-13
-  prteigrs : nnsclo,ikpt=   25   55 max resid (incl. the buffer)=  7.56970E-17
-  prteigrs : nnsclo,ikpt=   25   56 max resid (incl. the buffer)=  4.49941E-16
-  prteigrs : nnsclo,ikpt=   25   57 max resid (incl. the buffer)=  1.72832E-08
-  prteigrs : nnsclo,ikpt=   25   58 max resid (incl. the buffer)=  4.49838E-16
-  prteigrs : nnsclo,ikpt=   25   59 max resid (incl. the buffer)=  3.35957E-13
-  prteigrs : nnsclo,ikpt=   25   60 max resid (incl. the buffer)=  1.35742E-14
-  prteigrs : nnsclo,ikpt=   25   61 max resid (incl. the buffer)=  1.35736E-14
-  prteigrs : nnsclo,ikpt=   25   62 max resid (incl. the buffer)=  3.35951E-13
-  prteigrs : nnsclo,ikpt=   25   63 max resid (incl. the buffer)=  4.49978E-16
-  prteigrs : nnsclo,ikpt=   25   64 max resid (incl. the buffer)=  1.72832E-08
-  prteigrs : nnsclo,ikpt=   25   65 max resid (incl. the buffer)=  1.61884E-06
-  prteigrs : nnsclo,ikpt=   25   66 max resid (incl. the buffer)=  7.57021E-17
-  prteigrs : nnsclo,ikpt=   25   67 max resid (incl. the buffer)=  7.57023E-17
-  prteigrs : nnsclo,ikpt=   25   68 max resid (incl. the buffer)=  2.07219E-14
-  prteigrs : nnsclo,ikpt=   25   69 max resid (incl. the buffer)=  3.01383E-13
-  prteigrs : nnsclo,ikpt=   25   70 max resid (incl. the buffer)=  3.01380E-13
-  prteigrs : nnsclo,ikpt=   25   71 max resid (incl. the buffer)=  3.01379E-13
-  prteigrs : nnsclo,ikpt=   25   72 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   73 max resid (incl. the buffer)=  3.58867E-17
-  prteigrs : nnsclo,ikpt=   25   74 max resid (incl. the buffer)=  3.58668E-17
-  prteigrs : nnsclo,ikpt=   25   75 max resid (incl. the buffer)=  3.35953E-13
-  prteigrs : nnsclo,ikpt=   25   76 max resid (incl. the buffer)=  3.01381E-13
-  prteigrs : nnsclo,ikpt=   25   77 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   78 max resid (incl. the buffer)=  3.58693E-17
-  prteigrs : nnsclo,ikpt=   25   79 max resid (incl. the buffer)=  3.58841E-17
-  prteigrs : nnsclo,ikpt=   25   80 max resid (incl. the buffer)=  3.01380E-13
-  prteigrs : nnsclo,ikpt=   25   81 max resid (incl. the buffer)=  3.01386E-13
-  prteigrs : nnsclo,ikpt=   25   82 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25   83 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25   84 max resid (incl. the buffer)=  3.01379E-13
-  prteigrs : nnsclo,ikpt=   25   85 max resid (incl. the buffer)=  3.01384E-13
-  prteigrs : nnsclo,ikpt=   25   86 max resid (incl. the buffer)=  1.61884E-06
-  prteigrs : nnsclo,ikpt=   25   87 max resid (incl. the buffer)=  2.07219E-14
-  prteigrs : nnsclo,ikpt=   25   88 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   89 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25   90 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25   91 max resid (incl. the buffer)=  1.61884E-06
-  prteigrs : nnsclo,ikpt=   25   92 max resid (incl. the buffer)=  7.56886E-17
-  prteigrs : nnsclo,ikpt=   25   93 max resid (incl. the buffer)=  7.57158E-17
-  prteigrs : nnsclo,ikpt=   25   94 max resid (incl. the buffer)=  7.57105E-17
-  prteigrs : nnsclo,ikpt=   25   95 max resid (incl. the buffer)=  3.01386E-13
-  prteigrs : nnsclo,ikpt=   25   96 max resid (incl. the buffer)=  3.58872E-17
-  prteigrs : nnsclo,ikpt=   25   97 max resid (incl. the buffer)=  3.58669E-17
-  prteigrs : nnsclo,ikpt=   25   98 max resid (incl. the buffer)=  3.01377E-13
-  prteigrs : nnsclo,ikpt=   25   99 max resid (incl. the buffer)=  7.56970E-17
-  prteigrs : nnsclo,ikpt=   25  100 max resid (incl. the buffer)=  4.49946E-16
-  prteigrs : nnsclo,ikpt=   25  101 max resid (incl. the buffer)=  7.56970E-17
-  prteigrs : nnsclo,ikpt=   25  102 max resid (incl. the buffer)=  3.01382E-13
-  prteigrs : nnsclo,ikpt=   25  103 max resid (incl. the buffer)=  3.58698E-17
-  prteigrs : nnsclo,ikpt=   25  104 max resid (incl. the buffer)=  3.58843E-17
-  prteigrs : nnsclo,ikpt=   25  105 max resid (incl. the buffer)=  3.01381E-13
-  prteigrs : nnsclo,ikpt=   25  106 max resid (incl. the buffer)=  7.57105E-17
-  prteigrs : nnsclo,ikpt=   25  107 max resid (incl. the buffer)=  2.07219E-14
-  prteigrs : nnsclo,ikpt=   25  108 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25  109 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25  110 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25  111 max resid (incl. the buffer)=  2.07219E-14
-  prteigrs : nnsclo,ikpt=   25  112 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25  113 max resid (incl. the buffer)=  2.31121E-12
-  prteigrs : nnsclo,ikpt=   25  114 max resid (incl. the buffer)=  2.07220E-14
-  prteigrs : nnsclo,ikpt=   25  115 max resid (incl. the buffer)=  4.49911E-16
-  prteigrs : nnsclo,ikpt=   25  116 max resid (incl. the buffer)=  3.35954E-13
-  prteigrs : nnsclo,ikpt=   25  117 max resid (incl. the buffer)=  1.35740E-14
-  prteigrs : nnsclo,ikpt=   25  118 max resid (incl. the buffer)=  1.35739E-14
-  prteigrs : nnsclo,ikpt=   25  119 max resid (incl. the buffer)=  3.35954E-13
-  prteigrs : nnsclo,ikpt=   25  120 max resid (incl. the buffer)=  4.49905E-16
-  prteigrs : nnsclo,ikpt=   25  121 max resid (incl. the buffer)=  4.49873E-16
-  prteigrs : nnsclo,ikpt=   25  122 max resid (incl. the buffer)=  3.35956E-13
-  prteigrs : nnsclo,ikpt=   25  123 max resid (incl. the buffer)=  1.35742E-14
-  prteigrs : nnsclo,ikpt=   25  124 max resid (incl. the buffer)=  1.35739E-14
-  prteigrs : nnsclo,ikpt=   25  125 max resid (incl. the buffer)=  3.35952E-13
-  prteigrs : nnsclo,ikpt=   25  126 max resid (incl. the buffer)=  4.49940E-16
-  prteigrs : nnsclo,ikpt=   25  127 max resid (incl. the buffer)=  1.72832E-08
-  prteigrs : nnsclo,ikpt=   25  128 max resid (incl. the buffer)=  1.61884E-06
 
 
 --- !ResultsGS
@@ -1093,7 +955,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file toptic_3o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1110,7 +971,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file toptic_3o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1206,7 +1066,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file toptic_3o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1223,7 +1082,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file toptic_3o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1319,7 +1177,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file toptic_3o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1336,7 +1193,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file toptic_3o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1925,10 +1781,10 @@ P          mk1mem6        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  22 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.2
+.Delivered  20 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.5  wall=          2.6

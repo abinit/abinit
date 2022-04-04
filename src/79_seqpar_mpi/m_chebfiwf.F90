@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (BS)
+!! Copyright (C) 2018-2022 ABINIT group (BS)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,6 @@ module m_chebfiwf
  integer,save  :: l_sij_opt
  integer, save :: l_paral_kgb
  integer, save :: l_useria
- real(dp), allocatable,save :: l_gvnlc(:,:)
  real(dp), allocatable,save ::  l_pcon(:)
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
@@ -153,6 +152,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp) :: tsec(2),chebfiMem(2)
  real(dp),pointer :: eig_ptr(:,:) => NULL()
  real(dp),pointer :: resid_ptr(:,:) => NULL()
+ real(dp), allocatable :: l_gvnlxc(:,:)
 
  !Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
@@ -252,7 +252,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
 
- ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*l_nband_filter))
+! ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*l_nband_filter))
  call timab(tim_chebfiwf2,2,tsec)
 
  cputime = abi_cpu_time() - cputime
@@ -287,18 +287,17 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !  chebfi algorithm
  if ( .not. l_paw ) then
    !Check l_gvnlc size
-   !if ( size(l_gvnlc) < 2*nband*l_npw*l_nspinor ) then
-   if ( size(l_gvnlc) /= 0 ) then
-     ABI_FREE(l_gvnlc)
-     ABI_MALLOC(l_gvnlc,(0,0))
-   end if
+   !if ( size(l_gvnlxc) < 2*nband*l_npw*l_nspinor ) then
+   !if ( size(l_gvnlxc) /= 0 ) then
+   !  ABI_FREE(l_gvnlxc)
+   ABI_MALLOC(l_gvnlxc,(0,0))
+   !end if
 
    !Call nonlop
    call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
+&            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+   ABI_FREE(l_gvnlxc)
  end if
-
- ABI_FREE(l_gvnlc)
 
 !Free chebfi
  call chebfi_free(chebfi)
@@ -372,6 +371,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
  real(dp), pointer :: gsc(:,:)
+ real(dp), allocatable :: l_gvnlxc(:,:)
 
 ! *********************************************************************
 
@@ -397,13 +397,16 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    end if
  end if
 
- if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
-   ABI_FREE(l_gvnlc)
-   ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
- end if
+ !if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
+ !  ABI_FREE(l_gvnlxc)
+ !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
+ !end if
+ ABI_MALLOC(l_gvnlxc,(0,0))
 
  call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
-   l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+   l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+
+ ABI_FREE(l_gvnlxc)
 
 !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then

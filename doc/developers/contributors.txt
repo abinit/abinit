@@ -3,7 +3,7 @@ Contributors
 
 The ABINIT package : list of contributors.
 
-Copyright (C) 2000-2021 ABINIT group (XG)
+Copyright (C) 2000-2022 ABINIT group (XG)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +34,7 @@ G. Antonius
 L. Baguet
 J.-M. Beuken
 J. Bieder
+A. Blanchet
 J. Bouchet
 E. Bousquet
 V. Brousseau

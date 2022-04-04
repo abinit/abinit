@@ -11,7 +11,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2022 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3085,7 +3085,11 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  hdr%nh_qFD   = zero
  hdr%fermih   = zero
  if (hdr%occopt == 9) then
-    write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   This was erroneous
+!   write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   But this induced problems on bob_gnu_7.5_openmp
+    read(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!
  end if
  ! End CP added
 
