@@ -2445,7 +2445,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
- complex(dpc) :: lms
+ complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:)
@@ -2514,13 +2514,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     ! the lms matrix element from the last call always has zero real part
-     ! thus the real part of dijnd is always zero
-     dijnd(2*klmn-1,1) = zero
-
-     ! removed dltij(klmn) in the following, don't think it should be there
-     dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
+     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
+     dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
    end do ! end loop over idir
 
