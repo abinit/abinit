@@ -701,7 +701,8 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !DEBUG
 !   write(6,*)' preparatory computations : usexcnhat, nspden, dimvtrial=',usexcnhat, nspden, dimvtrial
 !ENDDEBUG
- nsploop=nspden;if (dimvtrial<nspden) nsploop=2
+!nsploop=nspden;if (dimvtrial<nspden) nsploop=2
+ nsploop=nspden;if (dimvtrial<nspden .and. nspden==4) nsploop=1
  if (optgr2/=1.and.optstr2/=1) then
    ABI_MALLOC(grhat_tmp,(ngrhat,1))
  else
