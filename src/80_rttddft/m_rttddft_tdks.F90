@@ -80,7 +80,7 @@ module m_rttddft_tdks
  use m_spacepar,         only: setsym
  use m_symtk,            only: symmetrize_xred
  use m_wffile,           only: wffile_type, WffClose
- use m_xmpi,             only: xmpi_bcast!, xmpi_sum
+ use m_xmpi,             only: xmpi_bcast, xmpi_sum
 
  implicit none
 
@@ -511,7 +511,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  integer,parameter   :: response=0, cplex=1
  integer             :: comm_psp
  integer             :: gscase
- integer             :: iatom, itypat, indx
+ integer             :: iatom, ierr, itypat, indx
  integer             :: mgfftf, my_natom
  integer             :: npwmin, nfftot
  integer             :: ylm_option
@@ -520,6 +520,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  type(ebands_t)      :: bstruct
  !arrays
  character(len=500)  :: msg
+ integer, pointer    :: npwarr_(:)
  integer             :: ngfft(18)
  integer             :: ngfftf(18)
  integer             :: npwtot(dtset%nkpt)
@@ -611,24 +612,19 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%energies%e_corepspdc = zero
  end select
 
- !FB: @MT The npwarr_ pointer array doesn't seem necessary?
-!!** Initialize band structure datatype
-!if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
-!  ABI_MALLOC(npwarr_,(dtset%nkpt))
-!  npwarr_(:)=tdks%npwarr(:)
-!  call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
-!else
-!  npwarr_ => npwarr
-!end if
-!bstruct = ebands_from_dtset(dtset, npwarr_)
-!if (dtset%paral_kgb/=0)  then
-!  ABI_FREE(npwarr_)
-!end if
-!nullify(npwarr_)
-!if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
-!  call xmpi_sum(tdks%npwarr,mpi_enreg%comm_bandfft,ierr)
-!end if
- bstruct = ebands_from_dtset(dtset, tdks%npwarr)
+ !** Initialize band structure datatype
+ if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
+   ABI_MALLOC(npwarr_,(dtset%nkpt))
+   npwarr_(:)=tdks%npwarr(:)
+   call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
+ else
+   npwarr_(:)=tdks%npwarr(:)
+ end if
+ bstruct = ebands_from_dtset(dtset, npwarr_)
+ if (dtset%paral_kgb/=0)  then
+   ABI_FREE(npwarr_)
+ end if
+ nullify(npwarr_)
  call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
  !** Initialize PAW atomic occupancies

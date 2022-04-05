@@ -839,10 +839,8 @@ contains
 
 !    Loop over bands or blocks of bands
      icgb=icg ; ibgb=ibg ; iband_start=1
-     !FB blocksz=npband_bandfft*cg_bandpp
-     blocksz=nband_k/npband_bandfft
-     !FB nblockbd=nband_k/blocksz
-     nblockbd=1
+     blocksz=npband_bandfft*cg_bandpp
+     nblockbd=nband_k/blocksz
      nband_cprj_k=merge(nband_k/npband_bandfft/npband_dfpt,nband_k,cprj_band_distributed)
      nband_cg_k=merge(nband_k/npband_bandfft/npband_dfpt,nband_k,cg_band_distributed)
      do iblockbd=1,nblockbd
@@ -868,8 +866,11 @@ contains
          ABI_FREE(cwavef_tmp)
          !Reorder WF according to cg_bandpp and/or spinor
          if (cg_bandpp>1.or.my_nspinor>1) then
-           ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*blocksz))
-           do ig=1,npw_nk*my_nspinor*blocksz
+           !FB ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*blocksz))
+           ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*cg_bandpp))
+           !FB do ig=1,npw_nk*my_nspinor*blocksz
+           !FB-test print*, 'FB-test - before rearranging:', cwavef(1,:)
+           do ig=1,npw_nk*my_nspinor*cg_bandpp
              cwavef_tmp(:,ig)=cwavef(:,ig)
            end do
            shift1=0
@@ -884,14 +885,16 @@ contains
                end do
              end do
            end do
+           !FB-test print*, 'FB-test - after rearranging:', cwavef(1,:)
            ABI_FREE(cwavef_tmp)
          end if
        else
-         !FB do ig=1,npw_k*my_nspinor*cg_bandpp
-         do ig=1,npw_k*my_nspinor
+         do ig=1,npw_k*my_nspinor*cg_bandpp
            cwavef(1,ig)=cg(1,ig+icgb)
            cwavef(2,ig)=cg(2,ig+icgb)
          end do
+         !FB-test print*, 'FB-test - before rearranging:', cwavef(1,:)
+         !FB-test print*, 'FB-test - after rearranging:', cwavef(1,:)
        end if
 
 !      Compute scalar product of wavefunction with all NL projectors

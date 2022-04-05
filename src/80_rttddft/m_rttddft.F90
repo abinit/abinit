@@ -56,7 +56,8 @@ module m_rttddft
  use m_rttddft_tdks,     only: tdks_type
  use m_specialmsg,       only: wrtout
  use m_setvtr,           only: setvtr
- use m_xmpi,             only: xmpi_paral
+ use m_xmpi,             only: xmpi_paral, &
+                               xmpi_comm_rank !FB-test
 
  implicit none
 
@@ -416,6 +417,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  type(pseudopotential_type), intent(inout) :: psps
 
  !Local variables-------------------------------
+ integer :: i, me !FB-test
  !scalars
  integer, parameter          :: cplex=1
  integer                     :: cplex_rhoij
@@ -453,6 +455,14 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
               & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
               & tdks%ylm,tdks%ylmgr)
+
+   !FB-test
+   !FB-test me=xmpi_comm_rank(mpi_enreg%comm_band)
+   !FB-test do i=1, size(tdks%cprj(1,:))
+   !FB-test    write(100+me,*) tdks%cprj(1,i)%cp
+   !FB-test end do
+   !FB-test write(100+me,*) ' '
+
 
    !paral atom
    if (my_natom/=dtset%natom) then
