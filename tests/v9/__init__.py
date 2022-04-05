@@ -25,6 +25,8 @@ inp_files = [
 "t10.abi", # optic
 "t11.abi", # GGA-PBE PAW nsppol=2
 "t12.abi", # optic
+"t13.abi", # GGA-PBE NC BCC Iron ferromagnetic
+"t14.abi", # GGA-PBE PAW BCC Iron ferromagnetic
 "t15.abi", # check slight misalignment of rprim, with large tolsym
 "t16.abi", # check slightly incorrect xred, with large tolsym
 "t17.abi", # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
