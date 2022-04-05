@@ -2,18 +2,22 @@
 
 ndtset 5
 
-
 nsppol1   2                 spinat1 0 0 4     nband1 12
+
 nspinor2  2   nspden2  4    spinat2 0 0 4     nband2 24
 nspinor3  2   nspden3  4    spinat3 4 0 0     nband3 24
 nspinor4  2   nspden4  4    spinat4 0 4 0     nband4 24
 nspinor5  2   nspden5  4    spinat5 sqrt(8.0) sqrt(8.0) 0     nband5 24
 
+prtvol 11
 
 #
 
 kptopt 3
 ecut 10.0
+
+pawecutdg 20.0
+pawspnorb 0    #   This is for testing purposes only : one expect the collinear results to be exactly equal to the non-collinear results, so spin-orbit coupling must be suppressed
 
 occopt 7
 
@@ -21,7 +25,7 @@ nstep 12
 tolwfr    1.0d-12
 
 #Definition of the k-point grid
-ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
+ ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
 
 #Definition of the atoms
 natom 1
@@ -38,16 +42,15 @@ rprim     -0.5  0.5  0.5
            0.5 -0.5  0.5
            0.5  0.5 -0.5
 
- so_psp 0
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/26fe.pspnc"
+ pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t13.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 ;
+#%%   t94.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 ;
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]
@@ -56,6 +59,10 @@ rprim     -0.5  0.5  0.5
 #%% description =
 #%%   BCC iron, ferromagnetic, GGA, PAW.
 #%%   Test collinear treatment as well as non-collinear, with different starting spinat
-#%%   See test v9#41 for DFPT, with PAW atomic data.
+#%%   See test v9#41 for DFPT, with the same PAW atomic data, and same usexcnhat=0 (default).
+#%%   The total energy and stress change very little within the set of non-collinear calculations
+#%%   However they differ a little (etotal) or a lot (stress) between the collinear calculation and the non-collinear calculation.
+#%%   The similarity was much better for norm-conserving pseudos (see test v9#13) or PAW with usexcnhat=1 .
+#%%   This seems suscpicious and should be clarified. 
 #%% topics = PAW
 #%%<END TEST_INFO>

@@ -17,10 +17,10 @@
 .Starting date : Tue  5 Apr 2022.
 - ( at 16h42 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v9_t107/t107.abi
-- output file    -> t107.abo
-- root for input  files -> t107i
-- root for output files -> t107o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v9_t78/t78.abi
+- output file    -> t78.abo
+- root for input  files -> t78i
+- root for output files -> t78o
 
 
  invars1: COMMENT -
