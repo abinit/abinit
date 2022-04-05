@@ -8,7 +8,7 @@
 !!  pawfgr_type variables define Fine rectangular GRid parameters and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2022 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -382,7 +382,7 @@ end subroutine pawfgr_nullify
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2022 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
