@@ -1684,6 +1684,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !    ==== Stresses ====
      if (optstr==1) then
+!      This is contribution Eq.(41) of Torrent2008.
 !DEBUG
 !   write(6,*)' after loop on ispden,ishift_str,idiag,hatstr(1),grhat_tmp(ishift_str+1)',hatstr(1),grhat_tmp(ishift_str+1,idiag)
 !ENDDEBUG
@@ -1858,7 +1859,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !===== Convert stresses (add diag and off-diag contributions) =====
  if (optstr==1) then
 
-!  Has to compute int[nhat*vtrial]
+!  Has to compute int[nhat*vtrial]. See Eq.(40) in Torrent2008 .
    hatstr_diag=zero
    if (nspden==1.or.dimvtrial==1) then
      do ic=1,nfft
