@@ -1661,14 +1661,14 @@ force_length_stats: {min: null, max: null, mean: null, }
  Magnetization (spin up - spin down) [el/Bohr^3]
 )     Maximum=    4.0399E-05  at reduced coord.    0.0000    0.0000    0.7593
 )Next maximum=    4.0399E-05  at reduced coord.    0.0000    0.0000    0.2407
-      Minimum=   -5.9498E-03  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=   -5.8622E-03  at reduced coord.    0.0185    0.0000    0.0000
+)     Minimum=   -5.9498E-03  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=   -5.8622E-03  at reduced coord.    0.0185    0.0000    0.0000
    Integrated=   -6.3793E-02
  Relative magnetization (=zeta, between -1 and 1)
 )     Maximum=    2.9942E-04  at reduced coord.    0.0000    0.0000    0.7593
 )Next maximum=    2.9942E-04  at reduced coord.    0.0000    0.0000    0.2407
-      Minimum=   -1.0620E-02  at reduced coord.    0.1481    0.1481    0.1481
- Next minimum=   -1.0620E-02  at reduced coord.    0.8519    0.1481    0.1481
+)     Minimum=   -1.0620E-02  at reduced coord.    0.1481    0.1481    0.1481
+)Next minimum=   -1.0620E-02  at reduced coord.    0.8519    0.1481    0.1481
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }

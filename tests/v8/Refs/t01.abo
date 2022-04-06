@@ -1564,14 +1564,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
  Magnetization (spin up - spin down) [el/Bohr^3]
 )     Maximum=    3.3624E-05  at reduced coord.    0.0000    0.0000    0.7593
 )Next maximum=    3.3624E-05  at reduced coord.    0.0000    0.0000    0.2407
-      Minimum=   -4.8871E-03  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=   -4.8152E-03  at reduced coord.    0.0185    0.0000    0.0000
+)     Minimum=   -4.8871E-03  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=   -4.8152E-03  at reduced coord.    0.0185    0.0000    0.0000
    Integrated=   -5.1829E-02
  Relative magnetization (=zeta, between -1 and 1)
 )     Maximum=    2.4920E-04  at reduced coord.    0.0000    0.0000    0.7593
 )Next maximum=    2.4920E-04  at reduced coord.    0.0000    0.0000    0.2407
-      Minimum=   -8.5311E-03  at reduced coord.    0.1481    0.1481    0.1481
- Next minimum=   -8.5311E-03  at reduced coord.    0.8519    0.1481    0.1481
+)     Minimum=   -8.5311E-03  at reduced coord.    0.1481    0.1481    0.1481
+)Next minimum=   -8.5311E-03  at reduced coord.    0.8519    0.1481    0.1481
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
