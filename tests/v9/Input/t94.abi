@@ -1,15 +1,22 @@
+# Added by runtests.py
+output_file = "t94.abo"
+indata_prefix = "t94i"
+outdata_prefix = "t94o"
+tmpdata_prefix = "t94t"
+# end runtests.py section
+
 #   Test  iron BCC metallic spin-polarized ferromagnetic collinear and non-collinear
 
-ndtset 5
+ndtset 7
 
 nsppol1   2                 spinat1 0 0 4     nband1 12
+nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1
 
-nspinor2  2   nspden2  4    spinat2 0 0 4     nband2 24
-nspinor3  2   nspden3  4    spinat3 4 0 0     nband3 24
-nspinor4  2   nspden4  4    spinat4 0 4 0     nband4 24
-nspinor5  2   nspden5  4    spinat5 sqrt(8.0) sqrt(8.0) 0     nband5 24
-
-prtvol 11
+nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1
+nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1
+nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
+nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
+nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
 
 #
 
@@ -21,8 +28,8 @@ pawspnorb 0    #   This is for testing purposes only : one expect the collinear 
 
 occopt 7
 
-nstep 12
-tolwfr    1.0d-12
+nstep 30
+tolvrs    1.0d-10
 
 #Definition of the k-point grid
  ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
@@ -42,7 +49,7 @@ rprim     -0.5  0.5  0.5
            0.5 -0.5  0.5
            0.5  0.5 -0.5
 
- pp_dirpath "$ABI_PSPDIR"
+ pp_dirpath "../../Psps_for_tests"
  pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
@@ -50,7 +57,7 @@ rprim     -0.5  0.5  0.5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t94.abo, tolnlines = 1, tolabs = 2.0e-2, tolrel = 3.0e-2 , fld_options= -ridiculous;
+#%%   t94.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 , fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]
@@ -64,6 +71,5 @@ rprim     -0.5  0.5  0.5
 #%%   However they differ a little (etotal) or a lot (stress) between the collinear calculation and the non-collinear calculation.
 #%%   The similarity was much better for norm-conserving pseudos (see test v9#13) or PAW with usexcnhat=1 .
 #%%   This seems suscpicious and should be clarified. 
-#%%   Indeed, with LDA, the collinear and non-collinear values perfectly agree.
 #%% topics = PAW
 #%%<END TEST_INFO>
