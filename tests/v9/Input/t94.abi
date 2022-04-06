@@ -50,7 +50,7 @@ rprim     -0.5  0.5  0.5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t94.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 , fld_options= -ridiculous;
+#%%   t94.abo, tolnlines = 1, tolabs = 2.0e-2, tolrel = 3.0e-2 , fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]
