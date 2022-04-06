@@ -168,94 +168,94 @@ tolerances: {tolwfr: 1.00E-14, }
  1rst direction:
 --------------------------------------------------------------------------------
  Gradient of the electronic density [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.9630    0.0000    0.0000
+)     Maximum=    3.3642E-01  at reduced coord.    0.9630    0.0000    0.0000
       Minimum=   -3.3642E-01  at reduced coord.    0.0370    0.0000    0.0000
    Integrated=    0.0000E+00
  Spin up density      [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.9630    0.0000    0.0000
+)     Maximum=    3.3642E-01  at reduced coord.    0.9630    0.0000    0.0000
       Minimum=   -3.3642E-01  at reduced coord.    0.0370    0.0000    0.0000
    Integrated=    0.0000E+00
  Spin down density    [el/Bohr^4]
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Magnetization (spin up - spin down) [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.9630    0.0000    0.0000
+)     Maximum=    3.3642E-01  at reduced coord.    0.9630    0.0000    0.0000
       Minimum=   -3.3642E-01  at reduced coord.    0.0370    0.0000    0.0000
    Integrated=    0.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  2nd direction:
 --------------------------------------------------------------------------------
  Gradient of the electronic density [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.0000    0.9630    0.0000
+)     Maximum=    3.3642E-01  at reduced coord.    0.0000    0.9630    0.0000
       Minimum=   -3.3642E-01  at reduced coord.    0.0000    0.0370    0.0000
    Integrated=    0.0000E+00
  Spin up density      [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.0000    0.9630    0.0000
+)     Maximum=    3.3642E-01  at reduced coord.    0.0000    0.9630    0.0000
       Minimum=   -3.3642E-01  at reduced coord.    0.0000    0.0370    0.0000
    Integrated=    0.0000E+00
  Spin down density    [el/Bohr^4]
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Magnetization (spin up - spin down) [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.0000    0.9630    0.0000
+)     Maximum=    3.3642E-01  at reduced coord.    0.0000    0.9630    0.0000
       Minimum=   -3.3642E-01  at reduced coord.    0.0000    0.0370    0.0000
    Integrated=    0.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  3rd direction:
 --------------------------------------------------------------------------------
  Gradient of the electronic density [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.0000    0.0000    0.9630
+)     Maximum=    3.3642E-01  at reduced coord.    0.0000    0.0000    0.9630
       Minimum=   -3.3642E-01  at reduced coord.    0.0000    0.0000    0.0370
    Integrated=    0.0000E+00
  Spin up density      [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.0000    0.0000    0.9630
+)     Maximum=    3.3642E-01  at reduced coord.    0.0000    0.0000    0.9630
       Minimum=   -3.3642E-01  at reduced coord.    0.0000    0.0000    0.0370
    Integrated=    0.0000E+00
  Spin down density    [el/Bohr^4]
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Magnetization (spin up - spin down) [el/Bohr^4]
-      Maximum=    3.3642E-01  at reduced coord.    0.0000    0.0000    0.9630
+)     Maximum=    3.3642E-01  at reduced coord.    0.0000    0.0000    0.9630
       Minimum=   -3.3642E-01  at reduced coord.    0.0000    0.0000    0.0370
    Integrated=    0.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Result for Laplacian of the electron density :
 
 --------------------------------------------------------------------------------
  Laplacian of the electronic density [el/Bohr^5]
-      Maximum=    2.7599E-02  at reduced coord.    0.9630    0.8519    0.0000
+)     Maximum=    2.7599E-02  at reduced coord.    0.9630    0.8519    0.0000
       Minimum=   -6.3968E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Spin up density      [el/Bohr^5]
-      Maximum=    2.7599E-02  at reduced coord.    0.9630    0.8519    0.0000
+)     Maximum=    2.7599E-02  at reduced coord.    0.9630    0.8519    0.0000
       Minimum=   -6.3968E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Spin down density    [el/Bohr^5]
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Magnetization (spin up - spin down) [el/Bohr^5]
-      Maximum=    2.7599E-02  at reduced coord.    0.9630    0.8519    0.0000
+)     Maximum=    2.7599E-02  at reduced coord.    0.9630    0.8519    0.0000
       Minimum=   -6.3968E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
@@ -263,24 +263,24 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    8.4793E-02  at reduced coord.    0.9815    0.9630    0.9815
-      Minimum=    1.2766E-05  at reduced coord.    0.5000    0.5000    0.5000
+)     Maximum=    8.4793E-02  at reduced coord.    0.9815    0.9630    0.9815
+)     Minimum=    1.2766E-05  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    4.5453E-01
  Spin up density      [Ha/Bohr^3]
-      Maximum=    8.4793E-02  at reduced coord.    0.9815    0.9630    0.9815
-      Minimum=    1.2766E-05  at reduced coord.    0.5000    0.5000    0.5000
+)     Maximum=    8.4793E-02  at reduced coord.    0.9815    0.9630    0.9815
+)     Minimum=    1.2766E-05  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    4.5453E-01
  Spin down density    [Ha/Bohr^3]
-      Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    0.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    0.0000E+00
  Magnetization (spin up - spin down) [Ha/Bohr^3]
-      Maximum=    8.4793E-02  at reduced coord.    0.9815    0.9630    0.9815
-      Minimum=    1.2766E-05  at reduced coord.    0.5000    0.5000    0.5000
+)     Maximum=    8.4793E-02  at reduced coord.    0.9815    0.9630    0.9815
+)     Minimum=    1.2766E-05  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    4.5453E-01
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
-      Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    1.0000E+00  at reduced coord.    0.9815    0.9815    0.9815
+)     Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
