@@ -572,10 +572,6 @@ class Differ(object):
                                         # compare absolute values
                                         f1, f2 = abs(f1), abs(f2)
 
-                                    if meta1 == ')':
-                                        # turn off further numerical comparison
-
-
                                     abs_sum = abs(f1) + abs(f2)
                                     diff = abs(f1 - f2)
                                     if abs_sum == 0.0:
