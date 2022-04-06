@@ -63,10 +63,7 @@ __global__ void kernel_compute_nl_projections(double2 *proj,
 {
 
   //Definition of locals
-  int ilmn,ipw,itypat;
-  int dec_iatom_ph3d,dec_ffnl;
-  double2 vect,ph3d;
-  double ffnl;
+  double2 vect;
 
   //Shared memory areas to compute and reduce
   extern __shared__ double sh_mem[];
@@ -75,10 +72,10 @@ __global__ void kernel_compute_nl_projections(double2 *proj,
 
   //Get the couple (iatom,ilmn) of the block
   //iatom = atoms[blockIdx.y];// we don't need it because we use it only in dec_iatom_ph3d
-  ilmn = lmn[blockIdx.y];
-  itypat = typat[blockIdx.y];
-  dec_iatom_ph3d = npw * atoms[blockIdx.y];
-  dec_ffnl = npw*(0 + dimffnlin*(ilmn + lmnmax*itypat));
+  int ilmn = lmn[blockIdx.y];
+  int itypat = typat[blockIdx.y];
+  int dec_iatom_ph3d = npw * atoms[blockIdx.y];
+  int dec_ffnl = npw*(0 + dimffnlin*(ilmn + lmnmax*itypat));
 
   //Initialisation of Shared mem
   sh_proj_x[threadIdx.x] = 0.;
@@ -87,12 +84,12 @@ __global__ void kernel_compute_nl_projections(double2 *proj,
   // Step1 and 2 computes c(g).exp(2pi.i.g.R) => opernla (all choices)
 
   //Step 1: Compute value for each plane wave and reduce by thread in sh mem
-  for(ipw=threadIdx.x ;ipw<npw; ipw+=blockDim.x){
+  for (int ipw=threadIdx.x; ipw<npw; ipw+=blockDim.x) {
     //ffnl= ffnlin[ipw + npw*(0 + dimffnlin*(ilmn + lmnmax*itypat))];
-    ffnl= ffnlin[ipw + dec_ffnl];
-    vect= vectin[ipw];
+    double ffnl = ffnlin[ipw + dec_ffnl];
+    vect = vectin[ipw];
     //ph3d= ph3din[ipw + npw*iatom];
-    ph3d= ph3din[ipw + dec_iatom_ph3d];
+    double2 ph3d = ph3din[ipw + dec_iatom_ph3d];
 
     //We add the complex product in shared mem
     sh_proj_x[threadIdx.x] += ffnl*(vect.x*ph3d.x - vect.y*ph3d.y) ;
@@ -100,7 +97,7 @@ __global__ void kernel_compute_nl_projections(double2 *proj,
   }
 
   //Step 2: Reduce between threads
-  for(int decalage=blockDim.x>>1;decalage>0;decalage=decalage>>1){
+  for (int decalage=blockDim.x>>1; decalage>0; decalage=decalage>>1) {
     //We ensure every load on shared mem is accomplished in the block
     __syncthreads();
     if( threadIdx.x <  decalage)
@@ -112,36 +109,39 @@ __global__ void kernel_compute_nl_projections(double2 *proj,
   __syncthreads();
 
   //Write results for the block
-  if(threadIdx.x == 0){
+  if (threadIdx.x == 0) {
+
     //We need to know l;
     int l=indlmn[ 0 + 6*(ilmn + lmnmax*itypat)];
     //We write the result as a complex in register before storing it in glob mem
-    switch (l%4){
+    switch (l%4) {
     case 0: //i^l = 1
-      vect.x = four_pi_by_squcvol * sh_proj_x[0] ;
-      vect.y = four_pi_by_squcvol * sh_proj_y[blockDim.x -1] ;
+      vect.x =  four_pi_by_squcvol * sh_proj_x[0];
+      vect.y =  four_pi_by_squcvol * sh_proj_y[blockDim.x -1];
       break;
     case 1: //i^l = i
-      vect.x = -four_pi_by_squcvol * sh_proj_y[blockDim.x -1] ;
-      vect.y = four_pi_by_squcvol * sh_proj_x[0] ;
+      vect.x = -four_pi_by_squcvol * sh_proj_y[blockDim.x -1];
+      vect.y =  four_pi_by_squcvol * sh_proj_x[0];
       break;
     case 2: //i^l = -1
-      vect.x = -four_pi_by_squcvol * sh_proj_x[0] ;
-      vect.y = -four_pi_by_squcvol * sh_proj_y[blockDim.x -1] ;
+      vect.x = -four_pi_by_squcvol * sh_proj_x[0];
+      vect.y = -four_pi_by_squcvol * sh_proj_y[blockDim.x -1];
       break;
     case 3: //i^l = -i
-      vect.x = four_pi_by_squcvol * sh_proj_y[blockDim.x -1] ;
-      vect.y = -four_pi_by_squcvol * sh_proj_x[0] ;
+      vect.x =  four_pi_by_squcvol * sh_proj_y[blockDim.x -1];
+      vect.y = -four_pi_by_squcvol * sh_proj_x[0];
       break;
     default:
       break;
     }
+
     if(cplex==1){
       vect.x *= 2.;
       vect.y = 0.;
     }
     proj[blockIdx.y] = vect;
-  }
+
+  } // if (threadIdx.x == 0)
 
 }//end of kernel_compute_nl_projections
 
