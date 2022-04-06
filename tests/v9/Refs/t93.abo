@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  6 Apr 2022.
-- ( at 21h04 )
+- ( at 21h15 )
   
 - input  file    -> /Users/gonze/_Research/ABINIT_git/gonze2/tests/Test_suite/v9_t93/t93.abi
 - output file    -> t93.abo
@@ -35,10 +35,11 @@
     occopt =       7   xclevel =       2
 -    mband =          24        mffmem =           1         mkmem =           1
        mpw =         104          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       9.940 Mbytes of memory.
+P This job should need less than                       9.419 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.078 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
 ================================================================================
@@ -54,10 +55,11 @@ _ WF disk file :      0.078 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
     occopt =       7   xclevel =       2
 -    mband =          24        mffmem =           1         mkmem =           1
        mpw =         104          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       9.940 Mbytes of memory.
+P This job should need less than                       9.419 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.078 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
 ================================================================================
@@ -75,10 +77,11 @@ _ WF disk file :      0.078 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
     occopt =       7   xclevel =       2
 -    mband =          48        mffmem =           1         mkmem =           1
        mpw =         208          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                      15.005 Mbytes of memory.
+P This job should need less than                      14.427 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -96,10 +99,11 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     occopt =       7   xclevel =       2
 -    mband =          48        mffmem =           1         mkmem =           1
        mpw =         208          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                      15.005 Mbytes of memory.
+P This job should need less than                      14.427 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -117,10 +121,11 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     occopt =       7   xclevel =       2
 -    mband =          48        mffmem =           1         mkmem =           1
        mpw =         208          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                      15.005 Mbytes of memory.
+P This job should need less than                      14.427 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -138,10 +143,11 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     occopt =       7   xclevel =       2
 -    mband =          48        mffmem =           1         mkmem =           1
        mpw =         208          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                      15.005 Mbytes of memory.
+P This job should need less than                      14.427 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -159,10 +165,11 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
     occopt =       7   xclevel =       2
 -    mband =          48        mffmem =           1         mkmem =           1
        mpw =         208          nfft =        4096          nkpt =           1
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                      15.005 Mbytes of memory.
+P This job should need less than                      14.427 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -206,7 +213,7 @@ _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
               ixc     -101130
            jdtset        1    2    3    4    5    6    7
               kpt      5.00000000E-01  5.00000000E-01  5.00000000E-01
-           kptopt           3
+           kptopt           4
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      5.20000000E+00
 P           mkmem           1
@@ -410,7 +417,8 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -728,7 +736,7 @@ xc                  : -7.00655411674589E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821648E+01
 local_psp           : -1.25266851311040E+02
-spherical_terms     : -2.32032535428887E+01
+spherical_terms     : -2.32032535428886E+01
 internal            : -2.48674977894127E+02
 '-kT*entropy'       : -9.48107883194041E-15
 total_energy        : -2.48674977894127E+02
@@ -763,7 +771,8 @@ total_energy_dc_eV  : -6.76679029536074E+03
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -1082,7 +1091,8 @@ total_energy_dc_eV  : -6.76679029535586E+03
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -1643,7 +1653,7 @@ xc                  : -7.00617619115616E+00
 Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821648E+01
 local_psp           : -1.25268980321362E+02
-spherical_terms     : -2.32015439753466E+01
+spherical_terms     : -2.32015439753465E+01
 internal            : -2.48674974290473E+02
 '-kT*entropy'       : -7.80353522116331E-16
 total_energy        : -2.48674974290473E+02
@@ -1678,7 +1688,8 @@ total_energy_dc_eV  : -6.76678996195302E+03
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -2255,7 +2266,8 @@ total_energy_dc_eV  : -6.76678995037827E+03
 
 ================================================================================
 == DATASET  5 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -2798,7 +2810,7 @@ spherical_terms     : -2.32015455637860E+01
 internal            : -2.48674975926015E+02
 '-kT*entropy'       : -7.80871166786664E-16
 total_energy        : -2.48674975926015E+02
-total_energy_eV     : -6.76679022629904E+03
+total_energy_eV     : -6.76679022629905E+03
 ...
 
 
@@ -2829,7 +2841,8 @@ total_energy_dc_eV  : -6.76678999282864E+03
 
 ================================================================================
 == DATASET  6 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -3384,9 +3397,9 @@ Ewald energy        : -1.78662593800648E+02
 psp_core            :  1.41464799821648E+01
 xc_dc               : -4.35284770181580E+01
 spherical_terms     : -1.58912087447276E+01
-internal            : -2.48674965696457E+02
+internal            : -2.48674965696456E+02
 '-kT*entropy'       : -7.79382499934444E-16
-total_energy_dc     : -2.48674965696457E+02
+total_energy_dc     : -2.48674965696456E+02
 total_energy_dc_eV  : -6.76678994793861E+03
 ...
 
@@ -3403,7 +3416,8 @@ total_energy_dc_eV  : -6.76678994793861E+03
 
 ================================================================================
 == DATASET  7 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
 --- !DatasetInfo
@@ -4028,7 +4042,7 @@ total_energy_dc_eV  : -6.76678996017703E+03
               ixc     -101130
            jdtset        1    2    3    4    5    6    7
               kpt      5.00000000E-01  5.00000000E-01  5.00000000E-01
-           kptopt           3
+           kptopt           4
          kptrlatt        1    0    0      0    1    0      0    0    1
           kptrlen      5.20000000E+00
 P           mkmem           1
@@ -4313,10 +4327,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         29.0  wall=         29.0
+- Proc.   0 individual time (sec): cpu=         28.9  wall=         29.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  34 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.0  wall=         29.0
+.Delivered   5 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=        115.3  wall=        115.6

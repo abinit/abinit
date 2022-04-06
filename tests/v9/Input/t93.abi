@@ -14,7 +14,7 @@ nspinor7  2   nspden7  4    spinat7 sqrt(0.5) sqrt(0.5) 0   sqrt(0.5) sqrt(0.5) 
 
 #
 
-kptopt 3
+kptopt 4  
 ecut 10.0
 
 pawecutdg 20.0

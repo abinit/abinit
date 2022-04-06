@@ -12,7 +12,7 @@ nspinor5  2   nspden5  4    spinat5 sqrt(8.0) sqrt(8.0) 0     nband5 24
 
 #
 
-kptopt 3
+kptopt 4
 ecut 10.0
 
 occopt 7

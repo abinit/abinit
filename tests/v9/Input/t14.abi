@@ -14,7 +14,7 @@ prtvol 11
 
 #
 
-kptopt 3
+kptopt 3   #    kptopt 4 # Should work as well, but the stress seem not sufficiently close for the different datasets
 ecut 10.0
 
 pawecutdg 20.0
