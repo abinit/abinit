@@ -1,10 +1,3 @@
-# Added by runtests.py
-output_file = "t94.abo"
-indata_prefix = "t94i"
-outdata_prefix = "t94o"
-tmpdata_prefix = "t94t"
-# end runtests.py section
-
 #   Test  iron BCC metallic spin-polarized ferromagnetic collinear and non-collinear
 
 ndtset 7
@@ -59,7 +52,7 @@ rprim     -0.5  0.5  0.5
 #%% files_to_test =
 #%%   t94.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0e-0 , fld_options= -ridiculous;
 #%% [paral_info]
-#%% max_nprocs = 28
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = PAW

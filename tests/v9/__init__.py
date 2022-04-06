@@ -109,6 +109,7 @@ inp_files = [
 "t90.abi", # checkG Coulomb cut-off, large tolerance a.t.m.
 "t91.abi", # occopt 9 tests on Si
 "t92.abi", # check extended fpmd routines with low number of bands
+"t93.abi", # energy, forces for PAW non-collinear, with usexcnhat=0
 "t94.abi", # energy, stress for PAW non-collinear, with usexcnhat=0
 "t95.abi", # test treatment of inaccurate POSCAR file
 "t96.abi", # test treatment of inaccurate POSCAR file
