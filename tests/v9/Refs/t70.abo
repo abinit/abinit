@@ -1132,7 +1132,7 @@ tolerances: {tolvrs: 1.00E-03, }
  At SCF step    5       vres2   =  5.41E-05 < tolvrs=  1.00E-03 =>converged.
 -open ddk wf file :t70o_DS2_1WF7
 -open ddk wf file :t70o_DS2_1WF8
--open ddk wf file :t<è0o_DS2_1WF9
+-open ddk wf file :t70o_DS2_1WF9
 ================================================================================
 
  ----iterations are completed or convergence reached----
