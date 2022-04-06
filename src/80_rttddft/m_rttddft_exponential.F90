@@ -139,7 +139,7 @@ contains
 ! ***********************************************************************
 
  !Transpose if paral_kgb
- if (dtset%paral_kgb == 1) then
+ if (dtset%paral_kgb == 1 .and. mpi_enreg%nproc_band>1) then
    call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t,npw_k,npw_t, &
                           & nspinor,1,index_wavef_band)
  else
@@ -246,8 +246,10 @@ contains
  ABI_FREE(cwaveprj)
 
  !Transpose back if paral_kgb
- if (dtset%paral_kgb == 1) call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t, &
-                                                  & npw_k,npw_t,nspinor,-1, index_wavef_band)
+ if (dtset%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) then 
+    call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t, &
+                           & npw_k,npw_t,nspinor,-1, index_wavef_band)
+ end if
 
  end subroutine rttddft_exp_taylor
 
