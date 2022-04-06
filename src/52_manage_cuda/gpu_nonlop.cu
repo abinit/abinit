@@ -428,7 +428,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
 
   // if cpot==2, the projections are already in memory, so we just upload them on device
   if((*cpopt)==2){
-      cudaMemcpy(proj_gpu,proj,nb_proj_to_compute*sizeof(double2),cudaMemcpyHostToDevice);
+    cudaMemcpy(proj_gpu,proj,nb_proj_to_compute*sizeof(double2),cudaMemcpyHostToDevice);
   }
   else {
     gpu_compute_nl_projections_(proj_gpu,
@@ -468,17 +468,17 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
 
     if(m_ham_used != 1) {
       if((*paw_opt)!=3)
-	cuda_state=cudaMemcpy(enl_gpu, enl, (*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double),cudaMemcpyHostToDevice);
+        cuda_state=cudaMemcpy(enl_gpu, enl, (*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double),cudaMemcpyHostToDevice);
       if((*paw_opt)>1)
-      cuda_state=cudaMemcpy(sij_gpu, sij, (*dimenl1)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice);
+        cuda_state=cudaMemcpy(sij_gpu, sij, (*dimenl1)*(*ntypat)*sizeof(double),cudaMemcpyHostToDevice);
 
       if((*choice==3)||((*choice==23)))
-	cuda_state=cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice);
+        cuda_state=cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice);
 
       if(cuda_state!=cudaSuccess){
-	printf("gpu_nonlop: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
-	fflush(stdout);
-	abi_cabort();
+        printf("gpu_nonlop: Error while copying data 2 to gpu :\n %s \n",cudaGetErrorString(cuda_state));
+        fflush(stdout);
+        abi_cabort();
       }
     }
 
@@ -541,14 +541,14 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
 
 //Allocation routine
 extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
-				  int *natom,int *ntypat,int *lmnmax,
-				  int *indlmn,int *nattyp,
-				  int *atindx1,double *gprimd,
-				  int *dimffnlin,int *dimffnlout,
-				  int *dimenl1, int *dimenl2 ){
+                                  int *natom,int *ntypat,int *lmnmax,
+                                  int *indlmn,int *nattyp,
+                                  int *atindx1,double *gprimd,
+                                  int *dimffnlin,int *dimffnlout,
+                                  int *dimenl1, int *dimenl2 ){
 
-//   printf("calling alloc_nonlop_gpu with npw=%d \n",*npwin);
-//   fflush(stdout);
+  //   printf("calling alloc_nonlop_gpu with npw=%d \n",*npwin);
+  //   fflush(stdout);
 
   //Si on avait deja alloue
   if(gpu_initialization==1)
@@ -701,8 +701,13 @@ extern "C" void free_nonlop_gpu_(){
   }
 }
 
-extern "C" void gpu_update_ham_data_(double *enl,int *size_enl, double *sij,int *size_sij,
-                                     double *gprimd,int *size_gprimd){
+/**
+ *
+ */
+extern "C" void gpu_update_ham_data_(double *enl,    int *size_enl,
+                                     double *sij,    int *size_sij,
+                                     double *gprimd, int *size_gprimd)
+{
 
   cudaError_t cuda_state;
 
@@ -730,7 +735,9 @@ extern "C" void gpu_update_ham_data_(double *enl,int *size_enl, double *sij,int 
   m_ham_used = 1;
 }
 
-extern "C" void gpu_update_ffnl_ph3d_(double *ph3din,int *dimph3din,double *ffnlin,int *dimffnlin){
+extern "C" void gpu_update_ffnl_ph3d_(double *ph3din, int *dimph3din,
+                                      double *ffnlin, int *dimffnlin)
+{
 
   cudaError_t cuda_state;
 
@@ -750,12 +757,14 @@ extern "C" void gpu_update_ffnl_ph3d_(double *ph3din,int *dimph3din,double *ffnl
   ffnl_ph3d_updated = 1;
 }
 
-extern "C" void gpu_finalize_ffnl_ph3d_(){
+extern "C" void gpu_finalize_ffnl_ph3d_()
+{
   ffnl_ph3d_updated = 0;
 }
 
 
-extern "C" void gpu_finalize_ham_data_(){
+extern "C" void gpu_finalize_ham_data_()
+{
   m_ham_used = 0;
 }
 //***
