@@ -502,6 +502,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    !For RTTDDFT ensure that bandpp = nband / npband
    if (optdriver == RUNL_RTTDDFT) then
       dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+      if ( tread(8) == 1 ) then 
+         write(msg, '(a,a)') 'It is useless to set bandpp for a RT-TDDFT run because it is automatically set to bandpp=nband/npband', ch10
+         ABI_WARNING(msg)
+      end if
    end if
 
 !  Set mpi_enreg
