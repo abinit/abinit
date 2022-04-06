@@ -13,7 +13,7 @@ nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
 
 #
 
-kptopt 3
+kptopt 3  #    kptopt 4 # Should work as well, but yield convergence problems
 ecut 10.0
 
 pawecutdg 20.0
