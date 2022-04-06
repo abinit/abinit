@@ -64,5 +64,6 @@ rprim     -0.5  0.5  0.5
 #%%   However they differ a little (etotal) or a lot (stress) between the collinear calculation and the non-collinear calculation.
 #%%   The similarity was much better for norm-conserving pseudos (see test v9#13) or PAW with usexcnhat=1 .
 #%%   This seems suscpicious and should be clarified. 
+#%%   Indeed, with LDA, the collinear and non-collinear values perfectly agree.
 #%% topics = PAW
 #%%<END TEST_INFO>
