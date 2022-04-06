@@ -816,11 +816,11 @@ Result for kinetic energy density :
    Integrated=    1.7097E+00
  x component of magnetization [Ha/Bohr^3]
 )     Maximum=    0.0000E+00  at reduced coord.    0.6296    0.9630    0.9630
-      Minimum=   -1.1198E-07  at reduced coord.    0.9259    0.9630    0.0000
+)     Minimum=   -1.1198E-07  at reduced coord.    0.9259    0.9630    0.0000
    Integrated=   -4.9070E-06
  y component of magnetization [Ha/Bohr^3]
 )     Maximum=    0.0000E+00  at reduced coord.    0.7407    0.9630    0.9630
-      Minimum=   -3.4718E-08  at reduced coord.    0.9630    0.0370    0.0741
+)     Minimum=   -3.4718E-08  at reduced coord.    0.9630    0.0370    0.0741
    Integrated=   -1.0383E-06
  z component of magnetization [Ha/Bohr^3]
 )     Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259
@@ -1170,11 +1170,11 @@ Result for kinetic energy density :
    Integrated=    1.7097E+00
  x component of magnetization [Ha/Bohr^3]
 )     Maximum=    0.0000E+00  at reduced coord.    0.6296    0.9630    0.9630
-      Minimum=   -1.1198E-07  at reduced coord.    0.9259    0.9630    0.0000
+)     Minimum=   -1.1198E-07  at reduced coord.    0.9259    0.9630    0.0000
    Integrated=   -4.9070E-06
  y component of magnetization [Ha/Bohr^3]
 )     Maximum=    0.0000E+00  at reduced coord.    0.7407    0.9630    0.9630
-      Minimum=   -3.4718E-08  at reduced coord.    0.9630    0.0370    0.0741
+)     Minimum=   -3.4718E-08  at reduced coord.    0.9630    0.0370    0.0741
    Integrated=   -1.0383E-06
  z component of magnetization [Ha/Bohr^3]
 )     Maximum=    2.6343E-02  at reduced coord.    0.0370    0.0370    0.9259

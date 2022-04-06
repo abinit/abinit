@@ -870,20 +870,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     202.750     202.738
  x component of magnetization [el/Bohr^3]
 )     Maximum=    2.1581E-07  at reduced coord.    0.8000    0.2000    0.2333
 )Next maximum=    2.1581E-07  at reduced coord.    0.7667    0.2000    0.2333
-      Minimum=   -2.1581E-07  at reduced coord.    0.2000    0.8000    0.7667
- Next minimum=   -2.1581E-07  at reduced coord.    0.2333    0.8000    0.7667
+)     Minimum=   -2.1581E-07  at reduced coord.    0.2000    0.8000    0.7667
+)Next minimum=   -2.1581E-07  at reduced coord.    0.2333    0.8000    0.7667
    Integrated=    0.0000E+00
  y component of magnetization [el/Bohr^3]
 )     Maximum=    2.1581E-07  at reduced coord.    0.2000    0.8000    0.2333
 )Next maximum=    2.1581E-07  at reduced coord.    0.2000    0.7667    0.2333
-      Minimum=   -2.1581E-07  at reduced coord.    0.8000    0.2000    0.7667
- Next minimum=   -2.1581E-07  at reduced coord.    0.8000    0.2333    0.7667
+)     Minimum=   -2.1581E-07  at reduced coord.    0.8000    0.2000    0.7667
+)Next minimum=   -2.1581E-07  at reduced coord.    0.8000    0.2333    0.7667
    Integrated=    0.0000E+00
  z component of magnetization [el/Bohr^3]
 )     Maximum=    2.1581E-07  at reduced coord.    0.2000    0.2333    0.8000
 )Next maximum=    2.1581E-07  at reduced coord.    0.2333    0.2000    0.8000
-      Minimum=   -2.1581E-07  at reduced coord.    0.8000    0.7667    0.2000
- Next minimum=   -2.1581E-07  at reduced coord.    0.7667    0.8000    0.2000
+)     Minimum=   -2.1581E-07  at reduced coord.    0.8000    0.7667    0.2000
+)Next minimum=   -2.1581E-07  at reduced coord.    0.7667    0.8000    0.2000
    Integrated=    0.0000E+00
  Magnetization (absolute value) [el/Bohr^3]
 )     Maximum=    2.1586E-07  at reduced coord.    0.2333    0.7667    0.8000
@@ -1605,20 +1605,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      50.750      50.748
  x component of magnetization [el/Bohr^3]
 )     Maximum=    2.8455E-08  at reduced coord.    0.7667    0.2333    0.2333
 )Next maximum=    2.8130E-08  at reduced coord.    0.8000    0.2000    0.2333
-      Minimum=   -2.8455E-08  at reduced coord.    0.2333    0.7667    0.7667
- Next minimum=   -2.8130E-08  at reduced coord.    0.2000    0.8000    0.7667
+)     Minimum=   -2.8455E-08  at reduced coord.    0.2333    0.7667    0.7667
+)Next minimum=   -2.8130E-08  at reduced coord.    0.2000    0.8000    0.7667
    Integrated=    0.0000E+00
  y component of magnetization [el/Bohr^3]
 )     Maximum=    2.8455E-08  at reduced coord.    0.2333    0.7667    0.2333
 )Next maximum=    2.8130E-08  at reduced coord.    0.2000    0.8000    0.2333
-      Minimum=   -2.8455E-08  at reduced coord.    0.7667    0.2333    0.7667
- Next minimum=   -2.8130E-08  at reduced coord.    0.8000    0.2000    0.7667
+)     Minimum=   -2.8455E-08  at reduced coord.    0.7667    0.2333    0.7667
+)Next minimum=   -2.8130E-08  at reduced coord.    0.8000    0.2000    0.7667
    Integrated=    0.0000E+00
  z component of magnetization [el/Bohr^3]
 )     Maximum=    2.8455E-08  at reduced coord.    0.2333    0.2333    0.7667
 )Next maximum=    2.8130E-08  at reduced coord.    0.2000    0.2333    0.8000
-      Minimum=   -2.8455E-08  at reduced coord.    0.7667    0.7667    0.2333
- Next minimum=   -2.8130E-08  at reduced coord.    0.8000    0.7667    0.2000
+)     Minimum=   -2.8455E-08  at reduced coord.    0.7667    0.7667    0.2333
+)Next minimum=   -2.8130E-08  at reduced coord.    0.8000    0.7667    0.2000
    Integrated=    0.0000E+00
  Magnetization (absolute value) [el/Bohr^3]
 )     Maximum=    2.8455E-08  at reduced coord.    0.2333    0.7667    0.7667
