@@ -5,8 +5,8 @@ ndtset 7
 nsppol1   2                 spinat1 0 0 4     nband1 12
 nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
 
-nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1  # getden3 -1  This can be seen to help !
-nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1
+nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1  # getden3 -1  This can be seen to help but was not activated !
+nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1    tolvrs4   2.0d-10
 nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
 nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
 nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
