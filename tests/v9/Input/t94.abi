@@ -5,8 +5,8 @@ ndtset 7
 nsppol1   2                 spinat1 0 0 4     nband1 12
 nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
 
-nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1  # getden3 -1  This can be seen to help but was not activated !
-nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1    tolvrs4   2.0d-10
+nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1  tolvrs3 1.1d-10  # getden3 -1  This can be seen to help but was not activated !
+nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1    tolvrs4   2.0d-10  # The changes of tolvrs are there only to favor portability.
 nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
 nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
 nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
@@ -66,5 +66,6 @@ rprim     -0.5  0.5  0.5
 #%%   Also, note that the restart from a collinear calculation of a non-collinear calculation along z does not work well 
 #%%   with getwfk alone (DS3). After tuning the test, the use of getden -1 has been tried (in addition to getwfk -1),
 #%%   and was observed to help significantly, although not being perfect as in DS2 or DS4.
+#%%  Also, the portability of the restart is rather poor. This warrants further investigation.
 #%% topics = PAW
 #%%<END TEST_INFO>
