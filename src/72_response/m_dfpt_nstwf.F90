@@ -2093,7 +2093,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
      end do
 ! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
 !     only certain columns for my iband are filled, then used below
-     call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
+     call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, &
+&         cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
    end if ! ddk file is already present
  end do
 
