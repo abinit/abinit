@@ -5,7 +5,7 @@ ndtset 7
 nsppol1   2                 spinat1 0 0 4     nband1 12
 nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
 
-nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1
+nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1  # getden3 -1  This can be seen to help !
 nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1
 nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
 nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
@@ -63,6 +63,8 @@ rprim     -0.5  0.5  0.5
 #%%   The total energy and stress change very little between all calculations. Good !
 #%%   Note however that the SCF convergence is quite slow. Thus the good match was not obtained with 
 #%%   the initial value of nstep 12 (now nstep 30).
-#%%   Also, note that the restart from a collinear calculation of a non-collinear calculation along z does not work well (DS3).
+#%%   Also, note that the restart from a collinear calculation of a non-collinear calculation along z does not work well 
+#%%   with getwfk alone (DS3). After tuning the test, the use of getden -1 has been tried (in addition to getwfk -1),
+#%%   and was observed to help significantly, although not being perfect as in DS2 or DS4.
 #%% topics = PAW
 #%%<END TEST_INFO>
