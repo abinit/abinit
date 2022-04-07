@@ -2236,7 +2236,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
-!            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal
              if(dtset%prtbbb==1) then ! .and. mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt)then
                d2bbb_k(1,idir1,iband,iband) =      wtk_k*occ_k(iband)*two*dotr
                d2bbb_k(2,idir1,iband,iband) = -one*wtk_k*occ_k(iband)*two*doti
@@ -2269,10 +2268,10 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
-           eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
-           !gvnlx1 = cwaveddk(:,:,idir1)
-           !eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
+           !call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
+           !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
+           gvnlx1 = cwaveddk(:,:,idir1)
+           eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
 
              !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
            !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
@@ -2305,7 +2304,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !      XG 020216 : Marek, could you check the next forty lines
 !      In the parallel gauge, dot1 and dot2 vanishes
        if(dtset%prtbbb==1)then
-         ! d2bbb_k will be mpisummed below - only save my local band indices for diagonal contribution
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
            d2bbb_k(1,idir1,iband,iband)=d2bbb_k(1,idir1,iband,iband)+dotr
            d2bbb_k(2,idir1,iband,iband)=d2bbb_k(2,idir1,iband,iband)+doti
@@ -2348,10 +2346,10 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
  end do !  End loop over iband
 
- if(dtset%prtbbb==1)then
-   ! complete over jband index
-   call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
- end if
+! if(dtset%prtbbb==1)then
+!   ! complete over jband index
+!   call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
+! end if
 
 !Final deallocations
  ABI_FREE(cwave0)
