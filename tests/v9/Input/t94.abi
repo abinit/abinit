@@ -3,10 +3,10 @@
 ndtset 7
 
 nsppol1   2                 spinat1 0 0 4     nband1 12
-nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1
+nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
 
 nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1
-nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1
+nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1
 nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
 nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
 nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
@@ -15,13 +15,13 @@ nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
 
 kptopt 3  #    kptopt 4 # Should work as well, but yield convergence problems
 ecut 10.0
+nstep 27
 
 pawecutdg 20.0
 pawspnorb 0    #   This is for testing purposes only : one expect the collinear results to be exactly equal to the non-collinear results, so spin-orbit coupling must be suppressed
 
 occopt 7
 
-nstep 30
 tolvrs    1.0d-10
 
 #Definition of the k-point grid

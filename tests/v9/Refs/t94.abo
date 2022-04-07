@@ -1,6 +1,6 @@
 
 .Version 9.7.3 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin20.6.0_gnu11.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  6 Apr 2022.
-- ( at 19h04 )
+.Starting date : Thu  7 Apr 2022.
+- ( at 10h57 )
   
-- input  file    -> t94.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Test_suite/v9_t94/t94.abi
 - output file    -> t94.abo
 - root for input  files -> t94i
 - root for output files -> t94o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -243,6 +243,13 @@ P           mkmem           8
            nsppol5          1
            nsppol6          1
            nsppol7          1
+            nstep1         27
+            nstep2          1
+            nstep3         27
+            nstep4          1
+            nstep5         27
+            nstep6         27
+            nstep7         27
              nsym1         48
              nsym2         48
              nsym3          8
@@ -703,9 +710,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -732,47 +739,48 @@ _setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
 
 --- !BeginCycle
 iteration_state: {dtset: 1, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 27, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -115.13459749336    -1.15E+02 1.32E+01 2.02E+02 3.824
- ETOT  2  -126.43130673905    -1.13E+01 2.26E-01 3.14E+02 2.000
- ETOT  3  -124.44348610978     1.99E+00 4.94E-01 3.68E+01 2.000
+ ETOT  1  -115.13459749334    -1.15E+02 1.32E+01 2.02E+02 3.824
+ ETOT  2  -126.43130673906    -1.13E+01 2.26E-01 3.14E+02 2.000
+ ETOT  3  -124.44348610979     1.99E+00 4.94E-01 3.68E+01 2.000
  ETOT  4  -124.39249016536     5.10E-02 2.80E-01 2.06E+01 2.000
  ETOT  5  -124.33948765582     5.30E-02 3.59E-02 4.32E+00 2.000
  ETOT  6  -124.34471161832    -5.22E-03 4.85E-02 5.05E+00 1.002
  ETOT  7  -124.32510307507     1.96E-02 1.24E-02 6.63E-01 1.925
- ETOT  8  -124.32430842612     7.95E-04 3.94E-03 2.48E+00 1.947
- ETOT  9  -124.26076602812     6.35E-02 2.19E-02 1.72E+01 3.499
- ETOT 10  -124.32252044490    -6.18E-02 2.37E-02 1.79E+00 1.974
- ETOT 11  -124.34162113216    -1.91E-02 7.68E-03 2.51E-01 0.513
- ETOT 12  -124.34005563987     1.57E-03 5.94E-04 3.78E-01 0.744
- ETOT 13  -124.34130323846    -1.25E-03 2.35E-04 2.74E-01 0.562
- ETOT 14  -124.34181608261    -5.13E-04 2.03E-05 2.32E-01 0.514
- ETOT 15  -124.34146579584     3.50E-04 5.60E-04 3.36E-01 0.452
- ETOT 16  -124.33966957372     1.80E-03 2.82E-03 6.55E-01 0.793
- ETOT 17  -124.34064226309    -9.73E-04 6.68E-05 1.03E+00 0.578
- ETOT 18  -124.34186849357    -1.23E-03 5.45E-03 3.03E-01 0.338
- ETOT 19  -124.34258977225    -7.21E-04 6.09E-04 1.56E-02 0.469
- ETOT 20  -124.34260429584    -1.45E-05 1.52E-07 1.55E-02 0.471
- ETOT 21  -124.34271200057    -1.08E-04 3.45E-06 4.46E-03 0.489
- ETOT 22  -124.34273579454    -2.38E-05 7.84E-07 1.71E-03 0.493
- ETOT 23  -124.34274331548    -7.52E-06 3.89E-06 7.15E-04 0.498
+ ETOT  8  -124.32430842611     7.95E-04 3.94E-03 2.48E+00 1.947
+ ETOT  9  -124.26076602796     6.35E-02 2.19E-02 1.72E+01 3.499
+ ETOT 10  -124.32252044494    -6.18E-02 2.37E-02 1.79E+00 1.974
+ ETOT 11  -124.34162113215    -1.91E-02 7.68E-03 2.51E-01 0.513
+ ETOT 12  -124.34005563991     1.57E-03 5.94E-04 3.78E-01 0.744
+ ETOT 13  -124.34130323844    -1.25E-03 2.35E-04 2.74E-01 0.562
+ ETOT 14  -124.34181608250    -5.13E-04 2.03E-05 2.32E-01 0.514
+ ETOT 15  -124.34146579503     3.50E-04 5.60E-04 3.36E-01 0.451
+ ETOT 16  -124.33966957340     1.80E-03 2.82E-03 6.55E-01 0.793
+ ETOT 17  -124.34064226210    -9.73E-04 6.68E-05 1.03E+00 0.578
+ ETOT 18  -124.34186849386    -1.23E-03 5.45E-03 3.03E-01 0.338
+ ETOT 19  -124.34258977226    -7.21E-04 6.09E-04 1.56E-02 0.469
+ ETOT 20  -124.34260429570    -1.45E-05 1.52E-07 1.55E-02 0.471
+ ETOT 21  -124.34271200039    -1.08E-04 3.45E-06 4.46E-03 0.489
+ ETOT 22  -124.34273579444    -2.38E-05 7.84E-07 1.71E-03 0.493
+ ETOT 23  -124.34274331540    -7.52E-06 3.89E-06 7.15E-04 0.498
  ETOT 24  -124.34274868225    -5.37E-06 6.30E-07 3.71E-05 0.497
  ETOT 25  -124.34274890929    -2.27E-07 1.06E-08 9.30E-07 0.496
  ETOT 26  -124.34274891435    -5.06E-09 1.20E-09 1.66E-07 0.496
  ETOT 27  -124.34274891587    -1.53E-09 3.66E-10 2.99E-08 0.496
- ETOT 28  -124.34274891554     3.35E-10 1.54E-10 3.03E-09 0.496
- ETOT 29  -124.34274891574    -2.05E-10 6.62E-12 5.68E-11 0.496
-
- At SCF step   29       nres2   =  5.68E-11 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34681098E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34681098E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34681098E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.34441081E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34441081E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34441081E-04  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=   27 was not enough SCF cycles to converge;
+  density residual=  2.990E-08 exceeds tolvrs=  1.000E-10
 
 
 --- !ResultsGS
@@ -785,15 +793,15 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae: -2.046E-10, res2:  5.680E-11, residm:  6.615E-12, diffor: null, }
+convergence: {deltae: -1.527E-09, res2:  2.990E-08, residm:  3.661E-10, diffor: null, }
 etotal    :  -1.24342749E+02
 entropy   :   0.00000000E+00
-fermie    :   4.95502258E-01
+fermie    :   4.95500624E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34681098E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   4.34681098E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34681098E-04, ]
-pressure_GPa:  -1.2789E+01
+- [  4.34441081E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.34441081E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.34441081E-04, ]
+pressure_GPa:  -1.2782E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
 cartesian_forces: # hartree/bohr
@@ -805,17 +813,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.11532     7.776106     7.269170     15.045276     0.506936
+    1   2.11532     7.776112     7.269163     15.045275     0.506949
  ---------------------------------------------------------------------
-  Sum:              7.776106     7.269170     15.045276     0.506936
- Total magnetization (from the atomic spheres):             0.506936
- Total magnetization (exact up - dn):                       0.496359
+  Sum:              7.776112     7.269163     15.045275     0.506949
+ Total magnetization (from the atomic spheres):             0.506949
+ Total magnetization (exact up - dn):                       0.496368
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543860290068361
- Compensation charge over fine fft grid    =      8.543451458787256
+ Compensation charge over spherical meshes =      8.543860366683424
+ Compensation charge over fine fft grid    =      8.543445513026620
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -823,9 +831,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Atom #  1 - Spin component 1
   -2.30173   0.22433   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.22433   0.07125   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -1.68702   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.68702   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.68702   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -1.68703   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.68703   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.68703   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.05583   0.00000   0.00000   2.99544   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.05583   0.00000   0.00000   2.99544   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.05583   0.00000   0.00000   2.99544   0.00000   0.00000   0.00000   0.00000 ...
@@ -885,7 +893,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   74.915E-14; max=  66.152E-13
+ Mean square residual over all n,k,spin=   53.825E-12; max=  36.613E-11
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -905,11 +913,11 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
               =  2.540050601232  2.540050601232  2.540050601232 angstroms
  prteigrs : about to open file t94o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.49550   Average Vxc (hartree)=  -0.53592
- Magnetization (Bohr magneton)=  4.96377792E-01
- Total spin up =  8.24818890E+00   Total spin down =  7.75181110E+00
+ Magnetization (Bohr magneton)=  4.96387026E-01
+ Total spin up =  8.24819351E+00   Total spin down =  7.75180649E+00
  Eigenvalues (hartree) for nkpt=   8  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
-  -2.70512   -1.46038   -1.46038   -1.46038    0.36725    0.36725    0.36725    0.52780
+  -2.70512   -1.46039   -1.46039   -1.46039    0.36725    0.36725    0.36725    0.52780
    0.52780    0.94904    0.94904    0.94904
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000
@@ -918,7 +926,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Eigenvalues (hartree) for nkpt=   8  k points, SPIN DOWN:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
-  -2.68375   -1.43981   -1.43981   -1.43981    0.38310    0.38310    0.38310    0.54218
+  -2.68375   -1.43980   -1.43980   -1.43980    0.38310    0.38310    0.38310    0.54218
    0.54218    0.95887    0.95887    0.95887
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000
@@ -929,44 +937,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.27554751583395E+01
-hartree             :  1.84904740461543E+01
-xc                  : -3.58747453118788E+00
+kinetic             :  1.27554792371210E+01
+hartree             :  1.84904826801012E+01
+xc                  : -3.58747535921568E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24873916912486E+01
-spherical_terms     : -1.14586335662981E+01
-internal            : -1.24340773438984E+02
-'-kT*entropy'       : -1.97615036579434E-03
-total_energy        : -1.24342749589350E+02
-total_energy_eV     : -3.38353828928366E+03
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24874036235902E+01
+spherical_terms     : -1.14586284793243E+01
+internal            : -1.24340768399651E+02
+'-kT*entropy'       : -1.97605204322015E-03
+total_energy        : -1.24342744451695E+02
+total_energy_eV     : -3.38353814948095E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395466414917E+01
+band_energy         : -1.08395328195981E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73959771239483E+01
-spherical_terms     : -8.05202614519467E+00
-internal            : -1.24340772765378E+02
-'-kT*entropy'       : -1.97615036579434E-03
-total_energy_dc     : -1.24342748915744E+02
-total_energy_dc_eV  : -3.38353827095390E+03
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73959855099687E+01
+spherical_terms     : -8.05203167952114E+00
+internal            : -1.24340772863831E+02
+'-kT*entropy'       : -1.97605204322015E-03
+total_energy_dc     : -1.24342748915875E+02
+total_energy_dc_eV  : -3.38353827095746E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34681098E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34681098E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34681098E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.34441081E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34441081E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34441081E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.2789E+01 GPa]
-- sigma(1 1)=  1.27887573E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.27887573E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.27887573E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.2782E+01 GPa]
+- sigma(1 1)=  1.27816957E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.27816957E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.27816957E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1008,19 +1016,22 @@ _setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 1, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -124.34274891574    -1.24E+02 1.17E-14 4.57E-11 0.496
-
- At SCF step    1       nres2   =  4.57E-11 < tolvrs=  1.00E-10 =>converged.
+ ETOT  1  -124.34274891580    -1.24E+02 2.21E-12 6.18E-09 0.496
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34775606E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34775606E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34775606E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.35461567E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.35461567E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.35461567E-04  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=    1 was not enough SCF cycles to converge;
+  density residual=  6.175E-09 exceeds tolvrs=  1.000E-10
 
 
 --- !ResultsGS
@@ -1033,15 +1044,15 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae: -1.243E+02, res2:  4.570E-11, residm:  1.172E-14, diffor: null, }
+convergence: {deltae: -1.243E+02, res2:  6.175E-09, residm:  2.213E-12, diffor: null, }
 etotal    :  -1.24342749E+02
 entropy   :   0.00000000E+00
-fermie    :   4.95502027E-01
+fermie    :   4.95499407E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34775606E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   4.34775606E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34775606E-04, ]
-pressure_GPa:  -1.2792E+01
+- [  4.35461567E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.35461567E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.35461567E-04, ]
+pressure_GPa:  -1.2812E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
 cartesian_forces: # hartree/bohr
@@ -1053,17 +1064,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.11532     7.776106     7.269170     15.045277     0.506936
+    1   2.11532     7.776110     7.269172     15.045281     0.506938
  ---------------------------------------------------------------------
-  Sum:              7.776106     7.269170     15.045277     0.506936
- Total magnetization (from the atomic spheres):             0.506936
- Total magnetization (exact up - dn):                       0.496359
+  Sum:              7.776110     7.269172     15.045281     0.506938
+ Total magnetization (from the atomic spheres):             0.506938
+ Total magnetization (exact up - dn):                       0.496360
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543859587158902
- Compensation charge over fine fft grid    =      8.543453152081041
+ Compensation charge over spherical meshes =      8.543853641122679
+ Compensation charge over fine fft grid    =      8.543466063595128
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1071,12 +1082,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Atom #  1 - Spin component 1
   -2.30173   0.22433   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.22433   0.07125   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -1.68702   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.68702   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.68702   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.05583   0.00000   0.00000   2.99544   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.05583   0.00000   0.00000   2.99544   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.05583   0.00000   0.00000   2.99544   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -1.68703   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.68703   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.68703   0.00000   0.00000   0.05583   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.05583   0.00000   0.00000   2.99543   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.05583   0.00000   0.00000   2.99543   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.05583   0.00000   0.00000   2.99543   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11468   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11468   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11680   0.00000 ...
@@ -1085,23 +1096,23 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Atom #  1 - Spin component 2
   -2.28235   0.22140   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.22140   0.07172   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -1.66919   0.00000   0.00000   0.04265   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.66919   0.00000   0.00000   0.04265   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.66919   0.00000   0.00000   0.04265   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.04265   0.00000   0.00000   3.00863   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.04265   0.00000   0.00000   3.00863   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.04265   0.00000   0.00000   3.00863   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09898   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09898   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.10653   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09898 ...
+   0.00000   0.00000  -1.66919   0.00000   0.00000   0.04266   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.66919   0.00000   0.00000   0.04266   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.66919   0.00000   0.00000   0.04266   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.04266   0.00000   0.00000   3.00863   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.04266   0.00000   0.00000   3.00863   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.04266   0.00000   0.00000   3.00863   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09899   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09899   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.10654   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09899 ...
    ...  only 12  components have been written...
 
 
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    0.99617  -0.03395   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.03395   0.81770   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.03395   0.81769   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   1.00517   0.00000   0.00000  -0.00811   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   1.00517   0.00000   0.00000  -0.00811   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   1.00517   0.00000   0.00000  -0.00811   0.00000   0.00000   0.00000   0.00000 ...
@@ -1133,7 +1144,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.853E-17; max=  11.718E-15
+ Mean square residual over all n,k,spin=   39.125E-15; max=  22.126E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1153,12 +1164,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
               =  2.540050601232  2.540050601232  2.540050601232 angstroms
  prteigrs : about to open file t94o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.49550   Average Vxc (hartree)=  -0.53592
- Magnetization (Bohr magneton)=  4.96377527E-01
- Total spin up =  8.24818876E+00   Total spin down =  7.75181124E+00
+ Magnetization (Bohr magneton)=  4.96378702E-01
+ Total spin up =  8.24818935E+00   Total spin down =  7.75181065E+00
  Eigenvalues (hartree) for nkpt=   8  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
-  -2.70512   -1.46038   -1.46038   -1.46038    0.36725    0.36725    0.36725    0.52780
-   0.52780    0.94904    0.94904    0.94904
+  -2.70512   -1.46039   -1.46039   -1.46039    0.36724    0.36724    0.36724    0.52779
+   0.52779    0.94904    0.94904    0.94904
       occupation numbers for kpt#   1
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000
    0.00000    0.00000    0.00000    0.00000
@@ -1177,44 +1188,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.27554745060091E+01
-hartree             :  1.84904707564386E+01
-xc                  : -3.58747483033139E+00
+kinetic             :  1.27554689802479E+01
+hartree             :  1.84904484558301E+01
+xc                  : -3.58747783726311E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24873870146894E+01
-spherical_terms     : -1.14586339803828E+01
-internal            : -1.24340773417699E+02
-'-kT*entropy'       : -1.97615323921925E-03
-total_energy        : -1.24342749570939E+02
-total_energy_eV     : -3.38353828878266E+03
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24873552439688E+01
+spherical_terms     : -1.14586446206506E+01
+internal            : -1.24340783120548E+02
+'-kT*entropy'       : -1.97614107349050E-03
+total_energy        : -1.24342759261621E+02
+total_energy_eV     : -3.38353855247955E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395513060756E+01
+band_energy         : -1.08395866653762E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73959737348449E+01
-spherical_terms     : -8.05202486683222E+00
-internal            : -1.24340772762496E+02
-'-kT*entropy'       : -1.97615323921925E-03
-total_energy_dc     : -1.24342748915735E+02
-total_energy_dc_eV  : -3.38353827095367E+03
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73959504693787E+01
+spherical_terms     : -8.05201278522510E+00
+internal            : -1.24340772774723E+02
+'-kT*entropy'       : -1.97614107349050E-03
+total_energy_dc     : -1.24342748915797E+02
+total_energy_dc_eV  : -3.38353827095535E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34775606E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34775606E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34775606E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.35461567E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.35461567E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.35461567E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.2792E+01 GPa]
-- sigma(1 1)=  1.27915378E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.27915378E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.27915378E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.2812E+01 GPa]
+- sigma(1 1)=  1.28117195E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.28117195E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.28117195E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1249,9 +1260,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm: opening atomic psp file    ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from ../../Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -1278,29 +1289,29 @@ _setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 27, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -124.37158905760    -1.244E+02 2.204E-06 4.135E+00
- ETOT  2  -124.37306027352    -1.471E-03 7.669E-06 2.264E+00
- ETOT  3  -124.34205913620     3.100E-02 2.285E-02 2.113E-01
- ETOT  4  -124.34266725711    -6.081E-04 1.129E-03 1.475E-02
- ETOT  5  -124.34272758078    -6.032E-05 6.346E-05 2.855E-03
- ETOT  6  -124.34274858049    -2.100E-05 9.488E-06 2.556E-04
- ETOT  7  -124.34274874587    -1.654E-07 1.863E-06 3.885E-05
- ETOT  8  -124.34274862028     1.256E-07 2.579E-07 2.731E-07
- ETOT  9  -124.34274871548    -9.520E-08 1.103E-07 4.406E-08
- ETOT 10  -124.34274870919     6.289E-09 5.933E-08 1.626E-09
- ETOT 11  -124.34274871073    -1.535E-09 1.659E-07 6.132E-11
+ ETOT  1  -124.37163591224    -1.244E+02 4.873E-06 4.134E+00
+ ETOT  2  -124.37304469034    -1.409E-03 7.874E-06 2.262E+00
+ ETOT  3  -124.34205410888     3.099E-02 2.283E-02 2.103E-01
+ ETOT  4  -124.34266819985    -6.141E-04 1.100E-03 1.453E-02
+ ETOT  5  -124.34272806715    -5.987E-05 6.117E-05 2.860E-03
+ ETOT  6  -124.34274855299    -2.049E-05 9.390E-06 2.526E-04
+ ETOT  7  -124.34274873302    -1.800E-07 1.840E-06 3.488E-05
+ ETOT  8  -124.34274862804     1.050E-07 2.409E-07 2.213E-07
+ ETOT  9  -124.34274871474    -8.670E-08 2.897E-08 3.891E-08
+ ETOT 10  -124.34274870971     5.027E-09 2.093E-08 2.288E-09
+ ETOT 11  -124.34274871107    -1.356E-09 3.819E-08 4.283E-11
 
- At SCF step   11       nres2   =  6.13E-11 < tolvrs=  1.00E-10 =>converged.
+ At SCF step   11       nres2   =  4.28E-11 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34658686E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34658686E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34681438E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.34654549E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34654549E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34669165E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -1313,14 +1324,14 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae: -1.535E-09, res2:  6.132E-11, residm:  1.659E-07, diffor: null, }
+convergence: {deltae: -1.356E-09, res2:  4.283E-11, residm:  3.819E-08, diffor: null, }
 etotal    :  -1.24342749E+02
 entropy   :   0.00000000E+00
-fermie    :   4.95538746E-01
+fermie    :   4.95538779E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34658686E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   4.34658686E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34681438E-04, ]
+- [  4.34654549E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.34654549E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.34669165E-04, ]
 pressure_GPa:  -1.2788E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
@@ -1336,13 +1347,367 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1   2.11532       15.045280      0.000000    0.000000    0.506203
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000    0.000000    0.506203
- Total magnetization (exact)         0.000000    0.000000    0.496232
+ Total magnetization (exact)        -0.000000   -0.000000    0.496232
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543860970161377
- Compensation charge over fine fft grid    =      8.543452615433267
+ Compensation charge over spherical meshes =      8.543861032997807
+ Compensation charge over fine fft grid    =      8.543452430416391
+
+ ==== Results concerning PAW augmentation regions ====
+
+ Total pseudopotential strength Dij (hartree):
+ Atom #  1 - Component up-up
+   === REAL PART:
+  -2.30170   0.22432   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.22432   0.07125   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -1.68700   0.00000   0.00000   0.05581   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.68700   0.00000   0.00000   0.05581   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.68700   0.00000   0.00000   0.05581   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.05581   0.00000   0.00000   2.99546   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.05581   0.00000   0.00000   2.99546   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.05581   0.00000   0.00000   2.99546   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11466   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11466   0.00000   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11678   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11466 ...
+   ...  only 12  components have been written...
+   === IMAGINARY PART:
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   ...  only 12  components have been written...
+ Atom #  1 - Component dwn-dwn
+   === REAL PART:
+  -2.28237   0.22141   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.22141   0.07172   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -1.66921   0.00000   0.00000   0.04267   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -1.66921   0.00000   0.00000   0.04267   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -1.66921   0.00000   0.00000   0.04267   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.04267   0.00000   0.00000   3.00861   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.04267   0.00000   0.00000   3.00861   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.04267   0.00000   0.00000   3.00861   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09900   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09900   0.00000   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.10655   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09900 ...
+   ...  only 12  components have been written...
+   === IMAGINARY PART:
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   ...  only 12  components have been written...
+ Atom #  1 - Component up-dwn
+   === REAL PART:
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   ...  only 12  components have been written...
+   === IMAGINARY PART:
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   ...  only 12  components have been written...
+ Atom #  1 - Component dwn-up
+   === REAL PART:
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   ...  only 12  components have been written...
+   === IMAGINARY PART:
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   ...  only 12  components have been written...
+
+
+ Augmentation waves occupancies Rhoij:
+ Atom #  1 - Component dens (n)
+   1.99269  -0.06495   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.06495   1.64084   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.02092   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783 ...
+   ...  only 12  components have been written...
+ Atom #  1 - Component magn (x)
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   ...  only 12  components have been written...
+ Atom #  1 - Component magn (y)
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   ...  only 12  components have been written...
+ Atom #  1 - Component magn (z)
+  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00294  -0.00531   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.18494   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494 ...
+   ...  only 12  components have been written...
+
+
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   72.717E-11; max=  38.189E-09
+ reduced coordinates (array xred) for    1 atoms
+       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  4.800000000000  4.800000000000  4.800000000000 bohr
+              =  2.540050601232  2.540050601232  2.540050601232 angstroms
+ prteigrs : about to open file t94o_DS3_EIG
+ Fermi (or HOMO) energy (hartree) =   0.49554   Average Vxc (hartree)=  -0.53592
+ Eigenvalues (hartree) for nkpt=   8  k points:
+ kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
+  -2.70509   -2.68378   -1.46037   -1.46037   -1.46036   -1.43983   -1.43983   -1.43983
+   0.36720    0.36720    0.36721    0.38315    0.38316    0.38316    0.52781    0.52781
+   0.54217    0.54217    0.94884    0.94884    0.94885    0.95905    0.95906    0.95906
+      occupation numbers for kpt#   1
+   1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
+   1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
+   0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--- !EnergyTerms
+iteration_state     : {dtset: 3, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.27554587473162E+01
+hartree             :  1.84904807689661E+01
+xc                  : -3.58747041153938E+00
+Ewald energy        : -9.70462253202573E+01
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24874007488896E+01
+spherical_terms     : -1.14586175036891E+01
+internal            : -1.24340772002579E+02
+'-kT*entropy'       : -1.97752551512348E-03
+total_energy        : -1.24342749528094E+02
+total_energy_eV     : -3.38353828761681E+03
+...
+
+
+--- !EnergyTermsDC
+iteration_state     : {dtset: 3, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.08395135153589E+01
+Ewald energy        : -9.70462253202573E+01
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73960009686654E+01
+spherical_terms     : -8.05203384678661E+00
+internal            : -1.24340771185554E+02
+'-kT*entropy'       : -1.97752551512348E-03
+total_energy_dc     : -1.24342748711069E+02
+total_energy_dc_eV  : -3.38353826538443E+03
+...
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  4.34654549E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34654549E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34669165E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.2788E+01 GPa]
+- sigma(1 1)=  1.27879762E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.27879762E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.27884062E+01  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET  4 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 1, nkpt: 8, mband: 24, nsppol: 1, nspinor: 2, nspden: 4, mpw: 87, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  20.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   3.
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= -2.4000000  2.4000000  2.4000000  G(1)=  0.0000000  0.2083333  0.2083333
+ R(2)=  2.4000000 -2.4000000  2.4000000  G(2)=  0.2083333  0.0000000  0.2083333
+ R(3)=  2.4000000  2.4000000 -2.4000000  G(3)=  0.2083333  0.2083333  0.0000000
+ Unit cell volume ucvol=  5.5296000E+01 bohr^3
+ Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  12  12  12
+         ecut(hartree)=     10.000   => boxcut(ratio)=   2.02789
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t94o_DS3_WFK
+_setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
+
+================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 17, nstep: 1, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
+     iter   Etot(hartree)      deltaE(h)  residm     nres2
+ ETOT  1  -124.34274871142    -1.243E+02 2.496E-08 1.119E-12
+
+ At SCF step    1       nres2   =  1.12E-12 < tolvrs=  1.00E-10 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  4.34701704E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34701704E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34700799E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -2.4000000,   2.4000000,   2.4000000, ]
+- [  2.4000000,  -2.4000000,   2.4000000, ]
+- [  2.4000000,   2.4000000,  -2.4000000, ]
+lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
+lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
+lattice_volume:   5.5296000E+01
+convergence: {deltae: -1.243E+02, res2:  1.119E-12, residm:  2.496E-08, diffor: null, }
+etotal    :  -1.24342749E+02
+entropy   :   0.00000000E+00
+fermie    :   4.95538696E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  4.34701704E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.34701704E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.34700799E-04, ]
+pressure_GPa:  -1.2789E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
+    1   2.11532       15.045280      0.000000    0.000000    0.506203
+ ---------------------------------------------------------------------
+ Total magnetization (spheres)       0.000000    0.000000    0.506203
+ Total magnetization (exact)        -0.000000   -0.000000    0.496232
+
+ PAW TEST:
+ ==== Compensation charge inside spheres ============
+ The following values must be close to each other ...
+ Compensation charge over spherical meshes =      8.543860558964596
+ Compensation charge over fine fft grid    =      8.543452469894573
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1469,360 +1834,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Atom #  1 - Component dens (n)
    1.99269  -0.06495   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
   -0.06495   1.64084   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.02092   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783 ...
-   ...  only 12  components have been written...
- Atom #  1 - Component magn (x)
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   ...  only 12  components have been written...
- Atom #  1 - Component magn (y)
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   ...  only 12  components have been written...
- Atom #  1 - Component magn (z)
-  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-  -0.00294  -0.00531   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.18494   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494 ...
-   ...  only 12  components have been written...
-
-
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   24.537E-10; max=  16.594E-08
- reduced coordinates (array xred) for    1 atoms
-       0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-
- cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  4.800000000000  4.800000000000  4.800000000000 bohr
-              =  2.540050601232  2.540050601232  2.540050601232 angstroms
- prteigrs : about to open file t94o_DS3_EIG
- Fermi (or HOMO) energy (hartree) =   0.49554   Average Vxc (hartree)=  -0.53592
- Eigenvalues (hartree) for nkpt=   8  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
-  -2.70509   -2.68378   -1.46037   -1.46037   -1.46036   -1.43983   -1.43983   -1.43983
-   0.36720    0.36720    0.36721    0.38315    0.38316    0.38316    0.52781    0.52781
-   0.54217    0.54217    0.94884    0.94884    0.94885    0.95905    0.95906    0.95906
-      occupation numbers for kpt#   1
-   1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
-   1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    0.00000    0.00000
-   0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
---- !EnergyTerms
-iteration_state     : {dtset: 3, }
-comment             : Components of total free energy in Hartree
-kinetic             :  1.27554588113955E+01
-hartree             :  1.84904809254450E+01
-xc                  : -3.58747047925764E+00
-Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24874008942372E+01
-spherical_terms     : -1.14586185857903E+01
-internal            : -1.24340773077188E+02
-'-kT*entropy'       : -1.97752573158754E-03
-total_energy        : -1.24342750602920E+02
-total_energy_eV     : -3.38353831686429E+03
-...
-
-
---- !EnergyTermsDC
-iteration_state     : {dtset: 3, }
-comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395140799996E+01
-Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73960010990149E+01
-spherical_terms     : -8.05203315123991E+00
-internal            : -1.24340771184998E+02
-'-kT*entropy'       : -1.97752573158754E-03
-total_energy_dc     : -1.24342748710729E+02
-total_energy_dc_eV  : -3.38353826537518E+03
-...
-
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34658686E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34658686E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34681438E-04  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -1.2788E+01 GPa]
-- sigma(1 1)=  1.27880979E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.27880979E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.27887673E+01  sigma(2 1)=  0.00000000E+00
-
-================================================================================
-== DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
-
---- !DatasetInfo
-iteration_state: {dtset: 4, }
-dimensions: {natom: 1, nkpt: 8, mband: 24, nsppol: 1, nspinor: 2, nspden: 4, mpw: 87, }
-cutoff_energies: {ecut:  10.0, pawecutdg:  20.0, }
-electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
-...
-
- mkfilename : getwfk/=0, take file _WFK from output of DATASET   3.
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)= -2.4000000  2.4000000  2.4000000  G(1)=  0.0000000  0.2083333  0.2083333
- R(2)=  2.4000000 -2.4000000  2.4000000  G(2)=  0.2083333  0.0000000  0.2083333
- R(3)=  2.4000000  2.4000000 -2.4000000  G(3)=  0.2083333  0.2083333  0.0000000
- Unit cell volume ucvol=  5.5296000E+01 bohr^3
- Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
-
- Coarse grid specifications (used for wave-functions):
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  12  12  12
-         ecut(hartree)=     10.000   => boxcut(ratio)=   2.02789
-
- Fine grid specifications (used for densities):
-
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
-         ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file t94o_DS3_WFK
-_setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
-
-================================================================================
-
---- !BeginCycle
-iteration_state: {dtset: 4, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 1.00E-10, }
-...
-
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -124.34274871138    -1.243E+02 8.936E-08 3.376E-12
-
- At SCF step    1       nres2   =  3.38E-12 < tolvrs=  1.00E-10 =>converged.
-
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34680894E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34680894E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34670418E-04  sigma(2 1)=  0.00000000E+00
-
-
---- !ResultsGS
-iteration_state: {dtset: 4, }
-comment   : Summary of ground state results
-lattice_vectors:
-- [ -2.4000000,   2.4000000,   2.4000000, ]
-- [  2.4000000,  -2.4000000,   2.4000000, ]
-- [  2.4000000,   2.4000000,  -2.4000000, ]
-lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
-lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
-lattice_volume:   5.5296000E+01
-convergence: {deltae: -1.243E+02, res2:  3.376E-12, residm:  8.936E-08, diffor: null, }
-etotal    :  -1.24342749E+02
-entropy   :   0.00000000E+00
-fermie    :   4.95538773E-01
-cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34680894E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   4.34680894E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34670418E-04, ]
-pressure_GPa:  -1.2789E+01
-xred      :
-- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
-...
-
- Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
- Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.045280     -0.000000   -0.000000    0.506203
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000   -0.000000    0.506203
- Total magnetization (exact)        -0.000000   -0.000000    0.496232
-
- PAW TEST:
- ==== Compensation charge inside spheres ============
- The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543860743989983
- Compensation charge over fine fft grid    =      8.543452045630868
-
- ==== Results concerning PAW augmentation regions ====
-
- Total pseudopotential strength Dij (hartree):
- Atom #  1 - Component up-up
-   === REAL PART:
-  -2.30170   0.22432   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.22432   0.07125   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -1.68700   0.00000   0.00000   0.05581   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.68700   0.00000   0.00000   0.05581   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.68700   0.00000   0.00000   0.05581   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.05581   0.00000   0.00000   2.99546   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.05581   0.00000   0.00000   2.99546   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.05581   0.00000   0.00000   2.99546   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11466   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11466   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11678   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.11466 ...
-   ...  only 12  components have been written...
-   === IMAGINARY PART:
-  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   ...  only 12  components have been written...
- Atom #  1 - Component dwn-dwn
-   === REAL PART:
-  -2.28237   0.22141   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.22141   0.07172   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -1.66921   0.00000   0.00000   0.04267   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -1.66921   0.00000   0.00000   0.04267   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -1.66921   0.00000   0.00000   0.04267   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.04267   0.00000   0.00000   3.00861   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.04267   0.00000   0.00000   3.00861   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.04267   0.00000   0.00000   3.00861   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09900   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09900   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.10655   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.09900 ...
-   ...  only 12  components have been written...
-   === IMAGINARY PART:
-  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   ...  only 12  components have been written...
- Atom #  1 - Component up-dwn
-   === REAL PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   ...  only 12  components have been written...
-   === IMAGINARY PART:
-  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   ...  only 12  components have been written...
- Atom #  1 - Component dwn-up
-   === REAL PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   ...  only 12  components have been written...
-   === IMAGINARY PART:
-  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   ...  only 12  components have been written...
-
-
- Augmentation waves occupancies Rhoij:
- Atom #  1 - Component dens (n)
-   1.99269  -0.06495   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-  -0.06495   1.64084   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000 ...
@@ -1831,7 +1842,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000 ...
-  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.02092   0.00000 ...
+   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.02092   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (x)
@@ -1843,10 +1854,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (y)
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
@@ -1857,13 +1868,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (z)
-  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
   -0.00294  -0.00531   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
    0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000 ...
@@ -1873,7 +1884,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494 ...
    ...  only 12  components have been written...
 
@@ -1882,7 +1893,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   21.362E-10; max=  89.365E-09
+ Mean square residual over all n,k,spin=   59.398E-11; max=  24.964E-09
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1917,44 +1928,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.27554595376243E+01
-hartree             :  1.84904801688477E+01
-xc                  : -3.58747056638291E+00
+kinetic             :  1.27554593650341E+01
+hartree             :  1.84904793412424E+01
+xc                  : -3.58747064989529E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24873998317667E+01
-spherical_terms     : -1.14586169063001E+01
-internal            : -1.24340770452721E+02
-'-kT*entropy'       : -1.97752472716505E-03
-total_energy        : -1.24342747977448E+02
-total_energy_eV     : -3.38353824542159E+03
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24873986635474E+01
+spherical_terms     : -1.14586170995807E+01
+internal            : -1.24340770561490E+02
+'-kT*entropy'       : -1.97752474195917E-03
+total_energy        : -1.24342748086232E+02
+total_energy_eV     : -3.38353824838175E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 4, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395133965681E+01
+band_energy         : -1.08395145767643E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73960003184952E+01
-spherical_terms     : -8.05203461684585E+00
-internal            : -1.24340771186653E+02
-'-kT*entropy'       : -1.97752472716505E-03
-total_energy_dc     : -1.24342748711380E+02
-total_energy_dc_eV  : -3.38353826539287E+03
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73959994643484E+01
+spherical_terms     : -8.05203429082350E+00
+internal            : -1.24340771186680E+02
+'-kT*entropy'       : -1.97752474195917E-03
+total_energy_dc     : -1.24342748711422E+02
+total_energy_dc_eV  : -3.38353826539401E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34680894E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34680894E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34670418E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.34701704E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34701704E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34700799E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.2789E+01 GPa]
-- sigma(1 1)=  1.27887513E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.27887513E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.27884431E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.27893635E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.27893635E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.27893369E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1993,7 +2004,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 27, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
@@ -2002,23 +2013,23 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2  -124.33009474741    -1.589E+00 5.620E-02 5.346E+00
  ETOT  3  -124.35595849012    -2.586E-02 4.215E-02 2.135E+00
  ETOT  4  -124.34094661845     1.501E-02 2.725E-02 1.344E+00
- ETOT  5  -124.34177077600    -8.242E-04 5.379E-03 8.875E-02
- ETOT  6  -124.34255499868    -7.842E-04 5.048E-04 4.738E-02
+ ETOT  5  -124.34177077753    -8.242E-04 5.379E-03 8.875E-02
+ ETOT  6  -124.34255499872    -7.842E-04 5.048E-04 4.738E-02
  ETOT  7  -124.34278646406    -2.315E-04 7.242E-03 3.576E-03
  ETOT  8  -124.34274768896     3.878E-05 6.363E-04 1.687E-04
  ETOT  9  -124.34274896176    -1.273E-06 1.162E-03 9.265E-05
  ETOT 10  -124.34274869644     2.653E-07 5.843E-04 1.047E-06
  ETOT 11  -124.34274871258    -1.615E-08 1.701E-04 3.819E-08
- ETOT 12  -124.34274871239     1.917E-10 4.942E-05 2.166E-09
+ ETOT 12  -124.34274871239     1.918E-10 4.942E-05 2.166E-09
  ETOT 13  -124.34274871205     3.421E-10 2.428E-05 2.129E-10
- ETOT 14  -124.34274871172     3.281E-10 8.444E-06 1.851E-11
+ ETOT 14  -124.34274871172     3.283E-10 8.444E-06 1.850E-11
 
  At SCF step   14       nres2   =  1.85E-11 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34689048E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34686759E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34686759E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.34689051E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34686762E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34686762E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -2031,19 +2042,19 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae:  3.281E-10, res2:  1.851E-11, residm:  8.444E-06, diffor: null, }
+convergence: {deltae:  3.283E-10, res2:  1.850E-11, residm:  8.444E-06, diffor: null, }
 etotal    :  -1.24342749E+02
 entropy   :   0.00000000E+00
 fermie    :   4.95538730E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34689048E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   4.34686759E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34686759E-04, ]
+- [  4.34689051E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.34686762E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.34686762E-04, ]
 pressure_GPa:  -1.2789E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
@@ -2051,16 +2062,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.045280      0.506203   -0.000000   -0.000000
+    1   2.11532       15.045280      0.506203    0.000000   -0.000000
  ---------------------------------------------------------------------
- Total magnetization (spheres)       0.506203   -0.000000   -0.000000
- Total magnetization (exact)         0.496232   -0.000000    0.000000
+ Total magnetization (spheres)       0.506203    0.000000   -0.000000
+ Total magnetization (exact)         0.496232    0.000000   -0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543860325853801
- Compensation charge over fine fft grid    =      8.543452427215513
+ Compensation charge over spherical meshes =      8.543860325828842
+ Compensation charge over fine fft grid    =      8.543452427274760
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2199,46 +2210,46 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (x)
-  -0.00034  -0.00294   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00294  -0.00531   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00033  -0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.18494   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.18494 ...
+  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00294  -0.00531   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033  -0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00033  -0.00000  -0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.18494   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.18494   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00647  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.18494 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (y)
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (z)
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
   -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000 ...
    ...  only 12  components have been written...
 
 
@@ -2246,21 +2257,21 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   51.536E-09; max=  84.444E-07
+ Mean square residual over all n,k,spin=   51.535E-09; max=  84.444E-07
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  9.1090E-31; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  4.800000000000  4.800000000000  4.800000000000 bohr
               =  2.540050601232  2.540050601232  2.540050601232 angstroms
@@ -2281,44 +2292,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.27554593969961E+01
-hartree             :  1.84904804538813E+01
-xc                  : -3.58747093512511E+00
+kinetic             :  1.27554593969773E+01
+hartree             :  1.84904804538218E+01
+xc                  : -3.58747093514083E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24874001547208E+01
-spherical_terms     : -1.14586181030385E+01
-internal            : -1.24340772196750E+02
-'-kT*entropy'       : -1.97752547739547E-03
-total_energy        : -1.24342749722228E+02
-total_energy_eV     : -3.38353829289945E+03
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24874001546354E+01
+spherical_terms     : -1.14586181031138E+01
+internal            : -1.24340772196834E+02
+'-kT*entropy'       : -1.97752547714168E-03
+total_energy        : -1.24342749722312E+02
+total_energy_eV     : -3.38353829290173E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 5, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395143830744E+01
+band_energy         : -1.08395143834404E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73960004896864E+01
-spherical_terms     : -8.05203345873986E+00
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73960004896220E+01
+spherical_terms     : -8.05203345843838E+00
 internal            : -1.24340771186244E+02
-'-kT*entropy'       : -1.97752547739547E-03
+'-kT*entropy'       : -1.97752547714168E-03
 total_energy_dc     : -1.24342748711721E+02
 total_energy_dc_eV  : -3.38353826540217E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34689048E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34686759E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34686759E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.34689051E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34686762E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34686762E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.2789E+01 GPa]
-- sigma(1 1)=  1.27889912E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.27889238E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.27889238E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.27889913E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.27889239E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.27889239E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -2357,7 +2368,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 27, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
@@ -2375,15 +2386,15 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 11  -124.34274871656    -4.242E-08 6.923E-04 5.844E-07
  ETOT 12  -124.34274870326     1.329E-08 1.622E-04 1.771E-08
  ETOT 13  -124.34274871150    -8.234E-09 1.530E-04 1.756E-09
- ETOT 14  -124.34274871181    -3.145E-10 4.335E-05 1.344E-10
- ETOT 15  -124.34274871167     1.472E-10 3.991E-05 1.238E-11
+ ETOT 14  -124.34274871181    -3.144E-10 4.335E-05 1.344E-10
+ ETOT 15  -124.34274871167     1.470E-10 3.991E-05 1.238E-11
 
  At SCF step   15       nres2   =  1.24E-11 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34692605E-04  sigma(3 2)=  0.00000000E+00
+  sigma(1 1)=  4.34692606E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.34691822E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34692605E-04  sigma(2 1)=  0.00000000E+00
+  sigma(3 3)=  4.34692606E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -2396,14 +2407,14 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae:  1.472E-10, res2:  1.238E-11, residm:  3.991E-05, diffor: null, }
+convergence: {deltae:  1.470E-10, res2:  1.238E-11, residm:  3.991E-05, diffor: null, }
 etotal    :  -1.24342749E+02
 entropy   :   0.00000000E+00
 fermie    :   4.95538723E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34692605E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  4.34692606E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   4.34691822E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34692605E-04, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.34692606E-04, ]
 pressure_GPa:  -1.2789E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
@@ -2416,16 +2427,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.045280     -0.000000    0.506203   -0.000000
+    1   2.11532       15.045280      0.000000    0.506203   -0.000000
  ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000    0.506203   -0.000000
- Total magnetization (exact)         0.000000    0.496232    0.000000
+ Total magnetization (spheres)       0.000000    0.506203   -0.000000
+ Total magnetization (exact)         0.000000    0.496232   -0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543860461957809
- Compensation charge over fine fft grid    =      8.543452332535209
+ Compensation charge over spherical meshes =      8.543860461964215
+ Compensation charge over fine fft grid    =      8.543452332543071
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2556,54 +2567,54 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   2.01041   0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   2.01041  -0.00000   0.00000  -0.01589   0.00000   0.00000   0.00000  -0.00000 ...
    0.00000   0.00000  -0.01589   0.00000  -0.00000   0.01946   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
    0.00000   0.00000  -0.00000   0.00000  -0.01589   0.00000   0.00000   0.01946   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000  -0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   1.02092   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   1.02092   0.00000 ...
    0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   1.66783 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (x)
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (y)
-  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-  -0.00294  -0.00531   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00033  -0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.18494   0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.18494 ...
+  -0.00034  -0.00294   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+  -0.00294  -0.00531   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00007   0.00000  -0.00000  -0.00033   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00007   0.00000   0.00000  -0.00033   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00033  -0.00000   0.00000  -0.00027   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00033   0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000   0.00000   0.00000  -0.00033  -0.00000   0.00000  -0.00027   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.18494   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.18494   0.00000  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00647   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.18494 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (z)
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000 ...
    ...  only 12  components have been written...
 
 
@@ -2646,39 +2657,39 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.27554596461715E+01
-hartree             :  1.84904805098899E+01
-xc                  : -3.58747084034421E+00
+kinetic             :  1.27554596461854E+01
+hartree             :  1.84904805099211E+01
+xc                  : -3.58747084034178E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24874002619445E+01
-spherical_terms     : -1.14586185594657E+01
-internal            : -1.24340772360436E+02
-'-kT*entropy'       : -1.97752537211870E-03
-total_energy        : -1.24342749885808E+02
-total_energy_eV     : -3.38353829735071E+03
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24874002619890E+01
+spherical_terms     : -1.14586185594593E+01
+internal            : -1.24340772360427E+02
+'-kT*entropy'       : -1.97752537189546E-03
+total_energy        : -1.24342749885799E+02
+total_energy_eV     : -3.38353829735044E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 6, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395144264937E+01
+band_energy         : -1.08395144266377E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73960005773799E+01
-spherical_terms     : -8.05203332767707E+00
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73960005774120E+01
+spherical_terms     : -8.05203332750120E+00
 internal            : -1.24340771186294E+02
-'-kT*entropy'       : -1.97752537211870E-03
+'-kT*entropy'       : -1.97752537189546E-03
 total_energy_dc     : -1.24342748711666E+02
 total_energy_dc_eV  : -3.38353826540067E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34692605E-04  sigma(3 2)=  0.00000000E+00
+  sigma(1 1)=  4.34692606E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.34691822E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34692605E-04  sigma(2 1)=  0.00000000E+00
+  sigma(3 3)=  4.34692606E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.2789E+01 GPa]
 - sigma(1 1)=  1.27890958E+01  sigma(3 2)=  0.00000000E+00
@@ -2722,17 +2733,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      85.250      85.195
 
 --- !BeginCycle
 iteration_state: {dtset: 7, }
-solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
+solver: {iscf: 17, nstep: 27, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -122.63760474320    -1.226E+02 2.166E+01 1.838E+01
  ETOT  2  -124.32557590521    -1.688E+00 8.051E-02 5.423E+00
- ETOT  3  -124.34796906273    -2.239E-02 3.419E-02 1.617E+00
+ ETOT  3  -124.34796906272    -2.239E-02 3.419E-02 1.617E+00
  ETOT  4  -124.34469921545     3.270E-03 2.664E-02 1.695E+00
- ETOT  5  -124.34161582220     3.083E-03 9.445E-03 9.088E-02
- ETOT  6  -124.34263435707    -1.019E-03 1.387E-03 2.821E-02
+ ETOT  5  -124.34161582542     3.083E-03 9.445E-03 9.088E-02
+ ETOT  6  -124.34263435744    -1.019E-03 1.387E-03 2.821E-02
  ETOT  7  -124.34276887854    -1.345E-04 1.049E-02 3.508E-03
  ETOT  8  -124.34274745353     2.143E-05 5.801E-04 9.472E-05
  ETOT  9  -124.34274881749    -1.364E-06 1.457E-04 5.600E-05
@@ -2740,14 +2751,14 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT 11  -124.34274872715     1.333E-08 4.344E-05 5.194E-08
  ETOT 12  -124.34274870761     1.953E-08 2.078E-05 1.373E-08
  ETOT 13  -124.34274870917    -1.553E-09 9.559E-06 2.600E-10
- ETOT 14  -124.34274870898     1.866E-10 3.918E-06 3.590E-11
+ ETOT 14  -124.34274870898     1.867E-10 3.918E-06 3.590E-11
 
  At SCF step   14       nres2   =  3.59E-11 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34693242E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34693242E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34696701E-04  sigma(2 1)= -3.45144186E-08
+  sigma(1 1)=  4.34693241E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34693241E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34696700E-04  sigma(2 1)= -3.45143732E-08
 
 
 --- !ResultsGS
@@ -2760,19 +2771,19 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae:  1.866E-10, res2:  3.590E-11, residm:  3.918E-06, diffor: null, }
+convergence: {deltae:  1.867E-10, res2:  3.590E-11, residm:  3.918E-06, diffor: null, }
 etotal    :  -1.24342749E+02
 entropy   :   0.00000000E+00
 fermie    :   4.95538686E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.34693242E-04,  -3.45144186E-08,   0.00000000E+00, ]
-- [ -3.45144186E-08,   4.34693242E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.34696701E-04, ]
+- [  4.34693241E-04,  -3.45143732E-08,   0.00000000E+00, ]
+- [ -3.45143732E-08,   4.34693241E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.34696700E-04, ]
 pressure_GPa:  -1.2789E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
 cartesian_forces: # hartree/bohr
-- [  0.00000000E+00,   0.00000000E+00,  -0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
@@ -2780,16 +2791,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.11532       15.045280      0.357939    0.357939    0.000000
+    1   2.11532       15.045280      0.357939    0.357939   -0.000000
  ---------------------------------------------------------------------
- Total magnetization (spheres)       0.357939    0.357939    0.000000
- Total magnetization (exact)         0.350889    0.350889    0.000000
+ Total magnetization (spheres)       0.357939    0.357939   -0.000000
+ Total magnetization (exact)         0.350889    0.350889   -0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.543860078403162
- Compensation charge over fine fft grid    =      8.543452798308396
+ Compensation charge over spherical meshes =      8.543860078408837
+ Compensation charge over fine fft grid    =      8.543452798303859
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2928,46 +2939,46 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00001   0.00000   1.66783 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (x)
-  -0.00024  -0.00208   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-  -0.00208  -0.00375   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00005   0.00000  -0.00000   0.00000 ...
+  -0.00024  -0.00208   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00208  -0.00375   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00005   0.00000  -0.00000   0.00000 ...
    0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000  -0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00019   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-  -0.00000   0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00019   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00023  -0.00000   0.00000  -0.00019   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00005   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.13078   0.00000   0.00002   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.13078   0.00000  -0.00002 ...
-  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00002   0.00000   0.00458   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00002   0.00000   0.13078 ...
+  -0.00000  -0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00019   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000 ...
+  -0.00000   0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00019   0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00023  -0.00000   0.00000  -0.00019   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00005   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.13078   0.00000   0.00002   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.13078  -0.00000  -0.00002 ...
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00002  -0.00000   0.00458  -0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00002  -0.00000   0.13078 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (y)
-  -0.00024  -0.00208   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-  -0.00208  -0.00375   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00005   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00005   0.00000   0.00000  -0.00023   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00019   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
-   0.00000  -0.00000   0.00000  -0.00023   0.00000   0.00000  -0.00019   0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00023  -0.00000   0.00000  -0.00019   0.00000  -0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00005   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.13078   0.00000   0.00002   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.13078   0.00000  -0.00002 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00002   0.00000   0.00458   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00002   0.00000   0.13078 ...
+  -0.00024  -0.00208   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+  -0.00208  -0.00375   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00005   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00005  -0.00000   0.00000  -0.00023  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00005  -0.00000  -0.00000  -0.00023  -0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00005   0.00000  -0.00000  -0.00023  -0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00023  -0.00000   0.00000  -0.00019   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00023  -0.00000   0.00000  -0.00019   0.00000   0.00000  -0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00023  -0.00000   0.00000  -0.00019   0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00005   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.13078   0.00000   0.00002   0.00000 ...
+  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.13078   0.00000  -0.00002 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00002   0.00000   0.00458   0.00000 ...
+  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00002   0.00000   0.13078 ...
    ...  only 12  components have been written...
  Atom #  1 - Component magn (z)
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ...
+  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000 ...
    ...  only 12  components have been written...
 
 
@@ -2985,11 +2996,11 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  4.800000000000  4.800000000000  4.800000000000 bohr
               =  2.540050601232  2.540050601232  2.540050601232 angstroms
@@ -3010,44 +3021,44 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.27554590273072E+01
-hartree             :  1.84904803121029E+01
-xc                  : -3.58747112243482E+00
+kinetic             :  1.27554590272805E+01
+hartree             :  1.84904803121068E+01
+xc                  : -3.58747112243041E+00
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-local_psp           : -5.24873999135638E+01
-spherical_terms     : -1.14586188068120E+01
-internal            : -1.24340773358144E+02
-'-kT*entropy'       : -1.97752558921406E-03
-total_energy        : -1.24342750883733E+02
-total_energy_eV     : -3.38353832450562E+03
+psp_core            :  8.99300246551397E+00
+local_psp           : -5.24873999135699E+01
+spherical_terms     : -1.14586188067764E+01
+internal            : -1.24340773358133E+02
+'-kT*entropy'       : -1.97752558936696E-03
+total_energy        : -1.24342750883722E+02
+total_energy_eV     : -3.38353832450532E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 7, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.08395151297699E+01
+band_energy         : -1.08395151296067E+01
 Ewald energy        : -9.70462253202573E+01
-psp_core            :  8.99300246551391E+00
-xc_dc               : -1.73960002850804E+01
-spherical_terms     : -8.05203291379767E+00
+psp_core            :  8.99300246551397E+00
+xc_dc               : -1.73960002850856E+01
+spherical_terms     : -8.05203291395543E+00
 internal            : -1.24340771183391E+02
-'-kT*entropy'       : -1.97752558921406E-03
-total_energy_dc     : -1.24342748708981E+02
+'-kT*entropy'       : -1.97752558936696E-03
+total_energy_dc     : -1.24342748708980E+02
 total_energy_dc_eV  : -3.38353826532759E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.34693242E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.34693242E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.34696701E-04  sigma(2 1)= -3.45144186E-08
+  sigma(1 1)=  4.34693241E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.34693241E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.34696700E-04  sigma(2 1)= -3.45143732E-08
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.2789E+01 GPa]
-- sigma(1 1)=  1.27891146E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.27891146E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.27892163E+01  sigma(2 1)= -1.01544908E-03
+- sigma(1 1)=  1.27891145E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.27891145E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.27892163E+01  sigma(2 1)= -1.01544775E-03
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -3074,9 +3085,9 @@ total_energy_dc_eV  : -3.38353826532759E+03
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart5    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart7     0.0000000000E+00  0.0000000000E+00 -0.0000000000E+00
+            fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            getwfk1          0
            getwfk2         -1
@@ -3132,6 +3143,13 @@ P           mkmem           8
            nsppol5          1
            nsppol6          1
            nsppol7          1
+            nstep1         27
+            nstep2          1
+            nstep3         27
+            nstep4          1
+            nstep5         27
+            nstep6         27
+            nstep7         27
              nsym1         48
              nsym2         48
              nsym3          8
@@ -3143,65 +3161,65 @@ P           mkmem           8
               occ1     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000002  0.000002  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664256  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664256  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664256  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664256  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664256  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664256  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000002  0.000002  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002475  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002475  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002475  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002475  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002475  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002475  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
               occ2     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000002  0.000002  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664251  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664251  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664251  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664251  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664251  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.664250  0.000000  0.000000  0.000000
+                       1.000000  1.000000  0.664251  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000002  0.000002  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002480  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002480  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002480  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002480  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002480  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       0.999967  0.999967  0.002481  0.000000  0.000000  0.000000
+                       0.999967  0.999967  0.002480  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
               occ3     1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -3210,27 +3228,27 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002564
+                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002564
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002564
+                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002564
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002563
+                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002563
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002563
+                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002563
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002564
+                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002564
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002564
+                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002564
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -3242,11 +3260,11 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002563
+                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002563
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002563
+                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002563
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -3258,11 +3276,11 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002563
+                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002563
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  0.999968  0.999968  0.664165  0.002563
+                       1.000000  1.000000  0.999968  0.999968  0.664166  0.002563
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -3391,20 +3409,20 @@ P           mkmem           8
            spinat5     4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            spinat6     0.0000000000E+00  4.0000000000E+00  0.0000000000E+00
            spinat7     2.8284271247E+00  2.8284271247E+00  0.0000000000E+00
-           strten1     4.3468109806E-04  4.3468109806E-04  4.3468109806E-04
+           strten1     4.3444108077E-04  4.3444108077E-04  4.3444108077E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     4.3477560594E-04  4.3477560594E-04  4.3477560594E-04
+           strten2     4.3546156703E-04  4.3546156703E-04  4.3546156703E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     4.3465868583E-04  4.3465868583E-04  4.3468143760E-04
+           strten3     4.3465454939E-04  4.3465454939E-04  4.3466916527E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     4.3468089368E-04  4.3468089368E-04  4.3467041848E-04
+           strten4     4.3470170404E-04  4.3470170404E-04  4.3470079940E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5     4.3468904820E-04  4.3468675919E-04  4.3468675919E-04
+           strten5     4.3468905095E-04  4.3468676191E-04  4.3468676191E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten6     4.3469260528E-04  4.3469182155E-04  4.3469260528E-04
+           strten6     4.3469260557E-04  4.3469182196E-04  4.3469260557E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten7     4.3469324181E-04  4.3469324181E-04  4.3469670075E-04
-                       0.0000000000E+00  0.0000000000E+00 -3.4514418601E-08
+           strten7     4.3469324109E-04  4.3469324109E-04  4.3469669998E-04
+                       0.0000000000E+00  0.0000000000E+00 -3.4514373189E-08
            symafm1       1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
@@ -3644,10 +3662,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         23.1  wall=         23.2
+- Proc.   0 individual time (sec): cpu=         23.5  wall=         23.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  29 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.1  wall=         23.2
+.Delivered  31 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         23.5  wall=         23.6
