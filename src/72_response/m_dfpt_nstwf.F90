@@ -302,6 +302,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  integer :: nband_me, iband_me, jband_me, iband_
  integer :: do_scprod, do_bcast
+ integer :: startband, endband
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -322,6 +323,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dcwavef(:,:)
+ real(dp),allocatable :: cg_ddk(:,:,:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: dnhat1(:,:),drhoaug1(:,:,:,:)
  real(dp),allocatable :: drhor1(:,:),drho1wfg(:,:),drho1wfr(:,:,:)
@@ -492,6 +494,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
      end if
    end do
+
+   ABI_MALLOC(cg_ddk,(2,mpw1*nspinor*mband_mem_rbz,3))
+   cg_ddk = zero ! not all may be initialized below if only certain ddk directions are provided
  end if
 
 !Zero only portion of matrix to be computed here
@@ -787,6 +792,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    ibg1=0;icg1=0
    ibgq=0;icgq=0
 
+
 !  Has to get 1st-order non-local factors before the loop over spins
 !  because this needs a communication over comm_atom (=comm_spinkpt)
    if (need_pawij10) then
@@ -892,7 +898,20 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                ABI_ERROR(msg)
              end if
 
-           end if
+!   NB: this will fail if the bands are not contiguous.
+             startband = nband_k
+             endband = 1
+             do iband=1,nband_k
+               if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
+                 if (iband < startband) startband = iband
+                 if (iband > endband) endband = iband
+               end if
+             end do
+! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+!     only certain columns for my iband are filled, then used below
+             call ddks(idir1)%read_band_block((/startband,endband/),ik_ddk,isppol,xmpio_collective, &
+&                 cg_k=cg_ddk(:,:,idir1))
+           end if ! ddk file is already present
          end do
        end if
 
@@ -1195,8 +1214,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
-                 ik_ddk = indkpt1(ikpt)
-                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
+                 !ik_ddk = indkpt1(ikpt)
+                 !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
+                 gvnlx1 = cg_ddk(:,1+(iband_me-1)*npw1_k*nspinor:iband_me*npw1_k*nspinor,idir1)
                else
                  gvnlx1=zero
                end if
@@ -1415,8 +1435,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              else
                if (need_ddk_file.and.ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
-                 ik_ddk = indkpt1(ikpt)
-                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
+                 !ik_ddk = indkpt1(ikpt)
+                 !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
+                 gh1 = cg_ddk(:,1+(iband_me-1)*npw1_k*nspinor:iband_me*npw1_k*nspinor,idir1)
                else
                  gh1=zero
                end if
@@ -1721,6 +1742,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0) call ddks(idir1)%close()
    end do
+   ABI_FREE(cg_ddk)
  end if
  ABI_FREE(jpert1)
  ABI_FREE(jdir1)
@@ -2096,7 +2118,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
      call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, &
 &         cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
    end if ! ddk file is already present
- end do
+ end do ! idir1
 
  if (ipert==dtset%natom+1) then
    nband_kocc = 0
