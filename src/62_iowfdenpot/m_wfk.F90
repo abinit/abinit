@@ -1357,6 +1357,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        if (present(eig_k)) then
          ! Read column matrix of size (2*nband_k)
          base = 2*(band-1)*nband_disk
+print *, ' read_band_block base = ', base, ' range ', base+1,base+2*nband_disk
          read(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*nband_disk)
        else
          read(Wfk%fh, err=10, iomsg=errmsg ) ! eig_k(2*nband_disk)
