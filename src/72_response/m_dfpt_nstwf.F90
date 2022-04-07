@@ -2082,8 +2082,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
        ABI_BUG(msg)
      end if
 
-! TODO: read block of DDK wf and eig2 here, save for everybody in pool. collective: everyone reads their own bands
-!   find slice of bands for current ik_ddks(idir1) and isppol
 !   NB: this will fail if the bands are not contiguous.
      startband = nband_k
      endband = 1
@@ -2093,7 +2091,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          if (iband > endband) endband = iband
        end if
      end do
-! NB: eig_k is band distributed in call to read_band_block, though array has full size
+! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+!     only certain columns for my iband are filled, then used below
      call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
    end if ! ddk file is already present
  end do
@@ -2183,10 +2182,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
-!TODO MJV: this needed to be band parallelized as well. Check if it works with HAVE_MPI_IO_DEFAULT now.
-!               call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
-!                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
-                 !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
+!TODO MJV: Check if it works with HAVE_MPI_IO_DEFAULT now.
 
                gvnlx1 = cwaveddk(:,:,idir1)
                eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
@@ -2200,7 +2196,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
-!TODO: check if this is still correct in the bandparal case
                  call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
 &                  dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
@@ -2268,12 +2263,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           !call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
-           !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
            gvnlx1 = cwaveddk(:,:,idir1)
            eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
 
-             !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
            !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
            !do ii=1,2*nband_k
            !  write(778,*)eig2_k(ii+(iband-1))
