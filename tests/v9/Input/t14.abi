@@ -14,7 +14,7 @@ prtvol 11
 
 #
 
-kptopt 3
+kptopt 3   #    kptopt 4 # Should work as well, but the stress seem not sufficiently close for the different datasets
 ecut 10.0
 
 pawecutdg 20.0
@@ -56,7 +56,7 @@ rprim     -0.5  0.5  0.5
 #%% files_to_test =
 #%%   t14.abo, tolnlines = 94, tolabs = 2.0e-3, tolrel = 6.0e-2, fld_options= -easy;
 #%% [paral_info]
-#%% max_nprocs = 28
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = PAW
