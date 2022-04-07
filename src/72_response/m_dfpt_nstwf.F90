@@ -2009,6 +2009,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    cg_ddk = zero ! not all may be initialized below if only certain ddk directions are provided
 
    ABI_MALLOC(eig2_ddk,(2*dtset%mband**2,3))
+   eig2_ddk = zero
  end if
 
 !Compute (k+G) vectors
@@ -2083,6 +2084,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 ! TODO: read block of DDK wf and eig2 here, save for everybody in pool. collective: everyone reads their own bands
 !   find slice of bands for current ik_ddks(idir1) and isppol
+!   NB: this will fail if the bands are not contiguous.
      startband = nband_k
      endband = 1
      do iband=1,nband_k
@@ -2091,10 +2093,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          if (iband > endband) endband = iband
        end if
      end do
-print *, " about to read ddk file ", idir1, " for is,ik, ", isppol, ikpt, " and bands ", startband, endband
 ! NB: eig_k is band distributed in call to read_band_block, though array has full size
-     call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk)
-   end if
+     call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
+   end if ! ddk file is already present
  end do
 
  if (ipert==dtset%natom+1) then
@@ -2182,13 +2183,14 @@ print *, " about to read ddk file ", idir1, " for is,ik, ", isppol, ikpt, " and 
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
-!TODO MJV: this needs to be band parallelized as well, probably
+!TODO MJV: this needed to be band parallelized as well. Check if it works with HAVE_MPI_IO_DEFAULT now.
 !               call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
 !                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
+                 !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
+
                gvnlx1 = cwaveddk(:,:,idir1)
                eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
 
-                 !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
                !write(777,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
                !do ii=1,2*nband_k
                !  write(777,*)eig2_k(ii+(iband-1))
@@ -2267,10 +2269,10 @@ print *, " about to read ddk file ", idir1, " for is,ik, ", isppol, ikpt, " and 
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           !call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
-           !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
-           gvnlx1 = cwaveddk(:,:,idir1)
-           eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
+           call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
+           eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
+           !gvnlx1 = cwaveddk(:,:,idir1)
+           !eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
 
              !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
            !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
