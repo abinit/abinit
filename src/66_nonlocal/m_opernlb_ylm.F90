@@ -349,7 +349,8 @@ if (choice==33) two_piinv=1.0_dp/two_pi
 
 !      Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
        if (paw_opt>=3) then
-         do ilmn=1,nlmn
+
+        do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (parity) then
@@ -620,7 +621,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          vect(1,1+ipwshft:npw+ipwshft)=vect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
          vect(2,1+ipwshft:npw+ipwshft)=vect(2,1+ipwshft:npw+ipwshft)+aimag(ztab(:))
 
-       end if
+       end if ! paw_opt /= 3
 
 !      Compute <g|S|c> (or derivatives) for each plane wave:
 
@@ -739,7 +740,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
          ztab(:)=ztab(:)*cmplx(ph3d(1,:,iaph3d),-ph3d(2,:,iaph3d),kind=dp)
          svect(1,1+ipwshft:npw+ipwshft)=svect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
          svect(2,1+ipwshft:npw+ipwshft)=svect(2,1+ipwshft:npw+ipwshft)+aimag(ztab(:))
-       end if
+       end if ! paw_opt >= 3
 
 !      End loop on atoms
      end do
