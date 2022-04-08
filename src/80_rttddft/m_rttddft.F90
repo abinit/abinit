@@ -34,6 +34,7 @@ module m_rttddft
  use defs_datatypes,    only: pseudopotential_type
 
  use m_cgprj,            only: ctocprj
+ use m_cgtools,          only: dotprod_g
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
  use m_efield,           only: efield_type
@@ -42,6 +43,7 @@ module m_rttddft
  use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
  use m_kg,               only: getcut, getph
  use m_mkrho,            only: mkrho
+ use m_mpinfo,           only: proc_distrb_cycle
  use m_paw_an,           only: paw_an_reset_flags
  use m_paw_correlations, only: setrhoijpbe0
  use m_paw_denpot,       only: pawdenpot
@@ -64,10 +66,11 @@ module m_rttddft
  private
 !!***
 
- public :: rttddft_calc_density
- public :: rttddft_calc_etot
  public :: rttddft_setup_ele_step
  public :: rttddft_init_hamiltonian
+ public :: rttddft_calc_density
+ public :: rttddft_calc_etot
+ public :: rttddft_calc_occ
 !!***
 
 contains
@@ -417,7 +420,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  type(pseudopotential_type), intent(inout) :: psps
 
  !Local variables-------------------------------
- integer :: i, me !FB-test
+ !FB-test integer :: i, me !FB-test
  !scalars
  integer, parameter          :: cplex=1
  integer                     :: cplex_rhoij
@@ -444,7 +447,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    ! 1-Compute density from WFs (without compensation charge density nhat)
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
-            & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
+            & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
@@ -480,7 +483,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
-                 & dtset%nsppol,tdks%occ,dtset%paral_kgb,tdks%paw_dmft,             &
+                 & dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft,             &
                  & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
    ! 4-Symetrize rhoij, compute nhat and add it to rhor
@@ -499,7 +502,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    ! 6-Take care of kinetic energy density
    if(dtset%usekden==1)then
      call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
-              & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
+              & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
      !FB: Useful?
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
@@ -520,12 +523,12 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    ! 1-Compute density from WFs
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
-            & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,tdks%rhog,tdks%rhor, &
+            & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,tdks%rhog,tdks%rhor, &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
    ! 2-Take care of kinetic energy density
    if(dtset%usekden==1)then
      call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
-              & tdks%npwarr,tdks%occ,tdks%paw_dmft,tdks%phnons,tdks%taug,tdks%taur, &
+              & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,tdks%taug,tdks%taur, &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
    end if
 
@@ -610,106 +613,149 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
 
  end subroutine rttddft_calc_etot
 
-end module m_rttddft
-!!***
+!****f* m_rttddft/rttddft_calc_occ
+!
+! NAME
+!  rttddft_calc_occ
+!
+! FUNCTION
+!  Compute occupation numbers at time t
+!
+! INPUTS
+!  dtset <type(dataset_type)> = all input variables for this dataset
+!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!  tdks <type(tdks_type)> = Main RT-TDDFT object
+!
+! OUTPUT
+!
+! SIDE EFFECTS
+!
+! PARENTS
+!  m_rttddft_driver/rttddft
+!
+! CHILDREN
+!
+! SOURCE
+subroutine rttddft_calc_occ(tdks, dtset, mpi_enreg)
 
-!!****f* m_rttddft/rttddft_calc_occ
-!!
-!! NAME
-!!  rttddft_calc_occ
-!!
-!! FUNCTION
-!!  Compute occupation numbers at time t
-!!
-!! INPUTS
-!!  cg <real(npw*nspinor*nband)> = the wavefunction coefficients
-!!  cg0 <real(npw*nspinor*nband)> = the intial wavefunction coefficients
-!!  dtset <type(dataset_type)> = all input variables for this dataset
-!!  occ0 <real(nkpt*nspinor*nband)> = initial occupation numbers at t = 0
-!!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!
-!! OUTPUT
-!!  occ <real(nkpt*nspinor*nband)> = occupation numbers
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!  m_rttddft_driver/rttddft
-!!
-!! CHILDREN
-!!
-!! SOURCE
-!subroutine rttddft_calc_occ(cg, cg0, dtset, occ, occ0, mpi_enreg)
-!
-! implicit none
-!
-! !Arguments ------------------------------------
-! !scalars
-! type(dataset_type),         intent(inout) :: dtset
-! type(MPI_type),             intent(inout) :: mpi_enreg
-! !arrays
-! real(dp),                   intent(in)    :: cg(:)
-! real(dp),                   intent(in)    :: cg0(:)
-! real(dp),                   intent(out)   :: occ(:)
-! real(dp),                   intent(in)    :: occ0(:)
-!
-! !Local variables-------------------------------
-! !scalars
-! !arrays
-!! ***********************************************************************
-!
-! my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-!
-! icg=0
-! bdtot_index=0
-!
-! !*** LOOP OVER SPINS
-! do isppol=1,dtset%nsppol
-!
-!   ikpt_loc=0
-!   ikg=0
-!
-!   !*** BIG FAT k POINT LOOP
-!   ikpt = 0
-!   do while (ikpt_loc < dtset%nkpt)
-!
-!      ikpt_loc = ikpt_loc + 1
-!      ikpt = ikpt_loc
-!      my_ikpt = mpi_enreg%my_kpttab(ikpt)
-!
-!      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-!      istwf_k=dtset%istwfk(ikpt)
-!      npw_k=tdks%npwarr(ikpt)
-!
-!      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
-!         bdtot_index=bdtot_index+nband_k
-!         cycle
-!      end if
-!
-!      !Calc occupation number at point k
-!      do iband=1,nband_k
-!         shift_i = npw_k*nspinor*(iband-1)
-!         do jband=1,nband_k
-!            shift_j = npw_k*nspinor*(jband-1)
-!            call dotprod_g(dprod_r,dprod_i,istwf_k,npw_k*my_nspinor,2,cg0(:, shift_i+1:shift_i+npw_k*my_nspinor),&
-!                         & cg(:, shift_j+1:shift_j+npw_k*my_nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!            dot_prod = dprod_r**2 + d_prod_i**2
-!            occ(1+bdtot_index:nband_k+bdtot_index) = occ0(1+bdtot_index:nband_k+bdtot_index)
-!
-!         end do
-!      end do
-!
-!      !** Also shift array memory if dtset%mkmem/=0
-!      if (dtset%mkmem/=0) then
-!         icg=icg+npw_k*my_nspinor*nband_k
-!         ikg=ikg+npw_k
-!      end if
-!
-!   end do !nkpt
-!
-! end do !nsppol
-!
-! end subroutine rttddft_calc_occ
-!
-!end module m_rttddft
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ type(dataset_type), intent(inout) :: dtset
+ type(MPI_type),     intent(inout) :: mpi_enreg
+ type(tdks_type),    intent(inout) :: tdks
+
+ !Local variables-------------------------------
+ integer :: ii
+ real(dp) :: norm
+ !scalars
+ integer   :: bdtot_index
+ integer   :: iband, jband
+ integer   :: icg
+ integer   :: ikpt, ikpt_loc
+ integer   :: istwf_k
+ integer   :: isppol
+ integer   :: me_distrb
+ integer   :: my_ikpt, my_nspinor
+ integer   :: nband_k
+ integer   :: npw_k
+ integer   :: nkpt, nsppol
+ integer   :: shift_i, shift_j
+ integer   :: spaceComm_distrb
+ real(dp)  :: dprod_r, dprod_i, dot_prod
+ !arrays
+! ***********************************************************************
+
+ !Init MPI
+ spaceComm_distrb=mpi_enreg%comm_cell
+ if (mpi_enreg%paral_kgb==1) spaceComm_distrb=mpi_enreg%comm_kpt
+ me_distrb=xmpi_comm_rank(spaceComm_distrb)
+
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+
+ nkpt = dtset%nkpt
+ nsppol = dtset%nsppol
+
+ tdks%occ = zero
+
+ icg=0
+ bdtot_index=0
+
+ !*** LOOP OVER SPINS
+ do isppol=1,nsppol
+
+   ikpt_loc=0
+   !ikg=0
+
+   !*** BIG FAT k POINT LOOP
+   ikpt = 0
+   do while (ikpt_loc < nkpt)
+
+      ikpt_loc = ikpt_loc + 1
+      ikpt = ikpt_loc
+      my_ikpt = mpi_enreg%my_kpttab(ikpt)
+
+      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+      istwf_k=dtset%istwfk(ikpt)
+      npw_k=tdks%npwarr(ikpt)
+
+      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
+         bdtot_index=bdtot_index+nband_k
+         cycle
+      end if
+
+      !Calc occupation number at point k
+      !PAW - calc <\phi_n|S|\phi_m> (getgsc)
+      if (dtset%usepaw /=0) then 
+         !do iband = 1, nband_k
+         !   shift_i = icg+npw_k*my_nspinor*(iband-1)
+         !   call getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,tdks%gs_hamk,mpi_enreg,ndat,tim_getcsc,)
+         !end do
+      !Norm-conserving - calc <\phi_n|\phi_m> (dotprod_g)
+      else
+         do iband = 1, nband_k
+            shift_i = icg+npw_k*my_nspinor*(iband-1)
+            do jband = 1, nband_k
+               shift_j = icg+npw_k*my_nspinor*(jband-1)
+               call dotprod_g(dprod_r,dprod_i,istwf_k,npw_k*my_nspinor,2,tdks%cg0(:, shift_i+1:shift_i+npw_k*my_nspinor),&
+                            & tdks%cg(:, shift_j+1:shift_j+npw_k*my_nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+               dot_prod = dprod_r**2 + dprod_i**2
+               norm = 0.0_dp
+               do ii = shift_i+1, shift_i+npw_k*my_nspinor
+                  norm = norm + tdks%cg(1,ii)**2+tdks%cg(2,ii)**2
+               end do 
+               !FB-test print*, 'sum(cg(t)^2):', sqrt(norm)
+               norm = 0.0_dp
+               do ii = shift_i+1, shift_i+npw_k*my_nspinor
+                  norm = norm + tdks%cg0(1,ii)**2+tdks%cg0(2,ii)**2
+               end do 
+               !FB-test print*, 'sum(cg(0)^2):', sqrt(norm)
+               tdks%occ(bdtot_index+iband) = tdks%occ(bdtot_index+iband)+tdks%occ0(bdtot_index+jband)*dot_prod
+               !FB-test print*, 'ikpt, iband, jband, bdtot_index, dot_prod :', ikpt, iband, jband, bdtot_index, dot_prod
+               !FB-test print*, 'bdtot_index+iband, tdks%occ(bdtot_index+iband):', bdtot_index+iband, tdks%occ(bdtot_index+iband)
+               !FB-test print*, 'bdtot_index+jband, tdks%occ0(bdtot_index+jband), tdks%occ0(bdtot_index+jband)*dot_prod:', &
+               !FB-test        & bdtot_index+jband, tdks%occ0(bdtot_index+jband), tdks%occ0(bdtot_index+jband)*dot_prod
+            end do
+         end do
+      end if
+
+      !** Also shift array memory if dtset%mkmem/=0
+      if (dtset%mkmem/=0) then
+         icg=icg+npw_k*my_nspinor*nband_k
+         bdtot_index=bdtot_index+nband_k
+      end if
+
+   end do !nkpt
+
+ end do !nsppol
+
+ print*, 'FB-test - occ', tdks%occ
+ print*, 'FB-test - occ0', tdks%occ0
+
+ !FB TODO some MPI sum are needed here
+
+ end subroutine rttddft_calc_occ
+
+end module m_rttddft
 !!***

@@ -51,6 +51,7 @@ module m_rttddft_output
  use m_nctk,          only: nctk_open_create
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
  use m_rttddft_tdks,  only: tdks_type
+ use m_rttddft,       only: rttddft_calc_occ
  use m_specialmsg,    only: wrtout
  use m_xmpi,          only: xmpi_comm_rank
    
@@ -140,7 +141,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 !!FB: This is most probably not needed
 !!Update header, with evolving variables
 !call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
-!                   & tdks%hdr%residm,tdks%rprimd,tdks%occ,tdks%pawrhoij,                  &
+!                   & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                  &
 !                   & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
 !                   & mpi_atmtab=mpi_enreg%my_atmtab)
 
@@ -182,6 +183,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (mod(istep,dtset%td_prtstr) == 0) then
     call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
     call prt_eig(dtfil,dtset,istep,mpi_enreg,tdks)
+    call prt_occ(dtfil,dtset,istep,mpi_enreg,tdks)
     if (dtset%prtwf > 0) then
        call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
        call prt_restart(dtfil,istep,mpi_enreg,tdks)
@@ -262,12 +264,116 @@ subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
  if(me==0)then
    call prteigrs(tdks%eigen,enunit,tdks%energies%e_fermie,tdks%energies%e_fermih,  & 
                & fname,ab_out,dtset%iscf,dtset%kptns,dtset%kptopt,dtset%mband,     &
-               & dtset%nband,dtset%nbdbuf,dtset%nkpt,0,dtset%nsppol,tdks%occ,      &
-               & dtset%occopt, option,dtset%prteig,dtset%prtvol,resid,dtset%tolwfr, &
+               & dtset%nband,dtset%nbdbuf,dtset%nkpt,0,dtset%nsppol,tdks%occ0,      &
+               & dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,dtset%tolwfr, &
                & vxcavg_dum,dtset%wtk)
  end if
 
 end subroutine prt_eig
+
+!!****f* m_rttddft_output/prt_occ
+!!
+!! NAME
+!!  prt_occ
+!!
+!! FUNCTION
+!!  Computes and then outputs occupation numbers
+!!
+!! INPUTS
+!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  istep <integer> = step number
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = the tdks object to initialize
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,                    intent(in)    :: istep
+ type(datafiles_type),       intent(inout) :: dtfil
+ type(dataset_type),         intent(inout) :: dtset
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(tdks_type),            intent(inout) :: tdks
+ !arrays
+ 
+ !Local variables-------------------------------
+ !scalars
+ integer              :: band_index
+ integer              :: iband, ii, ikpt, isppol
+ integer              :: me
+ integer              :: nkpt
+ integer              :: nband_k, nsppol
+ integer              :: temp_unit
+ !arrays
+ character(len=fnlen) :: fname
+ character(len=4)     :: ikpt_fmt
+ character(len=500)   :: msg
+ character(len=24)    :: step_nb
+
+
+! *************************************************************************
+
+ if (dtset%prtocc > 0) then 
+   
+   !1-First compute occupation numbers
+   call rttddft_calc_occ(tdks, dtset, mpi_enreg)
+
+   !2-Then outputs them
+   me = xmpi_comm_rank(mpi_enreg%comm_cell)
+   
+   write(step_nb,*) istep
+   fname = trim(dtfil%filnam_ds(4))//'_OCC_'//trim(adjustl(step_nb))
+   
+   if (open_file(fname, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
+       ABI_ERROR(msg)
+   end if
+   
+   nkpt = dtset%nkpt
+   nsppol = dtset%nsppol
+   
+   if(me==0)then
+     band_index=0
+     do isppol=1,nsppol
+   
+        if(nsppol==2)then
+           if(isppol==1)write(msg, '(2a)' ) ch10,' SPIN UP channel '
+           if(isppol==2)write(msg, '(2a)' ) ch10,' SPIN DOWN channel '
+           call wrtout(temp_unit,msg)
+        end if
+   
+        do ikpt=1,nkpt
+           nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+           ikpt_fmt="i5" ; if(nkpt>=10000)ikpt_fmt="i7" ; if(nkpt>=1000000)ikpt_fmt="i9"
+   
+           write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
+               & 'kpt',ikpt,' (',(dtset%kptns(ii,ikpt),ii=1,3),'), occupations='
+           call wrtout(temp_unit,msg)
+           do ii=0,(nband_k-1)/6
+              write(msg, '(1p,6e12.4)')(tdks%occ(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
+              call wrtout(temp_unit,msg)
+           end do
+           band_index=band_index+nband_k
+        end do
+     end do
+   end if
+   
+   close(temp_unit)
+ end if
+
+end subroutine prt_occ
 
 !!****f* m_rttddft_output/prt_den
 !!
@@ -364,7 +470,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  ABI_CALLOC(doccde, (bantot))
  call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
    doccde,tdks%eigen,dtset%istwfk,dtset%kptns,dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol, &
-   dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ,dtset%wtk,&
+   dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ0,dtset%wtk,&
    dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig, &
    dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
  ABI_FREE(doccde)
@@ -389,7 +495,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
       ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
       collect = 1 !; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
       if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
-         call partial_dos_fractions(dos,crystal,dtset,tdks%eigen,tdks%occ,tdks%npwarr,tdks%kg,tdks%cg,tdks%mcg,collect,mpi_enreg)
+         call partial_dos_fractions(dos,crystal,dtset,tdks%eigen,tdks%occ0,tdks%npwarr,tdks%kg,tdks%cg,tdks%mcg,collect,mpi_enreg)
       end if
 
       if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
@@ -480,22 +586,22 @@ subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks, force_write)
 ! *************************************************************************
 
  write(step_nb,*) istep
- !Use initial eigenvalues to ensure that we get the same occupation upon restart
  fname = trim(dtfil%filnam_ds(4))//'_WFK_'//trim(adjustl(step_nb))
 
  if (present(force_write)) then
     if (force_write) lforce_write = .TRUE.
  end if
 
+ !Use initial eigenvalues to ensure that we get the same occupation upon restart
  if (lforce_write) then
    call outwf(tdks%cg,dtset,psps,tdks%eigen0,fname,tdks%hdr,tdks%kg,dtset%kptns, &
              & dtset%mband,tdks%mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,  &
-             & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ,response, &
+             & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ0,response, &
              & dtfil%unwff2,tdks%wvl%wfs,tdks%wvl%descr, force_write=.TRUE.)
  else
    call outwf(tdks%cg,dtset,psps,tdks%eigen0,fname,tdks%hdr,tdks%kg,dtset%kptns, &
              & dtset%mband,tdks%mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,  &
-             & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ,response, &
+             & dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%occ0,response, &
              & dtfil%unwff2,tdks%wvl%wfs,tdks%wvl%descr)
  end if
 

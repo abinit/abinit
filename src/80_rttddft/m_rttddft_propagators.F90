@@ -327,13 +327,13 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
             displ = my_bandfft_kpt%rdispls(me_bandfft+1)
          end if
          do iband=1, nband_k
-            if (abs(tdks%occ(bdtot_index+iband))>tol8) then 
+            if (abs(tdks%occ0(bdtot_index+iband))>tol8) then 
                shift = icg+npw_k*my_nspinor*(iband-1)
                !FB: meanvalue_g does the mpi_sum over the bands inside, that's not very efficient since 
                !FB: we could do it only once at the end
                call meanvalue_g(ar,ham_k%kinpw_k(1+displ:displ+npw_k*my_nspinor),0,ham_k%istwf_k,mpi_enreg,npw_k,my_nspinor, &
                               & tdks%cg(:,1+shift:shift+npw_k*my_nspinor),tdks%cg(:,1+shift:shift+npw_k*my_nspinor),0)
-               energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*ar
+               energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*tdks%occ0(bdtot_index+iband)*ar
             end if
          end do
       end if
@@ -355,7 +355,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
             call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor, &
                                   & eig=tdks%eigen(1+shift:upbound+shift), enl=enl)
             do iband = 1, nband_k
-               energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ(bdtot_index+iband)*enl(iband)
+               energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ0(bdtot_index+iband)*enl(iband)
             end do
             ABI_FREE(enl)
          else
