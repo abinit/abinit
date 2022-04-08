@@ -779,15 +779,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
     end if
 
-    ! fffff
-    if (choice==7) then
-       !call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(2,npwout*my_nspinor*ndat) = ",ftoa(svectout(2,npwout*my_nspinor*ndat))),"COLL")
-       !call wrtout(std_out,sjoin("(b2,e2)=",itoa(b2),itoa(e2)),"COLL")
-       call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(1) = ",ftoa(svectout(1,1)),ftoa(svectout(2,1))),"COLL")
-       call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(2) = ",ftoa(svectout(1,2)),ftoa(svectout(2,2))),"COLL")
-       call wrtout(std_out,sjoin("idat=",itoa(idat),"svectout(3) = ",ftoa(svectout(1,3)),ftoa(svectout(2,3))),"COLL")
-    end if
-
    end do
    !$omp end parallel do
  end if
@@ -1069,11 +1060,6 @@ end subroutine nonlop
  end if
 
 #if defined HAVE_GPU_CUDA
- if (choice==7) then
-    write(std_out,fmt='(10(f9.6, 2x))') proj(1,1:10)
-    write(std_out,fmt='(10(f9.6, 2x))') vectin(1,1:10)
-    write(std_out,*) "===="
- end if
  call gpu_nonlop(atindx1,choice,cpopt,proj,dimenl1,dimenl2,dimffnlin,dimffnlout,&
 & enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
 & kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&

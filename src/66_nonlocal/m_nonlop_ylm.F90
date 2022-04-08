@@ -643,13 +643,6 @@ contains
    end if
  end if
 
- if (choice==7) then
-    write(std_out,fmt='(10(f9.6, 2x))') cprjin(1,1)%cp(1,1:10)
-    write(std_out,fmt='(10(f9.6, 2x))') vectin(1,1:10)
-    write(std_out,*) "===="
- end if
-
-
 
 !Additional steps before calculation
 !==============================================================
@@ -856,7 +849,7 @@ contains
                end if
              end do
            end do
-         else
+         else ! cplex != 2
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
@@ -884,8 +877,8 @@ contains
                end do
              end do
            end do
-         end if
-       end if
+         end if ! cplex == 2
+       end if ! cpopt==4 and ndgxdt>0
 
        ! Computation or <p_lmn|c> (and derivatives) for this block of atoms if :
        !    <p_lmn|c> are not in memory : cpopt<=1
@@ -961,7 +954,7 @@ contains
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
            call timab(1105,2,tsec)
          else
-           gxfac_sij=gx
+            gxfac_sij=gx
          end if
 
 !        Operate with the non-local potential on the projected scalars,
@@ -1005,7 +998,7 @@ contains
              end if
              ABI_FREE(gx_left)
            end if
-         end if
+         end if ! signs == 1
 
 !        Operate with the non-local potential on the projected scalars,
 !        in order to get matrix element
@@ -1029,9 +1022,9 @@ contains
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
              call timab(1104,2,tsec)
            end if
-         end if
+         end if ! signs == 2
 
-       end if ! choice==0
+       end if ! choice>=0
 
 !      Deallocate temporary projected scalars
        ABI_FREE(gx)
