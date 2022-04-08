@@ -84,7 +84,7 @@ __device__ static inline  void reduce_double_32(volatile double *sh_vect)
 }
 
 /**
- * Kind of equivalent to opernlc_ylm.
+ * Kind of equivalent to opernlc_ylm + the first half of opernlb.
  *
  * For a given wave function compute gxfac, gxfac_sij, dgxdtfac
  *
@@ -141,17 +141,17 @@ __global__ void kernel_compute_proj_factor(const double2 *proj,
       double2 proj_ilmn_R;
       proj_ilmn_R = proj[iproj];
 
-      if (choice != 7) {
+      if (choice == 7) {
+        a_jlmn.x = proj_ilmn_R.x;
+        a_jlmn.y = proj_ilmn_R.y;
+      } else {
         double val_enl; // enl is real when norm conserving
         int iln =
-            indlmn[4 + 6 * (jlmn + lmnmax * itypat)]; // iln=indlmn(5,ilmn)
-                                                      // (pour un type fixe)
+          indlmn[4 + 6 * (jlmn + lmnmax * itypat)]; // iln=indlmn(5,ilmn)
+        // (pour un type fixe)
         val_enl = enl[(iln - 1) + dimenl1 * itypat]; // enl_(1)=enl(iln,itypat,ispinor)
         a_jlmn.x = val_enl * proj_ilmn_R.x; // gxfac(1:cplex,ilmn,ia,ispinor)=enl_(1)*gx(1:cplex,ilmn,ia,ispinor)
         a_jlmn.y = val_enl * proj_ilmn_R.y;
-      } else {
-        a_jlmn.x = proj_ilmn_R.x;
-        a_jlmn.y = proj_ilmn_R.y;
       }
 
     } else { // PAW - paw_opt != 0
@@ -182,22 +182,21 @@ __global__ void kernel_compute_proj_factor(const double2 *proj,
           a_jlmn.y -= lambda * sa_jlmn.y;
         }
 
-      } else { // choice == 7
+      } else { // choice == 7, when choice = 7 paw_opt must be 3
 
         double2 proj_ilmn_R = proj[iproj];
-        if (paw_opt != 3) {
-          a_jlmn.x = proj_ilmn_R.x;
-          a_jlmn.y = proj_ilmn_R.y;
-        }
-        if (paw_opt == 3 || paw_opt == 4) {
+        if (paw_opt == 3) {
+          a_jlmn.x  = proj_ilmn_R.x;
+          a_jlmn.y  = proj_ilmn_R.y;
           sa_jlmn.x = proj_ilmn_R.x;
           sa_jlmn.y = proj_ilmn_R.y;
         }
+
       } // choice == 7
     } // paw_opt != 0
 
     // Cas choice==1 && signs==2 :  a_jlmn = a_jlmn*i^(-l)
-    if (choice == 1) {
+    if (choice == 1 or choice == 7) {
       tmp_loc = a_jlmn.x;
       switch (l % 4) {
         // case 0: //i^(-l) = 1 : Nothing to do
@@ -232,7 +231,7 @@ __global__ void kernel_compute_proj_factor(const double2 *proj,
         val_ajlmn[iproj]  =  a_jlmn;
         val_sajlmn[iproj] = sa_jlmn;
       }
-    } // End choice==1 && signs==2
+    } // End choice==1 or 7 && signs==2
 
     // Case choice==2 && signs==1: a_jlmn_alpha =
     // a_jlmn*conjuguate(dproj(jlmn,alpha))
@@ -304,18 +303,8 @@ __global__ void kernel_compute_proj_factor(const double2 *proj,
       }
     } // end choice 23
 
-    else if (choice == 7) {
-      // Store computed values
-      if (paw_opt == 3) {
-        val_ajlmn[iproj]  = sa_jlmn;
-        val_sajlmn[iproj] = sa_jlmn;
-      } else {
-        val_ajlmn[iproj]  =  a_jlmn;
-        val_sajlmn[iproj] = sa_jlmn;
-      }
-    }
+  } // end if thread's global id < nb_projection
 
-  }   // end if thread's global id < nb_projection
 } // End of kernel_compute_proj_factor
 
 /**
@@ -326,13 +315,13 @@ __global__ void kernel_compute_proj_factor(const double2 *proj,
 //  Blocks in Y direction represent a plane wave couple indexed by jpw
 //  threads of the blocks take care of a couple (iaton,ilmn)
 // The primary compute and the reduction are made over the threads of this block
-__global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
+__global__ void kernel_compute_nl_hamiltonian(const double2 *vectin,
                                               double2 *vectout,
                                               double2 *svectout,
-                                              double2 *val_ajlmn,
-                                              double2 *val_sajlmn,
-                                              double2 *ph3dout,
-                                              double *ffnlout,
+                                              const double2 *val_ajlmn,
+                                              const double2 *val_sajlmn,
+                                              const double2 *ph3dout,
+                                              const double *ffnlout,
                                               const unsigned short int* atoms,
                                               const unsigned char *lmn,
                                               const unsigned char *typat,
@@ -345,12 +334,12 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
                                               const double lambda)
 {
 
-  //Definition of locals
+  // definition of locals
   unsigned short int jpw,iatom;
   unsigned char jlmn,itypat;
   double2 vect_loc,svect_loc;
 
-  //Shared memory areas to compute and reduce
+  // shared memory areas to compute and reduce
   extern __shared__ double sh_mem[];
   double *sh_vect_x = sh_mem ;
   double *sh_vect_y = &(sh_mem[blockDim.x]);
@@ -384,8 +373,8 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
     ph3d.y *= ffnl;
 
     //Warning: the product is between a_jlmn and conjuguate(ph3d)
-    vect_loc.x += a_jlmn.x*ph3d.x + a_jlmn.y*ph3d.y;
-    vect_loc.y += a_jlmn.y*ph3d.x - a_jlmn.x*ph3d.y;
+    vect_loc.x  +=  a_jlmn.x*ph3d.x +  a_jlmn.y*ph3d.y;
+    vect_loc.y  +=  a_jlmn.y*ph3d.x -  a_jlmn.x*ph3d.y;
     svect_loc.x += sa_jlmn.x*ph3d.x + sa_jlmn.y*ph3d.y;
     svect_loc.y += sa_jlmn.y*ph3d.x - sa_jlmn.x*ph3d.y;
 
@@ -405,12 +394,12 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
     }
     __syncthreads();
     //Step3: Thread 0 writes the results for the block (ie for the plane wave)
-    if(threadIdx.x==0){
-      if(paw_opt==2){
+    if (threadIdx.x==0) {
+      if (paw_opt==2) {
         vect_loc.x = -lambda*vectin[jpw].x + four_pi_by_ucvol * sh_vect_x[0];
         vect_loc.x = -lambda*vectin[jpw].y + four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
       }
-      else{
+      else {
         vect_loc.x = four_pi_by_ucvol * sh_vect_x[0];
         vect_loc.y = four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
       }
@@ -418,12 +407,12 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
     }
   }
 
-  if(paw_opt>2){
+  if (paw_opt>2) {
     //Step4: We reduce for overlap
     __syncthreads();
-    sh_vect_x[threadIdx.x]=svect_loc.x;
-    sh_vect_y[threadIdx.x]=svect_loc.y;
-    for(int decalage=blockDim.x>>1;decalage>0;decalage=decalage>>1){
+    sh_vect_x[threadIdx.x] = svect_loc.x;
+    sh_vect_y[threadIdx.x] = svect_loc.y;
+    for (int decalage=blockDim.x>>1; decalage>0; decalage=decalage>>1){
       //We ensure every access in shared mem is accomplished in the block
       __syncthreads();
       if( threadIdx.x <  decalage)
@@ -433,7 +422,7 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
     }
     __syncthreads();
     //Step5: Thread 0 writes the results for the block (ie for the plane wave)
-    if(threadIdx.x==0){
+    if (threadIdx.x==0) {
       svect_loc = vectin[jpw];
       svect_loc.x += four_pi_by_ucvol * sh_vect_x[0];
       svect_loc.y += four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
@@ -444,15 +433,23 @@ __global__ void kernel_compute_nl_hamiltonian(double2 *vectin,
 }//end of kernel_compute_nl_hamiltonian
 
 /**
- * Kind of equivalent to opernlb_ylm.
+ * Kind of equivalent to opernlb_ylm without the first part (modifying gxfac / gxfacs).
+ *
+ * \param[in] vectin
+ * \param[out] vectout
+ * \param[out] svectout
+ * \param[in]  val_ajlmn is computed in kernel_compute_proj_factor
+ * \param[in] val_sajlmn is computed in kernel_compute_proj_factor
+ * \param[in] ph3dout
+ * \param[in] ffnlout
  */
-__global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
+__global__ void kernel_compute_nl_hamiltonian_64(const double2 *vectin,
                                                  double2 *vectout,
                                                  double2 *svectout,
-                                                 double2 *val_ajlmn,
-                                                 double2 *val_sajlmn,
-                                                 double2 *ph3dout,
-                                                 double *ffnlout,
+                                                 const double2 *val_ajlmn,
+                                                 const double2 *val_sajlmn,
+                                                 const double2 *ph3dout,
+                                                 const double *ffnlout,
                                                  const unsigned short int* atoms,
                                                  const unsigned char *lmn,
                                                  const unsigned char *typat,
@@ -462,7 +459,8 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
                                                  const int nb_projections,
                                                  const int lmnmax,
                                                  const double four_pi_by_ucvol,
-                                                 const double lambda)
+                                                 const double lambda,
+                                                 const int choice)
 {
 
   //Definition of locals
@@ -488,8 +486,8 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
     unsigned char itypat = typat[iproj];
 
     // read the projections factor
-    a_jlmn =val_ajlmn[iproj];
-    sa_jlmn=val_sajlmn[iproj];
+    a_jlmn  = val_ajlmn[iproj];
+    sa_jlmn = val_sajlmn[iproj];
 
     // accumulate the contribution of the projection for this thread in register
     // these 2 loads are'nt coalesced and may be costly
@@ -499,9 +497,9 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
     ph3d.x *= ffnl;
     ph3d.y *= ffnl;
 
-    //Warning: the product is between a_jlmn and conjuguate(ph3d)
-    vect_loc.x += a_jlmn.x*ph3d.x + a_jlmn.y*ph3d.y;
-    vect_loc.y += a_jlmn.y*ph3d.x - a_jlmn.x*ph3d.y;
+    // warning: the product is between a_jlmn and conjuguate(ph3d)
+    vect_loc.x  +=  a_jlmn.x*ph3d.x +  a_jlmn.y*ph3d.y;
+    vect_loc.y  +=  a_jlmn.y*ph3d.x -  a_jlmn.x*ph3d.y;
     svect_loc.x += sa_jlmn.x*ph3d.x + sa_jlmn.y*ph3d.y;
     svect_loc.y += sa_jlmn.y*ph3d.x - sa_jlmn.x*ph3d.y;
 
@@ -510,7 +508,7 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
   /*
    * Compute <g|Vnl|c> for each plane wave (<g|). See opernlb.
    */
-  //if(paw_opt!=3)
+  if(paw_opt!=3)
   {
     // step2: reduce in Shared Memory
     sh_vect_x[threadIdx.x] = vect_loc.x;
@@ -539,7 +537,7 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
   /*
    *  Compute <g|S|c>  for each plane wave (<g|). See opernlb.
    */
-  //  if(paw_opt>2)
+  if(paw_opt>=3)
   {
     // step4: reduce for overlap
     sh_vect_x[threadIdx.x]=svect_loc.x;
@@ -552,6 +550,7 @@ __global__ void kernel_compute_nl_hamiltonian_64(double2 *vectin,
     // step5: thread 0 writes the results for the block (ie for the plane wave)
     if (threadIdx.x==0) {
       svect_loc = vectin[jpw];
+      if (choice==7) svect_loc = {0., 0.};
       svect_loc.x += four_pi_by_ucvol * sh_vect_x[0];
       svect_loc.y += four_pi_by_ucvol * sh_vect_y[63];
       svectout[jpw] = svect_loc;
@@ -739,6 +738,7 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
                                              *signs,
                                              *lambda);
 
+
   /************* Compute output needed with signs ***********************/
 
   if ( ( (*choice)==1 or (*choice)==7 ) and (*signs)==2 )
@@ -765,7 +765,8 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
                                                                                   *nb_projections,
                                                                                   *lmnmax,
                                                                                   *four_pi_by_ucvol,
-                                                                                  *lambda);
+                                                                                  *lambda,
+                                                                                  *choice);
 
     } //End choice==1,signs==2
 
