@@ -40,9 +40,10 @@ module m_rttddft_exponential
  use m_getghc,        only: multithreaded_getghc
  use m_hamiltonian,   only: gs_hamiltonian_type
  use m_invovl,        only: apply_invovl
- use m_nonlop,        only: nonlop
  use m_pawcprj,       only: pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_prep_kgb,      only: prep_getghc, prep_index_wavef_bandpp
+ use m_rttddft,       only: rttddft_calc_eig, rttddft_calc_enl, &
+                          & rttddft_calc_occ
  use m_xmpi,          only: xmpi_alltoallv, xmpi_comm_rank
 
  implicit none
@@ -77,7 +78,7 @@ contains
 !!
 !! OUTPUT
 !!  cg <real(npw*nspinor*nband)> = the exponential propagator 
-!!   applied to the WF coeeficients
+!!   applied to the WF coefficients
 !!
 !! SIDE EFFECTS
 !!
@@ -87,7 +88,7 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine rttddft_exp_taylor(cg,dt,dtset,ham_k,mpi_enreg,nband_k,npw_k,nspinor,eig,enl)
+ subroutine rttddft_exp_taylor(cg,dt,dtset,ham_k,mpi_enreg,nband_k,npw_k,nspinor,eig,enl,occ,occ0,cg0)
 
  implicit none
 
@@ -104,36 +105,29 @@ contains
  real(dp), target,          intent(inout)         :: cg(2,npw_k*nband_k*nspinor)
  real(dp),                  intent(out), optional :: eig(nband_k)
  real(dp),                  intent(out), optional :: enl(nband_k)
+ real(dp),                  intent(out), optional :: occ(nband_k)
+ real(dp),                  intent(in),  optional :: occ0(nband_k)
+ real(dp),                  intent(in),  optional :: cg0(2,npw_k*nband_k*nspinor)
  
  !Local variables-------------------------------
  !scalars
- integer                         :: choice
- integer                         :: cpopt, cpopt1
- integer                         :: iband
+ integer                         :: cpopt
  integer                         :: iorder
- integer                         :: me_band
  integer                         :: nband_t
  integer                         :: npw_t
- integer                         :: paw_opt
- integer                         :: shift
  integer                         :: sij_opt
- integer                         :: signs
  integer                         :: tim_getghc = 5
  integer                         :: nfact
- logical                         :: paw
- real(dp)                        :: dprod_r, dprod_i
+ logical                         :: l_paw
  !arrays
  integer,            allocatable :: index_wavef_band(:)
  type(pawcprj_type), allocatable :: cwaveprj(:,:)
- type(pawcprj_type), allocatable :: cprj_dummy(:,:)
  real(dp), pointer               :: cg_t(:,:)
  real(dp),           allocatable :: cg_work(:,:)
- real(dp),           allocatable :: eig_dummy(:)
  real(dp),           allocatable :: ghc(:,:)
  real(dp),           allocatable :: gvnlxc_dummy(:,:)
  real(dp),           allocatable :: gsm1hc(:,:)
  real(dp),           allocatable :: gsc(:,:)
- real(dp),           allocatable :: gsc_dummy(:,:)
  real(dp),           allocatable :: tmp(:,:)
  
 ! ***********************************************************************
@@ -148,8 +142,8 @@ contains
    cg_t => cg
  end if
 
- paw = (ham_k%usepaw == 1)
- if(paw) then
+ l_paw = (ham_k%usepaw == 1)
+ if(l_paw) then
    ABI_MALLOC(cwaveprj, (ham_k%natom,nspinor*nband_t))
    call pawcprj_alloc(cwaveprj,0,ham_k%dimcprj)
  else
@@ -157,13 +151,13 @@ contains
  end if
  cpopt = 0
 
- ABI_MALLOC(ghc,    (2, npw_t*nspinor*nband_t))
- ABI_MALLOC(gsc,    (2, npw_t*nspinor*nband_t))
- ABI_MALLOC(gsm1hc, (2, npw_t*nspinor*nband_t))
+ ABI_MALLOC(ghc,   (2, npw_t*nspinor*nband_t))
+ ABI_MALLOC(gsc,   (2, npw_t*nspinor*nband_t))
+ ABI_MALLOC(gsm1hc,(2, npw_t*nspinor*nband_t))
  ABI_MALLOC(gvnlxc_dummy, (0, 0))
       
  !*** Taylor expansion ***
- ABI_MALLOC(tmp, (2, npw_t*nspinor*nband_t))
+ ABI_MALLOC(tmp,(2, npw_t*nspinor*nband_t))
  tmp(:,:) = cg_t(:,:)
  nfact = 1
 
@@ -173,7 +167,7 @@ contains
 
    !** Apply Hamiltonian
    sij_opt = 0
-   if (iorder == 1 .and. paw .and. present(eig)) sij_opt = 1
+   if (iorder == 1 .and. l_paw .and. (present(eig) .or. present(occ))) sij_opt = 1
    if (dtset%paral_kgb /= 1) then
       call multithreaded_getghc(cpopt,tmp,cwaveprj,ghc,gsc,ham_k,gvnlxc_dummy,1.0_dp, &
                               & mpi_enreg,nband_t,dtset%prtvol,sij_opt,tim_getghc,0)
@@ -183,7 +177,7 @@ contains
    end if
 
    !** Also apply S^-1 in PAW case
-   if (paw) then
+   if (l_paw) then
       call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor)
       tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
       tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
@@ -192,45 +186,31 @@ contains
       tmp(2,:) = -dt*ghc(1,:)/real(nfact,dp)
    end if
 
-   !Compute eigenvalues if required
-   if (present(eig) .and. iorder == 1) then
-      do iband=1, nband_t
-         shift = npw_t*nspinor*(iband-1)
-         !Compute eigenvalues
-         call dotprod_g(eig(iband),dprod_i,ham_k%istwf_k,                     &
-                      & npw_t*nspinor,1,ghc(:, shift+1:shift+npw_t*nspinor),  &
-                      & cg_t(:, shift+1:shift+npw_t*nspinor),mpi_enreg%me_g0, &
-                      & mpi_enreg%comm_spinorfft)
-         if(paw) then
-            call dotprod_g(dprod_r,dprod_i,ham_k%istwf_k,                        &
-                         & npw_t*nspinor,1,gsc(:, shift+1:shift+npw_t*nspinor),  &
-                         & cg_t(:, shift+1:shift+npw_t*nspinor),mpi_enreg%me_g0, &
-                         & mpi_enreg%comm_spinorfft)
-            eig(iband) = eig(iband)/dprod_r
+   !** Compute properties if requested
+   if (iorder == 1) then
+      !eigenvalues
+      if (present(eig)) then
+         if (l_paw) then
+            call rttddft_calc_eig(cg_t,eig,ghc,ham_k%istwf_k,nband_t,npw_t,nspinor, &
+                                & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gsc=gsc)
+         else
+            call rttddft_calc_eig(cg_t,eig,ghc,ham_k%istwf_k,nband_t,npw_t,nspinor, &
+                                & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
          end if
-      end do
-   end if
-
-   !Compute non local PSP eneregy contribution in NC case if required
-   if (present(enl) .and. iorder == 1) then
-      ABI_MALLOC(cprj_dummy,(ham_k%natom,0))
-      ABI_MALLOC(gsc_dummy,(0,0))
-      ABI_MALLOC(eig_dummy,(nband_k))
-      choice=1; paw_opt=0; cpopt1=-1; signs=1
-      if (dtset%paral_kgb == 1) then
-         me_band = xmpi_comm_rank(mpi_enreg%comm_band)
-         shift = me_band*mpi_enreg%bandpp
-      else
-         shift = 0
       end if
-      call nonlop(choice,cpopt1,cprj_dummy,enl(1+shift:nband_t+shift),ham_k,0,      &
-                & eig_dummy,mpi_enreg,nband_t,1,paw_opt,signs,gsc_dummy,tim_getghc, &
-                & cg_t,gvnlxc_dummy)
-      ABI_FREE(cprj_dummy)
-      ABI_FREE(gsc_dummy)
-      ABI_FREE(eig_dummy)
+
+      !non local PSP energy contribution in NC case
+      if (present(enl) .and. iorder == 1) then
+         call rttddft_calc_enl(cg_t,dtset,enl,ham_k,nband_t,npw_t,nspinor,mpi_enreg)
+      end if
+
+      !occupations
+      if (present(occ) .and. iorder == 1) then
+         call rttddft_calc_occ(cg_t,dtset,enl,ham_k,nband_t,npw_t,nspinor,mpi_enreg)
+      end if
    end if
 
+   !** Update cg
    cg_t(:,:) = cg_t(:,:) + tmp(:,:)
 
  end do
@@ -241,7 +221,7 @@ contains
  ABI_FREE(gsm1hc)
  ABI_FREE(gvnlxc_dummy)
 
- if(paw) call pawcprj_free(cwaveprj)
+ if(l_paw) call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
  !Transpose back if paral_kgb

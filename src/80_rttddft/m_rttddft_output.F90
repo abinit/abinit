@@ -329,7 +329,7 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
  if (dtset%prtocc > 0) then 
    
    !1-First compute occupation numbers
-   call rttddft_calc_occ(tdks, dtset, mpi_enreg)
+   !call rttddft_calc_occ(tdks, dtset, mpi_enreg)
 
    !2-Then outputs them
    me = xmpi_comm_rank(mpi_enreg%comm_cell)

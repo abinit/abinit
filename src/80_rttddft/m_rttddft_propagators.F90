@@ -168,7 +168,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
    !Init to zero different energies
    call energies_init(energies)
    tdks%eigen(:) = zero
-   energies%entropy=tdks%energies%entropy !FB: Is that right?
+   energies%entropy=tdks%energies%entropy
    energies%e_corepsp=tdks%energies%e_corepsp
    energies%e_ewald=tdks%energies%e_ewald
  end if
@@ -285,19 +285,19 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
       !**  - Load k-dependent quantities in the Hamiltonian
       ABI_MALLOC(ph3d,(2,npw_k,ham_k%matblk))
       call ham_k%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k, &
-                        & ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step),   &
-                        & compute_gbound=(mpi_enreg%paral_kgb/=1))
+                      & ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step),   &
+                      & compute_gbound=(mpi_enreg%paral_kgb/=1))
 
       !** Load band-FFT tabs (transposed k-dependent arrays)
       if (mpi_enreg%paral_kgb==1) then
          if (istep<=tdks%first_step) call prep_bandfft_tabs(ham_k,ikpt,dtset%mkmem,mpi_enreg)
-         call ham_k%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv,    &
-                           & gbound_k =my_bandfft_kpt%gbound,       &
-                           & kinpw_k  =my_bandfft_kpt%kinpw_gather, &
-                           & kg_k     =my_bandfft_kpt%kg_k_gather,  &
-                           & kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-                           & ffnl_k   =my_bandfft_kpt%ffnl_gather,  &
-                           & ph3d_k   =my_bandfft_kpt%ph3d_gather)
+         call ham_k%load_k(npw_fft_k =my_bandfft_kpt%ndatarecv,    &
+                         & gbound_k  =my_bandfft_kpt%gbound,       &
+                         & kinpw_k   =my_bandfft_kpt%kinpw_gather, &
+                         & kg_k      =my_bandfft_kpt%kg_k_gather,  &
+                         & kpg_k     =my_bandfft_kpt%kpg_k_gather, &
+                         & ffnl_k    =my_bandfft_kpt%ffnl_gather,  &
+                         & ph3d_k    =my_bandfft_kpt%ph3d_gather)
       end if
 
       !** Build inverse of overlap matrix
@@ -311,7 +311,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= tdks%first_step) then
             !Init the arrays
-            call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax,ham_k%ntypat,       &
+            call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax,ham_k%ntypat,     &
                                & ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, ham_k%ucvol, &
                                & ham_k%ffnl_k,ham_k%ph3d_k)
          end if
