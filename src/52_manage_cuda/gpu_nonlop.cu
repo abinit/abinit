@@ -462,6 +462,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
     //     }
 
     if(m_ham_used != 1) {
+
       if((*paw_opt)!=3)
         CHECK_CUDA_ERROR( cudaMemcpy(enl_gpu, enl, (*dimenl1)*(*dimenl2)*(*nspinor)*(*nspinor)*sizeof(double),cudaMemcpyHostToDevice) );
       if((*paw_opt)>1)
@@ -475,7 +476,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
       }
 
       if((*choice==3)||((*choice==23))){
-	CHECK_CUDA_ERROR( cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice) );
+        CHECK_CUDA_ERROR( cudaMemcpy(gprimd_gpu,gprimd,9*sizeof(double),cudaMemcpyHostToDevice) );
       }
 
     }
@@ -511,8 +512,6 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
       CHECK_CUDA_ERROR( cudaMemcpy(enlout,enlout_gpu,(6+3*(*natom))*sizeof(double),cudaMemcpyDeviceToHost) );
     else if( ((*choice)==7) && ((*signs)==2))
       CHECK_CUDA_ERROR( cudaMemcpy(svectout,svectout_gpu,(*npwout)*sizeof(double2),cudaMemcpyDeviceToHost) );
-
-    }
 
   }
 
