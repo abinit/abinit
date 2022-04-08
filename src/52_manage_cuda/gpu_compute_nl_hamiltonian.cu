@@ -331,61 +331,61 @@ __global__ void kernel_compute_nl_hamiltonian(const double2 *vectin,
                                               const int nb_projections,
                                               const int lmnmax,
                                               const double four_pi_by_ucvol,
-                                              const double lambda)
+                                              const double lambda,
+                                              const int choice)
 {
 
   // definition of locals
-  unsigned short int jpw,iatom;
-  unsigned char jlmn,itypat;
-  double2 vect_loc,svect_loc;
+  unsigned short int jpw = blockIdx.y;
+
+  double2  vect_loc = make_double2(0., 0.);
+  double2 svect_loc = make_double2(0., 0.);
 
   // shared memory areas to compute and reduce
   extern __shared__ double sh_mem[];
   double *sh_vect_x = sh_mem ;
   double *sh_vect_y = &(sh_mem[blockDim.x]);
 
-  jpw=blockIdx.y;
-
-  vect_loc.x = 0.;
-  vect_loc.y = 0.;
-  svect_loc.x = 0.;
-  svect_loc.y = 0.;
-
-  //Step 1: Compute value for each plane wave and reduce by thread in sh mem
-  for(int iproj=threadIdx.x ; iproj<nb_projections ; iproj+=blockDim.x){
+  // step 1: Compute value for each plane wave and reduce by thread in sh mem
+  for (int iproj=threadIdx.x ; iproj<nb_projections ; iproj+=blockDim.x){
     double2 a_jlmn,sa_jlmn,ph3d;
     double ffnl;
 
-    //Get the couple (iatom,ilmn) of the thread's projection
-    iatom=atoms[iproj];//atoms's indice sorted by type
-    jlmn =lmn[iproj];
-    itypat=typat[iproj];
+    // get the couple (iatom,ilmn) of the thread's projection
+    unsigned short int iatom = atoms[iproj];//atoms's indice sorted by type
+    unsigned char jlmn   = lmn[iproj];
+    unsigned char itypat = typat[iproj];
 
-    //Read the projections factor
+    // read the projections factor
     a_jlmn =val_ajlmn[iproj];
     sa_jlmn=val_sajlmn[iproj];
 
-    //Accumulate the contribution of the projection for this thread in register
+    // accumulate the contribution of the projection for this thread in register
     ffnl = ffnlout[jpw + npwout*(0 + dimffnlout*(jlmn + lmnmax*itypat))]; //ffnlout(npwout,dimffnlout,lmnmax,ntypat)
     ph3d = ph3dout[jpw + npwout*iatom];
 
     ph3d.x *= ffnl;
     ph3d.y *= ffnl;
 
-    //Warning: the product is between a_jlmn and conjuguate(ph3d)
+    // warning: the product is between a_jlmn and conjuguate(ph3d)
     vect_loc.x  +=  a_jlmn.x*ph3d.x +  a_jlmn.y*ph3d.y;
     vect_loc.y  +=  a_jlmn.y*ph3d.x -  a_jlmn.x*ph3d.y;
     svect_loc.x += sa_jlmn.x*ph3d.x + sa_jlmn.y*ph3d.y;
     svect_loc.y += sa_jlmn.y*ph3d.x - sa_jlmn.x*ph3d.y;
 
-  }//End loop to performs all projections
+  } // end loop to performs all projections
 
-  if(paw_opt!=3){
-    //Step2: We reduce in Shared Memory
-    sh_vect_x[threadIdx.x]=vect_loc.x;
-    sh_vect_y[threadIdx.x]=vect_loc.y;
-    for(int decalage=blockDim.x>>1;decalage>0;decalage=decalage>>1){
-      //We ensure every access in shared mem is accomplished in the block
+  /*
+   * Compute <g|Vnl|c> for each plane wave (<g|). See opernlb.
+   */
+  if (paw_opt!=3)
+  {
+    // step2: reduce in Shared Memory
+    sh_vect_x[threadIdx.x] = vect_loc.x;
+    sh_vect_y[threadIdx.x] = vect_loc.y;
+
+    for (int decalage=blockDim.x>>1; decalage>0; decalage=decalage>>1) {
+      // ensure every access in shared mem is accomplished in the block
       __syncthreads();
       if( threadIdx.x <  decalage)
         sh_vect_x[threadIdx.x] += sh_vect_x[threadIdx.x + decalage];
@@ -393,7 +393,8 @@ __global__ void kernel_compute_nl_hamiltonian(const double2 *vectin,
         sh_vect_y[threadIdx.x] += sh_vect_y[threadIdx.x - decalage];
     }
     __syncthreads();
-    //Step3: Thread 0 writes the results for the block (ie for the plane wave)
+
+    // step3: thread 0 writes the results for the block (ie for the plane wave)
     if (threadIdx.x==0) {
       if (paw_opt==2) {
         vect_loc.x = -lambda*vectin[jpw].x + four_pi_by_ucvol * sh_vect_x[0];
@@ -407,30 +408,42 @@ __global__ void kernel_compute_nl_hamiltonian(const double2 *vectin,
     }
   }
 
-  if (paw_opt>2) {
-    //Step4: We reduce for overlap
-    __syncthreads();
+  __syncthreads();
+
+  /*
+   *  Compute <g|S|c>  for each plane wave (<g|). See opernlb.
+   */
+  if (paw_opt>=3)
+  {
+    // step4: reduce for overlap
     sh_vect_x[threadIdx.x] = svect_loc.x;
     sh_vect_y[threadIdx.x] = svect_loc.y;
-    for (int decalage=blockDim.x>>1; decalage>0; decalage=decalage>>1){
-      //We ensure every access in shared mem is accomplished in the block
+
+    for (int decalage=blockDim.x>>1; decalage>0; decalage=decalage>>1) {
+      // ensure every access in shared mem is accomplished in the block
       __syncthreads();
       if( threadIdx.x <  decalage)
         sh_vect_x[threadIdx.x] += sh_vect_x[threadIdx.x + decalage];
       else if(threadIdx.x >= (blockDim.x - decalage))
         sh_vect_y[threadIdx.x] += sh_vect_y[threadIdx.x - decalage];
     }
+
     __syncthreads();
-    //Step5: Thread 0 writes the results for the block (ie for the plane wave)
+
+    // step5: thread 0 writes the results for the block (ie for the plane wave)
     if (threadIdx.x==0) {
-      svect_loc = vectin[jpw];
+      if (choice==7)
+        svect_loc = {0., 0.};
+      else
+        svect_loc = vectin[jpw];
+
       svect_loc.x += four_pi_by_ucvol * sh_vect_x[0];
       svect_loc.y += four_pi_by_ucvol * sh_vect_y[blockDim.x-1];
       svectout[jpw] = svect_loc;
     }
-  }//End of overlap calculation
+  } // end of overlap calculation
 
-}//end of kernel_compute_nl_hamiltonian
+} // end kernel_compute_nl_hamiltonian
 
 /**
  * Kind of equivalent to opernlb_ylm without the first part (modifying gxfac / gxfacs).
@@ -469,7 +482,7 @@ __global__ void kernel_compute_nl_hamiltonian_64(const double2 *vectin,
   double2  vect_loc = make_double2(0., 0.);
   double2 svect_loc = make_double2(0., 0.);
 
-  //Shared memory areas to compute and reduce
+  // shared memory areas to compute and reduce
   extern __shared__ double sh_mem[];
   double *sh_vect_x = sh_mem ;
   double *sh_vect_y = &(sh_mem[64]);
@@ -508,7 +521,7 @@ __global__ void kernel_compute_nl_hamiltonian_64(const double2 *vectin,
   /*
    * Compute <g|Vnl|c> for each plane wave (<g|). See opernlb.
    */
-  if(paw_opt!=3)
+  if (paw_opt!=3)
   {
     // step2: reduce in Shared Memory
     sh_vect_x[threadIdx.x] = vect_loc.x;
@@ -549,8 +562,11 @@ __global__ void kernel_compute_nl_hamiltonian_64(const double2 *vectin,
 
     // step5: thread 0 writes the results for the block (ie for the plane wave)
     if (threadIdx.x==0) {
-      svect_loc = vectin[jpw];
-      if (choice==7) svect_loc = {0., 0.};
+      if (choice==7)
+        svect_loc = {0., 0.};
+      else
+        svect_loc = vectin[jpw];
+
       svect_loc.x += four_pi_by_ucvol * sh_vect_x[0];
       svect_loc.y += four_pi_by_ucvol * sh_vect_y[63];
       svectout[jpw] = svect_loc;
@@ -768,7 +784,7 @@ extern "C" void gpu_compute_nl_hamiltonian_(double2 *proj_gpu,
                                                                                   *lambda,
                                                                                   *choice);
 
-    } //End choice==1,signs==2
+    } //End choice==1 or 7,signs==2
 
   else
     {
