@@ -150,7 +150,6 @@ contains
 
  paw = (ham_k%usepaw == 1)
  if(paw) then
-   !FB: Needs cwaveprj for invovl
    ABI_MALLOC(cwaveprj, (ham_k%natom,nspinor*nband_t))
    call pawcprj_alloc(cwaveprj,0,ham_k%dimcprj)
  else
@@ -185,7 +184,7 @@ contains
 
    !** Also apply S^-1 in PAW case
    if (paw) then
-      call apply_invovl(ham_k, ghc, gsm1hc, cwaveprj, npw_t, nband_t, mpi_enreg, nspinor)
+      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor)
       tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
       tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
    else
@@ -248,7 +247,7 @@ contains
  !Transpose back if paral_kgb
  if (dtset%paral_kgb == 1 .and. mpi_enreg%nproc_band > 1) then 
     call paral_kgb_transpose(cg,cg_t,cg_work,mpi_enreg,nband_k,nband_t, &
-                           & npw_k,npw_t,nspinor,-1, index_wavef_band)
+                           & npw_k,npw_t,nspinor,-1,index_wavef_band)
  end if
 
  end subroutine rttddft_exp_taylor

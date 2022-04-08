@@ -145,11 +145,13 @@ module m_rttddft_tdks
    real(dp)                         :: rprimd(3,3) !prim cell vectors in direct space
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
+   real(dp),allocatable             :: cg0(:,:)    !Initial WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: eigen(:)    !eigen-energies
    real(dp),allocatable             :: eigen0(:)   !Initial eigen-energies (at t=0)
    real(dp),allocatable             :: grvdw(:,:)  !Gradient of the total energy coming
                                                    !from VDW dispersion correction             !FB: Needed?
    real(dp),allocatable             :: occ(:)      !occupation numbers
+   real(dp),allocatable             :: occ0(:)     !Initial occupation numbers
    real(dp),allocatable             :: nhat(:,:)   !compensation charge density
    real(dp),allocatable             :: nhatgr(:,:,:) !gradient of nhat
    real(dp),allocatable             :: phnons(:,:,:) !For symmetries (nonsymmorphic translation phases)
@@ -291,17 +293,26 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
  
  !4) Init occupation numbers
- ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
- tdks%occ(:)=dtset%occ_orig(:,1)
+ ABI_MALLOC(tdks%occ0,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ tdks%occ0(:)=dtset%occ_orig(:,1)
  !calc occupation number with metallic occupation using the previously read WF
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    call newocc(doccde,tdks%eigen,tdks%energies%entropy,tdks%energies%e_fermie, &
              & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
              & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
-             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ,dtset%occopt,    &
+             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,    &
              & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
    ABI_FREE(doccde)
+ end if
+
+ !FB-TODO: only do this if needed ie. if printing of occupation is requested
+ if (dtset%prtocc > 0) then
+   ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
+   !FB Ouch! Could we avoid this...?
+   tdks%cg0(:,:) = tdks%cg(:,:)
+   ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
+   tdks%occ(:) = tdks%occ0(:)
  end if
 
  !5) Some further initialization (Mainly for PAW)
@@ -383,6 +394,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(allocated(tdks%atindx))      ABI_FREE(tdks%atindx)
    if(allocated(tdks%atindx1))     ABI_FREE(tdks%atindx1)
    if(allocated(tdks%cg))          ABI_FREE(tdks%cg)
+   if(allocated(tdks%cg0))         ABI_FREE(tdks%cg0)
    if(allocated(tdks%dimcprj))     ABI_FREE(tdks%dimcprj)
    if(allocated(tdks%eigen))       ABI_FREE(tdks%eigen)
    if(allocated(tdks%eigen0))      ABI_FREE(tdks%eigen0)
@@ -395,6 +407,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(allocated(tdks%nhatgr))      ABI_FREE(tdks%nhatgr)
    if(allocated(tdks%npwarr))      ABI_FREE(tdks%npwarr)
    if(allocated(tdks%occ))         ABI_FREE(tdks%occ)
+   if(allocated(tdks%occ0))        ABI_FREE(tdks%occ0)
    if(allocated(tdks%ph1d))        ABI_FREE(tdks%ph1d)
    if(allocated(tdks%ph1df))       ABI_FREE(tdks%ph1df)
    if(allocated(tdks%phnons))      ABI_FREE(tdks%phnons)
@@ -508,22 +521,22 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
  !Local variables-------------------------------
  !scalars
- integer,parameter   :: response=0, cplex=1
- integer             :: comm_psp
- integer             :: gscase
- integer             :: iatom, ierr, itypat, indx
- integer             :: mgfftf, my_natom
- integer             :: npwmin, nfftot
- integer             :: ylm_option
- real(dp)            :: gsqcut_eff, gsqcutc_eff
- real(dp)            :: ecutdg_eff
- type(ebands_t)      :: bstruct
+ integer,parameter    :: response=0, cplex=1
+ integer              :: comm_psp
+ integer              :: gscase
+ integer              :: iatom, ierr, itypat, indx
+ integer              :: mgfftf, my_natom
+ integer              :: npwmin, nfftot
+ integer              :: ylm_option
+ real(dp)             :: gsqcut_eff, gsqcutc_eff
+ real(dp)             :: ecutdg_eff
+ type(ebands_t)       :: bstruct
  !arrays
- character(len=500)  :: msg
- integer, pointer    :: npwarr_(:)
- integer             :: ngfft(18)
- integer             :: ngfftf(18)
- integer             :: npwtot(dtset%nkpt)
+ character(len=500)   :: msg
+ integer, allocatable :: npwarr_(:)
+ integer              :: ngfft(18)
+ integer              :: ngfftf(18)
+ integer              :: npwtot(dtset%nkpt)
 
 ! ***********************************************************************
 
@@ -613,18 +626,13 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  end select
 
  !** Initialize band structure datatype
- if (dtset%paral_kgb/=0) then     !  We decide to store total npw in bstruct,
-   ABI_MALLOC(npwarr_,(dtset%nkpt))
-   npwarr_(:)=tdks%npwarr(:)
+ ABI_MALLOC(npwarr_,(dtset%nkpt))
+ npwarr_(:)=tdks%npwarr(:)
+ if (dtset%paral_kgb/=0) then
    call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
- else
-   npwarr_(:)=tdks%npwarr(:)
  end if
  bstruct = ebands_from_dtset(dtset, npwarr_)
- if (dtset%paral_kgb/=0)  then
-   ABI_FREE(npwarr_)
- end if
- nullify(npwarr_)
+ ABI_FREE(npwarr_)
  call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
  !** Initialize PAW atomic occupancies
@@ -817,7 +825,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  !Initialize paw_dmft, even if neither dmft not paw are used
  call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,                &
                  & dtset%dmft_read_occnd,dtset%mband,dtset%nband,dtset%nkpt,      &
-                 & dtset%nspden,dtset%nspinor,dtset%nsppol,tdks%occ,dtset%usedmft,&
+                 & dtset%nspden,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%usedmft,&
                  & tdks%paw_dmft,dtset%usedmft,dtset%dmft_solv,mpi_enreg)
 
  !*** Main PAW initialization ***

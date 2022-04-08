@@ -2626,6 +2626,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtnest',tread,'INT')
  if(tread==1) dtset%prtnest=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtocc',tread,'INT')
+ if(tread==1) dtset%prtocc=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphbands',tread,'INT')
  if(tread==1) dtset%prtphbands=intarr(1)
 

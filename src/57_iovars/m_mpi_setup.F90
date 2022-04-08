@@ -499,12 +499,28 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
 
-   !For RTTDDFT ensure that bandpp = nband / npband
+   !Check parallelization in case of RTTDDFT 
+   !In particular ensure that bandpp = nband / npband
    if (optdriver == RUNL_RTTDDFT) then
       dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
       if ( tread(8) == 1 ) then 
-         write(msg, '(a,a)') 'It is useless to set bandpp for a RT-TDDFT run because it is automatically set to bandpp=nband/npband', ch10
+         write(msg, '(a,a)') 'It is useless to set bandpp for a RT-TDDFT run because it is automatically set to bandpp=nband/npband.', ch10
          ABI_WARNING(msg)
+      end if
+      if (dtsets(idtset)%npfft/=1) then 
+         dtsets(idtset)%npfft=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with FFT-parallelization. Remove npfft or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
+      if (dtsets(idtset)%npspinor/=1) then 
+         dtsets(idtset)%npspinor=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with spinor parallelization. Remove npspinor or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
+      if (dtsets(idtset)%nphf/=1) then 
+         dtsets(idtset)%nphf=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with HF parallelization. Remove nphf or set it to 1.', ch10
+         ABI_ERROR(msg)
       end if
    end if
 
