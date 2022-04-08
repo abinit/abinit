@@ -1603,7 +1603,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(msg,'(2a)')'- dfpt_looppert: read the DDK wavefunctions from file: ',trim(fiwfddk)
        call wrtout([std_out, ab_out],msg)
        ! Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), xmpi_comm_self)
+       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), spacecomm) !xmpi_comm_self)
      end do
    end if
 
