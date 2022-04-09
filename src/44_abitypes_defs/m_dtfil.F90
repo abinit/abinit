@@ -290,7 +290,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
+  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_ks_den         ! KS DEN file at Sigma level
@@ -1325,7 +1325,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        ABI_ERROR(msg)
      end if
      filnam_out = rmquotes(getpath)
-     write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
+     write(msg, '(5a)')' mkfilename: get', trim(stringvar), " from: ",trim(filnam_out), ch10
      call wrtout([std_out, ab_out], msg)
      ! Check whether file exists taking into account a possible NC file extension.
      if (xmpi_comm_rank(xmpi_world) == 0) then

@@ -1837,9 +1837,11 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
  write(msg,'(a,f8.1,a)')' Memory allocated for Fourier components u(G): ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
- ur_size = one * Wfd%nspinor * Wfd%nfft * ur_cnt
- write(msg,'(a,f8.1,a)')' Memory allocated for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
- call wrtout(std_out, msg)
+ if (any(wfd%keep_ur)) then
+   ur_size = one * Wfd%nspinor * Wfd%nfft * ur_cnt
+   write(msg,'(a,f8.1,a)')' Memory allocated for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
+   call wrtout(std_out, msg)
+ end if
 
  if (wfd%usepaw==1) then
    cprj_size = one * Wfd%nspinor * sum(Wfd%nlmn_atm) * cprj_cnt

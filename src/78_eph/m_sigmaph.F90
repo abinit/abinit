@@ -668,7 +668,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(crystal_t) :: pot_cryst
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
- character(len=500) :: msg
+ character(len=5000) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
  integer :: g0_k(3),g0_kq(3), unts(2), work_ngfft(18), gmax(3)
@@ -2501,7 +2501,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: isym_k, trev_k, mband, i1,i2,i3, nrest, color
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
- character(len=500) :: msg
+ character(len=5000) :: msg
  real(dp) :: dksqmax, estep, cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed, isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -2561,6 +2561,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
  qptrlatt = 0; qptrlatt(1, 1) = new%ngqpt(1); qptrlatt(2, 2) = new%ngqpt(2); qptrlatt(3, 3) = new%ngqpt(3)
+ !my_shiftq(:,1) = [0.1, 0, 0]
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
                              new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_qbz2ibz)
 
@@ -3358,7 +3359,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr, grp_ncid
 #endif
- !character(len=500) :: msg
+ !character(len=5000) :: msg
  real(dp) :: edos_broad, edos_step,  cpu_all, wall_all, gflops_all, cpu, wall, gflops
  character(len=fnlen) :: path
  type(edos_t) :: edos
@@ -3612,7 +3613,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  integer,intent(in) :: comm
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
- character(len=500),intent(out) :: msg
+ character(len=5000),intent(out) :: msg
  real(dp), optional, intent(out) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
  integer,optional, intent(out) :: sigma_ngkpt(3)
@@ -3814,7 +3815,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  integer :: ncerr
 #endif
  type(krank_t) :: krank
- character(len=500) :: msg
+ character(len=5000) :: msg
 !arrays
  !integer,allocatable :: kcalc2ebands(:,:)
  real(dp) :: dksqmax
@@ -4131,7 +4132,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  integer :: spin, my_rank, iq_ibz, nprocs !, nbcalc_ks !, bstart_ks
  integer :: ikpt, ibz_k, isym_k, itim_k !isym_lgk,
  real(dp) :: dksqmax, cpu, wall, gflops
- character(len=500) :: msg
+ character(len=5000) :: msg
  logical :: compute_lgk
  type(lgroup_t),target :: lgk
  type(lgroup_t),pointer :: lgk_ptr
@@ -4432,7 +4433,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
  integer :: min_nqibz_k, max_nqibz_k
  real(dp) :: cpu, wall, gflops, efact_min, efact_max
  logical :: qfilter
- character(len=500) :: msg
+ character(len=5000) :: msg
 !arrays
  integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:), ineed_qibz(:), ineed_qdvdb(:)
 
@@ -4647,7 +4648,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
- !character(len=500) :: msg
+ !character(len=5000) :: msg
 #ifdef HAVE_NETCDF
  integer :: grp_ncid, ncerr
 #endif
@@ -5117,7 +5118,7 @@ subroutine sigmaph_print(self, dtset, unt)
 
 !Local variables-------------------------------
  integer :: ikc, is, ndiv
- character(len=500) :: msg
+ character(len=5000) :: msg
 
 ! *************************************************************************
 
@@ -5171,8 +5172,10 @@ subroutine sigmaph_print(self, dtset, unt)
  if (any(abs(dtset%sigma_erange) /= zero)) then
    write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
  end if
- write(unt,"(a, 2(f5.3, 1x), a)")" Including all final {mk+q} states inside energy window: [", &
-     self%elow * Ha_eV, self%ehigh * Ha_eV, "] [eV]"
+ if (self%imag_only .and. self%qint_method == 1) then
+   write(unt,"(a, 2(f5.3, 1x), a)")" Including all final {mk+q} states inside energy window: [", &
+      self%elow * Ha_eV, self%ehigh * Ha_eV, "] [eV]"
+ end if
  write(unt,"(a)")" List of k-points for self-energy corrections:"
  do ikc=1,self%nkcalc
    if (ikc > 10) then
@@ -5425,7 +5428,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
- character(len=500) :: msg
+ character(len=5000) :: msg
  type(krank_t) :: krank, qrank
 !arrays
  integer :: g0(3), qptrlatt(3,3)
