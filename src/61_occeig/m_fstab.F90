@@ -161,6 +161,7 @@ module m_fstab
    ! Find the index of the k-point on the FS
 
    procedure :: get_dbldelta_weights => fstab_get_dbldelta_weights
+   ! Compute weights for the integration of the double-delta.
 
  end type fstab_t
 
@@ -577,7 +578,7 @@ end function fstab_findkg0
 !!  fstab_get_dbldelta_weights
 !!
 !! FUNCTION
-!!  Return the weights for the integration on the Fermi-surface
+!!  Return the weights for the integration of the double-delta on the Fermi-surface
 !!
 !! INPUTS
 !!  ebands<ebands_type>=GS band structure.

@@ -1310,7 +1310,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  !----------------------------------------------------------------------------
  ! Read other parameters
- ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90 
+ ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
@@ -2681,7 +2681,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf',tread,'INT')
  if(tread==1) then
    dtset%prtwf=intarr(1)
- else if (dtset%tfkinfunc==2)then 
+ else if (dtset%tfkinfunc==2)then
    dtset%prtwf=0
  endif
 
@@ -3244,13 +3244,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%nkptgw>0) then
    ! Read bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
-   if(tread==1) then
+   if (tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
        reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then
+   if (any(dtset%optdriver == [RUNL_SIGMA, RUNL_EPH])) then
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        ABI_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if

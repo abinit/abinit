@@ -2566,11 +2566,10 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
      ! Phase due to L0 + R^{-1}tau
      l0 = cryst%indsym(1:3,isym,ipert)
      tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
-     ! FIXME
-     if (.not. all(abs(tnon) < tol12)) then
-       enough = enough + 1
-       if (enough == 1) ABI_WARNING("tnon must be tested!")
-     end if
+     !if (.not. all(abs(tnon) < tol12)) then
+     !  enough = enough + 1
+     !  if (enough == 1) ABI_WARNING("tnon must be tested!")
+     !end if
 
      ipert_eq = cryst%indsym(4, isym, ipert)
 
@@ -2710,11 +2709,10 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
    ! Phase due to L0 + R^{-1}tau
    l0 = cryst%indsym(1:3,isym,ipert)
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
-   ! FIXME
-   if (.not. all(abs(tnon) < tol12)) then
-     enough = enough + 1
-     if (enough == 1) ABI_WARNING("tnon must be tested!")
-   end if
+   !if (.not. all(abs(tnon) < tol12)) then
+   !  enough = enough + 1
+   !  if (enough == 1) ABI_WARNING("tnon must be tested!")
+   !end if
 
    ipert_eq = cryst%indsym(4, isym, ipert)
 
@@ -3618,7 +3616,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  ! Compute long-range part of the coupling potential.
  if (my_add_lr > 0) then
-   call wrtout(std_out, "dvdb_ftinterp_qpt: Computing long-range part of the coupling potential.")
+   !call wrtout(std_out, "dvdb_ftinterp_qpt: Computing long-range part of the coupling potential.")
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3661,7 +3659,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
      ! Add the long-range part of the potential
      if (my_add_lr > 0) then
-       call wrtout(std_out, "Adding the long-range part of the potential")
+       !call wrtout(std_out, "Adding the long-range part of the potential")
        ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
      end if
 

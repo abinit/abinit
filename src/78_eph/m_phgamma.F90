@@ -3479,7 +3479,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call xmpi_comm_free(comm_cart)
 #endif
 
- ! Distribute k-points and create mapping to iq_ibz index.
+ ! Distribute spins and q-points in IBZ.
  call xmpi_split_cyclic(nsppol, spin_comm%value, gams%my_nspins, gams%my_spins)
  ABI_CHECK(gams%my_nspins > 0, sjoin("nsppol (", itoa(nsppol), ") < spin_comm_nproc (", itoa(spin_comm%nproc), ")"))
 
@@ -3820,7 +3820,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ABI_MALLOC(tgamvv_out, (2, 9, natom3, natom3))
  end if
 
- ! Build krank object to find points
+ ! Build krank object to find k-points
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Loop over my q-points in the IBZ.
@@ -3978,6 +3978,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
        ABI_CHECK(nband_k <= mnb .and. nband_kq <= mnb, "wrong nband")
 
+       ! Compute weights for double delta integration at the Fermi level.
+       ! TODO: Could precompute weights before entering the loop, apply filter and compute MPI-distribution
+       call fs%get_dbldelta_weights(ebands, ik_fs, ik_ibz, ikq_ibz, spin, nesting, dbldelta_wts)
+       ! Multiply by the weight of the q-point if we are summing over the IBZ(q).
+       !dbldelta_wts = dbldelta_wts * wtk_lgq
+
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
        call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, fs%indkk_fs(:,ik_fs), cryst, &
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
@@ -4127,11 +4133,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            fs%vkq(:,ib_kq) = vkq
          end do
        end if
-
-       ! Compute weights for double delta integration at the Fermi level.
-       call fs%get_dbldelta_weights(ebands, ik_fs, ik_ibz, ikq_ibz, spin, nesting, dbldelta_wts)
-       ! Multiply by the weight of the q-point if we are summing over IBZ(q).
-       !dbldelta_wts = dbldelta_wts * wtk_lgq
 
        ! Accumulate results in tgam (summing over FS k-points and bands for this spin).
        do ipc2=1,natom3
