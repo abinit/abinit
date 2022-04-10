@@ -2973,7 +2973,7 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 !scalars
  integer,parameter :: master = 0, formeig0 = 0
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
- real(dp) :: cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops, cpu_io, wall_io, gflops_io
  type(wfk_t) :: Wfk
 
 !************************************************************************
@@ -2985,6 +2985,7 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
  call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
  if (my_rank == master) then
+   call cwtime(cpu_io, wall_io, gflops_io, "start")
    ! Open the file.
    sc_mode = xmpio_single
    funt = get_unit()
@@ -3010,6 +3011,7 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
    ! Close the file.
    call wfk%close()
+   call cwtime_report(" wfk_read_eigenvalues_io", cpu_io, wall_io, gflops_io)
  end if
 
  ! Broadcast data
