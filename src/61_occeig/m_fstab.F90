@@ -621,7 +621,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 
  wtk = zero
  if (fs%eph_intmeth == 1 .or. nesting /= 0) then
-   ! Gaussian method (constant or adaptive method from group velocities if eph_fsmear is negative)
+   ! Gaussian method: constant or adaptive method from group velocities if eph_fsmear is negative.
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
@@ -693,7 +693,6 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !scalars
  integer :: my_unt,my_prtvol,spin
  class(fstab_t),pointer :: fs
-! type(fstab_t),pointer :: fs ! changed by NP from type() to class() based on fortran compile error message
  character(len=500) :: msg
 
 ! *************************************************************************

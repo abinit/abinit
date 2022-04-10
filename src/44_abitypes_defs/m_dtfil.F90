@@ -1525,7 +1525,7 @@ end subroutine isfile
 !! FUNCTION
 !! Begin by eventual redefinition of unit std_in and std_out
 !! Then, print greetings for interactive user.
-!! Next, Read filenames from unit std_in, AND check that new
+!! Next, read filenames from unit std_in, AND check that new
 !! output file does not already exist.
 !!
 !! INPUTS
@@ -1765,6 +1765,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'Action: correct your "file" file.'
      ABI_ERROR(msg)
    end if
+
+   ! TODO: Create directories if needed but I need C routines to be portable.
+   !i = index(filnam(5), "/"); if (i > 0) call mkdir(filnam(5)(1:i-1), ierr)
+   !i = index(filnam(6), "/"); if (i > 0) call mkdir(filnam(6)(1:i-1), ierr)
 
  end if ! master only
 

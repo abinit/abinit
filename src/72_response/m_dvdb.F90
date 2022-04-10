@@ -1031,8 +1031,11 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(my_unt,"(a)")sjoin(" File path:", db%path)
  write(my_unt,"(a)")sjoin(" Number of v1scf potentials:", itoa(db%numv1))
  write(my_unt,"(a)")sjoin(" Number of q-points in DVDB: ", itoa(db%nqpt))
+ ! TODO
+ !if (with_mpi) then
  write(my_unt,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
  write(my_unt,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
+ !end if
  write(my_unt,"(a)")sjoin(" Option for symmetrization of v1scf(r):", itoa(db%symv1))
  write(my_unt,"(a)")" List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)

@@ -209,6 +209,7 @@ type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_li
    end do
    new%max_linear_density = nint(one/smallestlen)
  else
+   ! Get it from input
    new%max_linear_density = max_linear_density
  end if
 
