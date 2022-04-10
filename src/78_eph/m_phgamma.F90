@@ -3585,7 +3585,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    !    count(self%itreat_qibz == 1), " of ", self%nqibz
    write(std_out, "(a,i0)")"P Number of CPUs for parallelism over bands: ", bsum_comm%nproc
    write(std_out, "(a,i0)")"P Number of CPUs for parallelism over spins: ", spin_comm%nproc
-   !write(std_out, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%kcalc_comm%nproc
+   write(std_out, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", kpt_comm%nproc
    !write(std_out, "(2(a,i0),/)")"P Number of k-point in Sigma_nk treated by this proc: ", self%my_nkcalc, " of ", self%nkcalc
 
    ! Master creates the netcdf file used to store the results of the calculation.
@@ -4772,7 +4772,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
  !write(std_out,"(2(a,i0),/)")" Treating ", gams%my_nfsk_q, " my k-points in the FS window over total nkfs: ", fs%nkfs
 
- write(msg, "(2(a,i0,a),a)") &
+ write(msg, "(2(a,i0),a)") &
   " Number of k-points in the FS window treated by this MPI proc: ", gams%my_nfsk_q, "over: ", nkfs_q, ch10
   !" Number of MPI procs in kpt_comm: ", gams%kpt_comm%nproc
  call wrtout(std_out, msg)
