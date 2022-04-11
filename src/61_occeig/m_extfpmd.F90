@@ -546,36 +546,30 @@ contains
     ! as we do for version=1 and version=2.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==4) then
-      step=one
+      this%entropy=zero
       do ifftf=1,this%nfftf
         do ispden=1,this%nspden
-          ! Dynamic array find size
-          ix=dble(this%bcut)
-          ii=0
-          fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-          & this%vtrial(ifftf,ispden),fermie,tsmear)
-          minocc=tol16
-          do while(fn>minocc)
-            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-            & this%vtrial(ifftf,ispden),fermie,tsmear)
-            ii=ii+1
-            ix=ix+step
+          factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+          gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
+          ABI_MALLOC(valuesent,(this%bcut+1))
+
+          !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
+          do ii=1,this%bcut+1
+            ix=dble(ii)-one
+            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifftf,ispden),fermie,tsmear)
+            if(fn>tol16.and.(one-fn)>tol16) then
+              valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
+            else
+              valuesent(ii)=zero
+            end if
           end do
-          ABI_MALLOC(valuesent,(ii))
-          ix=dble(this%bcut)
-          ii=0
-          fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-          & this%vtrial(ifftf,ispden),fermie,tsmear)
-          do while(fn>minocc)
-            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+&
-            & this%vtrial(ifftf,ispden),fermie,tsmear)
-            ii=ii+1
-            valuesent(ii)=-2*(fn*log(fn)+(1.-fn)*log(1.-fn))
-            ix=ix+step
-          end do
-          if (ii>1) then
-            this%entropy=this%entropy+simpson(step,valuesent)/&
-            & (this%nfftf*this%nspden)
+          !$OMP END PARALLEL DO
+
+          ! We need at least 6 elements in valuesent to call simpson function.
+          if(size(valuesent)>=6) then
+            this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
+            & gamma*factor*dip12(gamma)/tsmear-&
+            simpson(one,valuesent))/(this%nfftf*this%nspden)
           end if
           ABI_FREE(valuesent)
         end do
