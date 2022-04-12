@@ -739,7 +739,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      else if(extfpmd%version==4) then
        do ispden=1,dtset%nspden
          do ifft=1,dtset%nfft
-           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelect(ifft,ispden)/ucvol/dtset%nspden
+           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
          end do
        end do
      end if
