@@ -105,7 +105,7 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
  integer,intent(in) :: blocksize,iterationnumber,npw,nspinor,optekin
  integer,intent(in) :: optpcon,vectsize
  integer, intent(in), optional :: timopt,tim_xprecon
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: cg(vectsize,blocksize),eval(blocksize,blocksize)
  real(dp),intent(in) :: kinpw(npw)

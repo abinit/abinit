@@ -1493,7 +1493,7 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
 !  Storage for the Gamma point. The component of the G=0 vector
 !  should not be scaled, and no G=0 imaginary part is allowed.
    if(istwf_k==2)then
-     if (mpi_enreg%me_g0==1) then
+     if (mpi_enreg%me_g0_fft==1) then
        vect(2,1)=zero
 !$OMP PARALLEL DO
        do ipw=2,npw

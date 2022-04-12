@@ -171,7 +171,7 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
 
 !Useful variables
  wt=four_pi/sqrt(ucvol);if (cplex==1) wt=2.d0*wt
- ipw0=1;if (istwf_k==2.and.mpi_enreg%me_g0==1) ipw0=2
+ ipw0=1;if (istwf_k==2.and.mpi_enreg%me_g0_fft==1) ipw0=2
 
 !Allocate work space
  ABI_MALLOC(scalr,(npw))

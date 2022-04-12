@@ -410,7 +410,7 @@ contains
        ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
       ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
       temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         do idat=1, ndat*nspinor
           temp_realvec(1+(idat-1)*npwin) = temp_realvec(1+(idat-1)*npwin)/2
         end do
@@ -419,7 +419,7 @@ contains
 &                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwin, &
 &                temp_realvec, npwin, zero, projections, nprojs)
       temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         do idat=1, ndat*nspinor
           temp_realvec(1+(idat-1)*npwin) = zero
         end do
