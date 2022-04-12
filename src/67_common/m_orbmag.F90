@@ -63,6 +63,18 @@ module m_orbmag
 
   implicit none
 
+  ! antisymmetric unit tensor, for doing the crossproduct summations
+  real(dp),parameter :: eijk(3,3,3) = reshape((/zero,zero,zero,& !{1..3}11
+                                               &zero,zero,-one,& !{1..3}21
+                                               &zero,one,zero,& !{1..3}31
+                                               &zero,zero,one,& !{1..3}12
+                                               &zero,zero,zero,& !{1..3}22
+                                               &-one,zero,zero,& !{1..3}32
+                                               &zero,-one,zero,& !{1..3}13
+                                               &one,zero,zero,& !{1..3}23
+                                               &zero,zero,zero/),& !{1..3}33
+                                               &(/3,3,3/))
+
   ! Bound methods:
 
   public :: orbmag_tt
@@ -157,8 +169,8 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  integer,parameter :: ibcpw=1,ibcdpdp=2,ibcdpu=3,ibcdudu=4,ibcd=5
  integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
- integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16
- integer,parameter :: nterms=16
+ integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
+ integer,parameter :: nterms=17
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  complex(dpc) :: cberry,com
  logical :: has_nucdip
@@ -492,6 +504,15 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    orbmag_terms(:,:,:,iomdlanp) = orbmag_terms(:,:,:,iomdlanp) + trnrm*om_k
 
    !--------------------------------------------------------------------------------
+   ! apply dl_Eqij term to orb mag
+   !--------------------------------------------------------------------------------
+
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlq,om_k,com,lmn2max,dtset%natom,&
+     & nband_k,dtset%ntypat,pawtab,dtset%typat,Enk=Enk)
+   orbmag_terms(:,:,:,iomdlq) = orbmag_terms(:,:,:,iomdlq) + trnrm*om_k
+
+
+   !--------------------------------------------------------------------------------
    ! apply dl_p2 term to orb mag
    !--------------------------------------------------------------------------------
 
@@ -688,9 +709,9 @@ subroutine apply_pw_k(bc_k,bcpre,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,cpopt,epsabg,gdir,isppol,my_ndat,my_nspinor,my_timer
+  integer :: adir,bdir,cpopt,gdir,isppol,my_ndat,my_nspinor,my_timer
   integer :: nbeg,nend,nn,prtvol,sij_opt,type_calc
-  real(dp) :: c2,doti,dotr,lambda
+  real(dp) :: c2,doti,dotr,eabg,lambda
   complex(dpc) :: cme
   !arrays
   real(dp),allocatable :: bcc(:,:),bwavef(:,:),ghc(:,:),gsc(:,:)
@@ -729,47 +750,45 @@ subroutine apply_pw_k(bc_k,bcpre,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
   do nn = 1, nband_k
     nbeg = (nn-1)*npw_k+1
     nend = nn*npw_k
+
     do adir = 1, 3
-      do epsabg = 1, -1, -2
-        if (epsabg .EQ. 1) then
-          bdir = modulo(adir,3)+1
-          gdir = modulo(adir+1,3)+1
-        else
-          bdir = modulo(adir+1,3)+1
-          gdir = modulo(adir,3)+1
-        end if
+      do bdir = 1, 3
+        do gdir = 1, 3
+          eabg = eijk(adir,bdir,gdir)
+          if (abs(eabg) < tol8) cycle
 
-        bwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,bdir)
-        gwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,gdir)
+          bwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,bdir)
+          gwavef(1:2,1:npw_k) = cg1_k(1:2,nbeg:nend,gdir)
 
-        ! compute H|g>, S|g>, Vnl|g>
-        call getghc(cpopt,gwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,my_ndat,&
-          &           prtvol,sij_opt,my_timer,type_calc)
+          ! compute H|g>, S|g>, Vnl|g>
+          call getghc(cpopt,gwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,my_ndat,&
+            &           prtvol,sij_opt,my_timer,type_calc)
      
-        ! orbital mag needs <du/dk|H + E|du/dk> , no nonlocal parts here, do that elsewhere
-        omc = (ghc - gvnlc) + Enk(nn)*gwavef
-        
-        !omc = ghc + Enk(nn)*gsc
+          ! orbital mag needs <du/dk|H + E|du/dk> , no nonlocal parts here, do that elsewhere
+          omc = (ghc - gvnlc) + Enk(nn)*gwavef
+          
+          !omc = ghc + Enk(nn)*gsc
        
-        dotr = DOT_PRODUCT(bwavef(1,:),omc(1,:))+DOT_PRODUCT(bwavef(2,:),omc(2,:))
-        doti = DOT_PRODUCT(bwavef(1,:),omc(2,:))-DOT_PRODUCT(bwavef(2,:),omc(1,:))
-        cme = cmplx(dotr,doti,KIND=dpc)
-        om_k(1,nn,adir) = om_k(1,nn,adir) + real(ompre*epsabg*c2*cme)
-        om_k(2,nn,adir) = om_k(2,nn,adir) + aimag(ompre*epsabg*c2*cme)
+          dotr = DOT_PRODUCT(bwavef(1,:),omc(1,:))+DOT_PRODUCT(bwavef(2,:),omc(2,:))
+          doti = DOT_PRODUCT(bwavef(1,:),omc(2,:))-DOT_PRODUCT(bwavef(2,:),omc(1,:))
+          cme = cmplx(dotr,doti,KIND=dpc)
+          om_k(1,nn,adir) = om_k(1,nn,adir) + real(ompre*eabg*c2*cme)
+          om_k(2,nn,adir) = om_k(2,nn,adir) + aimag(ompre*eabg*c2*cme)
 
-        ! berry curvature needs <du/dk|S|du/dk>, no nonlocal parts here, do that elsewhere
-        bcc = gwavef
-        
-        !bcc = gsc - gwavef
+          ! berry curvature needs <du/dk|S|du/dk>, no nonlocal parts here, do that elsewhere
+          bcc = gwavef
+          
+          !bcc = gsc
 
-        dotr = DOT_PRODUCT(bwavef(1,:),bcc(1,:))+DOT_PRODUCT(bwavef(2,:),bcc(2,:))
-        doti = DOT_PRODUCT(bwavef(1,:),bcc(2,:))-DOT_PRODUCT(bwavef(2,:),bcc(1,:))
-        cme = cmplx(dotr,doti,KIND=dpc)
-        bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(bcpre*epsabg*c2*cme)
-        bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(bcpre*epsabg*c2*cme)
+          dotr = DOT_PRODUCT(bwavef(1,:),bcc(1,:))+DOT_PRODUCT(bwavef(2,:),bcc(2,:))
+          doti = DOT_PRODUCT(bwavef(1,:),bcc(2,:))-DOT_PRODUCT(bwavef(2,:),bcc(1,:))
+          cme = cmplx(dotr,doti,KIND=dpc)
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(bcpre*eabg*c2*cme)
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(bcpre*eabg*c2*cme)
 
-      end do ! loop over epsabg
-    end do !loop over adir
+        end do ! gdir
+      end do ! bdir
+    end do ! adir
   end do !loop over bands
 
   ABI_FREE(bwavef)
@@ -818,7 +837,8 @@ end subroutine apply_pw_k
 !! SOURCE
 
 subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
-    & lmn2max,natom,nband_k,ntypat,pawtab,typat)
+    & lmn2max,natom,nband_k,ntypat,pawtab,typat,&
+    & Enk) ! Enk is an optional argument
 
  !Arguments ------------------------------------
  !scalars
@@ -827,6 +847,7 @@ subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
 
  !arrays
  integer,intent(in) :: atindx(natom),typat(natom)
+ real(dp),optional,intent(in) :: Enk(nband_k)
  real(dp),intent(out) :: dl_k(2,nband_k,3)
  complex(dpc),intent(in) :: dlij(lmn2max,natom,3)
  type(pawcprj_type),intent(inout) :: cprj_k(natom,nband_k)
@@ -835,14 +856,21 @@ subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
- real(dp) :: c2
+ integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
+ real(dp) :: c2,eabg
  complex(dpc) :: cpi,cpj,dlme
 
  !arrays
+ real(dp),allocatable :: ewt(:)
  complex(dpc) :: dup(2,2),udp(2,2)
 
  !-----------------------------------------------------------------------
+
+ ABI_MALLOC(ewt,(nband_k))
+ ewt = one
+ if(present(Enk)) then
+   ewt = Enk
+ end if
 
  ! in abinit, exp(i k.r) is used not exp(i 2\pi k.r) so the following
  ! term arises to properly normalize the derivatives (there are two in the Chern number,
@@ -859,44 +887,39 @@ subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
        jlmn = pawtab(itypat)%indklmn(8,klmn)
 
        do adir = 1, 3
-
          dlme = czero
-         do epsabg = 1, -1, -2
+         do bdir = 1, 3
+           do gdir = 1, 3
+             eabg = eijk(adir,bdir,gdir)
+             if ( abs(eabg) < tol8 ) cycle
 
-           if (epsabg .EQ. 1) then
-             bdir = modulo(adir,3)+1
-             gdir = modulo(adir+1,3)+1
-           else
-             bdir = modulo(adir+1,3)+1
-             gdir = modulo(adir,3)+1
-           end if
+             cpi = cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
+             cpj = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+             ! <u|d_m p_n> : udp(m,n) means direction m, state m
+             udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+             udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
+             udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
+             udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
 
-           cpi = cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
-           cpj = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
-           ! <u|d_m p_n> : udp(m,n) means direction m, state m
-           udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-           udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
-           udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
-           udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
+             ! <d_m u|p_n> : dup(m,n) means direction m, state m
+             dup(1,1) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
+             dup(1,2) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,jlmn),cprj1_k(iatom,nn,bdir)%cp(2,jlmn),KIND=dpc)
+             dup(2,1) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,ilmn),cprj1_k(iatom,nn,gdir)%cp(2,ilmn),KIND=dpc)     
+             dup(2,2) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)     
 
-           ! <d_m u|p_n> : dup(m,n) means direction m, state m
-           dup(1,1) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
-           dup(1,2) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,jlmn),cprj1_k(iatom,nn,bdir)%cp(2,jlmn),KIND=dpc)
-           dup(2,1) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,ilmn),cprj1_k(iatom,nn,gdir)%cp(2,ilmn),KIND=dpc)     
-           dup(2,2) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)     
+             dlme = dlme + dlpre*c2*eabg*ewt(nn)*dlij(klmn,iat,bdir)*conjg(cpi)*(dup(2,2)+udp(2,2))
+             if (ilmn /= jlmn) then
+               dlme = dlme - dlpre*c2*eabg*ewt(nn)*conjg(dlij(klmn,iat,bdir))*conjg(cpj)*(dup(2,1)+udp(2,1))
+             end if
 
-           dlme = dlme + dlpre*c2*epsabg*dlij(klmn,iat,bdir)*conjg(cpi)*(dup(2,2)+udp(2,2))
-           if (ilmn /= jlmn) then
-             dlme = dlme - dlpre*c2*epsabg*conjg(dlij(klmn,iat,bdir))*conjg(cpj)*(dup(2,1)+udp(2,1))
-           end if
+             ! add on the right derivative term
+             dlme = dlme + dlpre*c2*eabg*ewt(nn)*(-dlij(klmn,iat,gdir))*conjg(dup(1,1)+udp(1,1))*cpj
+             if (ilmn /= jlmn) then
+               dlme = dlme - dlpre*c2*eabg*ewt(nn)*conjg(-dlij(klmn,iat,gdir))*conjg(dup(1,2)+udp(1,2))*cpi
+             end if
 
-           ! add on the right derivative term
-           dlme = dlme + dlpre*c2*epsabg*(-dlij(klmn,iat,gdir))*conjg(dup(1,1)+udp(1,1))*cpj
-           if (ilmn /= jlmn) then
-             dlme = dlme - dlpre*c2*epsabg*conjg(-dlij(klmn,iat,gdir))*conjg(dup(1,2)+udp(1,2))*cpi
-           end if
-
-         end do ! end loop over epsabg
+           end do ! end loop over gdir
+         end do ! end loop over bdir
          dl_k(1,nn,adir) = dl_k(1,nn,adir) + REAL(dlme)
          dl_k(2,nn,adir) = dl_k(2,nn,adir) + AIMAG(dlme)
 
@@ -906,6 +929,8 @@ subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
    end do ! end loop over atoms
    
  end do ! end loop over nn
+
+ ABI_FREE(ewt)
 
 end subroutine apply_dl_term_k
 !!***
@@ -962,9 +987,9 @@ subroutine apply_onsite_d0_k(atindx,bc_k,bcpre,cprj_k,cprj1_k,Enk,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,epsabg,gdir,iat,iatom,ilmn,iterm,itypat,jlmn,klmn,nn
+ integer :: adir,bdir,gdir,iat,iatom,ilmn,iterm,itypat,jlmn,klmn,nn
  integer,parameter :: idpdp=1,idpu=2,idudu=3
- real(dp) :: c2,qij
+ real(dp) :: c2,eabg,qij
  complex(dpc) :: dij,uij,uji
  logical :: cplex_dij
 
@@ -994,73 +1019,68 @@ subroutine apply_onsite_d0_k(atindx,bc_k,bcpre,cprj_k,cprj1_k,Enk,&
 
          bcme = czero
          omme = czero
-         do epsabg = 1, -1, -2
+         do bdir = 1, 3
+           do gdir = 1, 3
+             eabg = eijk(adir,bdir,gdir)
+             if ( abs(eabg) < tol8 ) cycle
 
-           if (epsabg .EQ. 1) then
-             bdir = modulo(adir,3)+1
-             gdir = modulo(adir+1,3)+1
-           else
-             bdir = modulo(adir+1,3)+1
-             gdir = modulo(adir,3)+1
-           end if
+             ! <u|d_m p_n> : udp(m,n) means direction m, state n
+             udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+             udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
+             udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
+             udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
 
-           ! <u|d_m p_n> : udp(m,n) means direction m, state n
-           udp(1,1) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
-           udp(1,2) = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
-           udp(2,1) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,ilmn),cprj_k(iatom,nn)%dcp(2,gdir,ilmn),KIND=dpc)     
-           udp(2,2) = cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)     
+             ! <d_m u|p_n> : dup(m,n) means direction m, state n
+             dup(1,1) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
+             dup(1,2) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,jlmn),cprj1_k(iatom,nn,bdir)%cp(2,jlmn),KIND=dpc)
+             dup(2,1) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,ilmn),cprj1_k(iatom,nn,gdir)%cp(2,ilmn),KIND=dpc)     
+             dup(2,2) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)     
 
-           ! <d_m u|p_n> : dup(m,n) means direction m, state n
-           dup(1,1) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,ilmn),cprj1_k(iatom,nn,bdir)%cp(2,ilmn),KIND=dpc)
-           dup(1,2) = cmplx(cprj1_k(iatom,nn,bdir)%cp(1,jlmn),cprj1_k(iatom,nn,bdir)%cp(2,jlmn),KIND=dpc)
-           dup(2,1) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,ilmn),cprj1_k(iatom,nn,gdir)%cp(2,ilmn),KIND=dpc)     
-           dup(2,2) = cmplx(cprj1_k(iatom,nn,gdir)%cp(1,jlmn),cprj1_k(iatom,nn,gdir)%cp(2,jlmn),KIND=dpc)     
+             qij = pawtab(itypat)%sij(klmn)
 
-           qij = pawtab(itypat)%sij(klmn)
+             if (cplex_dij) then
+               dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
+             else
+               dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
+             end if
 
-           if (cplex_dij) then
-             dij = cmplx(paw_ij(iat)%dij(2*klmn-1,1),paw_ij(iat)%dij(2*klmn,1),KIND=dpc)
-           else
-             dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
-           end if
+             ! uij is d/d_beta (<u|p_i> * d/d_gamma (<p_j|u>) 
+             !uij = conjg(udp(1,1)+dup(1,1))*(udp(2,2)+dup(2,2))
+             !uji = conjg(udp(1,2)+dup(1,2))*(udp(2,1)+dup(2,1))
 
-           ! uij is d/d_beta (<u|p_i> * d/d_gamma (<p_j|u>) 
-           uij = conjg(udp(1,1)+dup(1,1))*(udp(2,2)+dup(2,2))
-           uji = conjg(udp(1,2)+dup(1,2))*(udp(2,1)+dup(2,1))
+             !uij = conjg(udp(1,1))*udp(2,2)+conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2)
+             !uji = conjg(udp(1,2))*udp(2,1)+conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1)
 
-           !uij = conjg(udp(1,1))*udp(2,2)+conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2)
-           !uji = conjg(udp(1,2))*udp(2,1)+conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1)
+             !uij = conjg(dup(1,1))*dup(2,2)
+             !uji = conjg(dup(1,2))*dup(2,1)
 
-           !uij = conjg(dup(1,1))*dup(2,2)
-           !uji = conjg(dup(1,2))*dup(2,1)
+             !uij = conjg(udp(1,1))*udp(2,2)
+             !uji = conjg(udp(1,2))*udp(2,1)
 
-           !uij = conjg(udp(1,1))*udp(2,2)
-           !uji = conjg(udp(1,2))*udp(2,1)
+             !bcme = bcme + bcpre*c2*epsabg*qij*uij
+             bcme(idpdp) = bcme(idpdp) + bcpre*c2*eabg*qij*conjg(udp(1,1))*udp(2,2)
+             bcme(idpu) =  bcme(idpu)  + bcpre*c2*eabg*qij*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
+             bcme(idudu) = bcme(idudu) + bcpre*c2*eabg*qij*conjg(dup(1,1))*dup(2,2)
 
-           !bcme = bcme + bcpre*c2*epsabg*qij*uij
-           bcme(idpdp) = bcme(idpdp) + bcpre*c2*epsabg*qij*conjg(udp(1,1))*udp(2,2)
-           bcme(idpu) =  bcme(idpu)  + bcpre*c2*epsabg*qij*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
-           bcme(idudu) = bcme(idudu) + bcpre*c2*epsabg*qij*conjg(dup(1,1))*dup(2,2)
+             omme(idpdp) = omme(idpdp) + ompre*c2*eabg*(dij+Enk(nn)*qij)*conjg(udp(1,1))*udp(2,2)
+             omme(idpu) =  omme(idpu)  + ompre*c2*eabg*(dij+Enk(nn)*qij)*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
+             omme(idudu) = omme(idudu) + ompre*c2*eabg*(dij+Enk(nn)*qij)*conjg(dup(1,1))*dup(2,2)
 
-           omme(idpdp) = omme(idpdp) + ompre*c2*epsabg*(dij+Enk(nn)*qij)*conjg(udp(1,1))*udp(2,2)
-           omme(idpu) =  omme(idpu)  + ompre*c2*epsabg*(dij+Enk(nn)*qij)*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
-           omme(idudu) = omme(idudu) + ompre*c2*epsabg*(dij+Enk(nn)*qij)*conjg(dup(1,1))*dup(2,2)
+             !omme = omme + ompre*c2*epsabg*(dij+Enk(nn)*qij)*uij
 
-           !omme = omme + ompre*c2*epsabg*(dij+Enk(nn)*qij)*uij
+             if (ilmn /= jlmn) then
+               bcme(idpdp) = bcme(idpdp) + bcpre*c2*eabg*qij*conjg(udp(1,2))*udp(2,1)
+               bcme(idpu) =  bcme(idpu)  + bcpre*c2*eabg*qij*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
+               bcme(idudu) = bcme(idudu) + bcpre*c2*eabg*qij*conjg(dup(1,2))*dup(2,1)
 
-           if (ilmn /= jlmn) then
-             bcme(idpdp) = bcme(idpdp) + bcpre*c2*epsabg*qij*conjg(udp(1,2))*udp(2,1)
-             bcme(idpu) =  bcme(idpu)  + bcpre*c2*epsabg*qij*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
-             bcme(idudu) = bcme(idudu) + bcpre*c2*epsabg*qij*conjg(dup(1,2))*dup(2,1)
-
-             omme(idpdp) = omme(idpdp) + ompre*c2*epsabg*conjg(dij+Enk(nn)*qij)*conjg(udp(1,2))*udp(2,1)
-             omme(idpu) =  omme(idpu)  + ompre*c2*epsabg*conjg(dij+Enk(nn)*qij)*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
-             omme(idudu) = omme(idudu) + ompre*c2*epsabg*conjg(dij+Enk(nn)*qij)*conjg(dup(1,2))*dup(2,1)
-             !bcme = bcme + bcpre*c2*epsabg*qij*uji
-             !omme = omme + ompre*c2*epsabg*conjg(dij+Enk(nn)*qij)*uji
-           end if
-
-         end do ! end loop over epsabg
+               omme(idpdp) = omme(idpdp) + ompre*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(udp(1,2))*udp(2,1)
+               omme(idpu) =  omme(idpu)  + ompre*c2*eabg*conjg(dij+Enk(nn)*qij)*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
+               omme(idudu) = omme(idudu) + ompre*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(dup(1,2))*dup(2,1)
+               !bcme = bcme + bcpre*c2*epsabg*qij*uji
+               !omme = omme + ompre*c2*epsabg*conjg(dij+Enk(nn)*qij)*uji
+             end if
+           end do ! gdir
+         end do ! bdir
 
          do iterm = idpdp,idudu
            bc_k(1,nn,adir,iterm) = bc_k(1,nn,adir,iterm) + REAL(bcme(iterm))
@@ -2041,10 +2061,10 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,epsabg,gdir,gint_b,gint_g,iat,il,ilm,ilmn,itypat
+  integer :: adir,bdir,gdir,gint_b,gint_g,iat,il,ilm,ilmn,itypat
   integer :: jl,jlmn,jlm,klmn,kln,lb,ldir,lg,ll,llp,lm1b,lm1g,llmm,llmmp
   integer :: mesh_size,mm,mmp
-  real(dp) :: a2,intg,sij
+  real(dp) :: a2,eabg,intg,sij
   complex(dpc) :: cme,orbl_me
 
   !arrays
@@ -2080,45 +2100,41 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
       jlm = pawtab(itypat)%indlmn(4,jlmn)
 
       do adir = 1, 3
-
         cme = czero
-        do epsabg = 1, -1, -2
-          if (epsabg .EQ. 1) then
-            bdir = modulo(adir,3)+1
-            gdir = modulo(adir+1,3)+1
-          else
-            bdir = modulo(adir+1,3)+1
-            gdir = modulo(adir,3)+1
-          end if
+        do bdir = 1, 3
+          do gdir = 1, 3
+            eabg = eijk(adir,bdir,gdir)
+            if ( abs(eabg) < tol8 ) cycle
 
-          lb = adir_to_sij(bdir)
-          lm1b = MATPACK(ilm,lb)
+            lb = adir_to_sij(bdir)
+            lm1b = MATPACK(ilm,lb)
 
-          lg = adir_to_sij(gdir)
-          lm1g = MATPACK(jlm,lg)
+            lg = adir_to_sij(gdir)
+            lm1g = MATPACK(jlm,lg)
 
-          do ll = abs(il-1),il+1
-            do mm = -ll,ll
-              llmm = ll*ll + ll + 1 + mm
-              gint_b = gntselect(llmm,lm1b)
-              if(gint_b == 0) cycle
+            do ll = abs(il-1),il+1
+              do mm = -ll,ll
+                llmm = ll*ll + ll + 1 + mm
+                gint_b = gntselect(llmm,lm1b)
+                if(gint_b == 0) cycle
 
-              do llp = abs(jl-1),jl+1
-                do mmp = -llp,llp
-                  llmmp = llp*llp + llp + 1 + mmp
-                  gint_g = gntselect(llmmp,lm1g)
-                  if(gint_g == 0) cycle
+                do llp = abs(jl-1),jl+1
+                  do mmp = -llp,llp
+                    llmmp = llp*llp + llp + 1 + mmp
+                    gint_g = gntselect(llmmp,lm1g)
+                    if(gint_g == 0) cycle
 
-                  do ldir = 1, 3
-                    call slxyzs(ll,mm,ldir,llp,mmp,orbl_me)
-                    cme = cme + a2*sij*epsabg*intg*realgnt(gint_b)*realgnt(gint_g)*&
-                      & orbl_me*dtset%nucdipmom(ldir,iat)
-                  end do ! end loop over ldir
-                end do
-              end do ! end loop over llp
-            end do 
-          end do ! end loop over ll
-        end do ! end loop over epsabg
+                    do ldir = 1, 3
+                      call slxyzs(ll,mm,ldir,llp,mmp,orbl_me)
+                      cme = cme + a2*sij*eabg*intg*realgnt(gint_b)*realgnt(gint_g)*&
+                        & orbl_me*dtset%nucdipmom(ldir,iat)
+                    end do ! end loop over ldir
+                  end do
+                end do ! end loop over llp
+              end do 
+            end do ! end loop over ll
+          end do ! end  gdir
+        end do ! bdir
         dij_cart(adir) = cme
       end do ! end loop over adir
       dij_red = MATMUL(TRANSPOSE(gprimd),dij_cart)
@@ -2180,7 +2196,7 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  integer :: adir,iband,ikpt,iterms
  integer,parameter :: ibcpw=1,ibcdpdp=2,ibcdpu=3,ibcdudu=4,ibcd=5
  integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
- integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16
+ integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
  character(len=500) :: message
 
  !arrays
@@ -2234,6 +2250,8 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     onsite <du|D+Eq|du> : ',(orbmag_trace(1,adir,iomdudu),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') '                   dl Eq : ',(orbmag_trace(1,adir,iomdlq),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '                   dl vh : ',(orbmag_trace(1,adir,iomdlvh),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '                dl vhnzc : ',(orbmag_trace(1,adir,iomdlvhnzc),adir=1,3)
@@ -2283,6 +2301,8 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
      write(message,'(a,3es16.8)') '      onsite <dp|D+Eq|u> : ',(orbmag_terms(1,iband,adir,iomdpu),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '     onsite <du|D+Eq|du> : ',(orbmag_terms(1,iband,adir,iomdudu),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+     write(message,'(a,3es16.8)') '                   dl Eq : ',(orbmag_terms(1,iband,adir,iomdlq),adir=1,3)
      call wrtout(ab_out,message,'COLL')
      write(message,'(a,3es16.8)') '                   dl vh : ',(orbmag_terms(1,iband,adir,iomdlvh),adir=1,3)
      call wrtout(ab_out,message,'COLL')
