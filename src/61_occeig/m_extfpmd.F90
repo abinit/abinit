@@ -60,10 +60,11 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    integer :: bcut,nbcut,nfftf,nspden,version
+    integer :: bcut,nbcut,nfft,nspden,version
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
+    real(dp),allocatable :: nelectarr(:,:)
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -98,11 +99,11 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nfftf,nspden,rprimd,version)
+  subroutine init(this,mband,nbcut,nfft,nspden,rprimd,version)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut,nfftf,nspden,version
+    integer,intent(in) :: mband,nbcut,nfft,nspden,version
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -115,15 +116,17 @@ contains
     this%bcut=mband
     this%nbcut=nbcut
     this%version=version
-    ABI_MALLOC(this%vtrial,(nfftf,nspden))
+    ABI_MALLOC(this%vtrial,(nfft,nspden))
     this%vtrial(:,:)=zero
-    this%nfftf=nfftf
+    this%nfft=nfft
     this%nspden=nspden
     this%e_bcut=zero
     this%edc_kinetic=zero
     this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
+    ABI_MALLOC(this%nelectarr,(nfft,nspden))
+    this%nelectarr(:,:)=zero
     this%shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
@@ -157,7 +160,9 @@ contains
 
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
-    this%nfftf=0
+    this%nelectarr(:,:)=zero
+    ABI_FREE(this%nelectarr)
+    this%nfft=0
     this%nspden=0
     this%bcut=0
     this%nbcut=0
@@ -221,7 +226,7 @@ contains
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1) then
-      this%shiftfactor=sum(this%vtrial)/(this%nfftf*this%nspden)
+      this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
 
       ! Computes the relative error of the model vs last eigenvalues
       if(me==0) then
@@ -325,7 +330,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifftf,ispden
+    integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
 
     ! *********************************************************************
@@ -354,13 +359,14 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==4) then
-      do ifftf=1,this%nfftf
+      do ifft=1,this%nfft
         do ispden=1,this%nspden
-          gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
           xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
-          nelect=nelect+factor*djp12(xcut,gamma)/(this%nfftf*this%nspden)
+          this%nelectarr(ifft,ispden)=factor*djp12(xcut,gamma)/(this%nfft*this%nspden)
         end do
       end do
+      nelect=nelect+sum(this%nelectarr)
     end if
   end subroutine compute_nelect
   !!***
@@ -395,7 +401,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifftf,ispden
+    integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
 
     ! *********************************************************************
@@ -425,12 +431,12 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==4) then
-      do ifftf=1,this%nfftf
+      do ifft=1,this%nfft
         do ispden=1,this%nspden
-          gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
           xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
           this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
-          & (this%nfftf*this%nspden)
+          & (this%nfft*this%nspden)
         end do
       end do
     end if
@@ -472,7 +478,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifftf,ispden
+    integer :: ii,ifft,ispden
     real(dp) :: ix,step,factor,fn,gamma,minocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
@@ -547,16 +553,16 @@ contains
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==4) then
       this%entropy=zero
-      do ifftf=1,this%nfftf
+      do ifft=1,this%nfft
         do ispden=1,this%nspden
           factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-          gamma=(fermie-this%vtrial(ifftf,ispden))/tsmear
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
           ABI_MALLOC(valuesent,(this%bcut+1))
 
           !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
           do ii=1,this%bcut+1
             ix=dble(ii)-one
-            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifftf,ispden),fermie,tsmear)
+            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifft,ispden),fermie,tsmear)
             if(fn>tol16.and.(one-fn)>tol16) then
               valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
             else
@@ -569,7 +575,7 @@ contains
           if(size(valuesent)>=6) then
             this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
             & gamma*factor*dip12(gamma)/tsmear-&
-            simpson(one,valuesent))/(this%nfftf*this%nspden)
+            simpson(one,valuesent))/(this%nfft*this%nspden)
           end if
           ABI_FREE(valuesent)
         end do
