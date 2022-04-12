@@ -46,7 +46,7 @@ module m_extfpmd
   use m_spacepar,       only : meanvalue_g
 
   implicit none
-  public :: dip12,djp12,dip32,djp32,extfpmd_dos,extfpmd_e_fg
+  public :: dip12,djp12,dip32,djp32,extfpmd_dos,extfpmd_e_fg,extfpmd_e_tf
   !!***
 
   !----------------------------------------------------------------------
@@ -362,7 +362,7 @@ contains
       do ifft=1,this%nfft
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-          xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
+          xcut=extfpmd_e_tf(dble(this%bcut))/tsmear
           this%nelectarr(ifft,ispden)=factor*djp12(xcut,gamma)/(this%nfft*this%nspden)
         end do
       end do
@@ -1069,6 +1069,37 @@ contains
 
     extfpmd_e_fg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
   end function extfpmd_e_fg
+  !!***
+  
+  !!****f* ABINIT/m_extfpmd/extfpmd_e_tf
+  !! NAME
+  !!  extfpmd_e_tf
+  !!
+  !! FUNCTION
+  !!  Returns the Thomas-Fermi energy for a given number of
+  !!  accessible states.
+  !!
+  !! INPUTS
+  !!  iband=number of accessible states
+  !!
+  !! OUTPUT
+  !!  extfpmd_e_tf=energy of non homogeneous electron gas for a given number of accessible states
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function extfpmd_e_tf(iband)
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: iband
+    real(dp) :: extfpmd_e_tf
+
+    ! *********************************************************************
+
+    extfpmd_e_tf=(iband*6*PI*PI*PI/4./sqrt(2.))**(2./3.)
+  end function extfpmd_e_tf
   !!***
 
 end module m_extfpmd
