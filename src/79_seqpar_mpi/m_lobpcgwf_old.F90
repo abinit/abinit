@@ -117,7 +117,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol,use_totvnlx
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
  real(dp),intent(in) :: kinpw(npw_k)
  real(dp),intent(out) :: resid_k(nband_k)

@@ -289,6 +289,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_fft=mpi_enreg1%nproc_fft
  mpi_enreg2%paral_kgb=mpi_enreg1%paral_kgb
  mpi_enreg2%me_g0=mpi_enreg1%me_g0
+ mpi_enreg2%me_g0_fft=mpi_enreg1%me_g0_fft
  mpi_enreg2%paral_pert=mpi_enreg1%paral_pert
  mpi_enreg2%me_pert=mpi_enreg1%me_pert
  mpi_enreg2%nproc_pert=mpi_enreg1%nproc_pert
@@ -452,6 +453,10 @@ subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
  mpi_enreg%me_g0=me_g0
  mpi_enreg%nproc_fft=xmpi_comm_size(comm_fft)
  mpi_enreg%me_fft=xmpi_comm_rank(comm_fft)
+ mpi_enreg%me_g0_fft=0
+ if (mpi_enreg%me_fft==0) then
+   mpi_enreg%me_g0_fft=1
+ end if
  if (associated(mpi_enreg%distribfft)) then
    call destroy_distribfft(mpi_enreg%distribfft)
    ABI_FREE(mpi_enreg%distribfft)
@@ -495,6 +500,7 @@ subroutine unset_mpi_enreg_fft(MPI_enreg)
  mpi_enreg%comm_fft=xmpi_comm_self
  mpi_enreg%nproc_fft=1
  mpi_enreg%me_fft=0
+ mpi_enreg%me_g0_fft=1
  mpi_enreg%paral_kgb=0
  nullify(mpi_enreg%distribfft)
 
@@ -1036,6 +1042,7 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%me_cell=0
  mpi_enreg%me_fft=0
  mpi_enreg%me_g0=1
+ mpi_enreg%me_g0_fft=1
  mpi_enreg%me_img=0
  mpi_enreg%me_hf=0
  mpi_enreg%me_kpt=0

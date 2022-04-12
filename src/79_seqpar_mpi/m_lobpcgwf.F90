@@ -86,7 +86,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer,intent(in) :: nband,npw,prtvol,nspinor
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
- type(mpi_type)           ,target,intent(inout) :: mpi_enreg
+ type(mpi_type)           ,target,intent(in)    :: mpi_enreg
  real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)!,gsc(2,nspinor*nband*npw)
  real(dp)                        ,intent(in   ) :: kinpw(npw)
  real(dp)                 ,target,intent(  out) :: resid(nband)

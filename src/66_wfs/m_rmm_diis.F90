@@ -177,7 +177,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,intent(in) :: istep, ikpt, isppol, nband, npw, my_nspinor
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband), resid(nband)
@@ -939,7 +939,7 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
  integer,intent(in) :: npw, my_nspinor, ndat, prtvol
  real(dp),intent(inout) :: cg(2, npw*my_nspinor*ndat)
  real(dp),intent(out) :: ghc(2,npw*my_nspinor*ndat), gsc(2,npw*my_nspinor*ndat*gs_hamk%usepaw)
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),intent(out) :: eig(ndat), resid(ndat), enlx(ndat)
  real(dp),intent(out) :: residvecs(2, npw*my_nspinor*ndat), gvnlxc(2, npw*my_nspinor*ndat)
  logical,optional,intent(in) :: normalize
@@ -1339,7 +1339,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
 !Arguments ------------------------------------
  integer,intent(in) :: prtvol, nband, npw, my_nspinor, savemem
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*gs_hamk%usepaw)
  !real(dp),target,intent(out) :: ghc(2,npw*my_nspinor*nband)

@@ -2322,7 +2322,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
 
- comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0
+ comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0_fft
  paral_kgb = mpi_enreg%paral_kgb
 
  !if (ndat/=1) then

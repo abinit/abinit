@@ -131,7 +131,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
- type(mpi_type),target,intent(inout) :: mpi_enreg
+ type(mpi_type),target,intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
  real(dp),intent(in) :: kinpw(npw)
  real(dp),target,intent(out) :: resid(nband)

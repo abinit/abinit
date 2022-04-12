@@ -1709,7 +1709,7 @@ use m_wfutils
 
 !Arguments of gw_sternheimer, reveived as argument by build_H-------------------------
 type(dataset_type),  intent(in) :: dtset2
-type(MPI_type),   intent(inout) :: mpi_enreg2
+type(MPI_type),   intent(in) :: mpi_enreg2
 type(gs_hamiltonian_type), intent(inout) :: gs_hamk2
 
 integer, intent(in) :: cpopt2
