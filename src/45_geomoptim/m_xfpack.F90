@@ -233,6 +233,8 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
          end do
        end do
      end do
+   ! for optcell=4,5,6, implementing search for all 3 components of the vector to be relaxed according to Eq.10 of J. Chem. Phys.
+   ! 136, 074103 (2012), i.e. search direction given by rprimd0 * stress
    else if(optcell==4)then
      rprimd(:,2) = rprimd0(:,2)
      rprimd(:,3) = rprimd0(:,3)
