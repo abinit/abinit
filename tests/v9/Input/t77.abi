@@ -1,12 +1,12 @@
 # ================================================================
 # NiO: 2 Ni and 2 O atoms in a fcc supercell
 #
-# Test for Abinit: PAW + U + no magnetism
+# Test for Abinit: PAW + U + collinear magnetism
 # Low cut-off for test; too few k-points
 # ================================================================
 
-nsppol 1  nspden 1  nspinor 1
-#
+nsppol 2  nspden 2  nspinor 1
+
 # === Structure and cell
 natom 4 ntypat 2 typat 1 1 2 2
 spinat 0 0 1   0 0 -1   0 0 0   0 0 0
@@ -59,7 +59,7 @@ pawprtvol 3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t105.abo, tolnlines = 244, tolabs = 1.200e-05, tolrel = 9.000e-05
+#%%   t77.abo, tolnlines = 290, tolabs = 1.200e-04, tolrel = 5.000e-04
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

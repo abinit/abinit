@@ -1656,19 +1656,19 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 
        call wrtout(iout,message,'COLL')
 
-       write(message,'(a,es13.4,a,3f10.4)') '      Maximum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Maximum= ',&
 &       value(1,1,iitems),'  at reduced coord.',coord(:,1,1,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next maximum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next maximum= ',&
 &         value(2,1,iitems),'  at reduced coord.',coord(:,2,1,iitems)
          call wrtout(iout,message,'COLL')
        end if
-       write(message,'(a,es13.4,a,3f10.4)') '      Minimum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Minimum= ',&
 &       value(1,2,iitems),'  at reduced coord.',coord(:,1,2,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next minimum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next minimum= ',&
 &         value(2,2,iitems),'  at reduced coord.',coord(:,2,2,iitems)
          call wrtout(iout,message,'COLL')
        end if

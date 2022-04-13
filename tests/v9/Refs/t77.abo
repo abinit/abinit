@@ -17,10 +17,10 @@
 .Starting date : Sat 12 Feb 2022.
 - ( at 06h55 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t106/t106.abi
-- output file    -> t106.abo
-- root for input  files -> t106i
-- root for output files -> t106o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t77/t77.abi
+- output file    -> t77.abo
+- root for input  files -> t77i
+- root for output files -> t77o
 
 
  DATASET    1 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
