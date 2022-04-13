@@ -278,7 +278,7 @@ contains
     ! Computes U_0^K from the difference between
     ! eigenvalues and kinetic energies, averaged
     ! over lasts nbcut bands.
-    if(this%version==3) then
+    if(this%version==3.or.this%version==4) then
       this%shiftfactor=zero
       this%e_bcut=0
       band_index=0
@@ -362,11 +362,12 @@ contains
       do ifft=1,this%nfft
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-          xcut=extfpmd_e_tf(dble(this%bcut))/tsmear
-          this%nelectarr(ifft,ispden)=factor*djp12(xcut,gamma)/(this%nfft*this%nspden)
+          xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
+          ! xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
+          this%nelectarr(ifft,ispden)=factor*djp12(xcut,gamma)
         end do
       end do
-      nelect=nelect+sum(this%nelectarr)
+      nelect=nelect+sum(this%nelectarr)/(this%nfft*this%nspden)
     end if
   end subroutine compute_nelect
   !!***
@@ -412,7 +413,7 @@ contains
     ! Computes extfpmd contribution to kinetic energy integrating
     ! over accessible states from bcut to infinity with
     ! order 3/2 incomplete Fermi-Dirac integral.
-    if(this%version==1.or.this%version==2.or.this%version==4) then
+    if(this%version==1.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
@@ -430,21 +431,35 @@ contains
     ! Computes extfpmd contribution to kinetic energy using a sum
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
-    ! if(this%version==4) then
-    !   do ifft=1,this%nfft
-    !     do ispden=1,this%nspden
-    !       gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-    !       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
-    !       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
-    !       & (this%nfft*this%nspden)
-    !     end do
-    !   end do
-    ! end if
+    if(this%version==4) then
+      do ifft=1,this%nfft
+        do ispden=1,this%nspden
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
+          xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
+          ! xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
+          this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
+          & (this%nfft*this%nspden)
+        end do
+      end do
+    end if
+
 
     ! Computes the double counting term from the shiftfactor, and
     ! from the contributions to the kinetic energy and
     ! the number of electrons
-    this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
+    if(this%version==1.or.this%version==2.or.this%version==3) then
+      this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
+    else if(this%version==4) then
+      this%edc_kinetic=zero
+      do ifft=1,this%nfft
+        do ispden=1,this%nspden
+          this%edc_kinetic=this%edc_kinetic+(this%e_kinetic+this%nelectarr(ifft,ispden)*&
+          & this%vtrial(ifft,ispden))/(this%nfft*this%nspden)
+        end do
+      end do
+    end if
+
+    write(0,*) this%e_kinetic,this%shiftfactor,this%nelect,this%edc_kinetic
   end subroutine compute_e_kinetic
   !!***
 
@@ -490,7 +505,7 @@ contains
     ! Computes extfpmd contribution to the entropy integrating
     ! over accessible states with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
-    if(this%version==1.or.this%version==2.or.this%version==4) then
+    if(this%version==1.or.this%version==2) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -541,8 +556,7 @@ contains
       ! We need at least 6 elements in valuesent to call simpson function.
       if(size(valuesent)>=6) then
         this%entropy=5./3.*factor*dip32(gamma)/tsmear-&
-        & gamma*factor*dip12(gamma)/tsmear-&
-        simpson(step,valuesent)
+        & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent)
       end if
       ABI_FREE(valuesent)
     end if
@@ -551,36 +565,40 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid,
     ! as we do for version=1 and version=2.
     ! Warning: This is not yet operational. Work in progress.
-    ! if(this%version==4) then
-    !   this%entropy=zero
-    !   do ifft=1,this%nfft
-    !     do ispden=1,this%nspden
-    !       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-    !       gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-    !       ABI_MALLOC(valuesent,(this%bcut+1))
-    !
-    !       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
-    !       do ii=1,this%bcut+1
-    !         ix=dble(ii)-one
-    !         fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifft,ispden),fermie,tsmear)
-    !         if(fn>tol16.and.(one-fn)>tol16) then
-    !           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
-    !         else
-    !           valuesent(ii)=zero
-    !         end if
-    !       end do
-    !       !$OMP END PARALLEL DO
-    !
-    !       ! We need at least 6 elements in valuesent to call simpson function.
-    !       if(size(valuesent)>=6) then
-    !         this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
-    !         & gamma*factor*dip12(gamma)/tsmear-&
-    !         simpson(one,valuesent))/(this%nfft*this%nspden)
-    !       end if
-    !       ABI_FREE(valuesent)
-    !     end do
-    !   end do
-    ! end if
+    if(this%version==4) then
+      this%entropy=zero
+      do ifft=1,this%nfft
+        do ispden=1,this%nspden
+          factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
+          ABI_MALLOC(valuesent,(this%bcut+1))
+
+          step=(this%e_bcut-this%vtrial(ifft,ispden))/(this%bcut)
+          !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
+          do ii=1,this%bcut+1
+            ! ix=dble(ii)-one
+            ix=this%vtrial(ifft,ispden)+(dble(ii)-one)*step
+            fn=fermi_dirac(ix,fermie,tsmear)
+            ! fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifft,ispden),fermie,tsmear)
+            if(fn>tol16.and.(one-fn)>tol16) then
+              valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
+              & extfpmd_dos(ix,this%vtrial(ifft,ispden),this%ucvol)
+            else
+              valuesent(ii)=zero
+            end if
+          end do
+          !$OMP END PARALLEL DO
+
+          ! We need at least 6 elements in valuesent to call simpson function.
+          if(size(valuesent)>=6) then
+            this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
+            & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent))/&
+            & (this%nfft*this%nspden)
+          end if
+          ABI_FREE(valuesent)
+        end do
+      end do
+    end if
   end subroutine compute_entropy
   !!***
 
@@ -1070,7 +1088,7 @@ contains
     extfpmd_e_fg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
   end function extfpmd_e_fg
   !!***
-  
+
   !!****f* ABINIT/m_extfpmd/extfpmd_e_tf
   !! NAME
   !!  extfpmd_e_tf
@@ -1098,7 +1116,7 @@ contains
 
     ! *********************************************************************
 
-    extfpmd_e_tf=(iband*6*PI*PI*PI/4./sqrt(2.))**(2./3.)
+    extfpmd_e_tf=(iband*6*PI*PI*PI/(2*sqrt(8.)))**(2./3.)
   end function extfpmd_e_tf
   !!***
 
