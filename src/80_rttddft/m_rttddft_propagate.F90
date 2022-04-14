@@ -109,7 +109,7 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  ! Propagate cg
  select case (dtset%td_propagator) 
    case(0)
-      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks,store_energies=.true.)
+      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
    case(1)
       call rttddft_propagator_emr(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)  
    case default

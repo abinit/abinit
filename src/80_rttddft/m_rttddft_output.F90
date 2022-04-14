@@ -51,7 +51,6 @@ module m_rttddft_output
  use m_nctk,          only: nctk_open_create
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
  use m_rttddft_tdks,  only: tdks_type
- use m_rttddft,       only: rttddft_calc_occ
  use m_specialmsg,    only: wrtout
  use m_xmpi,          only: xmpi_comm_rank
    
@@ -328,10 +327,6 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
 
  if (dtset%prtocc > 0) then 
    
-   !1-First compute occupation numbers
-   !call rttddft_calc_occ(tdks, dtset, mpi_enreg)
-
-   !2-Then outputs them
    me = xmpi_comm_rank(mpi_enreg%comm_cell)
    
    write(step_nb,*) istep
