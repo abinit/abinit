@@ -75,6 +75,13 @@ module m_orbmag
                                                &zero,zero,zero/),& !{1..3}33
                                                &(/3,3,3/))
 
+  integer,parameter :: ibcpw=1,ibcdpdp=2,ibcdpu=3,ibcdudu=4,ibcd=5
+  integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
+  integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
+  integer,parameter :: nterms=17
+  complex(dpc),parameter :: cbc = j_dpc/two_pi ! Berry curvature pre-factor
+  complex(dpc),parameter :: com = -half*j_dpc  ! Orbital magnetism pre-factor
+
   ! Bound methods:
 
   public :: orbmag_tt
@@ -167,12 +174,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: klm
  integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
- integer,parameter :: ibcpw=1,ibcdpdp=2,ibcdpu=3,ibcdudu=4,ibcd=5
- integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
- integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
- integer,parameter :: nterms=17
  real(dp) :: arg,ecut_eff,trnrm,ucvol
- complex(dpc) :: cberry,com
  logical :: has_nucdip
  type(gs_hamiltonian_type) :: gs_hamk
 
@@ -437,9 +439,6 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! Finally ready to compute contributions to orbital magnetism and Berry curvature
    !--------------------------------------------------------------------------------
 
-   ! overall pre-factors
-   cberry = j_dpc/two_pi
-   com = -half*j_dpc
    
    !--------------------------------------------------------------------------------
    ! planewave contributions to Berry curvature and orbital magnetism
@@ -449,9 +448,8 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_MALLOC(om_k,(2,nband_k,3))
    ABI_MALLOC(omo_k,(2,nband_k,3,3))
 
-   !call bc_pw_k(cg1_k,cberry,dimlmn,gs_hamk,mcgk,mpi_enreg,dtset%natom,nband_k,npw_k,dtset%nspinor,bcpw_k)
-   call apply_pw_k(bc_k,cberry,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
-     & nband_k,npw_k,dtset%nspinor,om_k,com)
+   call apply_pw_k(bc_k,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
+     & nband_k,npw_k,dtset%nspinor,om_k)
 
    orbmag_terms(:,:,:,ibcpw) = orbmag_terms(:,:,:,ibcpw) + trnrm*bc_k
    orbmag_terms(:,:,:,iompw) = orbmag_terms(:,:,:,iompw) + trnrm*om_k
@@ -460,8 +458,8 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! additional onsite terms to both Berry and orbmag (no |phi> derivatives) 
    !--------------------------------------------------------------------------------
 
-   call apply_onsite_d0_k(atindx,bco_k,cberry,cprj_k,cprj1_k,Enk,&
-     & dtset%natom,nband_k,dtset%ntypat,omo_k,com,paw_ij,pawtab,dtset%typat)
+   call apply_onsite_d0_k(atindx,bco_k,cprj_k,cprj1_k,Enk,&
+     & dtset%natom,nband_k,dtset%ntypat,omo_k,paw_ij,pawtab,dtset%typat)
 
    orbmag_terms(:,:,:,ibcdpdp) = orbmag_terms(:,:,:,ibcdpdp) + trnrm*bco_k(:,:,:,1)
    orbmag_terms(:,:,:,ibcdpu) = orbmag_terms(:,:,:,ibcdpu) + trnrm*bco_k(:,:,:,2)
@@ -475,7 +473,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! apply dlq term to Berry curvature
    !--------------------------------------------------------------------------------
 
-   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlq,bc_k,cberry,lmn2max,dtset%natom,&
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlq,bc_k,ibcd,lmn2max,dtset%natom,&
      & nband_k,dtset%ntypat,pawtab,dtset%typat)
    orbmag_terms(:,:,:,ibcd) = orbmag_terms(:,:,:,ibcd) + trnrm*bc_k
 
@@ -483,7 +481,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! apply dl_vh term to orb mag
    !--------------------------------------------------------------------------------
 
-   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlvh,om_k,com,lmn2max,dtset%natom,&
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlvh,om_k,iomdlvh,lmn2max,dtset%natom,&
      & nband_k,dtset%ntypat,pawtab,dtset%typat)
    orbmag_terms(:,:,:,iomdlvh) = orbmag_terms(:,:,:,iomdlvh) + trnrm*om_k
 
@@ -491,7 +489,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! apply dl_vhnzc term to orb mag
    !--------------------------------------------------------------------------------
 
-   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlvhnzc,om_k,com,lmn2max,dtset%natom,&
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlvhnzc,om_k,iomdlvhnzc,lmn2max,dtset%natom,&
      & nband_k,dtset%ntypat,pawtab,dtset%typat)
    orbmag_terms(:,:,:,iomdlvhnzc) = orbmag_terms(:,:,:,iomdlvhnzc) + trnrm*om_k
 
@@ -499,7 +497,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! apply dl_Anp term to orb mag
    !--------------------------------------------------------------------------------
 
-   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlanp,om_k,com,lmn2max,dtset%natom,&
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlanp,om_k,iomdlanp,lmn2max,dtset%natom,&
      & nband_k,dtset%ntypat,pawtab,dtset%typat)
    orbmag_terms(:,:,:,iomdlanp) = orbmag_terms(:,:,:,iomdlanp) + trnrm*om_k
 
@@ -507,7 +505,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! apply dl_Eqij term to orb mag
    !--------------------------------------------------------------------------------
 
-   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlq,om_k,com,lmn2max,dtset%natom,&
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlq,om_k,iomdlq,lmn2max,dtset%natom,&
      & nband_k,dtset%ntypat,pawtab,dtset%typat,Enk=Enk)
    orbmag_terms(:,:,:,iomdlq) = orbmag_terms(:,:,:,iomdlq) + trnrm*om_k
 
@@ -516,20 +514,20 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! apply dl_p2 term to orb mag
    !--------------------------------------------------------------------------------
 
-   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlp2,om_k,com,lmn2max,dtset%natom,&
+   call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlp2,om_k,iomdlp2,lmn2max,dtset%natom,&
      & nband_k,dtset%ntypat,pawtab,dtset%typat)
    orbmag_terms(:,:,:,iomdlp2) = orbmag_terms(:,:,:,iomdlp2) + trnrm*om_k
 
    !--------------------------------------------------------------------------------
    ! onsite <phi|r_b p^2/2 r_g>
    !--------------------------------------------------------------------------------
-   call apply_d2lr_term_k(atindx,com,cprj_k,dtset,lmn2max,mp2,nband_k,om_k,pawtab)
+   call apply_d2lr_term_k(atindx,cprj_k,dtset,iomlr,lmn2max,mp2,nband_k,om_k,pawtab)
    orbmag_terms(:,:,:,iomlr) = orbmag_terms(:,:,:,iomlr) + trnrm*om_k
    
    !--------------------------------------------------------------------------------
    ! onsite <phi|r_b p.A0 r_g> 
    !--------------------------------------------------------------------------------
-   call apply_d2lr_term_k(atindx,com,cprj_k,dtset,lmn2max,mpan,nband_k,om_k,pawtab)
+   call apply_d2lr_term_k(atindx,cprj_k,dtset,iomanp,lmn2max,mpan,nband_k,om_k,pawtab)
    orbmag_terms(:,:,:,iomanp) = orbmag_terms(:,:,:,iomanp) + trnrm*om_k
 
    ABI_FREE(bc_k)
@@ -663,7 +661,7 @@ end subroutine orbmag_tt
 
 !!****f* ABINIT/apply_pw_k
 !! NAME
-!! om_pw_k
+!! apply_pw_k
 !!
 !! FUNCTION
 !! compute pure planewave part of orbital magnetization and Berry curvature
@@ -692,13 +690,12 @@ end subroutine orbmag_tt
 !!
 !! SOURCE
 
-subroutine apply_pw_k(bc_k,bcpre,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
-    & natom,nband_k,npw_k,nspinor,om_k,ompre)
+subroutine apply_pw_k(bc_k,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
+    & natom,nband_k,npw_k,nspinor,om_k)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcgk,natom,nband_k,npw_k,nspinor
-  complex(dpc),intent(in) :: bcpre,ompre
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
 
@@ -772,8 +769,8 @@ subroutine apply_pw_k(bc_k,bcpre,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
           dotr = DOT_PRODUCT(bwavef(1,:),omc(1,:))+DOT_PRODUCT(bwavef(2,:),omc(2,:))
           doti = DOT_PRODUCT(bwavef(1,:),omc(2,:))-DOT_PRODUCT(bwavef(2,:),omc(1,:))
           cme = cmplx(dotr,doti,KIND=dpc)
-          om_k(1,nn,adir) = om_k(1,nn,adir) + real(ompre*eabg*c2*cme)
-          om_k(2,nn,adir) = om_k(2,nn,adir) + aimag(ompre*eabg*c2*cme)
+          om_k(1,nn,adir) = om_k(1,nn,adir) + real(com*eabg*c2*cme)
+          om_k(2,nn,adir) = om_k(2,nn,adir) + aimag(com*eabg*c2*cme)
 
           ! berry curvature needs <du/dk|S|du/dk>, no nonlocal parts here, do that elsewhere
           bcc = gwavef
@@ -783,8 +780,8 @@ subroutine apply_pw_k(bc_k,bcpre,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,&
           dotr = DOT_PRODUCT(bwavef(1,:),bcc(1,:))+DOT_PRODUCT(bwavef(2,:),bcc(2,:))
           doti = DOT_PRODUCT(bwavef(1,:),bcc(2,:))-DOT_PRODUCT(bwavef(2,:),bcc(1,:))
           cme = cmplx(dotr,doti,KIND=dpc)
-          bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(bcpre*eabg*c2*cme)
-          bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(bcpre*eabg*c2*cme)
+          bc_k(1,nn,adir) = bc_k(1,nn,adir) + real(cbc*eabg*c2*cme)
+          bc_k(2,nn,adir) = bc_k(2,nn,adir) + aimag(cbc*eabg*c2*cme)
 
         end do ! gdir
       end do ! bdir
@@ -836,14 +833,13 @@ end subroutine apply_pw_k
 !!
 !! SOURCE
 
-subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
-    & lmn2max,natom,nband_k,ntypat,pawtab,typat,&
+subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,&
+    & iterm,lmn2max,natom,nband_k,ntypat,pawtab,typat,&
     & Enk) ! Enk is an optional argument
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: lmn2max,natom,nband_k,ntypat
- complex(dpc),intent(in) :: dlpre
+ integer,intent(in) :: iterm,lmn2max,natom,nband_k,ntypat
 
  !arrays
  integer,intent(in) :: atindx(natom),typat(natom)
@@ -858,13 +854,20 @@ subroutine apply_dl_term_k(atindx,cprj_k,cprj1_k,dlij,dl_k,dlpre,&
  !scalars
  integer :: adir,bdir,gdir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
  real(dp) :: c2,eabg
- complex(dpc) :: cpi,cpj,dlme
+ complex(dpc) :: cpi,cpj,dlme,dlpre
 
  !arrays
  real(dp),allocatable :: ewt(:)
  complex(dpc) :: dup(2,2),udp(2,2)
 
  !-----------------------------------------------------------------------
+
+ ! iterm <= ibcd is berry type, others are orb mag type
+ if ( iterm <= ibcd ) then
+   dlpre = cbc
+ else
+   dlpre =com
+ end if
 
  ABI_MALLOC(ewt,(nband_k))
  ewt = one
@@ -968,13 +971,12 @@ end subroutine apply_dl_term_k
 !!
 !! SOURCE
 
-subroutine apply_onsite_d0_k(atindx,bc_k,bcpre,cprj_k,cprj1_k,Enk,&
-    & natom,nband_k,ntypat,om_k,ompre,paw_ij,pawtab,typat)
+subroutine apply_onsite_d0_k(atindx,bc_k,cprj_k,cprj1_k,Enk,&
+    & natom,nband_k,ntypat,om_k,paw_ij,pawtab,typat)
 
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: natom,nband_k,ntypat
- complex(dpc),intent(in) :: bcpre,ompre
 
  !arrays
  integer,intent(in) :: atindx(natom),typat(natom)
@@ -1057,27 +1059,22 @@ subroutine apply_onsite_d0_k(atindx,bc_k,bcpre,cprj_k,cprj1_k,Enk,&
              !uij = conjg(udp(1,1))*udp(2,2)
              !uji = conjg(udp(1,2))*udp(2,1)
 
-             !bcme = bcme + bcpre*c2*epsabg*qij*uij
-             bcme(idpdp) = bcme(idpdp) + bcpre*c2*eabg*qij*conjg(udp(1,1))*udp(2,2)
-             bcme(idpu) =  bcme(idpu)  + bcpre*c2*eabg*qij*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
-             bcme(idudu) = bcme(idudu) + bcpre*c2*eabg*qij*conjg(dup(1,1))*dup(2,2)
+             bcme(idpdp) = bcme(idpdp) + cbc*c2*eabg*qij*conjg(udp(1,1))*udp(2,2)
+             bcme(idpu) =  bcme(idpu)  + cbc*c2*eabg*qij*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
+             bcme(idudu) = bcme(idudu) + cbc*c2*eabg*qij*conjg(dup(1,1))*dup(2,2)
 
-             omme(idpdp) = omme(idpdp) + ompre*c2*eabg*(dij+Enk(nn)*qij)*conjg(udp(1,1))*udp(2,2)
-             omme(idpu) =  omme(idpu)  + ompre*c2*eabg*(dij+Enk(nn)*qij)*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
-             omme(idudu) = omme(idudu) + ompre*c2*eabg*(dij+Enk(nn)*qij)*conjg(dup(1,1))*dup(2,2)
-
-             !omme = omme + ompre*c2*epsabg*(dij+Enk(nn)*qij)*uij
+             omme(idpdp) = omme(idpdp) + com*c2*eabg*(dij+Enk(nn)*qij)*conjg(udp(1,1))*udp(2,2)
+             omme(idpu) =  omme(idpu)  + com*c2*eabg*(dij+Enk(nn)*qij)*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
+             omme(idudu) = omme(idudu) + com*c2*eabg*(dij+Enk(nn)*qij)*conjg(dup(1,1))*dup(2,2)
 
              if (ilmn /= jlmn) then
-               bcme(idpdp) = bcme(idpdp) + bcpre*c2*eabg*qij*conjg(udp(1,2))*udp(2,1)
-               bcme(idpu) =  bcme(idpu)  + bcpre*c2*eabg*qij*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
-               bcme(idudu) = bcme(idudu) + bcpre*c2*eabg*qij*conjg(dup(1,2))*dup(2,1)
+               bcme(idpdp) = bcme(idpdp) + cbc*c2*eabg*qij*conjg(udp(1,2))*udp(2,1)
+               bcme(idpu) =  bcme(idpu)  + cbc*c2*eabg*qij*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
+               bcme(idudu) = bcme(idudu) + cbc*c2*eabg*qij*conjg(dup(1,2))*dup(2,1)
 
-               omme(idpdp) = omme(idpdp) + ompre*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(udp(1,2))*udp(2,1)
-               omme(idpu) =  omme(idpu)  + ompre*c2*eabg*conjg(dij+Enk(nn)*qij)*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
-               omme(idudu) = omme(idudu) + ompre*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(dup(1,2))*dup(2,1)
-               !bcme = bcme + bcpre*c2*epsabg*qij*uji
-               !omme = omme + ompre*c2*epsabg*conjg(dij+Enk(nn)*qij)*uji
+               omme(idpdp) = omme(idpdp) + com*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(udp(1,2))*udp(2,1)
+               omme(idpu) =  omme(idpu)  + com*c2*eabg*conjg(dij+Enk(nn)*qij)*(conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1))
+               omme(idudu) = omme(idudu) + com*c2*eabg*conjg(dij+Enk(nn)*qij)*conjg(dup(1,2))*dup(2,1)
              end if
            end do ! gdir
          end do ! bdir
@@ -1960,12 +1957,11 @@ end subroutine d2lr_p2
 !!
 !! SOURCE
 
-subroutine apply_d2lr_term_k(atindx,cpre,cprj_k,dtset,lmn2max,mterm,nband_k,omm,pawtab)
+subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmn2max,nband_k
-  complex(dpc),intent(in) :: cpre
+  integer,intent(in) :: iterm,lmn2max,nband_k
   type(dataset_type),intent(in) :: dtset
 
   !arrays
@@ -1978,11 +1974,17 @@ subroutine apply_d2lr_term_k(atindx,cpre,cprj_k,dtset,lmn2max,mterm,nband_k,omm,
   !Local variables -------------------------
   !scalars
   integer :: adir,iat,iatom,ilmn,itypat,jlmn,klmn,nn
-  complex(dpc) :: cpb,cpk,cme
+  complex(dpc) :: cpb,cpk,cme,cpre
 
   !arrays
 
 !--------------------------------------------------------------------
+  ! iterm <= ibcd is berry type, others are orb mag type
+  if ( iterm <= ibcd ) then
+    cpre = cbc
+  else
+    cpre = com
+  end if
 
   omm = zero 
   do nn = 1, nband_k
@@ -2194,9 +2196,6 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
  !Local variables -------------------------
  !scalars
  integer :: adir,iband,ikpt,iterms
- integer,parameter :: ibcpw=1,ibcdpdp=2,ibcdpu=3,ibcdudu=4,ibcd=5
- integer,parameter :: iompw=6,iomdpdp=7,iomdpu=8,iomdudu=9,iomlr=10,iomlmb=11,iomanp=12
- integer,parameter :: iomdlanp=13,iomdlp2=14,iomdlvhnzc=15,iomdlvh=16,iomdlq=17
  character(len=500) :: message
 
  !arrays
