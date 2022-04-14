@@ -260,6 +260,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 ! *********************************************************************
 
  call timab(91,1,tsec)
+ print*, 'FB-test: in setvtr'
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))

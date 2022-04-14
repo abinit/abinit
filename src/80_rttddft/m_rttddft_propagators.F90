@@ -45,8 +45,10 @@ module m_rttddft_propagators
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
  use m_nonlop,              only: nonlop
+ use m_pawcprj,             only: pawcprj_type
  use m_rttddft,             only: rttddft_init_hamiltonian, &
-                                & rttddft_calc_density
+                                & rttddft_calc_density, &
+                                & rttddft_calc_occ
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_tdks,        only: tdks_type
  use m_spacepar,            only: meanvalue_g
@@ -100,19 +102,19 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, store_energies)
+subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, calc_properties)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
- logical,          optional, intent(in)    :: store_energies
+ logical,          optional, intent(in)    :: calc_properties
  type(dataset_type),         intent(inout) :: dtset
  type(gs_hamiltonian_type),  intent(inout) :: ham_k
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
- type(tdks_type),            intent(inout) :: tdks
+ type(tdks_type),    target, intent(inout) :: tdks
  
  !Local variables-------------------------------
  !scalars
@@ -138,21 +140,29 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
  integer                        :: upbound
  integer                        :: n4, n5, n6
  logical                        :: with_vxctau
- logical                        :: lstore_ene
+ logical                        :: lcalc_properties
  real(dp)                       :: ar
  type(energies_type)            :: energies
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  !arrays
  integer,  allocatable          :: kg_k(:,:)
+ real(dp), pointer              :: cg(:,:) => null()
+ real(dp), pointer              :: cg0(:,:) => null()
  real(dp), allocatable          :: enl(:)
+ real(dp), pointer              :: eig(:) => null()
  real(dp), allocatable          :: ffnl(:,:,:,:)
  real(dp), allocatable          :: kpg_k(:,:)
  real(dp)                       :: kpoint(3)
  real(dp), allocatable          :: kinpw(:)
+ real(dp), pointer              :: occ(:) => null() 
+ real(dp), pointer              :: occ0(:) => null()
+ type(pawcprj_type), allocatable:: cprj(:,:)
+ type(pawcprj_type), allocatable:: cprj0(:,:)
  real(dp), allocatable          :: ph3d(:,:,:)
  real(dp), allocatable          :: vlocal(:,:,:,:)
  real(dp), allocatable          :: vxctaulocal(:,:,:,:,:)
  real(dp), allocatable          :: ylm_k(:,:)
+ logical                        :: lproperties(4)
  
 ! ***********************************************************************
 
@@ -161,16 +171,40 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
  if (mpi_enreg%paral_kgb==1) spaceComm_distrb=mpi_enreg%comm_kpt
  me_distrb=xmpi_comm_rank(spaceComm_distrb)
 
- !Do we store resulting energies in tdks?
- lstore_ene = .false.
- if (present(store_energies)) lstore_ene = store_energies
- if (lstore_ene) then
-   !Init to zero different energies
-   call energies_init(energies)
-   tdks%eigen(:) = zero
-   energies%entropy=tdks%energies%entropy
-   energies%e_corepsp=tdks%energies%e_corepsp
-   energies%e_ewald=tdks%energies%e_ewald
+ !Do we calculate properties?
+ !Governed by lproperties:
+ !  lproperties(1) = compute energy contributions (kinetic)
+ !  lproperties(2) = NL energy contribution in NC case
+ !  lproperties(3) = eigenvalues
+ !  lproperties(4) = occupations
+ lproperties(:) = .false.
+ lcalc_properties = .false.
+ if (present(calc_properties)) then 
+   lcalc_properties = calc_properties
+   if (lcalc_properties) then
+      !compute energy contributions
+      lproperties(1) = .true.
+      !Init to zero different energies
+      call energies_init(energies)
+      tdks%eigen(:) = zero
+      tdks%occ(:) = zero
+      energies%entropy=tdks%energies%entropy
+      energies%e_corepsp=tdks%energies%e_corepsp
+      energies%e_ewald=tdks%energies%e_ewald
+      !including NL part in NC case?
+      if (dtset%usepaw == 0) then 
+         lproperties(2) = .true.
+      else
+         ABI_MALLOC(enl,(0))
+      end if
+      !other properties
+      if (mod(istep,dtset%td_prtstr) == 0) then 
+         ! eigenvalues
+         if (dtset%prteig /= 0 .or. dtset%prtdos /= 0) lproperties(3) = .true.
+         ! occupations
+         if (dtset%prtocc /= 0) lproperties(4) = .true.
+      end if
+   end if
  end if
 
  !Set "vtrial" and initialize the Hamiltonian
@@ -317,8 +351,8 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
          end if
       end if
 
-      if (lstore_ene) then
-         ! Compute energy components if required
+      ! Compute energy components if required
+      if (lproperties(1)) then
          ! Kinetic energy
          if (dtset%paral_kgb /= 1) then 
             displ = 0
@@ -339,7 +373,8 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
-      if (lstore_ene) then
+      cg => tdks%cg(:,icg+1:icg+nband_k*npw_k*my_nspinor)
+      if (lcalc_properties) then 
          if (dtset%paral_kgb /= 1) then 
             shift = bdtot_index
             upbound = nband_k
@@ -348,24 +383,45 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
             shift = bdtot_index+me_bandfft*mpi_enreg%bandpp
             upbound = mpi_enreg%bandpp
          end if
-         if (psps%usepaw == 0) then
-            ABI_MALLOC(enl,(nband_k))
+         if (lproperties(2)) then
+            ABI_MALLOC(enl,(mpi_enreg%bandpp))
             enl = zero
-            !Propagate cg and compute eigenvalues and NL PSP energy contribution
-            call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor, &
-                                  & eig=tdks%eigen(1+shift:upbound+shift), enl=enl)
-            do iband = 1, nband_k
-               energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ0(bdtot_index+iband)*enl(iband)
+         end if
+         if (lproperties(3)) then
+            eig => tdks%eigen(1+shift:upbound+shift)
+         end if
+         if (lproperties(4)) then
+            !note that occupations are computed at istep-1 like energies
+            cg0 => tdks%cg0(:,icg+1:icg+nband_k*npw_k*my_nspinor)
+            occ => tdks%occ(bdtot_index+1:bdtot_index+nband_k)
+            occ0 => tdks%occ0(bdtot_index+1:bdtot_index+nband_k)
+            if (dtset%usepaw == 1) then 
+               call rttddft_calc_occ(cg,cg0,tdks%cprj,tdks%cprj0,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,occ,occ0)
+            else
+               ABI_MALLOC(cprj,(0,0))
+               ABI_MALLOC(cprj0,(0,0))
+               call rttddft_calc_occ(cg,cg0,cprj,cprj0,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,occ,occ0)
+               ABI_FREE(cprj)
+               ABI_FREE(cprj0)
+            end if
+         end if
+
+         !Propagate cg and compute the requested properties
+         print*, 'FB-test: Taylor + properties'
+         print*, 'FB-test: lproperties', lproperties
+         print*, 'FB-test: size enl, eig, occ', size(enl), size(eig), size(occ)
+         call rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,enl=enl,eig=eig)
+
+         if (lproperties(2)) then
+            do iband = 1, mpi_enreg%bandpp
+               energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ0(shift+iband)*enl(iband)
             end do
             ABI_FREE(enl)
-         else
-            !Propagate cg and compute eigenvalues
-            call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor, &
-                                  & eig=tdks%eigen(1+shift:upbound+shift))
          end if
       else
          !Propagate cg only
-         call rttddft_exp_taylor(tdks%cg(:,1+icg:),dtset%dtele,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor)
+         print*, 'FB-test: Taylor only'
+         call rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor)
       end if
 
       ABI_FREE(kg_k)
@@ -393,14 +449,16 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, sto
  end if
 
  !Keep the computed energies in memory
- if (lstore_ene) then
+ if (lcalc_properties) then
    call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kpt,ierr)
    call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kptband,ierr)
    call energies_copy(energies,tdks%energies)
-   call xmpi_sum(tdks%eigen,mpi_enreg%comm_kptband,ierr)
+   if (lproperties(3)) call xmpi_sum(tdks%eigen,mpi_enreg%comm_kptband,ierr)
+   if (lproperties(4)) call xmpi_sum(tdks%occ,mpi_enreg%comm_kpt,ierr)
  end if
 
- end subroutine rttddft_propagator_er
+end subroutine rttddft_propagator_er
+!!***
 
 !!****f* m_rttddft/rttddft_propagator_emr
 !!
@@ -464,7 +522,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
 
  !** Predictor step
  ! predict psi(t+dt) using ER propagator
- call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks,store_energies=.true.)
+ call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
  ! for convergence check
  diff = tdks%cg
  ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2

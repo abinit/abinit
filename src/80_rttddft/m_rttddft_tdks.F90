@@ -45,7 +45,6 @@ module m_rttddft_tdks
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
- use m_fourier_interpol, only: transgrid
  use m_gemm_nonlop,      only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
  use m_hdr,              only: hdr_type, hdr_init
@@ -54,7 +53,6 @@ module m_rttddft_tdks
  use m_io_tools,         only: open_file
  use m_inwffil,          only: inwffil
  use m_kg,               only: kpgio, getph, getcut
- use m_mkrho,            only: mkrho
  use m_mpinfo,           only: proc_distrb_cycle
  use m_occ,              only: newocc
  use m_paw_an,           only: paw_an_type, paw_an_init, paw_an_free, &
@@ -67,12 +65,10 @@ module m_rttddft_tdks
  use m_pawfgrtab,        only: pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_paw_init,         only: pawinit,paw_gencond
  use m_paw_ij,           only: paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
- use m_paw_mkrho,        only: pawmkrho
  use m_paw_nhat,         only: nhatgrid
- use m_paw_occupancies,  only: initrhoij, pawmkrhoij
+ use m_paw_occupancies,  only: initrhoij
  use m_pawrad,           only: pawrad_type
- use m_pawrhoij,         only: pawrhoij_type, pawrhoij_copy, pawrhoij_free, &
-                             & pawrhoij_alloc, pawrhoij_inquire_dim
+ use m_pawrhoij,         only: pawrhoij_type, pawrhoij_copy, pawrhoij_free
  use m_paw_sphharm,      only: setsym_ylm
  use m_pawtab,           only: pawtab_type, pawtab_get_lsize
  use m_paw_tools,        only: chkpawovlp
@@ -178,6 +174,7 @@ module m_rttddft_tdks
    real(dp),allocatable             :: ylm(:,:)    !real spherical harmonics for each k+G
    real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients         !FB: Needed?
    type(pawcprj_type),allocatable   :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
+   type(pawcprj_type),allocatable   :: cprj0(:,:)  !projectors applied on WF <p_lmn|C_nk>
    type(paw_an_type),allocatable    :: paw_an(:)   !various arrays on angular mesh
    type(pawfgrtab_type),allocatable :: pawfgrtab(:) !PAW atomic data on fine grid
    type(paw_ij_type),allocatable    :: paw_ij(:)   !various arrays on partial waves (i,j channels)
@@ -245,6 +242,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !scalars
  integer                     :: ierr
  integer                     :: my_natom
+ integer                     :: ncpgr
  integer                     :: psp_gencond
  real(dp)                    :: ecut_eff
  character(len=500)          :: msg
@@ -257,8 +255,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  my_natom=mpi_enreg%my_natom
 
  !1) Various initializations & checks (MPI, PW, FFT, PSP, Symmetry ...)
- call first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad, &
-                & pawtab,psps,psp_gencond,tdks)
+ call first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !2) Deals with restart
  !FB: @MT Is this the proper way to read a file in abinit..?
@@ -301,22 +298,35 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    call newocc(doccde,tdks%eigen,tdks%energies%entropy,tdks%energies%e_fermie, &
              & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
              & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
-             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,    &
+             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,   &
              & dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd)
    ABI_FREE(doccde)
  end if
 
- !FB-TODO: only do this if needed ie. if printing of occupation is requested
+ !5) Some further initialization (Mainly for PAW)
+ call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
+
+ !Keep initial wavefunction in memory for occupations
+ !and also associated cprojs
  if (dtset%prtocc > 0) then
    ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
-   !FB Ouch! Could we avoid this...?
+   !FB Ouch! If only we could we avoid this..
    tdks%cg0(:,:) = tdks%cg(:,:)
+   if (psps%usepaw ==1) then 
+      ncpgr=0
+      ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
+      call pawcprj_alloc(tdks%cprj0,ncpgr,tdks%dimcprj)
+      call ctocprj(tdks%atindx,tdks%cg0,1,tdks%cprj0,tdks%gmet,tdks%gprimd,0,0,0,         &
+                 & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
+                 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
+                 & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
+                 & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
+                 & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
+                 & tdks%ylm,tdks%ylmgr)
+   end if
    ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
    tdks%occ(:) = tdks%occ0(:)
  end if
-
- !5) Some further initialization (Mainly for PAW)
- call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !FB: That should be all for now but there were a few more initialization in
  !g_state.F90 in particular related to electric field, might want to check that out
@@ -330,6 +340,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%pawang => pawang
  tdks%pawrad => pawrad
  tdks%pawtab => pawtab
+
+ print*, 'FB-test: in tdks_init:', size(pawtab), size(tdks%pawtab) 
 
 end subroutine tdks_init
 
@@ -428,11 +440,15 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(allocated(tdks%ylm))         ABI_FREE(tdks%ylm)
    if(allocated(tdks%ylmgr))       ABI_FREE(tdks%ylmgr)
 
-   if (allocated(tdks%cprj)) then       
+   if(allocated(tdks%cprj)) then       
       call pawcprj_free(tdks%cprj)
       ABI_FREE(tdks%cprj)
    end if
-   if (allocated(tdks%paw_an)) then
+   if(allocated(tdks%cprj0)) then       
+      call pawcprj_free(tdks%cprj0)
+      ABI_FREE(tdks%cprj0)
+   end if
+   if(allocated(tdks%paw_an)) then
       call paw_an_free(tdks%paw_an)
       ABI_FREE(tdks%paw_an)
    end if
@@ -440,7 +456,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
       call pawfgrtab_free(tdks%pawfgrtab)
       ABI_FREE(tdks%pawfgrtab)
    end if
-   if (allocated(tdks%paw_ij)) then
+   if(allocated(tdks%paw_ij)) then
       call paw_ij_free(tdks%paw_ij)
       ABI_FREE(tdks%paw_ij)
    end if
@@ -823,8 +839,8 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  !FB: Needed because paw_dmft is required in mkrho
  !PAW related operations
  !Initialize paw_dmft, even if neither dmft not paw are used
- call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,                &
-                 & dtset%dmft_read_occnd,dtset%mband,dtset%nband,dtset%nkpt,      &
+ call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,                 &
+                 & dtset%dmft_read_occnd,dtset%mband,dtset%nband,dtset%nkpt,       &
                  & dtset%nspden,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%usedmft,&
                  & tdks%paw_dmft,dtset%usedmft,dtset%dmft_solv,mpi_enreg)
 

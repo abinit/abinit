@@ -39,6 +39,7 @@ module m_rttddft
  use m_dtset,            only: dataset_type
  use m_efield,           only: efield_type
  use m_energies,         only: energies_type
+ use m_getchc,           only: getcsc
  use m_fourier_interpol, only: transgrid
  use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
  use m_kg,               only: getcut, getph
@@ -60,7 +61,7 @@ module m_rttddft
  use m_rttddft_tdks,     only: tdks_type
  use m_specialmsg,       only: wrtout
  use m_setvtr,           only: setvtr
- use m_xmpi,             only: xmpi_paral, &
+ use m_xmpi,             only: xmpi_paral, xmpi_sum, &
                              & xmpi_comm_rank !FB-test
 
  implicit none
@@ -290,16 +291,19 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  calc_ewald = .false.
  if (dtset%ionmov/=0 .or. istep == tdks%first_step) calc_ewald=.true.
  !FB: Should we also add an option to avoid recomputing xccc3d?
- call setvtr(tdks%atindx1,dtset,energies,tdks%gmet,tdks%gprimd,grchempottn,  &
-          & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,            &
-          & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,   &
-          & tdks%pawfgr%ngfft,tdks%ngrvdw,tdks%nhat,tdks%nhatgr,tdks%nhatgrdim,   &
-          & nkxc,psps%ntypat,psps%n1xccc,n3xccc,optene,tdks%pawrad,tdks%pawtab,   &
-          & tdks%ph1df,psps,tdks%rhog,tdks%rhor,tdks%rmet,tdks%rprimd,strsxc,     &
-          & tdks%ucvol,tdks%usexcnhat,tdks%vhartr,tdks%vpsp,tdks%vtrial,tdks%vxc, &
-          & vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,taur=tdks%taur,                 &
-          & vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,add_tfw=tfw_activated,&
-          & xcctau3d=tdks%xcctau3d,calc_ewald=calc_ewald)
+ print*, 'FB-test: before setvtr'
+ print*, 'FB-test: tdks%pawtab', associated(tdks%pawtab), size(tdks%pawtab)
+ print*, 'FB-test: tdks%pawrad', associated(tdks%pawrad), size(tdks%pawrad)
+ call setvtr(tdks%atindx1,dtset,energies,tdks%gmet,tdks%gprimd,grchempottn,         &
+           & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,             &
+           & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,    &
+           & tdks%pawfgr%ngfft,tdks%ngrvdw,tdks%nhat,tdks%nhatgr,tdks%nhatgrdim,    &
+           & nkxc,psps%ntypat,n1xccc,n3xccc,optene,tdks%pawrad,tdks%pawtab,         &
+           & tdks%ph1df,psps,tdks%rhog,tdks%rhor,tdks%rmet,tdks%rprimd,strsxc,      &
+           & tdks%ucvol,tdks%usexcnhat,tdks%vhartr,tdks%vpsp,tdks%vtrial,tdks%vxc,  &
+           & vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,taur=tdks%taur,                  &
+           & vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,add_tfw=tfw_activated, &
+           & xcctau3d=tdks%xcctau3d,calc_ewald=calc_ewald)
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(kxc)
@@ -330,13 +334,13 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,           &
-                & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,    &
-                & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,     &
-                & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,        &
-                & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,   &
-                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,tdks%ucvol,   &
-                & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,                &
+   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,         &
+                & dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,  &
+                & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,   &
+                & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,      &
+                & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev, &
+                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,tdks%ucvol, &
+                & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,              &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly
@@ -702,7 +706,6 @@ subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
 !!
 !! INPUTS
 !!  cg <real(2,npw*nspinor*nband)> = the wavefunction coefficients
-!!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  ham_k <gs_hamiltonian_type> = hamiltonian at point k
 !!  nband <integer> = number of bands
 !!  npw <integer> = number of plane waves
@@ -720,7 +723,7 @@ subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_enl(cg,dtset,enl,ham_k,nband,npw,nspinor,mpi_enreg)
+subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 
  implicit none
 
@@ -730,7 +733,6 @@ subroutine rttddft_calc_enl(cg,dtset,enl,ham_k,nband,npw,nspinor,mpi_enreg)
  integer,                   intent(in)    :: npw
  integer,                   intent(in)    :: nspinor
  type(gs_hamiltonian_type), intent(in)    :: ham_k
- type(dataset_type),        intent(in)    :: dtset
  type(MPI_type),            intent(in)    :: mpi_enreg
  !arrays
  real(dp),                  intent(inout) :: cg(2,npw*nspinor*nband)
@@ -743,8 +745,6 @@ subroutine rttddft_calc_enl(cg,dtset,enl,ham_k,nband,npw,nspinor,mpi_enreg)
  integer, parameter              :: paw_opt=0
  integer, parameter              :: signs=1
  integer, parameter              :: tim_getghc = 5
- integer                         :: me_band
- integer                         :: shift
  !arrays
  type(pawcprj_type), allocatable :: cprj_dummy(:,:)
  real(dp),           allocatable :: eig_dummy(:)
@@ -756,15 +756,8 @@ subroutine rttddft_calc_enl(cg,dtset,enl,ham_k,nband,npw,nspinor,mpi_enreg)
  ABI_MALLOC(gsc_dummy,(0,0))
  ABI_MALLOC(gvnlxc_dummy, (0, 0))
  ABI_MALLOC(eig_dummy,(nband))
- if (dtset%paral_kgb == 1) then
-    me_band = xmpi_comm_rank(mpi_enreg%comm_band)
-    shift = me_band*mpi_enreg%bandpp
- else
-    shift = 0
- end if
- call nonlop(choice,cpopt,cprj_dummy,enl(1+shift:nband+shift),ham_k,0,       &
-           & eig_dummy,mpi_enreg,nband,1,paw_opt,signs,gsc_dummy,tim_getghc, &
-           & cg,gvnlxc_dummy)
+ call nonlop(choice,cpopt,cprj_dummy,enl,ham_k,0,eig_dummy,mpi_enreg,nband, &
+            & 1,paw_opt,signs,gsc_dummy,tim_getghc,cg,gvnlxc_dummy)
  ABI_FREE(cprj_dummy)
  ABI_FREE(gsc_dummy)
  ABI_FREE(eig_dummy)
@@ -778,18 +771,19 @@ subroutine rttddft_calc_enl(cg,dtset,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 !!  rttddft_calc_occ
 !!
 !! FUNCTION
-!!  Computes occupations from cg, cg0 and gsc = <G|S|C> if paw
+!!  Computes occupations at time t from cg(t), cg0 and occ0
+!!  f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|\phi_n(t)>   in NC
+!!  f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|S|\phi_n(t)> in PAW
 !!
 !! INPUTS
 !!  cg <real(2,npw*nspinor*nband)> = the wavefunction coefficients
-!!  cg0 <real(2,npw*nspinor*nband)> = the wavefunction coefficients at t=0
-!!  istwfk <integer> = option describing the storage of wfs at k
+!!  cg0 <real(2,npw*nspinor*nband)> = the initial wavefunction coefficients
+!!  ham_k <gs_hamiltonian_type> = hamiltonian at point k
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  nband <integer> = number of bands
 !!  npw <integer> = number of plane waves
 !!  nspinor <integer> = dimension of spinors
-!!  me_g0 <integer> = if set to 1 current proc contains G(0,0,0)
-!!  comm <integer> = MPI communicator
-!!  gsc <real(2,npw*nspinor*nband)> = <G|S|C> (optional - only in PAW)
+!!  occ0 <real(nband)> = initial occupations
 !!
 !! OUTPUT
 !!  occ <real(nband)> = the occupations at time t
@@ -797,54 +791,57 @@ subroutine rttddft_calc_enl(cg,dtset,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_eig(cg,cg0,occ,occ0,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
+subroutine rttddft_calc_occ(cg,cg0,cprj,cprj0,ham_k,mpi_enreg,nband,npw,nspinor,occ,occ0)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- integer,  intent(in)            :: istwf_k
- integer,  intent(in)            :: nband
- integer,  intent(in)            :: npw
- integer,  intent(in)            :: nspinor
- integer,  intent(in)            :: me_g0
- integer,  intent(in)            :: comm
+ integer,                   intent(in)    :: nband
+ integer,                   intent(in)    :: npw
+ integer,                   intent(in)    :: nspinor
+ type(pawcprj_type),        intent(inout) :: cprj(:,:)
+ type(pawcprj_type),        intent(inout) :: cprj0(:,:)
+ type(gs_hamiltonian_type), intent(inout) :: ham_k
+ type(MPI_type),            intent(inout) :: mpi_enreg
  !arrays
- real(dp), intent(in)            :: cg(2,npw*nspinor*nband)
- real(dp), intent(in)            :: cg0(2,npw*nspinor*nband)
- real(dp), intent(out)           :: occ(nband)
- real(dp), intent(in), optional  :: gsc(2,npw*nspinor*nband)
+ real(dp),                  intent(inout) :: cg(2,npw*nspinor*nband)
+ real(dp),                  intent(inout) :: cg0(2,npw*nspinor*nband)
+ real(dp),                  intent(out)   :: occ(nband)
+ real(dp),                  intent(in)    :: occ0(nband)
 
  !Local variables-------------------------------
  !scalars
- integer   :: iband
- integer   :: shift
- real(dp)  :: dprod_r, dprod_i
+ integer, parameter :: cpopt = 2 !cprojs already in memory (in cprj) 
+ integer            :: iband, jband, ierr, ind
+ integer            :: shift
+ integer            :: tim_getcsc=6
  !arrays
+ real(dp) :: csc(2*nband*nband)
 ! ***********************************************************************
 
- do iband=1, nband
-    shift = npw*nspinor*(iband-1)
-    !Compute eigenvalues
-    call dotprod_g(eig(iband),dprod_i,istwf_k,npw*nspinor,1, &
-                 & ghc(:, shift+1:shift+npw*nspinor),        &
-                 & cg(:, shift+1:shift+npw*nspinor),         &
-                 & me_g0, comm)
-    if (present(gsc)) then
-       call dotprod_g(dprod_r,dprod_i,istwf_k,npw*nspinor,1, &
-                    & gsc(:, shift+1:shift+npw*nspinor),     &
-                    & cg(:, shift+1:shift+npw*nspinor),      &
-                    & me_g0, comm)
-       eig(iband) = eig(iband)/dprod_r
-    end if
+ do iband = 1, nband
+   !** 1 - First calc csc = <cg0|S|cg> (PAW) or <cg0|cg> (NC)
+   shift = npw*nspinor*(iband-1)
+   print*, 'FB-test: size(cprj,2), nspinor, nband, nspinor*nband', size(cprj,2), nspinor, nband, nspinor*nband
+   print*, 'FB-test: size(cprj0,2), nspinor, nband, nspinor*nband', size(cprj0,2), nspinor, nband, nspinor*nband
+   call getcsc(csc,cpopt,cg(:,shift+1:shift+npw*nspinor),cg0,cprj(:,iband:iband+(nspinor-1)),cprj0,ham_k,mpi_enreg,nband,tim_getcsc)
+   !** 2 - If band parallel then reduce csc
+   if (mpi_enreg%nproc_band > 1) then
+      call xmpi_sum(csc,mpi_enreg%comm_band,ierr)
+   end if
+   !** 3 - Calc occupations from csc
+   do jband = 1, nband
+      ind = 2*jband
+      occ(iband) = occ(iband) + occ0(jband)*(csc(ind-1)**2+csc(ind)**2)
+   end do
  end do
 
- end subroutine rttddft_calc_eig
+ end subroutine rttddft_calc_occ
 
 !!!****f* m_rttddft/rttddft_calc_occ
 !!!

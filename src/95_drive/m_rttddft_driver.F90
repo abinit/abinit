@@ -6,12 +6,10 @@
 !!  Real-time Time Dependent DFT (RT-TDDFT)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -53,19 +51,20 @@ module m_rttddft_driver
 !!***
 
 contains
+!!***
 
 !!****f* m_rttddft_driver/rttddft
 !! NAME
 !!  rttddft
 !!
 !! FUNCTION
-!!  Primary routine that drives real-time TDDFT calculations.
+!!  Primary routine for real-time TDDFT calculations.
 !!  1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
 !!    - intialize various important parameters
 !!    - read intial KS orbitals in WFK file
 !!    - compute initial density from KS orbitals
 !!  2) Propagation loop (rttddft_propagate):
-!!    for i = 1, nstep
+!!    for i = 1, ntime
 !!       - propagate KS orbitals
 !!       - propagate nuclei if requested (Erhenfest dynamics)
 !!       - compute new density
@@ -74,8 +73,8 @@ contains
 !!
 !! INPUTS
 !!  codvsn = code version
-!!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  pawang <type(pawang_type)> = paw angular mesh and related data
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
@@ -84,17 +83,13 @@ contains
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! PARENTS
 !!  m_driver
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps)
+subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  implicit none
 
@@ -107,8 +102,8 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  type(pawang_type),          intent(inout) :: pawang
  type(pseudopotential_type), intent(inout) :: psps
  !arrays
- type(pawrad_type),          intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawtab_type),          intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawrad_type), target,  intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
+ type(pawtab_type), target,  intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
  !Local variables-------------------------------
  !scalars
@@ -182,6 +177,7 @@ subroutine rttddft(codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawtab, psps
  call tdks%free(dtset,mpi_enreg,psps)
 
 end subroutine rttddft
+!!***
 
 end module m_rttddft_driver
 !!***
