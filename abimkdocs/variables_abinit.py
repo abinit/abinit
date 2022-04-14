@@ -19734,8 +19734,11 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Fix the convention for the choice of the average value of the Hartree potential, as described in [[cite:Bruneval2014]].
+
   * [[usepotzero]] = 0, the usual convention: the smooth potential is set to zero average value.
+
   * [[usepotzero]] = 1, the new convention: the all-electron physical potential is set to zero average value.
+
   * [[usepotzero]] = 2, the PWscf convention: the potential of equivalent point charges is set to
   zero average value (convention also valid for NC pseudopotentials).
 """,
@@ -19955,13 +19958,29 @@ Variable(
 
 This flag determines how the exchange-correlation terms are computed for the
 pseudo-density.
-When **usexcnhat** = 0, the exchange-correlation potential does not include the
+ 
+  * When **usexcnhat** = 0, the exchange-correlation potential does not include the
 compensation charge density, i.e. $V_{xc}=V_{xc}(\tilde{n}_{core} + \tilde{n}_{valence})$.
-When **usexcnhat** = 1, the exchange-correlation potential includes the compensation
+
+  * When **usexcnhat** = 1, the exchange-correlation potential includes the compensation
 charge density, i.e. $V_{xc}=V_{xc}(\tilde{n}_{core} + \tilde{n}_{valence}+\hat{n})$.
-When **usexcnhat** = -1,the value of **usexcnhat** is determined from the
-reading of the PAW dataset file (pseudopotential file). When PAW datasets with
-different treatment of $V_{xc}$ are used in the same run, the code stops.
+
+  * When **usexcnhat** = -1,the value of **usexcnhat** is determined from the
+reading of the PAW dataset file (pseudopotential file). 
+
+When PAW datasets with different treatment of $V_{xc}$ are used in the same run, the code stops.
+
+The difference between these treatments has been studied in detail in [[cite:Torrent2010]].
+The choice **usexcnhat** = 1 is implemented in VASP and QE, but **usexcnhat** = 0 is not available in these software (as of 2022).
+However, in [[cite:Torrent2010]] several advantages of the choice **usexcnhat** = 0 are made clear.
+
+The value **usexcnhat** = 0 corresponds to Bloechl form, see Eq.(2) of [[cite:Torrent2010]].
+The PAW atomic datasets from JTH table [[cite:Jollet2014]] yield **usexcnhat** = 0 by default,
+and it is expected that all future versions of this table will also yield **usexcnhat** = 0 by default..
+The value **usexcnhat** = 1 corresponds to Kresse form, see Eq.(3) of [[cite:Torrent2010]].
+With ABINIT, only the oldest PAW atomic datasets favour **usexcnhat** = 1. 
+
+Still, the ABINIT user has both options.
 """,
 ),
 
