@@ -24,6 +24,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_scfcv_core
 
  use defs_basis
@@ -119,6 +122,7 @@ module m_scfcv_core
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
+ use m_nvtx_data
 
  implicit none
 
@@ -1032,7 +1036,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  ABI_ICALLOC(rmm_diis_status, (2, dtset%nkpt, dtset%nsppol))
 
-! start SCF loop
+ ! start SCF loop
+ ABI_NVTX_START_RANGE(NVTX_SCF)
  do istep=1,max(1,nstep)
 
    ! Handle time limit condition.
@@ -1587,6 +1592,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    if (dtset%tfkinfunc==0) then
      if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
 
+     ABI_NVTX_START_RANGE(NVTX_VTORHO)
+
      call vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
@@ -1599,6 +1606,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,rmet,rprimd,&
 &     susmat,symrec,taug,taur,nvtauresid,ucvol_local,usecprj,wffnew,with_vectornd,&
 &     vectornd,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
+
+     ABI_NVTX_END_RANGE()
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      ! CP: occopt 9 not available with Thomas Fermi functionals
@@ -2041,6 +2050,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
    call timab(245,2,tsec)
  end do ! istep
+ ABI_NVTX_END_RANGE()
 
  ABI_FREE(rmm_diis_status)
  ABI_SFREE(nhatgr)
