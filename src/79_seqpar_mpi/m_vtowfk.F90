@@ -23,6 +23,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_vtowfk
 
  use defs_basis
@@ -58,6 +61,7 @@ module m_vtowfk
  use m_cgprj,       only : cprj_rotate
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
+ use m_nvtx_data
 
  implicit none
 
@@ -435,7 +439,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
-           if ( .not. newlobpcg ) then
+            if ( .not. newlobpcg ) then
+
+             ABI_NVTX_START_RANGE(NVTX_LOBPCG1)
              call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &             nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
              ! In case of FFT parallelism, exchange subspace arrays
@@ -449,10 +455,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                end if
              end if
              if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
-           else
+             ABI_NVTX_END_RANGE()
+
+          else
+
+             ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
 &             nband_k,npw_k,my_nspinor,prtvol,resid_k)
-           end if
+             ABI_NVTX_END_RANGE()
+
+          end if
 
          end if
 
@@ -461,12 +473,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
        else if (wfopta10 == 1) then
          if ( .not. newchebfi) then
+           ABI_NVTX_START_RANGE(NVTX_CHEBFI1)
            call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-         else          
+           ABI_NVTX_END_RANGE()
+        else
+           ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
-&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)          
-         end if            
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+           ABI_NVTX_END_RANGE()
+        end if
        end if
 
 !      =========================================================================
@@ -575,6 +591,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if (use_rmm_diis) do_ortho = .False.
 
    if (do_ortho) then
+
+     ABI_NVTX_START_RANGE(NVTX_ORTHO_WF)
+
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
      if (has_cprj_in_memory.and.ortalgo==0) then
        ABI_FREE(subovl)
@@ -585,6 +604,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &        mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
      end if
+
+     ABI_NVTX_END_RANGE()
    end if
    call timab(583,2,tsec)
 

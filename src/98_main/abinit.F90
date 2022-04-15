@@ -130,8 +130,8 @@ program abinit
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
  use m_manage_cuda
- use m_nvtx_data
 #endif
+ use m_nvtx_data
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories,&
