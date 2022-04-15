@@ -83,6 +83,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 program abinit
 
  use defs_basis
@@ -126,6 +129,8 @@ program abinit
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
+ use m_manage_cuda
+ use m_nvtx_data
 #endif
 
 #if defined HAVE_BIGDFT
@@ -163,6 +168,7 @@ program abinit
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
+ logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -366,8 +372,9 @@ program abinit
    call xmpi_show_info(std_out)  ! Info on the MPI environment.
  end if
 
-!Eventually activate GPU
+!Activate GPU is required
  use_gpu_cuda=0
+ use_nvtx=.false.
 #if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
@@ -375,8 +382,15 @@ program abinit
      use_gpu_cuda=1
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
+   if (dtsets(ii)%use_nvtx==1) then
+      use_nvtx=.true.
+   end if
  end do
  call setdevice_cuda(gpu_devices,use_gpu_cuda)
+
+#ifdef HAVE_GPU_NVTX_V3
+    NVTX_INIT(use_nvtx)
+#endif
 #endif
 
 !------------------------------------------------------------------------------
@@ -393,7 +407,9 @@ program abinit
  end if
 
  if(.not.test_exit)then
+   ABI_NVTX_START_RANGE(NVTX_MAIN_COMPUTATION)
    call driver(abinit_version,tcpui,dtsets,filnam,filstat, mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
+   ABI_NVTX_END_RANGE()
  end if
 
 !------------------------------------------------------------------------------

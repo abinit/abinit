@@ -16,5 +16,6 @@
 !! CHILDREN
 !! interfaces_52_manage_cuda.F90
 !! m_alloc_hamilt_gpu.F90
+!! m_nvtx_data.F90
 !!
 !!***
