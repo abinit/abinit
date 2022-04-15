@@ -2539,17 +2539,39 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        if (ncerr /= nf90_noerr) then
          NCF_CHECK(nf90_def_dim(ncid, "number_of_atoms", natom, natom_id))
        end if
-       NCF_CHECK(nf90_def_var(ncid, "nrhoijsel_atoms", NF90_INT, natom_id, nsel56_id))
-
-       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_cplex", my_cplex, cplex_id))
-       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_nspden", my_nspden, nspden_id))
-       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
+       ncerr = nf90_inq_varid(ncid, "nrhoijsel_atoms", nsel56_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_var(ncid, "nrhoijsel_atoms", NF90_INT, natom_id, nsel56_id))
+       end if
+       ncerr = nf90_inq_dimid(ncid, "pawrhoij_cplex", cplex_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_cplex", my_cplex, cplex_id))
+       end if
+       ncerr = nf90_inq_dimid(ncid, "pawrhoij_nspden", nspden_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_nspden", my_nspden, nspden_id))
+       end if
+       ncerr = nf90_inq_dimid(ncid, "pawrhoij_qphase", qphase_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
+       end if
        if (bsize > 0) then
-         NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
-         NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_qphase*my_cplex, bufsize_id))
-         ! Define variables.
-         NCF_CHECK(nf90_def_var(ncid, "rhoijselect_atoms", NF90_INT, bsize_id, ibuffer_id))
-         NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
+         ncerr = nf90_inq_dimid(ncid, "rhoijselect_atoms_dim", bsize_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
+         end if
+         ncerr = nf90_inq_dimid(ncid, "rhoijp_atoms_dim", bufsize_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_qphase*my_cplex, bufsize_id))
+         end if
+         ncerr = nf90_inq_varid(ncid, "rhoijselect_atoms", ibuffer_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_var(ncid, "rhoijselect_atoms", NF90_INT, bsize_id, ibuffer_id))
+         end if
+         ncerr = nf90_inq_varid(ncid, "rhoijp_atoms", buffer_id)
+         if (ncerr /= nf90_noerr) then
+           NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
+         end if
        else
          ! This happens in v5[40] and bsize == 0 corresponds to NC_UNLIMITED
          LIBPAW_COMMENT("All rhoij entries are zero. No netcdf entry produced")

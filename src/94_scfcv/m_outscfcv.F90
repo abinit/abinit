@@ -1085,11 +1085,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (psps%usepaw==1.and.prtnabla>0) then
    if (prtnabla==1.or.prtnabla==2) then
      call optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen,gprimd,hdr,kg,&
-&     mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,pawrad,pawtab)
+&     mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,pawang,&
+&     pawrad,pawrhoij,pawtab,ucvol,psps%znuclpsp)
    end if
    if (prtnabla==2.or.prtnabla==3) then
      call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
-&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
+&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
+&     ucvol,psps%znuclpsp)
    end if
  end if
  if (prtnabla<0) then

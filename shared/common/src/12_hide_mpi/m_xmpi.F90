@@ -496,6 +496,7 @@ end interface xmpi_max
 interface xmpi_min
   module procedure xmpi_min_intv
   module procedure xmpi_min_dpv
+  module procedure xmpi_min_dp
 end interface xmpi_min
 
 !----------------------------------------------------------------------
@@ -639,7 +640,8 @@ interface xmpi_sum
   module procedure xmpi_sum_c4cplx
   module procedure xmpi_sum_c5cplx
   module procedure xmpi_sum_c6cplx
-end interface xmpi_sum
+  module procedure xmpi_sum_coeff5d1
+ end interface xmpi_sum
 !!***
 
 ! Non-blocking version
