@@ -91,7 +91,7 @@ MODULE m_mpinfo
  public :: iwrite_fftdatar  ! Select the subset of processors that will write density/potential files.
 
  public :: distrb2          ! Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
- public :: distrb2_hf       ! Ceate the tabs of repartition for Hartree-Fock calculations.
+ public :: distrb2_hf       ! Creates the tabs of repartition for Hartree-Fock calculations.
 !!***
 
 CONTAINS  !========================================================================================

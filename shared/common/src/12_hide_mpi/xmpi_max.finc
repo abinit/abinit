@@ -28,7 +28,9 @@ subroutine xmpi_max_int0d_i4b(xval,xmax,comm,ier)
  integer ,intent(out) :: ier
 
 !Local variables-------------------
+#if defined HAVE_MPI
  integer :: arr_xval(1),arr_xmax(1)
+#endif
 
 ! *************************************************************************
  ier=0
@@ -68,7 +70,9 @@ subroutine xmpi_max_int0d_i8b(xval,xmax,comm,ier)
  integer ,intent(out) :: ier
 
 !Local variables-------------------
+#if defined HAVE_MPI
  integer(i8b) :: arr_xval(1),arr_xmax(1)
+#endif
 
 ! *************************************************************************
  ier=0
@@ -196,7 +200,9 @@ subroutine xmpi_max_dp0d_ip(ioval,comm,ier)
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
+#if defined HAVE_MPI
  real(dp) :: xmax
+#endif
 
 ! *************************************************************************
 
