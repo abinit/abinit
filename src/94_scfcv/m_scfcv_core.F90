@@ -1163,11 +1163,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
          idir=0
          iorder_cprj=0
          call wrtout(std_out,' Computing cprj from wavefunctions (scfcv_core)')
+         ABI_NVTX_START_RANGE(NVTX_CTOCPRJ)
          call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,idir,&
 &          iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &          dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
 &          dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &          xred,ylm,ylmgr)
+         ABI_NVTX_END_RANGE()
          call wrtout(std_out,' cprj is computed')
        end if
      end if

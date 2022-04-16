@@ -24,6 +24,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_vtorho
 
  use defs_basis
@@ -93,6 +96,8 @@ module m_vtorho
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
+
+ use m_nvtx_data
 
  implicit none
 
@@ -895,7 +900,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
-         call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+          ABI_NVTX_START_RANGE(NVTX_INVOVL)
+          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
+          ABI_NVTX_END_RANGE()
        end if
 
        ! Setup gemm_nonlop
@@ -924,6 +931,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
        end if
 
+       ABI_NVTX_START_RANGE(NVTX_VTOWFK)
 !      Compute the eigenvalues, wavefunction, residuals,
 !      contributions to kinetic energy, nuclear dipole energy,
 !      nonlocal energy, forces,
@@ -934,6 +942,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
+       ABI_NVTX_END_RANGE()
 
        call timab(985,1,tsec)
 
