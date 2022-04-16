@@ -24,6 +24,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_chebfiwf
 
  use defs_abitypes
@@ -49,6 +52,8 @@ module m_chebfiwf
 
  use m_xg
  use m_xgTransposer
+
+ use m_nvtx_data
 
  use iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
 
@@ -293,9 +298,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    ABI_MALLOC(l_gvnlxc,(0,0))
    !end if
 
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NONLOP)
    !Call nonlop
    call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+        &            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+   ABI_NVTX_END_RANGE()
    ABI_FREE(l_gvnlxc)
  end if
 
@@ -375,6 +382,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
 ! *********************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GETGHC)
+
  call xgBlock_getSize(X,spacedim,blockdim)
 
  spacedim = spacedim/l_icplx
@@ -437,6 +446,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  end if
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine getghc_gsc1
 !!***

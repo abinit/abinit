@@ -709,6 +709,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_SCF_FOURWF)
 !The code below is more efficient if paral_kgb==1 (less MPI communications)
 !however OMP is not compatible with paral_kgb since we should define
 !which threads performs the call to MPI_ALL_REDUCE.
@@ -966,6 +967,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end do !  End of loop on blocks
  !call cwtime_report(" Block loop", cpu, wall, gflops)
+ ABI_NVTX_END_RANGE()
 
  ABI_FREE(cwavef)
  ABI_FREE(enlout)
