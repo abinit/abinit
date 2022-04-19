@@ -153,16 +153,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !scalars
  integer,parameter :: level=114,re=1,im=2,tim_fourwf=1
  integer :: choice,cplex,cpopt_here,i1,i2,i3,idat,idir,ierr
- integer :: ig,igspinor,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
- integer :: n4,n5,n6,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
+ integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
+ integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
- logical :: k1_eq_k2,have_to_reequilibrate,has_fock,local_gvnlxc
+ logical :: double_rfft_trick,k1_eq_k2,have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r
  real(dp) :: ghcim,ghcre,weight
  character(len=500) :: msg
- ! To include in a routine
- integer :: i0,ndat_,istwf_k_,ib1,ib2
- logical :: double_real_fft_trick
 
 !arrays
  integer, pointer :: gbound_k1(:,:),gbound_k2(:,:),kg_k1(:,:),kg_k2(:,:)
@@ -329,55 +326,18 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
    ndat_                 = ndat
    istwf_k_              = gs_ham%istwf_k
-   npw_fft               = npw_k1
    ! TO DO: implement the following for nproc_fft>1
-   double_real_fft_trick = istwf_k_==2.and.ndat>1.and.modulo(ndat,2)==0.and.k1_eq_k2
-   double_real_fft_trick = double_real_fft_trick.and.mpi_enreg%nproc_fft==1.and.(.not.have_to_reequilibrate)
+   double_rfft_trick = istwf_k_==2.and.modulo(ndat,2)==0.and.k1_eq_k2
+   double_rfft_trick = double_rfft_trick.and.mpi_enreg%nproc_fft==1.and.(.not.have_to_reequilibrate)
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
-   if (double_real_fft_trick) then
-     ! We have C(G)=C(-G) and D(G)=D(-G) and only G components are in memory
-     ! The Fourier transform is:
-     ! C(r) = sum_G e^(iGr) C(G) = sum_(G_z>=0,G/=0) 2 Re[e^(iGr) C(G)] + C(0)
-     ! so C(r) is a real function (same for D)
-     ! We construct:
-     ! E( G) = C(G)   + i D(G)
-     ! E(-G) = C(G)^* + i D(G)^* (G/=0)
-     ! so:
-     ! E(r) = C(r) + i D(r)
-     ! Also:
-     ! C(G) = ( E(G) + E(-G)^* ) / 2
-     ! D(G) = ( iE(-G)^* - iE(G)) / 2
-     ! and:
-     ! C(0) = Re(E(0))
-     ! D(0) = Im(E(0))
-     ndat_    = ndat/2
+   if (double_rfft_trick) then
      istwf_k_ = 1
-
-     npw_fft  = 2*npw_k1
-     if (mpi_enreg%me_g0_fft==1) npw_fft = npw_fft-1 ! Do not count G=(0,0,0) twice
-
+     ndat_    = ndat / 2
      kg_k_fft => bandfft_kpt(ikpt_this_proc)%kg_k_gather_sym(:,:)
-
+     npw_fft=2*npw_k1
+     if (mpi_enreg%me_g0_fft==1) npw_fft=npw_fft-1 ! Do not include G=(0,0,0) twice
      ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
-
-     ib1=0 ! band shift for cwavef_fft
-     ib2=0 ! band shift for cwavef
-     i0=1
-     if (mpi_enreg%me_g0_fft==1) i0=2
-     do idat=1, ndat_
-       ! E(G) = C(G) + i D(G)
-       cwavef_fft(1,1+ib1:npw_k1+ib1) = cwavef(1,1+ib2       :  npw_k1+ib2) &
-                                       -cwavef(2,1+npw_k1+ib2:2*npw_k1+ib2)
-       cwavef_fft(2,1+ib1:npw_k1+ib1) = cwavef(2,1+ib2       :  npw_k1+ib2) &
-                                       +cwavef(1,1+npw_k1+ib2:2*npw_k1+ib2)
-       ! E(-G) = C(G)^* + i D(G)^* (G/=0)
-       cwavef_fft(1,1+npw_k1+ib1:npw_fft+ib1) = cwavef(1,i0       +ib2:  npw_k1+ib2) &
-                                               +cwavef(2,i0+npw_k1+ib2:2*npw_k1+ib2)
-       cwavef_fft(2,1+npw_k1+ib1:npw_fft+ib1) =-cwavef(2,i0       +ib2:  npw_k1+ib2) &
-                                               +cwavef(1,i0+npw_k1+ib2:2*npw_k1+ib2)
-       ib1=ib1+npw_fft
-       ib2=ib2+2*npw_k1
-     end do
+     call cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg,ndat_,npw_k1)
    end if
 
    if (have_to_reequilibrate) then
@@ -455,14 +415,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do
          end do
        end if
-       if (have_to_reequilibrate) then
+       if (have_to_reequilibrate.or.double_rfft_trick) then
          call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
-&         istwf_k_,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
-&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
-       else if (double_real_fft_trick) then
-         !TO FINISH
-         call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k1,&
 &         istwf_k_,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
 &         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
@@ -676,44 +630,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
    ABI_FREE(work)
 
-   if (double_real_fft_trick) then
-     ! C(G) = ( E(G) + E(-G)^* ) / 2
-     ! D(G) = ( iE(-G)^* - iE(G) ) / 2
-     ib1=0 ! band shift for cwavef_fft
-     ib2=0 ! band shift for ghc
-     i0=1
-     if (mpi_enreg%me_g0_fft==1) i0=2
-     do idat=1,ndat_
-       ! C(G) = ( E(G) + E(-G)^* ) / 2 (factor 1/2 will be applied later)
-       ghc(1,i0+ib2:npw_k1+ib2) = cwavef_fft(1,i0       +ib1:npw_k1 +ib1) & !+Re(E( G))
-                                 +cwavef_fft(1,1 +npw_k1+ib1:npw_fft+ib1)   !+Re(E(-G))
-       ghc(2,i0+ib2:npw_k1+ib2) = cwavef_fft(2,i0       +ib1:npw_k1 +ib1) & !+Im(E( G))
-                                 -cwavef_fft(2,1 +npw_k1+ib1:npw_fft+ib1)   !-Im(E(-G))
-       ! D(G) = ( iE(-G)^* - iE(G) ) / 2 (factor 1/2 will be applied later)
-       ghc(1,i0+npw_k1+ib2:2*npw_k1+ib2) = cwavef_fft(2,i0       +ib1:npw_k1 +ib1) & !+Im(E( G))
-                                          +cwavef_fft(2,1 +npw_k1+ib1:npw_fft+ib1)   !+Im(E(-G))
-       ghc(2,i0+npw_k1+ib2:2*npw_k1+ib2) =-cwavef_fft(1,i0       +ib1:npw_k1 +ib1) & !-Re(E( G))
-                                          +cwavef_fft(1,1 +npw_k1+ib1:npw_fft+ib1)   !+Re(E(-G))
-       ib1=ib1+npw_fft
-       ib2=ib2+2*npw_k1
-     end do
-     if (mpi_enreg%me_g0_fft==1) then
-       ib1=0 ! band shift for cwavef_fft
-       ib2=0 ! band shift for ghc
-       ! Compute C(G=0) and D(G=0) (and multiply by 2 as we apply 1/2 to the whole array shortly afterwards)
-       do idat=1,ndat_
-         ! C(G=0) = Re(E(G=0))
-         ghc(1,1+ib2) = two*cwavef_fft(1,1+ib1)
-         ghc(2,1+ib2) = zero
-         ! D(G=0) = Im(E(G=0))
-         ghc(1,1+npw_k1+ib2) = two*cwavef_fft(2,1+ib1)
-         ghc(2,1+npw_k1+ib2) = zero
-         ib1=ib1+npw_fft
-         ib2=ib2+2*npw_k1
-       end do
-     end if
+   if (double_rfft_trick) then
+     call cwavef_double_rfft_trick_unpack(ghc,cwavef_fft,mpi_enreg,ndat_,npw_k1)
      ABI_FREE(cwavef_fft)
-     ghc(:,:) = half*ghc(:,:)
    end if
 
 !  Retrieve eventually original FFT distrib
@@ -972,8 +891,194 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 end subroutine getghc
 !!***
-
 !----------------------------------------------------------------------
+
+!!****f* ABINIT/cwavef_double_rfft_trick_pack
+!!
+!! NAME
+!! cwavef_double_rfft_trick_pack
+!!
+!! FUNCTION
+!!
+!! We have C(G)=C(-G) and D(G)=D(-G) and only G components are in memory (istwfk=2)
+!! The Fourier transform is:
+!! C(r) = sum_G e^(iGr) C(G) = sum_(G_z>=0,G/=0) 2 Re[e^(iGr) C(G)] + C(0)
+!! so C(r) is a real function (same for D)
+!! Here we construct:
+!! E( G) = C(G)   + i D(G)
+!! E(-G) = C(G)^* + i D(G)^* (G/=0)
+!! so:
+!! E(r) = C(r) + i D(r)
+!! In short, one can do only one FFT on E (with istwfk=1) and obtains the FFT of C and D (istwfk=2)
+!!
+!! INPUTS
+!! cwavef(2,npw_k*my_nspinor*(2*ndat))=planewave coefficients of wavefunctioni (istwfk=2)
+!! mpi_enreg=information about MPI parallelization
+!! ndat=number of FFTs to perform in parall
+!! npw_k=number of planewaves in basis for given k point (istwfk=2).
+!!
+!! OUTPUT
+!! cwavef_fft(2,npw_fft*my_nspinor*ndat)=planewave coefficients of wavefunction (istwfk=1)
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
+!! TODO To implement npfft>1
+
+subroutine cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndat,npw_k
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ real(dp),intent(in) :: cwavef(:,:)
+ real(dp),intent(out) :: cwavef_fft(:,:)
+!Local variables-------------------------------
+!scalars
+ integer :: idat,i0,ib1,ib2,npw_fft
+
+ if (mpi_enreg%nproc_fft>1) then
+   ABI_BUG('double rfft trick not implemented yet with npfft>1')
+ end if
+
+ npw_fft=2*npw_k
+ i0=1
+ if (mpi_enreg%me_g0_fft==1) then! Do not include G=(0,0,0) twice
+   npw_fft=npw_fft-1
+   i0=2
+ end if
+
+ if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*2*ndat) then
+   ABI_BUG('wrong size for cwavef')
+ end if
+ if (size(cwavef_fft,1)/=2.or.size(cwavef_fft,2)/=npw_fft*ndat) then
+   ABI_BUG('wrong size for cwavef_fft')
+ end if
+
+ do idat=1,ndat
+   ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
+   ib2=(idat-1)*2*npw_k ! band shift for cwavef
+   ! E(G) = C(G) + i D(G)
+   cwavef_fft(1,1+ib1:npw_k+ib1) = cwavef(1,1+ib2      :  npw_k+ib2) &
+                                  -cwavef(2,1+npw_k+ib2:2*npw_k+ib2)
+   cwavef_fft(2,1+ib1:npw_k+ib1) = cwavef(2,1+ib2      :  npw_k+ib2) &
+                                  +cwavef(1,1+npw_k+ib2:2*npw_k+ib2)
+   ! E(-G) = C(G)^* + i D(G)^* (G/=0)
+   cwavef_fft(1,1+npw_k+ib1:npw_fft+ib1) = cwavef(1,i0      +ib2:  npw_k+ib2) &
+                                          +cwavef(2,i0+npw_k+ib2:2*npw_k+ib2)
+   cwavef_fft(2,1+npw_k+ib1:npw_fft+ib1) =-cwavef(2,i0      +ib2:  npw_k+ib2) &
+                                          +cwavef(1,i0+npw_k+ib2:2*npw_k+ib2)
+ end do
+
+end subroutine cwavef_double_rfft_trick_pack
+!!***
+
+!!****f* ABINIT/cwavef_double_rfft_trick_unpack
+!!
+!! NAME
+!! cwavef_double_rfft_trick_unpack
+!!
+!! FUNCTION
+!!
+!! From the "cwavef_double_rfft_trick_pack" routine we have:
+!! E( G) = C(G)   + i D(G)
+!! E(-G) = C(G)^* + i D(G)^* (G/=0)
+!! Here we compute:
+!! C(G) = ( E(G) + E(-G)^* ) / 2   (G/=0)
+!! D(G) = ( iE(-G)^* - iE(G)) / 2  (G/=0)
+!! and:
+!! C(0) = Re(E(0))
+!! D(0) = Im(E(0))
+!!
+!! INPUTS
+!! cwavef_fft(2,npw_fft*my_nspinor*ndat_)=planewave coefficients of wavefunction (istwfk=1)
+!! mpi_enreg=information about MPI parallelization
+!! ndat=number of FFTs to perform in parall
+!! npw_k=number of planewaves in basis for given k point (istwfk=2).
+!!
+!! OUTPUT
+!! cwavef(2,npw_fft*my_nspinor*(2*ndat))=planewave coefficients of wavefunction (istwfk=2)
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+!!
+!! TODO To implement npfft>1
+
+subroutine cwavef_double_rfft_trick_unpack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndat,npw_k
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ real(dp),intent(out) :: cwavef(:,:)
+ real(dp),intent(in) :: cwavef_fft(:,:)
+!Local variables-------------------------------
+!scalars
+ integer :: idat,i0,ib1,ib2,npw_fft
+
+ if (mpi_enreg%nproc_fft>1) then
+   ABI_BUG('double rfft trick not implemented yet with npfft>1')
+ end if
+
+ npw_fft=2*npw_k
+ i0=1
+ if (mpi_enreg%me_g0_fft==1) then! Do not include G=(0,0,0) twice
+   npw_fft=npw_fft-1
+   i0=2
+ end if
+
+ if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*2*ndat) then
+   ABI_BUG('wrong size for cwavef')
+ end if
+ if (size(cwavef_fft,1)/=2.or.size(cwavef_fft,2)/=npw_fft*ndat) then
+   ABI_BUG('wrong size for cwavef_fft')
+ end if
+
+ do idat=1,ndat
+   ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
+   ib2=(idat-1)*2*npw_k ! band shift for cwavef
+   ! C(G) = ( E(G) + E(-G)^* ) / 2 (factor 1/2 will be applied later)
+   cwavef(1,i0+ib2:npw_k+ib2) = cwavef_fft(1,i0       +ib1:npw_k +ib1) & !+Re(E( G))
+                               +cwavef_fft(1,1 +npw_k+ib1:npw_fft+ib1)   !+Re(E(-G))
+   cwavef(2,i0+ib2:npw_k+ib2) = cwavef_fft(2,i0       +ib1:npw_k +ib1) & !+Im(E( G))
+                               -cwavef_fft(2,1 +npw_k+ib1:npw_fft+ib1)   !-Im(E(-G))
+   ! D(G) = ( iE(-G)^* - iE(G) ) / 2 (factor 1/2 will be applied later)
+   cwavef(1,i0+npw_k+ib2:2*npw_k+ib2) = cwavef_fft(2,i0       +ib1:npw_k +ib1) & !+Im(E( G))
+                                       +cwavef_fft(2,1 +npw_k+ib1:npw_fft+ib1)   !+Im(E(-G))
+   cwavef(2,i0+npw_k+ib2:2*npw_k+ib2) =-cwavef_fft(1,i0       +ib1:npw_k +ib1) & !-Re(E( G))
+                                       +cwavef_fft(1,1 +npw_k+ib1:npw_fft+ib1)   !+Re(E(-G))
+   if (mpi_enreg%me_g0_fft==1) then
+     ! Compute C(G=0) and D(G=0) and multiply by 2 as we apply 1/2 to the whole array shortly afterwards
+     ! C(G=0) = Re(E(G=0))
+     cwavef(1,1+ib2) = two*cwavef_fft(1,1+ib1)
+     cwavef(2,1+ib2) = zero
+     ! D(G=0) = Im(E(G=0))
+     cwavef(1,1+npw_k+ib2) = two*cwavef_fft(2,1+ib1)
+     cwavef(2,1+npw_k+ib2) = zero
+   end if
+
+ end do
+
+ cwavef(:,:) = half*cwavef(:,:)
+
+end subroutine cwavef_double_rfft_trick_unpack
+!!***
 
 !!****f* ABINIT/getghc_nucdip
 !!
