@@ -27,6 +27,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_invovl
 
  use defs_basis
@@ -41,6 +44,8 @@ MODULE m_invovl
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
+
+ use m_nvtx_data
 
  implicit none
 
@@ -492,6 +497,7 @@ end subroutine make_invovl
  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
 
  ! get the cprj
+ ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP1)
  choice = 0 ! only compute cprj, nothing else
  cpopt = 0 ! compute and save cprj
  paw_opt = 3 ! S nonlocal operator
@@ -502,6 +508,7 @@ end subroutine make_invovl
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
 &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
+ ABI_NVTX_END_RANGE()
 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
  call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
@@ -517,9 +524,11 @@ end subroutine make_invovl
  end do
 
  !multiply by S^1
+ ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
  call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
  sm1proj = - sm1proj
  PtPsm1proj = - PtPsm1proj
+ ABI_NVTX_END_RANGE()
 
  ! copy sm1proj to cwaveprj(:,:)
  do idat=1, ndat*nspinor
@@ -534,6 +543,7 @@ end subroutine make_invovl
  call timab(timer_apply_inv_ovl_opernlb, 1, tsec)
 
  ! get the corresponding wf
+ ABI_NVTX_START_RANGE(NVTX_INVOVL_NONLOP2)
  cpopt = 2 ! reuse cprj
  choice = 7 ! get wf from cprj, without the application of S
  paw_opt = 3
@@ -544,6 +554,7 @@ end subroutine make_invovl
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
 &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
+ ABI_NVTX_END_RANGE()
 
  call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
 
