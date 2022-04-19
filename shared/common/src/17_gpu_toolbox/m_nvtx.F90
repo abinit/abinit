@@ -20,7 +20,22 @@ module m_nvtx
   use iso_c_binding
   implicit none
 
-  integer,private :: col(7) = [ Z'0000ff00', Z'000000ff', Z'00ffff00', Z'00ff00ff', Z'0000ffff', Z'00ff0000', Z'00ffffff']
+  integer,private,parameter :: nbcol=14
+  integer,private :: col(nbcol) = [ &
+       & Z'0000ff00', & ! GREEN
+       & Z'000000ff', & ! BLUE
+       & Z'00ffff00', & ! YELLOW
+       & Z'00ff00ff', & ! PURPLE
+       & Z'0000ffff', & ! CYAN
+       & Z'00ff0000', & ! READ
+       & Z'00ff8000', & ! ORANGE
+       & Z'000080ff', & ! LIGHT BLUE
+       & Z'00ff80ff', & ! PINK
+       & Z'0080ff80', & ! LIGHT GREEN
+       & Z'00b832ff', &
+       & Z'00f9fa7d', & ! LIGHT YELLOW
+       & Z'00f96c56', &
+       & Z'0094b5dc' ]
   character,private,target :: tempName(256)
 
   type, bind(C):: nvtxEventAttributes
@@ -76,7 +91,7 @@ contains
     if ( .not. present(id)) then
        call nvtxRangePush(tempName)
     else
-       event%color=col(mod(id,7)+1)
+       event%color=col(mod(id,nbcol)+1)
        event%message=c_loc(tempName)
        call nvtxRangePushEx(event)
     end if
