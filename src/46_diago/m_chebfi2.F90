@@ -651,20 +651,26 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  do iline = 0, nline - 1
 
    call timab(tim_next_p,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
    call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
+   ABI_NVTX_END_RANGE()
    call timab(tim_next_p,2,tsec)
 
    call timab(tim_swap,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
    if (chebfi%paral_kgb == 0) then
      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
    else
      call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
-   end if
+  end if
+  ABI_NVTX_END_RANGE()
    call timab(tim_swap,2,tsec)
 
    !A * Psi
    call timab(tim_getAX_BX,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
+   ABI_NVTX_END_RANGE()
    call timab(tim_getAX_BX,2,tsec)
  end do
  ABI_NVTX_END_RANGE()

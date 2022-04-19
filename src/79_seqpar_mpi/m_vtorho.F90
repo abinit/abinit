@@ -1037,6 +1037,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(986,1,tsec)
 
+     !ABI_NVTX_START_RANGE(NVTX_FFTPAC)
      if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
        call xmpi_sum(rhoaug,mpi_enreg%comm_bandspinorfft,ierr) !Sum the contributions over bands/FFT/spinors
      end if
@@ -1060,6 +1061,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
      end if
+
+     !ABI_NVTX_END_RANGE()
 
      call timab(986,2,tsec)
 
@@ -1475,6 +1478,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
+     ABI_NVTX_START_RANGE(NVTX_MKRHO)
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
@@ -1483,7 +1487,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
 &       extfpmd=extfpmd)
-     end if
+    end if
+    ABI_NVTX_END_RANGE()
      call timab(992,2,tsec)
 
 !    Treat fixed occupation numbers or non-self-consistent case

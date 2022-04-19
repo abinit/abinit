@@ -535,6 +535,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
 
+   ABI_NVTX_START_RANGE(NVTX_SUB_SPC_DIAGO)
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
      call timab(585,1,tsec) !"vtowfk(subdiago)"
@@ -552,6 +553,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call timab(585,2,tsec)
      end if
    end if
+   ABI_NVTX_END_RANGE()
 
 !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
@@ -964,7 +966,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end if ! PAW or forces
      end if ! iscf>0 or iscf=-3
-   end if
+  end if
  end do !  End of loop on blocks
  !call cwtime_report(" Block loop", cpu, wall, gflops)
  ABI_NVTX_END_RANGE()
