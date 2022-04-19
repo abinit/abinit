@@ -859,8 +859,9 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
 
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
-
+   ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call getBm1X(chebfi%xAXColsRows, chebfi%X_next, chebfi%xgTransposerX)
+   ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
    call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1)
