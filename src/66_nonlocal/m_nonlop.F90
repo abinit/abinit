@@ -521,7 +521,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
  if (size(vectin)<2*npwin*my_nspinor*ndat) then
-   ABI_BUG('Incorrect size for vectin!')
+   !FB: Allow the usage of nonlop from the "linalg" representation where
+   !FB: the cg are distributed over the plane waves with npband > 1
+   !FB: in case signs=1 & choice=1
+   if (signs==1 .and. choice==1) then
+      npwin = size(vectin,2)/ndat/my_nspinor
+   else
+      ABI_BUG('Incorrect size for vectin!')
+   end if
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then

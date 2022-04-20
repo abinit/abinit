@@ -48,7 +48,8 @@ module m_rttddft
  use m_nonlop,           only: nonlop
  use m_paw_an,           only: paw_an_reset_flags
  use m_paw_correlations, only: setrhoijpbe0
- use m_pawcprj,          only: pawcprj_type
+ use m_pawcprj,          only: pawcprj_type, pawcprj_alloc, pawcprj_get, &
+                             & pawcprj_free,pawcprj_mpi_allgather
  use m_paw_denpot,       only: pawdenpot
  use m_pawdij,           only: pawdij, symdij
  use m_paw_ij,           only: paw_ij_reset_flags
@@ -772,18 +773,24 @@ subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 !!
 !! FUNCTION
 !!  Computes occupations at time t from cg(t), cg0 and occ0
-!!  f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|\phi_n(t)>   in NC
-!!  f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|S|\phi_n(t)> in PAW
+!!  In NC:
+!!    f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|\phi_n(t)>
+!!  In PAW:
+!!    f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|S|\phi_n(t)>
+!!               = \sum_{m} f_{m,k}(0) [ <\phi_m(0)|\phi_n(t)> +
+!!                 \sum_{i} <\phi_m(0)|p_{i}>\sum_jS_{i,j}<p_{j}|\phi_n(t)> ]
 !!
 !! INPUTS
 !!  cg <real(2,npw*nspinor*nband)> = the wavefunction coefficients
 !!  cg0 <real(2,npw*nspinor*nband)> = the initial wavefunction coefficients
+!!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  ham_k <gs_hamiltonian_type> = hamiltonian at point k
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  nband <integer> = number of bands
-!!  npw <integer> = number of plane waves
+!!  nband_k <integer> = number of bands
+!!  npw_k <integer> = number of plane waves
 !!  nspinor <integer> = dimension of spinors
 !!  occ0 <real(nband)> = initial occupations
+!!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!
 !! OUTPUT
 !!  occ <real(nband)> = the occupations at time t
@@ -795,197 +802,148 @@ subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_calc_occ(cg,cg0,cprj,cprj0,ham_k,mpi_enreg,nband,npw,nspinor,occ,occ0)
+subroutine rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg,nband_k,npw_k,nspinor,occ,occ0,tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- integer,                   intent(in)    :: nband
- integer,                   intent(in)    :: npw
+ integer,                   intent(in)    :: ikpt
+ integer,                   intent(in)    :: ibg
+ integer,                   intent(in)    :: isppol
+ integer,                   intent(in)    :: nband_k
+ integer,                   intent(in)    :: npw_k
  integer,                   intent(in)    :: nspinor
- type(pawcprj_type),        intent(inout) :: cprj(:,:)
- type(pawcprj_type),        intent(inout) :: cprj0(:,:)
+ type(dataset_type),        intent(inout) :: dtset
  type(gs_hamiltonian_type), intent(inout) :: ham_k
  type(MPI_type),            intent(inout) :: mpi_enreg
+ type(tdks_type), target,   intent(inout) :: tdks
  !arrays
- real(dp),                  intent(inout) :: cg(2,npw*nspinor*nband)
- real(dp),                  intent(inout) :: cg0(2,npw*nspinor*nband)
- real(dp),                  intent(out)   :: occ(nband)
- real(dp),                  intent(in)    :: occ0(nband)
+ real(dp),                  intent(inout) :: cg(2,npw_k*nspinor*nband_k)
+ real(dp),                  intent(inout) :: cg0(2,npw_k*nspinor*nband_k)
+ real(dp),                  intent(out)   :: occ(nband_k)
+ real(dp),                  intent(in)    :: occ0(nband_k)
 
  !Local variables-------------------------------
  !scalars
- integer, parameter :: cpopt = 2 !cprojs already in memory (in cprj) 
- integer            :: iband, jband, ierr, ind
- integer            :: shift
- integer            :: tim_getcsc=6
+ integer                     :: iband, jband, ierr, ind
+ integer                     :: nband_cprj_k
+ integer                     :: natom
+ integer                     :: shift
+ !parameters for nonlop
+ integer, parameter          :: cpopt = 2
+ integer, parameter          :: choice = 1
+ integer, parameter          :: idir = 1
+ integer, parameter          :: nnlout = 1
+ integer, parameter          :: paw_opt = 3
+ integer, parameter          :: signs = 1
+ integer, parameter          :: tim_nonlop = 16
+ logical                     :: cprj_paral_band
  !arrays
- real(dp) :: csc(2*nband*nband)
+ real(dp)                    :: csc(2*nband_k)
+ real(dp),allocatable        :: gsc(:,:),gvnlxc(:,:)
+ real(dp),allocatable        :: enlout(:),enlout_im(:)
+ type(pawcprj_type), pointer :: cprj(:,:), cprj_k(:,:)
+ type(pawcprj_type), pointer :: cprj0(:,:), cprj0_k(:,:)
 ! ***********************************************************************
 
- do iband = 1, nband
-   !** 1 - First calc csc = <cg0|S|cg> (PAW) or <cg0|cg> (NC)
-   shift = npw*nspinor*(iband-1)
-   print*, 'FB-test: size(cprj,2), nspinor, nband, nspinor*nband', size(cprj,2), nspinor, nband, nspinor*nband
-   print*, 'FB-test: size(cprj0,2), nspinor, nband, nspinor*nband', size(cprj0,2), nspinor, nband, nspinor*nband
-   call getcsc(csc,cpopt,cg(:,shift+1:shift+npw*nspinor),cg0,cprj(:,iband:iband+(nspinor-1)),cprj0,ham_k,mpi_enreg,nband,tim_getcsc)
-   !** 2 - If band parallel then reduce csc
+ !Prepare cprj in PAW case
+ cprj_paral_band=.false.
+ if (ham_k%usepaw == 1) then
+    ! Determine if cprj datastructure is distributed over bands
+    cprj_paral_band=(tdks%mband_cprj<dtset%mband)
+    nband_cprj_k=nband_k; if (cprj_paral_band) nband_cprj_k=mpi_enreg%bandpp
+    natom = dtset%natom
+    ! Extract the right cprj for this k-point
+    if (dtset%mkmem*dtset%nsppol/=1) then
+       ABI_MALLOC(cprj_k,(natom,nspinor*nband_cprj_k))
+       ABI_MALLOC(cprj0_k,(natom,nspinor*nband_cprj_k))
+       call pawcprj_alloc(cprj_k,0,tdks%dimcprj)
+       call pawcprj_alloc(cprj0_k,0,tdks%dimcprj)
+       call pawcprj_get(tdks%atindx1,cprj_k,tdks%cprj,natom,1,ibg,ikpt,0,isppol,     &
+                      & tdks%mband_cprj,dtset%mkmem,natom,nband_cprj_k,nband_cprj_k, &
+                      & nspinor,dtset%nsppol,tdks%unpaw,mpicomm=mpi_enreg%comm_kpt,  &
+                      & proc_distrb=mpi_enreg%proc_distrb)
+       call pawcprj_get(tdks%atindx1,cprj0_k,tdks%cprj0,natom,1,ibg,ikpt,0,isppol,   &
+                      & tdks%mband_cprj,dtset%mkmem,natom,nband_cprj_k,nband_cprj_k, &
+                      & nspinor,dtset%nsppol,tdks%unpaw,mpicomm=mpi_enreg%comm_kpt,  &
+                      & proc_distrb=mpi_enreg%proc_distrb)
+    else
+       cprj_k => tdks%cprj
+       cprj0_k => tdks%cprj0
+    end if
+    ! If cprj are distributed over bands, gather them (because we need to mix bands)
+    if (cprj_paral_band) then
+       ABI_MALLOC(cprj,(natom,nspinor*nband_k))
+       ABI_MALLOC(cprj0,(natom,nspinor*nband_k))
+       call pawcprj_alloc(cprj,0,tdks%dimcprj)
+       call pawcprj_alloc(cprj0,0,tdks%dimcprj)
+       call pawcprj_mpi_allgather(cprj_k,cprj,natom,nspinor*nband_cprj_k,mpi_enreg%bandpp, &
+                                & tdks%dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band, &
+                                & ierr,rank_ordered=.false.)
+       call pawcprj_mpi_allgather(cprj0_k,cprj0,natom,nspinor*nband_cprj_k,mpi_enreg%bandpp, &
+                                & tdks%dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,   &
+                                & ierr,rank_ordered=.false.)
+    else
+       cprj => cprj_k
+       cprj0 => cprj0_k
+    end if
+
+   !allocate necessary arrays for nonlop
+   ABI_MALLOC(gsc,(0,0))
+   ABI_MALLOC(gvnlxc,(0,0))
+   ABI_MALLOC(enlout,(nband_k))
+   ABI_MALLOC(enlout_im,(nband_k))
+ end if
+
+ csc = zero
+ do iband = 1, nband_k
+   !* 1 - Compute csc = <cg0|cg>
+   shift = npw_k*nspinor*(iband-1)
+   call zgemv('C',npw_k*nspinor,nband_k,cone,cg0,npw_k*nspinor, &
+            & cg(:,shift+1:shift+npw_k*nspinor),1,czero,csc,1)
+   !If band parallel then reduce csc
    if (mpi_enreg%nproc_band > 1) then
-      call xmpi_sum(csc,mpi_enreg%comm_band,ierr)
+      call xmpi_sum(csc,mpi_enreg%comm_bandfft,ierr)
    end if
-   !** 3 - Calc occupations from csc
-   do jband = 1, nband
+   !* 2 - If PAW, add the additional term \sum_i cprj_i \sum_j S_{i,j} cprj_j
+   if (ham_k%usepaw == 1) then
+      call nonlop(choice,cpopt,cprj(:,iband:iband+(nspinor-1)),enlout,     &
+                & ham_k,idir,(/zero/),mpi_enreg,1,nnlout,paw_opt,signs,    &
+                & gsc,tim_nonlop,cg(:,shift+1:shift+npw_k*nspinor),gvnlxc, &
+                & cprjin_left=cprj0,enlout_im=enlout_im,ndat_left=nband_k)
+      do jband = 1, nband_k
+         csc(2*jband-1) = csc(2*jband-1) + enlout(jband)
+         csc(2*jband)   = csc(2*jband)   + enlout_im(jband)
+      end do
+   end if
+   !* 3 - Calc occupations from csc and occ0
+   do jband = 1, nband_k
       ind = 2*jband
       occ(iband) = occ(iband) + occ0(jband)*(csc(ind-1)**2+csc(ind)**2)
    end do
  end do
 
- end subroutine rttddft_calc_occ
+ if (ham_k%usepaw == 1) then
+   ABI_FREE(gsc)
+   ABI_FREE(gvnlxc)
+   ABI_FREE(enlout)
+   ABI_FREE(enlout_im)
+   if (cprj_paral_band) then
+      call pawcprj_free(cprj)
+      ABI_FREE(cprj)
+      call pawcprj_free(cprj0)
+      ABI_FREE(cprj0)
+   end if
+   if (dtset%mkmem*dtset%nsppol/=1) then
+      call pawcprj_free(cprj_k)
+      ABI_FREE(cprj_k)
+      call pawcprj_free(cprj0_k)
+      ABI_FREE(cprj0_k)
+   end if
+ end if
 
-!!!****f* m_rttddft/rttddft_calc_occ
-!!!
-!!! NAME
-!!!  rttddft_calc_occ
-!!!
-!!! FUNCTION
-!!!  Compute occupation numbers at time t
-!!!
-!!! INPUTS
-!!!  dtset <type(dataset_type)> = all input variables for this dataset
-!!!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!!  tdks <type(tdks_type)> = Main RT-TDDFT object
-!!!
-!!! OUTPUT
-!!!
-!!! SIDE EFFECTS
-!!!
-!!! PARENTS
-!!!  m_rttddft_driver/rttddft
-!!!
-!!! CHILDREN
-!!!
-!!! SOURCE
-!subroutine rttddft_calc_occ(tdks, dtset, mpi_enreg)
-!
-! implicit none
-!
-! !Arguments ------------------------------------
-! !scalars
-! type(dataset_type), intent(inout) :: dtset
-! type(MPI_type),     intent(inout) :: mpi_enreg
-! type(tdks_type),    intent(inout) :: tdks
-!
-! !Local variables-------------------------------
-! integer :: ii
-! real(dp) :: norm
-! !scalars
-! integer   :: bdtot_index
-! integer   :: iband, jband
-! integer   :: icg
-! integer   :: ikpt, ikpt_loc
-! integer   :: istwf_k
-! integer   :: isppol
-! integer   :: me_distrb
-! integer   :: my_ikpt, my_nspinor
-! integer   :: nband_k
-! integer   :: npw_k
-! integer   :: nkpt, nsppol
-! integer   :: shift_i, shift_j
-! integer   :: spaceComm_distrb
-! real(dp)  :: dprod_r, dprod_i, dot_prod
-! !arrays
-!! ***********************************************************************
-!
-! !Init MPI
-! spaceComm_distrb=mpi_enreg%comm_cell
-! if (mpi_enreg%paral_kgb==1) spaceComm_distrb=mpi_enreg%comm_kpt
-! me_distrb=xmpi_comm_rank(spaceComm_distrb)
-!
-! my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-!
-! nkpt = dtset%nkpt
-! nsppol = dtset%nsppol
-!
-! tdks%occ = zero
-!
-! icg=0
-! bdtot_index=0
-!
-! !*** LOOP OVER SPINS
-! do isppol=1,nsppol
-!
-!   ikpt_loc=0
-!   !ikg=0
-!
-!   !*** BIG FAT k POINT LOOP
-!   ikpt = 0
-!   do while (ikpt_loc < nkpt)
-!
-!      ikpt_loc = ikpt_loc + 1
-!      ikpt = ikpt_loc
-!      my_ikpt = mpi_enreg%my_kpttab(ikpt)
-!
-!      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-!      istwf_k=dtset%istwfk(ikpt)
-!      npw_k=tdks%npwarr(ikpt)
-!
-!      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_distrb)) then
-!         bdtot_index=bdtot_index+nband_k
-!         cycle
-!      end if
-!
-!      !Calc occupation number at point k
-!      !PAW - calc <\phi_n|S|\phi_m> (getgsc)
-!      if (dtset%usepaw /=0) then 
-!         !do iband = 1, nband_k
-!         !   shift_i = icg+npw_k*my_nspinor*(iband-1)
-!         !   call getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,tdks%gs_hamk,mpi_enreg,ndat,tim_getcsc,)
-!         !end do
-!      !Norm-conserving - calc <\phi_n|\phi_m> (dotprod_g)
-!      else
-!         do iband = 1, nband_k
-!            shift_i = icg+npw_k*my_nspinor*(iband-1)
-!            do jband = 1, nband_k
-!               shift_j = icg+npw_k*my_nspinor*(jband-1)
-!               call dotprod_g(dprod_r,dprod_i,istwf_k,npw_k*my_nspinor,2,tdks%cg0(:, shift_i+1:shift_i+npw_k*my_nspinor),&
-!                            & tdks%cg(:, shift_j+1:shift_j+npw_k*my_nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!               dot_prod = dprod_r**2 + dprod_i**2
-!               norm = 0.0_dp
-!               do ii = shift_i+1, shift_i+npw_k*my_nspinor
-!                  norm = norm + tdks%cg(1,ii)**2+tdks%cg(2,ii)**2
-!               end do 
-!               !FB-test print*, 'sum(cg(t)^2):', sqrt(norm)
-!               norm = 0.0_dp
-!               do ii = shift_i+1, shift_i+npw_k*my_nspinor
-!                  norm = norm + tdks%cg0(1,ii)**2+tdks%cg0(2,ii)**2
-!               end do 
-!               !FB-test print*, 'sum(cg(0)^2):', sqrt(norm)
-!               tdks%occ(bdtot_index+iband) = tdks%occ(bdtot_index+iband)+tdks%occ0(bdtot_index+jband)*dot_prod
-!               !FB-test print*, 'ikpt, iband, jband, bdtot_index, dot_prod :', ikpt, iband, jband, bdtot_index, dot_prod
-!               !FB-test print*, 'bdtot_index+iband, tdks%occ(bdtot_index+iband):', bdtot_index+iband, tdks%occ(bdtot_index+iband)
-!               !FB-test print*, 'bdtot_index+jband, tdks%occ0(bdtot_index+jband), tdks%occ0(bdtot_index+jband)*dot_prod:', &
-!               !FB-test        & bdtot_index+jband, tdks%occ0(bdtot_index+jband), tdks%occ0(bdtot_index+jband)*dot_prod
-!            end do
-!         end do
-!      end if
-!
-!      !** Also shift array memory if dtset%mkmem/=0
-!      if (dtset%mkmem/=0) then
-!         icg=icg+npw_k*my_nspinor*nband_k
-!         bdtot_index=bdtot_index+nband_k
-!      end if
-!
-!   end do !nkpt
-!
-! end do !nsppol
-!
-! print*, 'FB-test - occ', tdks%occ
-! print*, 'FB-test - occ0', tdks%occ0
-!
-! !FB TODO some MPI sum are needed here
-!
-! end subroutine rttddft_calc_occ
+ end subroutine rttddft_calc_occ
 
 end module m_rttddft
 !!***

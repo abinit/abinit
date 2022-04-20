@@ -556,7 +556,6 @@ subroutine getcsc(csc,cpopt,cwavef,cwavef_left,cprj,cprj_left,gs_ham,mpi_enreg,n
 
  if (gs_ham%usepaw==1) then
 
-   print*, 'FB-test: size(cprj)', size(cprj(:,1)), size(cprj,2)
    if (size(cprj,2)/=nspinor) then
       ABI_BUG('Wrong size for cprj')
    end if
