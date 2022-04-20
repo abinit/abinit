@@ -7,15 +7,12 @@
 !!  part of the propagator using various approximations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
-!!  m_rttddft_propagators
 !!
 !! CHILDREN
 !!
@@ -34,9 +31,7 @@ module m_rttddft_exponential
 
  use m_bandfft_kpt,   only: bandfft_kpt, &
                           & bandfft_kpt_get_ikpt
- use m_cgtools,       only: dotprod_g
  use m_dtset,         only: dataset_type
- use m_energies,      only: energies_type
  use m_getghc,        only: multithreaded_getghc
  use m_hamiltonian,   only: gs_hamiltonian_type
  use m_invovl,        only: apply_invovl
@@ -54,7 +49,7 @@ module m_rttddft_exponential
 !!***
 
 contains
-
+!!***
 
 !!****f* m_rttddft_exponential/rttddft_exp_taylor
 !!
@@ -63,26 +58,25 @@ contains
 !!
 !! FUNCTION
 !!  Applies the propagator exp(-i*dt*H(*S^-1)) on the cg coeffs
-!!  approximating the exponential using different methods
+!!  approximating the exponential using a Taylor exapansion
 !!
 !! INPUTS
 !!  cg <real(npw*nspinor*nband)> = the wavefunction coefficients
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  ham_k <type(gs_hamiltonian_type)> = the Hamiltonian H
-!!  method <integer> = method use to approximate the exponential
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  nband <integer> = number of bands
-!!  npw <integer> = number of plane waves
+!!  nband_k <integer> = number of bands
+!!  npw_k <integer> = number of plane waves
 !!  nspinor <integer> = dimension of spinors
 !!
 !! OUTPUT
-!!  cg <real(npw*nspinor*nband)> = the exponential propagator 
-!!   applied to the WF coefficients
-!!
-!! SIDE EFFECTS
+!!  cg <real(npw*nspinor*nband)> = the new cg after application 
+!!  of the exponential propagator
+!!  enl <real(bandpp)> = non local contribution to the energy in the 
+!!                       NC case - optional
+!!  eig <real(bandpp)> = eigenvalues - optional
 !!
 !! PARENTS
-!!  m_rttddft_propagators/rttddft_propagator_er
 !!
 !! CHILDREN
 !!
@@ -174,10 +168,8 @@ contains
    sij_opt = 0
    if (iorder == 1 .and. l_eig .and. l_paw) sij_opt = 1
    if (dtset%paral_kgb /= 1) then
-      print*, 'FB-test: before multithreaded_getghc'
       call multithreaded_getghc(cpopt,tmp,cwaveprj,ghc,gsc,ham_k,gvnlxc_dummy,1.0_dp, &
                               & mpi_enreg,nband_t,dtset%prtvol,sij_opt,tim_getghc,0)
-      print*, 'FB-test: after multithreaded_getghc'
    else
       call prep_getghc(tmp,ham_k,gvnlxc_dummy,ghc,gsc,1.0_dp,nband_t,mpi_enreg, &
                      & dtset%prtvol,sij_opt,cpopt,cwaveprj,already_transposed=.true.)
@@ -234,6 +226,7 @@ contains
  nullify(cg_t)
 
  end subroutine rttddft_exp_taylor
+!!***
 
 !!****f* m_rttddft_exponential/paral_kgb_transpose
 !!
@@ -242,49 +235,60 @@ contains
 !!
 !! FUNCTION
 !!  if option = 1: Forward transpose
-!!    Transpose cg_1 in ((npw/npband),nband) distribution
-!!    into cg_2 in (npw,bandpp) distribution 
+!!    Transpose cg_1 in linalg ((npw/npband),nband) distribution
+!!    into cg_2 in fft (npw,bandpp) distribution 
 !!
 !!  if option = -1: Backward transpose
-!!    Transpose back cg_2 in (npw,bandpp) distribution 
-!!    into cg_1 (npw/npband),nband) distribution
+!!    Transpose back cg_2 in fft (npw,bandpp) distribution 
+!!    into cg_1 linakg (npw/npband),nband) distribution
 !!
 !! INPUTS
-!!  if option = 1 : cg_1 <real((npw/nband)*nspinor*nband)> 
-!!  if option = -1: cg_2 <real(npw*nspinor*bandpp)> 
+!!  if option = 1:
+!!    cg_1 <real((npw/nband)*nspinor*nband)> 
+!!  if option = -1:
+!!    cg_2 <real(npw*nspinor*bandpp)> 
+!!    nband_t <integer> = number of bands after forward transpose (bandpp)
+!!    npw_t <integer> = number of pw after forward transpose (npw_k)
 !!  dtset <type(dataset_type)> = all input variables for this dataset
-!!  ham_k <type(gs_hamiltonian_type)> = the Hamiltonian H
-!!  method <integer> = method use to approximate the exponential
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  nband <integer> = number of bands
-!!  npw <integer> = number of plane waves
 !!  nspinor <integer> = "dimension of spinors"
+!!  option <integer> = option for forward or backward transpose
+!!  index_wavef_band <integer> = order of the bands after transpose
 !!
 !! OUTPUT
-!!  if option = 1 : cg_2 <real(npw*nspinor*bandpp)>
-!!  if option = -1: cg_1 <real((npw/nband)*nspinor*nband)>
-!!
+!!  if option = 1 : 
+!!    cg_2 <real(npw*nspinor*bandpp)>
+!!    nband_t <integer> = number of bands after forward transpose (bandpp)
+!!    npw_t <integer> = number of pw after forward transpose (npw_k)
+!!  if option = -1: 
+!!    cg_1 <real((npw/nband)*nspinor*nband)>
+
 !! SIDE EFFECTS
-!!  if option = 1 : array cg_2 has been allocated with size (npw*nspinor*bandpp)
-!!  if option = -1: array cg_2 has been deallocated
+!!  if option = 1 : 
+!!    cg_2 has been allocated
+!!    index_wavef_band has been allocated
+!!  if option = -1: 
+!!    cg_2 has been deallocated
+!!    index_wavef_band has been allocated
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-subroutine paral_kgb_transpose(cg_1,cg_2,mpi_enreg,nband_out,npw_out,nspinor,option,index_wavef_band)
+subroutine paral_kgb_transpose(cg_1,cg_2,mpi_enreg,nband_t,npw_t,nspinor,option,index_wavef_band)
 
 implicit none
 
 !Arguments ------------------------------------
 !scalars
-integer,               intent(out)   :: nband_out
-integer,               intent(out)   :: npw_out
+integer,               intent(inout) :: nband_t
+integer,               intent(inout) :: npw_t
 integer,               intent(in)    :: nspinor
 integer,               intent(in)    :: option
 type(MPI_type),        intent(inout) :: mpi_enreg
 !arrays
+integer,  allocatable, intent(inout) :: index_wavef_band(:)
 real(dp),              intent(inout) :: cg_1(:,:)
 real(dp), allocatable, intent(inout) :: cg_2(:,:)
 
@@ -298,7 +302,6 @@ integer               :: recvcountsloc(mpi_enreg%nproc_band)
 integer               :: rdisplsloc(mpi_enreg%nproc_band)
 integer               :: sendcountsloc(mpi_enreg%nproc_band)
 integer               :: sdisplsloc(mpi_enreg%nproc_band)
-integer,  allocatable :: index_wavef_band(:)
 real(dp), allocatable :: cg_work(:,:)
 
 ! ***********************************************************************
@@ -313,10 +316,10 @@ real(dp), allocatable :: cg_work(:,:)
 
  !Forward transpose: cg_1 -> cg_2
  if (option == 1) then 
-   nband_out = bandpp
-   npw_out = bandfft_kpt(ikpt_this_proc)%ndatarecv
-   ABI_MALLOC(cg_2,  (2, npw_out*nspinor*nband_out))
-   ABI_MALLOC(cg_work, (2, npw_out*nspinor*nband_out))
+   nband_t = bandpp
+   npw_t = bandfft_kpt(ikpt_this_proc)%ndatarecv
+   ABI_MALLOC(cg_2,  (2, npw_t*nspinor*nband_t))
+   ABI_MALLOC(cg_work, (2, npw_t*nspinor*nband_t))
    !Transpose input cg_1 into cg_work
    call xmpi_alltoallv(cg_1,sendcountsloc,sdisplsloc,cg_work, &
                      & recvcountsloc,rdisplsloc,mpi_enreg%comm_band,ierr)
@@ -331,7 +334,7 @@ real(dp), allocatable :: cg_work(:,:)
  
  !Transpose back: cg_2 -> cg_1
  if (option == -1) then
-   ABI_MALLOC(cg_work, (2, npw_out*nspinor*nband_out))
+   ABI_MALLOC(cg_work, (2, npw_t*nspinor*nband_t))
    cg_work(:,index_wavef_band) = cg_2(:,:)
    !Transpose cg_work to input cg_1
    call xmpi_alltoallv(cg_work,recvcountsloc,rdisplsloc,cg_1, &
@@ -343,6 +346,7 @@ real(dp), allocatable :: cg_work(:,:)
  end if
 
 end subroutine paral_kgb_transpose
+!!***
 
 end module m_rttddft_exponential
 !!***

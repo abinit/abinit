@@ -6,15 +6,12 @@
 !!  Contains various propagators for the KS orbitals
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
-!!  m_rttddft_propagate
 !!
 !! CHILDREN
 !!
@@ -34,7 +31,6 @@ module m_rttddft_propagators
  
  use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
                                 & bandfft_kpt_set_ikpt,          &
-                                & bandfft_kpt_get_ikpt,          &
                                 & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
@@ -44,7 +40,6 @@ module m_rttddft_propagators
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
- use m_nonlop,              only: nonlop
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density, &
                                 & rttddft_calc_occ
@@ -64,6 +59,7 @@ module m_rttddft_propagators
 !!***
 
 contains 
+!!***
 
 !!****f* m_rttddft/rttddft_propagator_er
 !!
@@ -75,16 +71,14 @@ contains
 !!  the Exponential Rule (ER) propagator.
 !!
 !! INPUTS
-!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  ham_k <type(gs_hamiltonian_type)> = Hamiltonian object
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
+!!  calc_properties <logical> = logical governing the computation of 
+!!                              some properties (energies, occupations, eigenvalues..)
 !!
 !! NOTES
 !!  Other propagators such as the Exponential Midpoint Rule (EMR) 
@@ -93,10 +87,8 @@ contains
 !!  the exponential approximated by Taylor expansion of order 1 leads 
 !!  to the famous Euler method which is fast and simple but unstable
 !!  and thus insufficient for RT-TDDFT.
-!!  
 !!
 !! PARENTS
-!!  m_rttddft_propagate/rttddft_propagate_ele
 !!
 !! CHILDREN
 !!
@@ -399,9 +391,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          end if
 
          !Propagate cg and compute the requested properties
-         print*, 'FB-test: Taylor + properties'
-         print*, 'FB-test: lproperties', lproperties
-         print*, 'FB-test: size enl, eig, occ', size(enl), size(eig), size(occ)
          call rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,enl=enl,eig=eig)
 
          if (lproperties(2)) then
@@ -412,7 +401,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          end if
       else
          !Propagate cg only
-         print*, 'FB-test: Taylor only'
          call rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor)
       end if
 
@@ -460,7 +448,7 @@ end subroutine rttddft_propagator_er
 !!
 !! FUNCTION
 !!  Main subroutine to propagate the KS orbitals using 
-!!  the Euler propagator
+!!  the Exponential Midpoint Rule (EMR) propagator
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -472,14 +460,11 @@ end subroutine rttddft_propagator_er
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
-!!  This propagator is time reversible (if H(t+dt/2) and the exponential 
-!!  would be computed exactly).
+!!  This propagator is time reversible 
+!!  (if H(t+dt/2) and the exponential are computed exactly).
 !!
 !! PARENTS
-!!  m_rttddft_propagate/rttddft_propagate_ele
 !!
 !! CHILDREN
 !!
@@ -577,7 +562,8 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
    if (do_write_log) call wrtout(std_out,msg)
  end if
  
- end subroutine rttddft_propagator_emr
+end subroutine rttddft_propagator_emr
+!!***
 
 end module m_rttddft_propagators
 !!***
