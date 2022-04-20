@@ -143,7 +143,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
+    & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
     & xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -158,7 +158,6 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),ngfftf(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3),rprimd(3,3),xred(3,dtset%natom)
- real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -171,8 +170,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
- integer :: klm
- integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
@@ -607,7 +605,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  end do
 
  ! get the Lamb term
- call lamb_core(atindx,dtset,omlamb,pawtab)
+ call lamb_core(atindx,dtset,omlamb)
  orbmag_trace(:,:,iomlmb) = omlamb
 
  call orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
@@ -992,7 +990,7 @@ subroutine apply_onsite_d0_k(atindx,bc_k,cprj_k,cprj1_k,Enk,&
  integer :: adir,bdir,gdir,iat,iatom,ilmn,iterm,itypat,jlmn,klmn,nn
  integer,parameter :: idpdp=1,idpu=2,idudu=3
  real(dp) :: c2,eabg,qij
- complex(dpc) :: dij,uij,uji
+ complex(dpc) :: dij
  logical :: cplex_dij
 
  !arrays
@@ -1045,19 +1043,6 @@ subroutine apply_onsite_d0_k(atindx,bc_k,cprj_k,cprj1_k,Enk,&
              else
                dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
              end if
-
-             ! uij is d/d_beta (<u|p_i> * d/d_gamma (<p_j|u>) 
-             !uij = conjg(udp(1,1)+dup(1,1))*(udp(2,2)+dup(2,2))
-             !uji = conjg(udp(1,2)+dup(1,2))*(udp(2,1)+dup(2,1))
-
-             !uij = conjg(udp(1,1))*udp(2,2)+conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2)
-             !uji = conjg(udp(1,2))*udp(2,1)+conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1)
-
-             !uij = conjg(dup(1,1))*dup(2,2)
-             !uji = conjg(dup(1,2))*dup(2,1)
-
-             !uij = conjg(udp(1,1))*udp(2,2)
-             !uji = conjg(udp(1,2))*udp(2,1)
 
              bcme(idpdp) = bcme(idpdp) + cbc*c2*eabg*qij*conjg(udp(1,1))*udp(2,2)
              bcme(idpu) =  bcme(idpu)  + cbc*c2*eabg*qij*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
@@ -1225,7 +1210,7 @@ end subroutine gs_eigenvalues
 !!
 !! SOURCE
 
-subroutine lamb_core(atindx,dtset,omlamb,pawtab)
+subroutine lamb_core(atindx,dtset,omlamb)
 
   !Arguments ------------------------------------
   !scalars
@@ -1234,7 +1219,6 @@ subroutine lamb_core(atindx,dtset,omlamb,pawtab)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(out) :: omlamb(2,3)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -1766,7 +1750,7 @@ subroutine dl_Anp(dlanp,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,rea
   !arrays
   integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp),allocatable :: ff(:)
-  complex(dpc) :: dij_cart(3),dij_red(3)
+  complex(dpc) :: dij_cart(3)
 
 !--------------------------------------------------------------------
 
@@ -1875,7 +1859,7 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
   !scalars
   integer :: adir,iat,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size
   real(dp) :: intg
-  complex(dpc) :: cme,orbl_me
+  complex(dpc) :: orbl_me
 
   !arrays
   complex(dpc) :: dij_cart(3),dij_red(3)
@@ -2195,7 +2179,7 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
  !Local variables -------------------------
  !scalars
- integer :: adir,iband,ikpt,iterms
+ integer :: adir,iband,iterms
  character(len=500) :: message
 
  !arrays
