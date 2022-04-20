@@ -113,7 +113,6 @@ CONTAINS  !=====================================================================
 !!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= PAW rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  ucvol=unit cell volume
 !!  znucl(ntypat)=atomic number of atom type
 !!
 !! OUTPUT
@@ -134,12 +133,11 @@ CONTAINS  !=====================================================================
 
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
-&               pawang,pawrad,pawrhoij,pawtab,ucvol,znucl)
+&               pawang,pawrad,pawrhoij,pawtab,znucl)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mkmem,mpsang,mpw,natom,nkpt,nsppol
- real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -161,8 +159,8 @@ CONTAINS  !=====================================================================
  integer,parameter :: master=0
  integer :: iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibg,ibsp
  integer :: icg,ierr,ikg,ikpt,ilmn,ount,ncid,varid,idir
- integer :: iorder_cprj,ipw,ispinor,jspinor,isppol,istwf_k,itypat,iwavef
- integer :: jb,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,ijspinor,option_core
+ integer :: iorder_cprj,ipw,ispinor,isppol,istwf_k,itypat,iwavef
+ integer :: jb,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,option_core
  integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
@@ -289,7 +287,7 @@ CONTAINS  !=====================================================================
    option_core=0
    call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
-&       dtset%spnorbscl,dtset%typat,ucvol,dtset%xc_denpos,znucl,&
+&       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,znucl,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
@@ -773,7 +771,6 @@ CONTAINS  !=====================================================================
 !!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= PAW rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  ucvol=unit cell volume
 !!  znucl(ntypat)=atomic number of atom type
 !!
 !! OUTPUT
@@ -790,12 +787,11 @@ CONTAINS  !=====================================================================
 
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
 &               mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,&
-&               pawang,pawrad,pawrhoij,pawtab,ucvol,znucl)
+&               pawang,pawrad,pawrhoij,pawtab,znucl)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcprj,mkmem,mpsang,natom,nkpt,nsppol
- real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -941,7 +937,7 @@ CONTAINS  !=====================================================================
    option_core=1
    call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
-&       dtset%spnorbscl,dtset%typat,ucvol,dtset%xc_denpos,znucl,&
+&       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,znucl,&
 &       phi_cor=phi_cor,indlmn_cor=indlmn_cor,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
@@ -1759,7 +1755,6 @@ CONTAINS  !=====================================================================
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  spnorbscl=scaling factor for spin-orbit coupling
 !!  typat(natom) =Type of each atoms
-!!  ucvol=unit cell volume (bohr^3)
 !!  xc_denpos= lowest allowe density (usually for the computation of the XC functionals)
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
 !!  [phi_cor(mesh_size,nphicor)]=--optional-- core wave-functions for the current type of atoms;
@@ -1806,14 +1801,14 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawnabla_soc_init(phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
-&           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,ucvol,xc_denpos,znucl, &
+&           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,xc_denpos,znucl, &
 &           phi_cor,indlmn_cor,mpi_atmtab,comm_atom) ! Optional arguments
-           
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,my_natom,natom,nspden,ntypat,option_core,pawxcdev
  integer,optional,intent(in) :: comm_atom
- real(dp),intent(in) :: ucvol,spnorbscl,xc_denpos
+ real(dp),intent(in) :: spnorbscl,xc_denpos
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in),target,optional :: indlmn_cor(:,:)
@@ -1835,7 +1830,7 @@ CONTAINS  !=====================================================================
  integer :: idum,option,usenhat,usekden,usecore,xclevel,nkxc,my_comm_atom
  integer :: mesh_size,mesh_size_cor,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
  integer :: lm_size,ln_size,ln_size_j,ln_size_cor,nspinor_cor
- integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jn,jlmn,jlm,jlm_re,jlm_im,jln,jmj,js,klm_re,klm_im
+ integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,jmj,js,klm_re,klm_im
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: compch_sph_dum,eexc_dum,eexcdc_dum
  real(dp) :: fact_re,fact_im,gx_re,gx_im,gy_re,gy_im,gz_re,gz_im,if3
