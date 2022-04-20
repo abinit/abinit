@@ -321,7 +321,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_3(:,:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
  real(dp),allocatable :: doccde_rbz(:),docckqde(:)
- real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_mean(:)
+ real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_3(:,:),eigen1_mean(:)
  real(dp),allocatable :: eigenq(:),gh1c_set(:,:),gh0c1_set(:,:),kpq(:,:)
  real(dp),allocatable :: kpq_rbz(:,:),kpt_rbz(:,:),occ_pert(:),occ_rbz(:),occkq(:),kpt_rbz_pert(:,:)
  real(dp),allocatable :: occ_disk(:)
@@ -1478,6 +1478,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
    if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_3)) ) then
      ABI_MALLOC(cg1_3,(2,mcg1,3))
+     ABI_MALLOC(eigen1_3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol,3))
      has_cg1_3(:) = .FALSE.
    end if
    if (.not.kramers_deg) then
@@ -2104,6 +2105,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! only relevant for DDK pert with orbmag calculation
    if( (dtset%orbmag .NE. 0) .AND. (ipert .EQ. dtset%natom+1) ) then
      cg1_3(:,:,idir) = cg1(:,:)
+     eigen1_3(:,idir) = eigen1(:)
      has_cg1_3(idir) = .TRUE.
    end if
 
@@ -2197,7 +2199,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      vtrial_local = vtrial
      if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 4)) then
-       call orbmag_tt(cg,cg1_3,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+       call orbmag_tt(cg,cg1_3,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
          & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,&
          & vtrial_local,xred,ylm,ylmgr)
      end if 
@@ -2207,6 +2209,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if( ALLOCATED(cg1_3) ) then
        ABI_FREE(cg1_3)
        has_cg1_3(:) = .FALSE.
+     end if
+     if ( ALLOCATED(eigen1_3) ) then
+       ABI_FREE(eigen1_3)
      end if
 
    end if
