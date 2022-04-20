@@ -6,16 +6,12 @@
 !!  Contains various subroutines used in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
-!!  m_rttddft_driver
-!!  m_rttddft_propagate
 !!
 !! CHILDREN
 !!
@@ -35,16 +31,12 @@ module m_rttddft
 
  use m_cgprj,            only: ctocprj
  use m_cgtools,          only: dotprod_g
- use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
- use m_efield,           only: efield_type
  use m_energies,         only: energies_type
- use m_getchc,           only: getcsc
  use m_fourier_interpol, only: transgrid
  use m_hamiltonian,      only: init_hamiltonian, gs_hamiltonian_type
- use m_kg,               only: getcut, getph
+ use m_kg,               only: getph
  use m_mkrho,            only: mkrho
- use m_mpinfo,           only: proc_distrb_cycle
  use m_nonlop,           only: nonlop
  use m_paw_an,           only: paw_an_reset_flags
  use m_paw_correlations, only: setrhoijpbe0
@@ -62,8 +54,7 @@ module m_rttddft
  use m_rttddft_tdks,     only: tdks_type
  use m_specialmsg,       only: wrtout
  use m_setvtr,           only: setvtr
- use m_xmpi,             only: xmpi_paral, xmpi_sum, &
-                             & xmpi_comm_rank !FB-test
+ use m_xmpi,             only: xmpi_paral, xmpi_sum
 
  implicit none
 
@@ -80,6 +71,7 @@ module m_rttddft
 !!***
 
 contains
+!!***
 
 !!****f* m_rttddft/rttddft_setup_ele_step
 !!
@@ -98,10 +90,7 @@ contains
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_propagate/rttddft_propagate_ele
 !!
 !! CHILDREN
 !!
@@ -195,6 +184,7 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
 !        & rprimd,vectornd,xred)
 
 end subroutine rttddft_setup_ele_step
+!!***
 
 !!****f* m_rttddft/rttddft_init_hamiltonian
 !!
@@ -207,18 +197,16 @@ end subroutine rttddft_setup_ele_step
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)> = all input variables for this dataset
-!!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
+!!  energies <energies_type> = contains various contribution to the energy
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
+!!  gs_hamk <type(gs_hamiltonian_type)> = Hamiltonian object
 !!
 !! PARENTS
-!!  m_rttddft_propagators/rttddft_propagator_er
 !!
 !! CHILDREN
 !!
@@ -278,12 +266,12 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  !**  - possibly compute vxc and vhartr
  !**  - set up vtrial
  !** Only the local part of the potential is computed here
- !FB: Are the values of moved_atm_inside and moved_rhor correct?
+ !FB: @MT Are the values of moved_atm_inside and moved_rhor correct?
  optene = 4; nkxc=0; moved_atm_inside=0; moved_rhor=1
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=tdks%pawfgr%nfft
  strsxc(:)=zero
- !FB: tfw_activated is a save variable in scfcv, should check where it appears again
+ !FB: tfw_activated is a save variable in scfcv, should maybe check where it appears again
  tfw_activated=.false.
  if (dtset%tfkinfunc==12) tfw_activated=.true.
  ABI_MALLOC(grchempottn,(3,dtset%natom))
@@ -291,10 +279,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  ABI_MALLOC(kxc,(tdks%pawfgr%nfft,nkxc))
  calc_ewald = .false.
  if (dtset%ionmov/=0 .or. istep == tdks%first_step) calc_ewald=.true.
- !FB: Should we also add an option to avoid recomputing xccc3d?
- print*, 'FB-test: before setvtr'
- print*, 'FB-test: tdks%pawtab', associated(tdks%pawtab), size(tdks%pawtab)
- print*, 'FB-test: tdks%pawrad', associated(tdks%pawrad), size(tdks%pawrad)
+ !FB: Should we also add an option to avoid recomputing xccc3d as for Ewald?
  call setvtr(tdks%atindx1,dtset,energies,tdks%gmet,tdks%gprimd,grchempottn,         &
            & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,             &
            & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,    &
@@ -392,6 +377,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                      & use_gpu_cuda=dtset%use_gpu_cuda)
 
 end subroutine rttddft_init_hamiltonian
+!!***
  
 !!****f* m_rttddft/rttddft_calc_density
 !!
@@ -409,10 +395,7 @@ end subroutine rttddft_init_hamiltonian
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -429,7 +412,6 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  type(pseudopotential_type), intent(inout) :: psps
 
  !Local variables-------------------------------
- !FB-test integer :: i, me !FB-test
  !scalars
  integer, parameter          :: cplex=1
  integer                     :: cplex_rhoij
@@ -456,7 +438,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    ! 1-Compute density from WFs (without compensation charge density nhat)
    call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
-            & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
+            & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,    &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
@@ -467,14 +449,6 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
               & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
               & tdks%ylm,tdks%ylmgr)
-
-   !FB-test
-   !FB-test me=xmpi_comm_rank(mpi_enreg%comm_band)
-   !FB-test do i=1, size(tdks%cprj(1,:))
-   !FB-test    write(100+me,*) tdks%cprj(1,i)%cp
-   !FB-test end do
-   !FB-test write(100+me,*) ' '
-
 
    !paral atom
    if (my_natom/=dtset%natom) then
@@ -492,7 +466,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
-                 & dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft,             &
+                 & dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft,            &
                  & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
    ! 4-Symetrize rhoij, compute nhat and add it to rhor
@@ -543,7 +517,8 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
  endif
 
- end subroutine rttddft_calc_density
+end subroutine rttddft_calc_density
+!!***
 
 !!****f* m_rttddft/rttddft_calc_energy
 !!
@@ -560,10 +535,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 !! OUTPUT
 !!  etotal <real(dp)> = the total energy
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -581,6 +553,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
  !Local variables-------------------------------
  !scalars
  !arrays
+
 ! ***********************************************************************
 
 !  When the finite-temperature VG broadening scheme is used,
@@ -608,6 +581,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
       & + energies%e_nlpsp_vfock &
       & + energies%e_paw         
 !FB: @MT Should one add the last e_paw contribution or not?
+!FB: Seeems like all the other contributions are not relevant here @MT?
 !     & + energies%e_chempot     &
 !     & + energies%e_elecfield   &  
 !     & + energies%e_magfield    &
@@ -620,7 +594,8 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
 !if (psps%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0
 !if (psps%usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
 
- end subroutine rttddft_calc_etot
+end subroutine rttddft_calc_etot
+!!***
 
 !!****f* m_rttddft/rttddft_calc_eig
 !!
@@ -634,7 +609,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
 !! INPUTS
 !!  cg <real(2,npw*nspinor*nband)> = the wavefunction coefficients
 !!  ghc <real(2,npw*nspinor*nband)> = <G|H|C>
-!!  istwfk <integer> = option describing the storage of wfs at k
+!!  istwf_k <integer> = option describing the storage of wfs at k
 !!  nband <integer> = number of bands
 !!  npw <integer> = number of plane waves
 !!  nspinor <integer> = dimension of spinors
@@ -645,10 +620,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal)
 !! OUTPUT
 !!  eig <real(nband)> = the eigenvalues
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -677,6 +649,7 @@ subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
  integer   :: shift
  real(dp)  :: dprod_r, dprod_i
  !arrays
+
 ! ***********************************************************************
 
  do iband=1, nband
@@ -695,7 +668,8 @@ subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
     end if
  end do
 
- end subroutine rttddft_calc_eig
+end subroutine rttddft_calc_eig
+!!***
 
 !!****f* m_rttddft/rttddft_calc_enl
 !!
@@ -719,7 +693,6 @@ subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -764,7 +737,8 @@ subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
  ABI_FREE(eig_dummy)
  ABI_FREE(gvnlxc_dummy)
 
- end subroutine rttddft_calc_enl
+end subroutine rttddft_calc_enl
+!!***
 
 !!****f* m_rttddft/rttddft_calc_occ
 !!
@@ -785,6 +759,9 @@ subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 !!  cg0 <real(2,npw*nspinor*nband)> = the initial wavefunction coefficients
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  ham_k <gs_hamiltonian_type> = hamiltonian at point k
+!!  ikpt <integer> = indice of the considered k-point
+!!  ibg <integer> = indice of the considered k-point for cprj
+!!  isppol <integer> = indice of the considered spin-polarization
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  nband_k <integer> = number of bands
 !!  npw_k <integer> = number of plane waves
@@ -819,8 +796,8 @@ subroutine rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg,nband_k
  type(MPI_type),            intent(inout) :: mpi_enreg
  type(tdks_type), target,   intent(inout) :: tdks
  !arrays
- real(dp),                  intent(inout) :: cg(2,npw_k*nspinor*nband_k)
- real(dp),                  intent(inout) :: cg0(2,npw_k*nspinor*nband_k)
+ real(dp),                  intent(in)    :: cg(2,npw_k*nspinor*nband_k)
+ real(dp),                  intent(in)    :: cg0(2,npw_k*nspinor*nband_k)
  real(dp),                  intent(out)   :: occ(nband_k)
  real(dp),                  intent(in)    :: occ0(nband_k)
 
@@ -943,7 +920,8 @@ subroutine rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg,nband_k
    end if
  end if
 
- end subroutine rttddft_calc_occ
+end subroutine rttddft_calc_occ
+!!***
 
 end module m_rttddft
 !!***

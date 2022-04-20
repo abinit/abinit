@@ -7,15 +7,12 @@
 !!  the time-dependent Kohn-Sham equations in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
-!!  m_rttddft_driver
 !!
 !! CHILDREN
 !!
@@ -83,12 +80,12 @@ module m_rttddft_tdks
  private
 !!***
 
-! NAME
-! tdks_type: Time Dependent Kohn-Sham type
-! Object containing the TD KS orbitals and all other 
-! important variables required to run RT-TDDFT
-!
-! SOURCE
+!! NAME
+!! tdks_type: Time Dependent Kohn-Sham type
+!! Object containing the TD KS orbitals and all other 
+!! important variables required to run RT-TDDFT
+!!
+!! SOURCE
  type,public :: tdks_type
 
   !scalars
@@ -97,7 +94,6 @@ module m_rttddft_tdks
    integer                          :: mband_cprj  !nb of band per proc (for cprj)
    integer                          :: mcg         !nb of WFs (cg) coeffs
    integer                          :: mcprj       !nb of cprj (projectors applied to WF)
-!  integer                          :: my_nspinor  !nb of spinors treated by proc              !FB: Needed?
    integer                          :: nfftf       !nb of FFT grid pts (fine grid)
    integer                          :: nfft        !nb of FFT grid pts (coarse grid)
    integer                          :: nhatgrdim   !dimension of nhatgr array
@@ -188,9 +184,10 @@ module m_rttddft_tdks
     procedure :: free => tdks_free
 
  end type tdks_type
-!***
+!!***
 
 contains
+!!***
 
 !!****f* m_rttddft_tdks/tdks_init
 !!
@@ -209,14 +206,11 @@ contains
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
-!!  tdks <class(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
+!!  tdks <class(tdks_type)> = the tdks object to initialize
 !!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -310,7 +304,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !and also associated cprojs
  if (dtset%prtocc > 0) then
    ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
-   !FB Ouch! If only we could we avoid this..
+   !FB Could we could we avoid this..?
    tdks%cg0(:,:) = tdks%cg(:,:)
    if (psps%usepaw ==1) then 
       ncpgr=0
@@ -328,8 +322,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    tdks%occ(:) = tdks%occ0(:)
  end if
 
- !FB: That should be all for now but there were a few more initialization in
- !g_state.F90 in particular related to electric field, might want to check that out
+ !FB: That should be all for now but there were few more initializations in
+ !g_state.F90 in particular related to electric field, might want to check it out
  !once we reach the point of including external electric field
 
  !Keep some additional stuff in memory within the tdks object
@@ -341,9 +335,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%pawrad => pawrad
  tdks%pawtab => pawtab
 
- print*, 'FB-test: in tdks_init:', size(pawtab), size(tdks%pawtab) 
-
 end subroutine tdks_init
+!!***
 
 !!****f* m_rttddft_tdks/tdks_free
 !!
@@ -361,10 +354,7 @@ end subroutine tdks_init
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -462,6 +452,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    end if
 
 end subroutine tdks_free
+!!***
 
 !!****f* m_rttddft_tdks/first_setup
 !!
@@ -476,43 +467,17 @@ end subroutine tdks_free
 !!  codvsn = code version
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
-!!  ecut_eff <real(dp)> = effective PW cutoff energy
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)> = paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)> = paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
-!!  psp_gencond <integer> = store conditions for generating psp
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!! It is worth to explain THE USE OF FFT GRIDS:
-!! ============================================
-!! In case of PAW:
-!! ---------------
-!!    Two FFT grids are used:
-!!    - A "coarse" FFT grid (defined by ecut)
-!!      for the application of the Hamiltonian on the plane waves basis.
-!!      It is defined by nfft, ngfft, mgfft, ...
-!!      Hamiltonian, wave-functions, density related to WFs (rhor here), ...
-!!      are expressed on this grid.
-!!    - A "fine" FFT grid (defined) by ecutdg)
-!!      for the computation of the density inside PAW spheres.
-!!      It is defined by nfftf, ngfftf, mgfftf, ...
-!!      Total density, potentials, ...
-!!      are expressed on this grid.
-!! In case of norm-conserving:
-!! ---------------------------
-!!    - Only the usual FFT grid (defined by ecut) is used.
-!!      It is defined by nfft, ngfft, mgfft, ...
-!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
-!!      are set equal to (nfft,ngfft,mgfft) in that case.
+!!  psp_gencond <integer> = store conditions for generating psp
+!!  ecut_eff <real(dp)> = effective PW cutoff energy
 !!
 !! PARENTS
-!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -707,7 +672,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  tdks%indsym(:,:,:)=0
  tdks%symrec(:,:,:)=0
 
- !TODO FB: Should symmetry be used when ions are moving? Modify if Ehrenfest dynamics
+ !FB TODO: Should symmetry be used when ions are moving? Modify if Ehrenfest dynamics
  !Do symmetry stuff if nsym>1
  if (dtset%nsym>1) then
    call setsym(tdks%indsym,tdks%irrzon,dtset%iscf,dtset%natom, &
@@ -760,6 +725,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  !call setup2(dtset,npwtot,start,tdks%wvl%wfs,tdks%xred)
 
 end subroutine first_setup
+!!***
 
 !!****f* m_rttddft_tdks/second_setup
 !!
@@ -782,10 +748,7 @@ end subroutine first_setup
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -1044,6 +1007,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  ABI_MALLOC(tdks%taug,(2,tdks%nfftf*dtset%usekden))
 
 end subroutine second_setup
+!!***
 
 !!****f* m_rttddft_tdks/read_wfk
 !!
@@ -1062,10 +1026,7 @@ end subroutine second_setup
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_tdks/rttddft_init
 !!
 !! CHILDREN
 !!
@@ -1164,6 +1125,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  tdks%eigen0(:) = tdks%eigen(:)
 
 end subroutine read_wfk
+!!***
 
 end module m_rttddft_tdks
 !!***

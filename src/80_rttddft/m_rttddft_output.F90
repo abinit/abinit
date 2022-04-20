@@ -6,15 +6,12 @@
 !!  Manages most output of RT-TDDFT runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
-!!  m_rttddft_driver
 !!
 !! CHILDREN
 !!
@@ -40,7 +37,7 @@ module m_rttddft_output
  use m_epjdos,        only: dos_calcnwrite, partial_dos_fractions, &
                           & partial_dos_fractions_paw,epjdos_t,    &
                           & epjdos_new, prtfatbands, fatbands_ncwrite
- use m_errors,        only: msg_hndl, assert, netcdf_check
+ use m_errors,        only: msg_hndl, assert
  use m_ioarr,         only: fftdatar_write
  use m_io_tools,      only: open_file
  use m_iowf,          only: outwf
@@ -48,7 +45,6 @@ module m_rttddft_output
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
- use m_nctk,          only: nctk_open_create
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
  use m_rttddft_tdks,  only: tdks_type
  use m_specialmsg,    only: wrtout
@@ -63,6 +59,7 @@ module m_rttddft_output
 !!***
 
 contains 
+!!***
 
 !!****f* m_rttddft_output/rttddft_output
 !!
@@ -82,10 +79,7 @@ contains
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -161,24 +155,6 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
                                     & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
-!!Special case of last step
-!!prints last WF for restart and close TD_ENER file
-!if (istep == tdks%first_step+tdks%ntime-1) then
-!   if (mod(istep,dtset%td_prtstr) == 0) then 
-!      call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-!      call prt_eig(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-!   end if
-!   call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-!   call prt_restart(dtfil,istep,mpi_enreg,tdks)
-!   close(tdks%tdener_unit)
-!else if (mod(istep,dtset%td_prtstr) == 0) then
-!   call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-!   if (dtset%prtwf > 0) then
-!      call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-!      call prt_restart(dtfil,istep,mpi_enreg,tdks)
-!   end if
-!end if
-
  if (mod(istep,dtset%td_prtstr) == 0) then
     call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
     call prt_eig(dtfil,dtset,istep,mpi_enreg,tdks)
@@ -200,6 +176,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  end if
 
 end subroutine rttddft_output
+!!***
 
 !!****f* m_rttddft_output/prt_eig
 !!
@@ -207,14 +184,13 @@ end subroutine rttddft_output
 !!  prt_eig
 !!
 !! FUNCTION
-!!  Outputs the eigenvalues
+!!  Outputs eigenvalues
 !!
 !! INPUTS
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
@@ -269,6 +245,7 @@ subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
  end if
 
 end subroutine prt_eig
+!!***
 
 !!****f* m_rttddft_output/prt_occ
 !!
@@ -276,19 +253,16 @@ end subroutine prt_eig
 !!  prt_occ
 !!
 !! FUNCTION
-!!  Computes and then outputs occupation numbers
+!!  Outputs occupation numbers
 !!
 !! INPUTS
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  istep <integer> = step number
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
-!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
@@ -369,6 +343,7 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
  end if
 
 end subroutine prt_occ
+!!***
 
 !!****f* m_rttddft_output/prt_den
 !!
@@ -387,8 +362,6 @@ end subroutine prt_occ
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
@@ -514,21 +487,12 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    end if
  end if
 
-!#ifdef HAVE_NETCDF
-!   ! Write netcdf file with dos% results.
-!   if (me == master) then
-!     fname = trim(dtfil%filnam_ds(4))//'_FATBANDS_'//trim(adjustl(step_nb))//'.nc'
-!     NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-!     call fatbands_ncwrite(dos, crystal, ebands, tdks%hdr, dtset, psps, tdks%pawtab, ncid)
-!     NCF_CHECK(nf90_close(ncid))
-!   end if
-!#endif
-
  call dos%free()
  call crystal%free()
  call ebands_free(ebands)
  
 end subroutine prt_den
+!!***
 
 !!****f* m_rttddft_output/prt_wfk
 !!
@@ -545,10 +509,9 @@ end subroutine prt_den
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
+!!  force_write <logical> = force the writing of WFK (useful for last step) - optional
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
@@ -601,6 +564,7 @@ subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks, force_write)
  end if
 
 end subroutine prt_wfk
+!!***
 
 !!****f* m_rttddft_output/prt_restart
 !!
@@ -617,8 +581,6 @@ end subroutine prt_wfk
 !!  tdks <type(tdks_type)> = the tdks object to initialize
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!
@@ -659,6 +621,7 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
  end if
 
 end subroutine prt_restart
+!!***
 
 end module m_rttddft_output
 !!***

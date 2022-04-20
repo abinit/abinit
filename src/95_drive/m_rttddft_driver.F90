@@ -1,9 +1,9 @@
 !!****m* ABINIT/m_rttddft_driver
 !! NAME
-!!  m_rttddft
+!!  m_rttddft_driver
 !!
 !! FUNCTION
-!!  Real-time Time Dependent DFT (RT-TDDFT)
+!!  Real-Time Time Dependent DFT (RT-TDDFT)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2021-2022 ABINIT group (FB)
@@ -73,7 +73,7 @@ contains
 !!
 !! INPUTS
 !!  codvsn = code version
-!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  dtfil <type datafiles_type> = infos about file names
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  pawang <type(pawang_type)> = paw angular mesh and related data
@@ -84,7 +84,6 @@ contains
 !! OUTPUT
 !!
 !! PARENTS
-!!  m_driver
 !!
 !! CHILDREN
 !!
@@ -126,14 +125,10 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- !TODO: Add calculation of eigenvalues and energy contributions in init
  call tdks%init(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
  !Compute initial electronic density
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
-
- !TODO: If not restart then compute and output properties at t = 0
- !call rttddft_output(dtset,mpi_enreg,psps,tdks)
 
  !** 2) Propagation loop
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
@@ -157,7 +152,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    !Compute and output useful electronic values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
 
-   !FB TODO: If Ehrenfest dynamics perform nuclear step
+   !TODO: If Ehrenfest dynamics perform nuclear step
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    call cwtime(cpu,wall,gflops,"stop")

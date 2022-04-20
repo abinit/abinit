@@ -3,19 +3,15 @@
 !!  m_rttddft_propagate
 !!
 !! FUNCTION
-!!  Contains a driver to propagate the KS orbitals 
-!!  and the nuclei (Ehrenfest) if required
+!!  Driver to perform electronic or nuclear step
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB, MT)
+!!  Copyright (C) 2021-2022 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
-!!  m_rttddft_driver
 !!
 !! CHILDREN
 !!
@@ -41,7 +37,6 @@ module m_rttddft_propagate
                                 & rttddft_propagator_emr
  use m_rttddft_tdks,        only: tdks_type
  use m_specialmsg,          only: wrtout
- use m_symtk,               only: symmetrize_xred
 
  implicit none
 
@@ -53,6 +48,7 @@ module m_rttddft_propagate
 !!***
 
 contains 
+!!***
 
 !!****f* m_rttddft/rttddft_propagate_ele
 !!
@@ -71,10 +67,7 @@ contains
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
-!!  m_rttddft_driver/rttddft
 !!
 !! CHILDREN
 !!
@@ -117,7 +110,8 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
       ABI_ERROR(msg)
  end select
 
- end subroutine rttddft_propagate_ele
+end subroutine rttddft_propagate_ele
+!!***
 
 !!****f* m_rttddft/rttddft_propagate_nuc
 !!
@@ -167,7 +161,8 @@ subroutine rttddft_propagate_nuc(dtset, istep, mpi_enreg, psps, tdks)
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- end subroutine rttddft_propagate_nuc
+end subroutine rttddft_propagate_nuc
+!!***
 
 end module m_rttddft_propagate
 !!***
