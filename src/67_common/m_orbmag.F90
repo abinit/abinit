@@ -86,7 +86,6 @@ module m_orbmag
 
   public :: orbmag_tt
 
-  private :: gs_eigenvalues
   private :: d2lr_p2
   private :: d2lr_Anp
   private :: dl_Anp
@@ -142,8 +141,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
+subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+    & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial,&
     & xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -157,8 +156,10 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  !arrays
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),ngfftf(18),npwarr(dtset%nkpt)
- real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3),rprimd(3,3),xred(3,dtset%natom)
- real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: cg(2,mcg),cg1(2,mcg1,3)
+ real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: eigen1_3(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol,3)
+ real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -183,7 +184,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
  real(dp),allocatable :: bc_k(:,:,:),bco_k(:,:,:,:),buffer1(:),buffer2(:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
- real(dp),allocatable :: Enk(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
+ real(dp),allocatable :: eig_k(:),eig1_k(:,:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: om_k(:,:,:),omo_k(:,:,:,:),orbmag_terms(:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:),rhoij(:,:,:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
@@ -431,9 +432,11 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    end do
    ABI_FREE(cwavef)
 
-   ! compute GS eigenvalues
-   ABI_MALLOC(Enk,(nband_k))
-   call gs_eigenvalues(atindx,cg_k,cprj_k,dimlmn,dtset,Enk,gs_hamk,ikpt,mcgk,mpi_enreg,nband_k,npw_k)
+   ! retrieve zeroth order and first order eigenvalues
+   ABI_MALLOC(eig_k,(nband_k))
+   eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)
+   ABI_MALLOC(eig1_k,(2*nband_k*nband_k,3))
+   eig1_k(1:2*nband_k*nband_k,1:3) = eigen1_3(2*nband_k*nband_k*(ikpt-1)+1:2*nband_k*nband_k*ikpt,1:3)
 
    !--------------------------------------------------------------------------------
    ! Finally ready to compute contributions to orbital magnetism and Berry curvature
@@ -448,7 +451,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ABI_MALLOC(om_k,(2,nband_k,3))
    ABI_MALLOC(omo_k,(2,nband_k,3,3))
 
-   call apply_pw_k(bc_k,cg1_k,dimlmn,Enk,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
+   call apply_pw_k(bc_k,cg1_k,dimlmn,eig_k,gs_hamk,mcgk,mpi_enreg,dtset%natom,&
      & nband_k,npw_k,dtset%nspinor,om_k)
 
    orbmag_terms(:,:,:,ibcpw) = orbmag_terms(:,:,:,ibcpw) + trnrm*bc_k
@@ -458,7 +461,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! additional onsite terms to both Berry and orbmag (no |phi> derivatives) 
    !--------------------------------------------------------------------------------
 
-   call apply_onsite_d0_k(atindx,bco_k,cprj_k,cprj1_k,Enk,&
+   call apply_onsite_d0_k(atindx,bco_k,cprj_k,cprj1_k,eig_k,&
      & dtset%natom,nband_k,dtset%ntypat,omo_k,paw_ij,pawtab,dtset%typat)
 
    orbmag_terms(:,:,:,ibcdpdp) = orbmag_terms(:,:,:,ibcdpdp) + trnrm*bco_k(:,:,:,1)
@@ -506,7 +509,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    !--------------------------------------------------------------------------------
 
    call apply_dl_term_k(atindx,cprj_k,cprj1_k,dlq,om_k,iomdlq,lmn2max,dtset%natom,&
-     & nband_k,dtset%ntypat,pawtab,dtset%typat,Enk=Enk)
+     & nband_k,dtset%ntypat,pawtab,dtset%typat,Enk=eig_k)
    orbmag_terms(:,:,:,iomdlq) = orbmag_terms(:,:,:,iomdlq) + trnrm*om_k
 
 
@@ -541,7 +544,8 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
    ABI_FREE(cg_k)
    ABI_FREE(cg1_k)
-   ABI_FREE(Enk)
+   ABI_FREE(eig_k)
+   ABI_FREE(eig1_k)
    ABI_FREE(ylm_k)
    ABI_FREE(ylmgr_k)
    ABI_FREE(kpg_k)
@@ -1095,103 +1099,6 @@ subroutine apply_onsite_d0_k(atindx,bc_k,cprj_k,cprj1_k,Enk,&
 
 end subroutine apply_onsite_d0_k
 !!***
-
-!!****f* ABINIT/gs_eigenvalues
-!! NAME
-!! gs_eigenvalues
-!!
-!! FUNCTION
-!! compute GS eigenvalues from GS wavefunctions
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine gs_eigenvalues(atindx,cg_k,cprj_k,dimlmn,dtset,Enk,&
-    & gs_hamk,ikpt,mcgk,mpi_enreg,nband_k,npw_k)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: ikpt,mcgk,nband_k,npw_k
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk)
-  real(dp),intent(out) :: Enk(nband_k)
-  type(pawcprj_type),intent(inout) :: cprj_k(dtset%natom,dtset%mband)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: cpopt,isppol,my_ndat,my_nspinor,my_timer,nn,prtvol,sij_opt,type_calc
-  real(dp) :: lambda
-  !arrays
-  real(dp),allocatable :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
-!--------------------------------------------------------------------
-
-  ABI_MALLOC(cwaveprj,(dtset%natom,1))
-  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
-  ABI_MALLOC(cwavef,(2,npw_k))
-  ABI_MALLOC(ghc,(2,npw_k))
-  ABI_MALLOC(gsc,(2,npw_k))
-  ABI_MALLOC(gvnlc,(2,npw_k))
-
-  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-  isppol = 1
-  cpopt=4 ! use cprj in memory, not using lambda
-  lambda=zero 
-  sij_opt = 0 ! no gsc saved
-  type_calc = 0 ! use all of Hamiltonian: kinetic, local, nonlocal
-  my_timer = 0
-  my_ndat = 1
-  prtvol=0
-
-  do nn = 1, nband_k
-    cwavef(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
-
-    ! compute Enk and S|u_nk>
-    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-         &           dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
-    call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,my_ndat,&
-       &           prtvol,sij_opt,my_timer,type_calc)
-    Enk(nn) = DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
-
-  end do
-
-  ABI_FREE(cwavef)
-  ABI_FREE(ghc)
-  ABI_FREE(gsc)
-  ABI_FREE(gvnlc)
-  call pawcprj_free(cwaveprj)
-  ABI_FREE(cwaveprj)
- 
-end subroutine gs_eigenvalues
-!!***
-
 
 !!****f* ABINIT/lamb_core
 !! NAME
