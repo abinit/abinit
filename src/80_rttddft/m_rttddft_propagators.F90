@@ -45,7 +45,6 @@ module m_rttddft_propagators
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
  use m_nonlop,              only: nonlop
- use m_pawcprj,             only: pawcprj_type
  use m_rttddft,             only: rttddft_init_hamiltonian, &
                                 & rttddft_calc_density, &
                                 & rttddft_calc_occ
@@ -124,7 +123,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: displ
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: iband
- integer                        :: icg
+ integer                        :: ibg, icg
  integer                        :: ider, idir
  integer                        :: ierr, ilm
  integer                        :: ikpt, ikpt_loc, ikg
@@ -133,11 +132,10 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: me_distrb
  integer                        :: me_bandfft
  integer                        :: my_ikpt, my_nspinor
- integer                        :: nband_k
+ integer                        :: nband_k, nband_k_mem
  integer                        :: npw_k, nkpg
  integer                        :: shift
  integer                        :: spaceComm_distrb
- integer                        :: upbound
  integer                        :: n4, n5, n6
  logical                        :: with_vxctau
  logical                        :: lcalc_properties
@@ -156,8 +154,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  real(dp), allocatable          :: kinpw(:)
  real(dp), pointer              :: occ(:) => null() 
  real(dp), pointer              :: occ0(:) => null()
- type(pawcprj_type), allocatable:: cprj(:,:)
- type(pawcprj_type), allocatable:: cprj0(:,:)
  real(dp), allocatable          :: ph3d(:,:,:)
  real(dp), allocatable          :: vlocal(:,:,:,:)
  real(dp), allocatable          :: vxctaulocal(:,:,:,:,:)
@@ -230,7 +226,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 !  vectornd_pac=zero
 !end if
 
- icg=0
+ icg=0; ibg=0
  bdtot_index=0
 
  !*** LOOP OVER SPINS
@@ -274,6 +270,11 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       my_ikpt = mpi_enreg%my_kpttab(ikpt)
 
       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+      if (mpi_enreg%paral_kgb==1) then
+         nband_k_mem=mpi_enreg%bandpp
+      else
+         nband_k_mem=nband_k
+      end if
       istwf_k=dtset%istwfk(ikpt)
       npw_k=tdks%npwarr(ikpt)
 
@@ -377,33 +378,24 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       if (lcalc_properties) then 
          if (dtset%paral_kgb /= 1) then 
             shift = bdtot_index
-            upbound = nband_k
          else
             me_bandfft = xmpi_comm_rank(mpi_enreg%comm_band) 
             shift = bdtot_index+me_bandfft*mpi_enreg%bandpp
-            upbound = mpi_enreg%bandpp
          end if
          if (lproperties(2)) then
             ABI_MALLOC(enl,(mpi_enreg%bandpp))
             enl = zero
          end if
          if (lproperties(3)) then
-            eig => tdks%eigen(1+shift:upbound+shift)
+            eig => tdks%eigen(1+shift:nband_k_mem+shift)
          end if
          if (lproperties(4)) then
             !note that occupations are computed at istep-1 like energies
             cg0 => tdks%cg0(:,icg+1:icg+nband_k*npw_k*my_nspinor)
             occ => tdks%occ(bdtot_index+1:bdtot_index+nband_k)
             occ0 => tdks%occ0(bdtot_index+1:bdtot_index+nband_k)
-            if (dtset%usepaw == 1) then 
-               call rttddft_calc_occ(cg,cg0,tdks%cprj,tdks%cprj0,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,occ,occ0)
-            else
-               ABI_MALLOC(cprj,(0,0))
-               ABI_MALLOC(cprj0,(0,0))
-               call rttddft_calc_occ(cg,cg0,cprj,cprj0,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,occ,occ0)
-               ABI_FREE(cprj)
-               ABI_FREE(cprj0)
-            end if
+            call rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg, &
+                                & nband_k,npw_k,my_nspinor,occ,occ0,tdks)
          end if
 
          !Propagate cg and compute the requested properties
@@ -435,6 +427,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
       !** Also shift array memory if dtset%mkmem/=0
       if (dtset%mkmem/=0) then
+         ibg=ibg+nband_k_mem
          icg=icg+npw_k*my_nspinor*nband_k
          ikg=ikg+npw_k
       end if
