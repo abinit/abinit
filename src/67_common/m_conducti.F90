@@ -699,7 +699,7 @@ contains
    write(ocond_unt,'(a,3f10.5,a)' )'#                    ',rprimd(1:3,3)
    write(ocond_unt,'(a,i8)' )      '# natom             =',natom
    write(ocond_unt,'(a,3i8)' )     '# nkpt,mband,nsppol        =',nkpt,mband,nsppol
-   write(ocond_unt,'(a, f10.5)' )'# ecut                  =',ecut,' Ha'
+   write(ocond_unt,'(a, f10.5,a)' )'# ecut                  =',ecut,' Ha'
    write(ocond_unt,'(a,f10.5,a,f10.5,a)' )'# fermie            =',fermie,' Ha ',fermie*Ha_eV,' eV'
 
    write(ocond_unt,'(a,f12.5,a,f12.5,a)') '# Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
@@ -933,8 +933,11 @@ end subroutine conducti_paw
    filnam2=trim(filnam_gen)//'_OPT2'
 !  Read frequency range
    if (need_absorption) then
-     read(iunt,*) dom,omin,omax,mom,atnbr,dom_max,dom_ctr
-   else if (need_emissivity) then
+     read(iunt,err=11,end=11,fmt=*) dom,omin,omax,mom,atnbr,dom_max,dom_ctr
+     goto 12
+11   backspace(iunt) ; read(iunt,*) dom,omin,omax,mom,atnbr ; dom_max=zero ; dom_ctr=zero
+12   continue
+else if (need_emissivity) then
      read(iunt,*) dom,omin,omax,mom,atnbr
      dom_max=zero;dom_ctr=zero
    end if
