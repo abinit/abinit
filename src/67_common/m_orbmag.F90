@@ -1402,6 +1402,7 @@ subroutine dl_vha(atindx,dlvh,dtset,gntselect,gprimd,lmn2max,my_lmax,&
 
  ABI_FREE(intg) 
 end subroutine dl_vha
+!!***
 
 
 !!****f* ABINIT/dl_vhnzc
@@ -1501,6 +1502,7 @@ subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab
  end do ! end loop over types
  
 end subroutine dl_vhnzc
+!!***
 
 !!****f* ABINIT/dl_q
 !! NAME
@@ -1581,6 +1583,7 @@ subroutine dl_q(dlq,dtset,gprimd,lmn2max,pawtab)
  end do ! end loop over types
  
 end subroutine dl_q
+!!***
 
 !!****f* ABINIT/dl_p2
 !! NAME
@@ -1691,6 +1694,7 @@ subroutine dl_p2(dlp2,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,realg
   end do ! end loop over atoms
  
 end subroutine dl_p2
+!!***
 
 !!****f* ABINIT/dl_Anp
 !! NAME
@@ -1808,6 +1812,7 @@ subroutine dl_Anp(dlanp,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,rea
   end do ! end loop over atoms
  
 end subroutine dl_Anp
+!!***
 
 
 !!****f* ABINIT/d2lr_p2
@@ -1908,6 +1913,7 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
   end do ! end loop over atoms
  
 end subroutine d2lr_p2
+!!***
 
 !!****f* ABINIT/apply_d2lr_term_k
 !! NAME
@@ -1997,6 +2003,7 @@ subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm
   end do ! end loop over nn
  
 end subroutine apply_d2lr_term_k
+!!***
 
 !!****f* ABINIT/d2lr_Anp
 !! NAME
@@ -2428,6 +2435,7 @@ subroutine local_rhoij(atindx,dtset,cprj,lmn2max,mcprj,mpi_enreg,rhoij,pawtab,uc
  end if
 
 end subroutine local_rhoij
+!!***
 
 
 end module m_orbmag
