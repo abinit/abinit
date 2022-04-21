@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (MT)
+!!  Copyright (C) 1998-2022 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -721,7 +721,7 @@ contains
 
 !  Test on local part
    testnl=(paw_opt/=0)
-   if (paw_opt==0) testnl=any(enl(:,:,:,:)>tol10)
+   if (paw_opt==0) testnl=any(abs(enl(:,:,:,:))>tol10)
 
 !  Some non-local part is to be applied for that type of atom
    if (testnl) then

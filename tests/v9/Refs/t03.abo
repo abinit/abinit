@@ -2,7 +2,7 @@
 .Version 9.5.4 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin20.6.0_gnu11.2 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -57,6 +57,7 @@ _ WF disk file :      0.745 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
           chkprim           0
+      chksymtnons           3
   constraint_kind        1
              ecut      7.00000000E+00 Hartree
 -          fftalg         312
@@ -799,6 +800,7 @@ total_energy_dc_eV  : -6.75620305898979E+03
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
           chkprim           0
+      chksymtnons           3
   constraint_kind        1
              ecut      7.00000000E+00 Hartree
            etotal1    -2.4828708968E+02

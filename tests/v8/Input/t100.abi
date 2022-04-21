@@ -14,6 +14,8 @@ ncell = 2 2 2
 # Optimize a coefficient in th effective potential 
 bound_model = 3
 bound_rangePower = 6 6  
+bound_penalty = 1.001 
+bound_factors = 0 1 1
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

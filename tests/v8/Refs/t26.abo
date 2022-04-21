@@ -2,7 +2,7 @@
 .Version 9.5.4 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin20.6.0_gnu11.2 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -145,6 +145,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
            chrgat      6.90000000E-01  6.90000000E-01
   constraint_kind11      1
   constraint_kind12     11
@@ -1301,6 +1302,7 @@ band_energy         : -6.32416126747898E-01
  -outvars: echo values of variables after computation  --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
            chrgat      6.90000000E-01  6.90000000E-01
   constraint_kind11      1
   constraint_kind12     11

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (GG)
+!!  Copyright (C) 2010-2022 ABINIT group (GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -223,8 +223,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
 !    Take acell and rprim from 1st image
      call mkrdim(results_img(1,itime)%acell,results_img(1,itime)%rprim,rprimd)
      call mkrdim(results_img(1,itime_prev)%acell,results_img(1,itime_prev)%rprim,rprimd_prev)
-     rprimd_next(:,:)=rprimd_prev(:,:)
-     vel_cell(:,:)=results_img(1,1)%vel_cell(:,:)
+     vel_cell(:,:)=results_img(1,itime)%vel_cell(:,:)
 
 !    Compute the volume of the supercell
      volume=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
@@ -267,10 +266,10 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
 !  Parallelism: dispatch results
 !  The trick: use (9,natom) to store xred,xred_next,vel for all atoms
 !  use (9      ) to store rprimd_next
-   ABI_MALLOC(mpibuffer,(9,natom+2,nimage))
+   ABI_MALLOC(mpibuffer,(9,natom+3,nimage))
    if (mpi_enreg%paral_img==1) then
      if (mpi_enreg%me_img==0) then
-       ABI_MALLOC(mpibuffer_all,(9,natom+2,nimage_tot))
+       ABI_MALLOC(mpibuffer_all,(9,natom+3,nimage_tot))
        do ii=1,nimage_tot
          mpibuffer_all(1:3,1:natom,ii)=xred_next(1:3,1:natom,ii)
          mpibuffer_all(4:6,1:natom,ii)=xred(1:3,1:natom,ii)
@@ -281,6 +280,9 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
          mpibuffer_all(1:3,natom+2,ii)=vel_cell(1:3,1)
          mpibuffer_all(4:6,natom+2,ii)=vel_cell(1:3,2)
          mpibuffer_all(7:9,natom+2,ii)=vel_cell(1:3,3)
+         mpibuffer_all(1:3,natom+3,ii)=rprimd(1:3,1)
+         mpibuffer_all(4:6,natom+3,ii)=rprimd(1:3,2)
+         mpibuffer_all(7:9,natom+3,ii)=rprimd(1:3,3)
        end do
      end if
      call scatter_array_img(mpibuffer,mpibuffer_all,mpi_enreg)
@@ -298,6 +300,9 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
        mpibuffer(1:3,natom+2,ii)=vel_cell(1:3,1)
        mpibuffer(4:6,natom+2,ii)=vel_cell(1:3,2)
        mpibuffer(7:9,natom+2,ii)=vel_cell(1:3,3)
+       mpibuffer(1:3,natom+3,ii)=rprimd(1:3,1)
+       mpibuffer(4:6,natom+3,ii)=rprimd(1:3,2)
+       mpibuffer(7:9,natom+3,ii)=rprimd(1:3,3)
      end do
    end if
 
@@ -312,7 +317,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
    end if
 
  else
-   ABI_MALLOC(mpibuffer,(9,natom+2,nimage))
+   ABI_MALLOC(mpibuffer,(9,natom+3,nimage))
 
  end if ! mpi_enreg%me_cell==0
 
@@ -330,15 +335,17 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
  end do
  if (pimd_param%optcell/=0) then
    do ii=1,nimage
-     results_img(ii,itime)%acell(1:3)=results_img(ii,itime_prev)%acell(1:3)
-     results_img(ii,itime)%rprim(1:3,1:3)=results_img(ii,itime_prev)%rprim(1:3,1:3)
      rprimd(1:3,1)=mpibuffer(1:3,natom+1,ii)
      rprimd(1:3,2)=mpibuffer(4:6,natom+1,ii)
      rprimd(1:3,3)=mpibuffer(7:9,natom+1,ii)
+     call mkradim(results_img(ii,itime_next)%acell,results_img(ii,itime_next)%rprim,rprimd)
+     rprimd_prev(1:3,1)=mpibuffer(1:3,natom+3,ii)
+     rprimd_prev(1:3,2)=mpibuffer(4:6,natom+3,ii)
+     rprimd_prev(1:3,3)=mpibuffer(7:9,natom+3,ii)
+     call mkradim(results_img(ii,itime)%acell,results_img(ii,itime)%rprim,rprimd_prev)
      results_img(ii,itime_next)%vel_cell(1:3,1)=mpibuffer(1:3,natom+2,ii)
      results_img(ii,itime_next)%vel_cell(1:3,2)=mpibuffer(4:6,natom+2,ii)
      results_img(ii,itime_next)%vel_cell(1:3,3)=mpibuffer(7:9,natom+2,ii)
-     call mkradim(results_img(ii,itime_next)%acell,results_img(ii,itime_next)%rprim,rprimd)
    end do
  end if
  ABI_FREE(mpibuffer)

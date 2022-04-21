@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -819,7 +819,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    energies%e_extfpmd=extfpmd%e_kinetic
    energies%edc_extfpmd=extfpmd%edc_kinetic
    if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
-   if(optene==1.or.optene==3) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+   if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
  end if
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 

@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -867,10 +867,10 @@ force_length_stats: {min:   1.01237417E-02, max:   1.01237417E-02, mean:   1.012
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23836   -0.07393   -0.03902   -0.01686
  Total charge density [el/Bohr^3]
-      Maximum=    4.7067E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.7067E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.4743E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5192E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7067E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.7067E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.4743E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5192E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1140,10 +1140,10 @@ force_length_stats: {min:   1.01080304E-02, max:   1.01080304E-02, mean:   1.010
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23834   -0.07394   -0.03901   -0.01687
  Total charge density [el/Bohr^3]
-      Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1413,10 +1413,10 @@ force_length_stats: {min:   1.00924029E-02, max:   1.00924029E-02, mean:   1.009
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28977   -0.23832   -0.07394   -0.03899   -0.01688
  Total charge density [el/Bohr^3]
-      Maximum=    4.7053E-02  at reduced coord.    0.5000    0.0000    0.0000
- Next maximum=    4.7035E-02  at reduced coord.    0.0000    0.0000    0.5000
-      Minimum=    2.4737E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5183E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7053E-02  at reduced coord.    0.5000    0.0000    0.0000
+)Next maximum=    4.7035E-02  at reduced coord.    0.0000    0.0000    0.5000
+)     Minimum=    2.4737E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5183E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -1892,10 +1892,10 @@ force_length_stats: {min:   1.01080303E-02, max:   1.01080303E-02, mean:   1.010
   -0.28978   -0.28978   -0.23834   -0.23834   -0.07394   -0.07394   -0.03901   -0.03901
   -0.01687   -0.01687
  Total charge density [el/Bohr^3]
-      Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.7051E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.7051E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.4740E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.5187E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -2581,10 +2581,10 @@ force_length_stats: {min:   3.53104826E-03, max:   3.53104826E-03, mean:   3.531
   -0.28728   -0.28728   -0.23668   -0.23668   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
  Total charge density [el/Bohr^3]
-      Maximum=    4.5752E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.5752E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.3192E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.3807E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.5752E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.5752E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.3192E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.3807E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -2899,10 +2899,10 @@ force_length_stats: {min:   3.51107577E-03, max:   3.51107577E-03, mean:   3.511
   -0.28727   -0.28727   -0.23665   -0.23665   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
  Total charge density [el/Bohr^3]
-      Maximum=    4.5736E-02  at reduced coord.    0.0000    0.0000    0.5000
- Next maximum=    4.5736E-02  at reduced coord.    0.0000    0.5000    0.0000
-      Minimum=    2.3188E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.3803E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.5736E-02  at reduced coord.    0.0000    0.0000    0.5000
+)Next maximum=    4.5736E-02  at reduced coord.    0.0000    0.5000    0.0000
+)     Minimum=    2.3188E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.3803E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms
@@ -3217,10 +3217,10 @@ force_length_stats: {min:   3.49125150E-03, max:   3.49125150E-03, mean:   3.491
   -0.28727   -0.28727   -0.23663   -0.23663   -0.08321   -0.08321   -0.06345   -0.06345
   -0.00235   -0.00235
  Total charge density [el/Bohr^3]
-      Maximum=    4.5737E-02  at reduced coord.    0.5000    0.0000    0.0000
- Next maximum=    4.5720E-02  at reduced coord.    0.0000    0.0000    0.5000
-      Minimum=    2.3184E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    2.3799E-03  at reduced coord.    0.0000    0.0000    0.0000
+)     Maximum=    4.5737E-02  at reduced coord.    0.5000    0.0000    0.0000
+)Next maximum=    4.5720E-02  at reduced coord.    0.0000    0.0000    0.5000
+)     Minimum=    2.3184E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    2.3799E-03  at reduced coord.    0.0000    0.0000    0.0000
    Integrated=    1.0000E+01
 
 --- !EnergyTerms

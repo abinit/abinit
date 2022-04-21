@@ -7,7 +7,7 @@ prt_model = 0
 dynamics = 101  # Velocity Verlet NVE
 ncell = 6 6 6 
 temperature = 50
-ntime = 1000
+ntime = 10000
 nctime = 10
 dtion = 10
 
@@ -18,7 +18,7 @@ spin_init_qpoint = 0.5 0.5 0.5
 spin_init_rotate_axis = 1.0 0.0 0.0
 spin_mag_field= 0.0 0.0 0.0
 spin_temperature = 50
-spin_ntime =1000
+spin_ntime =10000
 spin_nctime=10
 spin_dt= 2.41888e-16 s 
 spin_projection_qpoint = 0.5 0.5 0.5
@@ -33,7 +33,7 @@ slc_coupling = 1010 # Tijuv and Oiju
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% exclude_builders = .*_nag_7.0_.*
+#%% exclude_builders = .*_nag_7.[01]_.*
 #%% spin_pot = t83.nc
 #%% latt_pot = t83.nc
 #%% slc_pot = t83.nc

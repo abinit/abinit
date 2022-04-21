@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -489,7 +489,7 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 19) Delete the status file, and, for build-in tests, analyse the correctness of results.
- if (ndtset == 0) then
+ if (ndtset == 0 .and. me == 0 .and. dtsets(1)%builtintest /= 0) then
    call testfi(dtsets(1)%builtintest,etotal,filstat,gred,natom,strten,xred)
  end if
 

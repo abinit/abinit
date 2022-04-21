@@ -10,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -289,6 +289,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(std_out,*) 'Initial temp (mdtemp(1)):',ab_mover%mdtemp(1)
    write(std_out,*) 'Final temp (mdtemp(2)):',ab_mover%mdtemp(2)
    write(std_out,*) 'Delay for atom permutation (delayperm)',ab_mover%delayperm
+   write(std_out,*) 'dtion',ab_mover%dtion
    write(std_out,*) 'nnos:', ab_mover%nnos
    write(std_out,*) 'qmass', ab_mover%qmass(:)
    write(std_out,*) 'bmass',ab_mover%bmass

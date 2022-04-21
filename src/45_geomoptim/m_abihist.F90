@@ -20,7 +20,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2022 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -203,6 +203,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Initialize flags
  hist%isVused=isVUsed
  hist%isARused=isARUsed
+
 
 !Allocate all the histories
  ABI_MALLOC(hist%acell,(3,mxhist))
