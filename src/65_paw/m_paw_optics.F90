@@ -2088,12 +2088,14 @@ CONTAINS  !=====================================================================
 !      >>>> Calculate g_ij=(g_x,g_y,g_z) = sqrt(4pi/3) int dOmega Ylm Ylm' S1-1,0,1
 !              using real Gaunt coefficients
        gx_re=zero;gy_re=zero;gz_re=zero         
-       gx_im=zero;gy_im=zero;gz_im=zero         
+       gx_im=zero;gy_im=zero;gz_im=zero
+       if3=zero
 
 !      jl was set as a flag for invalid combinations
 !        i.e. m=-(l+1) or m=(l+1)
 !      In these cases, cgc=0 ; so gx=gy=gz=0 
        if (jl/=-1) then
+         if3=intf3(iln,jln)
          klm_re=merge((jlm_re*(jlm_re-1))/2+ilm,(ilm*(ilm-1))/2+jlm_re,ilm<=jlm_re)
 
 !        Real parts
@@ -2123,7 +2125,6 @@ CONTAINS  !=====================================================================
        end if
 
 !      >>>> Calculate Sigma X g_ij
-       if3=intf3(iln,jln)
 
        if (option_core==0.or.js==1) then
          !(Sigma^up-up X gij)_x = -gy*f_3
