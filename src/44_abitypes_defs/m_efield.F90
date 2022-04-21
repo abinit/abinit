@@ -7,7 +7,7 @@
 !!  used to handle electric fields
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MJV)
+!! Copyright (C) 2011-2022 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
