@@ -116,4 +116,10 @@ inp_files = [
 "t97.abi", # test treatment of inaccurate POSCAR file
 "t98.abi", # test treatment of inaccurate POSCAR file
 "t99.abi", # test treatment of inaccurate POSCAR file
+
+# Optics with spin-orbit coupling
+"t100.abi", # Optical conductivity with spin-orbit coupling - ABINIT step
+"t101.abi", # Optical conductivity with spin-orbit coupling - CONDUCTI step
+"t102.abi", # X-ray core spectrocopy with spin-orbit coupling - ABINIT step
+"t103.abi", # X-ray core spectrocopy with spin-orbit coupling - CONDUCTI step
 ]
