@@ -43,6 +43,7 @@ module m_orbmag
   use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
   use m_cgprj,            only : getcprj
+  use m_dfpt_nstwf,       only : gaugetransfo
   use m_fft,              only : fftpac
   use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
@@ -86,6 +87,7 @@ module m_orbmag
 
   public :: orbmag_tt
 
+  private :: regauge
   private :: d2lr_p2
   private :: d2lr_Anp
   private :: dl_Anp
@@ -405,6 +407,15 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
    ABI_MALLOC(cg1_k,(2,mcgk,3))
    cg1_k = cg1(1:2,icg+1:icg+mcgk,1:3)
 
+   ! retrieve zeroth order and first order eigenvalues
+   ABI_MALLOC(eig_k,(nband_k))
+   eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)
+   ABI_MALLOC(eig1_k,(2*nband_k*nband_k,3))
+   eig1_k(1:2*nband_k*nband_k,1:3) = eigen1_3(2*nband_k*nband_k*(ikpt-1)+1:2*nband_k*nband_k*ikpt,1:3)
+
+   ! change cg1 from parallel to diagonal gauge
+   call regauge(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
+
    ! retrieve cprj_k
    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
      & dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
@@ -431,12 +442,6 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
      end do
    end do
    ABI_FREE(cwavef)
-
-   ! retrieve zeroth order and first order eigenvalues
-   ABI_MALLOC(eig_k,(nband_k))
-   eig_k(1:nband_k) = eigen0(nband_k*(ikpt-1)+1:nband_k*ikpt)
-   ABI_MALLOC(eig1_k,(2*nband_k*nband_k,3))
-   eig1_k(1:2*nband_k*nband_k,1:3) = eigen1_3(2*nband_k*nband_k*(ikpt-1)+1:2*nband_k*nband_k*ikpt,1:3)
 
    !--------------------------------------------------------------------------------
    ! Finally ready to compute contributions to orbital magnetism and Berry curvature
@@ -662,6 +667,92 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
 
 end subroutine orbmag_tt
 !!***
+
+!!****f* ABINIT/regauge
+!! NAME
+!! regauge
+!!
+!! FUNCTION
+!! convert cg1 wavefunctions from parallel gauge to diagonal gauge
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine regauge(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: mcgk,nband_k,npw_k
+
+  !arrays
+  real(dp),intent(in) :: cg_k(2,mcgk)
+  real(dp),intent(in) :: eig_k(nband_k),eig1_k(2*nband_k*nband_k,3)
+  real(dp),intent(inout) :: cg1_k(2,mcgk,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,ipw,mm,nn
+  real(dp) :: em0,en0
+  complex(dpc) :: cfac,en1
+  !arrays
+  complex(dpc),allocatable :: c0d(:),c1p(:)
+
+!--------------------------------------------------------------------
+  ABI_MALLOC(c0d,(npw_k))
+  ABI_MALLOC(c1p,(npw_k))
+
+  do adir = 1, 3
+    do mm = 1, nband_k
+      em0 = eig_k(mm)
+      do ipw = 1, npw_k
+        c1p(ipw) = cmplx(cg1_k(1,(mm-1)*npw_k+ipw,adir),cg1_k(2,(mm-1)*npw_k+ipw,adir),KIND=dpc)
+      end do
+
+      do nn = 1, nband_k
+        if (nn == mm) cycle
+        en0 = eig_k(nn)
+        en1 = cmplx(eig1_k(2*nn-1 + (mm-1)*2*nband_k,adir),eig1_k(2*nn + (mm-1)*2*nband_k,adir),KIND=dpc)
+        cfac = en1/(en0 - em0)
+        do ipw = 1, npw_k
+          c0d(ipw) = cmplx(cg_k(1,(nn-1)*npw_k+ipw),cg_k(2,(nn-1)*npw_k+ipw),KIND=dpc)
+        end do
+        c1p = c1p - cfac*c0d
+      end do
+      do ipw = 1, npw_k
+        cg1_k(1,(mm-1)*npw_k+ipw,adir) = real(c1p(ipw))
+        cg1_k(2,(mm-1)*npw_k+ipw,adir) = aimag(c1p(ipw))
+      end do
+
+    end do
+  end do ! adir
+
+  ABI_FREE(c0d)
+  ABI_FREE(c1p)
+ 
+end subroutine regauge
+!!***
+
 
 !!****f* ABINIT/apply_pw_k
 !! NAME
