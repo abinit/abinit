@@ -89,6 +89,7 @@ nav:
     - topics/Hybrids.md
     - topics/k-points.md
     - topics/LatticeModel.md
+    - topics/LatticeWannier.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
     - topics/longwave.md
