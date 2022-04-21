@@ -9644,6 +9644,7 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="LAMB shielding SIGma",
+    added_in_version="v9",
     text=r"""
 Chemical shielding at each nucleus due to the core electrons. This quantity is
 input as an array of values, one for each type, see [[ntypat]]. In calculations
