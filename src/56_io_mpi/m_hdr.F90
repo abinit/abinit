@@ -11,7 +11,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2022 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1154,7 +1154,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  Hdr_cp%headform = Hdr_in%headform
  hdr_cp%icoulomb = hdr_in%icoulomb
  Hdr_cp%intxc    = Hdr_in%intxc
- Hdr_cp%ivalence = Hdr_in%ivalence ! CP added for occopt 9 calls 
+ Hdr_cp%ivalence = Hdr_in%ivalence ! CP added for occopt 9 calls
  Hdr_cp%ixc      = Hdr_in%ixc
  Hdr_cp%natom    = Hdr_in%natom
  Hdr_cp%nkpt     = Hdr_in%nkpt
@@ -2177,8 +2177,8 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
    write(ount, '(a,i3,a)' ) ' The header contain ',hdr%npsp+2,' additional records.'
  else
    write(ount, '(a)' ) ' Third record :'
-   write(ount, '(a,(12i4,8x))') ' istwfk=',hdr%istwfk
-   write(ount, '(a,(12i4,8x))') ' nband =',hdr%nband
+   write(ount, '(a,(12i5,8x))') ' istwfk=',hdr%istwfk
+   write(ount, '(a,(12i5,8x))') ' nband =',hdr%nband
    write(ount, '(a,(10i5,8x))') ' npwarr=',hdr%npwarr
 
    write(ount, '(a,(12i4,8x))') ' so_psp=',hdr%so_psp(:)
@@ -3085,7 +3085,11 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  hdr%nh_qFD   = zero
  hdr%fermih   = zero
  if (hdr%occopt == 9) then
-    write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   This was erroneous
+!   write(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!   But this induced problems on bob_gnu_7.5_openmp
+    read(unit,err=10, iomsg=errmsg) hdr%ivalence, hdr%ne_qFD, hdr%nh_qFD, hdr%fermie, hdr%fermih
+!
  end if
  ! End CP added
 
@@ -3379,7 +3383,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  class(hdr_type),intent(inout) :: hdr
 
 !Local variables-------------------------------
- integer :: headform,ipsp
+ integer :: headform,ipsp,major,ii
  character(len=500) :: errmsg
  real(dp),allocatable :: occ3d(:,:,:)
 
@@ -3395,15 +3399,26 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
  call check_fform(fform)
 
+ ii = index(hdr%codvsn, ".")
+ if (ii == 0 .or. ii == 1) then
+   ABI_WARNING(sjoin("Cannot find major.minor pattern in codvsn:", hdr%codvsn))
+   ierr = 1; return
+ end if
+
+ major = atoi(hdr%codvsn(:ii-1))
+
 !Writing always use last format version
  headform = HDR_LATEST_HEADFORM
- ! CP debug
  !write(std_out,*) 'CP debug = ', headform
- ! End CP debug
- write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
+
+ if (major > 8) then
+   write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
+ else
+   write(unit, err=10, iomsg=errmsg) hdr%codvsn(1:6), headform, fform
+ end if
 
  write(unit, err=10, iomsg=errmsg) &
-    hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
+   hdr%bantot, hdr%date, hdr%intxc, hdr%ixc, hdr%natom, hdr%ngfft(1:3), &
    hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
    hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn, hdr%rprimd, &
    hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
@@ -3416,7 +3431,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
    hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
  ABI_FREE(occ3d)
 
- write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:) 
+ write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
  write(unit,err=10, iomsg=errmsg) &
     hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%cellcharge, hdr%icoulomb,&
    hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)

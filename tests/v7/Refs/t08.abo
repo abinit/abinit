@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.6.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Fri  8 Oct 2021.
+- ( at 15h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t08/t08.in
-- output file    -> t08.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/TestBot_MPI1/v7_t08/t08.abi
+- output file    -> t08.abo
 - root for input  files -> t08i
 - root for output files -> t08o
 
@@ -37,7 +37,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       1.620 Mbytes of memory.
+P This job should need less than                       1.667 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -57,7 +57,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       1.620 Mbytes of memory.
+P This job should need less than                       1.667 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -77,7 +77,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       1.620 Mbytes of memory.
+P This job should need less than                       1.667 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -97,7 +97,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       1.620 Mbytes of memory.
+P This job should need less than                       1.667 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -117,7 +117,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       1.620 Mbytes of memory.
+P This job should need less than                       1.667 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -137,7 +137,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       1.620 Mbytes of memory.
+P This job should need less than                       1.667 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -294,8 +294,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.19911
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/1h.atompaw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/1h.atompaw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/1h.atompaw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/1h.atompaw
 - Paw atomic data for element H - Generated by atompaw v3.0.1.5 & AtomPAW2Abinit v3.3.1
 -  1.00000   1.00000  20120829                znucl, zion, pspdat
     7    7    0    0      5992   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1432,8 +1432,10 @@ total_energy_dc_eV  : -3.48803103397353E+01
          -0.000000000      -0.000000000       0.002137697
  Pressure (primitive estimator) =     -50.802032986 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -2618,8 +2620,10 @@ total_energy_dc_eV  : -3.49113423351063E+01
           0.000002751       0.000000021       0.002137683
  Pressure (primitive estimator) =     -50.829339461 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600     -0.0000000000     -0.0000000000
 
  Atomic positions:
  xred
@@ -3804,8 +3808,10 @@ total_energy_dc_eV  : -3.49427577269977E+01
           0.000005436       0.000000091       0.002137671
  Pressure (primitive estimator) =     -50.887931096 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000     -0.0000000000
 
  Atomic positions:
  xred
@@ -4990,8 +4996,10 @@ total_energy_dc_eV  : -3.49760180839681E+01
           0.000008209       0.000000205       0.002137638
  Pressure (primitive estimator) =     -50.994403950 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000     -0.0000000000
 
  Atomic positions:
  xred
@@ -6176,8 +6184,10 @@ total_energy_dc_eV  : -3.50114157795048E+01
           0.000011202       0.000000368       0.002137615
  Pressure (primitive estimator) =     -51.138806924 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000     -0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000     -0.0000000000
 
  Atomic positions:
  xred
@@ -7383,8 +7393,10 @@ total_energy_dc_eV  : -3.48803103397353E+01
          -0.000000000      -0.000000000       0.002137697
  Pressure (primitive estimator) =     -50.802032986 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -8569,8 +8581,10 @@ total_energy_dc_eV  : -3.49176146072968E+01
          -0.000009450      -0.000000037       0.002137578
  Pressure (primitive estimator) =     -50.881537886 GPa
 
- Center of mass:
-      0.7077272029     -0.0009513245     -0.0006718784
+ Center of mass, in cartes. coordinates :
+         0.7077272029     -0.0009513245     -0.0006718784
+ Center of mass, in reduced coordinates :
+         0.1415454406     -0.0001902649     -0.0001343757
 
  Atomic positions:
  xred
@@ -9755,8 +9769,10 @@ total_energy_dc_eV  : -3.49697218181344E+01
          -0.000018339      -0.000000139       0.002137129
  Pressure (primitive estimator) =     -51.200515916 GPa
 
- Center of mass:
-      0.7067504205     -0.0018613253     -0.0009977207
+ Center of mass, in cartes. coordinates :
+         0.7067504205     -0.0018613253     -0.0009977207
+ Center of mass, in reduced coordinates :
+         0.1413500841     -0.0003722651     -0.0001995441
 
  Atomic positions:
  xred
@@ -10941,8 +10957,10 @@ total_energy_dc_eV  : -3.50298600725407E+01
          -0.000026232      -0.000000294       0.002136513
  Pressure (primitive estimator) =     -51.698787288 GPa
 
- Center of mass:
-      0.7057251427     -0.0030000477     -0.0013284431
+ Center of mass, in cartes. coordinates :
+         0.7057251427     -0.0030000477     -0.0013284431
+ Center of mass, in reduced coordinates :
+         0.1411450285     -0.0006000095     -0.0002656886
 
  Atomic positions:
  xred
@@ -12127,8 +12145,10 @@ total_energy_dc_eV  : -3.50996879453458E+01
          -0.000033319      -0.000000497       0.002135803
  Pressure (primitive estimator) =     -52.403114420 GPa
 
- Center of mass:
-      0.7047033099     -0.0042979457     -0.0018298877
+ Center of mass, in cartes. coordinates :
+         0.7047033099     -0.0042979457     -0.0018298877
+ Center of mass, in reduced coordinates :
+         0.1409406620     -0.0008595891     -0.0003659775
 
  Atomic positions:
  xred
@@ -13334,8 +13354,10 @@ total_energy_dc_eV  : -3.48803103397353E+01
          -0.000000000      -0.000000000       0.002137697
  Pressure (primitive estimator) =     -50.802032986 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -14520,8 +14542,10 @@ total_energy_dc_eV  : -3.48938028656650E+01
           0.000014134      -0.000000086       0.002136929
  Pressure (primitive estimator) =     -51.351996885 GPa
 
- Center of mass:
-      0.7094926016     -0.0006642088     -0.0052191524
+ Center of mass, in cartes. coordinates :
+         0.7094926016     -0.0006642088     -0.0052191524
+ Center of mass, in reduced coordinates :
+         0.1418985203     -0.0001328418     -0.0010438305
 
  Atomic positions:
  xred
@@ -15706,8 +15730,10 @@ total_energy_dc_eV  : -3.49223582136353E+01
           0.000027285      -0.000000331       0.002135959
  Pressure (primitive estimator) =     -52.091134455 GPa
 
- Center of mass:
-      0.7102603419     -0.0011716878     -0.0105122124
+ Center of mass, in cartes. coordinates :
+         0.7102603419     -0.0011716878     -0.0105122124
+ Center of mass, in reduced coordinates :
+         0.1420520684     -0.0002343376     -0.0021024425
 
  Atomic positions:
  xred
@@ -16892,8 +16918,10 @@ total_energy_dc_eV  : -3.49646564403324E+01
           0.000038009      -0.000000689       0.002135037
  Pressure (primitive estimator) =     -53.014174788 GPa
 
- Center of mass:
-      0.7114359688     -0.0011547497     -0.0154929442
+ Center of mass, in cartes. coordinates :
+         0.7114359688     -0.0011547497     -0.0154929442
+ Center of mass, in reduced coordinates :
+         0.1422871938     -0.0002309499     -0.0030985888
 
  Atomic positions:
  xred
@@ -18078,8 +18106,10 @@ total_energy_dc_eV  : -3.50180184643606E+01
           0.000046671      -0.000001086       0.002134460
  Pressure (primitive estimator) =     -54.087788335 GPa
 
- Center of mass:
-      0.7122798024     -0.0012186476     -0.0203465145
+ Center of mass, in cartes. coordinates :
+         0.7122798024     -0.0012186476     -0.0203465145
+ Center of mass, in reduced coordinates :
+         0.1424559605     -0.0002437295     -0.0040693029
 
  Atomic positions:
  xred
@@ -19285,8 +19315,10 @@ total_energy_dc_eV  : -3.48803103397353E+01
          -0.000000000      -0.000000000       0.002137697
  Pressure (primitive estimator) =     -50.802032986 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -20471,8 +20503,10 @@ total_energy_dc_eV  : -3.49119963520635E+01
           0.000003041       0.000000023       0.002137688
  Pressure (primitive estimator) =     -50.826536287 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -21657,8 +21691,10 @@ total_energy_dc_eV  : -3.49447000893735E+01
           0.000006007       0.000000095       0.002137683
  Pressure (primitive estimator) =     -50.881645314 GPa
 
- Center of mass:
-      0.7086444348      0.0000013936      0.0000061405
+ Center of mass, in cartes. coordinates :
+         0.7086444348      0.0000013936      0.0000061405
+ Center of mass, in reduced coordinates :
+         0.1417288870      0.0000002787      0.0000012281
 
  Atomic positions:
  xred
@@ -22843,8 +22879,10 @@ total_energy_dc_eV  : -3.49780867683810E+01
           0.000008882       0.000000213       0.002137689
  Pressure (primitive estimator) =     -50.966538764 GPa
 
- Center of mass:
-      0.7086362113      0.0000086934      0.0000243115
+ Center of mass, in cartes. coordinates :
+         0.7086362113      0.0000086934      0.0000243115
+ Center of mass, in reduced coordinates :
+         0.1417272423      0.0000017387      0.0000048623
 
  Atomic positions:
  xred
@@ -24029,8 +24067,10 @@ total_energy_dc_eV  : -3.50118147723941E+01
           0.000011645       0.000000376       0.002137714
  Pressure (primitive estimator) =     -51.080126998 GPa
 
- Center of mass:
-      0.7086206015      0.0000309042      0.0000599270
+ Center of mass, in cartes. coordinates :
+         0.7086206015      0.0000309042      0.0000599270
+ Center of mass, in reduced coordinates :
+         0.1417241203      0.0000061808      0.0000119854
 
  Atomic positions:
  xred
@@ -25236,8 +25276,10 @@ total_energy_dc_eV  : -3.48803103397353E+01
          -0.000000000      -0.000000000       0.002137697
  Pressure (primitive estimator) =     -50.802032986 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -26422,8 +26464,10 @@ total_energy_dc_eV  : -3.48976763511158E+01
          -0.000014259       0.000000032       0.002137107
  Pressure (primitive estimator) =     -51.183890512 GPa
 
- Center of mass:
-      0.7115116972      0.0035372312     -0.0007325648
+ Center of mass, in cartes. coordinates :
+         0.7115116972      0.0035372312     -0.0007325648
+ Center of mass, in reduced coordinates :
+         0.1423023394      0.0007074462     -0.0001465130
 
  Atomic positions:
  xred
@@ -27608,8 +27652,10 @@ total_energy_dc_eV  : -3.49262972604040E+01
          -0.000027359       0.000000123       0.002136248
  Pressure (primitive estimator) =     -51.720922353 GPa
 
- Center of mass:
-      0.7143457043      0.0070674222     -0.0014523585
+ Center of mass, in cartes. coordinates :
+         0.7143457043      0.0070674222     -0.0014523585
+ Center of mass, in reduced coordinates :
+         0.1428691409      0.0014134844     -0.0002904717
 
  Atomic positions:
  xred
@@ -28794,8 +28840,10 @@ total_energy_dc_eV  : -3.49644016969944E+01
          -0.000038904       0.000000262       0.002135281
  Pressure (primitive estimator) =     -52.393421689 GPa
 
- Center of mass:
-      0.7170902585      0.0105836246     -0.0021469916
+ Center of mass, in cartes. coordinates :
+         0.7170902585      0.0105836246     -0.0021469916
+ Center of mass, in reduced coordinates :
+         0.1434180517      0.0021167249     -0.0004293983
 
  Atomic positions:
  xred
@@ -29980,8 +30028,10 @@ total_energy_dc_eV  : -3.50096916758524E+01
          -0.000048645       0.000000434       0.002134381
  Pressure (primitive estimator) =     -53.174540293 GPa
 
- Center of mass:
-      0.7196516624      0.0140790765     -0.0028048304
+ Center of mass, in cartes. coordinates :
+         0.7196516624      0.0140790765     -0.0028048304
+ Center of mass, in reduced coordinates :
+         0.1439303325      0.0028158153     -0.0005609661
 
  Atomic positions:
  xred
@@ -31187,8 +31237,10 @@ total_energy_dc_eV  : -3.48803103397353E+01
          -0.000000000      -0.000000000       0.002137697
  Pressure (primitive estimator) =     -50.802032986 GPa
 
- Center of mass:
-      0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in cartes. coordinates :
+         0.7086472998      0.0000000000      0.0000000000
+ Center of mass, in reduced coordinates :
+         0.1417294600      0.0000000000      0.0000000000
 
  Atomic positions:
  xred
@@ -32373,8 +32425,10 @@ total_energy_dc_eV  : -3.48519864261842E+01
          -0.000008178       0.000000011       0.002137833
  Pressure (primitive estimator) =     -50.687671844 GPa
 
- Center of mass:
-      0.7051873441     -0.0025557542      0.0042161085
+ Center of mass, in cartes. coordinates :
+         0.7051873441     -0.0025557542      0.0042161085
+ Center of mass, in reduced coordinates :
+         0.1410374688     -0.0005111508      0.0008432217
 
  Atomic positions:
  xred
@@ -33559,8 +33613,10 @@ total_energy_dc_eV  : -3.48409607656527E+01
          -0.000015985       0.000000042       0.002137575
  Pressure (primitive estimator) =     -50.821971506 GPa
 
- Center of mass:
-      0.7017218338     -0.0050939039      0.0083707584
+ Center of mass, in cartes. coordinates :
+         0.7017218338     -0.0050939039      0.0083707584
+ Center of mass, in reduced coordinates :
+         0.1403443668     -0.0010187808      0.0016741517
 
  Atomic positions:
  xred
@@ -34745,8 +34801,10 @@ total_energy_dc_eV  : -3.48476942263591E+01
          -0.000022901       0.000000091       0.002136996
  Pressure (primitive estimator) =     -51.197170210 GPa
 
- Center of mass:
-      0.6982371301     -0.0075972022      0.0124080672
+ Center of mass, in cartes. coordinates :
+         0.6982371301     -0.0075972022      0.0124080672
+ Center of mass, in reduced coordinates :
+         0.1396474260     -0.0015194404      0.0024816134
 
  Atomic positions:
  xred
@@ -35931,8 +35989,10 @@ total_energy_dc_eV  : -3.48714165730675E+01
          -0.000028542       0.000000145       0.002136251
  Pressure (primitive estimator) =     -51.794742255 GPa
 
- Center of mass:
-      0.6947213380     -0.0100490948      0.0162819628
+ Center of mass, in cartes. coordinates :
+         0.6947213380     -0.0100490948      0.0162819628
+ Center of mass, in reduced coordinates :
+         0.1389442676     -0.0020098190      0.0032563926
 
  Atomic positions:
  xred
@@ -36609,10 +36669,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         33.5  wall=         34.8
+- Proc.   0 individual time (sec): cpu=         27.5  wall=         27.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered 360 WARNINGs and 294 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.5  wall=         34.8
+.Delivered 540 WARNINGs and 258 COMMENTs to log file.
++Overall time at end (sec) : cpu=         27.5  wall=         27.6

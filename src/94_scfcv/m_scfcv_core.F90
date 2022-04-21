@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -887,8 +887,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !    The dielectric stuff is performed in sequential mode; set mpi_enreg_diel accordingly
      call initmpi_seq(mpi_enreg_diel)
-     call getng(dtset%boxcutmin,ecutsus,gmet,k0,mpi_enreg_diel%me_fft,mgfftdiel,nfftdiel,ngfftdiel,&
-&     mpi_enreg_diel%nproc_fft,dtset%nsym,mpi_enreg_diel%paral_kgb,dtset%symrel,&
+     call getng(dtset%boxcutmin,dtset%chksymtnons,ecutsus,gmet,k0,mpi_enreg_diel%me_fft,mgfftdiel,nfftdiel,ngfftdiel,&
+&     mpi_enreg_diel%nproc_fft,dtset%nsym,mpi_enreg_diel%paral_kgb,dtset%symrel,dtset%tnons,&
 &     use_gpu_cuda=dtset%use_gpu_cuda)
 !    Update the fft distribution
      call init_distribfft_seq(mpi_enreg_diel%distribfft,'c',ngfftdiel(2),ngfftdiel(3),'all')
@@ -2115,14 +2115,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 !PAW: if cprj=<p_lmn|Cnk> are not in memory,need to compute them in some cases
  recompute_cprj = psps%usepaw ==1 .and. usecprj==0 .and. &
-& (dtset%prtwant  ==2 .or. &
-& dtset%prtwant  ==3  .or. &
-& dtset%prtnabla > 0  .or. &
-& dtset%prtdos   ==3  .or. &
-& dtset%berryopt /=0  .or. &
-& dtset%orbmag < 0    .or. &
-& dtset%kssform  ==3  .or. &
-& dtset%pawfatbnd> 0  .or. &
+& (dtset%prtwant  ==2      .or. &
+& dtset%prtwant  ==3       .or. &
+& dtset%prtnabla > 0       .or. &
+& dtset%prtdos   ==3       .or. &
+& dtset%berryopt /=0       .or. &
+& dtset%orbmag < 0         .or. &
+& dtset%kssform  ==3       .or. &
+& dtset%plowan_compute ==1 .or. &
+& dtset%pawfatbnd> 0       .or. &
 & dtset%pawprtwf > 0  )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
@@ -2726,7 +2727,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
      if(optene==0) etotal=etotal+energies%e_extfpmd
-     if(optene==1) etotal=etotal+energies%e_extfpmd+energies%edc_extfpmd
+     if(optene==1) etotal=etotal+energies%edc_extfpmd
    end if
 
 !  Compute energy residual

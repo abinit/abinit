@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2022 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,8 +70,8 @@ module m_dynmat
  public :: wings3               ! Suppress the wings of the cartesian 2DTE for which the diagonal element is not known
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
  public :: get_bigbox_and_weights ! Compute
- public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
- public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
+ public :: bigbx9               ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
+ public :: make_bigbox          ! Helper functions that faciliates the generation  of a Big Box containing
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
@@ -1897,6 +1897,8 @@ end subroutine d2sym3
 !! FUNCTION
 !! Takes care of the inclusion of the ewald q=0 term in the dynamical
 !! matrix - corrects the dyew matrix provided as input
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], 
+!! get the left hand side.
 !!
 !! INPUTS
 !!  dyewq0(3,3,natom) = part needed to correct
@@ -1963,6 +1965,7 @@ end subroutine q0dy3_apply
 !!
 !! FUNCTION
 !! Calculate the q=0 correction term to the dynamical matrix
+!! See Eq.(71) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], the sum over \kappa"
 !!
 !! INPUTS
 !!  dyew(2,3,natom,3,natom)= dynamical matrix
@@ -2892,9 +2895,9 @@ end subroutine get_bigbox_and_weights
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (3,nrpt) Give the index of the the cell and irpt
-!! nprt= Number of R points in the Big Box
-!! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
+!! cell(3,nrpt)= integer coordinates of the cells (R points) in the rprim basis
+!! nprt= Number of cells (R points) in the Big Box
+!! rpt(3,mrpt)= canonical coordinates of the cells (R points)
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!  The array is allocated here with the proper dimension. Client code is responsible
 !!  for the deallocation.
@@ -2949,7 +2952,7 @@ end subroutine make_bigbox
 !! bigbx9
 !!
 !! FUNCTION
-!! Generation of a Big Box containing all the R points in the
+!! Generation of a Big Box containing all the R points (cells) in the
 !! cartesian real space needed to Fourier Transforms the dynamical
 !! matrix into its corresponding interatomic force.
 !!
@@ -2966,9 +2969,9 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (3,nrpt) Give the index of the the cell and irpt
-!! nprt= Number of R points in the Big Box
-!! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
+!! cell(3,nrpt)= integer coordinates of the cells (R points) in the rprim basis
+!! nprt= Number of cells (R points) in the Big Box
+!! rpt(3,mrpt)= canonical coordinates of the cells (R points)
 !!  These coordinates are normalized (=> * acell(3)!!)
 !!  (output only if choice=1)
 !!
@@ -3214,12 +3217,12 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      found=0
      do ii=1,4
        if (found==1) exit
-       ! Canon will produces these coordinate transformations
+       ! Canon will produce these coordinate transformations
        call wrap2_pmhalf(rcan(1,iatom)+dontno(1,ii),rok(1),shift(1))
        call wrap2_pmhalf(rcan(2,iatom)+dontno(2,ii),rok(2),shift(2))
        call wrap2_pmhalf(rcan(3,iatom)+dontno(3,ii),rok(3),shift(3))
        ! In the F.C.C., ABS[ Ri ] + ABS[ Rj ] < or = 1/2
-       ! The equal signs has been treated using a tolerance parameter
+       ! The equal sign hase been treated using a tolerance parameter
        ! not to have twice the same point in the unit cell !
        rok(1)=rok(1)-1.0d-10
        rok(2)=rok(2)-2.0d-10
@@ -3256,7 +3259,7 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
        call wrap2_pmhalf(rcan(3,iatom)+dontno(3,ii),rok(3),shift(3))
        ! In the F.C.C., ABS[ Ri ] < or = 1/2
        ! and    ABS[ R1 ] + ABS[ R2 ] + ABS[ R3 ] < or = 3/4
-       ! The equal signs has been treated using a tolerance parameter
+       ! The equal signs have been treated using a tolerance parameter
        ! not to have twice the same point in the unit cell !
        rok(1)=rok(1)-1.0d-10
        rok(2)=rok(2)-2.0d-10
@@ -3293,10 +3296,10 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
      rec(3)=rok(3)
      ! Passage in Cartesian Normalized Coordinates
      rcan(:,iatom)=rec(1)*rprim(:,1)+rec(2)*rprim(:,2)+rec(3)*rprim(:,3)
-     ! Use of a tolerance parameter not to have twice the same pointin the unit cell !
+     ! Use of a tolerance parameter not to have twice the same point in the unit cell !
      rcan(1,iatom)=rcan(1,iatom)-1.0d-10
      rcan(2,iatom)=rcan(2,iatom)-2.0d-10
-     ! Passage to the honey-com hexagonal unit cell !
+     ! Passage to the honeycomb hexagonal unit cell !
      if (rcan(1,iatom)>0.5_dp) then
        rcan(1,iatom)=rcan(1,iatom)-1.0_dp
      end if
@@ -3978,7 +3981,7 @@ end subroutine ifclo9
 !! wght9
 !!
 !! FUNCTION
-!! Generates a weight to each R points of the Big Box and for each pair of atoms
+!! Generates a weight to each R point of the Big Box and for each pair of atoms
 !! For each R points included in the space generates by moving
 !! the unit cell around each atom; the weight will be one.
 !! Border conditions are provided.
@@ -4997,6 +5000,9 @@ end subroutine dymfz9
 !!           matrices, with number iqpt.
 !! If plus=1 then adds the non-analytical part to the dynamical
 !!           matrices, with number iqpt.
+!!
+!! For plus=0, see Eq.(76) in Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]],
+!! get the left hand side.
 !!
 !! INPUTS
 !! dyew(2,3,natom,3,natom)= Non-analytical part

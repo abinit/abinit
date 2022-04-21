@@ -23,6 +23,7 @@ nav:
     - Abinit: guide/abinit.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
+    - aTDEP: guide/atdep.md
     - Cut3d: guide/cut3d.md
     - Fold2Bloch: guide/fold2bloch.md
     - Mrgddb: guide/mrgddb.md
@@ -31,7 +32,6 @@ nav:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
-    - a-TDEP: guide/a-TDEP.md
     - Installation:
         - HowTo: installation.md
         - MacOS: INSTALL_MacOS.md
@@ -46,6 +46,7 @@ nav:
     - topics/APPA.md
     - topics/Artificial.md
     - topics/AtomManipulator.md
+    - topics/aTDEP.md
     - topics/AtomTypes.md
     - topics/Bader.md
     - topics/Band2eps.md
@@ -123,7 +124,6 @@ nav:
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
-    - topics/a-TDEP.md
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
@@ -157,9 +157,9 @@ nav:
         - VdW: variables/vdw.md
         - Wannier90: variables/w90.md
     - Anaddb: variables/anaddb.md
+    - aTDEP: variables/atdep.md
     - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
-    - a-TDEP: variables/atdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
@@ -211,6 +211,9 @@ nav:
         - Lattice Model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
         - Spin Model: tutorial/spin_model.md
+    - aTDEP: 
+        - ATDEP1: tutorial/atdep1.md
+          #- ATDEP2: tutorial/atdep2.md
     #- tutorial/abitk.md
     - tutorial/cut3d.md
     - tutorial/fold2bloch.md
@@ -339,7 +342,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.7.0
+    version: 9.7.3
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github
@@ -358,12 +361,12 @@ extra:
         today:  'Expands to datetime.date.today().strftime("%B %d, %Y")'
         # Links to doc pages (AbiPy scripts)
         AbiPy: "[AbiPy](https://github.com/abinit/abipy)"
-        abistruct: "[abistruct](http://abinit.github.io/abipy/scripts/abistruct.html)"
-        abiopen: "[abiopen](http://abinit.github.io/abipy/scripts/abiopen.html)"
-        abicomp: "[abicomp](http://abinit.github.io/abipy/scripts/abicomp.html)"
-        abiview: "[abiview](http://abinit.github.io/abipy/scripts/abiview.html)"
-        abirun: "[abirun](http://abinit.github.io/abipy/scripts/abirun.html)"
-        abidoc: "[abidoc](http://abinit.github.io/abipy/scripts/abidoc.html)"
+        abistruct: "[abistruct.py](http://abinit.github.io/abipy/scripts/abistruct.html)"
+        abiopen: "[abiopen.py](http://abinit.github.io/abipy/scripts/abiopen.html)"
+        abicomp: "[abicomp.py](http://abinit.github.io/abipy/scripts/abicomp.html)"
+        abiview: "[abiview.py](http://abinit.github.io/abipy/scripts/abiview.html)"
+        abirun: "[abirun.py](http://abinit.github.io/abipy/scripts/abirun.html)"
+        abidoc: "[abidoc.py](http://abinit.github.io/abipy/scripts/abidoc.html)"
         # Links to abitutorials jupyter notebooks served at
         # https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/index.ipynb?flush_cache=true
         AbipyStructureNb: "[AbiPy structure notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/structure.ipynb)"
@@ -413,4 +416,4 @@ extra:
         #netcdf: https://www.unidata.ucar.edu/software/netcdf/docs/faq.html#whatisit
         YAML: "[Yaml](https://en.wikipedia.org/wiki/YAML)"
         JSON: "[JSON](https://en.wikipedia.org/wiki/JSON)"
-        aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'
+        #aTDEP: '<span style="font-variant:small-caps;">a</span>-TDEP'

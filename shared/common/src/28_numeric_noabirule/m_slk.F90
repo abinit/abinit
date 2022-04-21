@@ -6,7 +6,7 @@
 !! This module contains high-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (CS,GZ,FB,MG)
+!! Copyright (C) 2004-2022 ABINIT group (CS,GZ,FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,7 +159,8 @@ module m_slk
    integer,allocatable :: ipiv(:)
 
    real(dp),allocatable  :: buffer_real(:,:)
-     ! local part of the (real) matrix
+     ! local part of the (real) matrix.
+     ! The istwf_k option passed to the constructor defines whether we have a real or complex matrix
 
    complex(dpc),allocatable :: buffer_cplx(:,:)
      ! local part of the (complex) matrix
@@ -175,7 +176,7 @@ module m_slk
     ! Return global indices of a matrix element from the local indices.
 
    procedure :: free => matrix_scalapack_free
-    ! Destroys ScaLAPACK matrix
+    ! Free local buffer
 
    procedure :: zinvert => slk_zinvert
      ! Inverse of a complex matrix in double precision
@@ -254,7 +255,8 @@ CONTAINS  !=====================================================================
 !!  build_grid_scalapack
 !!
 !! FUNCTION
-!!  Set up the processor grid for ScaLAPACK as a function of the total number of processors attributed to the grid.
+!!  Set up the processor grid for ScaLAPACK as a function of the total number
+!!  of processors attributed to the grid.
 !!
 !! INPUTS
 !!  nbprocs= total number of processors
@@ -447,14 +449,13 @@ end subroutine end_scalapack
 !!  init_matrix_scalapack
 !!
 !! FUNCTION
-!!  Initializes a matrix descriptor for ScaLAPACK.
 !!  Initialisation of a SCALAPACK matrix (each proc initialize its own part of the matrix)
 !!
 !! INPUTS
 !!  processor= descriptor of a processor
 !!  nbli_global= total number of lines
 !!  nbco_global= total number of columns
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!  tbloc= custom block size NOTE: NOT USED in the present version.
 !!
 !! OUTPUT
@@ -491,7 +492,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
  sizeb = SIZE_BLOCS
 #endif
 
-!Records of the matrix type :
+!Records of the matrix type:
  matrix%processor => processor
  matrix%sizeb_blocs(1) = MIN(sizeb,nbli_global)
  matrix%sizeb_blocs(2) = MIN(sizeb,nbco_global)
@@ -881,7 +882,7 @@ end function loc_glob
 !!  Routine to fill a SCALAPACK matrix from a global PACKED matrix.
 !!
 !! INPUTS
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!  reference= one-dimensional array with packed matrix.
 !!
 !! SIDE EFFECTS
@@ -955,7 +956,7 @@ end subroutine matrix_from_global
 !! FUNCTION
 !!
 !! INPUTS
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!  reference= one-dimensional array
 !!
 !! SIDE EFFECTS
@@ -1036,7 +1037,7 @@ end subroutine matrix_from_global_sym
 !!  Routine to fill a SCALAPACK matrix from a real global matrix (FULL STORAGE MODE)
 !!
 !! INPUTS
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!  reference= a real matrix
 !!
 !! SIDE EFFECTS
@@ -1084,7 +1085,7 @@ end subroutine matrix_from_realmatrix
 !!  Routine to fill a SCALAPACK matrix from a global matrix (FULL STORAGE MODE)
 !!
 !! INPUTS
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!  reference= a complex matrix
 !!
 !! SIDE EFFECTS
@@ -1133,7 +1134,7 @@ end subroutine matrix_from_complexmatrix
 !!
 !! INPUTS
 !!  matrix= the matrix to process
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!  nband_k= number of bands at this k point for that spin polarization
 !!
 !! SIDE EFFECTS
@@ -1198,7 +1199,7 @@ end subroutine matrix_to_global
 !!
 !! INPUTS
 !!  matrix= the matrix to process
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! SIDE EFFECTS
 !!  reference= the matrix to fill
@@ -1245,7 +1246,7 @@ end subroutine matrix_to_realmatrix
 !!
 !! INPUTS
 !!  matrix= the matrix to process
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! SIDE EFFECTS
 !!  reference= the matrix to fill
@@ -1292,7 +1293,7 @@ end subroutine matrix_to_complexmatrix
 !!
 !! INPUTS
 !!  matrix= the matrix to process
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! SIDE EFFECTS
 !!  reference= one-dimensional array
@@ -1788,7 +1789,7 @@ end subroutine slk_pzgemm
 !!  processor= descriptor of a processor
 !!  matrix= the matrix to process
 !!  comm= MPI communicator
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! OUTPUT
 !!  None
@@ -1994,7 +1995,7 @@ end subroutine compute_eigen_problem
 !!  matrix1= first ScaLAPACK matrix (matrix A)
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  comm= MPI communicator
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! OUTPUT
 !!  None
@@ -2335,7 +2336,7 @@ end subroutine compute_generalized_eigen_problem
 !!  nbco_global number of columns
 !!  matrix= the matrix to process
 !!  vector= eigenvalues of the matrix
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! OUTPUT
 !!  vector
@@ -2459,7 +2460,7 @@ end subroutine compute_eigen1
 !!  matrix1= first ScaLAPACK matrix (matrix A)
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  vector=
-!!  istwf_k= option parameter that describes the storage of wfs
+!!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! OUTPUT
 !!  None

@@ -1,8 +1,8 @@
 
-.Version 9.5.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.6.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  7 Aug 2021.
-- ( at 21h16 )
+.Starting date : Mon  8 Nov 2021.
+- ( at 07h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/TestBot_MPI1/v9_t66/t66.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/TestBot_MPI1/v9_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
@@ -468,8 +468,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -483,8 +483,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1497,8 +1497,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1512,8 +1512,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1890,8 +1890,8 @@ meta: {optdriver: 7, eph_task: 10, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1905,8 +1905,8 @@ meta: {optdriver: 7, eph_task: 10, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bguster_develop/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.6/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1930,7 +1930,7 @@ meta: {optdriver: 7, eph_task: 10, }
    ##      Frequency(meV)            Epsilon*
     6           66.541611            4.721243
  
-   ZPR (meV):     231.24
+   ZPR (meV):     234.29
  
    Electronic effective mass (a.u.) along 3 directions
     Direction 100:               -0.358805      -2.925580      -2.925580
@@ -1938,14 +1938,14 @@ meta: {optdriver: 7, eph_task: 10, }
     Direction 111:               -0.493869      -1.383295      -1.383295
  
    Polaron effective mass (a.u.) along 3 directions
-    Direction 100:               -6.441983      -6.206773      -6.213913
-    Direction 110:               -7.730596      -5.347814      -6.213913
-    Direction 111:               -8.327173      -5.610541      -5.605495
+    Direction 100:               -6.492404      -6.209469      -6.209468
+    Direction 110:               -7.780445      -5.360706      -6.209469
+    Direction 111:               -8.331402      -5.616615      -5.616615
  
-   Sum rule of inverse polaron masses check-up(for convergence purposes):
-    Direction 100:               -0.477275
-    Direction 110:               -0.477278
-    Direction 111:               -0.476721
+   Sum rule of inverse polaron masses check-up (for convergence purposes):
+    Direction 100:               -0.476115
+    Direction 110:               -0.476114
+    Direction 111:               -0.476114
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2201,62 +2201,10 @@ P          mk1mem6          1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         32.5        0.54      0.009
-- Total wall clock time (s,m,h):         32.8        0.55      0.009
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           32.5, wall_time =           32.8
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- fourwf%(pot)                      9.490  29.2         9.481  28.9          26664      -1.00        1.00       1.00
-- nonlop(apply)                     5.695  17.5         5.686  17.4          24648      -1.00        1.00       1.00
-- projbd                            1.876   5.8         1.870   5.7          48544      -1.00        1.00       1.00
-- fourwf%(G->r)                     1.422   4.4         1.455   4.4           7296      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)              1.152   3.5         1.183   3.6             -1      -1.00        0.97       0.97
-- pspini                            0.988   3.0         0.991   3.0              6      -1.00        1.00       1.00
-- nonlop(forces)                    0.593   1.8         0.619   1.9           2208      -1.00        0.96       0.96
-- invars2                           0.414   1.3         0.415   1.3              6      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop              0.368   1.1         0.373   1.1             75      -1.00        0.99       0.99
-- getgh1c_setup                     0.354   1.1         0.362   1.1            660      -1.00        0.98       0.98
-- getghc-other                      0.351   1.1         0.361   1.1             -1      -1.00        0.97       0.97
-- fourdp                            0.347   1.1         0.356   1.1           1863      -1.00        0.98       0.98
-- xc:pot/=fourdp                    0.335   1.0         0.340   1.0            199      -1.00        0.98       0.98
-- mkffnl                            0.329   1.0         0.340   1.0            866      -1.00        0.97       0.97
-- others (114)                     -1.132  -3.5        -1.061  -3.2             -1      -1.00        1.07       1.07
--<END_TIMER>
--
-- subtotal                         22.582  69.4        22.771  69.5                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          32.5, wall_time =          32.8
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- fourwf%(pot)                      9.490  29.2         9.481  28.9          26664      -1.00        1.00       1.00
-- nonlop(apply)                     5.695  17.5         5.686  17.4          24648      -1.00        1.00       1.00
-- projbd                            1.876   5.8         1.870   5.7          48544      -1.00        1.00       1.00
-- fourwf%(G->r)                     1.422   4.4         1.455   4.4           7296      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)              1.152   3.5         1.183   3.6             -1      -1.00        0.97       0.97
-- pspini                            0.988   3.0         0.991   3.0              6      -1.00        1.00       1.00
-- nonlop(forces)                    0.593   1.8         0.619   1.9           2208      -1.00        0.96       0.96
-- invars2                           0.414   1.3         0.415   1.3              6      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop              0.368   1.1         0.373   1.1             75      -1.00        0.99       0.99
-- getgh1c_setup                     0.354   1.1         0.362   1.1            660      -1.00        0.98       0.98
-- getghc-other                      0.351   1.1         0.361   1.1             -1      -1.00        0.97       0.97
-- fourdp                            0.347   1.1         0.356   1.1           1863      -1.00        0.98       0.98
-- xc:pot/=fourdp                    0.335   1.0         0.340   1.0            199      -1.00        0.98       0.98
-- mkffnl                            0.329   1.0         0.340   1.0            866      -1.00        0.97       0.97
-- others (114)                     -1.132  -3.5        -1.061  -3.2             -1      -1.00        1.07       1.07
--<END_TIMER>
 
-- subtotal                         22.582  69.4        22.771  69.5                                  0.99       0.99
 
 ================================================================================
 
@@ -2347,10 +2295,10 @@ P          mk1mem6          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         32.5  wall=         32.8
+- Proc.   0 individual time (sec): cpu=         30.6  wall=         30.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.5  wall=         32.8
+.Delivered   9 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         30.6  wall=         30.9

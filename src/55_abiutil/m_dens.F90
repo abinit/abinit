@@ -7,7 +7,7 @@
 !! and also includes the computation of integrated atomic charge and magnetization, as well as Hirshfeld charges.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2022 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -616,7 +616,7 @@ end subroutine add_atomic_fcts
 !!
 !! INPUTS
 !!  chrgat(natom) = target charge for each atom. Not always used, it depends on the value of constraint_kind
-!!  constraint_kinds(ntypat)=for each type of atom, 0=no constraint,
+!!  constraint_kind(ntypat)=for each type of atom, 0=no constraint,
 !!    1=fix only the magnetization direction, following spinat direction,
 !!    2=fix the magnetization vector to be the spinat one,
 !!    3=fix the magnetization amplitude to be the spinat one, but does not fix its direction
@@ -632,7 +632,7 @@ end subroutine add_atomic_fcts
 !!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radii for muffin tin spheres of each atom
 !!  rprimd=lattice vectors (dimensioned)
-!!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kinds
+!!  spinat(3,natom)=magnetic moments vectors, possible targets according to the value of constraint_kind
 !!  typat(natom)=types of atoms
 !!  xred(3,natom)=reduced atomic positions
 !!  ziontypat(ntypat)=ionic charge, per type of atom
@@ -845,7 +845,7 @@ end subroutine constrained_dft_free
 !scalars
  integer :: conkind,iatom,ii,jatom,info,natom,nfftf,nspden,ntypat,option
  integer :: cplex1=1
- real(dp) :: intgd,intgden_norm,intgden_proj,intgres_proj,norm
+ real(dp) :: intgd,intgden_norm,intgden_proj,intgres_proj,norm,scprod
 !arrays
  integer :: ipiv(c_dft%natom)
  real(dp) :: corr_denmag(4),gr_intgd(3),strs_intgd(6)
@@ -857,6 +857,7 @@ end subroutine constrained_dft_free
  real(dp), allocatable :: intgr(:,:) ! natom,nspden
  real(dp), allocatable :: strs_intgden(:,:,:) ! 6,nspden,natom
  real(dp) :: intgf2(c_dft%natom,c_dft%natom),rhomag(2,c_dft%nspden),work(2*c_dft%natom)
+ real(dp) :: intgden_normed(3)
  real(dp) :: spinat_normed(3)
 
 ! ***********************************************************************************************
@@ -1017,13 +1018,12 @@ end subroutine constrained_dft_free
      !Fix the different components of the magnetization vector
      if(nspden==2)intgden_delta(2,iatom)=intgden(2,iatom)-c_dft%spinat(3,iatom)
      if(nspden==4)intgden_delta(2:4,iatom)=intgden(2:4,iatom)-c_dft%spinat(1:3,iatom)
-   else if( ( mod(conkind,10)==2 .or. mod(conkind,10)==3) .and. nspden>1)then
+   else if( ( mod(conkind,10)>=2 .and. mod(conkind,10)<=4) .and. nspden>1)then
      norm = sqrt(sum(c_dft%spinat(:,iatom)**2))
      if (norm > tol10) then
        if( mod(conkind,10)==2 )then
-         !Fix the direction of the magnetization vector
+         !Fix the axis of the magnetization vector
          if(nspden==4)then
-           !Fix the direction
            spinat_normed(:) = c_dft%spinat(:,iatom) / norm
            !Calculate the scalar product of the fixed mag. mom. vector and calculated mag. mom. vector
            !This is actually the size of the projection of the calc. mag. mom. vector on the fixed mag. mom. vector
@@ -1031,7 +1031,7 @@ end subroutine constrained_dft_free
 &            spinat_normed(2)*intgden(3,iatom)+ &
 &            spinat_normed(3)*intgden(4,iatom)
            intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)-spinat_normed(1:3)*intgden_proj
-           !Also projects the residual
+           !Also projects the residual, so that the usual optimization is done is the largest possible space
            intgres_proj=spinat_normed(1)*intgres(2,iatom)+ &
 &            spinat_normed(2)*intgres(3,iatom)+ &
 &            spinat_normed(3)*intgres(4,iatom)
@@ -1044,13 +1044,51 @@ end subroutine constrained_dft_free
          !Fix the amplitude of the magnetization vector
          intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
          intgden_delta(2:nspden,iatom)=(one-norm/intgden_norm)*intgden(2:nspden,iatom)
+       else if( mod(conkind,10)==4 )then
+         !Fix the direction of the magnetization vector
+         if(nspden==4)then
+           spinat_normed(:) = c_dft%spinat(:,iatom) / norm
+           intgden_norm = sqrt(sum(intgden(2:nspden,iatom)**2))
+           intgden_normed(:) = intgden(2:nspden,iatom)/intgden_norm
+           !Calculate the difference vector between the actual magnetization vectoro, times the scalar product between the 
+           !directions of present magnetization and target one, and the target magnetization direction renormalized by the magnetization length.
+           !See notes 12 October 2021
+!DEBUG First possibility
+!          intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)-spinat_normed(1:3)*intgden_norm
+!ENDDEBUG
+!DEBUG Second possibility
+           scprod=sum(spinat_normed(:)*intgden_normed(:))
+           intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)*scprod-spinat_normed(1:3)*intgden_norm
+!ENDDEBUG
+           !Also projects the residual. There might be some misalignement of the intgden_delta with the correct space of allowed variations 
+           !(not exactly perpendicular to spinat_normed or intgden_normed, or even frankly not at all perpendicular),
+           !but when close to fulfilling the constraint, this difference becomes negligible.
+           !The present choice, couple with the above definition of intgden_delta aligns both.
+!DEBUG First possibility
+            intgres_proj=intgden_normed(1)*intgres(2,iatom)+ &
+ &            intgden_normed(2)*intgres(3,iatom)+ &
+ &            intgden_normed(3)*intgres(4,iatom)
+            intgres(2:nspden,iatom)=intgres(2:nspden,iatom)-intgden_normed(1:3)*intgres_proj
+!ENDDEBUG
+!DEBUG Second possibility
+!           intgres_proj=spinat_normed(1)*intgres(2,iatom)+ &
+!&            spinat_normed(2)*intgres(3,iatom)+ &
+!&            spinat_normed(3)*intgres(4,iatom)
+!           intgres(2:nspden,iatom)=intgres(2:nspden,iatom)-spinat_normed(1:3)*intgres_proj
+!ENDDEBUG
+         else if(nspden==2)then
+           !This case is ill-defined ... What follows is rather arbitrary.
+           !When the actual magnetization and the target magnetization have same sign, the intgden_delta is zero. 
+           ! Otherwise, intgres is set to the difference between the present intgden and the target
+           intgden_delta(2,iatom)=zero
+           if(c_dft%spinat(2,iatom)*intgden(2,iatom)<-tol10)intgden_delta(2,iatom)=c_dft%spinat(2,iatom)-intgden(2,iatom)
+         endif
        endif
      else
-       !In this case, we set the atomic magnetization to zero.
+       !In this case (norm of constraint vanishes), we set the atomic magnetization to zero.
        intgden_delta(2:nspden,iatom)=intgden(2:nspden,iatom)
      endif
    end if
-
 !  Lagrange energy contribution. Note that intgres is the derivative with respect to the chrgat and spinat constraints,
 !  because chrgat and spinat have directly been used in the definition of intgden_delta.
 !  WOOPS : chrgat comes with a POSITIVE sign in intgden_delta ?!?!
@@ -1081,6 +1119,7 @@ end subroutine constrained_dft_free
  coeffs_constr_dft=zero
 
 !With the delta of the integrated density and the atomic residual, compute the atomic correction to be applied to the potential
+!See the Eqs.(31), (33) and (34) of notes. 
  do iatom=1,natom
 
    !Computation of the correction in terms of density and magnetization coefficients.
@@ -1097,16 +1136,16 @@ end subroutine constrained_dft_free
      if(nspden==2)corr_denmag(2)=intgden_delta(2,iatom)*c_dft%magcon_lambda - intgres(2,iatom)
      if(nspden==4)corr_denmag(2:4)=intgden_delta(2:4,iatom)*c_dft%magcon_lambda - intgres(2:4,iatom)
 
-   else if( ( mod(conkind,10)==2 .or. mod(conkind,10)==3) .and. nspden>1)then
+   else if( ( mod(conkind,10)>=2 .and. mod(conkind,10)<=4) .and. nspden>1)then
 
      norm = sqrt(sum(c_dft%spinat(:,iatom)**2))
      if (norm > tol10) then
 
-       if( mod(conkind,10)==2 )then
-         !Fix the direction of the magnetization vector
-         if(nspden==4)then
+       if( mod(conkind,10)==2 .or. mod(conkind,10)==4)then
+         !Fix the axis/direction of the magnetization vector
+         if(nspden==4 .or. mod(conkind,10)==4)then
            corr_denmag(2:nspden)=intgden_delta(2:nspden,iatom)*c_dft%magcon_lambda -intgres(2:nspden,iatom)
-         else if(nspden==2)then
+         else if(nspden==2 .and. mod(conkind,10)==2)then
            !The direction must be correct, collinear, so no change.
            corr_denmag(2)=zero
          endif
@@ -1286,9 +1325,11 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 !  Calculate the z-component of the square bracket term
    if (magconon==1) then
      if (nspden == 4) then
+       ! This apparently enforces the axis of magnetization, not its direction.
        ! m_z - spinat_z * <m | spinat>
        cmm_z = intgden(4,iatom) - spinat_normed(3)*intgden_proj
      else if (nspden == 2) then
+       ! This apparently enforces the direction of the magnetization. So, the behaviour differs in nspden=4 and 2 cases .
        ! this will be just a sign +/- : are we in the same direction as spinat_z?
        !    need something more continuous??? To make sure the gradient pushes the state towards FM/AFM?
        cmm_z = -sign(one, (intgden(1,iatom)-intgden(2,iatom))*spinat_normed(3))

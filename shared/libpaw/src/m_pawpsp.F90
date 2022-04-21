@@ -6,7 +6,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2021 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2022 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3761,7 +3761,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
  end do
  if (vlocopt>0) then
    LIBPAW_ALLOCATE(pawtab%dij0,(pawtab%lmn2_size))
-   if (size(pawtab%vminushalf)>0.and.pawtab%has_vminushalf==1) then
+   if (allocated(pawtab%vminushalf).and.pawtab%has_vminushalf==1) then
      vlocr(1:vloc_mesh%mesh_size)=vlocr(1:vloc_mesh%mesh_size)+pawtab%vminushalf(1:vloc_mesh%mesh_size)
    end if
    call atompaw_dij0(pawtab%indlmn,kij,pawtab%lmn_size,ncore,0,pawtab,pawrad,core_mesh,&
@@ -4553,7 +4553,9 @@ subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 &        xclibxc(1:5)=='LDA_X'.or.xclibxc(1:5)=='LDA_C'.or. &
 &        xclibxc(1:5)=='lda_x'.or.xclibxc(1:5)=='lda_c'.or. &
 &        xclibxc(1:5)=='GGA_X'.or.xclibxc(1:5)=='GGA_C'.or. &
-&        xclibxc(1:5)=='gga_x'.or.xclibxc(1:5)=='gga_c') then
+&        xclibxc(1:5)=='gga_x'.or.xclibxc(1:5)=='gga_c'.or. &
+&        xclibxc(1:6)=='MGGA_X'.or.xclibxc(1:6)=='MGGA_C'.or. &
+&        xclibxc(1:6)=='mgga_x'.or.xclibxc(1:6)=='mgga_c') then
 #if defined LIBPAW_HAVE_LIBXC
        ii=index(xclibxc,'+')
        if (ii>0) then

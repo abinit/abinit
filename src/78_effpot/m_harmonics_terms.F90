@@ -7,7 +7,7 @@
 !! Module with datatype and tools for the harmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (AM)
+!! Copyright (C) 2010-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -704,13 +704,19 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
  fcart = zero
  strten = zero
 
+! write(*,*) "----- STRAIN -----"
+! write(*,*) strain 
+
 !1- Part due to elastic constants
  do alpha=1,6
    do beta=1,6
+!     write(*,*) "--- cij --- alpha: ", alpha, " beta: ", beta
      cij = ncell*elastic_constants(alpha,beta)
+!     write(*,*) cij 
      energy = energy + half*cij*strain(alpha)*strain(beta)
      strten(alpha) = strten(alpha) + cij*strain(beta)
    end do
+!   write(*,*) "strten(",alpha,"): ", strten(alpha)
  end do
 
 !2-Part due to the internal strain coupling parameters
@@ -729,6 +735,9 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
 !  Reset to 1 if the number of atoms is superior than in the initial cell
    if(ii==natom_uc+1) ii = 1
  end do
+ 
+! write(*,*) "--- STRTEN at the end --- " 
+! write(*,*) strten(:)
 
 end subroutine  harmonics_terms_evaluateElastic
 !!***

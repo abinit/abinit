@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,7 +74,7 @@ module m_dfpt_loopert
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_bcast, pawrhoij_copy, &
                           pawrhoij_nullify, pawrhoij_redistribute, pawrhoij_inquire_dim
- use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim
+ use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_getdim , pawcprj_output
  use m_pawfgr,     only : pawfgr_type
  use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
@@ -1131,7 +1131,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
-!TODO : distribute cprj by band as well?
+! distribute cprj by band as well
+! NB: currently nsppol=2 is distributed in data (0s saved for other spin) 
+!   but not in memory: all procs have nsppol 2 below
        mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
        ABI_FREE(cprj)
@@ -1601,7 +1603,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(msg,'(2a)')'- dfpt_looppert: read the DDK wavefunctions from file: ',trim(fiwfddk)
        call wrtout([std_out, ab_out],msg)
        ! Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), xmpi_comm_self)
+       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), spacecomm) !xmpi_comm_self)
      end do
    end if
 
@@ -2172,14 +2174,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call eigen_meandege(eigen0,eigen1,eigen1_mean,dtset%mband,nband_rbz,nkpt_rbz,dtset%nsppol,1)
      option=4
      if (me == master) then
-       ! CP modified
-       !call prteigrs(eigen1_mean,dtset%enunit,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
-!&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
-!&       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
        call prteigrs(eigen1_mean,dtset%enunit,fermie,fermie,dtfil%fnametmp_1wf1_eig,ab_out,iscf_mod,kpt_rbz,dtset%kptopt,&
-&       dtset%mband,nband_rbz,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
+&       dtset%mband,nband_rbz,dtset%nbdbuf,nkpt_rbz,dtset%nnsclo,dtset%nsppol,occ_rbz,dtset%occopt,&
 &       option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk_rbz)
-       ! End CP modified
      end if
      ABI_FREE(eigen1_mean)
    end if

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,7 +100,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2022 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -302,6 +302,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  integer :: nband_me, iband_me, jband_me, iband_
  integer :: do_scprod, do_bcast
+ integer :: startband, endband
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -322,6 +323,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dcwavef(:,:)
+ real(dp),allocatable :: cg_ddk(:,:,:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: dnhat1(:,:),drhoaug1(:,:,:,:)
  real(dp),allocatable :: drhor1(:,:),drho1wfg(:,:),drho1wfr(:,:,:)
@@ -492,6 +494,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
      end if
    end do
+
+   ABI_MALLOC(cg_ddk,(2,mpw1*nspinor*mband_mem_rbz,3))
+   cg_ddk = zero ! not all may be initialized below if only certain ddk directions are provided
  end if
 
 !Zero only portion of matrix to be computed here
@@ -787,6 +792,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    ibg1=0;icg1=0
    ibgq=0;icgq=0
 
+
 !  Has to get 1st-order non-local factors before the loop over spins
 !  because this needs a communication over comm_atom (=comm_spinkpt)
    if (need_pawij10) then
@@ -892,7 +898,20 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                ABI_ERROR(msg)
              end if
 
-           end if
+!   NB: this will fail if the bands are not contiguous.
+             startband = nband_k
+             endband = 1
+             do iband=1,nband_k
+               if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
+                 if (iband < startband) startband = iband
+                 if (iband > endband) endband = iband
+               end if
+             end do
+! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+!     only certain columns for my iband are filled, then used below
+             call ddks(idir1)%read_band_block((/startband,endband/),ik_ddk,isppol,xmpio_collective, &
+&                 cg_k=cg_ddk(:,:,idir1))
+           end if ! ddk file is already present
          end do
        end if
 
@@ -1195,8 +1214,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
-                 ik_ddk = indkpt1(ikpt)
-                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
+                 !ik_ddk = indkpt1(ikpt)
+                 !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1)
+                 gvnlx1 = cg_ddk(:,1+(iband_me-1)*npw1_k*nspinor:iband_me*npw1_k*nspinor,idir1)
                else
                  gvnlx1=zero
                end if
@@ -1415,8 +1435,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              else
                if (need_ddk_file.and.ddkfil(idir1)/=0) then
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
-                 ik_ddk = indkpt1(ikpt)
-                 call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
+                 !ik_ddk = indkpt1(ikpt)
+                 !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
+                 gh1 = cg_ddk(:,1+(iband_me-1)*npw1_k*nspinor:iband_me*npw1_k*nspinor,idir1)
                else
                  gh1=zero
                end if
@@ -1721,6 +1742,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0) call ddks(idir1)%close()
    end do
+   ABI_FREE(cg_ddk)
  end if
  ABI_FREE(jpert1)
  ABI_FREE(jdir1)
@@ -1846,7 +1868,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2022 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1942,6 +1964,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  integer :: iband,ider,idir1,ipert1,ipw,jband,nband_kocc,nkpg,nkpg1
  integer :: ierr, iband_me, jband_me
  integer :: npw_disk,nsp,optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
+ integer :: nddk_needed, startband, endband
  logical :: ddk
  real(dp) :: aa,dot1i,dot1r,dot2i,dot2r,dot_ndiagi,dot_ndiagr,doti,dotr,lambda
  character(len=500) :: msg
@@ -1952,7 +1975,11 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  logical :: distrb_cycle(nband_k)
  real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),dum_ylmgr(1,3,1),tsec(2)
  real(dp),allocatable :: cg_k(:,:),cwave0(:,:),cwavef(:,:),cwavef_da(:,:)
+ real(dp),allocatable :: cwaveddk(:,:,:)
+ real(dp),allocatable :: cg_ddk(:,:,:) !2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*nsppol,3) ==
+
  real(dp),allocatable :: cwavef_db(:,:),dkinpw(:),eig2_k(:),ffnl1(:,:,:,:),ffnlk(:,:,:,:)
+ real(dp),allocatable :: eig2_ddk(:,:)
  real(dp),allocatable :: gvnlx1(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),ph3d(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
@@ -1992,6 +2019,20 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  ABI_MALLOC(eig2_k,(2*nsppol*dtset%mband**2))
  ABI_MALLOC(cwave0,(2,npw_k*dtset%nspinor))
  ABI_MALLOC(cwavef,(2,npw1_k*dtset%nspinor))
+
+ nddk_needed = 0
+ do idir1=1,3
+   if (ddkfil(idir1)/=0)  nddk_needed = nddk_needed+1
+ end do
+ if (nddk_needed > 0) then
+   ABI_MALLOC(cwaveddk,(2,npw1_k*dtset%nspinor,3))
+!TODO: for the moment avoid indirect indexing of the ddk directions in case not all are present. Here all are allocated and read in
+   ABI_MALLOC(cg_ddk,(2,mpw1*dtset%nspinor*mband_mem_rbz,3))
+   cg_ddk = zero ! not all may be initialized below if only certain ddk directions are provided
+
+   ABI_MALLOC(eig2_ddk,(2*dtset%mband**2,3))
+   eig2_ddk = zero
+ end if
 
 !Compute (k+G) vectors
  nkpg=0;if (.not.ddk) nkpg=3*gs_hamkq%nloalg(3)
@@ -2062,8 +2103,22 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &       'while it should be ',npw_k
        ABI_BUG(msg)
      end if
-   end if
- end do
+
+!   NB: this will fail if the bands are not contiguous.
+     startband = nband_k
+     endband = 1
+     do iband=1,nband_k
+       if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
+         if (iband < startband) startband = iband
+         if (iband > endband) endband = iband
+       end if
+     end do
+! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+!     only certain columns for my iband are filled, then used below
+     call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, &
+&         cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
+   end if ! ddk file is already present
+ end do ! idir1
 
  if (ipert==dtset%natom+1) then
    nband_kocc = 0
@@ -2101,10 +2156,16 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 !  Get first-order wavefunctions for iband
      cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*dtset%nspinor+icg1:iband_me*npw1_k*dtset%nspinor+icg1)
-
+!  Get ddk wavefunctions for iband
+     if(nddk_needed > 0) then
+       cwaveddk(:,:,:)=cg_ddk(:,1+(iband_me-1)*npw1_k*dtset%nspinor:iband_me*npw1_k*dtset%nspinor,:)
+     end if 
    end if 
    call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
    call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
+   if(nddk_needed > 0) then
+     call xmpi_bcast(cwaveddk, band_procs(iband), mpi_enreg%comm_band, ierr)
+   end if
 
 !  In case non ddk perturbation
    if (ipert /= dtset%natom + 1) then
@@ -2144,10 +2205,11 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              else if( ipert1==dtset%natom+2 )then
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
-!TODO MJV: this needs to be band parallelized as well, probably
-               call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
-               eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
-                 !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
+!TODO MJV: Check if it works with HAVE_MPI_IO_DEFAULT now.
+
+               gvnlx1 = cwaveddk(:,:,idir1)
+               eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
+
                !write(777,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
                !do ii=1,2*nband_k
                !  write(777,*)eig2_k(ii+(iband-1))
@@ -2157,7 +2219,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
-!TODO: check if this is still correct in the bandparal case
                  call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
 &                  dtset%mband,mband_mem_rbz,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
@@ -2193,7 +2254,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
-!            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal
              if(dtset%prtbbb==1) then ! .and. mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt)then
                d2bbb_k(1,idir1,iband,iband) =      wtk_k*occ_k(iband)*two*dotr
                d2bbb_k(2,idir1,iband,iband) = -one*wtk_k*occ_k(iband)*two*doti
@@ -2226,9 +2286,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-           call ddks(idir1)%read_bks(iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnlx1, &
-           eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
-             !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
+           gvnlx1 = cwaveddk(:,:,idir1)
+           eig2_k(1+(iband-1)*2*nband_k:iband*2*nband_k) = eig2_ddk(1+(iband-1)*2*nband_k:iband*2*nband_k,idir1)
+
            !write(778,*)"eig2_k, gvnlx1 for band: ",iband,", ikpt: ",ikpt
            !do ii=1,2*nband_k
            !  write(778,*)eig2_k(ii+(iband-1))
@@ -2259,7 +2319,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !      XG 020216 : Marek, could you check the next forty lines
 !      In the parallel gauge, dot1 and dot2 vanishes
        if(dtset%prtbbb==1)then
-         ! d2bbb_k will be mpisummed below - only save my local band indices for diagonal contribution
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
            d2bbb_k(1,idir1,iband,iband)=d2bbb_k(1,idir1,iband,iband)+dotr
            d2bbb_k(2,idir1,iband,iband)=d2bbb_k(2,idir1,iband,iband)+doti
@@ -2302,10 +2361,10 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
  end do !  End loop over iband
 
- if(dtset%prtbbb==1)then
-   ! complete over jband index
-   call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
- end if
+! if(dtset%prtbbb==1)then
+!   ! complete over jband index
+!   call xmpi_sum(d2bbb_k, mpi_enreg%comm_band, ierr)
+! end if
 
 !Final deallocations
  ABI_FREE(cwave0)
@@ -2324,6 +2383,11 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    ABI_FREE(cg_k)
    ABI_FREE(cwavef_da)
    ABI_FREE(cwavef_db)
+ end if
+ if (nddk_needed > 0) then
+   ABI_FREE(cwaveddk)
+   ABI_FREE(cg_ddk)
+   ABI_FREE(eig2_ddk)
  end if
 
  call timab(102,2,tsec)

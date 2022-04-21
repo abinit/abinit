@@ -8,7 +8,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2022 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -703,6 +703,7 @@ end subroutine bound
 !! boxcutmin=minimum value of boxcut admitted (boxcut is the ratio
 !!  between the radius of the sphere contained in the FFT box, and the
 !!  radius of the planewave sphere) : usually 2.0 .
+!! chksymtnons= if==3, will impose the FFT grid to be invariant under the spatial symmetries.
 !! ecut=energy cutoff in Hartrees
 !! gmet(3,3)=reciprocal space metric (bohr**-2).
 !! kpt(3)=input k vector in terms of reciprocal lattice primitive translations
@@ -711,6 +712,7 @@ end subroutine bound
 !! nsym=number of symmetry elements in group
 !! paral_fft=0 if no FFT parallelisation ; 1 if FFT parallelisation
 !! symrel(3,3,nsym)=symmetry matrices in real space (integers)
+!! tnons(3,nsym)=nonsymmorphic translations associated to symrel
 !!
 !! OUTPUT
 !! mgfft= max(ngfft(1),ngfft(2),ngfft(3))
@@ -747,14 +749,15 @@ end subroutine bound
 !!
 !! SOURCE
 
-subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,paral_fft,symrel,&
+subroutine getng(boxcutmin,chksymtnons,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,&
+&                nproc_fft,nsym,paral_fft,symrel,tnons,&
 &                ngfftc,use_gpu_cuda,unit) ! optional
 
  use defs_fftdata,  only : mg
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: me_fft,nproc_fft,nsym,paral_fft
+ integer,intent(in) :: chksymtnons,me_fft,nproc_fft,nsym,paral_fft
  integer,intent(out) :: mgfft,nfft
  integer,optional,intent(in) :: unit,use_gpu_cuda
  real(dp),intent(in) :: boxcutmin,ecut
@@ -763,14 +766,15 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  integer,intent(in),optional :: ngfftc(3)
  integer,intent(inout) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
+ real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
  integer,save :: first=1,msrch(3),previous_paral_mode=0
- integer :: element,ii,index,isrch,isrch1,isrch2,isrch3,isym,jj,mu,paral_fft_
- integer :: plane,testok,tobechecked,ount,fftalga
+ integer :: element,ifactor,ii,index,ipower,isrch,isrch1,isrch2,isrch3,isym,jj,mu,paral_fft_
+ integer :: plane,testok,tobechecked,ount,fftalga,nn,ngdiv,valpow
  real(dp),parameter :: minbox=0.75_dp
- real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,xx,yy
+ real(dp) :: dsqmax,dsqmin,ecutmx,prodcurrent,prodtrial,tnscaled,xx,yy
  logical :: testdiv
  character(len=500) :: msg
  integer,parameter :: largest_ngfft=mg ! Goedecker FFT: any powers of 2, 3, and 5 - must be coherent with defs_fftdata.F90
@@ -780,14 +784,23 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
  integer,parameter :: maxpow7 =0
  integer,parameter :: maxpow11=0
  integer,parameter :: mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
+ integer,parameter :: nfactor=10, mpower=5
+!Arrays
  integer,save :: iperm(mmsrch),srch(mmsrch,3)
  integer(i8b) :: li_srch(mmsrch)
  integer :: divisor(3,3),gbound(3),imax(3),imin(3),ngcurrent(3)
  integer :: ngmax(3),ngsav(3),ngtrial(3)
+ integer :: npower(3,mpower)
+ integer,parameter :: factor(10) = (/1,2,3,4,5,6,8,9,10,12/)
+ integer,parameter :: power(5) = (/2,3,5,7,11/)
 
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
+
+!DEBUG
+!write(std_out,*)' m_fftcore/getng : enter'
+!ENDDEBUG
 
  fftalga = ngfft(7)/100
 
@@ -875,6 +888,11 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 !  The set of allowed ngfft values has been found
  end if ! first==1
 
+!=============================================================================================
+!
+! Determination of sufficient values of ngfft with ngfft(2) and ngfft(3) taken inside
+! sets of values that take into account the constraint on nproc_fft
+
 !Save input values of ngfft
  ngsav(1:3) = ngfft(1:3)
 
@@ -928,6 +946,12 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 ! (ngfft(jj)*symrel(jj,ii,isym))/ngfft(ii) is an integer.
 ! This relation is immediately verified for diagonal elements, since
 ! symrel is an integer. It is also verified if symrel(ii,jj,isym) is zero.
+! Moreover, to cope with the non-symmorphic translation vectors, at least the
+! origin must be sent to a point of the FFT grid. Hence, the non-symmorphic
+! translations tnons(i) multiplied by ngfft(i) must be an integer.
+! The latter condition is however imposed only when chksymtnons=3. 
+! Indeed, ABINIT will be able to reimpose the symmetry at the level of the density and potential.
+! This might be a problem for GW calculations, though ...
 
 !Compute the biggest (positive) common divisor of each off-diagonal element of the symmetry matrices
  divisor(:,:)=0; tobechecked=0
@@ -954,7 +978,8 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
    end do
  end do
 
-!Check whether there is a problem
+!Check whether there is a problem: the grid must be invariant
+!with respect to point symmetry operations, and spatial symmetry operations if chksymtnons==3
  testok=1
  if(tobechecked==1)then
    do ii=1,3
@@ -963,42 +988,136 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
        yy=xx/ngfft(ii)
        if(abs(yy-nint(yy))>tol8)testok=0
      end do
+     if(chksymtnons==3)then
+       do isym=1,nsym
+         tnscaled=tnons(ii,isym)*ngfft(ii)
+         if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
+       enddo
+     endif
    end do
  end if
 
-!There is definitely a problem
+!DEBUG
+!write(std_out,*)' m_fftcore/getng : chksymtnons,testok,nproc_fft=',chksymtnons,testok,nproc_fft
+!ENDDEBUG
+
+!If there is a problem
  if(testok==0)then
-!  Use a brute force algorithm
-!  1) Because one knows that three identical numbers will satisfy
-!  the constraint, use the maximal ngfft value to define current triplet
-!  and associate total number of grid points
-   ngcurrent(1:3)=maxval(ngfft(1:3))
-!  Takes into account the fact that ngfft(2) and ngfft(3) must
-!  be multiple of nproc_fft
-   if(mod(ngcurrent(1),nproc_fft)/=0)ngcurrent(1:3)=ngcurrent(1:3)*max(1,nproc_fft)
-   prodcurrent=ngcurrent(1)**3+1.0d-3
-!  2) Define maximal values for each component, limited
-!  by the maximal value of the list
-   ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
-   ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
-   ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
-!  3) Get minimal and maximal search indices
+!  Find the powers of 2, 3, 5 (possibly 7 and 11) that are needed or will be enough in ngfft,
+!  taking both the constraint on nproc_nfft and the constraint on tnons.
+!  First decompose nproc_fft, providing divisors of ngfft(2:3)
+   nn=nproc_fft
+   npower(:,:)=0 
+   do ipower=1,mpower
+     valpow=power(ipower)
+     do while (mod(nn,valpow)==0)
+       nn=nn/valpow 
+       npower(3,ipower)=npower(3,ipower)+1
+     end do
+     if(nn/=1)then
+       ABI_ERROR('nproc_fft is not a multiple of 2, 3, 5, 7 or 11 ')
+     endif
+   enddo
+   npower(2,:)=npower(3,:)
+
+!  Then examine tnons
+   if(chksymtnons==3)then
+     do ii=1,3
+       do ifactor=1,nfactor
+         testok=1
+         do isym=1,nsym
+           tnscaled=factor(ifactor)*tnons(ii,isym) 
+           if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
+         enddo
+         if(testok==1)exit
+       enddo
+       if(testok==1)then
+         if(ifactor/=1)then
+           if(ifactor==2)npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
+           if(ifactor==3)npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
+           if(ifactor==4)npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
+           if(ifactor==5)npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
+           if(ifactor==6)then 
+             npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
+             npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
+           endif
+           if(ifactor==7)npower(ii,1)=max(npower(ii,1),3)  ! At least three powers of 2
+           if(ifactor==8)npower(ii,2)=max(npower(ii,2),2)  ! At least two powers of 3
+           if(ifactor==9)then
+             npower(ii,1)=max(npower(ii,1),1)  ! At least one power of 2
+             npower(ii,3)=max(npower(ii,3),1)  ! At least one power of 5
+           end if
+           if(ifactor==10)then 
+             npower(ii,1)=max(npower(ii,1),2)  ! At least two powers of 2
+             npower(ii,2)=max(npower(ii,2),1)  ! At least one power of 3
+           end if
+         endif
+       else
+         write(msg, '(a,i12,5a)' ) &
+          'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
+&         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+&         '   for the symmetry number ',isym,ch10,&
+&         '   symrel is ',symrel(1:3,1:3,isym),ch10,&
+&         '   tnons is ',tnons(1:3,isym),ch10,&
+          'This problem should have been caught earlier.'
+         ABI_BUG(msg)
+       endif
+     enddo ! ii
+   endif ! chksymtnons
+
+!  Get minimal search indices, simply those of the current ngfft
    do ii=1,3
      do isrch=1,msrch(ii)
        index=srch(isrch,ii)
        if(index==ngfft(ii))imin(ii)=isrch
-!      One cannot suppose that imax belongs to the allowed list,
+     end do
+   end do
+
+!  Get maximal search indices : the ngtrial values must be identical (to fulfill the constraint induced by the
+!  off diagonal elements of symrel), but also must contain sufficient powers of basic primes (2, 3, 5, 7, 11), 
+!  and be bigger than all current ngfft components. This should guarantee that such a triplet fulfills all constraints.
+!  Determine the divisor of allowed ngmax
+   ngdiv=1
+   do ipower=1,mpower
+     ngdiv=ngdiv*power(ipower)**(maxval(npower(:,ipower)))
+   enddo
+   ngmax(1)=ngdiv*(maxval(ngfft(1:3)-1)/ngdiv+1)
+   ngmax(1:3)=ngmax(1)
+   do ii=1,3
+     do isrch=1,msrch(ii)
+       index=srch(isrch,ii)
+       if(mod(index,ngdiv)==0 .and. index>=ngmax(ii))then
+         imax(ii)=isrch
+         ngmax(ii)=index
+         exit
+       endif
+     end do
+   end do
+!  This gives a tentative symetric triplet
+   ngcurrent(1:3)=ngmax(1:3)
+   prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
+!  However, it is perhaps possible to do better, by assymetric triplets, still giving lower prodcurrent !
+   ngmax(1)=min(int(prodcurrent/(ngfft(2)*ngfft(3))),srch(msrch(1),1))
+   ngmax(2)=min(int(prodcurrent/(ngfft(1)*ngfft(3))),srch(msrch(2),2))
+   ngmax(3)=min(int(prodcurrent/(ngfft(1)*ngfft(2))),srch(msrch(3),3))
+   do ii=1,3
+     do isrch=1,msrch(ii)
+       index=srch(isrch,ii)
+!      One cannot suppose that ngmax belongs to the allowed list,
 !      so must use <= instead of == , to determine largest index
        if(index<=ngmax(ii))imax(ii)=isrch
      end do
    end do
-!  4) Compute product of trial ngffts
-!  DEBUG
-!  write(ount,*)' getng : enter triple loop '
-!  write(ount,*)'imin',imin(1:3)
-!  write(ount,*)'imax',imax(1:3)
-!  write(ount,*)'ngcurrent',ngcurrent(1:3)
-!  ENDDEBUG
+
+!DEBUG
+!write(std_out,*)' ngmin(1:3)=',srch(imin(1),1),srch(imin(2),2),srch(imin(3),3)
+!write(std_out,*)' ngmax(1:3)=',ngmax(1:3)
+!ENDDEBUG
+
+   ngcurrent(1:3)=ngmax(1:3)
+   prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
+
+!  Now, start brute force search
    do isrch1=imin(1),imax(1)
      ngtrial(1)=srch(isrch1,1)
      do isrch2=imin(2),imax(2)
@@ -1016,13 +1135,20 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
              yy=xx/ngtrial(ii)
              if(abs(yy-nint(yy))>tol8)testok=0
            end do
+           if(chksymtnons==3)then
+             do isym=1,nsym
+               tnscaled=tnons(ii,isym)*ngtrial(ii)
+               if(abs(tnscaled-nint(tnscaled))>tol8)testok=0
+             enddo
+           endif
          end do
 !        DEBUG
 !        write(ount,'(a,3i6,a,i3,a,es16.6)' )' getng : current trial triplet',ngtrial(1:3),&
 !        &     ' testok=',testok,' prodtrial=',prodtrial
 !        ENDDEBUG
          if(testok==0)cycle
-!        The symmetry constraints are fulfilled, so update current values
+!        When one arrives here, the symmetry constraints are fulfilled, so update current values
+!        Then continues the search, in hope of a better value.
          ngcurrent(1:3)=ngtrial(1:3)
          prodcurrent=prodtrial
        end do

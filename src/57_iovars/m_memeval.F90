@@ -6,7 +6,7 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2022 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -256,8 +256,9 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      ngfftdiel(1:3)=0 ; ngfftdiel(7)=101 ; ngfftdiel(8:18)=dtsets(idtset)%ngfft(8:18)
      if(iscf==-1)ngfftdiel(7)=102
      ecut_eff=ecutsus*dilatmx**2
-     call getng(dtsets(idtset)%boxcutmin,ecut_eff,gmet,k0,me_fft,mgfftdiel,nfftdiel,&
-&     ngfftdiel,nproc_fft,nsym,paral_fft,symrel,&
+     call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,&
+&     ecut_eff,gmet,k0,me_fft,mgfftdiel,nfftdiel,&
+&     ngfftdiel,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
 &     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
 !    Compute the size of the dielectric matrix : npwdiel
      kpt_diel(1:3)=(/ 0.0_dp, 0.0_dp, 0.0_dp /)

@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -139,6 +139,8 @@ P           mkmem           8
            occopt           3
         optdriver           4
         pawecutdg      5.00000000E+00 Hartree
+     plowan_bandi          21
+     plowan_bandf          25
    plowan_compute          10
      plowan_natom           1
         plowan_nt           1
@@ -147,7 +149,7 @@ P           mkmem           8
      plowan_iatom5       1
        plowan_nbl5       1
      plowan_lcalc5       2
-  plowan_projcalc5      -2
+  plowan_projcalc5       7
           ppmodel           3
           spgroup           1
            tolvrs      1.00000000E-10
@@ -593,19 +595,19 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  cRPA calculations using wannier weights from data.plowann
 
- == Lower and upper values of the selected bands    0    0
+ == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 
  == Lower and upper values of the selected bands   21   25
  == Number of atoms                                      1
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
 Reading of the Wannier weights from data.plowann
 
  == Lower and upper values of the selected bands   21   25
@@ -613,7 +615,7 @@ Reading of the Wannier weights from data.plowann
  == Atoms selected                                1
  == Nb of angular momenta used for each atom      1
  == Value of the angular momenta for atom 1 is :  2
- == Value of the projectors      for atom 1 is : -2
+ == Value of the projectors      for atom 1 is :  7
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
@@ -821,6 +823,8 @@ P           mkmem           8
            occopt           3
         optdriver           4
         pawecutdg      5.00000000E+00 Hartree
+     plowan_bandi          21
+     plowan_bandf          25
    plowan_compute          10
      plowan_natom           1
         plowan_nt           1
@@ -829,7 +833,7 @@ P           mkmem           8
      plowan_iatom5       1
        plowan_nbl5       1
      plowan_lcalc5       2
-  plowan_projcalc5      -2
+  plowan_projcalc5       7
           ppmodel           3
           spgroup           1
            strten5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

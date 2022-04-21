@@ -26,7 +26,7 @@ spin_write_traj = 0
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_builders = .*_nag_7.0_.*
+#%% exclude_builders = .*_nag_7.[01]_.*
 #%% spin_pot = t23.xml
 #%% exec_args = --F03
 #%% [files]

@@ -36,7 +36,7 @@ Care is taken not to duplicate existing more complete documentation in ABINIT,
 but to point to it if appropriate. Not all the ABINIT documentation is covered
 by the Web-accessible documents, there are still a few unlinked documents in
 the subdirectories of ~abinit/doc (work is in progress to make it all available).
-Discussions on the [ABINIT forum](https://forum.abinit.org) might also allow to get information.
+Discussions on the [ABINIT discourse forum](https://discourse.abinit.org) might also allow to get information.
 
 ## 2 ABINIT specifications for static DFT calculations
   
@@ -217,7 +217,7 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
   1. [[topic:Abipy|Abipy - ABINIT swiss knife]]
   2. [[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]
   3. [[topic:Band2eps|Band2eps for phonon dispersion curves]]
-  4. [[topic:a-TDEP|Temperature Dependent Effective Potential, for thermodynamical properties]]
+  4. [[topic:aTDEP|Temperature Dependent Effective Potential, for thermodynamical properties]]
 
 ## 12 Miscellaneous topics
   

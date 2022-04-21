@@ -7,7 +7,7 @@
 !!  correlation potentials and energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2021 ABINIT group (MO, MT)
+!! Copyright (C) 2015-2022 ABINIT group (MO, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2129,7 +2129,7 @@ end module m_libpaw_libxc_funcs
 !!   - Use of embedded m_libpaw_libxc_funcs module
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2021 ABINIT group (MT)
+!! Copyright (C) 2014-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

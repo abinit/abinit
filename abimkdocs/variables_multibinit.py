@@ -165,6 +165,23 @@ sampling (Warning: not BCC lattice, BCC *sampling*), and 4 for FCC sampling
 ),
 
 Variable(
+    abivarname="prt_GF_csv@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Effective potential XML output",
+    added_in_version="v9",
+    text=r"""
+* 0 --> do nothing (Default)
+* 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor 
+        at a given fit iteration into a csv file. Each iteration each processor 
+        prints a csv file. The colums are the GF on Energy, Force+Stresses, Forces, Stresses.
+""",
+),
+
+Variable(
     abivarname="prt_model@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -245,6 +262,22 @@ Default value is 0 1 1, so anharmonic coefficients get fitted on Forces and Stre
 """,
 ),
 
+Variable(
+    abivarname="fit_factors@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=[1,1,1],
+    mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses",
+    added_in_version="v9",
+    text=r"""
+Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+fit process allowing to change the relative weight of the three quantities. 
+
+Default value is 1 1 1, equally balancing energy, forces and stresses. 
+""",
+),
 
 Variable(
     abivarname="fit_ncoeff@multibinit",
@@ -257,6 +290,21 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the number of anharmonic coefficients to add in the model during the fit process
+""",
+),
+
+Variable(
+    abivarname="fit_ncoeff_per_iatom@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FIT Number of COEFFicients",
+    added_in_version="before_v9",
+    text=r"""
+Give the number of anharmonic coefficients per symmetric irreducible atoms to add during fit process.
+[[multibinit:fit_ncoeff]]/(nirred_atoms*fit_ncoeff_per_iatom) gives the number of fitting loops performed during the fit process, where in each loop fit_ncoeff_per_iatom coefficients for each irreducible atom will be added to the anharmonic potential. 
 """,
 ),
 
@@ -358,6 +406,22 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Flag to activate the strain  phonon coupling. This option will add coefficients like  (Sr-Ti)^1 (eta^4)
+""",
+),
+
+Variable(
+    abivarname="fit_dispterms@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
+    added_in_version="before_v9",
+    text=r"""
+Flag to activate the generation of pure displacement coefficients. This option will generate coefficients like (Sr-Ti)^2*(Sr-O), where only atomic displacements occur.  
+
+Default value: 1 -> displacement terms are generated.
 """,
 ),
 
@@ -467,6 +531,40 @@ Indices of the imposed coefficients during the fit process for the model:
 
 
 Variable(
+    abivarname="fit_nimposecoeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FIT Number of IMPOSEd COEFFicients",
+    added_in_version="before_v9",
+    text=r"""
+Number of coefficients imposed with fixed value as in the input xml during the fit process for the model:
+
+* -1 -->  fix all the coefficients
+
+* 0  -->  do not fix coefficients
+
+* n  -->  fix n coefficients (requires [[multibinit:fit_imposecoeff]] input variable)
+""",
+),
+
+Variable(
+    abivarname="fit_imposecoeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions=['[[multibinit:fit_nimposecoeff]]'],
+    defaultval=0,
+    mnemonics="FIT Number of IMPOSEd COEFFicients",
+    added_in_version="before_v9",
+    text=r"""
+Indices of the imposed coefficients with fixed coefficient value during the fit process for the model:
+""",
+),
+
+Variable(
     abivarname="fit_nbancoeff@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -515,6 +613,23 @@ Variable(
 ),
 
 Variable(
+    abivarname="bound_factors@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=[1,1,1],
+    mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during bounding process",
+    added_in_version="v9",
+    text=r"""
+Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+bounding process allowing to change the relative weight of the three quantities. 
+
+Default value is 1 1 1, equally balancing energy, forces and stresses. 
+""",
+),
+
+Variable(
     abivarname="bound_model@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -549,6 +664,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Number of maximum additional coefficients for the bound process
+""",
+),
+
+Variable(
+    abivarname="bound_penalty@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=1.001,
+    mnemonics="Goal Function penalty for determination of bounding coefficients",
+    added_in_version="v9",
+    text=r"""
+Relative penalty for the determination of bounding coefficient values. The penalty defines the ration of the goal function before and after adding the coefficient. If the optimum value of the coefficient (-one that decreases the value of the goal function-) is negative a positive value that .   
 """,
 ),
 
@@ -1695,6 +1824,23 @@ Variable(
         The optimization process gives the user the ability to refit the coefficients of specified terms with respect to the training set while keeping the rest fixed.
 
 **Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indices of the coefficients to optimize ([[multibinit:opt_coeff]]).
+""",
+),
+
+Variable(
+    abivarname="opt_factors@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=[1,1,1],
+    mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during optimization of coefficients",
+    added_in_version="v9",
+    text=r"""
+Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+optimization process allowing to change the relative weight of the three quantities. 
+
+Default value is 1 1 1, equally balancing energy, forces and stresses. 
 """,
 ),
 

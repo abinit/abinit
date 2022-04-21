@@ -1,0 +1,42 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 6 0
+natom_unitcell 2
+xred_unitcell -0.3333333333333 0.0 0.0 0.333333333333 0.33333333333 0.5
+typat_unitcell 1 1
+ntypat 1
+amu 5.58470000E+01
+#DEFINE_SUPERCELL
+rprimd  20.4768134 0.0000000 0.0000000 0.0000000 21.2801287 0.0000000 0.0000000 0.0000000 19.6577409
+multiplicity 5 0 0 3 6 0 0 0 3
+natom  180
+typat 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+temperature  50.00000000E+02
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut  9.8 
+#OPTIONAL_INPUT_VARIABLES
+use_ideal_positions 1
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% md_hist = t04
+#%% [files]
+#%% files_to_test = 
+#%%   t04.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t04omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t04thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (2nd order)
+#%%   Iron (hcp) with 180 atoms at T = 5000 K.
+#%% topics = aTDEP
+#%%<END TEST_INFO>

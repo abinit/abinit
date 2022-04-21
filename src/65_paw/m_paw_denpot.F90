@@ -6,7 +6,7 @@
 !!  This module contains routines related to PAW on-site densities and on-site potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2022 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -320,6 +320,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !Select PAW+U algo, different for DFT and DFPT
  usepawu=maxval(pawtab(1:ntypat)%usepawu)
  ii=minval(pawtab(1:ntypat)%usepawu);if (ii<0) usepawu=ii
+ non_magnetic_xc=(mod(abs(usepawu),10)==4)
 
 !if PAW+U, compute noccmmp^{\sigma}_{m,m'} occupation matrix
  if (usepawu/=0.and.ipert<=0.and.ipositron/=1) then
@@ -373,7 +374,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    usepawu=pawtab(itypat)%usepawu
    pawu_algo=merge(PAWU_ALGO_1,PAWU_ALGO_2,ipert<=0.and.usepawu>=0)
    pawu_dblec=merge(PAWU_FLL,PAWU_AMF,abs(usepawu)==1.or.abs(usepawu)==4)
-   non_magnetic_xc=(mod(abs(usepawu),10)==4)
 
 !  Allocations of "on-site" densities
    ABI_MALLOC(rho1 ,(cplex*mesh_size,lm_size,nspden))

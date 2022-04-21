@@ -7,7 +7,7 @@
 !! Choose among the whole set of geometry predictors defined by iommov.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 2018-2022 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -203,7 +203,7 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
    case (24)
      call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
    case (25)
-     call pred_hmc(ab_mover,hist,itime,icycle,ntime,hmctt,DEBUG,iexit)
+     call pred_hmc(ab_mover,hist,itime,icycle,ntime,hmctt,mttk_vars,DEBUG,iexit)
    case (27)
      !In case of ionmov 27, all the atomic configurations have been computed at the
      !beginning of the routine in generate_training_set, thus we just need to increase the indexes

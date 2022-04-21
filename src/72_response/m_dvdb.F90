@@ -10,7 +10,7 @@
 !!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG,GA)
+!! Copyright (C) 2009-2022 ABINIT group (MG,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -320,6 +320,7 @@ module m_dvdb
    ! -1 --> Remove LR model when building W(R,r). DO NOT reintroduce it after Fourier interpolation.
    !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
    !       in order to remove the long range component from the DFPT potentials.
+   ! 2 --> Similar to 1 but include only the dipole part. Q* are set to zero even if the DDB file contains them.
    ! 4,5,6,7 --> Use model for the LR part only.
    !        4: Use dipole + quadrupole part (if available)
    !        5: Use dipole part only.
