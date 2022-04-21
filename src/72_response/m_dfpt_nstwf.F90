@@ -81,6 +81,7 @@ module m_dfpt_nstwf
 
  public :: dfpt_nstpaw
  public :: dfpt_nstwf
+ public :: gaugetransfo
 !!***
 
 contains
@@ -2429,7 +2430,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
  DBG_EXIT("COLL")
 
-  contains
+end subroutine dfpt_nstwf
 !!***
 
 !!****f* ABINIT/gaugetransfo
@@ -2488,7 +2489,7 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
 !Local variables-------------------------------
 !tolerance for non degenerated levels
 !scalars
- integer :: jband,jband_me
+ integer :: ierr, jband,jband_me
  real(dp),parameter :: etol=1.0d-3
 !arrays
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
@@ -2524,8 +2525,6 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
   end subroutine gaugetransfo
 !!***
 
-end subroutine dfpt_nstwf
-!!***
 
 end module m_dfpt_nstwf
 !!***
