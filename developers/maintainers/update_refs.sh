@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2019-2021 ABINIT group (XG)
+# Copyright (C) 2019-2022 ABINIT group (XG)
 # 
 # The purpose of this script is to update all reference files, by brute force.
 

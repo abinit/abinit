@@ -8,7 +8,7 @@
 !! It mainly defines a 'chebfi' datatypes and associated methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (BS)
+!! Copyright (C) 2018-2022 ABINIT group (BS)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

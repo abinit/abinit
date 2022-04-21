@@ -10,9 +10,9 @@
 # Computation details
        nstep_max       101
        nstep_min         1
-            Rcut     7.426
+            rcut     7.426
 # Optional inputs
-          Ngqpt2 2 2 2
+          ngqpt2 2 2 2
           TheEnd
 
 # XG20191126 : the comparison of the omega.dat file has been suppressed, because on the new reference machine,
@@ -21,17 +21,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
-#%% md_hist = t37_HIST.nc
+#%% md_hist = t37_
 #%% [files]
 #%% files_to_test = 
 #%%   t37.abo, tolnlines = 1, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%%   t37thermo.dat, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -medium;
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = J. Bieder
 #%% keywords = atdep
 #%% description = 
-#%%   test a-TDEP 
-#%% topics = a-TDEP
+#%%   test aTDEP 
+#%% topics = aTDEP
 #%%<END TEST_INFO>

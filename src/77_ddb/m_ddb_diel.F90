@@ -6,7 +6,7 @@
 !! This module provides routines for the calculation of the dielectric constant (anaddb)
 !! 
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG,XW, MVeithen, EB)
+!!  Copyright (C) 1999-2022 ABINIT group (XG,XW, MVeithen, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

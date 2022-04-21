@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -3429,10 +3429,10 @@ force_length_stats: {min:   3.64511191E-04, max:   3.78666661E-03, mean:   1.660
    0.00001    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000
  Total charge density [el/Bohr^3]
-      Maximum=    5.7870E-02  at reduced coord.    0.4333    0.8167    0.0667
- Next maximum=    5.7813E-02  at reduced coord.    0.9333    0.0667    0.6833
-      Minimum=    1.9480E-03  at reduced coord.    0.0000    0.7500    0.7500
- Next minimum=    1.9492E-03  at reduced coord.    0.7500    0.7500    0.2500
+)     Maximum=    5.7870E-02  at reduced coord.    0.4333    0.8167    0.0667
+)Next maximum=    5.7813E-02  at reduced coord.    0.9333    0.0667    0.6833
+)     Minimum=    1.9480E-03  at reduced coord.    0.0000    0.7500    0.7500
+)Next minimum=    1.9492E-03  at reduced coord.    0.7500    0.7500    0.2500
    Integrated=    7.6800E+02
 
 --- !EnergyTerms
@@ -5810,10 +5810,10 @@ force_length_stats: {min:   1.37831720E-04, max:   3.10457500E-03, mean:   1.253
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
  Total charge density [el/Bohr^3]
-      Maximum=    5.7785E-02  at reduced coord.    0.3167    0.9333    0.6833
- Next maximum=    5.7731E-02  at reduced coord.    0.6833    0.1833    0.5667
-      Minimum=    1.9518E-03  at reduced coord.    0.0000    0.0000    0.7500
- Next minimum=    1.9594E-03  at reduced coord.    0.2500    0.2500    0.7500
+)     Maximum=    5.7785E-02  at reduced coord.    0.3167    0.9333    0.6833
+)Next maximum=    5.7731E-02  at reduced coord.    0.6833    0.1833    0.5667
+)     Minimum=    1.9518E-03  at reduced coord.    0.0000    0.0000    0.7500
+)Next minimum=    1.9594E-03  at reduced coord.    0.2500    0.2500    0.7500
    Integrated=    7.6800E+02
 
 --- !EnergyTerms

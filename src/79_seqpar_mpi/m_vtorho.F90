@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1208,8 +1208,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,nfftf,dtset%nspden,&
-&       dtset%tsmear,vtrial)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
      end if
 

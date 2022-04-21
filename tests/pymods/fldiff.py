@@ -24,6 +24,7 @@ P	handle as + if ignoreP option is False and as - else
 ;	floating point comparisons are done irrespective of signs
 :	ignore floating point numbers and do a characters comparison
 .	do a characters comparison, but do not count this line in the Summary
+)       floating point comparison is done only for the FIRST numeric field
 
 Both files should have the same number of non - starting lines.
 
@@ -554,6 +555,7 @@ class Differ(object):
 
                             # si -> plain text separators
                             # fi -> floats
+                            flag_compare = 1
                             for s1, f1, s2, f2 in pairs(splitted1, splitted2):
 
                                 if norm_spaces(s1) != norm_spaces(s2):
@@ -577,12 +579,16 @@ class Differ(object):
                                     else:
                                         diffrel = diff / abs_sum
 
-                                    if diff > tol and diffrel > tolrel:
+                                    if diff > tol and diffrel > tolrel and flag_compare==1:
                                         differences.append(
                                             FloatDifference(
                                                 i1, i2, line1, line2,
                                                 diff, diffrel
                                             )
                                         )
+
+                                    if meta1 == ')':
+                                        # turn off further numerical comparison
+                                        flag_compare = 0
 
         return differences
