@@ -9,7 +9,7 @@
   enunit 2
   prtvol 0
   prtden 0
-  prtnabla 2
+  prtnabla 1
 
 # 3-Parameters governing the convergence:
 # ---------------------------------------
