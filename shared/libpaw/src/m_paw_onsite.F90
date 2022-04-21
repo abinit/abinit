@@ -399,26 +399,26 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
 !      Calculate spinor dependend coeffs
 !        (Clebsch-Gordan, I guess)
        cgc=one ! so nothing changes without core spinors
-       if(sgnkappa==-1) then
+       if (sgnkappa==1) then
          if(js==1) then
-           cgc=sqrt((jl+half+jmj)/(2*jl+one))
+           cgc= sqrt((dble(jl)-jmj+half)/dble(2*jl+1))
          else
-           cgc=sqrt((jl+half-jmj)/(2*jl+one))
+           cgc=-sqrt((dble(jl)+jmj+half)/dble(2*jl+1))
          endif
        else
          if(js==1) then
-           cgc=sqrt((jl+half-jmj)/(2*jl+one))
+           cgc= sqrt((dble(jl)+jmj+half)/dble(2*jl+1))
          else
-           cgc=-sqrt((jl+half+jmj)/(2*jl+one))
+           cgc= sqrt((dble(jl)-jmj+half)/dble(2*jl+1))
          endif
        endif
 
        jlm=indlmn_cor(4,jlmn)
-       jln =indlmn_cor(5,jlmn)
+       jln=indlmn_cor(5,jlmn)
 
        do ilmn=1,lmn_size
          ilm=indlmn(4,ilmn)
-         iln =indlmn(5,ilmn)
+         iln=indlmn(5,ilmn)
 
 !        jl was set as a flag for invalid combinations
 !          i.e. m=-(l+1) or m=(l+1)
