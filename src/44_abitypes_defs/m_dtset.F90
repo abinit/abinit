@@ -3197,7 +3197,7 @@ subroutine chkvars(string)
 !scalars
  integer,parameter :: protocol1=1
  character(len=100) :: list_logicals,list_strings, list_vars_img
- character(len=10000) :: list_vars
+ character(len=20000) :: list_vars
 
 !************************************************************************
 
