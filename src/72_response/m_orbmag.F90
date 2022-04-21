@@ -174,8 +174,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
  !scalars
  integer :: adir,buff_size,choice,cpopt,dimffnl,exchn2n3d,iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
- integer :: klm
- integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,my_lmax,my_nspinor,nband_k,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nn,nkpg,npw_k,nproc,spaceComm,with_vectornd
  real(dp) :: arg,ecut_eff,trnrm,ucvol
  logical :: has_nucdip
@@ -616,7 +615,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
  end do
 
  ! get the Lamb term
- call lamb_core(atindx,dtset,omlamb,pawtab)
+ call lamb_core(atindx,dtset,omlamb)
  orbmag_trace(:,:,iomlmb) = omlamb
 
  call orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
@@ -1087,7 +1086,7 @@ subroutine apply_onsite_d0_k(atindx,bc_k,cprj_k,cprj1_k,Enk,&
  integer :: adir,bdir,gdir,iat,iatom,ilmn,iterm,itypat,jlmn,klmn,nn
  integer,parameter :: idpdp=1,idpu=2,idudu=3
  real(dp) :: c2,eabg,qij
- complex(dpc) :: dij,uij,uji
+ complex(dpc) :: dij
  logical :: cplex_dij
 
  !arrays
@@ -1140,19 +1139,6 @@ subroutine apply_onsite_d0_k(atindx,bc_k,cprj_k,cprj1_k,Enk,&
              else
                dij = cmplx(paw_ij(iat)%dij(klmn,1),zero,KIND=dpc)
              end if
-
-             ! uij is d/d_beta (<u|p_i> * d/d_gamma (<p_j|u>) 
-             !uij = conjg(udp(1,1)+dup(1,1))*(udp(2,2)+dup(2,2))
-             !uji = conjg(udp(1,2)+dup(1,2))*(udp(2,1)+dup(2,1))
-
-             !uij = conjg(udp(1,1))*udp(2,2)+conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2)
-             !uji = conjg(udp(1,2))*udp(2,1)+conjg(udp(1,2))*dup(2,1)+conjg(dup(1,2))*udp(2,1)
-
-             !uij = conjg(dup(1,1))*dup(2,2)
-             !uji = conjg(dup(1,2))*dup(2,1)
-
-             !uij = conjg(udp(1,1))*udp(2,2)
-             !uji = conjg(udp(1,2))*udp(2,1)
 
              bcme(idpdp) = bcme(idpdp) + cbc*c2*eabg*qij*conjg(udp(1,1))*udp(2,2)
              bcme(idpu) =  bcme(idpu)  + cbc*c2*eabg*qij*(conjg(udp(1,1))*dup(2,2)+conjg(dup(1,1))*udp(2,2))
@@ -1223,7 +1209,7 @@ end subroutine apply_onsite_d0_k
 !!
 !! SOURCE
 
-subroutine lamb_core(atindx,dtset,omlamb,pawtab)
+subroutine lamb_core(atindx,dtset,omlamb)
 
   !Arguments ------------------------------------
   !scalars
@@ -1232,7 +1218,6 @@ subroutine lamb_core(atindx,dtset,omlamb,pawtab)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(out) :: omlamb(2,3)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -1416,6 +1401,7 @@ subroutine dl_vha(atindx,dlvh,dtset,gntselect,gprimd,lmn2max,my_lmax,&
 
  ABI_FREE(intg) 
 end subroutine dl_vha
+!!***
 
 
 !!****f* ABINIT/dl_vhnzc
@@ -1515,6 +1501,7 @@ subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab
  end do ! end loop over types
  
 end subroutine dl_vhnzc
+!!***
 
 !!****f* ABINIT/dl_q
 !! NAME
@@ -1595,6 +1582,7 @@ subroutine dl_q(dlq,dtset,gprimd,lmn2max,pawtab)
  end do ! end loop over types
  
 end subroutine dl_q
+!!***
 
 !!****f* ABINIT/dl_p2
 !! NAME
@@ -1705,6 +1693,7 @@ subroutine dl_p2(dlp2,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,realg
   end do ! end loop over atoms
  
 end subroutine dl_p2
+!!***
 
 !!****f* ABINIT/dl_Anp
 !! NAME
@@ -1764,7 +1753,7 @@ subroutine dl_Anp(dlanp,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,rea
   !arrays
   integer,dimension(3) :: adir_to_sij = (/4,2,3/)
   real(dp),allocatable :: ff(:)
-  complex(dpc) :: dij_cart(3),dij_red(3)
+  complex(dpc) :: dij_cart(3)
 
 !--------------------------------------------------------------------
 
@@ -1822,6 +1811,7 @@ subroutine dl_Anp(dlanp,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,rea
   end do ! end loop over atoms
  
 end subroutine dl_Anp
+!!***
 
 
 !!****f* ABINIT/d2lr_p2
@@ -1873,7 +1863,7 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
   !scalars
   integer :: adir,iat,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size
   real(dp) :: intg
-  complex(dpc) :: cme,orbl_me
+  complex(dpc) :: orbl_me
 
   !arrays
   complex(dpc) :: dij_cart(3),dij_red(3)
@@ -1922,6 +1912,7 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
   end do ! end loop over atoms
  
 end subroutine d2lr_p2
+!!***
 
 !!****f* ABINIT/apply_d2lr_term_k
 !! NAME
@@ -2011,6 +2002,7 @@ subroutine apply_d2lr_term_k(atindx,cprj_k,dtset,iterm,lmn2max,mterm,nband_k,omm
   end do ! end loop over nn
  
 end subroutine apply_d2lr_term_k
+!!***
 
 !!****f* ABINIT/d2lr_Anp
 !! NAME
@@ -2193,7 +2185,7 @@ subroutine orbmag_tt_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
  !Local variables -------------------------
  !scalars
- integer :: adir,iband,ikpt,iterms
+ integer :: adir,iband,iterms
  character(len=500) :: message
 
  !arrays
@@ -2442,6 +2434,7 @@ subroutine local_rhoij(atindx,dtset,cprj,lmn2max,mcprj,mpi_enreg,rhoij,pawtab,uc
  end if
 
 end subroutine local_rhoij
+!!***
 
 
 end module m_orbmag
