@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_lwf_mover
+!!****m*ABINIT/m_lwf_mover
 !! NAME
 !! m_lwf_mover
 !!
@@ -58,69 +58,69 @@ module m_lwf_mover
   private
   !!***
 
-  type, public, extends(abstract_mover_t) :: lwf_mover_t
-     type(multibinit_dtset_type), pointer :: params
+  type, public, extends(abstract_mover_t):: lwf_mover_t
+     type(multibinit_dtset_type), pointer:: params
      real(dp) ::  energy
-     integer :: nlwf
-     real(dp), allocatable :: lwf(:), lwf_force(:), vcart(:)
-     type(lwf_ncfile_t) :: ncfile
-     type(lwf_hist_t) :: hist
-     real(dp), pointer :: lwf_masses(:) => null()
-     real(dp) :: Ek=0.0_dp     ! kinetic energy
-     real(dp) :: T_ob=0.0_dp    ! observed temperature
+     integer:: nlwf
+     real(dp), allocatable:: lwf(:), lwf_force(:), vcart(:)
+     type(lwf_ncfile_t):: ncfile
+     type(lwf_hist_t):: hist
+     real(dp), pointer:: lwf_masses(:) => null()
+     real(dp):: Ek = 0.0_dp     ! kinetic energy
+     real(dp):: T_ob = 0.0_dp    ! observed temperature
 
      ! constraints
-     integer :: n_fixed_lwf = 0
-     integer, allocatable :: fixed_lwf_ids(:)
-     real(dp), allocatable :: fixed_lwf_values(:)
+     integer:: n_fixed_lwf = 0
+     integer, allocatable:: fixed_lwf_ids(:)
+     real(dp), allocatable:: fixed_lwf_values(:)
 
    contains
-     procedure :: initialize
-     procedure :: finalize
-     procedure :: set_temperature
-     procedure :: set_params
-     procedure :: set_initial_state
-     procedure :: get_T_and_Ek
-     procedure :: run_one_step
-     procedure :: run_time
-     procedure :: run_varT
-     procedure :: prepare_ncfile
-     procedure :: set_ncfile_name
-     procedure :: read_hist_lwf_state
-     procedure :: read_lwf_constraints
-     procedure :: apply_fixed_lwf
-     procedure :: apply_constraints
+     procedure:: initialize
+     procedure:: finalize
+     procedure:: set_temperature
+     procedure:: set_params
+     procedure:: set_initial_state
+     procedure:: get_T_and_Ek
+     procedure:: run_one_step
+     procedure:: run_time
+     procedure:: run_varT
+     procedure:: prepare_ncfile
+     procedure:: set_ncfile_name
+     procedure:: read_hist_lwf_state
+     procedure:: read_lwf_constraints
+     procedure:: apply_fixed_lwf
+     procedure:: apply_constraints
   end type lwf_mover_t
 
 contains
 
   subroutine initialize(self, params, supercell, rng)
-    class(lwf_mover_t), intent(inout) :: self
-    type(multibinit_dtset_type),target, intent(in) :: params
-    type(mbsupercell_t),target, intent(in) :: supercell
-    type(rng_t), target, intent(in) :: rng
+    class(lwf_mover_t), intent(inout):: self
+    type(multibinit_dtset_type), target, intent(in):: params
+    type(mbsupercell_t), target, intent(in):: supercell
+    type(rng_t), target, intent(in):: rng
     self%params=>params
     self%supercell=>supercell
     self%label="LWF Mover"
     call self%set_params(params)
     call self%set_rng(rng)
-    self%nlwf=self%supercell%lwf%nlwf
+    self%nlwf = self%supercell%lwf%nlwf
     ABI_MALLOC(self%lwf, (self%nlwf))
     ABI_MALLOC(self%vcart, (self%nlwf))
     ABI_MALLOC(self%lwf_force, (self%nlwf))
     self%lwf(:) = 0.0_dp
     self%lwf_force(:) = 0.0_dp
     self%vcart(:) = 0.0_dp
-    self%energy=0.0_dp
+    self%energy = 0.0_dp
     self%lwf_masses=>self%supercell%lwf%lwf_masses
-    call self%hist%initialize(nlwf=self%nlwf, mxhist=1)
+    call self%hist%initialize(nlwf = self%nlwf, mxhist = 1)
 
     !call self%read_lwf_constraints()
   end subroutine initialize
 
 
   subroutine finalize(self)
-    class(lwf_mover_t), intent(inout) :: self
+    class(lwf_mover_t), intent(inout):: self
     nullify(self%supercell)
     nullify(self%params)
     ABI_SFREE(self%lwf)
@@ -130,7 +130,7 @@ contains
     call self%hist%finalize()
 
     ! constraints
-    self%n_fixed_lwf=0
+    self%n_fixed_lwf = 0
     ABI_SFREE(self%fixed_lwf_ids)
     ABI_SFREE(self%fixed_lwf_values)
 
@@ -138,17 +138,17 @@ contains
   end subroutine finalize
 
   subroutine set_params(self, params)
-    class(lwf_mover_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
-    self%dt=params%lwf_dt
-    self%total_time=params%lwf_ntime*params%lwf_dt
-    self%temperature=params%lwf_temperature
+    class(lwf_mover_t), intent(inout):: self
+    type(multibinit_dtset_type):: params
+    self%dt = params%lwf_dt
+    self%total_time = params%lwf_ntime*params%lwf_dt
+    self%temperature = params%lwf_temperature
   end subroutine set_params
 
   subroutine set_temperature(self, temperature)
-    class(lwf_mover_t), intent(inout) :: self
-    real(dp), intent(in) :: temperature
-    self%temperature=temperature
+    class(lwf_mover_t), intent(inout):: self
+    real(dp), intent(in):: temperature
+    self%temperature = temperature
   end subroutine set_temperature
 
   !-------------------------------------------------------------------!
@@ -157,19 +157,19 @@ contains
   ! T = 2 Ek/nlwf (in a.u.)
   !-------------------------------------------------------------------!
   subroutine get_T_and_Ek(self)
-    class(lwf_mover_t), intent(inout) :: self
-    integer :: i
-    self%Ek= sum(self%lwf_masses * (self%vcart * self%vcart))
+    class(lwf_mover_t), intent(inout):: self
+    integer:: i
+    self%Ek = 0.5*sum(self%lwf_masses * (self%vcart*self%vcart))
     self%T_ob = 2.0*self%Ek/self%nlwf
   end subroutine get_T_and_Ek
 
 
 
   subroutine run_one_step(self, effpot, displacement, strain, spin, lwf,  energy_table)
-    class(lwf_mover_t), intent(inout) :: self
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
-    class(abstract_potential_t), intent(inout) :: effpot
-    type(hash_table_t),optional, intent(inout) :: energy_table
+    class(lwf_mover_t), intent(inout):: self
+    real(dp), optional, intent(inout):: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    class(abstract_potential_t), intent(inout):: effpot
+    type(hash_table_t), optional, intent(inout):: energy_table
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(displacement)
@@ -185,13 +185,13 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_time(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
-    class(lwf_mover_t), intent(inout) :: self
+    class(lwf_mover_t), intent(inout):: self
     ! array of effective potentials so that there can be multiple of them.
-    class(abstract_potential_t), intent(inout) :: effpot
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
-    type(hash_table_t), optional, intent(inout) :: energy_table
-    integer :: i, nstep
-    character(len=90) :: msg
+    class(abstract_potential_t), intent(inout):: effpot
+    real(dp), optional, intent(inout):: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout):: energy_table
+    integer:: i, nstep
+    character(len = 90):: msg
     if(present(lwf)) then
        ABI_ERROR("lwf should not be input for lwf mover")
     end if
@@ -201,31 +201,34 @@ contains
     ABI_UNUSED_A(energy_table)
 
 
-    msg=repeat("=", 90)
-    call wrtout(std_out,msg,'COLL')
+    msg = repeat("=", 90)
+    call wrtout(std_out, msg, 'COLL')
     call wrtout(ab_out, msg, 'COLL')
     write(msg, '(A22)') "LWF dynamic steps:"
-    call wrtout(std_out,msg,'COLL')
+    call wrtout(std_out, msg, 'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    msg=repeat("=", 90)
-    call wrtout(std_out,msg,'COLL')
+    msg = repeat("=", 90)
+    call wrtout(std_out, msg, 'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
     write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)") &
             &  "Iteration", "temperature(K)", "Ekin(Ha/uc)", &
             & "Epot(Ha/uc)", "ETOT(Ha/uc)"
-    call wrtout(std_out,msg,'COLL')
+    call wrtout(std_out, msg, 'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
 
     call self%apply_constraints(self%lwf)
 
-    nstep=floor(self%total_time/self%dt)
-    do i =1, nstep
+    nstep = floor(self%total_time/self%dt)
+    do i = 1, nstep
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
-       call self%run_one_step(effpot=effpot, spin=spin, lwf=self%lwf, energy_table=energy_table)
+       call self%run_one_step(effpot = effpot, spin = spin, lwf = self%lwf, energy_table = energy_table)
 
-       call self%hist%set_hist(lwf=self%lwf, vcart=self%vcart, energy=self%energy )
+
+
+
+       call self%hist%set_hist(lwf = self%lwf, vcart = self%vcart, energy = self%energy )
        if(modulo(i, self%params%lwf_nctime)==0) then
           call self%ncfile%write_one_step(self%hist)
        !print *, "Step: ", i,   "Ev", self%energy, "Etot"
@@ -233,7 +236,7 @@ contains
        write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
             & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
             & (self%Ek+self%energy)/self%supercell%ncell
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg, 'COLL')
        call wrtout(ab_out, msg, 'COLL')
        !write(msg, "(I13, 4X,  ES15.5)")  i, self%energy/self%supercell%ncell
        !            & (self%Ek+self%energy)/self%supercell%ncell
@@ -242,8 +245,8 @@ contains
        !TODO: output, observables
     end do
 
-    msg=repeat("=", 90)
-    call wrtout(std_out,msg,'COLL')
+    msg = repeat("=", 90)
+    call wrtout(std_out, msg, 'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
   end subroutine run_time
@@ -256,24 +259,24 @@ contains
     !----------------------------------------------------------------------
     subroutine set_initial_state(self, mode)
       ! set initial positions, spin, etc
-      class(lwf_mover_t), intent(inout) :: self
-      integer, optional, intent(in) :: mode
-      integer :: i
-      real(dp) :: tmp
-      real(dp) :: kpoint(3)
+      class(lwf_mover_t), intent(inout):: self
+      integer, optional, intent(in):: mode
+      integer:: i
+      real(dp):: tmp
+      real(dp):: kpoint(3)
 
       self%lwf(:)=0.0
       select case(mode)
-      case(0) ! using k-vector
+      case(0)  ! using k-vector
               ! TODO make it more generic
          kpoint(:)=[0.5_dp, 0.0_dp, 0.5_dp]
-         do i=1, self%supercell%ncell
-           tmp=0.2*real(exp(cmplx(0.0,two_pi, kind=dp) * &
-                               &dot_product(kpoint, self%supercell%supercell_maker%rvecs(:, i))), kind=dp)
+         do i = 1, self%supercell%ncell
+           tmp = 0.2*real(exp(cmplx(0.0, two_pi, kind = dp) * &
+                               &dot_product(kpoint, self%supercell%supercell_maker%rvecs(:, i))), kind = dp)
            self%lwf(i*2-1)=tmp
            self%lwf(i*2)=tmp
          enddo
-      ! random number between -0.1 0.1
+      ! random number between-0.1 0.1
       case(1)
          call self%rng%rand_unif_01_array(self%lwf, self%nlwf)
          self%lwf=(self%lwf-0.5)*0.1
@@ -286,11 +289,11 @@ contains
       end select
 
       call self%rng%rand_normal_array(self%vcart(:), self%nlwf)
-      do i=1, self%nlwf
+      do i = 1, self%nlwf
          self%vcart(i) = self%vcart(i) *sqrt(self%temperature/self%lwf_masses(i))
       end do
 
-      call self%hist%set_hist(lwf=self%lwf, vcart=self%vcart, energy=0.0_dp)
+      call self%hist%set_hist(lwf = self%lwf, vcart = self%vcart, energy = 0.0_dp)
 
     end subroutine set_initial_state
 
@@ -299,40 +302,40 @@ contains
   !  read the last step of spin from hist file.
   !-------------------------------------------------------------------!
   subroutine read_hist_lwf_state(self, fname)
-    class(lwf_mover_t), intent(inout) :: self
-    character(len=*), intent(in) :: fname
-    integer :: ierr, ncid, varid
-    integer :: nlwf, ntime
-    character(len=118) :: msg
+    class(lwf_mover_t), intent(inout):: self
+    character(len=*), intent(in):: fname
+    integer:: ierr, ncid, varid
+    integer:: nlwf, ntime
+    character(len = 118):: msg
     ! open file
 
 #if defined HAVE_NETCDF
-    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    ierr = nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "The lwf_init_state is set to 4. But opening netcdf file "//trim(fname)//" Failed. ")
 
     ! sanity check. If the hist file is consistent with the current calculation
-    ierr=nctk_get_dim(ncid, "nlwf" , nlwf)
+    ierr = nctk_get_dim(ncid, "nlwf" , nlwf)
     NCF_CHECK_MSG(ierr, "when reading nlwf")
 
     msg="The number of lwfs in histfile is not equal & & to the present calculation." // &
          & " Please check if the file is consistent."
-    if (nlwf/= self%nlwf) then
+    if (nlwf /= self%nlwf) then
        ABI_ERROR(msg)
     end if
 
-    ierr=nctk_get_dim(ncid, "ntime", ntime)
+    ierr = nctk_get_dim(ncid, "ntime", ntime)
     NCF_CHECK_MSG(ierr, "when reading ntime")
 
     ! read lwf and set as initial state
-    ierr =nf90_inq_varid(ncid, "lwf", varid)
+    ierr = nf90_inq_varid(ncid, "lwf", varid)
     NCF_CHECK_MSG(ierr, "when reading lwf.")
 
-    ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%lwf(:), &
-         & start=(/ 1, ntime/), count=(/nlwf,1/))
+    ierr = nf90_get_var(ncid = ncid, varid = varid, values = self%lwf(:), &
+         & start=(/ 1, ntime/), count=(/nlwf, 1/))
     NCF_CHECK_MSG(ierr, "when reading lwf from lwf hist file")
 
     ! close file
-    ierr=nf90_close(ncid)
+    ierr = nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
     ABI_ERROR("lwf_init_state set to 4 but abinit is not compiled with netcdf.")
@@ -346,23 +349,23 @@ contains
   !  read the constrains from file
   !-------------------------------------------------------------------!
   subroutine read_lwf_constraints(self, fname)
-    class(lwf_mover_t), intent(inout) :: self
-    character(len=*), intent(in) :: fname
-    integer :: ierr, ncid, id_id, value_id
-    character(len=118) :: msg
+    class(lwf_mover_t), intent(inout):: self
+    character(len=*), intent(in):: fname
+    integer:: ierr, ncid, id_id, value_id
+    character(len = 118):: msg
     ! open file
     if (self%params%lwf_constraint .eq. 0) then
-      self%n_fixed_lwf=0
+      self%n_fixed_lwf = 0
       ABI_MALLOC(self%fixed_lwf_ids, (self%n_fixed_lwf))
       ABI_MALLOC(self%fixed_lwf_values, (self%n_fixed_lwf))
     else
 
 #if defined HAVE_NETCDF
-    ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
+    ierr = nf90_open(trim(fname), NF90_NOWRITE, ncid)
     NCF_CHECK_MSG(ierr, "Trying to read constrain from netcdf file "//trim(fname)//" Failed. ")
 
     ! sanity check. If the hist file is consistent with the current calculation
-    ierr=nctk_get_dim(ncid, "n_fixed_lwf" , self%n_fixed_lwf)
+    ierr = nctk_get_dim(ncid, "n_fixed_lwf" , self%n_fixed_lwf)
     NCF_CHECK_MSG(ierr, "when reading n_fixed_lwf")
 
     if (self%n_fixed_lwf .ne. 0) then
@@ -371,24 +374,24 @@ contains
 
 
       ! read fixed lwf ids and values 
-      ierr =nf90_inq_varid(ncid, "fixed_lwf_ids", id_id)
+      ierr = nf90_inq_varid(ncid, "fixed_lwf_ids", id_id)
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids.")
   
-      ierr = nf90_get_var(ncid=ncid, varid=id_id, values=self%fixed_lwf_ids, &
+      ierr = nf90_get_var(ncid = ncid, varid = id_id, values = self%fixed_lwf_ids, &
            & start=[1], count=[self%n_fixed_lwf])
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_ids from file "//trim(fname)//". " )
   
-      ierr =nf90_inq_varid(ncid, "fixed_lwf_values", value_id)
+      ierr = nf90_inq_varid(ncid, "fixed_lwf_values", value_id)
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values.")
   
-      ierr = nf90_get_var(ncid=ncid, varid=value_id, values=self%fixed_lwf_values, &
+      ierr = nf90_get_var(ncid = ncid, varid = value_id, values = self%fixed_lwf_values, &
            & start=[1], count=[self%n_fixed_lwf])
       NCF_CHECK_MSG(ierr, "when reading fixed_lwf_values from file "//trim(fname)//". " )
     endif
 
 
     ! close file
-    ierr=nf90_close(ncid)
+    ierr = nf90_close(ncid)
     NCF_CHECK_MSG(ierr, "Close netcdf file")
 #else
     ABI_ERROR("reading lwf constrain file but abinit is not compiled with netcdf.")
@@ -401,11 +404,11 @@ contains
 
 
     subroutine prepare_ncfile(self, params, fname)
-      class(lwf_mover_t), intent(inout) :: self
-      type(multibinit_dtset_type) :: params
-      character(len=*), intent(in) :: fname
-      integer :: master, my_rank, comm, nproc
-      logical :: iam_master
+      class(lwf_mover_t), intent(inout):: self
+      type(multibinit_dtset_type):: params
+      character(len=*), intent(in):: fname
+      integer:: master, my_rank, comm, nproc
+      logical:: iam_master
       ABI_UNUSED_A(params)
       call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
       if(iam_master) then
@@ -419,11 +422,11 @@ contains
     !set_ncfile_name :
     !-------------------------------------------------------------------!
     subroutine set_ncfile_name(self, params, fname)
-      class(lwf_mover_t), intent(inout) :: self
-      type(multibinit_dtset_type) :: params
-      character(len=fnlen), intent(in) :: fname
-      integer :: master, my_rank, comm, nproc
-      logical :: iam_master
+      class(lwf_mover_t), intent(inout):: self
+      type(multibinit_dtset_type):: params
+      character(len = fnlen), intent(in):: fname
+      integer:: master, my_rank, comm, nproc
+      logical:: iam_master
       call init_mpi_info(master, iam_master, my_rank, comm, nproc)
       if (iam_master) then
          call self%prepare_ncfile(params, trim(fname)//'_lwfhist.nc')
@@ -433,7 +436,7 @@ contains
 
     
 
-  !!****f* m_lwf_mover/run_varT
+  !!****f*m_lwf_mover/run_varT
   !!
   !! NAME
   !! run_varT
@@ -450,44 +453,44 @@ contains
   !! PARENTS
 !!
   !! CHILDREN
-!!      self%hist%finalize,self%mps%finalize,self%spin_mc%finalize
+!!      self%hist%finalize, self%mps%finalize, self%spin_mc%finalize
 !!      self%spin_ob%finalize
 !!
   !! SOURCE
   subroutine  run_varT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
-    class(lwf_mover_t), intent(inout) :: self
-    class(abstract_potential_t), intent(inout) :: pot
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
-    character(fnlen), intent(inout) :: ncfile_prefix
-    type(hash_table_t), optional, intent(inout) :: energy_table
-    real(dp) :: T_start, T_end
-    integer :: T_nstep
-    !type(lwf_ncfile_t) :: lwf_ncfile
-    character(len=4) :: post_fname
-    real(dp) :: T, T_step
-    integer :: i
-    !integer :: Tfile, iostat
-    character(len=90) :: msg
-    !character(len=4200) :: Tmsg ! to write to var T file
-    !character(len=150) :: iomsg
-    !character(fnlen) :: Tfname ! file name for output various T calculation
-    !real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
-    !real(dp), allocatable :: Mst_sub_norm_list(:, :)
+    class(lwf_mover_t), intent(inout):: self
+    class(abstract_potential_t), intent(inout):: pot
+    real(dp), optional, intent(inout):: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
+    character(fnlen), intent(inout):: ncfile_prefix
+    type(hash_table_t), optional, intent(inout):: energy_table
+    real(dp):: T_start, T_end
+    integer:: T_nstep
+    !type(lwf_ncfile_t):: lwf_ncfile
+    character(len = 4):: post_fname
+    real(dp):: T, T_step
+    integer:: i
+    !integer:: Tfile, iostat
+    character(len = 90):: msg
+    !character(len = 4200):: Tmsg  ! to write to var T file
+    !character(len = 150):: iomsg
+    !character(fnlen):: Tfname  ! file name for output various T calculation
+    !real(dp), allocatable:: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
+    !real(dp), allocatable:: Mst_sub_norm_list(:, :)
     !real(dp), allocatable ::  Mst_norm_total_list(:)
 
-    integer :: master, my_rank, comm, nproc, ierr
-    logical :: iam_master
+    integer:: master, my_rank, comm, nproc, ierr
+    logical:: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     if (iam_master) then
-       T_start=self%params%lwf_temperature_start
-       T_end=self%params%lwf_temperature_end
-       T_nstep=self%params%lwf_temperature_nstep
-       !Tfile=get_unit()
+       T_start = self%params%lwf_temperature_start
+       T_end = self%params%lwf_temperature_end
+       T_nstep = self%params%lwf_temperature_nstep
+       !Tfile = get_unit()
        !Tfname = trim(ncfile_prefix)//'.varT'
-       !iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
-       if (T_nstep<=1) then
-          T_step=0.0
+       !iostat = open_file(file = Tfname, unit = Tfile, iomsg = iomsg )
+       if (T_nstep <= 1) then
+          T_step = 0.0
        else
           T_step=(T_end-T_start)/(T_nstep-1)
        endif
@@ -499,10 +502,10 @@ contains
     end if
 
     call xmpi_bcast(T_nstep, 0, comm, ierr)
-    do i=1, T_nstep
+    do i = 1, T_nstep
        if(iam_master) then
-          T=T_start+(i-1)*T_step
-          msg=repeat("=", 79)
+          T = T_start+(i-1)*T_step
+          msg = repeat("=", 79)
           call wrtout(std_out, msg, "COLL")
           call wrtout(ab_out, msg, "COLL")
 
@@ -514,10 +517,10 @@ contains
           ! set temperature
           ! TODO make this into a subroutine set_params
        endif
-       call self%set_temperature(temperature=T)
+       call self%set_temperature(temperature = T)
        if(iam_master) then
-          if(i==1) then
-             call self%set_initial_state(mode=self%params%lwf_init_state)
+          if(i == 1) then
+             call self%set_initial_state(mode = self%params%lwf_init_state)
           endif
           call self%apply_constraints(self%lwf)
 
@@ -527,8 +530,8 @@ contains
           call self%ncfile%write_one_step(self%hist)
        endif
 
-       call self%run_time(pot, displacement=displacement, strain=strain, spin=spin, &
-            & lwf=lwf, energy_table=energy_table)
+       call self%run_time(pot, displacement = displacement, strain = strain, spin = spin, &
+            & lwf = lwf, energy_table = energy_table)
 
        if(iam_master) then
           call self%ncfile%finalize()
@@ -540,18 +543,18 @@ contains
 
 
   subroutine apply_fixed_lwf(self, lwf)
-    class(lwf_mover_t), intent(inout) :: self
-    real(dp), intent(inout) :: lwf(:)
-    integer :: i
-    do i=1, self%n_fixed_lwf
+    class(lwf_mover_t), intent(inout):: self
+    real(dp), intent(inout):: lwf(:)
+    integer:: i
+    do i = 1, self%n_fixed_lwf
         self%vcart(self%fixed_lwf_ids(i))=0.0_dp
         lwf(self%fixed_lwf_ids(i))=self%fixed_lwf_values(i)    
     end do
   end subroutine apply_fixed_lwf
 
   subroutine apply_constraints(self, lwf)
-    class(lwf_mover_t), intent(inout) :: self
-    real(dp), intent(inout) :: lwf(:)
+    class(lwf_mover_t), intent(inout):: self
+    real(dp), intent(inout):: lwf(:)
     call self%apply_fixed_lwf(lwf)
   end subroutine apply_constraints
 
