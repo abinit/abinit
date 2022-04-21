@@ -1151,7 +1151,7 @@ else if (need_emissivity) then
  
  if (need_emissivity) then
    ABI_MALLOC(oml_emis,(mom))
-   omin_emis=eigen0(1) ! MT-13sept21: why isn't it omin=val(eigen0) ?
+   omin_emis=minval(eigen0)
    omax_emis=maxval(eigen0)
    del_emis=(omax_emis-omin_emis)/(mom-1)
    do iom=1,mom

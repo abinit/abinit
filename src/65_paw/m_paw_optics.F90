@@ -172,10 +172,11 @@ CONTAINS  !=====================================================================
 !arrays
  integer :: nc_count(6),nc_start(6),nc_stride(6),tmp_shape(3)
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
- real(dp) :: kpoint(3),tsec(2),nabla_ij(3),soc_ij(2,2,3)
+ real(dp) :: kpoint(3),tsec(2),nabla_ij(3)
  real(dp),allocatable :: kpg_k(:,:),psinablapsi(:,:,:,:)
  real(dp),allocatable :: psinablapsi_paw(:,:,:,:),psinablapsi_soc(:,:,:,:)
- type(coeff5_type), allocatable :: phisocphj(:)
+ real(dp),pointer :: soc_ij(:,:,:)
+ type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(nctkarr_t) :: nctk_arrays(1)
 
@@ -539,7 +540,7 @@ CONTAINS  !=====================================================================
                  lmn_size=pawtab(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmn_size
-                     soc_ij(:,:,:)=phisocphj(iatom)%value(:,:,:,ilmn,jlmn)
+                     soc_ij => phisocphj(iatom)%value(:,:,:,ilmn,jlmn)
                      !Contribution from real part of <Psi^s_n|p_i><p_j|Psi^s'_m>
                      cpnm11=cprj_k(iatom,ibsp  )%cp(1,ilmn)*cprj_k(iatom,jbsp  )%cp(1,jlmn) &
 &                          +cprj_k(iatom,ibsp  )%cp(2,ilmn)*cprj_k(iatom,jbsp  )%cp(2,jlmn)
@@ -826,10 +827,11 @@ CONTAINS  !=====================================================================
 !arrays
  integer :: nc_count(7),nc_start(7),nc_stride(7),tmp_shape(3)
  integer,allocatable :: indlmn_cor(:,:),lcor(:),ncor(:),kappacor(:)
- real(dp) :: tsec(2),soc_ij(2,2,3)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: energy_cor(:),phi_cor(:,:)
  real(dp),allocatable :: psinablapsi(:,:,:,:,:),psinablapsi_soc(:,:,:,:,:)
- type(coeff5_type), allocatable :: phisocphj(:)
+ real(dp),pointer :: soc_ij(:,:,:)
+ type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(nctkdim_t) :: ncdims(3)
  type(nctkarr_t) :: nctk_arrays(5)
@@ -1186,15 +1188,17 @@ CONTAINS  !=====================================================================
                      is=indlmn_cor(6,ilmn)
                      if (modulo(jbsp,2)==modulo(is,2)) then ! Nabla is a spin-diagonal operator
                        ic=indlmn_cor(5,ilmn)
-                       cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
-                       cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
-                       psinablapsi(1,:,ic,iatom,my_jb)=psinablapsi(1,:,ic,iatom,my_jb) &
-&                          +cpnm1*pawtab(itypat)%nabla_im_ij(:,jlmn,ilmn) &
-&                          -cpnm2*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
-                       psinablapsi(2,:,ic,iatom,my_jb)=psinablapsi(2,:,ic,iatom,my_jb) &
-&                          -cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn) &
-&                          -cpnm2*pawtab(itypat)%nabla_im_ij(:,jlmn,ilmn)
-                     endif
+                       if (ic>0) then
+                         cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
+                         cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
+                         psinablapsi(1,:,ic,iatom,my_jb)=psinablapsi(1,:,ic,iatom,my_jb) &
+&                            +cpnm1*pawtab(itypat)%nabla_im_ij(:,jlmn,ilmn) &
+&                            -cpnm2*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
+                         psinablapsi(2,:,ic,iatom,my_jb)=psinablapsi(2,:,ic,iatom,my_jb) &
+&                            -cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn) &
+&                            -cpnm2*pawtab(itypat)%nabla_im_ij(:,jlmn,ilmn)
+                       end if
+                     end if
                    end do ! ilmn
                  end do !jlmn
                end do !iatom
@@ -1238,25 +1242,27 @@ CONTAINS  !=====================================================================
                do jlmn=1,lmn_size
                  do ilmn=1,lmncmax
                    ic=indlmn_cor(5,ilmn)
-                   soc_ij(:,:,:)=phisocphj(iatom)%value(:,:,:,jlmn,ilmn)
-                   !Contribution from real part of <Psi^s_n|p_i>
-                   cpnm1=cprj_k(iatom,jbsp  )%cp(1,jlmn)
-                   cpnm2=cprj_k(iatom,jbsp+1)%cp(1,jlmn)
-                   do idir=1,3
-                     psinablapsi_soc(1,idir,ic,iatom,my_jb)=psinablapsi_soc(1,idir,ic,iatom,my_jb) &
-&                           +soc_ij(1,1,idir)*cpnm1+soc_ij(1,2,idir)*cpnm2
-                     psinablapsi_soc(2,idir,ic,iatom,my_jb)=psinablapsi_soc(2,idir,ic,iatom,my_jb) &
-&                           +soc_ij(2,1,idir)*cpnm1+soc_ij(2,2,idir)*cpnm2
-                   end do
-                   !Contribution from imaginary part of <Psi^s_n|p_i>
-                   cpnm1=cprj_k(iatom,jbsp  )%cp(2,jlmn)
-                   cpnm2=cprj_k(iatom,jbsp+1)%cp(2,jlmn)
-                   do idir=1,3
-                     psinablapsi_soc(1,idir,ic,iatom,my_jb)=psinablapsi_soc(1,idir,ic,iatom,my_jb) &
-&                           +soc_ij(2,1,idir)*cpnm1+soc_ij(2,2,idir)*cpnm2
-                     psinablapsi_soc(2,idir,ic,iatom,my_jb)=psinablapsi_soc(2,idir,ic,iatom,my_jb) &
-&                           -soc_ij(1,1,idir)*cpnm1-soc_ij(1,2,idir)*cpnm2
-                   end do
+                   if (ic>0) then
+                     soc_ij => phisocphj(iatom)%value(:,:,:,jlmn,ilmn)
+                     !Contribution from real part of <Psi^s_n|p_i>
+                     cpnm1=cprj_k(iatom,jbsp  )%cp(1,jlmn)
+                     cpnm2=cprj_k(iatom,jbsp+1)%cp(1,jlmn)
+                     do idir=1,3
+                       psinablapsi_soc(1,idir,ic,iatom,my_jb)=psinablapsi_soc(1,idir,ic,iatom,my_jb) &
+&                             +soc_ij(1,1,idir)*cpnm1+soc_ij(1,2,idir)*cpnm2
+                       psinablapsi_soc(2,idir,ic,iatom,my_jb)=psinablapsi_soc(2,idir,ic,iatom,my_jb) &
+&                             +soc_ij(2,1,idir)*cpnm1+soc_ij(2,2,idir)*cpnm2
+                     end do
+                     !Contribution from imaginary part of <Psi^s_n|p_i>
+                     cpnm1=cprj_k(iatom,jbsp  )%cp(2,jlmn)
+                     cpnm2=cprj_k(iatom,jbsp+1)%cp(2,jlmn)
+                     do idir=1,3
+                       psinablapsi_soc(1,idir,ic,iatom,my_jb)=psinablapsi_soc(1,idir,ic,iatom,my_jb) &
+&                             +soc_ij(2,1,idir)*cpnm1+soc_ij(2,2,idir)*cpnm2
+                       psinablapsi_soc(2,idir,ic,iatom,my_jb)=psinablapsi_soc(2,idir,ic,iatom,my_jb) &
+&                             -soc_ij(1,1,idir)*cpnm1-soc_ij(1,2,idir)*cpnm2
+                     end do
+                   end if
                  end do ! ilmn
                end do ! jlmn
              end do ! iatom
@@ -1826,13 +1832,13 @@ CONTAINS  !=====================================================================
  real(dp),parameter :: one_over_fourpi   = one/sqrt(four_pi)
  real(dp),parameter :: sqr_fourpi_over_3 = sqrt(four_pi/3)
  real(dp),parameter :: QuarterFineStruct2=(half/InvFineStruct)**2
- integer :: iatom,iatom_tot,itypat,ierr,ipts,ignt,cgc,sgnkappa
+ integer :: iatom,iatom_tot,itypat,ierr,ipts,ignt,sgnkappa
  integer :: idum,option,usenhat,usekden,usecore,xclevel,nkxc,my_comm_atom
  integer :: mesh_size,mesh_size_cor,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
  integer :: lm_size,ln_size,ln_size_j,ln_size_cor,nspinor_cor
- integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,jmj,js,klm_re,klm_im
+ integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,js,klm_re,klm_im
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: compch_sph_dum,eexc_dum,eexcdc_dum
+ real(dp) :: cgc,compch_sph_dum,eexc_dum,eexcdc_dum,jmj
  real(dp) :: fact_re,fact_im,gx_re,gx_im,gy_re,gy_im,gz_re,gz_im,if3
  character(len=500) :: msg
 !arrays
@@ -2056,12 +2062,20 @@ CONTAINS  !=====================================================================
        sgnkappa=indlmn_j(3,jlmn)   !sign of kappa
        jmj=half*indlmn_j(8,jlmn)   !2mj is stored in indlmn_cor
        js=indlmn_cor(6,jlmn)       !1 is up, 2 is down
-       if ((sgnkappa== 1.and.js/=1).or. &
-&          (sgnkappa==-1.and.js==1)) then
-         cgc=sqrt((jl+half+jmj)/(2*jl+one))
+       if (sgnkappa==1) then
+         if(js==1) then
+           cgc= sqrt((dble(jl)-jmj+half)/dble(2*jl+1))
+         else
+           cgc=-sqrt((dble(jl)+jmj+half)/dble(2*jl+1))
+         endif
        else
-         cgc=sqrt((jl+half-jmj)/(2*jl+one))
-       end if
+         if(js==1) then
+           cgc= sqrt((dble(jl)+jmj+half)/dble(2*jl+1))
+         else
+           cgc= sqrt((dble(jl)-jmj+half)/dble(2*jl+1))
+         endif
+       endif
+
 !      Calculate factors to convert from complex to real sph. harm.
        if (jm<0) then
          fact_re=sqr_fourpi_over_3*half_sqrt2*cgc
