@@ -9,8 +9,8 @@ t100o
 #%% test_chain = t100.abi, t101.abi
 #%% [files]
 #%% files_to_test =
-#%%  t101.out, tolnlines =10, tolabs = 5.0e-05, tolrel = 2.0e-05, fld_options = -easy;
-#%%  t101_Kth, tolnlines =50, tolabs = 5.0e-05, tolrel = 2.0e-05, fld_options = -easy;
+#%%  t101.out, tolnlines =10, tolabs = 6.5e-05, tolrel = 2.2e-05, fld_options = -easy;
+#%%  t101_Kth, tolnlines =50, tolabs = 6.5e-05, tolrel = 2.2e-05, fld_options = -easy;
 #%%  t101_abs, tolnlines =50, tolabs = 4.0e+04, tolrel = 3.2e-05, fld_options = -ridiculous;
 #%%  t101_eps, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -easy;
 #%%  t101_Lij, tolnlines = 50, tolabs = 1.1e-07, tolrel = 1.9e-08, fld_options = -ridiculous;
