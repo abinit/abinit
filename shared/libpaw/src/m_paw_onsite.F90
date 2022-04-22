@@ -97,9 +97,9 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
 
 !Local variables-------------------------------
 !scalars
- integer :: nln,il,ilm,ilmn,iln,itypat
+ integer :: ii,nln,il,ilm,ilmn,iln,itypat
  integer :: jl,jlm,jlmn,jln,lmn_size,mesh_size 
- real(dp) :: intg
+ real(dp) :: avg,intg
  character(len=500) :: msg
 !arrays
  integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
@@ -199,6 +199,20 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
      end do !ilmn
    end do !jlmn
 
+!  Symetrization
+   if (lmn_size>1) then
+     do jlmn=2,lmn_size
+       do ilmn=1,jlmn-1
+         do ii=1,3
+           avg=half*(pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)-pawtab(itypat)%nabla_ij(ii,ilmn,jlmn))
+           pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)= avg
+           pawtab(itypat)%nabla_ij(ii,jlmn,ilmn)=-avg
+         end do           
+       end do
+     end do
+   end if
+
+!  End
    pawtab(itypat)%has_nabla=2
    LIBPAW_DEALLOCATE(ff)
    LIBPAW_DEALLOCATE(rad)
