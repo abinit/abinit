@@ -314,7 +314,7 @@ contains
   else
     ABI_ERROR('Please use recent format for the input file')
   end if  
-  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2021 ABINIT group (FB,JB).'
+  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2022 ABINIT group (FB,JB).'
   write(Invar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(Invar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(Invar%stdout,'(a)') ' under certain conditions (GNU General Public License,'

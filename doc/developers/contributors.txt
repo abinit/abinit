@@ -3,7 +3,7 @@ Contributors
 
 The ABINIT package : list of contributors.
 
-Copyright (C) 2000-2021 ABINIT group (XG)
+Copyright (C) 2000-2022 ABINIT group (XG)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +26,7 @@ in the ABINIT project in the past or currently :
 - University of West Virginia (A. Romero),
 
 Coming now to individuals,
-recent direct contributors to ABINIT (versions 8.10.0 to 9.6.0) are listed below.
+recent direct contributors to ABINIT (versions 8.10.0 to 9.8.0) are listed below.
 For reasons of privacy, we do not provide the e-mail address anymore.
 If you need to contact somebody, try the forum or the github.
 B. Amadon
@@ -71,6 +71,7 @@ G.-M. Rignanese
 M. Rodriguez-Mayorga
 M. Royo
 M. Schmitt
+B. Seddon
 F. Soubiran
 M. Stengel
 M. Torrent
