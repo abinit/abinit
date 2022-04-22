@@ -6,13 +6,13 @@ has been developped by O. Hellman *et al.* [[cite:Hellman2011]],
 in ABINIT has been performed and used for the first time in 2015 by
 J. Bouchet and F. Bottin [[cite:Bouchet2015]], [[cite:Bouchet2017]].
 
-* User guide (in a pdf format): [[pdf:aTDEP_Guide| aTDEP guide]]  
-* Theory: [[pdf:aTDEP_Paper|aTDEP paper]] corresponding to the article [[cite:Bottin2020]]
+* User guide (in a pdf format): [[pdf:aTDEP_Guide|aTDEP_Guide]]  
+* Theory: [[pdf:aTDEP_Paper|aTDEP_Paper]] corresponding to the article [[cite:Bottin2020]]
 
 ## Prerequisite and theory
 
 The approach used in this code is detailed in a publication dedicated to the development
-of all formula (see [[pdf:aTDEP_Paper|aTDEP paper]]). We strongly encourage all the users to carefully read
+of all formula (see [[pdf:aTDEP_Paper|aTDEP_Paper]]). We strongly encourage all the users to carefully read
 this paper before beginning. All the vibrational, elastic and thermodynamic
 quantities computed by aTDEP are
 presented with the same writing conventions as the ones used in the output files of aTDEP.
