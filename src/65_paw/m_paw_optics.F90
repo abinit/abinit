@@ -494,7 +494,7 @@ CONTAINS  !=====================================================================
                    do jlmn=1,lmn_size
                      do ilmn=1,lmn_size                  
                        nabla_ij(:)=pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
-                       if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn) ! We should take 1/2(nabla_ij-nabla_ji)
+                       if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                        cpnm1=cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn)
                        if (dtset%nspinor==2) cpnm1=cpnm1+cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn)
                        psinablapsi_paw(2,:,ib,my_jb)=psinablapsi_paw(2,:,ib,my_jb)-cpnm1*nabla_ij(:)
@@ -508,7 +508,7 @@ CONTAINS  !=====================================================================
                    do jlmn=1,lmn_size
                      do ilmn=1,lmn_size
                        nabla_ij(:)=pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
-                       if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn) ! We should take 1/2(nabla_ij-nabla_ji)
+                       if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                        cpnm1=(cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn) &
 &                            +cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn))
                        cpnm2=(cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn) &
@@ -1832,13 +1832,13 @@ CONTAINS  !=====================================================================
  real(dp),parameter :: one_over_fourpi   = one/sqrt(four_pi)
  real(dp),parameter :: sqr_fourpi_over_3 = sqrt(four_pi/3)
  real(dp),parameter :: QuarterFineStruct2=(half/InvFineStruct)**2
- integer :: iatom,iatom_tot,itypat,ierr,ipts,ignt,sgnkappa
+ integer :: iatom,iatom_tot,itypat,ii,jj,ierr,ipts,ignt,sgnkappa
  integer :: idum,option,usenhat,usekden,usecore,xclevel,nkxc,my_comm_atom
  integer :: mesh_size,mesh_size_cor,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
  integer :: lm_size,ln_size,ln_size_j,ln_size_cor,nspinor_cor
  integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,js,klm_re,klm_im
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: cgc,compch_sph_dum,eexc_dum,eexcdc_dum,jmj
+ real(dp) :: avg,cgc,compch_sph_dum,eexc_dum,eexcdc_dum,jmj
  real(dp) :: fact_re,fact_im,gx_re,gx_im,gy_re,gy_im,gz_re,gz_im,if3
  character(len=500) :: msg
 !arrays
@@ -2186,6 +2186,22 @@ CONTAINS  !=====================================================================
      end do ! ilmn
    end do ! jlmn
      
+!  Symetrization
+   !if (if (option_core==0.and.lmn_size>1) then
+   !  do jlmn=2,lmn_size
+   !    do ilmn=1,jlmn-1
+   !      do ii=1,3
+   !        do jj=1,2
+   !          avg=half*(soc_ij(1,jj,ii,ilmn,jlmn)+soc_ij(1,jj,ii,ilmn,jlmn))
+   !          soc_ij(1,jj,ii,ilmn,jlmn)=avg ; soc_ij(1,jj,ii,jlmn,ilmn)=avg
+   !          avg=half*(soc_ij(2,jj,ii,ilmn,jlmn)+soc_ij(2,jj,ii,ilmn,jlmn))
+   !          soc_ij(2,jj,ii,ilmn,jlmn)=avg ; soc_ij(2,jj,ii,jlmn,ilmn)=avg
+   !        end do
+   !      end do           
+   !    end do
+   !  end do
+   !end if
+
    ABI_FREE(dVdr)
    ABI_FREE(intf3)
 
