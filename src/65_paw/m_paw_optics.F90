@@ -2192,7 +2192,7 @@ CONTAINS  !=====================================================================
    !    do ilmn=1,jlmn-1
    !      do ii=1,3
    !        do jj=1,2
-   !          avg=half*(soc_ij(1,jj,ii,ilmn,jlmn)+soc_ij(1,jj,ii,ilmn,jlmn))
+   !          avg=half*(soc_ij(1,jj,ii,ilmn,jlmn)+soc_ij(1,jj,ii,jlmn,ilmn))
    !          soc_ij(1,jj,ii,ilmn,jlmn)=avg ; soc_ij(1,jj,ii,jlmn,ilmn)=avg
    !          avg=half*(soc_ij(2,jj,ii,ilmn,jlmn)+soc_ij(2,jj,ii,ilmn,jlmn))
    !          soc_ij(2,jj,ii,ilmn,jlmn)=avg ; soc_ij(2,jj,ii,jlmn,ilmn)=avg

@@ -204,7 +204,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
      do jlmn=2,lmn_size
        do ilmn=1,jlmn-1
          do ii=1,3
-           avg=half*(pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)-pawtab(itypat)%nabla_ij(ii,ilmn,jlmn))
+           avg=half*(pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)-pawtab(itypat)%nabla_ij(ii,jlmn,ilmn))
            pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)= avg
            pawtab(itypat)%nabla_ij(ii,jlmn,ilmn)=-avg
          end do           
