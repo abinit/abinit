@@ -250,7 +250,7 @@ contains
 
   ! automatically set the anchor points using the weight functions.
   ! The bands with the largest weights are selected as the anchor points. 
-  subroutine auto_find_anchors(self, anchor_kpt, ianchors)
+  subroutine auto_find_anchors(self, ianchors)
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(out):: ianchors(self%nwann)
     integer:: i
@@ -280,7 +280,7 @@ contains
 
     if (.not. present(anchor_ibands)) then
        call wrtout( std_out, "Anchor points not specified, finding atomatically")
-       call self%auto_find_anchors(anchor_kpt, self%anchor_ibands)
+       call self%auto_find_anchors( self%anchor_ibands)
     else if (.not. size(anchor_ibands) == self%nwann) then
        ABI_ERROR("The number of anchor points should be equal to the number of Wannier functions.")
     else
