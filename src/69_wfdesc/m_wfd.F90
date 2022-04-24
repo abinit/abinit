@@ -361,13 +361,6 @@ module m_wfd
    ! A node owns a wavefunction if the corresponding ug is allocated AND computed.
    ! If a node owns ur but not ug, or ug is just allocated then its entry in the table is zero.
 
-  integer, allocatable :: bks_comm(:,:,:)
-   ! TODO: To be removed
-   ! spin_comm(0:mband,0:nkibz,0:nsppol)
-   ! MPI communicators.
-   ! bks_comm(0,0,spin) MPI communicator for spin
-   ! bks_comm(0,ik_ibz,spin)  MPI communicator for k-points.
-
   real(dp),allocatable :: kibz(:,:)
    ! kibz(3,nkibz)
    ! Reduced coordinates of the k-points in the IBZ.
@@ -467,8 +460,6 @@ module m_wfd
    procedure :: update_bkstab => wfd_update_bkstab
    ! Update the internal table with info on the distribution of the ugs.
 
-   procedure :: set_mpicomm => wfd_set_mpicomm
-
    procedure :: rotate => wfd_rotate
    ! Linear transformation of the wavefunctions stored in Wfd
 
@@ -535,8 +526,6 @@ CONTAINS  !=====================================================================
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -675,8 +664,6 @@ end subroutine kdata_init
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -712,8 +699,6 @@ end subroutine kdata_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -749,8 +734,6 @@ end subroutine kdata_free_1D
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -792,8 +775,6 @@ end subroutine copy_kdata_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -861,8 +842,6 @@ end subroutine copy_kdata_1D
 !!      m_sigma_driver,m_sigmaph,m_wfk_analyze
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -912,9 +891,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  Wfd%my_rank = xmpi_comm_rank(Wfd%comm)
  Wfd%nproc   = xmpi_comm_size(Wfd%comm)
  Wfd%master  = 0
-
- ABI_MALLOC(Wfd%bks_comm,(0:mband,0:nkibz,0:nsppol))
- Wfd%bks_comm = xmpi_comm_null
 
  ! Sequential MPI datatype to be passed to abinit routines.
  call initmpi_seq(Wfd%MPI_enreg)
@@ -1083,23 +1059,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
      end do
    end do
  end do
-
- bks_size = one * wfd%mband * wfd%nkibz * wfd%nsppol * wfd%nproc
- write(msg,'(a,f8.1,a)')' Memory needed for bks_tab: ',one * bks_size * b2Mb,' [Mb] <<< MEM'
- call wrtout(std_out, msg)
-
- !ABI_MALLOC(wfd%bks_ranks, (wfd%mband, nkibz, nsppol))
-
- ! Allocate the global table used to keep trace of the distribution, including a possible duplication.
- ABI_MALLOC(Wfd%bks_tab, (Wfd%mband, nkibz, nsppol, 0:Wfd%nproc-1))
- Wfd%bks_tab = WFD_NOWAVE
-
- ! Update the kbs table storing the distribution of the ug.
- call wfd%update_bkstab(show=-std_out)
- !
- ! Initialize the MPI communicators.
- ! init MPI communicators:cannot be done here since waves are not stored yet.
- !call wfd%set_mpicomm()
  !
  ! ===================================================
  ! ==== Precalculate nonlocal form factors for PAW ====
@@ -1122,6 +1081,19 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
    end if
  end do
 
+ bks_size = one * wfd%mband * wfd%nkibz * wfd%nsppol * wfd%nproc
+ write(msg,'(a,f8.1,a)')' Memory needed for bks_tab: ',one * bks_size * b2Mb,' [Mb] <<< MEM'
+ call wrtout(std_out, msg)
+
+ !ABI_MALLOC(wfd%bks_ranks, (wfd%mband, nkibz, nsppol))
+
+ ! Allocate the global table used to keep trace of the distribution, including a possible duplication.
+ ABI_MALLOC(Wfd%bks_tab, (Wfd%mband, nkibz, nsppol, 0:Wfd%nproc-1))
+ Wfd%bks_tab = WFD_NOWAVE
+
+ ! Update the kbs table storing the distribution of the ug.
+ call wfd%update_bkstab(show=-std_out)
+
  call cwtime_report(" wfd_init", cpu, wall, gflops)
 
  DBG_EXIT("COLL")
@@ -1141,8 +1113,6 @@ end subroutine wfd_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1185,12 +1155,6 @@ subroutine wfd_free(Wfd)
  ABI_SFREE(wfd%my_nkspin)
  ABI_SFREE(wfd%bks2wfd)
 
- ! Free the MPI communicators.
- if (allocated(Wfd%bks_comm)) then
-   call xmpi_comm_free(Wfd%bks_comm)
-   ABI_FREE(Wfd%bks_comm)
- end if
-
  ! real arrays.
  ABI_SFREE(Wfd%kibz)
  ABI_SFREE(Wfd%ph1d)
@@ -1222,8 +1186,6 @@ end subroutine wfd_free
 !!      m_screening_driver,m_sigma_driver
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1282,7 +1244,6 @@ subroutine wfd_copy(Wfd_in, Wfd_out)
  call alloc_copy(Wfd_in%kibz          ,Wfd_out%kibz)
  call alloc_copy(Wfd_in%bks2wfd       ,Wfd_out%bks2wfd)
  call alloc_copy(Wfd_in%bks_tab       ,Wfd_out%bks_tab)
- call alloc_copy(Wfd_in%bks_comm      ,Wfd_out%bks_comm)
  call alloc_copy(Wfd_in%ph1d          ,Wfd_out%ph1d)
  call alloc_copy(Wfd_in%keep_ur       ,Wfd_out%keep_ur)
 
@@ -1514,8 +1475,6 @@ end function wfd_xdotc
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1566,8 +1525,6 @@ end subroutine wfd_reset_ur_cprj
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1618,8 +1575,6 @@ end subroutine wfd_get_many_ur
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1679,8 +1634,6 @@ end subroutine wfd_copy_cg
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1768,8 +1721,6 @@ end subroutine wfd_get_ur
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -1901,8 +1852,6 @@ end subroutine wfd_print
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2037,8 +1986,6 @@ end subroutine wfd_ug2cprj
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2102,8 +2049,6 @@ end subroutine wave_init
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2288,8 +2233,6 @@ end function wfd_get_wave_ptr
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2391,8 +2334,6 @@ end subroutine wfd_push_ug
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2590,8 +2531,6 @@ end function wfd_ihave_ug
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2641,8 +2580,6 @@ end subroutine wfd_mybands
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2711,8 +2648,6 @@ end subroutine wfd_show_bkstab
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2766,8 +2701,6 @@ end subroutine wfd_bands_of_rank
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2825,8 +2758,6 @@ end subroutine wfd_get_ug
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2898,8 +2829,6 @@ end subroutine wfd_wave_free
 !!      m_wfd
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -2981,8 +2910,6 @@ end subroutine wfd_who_has_ug
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3059,68 +2986,6 @@ end subroutine wfd_update_bkstab
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_set_mpicomm
-!! NAME
-!!  wfd_set_mpicomm
-!!
-!! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
-!!
-!! SOURCE
-
-subroutine wfd_set_mpicomm(Wfd)
-
-!Arguments ------------------------------------
-!scalars
- class(wfd_t),intent(inout) :: Wfd
-
-!Local variables ------------------------------
-!scalars
- integer :: spin,ierr,how_many,spin_comm
- integer :: world_group,spin_group
- !character(len=500) :: msg
-!arrays
- integer :: proc_ranks(Wfd%nproc)
-
-!************************************************************************
-
- ! First free the old communicators.
- call xmpi_comm_free(Wfd%bks_comm)
-
- ! Update the bks_tab.
- call wfd%update_bkstab()
-
- call xmpi_comm_group(Wfd%comm,world_group,ierr)
-
- ! Init spin communicators.
- do spin=1,Wfd%nsppol
-   ! The list of procs owining at least one state with this spin.
-   call wfd_who_has_ug(Wfd,0,0,spin,how_many,proc_ranks)
-
-   if (how_many>0) then
-     call xmpi_group_incl(world_group,how_many,proc_ranks,spin_group,ierr)
-     call xmpi_comm_create(Wfd%comm,spin_group,spin_comm,ierr)
-     Wfd%bks_comm(0,0,spin) = spin_comm
-     call xmpi_group_free(spin_group)
-   else
-     ABI_WARNING(sjoin("Nobody has spin:",itoa(spin)))
-     Wfd%bks_comm(0,0,spin) = xmpi_comm_null
-   end if
-
- end do
-
- call xmpi_group_free(world_group)
-
-end subroutine wfd_set_mpicomm
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_wfd/wfd_distribute_bands
 !! NAME
 !!  wfd_distribute_bands
@@ -3144,8 +3009,6 @@ end subroutine wfd_set_mpicomm
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3233,8 +3096,6 @@ end subroutine wfd_distribute_bands
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 !!
@@ -3420,8 +3281,6 @@ end function wfd_iterator_bks
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3502,8 +3361,6 @@ end subroutine wfd_bks_distrb
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3583,8 +3440,6 @@ end subroutine wfd_sanity_check
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3659,8 +3514,6 @@ end subroutine wfd_dump_errinfo
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3725,8 +3578,6 @@ end subroutine wfd_distribute_bbp
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3853,8 +3704,6 @@ end subroutine wfd_distribute_kb_kpbp
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -3967,8 +3816,6 @@ end subroutine wfd_get_cprj
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4074,8 +3921,6 @@ end subroutine wfd_change_ngfft
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4259,8 +4104,6 @@ end subroutine wfd_test_ortho
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4442,8 +4285,6 @@ end subroutine wfd_sym_ur
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4536,8 +4377,6 @@ end subroutine wfd_sym_ug_kg
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -4732,8 +4571,6 @@ end subroutine wfd_write_wfk
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5087,7 +4924,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ABI_FREE(all_countks)
 
  ! Update the kbs table storing the distribution of the ug and set the MPI communicators.
- call wfd%set_mpicomm()
  !call wfd%update_bkstab()
 
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
@@ -5139,8 +4975,6 @@ end subroutine wfd_read_wfk
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5274,8 +5108,6 @@ end subroutine wfd_paw_get_aeur
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5454,8 +5286,6 @@ end subroutine wfd_plot_ur
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -5829,8 +5659,6 @@ end subroutine wfd_get_nl_me
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -6064,8 +5892,6 @@ end subroutine wfd_mkrho
 !!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,mrgscr
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 
@@ -6179,8 +6005,6 @@ end subroutine test_charge
 !! PARENTS
 !!
 !! CHILDREN
-!!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawrhoij_mpisum_unpacked
-!!      pawrhoij_print_rhoij,wfd%bks_distrb,wfd%get_cprj,wrtout
 !!
 !! SOURCE
 

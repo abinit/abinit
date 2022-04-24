@@ -2608,7 +2608,6 @@ endif
        ABI_ERROR("Error distributing the GW density")
      endif
      ! We no longer need Wfd_nato_master.
-     Wfd_nato_master%bks_comm = xmpi_comm_null
      call Wfd_nato_master%free()
      call xmpi_barrier(Wfd%comm)
      ABI_FREE(bdm_mask) ! The master already used bdm_mask
@@ -2969,7 +2968,6 @@ endif
    end if
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
-     Wfdf%bks_comm = xmpi_comm_null
      call wfdf%free()
    end if
  end if
