@@ -521,7 +521,7 @@ CONTAINS  !=====================================================================
                end if
              end do !ispinor
 
-!        2-C Computation of  Spin-orbit coupling contribution:
+!        2-C Computation of Spin-orbit coupling contribution:
 !             Sum_ij,ss'[<psi_n,s|p_i><p_j|psi_m,s'>(<phi_i|1/4 Alpha^2 (Sigma^ss' X dV/dr)|phi_j>]
 !        ----------------------------------------------------------------------------------
              if (dtset%pawspnorb==1) then
@@ -2187,20 +2187,20 @@ CONTAINS  !=====================================================================
    end do ! jlmn
      
 !  Symetrization
-   !if (if (option_core==0.and.lmn_size>1) then
-   !  do jlmn=2,lmn_size
-   !    do ilmn=1,jlmn-1
-   !      do ii=1,3
-   !        do jj=1,2
-   !          avg=half*(soc_ij(1,jj,ii,ilmn,jlmn)+soc_ij(1,jj,ii,jlmn,ilmn))
-   !          soc_ij(1,jj,ii,ilmn,jlmn)=avg ; soc_ij(1,jj,ii,jlmn,ilmn)=avg
-   !          avg=half*(soc_ij(2,jj,ii,ilmn,jlmn)+soc_ij(2,jj,ii,ilmn,jlmn))
-   !          soc_ij(2,jj,ii,ilmn,jlmn)=avg ; soc_ij(2,jj,ii,jlmn,ilmn)=avg
-   !        end do
-   !      end do           
-   !    end do
-   !  end do
-   !end if
+   if (if (option_core==0.and.lmn_size>1) then
+     do jlmn=2,lmn_size
+       do ilmn=1,jlmn-1
+         do ii=1,3
+           do jj=1,2
+             avg=half*(soc_ij(1,jj,ii,ilmn,jlmn)+soc_ij(1,jj,ii,jlmn,ilmn))
+             soc_ij(1,jj,ii,ilmn,jlmn)=avg ; soc_ij(1,jj,ii,jlmn,ilmn)=avg
+             avg=half*(soc_ij(2,jj,ii,ilmn,jlmn)+soc_ij(2,jj,ii,ilmn,jlmn))
+             soc_ij(2,jj,ii,ilmn,jlmn)=avg ; soc_ij(2,jj,ii,jlmn,ilmn)=avg
+           end do
+         end do           
+       end do
+     end do
+   end if
 
    ABI_FREE(dVdr)
    ABI_FREE(intf3)
