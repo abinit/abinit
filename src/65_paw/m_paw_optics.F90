@@ -2187,7 +2187,7 @@ CONTAINS  !=====================================================================
    end do ! jlmn
      
 !  Symetrization
-   if (if (option_core==0.and.lmn_size>1) then
+   if (option_core==0.and.lmn_size>1) then
      do jlmn=2,lmn_size
        do ilmn=1,jlmn-1
          do ii=1,3
