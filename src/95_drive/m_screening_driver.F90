@@ -1522,7 +1522,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call pawpwff_free(Paw_pwff)
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
-     Wfdf%bks_comm = xmpi_comm_null
      call wfdf%free()
    end if
  end if
