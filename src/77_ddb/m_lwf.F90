@@ -110,11 +110,8 @@ contains
     type(ifc_type), target, intent(in):: ifc
     type(crystal_t), target, intent(in):: crystal
     type(anaddb_dataset_type), intent(in):: dtset
-    real(dp), allocatable:: eigvec(:,:,:,:,:), phfrqs(:,:), phdispl_cart(:,:,:,:), weights(:)
-
-    real(dp):: symcart(3, 3, crystal%nsym), syme2_xyza(3, crystal%natom)
+    real(dp):: symcart(3, 3, crystal%nsym)
     integer:: isym
-    real(dp), allocatable:: full_eigvec(:,:,:,:,:), full_phfrq(:,:), new_shiftq(:,:)
     ! TODO: add exclude_bands
     integer:: exclude_bands(0)
     
@@ -136,7 +133,7 @@ contains
 
     ! prepare qpoints
     call self%prepare_qpoints(crystal, dtset)
-    call self%prepare_Rlist(dtset)
+    call self%prepare_Rlist()
     ! prepare eigen values and eigen vectors
 
     call self%get_ifc_eigens(ifc, crystal)
@@ -218,11 +215,8 @@ contains
     type(anaddb_dataset_type), intent(in):: dtset
     integer:: nqshft = 1
     real(dp):: lwf_qshift(3, 1)
-    integer:: nqibz
-    real(dp), allocatable:: wtq_ibz( :)
     integer:: nqbz
     real(dp), allocatable:: qbz(:, :)
-    integer:: new_kptrlatt
     integer:: in_qptrlatt(3, 3), new_qptrlatt(3, 3)
     integer, allocatable:: bz2ibz_smap(:,:)!, bz2ibz(:)
     real(dp), allocatable::  new_shiftq(:,:)
@@ -275,9 +269,8 @@ contains
 
 
 
-  subroutine prepare_Rlist(self, dtset)
+  subroutine prepare_Rlist(self)
     class(LatticeWannier), intent(inout):: self
-    type(anaddb_dataset_type), intent(in):: dtset
     integer:: qptrlatt(3), i
     do i = 1, 3
        qptrlatt(i) = self%qptrlatt(i, i)
@@ -298,13 +291,6 @@ contains
   end function freq_to_eigenval
 
 
-  subroutine get_ifc_q(self, crystal)
-    type(LatticeWannier):: self
-    type(crystal_t), intent(in):: crystal
-    real(dp):: mass(crystal%natom), f
-    integer:: iatom,  iq, nq
-    mass = crystal%amu(crystal%typat(:)) * amu_emass
-  end subroutine get_ifc_q
 
   subroutine get_ifc_eigens(self, ifc, crystal)
     class(LatticeWannier), intent(inout):: self
@@ -342,13 +328,15 @@ contains
   subroutine write_lwf_nc(self, prefix)
     class(LatticeWannier), intent(inout):: self
     character(len=*), intent(in) ::  prefix
-    type(IOWannNC):: ncfile
 #ifdef HAVE_NETCDF
+    type(IOWannNC):: ncfile
     call self%scdm%create_ncfile(trim(prefix)//"_lwf.nc", ncfile)
     call self%scdm%write_wann_netcdf(ncfile, wannR_unit='dimensionless', HwannR_unit='Ha')
     !NCF_CHECK(self%crystal%ncwrite(ncfile%ncid))
     call self%scdm%close_ncfile(ncfile)
 #else
+    ABI_UNUSED_A(self)
+    ABI_UNUSED(prefix)
     NETCDF_NOTENABLED_ERROR()
 #endif
   end subroutine write_lwf_nc

@@ -1928,7 +1928,7 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
 
 !Write the heading
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
- write(nunit, '(2a)' )' -outvars_anaddb: echo values of input variables----------------------',ch10
+ write(nunit, '(2a)' )' -outvars_anaddb: echo values of input variables ----------------------',ch10
 
 !The flags
  if (anaddb_dtset%dieflag /= 0 .or. anaddb_dtset%ifcflag /= 0 .or. &
@@ -2173,7 +2173,6 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
        end do
        write(nunit, '(a)') ' '
     end if
-
  end if
 
 

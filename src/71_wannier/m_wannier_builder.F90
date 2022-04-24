@@ -252,7 +252,6 @@ contains
   ! The bands with the largest weights are selected as the anchor points. 
   subroutine auto_find_anchors(self, anchor_kpt, ianchors)
     class(WannierBuilder_t), intent(inout):: self
-    real(dp), intent(in) ::  anchor_kpt(:)
     integer, intent(out):: ianchors(self%nwann)
     integer:: i
     real(dp):: weights(self%nband)
@@ -318,11 +317,9 @@ contains
     integer::  iband
     complex(dp):: psi_dagger(self%nband, self%nbasis)
     complex(dp):: psi_dagger_copy(self%nband, self%nbasis)
-    complex(dp):: Amn(self%nband, self%nwann), Hwann(self%nwann, self%nwann)
-    real(dp):: evals(self%nwann)
     real(dp):: weight(self%nband)
-    real(dp), pointer:: evals_anchor(:)
-    type(eigensolver):: esolver
+    !real(dp), pointer:: evals_anchor(:)
+    !type(eigensolver):: esolver
     character(len = 500):: msg
     ! find anchor points, by default gamma
     self%anchor_ikpt = self%find_kpoint(self%anchor_kpt)
@@ -367,14 +364,13 @@ contains
 
   subroutine construct_wannier(self)
     class(WannierBuilder_t), intent(inout):: self
-    integer:: ikpt, iband
-    complex(dp):: psi_dagger(self%nband, self%nbasis)
+    integer:: ikpt
     complex(dp), pointer:: p(:, :)
-    real(dp):: weight(self%nband)
+    !real(dp):: weight(self%nband)
 
-    complex(dp):: tmp(self%nwann, self%nwann)
-    real(dp):: evals(self%nwann)
-    type(eigensolver):: esolver
+    !complex(dp):: tmp(self%nwann, self%nwann)
+    !real(dp):: evals(self%nwann)
+    !type(eigensolver):: esolver
 
     if(self%method == 1)then
        call self%select_columns()
@@ -530,7 +526,8 @@ contains
     complex(dp), intent(inout):: Amnk(self%nband, self%nwann)
     real(dp):: weight(self%nband)
     complex(dp):: U(self%nband, self%nwann), VT(self%nwann, self%nwann)
-    real(dp):: S(self%nband), weights(self%nband)
+    real(dp):: S(self%nband)
+    !real(dp):: weights(self%nband)
     integer:: iband
     complex(dp), pointer:: p(:, :)
  
@@ -687,12 +684,14 @@ contains
     class(WannierBuilder_t), intent(inout):: self
     type(IOWannNC):: ncfile
     character(len=*), intent(in):: fname
+    ABI_UNUSED_A(self)
     call ncfile%initialize(filename = fname)
   end subroutine create_ncfile
 
   subroutine close_ncfile(self, ncfile)
     class(WannierBuilder_t), intent(inout):: self
     type(IOWannNC):: ncfile
+    ABI_UNUSED_A(self)
     call ncfile%close_file()
   end subroutine close_ncfile
 

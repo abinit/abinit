@@ -142,15 +142,15 @@ contains
     LDU = M
     LDVT = N
     LWORK = -1
+    ABI_MALLOC(rwork, (min(M, N)*6))
     CALL ZGESVD( mode, mode, M, N, A, LDA, S, U, LDU, VT, LDVT, &
          & tmp, LWORK, rwork, INFO )
     LWORK = MIN( LWMAX, INT( tmp( 1 ) ) )
     ABI_MALLOC(work, (lwork))
-    ABI_MALLOC(rwork, (min(M, N)*6))
     CALL ZGESVD( mode, mode, M, N, A, LDA, S, U, LDU, VT, LDVT, &
          WORK, LWORK, rwork, INFO )
     IF( INFO .GT. 0 ) THEN
-       WRITE(*,*)'The algorithm computing SVD failed to converge.'
+       ABI_ERROR('The algorithm computing SVD failed to converge.')
        STOP
     END IF
     ABI_SFREE(work)
@@ -205,7 +205,7 @@ contains
        ABI_SFREE(self%work)
        ABI_MALLOC(self%work, (self%lwork))
     else if (self%ndim /= size(evecs, 1)) then
-       print *, "The size of the evecs is not the same as previous one."
+       ABI_ERROR("Eigensovler: The size of the evecs is not the same as previous one.")
     end if
     call ZHEEV('V', 'U', self%ndim, evecs, self%ndim, evals, self%work, self%lwork, self%rwork, info)
   end subroutine eigensolver_run

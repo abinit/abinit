@@ -505,8 +505,10 @@ program anaddb
      ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc, Crystal, ddb, &
-      inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
-      inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, Ifc_coarse = Ifc_coarse, dipquad = inp%dipquad, quadquad = inp%quadquad)
+      inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
+      & inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
+      inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, &
+      & Ifc_coarse = Ifc_coarse, dipquad = inp%dipquad, quadquad = inp%quadquad)
      call Ifc_coarse%free()
 
    else
@@ -922,7 +924,9 @@ end if  ! condition on nlflag
      end if
 
      ! then print out the piezoelectric constants
-     call ddb_piezo(inp, ddb%val, dielt_rlx, elast, iblok, instrain, ab_out, mpert, natom, ddb%nblok, piezo, Crystal%ucvol, ana_ncid)
+     call ddb_piezo(inp, ddb%val, dielt_rlx, elast, iblok, &
+         & instrain, ab_out, mpert, natom, ddb%nblok, piezo, &
+         & Crystal%ucvol, ana_ncid)
    end if
  end if
 
