@@ -29,9 +29,9 @@ module m_gwr_base
  !use m_abicore
  use m_errors
  use m_xmpi
- use m_slk
  !use m_xomp
- !use m_sort
+ use m_slk
+ use m_wfk
 
  !use defs_datatypes, only : ebands_t
  use m_fstrings, only : sjoin, itoa
@@ -63,8 +63,6 @@ module m_gwr_base
    integer :: istwfk = 1
    ! Storage mode for this k point.
 
-
-
    integer :: npw = -1
    ! Number of plane-waves for this k-point.
 
@@ -78,17 +76,18 @@ module m_gwr_base
    ! FFT mesh
 
    real(dp) :: point(3)
+   ! k/q point in reduced coordinates.
 
    integer,allocatable :: gvec(:,:)
    ! gvec(3, npw)
-   ! G vector coordinates in reduced cordinates.
+   ! G vectors in reduced coordinates.
    ! For each k, the g-vectors are ordered according to |k+g|
    ! so that we can use the same array for Green, chi and Sigma_x
    ! Note that this array is global i.e. it is not MPI-distributed in G-space, only in k-space.
 
    integer,allocatable :: gbound(:,:)
-   !  gbound(2 * mgfft + 8, 2)
-   !  sphere boundary info for reciprocal to real space (local)
+   ! gbound(2 * mgfft + 8, 2)
+   ! sphere boundary info for zero-padded FFT
 
  contains
 
@@ -103,6 +102,7 @@ module m_gwr_base
 
 !type, extends(matrix_scalapack) :: twopoint_func_t
 !   type(grdesc_t), pointer :: desc => null()
+!   character(len=100) :: name
 !
 !   type(matrix_scalapack) :: g_g
 !   type(matrix_scalapack) :: r_r
@@ -123,6 +123,7 @@ module m_gwr_base
  type, public :: gwr_t
 
    integer :: nspinor
+   ! Number of spinor components.
 
    integer :: nsppol
    ! Global number of independent spin polarizations.
@@ -223,15 +224,17 @@ module m_gwr_base
    type(crystal_t) :: cryst
 
    type(matrix_scalapack),allocatable :: go_g_gp(:,:,:)
-   !type(matrix_scalapack),allocatable :: go_gr(:,:,:)
-   !type(matrix_scalapack),allocatable :: go_rrp(:,:,:)
    type(matrix_scalapack),allocatable :: ge_g_gp(:,:,:)
-   !type(matrix_scalapack),allocatable :: ge_gr(:,:,:)
-   !type(matrix_scalapack),allocatable :: ge_rrp(:,:,:)
    ! (nk, my_ntau, my_nsppol)
 
    type(matrix_scalapack),allocatable :: chi_g_gp(:,:,:)
    ! (nq, my_ntau, my_nsppol)
+
+   type(matrix_scalapack),allocatable :: wc_g_gp(:,:)
+   ! Correlated screened Coulomb interacation
+
+   !type(matrix_scalapack),allocatable :: sigo_g_gp(:,:,:)
+   !type(matrix_scalapack),allocatable :: sige_g_gp(:,:,:)
 
    !character(len=fnlen) :: wfk_filepath
    ! Path to the WFK file with the KS wavefunctions.
@@ -385,15 +388,17 @@ function gwr_new(dtset, comm) result (gwr)
 !Local variables-------------------------------
 !scalars
  integer :: my_spin, my_it, ik, iq, ii, my_ir, my_nr, npwsp, col_bsize, iq_ibz, mgfft, nfft, ig1, ig2
+ integer :: sc_nfft, sc_augsize
  real(dp) :: ecuteff
  type(grdesc_t) :: desc_k, desc_kpq
  type(grdesc_t),pointer :: pdesc_k, pdesc_q
  type(processor_scalapack) :: slk_processor
  type(matrix_scalapack) :: go_k_gpr, go_kpq_gpr, ge_k_gpr, ge_kpq_gpr, chi_r_gp
 !arrays
- integer :: tmp_ngfft(18), ngfft(18)
+ integer :: tmp_ngfft(18), ngfft(18), sc_ngfft(18)
  integer,allocatable :: gf_scgvec(:,:), chi_scgvec(:,:)
  real(dp) :: kk(3), qq(3), kpq(3), qq_ibz(3)
+ complex(dp),allocatable :: sc_chi_box(:), sc_go_box(:), sc_ge_box(:)
  type(matrix_scalapack),allocatable :: go_gp_r(:), ge_gp_r(:), chiq_gp_r(:)
 
 ! *************************************************************************
@@ -429,6 +434,7 @@ function gwr_new(dtset, comm) result (gwr)
  !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
  !                            new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_qbz2ibz)
 
+ !gwr%ngkpt  = ??
  gwr%nkbz = 1
  gwr%nkibz = 1
  gwr%nqbz = 1
@@ -466,6 +472,7 @@ function gwr_new(dtset, comm) result (gwr)
 #endif
 
  ! Build FFT descriptors for Green's functions
+ ! TODO: I still need to decide if I want to use k-centered G-spheres or use a single gvec array as in the GW code.
  ABI_MALLOC(gwr%gf_desc_k, (gwr%nk))
  do ik=1,gwr%nk
    pdesc_k => gwr%gf_desc_k(ik)
@@ -516,7 +523,6 @@ function gwr_new(dtset, comm) result (gwr)
  ! Allocate arrays used to store Go_k, Ge_k and Chi_q
  ABI_MALLOC(gwr%go_g_gp, (gwr%nk, gwr%my_ntau, gwr%my_nsppol))
  ABI_MALLOC(gwr%ge_g_gp, (gwr%nk, gwr%my_ntau, gwr%my_nsppol))
- ABI_MALLOC(gwr%chi_g_gp, (gwr%nq, gwr%my_ntau, gwr%my_nsppol))
 
  call init_scalapack(slk_processor, gwr%gr_comm%value) !# grid_shape=[1, gwr%gr_comm%value]
 
@@ -555,6 +561,7 @@ function gwr_new(dtset, comm) result (gwr)
 
  ! TODO: Very likely this is needed only for GWr.
  ! Can be allocated inside loops to render code clearer.
+ !if (gwr%use_supercell) then
  ABI_MALLOC(chiq_gp_r, (gwr%nq))
  do iq=1,gwr%nq
     npwsp = gwr%chi_desc_q(iq)%npw * gwr%nspinor
@@ -566,24 +573,23 @@ function gwr_new(dtset, comm) result (gwr)
  end do
 
  ! Prepare FFT in the supercell from R' -> G'
- ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we block.
+ ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
  ! Perhaps the safest approach would be to generate the plan on the fly.
- !integer :: sc_ngfft(18)
- !sc_ngfft = ngfft
- !sc_ngfft(1:3) = gwr%ngkpt * ngfft(1:3)
- !sc_ngfft(4:6) = sc_ngfft(1:3)
- !sc_nfft = product(sc_ngfft(1:3))
- !sc_augsize = product(sc_ngfft(4:6))
+ sc_ngfft = ngfft
+ sc_ngfft(1:3) = gwr%ngkpt * ngfft(1:3)
+ sc_ngfft(4:6) = sc_ngfft(1:3)
+ sc_nfft = product(sc_ngfft(1:3))
+ sc_augsize = product(sc_ngfft(4:6))
  !cal fftbox_plan3_init(sc_plan_Gp2Rp,, ndat, dims, embed, fftalg, fftcache, isign)
  !cal fftbox_plan3_init(sc_plan_Rp2Gp,, ndat, dims, embed, fftalg, fftcache, isign)
 
- !complex(dp) :: sc_chi_box(:), sc_go_box(:), sc_ge_box(:)
- !ABI_MALLOC(sc_go_box, (sc_nfft))
- !ABI_MALLOC(sc_ge_box, (sc_nfft))
- !ABI_MALLOC(sc_chi_box, (sc_nfft))
- !ABI_FREE(sc_go_box)
- !ABI_FREE(sc_ge_box)
- !ABI_FREE(sc_chi_box)
+ ABI_MALLOC(sc_go_box, (sc_nfft))
+ ABI_MALLOC(sc_ge_box, (sc_nfft))
+ ABI_MALLOC(sc_chi_box, (sc_nfft))
+ ABI_SFREE(sc_go_box)
+ ABI_SFREE(sc_ge_box)
+ ABI_SFREE(sc_chi_box)
+ !end if ! gwr%use_supercell
 
  ABI_MALLOC(go_gp_r, (gwr%nk))
  ABI_MALLOC(ge_gp_r, (gwr%nk))
@@ -624,10 +630,10 @@ function gwr_new(dtset, comm) result (gwr)
        !call fftbox_execute_ip(sc_plan_Gp2Rp, sc_ge_box)
 
        ! Compute chi(R', r, it) for this r and go back to G' = k + g' space immediately.
-       !sc_chi_box = sc_go_box * sc_ge_box
+       sc_chi_box = sc_go_box * sc_ge_box
        !call fftbox_execute_ip(sc_plan_Rp2Gp, sc_chi_box)
 
-       ! Extract data usig g-sphere for chi_q (not necessarly equal to the one used for Green's function
+       ! Extract data using g-sphere for chi_q (not necessarly equal to the one used for Green's function)
        ! Assuming k-mesh == q-mesh.
        do iq=1,gwr%nq
          pdesc_q => gwr%chi_desc_q(iq)
@@ -644,7 +650,7 @@ function gwr_new(dtset, comm) result (gwr)
      do iq=1,gwr%nq
        pdesc_q => gwr%chi_desc_q(iq)
        !chi_r_gp = chiq_gp_r(iq)%alloc_transpose()
-       !call chiq_gp_r(iq)%ptran("N", chi_r_gp)
+       !call chiq_gp_r(iq)%ptran("C", chi_r_gp)
        call chiq_gp_r(iq)%free()
        ! FFT along the first dimension: chi_q(r, g') --> chi_q(g, g')
        do ig2=1,chi_r_gp%sizeb_local(2)
@@ -652,7 +658,6 @@ function gwr_new(dtset, comm) result (gwr)
          !call fft_ur(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
          gwr%chi_g_gp(iq, my_it, my_spin)%buffer_cplx(:, ig2) = zero ! ug
        end do
-       !call chiq_gp_r(iq)%free()
        call chi_r_gp%free()
      end do
 
@@ -673,10 +678,10 @@ function gwr_new(dtset, comm) result (gwr)
          !desc_k = gwr%gf_desc_k(ik_ibz)%rotate(symtab_k)
          !desc_kpq = gwr%gf_desc_k(ikpq_ibz)%rotate(symtab_kpq)
 
-         !go_k_gpr = gwr%go_g_gp(ik_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_k, symtab_k)
-         !ge_k_gpr = gwr%ge_g_gp(ik_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_k, symtab_k)
-         !go_kpq_gpr = gwr%go_g_gp(ikpq_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_kpq, symtab_kpq)
-         !ge_kpq_gpr = gwr%ge_g_gp(ikpq_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_kpq, symtab_kpq)
+         !go_k_gpr = gwr%go_g_gp(ik_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_k, "C", symtab_k)
+         !ge_k_gpr = gwr%ge_g_gp(ik_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_k, "C", symtab_k)
+         !go_kpq_gpr = gwr%go_g_gp(ikpq_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_kpq, "C", symtab_kpq)
+         !ge_kpq_gpr = gwr%ge_g_gp(ikpq_ibz, my_it, my_spin)%rotate_fftg1_and_ptran(desc_kpq, "C", symtab_kpq)
 
          my_nr = go_k_gpr%sizeb_local(2)
          do my_ir=1,my_nr
@@ -698,7 +703,7 @@ function gwr_new(dtset, comm) result (gwr)
          call ge_kpq_gpr%free()
          call ge_k_gpr%free()
 
-         !call chi_gp_r%ptran("N", chi_r_gp)
+         !call chi_gp_r%ptran("C", chi_r_gp)
          !call chi_gp_r%free()
          !do ig2=1, chi_rp_g%sizeb_local(2)
             !chi_r_gp%buffer_cplx(:, ig2)
@@ -781,33 +786,92 @@ subroutine gwr_free(self)
  end do
  ABI_SFREE(self%chi_desc_q)
 
- do kk=1,size(self%go_g_gp, 3)
-   do jj=1,size(self%go_g_gp, 2)
-     do ii=1,size(self%go_g_gp, 1)
-       call self%go_g_gp(ii, jj, kk)%free()
-       call self%ge_g_gp(ii, jj, kk)%free()
-     end do
-   end do
- end do
+ call free_slk_array3(self%go_g_gp)
  ABI_SFREE(self%go_g_gp)
+ call free_slk_array3(self%ge_g_gp)
  ABI_SFREE(self%ge_g_gp)
-
- do kk=1,size(self%chi_g_gp, 3)
-   do jj=1,size(self%chi_g_gp, 2)
-     do ii=1,size(self%chi_g_gp, 1)
-       call self%chi_g_gp(ii, jj, kk)%free()
-     end do
-   end do
- end do
+ call free_slk_array3(self%chi_g_gp)
  ABI_SFREE(self%chi_g_gp)
+ call free_slk_array2(self%wc_g_gp)
+ ABI_SFREE(self%wc_g_gp)
 
  ! Free MPI communicators
  call self%spin_comm%free()
  call self%gr_comm%free()
  call self%tau_comm%free()
 
+ contains
+   subroutine free_slk_array2(slk_arr3)
+     type(matrix_scalapack),intent(inout) :: slk_arr3(:,:)
+     integer :: i1, i2
+     do i2=1,size(slk_arr3, 2)
+       do i1=1,size(slk_arr3, 1)
+         call slk_arr3(i1, i2)%free()
+       end do
+     end do
+   end subroutine free_slk_array2
+
+   subroutine free_slk_array3(slk_arr3)
+     type(matrix_scalapack),intent(inout) :: slk_arr3(:,:,:)
+     integer :: i1, i2, i3
+     do i3=1,size(slk_arr3, 3)
+       do i2=1,size(slk_arr3, 2)
+         do i1=1,size(slk_arr3, 1)
+           call slk_arr3(i1, i2, i3)%free()
+         end do
+       end do
+     end do
+   end subroutine free_slk_array3
+
 end subroutine gwr_free
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr_base/gwr_build_gtau_from_wfk
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gwr_build_gtau_from_wfk(gwr, wfk_filepath)
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(inout) :: gwr
+ character(len=fnlen),intent(in) :: wfk_filepath
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: formeig0 = 0
+ !integer,intent(in) :: my_it, my_spin
+ !integer,intent(in) :: ik_ibz,spin,sc_mode
+ type(wfk_t) :: wfk
+!arrays
+ !integer,intent(out), DEV_CONTARRD  optional :: kg_k(:,:) !(3,npw_k)
+ !real(dp),intent(out), DEV_CONTARRD optional :: cg_k(:,:) !(2,npw_k*nspinor*nband)
+ !real(dp),intent(inout),optional :: eig_k((2*Wfk%mband)**Wfk%formeig*Wfk%mband)
+ !real(dp),intent(out),optional :: occ_k(Wfk%mband)
+
+! *************************************************************************
+
+ !ebands = wfk_read_ebands(wfk_filepath, comm, out_hdr=wfk0_hdr)
+ !call wfk0_hdr%vs_dtset(dtset)
+ !cryst = wfk0_hdr%get_crystal()
+ !call cryst%print(header="crystal structure from WFK file")
+
+ !call wfk_open_read(wfk, fname, formeig0, iomode, funt, comm, hdr_out)
+ !call wfk%read_band_block(band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
+ !call wfk%close()
+
+end subroutine gwr_build_gtau_from_wfk
 
 !----------------------------------------------------------------------
 
@@ -869,13 +933,11 @@ subroutine gwr_ggp_to_gpr(gwr, what, ik, my_it, my_spin, gp_r)
                desc%mgfft, desc%ngfft, desc%istwfk, desc%gvec, desc%gbound, &
                g_gp%buffer_cplx(:, ig2), r_gp%buffer_cplx(:, ig2))
 
-   ! TODO
-   ! Multiply by e^{ik.r}
-   !r_gp%buffer_cplx(:, ig2) =
-   !call times_eikr(desc%point, desc%ngfft, desc%nfft, ndat1, ur)
+   ! TODO: Multiply by e^{ik.r}
+   !call times_eikr(desc%point, desc%ngfft, desc%nfft, ndat1, r_gp%buffer_cplx(:, ig2)
  end do
 
- ! Transpose: X(r, g') -> Y(g', r)
+ ! Transpose: X(r, g') -> Y(g', r) and take complex conjugate
  call gp_r%free()
  call init_matrix_scalapack(gp_r, g_gp%sizeb_global(2), desc%nfft * gwr%nspinor, g_gp%processor, desc%istwfk) !, tbloc=tbloc)
 
@@ -911,7 +973,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
 !Local variables-------------------------------
 !scalars
- integer :: iq, my_spin, ig1, ig2, it, iw, ierr
+ integer :: iq, my_spin, ig1, ig2, it, iw, ierr, my_nsppol
  logical :: sum_spins_
  type(grdesc_t),pointer :: desc
  type(matrix_scalapack), pointer :: chit(:)
@@ -939,13 +1001,19 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end select
  end do
 
- do my_spin=1,gwr%my_nsppol
+ my_nsppol = gwr%my_nsppol
+ !if (what == "wc") my_nsppol = 1
+
+ do my_spin=1,my_nsppol
    do iq=1,gwr%nq
 
      select case (what)
      case ("chi")
-       chit => gwr%chi_g_gp(iq, 1:gwr%my_ntau, my_spin)
        desc => gwr%chi_desc_q(iq)
+       chit => gwr%chi_g_gp(iq, 1:gwr%my_ntau, my_spin)
+     !case ("wc")
+     !  desc => gwr%chi_desc_q(iq)
+     !  chit => gwr%wc_g_gp(iq, 1:gwr%my_ntau)
      case default
        ABI_ERROR(sjoin("Invalid value for what:", what))
      end select
@@ -985,6 +1053,94 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  ABI_FREE(my_weights)
 
 end subroutine gwr_cos_transform
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr_base/gwr_compute_wt_from_chiw
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gwr_compute_wt_from_chiw(gwr)
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(inout) :: gwr
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq, my_iw, ig1, ig2, ig1_glob, ig2_glob, ierr, my_spin
+ logical :: is_gamma
+ type(grdesc_t),pointer :: pdesc_q
+ type(matrix_scalapack), pointer :: chi
+ type(matrix_scalapack) :: eps
+
+! *************************************************************************
+
+ !ABI_MALLOC(gwr%wc_g_gp, (gwr%nq, gwr%my_ntau))
+
+ do iq=1,gwr%nq
+   pdesc_q => gwr%chi_desc_q(iq)
+   is_gamma = all(abs(pdesc_q%point) < tol12)  ! TODO: Handle q --> 0 limit
+
+   !npwsp = gwr%chi_desc_q(iq)%npw * gwr%nspinor
+   !col_bsize = npwsp / gwr%gr_comm%nproc
+   !if (mod(npwsp, gwr%gr_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   !!col_bsize = 50
+   !call init_matrix_scalapack(gwr%chi_g_gp(iq, my_iw, my_spin), &
+   !   npwsp, npwsp, slk_processor, 1) ! , tbloc=[npwsp, col_bsize])
+
+   do my_spin=1,gwr%my_nsppol  ! FIXME
+   do my_iw=1,gwr%my_niw
+     chi => gwr%chi_g_gp(iq, my_iw, my_spin)
+
+     ! Build epsilon(q, iw) =  delta_{g,g'} − v_q(g,g') chi_q(g,g, iw).
+     do ig2=1,chi%sizeb_local(2)
+       do ig1=1,chi%sizeb_local(1)
+         call chi%loc2glob(ig1, ig2, ig1_glob, ig2_glob)
+         !vc_qg1 = ??
+         !vc_qg2 = ??
+         !ceps = - chi%buffer_cplx(ig1, ig2) ! * vc_qg1 * vc_qg2
+         !if (ig1_glob == ig2_glob) eps = one - ceps
+       end do ! ig1
+     end do ! ig2
+
+     ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
+     ! This means here I need to redistribute the data before calling zinvert.
+     !call slk_zinvert(eps)
+     !call chi%free()
+
+     ! Build W(q, iw) = e^{-1}_q(g,g',iw) v_q(g,g')
+     ! Remove bare v
+     do ig2=1,eps%sizeb_local(2)
+       do ig1=1,eps%sizeb_local(1)
+         call eps%loc2glob(ig1, ig2, ig1_glob, ig2_glob)
+         !vc_qg1 = ??
+         !vc_qg2 = ??
+         !eps%buffer_cplx(ig1, ig2) = eps%buffer_cplx(ig1, ig2) ! * vc_qg1 * vc_qg2
+       end do ! ig1
+     end do ! ig2
+
+     !gwr%wc_g_gp, (iq, my_iw, my_spin) = ??
+     call eps%free()
+   end do  ! it
+   end do ! my_spin
+ end do ! iq
+
+ ! Perform cosine transform from iw to tau to get W(tau)
+ call gwr%cos_transform("wc", "w2t")
+
+end subroutine gwr_compute_wt_from_chiw
 !!***
 
 !----------------------------------------------------------------------
