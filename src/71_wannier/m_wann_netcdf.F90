@@ -74,7 +74,7 @@ module m_wann_netcdf
   subroutine write_header(self)
     class(IOWannNC), intent(inout):: self
     !TODO what information should be written in the header?
-    ABI_UNUSED(self)
+    ABI_UNUSED_A(self)
   end subroutine write_header
 
   subroutine write_wann( self,  nR, ndim, nwann, nbasis, Rlist, WannR, HwannR, wannR_unit,  HwannR_unit)
