@@ -111,9 +111,6 @@ inp_files = [
 "t86.abi",  # Spin lattice coupling, Only Oiju term activated.
 "t87.abi",  # Spin lattice coupling, Oiju and Tijuv.
 
-# Lattice Wannier function
-"t110.abi",  # scdm-k method for lattice wannier function in anaddb (disentangle option 1)
-
 # GS Coulomb cut-off
 "t90.abi",  # checkG Coulomb cut-off, large tolerance a.t.m.
 "t91.abi",  # occopt 9 tests on Si
@@ -125,4 +122,7 @@ inp_files = [
 "t97.abi",  # test treatment of inaccurate POSCAR file
 "t98.abi",  # test treatment of inaccurate POSCAR file
 "t99.abi",  # test treatment of inaccurate POSCAR file
+
+# Lattice Wannier function
+"t110.abi",  # scdm-k method for lattice wannier function in anaddb (disentangle option 1)
 ]

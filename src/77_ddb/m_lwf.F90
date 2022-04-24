@@ -97,6 +97,7 @@ module m_lwf
     procedure:: get_ifc_eigens
     procedure:: run_all 
     procedure:: write_lwf_nc
+    procedure:: print_Rlist
  end type LatticeWannier
 
  private
@@ -153,11 +154,11 @@ contains
          & project_to_anchor = (dtset%lwf_anchor_proj > 0 ), method = dtset%lwfflag)
 
      if(dtset%lwfflag == 1) then
-        write(msg, '(a)')  'Constructing LWF with SCDM-k method.'
+        write(msg, '(a)')  ' Constructing LWF with SCDM-k method.'
         call wrtout([ab_out, std_out], msg ) 
-        write(msg, '(a, i0)')  'Number of LWF: ', dtset%lwf_nwann
+        write(msg, '(a, i0)')  ' Number of LWF: ', dtset%lwf_nwann
         call wrtout([ab_out, std_out], msg ) 
-        write(msg, '(a, 3f8.5)')  'Anchor Points q-point: ', &
+        write(msg, '(a, 3f8.5)')  ' Anchor Points q-point: ', &
              & dtset%lwf_anchor_qpt(1), dtset%lwf_anchor_qpt(2), dtset%lwf_anchor_qpt(3)
         !write(msg, '(2a) ') 'Anchor points band indices: ', trim(ltoa(self%scdm%anchor_ibands))
         call wrtout([ab_out, std_out], msg ) 
@@ -170,10 +171,10 @@ contains
     ! output information
     else if(dtset%lwfflag == 2) then
     ! TODO: projected lattice wannier function
-       write(msg, '(a)')  'Constructing LWF with projected wannier function method.'
+       write(msg, '(a)')  ' Constructing LWF with projected wannier function method.'
        call wrtout([ab_out, std_out], msg ) 
        call self%scdm%set_disp_projector(dtset%lwf_projector)
-       write(msg, '(2a)')  'The projectors: ', trim(ltoa(dtset%lwf_projector))
+       write(msg, '(2a)')  ' The projectors: ', trim(ltoa(dtset%lwf_projector))
        call wrtout([ab_out, std_out], msg ) 
     end if
    
@@ -181,6 +182,7 @@ contains
 
   subroutine finalize(self)
     class(LatticeWannier), intent(inout):: self
+    call self%scdm%finalize()
     ABI_SFREE(self%qibz)
     ABI_SFREE(self%qweights)
     ABI_SFREE(self%eigenvalues)
@@ -223,7 +225,7 @@ contains
     integer, parameter:: bcorr0 = 0, master = 0
     integer:: my_qptopt
     character(len = 500):: msg
-    integer:: iqpt
+    integer:: iqpt, nkpout
     ! Copied from m_phonons/mkphdos
     in_qptrlatt = 0
     in_qptrlatt(1, 1) = dtset%lwf_ngqpt(1)
@@ -256,24 +258,62 @@ contains
        write(msg, "(2(a, i0))")" Number of q-points in the IBZ: ", self%nqibz, ", number of MPI processes: ", self%nprocs
        call wrtout([ab_out, std_out], msg)
 
-       write(msg, "(a)") "List of q-points: "
+       write(msg, "(a)") " List of q-points: "
        call wrtout([ab_out, std_out], msg)
 
-       do iqpt=1, self%nqibz
-          write(msg, '(3f8.5)') self%qibz(1,iqpt), self%qibz(3,iqpt), self%qibz(3,iqpt)
-          call wrtout([ab_out, std_out], msg)
+       write(msg,'(a,i8)')' Grid q points for sampling in the reciprocal space : ',self%nqibz
+       call wrtout([ab_out, std_out],msg,'COLL')
+       nkpout=self%nqibz
+       if(self%nqibz>80)then
+         call wrtout([ab_out, std_out],' greater than 80, so only write 20 of them ','COLL')
+         nkpout=20
+       end if
+       do iqpt=1,nkpout
+         write(msg, '(1x,i2,a2,3es16.8)' )iqpt,') ',self%qibz(1,iqpt),self%qibz(2,iqpt),self%qibz(3,iqpt)
+         call wrtout([ab_out, std_out], msg, 'COLL')
        end do
-
     end if
+    ABI_SFREE(new_shiftq)
+    ABI_SFREE(qbz)
   end subroutine prepare_qpoints
+
+  subroutine print_Rlist(self, dtset)
+    class(LatticeWannier), intent(inout):: self
+    type(anaddb_dataset_type) :: dtset
+    integer :: master=0
+    integer :: nRout, ii
+    character(len = 500):: msg
+
+      if (self%my_rank == master) then
+       write(msg, "(2a)")" LWF is transformed to the real space cells: ", trim(ltoa(dtset%lwf_ngqpt))
+       call wrtout([ab_out, std_out], msg)
+       write(msg, "((a, i0))")" Number of cells: ", self%nR
+       call wrtout([ab_out, std_out], msg)
+
+       write(msg,'(a,i8)')' R-vectors for cells in the real space : ',self%nR
+       call wrtout([ab_out, std_out],msg,'COLL')
+       nRout=self%nR
+       if(self%nR>80)then
+         call wrtout([ab_out, std_out],' greater than 80, so only write 20 of them ','COLL')
+         nRout=20
+       end if
+       do ii=1,nRout
+         write(msg, '(1x,i2,a2,3i8)' )ii,') ',self%Rlist(1,ii),self%Rlist(2,ii),self%Rlist(3,ii)
+         call wrtout([ab_out, std_out], msg, 'COLL')
+       end do
+    end if
+  end subroutine print_Rlist
+
 
 
 
   subroutine prepare_Rlist(self)
     class(LatticeWannier), intent(inout):: self
     integer:: qptrlatt(3), i
+    self%nR=1
     do i = 1, 3
        qptrlatt(i) = self%qptrlatt(i, i)
+       self%nR=self%nR*qptrlatt(i)
     end do
     call build_Rgrid(qptrlatt, self%Rlist)
   end subroutine prepare_Rlist
@@ -289,8 +329,6 @@ contains
        evalue = 0.0_dp
     end if
   end function freq_to_eigenval
-
-
 
   subroutine get_ifc_eigens(self, ifc, crystal)
     class(LatticeWannier), intent(inout):: self
@@ -328,12 +366,18 @@ contains
   subroutine write_lwf_nc(self, prefix)
     class(LatticeWannier), intent(inout):: self
     character(len=*), intent(in) ::  prefix
+    character(len=500) :: msg 
 #ifdef HAVE_NETCDF
     type(IOWannNC):: ncfile
     call self%scdm%create_ncfile(trim(prefix)//"_lwf.nc", ncfile)
     call self%scdm%write_wann_netcdf(ncfile, wannR_unit='dimensionless', HwannR_unit='Ha')
     !NCF_CHECK(self%crystal%ncwrite(ncfile%ncid))
     call self%scdm%close_ncfile(ncfile)
+    write(msg, '(a)')  ' LWF construction finished.' 
+    call wrtout([ab_out, std_out], msg) 
+    write(msg, '(a)')  ' LWF coefficients and Hamiltonian writen to file: '//trim(prefix)//"_lwf.nc ."
+    call wrtout([ab_out, std_out], msg) 
+
 #else
     ABI_UNUSED_A(self)
     ABI_UNUSED(prefix)
@@ -342,12 +386,13 @@ contains
   end subroutine write_lwf_nc
   
 
-  subroutine run_all(self, prefix)
+  subroutine run_all(self, prefix, dtset)
     class(LatticeWannier), intent(inout):: self
     character(len=*), intent(in) ::  prefix
+    type(anaddb_dataset_type), intent(in):: dtset
     call self%scdm%construct_wannier()
+    call self%print_Rlist(dtset)
     call self%write_lwf_nc(prefix = prefix)
-    call self%scdm%finalize()
   end subroutine run_all
 
   subroutine run_lattice_wannier(ifc, crystal, dtset, prefix, comm)
@@ -358,7 +403,7 @@ contains
     type(anaddb_dataset_type), intent(in):: dtset
     type(LatticeWannier):: lwf
     call lwf%initialize(ifc, crystal, dtset, comm)
-    call lwf%run_all(prefix)
+    call lwf%run_all(prefix, dtset)
     call lwf%finalize()
   end subroutine run_lattice_wannier
 
