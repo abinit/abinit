@@ -62,7 +62,7 @@ module m_wann_netcdf
   subroutine initialize(self, filename)
     class(IOwannNC), intent(inout):: self
     character(len=*), intent(in):: filename
-#ifdef HAVE_NETCDF
+#if defined HAVE_NETCDF
     integer:: ncerr
     ncerr = nf90_create(path = trim(filename), cmode = NF90_CLOBBER, ncid = self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when creating wannier netcdf  file")
@@ -73,6 +73,8 @@ module m_wann_netcdf
 
   subroutine write_header(self)
     class(IOWannNC), intent(inout):: self
+    !TODO what information should be written in the header?
+    ABI_UNUSED(self)
   end subroutine write_header
 
   subroutine write_wann( self,  nR, ndim, nwann, nbasis, Rlist, WannR, HwannR, wannR_unit,  HwannR_unit)
@@ -83,7 +85,7 @@ module m_wann_netcdf
     ! id of variables
     integer:: ncerr
 
-#ifdef HAVE_NETCDF
+#if defined HAVE_NETCDF
 
     ! define dimensions
     ncerr = nf90_def_dim(self%ncid, "ndim", ndim, self%d_ndim)
@@ -218,9 +220,9 @@ module m_wann_netcdf
     integer, intent(in):: natom
     integer, intent(in):: numbers(:)
     real(dp), intent(in):: cell(:,:), masses(:), xred(:, :), xcart(:,:)
-    integer:: ncerr
 
-#if defined_HAVE_NETCDF
+#if defined HAVE_NETCDF
+    integer:: ncerr
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error starting redef in wannier netcdf file")
     ncerr = nf90_def_dim(self%ncid, "three", 3, self%d_three)
@@ -271,10 +273,13 @@ module m_wann_netcdf
     NCF_CHECK_MSG(ncerr, "Error when writting atomic_xred in wannier netcdf file.")
 #else
     NETCDF_NOTENABLED_ERROR()
+    ABI_UNUSED(natom)
+    ABI_UNUSED(cell)
+    ABI_UNUSED(numbers)
+    ABI_UNUSED(masses)
+    ABI_UNUSED(xred)
+    ABI_UNUSED(xcart)
 #endif
-
-
-
   end subroutine write_atoms
 
 end module m_wann_netcdf
