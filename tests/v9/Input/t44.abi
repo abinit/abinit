@@ -1,4 +1,4 @@
-# test DDK response with nuclear dipole moment
+# test DDK and orbital magnetism response with nuclear dipole moment
 # Neon atom in a box
 
 ndtset 2
@@ -16,7 +16,8 @@ rfddk2 1
 rfdir2 1 1 1
 iscf2 -3
 getwfk2 -1
-
+orbmag2 3
+lambsig2 341.86D-6
 
 kptopt 0
 nkpt 1
@@ -30,6 +31,8 @@ enunit 2
 nstep 500
 ecut  5 # much too small for real studies
 pawecutdg 6 # much too small for real studies
+# ecut 30 # these values give converged orbital magnetism value
+# pawecutdg 60
 
 nband 4
 
