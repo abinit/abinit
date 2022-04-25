@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Apr 2022.
-- ( at 17h24 )
+.Starting date : Mon 25 Apr 2022.
+- ( at 10h20 )
   
 - input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -85,6 +85,8 @@ _ WF disk file :      0.267 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
               ixc     -101130
            jdtset        1    2
            kptopt           0
+          lambsig1     0.00000000E+00
+          lambsig2     3.41860000E-04
 P           mkmem           1
 P          mkqmem           1
 P          mk1mem           1
@@ -103,6 +105,8 @@ P          mk1mem           1
         optdriver2          1
         optforces           0
         optstress           0
+           orbmag1          0
+           orbmag2          3
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
          pawxcdev           0
@@ -607,6 +611,130 @@ tolerances: {tolwfr: 1.00E-20, }
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.4622609371E+00 Ha. Also 2DEtotal=   -0.125787598020E+02 eV
     (  non-var. 2DEtotal :   -4.6226093593E-01 Ha)
+ 
+====================================================
+ 
+ Orbital magnetic moment computed with DFPT derivative wavefunctions 
+ 
+ Orbital magnetic moment, Cartesian directions :
+ -1.14960731E-03  1.95440259E-17  3.47583618E-17
+ 
+ 
+ Integral of Berry curvature, Cartesian directions :
+  6.29862899E-09  2.25783572E-21 -8.90682662E-22
+ 
+ 
+ Orbital magnetic moment, term-by-term breakdown :
+       <du/dk|H+E|du/dk> :  -5.06972538E-04  5.34065567E-17 -3.51514461E-17
+     onsite <dp|D+Eq|dp> :  -7.29841178E-04  5.80852354E-19 -1.39039048E-17
+      onsite <dp|D+Eq|u> :  -2.42491313E-04 -1.36728753E-16  1.03948953E-16
+     onsite <du|D+Eq|du> :   4.26214197E-04  4.95276706E-17  3.31547394E-17
+                   dl Eq :   1.51843347E-05  2.49935697E-18 -2.44483192E-18
+                   dl vh :   2.26107434E-09 -2.12004995E-22  3.84371742E-21
+                dl vhnzc :   5.20870037E-05  7.81721191E-19 -3.20938029E-17
+                 dl An.p :  -3.00280534E-07 -4.30931727E-20  8.96590719E-20
+                dl p^2/2 :   1.90462852E-10  2.00630147E-17 -6.63189950E-18
+ <u|p>r_b p^2/2 r_g<p|u> :   2.69625010E-04  2.69947545E-17 -6.54550149E-18
+ <u|p>r_b A0.p r_g <p|u> :  -9.12549986E-05  2.46215689E-18 -5.66744715E-18
+               Lamb core :  -3.41860000E-04  0.00000000E+00  0.00000000E+00
+ 
+ 
+ Berry curvature, term-by-term breakdown :
+    <du/dk|du/dk> :   1.16431966E-08  3.14685246E-21 -1.66346340E-21
+  <u|dp><dp|u>Qij :  -4.67476493E-12 -7.37459705E-24  1.38513567E-23
+  <du|p><dp|u>Qij :  -1.31065275E-08 -1.07302423E-21 -4.85903939E-22
+  <du|p><p|du>Qij :   7.65009537E-09  1.88854161E-22  1.34931068E-21
+     <du/dk|u>dij :   1.16539221E-10  2.52793027E-24 -1.04477357E-22
+ 
+ 
+ Term-by-term breakdowns for each band :
+ 
+ 
+ band  1 of  4
+ Orbital magnetic moment :  -1.24299939E-04 -3.51154416E-17  1.37309335E-16
+       <du/dk|H+E|du/dk> :   1.77685090E-04  3.91641668E-17  1.32836891E-17
+    onsite <dp|D+Eq|dp>  :  -7.28880999E-04  1.89601893E-18 -1.68601160E-17
+      onsite <dp|D+Eq|u> :  -2.13511867E-04 -1.42297623E-16  1.06594242E-16
+     onsite <du|D+Eq|du> :   4.22455936E-04  5.43034598E-17  2.85302199E-17
+                   dl Eq :   2.56435791E-05  1.96506447E-18  7.01434807E-19
+                   dl vh :  -3.53498577E-08 -3.40237820E-21 -1.21403028E-21
+                dl vhnzc :   2.01378869E-04  1.55436666E-17  5.53718061E-18
+                 dl An.p :  -1.51075995E-07 -2.17501405E-20  6.43579421E-20
+                dl p^2/2 :  -7.90746278E-18 -5.66504221E-18 -5.40458830E-19
+ <u|p>r_b p^2/2 r_g<p|u> :   8.96523372E-26 -5.35539471E-27  5.10030593E-27
+ <u|p>r_b A0.p r_g <p|u> :  -8.88412137E-06  2.19560776E-28  6.54400233E-30
+         Berry curvature :   3.67109349E-09  1.76016705E-22  1.88718227E-21
+    <du/dk|du/dk> :   8.23230751E-09  9.52923315E-22  1.02638256E-21
+  <u|dp><dp|u>Qij :   1.05185243E-29 -3.00810785E-31 -1.79256524E-31
+  <du|p><p|du>Qij :  -1.28679298E-08 -1.06643028E-21 -4.60607431E-22
+  <du|p><p|du>Qij :   7.64801757E-09  2.39047705E-22  1.30338962E-21
+     <du/dk|u>dij :   6.58698175E-10  5.04759640E-23  1.80175250E-23
+ 
+ 
+ band  2 of  4
+ Orbital magnetic moment :   5.89707218E-01 -6.13605176E-11  1.08142259E-10
+       <du/dk|H+E|du/dk> :   2.26805872E-01 -2.36228816E-11  4.16283856E-11
+    onsite <dp|D+Eq|dp>  :  -3.68893392E-02  3.83513404E-12 -6.75408320E-12
+      onsite <dp|D+Eq|u> :   1.69956773E-02 -1.77202628E-12  3.12209258E-12
+     onsite <du|D+Eq|du> :  -1.53151281E-03  1.60642234E-13 -2.83041455E-13
+                   dl Eq :  -1.71389087E-03  1.78365533E-13 -3.13918295E-13
+                   dl vh :   2.28907125E-05 -2.37899617E-15  4.18790465E-15
+                dl vhnzc :  -2.03056095E-02  2.11588684E-12 -3.72171068E-12
+                 dl An.p :  -7.45762117E-08  3.86347708E-18 -6.80775571E-18
+                dl p^2/2 :   4.09938427E-10  9.39519393E-15  4.46294814E-15
+ <u|p>r_b p^2/2 r_g<p|u> :   4.06356164E-01 -4.22635155E-11  7.44574004E-11
+ <u|p>r_b A0.p r_g <p|u> :  -3.29599379E-05  8.57027733E-16 -1.50989028E-15
+         Berry curvature :  -6.41235165E-06  6.65474146E-16 -1.17241517E-15
+    <du/dk|du/dk> :  -6.23428689E-06  6.46951118E-16 -1.13981882E-15
+  <u|dp><dp|u>Qij :  -1.52006189E-07  1.58039192E-17 -2.78337716E-17
+  <du|p><p|du>Qij :   9.92994908E-08 -1.03362583E-17  1.82146934E-17
+  <du|p><p|du>Qij :  -6.08174437E-09  6.42216621E-19 -1.13047861E-18
+     <du/dk|u>dij :  -1.19276326E-07  1.24131506E-17 -2.18467941E-17
+ 
+ 
+ band  3 of  4
+ Orbital magnetic moment :  -2.29574510E-05  1.22556562E-10 -2.16075054E-10
+       <du/dk|H+E|du/dk> :  -6.48327440E-06  4.71874346E-11 -8.31783310E-11
+    onsite <dp|D+Eq|dp>  :  -7.24027543E-25 -7.66335166E-12  1.35083460E-11
+      onsite <dp|D+Eq|u> :   4.78139075E-21  3.53371796E-12 -6.22895881E-12
+     onsite <du|D+Eq|du> :  -5.25775392E-21 -3.18548541E-13  5.61511482E-13
+                   dl Eq :  -4.63457243E-23 -3.54958845E-13  6.25691332E-13
+                   dl vh :   1.76761819E-25  4.75144572E-15 -8.37546170E-15
+                dl vhnzc :  -1.02271546E-21 -4.20280149E-12  7.40832631E-12
+                 dl An.p :  -3.30492642E-27  7.47578222E-22 -1.85311777E-20
+                dl p^2/2 :   9.57809372E-26 -1.87683288E-14 -8.94001098E-15
+ <u|p>r_b p^2/2 r_g<p|u> :  -1.67087330E-23  8.43890869E-11 -1.48754321E-10
+ <u|p>r_b A0.p r_g <p|u> :  -1.64741766E-05 -4.07826961E-19 -2.22840617E-18
+         Berry curvature :   8.73041796E-11 -1.33237646E-15  2.34860550E-15
+    <du/dk|du/dk> :   8.73041796E-11 -1.29546641E-15  2.28354358E-15
+  <u|dp><dp|u>Qij :  -1.72797101E-30 -3.15775282E-17  5.56623497E-17
+  <du|p><p|du>Qij :   8.59651317E-26  2.06534233E-17 -3.64062525E-17
+  <du|p><p|du>Qij :  -7.61868532E-26 -1.26364308E-18  2.22743946E-18
+     <du/dk|u>dij :  -3.22790432E-27 -2.47223062E-17  4.35783836E-17
+ 
+ 
+ band  4 of  4
+ Orbital magnetic moment :  -5.90367708E-01 -6.11959894E-11  1.07932692E-10
+       <du/dk|H+E|du/dk> :  -2.27484047E-01 -2.35645388E-11  4.15498970E-11
+    onsite <dp|D+Eq|dp>  :   3.68883790E-02  3.82821630E-12 -6.75425980E-12
+      onsite <dp|D+Eq|u> :  -1.70246567E-02 -1.76168612E-12  3.10686359E-12
+     onsite <du|D+Eq|du> :   1.53527107E-03  1.57901531E-13 -2.78465403E-13
+                   dl Eq :   1.70343162E-03  1.76593846E-13 -3.11776183E-13
+                   dl vh :  -2.28531016E-05 -2.37244636E-15  4.18756212E-15
+                dl vhnzc :   2.01563176E-02  2.08689989E-12 -3.68665327E-12
+                 dl An.p :  -7.46283268E-08 -3.88556769E-18  6.85158802E-18
+                dl p^2/2 :  -2.19475567E-10  9.39886293E-15  4.47097140E-15
+ <u|p>r_b p^2/2 r_g<p|u> :  -4.06086539E-01 -4.21255445E-11  7.42969142E-11
+ <u|p>r_b A0.p r_g <p|u> :  -3.29367627E-05 -8.54157749E-16  1.50645124E-15
+         Berry curvature :   6.41489189E-06  6.66904399E-16 -1.17619310E-15
+    <du/dk|du/dk> :   6.23761047E-06  6.48517485E-16 -1.14372744E-15
+  <u|dp><dp|u>Qij :   1.52001514E-07  1.57736016E-17 -2.78285642E-17
+  <du|p><p|du>Qij :  -9.95380885E-08 -1.03171716E-17  1.81915338E-17
+  <du|p><p|du>Qij :   6.08382217E-09  6.21376266E-19 -1.09691493E-18
+     <du/dk|u>dij :   1.18734167E-07  1.23091077E-17 -2.17317120E-17
+ 
+====================================================
+ 
 ================================================================================
  
  ---- first-order wavefunction calculations are completed ----
@@ -634,6 +762,8 @@ tolerances: {tolwfr: 1.00E-20, }
               ixc     -101130
            jdtset        1    2
            kptopt           0
+          lambsig1     0.00000000E+00
+          lambsig2     3.41860000E-04
 P           mkmem           1
 P          mkqmem           1
 P          mk1mem           1
@@ -652,6 +782,8 @@ P          mk1mem           1
         optdriver2          1
         optforces           0
         optstress           0
+           orbmag1          0
+           orbmag2          3
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
          pawxcdev           0
@@ -776,10 +908,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         18.1  wall=         18.5
+- Proc.   0 individual time (sec): cpu=         19.1  wall=         19.4
  
 ================================================================================
  
  Calculation completed.
 .Delivered  24 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.1  wall=         18.5
++Overall time at end (sec) : cpu=         19.1  wall=         19.4
