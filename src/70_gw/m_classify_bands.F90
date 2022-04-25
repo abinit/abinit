@@ -160,7 +160,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  type(crystal_t),intent(in) :: Cryst
  type(pawang_type),intent(in) :: Pawang
  type(pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  type(ebands_t),target,intent(in) :: BSt
  type(esymm_t),intent(out) :: BSym
 !arrays

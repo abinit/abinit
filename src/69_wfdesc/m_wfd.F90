@@ -170,7 +170,7 @@ module m_wfd
 !! wave_t
 !!
 !! FUNCTION
-!!  Structure used to store a single wavefunction in G-space and, optionally, its r-space representation.
+!!  Object storing a single wavefunction in G-space and, optionally, its r-space representation.
 !!
 !! SOURCE
 
@@ -260,8 +260,8 @@ module m_wfd
 !! wfd_t
 !!
 !! FUNCTION
-!! Container gathering information on the set of wavefunctions treated by
-!! this node as well as their distribution inside the MPI communicator.
+!! Container gathering information on the set of wavefunctions treated by this node
+!! This is a base class without the bks_tab that is used in the GW/BSE code.
 !!
 !! SOURCE
 
@@ -354,7 +354,7 @@ module m_wfd
    ! Maps global (band, ik_ibz, spin) to index in the wave store.
    ! Set to 0 if the (b, k, s) state is not in the store.
 
-  integer(c_int8_t), private, allocatable :: bks_tab(:,:,:,:)
+  !integer(c_int8_t), private, allocatable :: bks_tab(:,:,:,:)
    ! bks_tab(mband,nkibz,nsppol,0:nproc-1)
    ! Global table used to keep trace of the distribution of the (b,k,s) states on each node inside Wfd%comm.
    ! 1 if the node has this state. 0 otherwise.
@@ -393,9 +393,6 @@ module m_wfd
 
    procedure :: free => wfd_free
    ! Destructor.
-
-   !procedure :: copy => wfd_copy
-   ! Copy routine
 
    procedure :: norm2 => wfd_norm2
    ! Compute <u(g)|u(g)> for the same k-point and spin.
@@ -445,32 +442,6 @@ module m_wfd
    procedure :: mybands => wfd_mybands
    ! Returns the list of band indices of the u(g) owned by this node at given (k,s).
 
-   procedure :: show_bkstab => wfd_show_bkstab
-   ! Print a table showing the distribution of the wavefunctions.
-
-   procedure :: distribute_bands => wfd_distribute_bands
-   ! Distribute a set of bands taking into account the distribution of the ug.
-
-   procedure :: iterator_bks => wfd_iterator_bks
-   ! Iterator used to loop over bands, k-points and spin indices
-
-   procedure :: bks_distrb => wfd_bks_distrb
-   ! Distribute bands, k-points and spins
-
-   procedure :: update_bkstab => wfd_update_bkstab
-   ! Update the internal table with info on the distribution of the ugs.
-
-   procedure :: rotate => wfd_rotate
-   ! Linear transformation of the wavefunctions stored in Wfd
-
-   procedure :: sanity_check => wfd_sanity_check
-   ! Debugging tool
-
-   procedure :: distribute_bbp => wfd_distribute_bbp
-   ! Distribute a set of (b,b') indices
-
-   procedure :: distribute_kb_kpbp => wfd_distribute_kb_kpbp
-
    procedure :: test_ortho => wfd_test_ortho
    ! Test the orthonormalization of the wavefunctions.
 
@@ -480,38 +451,98 @@ module m_wfd
 
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
-   ! TODO: Can be removed ?
    ! Used in phgamma only, see sigmaph for a more efficient version.
 
    procedure :: paw_get_aeur => wfd_paw_get_aeur
    ! Compute the AE PAW wavefunction in real space.
 
-   procedure :: plot_ur => wfd_plot_ur
-   ! Write u(r) to an external file in XSF format.
-
-   procedure :: write_wfk => wfd_write_wfk
-   ! Write u(g) to a WFK file.
-
    procedure :: read_wfk => wfd_read_wfk
    ! Read u(g) from the WFK file completing the initialization of the object.
-
-   procedure :: mkrho => wfd_mkrho
-   ! Calculate the charge density on the fine FFT grid in real space.
-
-   procedure :: get_nl_me => wfd_get_nl_me
-   ! Compute diagonal non-local pseudopotential matrix elements.
-
-   procedure :: pawrhoij => wfd_pawrhoij
 
    procedure :: dump_errinfo => wfd_dump_errinfo
 
  end type wfd_t
 
  public :: wfd_init                ! Main creation method.
- public :: wfd_copy
+
  !public :: wfd_get_socpert
  public :: test_charge
 !!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_wfd/wfdgw_t
+!! NAME
+!! wfdgw_t
+!!
+!! FUNCTION
+!!  This is a subclass class with the bks_tab used to parallelize the GW/BSE code.
+!!  Unfortunately, the size of the bks_tab increases with the number of procs
+!!  This design facilated the implementation of the MPI-algorithms but it leads to a big
+!!  scalability issue when nprocs/nband/nkibz is large.
+!!  New algorithms implemented outside of the GW/BSE code should use wfd_t.
+!!  wfdgw_t is kept to avoid breaking the GW/BSE code.
+!!
+!! SOURCE
+
+ type, extends (wfd_t), public :: wfdgw_t
+
+   integer(c_int8_t), private, allocatable :: bks_tab(:,:,:,:)
+    ! bks_tab(mband,nkibz,nsppol,0:nproc-1)
+    ! Global table used to keep trace of the distribution of the (b,k,s) states on each node inside Wfd%comm.
+    ! 1 if the node has this state. 0 otherwise.
+    ! A node owns a wavefunction if the corresponding ug is allocated AND computed.
+    ! If a node owns ur but not ug, or ug is just allocated then its entry in the table is zero.
+
+ contains
+
+   procedure :: show_bkstab => wfdgw_show_bkstab
+   ! Print a table showing the distribution of the wavefunctions.
+
+   procedure :: distribute_bands => wfdgw_distribute_bands
+   ! Distribute a set of bands taking into account the distribution of the ug.
+
+   procedure :: iterator_bks => wfdgw_iterator_bks
+   ! Iterator used to loop over bands, k-points and spin indices
+
+   procedure :: bks_distrb => wfdgw_bks_distrb
+   ! Distribute bands, k-points and spins
+
+   procedure :: update_bkstab => wfdgw_update_bkstab
+   ! Update the internal table with info on the distribution of the ugs.
+
+   procedure :: rotate => wfdgw_rotate
+   ! Linear transformation of the wavefunctions stored in Wfd
+
+   procedure :: sanity_check => wfdgw_sanity_check
+   ! Debugging tool
+
+   procedure :: distribute_bbp => wfdgw_distribute_bbp
+   ! Distribute a set of (b,b') indices
+
+   procedure :: distribute_kb_kpbp => wfdgw_distribute_kb_kpbp
+
+   procedure :: plot_ur => wfdgw_plot_ur
+   ! Write u(r) to an external file in XSF format.
+
+   procedure :: mkrho => wfdgw_mkrho
+   ! Calculate the charge density on the fine FFT grid in real space.
+
+   procedure :: pawrhoij => wfdgw_pawrhoij
+
+   procedure :: get_nl_me => wfdgw_get_nl_me
+
+   procedure :: rank_has_ug => wfdgw_rank_has_ug
+
+   procedure :: bands_of_rank => wfdgw_bands_of_rank
+
+   procedure :: write_wfk => wfdgw_write_wfk
+   ! Write u(g) to a WFK file.
+
+ end type wfdgw_t
+
+ public :: wfdgw_copy
+
 
 CONTAINS  !==============================================================================
 
@@ -856,7 +887,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  real(dp),intent(in) :: ecut,ecutsm,dilatmx
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !array
  integer,intent(in) :: ngfft(18),istwfk(nkibz),nband(nkibz,nsppol)
  integer,intent(in) :: nloalg(3)
@@ -881,8 +912,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  !integer :: my_band_list(Wfd%mband)
 
 !************************************************************************
-
- DBG_ENTER("COLL")
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -912,9 +941,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  Wfd%usepaw = Psps%usepaw
  Wfd%usewvl = 0 ! wavelets are not supported.
  Wfd%use_fnl_dir0der0 = .false.
- if(present(use_fnl_dir0der0)) then
-   Wfd%use_fnl_dir0der0 = use_fnl_dir0der0
- end if
+ if(present(use_fnl_dir0der0)) Wfd%use_fnl_dir0der0 = use_fnl_dir0der0
  Wfd%natom  = Cryst%natom
  Wfd%ntypat = Cryst%ntypat
  Wfd%lmnmax = Psps%lmnmax
@@ -1070,7 +1097,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! TODO: This one will require some memory if nkibz is large.
  ABI_MALLOC(Wfd%Kdata, (Wfd%nkibz))
- Wfd%Kdata%use_fnl_dir0der0=Wfd%use_fnl_dir0der0
+ Wfd%Kdata%use_fnl_dir0der0 = Wfd%use_fnl_dir0der0
 
  do ik_ibz=1,Wfd%nkibz
    kpoint  = Wfd%kibz(:,ik_ibz)
@@ -1081,22 +1108,23 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
    end if
  end do
 
- bks_size = one * wfd%mband * wfd%nkibz * wfd%nsppol * wfd%nproc
- write(msg,'(a,f8.1,a)')' Memory needed for bks_tab: ',one * bks_size * b2Mb,' [Mb] <<< MEM'
- call wrtout(std_out, msg)
+ select type (wfd)
+ class is (wfdgw_t)
+    ! Allocate the global table used to keep track of the bks distribution, including possible duplication.
+    bks_size = one * wfd%mband * wfd%nkibz * wfd%nsppol * wfd%nproc
+    write(msg,'(a,f8.1,a)')' Memory needed for bks_tab: ',one * bks_size * b2Mb,' [Mb] <<< MEM'
+    call wrtout(std_out, msg)
 
- !ABI_MALLOC(wfd%bks_ranks, (wfd%mband, nkibz, nsppol))
+    !ABI_MALLOC(wfd%bks_ranks, (wfd%mband, nkibz, nsppol))
 
- ! Allocate the global table used to keep trace of the distribution, including a possible duplication.
- ABI_MALLOC(Wfd%bks_tab, (Wfd%mband, nkibz, nsppol, 0:Wfd%nproc-1))
- Wfd%bks_tab = WFD_NOWAVE
+    ABI_MALLOC(Wfd%bks_tab, (Wfd%mband, nkibz, nsppol, 0:Wfd%nproc-1))
+    Wfd%bks_tab = WFD_NOWAVE
 
- ! Update the kbs table storing the distribution of the ug.
- call wfd%update_bkstab(show=-std_out)
+    ! Update the kbs table storing the distribution of the ug.
+    call wfd%update_bkstab(show=-std_out)
+ end select
 
  call cwtime_report(" wfd_init", cpu, wall, gflops)
-
- DBG_EXIT("COLL")
 
 end subroutine wfd_init
 !!***
@@ -1137,7 +1165,11 @@ subroutine wfd_free(Wfd)
  ABI_SFREE(Wfd%nlmn_sort)
  ABI_SFREE(Wfd%nlmn_type)
  ABI_SFREE(Wfd%npwarr)
- ABI_SFREE(Wfd%bks_tab)
+
+ select type (wfd)
+ class is (wfdgw_t)
+    ABI_SFREE(Wfd%bks_tab)
+ end select
 
  if (allocated(wfd%s)) then
    do is=1,size(wfd%s)
@@ -1175,9 +1207,9 @@ end subroutine wfd_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_copy
+!!****f* m_wfd/wfdgw_copy
 !! NAME
-!!  wfd_copy
+!!  wfdgw_copy
 !!
 !! FUNCTION
 !!  Copy a wfd_t data type.
@@ -1189,10 +1221,10 @@ end subroutine wfd_free
 !!
 !! SOURCE
 
-subroutine wfd_copy(Wfd_in, Wfd_out)
+subroutine wfdgw_copy(Wfd_in, Wfd_out)
 
 !Arguments ------------------------------------
- type(wfd_t),intent(inout) :: Wfd_in,Wfd_out
+ class(wfdgw_t),intent(inout) :: Wfd_in,Wfd_out
 
 !Local variables ------------------------------
 !scalars
@@ -1248,7 +1280,7 @@ subroutine wfd_copy(Wfd_in, Wfd_out)
  call alloc_copy(Wfd_in%keep_ur       ,Wfd_out%keep_ur)
 
  ! types
- if (size(Wfd_in%Kdata,DIM=1) .ne. size(Wfd_out%Kdata,DIM=1)) then
+ if (size(Wfd_in%Kdata,DIM=1) /= size(Wfd_out%Kdata,DIM=1)) then
    ABI_REMALLOC(Wfd_out%Kdata, (Wfd_out%nkibz))
  end if
 
@@ -1282,7 +1314,7 @@ subroutine wfd_copy(Wfd_in, Wfd_out)
 
  call copy_mpi_enreg(Wfd_in%MPI_enreg, Wfd_out%MPI_enreg)
 
-end subroutine wfd_copy
+end subroutine wfdgw_copy
 !!***
 
 !----------------------------------------------------------------------
@@ -2384,9 +2416,9 @@ end subroutine wfd_extract_cgblock
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_rank_has_ug
+!!****f* m_wfd/wfdgw_rank_has_ug
 !! NAME
-!!  wfd_rank_has_ug
+!!  wfdgw_rank_has_ug
 !!
 !! FUNCTION
 !!  This function is used to ask a particular processor whether it has a particular ug and with which status.
@@ -2405,13 +2437,13 @@ end subroutine wfd_extract_cgblock
 !!
 !! SOURCE
 
-function wfd_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
+function wfdgw_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin,rank
- logical :: wfd_rank_has_ug
- class(wfd_t),intent(in) :: Wfd
+ logical :: wfdgw_rank_has_ug
+ class(wfdgw_t),intent(in) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -2426,29 +2458,29 @@ function wfd_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
  bks_flag = WFD_STORED
 
  if (ALL(indices/= [0,0,0])) then
-   wfd_rank_has_ug = (Wfd%bks_tab(band,ik_ibz,spin,rank) == bks_flag); RETURN
+   wfdgw_rank_has_ug = (Wfd%bks_tab(band,ik_ibz,spin,rank) == bks_flag); RETURN
  else
    nzeros = COUNT(indices==0)
    if (nzeros==3) ABI_ERROR("All indices are zero!")
 
    if (band==0) then
-     if (nzeros==1) wfd_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,spin,rank)==bks_flag)
-     if (ik_ibz==0) wfd_rank_has_ug = ANY( Wfd%bks_tab(:,:,spin,rank)     ==bks_flag)
-     if (spin  ==0) wfd_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,:,rank)   ==bks_flag)
+     if (nzeros==1) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,spin,rank)==bks_flag)
+     if (ik_ibz==0) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(:,:,spin,rank)     ==bks_flag)
+     if (spin  ==0) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,:,rank)   ==bks_flag)
 
    else if (ik_ibz==0) then
-     if (nzeros==1) wfd_rank_has_ug = ANY( Wfd%bks_tab(band,:,spin,rank)==bks_flag)
-     if (band  ==0) wfd_rank_has_ug = ANY( Wfd%bks_tab(:,:,spin,rank)   ==bks_flag)
-     if (spin  ==0) wfd_rank_has_ug = ANY( Wfd%bks_tab(band,:,:,rank)   ==bks_flag)
+     if (nzeros==1) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(band,:,spin,rank)==bks_flag)
+     if (band  ==0) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(:,:,spin,rank)   ==bks_flag)
+     if (spin  ==0) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(band,:,:,rank)   ==bks_flag)
 
    else
-     if (nzeros==1) wfd_rank_has_ug = ANY( Wfd%bks_tab(band,ik_ibz,:,rank)==bks_flag)
-     if (ik_ibz==0) wfd_rank_has_ug = ANY( Wfd%bks_tab(band,:,:,rank)     ==bks_flag)
-     if (band  ==0) wfd_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,:,rank)   ==bks_flag)
+     if (nzeros==1) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(band,ik_ibz,:,rank)==bks_flag)
+     if (ik_ibz==0) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(band,:,:,rank)     ==bks_flag)
+     if (band  ==0) wfdgw_rank_has_ug = ANY( Wfd%bks_tab(:,ik_ibz,:,rank)   ==bks_flag)
    end if
  end if
 
-end function wfd_rank_has_ug
+end function wfdgw_rank_has_ug
 !!***
 
 !----------------------------------------------------------------------
@@ -2570,9 +2602,9 @@ end subroutine wfd_mybands
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_show_bkstab
+!!****f* m_wfd/wfdgw_show_bkstab
 !! NAME
-!!  wfd_show_bkstab
+!!  wfdgw_show_bkstab
 !!
 !! FUNCTION
 !!  Print a table showing the distribution of the wavefunctions.
@@ -2583,12 +2615,12 @@ end subroutine wfd_mybands
 !!
 !! SOURCE
 
-subroutine wfd_show_bkstab(Wfd, unit)
+subroutine wfdgw_show_bkstab(Wfd, unit)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: unit
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -2622,14 +2654,14 @@ subroutine wfd_show_bkstab(Wfd, unit)
    end do
  end do
 
-end subroutine wfd_show_bkstab
+end subroutine wfdgw_show_bkstab
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_bands_of_rank
+!!****f* m_wfd/wfdgw_bands_of_rank
 !! NAME
-!!  wfd_bands_of_rank
+!!  wfdgw_bands_of_rank
 !!
 !! FUNCTION
 !!  Return the list of band index of the ug owned by a given processor at given (k,s).
@@ -2651,13 +2683,13 @@ end subroutine wfd_show_bkstab
 !!
 !! SOURCE
 
-subroutine wfd_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
+subroutine wfdgw_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,rank
  integer,intent(out) :: how_manyb
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: rank_band_list(Wfd%mband)
 
@@ -2670,14 +2702,14 @@ subroutine wfd_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
 
  how_manyb=0; rank_band_list=-1
  do band=1,Wfd%nband(ik_ibz,spin)
-   it_has = wfd_rank_has_ug(Wfd, rank, band, ik_ibz, spin)
+   it_has = Wfd%rank_has_ug(rank, band, ik_ibz, spin)
    if (it_has) then
      how_manyb = how_manyb +1
      rank_band_list(how_manyb)=band
    end if
  end do
 
-end subroutine wfd_bands_of_rank
+end subroutine wfdgw_bands_of_rank
 !!***
 
 !----------------------------------------------------------------------
@@ -2793,28 +2825,28 @@ subroutine wfd_wave_free(Wfd, what, bks_mask)
             wave => wfd%s(is)%k(ik)%b(ib)
             call wave%free(what=my_what)
           end if
-          ! Update the associated flags if we release the G-space.
-          if ( firstchar(my_what, ["A", "G"])) Wfd%bks_tab(band, ik_ibz, spin, Wfd%my_rank) = WFD_NOWAVE
+          select type (wfd)
+          class is (wfdgw_t)
+            ! Update the associated flags if we release the G-space.
+            if ( firstchar(my_what, ["A", "G"])) Wfd%bks_tab(band, ik_ibz, spin, Wfd%my_rank) = WFD_NOWAVE
+          end select
         end if
      end do
    end do
  end do
-
- ! Reinit the MPI communicators.
- call wfd%set_mpicomm()
 
 end subroutine wfd_wave_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_who_has_ug
+!!****f* m_wfd/wfdgw_who_has_ug
 !! NAME
-!!  wfd_who_has_ug
+!!  wfdgw_who_has_ug
 !!
 !! FUNCTION
 !!  Return the number of processors having a particular (b,k,s) state as well as their MPI rank.
-!!  Warning: Wfd%bks_tab is supposed to be up-to-date (see wfd_update_bkstab).
+!!  Warning: Wfd%bks_tab is supposed to be up-to-date (see wfdgw_update_bkstab).
 !!
 !! INPUTS
 !!  band=the index of the band.
@@ -2832,13 +2864,13 @@ end subroutine wfd_wave_free
 !!
 !! SOURCE
 
-subroutine wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
+subroutine wfdgw_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  integer,intent(out) :: how_many
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: proc_ranks(Wfd%nproc)
 
@@ -2888,14 +2920,14 @@ subroutine wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
    ABI_ERROR(msg)
  end if
 
-end subroutine wfd_who_has_ug
+end subroutine wfdgw_who_has_ug
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_update_bkstab
+!!****f* m_wfd/wfdgw_update_bkstab
 !! NAME
-!!  wfd_update_bkstab
+!!  wfdgw_update_bkstab
 !!
 !! FUNCTION
 !!  This routine should be called by all the nodes before any MPI operation involving the object.
@@ -2913,12 +2945,12 @@ end subroutine wfd_who_has_ug
 !!
 !! SOURCE
 
-subroutine wfd_update_bkstab(Wfd, show)
+subroutine wfdgw_update_bkstab(Wfd, show)
 
 !Arguments ------------------------------------
 !scalars
+ class(wfdgw_t),intent(inout) :: Wfd
  integer,optional,intent(in) :: show
- class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -2981,14 +3013,14 @@ subroutine wfd_update_bkstab(Wfd, show)
    if (show >= 0) call wfd%show_bkstab(unit=show)
  end if
 
-end subroutine wfd_update_bkstab
+end subroutine wfdgw_update_bkstab
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_distribute_bands
+!!****f* m_wfd/wfdgw_distribute_bands
 !! NAME
-!!  wfd_distribute_bands
+!!  wfdgw_distribute_bands
 !!
 !! FUNCTION
 !!  Distribute a set of bands taking into account the distribution of the ug.
@@ -3012,13 +3044,13 @@ end subroutine wfd_update_bkstab
 !!
 !! SOURCE
 
-subroutine wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
+subroutine wfdgw_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
  integer,intent(out) :: my_nband
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: my_band_list(Wfd%mband)
  integer,optional,intent(inout) :: got(Wfd%nproc)
@@ -3042,7 +3074,7 @@ subroutine wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
      if (.not.bmask(band)) CYCLE
    end if
 
-   call wfd_who_has_ug(Wfd, band, ik_ibz, spin, how_many, proc_ranks)
+   call wfdgw_who_has_ug(Wfd, band, ik_ibz, spin, how_many, proc_ranks)
 
    if (how_many == 1) then
      ! I am the only one owing this band. Add it to list.
@@ -3067,14 +3099,14 @@ subroutine wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
 
  if (present(got)) got = get_more
 
-end subroutine wfd_distribute_bands
+end subroutine wfdgw_distribute_bands
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_rotate
+!!****f* m_wfd/wfdgw_rotate
 !! NAME
-!! wfd_rotate
+!! wfdgw_rotate
 !!
 !! FUNCTION
 !!  This routine performs a linear transformation of the wavefunctions stored in Wfd
@@ -3100,11 +3132,11 @@ end subroutine wfd_distribute_bands
 !! SOURCE
 !!
 
-subroutine wfd_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
+subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
 
 !Arguments ------------------------------------
 !scalars
- class(wfd_t),intent(inout) :: Wfd
+ class(wfdgw_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
  complex(dpc),target,intent(in) :: m_ks_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
@@ -3123,8 +3155,6 @@ subroutine wfd_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
 
 !************************************************************************
 
- DBG_ENTER("COLL")
-
  ! Update the distribution table, first.
  call wfd%update_bkstab()
 
@@ -3134,7 +3164,7 @@ subroutine wfd_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
      npw_k  = Wfd%npwarr(ik_ibz)
      istwf_k = Wfd%istwfk(ik_ibz)
      if (istwf_k /= 1) then
-       ABI_WARNING("wfd_rotate with istwfk /= 1")
+       ABI_WARNING("wfdgw_rotate with istwfk /= 1")
      end if
      umat_sk => m_ks_to_qp(:,:,ik_ibz,spin)
 
@@ -3202,16 +3232,14 @@ subroutine wfd_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  !call wfd%reset_ur_cprj()
  call xmpi_barrier(Wfd%comm)
 
- DBG_EXIT("COLL")
-
-end subroutine wfd_rotate
+end subroutine wfdgw_rotate
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_iterator_bks
+!!****f* m_wfd/wfdgw_iterator_bks
 !! NAME
-!!  wfd_iterator_bks
+!!  wfdgw_iterator_bks
 !!
 !! FUNCTION
 !!  Iterator used to loop over bands, k-points and spin indices
@@ -3228,11 +3256,11 @@ end subroutine wfd_rotate
 !!
 !! SOURCE
 
-type(iter2_t) function wfd_iterator_bks(Wfd, bks_mask) result(iter_bks)
+type(iter2_t) function wfdgw_iterator_bks(Wfd, bks_mask) result(iter_bks)
 
 !Arguments ------------------------------------
 !scalars
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
 !arrays
  logical,optional,intent(in) :: bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
 
@@ -3257,14 +3285,14 @@ type(iter2_t) function wfd_iterator_bks(Wfd, bks_mask) result(iter_bks)
    end do
  end do
 
-end function wfd_iterator_bks
+end function wfdgw_iterator_bks
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_bks_distrb
+!!****f* m_wfd/wfdgw_bks_distrb
 !! NAME
-!!  wfd_bks_distrb
+!!  wfdgw_bks_distrb
 !!
 !! FUNCTION
 !!  Build a local logical table indexed by bands, k-points and spin that defines
@@ -3284,11 +3312,11 @@ end function wfd_iterator_bks
 !!
 !! SOURCE
 
-subroutine wfd_bks_distrb(Wfd, bks_distrb, got, bks_mask)
+subroutine wfdgw_bks_distrb(Wfd, bks_distrb, got, bks_mask)
 
 !Arguments ------------------------------------
 !scalars
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: bks_distrb(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
  integer,optional,intent(inout) :: got(Wfd%nproc)
@@ -3316,7 +3344,7 @@ subroutine wfd_bks_distrb(Wfd, bks_distrb, got, bks_mask)
          if (.not.bks_mask(band, ik_ibz, spin)) CYCLE
        end if
 
-       call wfd_who_has_ug(Wfd, band, ik_ibz, spin, how_many, proc_ranks)
+       call wfdgw_who_has_ug(Wfd, band, ik_ibz, spin, how_many, proc_ranks)
 
        if (how_many == 1) then
          ! I am the only one owing this band. Add it to list.
@@ -3341,14 +3369,14 @@ subroutine wfd_bks_distrb(Wfd, bks_distrb, got, bks_mask)
 
  if (present(got)) got=get_more
 
-end subroutine wfd_bks_distrb
+end subroutine wfdgw_bks_distrb
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_sanity_check
+!!****f* m_wfd/wfdgw_sanity_check
 !! NAME
-!!  wfd_sanity_check
+!!  wfdgw_sanity_check
 !!
 !! FUNCTION
 !!  Debugging tool
@@ -3364,11 +3392,11 @@ end subroutine wfd_bks_distrb
 !!
 !! SOURCE
 
-subroutine wfd_sanity_check(Wfd)
+subroutine wfdgw_sanity_check(Wfd)
 
 !Arguments ------------------------------------
 !scalars
- class(wfd_t),intent(inout) :: Wfd
+ class(wfdgw_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -3421,7 +3449,7 @@ subroutine wfd_sanity_check(Wfd)
    ABI_ERROR("Sanity check failed. Check WFD_DEBUG")
  end if
 
-end subroutine wfd_sanity_check
+end subroutine wfdgw_sanity_check
 !!***
 
 !----------------------------------------------------------------------
@@ -3487,9 +3515,9 @@ end subroutine wfd_dump_errinfo
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_distribute_bbp
+!!****f* m_wfd/wfdgw_distribute_bbp
 !! NAME
-!!  wfd_distribute_bbp
+!!  wfdgw_distribute_bbp
 !!
 !! FUNCTION
 !!  Distribute a set of (b,b') indices taking into account the MPI distribution of the ug.
@@ -3517,13 +3545,13 @@ end subroutine wfd_dump_errinfo
 !!
 !! SOURCE
 
-subroutine wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
+subroutine wfdgw_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
  integer,intent(out) :: my_nbbp
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
  character(len=*),intent(in) :: allup
 !arrays
  integer,intent(out) :: bbp_distrb(Wfd%mband,Wfd%mband)
@@ -3536,7 +3564,7 @@ subroutine wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_m
 
 !************************************************************************
 
- ! Just a wrapper around wfd_distribute_kb_kpbp.
+ ! Just a wrapper around wfdgw_distribute_kb_kpbp.
  loc_got=0; if (present(got)) loc_got = got
 
  if (present(bbp_mask)) then
@@ -3545,14 +3573,14 @@ subroutine wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_m
    call wfd%distribute_kb_kpbp(ik_ibz,ik_ibz,spin,allup,my_nbbp,bbp_distrb,loc_got)
  end if
 
-end subroutine wfd_distribute_bbp
+end subroutine wfdgw_distribute_bbp
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_distribute_kb_kpbp
+!!****f* m_wfd/wfdgw_distribute_kb_kpbp
 !! NAME
-!!  wfd_distribute_kb_kpbp
+!!  wfdgw_distribute_kb_kpbp
 !!
 !! FUNCTION
 !!  This routines distributes as set of (b,b') indices taking into account the MPI distribution of the ug.
@@ -3581,13 +3609,13 @@ end subroutine wfd_distribute_bbp
 !!
 !! SOURCE
 
-subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
+subroutine wfdgw_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,ikp_ibz,spin
  integer,intent(out) :: my_nbbp
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
  character(len=*),intent(in) :: allup
 !arrays
  integer,intent(out) :: bbp_distrb(Wfd%mband,Wfd%mband)
@@ -3614,13 +3642,13 @@ subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_dist
 
  do rank=0,Wfd%nproc-1
 
-   call wfd_bands_of_rank(Wfd,rank,ik_ibz ,spin,howmany_b, rank_bandlist_k )
+   call wfd%bands_of_rank(rank,ik_ibz ,spin,howmany_b, rank_bandlist_k )
    do pcb1=1,howmany_b
      ib1 = rank_bandlist_k(pcb1)
      whocan_k(ib1,rank+1) = 1
    end do
 
-   call wfd_bands_of_rank(Wfd,rank,ikp_ibz,spin,howmany_bp,rank_bandlist_kp)
+   call wfd%bands_of_rank(rank,ikp_ibz,spin,howmany_bp,rank_bandlist_kp)
    do pcb2=1,howmany_bp
      ib2 = rank_bandlist_kp(pcb2)
      whocan_kp(ib2,rank+1) = 1
@@ -3679,7 +3707,7 @@ subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_dist
  my_nbbp = COUNT(bbp_distrb==Wfd%my_rank)
  if (present(got)) got=get_more
 
-end subroutine wfd_distribute_kb_kpbp
+end subroutine wfdgw_distribute_kb_kpbp
 !!***
 
 !----------------------------------------------------------------------
@@ -3839,8 +3867,6 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
 
 !************************************************************************
 
- DBG_ENTER("COLL")
-
  !@wfd_t
  if ( ALL(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
 
@@ -3895,8 +3921,6 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
      ABI_FREE(kg_k)
    end if
  end do
-
- DBG_EXIT("COLL")
 
 end subroutine wfd_change_ngfft
 !!***
@@ -4359,9 +4383,9 @@ end subroutine wfd_sym_ug_kg
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_write_wfk
+!!****f* m_wfd/wfdgw_write_wfk
 !! NAME
-!! wfd_write_wfk
+!! wfdgw_write_wfk
 !!
 !! FUNCTION
 !!  This routine writes the wavefunctions to the specified WFK file
@@ -4380,12 +4404,12 @@ end subroutine wfd_sym_ug_kg
 !!
 !! SOURCE
 
-subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
+subroutine wfdgw_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk_fname
- class(wfd_t),intent(in) :: Wfd
+ class(wfdgw_t),intent(in) :: Wfd
  type(Hdr_type),intent(in) :: Hdr
  type(ebands_t),intent(in) :: Bands
  logical,intent(in),optional :: wfknocheck
@@ -4406,7 +4430,6 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
 
 !************************************************************************
 
- DBG_ENTER("COLL")
  nocheck=.false.
  if(present(wfknocheck)) nocheck=wfknocheck
 
@@ -4448,7 +4471,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
-       call wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
+       call wfdgw_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
        if (how_many /= 1) then
          ierr = ierr + 1
          write(msg,'(a,3(i0,1x))')" Found replicated state (b,k,s) ",band,ik_ibz,spin
@@ -4544,9 +4567,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
 
  call cwtime_report(" write all cg" , cpu, wall, gflops)
 
- DBG_EXIT("COLL")
-
-end subroutine wfd_write_wfk
+end subroutine wfdgw_write_wfk
 !!***
 
 !----------------------------------------------------------------------
@@ -4606,8 +4627,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  character(len=6) :: tag_spin(2)
 
 !************************************************************************
-
- DBG_ENTER("COLL")
 
  ! Keep track of time spent in wfd_read_wfk
  call timab(300, 1, tsec)
@@ -4929,8 +4948,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
  call timab(300, 2, tsec)
 
- DBG_EXIT("COLL")
-
 end subroutine wfd_read_wfk
 !!***
 
@@ -5083,9 +5100,9 @@ end subroutine wfd_paw_get_aeur
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_plot_ur
+!!****f* m_wfd/wfdgw_plot_ur
 !! NAME
-!! wfd_plot_ur
+!! wfdgw_plot_ur
 !!
 !! FUNCTION
 !!  This routine writes the squared modulus of the wavefunctions in real space
@@ -5111,13 +5128,13 @@ end subroutine wfd_paw_get_aeur
 !!
 !! SOURCE
 
-subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
+subroutine wfdgw_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
- class(wfd_t),intent(inout) :: Wfd
+ class(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  logical,target,intent(in) :: bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
@@ -5143,8 +5160,6 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 !************************************************************************
 
  if (ALL(.not.bks_mask)) RETURN
-
- DBG_ENTER("COLL")
 
  call wrtout(std_out," Plotting |wfs|^2 ...")
  !
@@ -5262,16 +5277,14 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 
  ABI_FREE(my_plot_list)
 
- DBG_EXIT("COLL")
-
-end subroutine wfd_plot_ur
+end subroutine wfdgw_plot_ur
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_get_nl_me
+!!****f* m_wfd/wfdgw_get_nl_me
 !! NAME
-!! wfd_get_nl_me
+!! wfdgw_get_nl_me
 !!
 !! FUNCTION
 !!  Compute the non-local potential using the Wfd information.
@@ -5289,11 +5302,11 @@ end subroutine wfd_plot_ur
 !!
 !! SOURCE
 
-subroutine wfd_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
-implicit none
+subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
+
 !Arguments ------------------------------------
 !scalars
- class(wfd_t),target,intent(inout) :: Wfd
+ class(wfdgw_t),target,intent(inout) :: Wfd
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
 ! arrays
@@ -5322,7 +5335,6 @@ implicit none
 
 !************************************************************************
 
- DBG_ENTER("COLL")
  ABI_CHECK(Wfd%paral_kgb == 0, "paral_kgb not coded")
 
  natom = cryst%natom
@@ -5347,7 +5359,7 @@ implicit none
  nl_bks(:,:,:) = czero
 
  write(std_out,'(a)') " "
- call wrtout(std_out,sjoin(" Will calculate ",itoa(count(bks_mask))," <b,k,s|Vnl|b,k,s> matrix elements in wfd_get_nl_me."))
+ call wrtout(std_out,sjoin(" Will calculate ",itoa(count(bks_mask))," <b,k,s|Vnl|b,k,s> matrix elements in wfdgw_get_nl_me."))
  do ispin=1,Wfd%nsppol
    if (ispin/=1) then
      ABI_WARNING("In the construction of the non-local contribution, the case nsppol/=1 is not tested.")
@@ -5418,9 +5430,7 @@ implicit none
 
  call ham_k%free()
 
- DBG_EXIT("COLL")
-
-end subroutine wfd_get_nl_me
+end subroutine wfdgw_get_nl_me
 !!***
 
 !----------------------------------------------------------------------
@@ -5486,7 +5496,6 @@ end subroutine wfd_get_nl_me
 !!!
 !!!  !************************************************************************
 !!!
-!!!   DBG_ENTER("COLL")
 !!!   ABI_CHECK(wfd%paral_kgb == 0, "paral_kgb not coded")
 !!!
 !!!   natom = cryst%natom
@@ -5615,14 +5624,12 @@ end subroutine wfd_get_nl_me
 !!!     ABI_FREE(cprj)
 !!!   end if
 !!!
-!!!   DBG_EXIT("COLL")
-!!!
 !!!  end subroutine wfd_get_socpert
 !!***
 
-!!****f* m_wfd/wfd_mkrho
+!!****f* m_wfd/wfdgw_mkrho
 !! NAME
-!! wfd_mkrho
+!! wfdgw_mkrho
 !!
 !! FUNCTION
 !! Calculate the charge density on the fine FFT grid in real space.
@@ -5662,7 +5669,7 @@ end subroutine wfd_get_nl_me
 !!
 !! SOURCE
 
-subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
+subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
                      optcalc) ! optional arguments
 
 !Arguments ------------------------------------
@@ -5673,7 +5680,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
- class(wfd_t),intent(inout) :: Wfd
+ class(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: rhor(nfftf,Wfd%nspden)
@@ -5696,8 +5703,6 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  type(iter2_t) :: Iter_bks
 
 !*************************************************************************
-
- DBG_ENTER("COLL")
 
  ! Consistency check.
  ABI_CHECK(Wfd%nsppol == Bands%nsppol, "Mismatch in nsppol")
@@ -5728,7 +5733,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  end if
 
  ! Build the iterator that will distribute the states in an automated way.
- Iter_bks = wfd_iterator_bks(Wfd,bks_mask=ABS(Bands%occ)>=tol8)
+ Iter_bks = wfd%iterator_bks(bks_mask=ABS(Bands%occ)>=tol8)
 
  do alpha=1,nalpha
    do is=1,Wfd%nsppol
@@ -5868,9 +5873,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
    ABI_FREE(rhor_my)
  end if
 
- DBG_EXIT("COLL")
-
-end subroutine wfd_mkrho
+end subroutine wfdgw_mkrho
 !!***
 
 !----------------------------------------------------------------------
@@ -5973,9 +5976,9 @@ end if
 end subroutine test_charge
 !!***
 
-!!****f* m_wfd/wfd_pawrhoij
+!!****f* m_wfd/wfdgw_pawrhoij
 !! NAME
-!! wfd_pawrhoij
+!! wfdgw_pawrhoij
 !!
 !! FUNCTION
 !! Calculate the PAW quantities rhoij (augmentation occupancies)
@@ -6008,13 +6011,13 @@ end subroutine test_charge
 !!
 !! SOURCE
 
-subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
+subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: kptopt,pawprtvol
  type(crystal_t),intent(in) :: Cryst
- class(wfd_t),intent(inout) :: Wfd
+ class(wfdgw_t),intent(inout) :: Wfd
  type(ebands_t),intent(in) :: Bst
 !arrays
  type(pawrhoij_type),intent(inout) :: pawrhoij(Wfd%natom)
@@ -6035,8 +6038,6 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  logical :: bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
 
 !************************************************************************
-
- DBG_ENTER("COLL")
 
  ! Allocate temporary cwaveprj storage (sorted by atom type)
  ABI_MALLOC(cwaveprj,(Wfd%natom,Wfd%nspinor))
@@ -6107,7 +6108,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  ! Print info.
  if (abs(pawprtvol)>=1) then
    natinc=1; if(Wfd%natom>1.and.pawprtvol>=0) natinc=Wfd%natom-1
-   write(msg, '(7a)') ch10," PAW TEST:",ch10,' ========= Values of RHOIJ in wfd_pawrhoij =========',ch10
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,' ========= Values of RHOIJ in wfdgw_pawrhoij =========',ch10
    call wrtout(std_out,msg,'COLL')
    do iatom=1,Cryst%natom,natinc
      call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex_rhoij,&
@@ -6116,9 +6117,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
   end do
  end if
 
- DBG_EXIT("COLL")
-
-end subroutine wfd_pawrhoij
+end subroutine wfdgw_pawrhoij
 !!***
 
 end module m_wfd

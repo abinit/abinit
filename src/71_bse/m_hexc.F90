@@ -46,7 +46,7 @@ MODULE m_hexc
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
@@ -117,10 +117,10 @@ MODULE m_hexc
     type(ebands_t),pointer :: qp_bst => null()
     ! band structures of the full problem
 
-    type(wfd_t),pointer :: wfd_coarse => null()
+    type(wfdgw_t),pointer :: wfd_coarse => null()
     ! Wfd of the coarse problem
 
-    type(wfd_t),pointer :: wfd => null()
+    type(wfdgw_t),pointer :: wfd => null()
     ! wfd of the full problem
 
  !arrays
@@ -228,7 +228,7 @@ CONTAINS  !=====================================================================
 !! BS_files<excparam>=Files for BS
 !! Cryst<crystal_t>=Info on the crystalline structure
 !! Kmesh_coarse<kmesh_t>=Kmesh info
-!! Wfd_coarse<wfd_t>=Wavefunction descriptor
+!! Wfd_coarse<wfdgw_t>=Wavefunction descriptor
 !! KS_BSt<ebands_t>=Kohn-Sham band structure
 !! QP_BSt<ebands_t>=Quasi-Particle band structure
 !! comm=communicator
@@ -254,7 +254,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  type(excfiles),intent(in),target :: BS_files
  type(crystal_t),intent(in),target :: Cryst
  type(kmesh_t),intent(in),target :: Kmesh_coarse
- type(wfd_t),intent(in),target :: Wfd_coarse
+ type(wfdgw_t),intent(in),target :: Wfd_coarse
  type(ebands_t),intent(in),target :: KS_BSt, QP_BSt
 !arrays
 
@@ -415,7 +415,7 @@ end subroutine hexc_init
 !! Kmesh_dense<kmesh_t>=Kmesh info
 !! Vcp_dense<vcoul_t>=Dense mesh info about coulomb
 !! double_grid<double_grid_t>=Link between dense and coarse mesh
-!! Wfd_dense<wfd_t>=Wavefunction descriptor
+!! Wfd_dense<wfdgw_t>=Wavefunction descriptor
 !! KS_BSt_dense<ebands_t>=Kohn-Sham band structure
 !! QP_BSt_dense<ebands_t>=Quasi-Particle band structure
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
@@ -450,7 +450,7 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
  type(hexc_t),intent(inout) :: hexc
  type(hexc_interp_t),intent(inout) :: hexc_i
  type(double_grid_t),intent(in),target :: double_grid
- type(wfd_t),intent(inout),target :: Wfd_dense !, Wfd
+ type(wfdgw_t),intent(inout),target :: Wfd_dense !, Wfd
  type(kmesh_t),intent(in),target :: Kmesh_dense
  type(pseudopotential_type),intent(in) :: Psps
  type(vcoul_t),intent(in),target :: Vcp_dense
