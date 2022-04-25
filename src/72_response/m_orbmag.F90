@@ -86,8 +86,10 @@ module m_orbmag
   ! Bound methods:
 
   public :: orbmag_tt
+  public :: unitarity_checker
 
   private :: regauge
+  private :: regauge2
   private :: d2lr_p2
   private :: d2lr_Anp
   private :: dl_Anp
@@ -414,6 +416,7 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
 
    ! change cg1 from parallel to diagonal gauge
    call regauge(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
+   !call regauge2(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
 
    ! retrieve cprj_k
    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
@@ -667,6 +670,209 @@ subroutine orbmag_tt(cg,cg1,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,
 end subroutine orbmag_tt
 !!***
 
+!!****f* ABINIT/unitarity_checker
+!! NAME
+!! unitarity_checker
+!!
+!! FUNCTION
+!! print out U^\dagger U for matrix based on first order parallel to diagonal
+!! gauge transformation
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine unitarity_checker(dtset,eigen0,eigen1,mpi_enreg)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
+  real(dp),intent(in) :: eigen1(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: icol,ikpt,irow,me,nband_k
+  real(dp) :: ediff
+  complex(dpc) :: lam1
+  !arrays
+  complex(dpc),allocatable :: uu(:,:),utu(:,:)
+
+!--------------------------------------------------------------------
+
+  nband_k = dtset%mband
+  me = mpi_enreg%me_kpt
+
+  ABI_MALLOC(uu,(nband_k,nband_k))
+  ABI_MALLOC(utu,(nband_k,nband_k))
+
+  do ikpt = 1, dtset%nkpt
+    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+    uu=czero
+    do irow = 1, nband_k
+      do icol = 1, nband_k
+        if (irow == icol) then
+          uu(irow,icol) = cmplx(one,zero,KIND=dpc)
+        else
+          ediff = eigen0(nband_k*(ikpt-1)+icol) - eigen0(nband_k*(ikpt-1)+irow)
+          lam1 = cmplx(eigen1(2*nband_k*nband_k*(ikpt-1)+2*icol-1+(irow-1)*2*nband_k),&
+            &          eigen1(2*nband_k*nband_k*(ikpt-1)+2*icol  +(irow-1)*2*nband_k),KIND=dpc)
+          uu(irow,icol) = -lam1/ediff
+        end if
+      end do ! end loop over icol
+    end do ! end loop over irow
+ 
+    utu = czero
+    utu = MATMUL(CONJG(TRANSPOSE(uu)),uu)
+
+    write(std_out,'(a,i4)')'JWZ debug unitarity checker uu ikpt ',ikpt
+    do irow = 1, min(nband_k,4)
+      write(std_out,'(a,i4,8es16.8)')'JWZ debug irow ',irow,&
+        &real(uu(irow,1)),aimag(uu(irow,1)),real(uu(irow,2)),aimag(uu(irow,2)),&
+        &real(uu(irow,3)),aimag(uu(irow,3)),real(uu(irow,4)),aimag(uu(irow,4))
+    end do
+    write(std_out,'(a)')'  '
+
+
+    write(std_out,'(a,i4)')'JWZ debug unitarity checker utu ikpt ',ikpt
+    do irow = 1, min(nband_k,4)
+      write(std_out,'(a,i4,8es16.8)')'JWZ debug irow ',irow,&
+        &real(utu(irow,1)),aimag(utu(irow,1)),real(utu(irow,2)),aimag(utu(irow,2)),&
+        &real(utu(irow,3)),aimag(utu(irow,3)),real(utu(irow,4)),aimag(utu(irow,4))
+    end do
+    write(std_out,'(a)')'  '
+
+  end do ! end loop over ikpt
+
+  ABI_FREE(uu)
+  ABI_FREE(utu)
+
+end subroutine unitarity_checker
+!!***
+
+!!****f* ABINIT/regauge2
+!! NAME
+!! regauge2
+!!
+!! FUNCTION
+!! convert cg1 wavefunctions from parallel gauge to diagonal gauge
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine regauge2(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: mcgk,nband_k,npw_k
+
+  !arrays
+  real(dp),intent(in) :: cg_k(2,mcgk)
+  real(dp),intent(in) :: eig_k(nband_k),eig1_k(2*nband_k*nband_k,3)
+  real(dp),intent(inout) :: cg1_k(2,mcgk,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,cb,ce,icol,irow,rb,re
+  real(dp) :: ediff,lam1i,lam1r
+  !arrays
+  real(dp),allocatable :: cd0(:,:),cp1(:,:),u1(:,:,:,:)
+
+!--------------------------------------------------------------------
+
+  ABI_MALLOC(u1,(2,nband_k,nband_k,3))
+  ABI_MALLOC(cp1,(2,npw_k))
+  ABI_MALLOC(cd0,(2,npw_k))
+
+  u1 = zero
+
+  do adir = 1, 3
+    do irow = 1, nband_k
+      do icol = 1, nband_k
+        if (irow == icol) cycle
+        ediff = eig_k(icol) - eig_k(irow)
+        lam1r = eig1_k(2*icol-1+(irow-1)*nband_k*2,adir)
+        lam1i = eig1_k(2*icol+(irow-1)*nband_k*2,adir)
+        u1(1,irow,icol,adir) = -lam1r/ediff
+        u1(2,irow,icol,adir) = -lam1i/ediff
+      end do
+    end do
+  end do
+
+  do adir = 1, 3
+    do irow = 1, nband_k
+      rb = (irow-1)*npw_k+1
+      re = irow*npw_k
+      cp1(1:2,1:npw_k) = cg1_k(1:2,rb:re,adir)
+      do icol = 1, nband_k
+        if (icol == irow) cycle
+        cb = (icol-1)*npw_k+1
+        ce = icol*npw_k
+        cd0(1:2,1:npw_k) = cg_k(1:2,cb:ce)
+        cp1(1,1:npw_k) = cp1(1,1:npw_k) + &
+          & u1(1,irow,icol,adir)*cd0(1,1:npw_k) - &
+          & u1(2,irow,icol,adir)*cd0(2,1:npw_k)
+        cp1(2,1:npw_k) = cp1(2,1:npw_k) + &
+          & u1(2,irow,icol,adir)*cd0(1,1:npw_k) + &
+          & u1(1,irow,icol,adir)*cd0(2,1:npw_k)
+      end do
+      cg1_k(1,rb:re,adir) = cp1(1,1:npw_k)
+      cg1_k(2,rb:re,adir) = cp1(2,1:npw_k)
+    end do
+  end do
+
+  ABI_FREE(u1)
+  ABI_FREE(cp1)
+  ABI_FREE(cd0)
+
+end subroutine regauge2
+!!***
+
+
 !!****f* ABINIT/regauge
 !! NAME
 !! regauge
@@ -711,37 +917,31 @@ subroutine regauge(cg_k,cg1_k,eig_k,eig1_k,mcgk,nband_k,npw_k)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,ipw,mm,nn
-  real(dp) :: em0,en0
-  complex(dpc) :: cfac,en1
+  integer :: adir,mm,nn
+  real(dp) :: ediff,lam1i,lam1r
   !arrays
-  complex(dpc),allocatable :: c0d(:),c1p(:)
+  real(dp),allocatable :: c0d(:,:),c1p(:,:)
 
 !--------------------------------------------------------------------
-  ABI_MALLOC(c0d,(npw_k))
-  ABI_MALLOC(c1p,(npw_k))
+  ABI_MALLOC(c0d,(2,npw_k))
+  ABI_MALLOC(c1p,(2,npw_k))
 
   do adir = 1, 3
     do mm = 1, nband_k
-      em0 = eig_k(mm)
-      do ipw = 1, npw_k
-        c1p(ipw) = cmplx(cg1_k(1,(mm-1)*npw_k+ipw,adir),cg1_k(2,(mm-1)*npw_k+ipw,adir),KIND=dpc)
-      end do
+
+      c1p(1:2,1:npw_k) = cg1_k(1:2,(mm-1)*npw_k+1:mm*npw_k,adir)
 
       do nn = 1, nband_k
         if (nn == mm) cycle
-        en0 = eig_k(nn)
-        en1 = cmplx(eig1_k(2*nn-1 + (mm-1)*2*nband_k,adir),eig1_k(2*nn + (mm-1)*2*nband_k,adir),KIND=dpc)
-        cfac = en1/(en0 - em0)
-        do ipw = 1, npw_k
-          c0d(ipw) = cmplx(cg_k(1,(nn-1)*npw_k+ipw),cg_k(2,(nn-1)*npw_k+ipw),KIND=dpc)
-        end do
-        c1p = c1p - cfac*c0d
+        ediff = eig_k(nn) - eig_k(mm)
+        lam1r = -eig1_k(2*nn-1 + (mm-1)*2*nband_k,adir)/ediff
+        lam1i = -eig1_k(2*nn   + (mm-1)*2*nband_k,adir)/ediff
+        c0d(1:2,1:npw_k) = cg_k(1:2,(nn-1)*npw_k+1:nn*npw_k)
+        c1p(1,1:npw_k) = c1p(1,1:npw_k) + lam1r*c0d(1,1:npw_k) - lam1i*c0d(2,1:npw_k)
+        c1p(2,1:npw_k) = c1p(2,1:npw_k) + lam1r*c0d(2,1:npw_k) + lam1i*c0d(1,1:npw_k)
       end do
-      do ipw = 1, npw_k
-        cg1_k(1,(mm-1)*npw_k+ipw,adir) = real(c1p(ipw))
-        cg1_k(2,(mm-1)*npw_k+ipw,adir) = aimag(c1p(ipw))
-      end do
+
+      cg1_k(1:2,(mm-1)*npw_k+1:mm*npw_k,adir) = c1p(1:2,1:npw_k)
 
     end do
   end do ! adir
