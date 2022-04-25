@@ -542,6 +542,7 @@ module m_wfd
  end type wfdgw_t
 
  public :: wfdgw_copy
+!!***
 
 
 CONTAINS  !==============================================================================
@@ -4943,7 +4944,10 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ABI_FREE(all_countks)
 
  ! Update the kbs table storing the distribution of the ug and set the MPI communicators.
- !call wfd%update_bkstab()
+ select type (wfd)
+ class is (wfdgw_t)
+    call wfd%update_bkstab()
+ end select
 
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
  call timab(300, 2, tsec)
