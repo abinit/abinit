@@ -2458,6 +2458,21 @@ Typical use is for response to electric field ([[rfelfd]] = 3), but NOT for d/dk
 ),
 
 Variable(
+    abivarname="diago_apply_block_sliced",
+    varset="rlx",
+    vartype="integer",
+    topics=['Parallelism'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Inverse Overlapp block matrix applied in a sliced fashion",
+    added_in_version="9.7.2",
+    text=r"""
+In the Chebyshev-filtered subspace method, one need to apply inverse overlapp matrix.
+This parameter allows to choose between two variants, sliced (1) or non-sliced (0).
+""",
+),
+
+Variable(
     abivarname="diecut",
     varset="gstate",
     vartype="real",
