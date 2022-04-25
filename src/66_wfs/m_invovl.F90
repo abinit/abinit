@@ -441,14 +441,15 @@ end subroutine make_invovl
 !!
 !! SOURCE
 
- subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
+ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
 
  implicit none
 
  ! args
- type(gs_hamiltonian_type),intent(in) :: ham
- integer,intent(in) :: npw, ndat
- integer,intent(in) :: nspinor
+ type(gs_hamiltonian_type), intent(in) :: ham
+ integer, intent(in) :: npw, ndat
+ integer, intent(in) :: nspinor
+ integer, intent(in) :: block_sliced
  real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
  type(mpi_type) :: mpi_enreg
  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
@@ -469,8 +470,10 @@ end subroutine make_invovl
  integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
  type(invovl_kpt_type), pointer :: invovl
- integer, parameter :: timer_apply_inv_ovl_opernla = 1630, timer_apply_inv_ovl_opernlb = 1631, &
-&                      timer_apply_inv_ovl_inv_s = 1632
+ integer, parameter :: &
+      & timer_apply_inv_ovl_opernla = 1630, &
+      & timer_apply_inv_ovl_opernlb = 1631, &
+      & timer_apply_inv_ovl_inv_s   = 1632
 
 ! *************************************************************************
 
@@ -525,7 +528,7 @@ end subroutine make_invovl
 
  !multiply by S^1
  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
- call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
+ call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
  sm1proj = - sm1proj
  PtPsm1proj = - PtPsm1proj
  ABI_NVTX_END_RANGE()
@@ -595,7 +598,7 @@ end subroutine apply_invovl
 !!      dsymm,zhemm
 !!
 !! SOURCE
-subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj)
+subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj, block_sliced)
 
  use m_abi_linalg
  implicit none
@@ -606,6 +609,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
  real(dp), allocatable :: temp_proj(:,:,:)
  type(mpi_type), intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in) :: ham
+ integer, intent(in) :: block_sliced
 
  integer :: array_nlmntot_pp(mpi_enreg%nproc_fft)
  integer :: nlmntot_this_proc, ibeg, iend, ierr, i, nprojs
@@ -641,14 +645,14 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
  ABI_MALLOC(temp_proj, (cplx, nlmntot_this_proc,ndat))
 
  ! first guess for sm1proj
- call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, proj, sm1proj)
+ call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, proj, sm1proj, block_sliced)
 
  ! Iterative refinement
  ! TODO use a more efficient iterative algorithm than iterative refinement, use locking
  additional_steps_to_take = -1
  do i=1, 30
   ! compute resid = proj - (D^-1 + PtP)sm1proj
-   call apply_block(ham, cplx, invovl%inv_sij, nprojs, ndat, sm1proj, resid)
+   call apply_block(ham, cplx, invovl%inv_sij, nprojs, ndat, sm1proj, resid, block_sliced)
    temp_proj = sm1proj(:,ibeg:iend,:)
    call abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, invovl%gram_projs(:,:,1), nprojs, &
 &            temp_proj(:,:,1), nlmntot_this_proc, czero, PtPsm1proj(:,:,1), nprojs, x_cplx=cplx)
@@ -674,7 +678,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    previous_maxerr=maxerr
 
    ! add preconditionned residual
-   call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid)
+   call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, resid, precondresid, block_sliced)
    sm1proj = sm1proj + precondresid
  end do
 
@@ -707,7 +711,7 @@ end subroutine solve_inner
 !!      dsymm,zhemm
 !!
 !! SOURCE
-subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y)
+subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
   use m_abi_linalg
   implicit none
@@ -716,29 +720,57 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y)
   real(dp), intent(inout) :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
   type(gs_hamiltonian_type),intent(in) :: ham
   real(dp), intent(in) :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
+  integer, intent(in) :: block_sliced
 
   integer :: nlmn, shift, itypat, idat
 
 ! *************************************************************************
 
-  do idat = 1, ndat
-    shift = 1
-    do itypat=1, ham%ntypat
-      nlmn = count(ham%indlmn(3,:,itypat)>0)
-      !! apply mat to all atoms at once
-      ! perform natom multiplications of size nlmn
-      if(cplx == 2) then
-        call ZHEMM('L','U', nlmn, ham%nattyp(itypat), cone, mat(:, :, :, itypat), ham%lmnmax, &
-&                x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, czero, &
-&                y(:,shift:shift+nlmn*ham%nattyp(itypat)-1,idat), nlmn)
-      else
-        call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, mat(:, :, :, itypat), ham%lmnmax, &
-&                x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, zero, &
-&                y(:,shift:shift+nlmn*ham%nattyp(itypat)-1,idat), nlmn)
-      end if
-      shift = shift + ham%nattyp(itypat)*nlmn
-    end do
-  end do
+  if (block_sliced == 1) then
+
+     do idat = 1, ndat
+        shift = 1
+        do itypat=1, ham%ntypat
+           nlmn = count(ham%indlmn(3,:,itypat)>0)
+           !! apply mat to all atoms at once
+           ! perform natom multiplications of size nlmn
+           if(cplx == 2) then
+              call ZHEMM('L','U', nlmn, ham%nattyp(itypat), cone, &
+                   &  mat(:, :, :, itypat), ham%lmnmax, &
+                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, czero, &
+                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+           else
+              call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, &
+                   &  mat(:, :, :, itypat), ham%lmnmax, &
+                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, zero, &
+                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+           end if
+           shift = shift + nlmn*ham%nattyp(itypat)
+        end do
+     end do
+
+  else ! block_sliced = 0
+
+     shift = 1
+     do itypat=1, ham%ntypat
+        nlmn = count(ham%indlmn(3,:,itypat)>0)
+        !! apply mat to all atoms at once
+        ! perform natom multiplications of size nlmn
+        if(cplx == 2) then
+           call ZHEMM('L','U', nlmn, ham%nattyp(itypat)*ndat, cone, &
+                &  mat(:, :, :, itypat), ham%lmnmax, &
+                &  x(:, 1:nlmn*ham%nattyp(itypat), 1:ndat), nlmn, czero, &
+                &  y(:, 1:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn)
+        else
+           call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, &
+                &  mat(:, :, :, itypat), ham%lmnmax, &
+                &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn, zero, &
+                &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, 1:ndat), nlmn)
+        end if
+        shift = shift + ham%nattyp(itypat)*nlmn
+     end do
+
+  end if
 
 end subroutine apply_block
 !!***
