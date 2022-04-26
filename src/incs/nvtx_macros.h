@@ -1,4 +1,4 @@
-/*
+i/*
  * Copyright (C) 2008-2021 ABINIT Group
  *
  * This file is part of the ABINIT software package. For license information,
@@ -27,8 +27,7 @@
 #define ABI_NVTX_END_RANGE() call abi_nvtx_end_range()
 #define NVTX_INIT(value) call nvtx_init(value)
 #else
-#error
-#define ABI_NVTX_START_RANGE(name,id)
+#define ABI_NVTX_START_RANGE(id)
 #define ABI_NVTX_END_RANGE()
 #define NVTX_INIT(value)
 #endif
