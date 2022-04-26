@@ -300,27 +300,25 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !5) Some further initialization (Mainly for PAW)
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
- !Keep initial wavefunction in memory for occupations
- !and also associated cprojs
- if (dtset%prtocc > 0) then
-   ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
-   !FB Could we could we avoid this..?
-   tdks%cg0(:,:) = tdks%cg(:,:)
-   if (psps%usepaw ==1) then 
-      ncpgr=0
-      ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
-      call pawcprj_alloc(tdks%cprj0,ncpgr,tdks%dimcprj)
-      call ctocprj(tdks%atindx,tdks%cg0,1,tdks%cprj0,tdks%gmet,tdks%gprimd,0,0,0,         &
-                 & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
-                 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
-                 & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
-                 & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
-                 & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
-                 & tdks%ylm,tdks%ylmgr)
-   end if
-   ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   tdks%occ(:) = tdks%occ0(:)
+ !Keep initial wavefunction in memory
+ !and associated cprojs to compute occupations
+ ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
+ !FB Could we could we avoid this..?
+ tdks%cg0(:,:) = tdks%cg(:,:)
+ if (psps%usepaw ==1) then 
+    ncpgr=0
+    ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
+    call pawcprj_alloc(tdks%cprj0,ncpgr,tdks%dimcprj)
+    call ctocprj(tdks%atindx,tdks%cg0,1,tdks%cprj0,tdks%gmet,tdks%gprimd,0,0,0,         &
+               & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
+               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
+               & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
+               & tdks%npwarr,dtset%nspinor,dtset%nsppol,psps%ntypat,dtset%paral_kgb,    &
+               & tdks%ph1d,psps,tdks%rmet,dtset%typat,tdks%ucvol,tdks%unpaw,tdks%xred,  &
+               & tdks%ylm,tdks%ylmgr)
  end if
+ ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ tdks%occ(:) = tdks%occ0(:)
 
  !FB: That should be all for now but there were few more initializations in
  !g_state.F90 in particular related to electric field, might want to check it out

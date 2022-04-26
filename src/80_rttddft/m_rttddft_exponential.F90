@@ -27,18 +27,18 @@
 module m_rttddft_exponential
 
  use defs_basis
- use defs_abitypes,   only: MPI_type
+ use defs_abitypes,        only: MPI_type
 
- use m_bandfft_kpt,   only: bandfft_kpt, &
-                          & bandfft_kpt_get_ikpt
- use m_dtset,         only: dataset_type
- use m_getghc,        only: multithreaded_getghc
- use m_hamiltonian,   only: gs_hamiltonian_type
- use m_invovl,        only: apply_invovl
- use m_pawcprj,       only: pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_prep_kgb,      only: prep_getghc, prep_index_wavef_bandpp
- use m_rttddft,       only: rttddft_calc_eig, rttddft_calc_enl
- use m_xmpi,          only: xmpi_alltoallv
+ use m_bandfft_kpt,        only: bandfft_kpt, &
+                               & bandfft_kpt_get_ikpt
+ use m_dtset,              only: dataset_type
+ use m_getghc,             only: multithreaded_getghc
+ use m_hamiltonian,        only: gs_hamiltonian_type
+ use m_invovl,             only: apply_invovl
+ use m_pawcprj,            only: pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_prep_kgb,           only: prep_getghc, prep_index_wavef_bandpp
+ use m_rttddft_properties, only: rttddft_calc_eig, rttddft_calc_enl
+ use m_xmpi,               only: xmpi_alltoallv
 
  implicit none
 

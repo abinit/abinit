@@ -40,12 +40,12 @@ module m_rttddft_propagators
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
- use m_rttddft,             only: rttddft_init_hamiltonian, &
-                                & rttddft_calc_density, &
-                                & rttddft_calc_occ
+ use m_rttddft,             only: rttddft_init_hamiltonian
  use m_rttddft_exponential, only: rttddft_exp_taylor
+ use m_rttddft_properties,  only: rttddft_calc_density, &
+                                & rttddft_calc_occ,     &
+                                & rttddft_calc_kin
  use m_rttddft_tdks,        only: tdks_type
- use m_spacepar,            only: meanvalue_g
  use m_specialmsg,          only: wrtout
  use m_xmpi,                only: xmpi_comm_rank, xmpi_sum, xmpi_max
 
@@ -112,7 +112,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: bdtot_index
  integer                        :: calc_forces
  integer                        :: dimffnl
- integer                        :: displ
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: iband
  integer                        :: ibg, icg
@@ -131,7 +130,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: n4, n5, n6
  logical                        :: with_vxctau
  logical                        :: lcalc_properties
- real(dp)                       :: ar
  type(energies_type)            :: energies
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  !arrays
@@ -174,8 +172,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       lproperties(1) = .true.
       !Init to zero different energies
       call energies_init(energies)
-      tdks%eigen(:) = zero
-      tdks%occ(:) = zero
       energies%entropy=tdks%energies%entropy
       energies%e_corepsp=tdks%energies%e_corepsp
       energies%e_ewald=tdks%energies%e_ewald
@@ -186,12 +182,16 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          ABI_MALLOC(enl,(0))
       end if
       !other properties
-      if (mod(istep,dtset%td_prtstr) == 0) then 
-         ! eigenvalues
-         if (dtset%prteig /= 0 .or. dtset%prtdos /= 0) lproperties(3) = .true.
-         ! occupations
-         if (dtset%prtocc /= 0) lproperties(4) = .true.
+      ! eigenvalues
+      if (dtset%prteig /= 0 .or. dtset%prtdos /= 0) then 
+         if (mod(istep-1,dtset%td_prtstr) == 0) then 
+            lproperties(3) = .true.
+            tdks%eigen(:) = zero
+         end if
       end if
+      ! occupations
+      lproperties(4) = .true.
+      tdks%occ(:) = zero
    end if
  end if
 
@@ -344,55 +344,43 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          end if
       end if
 
-      ! Compute energy components if required
-      if (lproperties(1)) then
-         ! Kinetic energy
-         if (dtset%paral_kgb /= 1) then 
-            displ = 0
-         else
-            me_bandfft = xmpi_comm_rank(mpi_enreg%comm_bandspinorfft) 
-            displ = my_bandfft_kpt%rdispls(me_bandfft+1)
-         end if
-         do iband=1, nband_k
-            if (abs(tdks%occ0(bdtot_index+iband))>tol8) then 
-               shift = icg+npw_k*my_nspinor*(iband-1)
-               !FB: meanvalue_g does the mpi_sum over the bands inside, that's not very efficient since 
-               !FB: we could do it only once at the end
-               call meanvalue_g(ar,ham_k%kinpw_k(1+displ:displ+npw_k*my_nspinor),0,ham_k%istwf_k,mpi_enreg,npw_k,my_nspinor, &
-                              & tdks%cg(:,1+shift:shift+npw_k*my_nspinor),tdks%cg(:,1+shift:shift+npw_k*my_nspinor),0)
-               energies%e_kinetic = energies%e_kinetic + dtset%wtk(ikpt)*tdks%occ0(bdtot_index+iband)*ar
-            end if
-         end do
-      end if
-
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
       cg => tdks%cg(:,icg+1:icg+nband_k*npw_k*my_nspinor)
+      ! Compute properties "on-the-fly" if required
       if (lcalc_properties) then 
+         cg0 => tdks%cg0(:,icg+1:icg+nband_k*npw_k*my_nspinor)
+         occ => tdks%occ(bdtot_index+1:bdtot_index+nband_k)
+         occ0 => tdks%occ0(bdtot_index+1:bdtot_index+nband_k)
          if (dtset%paral_kgb /= 1) then 
             shift = bdtot_index
          else
             me_bandfft = xmpi_comm_rank(mpi_enreg%comm_band) 
             shift = bdtot_index+me_bandfft*mpi_enreg%bandpp
          end if
+         ! kinetic energy
+         if (lproperties(1)) then 
+            call rttddft_calc_kin(energies%e_kinetic,cg,dtset,ham_k,nband_k,npw_k,my_nspinor,occ0,dtset%wtk(ikpt),mpi_enreg,my_bandfft_kpt)
+         end if
+         ! for NL PSP part
          if (lproperties(2)) then
             ABI_MALLOC(enl,(mpi_enreg%bandpp))
             enl = zero
          end if
+         ! for eigenvalues
          if (lproperties(3)) then
             eig => tdks%eigen(1+shift:nband_k_mem+shift)
          end if
+         ! occupations
          if (lproperties(4)) then
             !note that occupations are computed at istep-1 like energies
-            cg0 => tdks%cg0(:,icg+1:icg+nband_k*npw_k*my_nspinor)
-            occ => tdks%occ(bdtot_index+1:bdtot_index+nband_k)
-            occ0 => tdks%occ0(bdtot_index+1:bdtot_index+nband_k)
             call rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg, &
                                 & nband_k,npw_k,my_nspinor,occ,occ0,tdks)
          end if
 
          !Propagate cg and compute the requested properties
          call rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,enl=enl,eig=eig)
-
+         
+         !Finish computing NL PSP part for NC PSP
          if (lproperties(2)) then
             do iband = 1, mpi_enreg%bandpp
                energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*tdks%occ0(shift+iband)*enl(iband)
@@ -431,7 +419,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
  !Keep the computed energies in memory
  if (lcalc_properties) then
-   call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kpt,ierr)
+   call xmpi_sum(energies%e_kinetic,mpi_enreg%comm_kptband,ierr)
    call xmpi_sum(energies%e_nlpsp_vfock,mpi_enreg%comm_kptband,ierr)
    call energies_copy(energies,tdks%energies)
    if (lproperties(3)) call xmpi_sum(tdks%eigen,mpi_enreg%comm_kptband,ierr)

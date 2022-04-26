@@ -869,7 +869,6 @@ contains
            !FB ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*blocksz))
            ABI_MALLOC(cwavef_tmp,(2,npw_nk*my_nspinor*cg_bandpp))
            !FB do ig=1,npw_nk*my_nspinor*blocksz
-           !FB-test print*, 'FB-test - before rearranging:', cwavef(1,:)
            do ig=1,npw_nk*my_nspinor*cg_bandpp
              cwavef_tmp(:,ig)=cwavef(:,ig)
            end do
@@ -885,7 +884,6 @@ contains
                end do
              end do
            end do
-           !FB-test print*, 'FB-test - after rearranging:', cwavef(1,:)
            ABI_FREE(cwavef_tmp)
          end if
        else
@@ -893,8 +891,6 @@ contains
            cwavef(1,ig)=cg(1,ig+icgb)
            cwavef(2,ig)=cg(2,ig+icgb)
          end do
-         !FB-test print*, 'FB-test - before rearranging:', cwavef(1,:)
-         !FB-test print*, 'FB-test - after rearranging:', cwavef(1,:)
        end if
 
 !      Compute scalar product of wavefunction with all NL projectors

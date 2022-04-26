@@ -108,8 +108,9 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
 ! *************************************************************************
 
+ !** Special case of first step
  if (istep == tdks%first_step) then
-    !Open energy file and write header if needed
+   ! Open energy file and writes header if needed
    if (open_file(tdks%fname_tdener, msg, newunit=tdks%tdener_unit, status='unknown', form='formatted') /= 0) then
       write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdener
       ABI_ERROR(msg)
@@ -134,11 +135,11 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 !!FB: This is most probably not needed
 !!Update header, with evolving variables
 !call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
-!                   & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                  &
+!                   & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                 &
 !                   & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
 !                   & mpi_atmtab=mpi_enreg%my_atmtab)
 
- !Write in output file
+ !** Writes some info in main output file
  write(msg,'(a,a,f14.6,a)') ch10, 'Total energy = ', tdks%etot,' Ha'
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
@@ -148,24 +149,28 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- !Writes in energy file
+ !** Writes in energy file
  write(msg,'(i8,f10.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
                                     & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
                                     & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
                                     & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
+ !** Writes additional optional properties
+ !Computed at previous step
+ if (mod(istep-1,dtset%td_prtstr) == 0) then
+    call prt_den(dtfil,dtset,istep-1,mpi_enreg,psps,tdks)
+    call prt_eig(dtfil,dtset,istep-1,mpi_enreg,tdks)
+    call prt_occ(dtfil,dtset,istep-1,mpi_enreg,tdks)
+ end if
  if (mod(istep,dtset%td_prtstr) == 0) then
-    call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-    call prt_eig(dtfil,dtset,istep,mpi_enreg,tdks)
-    call prt_occ(dtfil,dtset,istep,mpi_enreg,tdks)
     if (dtset%prtwf > 0) then
        call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
        call prt_restart(dtfil,istep,mpi_enreg,tdks)
     end if
  end if
 
- ! Special case of last step
+ !** Special case of last step
  me = xmpi_comm_rank(mpi_enreg%comm_world)
  if (istep == tdks%first_step+tdks%ntime-1) then
     if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then 
@@ -217,7 +222,7 @@ subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
  
  !Local variables-------------------------------
  !scalars
- integer,parameter     :: enunit=1, option=2
+ integer,parameter     :: enunit=0, option=3
  integer               :: me
  integer               :: spacecomm
  real(dp)              :: vxcavg_dum
@@ -292,7 +297,7 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
  integer              :: temp_unit
  !arrays
  character(len=fnlen) :: fname
- character(len=4)     :: ikpt_fmt
+ character(len=4)     :: ibnd_fmt, ikpt_fmt
  character(len=500)   :: msg
  character(len=24)    :: step_nb
 
@@ -300,7 +305,6 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
 ! *************************************************************************
 
  if (dtset%prtocc > 0) then 
-   
    me = xmpi_comm_rank(mpi_enreg%comm_cell)
    
    write(step_nb,*) istep
@@ -322,13 +326,25 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
            if(isppol==2)write(msg, '(2a)' ) ch10,' SPIN DOWN channel '
            call wrtout(temp_unit,msg)
         end if
-   
+        ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
+        if (nsppol==2.and.isppol==1) then
+          write(msg, '(a,'//ikpt_fmt//',2x,a)' ) &
+          'Occupation numbers for nkpt=',nkpt,'k points, SPIN UP:' 
+        else if (nsppol==2.and.isppol==2) then
+          write(msg, '(a,'//ikpt_fmt//',2x,a)' ) &
+             'Occupation numbers for nkpt=',nkpt,'k points, SPIN DOWN:' 
+        else
+          write(msg, '(a,'//ikpt_fmt//',2x,a)' ) &
+             'Occupation numbers for nkpt=',nkpt,'k points:' 
+        end if
+        call wrtout(temp_unit,msg)
         do ikpt=1,nkpt
            nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
-           ikpt_fmt="i5" ; if(nkpt>=10000)ikpt_fmt="i7" ; if(nkpt>=1000000)ikpt_fmt="i9"
-   
-           write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
-               & 'kpt',ikpt,' (',(dtset%kptns(ii,ikpt),ii=1,3),'), occupations='
+           ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
+           ibnd_fmt="i3" ; if(nband_k>=1000)ibnd_fmt="i6" ; if(nband_k>=1000000)ibnd_fmt="i9"
+           write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
+                    & ' kpt#',ikpt,', nband=',nband_k,', wtk=',dtset%wtk(ikpt)+tol10,', kpt=',&
+                    & dtset%kptns(1:3,ikpt)+tol10,' (reduced coord)'
            call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/6
               write(msg, '(1p,6e12.4)')(tdks%occ(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
