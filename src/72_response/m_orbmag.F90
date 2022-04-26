@@ -1492,7 +1492,7 @@ subroutine dl_vha(atindx,dlvh,dtset,gntselect,gprimd,lmn2max,my_lmax,&
   !scalars
   integer :: adir,bigl,biglm,bigm,gnt1,gnt2,gnt3,iat,iatom,il,ilm,ilmn,im,ir,itypat
   integer :: jlm,jlmn,klmn,kln
-  integer :: ll,llmm,llmmjlm,lm1b,max_ij_size,mm,msz,olmn,olm,oln
+  integer :: ll,llmm,llmmjlm,lm1b,max_ij_size,mm,msz,olmn,olm,oln,psz
   real(dp) :: cdij,cl,intg1,rg1,rg2,rg3,rr
   complex(dpc) :: cpre,rhomn
 
@@ -1512,22 +1512,25 @@ subroutine dl_vha(atindx,dlvh,dtset,gntselect,gprimd,lmn2max,my_lmax,&
  ABI_MALLOC(intg,(max_ij_size,max_ij_size,2*psps%mpsang,dtset%ntypat))
  do itypat = 1, dtset%ntypat
    msz = pawtab(itypat)%mesh_size
+   psz = size(pawtab(itypat)%phiphj(:,1))
    ABI_MALLOC(ff,(msz))
    ABI_MALLOC(fmnl,(msz))
    ABI_MALLOC(tfmnl,(msz))
    do oln = 1, pawtab(itypat)%ij_size
      do bigl = 0, pawtab(itypat)%l_size - 1
-       do ir=2,msz
+       do ir=2,psz
 
+         ff=zero
          rr=pawrad(itypat)%rad(ir)
          ff(2:ir) = pawtab(itypat)%phiphj(2:ir,oln)*pawrad(itypat)%rad(2:ir)**bigl/rr**(bigl+1)
-         ff(ir:msz) = pawtab(itypat)%phiphj(ir:msz,oln)*rr**bigl/pawrad(itypat)%rad(ir:msz)**(bigl+1)
+         ff(ir:psz) = pawtab(itypat)%phiphj(ir:psz,oln)*rr**bigl/pawrad(itypat)%rad(ir:psz)**(bigl+1)
          call pawrad_deducer0(ff,msz,pawrad(itypat))
          call simp_gen(intg1,ff,pawrad(itypat))
          fmnl(ir) = intg1
 
+         ff=zero
          ff(2:ir) = pawtab(itypat)%tphitphj(2:ir,oln)*pawrad(itypat)%rad(2:ir)**bigl/rr**(bigl+1)
-         ff(ir:msz) = pawtab(itypat)%tphitphj(ir:msz,oln)*rr**bigl/pawrad(itypat)%rad(ir:msz)**(bigl+1)
+         ff(ir:psz) = pawtab(itypat)%tphitphj(ir:psz,oln)*rr**bigl/pawrad(itypat)%rad(ir:psz)**(bigl+1)
          call pawrad_deducer0(ff,msz,pawrad(itypat))
          call simp_gen(intg1,ff,pawrad(itypat))
          tfmnl(ir) = intg1
@@ -1535,8 +1538,9 @@ subroutine dl_vha(atindx,dlvh,dtset,gntselect,gprimd,lmn2max,my_lmax,&
        end do ! end loop over ir
 
        do kln = 1, pawtab(itypat)%ij_size
-         ff(2:msz) = pawrad(itypat)%rad(2:msz)*pawtab(itypat)%phiphj(2:msz,kln)*fmnl(2:msz)
-         ff(2:msz) = ff(2:msz) - pawrad(itypat)%rad(2:msz)*pawtab(itypat)%tphitphj(2:msz,kln)*tfmnl(2:msz)
+         ff=zero
+         ff(2:psz) = pawrad(itypat)%rad(2:psz)*pawtab(itypat)%phiphj(2:psz,kln)*fmnl(2:psz)
+         ff(2:psz) = ff(2:psz) - pawrad(itypat)%rad(2:psz)*pawtab(itypat)%tphitphj(2:psz,kln)*tfmnl(2:psz)
          call pawrad_deducer0(ff,msz,pawrad(itypat))
          call simp_gen(intg1,ff,pawrad(itypat))
          intg(kln,oln,bigl+1,itypat) = intg1
@@ -1653,7 +1657,7 @@ subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,iat,itypat,klm,klmn,kln,lm1b,mesh_size
+  integer :: adir,gint,iat,itypat,klm,klmn,kln,lm1b,mesh_size,pwave_size
   real(dp) :: cdij,intg
   complex(dpc) :: cpre
 
@@ -1670,6 +1674,7 @@ subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab
  dlvhnzc=czero
  do itypat = 1, dtset%ntypat
    mesh_size=pawrad(itypat)%mesh_size
+   pwave_size=size(pawtab(itypat)%phiphj(:,1))
    ABI_MALLOC(ff,(mesh_size))
 
    do klmn=1, pawtab(itypat)%lmn2_size
@@ -1677,9 +1682,10 @@ subroutine dl_vhnzc(dlvhnzc,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab
      klm = pawtab(itypat)%indklmn(1,klmn)
      kln = pawtab(itypat)%indklmn(2,klmn)
 
-     ff(2:mesh_size) = pawtab(itypat)%phiphj(2:mesh_size,kln)*pawtab(itypat)%vhnzc(2:mesh_size)
-     ff(2:mesh_size) = ff(2:mesh_size) - pawtab(itypat)%tphitphj(2:mesh_size,kln)*pawtab(itypat)%vhtnzc(2:mesh_size)
-     ff(2:mesh_size) = ff(2:mesh_size)*pawrad(itypat)%rad(2:mesh_size)
+     ff = zero
+     ff(2:pwave_size) = pawtab(itypat)%phiphj(2:pwave_size,kln)*pawtab(itypat)%vhnzc(2:pwave_size)
+     ff(2:pwave_size) = ff(2:pwave_size) - pawtab(itypat)%tphitphj(2:pwave_size,kln)*pawtab(itypat)%vhtnzc(2:pwave_size)
+     ff(2:pwave_size) = ff(2:pwave_size)*pawrad(itypat)%rad(2:pwave_size)
      call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
      call simp_gen(intg,ff,pawrad(itypat))
 
@@ -1832,7 +1838,7 @@ subroutine dl_p2(dlp2,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,realg
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,gint,iat,itypat,ilmn,iln,jl,jlmn,jln,klm,klmn,lm1b,mesh_size,pmesh_size
+  integer :: adir,gint,iat,itypat,ilmn,iln,jl,jlmn,jln,klm,klmn,lm1b,mesh_size,pwave_size
   real(dp) :: c1m,intg
 
   !arrays
@@ -1847,7 +1853,7 @@ subroutine dl_p2(dlp2,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,realg
   do iat=1,dtset%natom
     itypat=dtset%typat(iat)
     mesh_size=pawrad(itypat)%mesh_size
-    pmesh_size=pawtab(itypat)%partialwave_mesh_size
+    pwave_size=size(pawtab(itypat)%phiphj(:,1))
     ABI_MALLOC(ff,(mesh_size))
     ABI_MALLOC(uj,(mesh_size))
     ABI_MALLOC(ujder,(mesh_size))
@@ -1862,17 +1868,18 @@ subroutine dl_p2(dlp2,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,realg
       jln = pawtab(itypat)%indlmn(5,jlmn)
       jl = pawtab(itypat)%indlmn(1,jlmn)
 
+      ff = zero
       uj = zero
-      uj(1:pmesh_size) = pawtab(itypat)%phi(1:pmesh_size,jln)
+      uj(1:pwave_size) = pawtab(itypat)%phi(1:pwave_size,jln)
       call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
-      ff(2:mesh_size) = pawrad(itypat)%rad(2:mesh_size)*pawtab(itypat)%phi(2:mesh_size,iln)*(uj2der(2:mesh_size)&
-        & - jl*(jl+1)*pawtab(itypat)%phi(2:mesh_size,jln)/pawrad(itypat)%rad(2:mesh_size)**2)
+      ff(2:pwave_size) = pawrad(itypat)%rad(2:pwave_size)*pawtab(itypat)%phi(2:pwave_size,iln)*(uj2der(2:pwave_size)&
+        & - jl*(jl+1)*pawtab(itypat)%phi(2:pwave_size,jln)/pawrad(itypat)%rad(2:pwave_size)**2)
       uj = zero
-      uj(1:pmesh_size) = pawtab(itypat)%tphi(1:pmesh_size,jln)
+      uj(1:pwave_size) = pawtab(itypat)%tphi(1:pwave_size,jln)
       call nderiv_gen(ujder,uj,pawrad(itypat),uj2der)
-      ff(2:mesh_size) = ff(2:mesh_size) - &
-        & (pawrad(itypat)%rad(2:mesh_size)*pawtab(itypat)%tphi(2:mesh_size,iln)*(uj2der(2:mesh_size)&
-        & - jl*(jl+1)*pawtab(itypat)%tphi(2:mesh_size,jln)/pawrad(itypat)%rad(2:mesh_size)**2))
+      ff(2:pwave_size) = ff(2:pwave_size) - &
+        & (pawrad(itypat)%rad(2:pwave_size)*pawtab(itypat)%tphi(2:pwave_size,iln)*(uj2der(2:pwave_size)&
+        & - jl*(jl+1)*pawtab(itypat)%tphi(2:pwave_size,jln)/pawrad(itypat)%rad(2:pwave_size)**2))
       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
       call simp_gen(intg,ff,pawrad(itypat))
 
@@ -1946,7 +1953,7 @@ subroutine dl_Anp(dlanp,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,rea
   !Local variables -------------------------
   !scalars
   integer :: adir,bigl,biglm,bigm,gint,iat,ilmn,il,ilm,ilml1b,itypat
-  integer :: jl,jlmn,jm,klmn,kln,l1b,ldir,mesh_size
+  integer :: jl,jlmn,jm,klmn,kln,l1b,ldir,mesh_size,pwave_size
   real(dp) :: a2,intg
   complex(dpc) :: cme,orbl_me
 
@@ -1963,14 +1970,17 @@ subroutine dl_Anp(dlanp,dtset,gntselect,gprimd,lmn2max,my_lmax,pawrad,pawtab,rea
   do iat=1,dtset%natom
     itypat=dtset%typat(iat)
     mesh_size=pawtab(itypat)%mesh_size
+    pwave_size=size(pawtab(itypat)%phiphj(:,1))
     ABI_MALLOC(ff,(mesh_size))
     do klmn=1, pawtab(itypat)%lmn2_size
       kln = pawtab(itypat)%indklmn(2,klmn) 
 
+      ff=zero
+
       ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r^2
-      ff(2:mesh_size) = (pawtab(itypat)%phiphj(2:mesh_size,kln)-&
-        &                pawtab(itypat)%tphitphj(2:mesh_size,kln))/&
-        &               pawrad(itypat)%rad(2:mesh_size)**2
+      ff(2:pwave_size) = (pawtab(itypat)%phiphj(2:pwave_size,kln)-&
+        &                pawtab(itypat)%tphitphj(2:pwave_size,kln))/&
+        &               pawrad(itypat)%rad(2:pwave_size)**2
       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
       call simp_gen(intg,ff,pawrad(itypat))
  
@@ -2061,7 +2071,7 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size
+  integer :: adir,iat,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size,pwave_size
   real(dp) :: intg
   complex(dpc) :: orbl_me
 
@@ -2074,6 +2084,7 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
   lr=czero
   do itypat=1,dtset%ntypat
     mesh_size=pawtab(itypat)%mesh_size
+    pwave_size=size(pawtab(itypat)%phiphj(:,1))
     ABI_MALLOC(ff,(mesh_size))
     do klmn=1, pawtab(itypat)%lmn2_size
 
@@ -2089,7 +2100,8 @@ subroutine d2lr_p2(dtset,gprimd,lmn2max,lr,pawrad,pawtab)
       if ( il == 0 ) cycle ! <00|L|00> = 0
 
       kln = pawtab(itypat)%indklmn(2,klmn) 
-      ff(1:mesh_size) = pawtab(itypat)%phiphj(1:mesh_size,kln)-pawtab(itypat)%tphitphj(1:mesh_size,kln)
+      ff=0
+      ff(2:pwave_size) = pawtab(itypat)%phiphj(2:pwave_size,kln)-pawtab(itypat)%tphitphj(2:pwave_size,kln)
       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
       call simp_gen(intg,ff,pawrad(itypat))
 
@@ -2255,7 +2267,7 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
   !scalars
   integer :: adir,bdir,gdir,gint_b,gint_g,iat,il,ilm,ilmn,itypat
   integer :: jl,jlmn,jlm,klmn,kln,lb,ldir,lg,ll,llp,lm1b,lm1g,llmm,llmmp
-  integer :: mesh_size,mm,mmp
+  integer :: mesh_size,mm,mmp,pwave_size
   real(dp) :: a2,eabg,intg,sij
   complex(dpc) :: cme,orbl_me
 
@@ -2274,13 +2286,15 @@ subroutine d2lr_Anp(dtset,gntselect,gprimd,lmn2_max,mpan,my_lmax,pawrad,pawtab,r
   do iat=1,dtset%natom
     itypat=dtset%typat(iat)
     mesh_size=pawtab(itypat)%mesh_size
+    pwave_size=size(pawtab(itypat)%phiphj(:,1))
     ABI_MALLOC(ff,(mesh_size))
     do klmn=1,pawtab(itypat)%lmn2_size
       kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
       ! compute integral of (phi_i*phi_j - tphi_i*tphi_j)/r
-      ff(2:mesh_size)=(pawtab(itypat)%phiphj(2:mesh_size,kln) - &
-           &           pawtab(itypat)%tphitphj(2:mesh_size,kln)) / &
-           &           pawrad(itypat)%rad(2:mesh_size)
+      ff = zero
+      ff(2:pwave_size)=(pawtab(itypat)%phiphj(2:pwave_size,kln) - &
+           &           pawtab(itypat)%tphitphj(2:pwave_size,kln)) / &
+           &           pawrad(itypat)%rad(2:pwave_size)
       call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
       call simp_gen(intg,ff,pawrad(itypat))
 
