@@ -975,6 +975,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
 
    if (nsppol2nspinor/=0)  then
+     ABI_FREE(indkk_eff)
      ABI_FREE(nband_eff)
    end if
 
