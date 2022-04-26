@@ -42,7 +42,7 @@ module m_sigc
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
- use m_wfd,           only : wfd_t, wave_t
+ use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
  use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
@@ -188,7 +188,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(pawang_type),intent(in) :: pawang
  type(sigparams_t),target,intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
- type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ type(wfdgw_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
  integer,intent(in) :: gwc_ngfft(18),rho_ngfft(18)
  real(dp),intent(in) :: rhor(rho_nfftot,Wfd%nspden)

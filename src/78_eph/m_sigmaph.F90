@@ -5147,7 +5147,11 @@ subroutine sigmaph_print(self, dtset, unt)
  if (.not. self%imag_only) write(unt, "(a)")" Both Real and Imaginary part of Sigma will be computed."
  write(unt,"(a)")sjoin(" Number of frequencies along the real axis:", itoa(self%nwr), &
     ", Step:", ftoa(self%wr_step * Ha_eV, fmt="f5.3"), "[eV]")
- write(unt, "(a)")sjoin(" Number of frequency in generalized Eliashberg functions:", itoa(self%phmesh_size))
+ if (dtset%prteliash /= 0) then
+   write(unt, "(a)")sjoin(" Number of frequency in generalized Eliashberg functions:", itoa(self%phmesh_size))
+ else
+   write(unt, "(a)")" Number of frequency in generalized Eliashberg functions: 0"
+ end if
  write(unt,"(a)")sjoin(" Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
  write(unt,"(a)")sjoin(" Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))

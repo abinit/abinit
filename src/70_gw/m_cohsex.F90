@@ -44,7 +44,7 @@ module m_cohsex
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
- use m_wfd,           only : wfd_t, wave_t
+ use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -174,7 +174,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  type(pawang_type),intent(in) :: pawang
  type(sigparams_t),target,intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: gwc_ngfft(18)
  complex(dpc),intent(out) :: sigcme_tmp(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Wfd%nsppol*Sigp%nsig_ab)
