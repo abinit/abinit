@@ -631,6 +631,8 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
    call wrtout(tdks%tdrestart_unit,msg)
    write(msg,'(a)') tdks%fname_tdener
    call wrtout(tdks%tdrestart_unit,msg)
+   write(msg,'(a)') tdks%fname_wfk0
+   call wrtout(tdks%tdrestart_unit,msg)
    fname = trim(dtfil%filnam_ds(4))//'_WFK_'//trim(adjustl(step_nb))
    write(msg,'(a)') fname
    call wrtout(tdks%tdrestart_unit,msg)

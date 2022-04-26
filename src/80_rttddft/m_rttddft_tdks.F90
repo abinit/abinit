@@ -121,7 +121,8 @@ module m_rttddft_tdks
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
    character(len=fnlen)             :: fname_tdener!Name of the TDENER file
-   character(len=fnlen)             :: fname_wfk   !Name of the input WFK file to use
+   character(len=fnlen)             :: fname_wfk0  !Name of the input WFK file containing 
+                                                   !the intial (t=0) wfs
    !arrays
    integer,allocatable              :: atindx(:)   !index table of atom ordered by type
    integer,allocatable              :: atindx1(:)  !nb of the atom for each index in atindx
@@ -240,6 +241,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  integer                     :: psp_gencond
  real(dp)                    :: ecut_eff
  character(len=500)          :: msg
+ character(len=fnlen)        :: fname_wfk
  type(extfpmd_type),pointer  :: extfpmd => null()
  !arrays
  real(dp),allocatable        :: doccde(:)
@@ -255,22 +257,25 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !FB: @MT Is this the proper way to read a file in abinit..?
  tdks%first_step = 1
  tdks%fname_tdener = dtfil%fnameabo_td_ener
- tdks%fname_wfk = dtfil%fnamewffk
+ tdks%fname_wfk0 = dtfil%fnamewffk
+ fname_wfk = dtfil%fnamewffk
  if (dtset%td_restart > 0) then
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
-         write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART needed for restarting the calculation.'
+         write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART needed to restart the calculation.'
          ABI_ERROR(msg)
       end if 
       read(tdks%tdrestart_unit,*) tdks%first_step
       tdks%first_step = tdks%first_step + 1
       read(tdks%tdrestart_unit,*) tdks%fname_tdener
-      read(tdks%tdrestart_unit,*) tdks%fname_wfk
+      read(tdks%tdrestart_unit,*) tdks%fname_wfk0
+      read(tdks%tdrestart_unit,*) fname_wfk
    end if
    !Send to all procs
    call xmpi_bcast(tdks%first_step,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(tdks%fname_tdener,0,mpi_enreg%comm_world,ierr)
-   call xmpi_bcast(tdks%fname_wfk,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_wfk0,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(fname_wfk,0,mpi_enreg%comm_world,ierr)
  else
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
@@ -281,7 +286,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  end if
 
  !3) Reads initial KS orbitals from file (calls inwffil)
- call read_wfk(dtfil,dtset,ecut_eff,mpi_enreg,tdks)
+ call read_wfk(dtfil,dtset,ecut_eff,fname_wfk,mpi_enreg,tdks)
  
  !4) Init occupation numbers
  ABI_MALLOC(tdks%occ0,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -289,7 +294,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !calc occupation number with metallic occupation using the previously read WF
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   call newocc(doccde,tdks%eigen,tdks%energies%entropy,tdks%energies%e_fermie, &
+   call newocc(doccde,tdks%eigen0,tdks%energies%entropy,tdks%energies%e_fermie, &
              & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
              & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
              & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,   &
@@ -301,10 +306,11 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !Keep initial wavefunction in memory
+ if (dtset%td_restart == 0) then
+   ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
+   tdks%cg0(:,:) = tdks%cg(:,:)
+ end if
  !and associated cprojs to compute occupations
- ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
- !FB Could we could we avoid this..?
- tdks%cg0(:,:) = tdks%cg(:,:)
  if (psps%usepaw ==1) then 
     ncpgr=0
     ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
@@ -318,7 +324,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
                & tdks%ylm,tdks%ylmgr)
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
- tdks%occ(:) = tdks%occ0(:)
 
  !FB: That should be all for now but there were few more initializations in
  !g_state.F90 in particular related to electric field, might want to check it out
@@ -1029,31 +1034,32 @@ end subroutine second_setup
 !! CHILDREN
 !!
 !! SOURCE
-subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
+subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- real(dp),                   intent(in)    :: ecut_eff
- type(datafiles_type),       intent(in)    :: dtfil
- type(dataset_type),         intent(inout) :: dtset
- type(MPI_type),             intent(inout) :: mpi_enreg
- type(tdks_type),            intent(inout) :: tdks
+ character(len=fnlen), intent(in)    :: fname_wfk
+ real(dp),             intent(in)    :: ecut_eff
+ type(datafiles_type), intent(in)    :: dtfil
+ type(dataset_type),   intent(inout) :: dtset
+ type(MPI_type),       intent(inout) :: mpi_enreg
+ type(tdks_type),      intent(inout) :: tdks
 
  !Local variables-------------------------------
  !scalars
- integer,parameter           :: formeig=0
- integer                     :: ask_accurate
- integer                     :: band
- integer                     :: cnt
- integer                     :: ierr, ikpt
- integer                     :: my_nspinor
- integer                     :: optorth
- integer                     :: spin
- type(wffile_type)           :: wff1, wffnow
+ integer,parameter  :: formeig=0
+ integer            :: ask_accurate
+ integer            :: band
+ integer            :: cnt
+ integer            :: ierr, ikpt
+ integer            :: my_nspinor
+ integer            :: optorth
+ integer            :: spin
+ type(wffile_type)  :: wff1, wffnow
  !arrays
- character(len=500)          :: msg
+ character(len=500) :: msg
 
 ! ***********************************************************************
 
@@ -1107,20 +1113,33 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, mpi_enreg, tdks)
  wff1%unwff=dtfil%unwff1
  optorth=0   !No need to orthogonalize the wfk
  tdks%hdr%rprimd=tdks%rprimd
- tdks%cg=0._dp
+ tdks%cg=zero
  call inwffil(ask_accurate,tdks%cg,dtset,dtset%ecut,ecut_eff,tdks%eigen,     &
             & dtset%exchn2n3d,formeig,tdks%hdr,1,dtset%istwfk,tdks%kg,       &
             & dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,dtset%mkmem,  &
             & mpi_enreg,dtset%mpw,dtset%nband,tdks%pawfgr%ngfft,dtset%nkpt,  &
             & tdks%npwarr,dtset%nsppol,dtset%nsym,dtset%occ_orig,optorth,    &
             & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
-            & dtfil%unwff1,tdks%fname_wfk,tdks%wvl)
+            & dtfil%unwff1,fname_wfk,tdks%wvl)
 
  !Close wff1
  call WffClose(wff1,ierr)
 
  !Keep initial eigenvalues in memory
  tdks%eigen0(:) = tdks%eigen(:)
+
+ !In case of restart also read wfk file containing wave functions at t=0
+ if (tdks%fname_wfk0 /= fname_wfk) then
+   ABI_MALLOC_OR_DIE(tdks%cg0,(2,tdks%mcg),ierr)
+   tdks%cg0=zero
+   call inwffil(ask_accurate,tdks%cg0,dtset,dtset%ecut,ecut_eff,tdks%eigen0,   &
+              & dtset%exchn2n3d,formeig,tdks%hdr,1,dtset%istwfk,tdks%kg,       &
+              & dtset%kptns,dtset%localrdwf,dtset%mband,tdks%mcg,dtset%mkmem,  &
+              & mpi_enreg,dtset%mpw,dtset%nband,tdks%pawfgr%ngfft,dtset%nkpt,  &
+              & tdks%npwarr,dtset%nsppol,dtset%nsym,dtset%occ_orig,optorth,    &
+              & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
+              & dtfil%unwff1,tdks%fname_wfk0,tdks%wvl)
+ end if
 
 end subroutine read_wfk
 !!***
