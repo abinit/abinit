@@ -251,15 +251,11 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       else
         AC_MSG_NOTICE([Cuda Nvtx: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
       fi
-    else
-       AC_MSG_NOTICE([CUDA 10 merde abi_gpu_cuda_version_10 = ${abi_gpu_cuda_version_10}])
     fi
 
     if test "${abi_gpu_nvtx_v3}" = "yes"; then
        AC_DEFINE([HAVE_GPU_NVTX_V3],1,[Define to 1 if you have library nvtx (v3).])
     fi
-
-    AM_CONDITIONAL(DO_BUILD_NVTX,[test "${abi_gpu_nvtx_v3}" = "yes"])
 
     if test -s "${abi_gpu_cuda_root}/SDK/C/lib/libcutil.a"; then
       if test "${GPU_LIBS}" = ""; then
@@ -300,6 +296,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
   AC_MSG_NOTICE([Cuda incs: ${abi_gpu_cuda_incs}])
   AC_MSG_NOTICE([Cuda libs: ${abi_gpu_cuda_libs}])
+
+  AC_SUBST(abi_gpu_nvtx_v3)
+
 ]) # _ABI_GPU_INIT_CUDA
 
 
@@ -467,4 +466,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
   # Inform Automake
   AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none"])
   AM_CONDITIONAL(DO_BUILD_46_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
+  AM_CONDITIONAL(DO_BUILD_NVTX,[test "${abi_gpu_nvtx_v3}" = "yes"])
+
 ]) # ABI_GPU_DETECT
