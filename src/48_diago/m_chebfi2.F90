@@ -45,7 +45,9 @@ module m_chebfi2
  use omp_lib
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
+#endif
 
  implicit none
 

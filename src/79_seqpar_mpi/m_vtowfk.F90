@@ -61,7 +61,10 @@ module m_vtowfk
  use m_cgprj,       only : cprj_rotate
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
+#endif
 
  implicit none
 
@@ -823,7 +826,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            nskip=nskip+1
          end if
        end do  ! Loop inside a block of bands
-       
+
 !      In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
      else if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
 
