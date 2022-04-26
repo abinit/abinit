@@ -1,4 +1,4 @@
-i/*
+/*
  * Copyright (C) 2008-2021 ABINIT Group
  *
  * This file is part of the ABINIT software package. For license information,
