@@ -26,21 +26,21 @@
 module m_rttddft_driver
 
  use defs_basis
- use defs_abitypes,       only: MPI_type
- use defs_datatypes,      only: pseudopotential_type
+ use defs_abitypes,        only: MPI_type
+ use defs_datatypes,       only: pseudopotential_type
 
- use m_dtfil,             only: datafiles_type
- use m_dtset,             only: dataset_type
- use m_pawang,            only: pawang_type
- use m_pawrad,            only: pawrad_type
- use m_pawtab,            only: pawtab_type
- use m_rttddft,           only: rttddft_calc_density, &
-                              & rttddft_calc_etot 
- use m_rttddft_output,    only: rttddft_output
- use m_rttddft_tdks,      only: tdks_type
- use m_rttddft_propagate, only: rttddft_propagate_ele
- use m_specialmsg,        only: wrtout
- use m_time,              only: cwtime
+ use m_dtfil,              only: datafiles_type
+ use m_dtset,              only: dataset_type
+ use m_pawang,             only: pawang_type
+ use m_pawrad,             only: pawrad_type
+ use m_pawtab,             only: pawtab_type
+ use m_rttddft_output,     only: rttddft_output
+ use m_rttddft_tdks,       only: tdks_type
+ use m_rttddft_propagate,  only: rttddft_propagate_ele
+ use m_rttddft_properties, only: rttddft_calc_density, &
+                               & rttddft_calc_etot
+ use m_specialmsg,         only: wrtout
+ use m_time,               only: cwtime
 
  implicit none
 
@@ -144,7 +144,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
    !Compute total energy at time t-dt
-   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot)
+   call rttddft_calc_etot(dtset,tdks%energies,tdks%etot,tdks%occ)
 
    !Compute new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
