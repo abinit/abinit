@@ -51,8 +51,8 @@ module m_fstab
 !! fstab_t
 !!
 !! FUNCTION
-!!  Tables with the correspondence between points of the Fermi surface (FS) and the k-points in the
-!!  IBZ (k-points found in ebands_t).
+!!  Tables with the correspondence between k-points of the Fermi surface (FS) and k-points
+!!  in the IBZ (i.e. the k-points found in ebands_t).
 !!  We use `nsppol` fstab_t objects to account for spin polarization.
 !!
 !! SOURCE
@@ -66,7 +66,7 @@ module m_fstab
     ! Number of k-points on the Fermi-surface in the full BZ.
 
    integer :: nktot
-    ! Total number of k-points in the initial mesh.
+    ! Total number of k-points in the initial mesh. Used to compute integrals in the BZ.
 
    integer :: nkibz
     ! Number of points in the IBZ
@@ -81,14 +81,18 @@ module m_fstab
 
    integer :: eph_intmeth
    ! Integration method.
-   ! 1 for gaussian, 2 for tetrahedra, -2 for optmized tetrahedron
+   ! 1 for gaussian,
+   ! |2| for tetrahedra.
+   !     2 for the optimized tetrahedron method.
+   !    -2 for the linear tetrahedron method.
+   !
 
    integer :: nene
    ! Number of chemical potential values used for inelastic integration
 
    real(dp) :: eph_fsmear
    ! Gaussian broadening. Negative value activates adaptive gaussian broadening.
-   ! https://journals.aps.org/prb/pdf/10.1103/PhysRevB.92.075405
+   ! See https://journals.aps.org/prb/pdf/10.1103/PhysRevB.92.075405
 
    real(dp) :: min_smear = tol9
    ! Used for the adaptive gaussian broadening: use min_smear if the broadening computed from the group velocity
@@ -134,7 +138,7 @@ module m_fstab
    real(dp),allocatable :: vk(:,:), vkq(:,:)
    ! (3, mnb)
    ! Velocities in cartesian coordinates. Used to implement the adaptive gaussian broadening
-   ! Values are filled by call (e.g. phgamma) inside the loop over k-points.
+   ! Values are filled by the caller (e.g. phgamma) inside the loop over k-points.
 
    real(dp),allocatable :: tetra_wtk(:,:)
    ! (maxnb, nkibz)
@@ -271,7 +275,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,dksqmax,cpu,wall,gflops
  logical :: inwin
  character(len=80) :: errstr
- character(len=500) :: msg
+ character(len=5000) :: msg
  type(fstab_t),pointer :: fs
  type(htetra_t) :: tetra
  type(krank_t) :: krank
@@ -283,7 +287,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
 
 ! *************************************************************************
 
- !@fstab_t
  call cwtime(cpu, wall, gflops, "start")
 
  if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
@@ -330,7 +333,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    ABI_ERROR(msg)
  end if
 
- call cwtime_report(" fstab_init%listkk", cpu, wall, gflops)
+ call cwtime_report(" fstab_init%krank", cpu, wall, gflops)
 
  ABI_MALLOC(full2ebands, (6, nkbz))
  full2ebands = 0
@@ -693,7 +696,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !scalars
  integer :: my_unt,my_prtvol,spin
  class(fstab_t),pointer :: fs
- character(len=500) :: msg
+ character(len=5000) :: msg
 
 ! *************************************************************************
 

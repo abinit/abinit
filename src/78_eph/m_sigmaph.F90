@@ -3613,7 +3613,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  integer,intent(in) :: comm
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
- character(len=5000),intent(out) :: msg
+ character(len=500),intent(out) :: msg
  real(dp), optional, intent(out) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
  integer,optional, intent(out) :: sigma_ngkpt(3)
