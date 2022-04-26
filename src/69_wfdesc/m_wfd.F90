@@ -540,7 +540,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut,kg_k)
+subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut, kg_k)
 
 !Arguments ------------------------------------
 !scalars
