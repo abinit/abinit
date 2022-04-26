@@ -438,8 +438,8 @@ subroutine rttddft_calc_kin(kin,cg,dtset,ham_k,nband,npw,nspinor,occ0,wk,mpi_enr
       shift = npw*nspinor*(iband-1)
       !FB: meanvalue_g does the mpi_sum over the bands inside, that's not very efficient since 
       !FB: we could do it only once at the end
-      !FB: TODO: From Lucas: the OMP part seems to slow down the calculations in meanvalue_g
-      !FB: TODO: It maybe useful not to use meanvalue_g at all here
+      !FB: From Lucas: meanvalue_g seems slow
+      !FB: It maybe useful not to use meanvalue_g at all here
       !call meanvalue_g(ar,ham_k%kinpw_k(1+displ:displ+npw*nspinor),0,1,mpi_enreg,npw,nspinor, &
       !               & cg(:,1+shift:shift+npw*nspinor),cg(:,1+shift:shift+npw*nspinor),0)
       ar = zero

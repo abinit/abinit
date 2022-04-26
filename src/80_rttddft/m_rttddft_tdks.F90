@@ -71,6 +71,7 @@ module m_rttddft_tdks
  use m_paw_tools,        only: chkpawovlp
  use m_pspini,           only: pspini
  use m_spacepar,         only: setsym
+ use m_specialmsg,       only: wrtout
  use m_symtk,            only: symmetrize_xred
  use m_wffile,           only: wffile_type, WffClose
  use m_xmpi,             only: xmpi_bcast, xmpi_sum
@@ -1110,6 +1111,13 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
  ask_accurate=0
 
  !Actually read the intial KS orbitals here
+ if (dtset%td_restart /= 1) then
+   write(msg,'(3a)') ch10,'-------------   Reading initial wavefunctions   -------------',ch10
+ else
+   write(msg,'(3a)') ch10,'-------------   Reading wavefunctions for restart  -------------',ch10
+ end if
+ call wrtout(ab_out,msg)
+ if (do_write_log) call wrtout(std_out,msg)
  wff1%unwff=dtfil%unwff1
  optorth=0   !No need to orthogonalize the wfk
  tdks%hdr%rprimd=tdks%rprimd
@@ -1129,8 +1137,11 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
  tdks%eigen0(:) = tdks%eigen(:)
 
  !In case of restart also read wfk file containing wave functions at t=0
- if (tdks%fname_wfk0 /= fname_wfk) then
+ if (dtset%td_restart == 1 .and. tdks%fname_wfk0 /= fname_wfk) then
+   write(msg,'(3a)') ch10,'-------------   Reading initial wavefunctions   -------------',ch10
    ABI_MALLOC_OR_DIE(tdks%cg0,(2,tdks%mcg),ierr)
+   call wrtout(ab_out,msg)
+   if (do_write_log) call wrtout(std_out,msg)
    tdks%cg0=zero
    call inwffil(ask_accurate,tdks%cg0,dtset,dtset%ecut,ecut_eff,tdks%eigen0,   &
               & dtset%exchn2n3d,formeig,tdks%hdr,1,dtset%istwfk,tdks%kg,       &
