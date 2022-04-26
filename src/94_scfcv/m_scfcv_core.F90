@@ -122,7 +122,10 @@ module m_scfcv_core
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
+#endif
 
  implicit none
 

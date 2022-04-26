@@ -53,7 +53,9 @@ module m_chebfiwf
  use m_xg
  use m_xgTransposer
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
+#endif
 
  use iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
 

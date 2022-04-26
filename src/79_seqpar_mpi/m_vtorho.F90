@@ -97,7 +97,9 @@ module m_vtorho
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
+#endif
 
  implicit none
 
