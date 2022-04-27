@@ -64,7 +64,7 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
 #endif
     ]],
     [[
-        cudaDeviceReset();
+      cudaDeviceReset();
     ]])], [abi_gpu_cuda_old="no"], [abi_gpu_cuda_old="yes"])
   AC_MSG_RESULT([${abi_gpu_cuda_old}])
 
@@ -73,13 +73,10 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
-  AC_LANG_POP([C])
-
   #
   # check if we are using CUDA runtime version at least 10
+  # version 10 of CUDA is required for NVTX (header only)
   #
-  AC_LANG_PUSH([C++])
-  # Do we have at least version 10 of Cuda ? Version 10 of CUDA is nice for NVTX (header only)
   AC_MSG_CHECKING([whether we have Cuda >= 10])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
     [[
@@ -92,13 +89,12 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
   AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
 
-  AC_LANG_POP([C++])
-
   # Restore build environment
+  AC_LANG_POP([C])
   LIBS="${abi_saved_LIBS}"
   ABI_ENV_RESTORE
-
 ]) # _ABI_GPU_CHECK_CUDA
+
 
 
                     ########################################
@@ -130,6 +126,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     abi_gpu_cuda_root="${CUDA_ROOT}"
   fi
 
+  # call this macro here to make sure variable `abi_gpu_cuda_version_10` (CUDA >= 10) has correct value
   _ABI_GPU_CHECK_CUDA
 
   # Check whether to look for generic files
@@ -309,7 +306,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
 # ABI_GPU_INIT()
 # --------------
-#
+#config/m4/arch-gpu.m4
 # Looks for an implementation of GPU, using the provided prefix.
 # Note 1: this is a convenience feature, purely for comfort.
 # Note 2: it should be run as early as possible.
