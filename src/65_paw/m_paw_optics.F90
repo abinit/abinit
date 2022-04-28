@@ -70,9 +70,12 @@ MODULE m_paw_optics
 !I/O parameters
 !Set to true to use netcdf-MPIIO when available
  logical,parameter :: use_netcdf_mpiio=.true.
+!Set to true to compute only half of the (n,m) dipoles
+ logical,parameter :: compute_half_dipoles=.false.
 !Set to true to use unlimited dimensions in netCDF file
 !  This is not mandatory because we know exactly the amount of data to write
-!    and seems to impact performances negatively
+!    and seems to impact performances negatively...
+!    Not compatible with compute_half_dipoles=.true.
  logical,parameter :: use_netcdf_unlimited=.false.
 
 CONTAINS  !========================================================================================
@@ -157,24 +160,24 @@ CONTAINS  !=====================================================================
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibg,ibsp
- integer :: icg,ierr,ikg,ikpt,ilmn,ount,ncid,varid,idir
+ integer :: bsize,iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibg,ibsp
+ integer :: ibshift,icg,ierr,ikg,ikpt,ilmn,ount,ncid,varid,idir
  integer :: iorder_cprj,ipw,ispinor,isppol,istwf_k,itypat,iwavef
- integer :: jb,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,option_core
+ integer :: jb,jbshift,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,option_core
  integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
  logical :: already_has_nabla,cprj_paral_band,myband,mykpt,iomode_etsf_mpiio
- logical :: i_am_master,i_am_master_kpt,i_am_master_band,i_am_master_spfft,nc_unlimited
+ logical :: i_am_master,i_am_master_kpt,i_am_master_band,i_am_master_spfft,nc_unlimited,store_half_dipoles
  real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12
  character(len=500) :: msg
  type(nctkdim_t) :: nctkdim
 !arrays
- integer :: nc_count(6),nc_start(6),nc_stride(6),tmp_shape(3)
+ integer :: nc_count_5(5),nc_count_6(6),nc_start_5(5),nc_start_6(6),nc_stride_5(5),nc_stride_6(6),tmp_shape(3)
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),tsec(2),nabla_ij(3)
- real(dp),allocatable :: kpg_k(:,:),psinablapsi(:,:,:,:)
- real(dp),allocatable :: psinablapsi_paw(:,:,:,:),psinablapsi_soc(:,:,:,:)
+ real(dp),allocatable :: kpg_k(:,:)
+ real(dp),allocatable :: psinablapsi(:,:,:),psinablapsi_paw(:,:,:),psinablapsi_soc(:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
@@ -227,7 +230,7 @@ CONTAINS  !=====================================================================
 
 !(master proc only)
  if (i_am_master) then
-   fformopt=610
+   fformopt=610 ; if (compute_half_dipoles) fformopt=620
 !  ====> NETCDF format
    if (dtset%iomode==IO_MODE_ETSF) then
      iomode=IO_MODE_ETSF
@@ -245,10 +248,16 @@ CONTAINS  !=====================================================================
        nctkdim%value=NF90_UNLIMITED
        NCF_CHECK(nctk_def_dims(ncid,nctkdim))
        nctk_arrays(1)%shape_str=&
-&     "complex,number_of_cartesian_directions,max_number_of_states,number_of_kpoints,number_of_spins,unlimited_bands"
+&      "complex,number_of_cartesian_directions,max_number_of_states,number_of_kpoints,number_of_spins,unlimited_bands"
+     else if (compute_half_dipoles) then
+       nctkdim%name="max_number_of_state_pairs"
+       nctkdim%value=(mband*(mband+1))/2
+       NCF_CHECK(nctk_def_dims(ncid,nctkdim))
+       nctk_arrays(1)%shape_str=&
+&      "complex,number_of_cartesian_directions,max_number_of_state_pairs,number_of_kpoints,number_of_spins"
      else
        nctk_arrays(1)%shape_str=&
-&     "complex,number_of_cartesian_directions,max_number_of_states,max_number_of_states,number_of_kpoints,number_of_spins"
+&      "complex,number_of_cartesian_directions,max_number_of_states,max_number_of_states,number_of_kpoints,number_of_spins"
      end if
      NCF_CHECK(nctk_def_arrays(ncid, nctk_arrays))
      NCF_CHECK(nctk_set_atomic_units(ncid, "dipole_valence_valence"))
@@ -275,6 +284,7 @@ CONTAINS  !=====================================================================
  call xmpi_bcast(iomode,master,spaceComm_w,ierr)
  iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
  nc_unlimited=(iomode==IO_MODE_ETSF.and.use_netcdf_unlimited.and.(.not.iomode_etsf_mpiio)) ! UNLIMITED not compatible with mpi-io
+ store_half_dipoles=(compute_half_dipoles.and.(.not.nc_unlimited))
 
 !----------------------------------------------------------------------------------
 !2- Computation of on-site contribution: <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j>
@@ -319,18 +329,20 @@ CONTAINS  !=====================================================================
  end if
  if (iomode_etsf_mpiio) then
    !If MPI-IO, store only ib elements for each jb
-   ABI_MALLOC(psinablapsi,(2,3,mband,1))
-   ABI_MALLOC(psinablapsi_paw,(2,3,mband,1))
+   ABI_MALLOC(psinablapsi,(2,3,mband))
+   ABI_MALLOC(psinablapsi_paw,(2,3,mband))
    if (dtset%pawspnorb==1) then
-     ABI_MALLOC(psinablapsi_soc,(2,3,mband,1))
+     ABI_MALLOC(psinablapsi_soc,(2,3,mband))
    end if
  else
-   !If not, store all (ib,jb) pairs
-   ABI_MALLOC(psinablapsi,(2,3,mband,mband))
-   ABI_MALLOC(psinablapsi_paw,(2,3,mband,mband))
+   !If not, store all (ib,jb) pairs (or half)
+   bsize=mband**2 ; if (store_half_dipoles) bsize=(mband*(mband+1))/2
+   ABI_MALLOC(psinablapsi,(2,3,bsize))
+   ABI_MALLOC(psinablapsi_paw,(2,3,bsize))
    if (dtset%pawspnorb==1) then
-     ABI_MALLOC(psinablapsi_soc,(2,3,mband,mband))
+     ABI_MALLOC(psinablapsi_soc,(2,3,bsize))
    end if
+   psinablapsi=zero
  end if
 
 !Determine if cprj datastructure is distributed over bands
@@ -409,10 +421,16 @@ CONTAINS  !=====================================================================
          !If MPI-IO, store only ib elements for each jb ; if not, store all (ib,jb) pairs
          my_jb=merge(1,jb,iomode_etsf_mpiio)
 
-         psinablapsi(:,:,:,my_jb)=zero
-         psinablapsi_paw(:,:,:,my_jb)=zero
-         if (dtset%pawspnorb==1) psinablapsi_soc(:,:,:,my_jb)=zero
-
+!        Fill output arrays with zeros
+         if (store_half_dipoles) then
+           jbshift=(my_jb*(my_jb-1))/2 ; bsize=nband_k
+         else
+           jbshift=(my_jb-1)*mband ; bsize=mband
+         end if
+         psinablapsi(:,:,jbshift+1:jbshift+bsize)=zero
+         psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
+         if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
+           
 !        2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !        ----------------------------------------------------------------------------------
 !        Note: <psi_nk|-i.nabla|psi_mk> => Sum_g[ <G|Psi_nk>^* <G|Psi_mk> G ]
@@ -433,21 +451,22 @@ CONTAINS  !=====================================================================
                !G=k+g=0 term is included but do not contribute
                do ipw=1,npw_k*my_nspinor
                  cgnm2=two*(cg(1,ipw+iwavef)*cg(2,ipw+jwavef)-cg(2,ipw+iwavef)*cg(1,ipw+jwavef))
-                 psinablapsi(2,1:3,ib,my_jb)=psinablapsi(2,1:3,ib,my_jb)+cgnm2*kpg_k(1:3,ipw)
+                 psinablapsi(2,1:3,jbshift+ib)=psinablapsi(2,1:3,jbshift+ib)+cgnm2*kpg_k(1:3,ipw)
                end do
              else
                do ipw=1,npw_k*my_nspinor
                  cgnm1=cg(1,ipw+iwavef)*cg(1,ipw+jwavef)+cg(2,ipw+iwavef)*cg(2,ipw+jwavef)
                  cgnm2=cg(1,ipw+iwavef)*cg(2,ipw+jwavef)-cg(2,ipw+iwavef)*cg(1,ipw+jwavef)
-                 psinablapsi(1,1:3,ib,my_jb)=psinablapsi(1,1:3,ib,my_jb)+cgnm1*kpg_k(1:3,ipw)
-                 psinablapsi(2,1:3,ib,my_jb)=psinablapsi(2,1:3,ib,my_jb)+cgnm2*kpg_k(1:3,ipw)
+                 psinablapsi(1,1:3,jbshift+ib)=psinablapsi(1,1:3,jbshift+ib)+cgnm1*kpg_k(1:3,ipw)
+                 psinablapsi(2,1:3,jbshift+ib)=psinablapsi(2,1:3,jbshift+ib)+cgnm2*kpg_k(1:3,ipw)
                end do
              end if
 
 !            Second half of the (n,m) matrix
-             if ((ib/=jb).and.(.not.iomode_etsf_mpiio)) then
-               psinablapsi(1,1:3,jb,ib)= psinablapsi(1,1:3,ib,jb)
-               psinablapsi(2,1:3,jb,ib)=-psinablapsi(2,1:3,ib,jb)
+             if ((ib/=jb).and.(.not.store_half_dipoles).and.(.not.iomode_etsf_mpiio)) then
+               ibshift=(ib-1)*mband
+               psinablapsi(1,1:3,ibshift+jb)= psinablapsi(1,1:3,jbshift+ib)
+               psinablapsi(2,1:3,ibshift+jb)=-psinablapsi(2,1:3,jbshift+ib)
              end if
 
            end do ! ib
@@ -497,7 +516,7 @@ CONTAINS  !=====================================================================
                        if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                        cpnm1=cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn)
                        if (dtset%nspinor==2) cpnm1=cpnm1+cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn)
-                       psinablapsi_paw(2,:,ib,my_jb)=psinablapsi_paw(2,:,ib,my_jb)-cpnm1*nabla_ij(:)
+                       psinablapsi_paw(2,:,jbshift+ib)=psinablapsi_paw(2,:,jbshift+ib)-cpnm1*nabla_ij(:)
                      end do !ilmn
                    end do !jlmn
                  end do !iatom
@@ -513,8 +532,8 @@ CONTAINS  !=====================================================================
 &                            +cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn))
                        cpnm2=(cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(2,jlmn) &
 &                            -cprj_k(iatom,ibsp)%cp(2,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn))
-                       psinablapsi_paw(1,:,ib,my_jb)=psinablapsi_paw(1,:,ib,my_jb)+cpnm2*nabla_ij(:)
-                       psinablapsi_paw(2,:,ib,my_jb)=psinablapsi_paw(2,:,ib,my_jb)-cpnm1*nabla_ij(:)
+                       psinablapsi_paw(1,:,jbshift+ib)=psinablapsi_paw(1,:,jbshift+ib)+cpnm2*nabla_ij(:)
+                       psinablapsi_paw(2,:,jbshift+ib)=psinablapsi_paw(2,:,jbshift+ib)-cpnm1*nabla_ij(:)
                      end do !ilmn
                    end do !jlmn
                  end do !iatom
@@ -554,9 +573,9 @@ CONTAINS  !=====================================================================
                      cpnm_21p12=cpnm21+cpnm12
                      cpnm_21m12=cpnm21-cpnm12
                      do idir=1,3
-                       psinablapsi_soc(1,idir,ib,my_jb)=psinablapsi_soc(1,idir,ib,my_jb) &
+                       psinablapsi_soc(1,idir,jbshift+ib)=psinablapsi_soc(1,idir,jbshift+ib) &
 &                             +soc_ij(1,1,idir)*cpnm_11m22+soc_ij(1,2,idir)*cpnm_21p12
-                       psinablapsi_soc(2,idir,ib,my_jb)=psinablapsi_soc(2,idir,ib,my_jb) &
+                       psinablapsi_soc(2,idir,jbshift+ib)=psinablapsi_soc(2,idir,jbshift+ib) &
 &                             +soc_ij(2,2,idir)*cpnm_21m12
                      end do
                      !Contribution from imaginary part of <Psi^s_n|p_i><p_j|Psi^s'_m>
@@ -572,9 +591,9 @@ CONTAINS  !=====================================================================
                      cpnm_21p12=cpnm21+cpnm12
                      cpnm_21m12=cpnm21-cpnm12
                      do idir=1,3
-                       psinablapsi_soc(1,idir,ib,my_jb)=psinablapsi_soc(1,idir,ib,my_jb) &
+                       psinablapsi_soc(1,idir,jbshift+ib)=psinablapsi_soc(1,idir,jbshift+ib) &
 &                          -soc_ij(2,2,idir)*cpnm_21m12
-                       psinablapsi_soc(2,idir,ib,my_jb)=psinablapsi_soc(2,idir,ib,my_jb) &
+                       psinablapsi_soc(2,idir,jbshift+ib)=psinablapsi_soc(2,idir,jbshift+ib) &
 &                          +soc_ij(1,1,idir)*cpnm_11m22+soc_ij(1,2,idir)*cpnm_21p12
                      end do
                    end do ! ilmn
@@ -583,16 +602,21 @@ CONTAINS  !=====================================================================
              end if ! pawspnorb
 
 !            Second half of the (n,m) matrix
-             if ((ib/=jb).and.(.not.iomode_etsf_mpiio)) then
-               psinablapsi_paw(1,1:3,jb,ib)= psinablapsi_paw(1,1:3,ib,jb)
-               psinablapsi_paw(2,1:3,jb,ib)=-psinablapsi_paw(2,1:3,ib,jb)
+             if ((ib/=jb).and.(.not.store_half_dipoles).and.(.not.iomode_etsf_mpiio)) then
+               ibshift=(ib-1)*mband
+               psinablapsi_paw(1,1:3,ibshift+jb)= psinablapsi_paw(1,1:3,jbshift+ib)
+               psinablapsi_paw(2,1:3,ibshift+jb)=-psinablapsi_paw(2,1:3,jbshift+ib)
+               if (dtset%pawspnorb==1) then
+                 psinablapsi_soc(1,1:3,ibshift+jb)= psinablapsi_soc(1,1:3,jbshift+ib)
+                 psinablapsi_soc(2,1:3,ibshift+jb)=-psinablapsi_soc(2,1:3,jbshift+ib)
+               end if
              end if
-           end do ! ib
+
+           end do ! ib loop
 
            if (iomode_etsf_mpiio.and.mpi_enreg%paral_spinor==1) then
              call timab(48,1,tsec)
              call xmpi_sum_master(psinablapsi_paw,master,spaceComm_spinor,ierr)
-             !call xmpi_sum_master(psinablapsi_soc,master,spaceComm_spinor,ierr)
              call timab(48,2,tsec)
            end if
 
@@ -600,17 +624,23 @@ CONTAINS  !=====================================================================
 
 !        Write to OPT file in case of MPI-IO
          if (iomode_etsf_mpiio.and.i_am_master_spfft) then
-           nc_start=[1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1] 
            if (myband) then
              psinablapsi=psinablapsi+psinablapsi_paw
              if (dtset%pawspnorb==1) psinablapsi=psinablapsi+psinablapsi_soc
-             nc_count=[2,3,mband,1,1,1]
-           else
-             nc_count=[0,0,0,0,0,0]
-           end if
+           end if       
+           if (store_half_dipoles) then
+             nc_start_5=[1,1,(jb*(jb-1))/2+1,ikpt,isppol];nc_stride_5=[1,1,1,1,1]
+             nc_count_5=[0,0,0,0,0];if (myband) nc_count_5=[2,3,jb,1,1] 
 #ifdef HAVE_NETCDF
-           NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+             NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
 #endif
+           else
+             nc_start_6=[1,1,1,jb,ikpt,isppol];nc_stride_6=[1,1,1,1,1,1]           
+             nc_count_6=[0,0,0,0,0,0];if (myband) nc_count_6=[2,3,mband,1,1,1]
+#ifdef HAVE_NETCDF
+             NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+#endif
+           end if
          end if
 
        end do ! jb
@@ -650,19 +680,23 @@ CONTAINS  !=====================================================================
        if (.not.iomode_etsf_mpiio) then
          if (i_am_master) then
            if (iomode==IO_MODE_ETSF) then
-             nc_stride=[1,1,1,1,1,1] 
-             if (nc_unlimited) then
-               nc_start=[1,1,1,ikpt,isppol,1] ; nc_count=[2,3,mband,1,1,mband]
-             else
-               nc_start=[1,1,1,1,ikpt,isppol] ; nc_count=[2,3,mband,mband,1,1]
-             end if
 #ifdef HAVE_NETCDF
-             NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+             if (nc_unlimited) then
+               nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+             else if (.not.store_half_dipoles) then
+               nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+             else
+               nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+             end if
 #endif
            else
-             write(ount)((psinablapsi(1:2,1,ib,jb),ib=1,nband_k),jb=1,nband_k)
-             write(ount)((psinablapsi(1:2,2,ib,jb),ib=1,nband_k),jb=1,nband_k)
-             write(ount)((psinablapsi(1:2,3,ib,jb),ib=1,nband_k),jb=1,nband_k)
+             bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
+             write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
+             write(ount)(psinablapsi(1:2,2,ib),ib=1,bsize)
+             write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
            end if
 
 !        >>> This my kpt and I am not the master node: I send the data    
@@ -679,19 +713,23 @@ CONTAINS  !=====================================================================
        sender=master_spfftband
        call xmpi_exch(psinablapsi,etiq,sender,psinablapsi,master,spaceComm_kpt,ierr)
        if (iomode==IO_MODE_ETSF) then
-         nc_stride=[1,1,1,1,1,1] 
-         if (nc_unlimited) then
-           nc_start=[1,1,1,ikpt,isppol,1] ; nc_count=[2,3,mband,1,1,mband]
-         else
-           nc_start=[1,1,1,1,ikpt,isppol] ; nc_count=[2,3,mband,mband,1,1]
-         end if
 #ifdef HAVE_NETCDF
-         NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+         if (nc_unlimited) then
+           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+           NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+         else if (.not.store_half_dipoles) then
+           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+           NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+         else
+           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+           NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+         end if
 #endif
        else
-         write(ount)((psinablapsi(1:2,1,ib,jb),ib=1,nband_k),jb=1,nband_k)
-         write(ount)((psinablapsi(1:2,2,ib,jb),ib=1,nband_k),jb=1,nband_k)
-         write(ount)((psinablapsi(1:2,3,ib,jb),ib=1,nband_k),jb=1,nband_k)
+         bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
+         write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
+         write(ount)(psinablapsi(1:2,2,ib),ib=1,bsize)
+         write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
        end if
      end if ! mykpt
 

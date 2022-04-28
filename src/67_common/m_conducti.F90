@@ -145,15 +145,15 @@ contains
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iomode,bantot,bdtot_index,ncid,varid,nb_per_proc,etiq
- integer :: comm,fform1,headform,iband,ierr,ikpt,master_band
+ integer :: bsize,bd_stride,dimid,iomode,bantot,bdtot_index,ncid,varid,nb_per_proc,etiq
+ integer :: comm,fform1,headform,iband,ijband,ierr,ikpt,master_band
  integer :: iom,isppol,jband,l1,l2,mband,me,mpierr,mom
  integer :: natom,nband_k,nkpt,nproc,nspinor,nsppol,ntypat
  integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband
- integer :: lij_unt,sig_unt,kth_unt,ocond_unt,occunit,occnpt,dimid
- logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio
- real(dp) :: del,deltae,deltae_min,deltae_min_tmp,diff_occ
- real(dp) :: dosdeltae,ecut,entropy,fermie,fermih,maxocc
+ integer :: lij_unt,sig_unt,kth_unt,ocond_unt,occunit,occnpt
+ logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio,read_half_dipoles
+ real(dp) :: dirac,del,deltae,deltae_min,deltae_min_tmp,dhdk2_g,diff_eig,diff_occ
+ real(dp) :: dosdeltae,ecut,entropy,fact_diag,fermie,fermih,kin_fact,maxocc
  real(dp) :: np_sum,np_sum_k1,np_sum_k2,omin,omax,dom,oml,sig,socc,socc_k
  real(dp) :: Tatm,tphysel,tsmear,ucvol,eig_in_max,eig_in_min
  character(len=fnlen) :: filnam1,filnam_gen,occfile
@@ -161,15 +161,15 @@ contains
  type(hdr_type) :: hdr
  type(MPI_type) :: mpi_enreg
 !arrays
- integer :: nc_count(6),nc_start(6),nc_stride(6)
+ integer :: nc_count_5(5),nc_count_6(6),nc_start_5(5),nc_start_6(6),nc_stride_5(5),nc_stride_6(6)
  integer,allocatable :: nband(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
- real(dp),allocatable :: cond_nd(:,:,:),cond_nd_k(:,:,:),dhdk2_r(:,:,:),dhdk2_g(:,:)
+ real(dp) :: dhdk2_r(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
+ real(dp),allocatable :: cond_nd(:,:,:),cond_nd_k(:,:,:)
  real(dp),allocatable :: doccde(:),doccde_k(:),eig0_k(:),eigen0(:),eig0nc(:,:,:)
  real(dp),allocatable :: occ(:),occ_k(:),wtk(:),oml1(:),occ_in(:),eig_in(:),occ_tmp(:),ypp(:)
  real(dp),allocatable :: kin11(:,:),kin12(:),kin21(:),kin22(:)
  real(dp),allocatable :: kin11_k(:),kin12_k(:),kin21_k(:),kin22_k(:),Kth(:),Stp(:)
- real(dp),allocatable :: psinablapsi(:,:,:,:),sig_abs(:)
+ real(dp),allocatable :: psinablapsi(:,:,:),sig_abs(:)
  
 ! *********************************************************************************
  
@@ -201,7 +201,6 @@ contains
      read(iunt,*) occfile !filename of the non-eq distribution function
    end if
    close(iunt)
-   write(std_out,'(a,i8,3f10.5,a)')' npts,omin,omax,width      =',mom,omin,omax,dom,' Ha'
  end if
 
 !Send data to all procs
@@ -209,6 +208,9 @@ contains
  call xmpi_bcast(omin,master,comm,mpierr)
  call xmpi_bcast(omax,master,comm,mpierr)
  call xmpi_bcast(mom,master,comm,mpierr)
+
+! ---------------------------------------------------------------------------------
+! Read OPT file
 
 !Check for FORTRAN/.nc OPT file and set iomode to IO_MODE_FORTRAN_MASTER/IO_MODE_ETSF
  if (me==master) then
@@ -218,7 +220,7 @@ contains
  call xmpi_bcast(filnam1,master,comm,mpierr)
  call xmpi_bcast(iomode,master,comm,mpierr)
 
-!Open OPT file and read HEADER
+ !Open OPT file and read HEADER
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
@@ -230,7 +232,7 @@ contains
      call hdr_fort_read(hdr,opt_unt,fform1,rewind=.true.)
    end if 
    ABI_CHECK(fform1/=0,sjoin("Error while reading ",filnam1))
-   ABI_CHECK(fform1==610,"Abinit requires an OPT file with fform=610!")
+   ABI_CHECK(fform1==610.or.fform1==620,"Conducti requires an OPT file with fform=610 or 620!")
  end if
  call hdr%bcast(master,me,comm)
  call xmpi_bcast(fform1,master,comm,mpierr)
@@ -256,20 +258,6 @@ contains
  wtk(1:nkpt)=hdr%wtk(1:nkpt)
  mband=maxval(nband(:))  ! Get mband, as the maximum value of nband(nkpt)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol) ! Get metrics of simulation cell
-
-!Print some data
- Tatm=tsmear*Ha_K
- if (me==master) then
-   write(std_out,*)
-   write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1:3,1)
-   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,2)
-   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,3)
-   write(std_out,'(a,i8)')       ' natom             =',natom
-   write(std_out,'(a,3i8)')      ' nkpt,mband,nsppol        =',nkpt,mband,nsppol
-   write(std_out, '(a, f10.5,a)' ) ' ecut              =',ecut,' Ha'
-   write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
-   write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
- end if
 
 !Read eigenvalues
  ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
@@ -340,6 +328,38 @@ contains
    occopt=2
  end if ! varocc?
 
+!---------------------------------------------------------------------------------
+! Prepare kpt/band parallelization
+
+ call init_mpi_enreg(mpi_enreg)
+ mpi_enreg%comm_kpt=comm
+ mpi_enreg%me_kpt=me
+ mpi_enreg%nproc_spkpt=nproc
+ mpi_enreg%paralbd=1
+ ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
+ ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt))
+ call distrb2(mband,nb_per_proc,nband,nkpt,nproc,nsppol,mpi_enreg)
+ call initmpi_band(nkpt,mpi_enreg,nband,nkpt,nsppol)
+
+!---------------------------------------------------------------------------------
+!Print some data
+
+ Tatm=tsmear*Ha_K
+ if (me==master) then
+   write(std_out,*)
+   write(std_out,'(a)' )' Input data:'
+   write(std_out,'(a,i8,3f10.5,a)')' npts,omin,omax,width      =',mom,omin,omax,dom,' Ha'
+   write(std_out,*)
+   write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1:3,1)
+   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,2)
+   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(1:3,3)
+   write(std_out,'(a,i8)')       ' natom             =',natom
+   write(std_out,'(a,3i8)')      ' nkpt,mband,nsppol        =',nkpt,mband,nsppol
+   write(std_out, '(a, f10.5,a)' ) ' ecut              =',ecut,' Ha'
+   write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
+   write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
+ end if
+
 ! ---------------------------------------------------------------------------------
 ! Compute derivative of occupations wrt the energy
 
@@ -399,19 +419,6 @@ contains
  Stp     = zero
 
 !---------------------------------------------------------------------------------
-! Preparew kpt/band parallelization
-
- call init_mpi_enreg(mpi_enreg)
- mpi_enreg%comm_kpt=comm
- mpi_enreg%me_kpt=me
- mpi_enreg%nproc_spkpt=nproc
- mpi_enreg%paralbd=1
- ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
- ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt))
- call distrb2(mband,nb_per_proc,nband,nkpt,nproc,nsppol,mpi_enreg)
- call initmpi_band(nkpt,mpi_enreg,nband,nkpt,nsppol)
-
-!---------------------------------------------------------------------------------
 !Prepare valence-valence dipoles reading
 
  iomode_estf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
@@ -424,22 +431,43 @@ contains
      if (nproc>1) then
        NCF_CHECK(nctk_set_collective(ncid,varid))
      end if
-   else if (me==master) then
-     NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
-     varid=nctk_idname(ncid,"dipole_valence_valence")
-     !if (nctk_has_mpiio.and.(.not.use_netcdf_mpiio)) then
-     !  NCF_CHECK(nctk_set_collective(ncid,varid))
-     !end if
+#ifdef HAVE_NETCDF
+     nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
+     read_half_dipoles=(nf90_inq_dimid(ncid,"max_number_of_state_pairs",dimid)==NF90_NOERR)
+#endif
+   else
+     if (me==master) then
+       NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
+       varid=nctk_idname(ncid,"dipole_valence_valence")
+       !if (nctk_has_mpiio.and.(.not.use_netcdf_mpiio)) then
+       !  NCF_CHECK(nctk_set_collective(ncid,varid))
+       !end if
+#ifdef HAVE_NETCDF
+       nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
+       read_half_dipoles=(nf90_inq_dimid(ncid,"max_number_of_state_pairs",dimid)==NF90_NOERR)
+#endif
+     end if
+     call xmpi_bcast(nc_unlimited,master,comm,ierr)
+     call xmpi_bcast(read_half_dipoles,master,comm,ierr)
    end if
-   nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
+   if (nc_unlimited.and.read_half_dipoles) then
+     msg="The OPT file has a wrong format!"
+     ABI_BUG(msg)
+   end if
+ else
+   read_half_dipoles=(fform1==620)
  end if
 
  if (iomode_estf_mpiio) then
    !If MPI-IO, store only ib elements for each jb
-   ABI_MALLOC(psinablapsi,(2,3,mband,1))
+   ABI_MALLOC(psinablapsi,(2,3,mband))
  else
-   !If not, store all (ib,jb) pairs
-   ABI_MALLOC(psinablapsi,(2,3,mband,mband))
+   !If not, store all pairs (or half)
+   if (read_half_dipoles) then ! only ib>=jb
+     ABI_MALLOC(psinablapsi,(2,3,(mband*(mband+1))/2))
+   else
+     ABI_MALLOC(psinablapsi,(2,3,mband*mband))
+   end if
  end if
 
 !---------------------------------------------------------------------------------
@@ -464,25 +492,30 @@ contains
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      mykpt=.not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me))
      master_band=minval(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol))
-
+     
 !    In case of non MPI-IO, has to read all (n,m) dipoles for this k-point
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
-         nc_stride=[1,1,1,1,1,1] 
-         if (nc_unlimited) then
-           nc_start=[1,1,1,ikpt,isppol,1] ; nc_count=[2,3,mband,1,1,mband]
-         else
-           nc_start=[1,1,1,1,ikpt,isppol] ; nc_count=[2,3,mband,mband,1,1]
-         end if
+         psinablapsi=zero
 #ifdef HAVE_NETCDF
-         NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+         if (nc_unlimited) then
+           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+           NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+         else if (.not.read_half_dipoles) then
+           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+           NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+         else
+           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+           NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+         end if
 #endif
        else
          psinablapsi=zero
-         read(opt_unt)((psinablapsi(1:2,1,iband,jband),iband=1,nband_k),jband=1,nband_k)
-         read(opt_unt)((psinablapsi(1:2,2,iband,jband),iband=1,nband_k),jband=1,nband_k)
-         read(opt_unt)((psinablapsi(1:2,3,iband,jband),iband=1,nband_k),jband=1,nband_k)
+         bsize=nband_k**2;if (read_half_dipoles) bsize=(nband_k*(nband_k+1))/2
+         read(opt_unt)(psinablapsi(1:2,1,ijband),ijband=1,bsize)
+         read(opt_unt)(psinablapsi(1:2,2,ijband),ijband=1,bsize)
+         read(opt_unt)(psinablapsi(1:2,3,ijband),ijband=1,bsize)           
        end if
        if (.not.mykpt) then
          call xmpi_exch(psinablapsi,etiq,master,psinablapsi,master_band,comm,ierr)
@@ -495,8 +528,6 @@ contains
        ABI_MALLOC(eig0_k,(nband_k))
        ABI_MALLOC(occ_k,(nband_k))
        ABI_MALLOC(doccde_k,(nband_k))
-       ABI_MALLOC(dhdk2_r,(3,3,nband_k))
-       ABI_MALLOC(dhdk2_g,(1,nband_k)) ! (natom,nband_k)
 
        cond_nd_k = zero
        kin11_k   = zero
@@ -528,78 +559,87 @@ contains
          !If not, store all (ib,jb) pairs
          my_iband=merge(1,iband,iomode_estf_mpiio)
 
-         dhdk2_r   = zero
-         dhdk2_g   = zero
-
 !        Select bands for current proc
          myband=(mpi_enreg%proc_distrb(ikpt,iband,isppol)==me)
          if (myband) then
        
 !          In case of MPI-IO, read valence-valence dipoles for band n
            if (iomode_estf_mpiio) then
-             nc_stride=[1,1,1,1,1,1] 
-             if (nc_unlimited) then
-               nc_start=[1,1,iband,ikpt,isppol,1] ; nc_count=[2,3,1,1,1,mband]
-             else
-               nc_start=[1,1,1,iband,ikpt,isppol] ; nc_count=[2,3,mband,1,1,1]
-             end if
 #ifdef HAVE_NETCDF
-             NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
+             if (nc_unlimited) then
+               nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+               NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+             else if (.not.read_half_dipoles) then
+               nc_start_6=[1,1,1,iband,ikpt,isppol] ; nc_count_6=[2,3,mband,1,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+               NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+             else
+               nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1] 
+               NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+             end if
 #endif
            end if
 
-           do jband=1,nband_k
-             do l2=1,3
-               do l1=1,3
-                 dhdk2_r(l1,l2,jband)=dhdk2_r(l1,l2,jband)+(&
-&                  psinablapsi(1,l1,jband,my_iband)*psinablapsi(1,l2,jband,my_iband)&
-&                 +psinablapsi(2,l1,jband,my_iband)*psinablapsi(2,l2,jband,my_iband))
-               end do
-             end do
-             do l1=1,3
-               dhdk2_g(1,jband)=dhdk2_g(1,jband)+( &
-&                psinablapsi(1,l1,jband,my_iband)*psinablapsi(1,l1,jband,my_iband) &
-&               +psinablapsi(2,l1,jband,my_iband)*psinablapsi(2,l1,jband,my_iband))
-             end do
-           end do
-
-!          Apply KG formula
-           do jband=1,nband_k                
+!          LOOP OVER BANDS m
+           do jband=1,iband-1
              diff_occ = occ_k(iband)-occ_k(jband)
-             !Select bands
+             diff_eig = eig0_k(iband)-eig0_k(jband)
              if (dabs(diff_occ)>=tol8) then
+
+               dhdk2_r = zero
+               dhdk2_g = zero
+
+               if (read_half_dipoles) then
+                 ijband=(my_iband*(my_iband-1))/2+jband
+               else
+                 !psinablapsi size is mband for netCDF I/O, nband_k for Fortran I/O
+                 bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
+                 ijband=(my_iband-1)*bd_stride+jband
+               end if
+                 
+               do l2=1,3
+                 do l1=1,3
+                   dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
+&                    psinablapsi(1,l1,ijband)*psinablapsi(1,l2,ijband)&
+&                   +psinablapsi(2,l1,ijband)*psinablapsi(2,l2,ijband))
+                 end do
+               end do
+               do l1=1,3
+                 dhdk2_g=dhdk2_g &
+&                  +(psinablapsi(1,l1,ijband)*psinablapsi(1,l1,ijband) &
+&                   +psinablapsi(2,l1,ijband)*psinablapsi(2,l1,ijband))
+               end do
+
+
                !Minimal validity limit
-               deltae_min_tmp=dabs(eig0_k(jband)-eig0_k(iband))
-               if ((deltae_min_tmp>=tol5).and.(deltae_min_tmp<=deltae_min)) then
-                 deltae_min=deltae_min_tmp
-               endif
-               !Conductivity for each omega
+               deltae_min_tmp=dabs(diff_eig)
+               if ((deltae_min_tmp>=tol5).and.(deltae_min_tmp<=deltae_min)) deltae_min=deltae_min_tmp
+
+               !Conductivity for each omega - Apply KG formula
+               kin_fact=(eig0_k(iband)+eig0_k(jband))*half-(fermie+entropy)
                do iom=1,mom
                  oml=oml1(iom)
-                 if (jband<iband) then
-                   sig= dhdk2_g(1,jband)&
-&                   *(diff_occ)/oml*(dexp(-((eig0_k(jband)-eig0_k(iband)-oml)/dom)**2) &
-&                   -dexp(-((eig0_k(iband)-eig0_k(jband)-oml)/dom)**2))
-                   kin11_k(iom)=kin11_k(iom)+sig
-                   kin12_k(iom)=kin12_k(iom)-sig*((eig0_k(iband)+eig0_k(jband))/two-(fermie+entropy))
-                   kin21_k(iom)=kin21_k(iom)-sig*((eig0_k(iband)+eig0_k(jband))/two-(fermie+entropy))
-                   kin22_k(iom)=kin22_k(iom)+sig*((eig0_k(iband)+eig0_k(jband))/two-(fermie+entropy))**2
-                 end if
+                 dirac=(dexp(-((diff_eig+oml)/dom)**2)-dexp(-((diff_eig-oml)/dom)**2))/oml ! Take into account (n,m) and (m,n)
+                 sig=dhdk2_g*diff_occ*dirac
+                 kin11_k(iom)=kin11_k(iom)+sig
+                 kin12_k(iom)=kin12_k(iom)-sig*kin_fact
+                 kin21_k(iom)=kin21_k(iom)-sig*kin_fact
+                 kin22_k(iom)=kin22_k(iom)+sig*kin_fact**2
                  do l2=1,3
                    do l1=1,3
-                     cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2,jband) &
-&                     *(diff_occ)/oml*dexp(-((eig0_k(jband)-eig0_k(iband)-oml)/dom)**2)
+                     cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*diff_occ*dirac
                    end do
                  end do
                end do
+
                !Evaluate sumrule
-               if (dabs(eig0_k(iband)-eig0_k(jband))>=tol10) then
-                 np_sum_k1=np_sum_k1 - dhdk2_g(1,jband)&
-&                 *(diff_occ)/(eig0_k(iband)-eig0_k(jband))
+               fact_diag=merge(one,two,iband==jband)
+               if (dabs(diff_eig)>=tol10) then
+                 np_sum_k1=np_sum_k1 - fact_diag*dhdk2_g*diff_occ/diff_eig
                else
-                 np_sum_k2=np_sum_k2 - doccde_k(iband)*dhdk2_g(1,jband)
+                 np_sum_k2=np_sum_k2 - fact_diag*doccde_k(iband)*dhdk2_g
                end if
-             end if
+
+             end if ! diff_occ>tol8
            end do !jband
 
            socc_k=socc_k+occ_k(iband)
@@ -624,8 +664,6 @@ contains
        ABI_FREE(eig0_k)
        ABI_FREE(occ_k)
        ABI_FREE(doccde_k)
-       ABI_FREE(dhdk2_r)
-       ABI_FREE(dhdk2_g)
 
 !    End loop over kpt/spin
      end if ! My kpt?
@@ -909,15 +947,15 @@ end subroutine conducti_paw
 
 ! *********************************************************************************
 
-! ---------------------------------------------------------------------------------
-! Read input data
-
 !optional flags
  need_absorption=.true. ;if (present(with_absorption)) need_absorption=with_absorption
  need_emissivity=.false.;if (present(with_emissivity)) need_emissivity=with_emissivity
  if ((.not.need_absorption).and.(.not.need_emissivity)) return
- 
-!MPI communicators
+
+! ---------------------------------------------------------------------------------
+! Read input data
+
+!Global MPI communicators
  comm = xmpi_world
  nproc = xmpi_comm_size(comm)
  me = xmpi_comm_rank(comm)
@@ -946,19 +984,6 @@ else if (need_emissivity) then
      msg = 'dom_max must be higher than dom!'
      ABI_ERROR(msg)
    end if
-   write(std_out,'(a)')'--------------------------------------------'
-   write(std_out,'(a,i4)') 'selected atom for X ray emission',atnbr
-   write(std_out,'(a)')'--------------------------------------------'
-   if (need_absorption) then
-     if (abs(dom_max)>tol10) then
-       write(std_out,'(a)')'************************ ARCTAN SMEARING'
-       write(std_out,'(a,i8,3f10.5,a)')' npts,omin,omax,width      =',mom,omin,omax,dom,' Ha'
-       write(std_out,'(a,2f10.5,a)')' dom_max,center       =',dom_max,dom_ctr,' Ha'
-     else
-       write(std_out,'(a)')'************************ FIXED SMEARING'
-       write(std_out,'(a,i8,3f10.5,a)')' npts,omin,omax,width      =',mom,omin,omax,dom,' Ha'
-     endif
-   end if
  end if
    
 !Send data to all procs
@@ -969,6 +994,9 @@ else if (need_emissivity) then
  call xmpi_bcast(atnbr,master,comm,mpierr)
  call xmpi_bcast(dom_max,master,comm,mpierr)
  call xmpi_bcast(dom_ctr,master,comm,mpierr)
+
+! ---------------------------------------------------------------------------------
+! Read OPT2 file
 
 !Check for FORTRAN/.nc OPT2 file and set iomode to IO_MODE_FORTRAN_MASTER/IO_MODE_ETSF
  if (me==master) then
@@ -1016,21 +1044,6 @@ else if (need_emissivity) then
  nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
  mband=maxval(nband(:))  ! Get mband, as the maximum value of nband(nkpt)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol) ! Get metrics of simulation cell
-
-!Print some data
- Tatm=tsmear*Ha_K
- if (me==master) then
-   write(std_out,*)
-   write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1,1:3)
-   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(2,1:3)
-   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(3,1:3)
-   write(std_out,'(a,i8)')       ' natom             =',natom
-   write(std_out,'(a,3i8)')      ' nkpt,mband,nsppol        =',nkpt,mband,nsppol
-   write(std_out, '(a, f10.5,a)' ) ' ecut              =',ecut,' Ha'
-   write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
-   write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
-   write(std_out,*)
- end if
 
 !Read eigenvalues
  ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
@@ -1098,7 +1111,49 @@ else if (need_emissivity) then
  call xmpi_bcast(energy_cor,master,comm,mpierr)
  edge(1:nphicor)=fermie-energy_cor(1:nphicor)
 
+!---------------------------------------------------------------------------------
+! Prepare kpt/band parallelization
+
+ call init_mpi_enreg(mpi_enreg)
+ mpi_enreg%comm_kpt=comm
+ mpi_enreg%me_kpt=me
+ mpi_enreg%nproc_spkpt=nproc
+ mpi_enreg%paralbd=1
+ ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
+ ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt))
+ call distrb2(mband,nb_per_proc,nband,nkpt,nproc,nsppol,mpi_enreg)
+ call initmpi_band(nkpt,mpi_enreg,nband,nkpt,nsppol)
+
+!---------------------------------------------------------------------------------
+!Print some data
+
+ Tatm=tsmear*Ha_K
  if (me==master) then
+   write(std_out,*)
+   write(std_out,'(a)')'--------------------------------------------'
+   write(std_out,'(a,i4)') 'selected atom for X ray emission',atnbr
+   write(std_out,'(a)')'--------------------------------------------'
+   if (need_absorption) then
+     if (abs(dom_max)>tol10) then
+       write(std_out,'(a)')'************************ ARCTAN SMEARING'
+       write(std_out,'(a,i8,3f10.5,a)')' npts,omin,omax,width      =',mom,omin,omax,dom,' Ha'
+       write(std_out,'(a,2f10.5,a)')' dom_max,center       =',dom_max,dom_ctr,' Ha'
+     else
+       write(std_out,'(a)')'************************ FIXED SMEARING'
+       write(std_out,'(a,i8,3f10.5,a)')' npts,omin,omax,width      =',mom,omin,omax,dom,' Ha'
+     endif
+   end if
+   write(std_out,*)
+   write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1,1:3)
+   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(2,1:3)
+   write(std_out,'(a,3f10.5,a)' )'                    ',rprimd(3,1:3)
+   write(std_out,'(a,i8)')       ' natom             =',natom
+   write(std_out,'(a,3i8)')      ' nkpt,mband,nsppol        =',nkpt,mband,nsppol
+   write(std_out, '(a, f10.5,a)' ) ' ecut              =',ecut,' Ha'
+   write(std_out,'(a,f10.5,a,f10.5,a)' )' fermie            =',fermie,' Ha',fermie*Ha_eV,' eV'
+   write(std_out,'(a,f12.5,a,f12.5,a)') ' Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
+   write(std_out,*)
+   write(std_out,*)
    write(std_out,'(a)')'--------------------------------------------'
    write(std_out,'(a,i4)') ' Number of core orbitals nc=',nphicor
    do icor=1,nphicor
@@ -1160,19 +1215,6 @@ else if (need_emissivity) then
    ABI_MALLOC(emisx,(nphicor,mom,natom,nsppol))
    emisx=zero
  end if
-
-!---------------------------------------------------------------------------------
-! Prepare kpt/band parallelization
-
- call init_mpi_enreg(mpi_enreg)
- mpi_enreg%comm_kpt=comm
- mpi_enreg%me_kpt=me
- mpi_enreg%nproc_spkpt=nproc
- mpi_enreg%paralbd=1
- ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
- ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt))
- call distrb2(mband,nb_per_proc,nband,nkpt,nproc,nsppol,mpi_enreg)
- call initmpi_band(nkpt,mpi_enreg,nband,nkpt,nsppol)
 
 !---------------------------------------------------------------------------------
 ! Prepare core-valence dipoles reading
