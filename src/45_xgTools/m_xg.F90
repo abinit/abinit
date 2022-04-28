@@ -52,24 +52,25 @@ module m_xg
   integer, parameter, public :: SPACE_C = 2
   integer, parameter, public :: SPACE_CR = 3
 
-  integer, parameter :: tim_potrf = 1670
-  integer, parameter :: tim_trsm  = 1671
-  integer, parameter :: tim_gemm  = 1672
-  integer, parameter :: tim_set   = 1673
-  integer, parameter :: tim_get   = 1674
-  integer, parameter :: tim_heev  = 1675
-  integer, parameter :: tim_heevd = 1676
-  integer, parameter :: tim_hpev  = 1677
-  integer, parameter :: tim_hpevd = 1678
-  integer, parameter :: tim_hegv  = 1679
-  integer, parameter :: tim_hegvx = 1680
-  integer, parameter :: tim_hegvd = 1681
-  integer, parameter :: tim_hpgv  = 1682
-  integer, parameter :: tim_hpgvx = 1683
-  integer, parameter :: tim_hpgvd = 1684
-  integer, parameter :: tim_copy  = 1685
-  integer, parameter :: tim_cshift= 1686
-  integer, parameter :: tim_pack  = 1687
+  integer, parameter :: tim_potrf      = 1670
+  integer, parameter :: tim_trsm       = 1671
+  integer, parameter :: tim_gemm_blas  = 1672
+  integer, parameter :: tim_gemm_mpi   = 1688
+  integer, parameter :: tim_set        = 1673
+  integer, parameter :: tim_get        = 1674
+  integer, parameter :: tim_heev       = 1675
+  integer, parameter :: tim_heevd      = 1676
+  integer, parameter :: tim_hpev       = 1677
+  integer, parameter :: tim_hpevd      = 1678
+  integer, parameter :: tim_hegv       = 1679
+  integer, parameter :: tim_hegvx      = 1680
+  integer, parameter :: tim_hegvd      = 1681
+  integer, parameter :: tim_hpgv       = 1682
+  integer, parameter :: tim_hpgvx      = 1683
+  integer, parameter :: tim_hpgvd      = 1684
+  integer, parameter :: tim_copy       = 1685
+  integer, parameter :: tim_cshift     = 1686
+  integer, parameter :: tim_pack       = 1687
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -950,7 +951,7 @@ module m_xg
     integer :: K
     double precision :: tsec(2)
 
-    call timab(tim_gemm,1,tsec)
+    call timab(tim_gemm_blas,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
     end if
@@ -966,8 +967,11 @@ module m_xg
       call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
         alpha,xgBlockA%vecR, xgBlockA%LDim, &
         xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,xgBlockW%LDim)
+        call timab(tim_gemm_blas,2,tsec)
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
+        call timab(tim_gemm_mpi,1,tsec)
         call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+        call timab(tim_gemm_mpi,2,tsec)
       end if
     case(SPACE_C)
       calpha = dcmplx(alpha,0.d0)
@@ -975,12 +979,14 @@ module m_xg
       call zgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
         calpha,xgBlockA%vecC, xgBlockA%LDim, &
         xgBlockB%vecC, xgBlockB%LDim, cbeta,xgBlockW%vecC,xgBlockW%LDim)
+      call timab(tim_gemm_blas,2,tsec)
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
+        call timab(tim_gemm_mpi,1,tsec)
         call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+        call timab(tim_gemm_mpi,2,tsec)
       end if
     end select
 
-    call timab(tim_gemm,2,tsec)
 
   end subroutine xgBlock_gemmR
 !!***
@@ -1002,7 +1008,7 @@ module m_xg
     integer :: K
     double precision :: tsec(2)
 
-    call timab(tim_gemm,1,tsec)
+    call timab(tim_gemm_blas,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
@@ -1020,11 +1026,12 @@ module m_xg
     call zgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
       alpha,xgBlockA%vecC, xgBlockA%LDim, &
       xgBlockB%vecC, xgBlockB%LDim, beta,xgBlockW%vecC,xgBlockW%LDim)
+    call timab(tim_gemm_blas,2,tsec)
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
+      call timab(tim_gemm_mpi,1,tsec)
       call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+      call timab(tim_gemm_mpi,2,tsec)
     end if
-
-    call timab(tim_gemm,2,tsec)
 
   end subroutine xgBlock_gemmC
 !!***

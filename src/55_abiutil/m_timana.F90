@@ -992,7 +992,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1669) = 'xgTransposer_transpose         '
  names(1670) = 'xgBlock_potrf                  '
  names(1671) = 'xgBlock_trsm                   '
- names(1672) = 'xgBlock_gemm                   '
+ names(1672) = 'xgBlock_gemm(blas)             '
  names(1673) = 'xgBlock_set                    '
  names(1674) = 'xgBlock_get                    '
  names(1675) = 'xgBlock_heev                   '
@@ -1008,6 +1008,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1685) = 'xgBlock_copy                   '
  names(1686) = 'xgBlock_cshift                 '
  names(1687) = 'xgBlock_pack                   '
+ names(1688) = 'xgBlock_gemm(mpi)              '
  names(1690) = 'xgScalapack_init               '
  names(1691) = 'xgScalapack_free               '
  names(1692) = 'xgScalapack_heev               '
@@ -1741,7 +1742,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(75)
          list(:12)=(/ (ii,ii=1650,1661,1) /)                         ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:18)=(/ (ii,ii=1670,1687,1) /)                         ; msg='low-level xgBlock type '
+         list(:18)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
