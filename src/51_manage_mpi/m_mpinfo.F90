@@ -2273,7 +2273,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(4(a,i6))') 'Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
+     write(msg,'(4(a,i6))') ' Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
 &     ' nband per processor= ', nb_per_proc, ' npband= ',nrank
      call wrtout(std_out,msg,'COLL')
 
