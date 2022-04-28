@@ -1281,11 +1281,11 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
        end if
        tmp_size = INT(hsize_of(sender),kind=i4b)
-       call xmpi_exch(my_bsham,tmp_size,sender,buffer,master,comm,mpi_err)
+       call xmpi_exch(my_bsham,tmp_size,sender,buffer,master,comm,10*block+1,mpi_err)
        if (BSp%prep_interp) then
-         call xmpi_exch(acoeffs,tmp_size,sender,abuffer,master,comm,mpi_err)
-         call xmpi_exch(bcoeffs,tmp_size,sender,bbuffer,master,comm,mpi_err)
-         call xmpi_exch(ccoeffs,tmp_size,sender,cbuffer,master,comm,mpi_err)
+         call xmpi_exch(acoeffs,tmp_size,sender,abuffer,master,comm,10*block+2,mpi_err)
+         call xmpi_exch(bcoeffs,tmp_size,sender,bbuffer,master,comm,10*block+3,mpi_err)
+         call xmpi_exch(ccoeffs,tmp_size,sender,cbuffer,master,comm,10*block+4,mpi_err)
        end if
 
        ! TODO Be careful with the MPI TAG here, add optional Arguments in xmpi_exch so that the TAG can be specified!
@@ -1295,7 +1295,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        my_extrema(:,2) = proc_end
 
        sender_extrema = my_extrema ! just to avoid NAN on sender. xechh_mpi is not well designed
-       call xmpi_exch(my_extrema,4,sender,sender_extrema,master,comm,mpi_err)
+       call xmpi_exch(my_extrema,4,sender,sender_extrema,master,comm,10*block+5,mpi_err)
 
        if (my_rank==master) then
           proc_start = sender_extrema(:,1)
@@ -1581,7 +1581,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
        if (my_rank==master)  then
          ABI_MALLOC(buffer_2d,(neh1,ncols_of(sender)))
        end if
-       call xmpi_exch(my_kxssp,neh1*ncols_of(sender),sender,buffer_2d,master,comm,mpi_err)
+       call xmpi_exch(my_kxssp,neh1*ncols_of(sender),sender,buffer_2d,master,comm,5,mpi_err)
        !
        if (my_rank==master) then ! Write the columns owned by sender.
          do jj=1,ncols_of(sender)

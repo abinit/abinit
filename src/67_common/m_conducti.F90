@@ -149,7 +149,7 @@ contains
  integer :: comm,fform1,headform,iband,ijband,ierr,ikpt,master_band
  integer :: iom,isppol,jband,l1,l2,mband,me,mpierr,mom
  integer :: natom,nband_k,nkpt,nproc,nspinor,nsppol,ntypat
- integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband
+ integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband,pnp_size
  integer :: lij_unt,sig_unt,kth_unt,ocond_unt,occunit,occnpt
  logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio,read_half_dipoles
  real(dp) :: dirac,del,deltae,deltae_min,deltae_min_tmp,dhdk2_g,diff_eig,diff_occ
@@ -469,6 +469,7 @@ contains
      ABI_MALLOC(psinablapsi,(2,3,mband*mband))
    end if
  end if
+ pnp_size=size(psinablapsi)
 
 !---------------------------------------------------------------------------------
 ! Compute conductivity
@@ -518,7 +519,7 @@ contains
          read(opt_unt)(psinablapsi(1:2,3,ijband),ijband=1,bsize)           
        end if
        if (.not.mykpt) then
-         call xmpi_exch(psinablapsi,etiq,master,psinablapsi,master_band,comm,ierr)
+         call xmpi_exch(psinablapsi,pnp_size,master,psinablapsi,master_band,comm,etiq,ierr)
        end if
      end if
 
@@ -547,7 +548,7 @@ contains
 !        Then broadcast them to all band processors
        if (.not.iomode_estf_mpiio) then
          if (me/=master.and.me==master_band) then
-           call xmpi_exch(psinablapsi,etiq,master,psinablapsi,me,comm,ierr)
+           call xmpi_exch(psinablapsi,pnp_size,master,psinablapsi,me,comm,etiq,ierr)
          end if
          call xmpi_bcast(psinablapsi,master,mpi_enreg%comm_band,mpierr)
        end if  
@@ -917,7 +918,7 @@ end subroutine conducti_paw
  integer,parameter :: master=0
  integer :: iomode,atnbr,bantot,bdtot_index,comm,my_iband
  integer :: fform2,headform,iatom,iband,icor,ierr,ikpt
- integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq
+ integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq,pnp_size
  integer :: natom,nband_k,nkpt,nphicor,nproc,nspinor,nsppol,ntypat
  integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc
  integer :: sigx1_unt,sigx1_s_unt,sigx1_tot_unt,ems_unt,ems_s_unt,ems_tot_unt
@@ -1245,6 +1246,7 @@ else if (need_emissivity) then
    !If not, store the elements for all bands
    ABI_MALLOC(psinablapsi2,(2,3,nphicor,natom,mband))
  end if
+ pnp_size=size(psinablapsi2)
 
 !---------------------------------------------------------------------------------
 ! Compute X absorption coefficient and/or X emissivity
@@ -1299,7 +1301,7 @@ else if (need_emissivity) then
          end if
        end if
        if (.not.mykpt) then
-         call xmpi_exch(psinablapsi2,etiq,master,psinablapsi2,master_band,comm,ierr)
+         call xmpi_exch(psinablapsi2,pnp_size,master,psinablapsi2,master_band,comm,etiq,ierr)
        end if
      end if
 
@@ -1320,7 +1322,7 @@ else if (need_emissivity) then
 !        Then broadcast them to all band processors
        if (.not.iomode_estf_mpiio) then
          if (me/=master.and.me==master_band) then
-           call xmpi_exch(psinablapsi2,etiq,master,psinablapsi2,me,comm,ierr)
+           call xmpi_exch(psinablapsi2,pnp_size,master,psinablapsi2,me,comm,etiq,ierr)
          end if
          call xmpi_bcast(psinablapsi2,master,mpi_enreg%comm_band,mpierr)
        end if  
