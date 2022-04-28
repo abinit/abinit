@@ -1245,7 +1245,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  integer :: ibsp,ibsp1,ibsp2,ibg,ig,ii,ikpt
  integer :: master,receiver,sender,spinor_shift1,shift
  integer :: ishm,ispinor,isppol,istwf_k,my_rank,j
- integer :: k_index,maxpw,mproj,n1,n2,n2dim,n3,n4,n5,n6,nband_k
+ integer :: k_index,maxpw,mproj,mtag,n1,n2,n2dim,n3,n4,n5,n6,nband_k
  integer :: nbandkss_k,nbandksseff,nbase,nprocs,npw_k,onpw_k,npwkss
  integer :: nrst1,nrst2,nsym2,ntemp,pinv,sizepw,spaceComm,comm_self
  integer :: pad1,pad2
@@ -1676,6 +1676,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      istwf_k   =Dtset%istwfk(ikpt)
      kpoint    =Dtset%kptns(:,ikpt)
      nbandkss_k=nbandkssk(ikpt)
+     mtag      =5*(ikpt+(isppol-1)*nkpt)
+
 
      ! Get G-vectors, for this k-point.
      call get_kg(kpoint,istwf_k,ecut_eff,gmet,onpw_k,kg_k)
@@ -1773,24 +1775,24 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
                end if
              end if
              if (sender/=receiver) then
-               call pawcprj_mpi_exch(natom,n2dim,dimlmn,0,Cprjnk_k,Cprjnk_k,sender,receiver,spaceComm,ierr)
+               call pawcprj_mpi_exch(natom,n2dim,dimlmn,0,Cprjnk_k,Cprjnk_k,sender,receiver,spaceComm,mtag+4,ierr)
              end if
            end if ! usepaw
 
          else ! do_diago
-           call xmpi_exch(eig_ene,nbandksseff,sender,eig_ene,receiver,spaceComm,ierr)
+           call xmpi_exch(eig_ene,nbandksseff,sender,eig_ene,receiver,spaceComm,mtag+1,ierr)
          end if
 
 !        Exchange eigenvectors.
          if (bufsz>0) then
            do i=0,bufnb-1
              call xmpi_exch(eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),2*npw_k*dtset%nspinor*bufsz,&
-&             sender,eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),receiver,spaceComm,ierr)
+&             sender,eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),receiver,spaceComm,mtag+2,ierr)
            end do
          end if
          if (bufrt>0) then
            call xmpi_exch(eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),2*npw_k*dtset%nspinor*bufrt,&
-&           sender,eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),receiver,spaceComm,ierr)
+&           sender,eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),receiver,spaceComm,mtag+3,ierr)
          end if
 
        end if

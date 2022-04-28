@@ -444,16 +444,16 @@ end interface xmpi_ibcast
 !----------------------------------------------------------------------
 
 interface xmpi_exch
-  module procedure xmpi_exch_intn
+  module procedure xmpi_exch_int1d
   module procedure xmpi_exch_int2d
-  module procedure xmpi_exch_dpn
+  module procedure xmpi_exch_dp1d
   module procedure xmpi_exch_dp2d
   module procedure xmpi_exch_dp3d
-  module procedure xmpi_exch_dp4d_tag
-  module procedure xmpi_exch_dp5d_tag
-  module procedure xmpi_exch_spc_1d
-  module procedure xmpi_exch_dpc_1d
-  module procedure xmpi_exch_dpc_2d
+  module procedure xmpi_exch_dp4d
+  module procedure xmpi_exch_dp5d
+  module procedure xmpi_exch_spc1d
+  module procedure xmpi_exch_dpc1d
+  module procedure xmpi_exch_dpc2d
 end interface xmpi_exch
 
 !----------------------------------------------------------------------

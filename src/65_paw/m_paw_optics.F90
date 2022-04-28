@@ -164,7 +164,7 @@ CONTAINS  !=====================================================================
  integer :: ibshift,icg,ierr,ikg,ikpt,ilmn,ount,ncid,varid,idir
  integer :: iorder_cprj,ipw,ispinor,isppol,istwf_k,itypat,iwavef
  integer :: jb,jbshift,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,option_core
- integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband
+ integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband,pnp_size
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
  logical :: already_has_nabla,cprj_paral_band,myband,mykpt,iomode_etsf_mpiio
@@ -344,7 +344,8 @@ CONTAINS  !=====================================================================
    end if
    psinablapsi=zero
  end if
-
+ pnp_size=size(psinablapsi)
+ 
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -704,14 +705,14 @@ CONTAINS  !=====================================================================
            if (mpi_enreg%me_kpt/=master_spfftband) then
              ABI_BUG('Problem with band communicator!')
            end if
-           call xmpi_exch(psinablapsi,etiq,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,ierr)
+           call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
          end if
        end if  
 
 !    >>> This is not my kpt and I am the master node: I receive the data and I write    
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
        sender=master_spfftband
-       call xmpi_exch(psinablapsi,etiq,sender,psinablapsi,master,spaceComm_kpt,ierr)
+       call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          if (nc_unlimited) then
@@ -852,7 +853,7 @@ CONTAINS  !=====================================================================
  integer :: ierr,ikpt,ilmn,iln,ount,is,my_jb
  integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat
  integer :: jb,jbsp,jlmn,lmn_size,lmncmax,mband_cprj,ncid,varid
- integer :: me,my_nspinor,nband_cprj_k,option_core
+ integer :: me,my_nspinor,nband_cprj_k,option_core,pnp_size
  integer :: nband_k,nphicor,ncorespinor,sender,iomode,fformopt,master_spfftband
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
@@ -1109,7 +1110,8 @@ CONTAINS  !=====================================================================
      ABI_MALLOC(psinablapsi_soc,(2,3,nphicor,natom,mband))
    end if
  end if
-
+ pnp_size=size(psinablapsi)
+ 
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -1391,14 +1393,14 @@ CONTAINS  !=====================================================================
            if (mpi_enreg%me_kpt/=master_spfftband) then
              ABI_BUG('Problem with band communicator!')
            end if
-           call xmpi_exch(psinablapsi,etiq,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,ierr)
+           call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
          end if
        end if  
 
 !    >>> This is not my kpt and I am the master node: I receive the data and I write    
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
        sender=master_spfftband
-       call xmpi_exch(psinablapsi,etiq,sender,psinablapsi,master,spaceComm_kpt,ierr)
+       call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
          nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
          nc_count=[2,3,nphicor,natom,mband,1,1]
