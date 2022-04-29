@@ -23,7 +23,6 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
   abi_gpu_cuda_serial="no"
   abi_gpu_cuda_mpi="no"
   abi_gpu_cuda_old="unknown"
-  abi_gpu_cuda_version_10="unknown"
 
   # Display variables
   AC_MSG_NOTICE([Cuda incs: ${abi_gpu_cuda_incs}])
@@ -73,22 +72,6 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
-  #
-  # check if we are using CUDA runtime version at least 10
-  # version 10 of CUDA is required for NVTX (header only)
-  #
-  AC_MSG_CHECKING([whether we have Cuda >= 10])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-    [[
-      #include <cuda_runtime_api.h>
-    ]],
-    [[
-      #if CUDART_VERSION < 10000
-      #error
-      #endif
-    ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
-  AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
-
   # Restore build environment
   AC_LANG_POP([C])
   LIBS="${abi_saved_LIBS}"
@@ -119,6 +102,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_incs="${GPU_CPPFLAGS}"
   abi_gpu_cuda_libs="${GPU_LIBS}"
   abi_gpu_cuda_root="${abi_gpu_prefix}"
+  abi_gpu_cuda_version_10="unknown"
   abi_gpu_nvtx_v3="unknown"
 
   # Make use of the CUDA_ROOT environment variable
@@ -126,8 +110,22 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     abi_gpu_cuda_root="${CUDA_ROOT}"
   fi
 
-  # call this macro here to make sure variable `abi_gpu_cuda_version_10` (CUDA >= 10) has correct value
-  _ABI_GPU_CHECK_CUDA
+  # call this macro here to make sure variable `abi_gpu_cuda_version_10`
+  #
+  # check if we are using CUDA runtime version at least 10
+  # version 10 of CUDA is required for NVTX (header only)
+  #
+  AC_MSG_CHECKING([whether we have Cuda >= 10])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+    [[
+      #include <cuda_runtime_api.h>
+    ]],
+    [[
+      #if CUDART_VERSION < 10000
+      #error
+      #endif
+    ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
+  AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
 
   # Check whether to look for generic files
   if test "${abi_gpu_cuda_root}" = ""; then
