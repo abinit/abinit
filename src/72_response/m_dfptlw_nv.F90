@@ -125,7 +125,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 !Local variables-------------------------------
 !scalars
  integer :: alpha,beta,delta,gamma,i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,istr,natom,sumg0 
- real(dp) :: tmpim,tmpre
+ real(dp) :: fac,tmpim,tmpre
  character(len=500) :: msg
 
 !arrays
@@ -179,6 +179,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
    call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,zion,&
 & mpi_atmtab=mpi_atmtab,comm_atom=comm_atom)
 
+
    !Convert the indexes labelling the strain perturbation into cartesian coordinates
    !Transform the metric perturbation direction 
    !(treat it as an atomic displacement)
@@ -216,13 +217,32 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
                dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)=vec2(delta)
              end do
            end do
-
          end do
        end do
      end do
    end do
 
-   !Convert to type-II quantity
+   !Transform the first q-gradient direction 
+   !(treat it as an electric field)
+   do i1pert=1,natom
+     do i1dir=1,3
+       do ii=1,2
+         do beta=1,3
+           do delta=1,3
+             do gamma=1,3
+               vec1(gamma)=dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             do gamma=1,3
+               dyewdqdq(ii,i1dir,i1pert,beta,delta,gamma)=vec2(gamma)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !Convert to a type-II quantity
    dyewdqdq_tII(:,:,:,:,:,:)=zero
    do i1pert=1,natom
      do alpha=1,3
@@ -233,6 +253,27 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
            & dyewdqdq(:,alpha,i1pert,beta,delta,gamma) + &
            & dyewdqdq(:,alpha,i1pert,delta,gamma,beta) - &
            & dyewdqdq(:,alpha,i1pert,gamma,beta,delta)
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !Transform back the first q-gradient direction to reduced coordinates
+   !(treat it as an electric field)
+   fac=two_pi**2
+   do i1pert=1,natom
+     do alpha=1,3
+       do ii=1,2
+         do delta=1,3
+           do beta=1,3
+             do gamma=1,3
+               vec1(gamma)=dyewdqdq_tII(ii,alpha,i1pert,gamma,beta,delta)
+             end do
+             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             do gamma=1,3
+               dyewdqdq_tII(ii,alpha,i1pert,gamma,beta,delta)=vec2(gamma)*fac
+             end do
            end do
          end do
        end do
