@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_gpu_detect
+!!****m* ABINIT/m_nvtx
 !! NAME
-!! m_gpu_detect
+!! m_nvtx
 !!
 !! FUNCTION
 !! Provide profiling helper routine to annotate execution ranges on both CPU and GPU
@@ -102,3 +102,4 @@ contains
   end subroutine nvtxEndRange
 
 end module m_nvtx
+!!***
