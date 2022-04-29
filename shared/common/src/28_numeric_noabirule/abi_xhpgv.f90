@@ -107,7 +107,8 @@
  if (info > 0) then
     ABI_COMMENT("DSPEV failed to converge")
     if (info <= n) then
-       ABI_COMMENT(sjoin("DSPEV failed to converge;", itoa(info), " off-diagonal elements of an intermediate tridiagonal form did not converge to zero."))
+       ABI_COMMENT(sjoin("DSPEV failed to converge;", itoa(info), " off-diagonal elements of"))
+       ABI_COMMENT(" an intermediate tridiagonal form did not converge to zero.")
     else
        ABI_COMMENT("The factorization of B could not be completed and no eigenvalues or eigenvectors were computed.")
     endif
