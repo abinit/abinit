@@ -40,7 +40,7 @@
 #include "abi_common.h"
 #include "stdio.h"
 #include "abi_gpu_header.h"
-
+#include "cuda_api_error_check.h"
 
 /******************************************************************/
 /*******                                                 **********/
@@ -84,6 +84,7 @@ extern "C" void gpu_apply_local_potential_(double2 *fofr,double* denpot,int* nff
 
   //Call To Kernel
   kernel_apply_local_potential<<<grid,bloc,0,*compute_stream>>>(fofr,denpot,*nfft_tot);
+  CUDA_KERNEL_CHECK("kernel_apply_local_potential");
 
 }//end subroutine gpu_apply_local_potential
 

@@ -1,6 +1,6 @@
-!!****d* ABINIT/52_manage_cuda
+!!****d* ABINIT/46_manage_cuda
 !! NAME
-!!  52_manage_cuda
+!!  46_manage_cuda
 !!
 !! DESCRIPTION
 !!  This directory adds support in ABINIT for CUDA.
@@ -14,7 +14,8 @@
 !!  ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_52_manage_cuda.F90
+!! interfaces_46_manage_cuda.F90
 !! m_alloc_hamilt_gpu.F90
+!! m_nvtx_data.F90
 !!
 !!***

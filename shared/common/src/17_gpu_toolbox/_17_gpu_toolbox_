@@ -16,5 +16,6 @@
 !! m_gpu_toolbox.F90
 !! m_gpu_detect.F90
 !! m_initcuda.F90
+!! m_nvtx.F90
 !!
 !!***
