@@ -579,6 +579,7 @@ type, public :: dataset_type
 !U
  integer :: ucrpa
  integer :: use_gpu_cuda
+ integer :: use_nvtx
  integer :: usedmatpu
  integer :: usedmft
  integer :: useexexch
@@ -667,7 +668,7 @@ type, public :: dataset_type
 !Integer allocatables
  integer, allocatable ::  algalch(:)         ! algalch(ntypalch)
  integer, allocatable ::  bdgw(:,:,:)        ! bdgw(2,nkptgw,nsppol)
- integer,allocatable  ::  bs_loband(:)
+ integer, allocatable ::  bs_loband(:)
  integer, allocatable ::  constraint_kind(:) ! constraint_kind(ntypat)
  integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
  integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
@@ -1895,7 +1896,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
- dtout%useextfpmd       = dtin%useextfpmd
+ dtout%use_nvtx           = dtin%use_nvtx
+ dtout%useextfpmd         = dtin%useextfpmd
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -3430,7 +3432,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk useextfpmd use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_nvtx use_slk useextfpmd use_yaml'
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'

@@ -96,7 +96,7 @@
 #include "stdio.h"
 #include "cuda_header.h" 
 #include "abi_gpu_header.h"
-
+#include "cuda_api_error_check.h"
 
 //STATIC vars to avoid too much cuda overhead
 //Cuda environnement vars
@@ -150,13 +150,6 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
   //   real(dp),intent(inout) :: fofr(2,n4,n5,n6*ndat)
   //   real(dp),intent(out) :: fofgout(2,npwout*ndat)
 
-
-
-
-  //Cuda return code
-  cufftResult cufft_state;
-  cudaError_t cuda_return;
-
   //Gpu buffers
 
   //Local integer
@@ -204,92 +197,46 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
     memcpy(buff_weighti,weight_i,(*ndat)*sizeof(double));
   }
   if (*option == 3){
-    cuda_return = cudaMemcpy(fofr_gpu,fofr,2*(*ndat)*nfft_tot*sizeof(double),cudaMemcpyHostToDevice);
-    if(cuda_return != cudaSuccess){
-      printf("ERROR while copying fofr to gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( cudaMemcpy(fofr_gpu,fofr,2*(*ndat)*nfft_tot*sizeof(double),cudaMemcpyHostToDevice) );
   }
 
   if(*option!=3){
-    cuda_return = cudaMemcpy(kg_kin_gpu,kg_kin,3*(*npwin)*sizeof(int),cudaMemcpyHostToDevice);
-    cuda_return = cudaMemcpy(fofgin_gpu,fofgin,2*(*npwin)*(*ndat)*sizeof(double),cudaMemcpyHostToDevice);
-    if(cuda_return != cudaSuccess){
-      printf("ERROR while copying input data to gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( cudaMemcpy(kg_kin_gpu,kg_kin,3*(*npwin)*sizeof(int),cudaMemcpyHostToDevice) );
+    CHECK_CUDA_ERROR( cudaMemcpy(fofgin_gpu,fofgin,2*(*npwin)*(*ndat)*sizeof(double),cudaMemcpyHostToDevice) );
 
     //We launch async transfert of denpot
     if(*option == 1 || *option == 2){
-      cuda_return = cudaMemcpyAsync(denpot_gpu,buff_denpot,nfft_tot*sizeof(double),cudaMemcpyHostToDevice,stream_cpy);
-      if(cuda_return != cudaSuccess){
-	printf("ERROR while copying denpot to gpu: %s \n",cudaGetErrorString(cuda_return));
-	fflush(stdout);
-	abi_cabort();
-      }
+      CHECK_CUDA_ERROR( cudaMemcpyAsync(denpot_gpu,buff_denpot,nfft_tot*sizeof(double),cudaMemcpyHostToDevice,stream_cpy) );
     }
     //We launch async transfert of denpot
     if(*option == 1){
-      cuda_return = cudaMemcpyAsync(weightr_gpu,buff_weightr,(*ndat)*sizeof(double),cudaMemcpyHostToDevice,stream_cpy);
-      cuda_return = cudaMemcpyAsync(weighti_gpu,buff_weighti,(*ndat)*sizeof(double),cudaMemcpyHostToDevice,stream_cpy);
-      if(cuda_return != cudaSuccess){
-	printf("ERROR while copying weight to gpu: %s \n",cudaGetErrorString(cuda_return));
-	fflush(stdout);
-	abi_cabort();
-      }
+      CHECK_CUDA_ERROR( cudaMemcpyAsync(weightr_gpu,buff_weightr,(*ndat)*sizeof(double),cudaMemcpyHostToDevice,stream_cpy) );
+      CHECK_CUDA_ERROR( cudaMemcpyAsync(weighti_gpu,buff_weighti,(*ndat)*sizeof(double),cudaMemcpyHostToDevice,stream_cpy) );
     }
 
     //call preprocessing routine on gpu
     gpu_sphere_in_(fofgin_gpu,work_gpu,kg_kin_gpu,npwin,&n1,&n2,&n3,ndat,istwf_k,&stream_compute);
 
     //call backward fourrier transform on gpu work_gpu => fofr_gpu
-    cufft_state = FFTEXECC2C(plan_fft,(cucmplx *)work_gpu,(cucmplx *)fofr_gpu,CUFFT_INVERSE);
-    if(cufft_state!=CUFFT_SUCCESS){
-      printf("ERROR while fft work_gpu ==> fofr:\n%s\n",cufftGetErrorString(cufft_state));
-      //printf("last cudaError was : %s \n",cudaGetErrorString(cudaGetLastError()));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( FFTEXECC2C(plan_fft,(cucmplx *)work_gpu,(cucmplx *)fofr_gpu,CUFFT_INVERSE) );
   }
 
   if(*option==0){
     //We copy back fofr
-    //cuda_return = cudaStreamSynchronize(stream_compute);
-    cuda_return = cudaThreadSynchronize();
-    if(cuda_return != cudaSuccess){
-      printf("ERROR when synchronizing after FFT on gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
-    cuda_return = cudaMemcpy(fofr,fofr_gpu,2*(*ndat)*nfft_tot*sizeof(double),cudaMemcpyDeviceToHost);
-    if(cuda_return != cudaSuccess){
-      printf("ERROR while copying fofr from gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
+    //CHECK_CUDA_ERROR( cudaStreamSynchronize(stream_compute) );
+    CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
+    CHECK_CUDA_ERROR( cudaMemcpy(fofr,fofr_gpu,2*(*ndat)*nfft_tot*sizeof(double),cudaMemcpyDeviceToHost) );
   }
 
   if(*option==1){
     //We finish denpot and weight transferts
-    cuda_return = cudaStreamSynchronize(stream_cpy);
-    if(cuda_return != cudaSuccess){
-      printf("ERROR while getting denpot and weight on gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
-
+    CHECK_CUDA_ERROR( cudaStreamSynchronize(stream_cpy) );
+    
     //call density accumulation routine on gpu
     gpu_density_accumulation_(fofr_gpu,denpot_gpu,weightr_gpu,weighti_gpu,&nfft_tot,ndat,&stream_compute);
 
     //We get denpot back on cpu
-    cuda_return = cudaMemcpy(denpot,denpot_gpu,nfft_tot*sizeof(double),cudaMemcpyDeviceToHost);
-    if(cuda_return != cudaSuccess){
-      printf("ERROR while copying denpot from gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( cudaMemcpy(denpot,denpot_gpu,nfft_tot*sizeof(double),cudaMemcpyDeviceToHost) );
   }
 
   if(*option==2){
@@ -302,24 +249,14 @@ extern "C" void gpu_fourwf_(int *cplex,double *denpot,double *fofgin,double *fof
   if(*option==2 || *option==3){
 
     //call forward fourier transform on gpu: fofr_gpu ==> work_gpu
-    cufft_state = FFTEXECC2C(plan_fft,(cucmplx *)fofr_gpu,(cucmplx *)work_gpu,CUFFT_FORWARD);
-    if(cufft_state!=CUFFT_SUCCESS){
-      printf("ERROR while fft fofr ==> work_gpu:\n%s\n",cufftGetErrorString(cufft_state));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( FFTEXECC2C(plan_fft,(cucmplx *)fofr_gpu,(cucmplx *)work_gpu,CUFFT_FORWARD) );
 
     //call post processing  routine on gpu
-    cuda_return = cudaMemcpy(kg_kout_gpu,kg_kout,3*(*npwout)*sizeof(int),cudaMemcpyHostToDevice);
+    CHECK_CUDA_ERROR( cudaMemcpy(kg_kout_gpu,kg_kout,3*(*npwout)*sizeof(int),cudaMemcpyHostToDevice) );
     gpu_sphere_out_(fofgout_gpu,work_gpu,kg_kout_gpu,npwout,&n1,&n2,&n3,ndat,&stream_compute);
 
     //We get fofgout back on cpu
-    cuda_return = cudaMemcpy(fofgout,fofgout_gpu,2*(*npwout)*(*ndat)*sizeof(double),cudaMemcpyDeviceToHost);
-    if(cuda_return != cudaSuccess){
-      printf("ERROR while copying fofgout from gpu: %s \n",cudaGetErrorString(cuda_return));
-      fflush(stdout);
-      abi_cabort();
-    }
+    CHECK_CUDA_ERROR( cudaMemcpy(fofgout,fofgout_gpu,2*(*npwout)*(*ndat)*sizeof(double),cudaMemcpyDeviceToHost) );
   }
 
 }//end subroutine gpu_fourwf
@@ -332,19 +269,11 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
 //   printf("alloc_gpu_fourwf called with (nfft,ndat,npwin,npwout)=(%d,%d,%d,%d)\n",ngfft[0]*ngfft[1]*ngfft[2],*ndat,*npwin,*npwout);
 //   fflush(stdout);
 
-  cufftResult cufft_state;
-  cudaError_t cuda_return;
-
   gpu_initialized = 1;
 
   //Creation des streams cuda
-  cuda_return = cudaStreamCreate(&stream_cpy);
-  cuda_return = cudaStreamCreate(&stream_compute);
-  if(cuda_return != cudaSuccess){
-    printf("ERROR: when creating cuda streams:\n%s\n",cudaGetErrorString(cuda_return));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cudaStreamCreate(&stream_cpy) );
+  CHECK_CUDA_ERROR( cudaStreamCreate(&stream_compute) );
 
   //Size modification if too little memory allocation
   int n1=ngfft[0];
@@ -366,86 +295,49 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft,int *ndat,int *npwin,int *npwout){
   t_fft[2]=n1;
 
   //Creation du plan
-  cufft_state=cufftPlanMany(&plan_fft,3,t_fft,NULL,1,0,NULL,1,0,FFT_C2C,*ndat);
-  if(cufft_state!=CUFFT_SUCCESS){
-    printf("alloc_gpu_fourwf:\n ERROR: At creation of cufftPlan:\n%s\n",cufftGetErrorString(cufft_state));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cufftPlanMany(&plan_fft,3,t_fft,NULL,1,0,NULL,1,0,FFT_C2C,*ndat) );
 
   //Association du plan au stream de calcul
-  cufft_state = cufftSetStream(plan_fft,stream_compute);
-  if(cufft_state!=CUFFT_SUCCESS){
-    printf("alloc_gpu_fourwf:\n ERROR: while associating cufftPlan to a stream:\n%s\n",cufftGetErrorString(cufft_state));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR(cufftSetStream( plan_fft,stream_compute) );
 
-  cuda_return = cudaMalloc(&work_gpu,2*ndat_loc*fft_size*sizeof(double));
-  cuda_return = cudaMalloc(&fofr_gpu,2*ndat_loc*fft_size*sizeof(double));
-  cuda_return = cudaMalloc(&denpot_gpu,fft_size*sizeof(double));
-  cuda_return = cudaMalloc(&weightr_gpu,ndat_loc*sizeof(double));
-  cuda_return = cudaMalloc(&weighti_gpu,ndat_loc*sizeof(double));
-  cuda_return = cudaMalloc(&kg_kin_gpu,3*npw*sizeof(int));
-  cuda_return = cudaMalloc(&fofgin_gpu,2*npw*ndat_loc*sizeof(double));
-  cuda_return = cudaMalloc(&kg_kout_gpu,3*npw*sizeof(int));
-  cuda_return = cudaMalloc(&fofgout_gpu,2*npw*ndat_loc*sizeof(double));
-  if(cuda_return != cudaSuccess){
-    printf("alloc_gpu_fourwf: ERROR while allocating memory on gpu: %s \n",cudaGetErrorString(cuda_return));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cudaMalloc(&work_gpu,2*ndat_loc*fft_size*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&fofr_gpu,2*ndat_loc*fft_size*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&denpot_gpu,fft_size*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&weightr_gpu,ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&weighti_gpu,ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&kg_kin_gpu,3*npw*sizeof(int)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&fofgin_gpu,2*npw*ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&kg_kout_gpu,3*npw*sizeof(int)) );
+  CHECK_CUDA_ERROR( cudaMalloc(&fofgout_gpu,2*npw*ndat_loc*sizeof(double)) );
 
-
-  //Allocation des buffers cpu "pinned"
-  cuda_return = cudaMallocHost(&buff_denpot,fft_size*sizeof(double));
-  cuda_return = cudaMallocHost(&buff_weightr,ndat_loc*sizeof(double));
-  cuda_return = cudaMallocHost(&buff_weighti,ndat_loc*sizeof(double));
-  if(cuda_return != cudaSuccess){
-    printf("alloc_gpu_fourwf:\n ERROR while allocating pinned memory for transfert to gpu: %s \n",cudaGetErrorString(cuda_return));
-    fflush(stdout);
-    abi_cabort();
-  }
+  // Allocation des buffers cpu "pinned"
+  CHECK_CUDA_ERROR( cudaMallocHost(&buff_denpot,fft_size*sizeof(double))) ;
+  CHECK_CUDA_ERROR( cudaMallocHost(&buff_weightr,ndat_loc*sizeof(double)) );
+  CHECK_CUDA_ERROR( cudaMallocHost(&buff_weighti,ndat_loc*sizeof(double)) );
+  
 }//End of alloc_gpu_fourwf_
 
 
 extern "C" void free_gpu_fourwf_(){
-  cufftResult cufft_state;
-  cudaError_t cuda_return;
 
-  //On detruit l'ancien plan
-  cufft_state = cufftDestroy(plan_fft);
-  if(cufft_state!=CUFFT_SUCCESS){
-    printf("free_gpu_fourwf:\n ERROR: at destruction of cufftPlan \n");
-    fflush(stdout);
-    abi_cabort();
-  }
+  // destroy old fftw plan
+  CHECK_CUDA_ERROR( cufftDestroy(plan_fft) );
 
-  cuda_return = cudaFree(work_gpu);
-  cuda_return = cudaFree(fofr_gpu);
-  cuda_return = cudaFree(denpot_gpu);
-  cuda_return = cudaFree(weightr_gpu);
-  cuda_return = cudaFree(weighti_gpu);
-  cuda_return = cudaFree(kg_kin_gpu);
-  cuda_return = cudaFree(fofgin_gpu);
-  cuda_return = cudaFree(kg_kout_gpu);
-  cuda_return = cudaFree(fofgout_gpu);
-  cuda_return = cudaFreeHost(buff_denpot);
-  cuda_return = cudaFreeHost(buff_weightr);
-  cuda_return = cudaFreeHost(buff_weighti);
-  if(cuda_return != cudaSuccess){
-    printf("free_gpu_fourwf:\n ERROR while freeing memory on gpu: %s \n",cudaGetErrorString(cuda_return));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cudaFree(work_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(fofr_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(denpot_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(weightr_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(weighti_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(kg_kin_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(fofgin_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(kg_kout_gpu) );
+  CHECK_CUDA_ERROR( cudaFree(fofgout_gpu) );
+  CHECK_CUDA_ERROR( cudaFreeHost(buff_denpot) );
+  CHECK_CUDA_ERROR( cudaFreeHost(buff_weightr) );
+  CHECK_CUDA_ERROR( cudaFreeHost(buff_weighti) );
 
-  cuda_return = cudaStreamDestroy(stream_cpy);
-  cuda_return = cudaStreamDestroy(stream_compute);
-  if(cuda_return != cudaSuccess){
-    printf("free_gpu_fourwf:\n ERROR: at destruction of streams: %s \n",cudaGetErrorString(cuda_return));
-    fflush(stdout);
-    abi_cabort();
-  }
+  CHECK_CUDA_ERROR( cudaStreamDestroy(stream_cpy) );
+  CHECK_CUDA_ERROR( cudaStreamDestroy(stream_compute) );
 
   gpu_initialized = 0;
 }//end of free_gpu_fourwf_()
