@@ -43,7 +43,7 @@ module m_vhxc_me
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_denpot,  only : paw_mknewh0
  use m_hide_blas,   only : xdotc
- use m_wfd,         only : wfd_t, wave_t
+ use m_wfd,         only : wfdgw_t, wave_t
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
@@ -90,7 +90,7 @@ contains
 !!     %typat(natom)=type of each atom
 !!  vhartr(nfftf)= Hartree potential in real space on the fine FFT mesh
 !!  vxc(nfftf,nspden)= xc potential in real space on the fine FFT grid
-!!  Wfd <type (wfd_t)>=Structure gathering information on the wavefunctions.
+!!  Wfd <type (wfdgw_t)>=Structure gathering information on the wavefunctions.
 !!  rhor(nfftf,nspden)=density in real space (smooth part if PAW).
 !!  nhatgrdim= -PAW only- 0 if nhatgr array is not used ; 1 otherwise
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
@@ -142,7 +142,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  integer,intent(in) :: nhatgrdim,usexcnhat,nfftf
  type(Dataset_type),intent(in) :: Dtset
  type(Pseudopotential_type),intent(in) :: Psps
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
  type(Pawang_type),intent(in) :: Pawang
  type(crystal_t),intent(in) :: Cryst
  type(melflags_t),intent(in) :: Mflags
