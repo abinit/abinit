@@ -548,10 +548,10 @@ vkbd       -0.6808E-03 -0.7624E-02
   -1.35245   -0.66109   -0.65587   -0.64987    0.37173    0.43147    0.62085    0.66033
    0.89502    1.08304
  Total charge density [el/Bohr^3]
-      Maximum=    1.0229E+00  at reduced coord.    0.4688    0.5000    0.5938
- Next maximum=    1.0229E+00  at reduced coord.    0.4375    0.5000    0.5938
-      Minimum=    1.6308E-03  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    2.1978E-03  at reduced coord.    0.0313    0.0000    0.0000
+)     Maximum=    1.0229E+00  at reduced coord.    0.4688    0.5000    0.5938
+)Next maximum=    1.0229E+00  at reduced coord.    0.4375    0.5000    0.5938
+)     Minimum=    1.6308E-03  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    2.1978E-03  at reduced coord.    0.0313    0.0000    0.0000
    Integrated=    8.0000E+00
 
 == END DATASET(S) ==============================================================
