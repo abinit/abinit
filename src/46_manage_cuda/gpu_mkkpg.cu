@@ -38,6 +38,7 @@
 #include "config.h"
 #endif
 
+#include "cuda_api_error_check.h"
 
 __global__ void kernel_mkkpg(double *kpg,int *kg,
 			     const int npw,
@@ -71,5 +72,6 @@ extern "C" void gpu_mkkpg_(int *kg_gpu,double *kpg_gpu,double *kpt,int *npw){
   block.x = 64;
   grid.x = ((*npw) + block.x - 1)/block.x;
   kernel_mkkpg<<<grid,block>>>(kpg_gpu,kg_gpu,*npw,kpt[0],kpt[1],kpt[2]);
+  CUDA_KERNEL_CHECK("kernel_mkkpg");
 }
 //***

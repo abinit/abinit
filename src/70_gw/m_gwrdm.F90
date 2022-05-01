@@ -3,7 +3,7 @@
 !!  m_gwrdm
 !!
 !! FUNCTION
-!!  Compute density matrix correction Galitskii-Migdal Ecorr, G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c) 
+!!  Compute density matrix correction Galitskii-Migdal Ecorr, G = Go + Go Sigma Go (imaginary freqs. are used in Sigma_c)
 !!  and associated quantities (natural orbitals, matrix elements, etc.).
 !! PARENTS
 !!
@@ -498,7 +498,7 @@ subroutine natoccs(ib1,ib2,rdm_k,nateigv,occs,BSt,ik_ibz,iinfo,checksij)
    do ib2dm=1,ndim
      nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ik_ibz,1)=eigenvect(ib1dm,ib2dm)
    end do
-   occs(ib1+(ib1dm-1),ik_ibz)=occs_tmp2(ib1dm)  ! Overwrite the initial KS-DFT occs from ib1 to ib2 
+   occs(ib1+(ib1dm-1),ik_ibz)=occs_tmp2(ib1dm)  ! Overwrite the initial KS-DFT occs from ib1 to ib2
    toccs_k=toccs_k+occs_tmp2(ib1dm)
  end do
 
@@ -555,7 +555,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  integer,intent(in),dimension(3) :: ngfft_in
  type(ebands_t),target,intent(inout) :: BSt
  type(Hdr_type),intent(inout) :: Hdr
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  real(dp),intent(in) :: occs(:,:)
 !Local variables ------------------------------
@@ -699,7 +699,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,BSt,occs,nateigv,sigmak_todo,my_rank,gw1rd
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  type(kmesh_t),intent(in) :: Kmesh
  type(sigparams_t),intent(in) :: Sigp
  type(ebands_t),intent(in) :: BSt
@@ -851,7 +851,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,my_rank
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  character(len=fnlen),intent(in) :: gw1rdm_fname_out
 !arrays
  real(dp),intent(in) :: occs(:,:)

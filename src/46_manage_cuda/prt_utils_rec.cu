@@ -12,6 +12,7 @@
 #include "cuda_common.h"
 #include "cuda_header.h"
 #include "cuda_rec_head.h"
+#include "cuda_api_error_check.h"
 
 /*=========================================================================*/
 /*________________________ GPU_function called by HOST_____________________*/
@@ -25,7 +26,7 @@ __host__ void prt_dbg_arr(cureal* v_d,
   cudaDeviceSynchronize();
   cureal* v_h  = NULL;
   v_h = (cureal*) malloc(size);
-  cudaMemcpy(v_h,&(v_d[pos]),size,cudaMemcpyDeviceToHost);
+  CHECK_CUDA_ERROR( cudaMemcpy(v_h,&(v_d[pos]),size,cudaMemcpyDeviceToHost) );
   printf("%s ",bo);
   for(int jj=0;jj<num; jj++) printf("%9.5e ",v_h[jj]);
   //for(int jj=0;jj<num; jj++) printf("%9.5f    \n",v_h[jj]);
@@ -39,10 +40,10 @@ __host__ void prt_dbg_arrc(cucmplx* v_d,
 			  char bo[20])
 {
 #ifdef  HAVE_GPU_CUDA_DEBUG
-  cudaDeviceSynchronize();
+  CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
   cucmplx* v_h = NULL;
   v_h = (cucmplx*) malloc(size);
-  cudaMemcpy(v_h,&(v_d[pos]),size,cudaMemcpyDeviceToHost);
+  CHECK_CUDA_ERROR( cudaMemcpy(v_h,&(v_d[pos]),size,cudaMemcpyDeviceToHost) );
   printf("%s ",bo);
   for(int jj=0;jj<num; jj++) printf("%9.5e ",v_h[jj].x);
   printf("\n");
@@ -72,7 +73,7 @@ __host__ void  prt_mem_use(size_t un_pitch,size_t hauteur,size_t size)
 __host__ void starttime(cudaEvent_t* start)
 {
 #ifdef  HAVE_GPU_CUDA_TM
-  cudaEventRecord(*start,0);
+  CHECK_CUDA_ERROR( cudaEventRecord(*start,0) );
 #endif
   return;
 }
@@ -84,13 +85,13 @@ __host__ void calctime(cudaEvent_t* stop,cudaEvent_t start,
   if(index>=DEBUGLEN){
     printf("ERROR!! YOU ARE TESTING TIME FOR TOO MUCH KERNELS\n");
     printf("TRY TO INCREASE IT IN \"cuda_rec_head.cu\"\n");
-    exit(EXIT_FAILURE);;
+    exit(EXIT_FAILURE);
   }
-  cudaDeviceSynchronize();
+  CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
   float bo;
-  cudaEventRecord(*stop,0);
-  cudaEventSynchronize(*stop);
-  cudaEventElapsedTime(&bo,start,*stop);
+  CHECK_CUDA_ERROR( cudaEventRecord(*stop,0) );
+  CHECK_CUDA_ERROR( cudaEventSynchronize(*stop) );
+  CHECK_CUDA_ERROR( cudaEventElapsedTime(&bo,start,*stop) );
   timer[index] += bo; 
 #endif
   return;
@@ -103,7 +104,7 @@ __host__ void  prt_device_timing(float* timing,int size)
   float accoum_time = 0.;
   printf( "___________________________________________________________________\n");
   printf( "________________  Timing on devices  ______________________________\n");
-  cudaDeviceSynchronize();
+  CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
   printf(" Allocation time        :    %10.3f (ms)\n", timing[0]);
   accoum_time += timing[0];
   /*FFT-TIMING*/

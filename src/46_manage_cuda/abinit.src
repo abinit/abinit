@@ -20,6 +20,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_manage_cuda.F90",
  "m_alloc_hamilt_gpu.F90",
+ "m_nvtx_data.F90",
  "cuda_rec.cu",
  "cuda_rec_cut.cu",
  "density.cu",
@@ -40,7 +41,9 @@ sources = [
  "recursion_no_bth.cu",
 ]
 
-
+#optional_sources = {
+#    "NVTX": ["m_nvtx_data.F90"],
+#}
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

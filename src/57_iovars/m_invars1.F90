@@ -574,7 +574,17 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
    if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
+end do
+
+ dtsets(:)%use_nvtx=0
+#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ do idtset=1,ndtset_alloc
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
+   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
  end do
+#endif
+
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
@@ -2046,7 +2056,7 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine, or even 
+!! (some are initialized earlier, see indefo1 routine, or even
 !!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
@@ -2138,7 +2148,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      else
        dtsets(idtset)%use_gpu_cuda=1
      end if
-   end if
+  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
