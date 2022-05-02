@@ -278,6 +278,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
         [[
 #         include <mpi.h>
 #         include <netcdf.h>
+#         include <netcdf_par.h>
 #         include <stdio.h>
         ]],
         [[
