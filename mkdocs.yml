@@ -187,6 +187,7 @@ nav:
         - Elastic: tutorial/elastic.md
         - tutorial/ffield.md
         - tutorial/nlo.md
+        - tutorial/lattice_wannier.md
     - DMFT: tutorial/dmft.md
     - EPH:
         - tutorial/eph_intro.md
