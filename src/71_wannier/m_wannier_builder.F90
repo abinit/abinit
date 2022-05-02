@@ -473,7 +473,7 @@ contains
     real(dp), intent(inout):: weight(self%nband)
     logical,  intent(in):: project_to_anchor
 
-    integer:: iband, ianchor, anchor
+    integer:: iband, ianchor
     real(dp):: proj
     complex(dp):: p
     real(dp), pointer:: ek(:)
