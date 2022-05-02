@@ -37,7 +37,7 @@
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = hexu
+#%% authors = X. He
 #%% keywords = 
 #%% description = Construct Lattice Wannier functions from phonon with SCDM-k method.
 #%% topics = LatticeWannier
