@@ -43,7 +43,7 @@
 #include "abi_common.h"
 #include "stdio.h"
 #include "abi_gpu_header.h"
-
+#include "cuda_api_error_check.h"
 
 /*******************************************************************/
 /**********                                      *******************/
@@ -97,6 +97,7 @@ extern "C" void gpu_density_accumulation_(double *fofr,double* denpot, double* w
 
   //Call To Kernel
   kernel_accumulate_density<<<grid,bloc,0,*compute_stream>>>(fofr,denpot,weight_r,weight_i,*nfft_tot,*ndat);
+  CUDA_KERNEL_CHECK("kernel_accumulate_density");
 
 }//end subroutine gpu_density_accumulation
 
