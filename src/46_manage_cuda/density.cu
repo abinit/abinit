@@ -14,7 +14,21 @@
 #include "cuda_rec_head.h"
 #include "rec_dens_calc.cu"
 
-#define PI 3.1415926535897932384626
+#include "cuda_api_error_check.h"
+
+/*
+ * PI is already defined in math.h, shouldn't we use it ?
+ * ABI_USE_MATH_DEFINE is not defined by default
+ *
+ */
+#ifndef PI
+#  ifdef ABI_USE_MATH_DEFINE
+#    include <math.h>
+#    define PI (M_PI)
+#  else
+#    define PI 3.1415926535897932384626
+#  endif
+#endif
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* This CUDA module contains the functions (kernels) to perform
@@ -102,19 +116,19 @@ void alloc_dens_cuda_(int* ntranche,
 
  )
 {
- size_t largeur  = (size_t)(*nrec+1)*sizeof(cureal);   //- Size of real vectors
- size_t anpitch = largeur;  //- Pitch to put multi-vectors in a matrix: intial guess
- size_t height = *ntranche;
+  size_t largeur  = (size_t)(*nrec+1)*sizeof(cureal);   //- Size of real vectors
+  size_t anpitch = largeur;  //- Pitch to put multi-vectors in a matrix: intial guess
+  size_t height = *ntranche;
 
- cudaMallocPitch((void**) &an_d,&anpitch,largeur,height);
- cudaMemcpy2D(an_d,anpitch,an_h,largeur,largeur,height,cudaMemcpyHostToDevice);
+  CHECK_CUDA_ERROR( cudaMallocPitch((void**) &an_d,&anpitch,largeur,height) );
+  CHECK_CUDA_ERROR( cudaMemcpy2D(an_d,anpitch,an_h,largeur,largeur,height,cudaMemcpyHostToDevice) );
 
- cudaMallocPitch((void**) &bn2_d,&anpitch,largeur,height);
- cudaMemcpy2D(bn2_d,anpitch,bn2_h,largeur,largeur,height,cudaMemcpyHostToDevice);
+  CHECK_CUDA_ERROR( cudaMallocPitch((void**) &bn2_d,&anpitch,largeur,height) );
+  CHECK_CUDA_ERROR( cudaMemcpy2D(bn2_d,anpitch,bn2_h,largeur,largeur,height,cudaMemcpyHostToDevice) );
 
- cudaMalloc((void**) &rho_d,height*sizeof(cureal));
+  CHECK_CUDA_ERROR( cudaMalloc((void**) &rho_d,height*sizeof(cureal)) );
 
- *npitch = (size_t)anpitch/sizeof(cureal);
+  *npitch = (size_t)anpitch/sizeof(cureal);
 
 // prt_dbg_arr(bn2_d,200**npitch*sizeof(cureal),200,0,"lala_a");
 // prt_dbg_arr(bn2_d,anpitch,10,(int)(anpitch/sizeof(cureal)),"lala_b");
@@ -124,10 +138,10 @@ void alloc_dens_cuda_(int* ntranche,
 extern "C" __host__
 void dealloc_dens_cuda_()
 {
- cudaFree(an_d);
- cudaFree(bn2_d);
- cudaFree(rho_d);
- // printf("dealloc_dens_cuda\n");
+  CHECK_CUDA_ERROR( cudaFree(an_d) );
+  CHECK_CUDA_ERROR( cudaFree(bn2_d) );
+  CHECK_CUDA_ERROR( cudaFree(rho_d) );
+  // printf("dealloc_dens_cuda\n");
 }
 
 
@@ -182,8 +196,9 @@ void density_cuda_(int* npitch,       //- Pitch for the an and bn2 on gpu */
 				    coeef_mu,
 				    an_d,bn2_d,
 				    rho_d);
-
- cudaMemcpy(rho_h,rho_d,height*sizeof(cureal),cudaMemcpyDeviceToHost);
+ CUDA_KERNEL_CHECK("density_kernel");
+ 
+ CHECK_CUDA_ERROR( cudaMemcpy(rho_h,rho_d,height*sizeof(cureal),cudaMemcpyDeviceToHost) );
 
 // for(int ii=0;ii<height;ii++) printf("%f ",rho_h[ii]);printf("\n");
  return;

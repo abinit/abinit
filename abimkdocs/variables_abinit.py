@@ -1683,7 +1683,7 @@ In ground-state or DFPT calculations, such breaking of the symmetry is harmless.
 However, for a GW, BSE or cDFT calculation, the presence of non-symmorphic translations
 that are not coherent with the FFT grid will cause problems (e.g. enormous memory reservation, inducing segfault, or lack of convergence).
 
-For cDFT calculations, the local integral of magnetization or charge is evaluated in real space, on the FFT grid. So, if 
+For cDFT calculations, the local integral of magnetization or charge is evaluated in real space, on the FFT grid. So, if
 the grids are locally different for two atoms related by symmetry (so in principle equivalent), there is a incoherency, that might induce
 lack of convergence.
 
@@ -2889,11 +2889,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1).. 
+Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1)..
 
    * 1 : corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
    * 2 : corresponds to the "Around Mean Field" double counting (this is not yet in production).
    * 5 : the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
+   * 6 : this option is in development.
 """,
 ),
 
@@ -5318,7 +5319,7 @@ the output wavefunction file appended with _1WF must be used.
 be taken, which is a frequently occurring case. However, if the first dataset is treated, -1
 is equivalent to 0, since no dataset has been computed in the same run.
   * If [[getddk]] is a negative number, it indicates the number of datasets to go
-backward to find the needed wavefunction file. 
+backward to find the needed wavefunction file.
 Going back beyond the first dataset is equivalent to using zero for the get variable.
 
 In the case of a ddk calculation in a multi dataset run, in order to compute
@@ -8095,7 +8096,7 @@ Variable(
     mnemonics="Integer that governs the ReaDing of DDK wavefunctions, in _1WF files",
     added_in_version="before_v9",
     text=r"""
-Indicates whether ABINIT should read the DDK wavefunctions as possible starting wavefunctions. 
+Indicates whether ABINIT should read the DDK wavefunctions as possible starting wavefunctions.
 As alternative, one can use the
 input variable [[getddk]].
 
@@ -18404,7 +18405,7 @@ that the real space operations should act also on the magnetization vector in th
 symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
 Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
 is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case.
-Note that real-space operations act on the magnetization as an axial vector, not as a normal vector. For example, the inversion symmetry 
+Note that real-space operations act on the magnetization as an axial vector, not as a normal vector. For example, the inversion symmetry
 does not change the magnetization vector.
 
 Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
@@ -19202,7 +19203,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 When equal to one or two, this variable allows one to calculate U with
-the cRPA method. 
+the cRPA method.
 The present implementation is parallelized (as for usual GW
 calculations), use symmetry over k points only for calculations involving one
 correlated atom, and can be used when correlated bands are entangled or not.
@@ -19390,6 +19391,23 @@ Note that, while running ABINIT on GPUs, it is recommended to use MAGMA
 external library (i.e. Lapack on GPUs). The latter is activated during
 compilation stage (see "configure" step of ABINIT compilation process). If
 MAGMA is not used, ABINIT performances on GPUs can be poor.
+""",
+),
+
+Variable(
+    abivarname="use_nvtx",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="activate USE of NVTX tracing/profiling (only meaningful use_gpu_cuda=1)",
+    added_in_version="9.7.2",
+    text=r"""
+Only available if ABINIT executable has been compiled with cuda nvcc compiler.
+This parameter activates the use of nvtx tracing/profiling if present.
+If [[use_nvtx]] = 1, when profiling with nsys, additional information with be added in report.
+If [[use_nvtx]] = 0, nothing happens.
 """,
 ),
 
