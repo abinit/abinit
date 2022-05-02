@@ -133,7 +133,7 @@ contains
 !!  KS_BSt<ebands_t>=KS energies and occupations.
 !!    %eig(mband,nkpt,nsppol)=KS energies
 !!  Paw_pwff<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
-!!  Wfd<wfd_t>=Object used to access the wavefunctions
+!!  Wfd<wfdgw_t>=Object used to access the wavefunctions
 !!
 !! OUTPUT
 !!  chi0(Ep%npwe,Ep%npwe,Ep%nomega)=independent-particle susceptibility matrix for wavevector qq,
@@ -197,7 +197,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ type(wfdgw_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
  integer,intent(in) :: ktabr(nfftot_gw,Kmesh%nbz),ktabrf(nfftf_tot*Dtset%pawcross,Kmesh%nbz)
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
@@ -1148,7 +1148,7 @@ end subroutine cchi0q0
 !!   %occ(mband,nkpt,nsppol)=QP occupation numbers, for each k point in IBZ, and each band
 !!   %eig(mband,nkpt,nsppol)=GW energies, for self-consistency purposes
 !!  Paw_pwff<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
-!!  Wfd<wfd_t>=Object used to access the wavefunctions
+!!  Wfd<wfdgw_t>=Object used to access the wavefunctions
 !!
 !! OUTPUT
 !!  chi0(Ep%npwe,Ep%npwe,Ep%nomega)=independent-particle susceptibility matrix at wavevector qpoint and
@@ -1185,7 +1185,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  type(littlegroup_t),intent(in) :: Ltg_q
  type(Pawang_type),intent(in) :: Pawang
  type(Pseudopotential_type),intent(in) :: Psps
- type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ type(wfdgw_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
  integer,intent(in) :: ktabr(nfftot_gw,Kmesh%nbz),ktabrf(nfftf_tot*Dtset%pawcross,Kmesh%nbz)
  integer,intent(in) :: ngfft_gw(18),ngfftf(18)
@@ -2055,7 +2055,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft_gw(18)
  complex(gwpc),intent(out) :: chi0(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega)
