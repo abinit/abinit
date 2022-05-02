@@ -919,5 +919,69 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
 end subroutine dfptlw_loop
 !!***
 
+!!****f* ABINIT/m_dfptlw_loop/dfptlw_typeIproc
+!! NAME
+!!  dfptlw_typeIproc
+!!
+!! FUNCTION
+!!  Process type-I terms and convert them to type-II in
+!!  the d3etot mixed (reduced/cartessian) coordinates. 
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2022 ABINIT group (MR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  d3e_pert1(mpert)=array with the i1pert cases to calculate
+!!  d3e_pert2(mpert)=array with the i2pert cases to calculate
+!!  mpert =maximum number of ipert
+!!
+!! OUTPUT
+!!  argout(sizeout)=description
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine dfptlw_typeIproc(d3e_pert1,d3e_pert1,mpert)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mpert
+ integer,intent(in) :: d3e_pert1(mpert),d3e_pert2(mpert)
+
+!arrays
+!Local variables-------------------------------
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ DBG_EXIT("COLL")
+
+end subroutine dfptlw_typeIproc
+
+
 end module m_dfptlw_loop
 !!***
