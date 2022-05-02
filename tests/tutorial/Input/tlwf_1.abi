@@ -30,7 +30,7 @@
 #%% input_ddb = BTO.DDB
 #%% [files]
 #%% files_to_test = 
-#%%   t110.abo, tolnlines = 6, tolabs = 2.0e-7, tolrel = 5.0e-6, fld_options = -medium
+#%%   tlwf_1.abo, tolnlines = 6, tolabs = 2.0e-7, tolrel = 5.0e-6, fld_options = -medium
 #%% [shell]
 #%% pre_commands =
 #%%   iw_cp BTO.DDB BTO.DDB;

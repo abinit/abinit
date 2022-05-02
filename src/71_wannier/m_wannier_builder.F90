@@ -60,8 +60,8 @@ module m_wannier_builder
   type::  WannierBuilder_t
 
      ! Inputs 
-     real(dp), pointer:: evals(:, :) => null()   !(iband, ikpt)
-     complex(dp), pointer:: psi(:, :, :) => null() ! (ibasis, iband, ikpt)
+     real(dp),  pointer:: evals(:, :) => null()   !(iband, ikpt)
+     complex(dp),  pointer:: psi(:, :, :) => null() ! (ibasis, iband, ikpt)
      real(dp), allocatable:: kpts(:, :) !(idim, ikpt)
      real(dp), allocatable:: kweights(:) !(ikpt)
      !real(dp), allocatable:: weight(:, :) !(iband, ikpt)
@@ -120,6 +120,8 @@ module m_wannier_builder
      procedure:: create_ncfile
      procedure:: close_ncfile
      procedure:: write_wann_netcdf
+     procedure:: get_wannier_eigen
+     procedure:: get_wannier_eigen_klist
   end type WannierBuilder_t
 
 contains
@@ -231,6 +233,7 @@ contains
     case(1)
        ABI_SFREE(self%anchor_kpt)
        ABI_SFREE(self%anchor_ibands)
+       ABI_SFREE(self%projectors)
     case(2)
        ABI_SFREE(self%projectors)
     end select
@@ -239,7 +242,7 @@ contains
   function get_psi_k(self, ikpt) result(psik)
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(in):: ikpt
-    complex(dp), pointer:: psik(:, :)
+    complex(dp),  pointer:: psik(:, :)
     psik => self%psi(:, :, ikpt)
   end function get_psi_k
 
@@ -274,9 +277,12 @@ contains
     class(WannierBuilder_t), intent(inout):: self
     real(dp), intent(in) ::  anchor_kpt(:)
     integer, optional, intent(in):: anchor_ibands(:)
+    complex(dp), pointer :: psik(:,:)
     character(len = 500):: msg
+    integer :: i
     ABI_MALLOC(self%anchor_ibands, (self%nwann))
     ABI_MALLOC(self%anchor_kpt, (size(anchor_kpt)))
+    ABI_MALLOC(self%projectors, (self%nbasis, self%nwann))
     self%anchor_kpt = anchor_kpt
     self%anchor_ikpt = self%find_kpoint(anchor_kpt)
 
@@ -290,6 +296,11 @@ contains
     end if
     write(msg, "(2a)") "Anchor point band indices set to ", trim(ltoa(self%anchor_ibands))
     call wrtout([ab_out, std_out], msg )
+     
+    psik=> self%get_psi_k(self%anchor_ikpt)
+    do i = 1, self%nwann
+        self%projectors(:, i)=psik(:, self%anchor_ibands(i))
+  end do
   end subroutine set_anchor
 
 
@@ -332,7 +343,8 @@ contains
     !end if
     ! calculate weight matrix for each kpoint
     call self%get_weight(self%anchor_ikpt, self%disentangle_func_type, self%mu, self%sigma, weight, &
-            &project_to_anchor = self%project_to_anchor)
+            &project_to_anchor = .True.)
+           ! &project_to_anchor = self%project_to_anchor)
 
     ! at anchor-kpoint, find cols
     ! psi: (ibasis, iband)
@@ -491,8 +503,7 @@ contains
         do iband = 1, self%nband
              proj = 0.0_dp
              do ianchor = 1, size(self%anchor_ibands)
-               anchor = self%anchor_ibands(ianchor)
-               p = dot_product(conjg(psik(:, anchor)), psik(:, iband))
+               p = dot_product(self%projectors(:, ianchor), psik(:, iband))
                proj = proj+real(conjg(p)*p)
              end do
             weight(iband) = weight(iband)*proj
@@ -531,7 +542,7 @@ contains
     real(dp):: S(self%nband)
     !real(dp):: weights(self%nband)
     integer:: iband
-    complex(dp), pointer:: p(:, :)
+    complex(dp),  pointer:: p(:, :)
  
     call self%get_weight(ikpt, self%disentangle_func_type, self%mu, self%sigma, weight, &
          &project_to_anchor = self%project_to_anchor)
@@ -564,7 +575,8 @@ contains
     do iband = 1, self%nband
        do iwann = 1, self%nwann
           !Amnk(iband, iwann)= dot_product(conjg(self%projectors(:, iwann)), psi(:, iband )) * weights(iband)
-          Amnk(iband, iwann)= dot_product(self%projectors(:, iwann), conjg(psi(:, iband ))) * weights(iband)
+          !Amnk(iband, iwann)= dot_product(self%projectors(:, iwann), conjg(psi(:, iband ))) * weights(iband)
+          Amnk(iband, iwann)= dot_product(self%projectors(:, iwann), psi(:, iband )) * weights(iband)
        end do
     end do
     call complex_svd(Amnk, U, S, VT, 'S')
@@ -710,6 +722,43 @@ contains
          & kpoints = self%kpts, eigvals = self%evals, Amnk = self%Amnk)
   end subroutine write_wann_netcdf
 
+  subroutine get_wannier_eigen(self, kpoint, evals, evecs)
+    class(WannierBuilder_t), intent(inout):: self
+    real(dp), intent(in) :: kpoint(3)
+    real(dp), intent(inout) :: evals(self%nwann)
+    complex(dp), optional, intent(inout) :: evecs(self%nwann, self%nwann)
+    complex(dp) :: Hk(self%nwann, self%nwann), phase
+    type(eigensolver):: esolver
+    integer :: iR
+    Hk(:,:)=0.0_dp
+    do iR=1, self%nR
+       phase = exp(tpi_im * dot_product(kpoint, self%Rlist(:, iR)))
+       Hk = Hk + self%HwannR(:, :, iR) * phase
+    end do
+    call esolver%run(evals, Hk)
+    ! Hk is overwritten as evecs
+    if (present(evecs)) then
+       evecs=Hk
+    end if
+    call esolver%finalize()
+  end subroutine get_wannier_eigen
+
+  subroutine get_wannier_eigen_klist(self, kpoints, nk, evals_nk, evecs_nk)
+    class(WannierBuilder_t), intent(inout):: self
+    integer, intent(in) :: nk
+    real(dp), intent(in) :: kpoints(3, nk)
+    real(dp), intent(inout) :: evals_nk(self%nwann, nk)
+    complex(dp), optional, intent(inout) :: evecs_nk(self%nwann, self%nwann, nk)
+    integer :: ik
+    do ik =1, nk
+       if (present(evecs_nk)) then
+          call self%get_wannier_eigen(kpoints(:, ik), &
+               & evals_nk(:, ik), evecs_nk(:,:, ik))
+       else
+          call self%get_wannier_eigen(kpoints(:, ik), evals_nk(:, ik))
+       end if
+    end do
+  end subroutine get_wannier_eigen_klist
 
 end module m_wannier_builder
 
