@@ -45,7 +45,9 @@ MODULE m_invovl
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
+#endif
 
  implicit none
 
