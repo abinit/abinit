@@ -72,6 +72,7 @@ module m_lwf
  use m_wannier_builder,            only : WannierBuilder_t
  use m_wann_netcdf,     only : IOWannNC
 
+
  implicit none
 
  type LatticeWannier
@@ -98,6 +99,7 @@ module m_lwf
     procedure:: run_all 
     procedure:: write_lwf_nc
     procedure:: print_Rlist
+    procedure :: write_bands
  end type LatticeWannier
 
  private
@@ -339,27 +341,29 @@ contains
     integer:: iq_ibz
     integer:: natom, natom3
     integer:: iatom, iband, i3
-    complex(dp):: phase
+    complex(dp):: phase, norm
     natom = crystal%natom
     natom3 = natom*3
     ABI_MALLOC(self%eigenvalues, (natom3, self%nqibz))
     ABI_MALLOC(self%eigenvectors, (natom3, natom3, self%nqibz))
+    !print *, "trans:", ifc%trans
+    !print *, "xred:", crystal%xred
     do iq_ibz = 1, self%nqibz
        call ifc%fourq(crystal, self%qibz(:,iq_ibz), phfrq, displ, out_eigvec = eigvec)
        ! freqency to eigenvalues
        self%eigenvalues(:, iq_ibz) = freq_to_eigenval(phfrq)
        ! remove phases from eigenvector
-       do iband = 1, natom3
-          do iatom = 1, natom
-             ! to remove the phase factor exp(iqr)
-             !phase = exp(two_pi*dot_product(crystal%xred(:, iatom), self%qibz(:, iq_ibz) ))
-             phase = exp(cmplx(0.0_dp, two_pi)*dot_product(crystal%xred(:, iatom), self%qibz(:, iq_ibz) ))
+       do iatom = 1, natom
+           ! to remove the phase factor exp(iqr)
+           !phase = exp(-cmplx(0.0_dp, two_pi)*dot_product(crystal%xred(:, iatom), self%qibz(:, iq_ibz) ))
+           phase = exp(-cmplx(0.0_dp, two_pi)*dot_product(ifc%trans(:, iatom), self%qibz(:, iq_ibz)))
+           do iband=1, natom3
              do i3 = 1, 3
-                self%eigenvectors((iatom-1)*3+i3, iband, iq_ibz ) = &
+              self%eigenvectors((iatom-1)*3+i3, iband, iq_ibz ) = &
                     &  CMPLX(eigvec(1, i3, iatom, iband), eigvec(2, i3, iatom, iband)) * phase
-             end do
-          end do
-       end do
+               end do
+           end do
+        end do
     end do
   end subroutine get_ifc_eigens
 
@@ -393,6 +397,9 @@ contains
     call self%scdm%construct_wannier()
     call self%print_Rlist(dtset)
     call self%write_lwf_nc(prefix = prefix)
+    if(dtset%nqpath>0) then
+       call self%write_bands(prefix, dtset)
+    end if
   end subroutine run_all
 
   subroutine run_lattice_wannier(ifc, crystal, dtset, prefix, comm)
@@ -406,6 +413,87 @@ contains
     call lwf%run_all(prefix, dtset)
     call lwf%finalize()
   end subroutine run_lattice_wannier
+
+
+  subroutine write_bands(self,  prefix, inp)
+    class(LatticeWannier), intent(inout):: self
+    character(len=*), intent(in):: prefix
+    type(anaddb_dataset_type), intent(in):: inp
+    integer,allocatable :: ndiv(:)
+    integer :: nfineqpath
+    real(dp),allocatable :: fineqpath(:,:)
+    real(dp),allocatable :: phfrq(:, :)
+    complex(dp), allocatable :: eigvec(:,:, :)
+    !real(dp),allocatable :: weights(:)
+    integer :: iq, iband
+    real(dp) :: f
+    ABI_MALLOC(ndiv,(inp%nqpath-1))
+    call make_path(inp%nqpath,inp%qpath,self%Crystal%gmet,'G',inp%ndivsm,ndiv,nfineqpath,fineqpath,std_out)
+    ABI_FREE(ndiv)
+
+    ABI_MALLOC(phfrq, (inp%lwf_nwann, nfineqpath))
+    ABI_MALLOC(eigvec, (inp%lwf_nwann, inp%lwf_nwann, nfineqpath))
+
+    call self%scdm%get_wannier_eigen_klist(fineqpath, nfineqpath, phfrq, eigvec)
+    do iq=1, nfineqpath
+       do iband =1, inp%lwf_nwann
+          f=phfrq(iband, iq)
+          if (f>1.0d-9) then
+             phfrq(iband, iq)= sqrt(f)
+          else if (f<-1.0d-9) then
+             phfrq(iband, iq)= -sqrt(-f)
+          else
+             phfrq(iband, iq)= 0.0_dp
+          end if
+
+       end do
+    end do
+
+    call write_phfrq(trim(prefix)//"_lwf_PHFRQ", inp%lwf_nwann, nfineqpath, fineqpath, phfrq)
+
+    ABI_FREE(phfrq)
+    ABI_FREE(eigvec)
+    ABI_FREE(fineqpath)
+  end subroutine write_bands
+
+  subroutine write_phfrq(path,nlwf,nqpts,qpoints, phfreq)
+    
+    !Arguments ------------------------------------
+    !scalars
+    integer,intent(in) :: nqpts, nlwf
+    character(len=*),intent(in) :: path
+    !arrays
+    real(dp),intent(in) :: qpoints(3,nqpts)
+    real(dp),intent(in) :: phfreq(nlwf,nqpts)
+    
+    !Local variables-------------------------------
+    !scalars
+    integer :: nphmodes, iq, iunit, imod, icomp
+    !real(dp) :: dummy
+    character(len=300) :: formt
+    character(len=500) :: msg
+    
+    ! *************************************************************************
+   
+    nphmodes = nlwf
+    !dummy = qpoints(1,1); dummy = weights(1)
+    if (open_file(path, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+      ABI_ERROR(msg)
+    end if
+   
+    write (iunit, '(a)')  '# ABINIT generated LWF phonon band structure file. All in Ha atomic units'
+    write (iunit, '(a)')  '# '
+    write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts
+    write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
+    write (iunit, '(a)')  '# '
+    write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
+    do iq= 1, nqpts
+      write (iunit, formt)  iq, phfreq(:,iq)
+    end do
+    close(iunit)
+
+end subroutine write_phfrq
+
 
 
 end module m_lwf
