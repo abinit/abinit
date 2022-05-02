@@ -607,21 +607,18 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
      call getgh1dqc(cwave0i,dum_cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq, &
      & i1dir,i1pert,mpi_enreg,optlocal,optnl,gamma,rf_hamkq,qdir2=delta)
 
-     !LOOP OVER ONE OF THE STRAIN DIRECTIONS
-     do ka=1,3
-       do ipw=1,npw_k
-         gh1dqpkc(:,ipw)=gh1dqc(:,ipw)*kpg_pk(ipw,ka)
-       end do
 
-       call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqpkc, &
-     & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-
-         !Take into account the two pi factor from the term
-         !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
-       d3etot_tgeom_k(1,idq)=d3etot_tgeom_k(1,idq)-occ_k(iband)*doti*two_pi
-       d3etot_tgeom_k(2,idq)=d3etot_tgeom_k(2,idq)-occ_k(iband)*dotr*two_pi
-
+     do ipw=1,npw_k
+       gh1dqpkc(:,ipw)=gh1dqc(:,ipw)*kpg_pk(ipw,beta)
      end do
+
+     call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0i,gh1dqpkc, &
+   & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
+     !Take into account the two pi factor from the term
+     !(\hat{p}_{k\beta + \frac{q_{\beta}}{2}}) appearing before the double q-derivation
+     d3etot_tgeom_k(1,idq)=d3etot_tgeom_k(1,idq)-occ_k(iband)*doti*two_pi
+     d3etot_tgeom_k(2,idq)=d3etot_tgeom_k(2,idq)-occ_k(iband)*dotr*two_pi
 
    end do !iband
 

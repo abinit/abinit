@@ -632,6 +632,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
                      t5_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_t5(:,1)
                    end if
 
+
                    if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
                      alpha=i1dir
                      gamma=i3dir
@@ -792,9 +793,72 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
    end do ! i1pert
  end if
 
-!Tgeom needs to be converted to type-II
+!Tgeom has to be converted to type-II
+!To do it we need to convert the three involve indexes to cartessian. Then,
+!after type-II conversion the q-gradient index is back converted to reduced.
  if (any(d3e_pert1(1:natom)==1).and.(d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1)) then
-   fac=two_pi ** 2
+
+   !Transform the metric perturbation direction 
+   !(treat it as an atomic displacement)
+   flg1(:)=1
+   do i1pert=1,natom
+     do i1dir=1,3
+       do gamma=1,3
+         do ii=1,2
+           do delta=1,3
+             do beta=1,3
+               vec1(beta)=tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
+             do beta=1,3
+               tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(beta)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !Transform the second q-gradient direction 
+   !(treat it as an electric field)
+   do i1pert=1,natom
+     do i1dir=1,3
+       do gamma=1,3
+         do ii=1,2
+           do beta=1,3
+             do delta=1,3
+               vec1(delta)=tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             do delta=1,3
+               tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(delta)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !Transform the first q-gradient direction 
+   !(treat it as an electric field)
+   do i1pert=1,natom
+     do i1dir=1,3
+       do ii=1,2
+         do beta=1,3
+           do delta=1,3
+             do gamma=1,3
+               vec1(gamma)=tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             do gamma=1,3
+               tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(gamma)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
    i3pert= natom+8
    do i1pert = 1, natom
      do i1dir = 1, 3
@@ -815,6 +879,29 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
        end do ! i2pert
      end do ! i1dir
    end do ! i1pert
+
+   !Transform back the first q-gradient direction to reduced coordinates
+   !(treat it as an electric field)
+   fac=two_pi**2
+   i3pert= natom+8
+   do i1pert = 1, natom
+     do i1dir = 1, 3
+       do i2pert = natom+3, natom+4
+         do i2dir = 1, 3
+           do ii=1,2
+             do i3dir=1,3
+               vec1(i3dir)=tgeom_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end do
+             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             do i3dir=1,3
+               tgeom_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
  end if
 
 !Incorporate T4, T5 and Tgeom to d3etot
