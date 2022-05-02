@@ -341,7 +341,7 @@ contains
     integer:: iq_ibz
     integer:: natom, natom3
     integer:: iatom, iband, i3
-    complex(dp):: phase, norm
+    complex(dp):: phase
     natom = crystal%natom
     natom3 = natom*3
     ABI_MALLOC(self%eigenvalues, (natom3, self%nqibz))
@@ -449,26 +449,26 @@ contains
        end do
     end do
 
-    call write_phfrq(trim(prefix)//"_lwf_PHFRQ", inp%lwf_nwann, nfineqpath, fineqpath, phfrq)
+    call write_phfrq(trim(prefix)//"_lwf_PHFRQ", inp%lwf_nwann, nfineqpath, phfrq)
 
     ABI_FREE(phfrq)
     ABI_FREE(eigvec)
     ABI_FREE(fineqpath)
   end subroutine write_bands
 
-  subroutine write_phfrq(path,nlwf,nqpts,qpoints, phfreq)
+  subroutine write_phfrq(path,nlwf,nqpts,phfreq)
     
     !Arguments ------------------------------------
     !scalars
     integer,intent(in) :: nqpts, nlwf
     character(len=*),intent(in) :: path
     !arrays
-    real(dp),intent(in) :: qpoints(3,nqpts)
+    !real(dp),intent(in) :: qpoints(3,nqpts)
     real(dp),intent(in) :: phfreq(nlwf,nqpts)
     
     !Local variables-------------------------------
     !scalars
-    integer :: nphmodes, iq, iunit, imod, icomp
+    integer :: nphmodes, iq, iunit
     !real(dp) :: dummy
     character(len=300) :: formt
     character(len=500) :: msg
