@@ -186,7 +186,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(Pseudopotential_type),intent(in) :: Psps
  type(sigparams_t),target,intent(in) :: Sigp
  type(pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd,Wfdf
+ class(wfd_t),target,intent(inout) :: Wfd,Wfdf
 !arrays
  complex(dpc), intent(out) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)
  complex(dpc), intent(out) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,sigp%npwx,Qmesh%nibz)

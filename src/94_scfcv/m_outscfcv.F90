@@ -626,7 +626,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    !call timab(1190,2,tsec)
 
    !call timab(1191,1,tsec)
-   NCF_CHECK(hdr%ncwrite(ncid, fform_den, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
    !call timab(1191,2,tsec)
 
    !call timab(1192,1,tsec)

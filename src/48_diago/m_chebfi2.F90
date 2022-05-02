@@ -22,6 +22,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_chebfi2
 
  use defs_basis
@@ -40,6 +43,10 @@ module m_chebfi2
  use m_xomp
 #ifdef HAVE_OPENMP
  use omp_lib
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -601,6 +608,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  end if
 
 !********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
  call timab(tim_RR_q, 1, tsec)
  call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
  call timab(tim_RR_q, 2, tsec)
@@ -612,6 +620,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    maxeig_global = maxeig
    mineig_global = mineig
  end if
+ ABI_NVTX_END_RANGE()
 
  lambda_minus = maxeig_global
 
@@ -640,25 +649,33 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  one_over_r = 1/radius
  two_over_r = 2/radius
 
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
  do iline = 0, nline - 1
 
    call timab(tim_next_p,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
    call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
+   ABI_NVTX_END_RANGE()
    call timab(tim_next_p,2,tsec)
 
    call timab(tim_swap,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
    if (chebfi%paral_kgb == 0) then
      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
    else
      call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
-   end if
+  end if
+  ABI_NVTX_END_RANGE()
    call timab(tim_swap,2,tsec)
 
    !A * Psi
    call timab(tim_getAX_BX,1,tsec)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
+   ABI_NVTX_END_RANGE()
    call timab(tim_getAX_BX,2,tsec)
  end do
+ ABI_NVTX_END_RANGE()
 
  if (chebfi%paral_kgb == 1) then
    call xmpi_barrier(chebfi%spacecom)
@@ -686,9 +703,11 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
  call timab(tim_RR, 1, tsec)
  call chebfi_rayleighRitz(chebfi, nline)
  call timab(tim_RR, 2, tsec)
+ ABI_NVTX_END_RANGE()
 
  call timab(tim_residu, 1, tsec)
  maximum =  chebfi_computeResidue(chebfi, residu, pcond)
@@ -842,8 +861,9 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
 
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
-
+   ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call getBm1X(chebfi%xAXColsRows, chebfi%X_next, chebfi%xgTransposerX)
+   ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
    call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1)
