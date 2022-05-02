@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon  2 May 2022.
-- ( at 22h13 )
+- ( at 22h17 )
   
 
 ================================================================================
@@ -24,7 +24,7 @@
 
  Flags :
      ifcflag         1
-     lwfflag         1
+     lwfflag         2
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -40,15 +40,15 @@
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
  Lattice Wannier function information:
-             lwfflag         1
+             lwfflag         2
            lwf_nwann         3
-     lwf_anchor_proj         1
+     lwf_anchor_proj         0
            lwf_ngqpt         4         4         4
      lwf_disentangle         2
-              lwf_mu    0.400000E+03
-           lwf_sigma    0.150000E+03
+              lwf_mu    0.000000E+00
+           lwf_sigma    0.500000E+02
       lwf_anchor_qpt    0.000000E+00    0.000000E+00    0.000000E+00
-    lwf_anchor_iband       1       2       3 
+       lwf_projector       4       5       6 
 
 ================================================================================
 
@@ -109,7 +109,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.042  and twall      0.090 sec
+-begin at tcpu      0.040  and twall      0.066 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -251,11 +251,8 @@
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- Constructing LWF with SCDM-k method.
- Number of LWF: 3
- Anchor Points q-point:  0.00000 0.00000 0.00000
-Anchor point band indices set to [1, 2, 3]
-Columns selected: [5, 6, 4]
+ Constructing LWF with projected wannier function method.
+ The projectors: [4, 5, 6]
  LWF is transformed to the real space cells: [4, 4, 4]
  Number of cells: 64
  R-vectors for cells in the real space :       64
@@ -324,7 +321,7 @@ Columns selected: [5, 6, 4]
  63)        1       2       2
  64)        2       2       2
  LWF construction finished.
- LWF coefficients and Hamiltonian writen to file: t110_lwf.nc .
+ LWF coefficients and Hamiltonian writen to file: t111_lwf.nc .
 
 ================================================================================
 
@@ -2699,15 +2696,15 @@ Columns selected: [5, 6, 4]
 -  1.790039E+02  3.633951E+02  3.633951E+02  3.972643E+02  3.972643E+02
 -  3.972643E+02  4.216572E+02  4.216572E+02  4.216572E+02  7.514479E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.199  and wall time      0.251 sec
++Total cpu time      0.184  and wall time      0.223 sec
 
  anaddb : the run completed succesfully.
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 0 allocations and 0 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 3125 allocations and 3125 deallocations in Fortran
+-   There were 3122 allocations and 3122 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
