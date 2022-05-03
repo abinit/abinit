@@ -554,9 +554,9 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
              if(action==2)then
                call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
                call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor, &
-&               source,cg_disk,nmaster,spaceWorld,5*(mtag-1)+2,ierr)
+&               source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              else
-               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,5*(mtag-1)+1,ierr)
+               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
                call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              end if
              call timab(48,2,tsec)
@@ -1129,12 +1129,12 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          if (action==2.or.action==3) then
            call timab(48,1,tsec)
            if (action==2) then
-             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,5*(mtag-1)+3,ierr)
+             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
              call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor,&
-&             source,cg_k,master,comm_cell,5*(mtag-1)+4,ierr)
+&             source,cg_k,master,comm_cell,2*mtag+2,ierr)
            else
-             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,5*(mtag-1)+3,ierr)
-             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,5*(mtag-1)+4,ierr)
+             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
+             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,2*mtag+2,ierr)
            end if
            call timab(48,2,tsec)
          end if

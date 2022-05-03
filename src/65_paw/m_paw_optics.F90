@@ -71,7 +71,7 @@ MODULE m_paw_optics
 !Set to true to use netcdf-MPIIO when available
  logical,parameter :: use_netcdf_mpiio=.true.
 !Set to true to compute only half of the (n,m) dipoles
- logical,parameter :: compute_half_dipoles=.false.
+ logical,parameter :: compute_half_dipoles=.true.
 !Set to true to use unlimited dimensions in netCDF file
 !  This is not mandatory because we know exactly the amount of data to write
 !    and seems to impact performances negatively...
