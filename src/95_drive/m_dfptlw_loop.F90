@@ -197,7 +197,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
  integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
- integer :: opthartdqdq,optorth,optres,pawread
+ integer :: optgeom,opthartdqdq,optorth,optres,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: boxcut,delad,delag,delbd,delbg,dum_scl,ecut,ecut_eff,fac,gsqcut   
  logical :: non_magnetic_xc,samepert
@@ -715,192 +715,21 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation
  if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
-   fac=two_pi ** 2
-   i3pert= natom+8
-   do i1pert = 1, mpert
-     do i1dir = 1, 3
-       if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
-         do i2pert = natom+3, natom+4
-           do i2dir = 1, 3
-             istr=(i2pert-natom-3)*3+i2dir
-             beta=idx(2*istr-1); delta=idx(2*istr)
-             do ii=1,2
-
-               !Transform into type-II
-               do i3dir=1,3
-                 gamma=i3dir
-                 t4_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
-               & t4_typeI(ii,i1dir,i1pert,beta,delta,gamma) + &
-               & t4_typeI(ii,i1dir,i1pert,delta,gamma,beta) - &
-               & t4_typeI(ii,i1dir,i1pert,gamma,beta,delta)
-               end do ! i3dir
-
-
-               !Transform i3dir into reduced coordinates
-               do i3dir=1,3
-                 vec1(i3dir)=t4_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                 flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
-               end do
-               call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
-               do i3dir=1,3
-                 t4_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
-               end do
-
-             end do ! ii
-           end do ! i2dir
-         end do ! i2pert
-       end if ! rfpert
-     end do ! i1dir
-   end do ! i1pert
+   optgeom=0
+   call dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t4_typeI,t4_typeII)
  end if
 
  if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
-   fac=two_pi ** 2
-   i3pert= natom+8
-   do i2pert = 1, mpert
-     do i2dir = 1, 3
-       if ((maxval(rfpert(:,:,i2dir,i2pert,:,:))==1)) then
-         do i1pert = natom+3, natom+4
-           do i1dir = 1, 3
-             istr=(i1pert-natom-3)*3+i1dir
-             beta=idx(2*istr-1); delta=idx(2*istr)
-             do ii=1,2
-
-               !Transform into type-II
-               do i3dir=1,3
-                 gamma=i3dir
-                 t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
-               & t5_typeI(ii,i2dir,i2pert,beta,delta,gamma) + &
-               & t5_typeI(ii,i2dir,i2pert,delta,gamma,beta) - &
-               & t5_typeI(ii,i2dir,i2pert,gamma,beta,delta)
-               end do ! i3dir
-
-               !Transform i3dir into reduced coordinates
-               do i3dir=1,3
-                 vec1(i3dir)=t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                 flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
-               end do
-               call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
-               do i3dir=1,3
-                 t5_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
-               end do
-
-             end do ! ii
-           end do ! i2dir
-         end do ! i2pert
-       end if ! rfpert
-     end do ! i1dir
-   end do ! i1pert
+   optgeom=0
+   call dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t5_typeI,t5_typeII)
  end if
 
 !Tgeom has to be converted to type-II
 !To do it we need to convert the three involve indexes to cartessian. Then,
 !after type-II conversion the q-gradient index is back converted to reduced.
  if (any(d3e_pert1(1:natom)==1).and.(d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1)) then
-
-   !Transform the metric perturbation direction 
-   !(treat it as an atomic displacement)
-   flg1(:)=1
-   do i1pert=1,natom
-     do i1dir=1,3
-       do gamma=1,3
-         do ii=1,2
-           do delta=1,3
-             do beta=1,3
-               vec1(beta)=tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)
-             end do
-             call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
-             do beta=1,3
-               tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(beta)
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
-
-   !Transform the second q-gradient direction 
-   !(treat it as an electric field)
-   do i1pert=1,natom
-     do i1dir=1,3
-       do gamma=1,3
-         do ii=1,2
-           do beta=1,3
-             do delta=1,3
-               vec1(delta)=tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)
-             end do
-             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
-             do delta=1,3
-               tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(delta)
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
-
-   !Transform the first q-gradient direction 
-   !(treat it as an electric field)
-   do i1pert=1,natom
-     do i1dir=1,3
-       do ii=1,2
-         do beta=1,3
-           do delta=1,3
-             do gamma=1,3
-               vec1(gamma)=tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)
-             end do
-             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
-             do gamma=1,3
-               tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(gamma)
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
-
-   i3pert= natom+8
-   do i1pert = 1, natom
-     do i1dir = 1, 3
-       do i2pert = natom+3, natom+4
-         do i2dir = 1, 3
-           istr=(i2pert-natom-3)*3+i2dir
-           beta=idx(2*istr-1); delta=idx(2*istr)
-           do ii=1,2
-             do i3dir=1,3
-               gamma=i3dir
-               tgeom_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
-             & tgeom_typeI(ii,i1dir,i1pert,beta,delta,gamma) + &
-             & tgeom_typeI(ii,i1dir,i1pert,delta,gamma,beta) - &
-             & tgeom_typeI(ii,i1dir,i1pert,gamma,beta,delta)
-             end do ! i3dir
-           end do ! ii
-         end do ! i2dir
-       end do ! i2pert
-     end do ! i1dir
-   end do ! i1pert
-
-   !Transform back the first q-gradient direction to reduced coordinates
-   !(treat it as an electric field)
-   fac=two_pi**2
-   i3pert= natom+8
-   do i1pert = 1, natom
-     do i1dir = 1, 3
-       do i2pert = natom+3, natom+4
-         do i2dir = 1, 3
-           do ii=1,2
-             do i3dir=1,3
-               vec1(i3dir)=tgeom_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-             end do
-             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
-             do i3dir=1,3
-               tgeom_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
+   optgeom=1
+   call dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,tgeom_typeI,tgeom_typeII)
 
  end if
 
@@ -934,12 +763,21 @@ end subroutine dfptlw_loop
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  d3e_pert1(mpert)=array with the i1pert cases to calculate
-!!  d3e_pert2(mpert)=array with the i2pert cases to calculate
+!!  blkflg(3,mpert,3,mpert) = flags for each element of the 3DTE
+!!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
+!!  optgeom= if 1 do special treatment for the geometric term
 !!  mpert =maximum number of ipert
+!!  natom = number of atoms in unit cell
+!!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
+!!       that have to be computed
+!!       1   ->   element has to be computed explicitely
+!!      -1   ->   use symmetry operations to obtain the corresponding element
+!!  rprimd(3,3)=dimensional primitive translations (bohr)
+!!  t_typeI(2,3,mpert,3,3,3)= Input type-I tensor
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
+!!  t_typeII(2,3,mpert,3,mpert,3,mpert)= type-II tensor converted to the mixed
+!!       coordinates. 
 !!
 !! SIDE EFFECTS
 !!
@@ -958,25 +796,140 @@ end subroutine dfptlw_loop
 #include "abi_common.h"
 
 
-subroutine dfptlw_typeIproc(d3e_pert1,d3e_pert1,mpert)
+subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_typeI,&
+ & t_typeII)
 
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_dynmat,      only : cart39
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mpert
- integer,intent(in) :: d3e_pert1(mpert),d3e_pert2(mpert)
-
+ integer,intent(in) :: mpert,natom,optgeom
 !arrays
+ integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert) 
+ integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(inout) :: t_typeI(2,3,mpert,3,3,3)
+ real(dp),intent(out) :: t_typeII(2,3,mpert,3,mpert,3,mpert)
+
 !Local variables-------------------------------
+!scalar 
+ integer :: beta,delta,gamma,ii
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,istr 
+ real(dp) :: fac
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ if (optgeom==1) then
+   !Transform the metric perturbation direction 
+   !(treat it as an atomic displacement)
+   flg1(:)=1
+   do i1pert=1,natom
+     do i1dir=1,3
+       do gamma=1,3
+         do ii=1,2
+           do delta=1,3
+             do beta=1,3
+               vec1(beta)=t_typeI(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
+             do beta=1,3
+               t_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(beta)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !Transform the second q-gradient direction 
+   !(treat it as an electric field)
+   do i1pert=1,natom
+     do i1dir=1,3
+       do gamma=1,3
+         do ii=1,2
+           do beta=1,3
+             do delta=1,3
+               vec1(delta)=t_typeI(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             do delta=1,3
+               t_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(delta)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !Transform the first q-gradient direction 
+   !(treat it as an electric field)
+   do i1pert=1,natom
+     do i1dir=1,3
+       do ii=1,2
+         do beta=1,3
+           do delta=1,3
+             do gamma=1,3
+               vec1(gamma)=t_typeI(ii,i1dir,i1pert,beta,delta,gamma)
+             end do
+             call cart39(flg1,flg2,gprimd,natom+2,natom,rprimd,vec1,vec2)
+             do gamma=1,3
+               t_typeI(ii,i1dir,i1pert,beta,delta,gamma)=vec2(gamma)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end if
+
+ fac=two_pi ** 2
+ i3pert= natom+8
+ do i1pert = 1, mpert
+   do i1dir = 1, 3
+     if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
+       do i2pert = natom+3, natom+4
+         do i2dir = 1, 3
+           istr=(i2pert-natom-3)*3+i2dir
+           beta=idx(2*istr-1); delta=idx(2*istr)
+           do ii=1,2
+
+             !Transform into type-II
+             do i3dir=1,3
+               gamma=i3dir
+               t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)= &
+             & t_typeI(ii,i1dir,i1pert,beta,delta,gamma) + &
+             & t_typeI(ii,i1dir,i1pert,delta,gamma,beta) - &
+             & t_typeI(ii,i1dir,i1pert,gamma,beta,delta)
+             end do ! i3dir
+
+             !Transform i3dir into reduced coordinates
+             do i3dir=1,3
+               vec1(i3dir)=t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) 
+             end do
+             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             do i3dir=1,3
+               t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
+             end do
+
+           end do ! ii
+         end do ! i2dir
+       end do ! i2pert
+     end if ! rfpert
+   end do ! i1dir
+ end do ! i1pert
 
  DBG_EXIT("COLL")
 
