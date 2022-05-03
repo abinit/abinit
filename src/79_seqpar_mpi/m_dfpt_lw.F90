@@ -1509,8 +1509,8 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  write(ab_out,*)' efidir   atom   atddir   qgrdir          real part        imaginary part'
  do iq1dir=1,3
    do iq2dir=1,3
-     do iatdir=1,3
-       do iatom=1,matom
+     do iatom=1,matom
+       do iatdir=1,3
 
          if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
 
