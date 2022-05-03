@@ -56,7 +56,7 @@ module m_longwave
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
  use m_fft,         only : fourdp
- use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
+ use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput,lwcart
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
  use m_mkcore,      only : mkcore
  use m_dfptlw_loop, only : dfptlw_loop
@@ -165,13 +165,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
- integer,allocatable :: blkflg(:,:,:,:,:,:)
+ integer,allocatable :: blkflg(:,:,:,:,:,:),blkflg_car(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
  integer,allocatable :: rfpert(:,:,:,:,:,:)
  real(dp),allocatable :: cg(:,:)
- real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_nv(:,:,:,:,:,:,:),doccde(:)
+ real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3etot_nv(:,:,:,:,:,:,:),doccde(:)
  real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
@@ -572,6 +573,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !  Close DDB
    close(dtfil%unddb)
+
+   !Calculate spatial-dispersion quantities in Cartesian coordinates and write
+   !them in abi_out
+   ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
+   ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
+   call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
+   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,mpert,natom,ucvol)
  end if
 
 !Deallocate arrays
@@ -604,6 +612,219 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  DBG_EXIT("COLL")
 
 end subroutine longwave
+!!***
+
+!!****f* ABINIT/m_dfptlw_loop/dfptlw_out
+!! NAME
+!!  dfptlw_out
+!!
+!! FUNCTION
+!!  Write the relevant spatial-dispersion quantities in Cartesian coordinates
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2022 ABINIT group (MR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  blkflg_car(3,mpert,3,mpert,3,mpert) =flags for each element of the 3DTE
+!!  d3etot_car(2,3,mpert,3,mpert,3,mpert) =array with the cartesian thir-order derivatives
+!!  lw_qdrpl= flag that activates quadrupoles calculation
+!!  lw_flexo= flag that activates flexoelectric tensor calculation
+!!  mpert =maximum number of ipert
+!!  natom = number of atoms in unit cell
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: lw_flexo,lw_qdrpl,mpert,natom
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert) 
+ real(dp),intent(out) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables-------------------------------
+!scalar 
+ integer :: beta,delta,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,istr
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ real(dp),allocatable :: qdrp(:,:,:,:,:,:,:)
+ real(dp) :: piezoci(2)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ i3pert=natom+8
+ if (lw_qdrpl==1.or.lw_flexo==3.or.lw_flexo==1) then
+   write(ab_out,'(a)')' First real-space moment of the polarization response '
+   write(ab_out,'(a)')' to an atomic displacementatom, in cartesian coordinates,'
+   write(ab_out,'(a)')' (1/ucvol factor not included),'
+   write(ab_out,'(a)')' efidir   atom   atddir   qgrdir          real part        imaginary part'
+   i1pert=natom+2
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2pert=1,natom
+         do i2dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i2pert,i2dir,i3dir, &
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+           & -d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+
+   !Calculate cuadrupoles (symmetrize i1dir/i3dir)
+   ABI_MALLOC(qdrp,(2,3,mpert,3,mpert,3,mpert))
+   i1pert=natom+2
+   do i2pert=1,natom
+     do i2dir=1,3
+       do i1dir=1,3
+         do i3dir=1,i1dir-1
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             !real part
+             qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
+           & d3etot_car(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) 
+
+             qdrp(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+           & qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+             qdrp(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+           & two*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
+
+             !imaginary part
+             qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
+           & -(d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
+           &   d3etot_car(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) ) 
+
+             qdrp(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+           & qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+             qdrp(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+           &-two*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
+           end if
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+
+   write(ab_out,'(a)')' Quadrupole tensor, in cartesian coordinates,'
+   write(ab_out,'(a)')' efidir   atom   atddir   qgrdir          real part        imaginary part'
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2pert=1,natom
+         do i2dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i2pert,i2dir,i3dir, &
+           & qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+           & qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+   ABI_FREE(qdrp)
+
+   write(ab_out,'(a)')' Electronic (clamped-ion) contribution to the piezoelectric tensor,'
+   write(ab_out,'(a)')' in cartesian coordinates, (from sum rule of dynamic quadrupoles or P^1 tensor)'
+   write(ab_out,'(a)')' efidir   atddir   qgrdir        real part           imaginary part'
+   piezoci=zero
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2dir=1,3
+         do i2pert=1,natom
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             piezoci(1)=piezoci(1)+d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             piezoci(2)=piezoci(2)-d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+         piezoci(1)=-piezoci(1)/ucvol
+         piezoci(2)=-piezoci(2)/ucvol
+         write(ab_out,'(3(i5,3x),2(1x,f20.10))') i1dir,i2dir,i3dir,piezoci(1),piezoci(2)
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+ end if
+
+ if (lw_flexo==2.or.lw_flexo==1) then
+   write(ab_out,'(a)')' Clamped-ion flexoelectric tensor (type-II), in cartesian coordinates,'
+   write(ab_out,'(a)')' efidir  qgrdir  strdir1  strdir2         real part          imaginary part'
+   i1pert=natom+2
+   do i3dir=1,3
+     do i2pert=natom+3,natom+4
+       do i2dir=1,3
+         istr=(i2pert-natom-3)*3+i2dir
+         beta=idx(2*istr-1); delta=idx(2*istr)
+         do i1dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i3dir,beta,delta, &
+           & d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/ucvol, &
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/ucvol
+           end if
+         end do
+       end do
+       write(ab_out,*)' '
+     end do
+   end do
+ end if
+
+ if (lw_flexo==3.or.lw_flexo==1) then
+   write(ab_out,'(a)')' 1st real-space moment of IFCs, in cartesian coordinates,'
+   write(ab_out,'(a)')' iatdir  iatom    jatdir  jatom    qgrdir           real part          imaginary part'
+   do i3dir=1,3
+     do i1pert=1,natom
+       do i1dir=1,3
+         do i2pert=1,natom
+           do i2dir=1,3
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               write(ab_out,'(5(i5,4x),2(1x,f20.10))') i1dir,i1pert,i2dir,i2pert,i3dir, &
+             & -d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+             &  d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+ end if
+ DBG_EXIT("COLL")
+
+end subroutine dfptlw_out
 !!***
 
 end module m_longwave
