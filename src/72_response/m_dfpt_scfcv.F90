@@ -1499,10 +1499,34 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
      ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+
+     ! Add rhog1(G=0) to file
+     ! This part is obsolete. I keep it just to maintain compatibility with the fileformat.
+     if (mpi_enreg%me_g0 == 1) then
+       if (dtset%iomode == IO_MODE_ETSF) then
+#ifdef HAVE_NETCDF
+         NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
+         ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
+         NCF_CHECK(ncerr)
+         NCF_CHECK(nctk_set_datamode(ncid))
+         NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
+         NCF_CHECK(nf90_close(ncid))
+#endif
+       else
+         ! Handle Fortran files.
+         if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
+           ABI_ERROR(msg)
+         end if
+         if (fort_denpot_skip(ncid, msg) /= 0) ABI_ERROR(msg)
+         write(ncid) rhog1(:,1)
+         close(ncid)
+       end if
+     end if
+
    end if
 
-! output files for perturbed potential components: vhartr1,vpsp1,vxc
-! NB: only 1 spin for these
+   ! output files for perturbed potential components: vhartr1,vpsp1,vxc
+   ! NB: only 1 spin for these
    if (dtset%prtvha > 0) then
      rdwrpaw=0
      ABI_MALLOC(vhartr1_tmp, (cplex*nfftf, dtset%nspden))
@@ -1515,15 +1539,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ABI_FREE(vhartr1_tmp)
    end if
 
-
-! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
-!   if (dtset%prtvpsp > 0) then
-!     rdwrpaw=0
-!     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
-!     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
-!     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
-!       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
-!   end if
+   ! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
+   !   if (dtset%prtvpsp > 0) then
+   !     rdwrpaw=0
+   !     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
+   !     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+   !     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
+   !       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
+   !   end if
 
    if (dtset%prtvxc > 0) then
      rdwrpaw=0
@@ -1531,29 +1554,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vxc",fi1o,dtset%iomode,hdr,&
      ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
-   end if
-
-
-   ! Add rhog1(G=0) to file
-   if (mpi_enreg%me_g0 == 1) then
-     if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
-       NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
-       ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
-       NCF_CHECK(ncerr)
-       NCF_CHECK(nctk_set_datamode(ncid))
-       NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
-       NCF_CHECK(nf90_close(ncid))
-#endif
-     else
-       ! Handle Fortran files.
-       if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
-         ABI_ERROR(msg)
-       end if
-       if (fort_denpot_skip(ncid, msg) /= 0) ABI_ERROR(msg)
-       write(ncid) rhog1(:,1)
-       close(ncid)
-     end if
    end if
 
  end if ! iwrite_fftdatar(mpi_enreg)
