@@ -56,7 +56,7 @@ MODULE m_paw_optics
  use m_numeric_tools,only : kramerskronig
  use m_geometry,     only : metric
  use m_hide_lapack,  only : matrginv
- use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
+ use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
 
  implicit none
 
@@ -68,11 +68,14 @@ MODULE m_paw_optics
  public :: linear_optics_paw
 
 !I/O parameters
+!Set to true to force the use of netCDF when available
+! overriding the value of dtset%iomode
+ logical,parameter :: use_netcdf_forced=.true.
 !Set to true to use netcdf-MPIIO when available
  logical,parameter :: use_netcdf_mpiio=.true.
-!Set to true to compute only half of the (n,m) dipoles
+!Set to true to compute/write only half of the (n,m) dipoles
  logical,parameter :: compute_half_dipoles=.true.
-!Set to true to use unlimited dimensions in netCDF file
+!Set to true to use unlimited dimensions in netCDF file (experimental)
 !  This is not mandatory because we know exactly the amount of data to write
 !    and seems to impact performances negatively...
 !    Not compatible with compute_half_dipoles=.true.
@@ -228,12 +231,17 @@ CONTAINS  !=====================================================================
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
-!(master proc only)
+!I/O mode is netCDF or Fortran
+ iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
+#ifdef HAVE_NETCDF
+ if (use_netcdf_forced) iomode=IO_MODE_ETSF
+#endif
+
+ !(master proc only)
  if (i_am_master) then
    fformopt=610 ; if (compute_half_dipoles) fformopt=620
 !  ====> NETCDF format
-   if (dtset%iomode==IO_MODE_ETSF) then
-     iomode=IO_MODE_ETSF
+   if (iomode==IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt),xmpi_comm_self))
@@ -272,16 +280,18 @@ CONTAINS  !=====================================================================
      ABI_ERROR(msg)
 #endif
 !  ====> Standard FORTRAN binary format
-   else
-     iomode=IO_MODE_FORTRAN_MASTER
+   else if (iomode==IO_MODE_FORTRAN_MASTER) then
      if (open_file(dtfil%fnameabo_app_opt,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
        ABI_ERROR(msg)
      end if
      call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
      write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
+   else
+     msg = "Wrong OPT file format!"
+     ABI_BUG(msg)
    end if ! File format
  end if ! master node
- call xmpi_bcast(iomode,master,spaceComm_w,ierr)
+ call xmpi_bcast(iomode,master,spaceComm_w,ierr)  ! Seems mandatory; why ?
  iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
  nc_unlimited=(iomode==IO_MODE_ETSF.and.use_netcdf_unlimited.and.(.not.iomode_etsf_mpiio)) ! UNLIMITED not compatible with mpi-io
  store_half_dipoles=(compute_half_dipoles.and.(.not.nc_unlimited))
@@ -987,11 +997,16 @@ CONTAINS  !=====================================================================
 !3- Opening of OPT2 file and header writing
 !----------------------------------------------------------------------------------
 
-!(master proc only)
+!I/O mode is netCDF or Fortran
+ iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
+#ifdef HAVE_NETCDF
+ if (use_netcdf_forced) iomode=IO_MODE_ETSF
+#endif
+
+ !(master proc only)
  if (i_am_master) then
 !  ====> NETCDF format
-   if (dtset%iomode==IO_MODE_ETSF) then
-     iomode=IO_MODE_ETSF
+   if (iomode==IO_MODE_ETSF) then
      fformopt=611 
 #ifdef HAVE_NETCDF
 !    Open/create nc file
@@ -1047,8 +1062,7 @@ CONTAINS  !=====================================================================
      ABI_ERROR(msg)
 #endif
 !  ====> Standard FORTRAN binary file format
-   else
-     iomode=IO_MODE_FORTRAN_MASTER
+   else if (iomode==IO_MODE_FORTRAN_MASTER) then
      fformopt=612  ! MT 12sept21: change the OPT2 Fortran file format
      if (2*nphicor*natom*mband>2**30) fformopt=613 ! Format for large file records
      if (open_file(dtfil%fnameabo_app_opt2,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
@@ -1060,9 +1074,12 @@ CONTAINS  !=====================================================================
      do iln=1,nphicor
        write(ount) ncor(iln),lcor(iln),kappacor(iln),energy_cor(iln)
      end do
+   else
+     msg = "Wrong OPT2 file format!"
+     ABI_BUG(msg)
    end if ! File format
  end if ! master node
- call xmpi_bcast(iomode,master,spaceComm_w,ierr)
+ call xmpi_bcast(iomode,master,spaceComm_w,ierr)  ! Seems mandatory; why ?
  call xmpi_bcast(fformopt,master,spaceComm_w,ierr)
  iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
 
