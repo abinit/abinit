@@ -1132,7 +1132,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
 ! distribute cprj by band as well
-! NB: currently nsppol=2 is distributed in data (0s saved for other spin) 
+! NB: currently nsppol=2 is distributed in data (0s saved for other spin)
 !   but not in memory: all procs have nsppol 2 below
        mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
@@ -1634,7 +1634,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        !To compute Absolute Deformation Potentials toghether with FxE tensor
        !the reference has to be the same as in the FxE routines
        g0term=0; if (dtset%rfstrs_ref==1) g0term=1
- 
+
        call vlocalstr(gmet,gprimd,gsqcut,istr,mgfftf,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
 &       ucvol,psps%vlspl,vpsp1,g0term=g0term)
@@ -2095,7 +2095,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ! Write wavefunctions file only if convergence was not achieved.
    write_1wfk = .True.
-   if (dtset%prtwf==-1 .and. dfpt_scfcv_retcode == 0) then
+   if (dtset%prtwf == 0) write_1wfk = .False.
+   if (dtset%prtwf == -1 .and. dfpt_scfcv_retcode == 0) then
      write_1wfk = .False.
      call wrtout(ab_out," dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.")
    end if
