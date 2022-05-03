@@ -509,14 +509,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  usexcnhat=0
 !This might be taken away later
  edocc=zero ; eeig0=zero ; ehart01=zero ; ehart1=zero ; ek0=zero ; ek1=zero
- eloc0=zero ; elpsp1=zero ; end0=zero; end1=zero; 
+ eloc0=zero ; elpsp1=zero ; end0=zero; end1=zero;
  enl0=zero ; enl1=zero ; eovl1=zero; exc1=zero
  deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero ; elmag1=zero
  elast_mq=zero
  dbl_nnsclo_mq=0
 !This might be taken away later
  edocc_mq=zero ; eeig0_mq=zero ; ehart01_mq=zero ; ehart1_mq=zero ; ek0_mq=zero ; ek1_mq=zero
- eloc0_mq=zero ; elpsp1_mq=zero ; enl0_mq=zero ; enl1_mq=zero ; 
+ eloc0_mq=zero ; elpsp1_mq=zero ; enl0_mq=zero ; enl1_mq=zero ;
  end0_mq=zero; end1_mq=zero; eovl1_mq=zero; exc1_mq=zero
  deltae_mq=zero ; fermie1_mq=zero ; epaw1_mq=zero ; eberry_mq=zero ; elmag1_mq=zero
  res2_mq=zero
@@ -698,7 +698,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_MALLOC(qmat,(0,0,0,0,0,0))
  end if
 
-! if any nuclear dipoles are nonzero, compute the vector potential in real space 
+! if any nuclear dipoles are nonzero, compute the vector potential in real space
  with_vectornd = 0
  ! nuclear dipoles only work with the DDK response function
  if ( (ANY(ABS(dtset%nucdipmom(:,:))>tol8)) .AND. (ipert.EQ.dtset%natom+1) )  with_vectornd = 1
@@ -1489,13 +1489,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
    end if
 
-   ! first order potentials are always written because the eph code requires them
-   ! the files are small (much much smaller that 1WFK, actually we should avoid writing 1WFK)
-   rdwrpaw=0
-   call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
-   ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
-   call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
-   ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+   ! Write first order potentials (needed by EPH)
+   ! In DFPT, prtpot is automatically set to 1 unless the user set it to 0 explictly in the input
+   ! (actually we should avoid writing 1WFK)
+   !if (dtset%prtpot > 0) then
+     rdwrpaw=0
+     call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
+     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+     call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
+     ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+   !end if
 
 ! output files for perturbed potential components: vhartr1,vpsp1,vxc
 ! NB: only 1 spin for these
