@@ -1491,14 +1491,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    ! Write first order potentials (needed by EPH)
    ! In DFPT, prtpot is automatically set to 1 unless the user set it to 0 explictly in the input
+   ! See invars2
    ! (actually we should avoid writing 1WFK)
-   !if (dtset%prtpot > 0) then
+   if (dtset%prtpot > 0) then
      rdwrpaw=0
      call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
      ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
-   !end if
+   end if
 
 ! output files for perturbed potential components: vhartr1,vpsp1,vxc
 ! NB: only 1 spin for these
