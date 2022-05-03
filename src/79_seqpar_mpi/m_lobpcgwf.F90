@@ -108,7 +108,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  double precision :: lobpcgMem(2)
  double precision :: localmem
 
- integer, parameter :: tim_lobpcgwf2 = 1650
+ integer, parameter :: tim_lobpcgwf2 = 1640
  double precision :: cputime, walltime
  double precision :: tsec(2)
 

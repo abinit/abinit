@@ -60,6 +60,15 @@ module m_lobpcg2
   integer, parameter :: tim_pcond    = 1660
   integer, parameter :: tim_hegv     = 1661
 
+  integer, parameter :: tim_Bortho_X    = 1641
+  integer, parameter :: tim_Bortho_XW   = 1642
+  integer, parameter :: tim_Bortho_XWP  = 1643
+  integer, parameter :: tim_Bortho_Xall = 1644
+  integer, parameter :: tim_RR_X        = 1645
+  integer, parameter :: tim_RR_XW       = 1646
+  integer, parameter :: tim_RR_XWP      = 1647
+  integer, parameter :: tim_RR_Xall     = 1648
+
 #ifdef HAVE_OPENMP
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
 #else
@@ -348,7 +357,7 @@ module m_lobpcg2
     integer :: iblock, nblock
     integer :: iline, nline
     integer :: rows_tmp, cols_tmp
-    integer :: RR_var
+    integer :: RR_var,RR_tim
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
@@ -470,10 +479,10 @@ module m_lobpcg2
       end if
 
       ! B-orthonormalize X, BX and AX
-      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr) ! true to rotate AX as well
+      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_X) ! true to rotate AX as well
 
       ! Do first RR on X to get the first eigen values
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr)
+      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr,tim_RR_X)
 
       do iline = 1, nline
 
@@ -545,8 +554,9 @@ module m_lobpcg2
         ! P with values such as 1e-29 that make the eigenvectors diverge
         if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
-          call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
+          call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
           RR_var = VAR_XW
+          RR_tim = tim_RR_XW
           call xgBlock_zero(lobpcg%P)
           call xgBlock_zero(lobpcg%AP)
           call xgBlock_zero(lobpcg%BP)
@@ -556,14 +566,16 @@ module m_lobpcg2
           end if
         else
           ! B-orthonormalize P, BP
-          call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr) ! Do rotate AWP
+          call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr,tim_Bortho_XWP) ! Do rotate AWP
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
             RR_var = VAR_XWP
+            RR_tim = tim_RR_XWP
             RR_eig = eigenvalues3N%self
           else
-            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
+            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
             RR_var = VAR_XW
+            RR_tim = tim_RR_XW
             RR_eig = eigenvalues2N
             call xgBlock_zero(lobpcg%P)
             call xgBlock_zero(lobpcg%AP)
@@ -573,7 +585,7 @@ module m_lobpcg2
           !RR_eig = eigenvalues3N%self
         end if
         !RR_eig = eigenvalues3N%self
-        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
+        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,RR_tim,2*dlamch('E'))
         if ( ierr /= 0 ) then
           ABI_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.")
           exit
@@ -621,8 +633,8 @@ module m_lobpcg2
       lobpcg%AX = lobpcg%AllAX0%self
       lobpcg%BX = lobpcg%AllBX0%self
       lobpcg%blockdim = blockdim*nblock
-      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr) ! Do rotate AX
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,2*dlamch('E'))
+      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_Xall) ! Do rotate AX
+      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,tim_RR_Xall,2*dlamch('E'))
     end if
 
     if ( lobpcg%paral_kgb == 1 ) then
@@ -699,10 +711,11 @@ module m_lobpcg2
   end subroutine lobpcg_orthoXwrtBlocks
 
 
-  subroutine lobpcg_Borthonormalize(lobpcg,var,BorthoA,info)
+  subroutine lobpcg_Borthonormalize(lobpcg,var,BorthoA,info,timer)
 
     type(lobpcg_t), intent(inout) :: lobpcg
     integer       , intent(in   ) :: var
+    integer       , intent(in   ) :: timer
     logical       , intent(in   ) :: BorthoA
     integer       , intent(  out) :: info
     type(xg_t) :: buffer
@@ -712,6 +725,7 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_Bortho,1,tsec)
+    call timab(timer,1,tsec)
 
     select case (var)
     case (VAR_X) ! Select X vectors
@@ -780,15 +794,17 @@ module m_lobpcg2
     call xg_free(buffer)
 
     call timab(tim_Bortho,2,tsec)
+    call timab(timer,2,tsec)
 
   end subroutine lobpcg_Borthonormalize
 
 
-  subroutine lobpcg_rayleighRitz(lobpcg,var,eigenvalues,info,tolerance)
+  subroutine lobpcg_rayleighRitz(lobpcg,var,eigenvalues,info,timer,tolerance)
 
     use m_time
     type(lobpcg_t) , intent(inout) :: lobpcg
     integer        , intent(in   ) :: var
+    integer        , intent(in   ) :: timer
     type(xgBlock_t), intent(inout) :: eigenvalues
     integer        , intent(  out) :: info
     double precision, optional, intent(in) :: tolerance
@@ -818,6 +834,7 @@ module m_lobpcg2
 #endif
 
     call timab(tim_RR, 1, tsec)
+    call timab(timer , 1, tsec)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
@@ -1076,6 +1093,7 @@ module m_lobpcg2
     call xg_free(subB)
 
     call timab(tim_RR, 2, tsec)
+    call timab(timer , 2, tsec)
 
   end subroutine lobpcg_rayleighRitz
 
