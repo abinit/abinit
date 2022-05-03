@@ -968,7 +968,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
- names(1650) = 'lobpcgwf2                     '; 
+ names(1640) = 'lobpcgwf2                      ';
+ names(1641) = 'lobpcg_Bortho(X)               '
+ names(1642) = 'lobpcg_Bortho(XW)              '
+ names(1643) = 'lobpcg_Bortho(XWP)             '
+ names(1644) = 'lobpcg_Bortho(Xall)            '
+ names(1645) = 'lobpcg_RR(X)                   '
+ names(1646) = 'lobpcg_RR(XW)                  '
+ names(1647) = 'lobpcg_RR(XWP)                 '
+ names(1648) = 'lobpcg_RR(Xall)                '
+
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
  names(1653) = 'lobpcg_run                     '
@@ -1280,7 +1289,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(21)
 !      Estimate different complements in vtowfk
 !      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
-     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1650,-1295,-1364/)
+     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1640,-1295,-1364/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1740,9 +1749,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(74)
          list(:7)=(/ (ii,ii=1741,1747,1) /)              ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
-         list(:12)=(/ (ii,ii=1650,1661,1) /)                         ; msg='lobpcgwf2 core engine '
+         list(:20)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1661,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:18)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
+         list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
