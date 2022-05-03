@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t08/t08.in
-- output file    -> t08.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t08/t08.abi
+- output file    -> t08.abo
 - root for input  files -> t08i
 - root for output files -> t08o
 
@@ -187,6 +187,12 @@ P          mk1mem           1
         optdriver4          0
         optdriver5          0
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       1
@@ -291,8 +297,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1080,7 +1086,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t08o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1097,7 +1102,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t08o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1119,11 +1123,11 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  7   188.81162533494     -5.602E-07 1.628E-09 9.908E-05
  ETOT  8   188.81162532863     -6.314E-09 8.764E-12 3.106E-07
  ETOT  9   188.81162532840     -2.331E-10 7.537E-13 1.566E-07
- ETOT 10   188.81162532839     -9.777E-12 1.916E-14 1.036E-08
- ETOT 11   188.81162532839     -8.811E-13 9.240E-16 1.460E-10
- ETOT 12   188.81162532839     -2.274E-13 7.906E-18 3.224E-12
- ETOT 13   188.81162532839      7.958E-13 3.921E-19 1.252E-14
- ETOT 14   188.81162532839     -1.180E-12 2.021E-21 1.318E-15
+ ETOT 10   188.81162532839     -9.791E-12 1.916E-14 1.036E-08
+ ETOT 11   188.81162532839     -8.527E-13 9.240E-16 1.460E-10
+ ETOT 12   188.81162532839     -2.558E-13 7.906E-18 3.224E-12
+ ETOT 13   188.81162532839      8.242E-13 3.921E-19 1.252E-14
+ ETOT 14   188.81162532839     -1.208E-12 2.021E-21 1.318E-15
  ETOT 15   188.81162532838     -1.734E-12 4.615E-23 2.607E-17
 
  At SCF step   15       vres2   =  2.61E-17 < tolvrs=  1.00E-16 =>converged.
@@ -1352,6 +1356,12 @@ P          mk1mem           1
         optdriver4          0
         optdriver5          0
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       1
@@ -1510,10 +1520,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.8
+.Delivered  12 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.7

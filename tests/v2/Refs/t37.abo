@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t37/t37.in
-- output file    -> t37.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t37/t37.abi
+- output file    -> t37.abo
 - root for input  files -> t37i
 - root for output files -> t37o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          15          nfft =         512          nkpt =           2
 ================================================================================
-P This job should need less than                       0.845 Mbytes of memory.
+P This job should need less than                       0.860 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          15          nfft =         512          nkpt =          32
 ================================================================================
-P This job should need less than                       0.833 Mbytes of memory.
+P This job should need less than                       0.848 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.031 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =         512          nkpt =          32
 ================================================================================
-P This job should need less than                       0.851 Mbytes of memory.
+P This job should need less than                       0.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -114,7 +114,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =         512          nkpt =          32
 ================================================================================
-P This job should need less than                       0.851 Mbytes of memory.
+P This job should need less than                       0.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -419,6 +419,12 @@ P          mk1mem6         32
         optdriver4          1
         optdriver5          0
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
            prtvol1          0
            prtvol2          0
            prtvol3          0
@@ -573,8 +579,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Mg,  from PRB58, 3641 (1998)
 - 12.00000   2.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -596,8 +602,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.063023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for O,  from PRB58, 3641 (1998)
 -  8.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1282,39 +1288,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.01589
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 
  ==>  initialize data related to q vector <== 
 
@@ -1336,108 +1309,10 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS3_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1466,69 +1341,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   46.500E-10; max=  99.404E-10
    0.2500  0.2500  0.2500    1  4.84749E-09 kpt; spin; max resid(k); each band:
-   2.77E-09  4.85E-09  1.88E-09  2.10E-09
+  2.77E-09 4.85E-09 1.88E-09 2.10E-09
   -0.2500 -0.2500 -0.2500    1  9.94040E-09 kpt; spin; max resid(k); each band:
-   7.73E-09  4.49E-10  6.79E-09  9.94E-09
+  7.73E-09 4.49E-10 6.79E-09 9.94E-09
    0.2500  0.0000  0.0000    1  8.43541E-09 kpt; spin; max resid(k); each band:
-   4.49E-09  7.82E-09  7.73E-09  8.44E-09
+  4.49E-09 7.82E-09 7.73E-09 8.44E-09
   -0.2500  0.0000  0.0000    1  8.82768E-09 kpt; spin; max resid(k); each band:
-   2.51E-10  6.20E-10  8.83E-09  8.70E-09
+  2.51E-10 6.20E-10 8.83E-09 8.70E-09
    0.0000  0.2500  0.0000    1  7.46743E-09 kpt; spin; max resid(k); each band:
-   2.76E-10  2.82E-10  3.32E-10  7.47E-09
+  2.76E-10 2.82E-10 3.32E-10 7.47E-09
    0.0000 -0.2500  0.0000    1  6.49404E-09 kpt; spin; max resid(k); each band:
-   2.10E-09  2.72E-10  6.49E-09  2.74E-09
+  2.10E-09 2.72E-10 6.49E-09 2.74E-09
    0.0000  0.0000  0.2500    1  4.77748E-09 kpt; spin; max resid(k); each band:
-   4.20E-10  4.63E-10  4.69E-09  4.78E-09
+  4.20E-10 4.63E-10 4.69E-09 4.78E-09
    0.0000  0.0000 -0.2500    1  6.59273E-09 kpt; spin; max resid(k); each band:
-   1.95E-09  6.59E-09  5.66E-09  2.41E-09
+  1.95E-09 6.59E-09 5.66E-09 2.41E-09
    0.2500  0.2500 -0.2500    1  7.93010E-09 kpt; spin; max resid(k); each band:
-   4.00E-09  7.78E-09  1.99E-10  7.93E-09
+  4.00E-09 7.78E-09 1.99E-10 7.93E-09
   -0.2500 -0.2500  0.2500    1  7.23993E-09 kpt; spin; max resid(k); each band:
-   2.18E-09  7.24E-09  1.06E-09  1.99E-09
+  2.18E-09 7.24E-09 1.06E-09 1.99E-09
    0.2500  0.5000  0.0000    1  9.77094E-09 kpt; spin; max resid(k); each band:
-   6.15E-09  9.41E-10  4.01E-09  9.77E-09
+  6.15E-09 9.41E-10 4.01E-09 9.77E-09
   -0.2500 -0.5000  0.0000    1  9.70205E-09 kpt; spin; max resid(k); each band:
-   3.86E-09  9.70E-09  6.01E-09  5.19E-09
+  3.86E-09 9.70E-09 6.01E-09 5.19E-09
    0.5000  0.2500  0.0000    1  9.44686E-09 kpt; spin; max resid(k); each band:
-   2.61E-09  7.14E-09  9.45E-09  1.95E-09
+  2.61E-09 7.14E-09 9.45E-09 1.95E-09
   -0.5000 -0.2500  0.0000    1  8.03137E-09 kpt; spin; max resid(k); each band:
-   6.13E-09  8.03E-09  2.51E-09  4.24E-09
+  6.13E-09 8.03E-09 2.51E-09 4.24E-09
    0.5000  0.5000  0.2500    1  9.77916E-09 kpt; spin; max resid(k); each band:
-   3.83E-09  6.73E-09  9.78E-09  6.90E-10
+  3.83E-09 6.73E-09 9.78E-09 6.90E-10
   -0.5000 -0.5000 -0.2500    1  8.62490E-09 kpt; spin; max resid(k); each band:
-   5.32E-09  8.62E-09  1.52E-09  7.65E-10
+  5.32E-09 8.62E-09 1.52E-09 7.65E-10
    0.2500 -0.2500  0.2500    1  6.02366E-09 kpt; spin; max resid(k); each band:
-   4.66E-09  4.91E-10  3.12E-10  6.02E-09
+  4.66E-09 4.91E-10 3.12E-10 6.02E-09
   -0.2500  0.2500 -0.2500    1  8.87915E-09 kpt; spin; max resid(k); each band:
-   4.84E-09  8.88E-09  9.07E-10  7.69E-09
+  4.84E-09 8.88E-09 9.07E-10 7.69E-09
    0.2500  0.0000  0.5000    1  6.32043E-09 kpt; spin; max resid(k); each band:
-   6.32E-09  1.71E-09  6.32E-09  1.45E-09
+  6.32E-09 1.71E-09 6.32E-09 1.45E-09
   -0.2500  0.0000 -0.5000    1  9.81576E-09 kpt; spin; max resid(k); each band:
-   3.45E-09  9.82E-09  2.35E-09  6.56E-09
+  3.45E-09 9.82E-09 2.35E-09 6.56E-09
    0.5000  0.2500  0.5000    1  5.40608E-09 kpt; spin; max resid(k); each band:
-   5.41E-09  3.71E-09  2.24E-09  1.03E-09
+  5.41E-09 3.71E-09 2.24E-09 1.03E-09
   -0.5000 -0.2500 -0.5000    1  6.34780E-09 kpt; spin; max resid(k); each band:
-   4.71E-09  6.35E-09  1.14E-09  1.19E-09
+  4.71E-09 6.35E-09 1.14E-09 1.19E-09
    0.5000  0.0000  0.2500    1  5.78665E-09 kpt; spin; max resid(k); each band:
-   2.99E-09  5.79E-09  1.40E-09  1.82E-09
+  2.99E-09 5.79E-09 1.40E-09 1.82E-09
   -0.5000  0.0000 -0.2500    1  9.31870E-09 kpt; spin; max resid(k); each band:
-   6.49E-09  9.32E-09  6.93E-09  6.06E-09
+  6.49E-09 9.32E-09 6.93E-09 6.06E-09
   -0.2500  0.2500  0.2500    1  6.86256E-09 kpt; spin; max resid(k); each band:
-   5.72E-09  3.56E-09  6.86E-09  2.23E-09
+  5.72E-09 3.56E-09 6.86E-09 2.23E-09
    0.2500 -0.2500 -0.2500    1  7.54224E-09 kpt; spin; max resid(k); each band:
-   7.31E-09  2.91E-09  7.54E-09  2.03E-09
+  7.31E-09 2.91E-09 7.54E-09 2.03E-09
    0.2500  0.5000  0.5000    1  8.71467E-09 kpt; spin; max resid(k); each band:
-   7.93E-09  1.40E-10  8.71E-09  6.67E-09
+  7.93E-09 1.40E-10 8.71E-09 6.67E-09
   -0.2500 -0.5000 -0.5000    1  8.38820E-09 kpt; spin; max resid(k); each band:
-   6.69E-09  4.93E-09  4.96E-09  8.39E-09
+  6.69E-09 4.93E-09 4.96E-09 8.39E-09
    0.0000  0.2500  0.5000    1  9.66623E-09 kpt; spin; max resid(k); each band:
-   9.05E-09  4.80E-09  7.88E-09  9.67E-09
+  9.05E-09 4.80E-09 7.88E-09 9.67E-09
    0.0000 -0.2500 -0.5000    1  9.84557E-09 kpt; spin; max resid(k); each band:
-   7.63E-09  9.85E-09  8.39E-10  1.91E-09
+  7.63E-09 9.85E-09 8.39E-10 1.91E-09
    0.0000  0.5000  0.2500    1  9.37433E-09 kpt; spin; max resid(k); each band:
-   9.37E-09  6.03E-09  4.76E-09  6.80E-10
+  9.37E-09 6.03E-09 4.76E-09 6.80E-10
    0.0000 -0.5000 -0.2500    1  8.38248E-09 kpt; spin; max resid(k); each band:
-   7.78E-10  1.56E-10  8.01E-10  8.38E-09
+  7.78E-10 1.56E-10 8.01E-10 8.38E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1558,108 +1433,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS3_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1688,69 +1465,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   30.348E-10; max=  97.025E-10
    0.2500  0.2500  0.2500    1  7.63858E-09 kpt; spin; max resid(k); each band:
-   7.64E-09  2.75E-09  4.82E-09  2.60E-09
+  7.64E-09 2.75E-09 4.82E-09 2.60E-09
   -0.2500 -0.2500 -0.2500    1  9.70249E-09 kpt; spin; max resid(k); each band:
-   8.18E-09  2.86E-09  1.07E-09  9.70E-09
+  8.18E-09 2.86E-09 1.07E-09 9.70E-09
    0.2500  0.0000  0.0000    1  4.60538E-09 kpt; spin; max resid(k); each band:
-   4.61E-09  8.98E-11  3.83E-09  3.48E-09
+  4.61E-09 8.98E-11 3.83E-09 3.48E-09
   -0.2500  0.0000  0.0000    1  6.44081E-09 kpt; spin; max resid(k); each band:
-   2.69E-10  2.21E-09  4.17E-09  6.44E-09
+  2.69E-10 2.21E-09 4.17E-09 6.44E-09
    0.0000  0.2500  0.0000    1  9.71969E-10 kpt; spin; max resid(k); each band:
-   7.58E-10  2.58E-10  9.64E-10  9.72E-10
+  7.58E-10 2.58E-10 9.64E-10 9.72E-10
    0.0000 -0.2500  0.0000    1  8.29185E-09 kpt; spin; max resid(k); each band:
-   8.29E-09  3.69E-10  1.55E-09  6.21E-10
+  8.29E-09 3.69E-10 1.55E-09 6.21E-10
    0.0000  0.0000  0.2500    1  5.84413E-09 kpt; spin; max resid(k); each band:
-   7.16E-10  2.84E-09  5.84E-09  1.54E-09
+  7.16E-10 2.84E-09 5.84E-09 1.54E-09
    0.0000  0.0000 -0.2500    1  7.30940E-09 kpt; spin; max resid(k); each band:
-   7.31E-09  1.50E-09  1.11E-09  1.59E-09
+  7.31E-09 1.50E-09 1.11E-09 1.59E-09
    0.2500  0.2500 -0.2500    1  3.54339E-09 kpt; spin; max resid(k); each band:
-   8.47E-10  3.54E-09  2.46E-09  1.04E-09
+  8.47E-10 3.54E-09 2.46E-09 1.04E-09
   -0.2500 -0.2500  0.2500    1  4.14255E-09 kpt; spin; max resid(k); each band:
-   9.88E-10  4.14E-09  1.54E-09  5.39E-10
+  9.88E-10 4.14E-09 1.54E-09 5.39E-10
    0.2500  0.5000  0.0000    1  3.01806E-09 kpt; spin; max resid(k); each band:
-   6.77E-10  1.32E-09  2.45E-09  3.02E-09
+  6.77E-10 1.32E-09 2.45E-09 3.02E-09
   -0.2500 -0.5000  0.0000    1  2.70284E-09 kpt; spin; max resid(k); each band:
-   1.25E-09  2.70E-09  1.37E-09  9.23E-10
+  1.25E-09 2.70E-09 1.37E-09 9.23E-10
    0.5000  0.2500  0.0000    1  1.51430E-09 kpt; spin; max resid(k); each band:
-   5.27E-10  1.51E-09  4.63E-10  5.46E-10
+  5.27E-10 1.51E-09 4.63E-10 5.46E-10
   -0.5000 -0.2500  0.0000    1  2.82591E-09 kpt; spin; max resid(k); each band:
-   1.47E-09  2.83E-09  7.36E-10  3.90E-10
+  1.47E-09 2.83E-09 7.36E-10 3.90E-10
    0.5000  0.5000  0.2500    1  6.74304E-09 kpt; spin; max resid(k); each band:
-   2.72E-10  2.48E-09  6.74E-09  6.70E-09
+  2.72E-10 2.48E-09 6.74E-09 6.70E-09
   -0.5000 -0.5000 -0.2500    1  8.94882E-09 kpt; spin; max resid(k); each band:
-   8.95E-09  5.43E-09  2.61E-09  2.66E-09
+  8.95E-09 5.43E-09 2.61E-09 2.66E-09
    0.2500 -0.2500  0.2500    1  4.62637E-09 kpt; spin; max resid(k); each band:
-   3.53E-10  4.63E-09  2.89E-09  3.00E-09
+  3.53E-10 4.63E-09 2.89E-09 3.00E-09
   -0.2500  0.2500 -0.2500    1  6.04968E-09 kpt; spin; max resid(k); each band:
-   5.59E-09  5.61E-10  6.05E-09  8.90E-10
+  5.59E-09 5.61E-10 6.05E-09 8.90E-10
    0.2500  0.0000  0.5000    1  8.98987E-09 kpt; spin; max resid(k); each band:
-   3.56E-10  6.18E-09  8.99E-09  8.48E-09
+  3.56E-10 6.18E-09 8.99E-09 8.48E-09
   -0.2500  0.0000 -0.5000    1  4.29105E-09 kpt; spin; max resid(k); each band:
-   7.57E-10  1.13E-09  2.07E-09  4.29E-09
+  7.57E-10 1.13E-09 2.07E-09 4.29E-09
    0.5000  0.2500  0.5000    1  9.66025E-09 kpt; spin; max resid(k); each band:
-   9.66E-09  2.02E-09  2.27E-09  1.11E-09
+  9.66E-09 2.02E-09 2.27E-09 1.11E-09
   -0.5000 -0.2500 -0.5000    1  8.99867E-09 kpt; spin; max resid(k); each band:
-   9.00E-09  6.70E-10  1.77E-09  7.42E-09
+  9.00E-09 6.70E-10 1.77E-09 7.42E-09
    0.5000  0.0000  0.2500    1  3.85419E-09 kpt; spin; max resid(k); each band:
-   8.72E-10  3.85E-09  2.32E-09  7.96E-10
+  8.72E-10 3.85E-09 2.32E-09 7.96E-10
   -0.5000  0.0000 -0.2500    1  5.09778E-09 kpt; spin; max resid(k); each band:
-   1.14E-09  1.84E-10  7.84E-10  5.10E-09
+  1.14E-09 1.84E-10 7.84E-10 5.10E-09
   -0.2500  0.2500  0.2500    1  6.91146E-09 kpt; spin; max resid(k); each band:
-   1.24E-09  3.90E-10  1.13E-09  6.91E-09
+  1.24E-09 3.90E-10 1.13E-09 6.91E-09
    0.2500 -0.2500 -0.2500    1  7.61980E-09 kpt; spin; max resid(k); each band:
-   7.62E-09  2.44E-10  1.44E-09  7.40E-09
+  7.62E-09 2.44E-10 1.44E-09 7.40E-09
    0.2500  0.5000  0.5000    1  5.65277E-09 kpt; spin; max resid(k); each band:
-   8.55E-10  5.65E-09  6.43E-10  1.16E-09
+  8.55E-10 5.65E-09 6.43E-10 1.16E-09
   -0.2500 -0.5000 -0.5000    1  8.06902E-09 kpt; spin; max resid(k); each band:
-   8.07E-09  4.04E-09  2.65E-09  2.62E-09
+  8.07E-09 4.04E-09 2.65E-09 2.62E-09
    0.0000  0.2500  0.5000    1  8.96015E-09 kpt; spin; max resid(k); each band:
-   7.11E-09  3.37E-09  8.96E-09  1.33E-09
+  7.11E-09 3.37E-09 8.96E-09 1.33E-09
    0.0000 -0.2500 -0.5000    1  5.09649E-09 kpt; spin; max resid(k); each band:
-   1.05E-10  3.23E-09  5.10E-09  2.54E-09
+  1.05E-10 3.23E-09 5.10E-09 2.54E-09
    0.0000  0.5000  0.2500    1  5.36332E-09 kpt; spin; max resid(k); each band:
-   4.34E-10  2.08E-10  5.36E-09  9.25E-10
+  4.34E-10 2.08E-10 5.36E-09 9.25E-10
    0.0000 -0.5000 -0.2500    1  8.95311E-09 kpt; spin; max resid(k); each band:
-   6.45E-09  1.67E-09  8.95E-09  1.35E-09
+  6.45E-09 1.67E-09 8.95E-09 1.35E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1780,108 +1557,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS3_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1910,69 +1589,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   31.176E-10; max=  97.856E-10
    0.2500  0.2500  0.2500    1  7.35793E-09 kpt; spin; max resid(k); each band:
-   7.36E-09  2.92E-09  4.76E-09  5.47E-09
+  7.36E-09 2.92E-09 4.76E-09 5.47E-09
   -0.2500 -0.2500 -0.2500    1  8.13681E-09 kpt; spin; max resid(k); each band:
-   8.14E-09  3.52E-09  7.06E-09  1.95E-09
+  8.14E-09 3.52E-09 7.06E-09 1.95E-09
    0.2500  0.0000  0.0000    1  6.00537E-09 kpt; spin; max resid(k); each band:
-   4.21E-09  8.92E-11  1.56E-09  6.01E-09
+  4.21E-09 8.92E-11 1.56E-09 6.01E-09
   -0.2500  0.0000  0.0000    1  9.22603E-09 kpt; spin; max resid(k); each band:
-   9.23E-09  4.04E-09  3.70E-09  5.14E-09
+  9.23E-09 4.04E-09 3.70E-09 5.14E-09
    0.0000  0.2500  0.0000    1  6.19380E-09 kpt; spin; max resid(k); each band:
-   6.49E-10  2.48E-09  6.19E-09  5.43E-10
+  6.49E-10 2.48E-09 6.19E-09 5.43E-10
    0.0000 -0.2500  0.0000    1  7.89568E-09 kpt; spin; max resid(k); each band:
-   7.90E-09  2.38E-09  1.01E-09  1.19E-09
+  7.90E-09 2.38E-09 1.01E-09 1.19E-09
    0.0000  0.0000  0.2500    1  1.53482E-09 kpt; spin; max resid(k); each band:
-   8.71E-10  4.28E-10  8.74E-10  1.53E-09
+  8.71E-10 4.28E-10 8.74E-10 1.53E-09
    0.0000  0.0000 -0.2500    1  8.01171E-09 kpt; spin; max resid(k); each band:
-   8.01E-09  3.11E-10  7.73E-10  6.32E-10
+  8.01E-09 3.11E-10 7.73E-10 6.32E-10
    0.2500  0.2500 -0.2500    1  3.23740E-09 kpt; spin; max resid(k); each band:
-   3.79E-10  2.55E-09  2.23E-09  3.24E-09
+  3.79E-10 2.55E-09 2.23E-09 3.24E-09
   -0.2500 -0.2500  0.2500    1  6.72112E-09 kpt; spin; max resid(k); each band:
-   6.72E-09  7.84E-10  5.70E-09  8.83E-10
+  6.72E-09 7.84E-10 5.70E-09 8.83E-10
    0.2500  0.5000  0.0000    1  9.12493E-09 kpt; spin; max resid(k); each band:
-   3.73E-10  7.44E-09  9.12E-09  8.16E-09
+  3.73E-10 7.44E-09 9.12E-09 8.16E-09
   -0.2500 -0.5000  0.0000    1  3.92937E-09 kpt; spin; max resid(k); each band:
-   7.05E-10  1.29E-09  1.80E-09  3.93E-09
+  7.05E-10 1.29E-09 1.80E-09 3.93E-09
    0.5000  0.2500  0.0000    1  4.56460E-09 kpt; spin; max resid(k); each band:
-   6.32E-10  4.56E-09  2.26E-09  6.47E-10
+  6.32E-10 4.56E-09 2.26E-09 6.47E-10
   -0.5000 -0.2500  0.0000    1  4.50666E-09 kpt; spin; max resid(k); each band:
-   1.28E-09  1.87E-10  7.73E-10  4.51E-09
+  1.28E-09 1.87E-10 7.73E-10 4.51E-09
    0.5000  0.5000  0.2500    1  6.51727E-09 kpt; spin; max resid(k); each band:
-   8.88E-10  6.52E-09  4.33E-09  1.14E-09
+  8.88E-10 6.52E-09 4.33E-09 1.14E-09
   -0.5000 -0.5000 -0.2500    1  9.78565E-09 kpt; spin; max resid(k); each band:
-   9.79E-09  4.15E-10  1.33E-09  6.97E-09
+  9.79E-09 4.15E-10 1.33E-09 6.97E-09
    0.2500 -0.2500  0.2500    1  7.11232E-09 kpt; spin; max resid(k); each band:
-   5.97E-10  4.59E-10  7.11E-09  9.97E-10
+  5.97E-10 4.59E-10 7.11E-09 9.97E-10
   -0.2500  0.2500 -0.2500    1  4.09125E-09 kpt; spin; max resid(k); each band:
-   8.82E-10  4.09E-09  1.56E-09  5.72E-10
+  8.82E-10 4.09E-09 1.56E-09 5.72E-10
    0.2500  0.0000  0.5000    1  9.31942E-09 kpt; spin; max resid(k); each band:
-   5.38E-10  8.17E-10  9.32E-09  3.00E-09
+  5.38E-10 8.17E-10 9.32E-09 3.00E-09
   -0.2500  0.0000 -0.5000    1  1.80604E-09 kpt; spin; max resid(k); each band:
-   1.17E-09  1.05E-09  1.81E-09  8.56E-10
+  1.17E-09 1.05E-09 1.81E-09 8.56E-10
    0.5000  0.2500  0.5000    1  6.89781E-09 kpt; spin; max resid(k); each band:
-   2.50E-10  1.77E-09  6.49E-09  6.90E-09
+  2.50E-10 1.77E-09 6.49E-09 6.90E-09
   -0.5000 -0.2500 -0.5000    1  8.75481E-09 kpt; spin; max resid(k); each band:
-   8.75E-09  6.17E-09  2.27E-09  3.05E-09
+  8.75E-09 6.17E-09 2.27E-09 3.05E-09
    0.5000  0.0000  0.2500    1  1.17783E-09 kpt; spin; max resid(k); each band:
-   4.70E-10  1.18E-09  4.92E-10  9.35E-10
+  4.70E-10 1.18E-09 4.92E-10 9.35E-10
   -0.5000  0.0000 -0.2500    1  9.46807E-09 kpt; spin; max resid(k); each band:
-   9.47E-09  2.93E-09  1.11E-09  5.52E-10
+  9.47E-09 2.93E-09 1.11E-09 5.52E-10
   -0.2500  0.2500  0.2500    1  6.06009E-09 kpt; spin; max resid(k); each band:
-   1.11E-09  7.16E-10  1.69E-09  6.06E-09
+  1.11E-09 7.16E-10 1.69E-09 6.06E-09
    0.2500 -0.2500 -0.2500    1  7.14649E-09 kpt; spin; max resid(k); each band:
-   7.15E-09  6.87E-10  1.55E-09  6.95E-09
+  7.15E-09 6.87E-10 1.55E-09 6.95E-09
    0.2500  0.5000  0.5000    1  9.32750E-09 kpt; spin; max resid(k); each band:
-   7.50E-10  2.46E-09  5.74E-10  9.33E-09
+  7.50E-10 2.46E-09 5.74E-10 9.33E-09
   -0.2500 -0.5000 -0.5000    1  5.28904E-09 kpt; spin; max resid(k); each band:
-   5.29E-09  4.20E-09  2.31E-09  1.74E-09
+  5.29E-09 4.20E-09 2.31E-09 1.74E-09
    0.0000  0.2500  0.5000    1  5.00478E-09 kpt; spin; max resid(k); each band:
-   3.84E-10  1.85E-10  5.00E-09  1.26E-09
+  3.84E-10 1.85E-10 5.00E-09 1.26E-09
    0.0000 -0.2500 -0.5000    1  8.66646E-09 kpt; spin; max resid(k); each band:
-   6.63E-09  1.87E-09  8.67E-09  1.24E-09
+  6.63E-09 1.87E-09 8.67E-09 1.24E-09
    0.0000  0.5000  0.2500    1  6.55692E-09 kpt; spin; max resid(k); each band:
-   6.56E-09  8.70E-10  1.29E-10  1.06E-09
+  6.56E-09 8.70E-10 1.29E-10 1.06E-09
    0.0000 -0.5000 -0.2500    1  5.84864E-09 kpt; spin; max resid(k); each band:
-   5.72E-11  3.43E-09  5.85E-09  3.24E-09
+  5.72E-11 3.43E-09 5.85E-09 3.24E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2002,108 +1681,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS3_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -2119,7 +1700,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  ETOT  3   5.2410831508766     -1.940E+02 1.367E-01 1.587E+02
 
- ETOT  4   3.9384558978848     -1.303E+00 7.545E-04 5.027E-02
+ ETOT  4   3.9384558978849     -1.303E+00 7.545E-04 5.027E-02
 
  ETOT  5   3.9380672964388     -3.886E-04 8.338E-07 2.493E-04
 
@@ -2132,69 +1713,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   31.035E-10; max=  96.652E-10
    0.2500  0.2500  0.2500    1  8.57262E-09 kpt; spin; max resid(k); each band:
-   3.64E-10  8.57E-09  5.31E-10  1.40E-09
+  3.64E-10 8.57E-09 5.31E-10 1.40E-09
   -0.2500 -0.2500 -0.2500    1  3.68558E-09 kpt; spin; max resid(k); each band:
-   1.59E-09  3.86E-10  3.69E-09  1.85E-09
+  1.59E-09 3.86E-10 3.69E-09 1.85E-09
    0.2500  0.0000  0.0000    1  8.12615E-09 kpt; spin; max resid(k); each band:
-   8.13E-09  1.44E-10  9.80E-10  5.29E-09
+  8.13E-09 1.44E-10 9.80E-10 5.29E-09
   -0.2500  0.0000  0.0000    1  6.67209E-09 kpt; spin; max resid(k); each band:
-   3.99E-10  5.33E-10  4.16E-09  6.67E-09
+  3.99E-10 5.33E-10 4.16E-09 6.67E-09
    0.0000  0.2500  0.0000    1  4.52989E-09 kpt; spin; max resid(k); each band:
-   8.21E-10  1.70E-10  4.53E-09  1.85E-09
+  8.21E-10 1.70E-10 4.53E-09 1.85E-09
    0.0000 -0.2500  0.0000    1  8.12048E-09 kpt; spin; max resid(k); each band:
-   8.12E-09  1.57E-10  3.59E-09  5.68E-09
+  8.12E-09 1.57E-10 3.59E-09 5.68E-09
    0.0000  0.0000  0.2500    1  6.76310E-09 kpt; spin; max resid(k); each band:
-   1.38E-09  6.76E-09  8.10E-10  5.44E-09
+  1.38E-09 6.76E-09 8.10E-10 5.44E-09
    0.0000  0.0000 -0.2500    1  3.88838E-09 kpt; spin; max resid(k); each band:
-   5.65E-10  3.89E-09  2.69E-09  3.48E-09
+  5.65E-10 3.89E-09 2.69E-09 3.48E-09
    0.2500  0.2500 -0.2500    1  9.18310E-09 kpt; spin; max resid(k); each band:
-   2.78E-09  9.18E-09  1.68E-09  2.49E-09
+  2.78E-09 9.18E-09 1.68E-09 2.49E-09
   -0.2500 -0.2500  0.2500    1  3.57067E-09 kpt; spin; max resid(k); each band:
-   1.31E-09  3.57E-09  3.32E-10  2.19E-09
+  1.31E-09 3.57E-09 3.32E-10 2.19E-09
    0.2500  0.5000  0.0000    1  5.65561E-09 kpt; spin; max resid(k); each band:
-   9.78E-10  6.86E-10  1.46E-09  5.66E-09
+  9.78E-10 6.86E-10 1.46E-09 5.66E-09
   -0.2500 -0.5000  0.0000    1  9.50267E-09 kpt; spin; max resid(k); each band:
-   8.88E-09  4.99E-09  3.18E-09  9.50E-09
+  8.88E-09 4.99E-09 3.18E-09 9.50E-09
    0.5000  0.2500  0.0000    1  4.43590E-09 kpt; spin; max resid(k); each band:
-   9.55E-10  5.63E-11  4.44E-09  1.13E-09
+  9.55E-10 5.63E-11 4.44E-09 1.13E-09
   -0.5000 -0.2500  0.0000    1  6.30514E-09 kpt; spin; max resid(k); each band:
-   3.25E-09  2.37E-09  6.31E-09  4.94E-09
+  3.25E-09 2.37E-09 6.31E-09 4.94E-09
    0.5000  0.5000  0.2500    1  2.21928E-09 kpt; spin; max resid(k); each band:
-   4.02E-10  2.77E-10  1.38E-09  2.22E-09
+  4.02E-10 2.77E-10 1.38E-09 2.22E-09
   -0.5000 -0.5000 -0.2500    1  1.86868E-09 kpt; spin; max resid(k); each band:
-   1.28E-09  2.43E-10  1.87E-09  1.74E-09
+  1.28E-09 2.43E-10 1.87E-09 1.74E-09
    0.2500 -0.2500  0.2500    1  7.22683E-09 kpt; spin; max resid(k); each band:
-   4.46E-09  7.23E-09  4.47E-10  2.55E-09
+  4.46E-09 7.23E-09 4.47E-10 2.55E-09
   -0.2500  0.2500 -0.2500    1  5.60002E-09 kpt; spin; max resid(k); each band:
-   4.75E-09  5.60E-09  1.38E-09  7.29E-10
+  4.75E-09 5.60E-09 1.38E-09 7.29E-10
    0.2500  0.0000  0.5000    1  9.66516E-09 kpt; spin; max resid(k); each band:
-   4.25E-10  6.89E-09  1.78E-09  9.67E-09
+  4.25E-10 6.89E-09 1.78E-09 9.67E-09
   -0.2500  0.0000 -0.5000    1  4.47663E-09 kpt; spin; max resid(k); each band:
-   1.19E-10  4.48E-09  2.19E-09  2.72E-09
+  1.19E-10 4.48E-09 2.19E-09 2.72E-09
    0.5000  0.2500  0.5000    1  4.11007E-09 kpt; spin; max resid(k); each band:
-   1.75E-09  1.59E-09  4.11E-09  3.28E-09
+  1.75E-09 1.59E-09 4.11E-09 3.28E-09
   -0.5000 -0.2500 -0.5000    1  7.64157E-09 kpt; spin; max resid(k); each band:
-   7.70E-10  1.65E-10  7.64E-09  1.44E-09
+  7.70E-10 1.65E-10 7.64E-09 1.44E-09
    0.5000  0.0000  0.2500    1  3.10653E-09 kpt; spin; max resid(k); each band:
-   1.78E-09  3.11E-09  2.34E-09  2.35E-09
+  1.78E-09 3.11E-09 2.34E-09 2.35E-09
   -0.5000  0.0000 -0.2500    1  9.25829E-09 kpt; spin; max resid(k); each band:
-   3.25E-09  9.26E-09  7.66E-09  1.42E-09
+  3.25E-09 9.26E-09 7.66E-09 1.42E-09
   -0.2500  0.2500  0.2500    1  7.11074E-09 kpt; spin; max resid(k); each band:
-   6.29E-10  2.29E-10  7.11E-09  1.90E-09
+  6.29E-10 2.29E-10 7.11E-09 1.90E-09
    0.2500 -0.2500 -0.2500    1  9.42358E-09 kpt; spin; max resid(k); each band:
-   1.68E-09  9.42E-09  8.44E-10  1.45E-09
+  1.68E-09 9.42E-09 8.44E-10 1.45E-09
    0.2500  0.5000  0.5000    1  4.97955E-09 kpt; spin; max resid(k); each band:
-   1.76E-10  4.98E-09  1.25E-09  2.93E-09
+  1.76E-10 4.98E-09 1.25E-09 2.93E-09
   -0.2500 -0.5000 -0.5000    1  7.66893E-09 kpt; spin; max resid(k); each band:
-   7.53E-09  1.49E-09  2.53E-09  7.67E-09
+  7.53E-09 1.49E-09 2.53E-09 7.67E-09
    0.0000  0.2500  0.5000    1  4.57476E-09 kpt; spin; max resid(k); each band:
-   1.02E-09  4.57E-09  7.05E-10  1.85E-09
+  1.02E-09 4.57E-09 7.05E-10 1.85E-09
    0.0000 -0.2500 -0.5000    1  6.30110E-09 kpt; spin; max resid(k); each band:
-   3.73E-10  6.06E-09  6.30E-09  1.18E-09
+  3.73E-10 6.06E-09 6.30E-09 1.18E-09
    0.0000  0.5000  0.2500    1  9.54704E-09 kpt; spin; max resid(k); each band:
-   1.41E-09  9.55E-09  1.49E-09  3.95E-09
+  1.41E-09 9.55E-09 1.49E-09 3.95E-09
    0.0000 -0.5000 -0.2500    1  9.58428E-09 kpt; spin; max resid(k); each band:
-   1.07E-09  9.58E-09  2.19E-09  4.25E-10
+  1.07E-09 9.58E-09 2.19E-09 4.25E-10
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2224,108 +1805,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS3_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -2343,7 +1826,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  ETOT  4   3.0573863630924     -8.377E-02 3.014E-04 4.464E-02
 
- ETOT  5   3.0570774090305     -3.090E-04 3.479E-07 3.117E-03
+ ETOT  5   3.0570774090304     -3.090E-04 3.479E-07 3.117E-03
 
  ETOT  6   3.0570529405835     -2.447E-05 1.351E-08 4.688E-05
 
@@ -2356,69 +1839,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   44.990E-10; max=  99.596E-10
    0.2500  0.2500  0.2500    1  9.95957E-09 kpt; spin; max resid(k); each band:
-   2.51E-09  2.88E-09  8.94E-09  9.96E-09
+  2.51E-09 2.88E-09 8.94E-09 9.96E-09
   -0.2500 -0.2500 -0.2500    1  9.38698E-09 kpt; spin; max resid(k); each band:
-   6.00E-10  9.39E-09  7.80E-09  4.99E-09
+  6.00E-10 9.39E-09 7.80E-09 4.99E-09
    0.2500  0.0000  0.0000    1  2.23037E-09 kpt; spin; max resid(k); each band:
-   2.23E-09  1.93E-09  3.32E-10  1.63E-09
+  2.23E-09 1.93E-09 3.32E-10 1.63E-09
   -0.2500  0.0000  0.0000    1  8.16626E-09 kpt; spin; max resid(k); each band:
-   8.17E-09  5.15E-09  7.22E-09  2.05E-09
+  8.17E-09 5.15E-09 7.22E-09 2.05E-09
    0.0000  0.2500  0.0000    1  8.91500E-09 kpt; spin; max resid(k); each band:
-   1.34E-09  2.97E-09  8.91E-09  5.07E-09
+  1.34E-09 2.97E-09 8.91E-09 5.07E-09
    0.0000 -0.2500  0.0000    1  7.38036E-09 kpt; spin; max resid(k); each band:
-   3.19E-09  2.84E-09  7.38E-09  3.88E-09
+  3.19E-09 2.84E-09 7.38E-09 3.88E-09
    0.0000  0.0000  0.2500    1  4.21245E-09 kpt; spin; max resid(k); each band:
-   4.21E-09  3.55E-09  5.09E-10  3.79E-09
+  4.21E-09 3.55E-09 5.09E-10 3.79E-09
    0.0000  0.0000 -0.2500    1  8.62455E-09 kpt; spin; max resid(k); each band:
-   8.62E-09  7.06E-09  8.13E-09  4.44E-09
+  8.62E-09 7.06E-09 8.13E-09 4.44E-09
    0.2500  0.2500 -0.2500    1  9.75678E-09 kpt; spin; max resid(k); each band:
-   2.74E-09  1.97E-09  2.15E-09  9.76E-09
+  2.74E-09 1.97E-09 2.15E-09 9.76E-09
   -0.2500 -0.2500  0.2500    1  6.38157E-09 kpt; spin; max resid(k); each band:
-   6.38E-09  4.37E-09  2.18E-09  2.23E-09
+  6.38E-09 4.37E-09 2.18E-09 2.23E-09
    0.2500  0.5000  0.0000    1  8.83028E-09 kpt; spin; max resid(k); each band:
-   7.07E-09  6.05E-09  8.83E-09  6.48E-09
+  7.07E-09 6.05E-09 8.83E-09 6.48E-09
   -0.2500 -0.5000  0.0000    1  6.43421E-09 kpt; spin; max resid(k); each band:
-   5.31E-09  3.85E-09  6.43E-09  4.78E-09
+  5.31E-09 3.85E-09 6.43E-09 4.78E-09
    0.5000  0.2500  0.0000    1  9.50468E-09 kpt; spin; max resid(k); each band:
-   3.39E-09  8.32E-09  1.84E-09  9.50E-09
+  3.39E-09 8.32E-09 1.84E-09 9.50E-09
   -0.5000 -0.2500  0.0000    1  2.51870E-09 kpt; spin; max resid(k); each band:
-   1.42E-09  2.09E-09  2.23E-09  2.52E-09
+  1.42E-09 2.09E-09 2.23E-09 2.52E-09
    0.5000  0.5000  0.2500    1  6.19311E-09 kpt; spin; max resid(k); each band:
-   1.83E-09  2.98E-09  1.35E-09  6.19E-09
+  1.83E-09 2.98E-09 1.35E-09 6.19E-09
   -0.5000 -0.5000 -0.2500    1  7.68047E-09 kpt; spin; max resid(k); each band:
-   1.70E-09  3.51E-10  7.68E-09  6.89E-09
+  1.70E-09 3.51E-10 7.68E-09 6.89E-09
    0.2500 -0.2500  0.2500    1  8.12721E-09 kpt; spin; max resid(k); each band:
-   8.13E-09  6.19E-09  4.53E-10  6.38E-09
+  8.13E-09 6.19E-09 4.53E-10 6.38E-09
   -0.2500  0.2500 -0.2500    1  8.76531E-09 kpt; spin; max resid(k); each band:
-   8.77E-09  5.11E-09  1.37E-09  1.74E-09
+  8.77E-09 5.11E-09 1.37E-09 1.74E-09
    0.2500  0.0000  0.5000    1  5.83936E-09 kpt; spin; max resid(k); each band:
-   2.16E-09  5.84E-09  3.02E-09  5.15E-10
+  2.16E-09 5.84E-09 3.02E-09 5.15E-10
   -0.2500  0.0000 -0.5000    1  8.32266E-09 kpt; spin; max resid(k); each band:
-   4.70E-09  8.32E-09  8.75E-10  2.87E-10
+  4.70E-09 8.32E-09 8.75E-10 2.87E-10
    0.5000  0.2500  0.5000    1  6.89440E-09 kpt; spin; max resid(k); each band:
-   4.68E-09  1.33E-09  4.71E-09  6.89E-09
+  4.68E-09 1.33E-09 4.71E-09 6.89E-09
   -0.5000 -0.2500 -0.5000    1  2.95540E-09 kpt; spin; max resid(k); each band:
-   2.59E-09  1.69E-09  2.96E-09  2.55E-09
+  2.59E-09 1.69E-09 2.96E-09 2.55E-09
    0.5000  0.0000  0.2500    1  9.54697E-09 kpt; spin; max resid(k); each band:
-   7.87E-09  1.17E-09  1.28E-09  9.55E-09
+  7.87E-09 1.17E-09 1.28E-09 9.55E-09
   -0.5000  0.0000 -0.2500    1  9.43235E-09 kpt; spin; max resid(k); each band:
-   2.76E-09  2.37E-09  9.00E-09  9.43E-09
+  2.76E-09 2.37E-09 9.00E-09 9.43E-09
   -0.2500  0.2500  0.2500    1  9.09634E-09 kpt; spin; max resid(k); each band:
-   4.87E-09  9.10E-09  1.61E-09  2.59E-09
+  4.87E-09 9.10E-09 1.61E-09 2.59E-09
    0.2500 -0.2500 -0.2500    1  8.51987E-09 kpt; spin; max resid(k); each band:
-   1.61E-09  2.52E-09  1.95E-09  8.52E-09
+  1.61E-09 2.52E-09 1.95E-09 8.52E-09
    0.2500  0.5000  0.5000    1  9.68675E-09 kpt; spin; max resid(k); each band:
-   7.38E-10  9.22E-09  1.35E-09  9.69E-09
+  7.38E-10 9.22E-09 1.35E-09 9.69E-09
   -0.2500 -0.5000 -0.5000    1  4.69673E-09 kpt; spin; max resid(k); each band:
-   2.09E-09  2.27E-09  5.80E-10  4.70E-09
+  2.09E-09 2.27E-09 5.80E-10 4.70E-09
    0.0000  0.2500  0.5000    1  9.12095E-09 kpt; spin; max resid(k); each band:
-   1.96E-09  9.12E-09  3.09E-09  5.62E-09
+  1.96E-09 9.12E-09 3.09E-09 5.62E-09
    0.0000 -0.2500 -0.5000    1  8.45041E-09 kpt; spin; max resid(k); each band:
-   4.36E-09  2.58E-09  8.45E-09  4.95E-09
+  4.36E-09 2.58E-09 8.45E-09 4.95E-09
    0.0000  0.5000  0.2500    1  7.89794E-09 kpt; spin; max resid(k); each band:
-   7.90E-09  2.61E-09  6.26E-09  6.21E-09
+  7.90E-09 2.61E-09 6.26E-09 6.21E-09
    0.0000 -0.5000 -0.2500    1  7.22231E-09 kpt; spin; max resid(k); each band:
-   5.69E-09  4.76E-09  7.22E-09  4.41E-09
+  5.69E-09 4.76E-09 7.22E-09 4.41E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2448,108 +1931,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS3_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -2565,9 +1950,9 @@ tolerances: {tolwfr: 1.00E-08, }
 
  ETOT  3   3.1342960050332     -4.762E+02 1.803E-01 4.912E+00
 
- ETOT  4   3.0444430334033     -8.985E-02 2.236E-04 5.869E-02
+ ETOT  4   3.0444430334032     -8.985E-02 2.236E-04 5.869E-02
 
- ETOT  5   3.0440665026924     -3.765E-04 4.999E-07 3.610E-03
+ ETOT  5   3.0440665026923     -3.765E-04 4.999E-07 3.610E-03
 
  ETOT  6   3.0440391986433     -2.730E-05 1.342E-08 4.120E-05
 
@@ -2580,69 +1965,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   43.074E-10; max=  99.826E-10
    0.2500  0.2500  0.2500    1  5.14206E-09 kpt; spin; max resid(k); each band:
-   2.37E-09  2.84E-09  5.14E-09  1.01E-09
+  2.37E-09 2.84E-09 5.14E-09 1.01E-09
   -0.2500 -0.2500 -0.2500    1  8.94785E-09 kpt; spin; max resid(k); each band:
-   6.15E-10  8.95E-09  4.87E-09  6.50E-09
+  6.15E-10 8.95E-09 4.87E-09 6.50E-09
    0.2500  0.0000  0.0000    1  6.74525E-09 kpt; spin; max resid(k); each band:
-   2.46E-09  2.14E-09  6.75E-09  6.29E-10
+  2.46E-09 2.14E-09 6.75E-09 6.29E-10
   -0.2500  0.0000  0.0000    1  9.02798E-09 kpt; spin; max resid(k); each band:
-   8.87E-09  5.86E-09  1.88E-09  9.03E-09
+  8.87E-09 5.86E-09 1.88E-09 9.03E-09
    0.0000  0.2500  0.0000    1  8.21412E-09 kpt; spin; max resid(k); each band:
-   5.28E-09  4.14E-09  1.67E-10  8.21E-09
+  5.28E-09 4.14E-09 1.67E-10 8.21E-09
    0.0000 -0.2500  0.0000    1  9.13287E-09 kpt; spin; max resid(k); each band:
-   1.18E-09  7.19E-09  9.13E-09  3.42E-09
+  1.18E-09 7.19E-09 9.13E-09 3.42E-09
    0.0000  0.0000  0.2500    1  5.57109E-09 kpt; spin; max resid(k); each band:
-   1.90E-09  3.35E-09  5.41E-10  5.57E-09
+  1.90E-09 3.35E-09 5.41E-10 5.57E-09
    0.0000  0.0000 -0.2500    1  9.15946E-09 kpt; spin; max resid(k); each band:
-   2.98E-09  9.16E-09  8.38E-09  3.46E-09
+  2.98E-09 9.16E-09 8.38E-09 3.46E-09
    0.2500  0.2500 -0.2500    1  7.57099E-09 kpt; spin; max resid(k); each band:
-   2.30E-09  1.62E-09  3.21E-09  7.57E-09
+  2.30E-09 1.62E-09 3.21E-09 7.57E-09
   -0.2500 -0.2500  0.2500    1  4.64291E-09 kpt; spin; max resid(k); each band:
-   1.43E-09  4.64E-09  9.54E-10  1.69E-09
+  1.43E-09 4.64E-09 9.54E-10 1.69E-09
    0.2500  0.5000  0.0000    1  8.40618E-09 kpt; spin; max resid(k); each band:
-   6.36E-09  8.41E-09  2.31E-09  1.32E-09
+  6.36E-09 8.41E-09 2.31E-09 1.32E-09
   -0.2500 -0.5000  0.0000    1  7.98148E-09 kpt; spin; max resid(k); each band:
-   5.64E-09  7.98E-09  1.49E-09  1.05E-09
+  5.64E-09 7.98E-09 1.49E-09 1.05E-09
    0.5000  0.2500  0.0000    1  8.67691E-09 kpt; spin; max resid(k); each band:
-   8.68E-09  7.35E-10  1.18E-09  6.53E-10
+  8.68E-09 7.35E-10 1.18E-09 6.53E-10
   -0.5000 -0.2500  0.0000    1  9.82957E-09 kpt; spin; max resid(k); each band:
-   3.85E-09  2.91E-09  9.83E-09  1.06E-09
+  3.85E-09 2.91E-09 9.83E-09 1.06E-09
    0.5000  0.5000  0.2500    1  8.51601E-09 kpt; spin; max resid(k); each band:
-   5.87E-09  1.17E-09  4.92E-09  8.52E-09
+  5.87E-09 1.17E-09 4.92E-09 8.52E-09
   -0.5000 -0.5000 -0.2500    1  3.27648E-09 kpt; spin; max resid(k); each band:
-   3.28E-09  1.89E-09  2.04E-09  3.00E-09
+  3.28E-09 1.89E-09 2.04E-09 3.00E-09
    0.2500 -0.2500  0.2500    1  3.15435E-09 kpt; spin; max resid(k); each band:
-   3.15E-09  2.31E-09  1.72E-09  6.44E-10
+  3.15E-09 2.31E-09 1.72E-09 6.44E-10
   -0.2500  0.2500 -0.2500    1  6.36874E-09 kpt; spin; max resid(k); each band:
-   6.37E-09  3.75E-09  2.01E-09  4.49E-09
+  6.37E-09 3.75E-09 2.01E-09 4.49E-09
    0.2500  0.0000  0.5000    1  9.03925E-09 kpt; spin; max resid(k); each band:
-   9.04E-09  7.06E-09  7.11E-10  7.26E-09
+  9.04E-09 7.06E-09 7.11E-10 7.26E-09
   -0.2500  0.0000 -0.5000    1  5.66896E-09 kpt; spin; max resid(k); each band:
-   5.67E-09  3.12E-09  5.55E-09  3.69E-09
+  5.67E-09 3.12E-09 5.55E-09 3.69E-09
    0.5000  0.2500  0.5000    1  7.48116E-09 kpt; spin; max resid(k); each band:
-   2.47E-09  3.73E-09  1.45E-09  7.48E-09
+  2.47E-09 3.73E-09 1.45E-09 7.48E-09
   -0.5000 -0.2500 -0.5000    1  9.98259E-09 kpt; spin; max resid(k); each band:
-   2.58E-09  9.20E-10  9.98E-09  7.92E-09
+  2.58E-09 9.20E-10 9.98E-09 7.92E-09
    0.5000  0.0000  0.2500    1  9.34312E-09 kpt; spin; max resid(k); each band:
-   3.08E-09  9.34E-09  1.64E-09  1.18E-10
+  3.08E-09 9.34E-09 1.64E-09 1.18E-10
   -0.5000  0.0000 -0.2500    1  9.89381E-09 kpt; spin; max resid(k); each band:
-   1.96E-09  2.23E-09  9.89E-09  2.62E-09
+  1.96E-09 2.23E-09 9.89E-09 2.62E-09
   -0.2500  0.2500  0.2500    1  9.55651E-09 kpt; spin; max resid(k); each band:
-   7.03E-09  9.56E-09  1.84E-09  1.78E-09
+  7.03E-09 9.56E-09 1.84E-09 1.78E-09
    0.2500 -0.2500 -0.2500    1  9.55953E-09 kpt; spin; max resid(k); each band:
-   1.85E-09  2.24E-09  9.56E-09  8.40E-09
+  1.85E-09 2.24E-09 9.56E-09 8.40E-09
    0.2500  0.5000  0.5000    1  9.91065E-09 kpt; spin; max resid(k); each band:
-   1.06E-09  9.91E-09  1.24E-09  3.38E-09
+  1.06E-09 9.91E-09 1.24E-09 3.38E-09
   -0.2500 -0.5000 -0.5000    1  8.52406E-09 kpt; spin; max resid(k); each band:
-   2.79E-09  2.81E-09  8.52E-09  1.95E-09
+  2.79E-09 2.81E-09 8.52E-09 1.95E-09
    0.0000  0.2500  0.5000    1  6.73827E-09 kpt; spin; max resid(k); each band:
-   7.72E-10  2.95E-09  6.74E-09  6.11E-09
+  7.72E-10 2.95E-09 6.74E-09 6.11E-09
    0.0000 -0.2500 -0.5000    1  8.19533E-09 kpt; spin; max resid(k); each band:
-   6.77E-09  4.91E-09  8.20E-09  4.58E-09
+  6.77E-09 4.91E-09 8.20E-09 4.58E-09
    0.0000  0.5000  0.2500    1  8.29141E-09 kpt; spin; max resid(k); each band:
-   2.12E-09  8.29E-09  4.15E-09  6.92E-09
+  2.12E-09 8.29E-09 4.15E-09 6.92E-09
    0.0000 -0.5000 -0.2500    1  7.44920E-09 kpt; spin; max resid(k); each band:
-   4.87E-09  2.76E-09  7.45E-09  4.39E-09
+  4.87E-09 2.76E-09 7.45E-09 4.39E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3377,39 +2762,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.01601
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 
  ==>  initialize data related to q vector <== 
 
@@ -3440,72 +2792,10 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  20      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS5_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=   9      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  11      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  12      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  14      14
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  17      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  19      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  20      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3534,45 +2824,45 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   46.354E-10; max=  97.831E-10
    0.2500  0.2500  0.2500    1  4.48725E-09 kpt; spin; max resid(k); each band:
-   2.57E-09  3.38E-09  4.49E-09  2.85E-09
+  2.57E-09 3.38E-09 4.49E-09 2.85E-09
   -0.2500 -0.2500 -0.2500    1  7.29391E-09 kpt; spin; max resid(k); each band:
-   7.29E-09  3.70E-10  6.18E-09  7.02E-09
+  7.29E-09 3.70E-10 6.18E-09 7.02E-09
    0.2500  0.0000  0.0000    1  8.12388E-09 kpt; spin; max resid(k); each band:
-   4.47E-09  5.66E-09  4.37E-09  8.12E-09
+  4.47E-09 5.66E-09 4.37E-09 8.12E-09
   -0.2500  0.0000  0.0000    1  8.84446E-09 kpt; spin; max resid(k); each band:
-   2.28E-10  6.31E-10  8.84E-09  7.94E-09
+  2.28E-10 6.31E-10 8.84E-09 7.94E-09
    0.0000  0.2500  0.0000    1  9.78306E-09 kpt; spin; max resid(k); each band:
-   3.54E-10  4.06E-10  9.78E-09  6.75E-09
+  3.54E-10 4.06E-10 9.78E-09 6.75E-09
    0.0000 -0.2500  0.0000    1  8.70227E-09 kpt; spin; max resid(k); each band:
-   6.63E-09  8.70E-09  4.74E-09  2.17E-09
+  6.63E-09 8.70E-09 4.74E-09 2.17E-09
    0.2500  0.2500 -0.2500    1  8.19536E-09 kpt; spin; max resid(k); each band:
-   3.89E-09  8.20E-09  2.27E-10  5.64E-09
+  3.89E-09 8.20E-09 2.27E-10 5.64E-09
   -0.2500 -0.2500  0.2500    1  6.95174E-09 kpt; spin; max resid(k); each band:
-   3.09E-09  6.95E-09  8.79E-10  5.60E-09
+  3.09E-09 6.95E-09 8.79E-10 5.60E-09
    0.2500  0.5000  0.0000    1  8.76117E-09 kpt; spin; max resid(k); each band:
-   5.60E-09  1.29E-09  3.86E-09  8.76E-09
+  5.60E-09 1.29E-09 3.86E-09 8.76E-09
   -0.2500 -0.5000  0.0000    1  8.00924E-09 kpt; spin; max resid(k); each band:
-   3.83E-09  8.01E-09  2.97E-09  4.55E-09
+  3.83E-09 8.01E-09 2.97E-09 4.55E-09
    0.5000  0.2500  0.0000    1  8.58531E-09 kpt; spin; max resid(k); each band:
-   2.39E-09  5.30E-09  8.59E-09  8.50E-09
+  2.39E-09 5.30E-09 8.59E-09 8.50E-09
   -0.5000 -0.2500  0.0000    1  9.35853E-09 kpt; spin; max resid(k); each band:
-   5.99E-09  7.60E-09  9.36E-09  5.07E-09
+  5.99E-09 7.60E-09 9.36E-09 5.07E-09
    0.5000  0.5000  0.2500    1  4.78174E-09 kpt; spin; max resid(k); each band:
-   4.42E-09  4.78E-09  1.31E-09  2.56E-09
+  4.42E-09 4.78E-09 1.31E-09 2.56E-09
   -0.5000 -0.5000 -0.2500    1  6.03002E-09 kpt; spin; max resid(k); each band:
-   4.86E-09  6.03E-09  1.31E-09  1.11E-09
+  4.86E-09 6.03E-09 1.31E-09 1.11E-09
   -0.2500  0.2500  0.2500    1  6.19646E-09 kpt; spin; max resid(k); each band:
-   5.35E-09  2.18E-09  6.20E-09  7.02E-11
+  5.35E-09 2.18E-09 6.20E-09 7.02E-11
    0.2500 -0.2500 -0.2500    1  7.47757E-09 kpt; spin; max resid(k); each band:
-   7.48E-09  1.83E-09  5.77E-09  8.73E-11
+  7.48E-09 1.83E-09 5.77E-09 8.73E-11
    0.2500  0.5000  0.5000    1  7.61506E-09 kpt; spin; max resid(k); each band:
-   7.50E-09  1.44E-10  7.62E-09  1.37E-09
+  7.50E-09 1.44E-10 7.62E-09 1.37E-09
   -0.2500 -0.5000 -0.5000    1  5.42722E-09 kpt; spin; max resid(k); each band:
-   5.43E-09  3.29E-09  4.72E-09  3.89E-10
+  5.43E-09 3.29E-09 4.72E-09 3.89E-10
    0.0000  0.2500  0.5000    1  9.50154E-09 kpt; spin; max resid(k); each band:
-   8.90E-09  4.16E-09  5.33E-09  9.50E-09
+  8.90E-09 4.16E-09 5.33E-09 9.50E-09
    0.0000 -0.2500 -0.5000    1  8.54846E-09 kpt; spin; max resid(k); each band:
-   8.55E-09  1.58E-10  7.23E-10  7.60E-09
+  8.55E-09 1.58E-10 7.23E-10 7.60E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3602,108 +2892,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS5_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3732,69 +2924,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   29.384E-10; max=  98.145E-10
    0.2500  0.2500  0.2500    1  7.30603E-09 kpt; spin; max resid(k); each band:
-   7.31E-09  2.97E-09  5.43E-09  2.39E-09
+  7.31E-09 2.97E-09 5.43E-09 2.39E-09
   -0.2500 -0.2500 -0.2500    1  8.41687E-09 kpt; spin; max resid(k); each band:
-   8.42E-09  3.02E-09  1.60E-09  3.70E-10
+  8.42E-09 3.02E-09 1.60E-09 3.70E-10
    0.2500  0.0000  0.0000    1  4.60780E-09 kpt; spin; max resid(k); each band:
-   4.61E-09  9.27E-11  3.99E-09  4.26E-09
+  4.61E-09 9.27E-11 3.99E-09 4.26E-09
   -0.2500  0.0000  0.0000    1  9.21080E-09 kpt; spin; max resid(k); each band:
-   2.71E-10  3.18E-09  4.80E-09  9.21E-09
+  2.71E-10 3.18E-09 4.80E-09 9.21E-09
    0.0000  0.2500  0.0000    1  1.14544E-09 kpt; spin; max resid(k); each band:
-   1.07E-09  2.15E-10  9.05E-10  1.15E-09
+  1.07E-09 2.15E-10 9.05E-10 1.15E-09
    0.0000 -0.2500  0.0000    1  1.61574E-09 kpt; spin; max resid(k); each band:
-   2.62E-10  3.18E-10  1.62E-09  7.01E-10
+  2.62E-10 3.18E-10 1.62E-09 7.01E-10
    0.0000  0.0000  0.2500    1  6.53766E-09 kpt; spin; max resid(k); each band:
-   9.86E-10  2.84E-09  6.54E-09  1.66E-09
+  9.86E-10 2.84E-09 6.54E-09 1.66E-09
    0.0000  0.0000 -0.2500    1  5.57689E-09 kpt; spin; max resid(k); each band:
-   3.41E-10  1.88E-09  5.58E-09  1.57E-09
+  3.41E-10 1.88E-09 5.58E-09 1.57E-09
    0.2500  0.2500 -0.2500    1  2.64830E-09 kpt; spin; max resid(k); each band:
-   8.20E-10  6.37E-10  2.65E-09  1.33E-09
+  8.20E-10 6.37E-10 2.65E-09 1.33E-09
   -0.2500 -0.2500  0.2500    1  4.34786E-09 kpt; spin; max resid(k); each band:
-   1.29E-09  4.35E-09  1.52E-09  6.33E-10
+  1.29E-09 4.35E-09 1.52E-09 6.33E-10
    0.2500  0.5000  0.0000    1  3.18979E-09 kpt; spin; max resid(k); each band:
-   6.32E-10  1.04E-09  2.39E-09  3.19E-09
+  6.32E-10 1.04E-09 2.39E-09 3.19E-09
   -0.2500 -0.5000  0.0000    1  9.65623E-09 kpt; spin; max resid(k); each band:
-   1.33E-09  3.11E-09  1.66E-09  9.66E-09
+  1.33E-09 3.11E-09 1.66E-09 9.66E-09
    0.5000  0.2500  0.0000    1  1.49443E-09 kpt; spin; max resid(k); each band:
-   6.10E-10  1.49E-09  5.15E-10  6.59E-10
+  6.10E-10 1.49E-09 5.15E-10 6.59E-10
   -0.5000 -0.2500  0.0000    1  3.15895E-09 kpt; spin; max resid(k); each band:
-   1.78E-09  3.16E-09  1.27E-09  5.84E-10
+  1.78E-09 3.16E-09 1.27E-09 5.84E-10
    0.5000  0.5000  0.2500    1  7.37738E-09 kpt; spin; max resid(k); each band:
-   3.82E-10  9.23E-10  6.54E-09  7.38E-09
+  3.82E-10 9.23E-10 6.54E-09 7.38E-09
   -0.5000 -0.5000 -0.2500    1  5.96755E-09 kpt; spin; max resid(k); each band:
-   4.87E-10  5.97E-09  2.56E-09  3.30E-09
+  4.87E-10 5.97E-09 2.56E-09 3.30E-09
    0.2500 -0.2500  0.2500    1  3.33439E-09 kpt; spin; max resid(k); each band:
-   4.82E-10  1.82E-09  2.91E-09  3.33E-09
+  4.82E-10 1.82E-09 2.91E-09 3.33E-09
   -0.2500  0.2500 -0.2500    1  8.59768E-09 kpt; spin; max resid(k); each band:
-   8.60E-09  6.72E-10  6.01E-09  1.01E-09
+  8.60E-09 6.72E-10 6.01E-09 1.01E-09
    0.2500  0.0000  0.5000    1  9.81452E-09 kpt; spin; max resid(k); each band:
-   3.85E-10  7.45E-09  9.81E-09  9.47E-09
+  3.85E-10 7.45E-09 9.81E-09 9.47E-09
   -0.2500  0.0000 -0.5000    1  6.29735E-09 kpt; spin; max resid(k); each band:
-   6.90E-10  1.26E-09  2.07E-09  6.30E-09
+  6.90E-10 1.26E-09 2.07E-09 6.30E-09
    0.5000  0.2500  0.5000    1  2.13543E-09 kpt; spin; max resid(k); each band:
-   1.02E-09  1.13E-09  2.14E-09  1.12E-09
+  1.02E-09 1.13E-09 2.14E-09 1.12E-09
   -0.5000 -0.2500 -0.5000    1  7.51339E-09 kpt; spin; max resid(k); each band:
-   7.93E-10  6.83E-10  1.64E-09  7.51E-09
+  7.93E-10 6.83E-10 1.64E-09 7.51E-09
    0.5000  0.0000  0.2500    1  4.67552E-09 kpt; spin; max resid(k); each band:
-   7.30E-10  4.68E-09  2.22E-09  7.50E-10
+  7.30E-10 4.68E-09 2.22E-09 7.50E-10
   -0.5000  0.0000 -0.2500    1  5.28996E-09 kpt; spin; max resid(k); each band:
-   1.52E-09  2.15E-10  8.19E-10  5.29E-09
+  1.52E-09 2.15E-10 8.19E-10 5.29E-09
   -0.2500  0.2500  0.2500    1  8.21222E-09 kpt; spin; max resid(k); each band:
-   1.22E-09  5.38E-10  1.16E-09  8.21E-09
+  1.22E-09 5.38E-10 1.16E-09 8.21E-09
    0.2500 -0.2500 -0.2500    1  9.52900E-09 kpt; spin; max resid(k); each band:
-   7.72E-09  9.26E-11  1.46E-09  9.53E-09
+  7.72E-09 9.26E-11 1.46E-09 9.53E-09
    0.2500  0.5000  0.5000    1  5.41969E-09 kpt; spin; max resid(k); each band:
-   8.42E-10  5.42E-09  6.24E-10  2.48E-09
+  8.42E-10 5.42E-09 6.24E-10 2.48E-09
   -0.2500 -0.5000 -0.5000    1  7.19102E-09 kpt; spin; max resid(k); each band:
-   7.19E-09  4.74E-09  2.77E-09  7.17E-09
+  7.19E-09 4.74E-09 2.77E-09 7.17E-09
    0.0000  0.2500  0.5000    1  8.79398E-09 kpt; spin; max resid(k); each band:
-   8.79E-09  4.81E-09  1.48E-10  2.15E-09
+  8.79E-09 4.81E-09 1.48E-10 2.15E-09
    0.0000 -0.2500 -0.5000    1  5.56364E-09 kpt; spin; max resid(k); each band:
-   1.33E-10  3.42E-09  5.56E-09  2.85E-09
+  1.33E-10 3.42E-09 5.56E-09 2.85E-09
    0.0000  0.5000  0.2500    1  5.49703E-09 kpt; spin; max resid(k); each band:
-   5.37E-10  1.35E-09  5.50E-09  1.23E-09
+  5.37E-10 1.35E-09 5.50E-09 1.23E-09
    0.0000 -0.5000 -0.2500    1  8.81918E-09 kpt; spin; max resid(k); each band:
-   8.52E-09  1.93E-09  8.82E-09  1.28E-09
+  8.52E-09 1.93E-09 8.82E-09 1.28E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3825,72 +3017,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  20      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS5_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=   9      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  11      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  12      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  14      14
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  17      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  19      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  20      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -3906,7 +3036,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  ETOT  3   5.2658231917313     -1.922E+02 1.346E-01 1.624E+02
 
- ETOT  4   3.9349679812423     -1.331E+00 6.291E-04 5.272E-02
+ ETOT  4   3.9349679812424     -1.331E+00 6.291E-04 5.272E-02
 
  ETOT  5   3.9345728695791     -3.951E-04 1.551E-07 1.259E-04
 
@@ -3919,45 +3049,45 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   31.806E-10; max=  94.912E-10
    0.2500  0.2500  0.2500    1  5.99281E-09 kpt; spin; max resid(k); each band:
-   4.01E-10  3.60E-09  5.99E-09  2.29E-09
+  4.01E-10 3.60E-09 5.99E-09 2.29E-09
   -0.2500 -0.2500 -0.2500    1  5.73541E-09 kpt; spin; max resid(k); each band:
-   1.57E-09  5.69E-09  5.74E-09  2.51E-09
+  1.57E-09 5.69E-09 5.74E-09 2.51E-09
    0.2500  0.0000  0.0000    1  7.00057E-09 kpt; spin; max resid(k); each band:
-   7.00E-09  5.51E-09  2.54E-09  1.52E-09
+  7.00E-09 5.51E-09 2.54E-09 1.52E-09
   -0.2500  0.0000  0.0000    1  2.08931E-09 kpt; spin; max resid(k); each band:
-   4.05E-10  1.85E-10  2.09E-09  1.47E-09
+  4.05E-10 1.85E-10 2.09E-09 1.47E-09
    0.0000  0.2500  0.0000    1  6.82487E-09 kpt; spin; max resid(k); each band:
-   7.95E-10  6.82E-09  9.61E-10  1.82E-09
+  7.95E-10 6.82E-09 9.61E-10 1.82E-09
    0.0000 -0.2500  0.0000    1  9.49122E-09 kpt; spin; max resid(k); each band:
-   9.49E-09  4.55E-09  1.14E-09  2.94E-09
+  9.49E-09 4.55E-09 1.14E-09 2.94E-09
    0.2500  0.2500 -0.2500    1  4.41188E-09 kpt; spin; max resid(k); each band:
-   3.08E-09  4.41E-09  1.17E-09  6.58E-10
+  3.08E-09 4.41E-09 1.17E-09 6.58E-10
   -0.2500 -0.2500  0.2500    1  8.27923E-09 kpt; spin; max resid(k); each band:
-   8.28E-09  3.83E-09  1.72E-09  2.88E-10
+  8.28E-09 3.83E-09 1.72E-09 2.88E-10
    0.2500  0.5000  0.0000    1  6.09700E-09 kpt; spin; max resid(k); each band:
-   3.67E-10  6.10E-09  5.13E-09  3.11E-09
+  3.67E-10 6.10E-09 5.13E-09 3.11E-09
   -0.2500 -0.5000  0.0000    1  6.25721E-09 kpt; spin; max resid(k); each band:
-   6.26E-09  3.57E-09  9.82E-10  3.89E-09
+  6.26E-09 3.57E-09 9.82E-10 3.89E-09
    0.5000  0.2500  0.0000    1  2.94703E-09 kpt; spin; max resid(k); each band:
-   1.40E-09  2.95E-09  2.73E-09  1.79E-09
+  1.40E-09 2.95E-09 2.73E-09 1.79E-09
   -0.5000 -0.2500  0.0000    1  4.40800E-09 kpt; spin; max resid(k); each band:
-   6.97E-10  4.41E-09  4.07E-09  8.84E-10
+  6.97E-10 4.41E-09 4.07E-09 8.84E-10
    0.5000  0.5000  0.2500    1  3.18085E-09 kpt; spin; max resid(k); each band:
-   8.95E-10  2.20E-09  3.18E-09  9.61E-10
+  8.95E-10 2.20E-09 3.18E-09 9.61E-10
   -0.5000 -0.5000 -0.2500    1  1.49763E-09 kpt; spin; max resid(k); each band:
-   5.06E-10  1.50E-09  1.35E-09  8.89E-10
+  5.06E-10 1.50E-09 1.35E-09 8.89E-10
   -0.2500  0.2500  0.2500    1  5.30953E-09 kpt; spin; max resid(k); each band:
-   6.13E-10  5.31E-09  4.77E-09  3.08E-10
+  6.13E-10 5.31E-09 4.77E-09 3.08E-10
    0.2500 -0.2500 -0.2500    1  6.97037E-09 kpt; spin; max resid(k); each band:
-   2.10E-09  6.97E-09  6.60E-09  2.28E-14
+  2.10E-09 6.97E-09 6.60E-09 2.28E-14
    0.2500  0.5000  0.5000    1  9.39552E-09 kpt; spin; max resid(k); each band:
-   2.07E-10  2.33E-09  8.97E-09  9.40E-09
+  2.07E-10 2.33E-09 8.97E-09 9.40E-09
   -0.2500 -0.5000 -0.5000    1  7.31871E-09 kpt; spin; max resid(k); each band:
-   4.70E-09  5.28E-09  7.32E-09  6.04E-10
+  4.70E-09 5.28E-09 7.32E-09 6.04E-10
    0.0000  0.2500  0.5000    1  4.15469E-09 kpt; spin; max resid(k); each band:
-   1.42E-09  4.15E-09  2.69E-09  1.82E-09
+  1.42E-09 4.15E-09 2.69E-09 1.82E-09
    0.0000 -0.2500 -0.5000    1  6.84299E-09 kpt; spin; max resid(k); each band:
-   9.20E-10  6.40E-09  4.47E-09  6.84E-09
+  9.20E-10 6.40E-09 4.47E-09 6.84E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3987,108 +3117,10 @@ tolerances: {tolwfr: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      15, make ikpt,npw=   1      15
-- newkpt: read input wf with ikpt,npw=   2      15, make ikpt,npw=   2      15
-- newkpt: read input wf with ikpt,npw=   3      15, make ikpt,npw=   3      15
-- newkpt: read input wf with ikpt,npw=   4      15, make ikpt,npw=   4      15
-- newkpt: read input wf with ikpt,npw=   5      15, make ikpt,npw=   5      15
-- newkpt: read input wf with ikpt,npw=   6      15, make ikpt,npw=   6      15
-- newkpt: read input wf with ikpt,npw=   7      15, make ikpt,npw=   7      15
-- newkpt: read input wf with ikpt,npw=   8      15, make ikpt,npw=   8      15
-- newkpt: read input wf with ikpt,npw=   9      15, make ikpt,npw=   9      15
-- newkpt: read input wf with ikpt,npw=  10      15, make ikpt,npw=  10      15
-- newkpt: read input wf with ikpt,npw=  11      15, make ikpt,npw=  11      15
-- newkpt: read input wf with ikpt,npw=  12      15, make ikpt,npw=  12      15
-- newkpt: read input wf with ikpt,npw=  13      15, make ikpt,npw=  13      15
-- newkpt: read input wf with ikpt,npw=  14      15, make ikpt,npw=  14      15
-- newkpt: read input wf with ikpt,npw=  15      15, make ikpt,npw=  15      15
-- newkpt: read input wf with ikpt,npw=  16      15, make ikpt,npw=  16      15
-- newkpt: read input wf with ikpt,npw=  17      15, make ikpt,npw=  17      15
-- newkpt: read input wf with ikpt,npw=  18      15, make ikpt,npw=  18      15
-- newkpt: read input wf with ikpt,npw=  19      15, make ikpt,npw=  19      15
-- newkpt: read input wf with ikpt,npw=  20      15, make ikpt,npw=  20      15
-- newkpt: read input wf with ikpt,npw=  21      15, make ikpt,npw=  21      15
-- newkpt: read input wf with ikpt,npw=  22      15, make ikpt,npw=  22      15
-- newkpt: read input wf with ikpt,npw=  23      15, make ikpt,npw=  23      15
-- newkpt: read input wf with ikpt,npw=  24      15, make ikpt,npw=  24      15
-- newkpt: read input wf with ikpt,npw=  25      15, make ikpt,npw=  25      15
-- newkpt: read input wf with ikpt,npw=  26      15, make ikpt,npw=  26      15
-- newkpt: read input wf with ikpt,npw=  27      15, make ikpt,npw=  27      15
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      15, make ikpt,npw=  29      15
-- newkpt: read input wf with ikpt,npw=  30      15, make ikpt,npw=  30      15
-- newkpt: read input wf with ikpt,npw=  31      15, make ikpt,npw=  31      15
-- newkpt: read input wf with ikpt,npw=  32      15, make ikpt,npw=  32      15
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t37o_DS5_WFQ
-- newkpt: read input wf with ikpt,npw=   1      14, make ikpt,npw=   1      14
-- newkpt: read input wf with ikpt,npw=   2      14, make ikpt,npw=   2      14
-- newkpt: read input wf with ikpt,npw=   3      14, make ikpt,npw=   3      14
-- newkpt: read input wf with ikpt,npw=   4      22, make ikpt,npw=   4      22
-- newkpt: read input wf with ikpt,npw=   5      16, make ikpt,npw=   5      16
-- newkpt: read input wf with ikpt,npw=   6      14, make ikpt,npw=   6      14
-- newkpt: read input wf with ikpt,npw=   7      16, make ikpt,npw=   7      16
-- newkpt: read input wf with ikpt,npw=   8      14, make ikpt,npw=   8      14
-- newkpt: read input wf with ikpt,npw=   9      16, make ikpt,npw=   9      16
-- newkpt: read input wf with ikpt,npw=  10      14, make ikpt,npw=  10      14
-- newkpt: read input wf with ikpt,npw=  11      22, make ikpt,npw=  11      22
-- newkpt: read input wf with ikpt,npw=  12      14, make ikpt,npw=  12      14
-- newkpt: read input wf with ikpt,npw=  13      14, make ikpt,npw=  13      14
-- newkpt: read input wf with ikpt,npw=  14      16, make ikpt,npw=  14      16
-- newkpt: read input wf with ikpt,npw=  15      14, make ikpt,npw=  15      14
-- newkpt: read input wf with ikpt,npw=  16      14, make ikpt,npw=  16      14
-- newkpt: read input wf with ikpt,npw=  17      16, make ikpt,npw=  17      16
-- newkpt: read input wf with ikpt,npw=  18      14, make ikpt,npw=  18      14
-- newkpt: read input wf with ikpt,npw=  19      22, make ikpt,npw=  19      22
-- newkpt: read input wf with ikpt,npw=  20      14, make ikpt,npw=  20      14
-- newkpt: read input wf with ikpt,npw=  21      14, make ikpt,npw=  21      14
-- newkpt: read input wf with ikpt,npw=  22      14, make ikpt,npw=  22      14
-- newkpt: read input wf with ikpt,npw=  23      14, make ikpt,npw=  23      14
-- newkpt: read input wf with ikpt,npw=  24      16, make ikpt,npw=  24      16
-- newkpt: read input wf with ikpt,npw=  25      14, make ikpt,npw=  25      14
-- newkpt: read input wf with ikpt,npw=  26      14, make ikpt,npw=  26      14
-- newkpt: read input wf with ikpt,npw=  27      14, make ikpt,npw=  27      14
-- newkpt: read input wf with ikpt,npw=  28      15, make ikpt,npw=  28      15
-- newkpt: read input wf with ikpt,npw=  29      14, make ikpt,npw=  29      14
-- newkpt: read input wf with ikpt,npw=  30      14, make ikpt,npw=  30      14
-- newkpt: read input wf with ikpt,npw=  31      14, make ikpt,npw=  31      14
-- newkpt: read input wf with ikpt,npw=  32      14, make ikpt,npw=  32      14
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  16 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  17 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  18 by node    0
-P newkpt: treating      4 bands with npw=      22 for ikpt=  19 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  20 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  21 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  22 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  23 by node    0
-P newkpt: treating      4 bands with npw=      16 for ikpt=  24 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  25 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  26 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  27 by node    0
-P newkpt: treating      4 bands with npw=      15 for ikpt=  28 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  29 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  30 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  31 by node    0
-P newkpt: treating      4 bands with npw=      14 for ikpt=  32 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 6, }
@@ -4119,69 +3151,69 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Mean square residual over all n,k,spin=   46.642E-10; max=  99.865E-10
    0.2500  0.2500  0.2500    1  7.09600E-09 kpt; spin; max resid(k); each band:
-   4.79E-09  2.25E-09  6.66E-09  7.10E-09
+  4.79E-09 2.25E-09 6.66E-09 7.10E-09
   -0.2500 -0.2500 -0.2500    1  7.12181E-09 kpt; spin; max resid(k); each band:
-   4.78E-10  7.12E-09  3.45E-09  1.87E-09
+  4.78E-10 7.12E-09 3.45E-09 1.87E-09
    0.2500  0.0000  0.0000    1  3.47073E-09 kpt; spin; max resid(k); each band:
-   3.47E-09  1.99E-09  2.49E-09  3.15E-09
+  3.47E-09 1.99E-09 2.49E-09 3.15E-09
   -0.2500  0.0000  0.0000    1  6.88289E-09 kpt; spin; max resid(k); each band:
-   6.79E-10  4.48E-09  6.88E-09  3.16E-09
+  6.79E-10 4.48E-09 6.88E-09 3.16E-09
    0.0000  0.2500  0.0000    1  9.25974E-09 kpt; spin; max resid(k); each band:
-   2.86E-09  1.85E-09  9.26E-09  6.01E-09
+  2.86E-09 1.85E-09 9.26E-09 6.01E-09
    0.0000 -0.2500  0.0000    1  9.15600E-09 kpt; spin; max resid(k); each band:
-   3.07E-09  9.16E-09  6.39E-09  4.79E-09
+  3.07E-09 9.16E-09 6.39E-09 4.79E-09
    0.0000  0.0000  0.2500    1  8.19283E-09 kpt; spin; max resid(k); each band:
-   5.63E-09  8.19E-09  9.59E-10  4.95E-09
+  5.63E-09 8.19E-09 9.59E-10 4.95E-09
    0.0000  0.0000 -0.2500    1  7.08094E-09 kpt; spin; max resid(k); each band:
-   2.05E-09  3.51E-09  7.08E-09  5.36E-09
+  2.05E-09 3.51E-09 7.08E-09 5.36E-09
    0.2500  0.2500 -0.2500    1  9.96785E-09 kpt; spin; max resid(k); each band:
-   2.50E-09  1.72E-09  8.86E-09  9.97E-09
+  2.50E-09 1.72E-09 8.86E-09 9.97E-09
   -0.2500 -0.2500  0.2500    1  7.50655E-09 kpt; spin; max resid(k); each band:
-   7.51E-09  1.90E-09  2.29E-09  3.15E-09
+  7.51E-09 1.90E-09 2.29E-09 3.15E-09
    0.2500  0.5000  0.0000    1  9.94440E-09 kpt; spin; max resid(k); each band:
-   9.94E-09  4.52E-09  7.67E-09  5.07E-09
+  9.94E-09 4.52E-09 7.67E-09 5.07E-09
   -0.2500 -0.5000  0.0000    1  5.87308E-09 kpt; spin; max resid(k); each band:
-   5.78E-09  1.44E-09  5.87E-09  3.43E-09
+  5.78E-09 1.44E-09 5.87E-09 3.43E-09
    0.5000  0.2500  0.0000    1  9.91539E-09 kpt; spin; max resid(k); each band:
-   3.67E-09  6.06E-09  2.01E-09  9.92E-09
+  3.67E-09 6.06E-09 2.01E-09 9.92E-09
   -0.5000 -0.2500  0.0000    1  3.61495E-09 kpt; spin; max resid(k); each band:
-   1.83E-09  1.96E-09  1.25E-09  3.61E-09
+  1.83E-09 1.96E-09 1.25E-09 3.61E-09
    0.5000  0.5000  0.2500    1  6.34971E-09 kpt; spin; max resid(k); each band:
-   2.43E-09  2.20E-09  6.35E-09  5.10E-09
+  2.43E-09 2.20E-09 6.35E-09 5.10E-09
   -0.5000 -0.5000 -0.2500    1  8.39407E-09 kpt; spin; max resid(k); each band:
-   1.89E-09  9.87E-10  8.39E-09  4.51E-09
+  1.89E-09 9.87E-10 8.39E-09 4.51E-09
    0.2500 -0.2500  0.2500    1  8.08878E-09 kpt; spin; max resid(k); each band:
-   2.74E-09  1.41E-09  8.09E-09  3.25E-09
+  2.74E-09 1.41E-09 8.09E-09 3.25E-09
   -0.2500  0.2500 -0.2500    1  7.15191E-09 kpt; spin; max resid(k); each band:
-   1.45E-09  3.07E-09  6.65E-09  7.15E-09
+  1.45E-09 3.07E-09 6.65E-09 7.15E-09
    0.2500  0.0000  0.5000    1  7.26742E-09 kpt; spin; max resid(k); each band:
-   7.27E-09  1.70E-09  3.82E-09  6.55E-10
+  7.27E-09 1.70E-09 3.82E-09 6.55E-10
   -0.2500  0.0000 -0.5000    1  5.92767E-09 kpt; spin; max resid(k); each band:
-   5.93E-09  2.09E-09  2.71E-10  1.79E-09
+  5.93E-09 2.09E-09 2.71E-10 1.79E-09
    0.5000  0.2500  0.5000    1  9.64531E-09 kpt; spin; max resid(k); each band:
-   7.89E-09  9.96E-10  9.65E-09  5.90E-09
+  7.89E-09 9.96E-10 9.65E-09 5.90E-09
   -0.5000 -0.2500 -0.5000    1  9.24407E-09 kpt; spin; max resid(k); each band:
-   2.57E-09  7.17E-09  9.24E-09  8.51E-09
+  2.57E-09 7.17E-09 9.24E-09 8.51E-09
    0.5000  0.0000  0.2500    1  9.98650E-09 kpt; spin; max resid(k); each band:
-   1.38E-09  8.42E-10  8.75E-09  9.99E-09
+  1.38E-09 8.42E-10 8.75E-09 9.99E-09
   -0.5000  0.0000 -0.2500    1  7.22045E-09 kpt; spin; max resid(k); each band:
-   3.04E-09  2.08E-09  6.75E-09  7.22E-09
+  3.04E-09 2.08E-09 6.75E-09 7.22E-09
   -0.2500  0.2500  0.2500    1  9.06683E-09 kpt; spin; max resid(k); each band:
-   5.18E-09  9.07E-09  1.61E-09  2.06E-09
+  5.18E-09 9.07E-09 1.61E-09 2.06E-09
    0.2500 -0.2500 -0.2500    1  7.65824E-09 kpt; spin; max resid(k); each band:
-   1.90E-09  2.59E-09  1.14E-09  7.66E-09
+  1.90E-09 2.59E-09 1.14E-09 7.66E-09
    0.2500  0.5000  0.5000    1  9.47884E-09 kpt; spin; max resid(k); each band:
-   6.35E-10  9.20E-09  5.37E-09  9.48E-09
+  6.35E-10 9.20E-09 5.37E-09 9.48E-09
   -0.2500 -0.5000 -0.5000    1  7.33635E-09 kpt; spin; max resid(k); each band:
-   4.52E-09  2.63E-09  5.56E-09  7.34E-09
+  4.52E-09 2.63E-09 5.56E-09 7.34E-09
    0.0000  0.2500  0.5000    1  8.06359E-09 kpt; spin; max resid(k); each band:
-   2.92E-09  8.06E-09  2.20E-09  6.43E-09
+  2.92E-09 8.06E-09 2.20E-09 6.43E-09
    0.0000 -0.2500 -0.5000    1  9.45600E-09 kpt; spin; max resid(k); each band:
-   5.58E-09  9.46E-09  7.73E-09  6.42E-09
+  5.58E-09 9.46E-09 7.73E-09 6.42E-09
    0.0000  0.5000  0.2500    1  7.01529E-09 kpt; spin; max resid(k); each band:
-   1.17E-09  2.20E-09  3.62E-09  7.02E-09
+  1.17E-09 2.20E-09 3.62E-09 7.02E-09
    0.0000 -0.5000 -0.2500    1  9.44150E-09 kpt; spin; max resid(k); each band:
-   9.44E-09  4.01E-09  4.99E-09  5.64E-09
+  9.44E-09 4.01E-09 4.99E-09 5.64E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -4907,6 +3939,12 @@ P          mk1mem6         32
         optdriver4          1
         optdriver5          0
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          0
+           prtpot6          1
            prtvol1          0
            prtvol2          0
            prtvol3          0
@@ -5102,10 +4140,10 @@ P          mk1mem6         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered 100 WARNINGs and  57 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.7  wall=          5.8
+.Delivered  15 WARNINGs and  31 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.0  wall=          7.3
