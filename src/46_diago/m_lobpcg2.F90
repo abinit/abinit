@@ -149,6 +149,14 @@ module m_lobpcg2
     type(xg_t) :: AllAX0
     type(xgBlock_t) :: BX0
 
+    type(xgBlock_t) :: AllX0ColsRows
+    type(xgBlock_t) :: AllAX0ColsRows
+    type(xgBlock_t) :: AllBX0ColsRows
+
+    type(xgTransposer_t) :: xgTransposerAllX0
+    type(xgTransposer_t) :: xgTransposerAllAX0
+    type(xgTransposer_t) :: xgTransposerAllBX0
+
     ! Variable for work for lapack
   end type lobpcg_t
 
@@ -438,12 +446,12 @@ module m_lobpcg2
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBW,lobpcg%xgTransposerX,&
         lobpcg%BW,lobpcg%BWColsRows,STATE_LINALG)
     else
-      call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, 1, spacedim, lobpcg%neigenpairs)
-      call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, 1, spacedim, lobpcg%neigenpairs)
-      call xgBlock_setBlock(lobpcg%BX, lobpcg%BXColsRows, 1, spacedim, lobpcg%neigenpairs)
-      call xgBlock_setBlock(lobpcg%W, lobpcg%WColsRows, 1, spacedim, lobpcg%neigenpairs)
-      call xgBlock_setBlock(lobpcg%AW, lobpcg%AWColsRows, 1, spacedim, lobpcg%neigenpairs)
-      call xgBlock_setBlock(lobpcg%BW, lobpcg%BWColsRows, 1, spacedim, lobpcg%neigenpairs)
+      call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%BX, lobpcg%BXColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%W, lobpcg%WColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%AW, lobpcg%AWColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%BW, lobpcg%BWColsRows, 1, spacedim, blockdim)
     end if
 
     !! Start big loop over blocks
@@ -622,9 +630,34 @@ module m_lobpcg2
 
     if ( ierr /= 0 ) then
       ABI_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
+      if ( lobpcg%paral_kgb == 1 ) then
+        call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
+          STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
+        call xgTransposer_copyConstructor(lobpcg%xgTransposerAllAX0,lobpcg%xgTransposerAllX0,&
+          lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
+        call xgTransposer_copyConstructor(lobpcg%xgTransposerAllBX0,lobpcg%xgTransposerAllX0,&
+          lobpcg%BX,lobpcg%BXColsRows,STATE_LINALG)
+      else
+        call xgBlock_setBlock(lobpcg%AllX0      , lobpcg%AllX0ColsRows , 1, spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllAX0%self, lobpcg%AllAX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllBX0%self, lobpcg%AllBX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
+      end if
+      if (lobpcg%paral_kgb == 1) then
+        call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_COLSROWS)
+        lobpcg%xgTransposerAllAX0%state=STATE_COLSROWS
+        lobpcg%xgTransposerAllBX0%state=STATE_COLSROWS
+      end if
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,lobpcg%xgTransposerX)
+      call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,lobpcg%xgTransposerAllX0)
       call timab(tim_ax_bx,2,tsec)
+      if (lobpcg%paral_kgb == 1) then
+        call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
+        call xgTransposer_transpose(lobpcg%xgTransposerAllAX0,STATE_LINALG)
+        call xgTransposer_transpose(lobpcg%xgTransposerAllBX0,STATE_LINALG)
+      end if
+      call xgTransposer_free(lobpcg%xgTransposerAllX0)
+      call xgTransposer_free(lobpcg%xgTransposerAllAX0)
+      call xgTransposer_free(lobpcg%xgTransposerAllBX0)
       nblock = 1 ! Avoid the next RR
     end if
 
