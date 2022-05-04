@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.Version 9.7.4 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Jan 2021.
-- ( at 13h33 )
+.Starting date : Wed  4 May 2022.
+- ( at 13h42 )
   
 - input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk_beauty/tests/Test_suite/tutoparal_tdfpt_03_MPI24-tdfpt_04_MPI24/tdfpt_04.abi
 - output file    -> tdfpt_04_MPI24.abo
@@ -45,7 +45,7 @@ _ WF disk file :    238.686 Mbytes ; DEN or POT disk file :      1.320 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  3 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -108,6 +108,7 @@ P          mk1mem           1
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000
         optdriver           1
+           prtpot           1
               qpt      0.00000000E+00  2.50000000E-01  0.00000000E+00
             rfdir           0       0       1
            rfphon           1
@@ -295,7 +296,6 @@ meta: {optdriver: 1, rfphon: 1, }
    7.43961143E+04                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdfpt_04_MPI24i_WFK.nc
 
  ==>  initialize data related to q vector <== 
 
@@ -313,10 +313,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdfpt_04_MPI24i_WFK.nc
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tdfpt_04_MPI24i_WFK.nc
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
