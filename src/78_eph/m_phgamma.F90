@@ -3985,12 +3985,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
        ABI_CHECK(nband_k <= mnb .and. nband_kq <= mnb, "wrong nband")
 
-       ! Compute weights for double delta integration at the Fermi level.
-       ! TODO: Could precompute weights before entering the loop, apply filter and compute MPI-distribution
-       call fs%get_dbldelta_weights(ebands, ik_fs, ik_ibz, ikq_ibz, spin, nesting, dbldelta_wts)
-       ! Multiply by the weight of the q-point if we are summing over the IBZ(q).
-       !dbldelta_wts = dbldelta_wts * wtk_lgq
-
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
        call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, fs%indkk_fs(:,ik_fs), cryst, &
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
@@ -4140,6 +4134,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            fs%vkq(:,ib_kq) = vkq
          end do
        end if
+
+       ! Compute weights for double delta integration at the Fermi level.
+       ! Note that we have to call the routine here after the initialization of fs%vk and fs%vkq
+       ! TODO: Could precompute weights before entering the loop, apply filter and compute MPI-distribution
+       call fs%get_dbldelta_weights(ebands, ik_fs, ik_ibz, ikq_ibz, spin, nesting, dbldelta_wts)
+       ! Multiply by the weight of the q-point if we are summing over the IBZ(q).
+       !dbldelta_wts = dbldelta_wts * wtk_lgq
 
        ! Accumulate results in tgam (sum over FS k-points and bands for this spin).
        do ipc2=1,natom3
