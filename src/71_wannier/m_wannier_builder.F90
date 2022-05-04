@@ -6,7 +6,7 @@
 !!  Algorithms for building Wannier functions
 !!  Methods:
 !!  SCDM (select columns of density matrix method) and
-!!  TODO projected wannier function
+!!  projected wannier function (PWF)
 !! COPYRIGHT
 !!  Copyright (C) 2005-2022 ABINIT group (hexu)
 !!  This file is distributed under the terms of the
@@ -42,6 +42,7 @@ module m_wannier_builder
   use defs_basis
   use m_abicore
   use m_errors
+  use m_io_tools,        only : open_file
   use m_fstrings,        only : ltoa
   use m_scdm_math, only: complex_QRCP_piv_only, complex_svd, tpi_im, &
        & gaussian, fermi, insertion_sort_double, eigensolver
@@ -639,15 +640,20 @@ contains
     character(len=*), intent(in):: fname
     integer:: iwann, iband, ikpt, locibnd
     integer:: iun_amn
+    character(len=500):: msg
 
-    iun_amn = 101
-    OPEN (unit = iun_amn, file = trim(fname)//".amn", form='formatted')
+    if (open_file(trim(fname)//".amn", msg, newunit=iun_amn, &
+         & form="formatted", status="unknown", action="write") /= 0) then
+       ABI_ERROR(msg)
+    end if
+
 
     !IF (wan_mode=='standalone') THEN
     !   iun_amn = find_free_unit()
     !   IF (ionode) OPEN (unit = iun_amn, file = trim(seedname)//".amn",form='formatted')
     !ENDIF
 
+    !TODO: re-enable this.
     !WRITE(stdout, '(a, i8)') '  AMN: iknum = ',iknum
     !
     !IF (wan_mode=='standalone') THEN
@@ -671,7 +677,6 @@ contains
           end do
        end do
     end do
-
     close (iun_amn)
   end subroutine write_Amnk_w90
 
@@ -681,8 +686,14 @@ contains
     integer, intent(in):: Rlist(:, :)
     character(len=*), intent(in):: fname
     integer:: iR, ifile, iwann1, iwann2
-    ifile = 103
-    OPEN (unit = ifile, file = trim(fname)//".hr", form='formatted')
+    character(len=500):: msg
+
+    if (open_file(trim(fname)//".hr", msg, newunit=ifile, &
+         & form="formatted", status="unknown", action="write") /= 0) then
+       ABI_ERROR(msg)
+    end if
+
+
     do iR = 1, size(Rlist, 2)
        WRITE (ifile, '(3i5)') Rlist(:, iR)
        do iwann1 = 1, self%nwann
