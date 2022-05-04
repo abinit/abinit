@@ -57,6 +57,7 @@
 #include "abi_common.h"
 #include "stdio.h"
 #include "abi_gpu_header.h"
+#include "cuda_api_error_check.h"
 
 /******************************************************************/
 /*******                                                 **********/
@@ -163,7 +164,8 @@ extern "C" void gpu_sphere_in_(double *cg,double *cfft,int *kg_k,int *npw,int *n
   grid.x = min((cfft_size + bloc.x - 1 )/bloc.x,MAX_GRID_SIZE);
   grid.y = (cfft_size + bloc.x*grid.x - 1)/(bloc.x*grid.x);
   kernel_set_zero<<<grid,bloc,0,*compute_stream>>>(cfft,cfft_size);
-
+  CUDA_KERNEL_CHECK("kernel_set_zero");
+ 
 
   //During GPU calculation we do some pre-calculation on symetries
   if((istwf_k==2) || (istwf_k==4) || (istwf_k==6) || (istwf_k==8)){
@@ -191,6 +193,7 @@ extern "C" void gpu_sphere_in_(double *cg,double *cfft,int *kg_k,int *npw,int *n
   grid.y = *ndat;
   //Call kernel to put cg into cfft
   kernel_sphere_in<<<grid,bloc,0,*compute_stream>>>(cfft,cg,kg_k,*npw,*ndat,*n1,*n2,*n3,shift_inv1,shift_inv2,shift_inv3,*istwfk);
+  CUDA_KERNEL_CHECK("kernel_sphere_in");
 
 }//end subroutine gpu_sphere_in
 
@@ -262,6 +265,7 @@ extern "C" void gpu_sphere_out_(double *cg,double *cfft,int *kg_k,int *npw,int *
   grid.y = *ndat;
   //Extract wave functions and appy fft normalisation factor before storing
   kernel_sphere_out<<<grid,bloc,0,*compute_stream>>>(cfft,cg,kg_k,*npw,*ndat,*n1,*n2,*n3,norme);
+  CUDA_KERNEL_CHECK("kernel_sphere_out");
 
 }//end subroutine gpu_sphere_out
 

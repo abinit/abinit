@@ -1,6 +1,6 @@
-!!****d* ABINIT/46_diago
+!!****d* ABINIT/48_diago
 !! NAME
-!! 46_diago
+!! 48_diago
 !!
 !! DESCRIPTION
 !!  FIXME: Description is missing
@@ -13,7 +13,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_46_diago.F90
+!! interfaces_48_diago.F90
 !! m_lobpcg2.F90
 !!
 !!***
