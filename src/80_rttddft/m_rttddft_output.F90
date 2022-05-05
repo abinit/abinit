@@ -157,11 +157,15 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call wrtout(tdks%tdener_unit,msg)
 
  !** Writes additional optional properties
+ !Computed at actual step
+ if (mod(istep,dtset%td_prtstr) == 0) then
+    call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+ end if
  !Computed at previous step
  if (mod(istep-1,dtset%td_prtstr) == 0) then
-    call prt_den(dtfil,dtset,istep-1,mpi_enreg,psps,tdks)
     call prt_eig(dtfil,dtset,istep-1,mpi_enreg,tdks)
     call prt_occ(dtfil,dtset,istep-1,mpi_enreg,tdks)
+    call prt_dos(dtfil,dtset,istep-1,mpi_enreg,psps,tdks)
  end if
  if (mod(istep,dtset%td_prtstr) == 0) then
     if (dtset%prtwf > 0) then
@@ -367,7 +371,7 @@ end subroutine prt_occ
 !!  prt_den
 !!
 !! FUNCTION
-!!  Computes and outputs the electronic density and/or DOS
+!!  Outputs the electronic density
 !!
 !! INPUTS
 !!  dtfil <type datafiles_type> = infos about file names, file unit numbers
@@ -442,7 +446,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    my_atmtab_allocated = .true.
  end if
 
- !FB: Maybe this should be moved out of that subroutine if needed in other outputs than densities?
+ !FB: Maybe this should be moved out of that subroutine if needed in other outputs than densities
  remove_inv=.false.
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
  call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
@@ -470,6 +474,112 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
      call fftdatar_write("density",fname,dtset%iomode,tdks%hdr,crystal,tdks%pawfgr%ngfft, &
                        & cplex1,tdks%pawfgr%nfft,dtset%nspden,tdks%rhor,mpi_enreg,ebands=ebands)
  end if
+
+ call crystal%free()
+ call ebands_free(ebands)
+ 
+end subroutine prt_den
+!!***
+
+!!****f* m_rttddft_output/prt_dos
+!!
+!! NAME
+!!  prt_dos
+!!
+!! FUNCTION
+!!  Computes and outputs the electronic DOS
+!!
+!! INPUTS
+!!  dtfil <type datafiles_type> = infos about file names, file unit numbers
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  istep <integer> = step number
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  tdks <type(tdks_type)> = the tdks object to initialize
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ integer,                    intent(in)    :: istep
+ type(datafiles_type),       intent(inout) :: dtfil
+ type(dataset_type),         intent(inout) :: dtset
+ type(MPI_type),             intent(inout) :: mpi_enreg
+ type(pseudopotential_type), intent(inout) :: psps
+ type(tdks_type),            intent(inout) :: tdks
+ !arrays
+ 
+ !Local variables-------------------------------
+ !scalars
+ integer,parameter     :: master=0, cplex1=1
+ integer               :: bantot
+ integer               :: collect
+ integer               :: iatom
+ integer               :: spacecomm
+ integer               :: my_comm_atom, my_natom
+ integer               :: me
+ integer               :: natom
+!#ifdef HAVE_NETCDF
+! integer               :: ncid
+!#endif
+ integer               :: timrev
+ character(len=fnlen)  :: fname
+ character(len=24)     :: step_nb
+ logical               :: paral_atom
+ logical               :: remove_inv
+ logical               :: my_atmtab_allocated
+ type(crystal_t)       :: crystal
+ type(epjdos_t)        :: dos
+ type(ebands_t)        :: ebands
+ !arrays
+ integer, pointer      :: my_atmtab(:)
+ real(dp), allocatable :: doccde(:)
+
+! *************************************************************************
+
+ spacecomm = mpi_enreg%comm_cell
+ me = xmpi_comm_rank(spacecomm)
+
+ !FB: @MT - Is this needed?
+ natom = dtset%natom
+ my_natom = mpi_enreg%my_natom
+ paral_atom=(my_natom/=natom)
+ my_comm_atom = mpi_enreg%comm_atom
+ nullify(my_atmtab)
+ if (paral_atom) then
+   call get_my_atmtab(mpi_enreg%comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+ else
+   ABI_MALLOC(my_atmtab, (natom))
+   my_atmtab = (/ (iatom, iatom=1, natom) /)
+   my_atmtab_allocated = .true.
+ end if
+
+ remove_inv=.false.
+ timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
+ call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
+   dtset%nsym,tdks%rprimd,dtset%typat,tdks%xred,dtset%ziontypat,dtset%znucl,timrev,&
+   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,tdks%hdr%title,&
+   dtset%symrel,dtset%tnons,dtset%symafm)
+ !Electron band energies.
+ bantot= dtset%mband*dtset%nkpt*dtset%nsppol
+ ABI_CALLOC(doccde, (bantot))
+ call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
+   doccde,tdks%eigen,dtset%istwfk,dtset%kptns,dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol, &
+   dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ0,dtset%wtk,&
+   dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig, &
+   dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
+ ABI_FREE(doccde)
+
+ write(step_nb,*) istep
 
  !** Generate DOS using the tetrahedron method or using Gaussians
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
@@ -507,7 +617,7 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call crystal%free()
  call ebands_free(ebands)
  
-end subroutine prt_den
+end subroutine prt_dos
 !!***
 
 !!****f* m_rttddft_output/prt_wfk

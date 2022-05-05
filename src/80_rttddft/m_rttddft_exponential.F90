@@ -87,16 +87,16 @@ contains
 
  !Arguments ------------------------------------
  !scalars
- integer,                   intent(in)            :: nband_k
- integer,                   intent(in)            :: npw_k
- integer,                   intent(in)            :: nspinor
- type(dataset_type),        intent(in)            :: dtset
- type(gs_hamiltonian_type), intent(inout)         :: ham_k
- type(MPI_type),            intent(inout)         :: mpi_enreg
+ integer,                   intent(in)              :: nband_k
+ integer,                   intent(in)              :: npw_k
+ integer,                   intent(in)              :: nspinor
+ type(dataset_type),        intent(in)              :: dtset
+ type(gs_hamiltonian_type), intent(inout)           :: ham_k
+ type(MPI_type),            intent(inout)           :: mpi_enreg
  !arrays
- real(dp), target,          intent(inout)         :: cg(2,npw_k*nband_k*nspinor)
- real(dp),                  intent(out), optional :: enl(:)
- real(dp), pointer,         intent(out), optional :: eig(:)
+ real(dp), target,          intent(inout)           :: cg(2,npw_k*nband_k*nspinor)
+ real(dp),                  intent(out),   optional :: enl(:)
+ real(dp), pointer,         intent(inout), optional :: eig(:)
  
  !Local variables-------------------------------
  !scalars

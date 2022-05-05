@@ -1279,7 +1279,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
 
 !      There is a discrepancy
        write(msg, &
-       '(a,a,i4,a,e16.8,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
+       '(a,a,i4,a,e22.14,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
        ' initocc_chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
        '         and input value of cellcharge=',dtset%cellcharge(iimage),',',ch10,&
        '   nelec_occ is computed from occ and wtk, iimage=',iimage,ch10,&
