@@ -368,8 +368,8 @@ Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    1.4424E+00  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=    3.7717E-08  at reduced coord.    0.5500    0.4500    0.4333
+)     Maximum=    1.4424E+00  at reduced coord.    0.0000    0.0000    0.0000
+)     Minimum=    3.7717E-08  at reduced coord.    0.5500    0.4500    0.4333
    Integrated=    3.1225E+00
 --------------------------------------------------------------------------------
 

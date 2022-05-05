@@ -37,8 +37,8 @@ module m_exc_build
  use mpi
 #endif
  use m_hdr
- use m_wfd
 
+ use m_wfd,          only : wfdgw_t, wave_t, WFD_STORED
  use defs_datatypes, only : pseudopotential_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
@@ -97,7 +97,7 @@ contains
 !!  Pawang<pawang_type>=PAW angular mesh and related data.
 !!  Paw_pwff(Cryst%ntypat*Wfd%usepaw)<pawpwff_t>=Form factor used to calculate the onsite matrix
 !!    elements of a plane wave.
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!    prtvol=Verbosity level.
 !!  rhxtwg_q0
 !!  is_resonant
@@ -177,7 +177,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  type(Pseudopotential_type),intent(in) :: Psps
  type(Hdr_type),intent(inout) :: Hdr_bse
  type(pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft_osc(18)
  integer,intent(in) :: ktabr(nfftot_osc,Kmesh%nbz)
@@ -2106,7 +2106,7 @@ end subroutine exc_build_v
 !!  Pawtab(Psps%ntypat)<pawtab_type>=PAW tabulated starting data.
 !!  Pawang<pawang_type>=PAW angular mesh and related data.
 !!  Paw_pwff(Cryst%ntypat*Wfd%usepaw)<pawpwff_t>=Form factor used to calculate the onsite mat. elements of a plane wave.
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!
 !! OUTPUT
 !!  The excitonic Hamiltonian is saved on an external binary file (see below).
@@ -2137,7 +2137,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  type(Pseudopotential_type),intent(in) :: Psps
  type(Hdr_type),intent(inout) :: Hdr_bse
  type(pawang_type),intent(in) :: Pawang
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfft_osc(18)
  integer,intent(in) :: ktabr(nfftot_osc,Kmesh%nbz)
@@ -2221,7 +2221,7 @@ end subroutine exc_build_ham
 !! FUNCTION
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!  Cryst<crystal_t>=Info on the crystalline structure.
 !!  Qmesh<kmesh_t>=The list of q-points for epsilon^{-1} and related symmetry tables.
 !!  Gsph_x<gsphere_t>=G-sphere with the G-vectors in mgq0.
@@ -2261,7 +2261,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  type(vcoul_t),intent(in) :: Vcp
  type(gsphere_t),intent(in) :: Gsph_x
  type(Pseudopotential_type),intent(in) :: Psps
- type(wfd_t),target,intent(inout) :: Wfd
+ type(wfdgw_t),target,intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: lomo_spin(Wfd%nsppol),homo_spin(Wfd%nsppol),humo_spin(Wfd%nsppol)
  integer,intent(in) :: ngfft_osc(18)

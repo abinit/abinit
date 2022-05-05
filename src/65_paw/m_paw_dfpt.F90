@@ -645,11 +645,12 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !Retrieve local potential according to the use of nhat in XC
  usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
  if (usexcnhat==0) then
-   ABI_MALLOC(vtrial_,(nfft,1))
+!  dimvtrial=nspden
    dimvtrial=1
+   ABI_MALLOC(vtrial_,(nfft,dimvtrial))
 !$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
    do ic=1,nfft
-     vtrial_(ic,1)=vtrial(ic,1)-vxc(ic,1)
+     vtrial_(ic,1:dimvtrial)=vtrial(ic,1:dimvtrial)-vxc(ic,1:dimvtrial)
    end do
  else
    dimvtrial=nspden
@@ -697,7 +698,11 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    ishift_grhoij = 6
  end if
 
- nsploop=nspden;if (dimvtrial<nspden) nsploop=2
+!DEBUG
+!   write(6,*)' preparatory computations : usexcnhat, nspden, dimvtrial=',usexcnhat, nspden, dimvtrial
+!ENDDEBUG
+!nsploop=nspden;if (dimvtrial<nspden) nsploop=2
+ nsploop=nspden;if (dimvtrial<nspden .and. nspden==4) nsploop=1
  if (optgr2/=1.and.optstr2/=1) then
    ABI_MALLOC(grhat_tmp,(ngrhat,1))
  else
@@ -1007,6 +1012,15 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
            end do
          end do
        end if ! optstr
+!DEBUG
+!   write(6,*)' after loops on ilm, ic, mu : ispden,lm_size, pawfgrtab_iatom%nfgd=',ispden,lm_size, pawfgrtab_iatom%nfgd
+!   write(6,*)' after loops on ilm, ic, mu, writes ilm, prod(1+ishift_str,ilm:lm_size) when bigger than tol10 (ilm between 1 and lm_size)'
+!   do ilm=1, lm_size
+!     if( abs(prod(1+ishift_str,ilm))>tol6 )then
+!       write(6,*)ilm,prod(1+ishift_str,ilm)
+!     endif
+!   enddo
+!ENDDEBUG
 
 !      ==== Diagonal contribution to frozen wf part of dyn. matrix ====
        if (optgr2==1) then
@@ -1377,12 +1391,24 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
                grhat_x=ro_d*pawtab(itypat)%qijl(ilm,klmn)
                do mu=1,ngrad
                  grhat_tmp(mu,idiag)=grhat_tmp(mu,idiag)+grhat_x*prod(mu,ilm)
+! DEBUG
+!               if(mu==ishift_str+1 .and. &
+!&                  (abs(grhat_x*prod(mu,ilm))>tol6 .or. irhoij==1 )      )then
+!                 write(6,'(a,5i4,3es16.6)')&
+!&                  'mu,idiag,ilm,irhoij,ll, grhat_tmp(mu,idiag),grhat_x,prod(mu,ilm)=',&
+!&                   mu,idiag,ilm,irhoij,ll, grhat_tmp(mu,idiag),grhat_x,prod(mu,ilm)
+!               endif
+! ENDDEBUG
                end do
              end if
            end do
          end do
          jrhoij=jrhoij+pawrhoij_iatom%cplex_rhoij
        end do
+
+! DEBUG
+!      write(6,*)' Accumulation of grhat_tmp : idiag,grhat_tmp(ishift_str+1,idiag),',idiag,grhat_tmp(ishift_str+1,idiag)
+! ENDDEBUG
 
 !      ---- Add additional (diagonal) terms for dynamical matrix
 !      ---- Terms including rhoij derivatives
@@ -1659,6 +1685,10 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 !    ==== Stresses ====
      if (optstr==1) then
+!      This is contribution Eq.(41) of Torrent2008.
+!DEBUG
+!   write(6,*)' after loop on ispden,ishift_str,idiag,hatstr(1),grhat_tmp(ishift_str+1)',hatstr(1),grhat_tmp(ishift_str+1,idiag)
+!ENDDEBUG
        hatstr(1:6)=hatstr(1:6)+grhat_tmp(ishift_str+1:ishift_str+6,idiag)
      end if
 
@@ -1716,9 +1746,13 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
          ABI_FREE(prodp_nondiag(jatm)%value)
        end do
      end if
-   end do
+   end do ! iatm
    iatshft=iatshft+nattyp(itypat)
- end do
+ end do ! itypat
+
+!DEBUG
+!  write(6,*)' before parallelization over atoms hatstr(1)',hatstr(1)
+!ENDDEBUG
 
 !Reduction in case of parallelisation over atoms
  if (paral_atom) then
@@ -1815,7 +1849,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
  end if
 
 !----------------------------------------------------------------------
-!Update non-local gardients
+!Update non-local gradients
 
 !===== Update forces =====
  if (optgr==1) then
@@ -1826,7 +1860,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !===== Convert stresses (add diag and off-diag contributions) =====
  if (optstr==1) then
 
-!  Has to compute int[nhat*vtrial]
+!  Has to compute int[nhat*vtrial]. See Eq.(40) in Torrent2008 .
    hatstr_diag=zero
    if (nspden==1.or.dimvtrial==1) then
      do ic=1,nfft
@@ -1840,7 +1874,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
      do ic=1,nfft
        hatstr_diag=hatstr_diag+half*(vtrial_(ic,1)*(nhat(ic,1)+nhat(ic,4)) &
 &       +vtrial_(ic,2)*(nhat(ic,1)-nhat(ic,4))) &
-&       +vtrial_(ic,3)*nhat(ic,2)+vtrial_(ic,4)*nhat(ic,3)
+&       +vtrial_(ic,3)*nhat(ic,2)-vtrial_(ic,4)*nhat(ic,3)
      end do
    end if
    hatstr_diag=hatstr_diag*fact_ucvol
@@ -1849,6 +1883,10 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
    end if
 
 !  Convert hat contribution
+
+!DEBUG
+!  write(6,*)' hatstr(1),hatstr_diag,nlstr(1)=',hatstr(1),hatstr_diag,nlstr(1)
+!ENDDEBUG
 
    hatstr(1:3)=(hatstr(1:3)+hatstr_diag)/ucvol
    hatstr(4:6)= hatstr(4:6)/ucvol

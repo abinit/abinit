@@ -354,7 +354,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    if(gwcalctyp/=21) then
     write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
     call wrtout([std_out, ab_out], msg)
-   endif 
+   endif
  end if
 
  if (sigma_needs_w(Sigp)) then
@@ -1740,7 +1740,7 @@ end function sigma_ncwrite
 !! Kmesh<kmesh_t>
 !! Qmesh<kmesh_t>
 !! Ltg_kgw<littlegroup_t>
-!! Wfd(wfd_t),intent(inout) ::
+!! Wfd(wfdgw_t),intent(inout) ::
 !! mg0(3)
 !! kptgw(3)
 !! [bks_mask(Wfd%mband,Kmesh%nbz,nsppol)]
@@ -1773,7 +1773,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
  logical,optional,intent(in) :: global
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(littlegroup_t),intent(in) :: Ltg_kgw
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: mg0(3)
  integer,optional,intent(inout) :: got(Wfd%nproc)
