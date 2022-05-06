@@ -100,7 +100,7 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% [NCPU_8]
 #%% files_to_test = tgswvl_1_MPI8.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
 #%% [NCPU_10]
-#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
+#%% files_to_test = tgswvl_1_MPI10.abo, tolnlines =   4, tolabs =  1.1e-4, tolrel= 1.1e-4
 #%% [NCPU_12]
 #%% files_to_test = tgswvl_1_MPI12.abo, tolnlines =   3, tolabs =  1.1e-5, tolrel= 1.1e-4
 #%% [extra_info]
