@@ -313,8 +313,8 @@ module m_sigmaph
 
   integer,allocatable :: my_spins(:)
    ! my_spins(my_nspins)
-   ! Indirect table giving the spin indices treated by this rank.
-   ! Used only the collinear case with nspinor == 1
+   ! Indirect table giving the spin indices treated by this MPI rank.
+   ! Used only in the collinear case with nsppol = 2 and nspinor == 1
 
   integer :: my_nkcalc
    ! Number of k-points treated by this MPI rank
@@ -602,8 +602,6 @@ contains  !=====================================================
 !!      m_eph_driver
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3019,7 +3017,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_CHECK(new%my_nkcalc > 0, sjoin("nkcalc (", itoa(new%nkcalc), ") < kcalc_comm_nproc (", itoa(new%kcalc_comm%nproc), ")"))
 
  ! Distribute spins and create mapping to spin index.
- if (new%nspinor == 1) then
+ if (new%nsppol == 2) then
    call xmpi_split_block(new%nsppol, new%spin_comm%value, new%my_nspins, new%my_spins)
    ABI_CHECK(new%my_nspins > 0, sjoin("nsppol (", itoa(new%nsppol), ") < spin_comm_nproc (", itoa(new%spin_comm%nproc), ")"))
  else
@@ -3930,8 +3928,6 @@ end function sigmaph_get_ebands
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3991,8 +3987,6 @@ end subroutine sigmaph_compare
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4113,8 +4107,6 @@ end subroutine sigmaph_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4410,8 +4402,6 @@ end function sigmaph_skip_phmode
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -4627,8 +4617,6 @@ end subroutine sigmaph_setup_qloop
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5104,8 +5092,6 @@ end subroutine sigmaph_gather_and_write
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5231,8 +5217,6 @@ end subroutine sigmaph_print
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -5409,8 +5393,6 @@ end subroutine sigmaph_get_all_qweights
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
