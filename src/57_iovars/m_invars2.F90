@@ -2105,6 +2105,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
 
+ call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
+ if(tread==1)then
+   dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nwfshist',tread,'INT')
  if(tread==1) dtset%nwfshist=intarr(1)
 
