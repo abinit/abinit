@@ -4008,7 +4008,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        !end if
 
        ! Compute k+G vectors
-       nkpg = 3*dtset%nloalg(3)
+       nkpg = 3 * dtset%nloalg(3)
        ABI_MALLOC(kpg_k, (npw_k, nkpg))
        if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
 
@@ -4021,7 +4021,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                    comm=pert_comm%value)
 
        ! Compute k+q+G vectors
-       nkpg1 = 3*dtset%nloalg(3)
+       nkpg1 = 3 * dtset%nloalg(3)
        ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
        if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
 
