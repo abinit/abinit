@@ -483,6 +483,13 @@ P          mk1mem7         32
         optdriver5          1
         optdriver6          0
         optdriver7          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
             rfdir1          0       0       0
             rfdir2          1       0       0
             rfdir3          1       1       1
@@ -2118,6 +2125,13 @@ P          mk1mem7         32
         optdriver5          1
         optdriver6          0
         optdriver7          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
             rfdir1          0       0       0
             rfdir2          1       0       0
             rfdir3          1       1       1

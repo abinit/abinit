@@ -15898,6 +15898,9 @@ the name being made of
 
 The file structure of this unformatted output file is described in [[help:abinit#localpotfile|this section]].
 No output is provided by a negative value of this variable.
+
+NB: In DFPT calculations, prtpot is automatically set to 1 as the POT files might be used to perform EPH calculations
+unless the user explictly sets prtpot to 0 in the input file.
 """,
 ),
 
@@ -19977,7 +19980,7 @@ Variable(
 
 This flag determines how the exchange-correlation terms are computed for the
 pseudo-density.
- 
+
   * When **usexcnhat** = 0, the exchange-correlation potential does not include the
 compensation charge density, i.e. $V_{xc}=V_{xc}(\tilde{n}_{core} + \tilde{n}_{valence})$.
 
@@ -19985,7 +19988,7 @@ compensation charge density, i.e. $V_{xc}=V_{xc}(\tilde{n}_{core} + \tilde{n}_{v
 charge density, i.e. $V_{xc}=V_{xc}(\tilde{n}_{core} + \tilde{n}_{valence}+\hat{n})$.
 
   * When **usexcnhat** = -1,the value of **usexcnhat** is determined from the
-reading of the PAW dataset file (pseudopotential file). 
+reading of the PAW dataset file (pseudopotential file).
 
 When PAW datasets with different treatment of $V_{xc}$ are used in the same run, the code stops.
 
@@ -19997,7 +20000,7 @@ The value **usexcnhat** = 0 corresponds to Bloechl form, see Eq.(2) of [[cite:To
 The PAW atomic datasets from JTH table [[cite:Jollet2014]] yield **usexcnhat** = 0 by default,
 and it is expected that all future versions of this table will also yield **usexcnhat** = 0 by default..
 The value **usexcnhat** = 1 corresponds to Kresse form, see Eq.(3) of [[cite:Torrent2010]].
-With ABINIT, only the oldest PAW atomic datasets favour **usexcnhat** = 1. 
+With ABINIT, only the oldest PAW atomic datasets favour **usexcnhat** = 1.
 
 Still, the ABINIT user has both options.
 """,

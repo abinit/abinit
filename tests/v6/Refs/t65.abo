@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t65/t65.in
-- output file    -> t65.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t65/t65.abi
+- output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =        1507          nfft =       54000          nkpt =           1
 ================================================================================
-P This job should need less than                      16.129 Mbytes of memory.
+P This job should need less than                      17.707 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =        1507          nfft =       54000          nkpt =           1
 ================================================================================
-P This job should need less than                       9.537 Mbytes of memory.
+P This job should need less than                      11.116 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -104,7 +104,7 @@ _ WF disk file :      0.186 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =        3013          nfft =       54000          nkpt =           1
 ================================================================================
-P This job should need less than                      16.542 Mbytes of memory.
+P This job should need less than                      18.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.186 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -228,6 +228,11 @@ P          mk1mem           1
           prepanl13         0
           prepanl14         1
           prepanl15         0
+           prtpot11         0
+           prtpot12         0
+           prtpot13         1
+           prtpot14         1
+           prtpot15         0
           rfatpol11         1       1
           rfatpol12         1       1
           rfatpol13         1       1
@@ -321,8 +326,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -339,8 +344,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.590411
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/17cl.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/17cl.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/17cl.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/17cl.pspnc
 -  Troullier-Martins psp for element  Cl        Thu Oct 27 17:32:09 EDT 1994
 - 17.00000   7.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -601,7 +606,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -623,7 +627,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -685,7 +688,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -747,7 +749,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -852,7 +853,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -883,7 +883,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -947,7 +946,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1011,7 +1009,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1028,7 +1025,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  2   3211.1897115665     -1.138E+03 7.022E+00 3.543E+06
  ETOT  3   168.78093027206     -3.042E+03 4.309E+00 2.056E+05
  ETOT  4   28.411091525761     -1.404E+02 1.782E-01 1.551E+04
- ETOT  5   20.809584129982     -7.602E+00 1.097E-03 1.507E+03
+ ETOT  5   20.809584129981     -7.602E+00 1.097E-03 1.507E+03
  ETOT  6   20.392648916224     -4.169E-01 2.231E-03 2.736E+02
  ETOT  7   20.281887437180     -1.108E-01 4.748E-04 4.264E+01
  ETOT  8   20.253539443140     -2.835E-02 3.670E-05 3.221E+00
@@ -1075,7 +1072,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1096,8 +1092,8 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  6 -0.31244385090173     -2.823E-04 7.881E-07 5.115E-02
  ETOT  7 -0.31246329854736     -1.945E-05 5.453E-07 1.125E-02
  ETOT  8 -0.31246496601585     -1.667E-06 9.778E-09 1.846E-04
- ETOT  9 -0.31246518121344     -2.152E-07 1.088E-09 6.977E-06
- ETOT 10 -0.31246518495124     -3.738E-09 2.450E-11 3.095E-07
+ ETOT  9 -0.31246518121355     -2.152E-07 1.088E-09 6.977E-06
+ ETOT 10 -0.31246518495135     -3.738E-09 2.450E-11 3.095E-07
 -open ddk wf file :t65o_DS13_1WF7
 -open ddk wf file :t65o_DS13_1WF8
 -open ddk wf file :t65o_DS13_1WF9
@@ -1139,7 +1135,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1197,7 +1192,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1255,7 +1249,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t65o_DS12_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2130,6 +2123,11 @@ P          mk1mem           1
           prepanl13         0
           prepanl14         1
           prepanl15         0
+           prtpot11         0
+           prtpot12         0
+           prtpot13         1
+           prtpot14         1
+           prtpot15         0
           rfatpol11         1       1
           rfatpol12         1       1
           rfatpol13         1       1
@@ -2283,10 +2281,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.3
+- Proc.   0 individual time (sec): cpu=         10.5  wall=         10.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  24 WARNINGs and  33 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.2  wall=          8.3
+.Delivered  74 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.5  wall=         10.7
