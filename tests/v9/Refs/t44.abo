@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 .Version 9.7.3 of ABINIT 
+=======
+.Version 9.7.4 of ABINIT 
+>>>>>>> remotes/gmatteo/develop
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,16 +18,30 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
+<<<<<<< HEAD
 .Starting date : Tue 26 Apr 2022.
 - ( at 17h56 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Test_suite/v9_t44/t44.abi
+=======
+.Starting date : Wed  4 May 2022.
+- ( at 01h27 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t44/t44.abi
+>>>>>>> remotes/gmatteo/develop
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
 
+<<<<<<< HEAD
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+=======
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+>>>>>>> remotes/gmatteo/develop
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -38,7 +56,11 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        48    nfftf =    110592
 ================================================================================
+<<<<<<< HEAD
 P This job should need less than                      38.922 Mbytes of memory.
+=======
+P This job should need less than                       4.545 Mbytes of memory.
+>>>>>>> remotes/gmatteo/develop
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.267 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
@@ -75,7 +97,10 @@ _ WF disk file :      0.267 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
             acell      2.0000000000E+01  2.0000000000E+01  2.0000000000E+01 Bohr
               amu      2.01797000E+01
              ecut      5.00000000E+00 Hartree
+<<<<<<< HEAD
            enunit           2
+=======
+>>>>>>> remotes/gmatteo/develop
 -          fftalg         312
            getwfk1          0
            getwfk2         -1
@@ -109,7 +134,16 @@ P          mk1mem           1
            orbmag2          3
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
+<<<<<<< HEAD
          pawxcdev           0
+=======
+           prtden           0
+           prteig           0
+           prtpot1          0
+           prtpot2          1
+            prtwf1          1
+            prtwf2          0
+>>>>>>> remotes/gmatteo/develop
             rfddk1          0
             rfddk2          1
             rfdir1          0       0       0
@@ -123,10 +157,26 @@ P          mk1mem           1
             typat      1
         usexcnhat           0
            useylm           1
+<<<<<<< HEAD
            xangst      5.2917720859E+00  5.2917720859E+00  5.2917720859E+00
             xcart      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01
              xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       10.00000
+=======
+              wtk        0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125
+           xangst      1.3627499763E+00  1.3627499763E+00  1.3627499763E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            xcart      2.5752242428E+00  2.5752242428E+00  2.5752242428E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+             xred      2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            znucl       15.00000   13.00000
+>>>>>>> remotes/gmatteo/develop
 
 ================================================================================
 
@@ -148,6 +198,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 ...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+<<<<<<< HEAD
  R(1)= 20.0000000  0.0000000  0.0000000  G(1)=  0.0500000  0.0000000  0.0000000
  R(2)=  0.0000000 20.0000000  0.0000000  G(2)=  0.0000000  0.0500000  0.0000000
  R(3)=  0.0000000  0.0000000 20.0000000  G(3)=  0.0000000  0.0000000  0.0500000
@@ -168,6 +219,35 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
 - pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+=======
+ R(1)=  0.0000000  5.1504485  5.1504485  G(1)= -0.0970789  0.0970789  0.0970789
+ R(2)=  5.1504485  0.0000000  5.1504485  G(2)=  0.0970789 -0.0970789  0.0970789
+ R(3)=  5.1504485  5.1504485  0.0000000  G(3)=  0.0970789  0.0970789 -0.0970789
+ Unit cell volume ucvol=  2.7325313E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.18228
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.24806
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    7.580664 Hartrees makes boxcut=2
+
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/P.xml
+>>>>>>> remotes/gmatteo/develop
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -185,10 +265,37 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
+<<<<<<< HEAD
    5.19616736E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
 _setup2: Arith. and geom. avg. npw (full set) are    4337.000    4337.000
+=======
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+ Pseudopotential format is: paw10
+ basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
+ Spheres core radius: rc_sph= 1.90363307
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=2001 , AA= 0.46377E-03 BB= 0.60291E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions =  1.60786206
+ mmax= 2001
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid 1
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to 1771 to avoid numerical noise.
+ Compensation charge density is not taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+  -2.65993774E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     146.250     146.234
+>>>>>>> remotes/gmatteo/develop
 
 ================================================================================
 
@@ -199,6 +306,7 @@ tolerances: {tolvrs: 1.00E-18, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
+<<<<<<< HEAD
  ETOT  1  -33.255360789091    -3.326E+01 3.625E-02 1.466E+01
  ETOT  2  -34.012211044960    -7.569E-01 1.053E-03 3.284E+00
  ETOT  3  -33.708210516581     3.040E-01 1.743E-05 7.110E-01
@@ -239,11 +347,32 @@ tolerances: {tolvrs: 1.00E-18, }
  ETOT 38  -33.612090135022     7.176E-13 1.860E-22 3.520E-19
 
  At SCF step   38       nres2   =  3.52E-19 < tolvrs=  1.00E-18 =>converged.
+=======
+ ETOT  1  -8.7881875378280    -8.788E+00 4.024E-02 2.978E-01
+ ETOT  2  -8.7992887868981    -1.110E-02 9.718E-05 4.735E-02
+ ETOT  3  -8.7983805533837     9.082E-04 6.272E-06 2.215E-03
+ ETOT  4  -8.7984993517350    -1.188E-04 7.039E-08 2.228E-04
+ ETOT  5  -8.7985365569071    -3.721E-05 1.628E-08 1.664E-05
+ ETOT  6  -8.7985407333543    -4.176E-06 8.997E-10 8.072E-07
+ ETOT  7  -8.7985409279082    -1.946E-07 4.114E-10 1.667E-08
+ ETOT  8  -8.7985409296376    -1.729E-09 2.542E-11 3.512E-09
+ ETOT  9  -8.7985409303391    -7.015E-10 4.287E-12 5.835E-10
+ ETOT 10  -8.7985409304507    -1.116E-10 1.141E-13 1.016E-10
+ ETOT 11  -8.7985409304692    -1.852E-11 1.957E-13 4.978E-12
+ ETOT 12  -8.7985409304694    -2.132E-13 4.219E-15 1.527E-12
+ ETOT 13  -8.7985409304695    -4.263E-14 5.051E-15 1.004E-13
+ ETOT 14  -8.7985409304694     1.776E-14 1.392E-16 2.516E-14
+ ETOT 15  -8.7985409304694    -1.776E-15 3.706E-17 5.829E-16
+ ETOT 16  -8.7985409304695    -1.776E-14 7.485E-19 5.092E-17
+
+ At SCF step   16       nres2   =  5.09E-17 < tolvrs=  1.00E-16 =>converged.
+>>>>>>> remotes/gmatteo/develop
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
 lattice_vectors:
+<<<<<<< HEAD
 - [ 20.0000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  20.0000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  20.0000000, ]
@@ -252,6 +381,16 @@ lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.0000000E+03
 convergence: {deltae:  7.176E-13, res2:  3.520E-19, residm:  1.860E-22, diffor:  0.000E+00, }
 etotal    :  -3.36120901E+01
+=======
+- [  0.0000000,   5.1504485,   5.1504485, ]
+- [  5.1504485,   0.0000000,   5.1504485, ]
+- [  5.1504485,   5.1504485,   0.0000000, ]
+lattice_lengths: [   7.28383,    7.28383,    7.28383, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7325313E+02
+convergence: {deltae: -1.776E-14, res2:  5.092E-17, residm:  7.485E-19, diffor:  0.000E+00, }
+etotal    :  -8.79854093E+00
+>>>>>>> remotes/gmatteo/develop
 entropy   :   0.00000000E+00
 fermie    :  -5.70833084E-01
 cartesian_stress_tensor: null
@@ -265,13 +404,23 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
+<<<<<<< HEAD
     1        1.80174          7.53346492
+=======
+    1        1.90690          2.53642897
+    2        1.90363          0.77709585
+>>>>>>> remotes/gmatteo/develop
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
+<<<<<<< HEAD
  Compensation charge over spherical meshes =      2.562890881181023
  Compensation charge over fine fft grid    =      2.562232923970846
+=======
+ Compensation charge over spherical meshes =     -0.545922034024871
+ Compensation charge over fine fft grid    =     -0.545806271339603
+>>>>>>> remotes/gmatteo/develop
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -288,6 +437,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    === IMAGINARY PART:
   -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+<<<<<<< HEAD
    0.00000   0.00000  -0.00000   0.00057  -0.00000  -0.00000  -0.00052  -0.00000
    0.00000   0.00000  -0.00057  -0.00000  -0.00000   0.00052  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
@@ -296,6 +446,15 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
 
  Total pseudopotential strength Dij (eV):
+=======
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+ Atom #  2
+>>>>>>> remotes/gmatteo/develop
    === REAL PART:
   -2.05975   0.30108   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.30108   3.97507   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -308,6 +467,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    === IMAGINARY PART:
   -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+<<<<<<< HEAD
    0.00000   0.00000  -0.00000   0.01545  -0.00000  -0.00000  -0.01405  -0.00000
    0.00000   0.00000  -0.01545  -0.00000  -0.00000   0.01405  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
@@ -316,6 +476,37 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
 
  Augmentation waves occupancies Rhoij:
+=======
+   0.00000   0.00000  -0.00000   0.00013  -0.00000  -0.00000  -0.00213  -0.00000
+   0.00000   0.00000  -0.00013  -0.00000  -0.00000   0.00213  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00213   0.00000  -0.00000   0.03220  -0.00000
+   0.00000   0.00000   0.00213   0.00000   0.00000  -0.03220  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+
+
+ Augmentation waves occupancies Rhoij:
+ Atom #  1
+   === REAL PART:
+   1.66488   0.00548   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.00548   0.00003   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   1.15684   0.00000   0.00000   0.00644  -0.00000   0.00000
+   0.00000   0.00000   0.00000   1.15684   0.00000  -0.00000   0.00644   0.00000
+  -0.00000   0.00000   0.00000   0.00000   1.15684   0.00000   0.00000   0.00644
+   0.00000   0.00000   0.00644  -0.00000   0.00000   0.00004  -0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00644   0.00000  -0.00000   0.00004   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00644   0.00000   0.00000   0.00004
+   === IMAGINARY PART:
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000   0.00006  -0.00000  -0.00000   0.00000  -0.00000
+  -0.00000   0.00000  -0.00006  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+ Atom #  2
+>>>>>>> remotes/gmatteo/develop
    === REAL PART:
    2.34657   0.45073   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.45073   0.08657   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -326,6 +517,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.45218   0.00000   0.00000   0.09306   0.00000
    0.00000   0.00000   0.00000   0.00000   0.45218   0.00000   0.00000   0.09306
    === IMAGINARY PART:
+<<<<<<< HEAD
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00018  -0.00000  -0.00000  -0.00026  -0.00000
@@ -333,6 +525,15 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000  -0.00026   0.00000   0.00000  -0.00011  -0.00000
    0.00000   0.00000   0.00026  -0.00000   0.00000   0.00011   0.00000  -0.00000
+=======
+  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+  -0.00000   0.00000   0.00000   0.00283   0.00000  -0.00000   0.00001  -0.00000
+   0.00000   0.00000  -0.00283  -0.00000  -0.00000  -0.00001   0.00000  -0.00000
+   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00001   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00001  -0.00000   0.00000   0.00000  -0.00000  -0.00000
+>>>>>>> remotes/gmatteo/develop
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
 
 
@@ -340,6 +541,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
+<<<<<<< HEAD
  Mean square residual over all n,k,spin=   77.172E-24; max=  18.601E-23
  reduced coordinates (array xred) for    1 atoms
        0.500000000000      0.500000000000      0.500000000000
@@ -359,10 +561,32 @@ force_length_stats: {min: null, max: null, mean: null, }
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -42.15052  -15.55750  -15.54532  -15.53316
+=======
+ Mean square residual over all n,k,spin=   26.768E-20; max=  74.854E-20
+ reduced coordinates (array xred) for    2 atoms
+       0.250000000000      0.250000000000      0.250000000000
+       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      1.36274997628497     1.36274997628497     1.36274997628497
+    2      0.00000000000000     0.00000000000000     0.00000000000000
+ length scales= 10.300896971100 10.300896971100 10.300896971100 bohr
+              =  5.450999905140  5.450999905140  5.450999905140 angstroms
+ Fermi (or HOMO) energy (hartree) =   0.18649   Average Vxc (hartree)=  -0.33355
+ Eigenvalues (hartree) for nkpt=  32  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.15240    0.02061    0.10378    0.14530
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+>>>>>>> remotes/gmatteo/develop
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
+<<<<<<< HEAD
 kinetic             :  8.82280629891836E+00
 hartree             :  2.25816005202421E+01
 xc                  : -2.88349598100075E+00
@@ -373,12 +597,25 @@ spherical_terms     :  1.83114575790150E-01
 nucl. magn. dipoles : -5.84931566370735E-09
 total_energy        : -3.36120901347678E+01
 total_energy_eV     : -9.14631486994085E+02
+=======
+kinetic             :  3.59017229872957E+00
+hartree             :  9.18139447303792E-01
+xc                  : -3.11556169381945E+00
+Ewald energy        : -8.73435537339883E+00
+psp_core            : -9.73433600340962E-02
+local_psp           : -3.09152854800784E+00
+spherical_terms     :  1.73193631462108E+00
+nucl. magn. dipoles : -1.90608155441983E-08
+total_energy        : -8.79854093366658E+00
+total_energy_eV     : -2.39420474753924E+02
+>>>>>>> remotes/gmatteo/develop
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
+<<<<<<< HEAD
 band_energy         : -6.52568789827421E+00
 Ewald energy        : -4.53967596716905E+00
 psp_core            :  6.49520920517537E-03
@@ -386,6 +623,15 @@ xc_dc               : -2.17230570698955E+01
 spherical_terms     : -8.30164408888153E-01
 total_energy_dc     : -3.36120901350218E+01
 total_energy_dc_eV  : -9.14631487000996E+02
+=======
+band_energy         :  3.04822369726956E-01
+Ewald energy        : -8.73435537339883E+00
+psp_core            : -9.73433600340962E-02
+xc_dc               : -3.52366581485075E-01
+spherical_terms     :  8.07020147215871E-02
+total_energy_dc     : -8.79854093046946E+00
+total_energy_dc_eV  : -2.39420474666926E+02
+>>>>>>> remotes/gmatteo/develop
 ...
 
 
@@ -405,6 +651,7 @@ meta: {optdriver: 1, rfddk: 1, }
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+<<<<<<< HEAD
  R(1)= 20.0000000  0.0000000  0.0000000  G(1)=  0.0500000  0.0000000  0.0000000
  R(2)=  0.0000000 20.0000000  0.0000000  G(2)=  0.0000000  0.0500000  0.0000000
  R(3)=  0.0000000  0.0000000 20.0000000  G(3)=  0.0000000  0.0000000  0.0500000
@@ -420,15 +667,45 @@ meta: {optdriver: 1, rfddk: 1, }
 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  48  48  48
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
+=======
+ R(1)=  0.0000000  5.1504485  5.1504485  G(1)= -0.0970789  0.0970789  0.0970789
+ R(2)=  5.1504485  0.0000000  5.1504485  G(2)=  0.0970789 -0.0970789  0.0970789
+ R(3)=  5.1504485  5.1504485  0.0000000  G(3)=  0.0970789  0.0970789 -0.0970789
+ Unit cell volume ucvol=  2.7325313E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.18228
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  18  18  18
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.24806
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    7.580664 Hartrees makes boxcut=2
+
+>>>>>>> remotes/gmatteo/develop
 --------------------------------------------------------------------------------
 
 
  ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
+<<<<<<< HEAD
     1)    idir= 1    ipert=   2
     2)    idir= 2    ipert=   2
     3)    idir= 3    ipert=   2
+=======
+    1)    idir= 1    ipert=   3
+    2)    idir= 2    ipert=   3
+    3)    idir= 3    ipert=   3
+>>>>>>> remotes/gmatteo/develop
 
 ================================================================================
 
@@ -452,6 +729,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+<<<<<<< HEAD
 -ETOT  1 -0.46224064102804     -4.622E-01 8.891E-05 0.000E+00
  ETOT  2 -0.46226092426063     -2.028E-05 4.787E-08 0.000E+00
  ETOT  3 -0.46226092833349     -4.073E-09 4.509E-12 0.000E+00
@@ -460,10 +738,23 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  6 -0.46226092833494     -4.552E-15 8.861E-21 0.000E+00
 
  At SCF step    6   max residual=  8.86E-21 < tolwfr=  1.00E-20 =>converged.
+=======
+-ETOT  1  -9.7141486796596     -9.714E+00 1.126E-02 0.000E+00
+ ETOT  2  -9.7167916413149     -2.643E-03 6.718E-06 0.000E+00
+ ETOT  3  -9.7167934110495     -1.770E-06 5.966E-09 0.000E+00
+ ETOT  4  -9.7167934132853     -2.236E-09 5.151E-12 0.000E+00
+ ETOT  5  -9.7167934132883     -3.013E-12 9.498E-15 0.000E+00
+ ETOT  6  -9.7167934132883      3.553E-14 9.522E-18 0.000E+00
+ ETOT  7  -9.7167934132884     -4.441E-14 1.841E-20 0.000E+00
+ ETOT  8  -9.7167934132884      0.000E+00 8.853E-21 0.000E+00
+
+ At SCF step    8   max residual=  8.85E-21 < tolwfr=  1.00E-20 =>converged.
+>>>>>>> remotes/gmatteo/develop
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
+<<<<<<< HEAD
  Mean square residual over all n,k,spin=   41.500E-22; max=  88.614E-22
  dfpt_looppert : ek2=    1.5791367042E+00
           f-sum rule ratio=    5.6448323356E-01
@@ -475,6 +766,17 @@ tolerances: {tolwfr: 1.00E-20, }
  Expectation of eigenvalue derivatives (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.00000    0.00000   -0.00000   -0.00000
+=======
+ Mean square residual over all n,k,spin=   31.621E-22; max=  88.533E-22
+ dfpt_looppert : ek2=    1.7858742990E+01
+          f-sum rule ratio=    1.2090377412E+00
+ Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
+  (in case of degenerate eigenvalues, averaged derivative)
+ kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.07326   -0.08309    0.19746    0.15068
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+>>>>>>> remotes/gmatteo/develop
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -489,8 +791,13 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.57278187E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+<<<<<<< HEAD
  2DEtotal=   -0.4622609283E+00 Ha. Also 2DEtotal=   -0.125787595644E+02 eV
     (  non-var. 2DEtotal :   -4.6226092837E-01 Ha)
+=======
+ 2DEtotal=   -0.9716793413E+01 Ha. Also 2DEtotal=   -0.264407395457E+03 eV
+    (  non-var. 2DEtotal :   -9.7250980888E+00 Ha)
+>>>>>>> remotes/gmatteo/develop
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -512,6 +819,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+<<<<<<< HEAD
 -ETOT  1 -0.46223821464592     -4.622E-01 7.283E-05 0.000E+00
  ETOT  2 -0.46226093273658     -2.272E-05 2.705E-08 0.000E+00
  ETOT  3 -0.46226093707251     -4.336E-09 2.958E-12 0.000E+00
@@ -520,10 +828,23 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  6 -0.46226093707404      5.551E-17 4.996E-21 0.000E+00
 
  At SCF step    6   max residual=  5.00E-21 < tolwfr=  1.00E-20 =>converged.
+=======
+-ETOT  1  -9.7141486807311     -9.714E+00 1.126E-02 0.000E+00
+ ETOT  2  -9.7167916423883     -2.643E-03 6.718E-06 0.000E+00
+ ETOT  3  -9.7167934121229     -1.770E-06 5.966E-09 0.000E+00
+ ETOT  4  -9.7167934143588     -2.236E-09 5.151E-12 0.000E+00
+ ETOT  5  -9.7167934143618     -2.956E-12 9.498E-15 0.000E+00
+ ETOT  6  -9.7167934143618     -3.553E-15 9.522E-18 0.000E+00
+ ETOT  7  -9.7167934143618     -3.553E-15 1.841E-20 0.000E+00
+ ETOT  8  -9.7167934143618      0.000E+00 8.853E-21 0.000E+00
+
+ At SCF step    8   max residual=  8.85E-21 < tolwfr=  1.00E-20 =>converged.
+>>>>>>> remotes/gmatteo/develop
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
+<<<<<<< HEAD
  Mean square residual over all n,k,spin=   38.467E-22; max=  49.960E-22
  dfpt_looppert : ek2=    1.5791367042E+00
           f-sum rule ratio=    5.6448323386E-01
@@ -535,6 +856,17 @@ tolerances: {tolwfr: 1.00E-20, }
  Expectation of eigenvalue derivatives (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.00000   -0.00000   -0.00000    0.00000
+=======
+ Mean square residual over all n,k,spin=   31.621E-22; max=  88.533E-22
+ dfpt_looppert : ek2=    1.7858742990E+01
+          f-sum rule ratio=    1.2090377413E+00
+ Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
+  (in case of degenerate eigenvalues, averaged derivative)
+ kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+  -0.11833    0.18175    0.19402   -0.04246
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+>>>>>>> remotes/gmatteo/develop
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -549,8 +881,13 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.57277985E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+<<<<<<< HEAD
  2DEtotal=   -0.4622609371E+00 Ha. Also 2DEtotal=   -0.125787598022E+02 eV
     (  non-var. 2DEtotal :   -4.6226093593E-01 Ha)
+=======
+ 2DEtotal=   -0.9716793414E+01 Ha. Also 2DEtotal=   -0.264407395487E+03 eV
+    (  non-var. 2DEtotal :   -9.7251325863E+00 Ha)
+>>>>>>> remotes/gmatteo/develop
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -572,6 +909,7 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+<<<<<<< HEAD
 -ETOT  1 -0.46223821463992     -4.622E-01 7.283E-05 0.000E+00
  ETOT  2 -0.46226093273058     -2.272E-05 2.705E-08 0.000E+00
  ETOT  3 -0.46226093706651     -4.336E-09 2.958E-12 0.000E+00
@@ -580,10 +918,23 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  6 -0.46226093706804     -9.992E-16 4.996E-21 0.000E+00
 
  At SCF step    6   max residual=  5.00E-21 < tolwfr=  1.00E-20 =>converged.
+=======
+-ETOT  1  -9.7141486814547     -9.714E+00 1.126E-02 0.000E+00
+ ETOT  2  -9.7167916431141     -2.643E-03 6.718E-06 0.000E+00
+ ETOT  3  -9.7167934128488     -1.770E-06 5.966E-09 0.000E+00
+ ETOT  4  -9.7167934150847     -2.236E-09 5.151E-12 0.000E+00
+ ETOT  5  -9.7167934150876     -2.974E-12 9.498E-15 0.000E+00
+ ETOT  6  -9.7167934150876      4.441E-14 9.522E-18 0.000E+00
+ ETOT  7  -9.7167934150876     -1.776E-14 1.841E-20 0.000E+00
+ ETOT  8  -9.7167934150876      0.000E+00 8.853E-21 0.000E+00
+
+ At SCF step    8   max residual=  8.85E-21 < tolwfr=  1.00E-20 =>converged.
+>>>>>>> remotes/gmatteo/develop
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
+<<<<<<< HEAD
  Mean square residual over all n,k,spin=   38.467E-22; max=  49.960E-22
  dfpt_looppert : ek2=    1.5791367042E+00
           f-sum rule ratio=    5.6448323385E-01
@@ -595,6 +946,17 @@ tolerances: {tolwfr: 1.00E-20, }
  Expectation of eigenvalue derivatives (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.00000    0.00000   -0.00000   -0.00000
+=======
+ Mean square residual over all n,k,spin=   31.621E-22; max=  88.533E-22
+ dfpt_looppert : ek2=    1.7858742990E+01
+          f-sum rule ratio=    1.2090377414E+00
+ Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
+  (in case of degenerate eigenvalues, averaged derivative)
+ kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
+   0.09575   -0.04933   -0.19589   -0.05360
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+>>>>>>> remotes/gmatteo/develop
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -609,14 +971,20 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.57277985E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
+<<<<<<< HEAD
  2DEtotal=   -0.4622609371E+00 Ha. Also 2DEtotal=   -0.125787598020E+02 eV
     (  non-var. 2DEtotal :   -4.6226093593E-01 Ha)
+=======
+ 2DEtotal=   -0.9716793415E+01 Ha. Also 2DEtotal=   -0.264407395506E+03 eV
+    (  non-var. 2DEtotal :   -9.7250636017E+00 Ha)
+>>>>>>> remotes/gmatteo/develop
 
 ====================================================
 
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
 
  Orbital magnetic moment, Cartesian directions :
+<<<<<<< HEAD
  -1.14960695E-03  6.53157374E-17  4.06224716E-17
 
 
@@ -732,6 +1100,81 @@ tolerances: {tolwfr: 1.00E-20, }
   <du|p><p|du>Qij :  -9.95380885E-08 -1.01987480E-17  1.78426063E-17
   <du|p><p|du>Qij :   6.08382217E-09  6.14093644E-19 -1.07551252E-18
      <du/dk|u>dij :   1.18734171E-07  1.21673082E-17 -2.13141831E-17
+=======
+ -8.50279572E-04  2.13120798E-13  6.02349193E-15
+
+
+ Integral of Berry curvature, Cartesian directions :
+ -2.38914256E-03  7.80833543E-13 -7.90721204E-14
+ Fermie energy :   1.86491421E-01
+
+
+ Orbital magnetic moment, Term-by-term breakdown :
+           Conduction space :  -7.37926597E-04  1.86437980E-13  7.11943617E-15
+          Valence space IIb :  -2.54414715E-04  5.47347196E-14 -4.04855364E-15
+  Valence space Ia+IIa+IIIa :   2.48703132E-09  2.19794719E-17 -5.66987524E-19
+          Valence space Ib  :  -3.55678940E-06 -1.58112455E-15  1.88250369E-15
+           S(1) PAW overlap :  -8.60186703E-07 -6.83123142E-17  8.96616052E-17
+                  H(1) cprj :   1.36777864E-04 -3.37437050E-14  1.65518989E-16
+    H(1) on-site 1/2 L_R.B  :   7.26613294E-06  7.40786535E-15  8.39534654E-16
+         H(1) on-site A0.An :   2.43223203E-06 -8.86039684E-17 -2.40425425E-17
+            Berry curvature :  -2.38914256E-03  7.80833543E-13 -7.90721204E-14
+
+
+ Orbital magnetic moment, Term-by-term breakdown for each band :
+
+
+ band  1 of  4
+        Total orbital moment :   3.31654819E-05 -2.84043111E-14 -6.04588665E-16
+            Conduction space :  -9.69745508E-06 -3.40188992E-14  9.03249218E-16
+           Valence space IIb :  -9.50582000E-07  1.53600804E-14 -7.58832154E-16
+  Valence space Ia+IIa+IIIa  :   1.80288090E-08  1.35536786E-17 -3.77768453E-18
+           Valence space Ib  :   1.81778773E-06  4.88459770E-16  2.34382557E-16
+            S(1) PAW overlap :   3.79688274E-08  1.22196436E-16  7.19109798E-18
+                   H(1) cprj :   4.14076749E-05 -1.16970928E-14 -1.06992894E-15
+      H(1) on-site 1/2 L_R.B :   2.27451844E-07  1.28812047E-15  8.05000122E-17
+          H(1) on-site A0.An :   3.04606829E-07  3.92701026E-17  2.62722644E-18
+             Berry curvature :   9.40651507E-06 -1.93285832E-13  8.40267839E-15
+
+
+ band  2 of  4
+        Total orbital moment :   1.29715190E-04  5.58710698E-14 -3.05314595E-14
+            Conduction space :  -5.12506749E-05  4.38094662E-14 -2.71633993E-14
+           Valence space IIb :   1.07526063E-05  1.74950731E-14 -3.23893904E-15
+  Valence space Ia+IIa+IIIa  :   1.17156529E-08  7.54818687E-18  5.29578740E-19
+           Valence space Ib  :  -9.64077097E-07 -6.38217785E-17  5.88524986E-17
+            S(1) PAW overlap :   1.02714620E-07  1.27330049E-17  7.88222134E-18
+                   H(1) cprj :   1.73823178E-04 -5.51555963E-15 -1.65243802E-16
+      H(1) on-site 1/2 L_R.B :  -3.43543980E-06  1.27034216E-16 -2.73371943E-17
+          H(1) on-site A0.An :   6.75167062E-07 -1.40345584E-18 -3.80448074E-18
+             Berry curvature :   5.54833299E-04  3.81246024E-13 -1.62960861E-13
+
+
+ band  3 of  4
+        Total orbital moment :   4.74676301E-01  4.36803767E-11  1.01814191E-10
+            Conduction space :   2.89488933E-01  2.43364525E-11  6.08038726E-11
+           Valence space IIb :   2.14460872E-01  2.82652386E-11  4.66876723E-11
+  Valence space Ia+IIa+IIIa  :  -3.21527582E-05 -9.41741003E-15 -4.76112972E-15
+           Valence space Ib  :  -6.51537091E-03 -1.69550386E-12 -1.21240486E-12
+            S(1) PAW overlap :  -7.59148738E-04 -2.63379878E-13 -1.27207645E-13
+                   H(1) cprj :  -2.68429081E-02 -8.52890528E-12 -5.16228224E-12
+      H(1) on-site 1/2 L_R.B :   4.87538237E-03  1.56403211E-12  8.22368107E-13
+          H(1) on-site A0.An :   6.93570706E-07  1.18599573E-14  6.93378942E-15
+             Berry curvature :   2.29976621E+00  2.04136917E-10  4.81801368E-10
+
+
+ band  4 of  4
+        Total orbital moment :  -4.75689461E-01 -4.34947227E-11 -1.01777031E-10
+            Conduction space :  -2.90165912E-01 -2.41598051E-11 -6.07704930E-11
+           Valence space IIb :  -2.14725089E-01 -2.82433590E-11 -4.66877231E-11
+  Valence space Ia+IIa+IIIa  :   3.21255008E-05  9.41828764E-15  4.76381084E-15
+           Valence space Ib  :   6.51096041E-03  1.69349809E-12  1.21399413E-12
+            S(1) PAW overlap :   7.58147868E-04  2.63176636E-13  1.27282233E-13
+                   H(1) cprj :   2.67644551E-02  8.51237423E-12  5.16368293E-12
+      H(1) on-site 1/2 L_R.B :  -4.86490825E-03 -1.55803940E-12 -8.21581735E-13
+          H(1) on-site A0.An :   7.58887431E-07 -1.19864280E-14 -6.95665471E-15
+             Berry curvature :  -2.30271960E+00 -2.03544044E-10 -4.81725881E-10
+>>>>>>> remotes/gmatteo/develop
 
 ====================================================
 
@@ -753,6 +1196,10 @@ tolerances: {tolwfr: 1.00E-20, }
            etotal1    -3.3612090135E+01
            etotal2    -4.6226093707E-01
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+<<<<<<< HEAD
+=======
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+>>>>>>> remotes/gmatteo/develop
 -          fftalg         312
            getwfk1          0
            getwfk2         -1
@@ -786,7 +1233,16 @@ P          mk1mem           1
            orbmag2          3
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
+<<<<<<< HEAD
          pawxcdev           0
+=======
+           prtden           0
+           prteig           0
+           prtpot1          0
+           prtpot2          1
+            prtwf1          1
+            prtwf2          0
+>>>>>>> remotes/gmatteo/develop
             rfddk1          0
             rfddk2          1
             rfdir1          0       0       0
@@ -802,10 +1258,26 @@ P          mk1mem           1
             typat      1
         usexcnhat           0
            useylm           1
+<<<<<<< HEAD
            xangst      5.2917720859E+00  5.2917720859E+00  5.2917720859E+00
             xcart      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01
              xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       10.00000
+=======
+              wtk        0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+                         0.03125    0.03125
+           xangst      1.3627499763E+00  1.3627499763E+00  1.3627499763E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            xcart      2.5752242428E+00  2.5752242428E+00  2.5752242428E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+             xred      2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            znucl       15.00000   13.00000
+>>>>>>> remotes/gmatteo/develop
 
 ================================================================================
 
@@ -902,10 +1374,19 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=         25.1  wall=         25.2
+=======
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         20.5
+>>>>>>> remotes/gmatteo/develop
 
 ================================================================================
 
  Calculation completed.
+<<<<<<< HEAD
 .Delivered  24 WARNINGs and   6 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         25.1  wall=         25.2
+=======
+.Delivered   5 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.3  wall=         20.5
+>>>>>>> remotes/gmatteo/develop

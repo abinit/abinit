@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h27 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h26 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v9_t05-t06/t05.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t05-t06/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
@@ -312,6 +312,12 @@ P          mk1mem6         16
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
@@ -419,8 +425,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18463
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Ga-low_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Ga-low_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Ga-low_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Ga-low_r.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -443,8 +449,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/As_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/As_r.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As_r.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.85233   1.80867   2.40819
 - 33.00000   5.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1326,6 +1332,12 @@ P          mk1mem6         16
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
@@ -1482,10 +1494,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.6  wall=          3.7
++Overall time at end (sec) : cpu=          4.2  wall=          4.4

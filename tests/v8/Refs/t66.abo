@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h35 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t66/t66.in
-- output file    -> t66.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t66/t66.abi
+- output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
 
@@ -34,7 +34,7 @@
 -    mband =          22        mffmem =           1         mkmem =           8
        mpw =         370          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       6.856 Mbytes of memory.
+P This job should need less than                       7.084 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.989 Mbytes ; DEN or POT disk file :      0.124 Mbytes.
 ================================================================================
@@ -167,6 +167,8 @@ P          mk1mem           8
            occopt           3
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
            prtvol           1
             prtwf1          1
             prtwf2         -1
@@ -248,8 +250,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -462,23 +464,6 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t66o_DS1_WFK
-P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   4 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   5 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   6 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
-P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
-P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   4 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   5 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   6 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
-P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -494,45 +479,12 @@ P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t66o_DS1_WFK
-P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   4 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   5 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   6 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
-P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
-P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   4 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   5 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   6 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
-P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    8.000000E+00 and    8.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   4 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   5 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   6 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
-P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
-P newkpt: treating     22 bands with npw=     321 for ikpt=   1 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   2 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   3 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   4 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   5 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   6 by node    0
-P newkpt: treating     22 bands with npw=     340 for ikpt=   7 by node    0
-P newkpt: treating     22 bands with npw=     370 for ikpt=   8 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -545,7 +497,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2   17.562182618412      5.420E+00 1.358E-03 1.388E+04
  ETOT  3   12.291330265289     -5.271E+00 1.303E-03 1.174E+03
  ETOT  4   13.719978999341      1.429E+00 1.161E-04 6.635E+00
- ETOT  5   14.967390527020      1.247E+00 2.222E-05 8.231E-02
+ ETOT  5   14.967390527019      1.247E+00 2.222E-05 8.231E-02
  ETOT  6   15.084638355986      1.172E-01 5.407E-07 9.984E-05
  ETOT  7   15.088474507841      3.836E-03 5.031E-08 6.622E-07
  ETOT  8   15.088595886723      1.214E-04 1.861E-09 7.020E-10
@@ -570,6 +522,7 @@ tolerances: {toldfe: 1.00E-06, }
  ----iterations are completed or convergence reached----
 
  dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.
+ Mean square residual over all n,k,spin=   23.508E-13; max=  74.026E-11
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -719,6 +672,8 @@ P          mk1mem           8
            occopt           3
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
            prtvol           1
             prtwf1          1
             prtwf2         -1
@@ -858,10 +813,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.7  wall=         12.8
+- Proc.   0 individual time (sec): cpu=         14.3  wall=         14.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.7  wall=         12.8
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.3  wall=         14.4

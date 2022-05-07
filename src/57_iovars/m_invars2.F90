@@ -1310,7 +1310,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  !----------------------------------------------------------------------------
  ! Read other parameters
- ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90 
+ ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
@@ -2626,6 +2626,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%prtprocar=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpot',tread,'INT')
+ if (dtset%optdriver == RUNL_RESPFN) dtset%prtpot = 1
  if(tread==1) dtset%prtpot=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpsps',tread,'INT')
@@ -2676,7 +2677,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf',tread,'INT')
  if(tread==1) then
    dtset%prtwf=intarr(1)
- else if (dtset%tfkinfunc==2)then 
+ else if (dtset%tfkinfunc==2)then
    dtset%prtwf=0
  endif
 
