@@ -2508,7 +2508,7 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp0 = 0
- integer,save :: enough = 0
+ !integer,save :: enough = 0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
@@ -2660,7 +2660,7 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp0 = 0
- integer,save :: enough = 0
+ !integer,save :: enough = 0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,imyp !ierr,
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),

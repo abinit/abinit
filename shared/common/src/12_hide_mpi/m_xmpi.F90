@@ -170,12 +170,13 @@ MODULE m_xmpi
    integer :: nproc = 1
    integer :: me = 0
  contains
-   ! procedure :: iam_master => xcomm_iam_master
    procedure :: skip => xcomm_skip
    procedure :: set_to_null => xcomm_set_to_null
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
  end type xcomm_t
+
+ public :: xcomm_from_mpi_int
 !!***
 
 ! Public procedures.
@@ -5081,15 +5082,19 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
 
- !type(xcomm_t) function from_mpi_int(comm_value) result(new)
- !  new%value = comm_value
- !  new%nproc  xmpi_comm_size(comm_value)
- !  new%me  xmpi_comm_rank(comm_value)
- !end function from_mpi_int
- !pure logical function xcomm_iam_master(self)
- !  class(xcomm_t),intent(in) :: self
- !  xcomm_iam_master = self%me == 0
- !end function xcomm_iam_master
+type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
+   integer,intent(in) :: comm_int
+   integer :: newcomm, ierr
+
+   new%value = comm_int; new%me = 0; new%nproc = 1
+#ifdef HAVE_MPI
+   call MPI_Comm_dup(comm_int, newcomm, ierr)
+   new%value = newcomm
+   new%nproc = xmpi_comm_size(newcomm)
+   new%me = xmpi_comm_rank(newcomm)
+#endif
+end function xcomm_from_mpi_int
+
  pure logical function xcomm_skip(self, iter)
    class(xcomm_t),intent(in) :: self
    integer,intent(in) :: iter
