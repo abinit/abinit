@@ -2,14 +2,23 @@
 
 ndtset 7
 
-nsppol1   2                 spinat1 0 0 4     nband1 12
-nsppol2   2                 spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
+nsppol1   2   spinat1 0 0 4     nband1 12
+nsppol2   2   spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
 
-nspinor3  2   nspden3  4    spinat3 0 0 4     nband3 24    getwfk3 -1  tolvrs3 1.1d-10  # getden3 -1  This can be seen to help but was not activated !
-nspinor4  2   nspden4  4    spinat4 0 0 4     nband4 24    getwfk4 -1  nstep4  1    tolvrs4   2.0d-10  # The changes of tolvrs are there only to favor portability.
+nspinor3  2  nspden3  4  spinat3 0 0 4     
+nband3 24    getwfk3 -1  
+#tolvrs3 1.1d-10  # getden3 -1  
+tolvrs3 1.0d-14
+nstep3 12
+#This can be seen to help but was not activated !
+
+# The changes of tolvrs are there only to favor portability.
+nspinor4  2  nspden4  4  spinat4 0 0 4    
+nband4 24    getwfk4 -1  nstep4  1    tolvrs4   2.0d-10
+ 
 nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
 nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
-nspinor7  2   nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0     nband7 24
+nspinor7  2  nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0  nband7 24
 
 #
 
@@ -18,7 +27,9 @@ ecut 10.0
 nstep 26
 
 pawecutdg 20.0
-pawspnorb 0    #   This is for testing purposes only : one expect the collinear results to be exactly equal to the non-collinear results, so spin-orbit coupling must be suppressed
+pawspnorb 0    #   This is for testing purposes only : one expect the collinear 
+               #results to be exactly equal to the non-collinear results, 
+               # so spin-orbit coupling must be suppressed
 
 occopt 7
 
@@ -50,7 +61,7 @@ rprim     -0.5  0.5  0.5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t94.abo, tolnlines = 8, tolabs = 4.0, tolrel = 1.0 , fld_options= -ridiculous;
+#%%   t94.abo, tolnlines = 9, tolabs = 4.0, tolrel = 1.0 , fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

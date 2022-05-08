@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ANADDB 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.4 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 20 Dec 2020.
-- ( at 23h11 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
 
 ================================================================================
@@ -88,7 +88,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.036  and twall      0.037 sec
+-begin at tcpu      0.034  and twall      0.040 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -120,9 +120,9 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.234023E-22    0.000000E+00
-       2        0.000000E+00    3.024139E-22    0.000000E+00
-       3        0.000000E+00    1.252094E-21    0.000000E+00
+       1        0.000000E+00    7.103530E-22    0.000000E+00
+       2        0.000000E+00    3.358210E-22    0.000000E+00
+       3        0.000000E+00    6.434970E-22    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -132,9 +132,9 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.234023E-22    0.000000E+00
-       2        0.000000E+00    3.024139E-22    0.000000E+00
-       3        0.000000E+00    1.252094E-21    0.000000E+00
+       1        0.000000E+00    7.103530E-22    0.000000E+00
+       2        0.000000E+00    3.358210E-22    0.000000E+00
+       3        0.000000E+00    6.434970E-22    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -191,12 +191,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00 -4.50906598E-03
+-  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
+-  1  0.00000000E+00 -4.50906598E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -210,13 +210,13 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.5
 
 ================================================================================
 
-+Total cpu time      2.770  and wall time      2.778 sec
++Total cpu time      2.470  and wall time      2.494 sec
 
  anaddb : the run completed succesfully.

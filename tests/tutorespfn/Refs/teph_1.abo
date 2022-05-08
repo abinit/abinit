@@ -1,6 +1,6 @@
 
-.Version 9.3.3 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.7.4 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 20 Dec 2020.
-- ( at 23h10 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Test_suite/tutorespfn_teph_1-teph_2-teph_3-teph_4-teph_5-teph_6/teph_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_teph_1-teph_2-teph_3-teph_4-teph_5-teph_6/teph_1.abi
 - output file    -> teph_1.abo
 - root for input  files -> teph_1i
 - root for output files -> teph_1o
@@ -34,7 +34,7 @@
 -    mband =          10        mffmem =           1         mkmem =          16
        mpw =          44          nfft =        1000          nkpt =          16
 ================================================================================
-P This job should need less than                       1.910 Mbytes of memory.
+P This job should need less than                       1.939 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.109 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -123,7 +123,7 @@ _ WF disk file :      1.683 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =         216
        mpw =          44          nfft =        1000          nkpt =         216
 ================================================================================
-P This job should need less than                       3.613 Mbytes of memory.
+P This job should need less than                       3.641 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.452 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -1529,6 +1529,16 @@ P          mk1mem10       216
            prtgkk8          1
            prtgkk9          1
            prtgkk10         1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
+           prtpot10         1
             prtwf1          1
             prtwf2          0
             prtwf3          0
@@ -1758,8 +1768,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1927,7 +1937,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1945,7 +1954,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1960,11 +1968,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.38075771300850E-03 -8.745E+00 1.228E-01 2.893E+00
- ETOT  2 -8.53310183921430E-04 -6.234E-03 1.090E-03 3.744E-02
- ETOT  3 -1.05188253145361E-03 -1.986E-04 6.637E-06 2.656E-04
+-ETOT  1  5.38075771300672E-03 -8.745E+00 1.228E-01 2.893E+00
+ ETOT  2 -8.53310183928535E-04 -6.234E-03 1.090E-03 3.744E-02
+ ETOT  3 -1.05188253144650E-03 -1.986E-04 6.637E-06 2.656E-04
  ETOT  4 -1.05360220010997E-03 -1.720E-06 8.868E-08 6.072E-07
- ETOT  5 -1.05360361035256E-03 -1.410E-09 6.618E-10 1.295E-09
+ ETOT  5 -1.05360361034901E-03 -1.410E-09 6.618E-10 1.295E-09
 
  At SCF step    5       vres2   =  1.29E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -1988,7 +1996,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -2.57385845E+00  frxc 2 =   1.89728329E+00
  Resulting in :
- 2DEtotal=   -0.1053603610E-02 Ha. Also 2DEtotal=   -0.286700122776E-01 eV
+ 2DEtotal=   -0.1053603610E-02 Ha. Also 2DEtotal=   -0.286700122775E-01 eV
     (2DErelax=   -8.7517555498E+00 Ha. 2DEnonrelax=    8.7507019462E+00 Ha)
     (  non-var. 2DEtotal :   -1.0509387369E-03 Ha)
 
@@ -2002,7 +2010,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2017,11 +2024,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.38075286449047E-03 -8.745E+00 1.357E-01 2.893E+00
- ETOT  2 -8.53315066673410E-04 -6.234E-03 1.212E-03 3.744E-02
- ETOT  3 -1.05188736792083E-03 -1.986E-04 9.639E-06 2.656E-04
- ETOT  4 -1.05360708336644E-03 -1.720E-06 8.838E-08 6.074E-07
- ETOT  5 -1.05360849397140E-03 -1.411E-09 7.756E-10 1.295E-09
+-ETOT  1  5.38075286448869E-03 -8.745E+00 1.357E-01 2.893E+00
+ ETOT  2 -8.53315066675187E-04 -6.234E-03 1.212E-03 3.744E-02
+ ETOT  3 -1.05188736790662E-03 -1.986E-04 9.639E-06 2.656E-04
+ ETOT  4 -1.05360708336466E-03 -1.720E-06 8.838E-08 6.074E-07
+ ETOT  5 -1.05360849397673E-03 -1.411E-09 7.756E-10 1.295E-09
 
  At SCF step    5       vres2   =  1.29E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2059,7 +2066,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2075,10 +2081,10 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  5.38075138811855E-03 -8.745E+00 1.229E-01 2.893E+00
- ETOT  2 -8.53316514367819E-04 -6.234E-03 1.087E-03 3.744E-02
+ ETOT  2 -8.53316514376701E-04 -6.234E-03 1.087E-03 3.744E-02
  ETOT  3 -1.05188881484075E-03 -1.986E-04 6.610E-06 2.656E-04
- ETOT  4 -1.05360853026504E-03 -1.720E-06 8.838E-08 6.074E-07
- ETOT  5 -1.05360994093751E-03 -1.411E-09 6.594E-10 1.295E-09
+ ETOT  4 -1.05360853026681E-03 -1.720E-06 8.838E-08 6.074E-07
+ ETOT  5 -1.05360994092152E-03 -1.411E-09 6.594E-10 1.295E-09
 
  At SCF step    5       vres2   =  1.29E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2102,7 +2108,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -2.57385845E+00  frxc 2 =   1.89728329E+00
  Resulting in :
- 2DEtotal=   -0.1053609941E-02 Ha. Also 2DEtotal=   -0.286701845416E-01 eV
+ 2DEtotal=   -0.1053609941E-02 Ha. Also 2DEtotal=   -0.286701845413E-01 eV
     (2DErelax=   -8.7517555561E+00 Ha. 2DEnonrelax=    8.7507019462E+00 Ha)
     (  non-var. 2DEtotal :   -1.0509321293E-03 Ha)
 
@@ -2201,8 +2207,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2218,7 +2224,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2237,10 +2242,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2295,10 +2298,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2313,8 +2314,8 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  0.69526808230259     -9.432E+00 3.837E-01 1.709E+00
  ETOT  2  0.69413125999038     -1.137E-03 8.232E-03 1.225E-02
- ETOT  3  0.69410211660548     -2.914E-05 2.675E-03 3.911E-05
- ETOT  4  0.69410188790320     -2.287E-07 5.503E-05 1.108E-07
+ ETOT  3  0.69410211660547     -2.914E-05 2.675E-03 3.911E-05
+ ETOT  4  0.69410188790319     -2.287E-07 5.503E-05 1.108E-07
  ETOT  5  0.69410188743143     -4.718E-10 2.045E-05 4.375E-10
 
  At SCF step    5       vres2   =  4.37E-10 < tolvrs=  1.00E-08 =>converged.
@@ -2352,10 +2353,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2368,7 +2367,7 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.69526807833787     -9.432E+00 3.837E-01 1.709E+00
+-ETOT  1  0.69526807833788     -9.432E+00 3.837E-01 1.709E+00
  ETOT  2  0.69413125591161     -1.137E-03 8.232E-03 1.225E-02
  ETOT  3  0.69410211252780     -2.914E-05 2.675E-03 3.911E-05
  ETOT  4  0.69410188382547     -2.287E-07 5.503E-05 1.108E-07
@@ -2480,8 +2479,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2497,7 +2496,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2515,10 +2513,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2573,10 +2569,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2631,10 +2625,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2710,14 +2702,14 @@ tolerances: {tolvrs: 1.00E-08, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.0637815064        -0.0000000000
-   1    1   2    1        -0.0000000000        -0.0000000000
-   1    1   3    1         0.0000000000        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0637815064        -0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000        -0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         0.1577707278         0.0000000001
 
@@ -2759,8 +2751,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2776,7 +2768,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2798,7 +2789,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2859,7 +2849,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2920,7 +2909,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2938,10 +2926,10 @@ tolerances: {tolwfr: 1.00E-14, }
 -ETOT  1  -24.078257884432     -2.408E+01 6.904E-02 0.000E+00
  ETOT  2  -24.078272791053     -1.491E-05 2.966E-04 0.000E+00
  ETOT  3  -24.078272791198     -1.450E-10 1.411E-06 0.000E+00
- ETOT  4  -24.078272791198     -3.553E-15 8.637E-09 0.000E+00
- ETOT  5  -24.078272791198      0.000E+00 5.104E-11 0.000E+00
- ETOT  6  -24.078272791198      0.000E+00 3.684E-13 0.000E+00
- ETOT  7  -24.078272791198      0.000E+00 9.784E-15 0.000E+00
+ ETOT  4  -24.078272791198      0.000E+00 8.637E-09 0.000E+00
+ ETOT  5  -24.078272791198     -3.553E-15 5.104E-11 0.000E+00
+ ETOT  6  -24.078272791198      3.553E-15 3.684E-13 0.000E+00
+ ETOT  7  -24.078272791198     -3.553E-15 9.784E-15 0.000E+00
 
  At SCF step    7   max residual=  9.78E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -3158,7 +3146,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3177,7 +3164,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3223,7 +3209,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3269,7 +3254,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3388,8 +3372,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3405,7 +3389,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3424,10 +3407,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3471,10 +3452,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3518,10 +3497,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3638,8 +3615,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3655,7 +3632,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3674,10 +3650,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3721,10 +3695,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3768,10 +3740,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3888,8 +3858,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/mverstra_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3905,7 +3875,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3924,7 +3893,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3982,7 +3950,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -4040,7 +4007,6 @@ tolerances: {tolwfr: 1.00E-14, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file teph_1o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -5431,6 +5397,16 @@ P          mk1mem10       216
            prtgkk8          1
            prtgkk9          1
            prtgkk10         1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
+           prtpot10         1
             prtwf1          1
             prtwf2          0
             prtwf3          0
@@ -5623,63 +5599,10 @@ P          mk1mem10       216
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         40.8        0.68      0.011
-- Total wall clock time (s,m,h):         41.0        0.68      0.011
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           40.8, wall_time =           41.0
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  17.217  42.2     17.294  42.2         412698      -1.00        1.00       1.00
-- nonlop(apply)                  3.198   7.8      3.248   7.9         333948      -1.00        0.98       0.98
-- nonlop(forces)                 2.586   6.3      2.647   6.5         171900      -1.00        0.98       0.98
-- getghc-other                   2.064   5.1      2.107   5.1             -1      -1.00        0.98       0.98
-- projbd                         2.039   5.0      2.105   5.1         733899      -1.00        0.97       0.97
-- pspini                         1.387   3.4      1.391   3.4             10      -1.00        1.00       1.00
-- inwffil(excl. calls)           1.159   2.8      1.162   2.8             70      -1.00        1.00       1.00
-- mkffnl                         1.131   2.8      1.054   2.6          30746      -1.00        1.07       1.07
-- listkk                         1.123   2.8      1.122   2.7             45      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           1.066   2.6      0.962   2.3             85      -1.00        1.11       1.11
-- getgh1c_setup                  0.896   2.2      0.793   1.9          13059      -1.00        1.13       1.13
-- fourwf%(G->r)                  0.867   2.1      0.845   2.1          37692      -1.00        1.03       1.03
-- dfpt_vtowfk(contrib)           0.707   1.7      0.659   1.6             -1      -1.00        1.07       1.07
-- invars2                        0.582   1.4      0.583   1.4             10      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.227   0.6      0.233   0.6             -1      -1.00        0.97       0.97
-- others (114)                  -1.643  -4.0     -1.771  -4.3             -1      -1.00        0.93       0.93
--<END_TIMER>
--
-- subtotal                      34.605  84.8     34.434  84.0                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          40.8, wall_time =          41.0
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  17.217  42.2     17.294  42.2         412698      -1.00        1.00       1.00
-- nonlop(apply)                  3.198   7.8      3.248   7.9         333948      -1.00        0.98       0.98
-- nonlop(forces)                 2.586   6.3      2.647   6.5         171900      -1.00        0.98       0.98
-- getghc-other                   2.064   5.1      2.107   5.1             -1      -1.00        0.98       0.98
-- projbd                         2.039   5.0      2.105   5.1         733899      -1.00        0.97       0.97
-- pspini                         1.387   3.4      1.391   3.4             10      -1.00        1.00       1.00
-- inwffil(excl. calls)           1.159   2.8      1.162   2.8             70      -1.00        1.00       1.00
-- mkffnl                         1.131   2.8      1.054   2.6          30746      -1.00        1.07       1.07
-- listkk                         1.123   2.8      1.122   2.7             45      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           1.066   2.6      0.962   2.3             85      -1.00        1.11       1.11
-- getgh1c_setup                  0.896   2.2      0.793   1.9          13059      -1.00        1.13       1.13
-- fourwf%(G->r)                  0.867   2.1      0.845   2.1          37692      -1.00        1.03       1.03
-- dfpt_vtowfk(contrib)           0.707   1.7      0.659   1.6             -1      -1.00        1.07       1.07
-- invars2                        0.582   1.4      0.583   1.4             10      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.227   0.6      0.233   0.6             -1      -1.00        0.97       0.97
-- others (114)                  -1.643  -4.0     -1.771  -4.3             -1      -1.00        0.93       0.93
--<END_TIMER>
 
-- subtotal                      34.605  84.8     34.434  84.0                                  1.00       1.00
 
 ================================================================================
 
@@ -5764,10 +5687,10 @@ P          mk1mem10       216
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         40.8  wall=         41.0
+- Proc.   0 individual time (sec): cpu=         36.8  wall=         37.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered 2017 WARNINGs and  282 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         40.8  wall=         41.0
+.Delivered 1970 WARNINGs and   19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         36.8  wall=         37.6
