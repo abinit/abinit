@@ -43,8 +43,7 @@ subroutine xmpi_exch_int1d(vsend,n1,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.n1==0) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag = MOD(mtag,xmpi_tag_ub)
- tag = MOD(n1,xmpi_tag_ub)
+ tag = MOD(mtag,xmpi_tag_ub)
 
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_INTEGER,sender,tag,comm,statux,ier)
@@ -104,10 +103,9 @@ subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.nt==0) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag = MOD(mtag, xmpi_tag_ub)
- tag = MOD(nt,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
-if (recever==me) then
+ if (recever==me) then
    call MPI_RECV(vrecv,nt,MPI_INTEGER,sender,tag,comm,statux,ier)
  end if
  if (sender==me) then
@@ -166,11 +164,10 @@ subroutine xmpi_exch_dp1d(vsend,nt,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.nt==0) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag=MOD(mtag, xmpi_tag_ub)
- tag = MOD(nt,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
  !The dimension can be greater than a 32bit integer
-  !We use a INT64 to store it. If it is too large, we switch to an
+ !We use a INT64 to store it. If it is too large, we switch to an
  !alternate routine because MPI<4 doesnt handle 64 bit counts.
  ntot=int(nt,kind=int64)
 
@@ -245,11 +242,10 @@ subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.nt==0) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag=MOD(mtag, xmpi_tag_ub)
- tag = MOD(nt,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
  !The dimension can be greater than a 32bit integer
-  !We use a INT64 to store it. If it is too large, we switch to an
+ !We use a INT64 to store it. If it is too large, we switch to an
  !alternate routine because MPI<4 doesnt handle 64 bit counts.
  ntot=int(nt,kind=int64)
 
@@ -324,8 +320,7 @@ subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.nt==0) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag = MOD(mtag, xmpi_tag_ub)
- tag = MOD(nt,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
  !The dimension can be greater than a 32bit integer
  !We use a INT64 to store it. If it is too large, we switch to an
@@ -544,8 +539,7 @@ subroutine xmpi_exch_spc1d(vsend,n1,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.(n1==0)) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag= MOD(mtag, xmpi_tag_ub)
- tag = MOD(n1,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_COMPLEX,sender, tag,comm,statux,ier)
@@ -591,8 +585,7 @@ subroutine xmpi_exch_dpc1d(vsend,n1,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.n1==0) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag = MOD(mtag, xmpi_tag_ub)
- tag = MOD(n1,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_DOUBLE_COMPLEX,sender, tag,comm,statux,ier)
@@ -637,8 +630,7 @@ subroutine xmpi_exch_dpc2d(vsend,nt,sender,vrecv,recever,comm,mtag,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.comm==MPI_COMM_NULL.or.(nt==0)) return
  call MPI_COMM_RANK(comm,me,ier)
-!tag=MOD(mtag, xmpi_tag_ub)
- tag = MOD(nt,xmpi_tag_ub)
+ tag = MOD(mtag, xmpi_tag_ub)
 
  if (recever==me) then
    call MPI_RECV(vrecv,nt,MPI_DOUBLE_COMPLEX,sender, tag,comm,statux,ier)
