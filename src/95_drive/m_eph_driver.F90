@@ -72,6 +72,7 @@ module m_eph_driver
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
+ use m_gstore,          only : gstore_t, gstore_build
 
  implicit none
 
@@ -185,6 +186,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
+ type(gstore_t) :: gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
@@ -662,7 +664,7 @@ endif
  ! TODO: Make sure that all subdrivers work with useylm == 1
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
 
- ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
+ ! Relase nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
  if (all(dtset%eph_task /= [6, 10])) call dtset%free_nkpt_arrays()
 
@@ -728,6 +730,15 @@ endif
      call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
+ case (14)
+    ! Write e-ph matrix elements to disk (WARNING: under HEAVY development)
+    gstore = gstore_build(2, dtset, "ibz", "bz", cryst, ebands, ifc, comm)
+    !call gstore%compute(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+    !                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+
+    call gstore%ncwrite_path("foo.nc", cryst, ebands)
+    call gstore%free()
+
  case (15, -15)
    ! Write average of DFPT potentials to file.
    if (nprocs > 1) then
@@ -755,6 +766,10 @@ endif
      ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
      call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
    end if
+
+
+
+
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

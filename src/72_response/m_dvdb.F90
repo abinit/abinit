@@ -893,7 +893,6 @@ end subroutine dvdb_open_read
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -929,7 +928,6 @@ end subroutine dvdb_close
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -998,7 +996,6 @@ end subroutine dvdb_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1356,7 +1353,6 @@ end function dvdb_read_onev1
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1474,7 +1470,6 @@ end subroutine dvdb_readsym_allv1
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1754,7 +1749,6 @@ end function qcache_new
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1851,7 +1845,6 @@ end subroutine dvdb_qcache_read
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1937,7 +1930,6 @@ end subroutine dvdb_qcache_update_from_file
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1980,7 +1972,6 @@ end subroutine qcache_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2162,7 +2153,6 @@ end function qcache_make_room
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2407,7 +2397,6 @@ end subroutine v1phq_complete
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2499,7 +2488,6 @@ end subroutine find_symeq
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2652,7 +2640,6 @@ end subroutine v1phq_rotate
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2785,7 +2772,6 @@ end subroutine v1phq_rotate_myperts
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2864,7 +2850,6 @@ end subroutine v1phq_symmetrize
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2998,7 +2983,6 @@ end subroutine rotate_fqg
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3541,7 +3525,6 @@ end subroutine prepare_ftinterp
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3748,7 +3731,6 @@ end subroutine dvdb_ftinterp_qpt
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -3947,7 +3929,6 @@ end subroutine dvdb_get_ftqbz
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4049,7 +4030,6 @@ end subroutine dvdb_ftqcache_build
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4143,7 +4123,6 @@ end subroutine dvdb_ftqcache_update_from_ft
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4491,7 +4470,6 @@ end subroutine dvdb_get_v1scf_rpt
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4612,7 +4590,6 @@ end subroutine dvdb_get_v1scf_qpt
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4792,7 +4769,6 @@ end function dvdb_find_qpts
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4845,7 +4821,6 @@ end subroutine dvdb_set_pert_distrib
 !!      m_dvdb
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5043,7 +5018,6 @@ end function my_hdr_skip
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5084,8 +5058,7 @@ subroutine dvdb_list_perts(db, ngqpt, npert_miss, unit)
      qptrlatt(ii, ii) = ngqpt(ii)
    end do
 
-   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nshiftq, shiftq, &
-     nqibz, qibz, wtq, nqbz, qbz)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz)
 
    ABI_FREE(qbz)
    ABI_FREE(wtq)
@@ -5218,7 +5191,6 @@ end subroutine dvdb_list_perts
 !!      mrgdv
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5514,7 +5486,6 @@ end function dvdb_check_fform
 !!      mrgdv
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5655,7 +5626,6 @@ end subroutine dvdb_test_v1rsym
 !!      mrgdv
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5895,7 +5865,6 @@ end subroutine dvdb_test_v1complete
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6280,7 +6249,6 @@ end subroutine dvdb_write_v1qavg
 !!      mrgdv
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6514,7 +6482,6 @@ end subroutine dvdb_test_ftinterp
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6880,7 +6847,6 @@ end subroutine dvdb_load_efield
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -7324,7 +7290,6 @@ end subroutine dvdb_interpolate_and_write
 !! PARENTS
 !!
 !! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -7363,8 +7328,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  ! =======================
  ! Generate the list of irreducible q-points in the coarse grid
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(dvdb%cryst, qptrlatt, qptopt1, 1, &
-                             [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+ call kpts_ibz_from_kptrlatt(dvdb%cryst, qptrlatt, qptopt1, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
  ! =======================================
  ! Open DVDB and copy important dimensions
