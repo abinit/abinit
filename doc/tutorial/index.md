@@ -219,6 +219,10 @@ the tutorial on non-linear optics, and the group of electron-phonon tutorials:**
     explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap 
     as well as temperature-dependent band gaps (or the whole electronic structure).
 
+* [The tutorial on building Lattice wannier function](lattice_wannier) presents how to use anaddb to build the lattice Wannier functions (LWF).
+
+
+
 **Two obsolete tutorials on electron-phonon interaction are still present. 
 The implementations are still available at time of writing,
 but have been superseded by the new implementations, described in the above-mentioned tutorials.

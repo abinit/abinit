@@ -43,7 +43,6 @@ sources = [
  "m_optic_tools.F90",
  "m_optics_vloc.F90",
  "m_rot_cg.F90",
- "m_orbmag.F90",
  "m_rhotov.F90",
  "m_common.F90",
  "m_positron.F90",
