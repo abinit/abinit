@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t08/t08.in
-- output file    -> t08.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t08/t08.abi
+- output file    -> t08.abo
 - root for input  files -> t08i
 - root for output files -> t08o
 
@@ -36,7 +36,7 @@
  For the susceptibility and dielectric matrices, or tddft :
    mgfft =         8  nbnd_in_blk=     2    nfft =       512     npw =        81
 ================================================================================
-P This job should need less than                       1.905 Mbytes of memory.
+P This job should need less than                       2.027 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -105,6 +105,8 @@ P          mk1mem           2
               occ      2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
           rfatpol1          1       1
           rfatpol2          2       2
             rfdir1          0       0       0
@@ -164,8 +166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Doug_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Doug_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14si.Doug_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/14si.Doug_mod
 - 1.75bohr 25Ha exncc psp for Si with core 19 June 1992 ( !! OLD, only for testing)
 - 14.00000   4.00000    920619                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -351,7 +353,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t08o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -368,7 +369,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t08o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -389,8 +389,8 @@ tolerances: {tolwfr: 1.00E-15, }
  ETOT  6   121.12504504144     -8.911E-06 8.045E-09 4.112E-05
  ETOT  7   121.12504499756     -4.388E-08 1.178E-10 2.573E-06
  ETOT  8   121.12504498392     -1.363E-08 6.717E-12 7.427E-09
- ETOT  9   121.12504498390     -2.591E-11 1.709E-14 1.961E-10
- ETOT 10   121.12504498390     -1.187E-12 5.450E-16 6.642E-12
+ ETOT  9   121.12504498390     -2.588E-11 1.709E-14 1.961E-10
+ ETOT 10   121.12504498390     -1.208E-12 5.450E-16 6.642E-12
 
  At SCF step   10   max residual=  5.45E-16 < tolwfr=  1.00E-15 =>converged.
 ================================================================================
@@ -525,6 +525,8 @@ P          mk1mem           2
               occ      2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
           rfatpol1          1       1
           rfatpol2          2       2
             rfdir1          0       0       0
@@ -638,10 +640,10 @@ P          mk1mem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.8
+.Delivered   6 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.0  wall=          1.5

@@ -4646,7 +4646,9 @@ subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,
    nselect=pawrhoij1%nrhoijsel
    use_rhoijres=pawrhoij1%use_rhoijres
    use_rhoij_  =pawrhoij1%use_rhoij_
-   rhoij_size2 =size(pawrhoij1%rhoij_,dim=2)
+   if (use_rhoij_ > 0) then
+     rhoij_size2 =size(pawrhoij1%rhoij_,dim=2)
+   end if
    buf_int(indx_int)=atmtab_send(irhoij_send)        ;indx_int=indx_int+1
    buf_int(indx_int)=cplex                           ;indx_int=indx_int+1
    buf_int(indx_int)=qphase                          ;indx_int=indx_int+1
