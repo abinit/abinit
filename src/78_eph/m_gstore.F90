@@ -70,7 +70,6 @@ module m_gstore
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
 
-
  !use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  !use m_occ,             only : occ_fd, occ_be
 
@@ -86,18 +85,18 @@ module m_gstore
 !! gqk_t
 !!
 !! FUNCTION
-!!  This object Stores MPI-distributed e-p matrix elements for a given spin index (collinear case).
+!!  This object Stores MPI-distributed e-p matrix elements for
+!!  a given spin index (collinear case).
 !!
 !! NOTES
 !!  global and local mean that the ...
-!!
 !!
 !! SOURCE
 
 type, public :: gqk_t
 
   integer :: cplex = -1
-  ! 1 if |g|^2,
+  ! 1 if |g|^2 is stored
   ! 2 if complex g (global)
 
   integer :: spin = -1
@@ -162,8 +161,10 @@ type, public :: gqk_t
   ! Mapping q + k --> kibz for each (q, k) treated by this MPI proc.
 
   logical :: with_velocities = .False.
+  ! True if electronic group velocities should be computed and stored.
 
   logical :: with_phdispl = .False.
+  ! True if phonon displacements should be computed and stored.
 
   ! Compute group velocities if we are in transport mode or adaptive gaussian or
   ! tetrahedron with libtetrabz returning nesting condition.
@@ -422,17 +423,6 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
     ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
 
-
-
-
-
-
-
-
-
-
-
-
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
    nkibz_, kibz_, wtk_, nkbz_, kbz_) !, bz2ibz=bz2ibz)
@@ -441,6 +431,7 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
 
  ! Note symrel and use_symrec=.False. in get_mapping.
  ! This means that this table can be used to symmetrize wavefunctions in cgtk_rotate.
+ ! This ambiguity should be removed. Change cgtk_rotate so that we can use the symrec convention.
 
  ABI_MALLOC(kbz2ibz_, (6, nkbz_))
 
@@ -523,11 +514,11 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
    ABI_ERROR(sjoin("Invalid qzone_type:", qzone_type))
  end select
 
- print *, "kzone_type: ", trim(kzone_type), ", qzone_type: ", trim(qzone_type)
- print *, "nqibz, nkibz: ", nqibz_, nkibz_
- print *, "nqbz, nkbz: ", nqbz_, nkbz_
- print *, "glob_nk_spin: ", glob_nk_spin
- print *, "glob_nq_spin: ", glob_nq_spin
+ !print *, "kzone_type: ", trim(kzone_type), ", qzone_type: ", trim(qzone_type)
+ !print *, "nqibz, nkibz: ", nqibz_, nkibz_
+ !print *, "nqbz, nkbz: ", nqbz_, nkbz_
+ !print *, "glob_nk_spin: ", glob_nk_spin
+ !print *, "glob_nq_spin: ", glob_nq_spin
 
  ! I need another table mapping the global index to the q/k in the BZ
  ! so that I can extract the symmetry tables computed previously.
@@ -685,7 +676,8 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
  end do ! my_is
 
 #ifdef HAVE_MPI
- ! For each spin treated by this rank, create 3d cartesian communicator: (q-points, k-points and perturbations)
+ ! For each spin treated by this rank, create 3d cartesian communicator:
+ ! (q-points, k-points, perturbations)
  ndims = 3
  ABI_MALLOC(dims, (ndims))
  ABI_MALLOC(periods, (ndims))
@@ -1104,8 +1096,9 @@ pure function gqk_get_mykpt(gqk, my_ik) result (kpt)
  ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
  trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
  isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+ !tsign = 1; if (trev_k == 1) tsign = -1
 
- !kpt = matmul(gqk%kibz(:, ik_ibz))
+ !kpt = tsign * matmul(gqk%cryst%sym??(:,:,isym_k), gqk%kibz(:, ik_ibz)) + g0_k
 
 end function gqk_get_mykpt
 !!***

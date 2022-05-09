@@ -45,7 +45,6 @@ module m_mkffnl
 
  public :: mkffnl_objs
  public :: mkffnl
-
 !!***
 
 contains
