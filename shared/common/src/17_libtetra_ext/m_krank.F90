@@ -83,6 +83,9 @@ module m_krank
     ! Prints the arrays and dimensions of a krank_t structure
 
    procedure :: get_mapping => krank_get_mapping
+    ! Use symmetries to map input kptn2 to the list of k-points used to generate krank_t.
+    ! Similar to listkk but, unlike listkk, this algo does not try to minimize the distance.
+    ! Must faster than listkk for dense meshes
 
  end type krank_t
 
@@ -107,6 +110,10 @@ contains
 !! OUTPUT
 !!  krank = object containing ranking and inverse ranking
 !!
+!! NOTES
+!!  By default, the object holds a reference to kpts so do not change/deallocate this array
+!!  while using krank.
+!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -121,7 +128,7 @@ type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank
  logical,optional,intent(in) :: compute_invrank
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: kpts(3,nkpt)
+ real(dp),target,intent(in) :: kpts(3,nkpt)
 
 !Local variables -------------------------
 !scalars

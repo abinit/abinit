@@ -206,7 +206,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !! tetra_from_kptrlatt
 !!
 !! FUNCTION
-!!  Create an instance from kptrlatt and shiftk
+!!  Helper functio to to create an instance and htetra from kptrlatt and shiftk
 !!
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
@@ -299,13 +299,15 @@ type(htetra_t) function tetra_from_kptrlatt( &
 
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
 
- ABI_MALLOC(indkk,(nkfull))
- indkk(:) = bz2ibz(1,:)
+ ABI_MALLOC(indkk, (nkfull))
+ indkk(:) = bz2ibz(1, :)
  ABI_SFREE(bz2ibz)
+
  call htetra_init(htetra, indkk, cryst%gprimd, klatt, kfull, nkfull, my_kibz, my_nkibz, ierr, errorstring, comm)
  if (ierr /= 0) msg = errorstring
 
  10 continue
+
  ABI_SFREE(my_kibz)
  ABI_SFREE(indkk)
  ABI_SFREE(kfull)
