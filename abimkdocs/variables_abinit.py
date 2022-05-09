@@ -9652,8 +9652,8 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]], 
-and input it here. 
+the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]],
+and input it here.
 """,
 ),
 
@@ -13356,7 +13356,7 @@ Compute quantities related to orbital magnetic moment. The
     insulators have orbital magnetization zero, except in the presence
     of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]], 
+    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]],
     and [[cite:Gonze2011a]] extended to the PAW case.
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
@@ -16453,7 +16453,7 @@ Variable(
   such a case oxygen almost always would have a point charge of -2. The present
   variable taken together with [[prtefg]] performs a full PAW computation of
   the electric field gradient and also a simple point charge computation. The
-  user inputs whatever point charges he/she wishes for each atom type.  
+  user inputs whatever point charges he/she wishes for each atom type.
 """,
 ),
 
@@ -21822,7 +21822,7 @@ mode by using [[eph_task]] = 8 with [[getsigeph_filepath]].
 Variable(
     abivarname="eph_prtscratew",
     varset="eph",
-    topics=['ElPhonInt_advanced'],
+    topics=['ElPhonInt_expert'],
     vartype="integer",
     defaultval=0,
     dimensions="scalar",

@@ -4294,7 +4294,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  !
  !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
  !
- ! Note also use_symrec=.False. This means that this table can be used to symmetrize wavefunctions in cgtk_rotate.
+ ! Note symrel and use_symrec=.False. in get_mapping.
+ ! This means that this table can be used to symmetrize wavefunctions in cgtk_rotate.
  !
  ABI_MALLOC(kq_list, (3, self%nqibz_k))
  do iq_ibz=1,self%nqibz_k
