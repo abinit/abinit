@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t02/t02.in
-- output file    -> t02.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t02/t02.abi
+- output file    -> t02.abo
 - root for input  files -> t02i
 - root for output files -> t02o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          43          nfft =        1000          nkpt =           2
 ================================================================================
-P This job should need less than                       0.879 Mbytes of memory.
+P This job should need less than                       0.907 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -330,6 +330,11 @@ P          mk1mem5         32
         optdriver3          1
         optdriver4          1
         optdriver5          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       2
@@ -450,8 +455,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.016   => boxcut(ratio)=   2.10814
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -469,8 +474,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -647,7 +652,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.016   => boxcut(ratio)=   2.10814
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -664,7 +668,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -770,7 +773,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      2.016   => boxcut(ratio)=   2.10814
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -820,7 +822,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -839,8 +840,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  4   13.250576102496     -5.758E-05 5.182E-08 8.444E-05
  ETOT  5   13.250575655347     -4.471E-07 6.682E-10 3.998E-07
  ETOT  6   13.250575653256     -2.091E-09 2.606E-12 1.914E-09
- ETOT  7   13.250575653246     -1.003E-11 1.209E-14 1.060E-11
- ETOT  8   13.250575653246     -6.750E-14 9.729E-17 3.476E-14
+ ETOT  7   13.250575653246     -1.004E-11 1.209E-14 1.060E-11
+ ETOT  8   13.250575653245     -6.750E-14 9.729E-17 3.476E-14
 
  At SCF step    8   max residual=  9.73E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t02o_DS2_1WF7
@@ -879,7 +880,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -899,8 +899,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5   13.250636208840     -2.310E-06 2.254E-09 1.347E-06
  ETOT  6   13.250636202265     -6.574E-09 1.040E-11 7.612E-09
  ETOT  7   13.250636202229     -3.676E-11 3.917E-14 5.136E-11
- ETOT  8   13.250636202228     -3.055E-13 4.401E-16 2.786E-13
- ETOT  9   13.250636202228     -6.395E-14 9.654E-17 7.102E-15
+ ETOT  8   13.250636202228     -3.126E-13 4.401E-16 2.786E-13
+ ETOT  9   13.250636202228     -7.105E-14 9.654E-17 7.102E-15
 
  At SCF step    9   max residual=  9.65E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t02o_DS2_1WF7
@@ -938,7 +938,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -959,7 +958,7 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5  -143.91746104353     -1.240E-06 9.258E-10 4.281E-06
  ETOT  6  -143.91746106473     -2.120E-08 2.816E-11 4.413E-08
  ETOT  7  -143.91746106495     -2.291E-10 4.582E-13 5.353E-10
- ETOT  8  -143.91746106496     -2.842E-12 4.676E-15 2.167E-12
+ ETOT  8  -143.91746106496     -2.814E-12 4.676E-15 2.167E-12
  ETOT  9  -143.91746106496     -2.842E-14 9.769E-17 1.090E-14
 
  At SCF step    9   max residual=  9.77E-17 < tolwfr=  1.00E-16 =>converged.
@@ -1275,8 +1274,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.016   => boxcut(ratio)=   2.10814
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1294,8 +1293,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1315,7 +1314,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1332,7 +1330,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1438,7 +1435,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      2.016   => boxcut(ratio)=   2.10814
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1488,7 +1484,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1507,7 +1502,7 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  4   13.250576102553     -5.758E-05 5.182E-08 8.444E-05
  ETOT  5   13.250575655403     -4.471E-07 6.682E-10 3.998E-07
  ETOT  6   13.250575653312     -2.091E-09 2.606E-12 1.914E-09
- ETOT  7   13.250575653302     -1.002E-11 1.209E-14 1.060E-11
+ ETOT  7   13.250575653302     -1.001E-11 1.209E-14 1.060E-11
  ETOT  8   13.250575653302     -9.237E-14 9.728E-17 3.476E-14
 
  At SCF step    8   max residual=  9.73E-17 < tolwfr=  1.00E-16 =>converged.
@@ -1547,7 +1542,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1566,9 +1560,9 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  4   13.250638518771     -4.023E-04 2.641E-07 4.356E-04
  ETOT  5   13.250636208869     -2.310E-06 2.254E-09 1.347E-06
  ETOT  6   13.250636202295     -6.574E-09 1.040E-11 7.612E-09
- ETOT  7   13.250636202258     -3.692E-11 3.917E-14 5.136E-11
- ETOT  8   13.250636202257     -4.050E-13 4.401E-16 2.786E-13
- ETOT  9   13.250636202257      1.634E-13 9.641E-17 7.101E-15
+ ETOT  7   13.250636202258     -3.691E-11 3.917E-14 5.136E-11
+ ETOT  8   13.250636202257     -4.121E-13 4.401E-16 2.786E-13
+ ETOT  9   13.250636202258      1.705E-13 9.641E-17 7.101E-15
 
  At SCF step    9   max residual=  9.64E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t02o_DS4_1WF7
@@ -1606,7 +1600,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1627,8 +1620,8 @@ tolerances: {tolwfr: 1.00E-16, }
  ETOT  5  -143.91746104417     -1.240E-06 9.258E-10 4.281E-06
  ETOT  6  -143.91746106537     -2.120E-08 2.816E-11 4.413E-08
  ETOT  7  -143.91746106560     -2.293E-10 4.582E-13 5.353E-10
- ETOT  8  -143.91746106560     -2.956E-12 4.676E-15 2.167E-12
- ETOT  9  -143.91746106560     -2.558E-13 9.769E-17 1.090E-14
+ ETOT  8  -143.91746106560     -2.984E-12 4.676E-15 2.167E-12
+ ETOT  9  -143.91746106560     -2.274E-13 9.769E-17 1.090E-14
 
  At SCF step    9   max residual=  9.77E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t02o_DS4_1WF7
@@ -2134,6 +2127,11 @@ P          mk1mem5         32
         optdriver3          1
         optdriver4          1
         optdriver5          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       2
@@ -2306,10 +2304,10 @@ P          mk1mem5         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  58 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          3.9
+.Delivered   9 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.2  wall=          4.4

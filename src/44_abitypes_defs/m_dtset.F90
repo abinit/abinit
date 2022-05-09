@@ -905,6 +905,7 @@ type, public :: dataset_type
  real(dp), allocatable :: kptns(:,:)        ! kptns(3,nkpt) k-points renormalized and shifted.
                                             !  The ones that should be used inside the code.
  real(dp), allocatable :: kptns_hf(:,:)     ! kpthf(3,nkptns_hf)
+ real(dp), allocatable :: lambsig(:)        ! lambsig(ntypat)
 
  real(dp), allocatable :: mixalch_orig(:,:,:) ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: mixesimgf(:)        ! mixesimgf(nimage)
@@ -2162,6 +2163,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%kptgw, dtout%kptgw)
  call alloc_copy(dtin%kptns, dtout%kptns)
  call alloc_copy(dtin%kptns_hf, dtout%kptns_hf)
+ call alloc_copy(dtin%lambsig, dtout%lambsig)
  call alloc_copy(dtin%mixalch_orig, dtout%mixalch_orig)
  call alloc_copy(dtin%mixesimgf, dtout%mixesimgf)
  call alloc_copy(dtin%nucdipmom, dtout%nucdipmom)
@@ -2281,6 +2283,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%kptgw)
  ABI_SFREE(dtset%kptns)
  ABI_SFREE(dtset%kptns_hf)
+ ABI_SFREE(dtset%lambsig)
  ABI_SFREE(dtset%mixalch_orig)
  ABI_SFREE(dtset%mixesimgf)
  ABI_SFREE(dtset%nucdipmom)
@@ -3322,7 +3325,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' kberry kpt kptbounds kptgw'
  list_vars=trim(list_vars)//' kptnrm kptopt kptrlatt kptrlen kssform'
 !L
- list_vars=trim(list_vars)//' latt_friction latt_taut'
+ list_vars=trim(list_vars)//' lambsig latt_friction latt_taut'
 ! list_vars=trim(list_vars)//' latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
