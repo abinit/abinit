@@ -35,16 +35,81 @@ module m_mkffnl
  use m_time,     only : timab
  use m_kg,       only : mkkin
  use m_sort,     only : sort_dp
+ use defs_datatypes, only : pseudopotential_type
+ use m_crystal,  only : crystal_t
 
  implicit none
 
  private
 !!***
 
+ public :: mkffnl_objs
  public :: mkffnl
+
 !!***
 
 contains
+!!***
+
+!!****f* ABINIT/mkffnl_objs
+!! NAME
+!! mkffnl_objs
+!!
+!! FUNCTION
+!!  Simplified wrapper around mkffnl in which input parameters are passed via crystal_t and pseudopotential_type.
+!!
+!! INPUTS
+!!  See mkffnl
+!!
+!! OUTPUT
+!!  ffnl(npw,dimffnl,lmnmax,ntypat)=described below
+!! [request]=Used in conjunction with [comm] to perform non-blocking xmpi_isum_ip. Client code must
+!!  wait on request before using ffnl. If not present, blocking API is used.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg, kpg, kpt, nkpg, npw, ylm, ylm_gr, &
+                       comm, request) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: dimffnl, ider, idir, npw, nkpg
+ integer,optional,intent(in) :: comm
+ integer ABI_ASYNC, optional,intent(out):: request
+!arrays
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: kpg(npw, nkpg), kpt(3)
+ real(dp),intent(in) :: ylm(:,:), ylm_gr(:,:,:)
+ real(dp),intent(out) :: ffnl(npw, dimffnl, psps%lmnmax, psps%ntypat)
+!
+!!Local variables-------------------------------
+ integer :: my_comm
+
+! *************************************************************************
+ my_comm = xmpi_comm_self; if (present(comm)) my_comm = comm
+
+ if (present(request)) then
+    call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                comm=comm, request=request)
+
+ else
+    call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                comm=comm)
+ end if
+
+end subroutine mkffnl_objs
 !!***
 
 !!****f* ABINIT/mkffnl
