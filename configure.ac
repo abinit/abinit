@@ -38,7 +38,13 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
+<<<<<<< HEAD
 AC_INIT([ABINIT],[9.7.2],[https://bugs.launchpad.net/abinit/],[abinit])
+||||||| ad21dc752
+AC_INIT([ABINIT],[9.7.3],[https://bugs.launchpad.net/abinit/],[abinit])
+=======
+AC_INIT([ABINIT],[9.7.4],[https://bugs.launchpad.net/abinit/],[abinit])
+>>>>>>> a1d7896fea4b0ec2ccf16d09ea65193f15fde1d0
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])

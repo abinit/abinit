@@ -243,6 +243,11 @@ P          mk1mem          32
           prepalw3          0
           prepalw4          1
           prepalw5          0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       1
@@ -3402,6 +3407,11 @@ P          mk1mem          32
           prepalw3          0
           prepalw4          1
           prepalw5          0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       1

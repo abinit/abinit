@@ -2445,7 +2445,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
- complex(dpc) :: lms
+ complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:)
@@ -2504,8 +2504,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
    ! Matrix elements of interest are <S_l'm'|L_i|S_lm>
    ! these are zero if l' /= l and also if l' == l == 0
-   if ( il .NE. jl ) cycle
-   if ( il .EQ. 0  ) cycle
+   if ( il /= jl ) cycle
+   if ( il == 0  ) cycle
 
    do idir = 1, 3
 
@@ -2514,10 +2514,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
-       & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
-     dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
+     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
+     dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
    end do ! end loop over idir
 
