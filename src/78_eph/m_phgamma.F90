@@ -3217,7 +3217,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, eph_scalprod0 = 0
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz, timrev
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz, ebands_timrev
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
@@ -3293,7 +3293,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  nkibz = ebands%nkpt; mband = ebands%mband
- timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+ ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  ! FFT meshes
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -3960,8 +3960,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
-       call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, timrev, &
-                              use_symrec=.False.)
+       call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                              ebands_timrev, use_symrec=.False.)
 
        if (dksqmax > tol12) then
          write(msg, '(3a,es16.6,6a)' ) &
