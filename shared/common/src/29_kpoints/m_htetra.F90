@@ -2068,16 +2068,16 @@ end subroutine htetra_wvals_weights
 !!
 !! SOURCE
 
-subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dweight,comm)
+subroutine htetra_wvals_weights_delta(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, dweight, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nw,nkpt,opt,comm
+ integer,intent(in) :: nw, nkpt, opt, comm
  class(htetra_t), intent(in) :: tetra
- real(dp) ,intent(in) :: max_occ
+ real(dp),intent(in) :: max_occ
 !arrays
- real(dp),intent(in) :: eig_ibz(nkpt)
- real(dp),intent(out) :: dweight(nw,nkpt)
+ real(dp),intent(in) :: eig_ibz(nkpt), wvals(nw)
+ real(dp),intent(out) :: dweight(nw, nkpt)
 
 !Local variables-------------------------------
 !scalars
@@ -2085,7 +2085,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: eig(4), wvals(nw), dweight_tmp(4,nw),tweight_tmp(4,nw)
+ real(dp) :: eig(4), dweight_tmp(4,nw),tweight_tmp(4,nw)
 
 ! *********************************************************************
 

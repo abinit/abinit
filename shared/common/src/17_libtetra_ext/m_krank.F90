@@ -65,6 +65,11 @@ module m_krank
    real(dp),ABI_CONTIGUOUS pointer :: kpts(:,:)
     ! Reference to input k-points or copy of the array depending on kpts_owns_memory
 
+    ! Internal tables used by krank_get_mapping
+   integer,allocatable :: rank2ikpt__(:)
+
+   integer,allocatable :: rank2symtime__(:)
+
  contains
 
    procedure :: get_rank
@@ -469,12 +474,13 @@ subroutine krank_free(krank)
 
  ABI_SFREE(krank%invrank)
  if (krank%kpts_owns_memory) then
-   if (associated(krank%kpts)) then
-     ABI_FREE(krank%kpts)
-   end if
+   ABI_SFREE_PTR(krank%kpts)
  else
    krank%kpts => null()
  end if
+
+ ABI_SFREE(krank%rank2ikpt__)
+ ABI_SFREE(krank%rank2symtime__)
 
 end subroutine krank_free
 !!***
@@ -545,6 +551,7 @@ end subroutine krank_print
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec)
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!  [qpt]: q-point to be added to kptns2. 0 if not specified.
 !!
 !! OUTPUT
 !!  dksqmax=maximal value of the norm**2 of the difference between
@@ -563,11 +570,11 @@ end subroutine krank_print
 !! SOURCE
 
 subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, symafm, symmat, timrev, &
-                             use_symrec) ! optional
+                             use_symrec, qpt) ! optional
 
 !Arguments ------------------------------------
 !scalars
- class(krank_t),intent(in) :: self
+ class(krank_t),intent(inout) :: self
  integer,intent(in) :: nkpt2, nsym, timrev
  real(dp),intent(out) :: dksqmax
  logical,optional,intent(in) :: use_symrec
@@ -575,6 +582,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  integer,intent(in) :: symafm(nsym), symmat(3,3,nsym)
  integer,intent(out) :: indkk(6, nkpt2)
  real(dp),intent(in) :: gmet(3,3), kptns2(3,nkpt2)
+ real(dp),optional,intent(in) :: qpt
 
 !Local variables-------------------------------
 !scalars
@@ -582,13 +590,14 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  logical :: my_use_symrec
 !arrays
  integer :: dkint(3), my_symmat(3, 3, nsym)
- integer,allocatable :: rank2ikpt(:)
- integer,allocatable :: rank2symtime(:)
- real(dp) :: kpt1a(3), dk(3)
+ !integer,allocatable :: rank2ikpt(:)
+ !integer,allocatable :: rank2symtime(:)
+ real(dp) :: kpt1a(3), dk(3), my_qpt(3)
 
 ! *************************************************************************
 
  my_use_symrec = .False.; if (present(use_symrec)) my_use_symrec = use_symrec
+ my_qpt = zero; if (present(qpt)) my_qpt = qpt
 
  if (my_use_symrec) then
    ! Symrec k
@@ -600,9 +609,14 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    end do
  end if
 
- ABI_MALLOC(rank2symtime, (self%min_rank:self%max_rank))
- ABI_MALLOC(rank2ikpt, (self%min_rank:self%max_rank))
- rank2ikpt = -1
+ !ABI_MALLOC(rank2symtime, (self%min_rank:self%max_rank))
+ !ABI_MALLOC(rank2ikpt, (self%min_rank:self%max_rank))
+ !rank2ikpt = -1
+
+ ABI_MALLOC_IFNOT(self%rank2symtime__, (self%min_rank:self%max_rank))
+ ABI_MALLOC_IFNOT(self%rank2ikpt__, (self%min_rank:self%max_rank))
+ self%rank2ikpt__ = -1
+
 
  do ikpt1=1,self%npoints
 
@@ -613,9 +627,9 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
        kpt1a = (1 - 2*itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
        irank = self%get_rank(kpt1a)
-       if (rank2ikpt(irank) == -1) then
-         rank2ikpt(irank) = ikpt1
-         rank2symtime(irank) = isym + itimrev * nsym
+       if (self%rank2ikpt__(irank) == -1) then
+         self%rank2ikpt__(irank) = ikpt1
+         self%rank2symtime__(irank) = isym + itimrev * nsym
        end if
      end do
    end do
@@ -624,15 +638,15 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
  dksqmax = zero
  do ikpt2=1,nkpt2
-   irank = self%get_rank(kptns2(:, ikpt2))
-   ikpt1 = rank2ikpt(irank)
-   ii = int(rank2symtime(irank))
+   irank = self%get_rank(kptns2(:, ikpt2) + my_qpt)
+   ikpt1 = self%rank2ikpt__(irank)
+   ii = int(self%rank2symtime__(irank))
    isym = 1 + mod(ii - 1, nsym)
    itimrev = (ii - 1) / nsym
    indkk(1, ikpt2) = ikpt1
    indkk(2, ikpt2) = isym
    kpt1a = (1 - 2 * itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
-   dk(:) = kptns2(:,ikpt2) - kpt1a(:)
+   dk(:) = kptns2(:,ikpt2) + my_qpt - kpt1a(:)
    dkint(:) = nint(dk(:) + tol12)
    indkk(3:5, ikpt2) = dkint(:)
    indkk(6, ikpt2) = itimrev
@@ -644,8 +658,8 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
                  two * (gmet(2,1)*dk(2)*dk(1) + gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1)))
  end do
 
- ABI_FREE(rank2ikpt)
- ABI_FREE(rank2symtime)
+ !ABI_FREE(rank2ikpt)
+ !ABI_FREE(rank2symtime)
 
 end subroutine krank_get_mapping
 !!***

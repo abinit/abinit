@@ -1700,7 +1700,7 @@ pure subroutine ebands_get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
  bstart = huge(1); bstop = -huge(1)
  do spin=1,ebands%nsppol
    do ik=1,ebands%nkpt
-     do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
+     do band=1,ebands%nband(ik + (spin - 1) * ebands%nkpt)
        if (ebands%eig(band, ik , spin) >= elow .and. ebands%eig(band, ik , spin) <= ehigh) then
           bstart = min(bstart, band)
           bstop = max(bstop, band)
