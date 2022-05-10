@@ -90,6 +90,7 @@ MODULE m_ebands
  public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
  public :: ebands_get_occupied     ! Returns band indeces after wich occupations are less than an input value.
  public :: ebands_enclose_degbands ! Adjust band indeces such that all degenerate states are treated.
+ public :: ebands_get_bands_e0     ! Find min/max band indices crossing energy e0
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
  public :: ebands_get_minmax       ! Returns min and Max value of (eig|occ|doccde).
@@ -115,7 +116,7 @@ MODULE m_ebands
  public :: ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving
                                            ! vectorial or tensorial matrix elements.
 
- public :: ebands_interp_kmesh     ! Use SWK Interpolate energies on a k-mesh.
+ public :: ebands_interp_kmesh     ! Use SWK to interpolate energies on a k-mesh.
  public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
  public :: ebands_interpolate_kpath
 
@@ -2052,6 +2053,62 @@ subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, t
  end if
 
 end subroutine ebands_enclose_degbands
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_get_bands_e0
+!! NAME
+!!  ebands_get_bands_e0
+!!
+!! FUNCTION
+!!  Find min/max band indices crossing energy e0
+!!  min/max are returned in bands_spin(1:2, spin) for each spin.
+!!  If no band crosses e0, bmin is set to +huge(1) and bmax to -huge(1) and ierr != 0
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_get_bands_e0(ebands, e0, bands_spin, ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: ebands
+ real(dp),intent(in) :: e0
+ integer,intent(out) :: bands_spin(2, ebands%nsppol)
+ integer,intent(out) :: ierr
+
+!Local variables-------------------------------
+ integer :: ik, band, spin, bmin, bmax
+ real(dp) :: emin, emax
+
+! *************************************************************************
+
+ ierr = 0
+ do spin=1,ebands%nsppol
+   bmin = +huge(1); bmax = -huge(1)
+
+   do band=1,minval(ebands%nband)
+     emin = minval(ebands%eig(band, :, spin))
+     emax = maxval(ebands%eig(band, :, spin))
+     if (emin <= e0 .and. emax >= e0) then
+       bmin = min(bmin, band)
+       bmax = max(bmax, band)
+     end if
+   end do
+
+   bands_spin(:, spin) = [bmin, bmax]
+   if (bmin == +huge(1)) ierr = ierr + 1
+ end do
+
+end subroutine ebands_get_bands_e0
 !!***
 
 !----------------------------------------------------------------------
