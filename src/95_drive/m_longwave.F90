@@ -676,7 +676,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  real(dp),allocatable :: qdrp(:,:,:,:,:,:,:)
- real(dp) :: piezoci(2)
+ real(dp) :: piezoci(2),piezofr(2),celastci(2)
 
 ! *************************************************************************
 
@@ -687,7 +687,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
    write(ab_out,'(a)')' First real-space moment of the polarization response '
    write(ab_out,'(a)')' to an atomic displacementatom, in cartesian coordinates,'
    write(ab_out,'(a)')' (1/ucvol factor not included),'
-   write(ab_out,'(a)')' efidir   atom   atddir   qgrdir          real part        imaginary part'
+   write(ab_out,'(a)')' efidir   atom   atdir    qgrdir          real part        imaginary part'
    i1pert=natom+2
    do i3dir=1,3
      do i1dir=1,3
@@ -741,7 +741,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
    end do
 
    write(ab_out,'(a)')' Quadrupole tensor, in cartesian coordinates,'
-   write(ab_out,'(a)')' efidir   atom   atddir   qgrdir          real part        imaginary part'
+   write(ab_out,'(a)')' efidir   atom   atdir    qgrdir          real part        imaginary part'
    do i3dir=1,3
      do i1dir=1,3
        do i2pert=1,natom
@@ -760,11 +760,11 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
 
    write(ab_out,'(a)')' Electronic (clamped-ion) contribution to the piezoelectric tensor,'
    write(ab_out,'(a)')' in cartesian coordinates, (from sum rule of dynamic quadrupoles or P^1 tensor)'
-   write(ab_out,'(a)')' efidir   atddir   qgrdir        real part           imaginary part'
-   piezoci=zero
+   write(ab_out,'(a)')' efidir   atdir    qgrdir        real part           imaginary part'
    do i3dir=1,3
      do i1dir=1,3
        do i2dir=1,3
+         piezoci=zero
          do i2pert=1,natom
            if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
              piezoci(1)=piezoci(1)+d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
@@ -804,7 +804,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
 
  if (lw_flexo==3.or.lw_flexo==1) then
    write(ab_out,'(a)')' 1st real-space moment of IFCs, in cartesian coordinates,'
-   write(ab_out,'(a)')' iatdir  iatom    jatdir  jatom    qgrdir           real part          imaginary part'
+   write(ab_out,'(a)')' iatdir   iatom    jatdir   jatom    qgrdir           real part          imaginary part'
    do i3dir=1,3
      do i1pert=1,natom
        do i1dir=1,3
@@ -821,7 +821,79 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
      end do
      write(ab_out,*)' '
    end do
+
+   write(ab_out,'(a)')' Piezoelectric force-response tensor, in cartesian coordinates '
+   write(ab_out,'(a)')' (from sum rule of 1st moment of IFCs),'
+   write(ab_out,'(a)')' (for non-vanishing forces in the cell it lacks an improper contribution),'
+   write(ab_out,'(a)')' iatom   iatddir  jatddir   qgrdir           real part          imaginary part'
+   do i3dir=1,3
+     do i1pert=1,natom
+       do i1dir=1,3
+         do i2dir=1,3
+           piezofr=zero
+           do i2pert=1,natom
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               piezofr(1)=piezofr(1)-d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               piezofr(2)=piezofr(2)+d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+           write(ab_out,'(4(i5,4x),2(1x,f20.10))') i1pert,i1dir,i2dir,i3dir, &
+         & piezofr(1), piezofr(2)
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
  end if
+
+ if (lw_flexo==4.or.lw_flexo==1) then
+   write(ab_out,'(a)')' Clamped-ion flexoelectric force-response tensor (type-II),  in cartesian coordinates,'
+   write(ab_out,'(a)')'  atom   atdir   qgrdir  strdir1 strdir2          real part          imaginary part'
+   do i3dir=1,3
+     do i1pert=1,natom
+       do i1dir=1,3
+         do i2pert=natom+3, natom+4
+           do i2dir=1,3
+             istr=(i2pert-natom-3)*3+i2dir
+             beta=idx(2*istr-1); delta=idx(2*istr)
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               write(ab_out,'(5(i5,3x),2(1x,f20.10))') i1pert,i1dir,i3dir,beta,delta, &
+             & d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+             & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+         end do
+         write(ab_out,*)' '
+       end do
+     end do
+   end do
+
+   write(ab_out,'(a)')' Clamped-ion elastic tensor, in cartesian coordinates '
+   write(ab_out,'(a)')' (from sum rule of clamped-ion flexoelectric force-response tensor),'
+   write(ab_out,'(a)')' (for stressed cells it lacks an improper contribution),'
+   write(ab_out,'(a)')' atdir   qgrdir  strdir1  strdir2         real part          imaginary part'
+   do i1dir=1,3
+     do i3dir=1,i1dir
+       do i2pert=natom+3, natom+4
+         do i2dir=1,3
+           istr=(i2pert-natom-3)*3+i2dir
+           beta=idx(2*istr-1); delta=idx(2*istr)
+           celastci=zero
+           do i1pert=1,natom
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               celastci(1)=celastci(1)+d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               celastci(2)=celastci(2)+d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i3dir,beta,delta, &
+         & celastci(1)/ucvol,celastci(2)/ucvol
+         end do
+       end do
+       write(ab_out,*)' '
+     end do
+   end do
+ end if
+
  DBG_EXIT("COLL")
 
 end subroutine dfptlw_out
