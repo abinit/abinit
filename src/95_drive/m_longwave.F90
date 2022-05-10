@@ -868,6 +868,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
      end do
    end do
 
+
    write(ab_out,'(a)')' Clamped-ion elastic tensor, in cartesian coordinates '
    write(ab_out,'(a)')' (from sum rule of clamped-ion flexoelectric force-response tensor),'
    write(ab_out,'(a)')' (for stressed cells it lacks an improper contribution),'
