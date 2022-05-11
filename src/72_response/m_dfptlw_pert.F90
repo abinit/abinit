@@ -402,7 +402,9 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
    tmpre=d3etot_t3(1);tmpim=d3etot_t3(2) ; d3etot_t3(1)=-tmpim;d3etot_t3(2)=tmpre
    do idq=1,n2dq
      tmpre=d3etot_t4(1,idq);tmpim=d3etot_t4(2,idq) ; d3etot_t4(1,idq)=-tmpim;d3etot_t4(2,idq)=tmpre
-     tmpre=d3etot_tgeom(1,idq);tmpim=d3etot_tgeom(2,idq) ; d3etot_tgeom(1,idq)=-tmpim;d3etot_tgeom(2,idq)=tmpre
+     if (any(d3e_pert1(1:natom)==1)) then
+       tmpre=d3etot_tgeom(1,idq);tmpim=d3etot_tgeom(2,idq) ; d3etot_tgeom(1,idq)=-tmpim;d3etot_tgeom(2,idq)=tmpre
+     end if
    end do
    do idq=1,n1dq
      tmpre=d3etot_t5(1,idq);tmpim=d3etot_t5(2,idq) ; d3etot_t5(1,idq)=-tmpim;d3etot_t5(2,idq)=tmpre
