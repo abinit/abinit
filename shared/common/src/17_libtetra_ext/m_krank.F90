@@ -350,7 +350,12 @@ integer function get_rank(krank, kpt) result(rank)
              real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
-   write(msg,'(2(a,i0))') ' Rank should be inferior to: ', krank%max_rank, ' but got: ', rank
+   write(msg,'(2(a,i0))') ' Rank should be <= max_rank: ', krank%max_rank, ' but got: ', rank
+   ABI_ERROR(msg)
+ end if
+ if (rank < krank%min_rank) then
+   !print *, "redkpt", redkpt
+   write(msg,'(2(a,i0))') ' Rank should be >= min_rank ', krank%min_rank, ' but got: ', rank
    ABI_ERROR(msg)
  end if
 
@@ -608,13 +613,9 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    end do
  end if
 
- !ABI_MALLOC(rank2symtime, (self%min_rank:self%max_rank))
- !ABI_MALLOC(rank2ikpt, (self%min_rank:self%max_rank))
- !rank2ikpt = -1
-
  ABI_MALLOC_IFNOT(self%rank2symtime_, (self%min_rank:self%max_rank))
  ABI_MALLOC_IFNOT(self%rank2ikpt_, (self%min_rank:self%max_rank))
- self%rank2ikpt_ = -1
+ self%rank2ikpt_ = -1 !; self%rank2symtime_ = -1
 
  do ikpt1=1,self%npoints
 
@@ -638,7 +639,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  do ikpt2=1,nkpt2
    irank = self%get_rank(kptns2(:, ikpt2) + my_qpt)
    ikpt1 = self%rank2ikpt_(irank)
-   ii = int(self%rank2symtime_(irank))
+   ii = self%rank2symtime_(irank)
    isym = 1 + mod(ii - 1, nsym)
    itimrev = (ii - 1) / nsym
    indkk(1, ikpt2) = ikpt1
@@ -651,13 +652,21 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
    ! Compute norm of the difference vector.
    dk(:) = dk(:) - dkint(:)
+
    dksqmax = max(dksqmax, &
                  gmet(1,1)*dk(1)**2 + gmet(2,2)*dk(2)**2 + gmet(3,3)*dk(3)**2 + &
                  two * (gmet(2,1)*dk(2)*dk(1) + gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1)))
+
+   !if (dksqmax > tol8) then
+   !  print *, "kbase:", self%kpts(:, ikpt1)
+   !  print *, "k", kptns2(:, ikpt2)
+   !  print *, "k + q", kptns2(:, ikpt2) + my_qpt
+   !  print *, "dk", dk, "dksqmax", dksqmax
+   !end if
  end do
 
- !ABI_FREE(rank2ikpt)
- !ABI_FREE(rank2symtime)
+ !ABI_FREE(self%rank2ikpt_)
+ !ABI_FREE(self%rank2symtime_)
 
 end subroutine krank_get_mapping
 !!***
