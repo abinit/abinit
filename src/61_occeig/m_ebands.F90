@@ -4449,7 +4449,7 @@ subroutine ebands_sort(self)
  do spin=1,self%nsppol
    do ik_ibz=1,self%nkpt
      nband_k = self%nband(ik_ibz + (spin - 1) * self%nkpt)
-     iperm_k = [(band, band=1,nband_k)]
+     iperm_k = [(band, band=1, nband_k)]
      call sort_dp(nband_k, self%eig(:, ik_ibz, spin), iperm_k, tol12)
 
      ! Shuffle other arrays depending on nband_k
