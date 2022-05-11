@@ -383,7 +383,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  end if
 
 !Apply +i or -i in case of strain perturbation.
- if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
+ if (i1pert==natom+3.or.i1pert==natom+4) then
    tmpre=d3etot_telec(1);tmpim=d3etot_telec(2) ; d3etot_telec(1)=tmpim;d3etot_telec(2)=-tmpre
    tmpre=d3etot_t1(1);tmpim=d3etot_t1(2) ; d3etot_t1(1)=tmpim;d3etot_t1(2)=-tmpre
    tmpre=d3etot_t2(1);tmpim=d3etot_t2(2) ; d3etot_t2(1)=tmpim;d3etot_t2(2)=-tmpre
@@ -395,14 +395,14 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      tmpre=d3etot_t5(1,idq);tmpim=d3etot_t5(2,idq) ; d3etot_t5(1,idq)=tmpim;d3etot_t5(2,idq)=-tmpre
    end do
  end if
- if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
+ if (i2pert==natom+3.or.i2pert==natom+4) then
    tmpre=d3etot_telec(1);tmpim=d3etot_telec(2) ; d3etot_telec(1)=-tmpim;d3etot_telec(2)=tmpre
    tmpre=d3etot_t1(1);tmpim=d3etot_t1(2) ; d3etot_t1(1)=-tmpim;d3etot_t1(2)=tmpre
    tmpre=d3etot_t2(1);tmpim=d3etot_t2(2) ; d3etot_t2(1)=-tmpim;d3etot_t2(2)=tmpre
    tmpre=d3etot_t3(1);tmpim=d3etot_t3(2) ; d3etot_t3(1)=-tmpim;d3etot_t3(2)=tmpre
    do idq=1,n2dq
      tmpre=d3etot_t4(1,idq);tmpim=d3etot_t4(2,idq) ; d3etot_t4(1,idq)=-tmpim;d3etot_t4(2,idq)=tmpre
-     if (any(d3e_pert1(1:natom)==1)) then
+     if (i1pert<=natom) then
        tmpre=d3etot_tgeom(1,idq);tmpim=d3etot_tgeom(2,idq) ; d3etot_tgeom(1,idq)=-tmpim;d3etot_tgeom(2,idq)=tmpre
      end if
    end do
