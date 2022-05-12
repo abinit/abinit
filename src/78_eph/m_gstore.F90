@@ -4,6 +4,74 @@
 !!
 !! FUNCTION
 !!
+!!  This module implements the gstore object that allows one to
+!!  **precompute"" the e-ph matrix elements g and store them in memory
+!!  with a MPI-distributed data structure.
+!!
+!!  This approach is the most CPU-efficient when one has to deal with
+!!  algorithms in which the same g(q, k) is required several (many) times.
+!!  Typical examples are iterative solvers for non-linear equations that are called inside a loop over T.
+!!  At each iteration, indeed, we need g(q, k) and computing these quantities from scratch
+!!  would be very expensive.
+!!
+!!  Note that g depends on the two wave vectors (q, k), two electron band indices (m, n),
+!!  phonon mode nu with momentum q and collinear spin.
+!!
+!!  g(q, k) is therefore a sloppy notation for:
+!!
+!!          g(q, k) = <k + q, m, spin| \Delta_{q, \nu} V_{scf} | k, n, spin>
+!!
+!!  There are lots of technical details that should be discussed but, roughly speaking,
+!!  the gqk API allows one to:
+!!
+!!   - select whether q or k should be in the IBZ or in the BZ.
+!!     NB: It is not possible to use the IBZ both for q and k as g(Sk, q) = g(k, Sq)
+!!     thus one has to select the appropriate sampling beforehand
+!!
+!!   - filter bands and/or k/q wavevectors according to some criterion.
+!!     In superconductors, for instance, only states on the Fermi surface are needed
+!!
+!!  - whether the code should compute and store the complex valued g or |g|^2.
+!!    Expression depending of |g|^2 are gauge-invariant provided that all degenerate states are summed over.
+!!    On the contrary, the complex valued g is gauge-dependent and hic sunt leones.
+!!    In Abinit, the g elements are computed within the same gauge by reconstructing Bloch states
+!!    in the BZ from the IBZ by using a deterministic symmetrization algorithm
+!!    Client code reading the e-ph matrix elements produced by ABINIT is expected to follow the
+!!    same conventions, especially if they need to mix g matrix elements with wavefunctions in the BZ.
+!!
+!!  At the level of the API, we have three different steps.
+!!
+!!      1) call gstore_build to define the BZ sampling type (e.g. k in the IBZ, q in the BZ)
+!!         and additional filtering techniques. The MPI grid is automatically generated at this level
+!!
+!!      2) call gstore_compute to compute the e-ph matrix elements
+!!
+!!      3) use the gstore object to implement your equations or write the results to nc file.
+!!
+!!  Now, let's discuss the MPI-distribution.
+!!  The (k, q) matrix is distributed inside a 2D cartesian grid using block distribution.
+!!  This is schematic representation for 4 procs with 2 procs for k and 2 procs for q:
+!!
+!!
+!!                      k-axis
+!!              |--------------------
+!!              |         |         |
+!!     q-axis   |   P00   |   P01   |
+!!              |         |         |
+!!              |--------------------
+!!              |         |         |
+!!              |   P10   |   P01   |
+!!              |         |         |
+!!              |--------------------
+!!
+!!  Each processor stores all the (band_1, band_2) transitions for a given (q, k) pair.
+!!  Perturbations can be optionally distributed along a third axis (pert_comm).
+!!
+!!  If nsppol == 2, we create two qqk objects, one for each spin.
+!!  The reason is that dimensions such as the number of effective bands/q-points/k-points
+!!  depend on the spin if we start to filter the g.
+!!
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
@@ -30,10 +98,8 @@ module m_gstore
  use m_errors
  use m_krank
  use m_htetra
- use m_tetrahedron
 
  use m_ebands
- use m_fstab
  use iso_c_binding
  use netcdf
  use m_nctk
@@ -54,7 +120,7 @@ module m_gstore
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, mkherm, get_diag, isdiagmat
+ use m_numeric_tools,  only : arth, get_diag ! , isdiagmat
  use m_io_tools,       only : iomode_from_fname
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
@@ -62,16 +128,13 @@ module m_gstore
  use m_kg,             only : getph, mkkpg
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_symtk,          only : matr3inv
- use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ifc,            only : ifc_type
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
-
- !use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
- !use m_occ,             only : occ_fd, occ_be
 
  implicit none
 
@@ -96,21 +159,22 @@ module m_gstore
 type, public :: gqk_t
 
   integer :: cplex = -1
-  ! 1 if |g|^2 is stored
-  ! 2 if complex g (global)
+  ! 1 if |g|^2 should be stored
+  ! 2 if complex valued g (mind the gauge)
 
   integer :: spin = -1
+  ! Spin index.
 
   integer :: natom3 = -1
   ! 3 * natom
+  ! Mainly used to dimension arrays
 
   integer :: nb = -1
   ! Number of bands included in the calculation for this spin
-  ! Global as this dimension is not MPI-distributed due to (m,n) pairs.
+  ! Global as this dimension is not MPI-distributed due to (m, n) pairs.
 
   integer :: bstart = 1
   ! The fist band starts at bstart. (global index)
-  ! Used to select bands inside energy window.
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -118,7 +182,7 @@ type, public :: gqk_t
   integer :: glob_nk = -1, glob_nq = -1
   ! Total number of k/q points in global matrix.
   ! Use k_zone_type and q_zone_type to interpret these values (IBZ or BZ)
-  ! Note that k-points can be filtered by erange.
+  ! Note that k-points can be filtered by ...
 
   integer :: my_nk = -1, my_nq = -1
   ! Number of k/q points treated by this MPI proc.
@@ -144,9 +208,6 @@ type, public :: gqk_t
   logical :: with_velocities = .False.
   ! True if electronic group velocities should be computed and stored.
 
-  ! Compute group velocities if we are in transport mode or adaptive gaussian or
-  ! tetrahedron with libtetrabz returning nesting condition.
-
   !complex(dp),allocatable :: my_vcar_k(:,:,:,:)
   ! group velocities v_{nm,k} for the k-points treated by this MPI proc.
   ! (3, nb, nb, my_nk)
@@ -162,6 +223,7 @@ type, public :: gqk_t
   ! (my_npert)
 
   real(dp), allocatable :: my_vals(:,:,:,:,:,:)
+  ! E-ph matrix elements
   ! (cplex, nb, my_nq, nb, my_nk, my_npert)
 
   integer :: coords_qkp(3)
@@ -225,7 +287,7 @@ type, public :: gstore_t
    ! Number of independent spin polarizations.
 
   integer :: my_nspins
-   ! Number of spins treated by this MPI rank
+   ! Number of collinear spins treated by this MPI rank
 
   integer :: nkibz = -1, nqibz = -1
   ! Number of k/q points in the IBZ.
@@ -234,7 +296,8 @@ type, public :: gstore_t
   ! Number of k/q points in the BZ.
 
   integer :: comm
-   ! Global communicator, inherited by caller so do not free in gstore_free.
+   ! Global communicator
+   ! Inherited by the caller so we don't free it in gstore_free.
 
   character(len=500) :: k_zone_type, q_zone_type
     ! Either "ibz" or "bz"
@@ -295,7 +358,7 @@ type, public :: gstore_t
 contains
 
   procedure :: fill_bks_mask => gstore_fill_bks_mask
-  ! Fill the table used to read (b, k, s) wavefunctions from the WFK file.
+  ! Fill the table used to read (b, k, s) wavefunctions from the WFK file
   ! keeping into account the distribution of the e-ph matrix elements.
 
   procedure :: get_mpw_gmax => gstore_get_mpw_gmax
@@ -312,6 +375,7 @@ contains
   !procedure :: ncread => gstore_ncread_path
 
   procedure :: compute => gstore_compute
+  ! Compute e-ph matrix elements.
 
 end type gstore_t
 
@@ -339,11 +403,11 @@ contains
 !!
 !! SOURCE
 
-function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
+function gstore_build(dtset, cryst, ebands, ifc, comm) result (gstore)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex, comm
+ integer,intent(in) :: comm
  type(dataset_type),intent(in) :: dtset
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
@@ -353,19 +417,19 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, timrev1 = 1, tetra_opt0 = 0
- integer :: all_nproc, my_rank, ik, ierr, out_nkibz, my_nshiftq, nsppol, iq_glob, ik_glob, ii
- integer :: my_is, my_ik, my_iq, spin, natom3, cnt, np, nw, band, bstart, bstop, iflag
- integer :: ik_ibz, ik_bz, isym_k, trev_k, ebands_timrev, nk_in_star
- integer :: iq_bz, iq_ibz, isym_q, trev_q, ikq_ibz, ikq_bz, len_kpts_ptr
- real(dp) :: cpu, wall, gflops, dksqmax, max_occ, elow, ehigh, estep
- logical :: isirr_k, isirr_q
+ integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, iq_glob, ik_glob, ii ! out_nkibz,
+ integer :: my_is, my_ik, my_iq, spin, natom3, cnt, np, band, iflag ! bstart, bstop, nw,
+ integer :: ik_ibz, ik_bz, ebands_timrev, nk_in_star  ! isym_k, trev_k,
+ integer :: iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr  !isym_q, trev_q,
+ real(dp) :: cpu, wall, gflops, dksqmax, max_occ ! , elow, ehigh, estep
+ !logical :: isirr_k, isirr_q
  character(len=5000) :: msg
  character(len=80) :: errorstring
  type(gqk_t),pointer :: gqk
  type(krank_t),target :: qrank
- type(htetra_t) :: ktetra, qtetra
+ type(htetra_t) :: ktetra ! , qtetra
 !arrays
- integer :: ngqpt(3), g0_k(3), g0_q(3), qptrlatt(3,3), indkk_kq(6,1)
+ integer :: ngqpt(3), qptrlatt(3,3) ! , indkk_kq(6,1)  ! g0_k(3), g0_q(3),
  integer :: comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
  integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
  integer :: bands_spin(2, ebands%nsppol), fs_bands_spin(2, ebands%nsppol)
@@ -373,8 +437,8 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
  integer,allocatable :: qbz2ibz_(:,:), kbz2ibz_(:,:), kibz2bz(:), qibz2bz(:), indkk(:), kstar_bz_inds(:)
  integer,allocatable :: qglob2bz_idx(:,:), kglob2bz_idx(:,:)
  integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:), map_kq(:,:)
- real(dp):: my_shiftq(3,1), qpt(3),kpt(3), rlatt(3,3), qlatt(3,3), klatt(3,3), delta_theta_ef(2)
- real(dp),allocatable :: qbz_(:,:), wtk_(:), my_kpts(:,:) !wtq_(:),
+ real(dp):: my_shiftq(3,1), qpt(3), rlatt(3,3), klatt(3,3), delta_theta_ef(2)  ! kpt(3), qlatt(3,3),
+ real(dp),allocatable :: qbz_(:,:), wtk_(:) !, my_kpts(:,:) !wtq_(:),
  real(dp),target,allocatable :: kibz_(:,:), kbz_(:,:)
  real(dp),allocatable :: eig_ibz(:)  !, wvals(:)
  real(dp),contiguous, pointer :: kpts_ptr(:,:)
@@ -397,7 +461,7 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
  gstore%nsppol = nsppol
  gstore%comm = comm
 
- ! Get a reference to other datastructures
+ ! Get a reference to other data structures
  gstore%cryst => cryst
  gstore%ebands => ebands
  gstore%ifc => ifc
@@ -474,12 +538,12 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
    gstore%nkibz, kibz_, wtk_, gstore%nkbz, kbz_) !, bz2ibz=bz2ibz)
 
  ABI_CHECK(gstore%nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
- ! In principle kibz_ should be equation to ebands%kptns
+ ! In principle kibz_ should be equal to ebands%kptns
  ABI_FREE(kibz_)
 
  ! Note symrel and use_symrec=.False. in get_mapping.
  ! This means that this table can be used to symmetrize wavefunctions in cgtk_rotate.
- ! TODOL This ambiguity should be removed. Change cgtk_rotate so that we can use the symrec convention.
+ ! TODO This ambiguity should be removed. Change cgtk_rotate so that we can use the symrec convention.
 
  ABI_MALLOC(kbz2ibz_, (6, gstore%nkbz))
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
@@ -541,9 +605,6 @@ function gstore_build(cplex, dtset, cryst, ebands, ifc, comm) result (gstore)
  end select
 
 if (gstore%k_filter_type == "fermi_surface") then
- ! =======================
- ! Tetrahedron in k-space
- ! =======================
  ! This is just to show how to use the tetrahedron method
  ! to filter k- and k+q points on the FS in metals and define bands_spin automatically
  !
@@ -686,7 +747,7 @@ end if
  ! We need another table mapping the global index in the gqk matrix to the q/k index in the BZ
  ! so that one can extract the symmetry tables computed above.
  ! Again this is needed as the global sizes of the gqk matrix
- ! is not necessarly equal to the size of the BZ/IBZ if we have filtered the wave vectors.
+ ! is not necessarily equal to the size of the BZ/IBZ if we have filtered the wave vectors.
 
  ABI_ICALLOC(qglob2bz_idx, (maxval(glob_nq_spin), nsppol))
  ABI_ICALLOC(kglob2bz_idx, (maxval(glob_nk_spin), nsppol))
@@ -868,7 +929,7 @@ end if
    !print *, "gqk%bstart:", gqk%bstart; print *, "gqk%nb:", gqk%nb
 
    ! Split q-points and transfer symmetry tables.
-   ! FIXME: Note that glob_nq and glob_nk does not necessarly correspond to the size of the BZ
+   ! FIXME: Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
    ! First of all we have to consider k_zone_type
    ! Even if k_zone_type == "bz" we may have filtered the wavevectors e.g. Fermi surface.
    call xmpi_split_block(gqk%glob_nq, gqk%kpt_comm%value, gqk%my_nq, myq2glob)
@@ -1587,7 +1648,7 @@ end subroutine gqk_ncwrite_path
 !!
 !! SOURCE
 
-subroutine gstore_compute(gstore, wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                           pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -1595,7 +1656,7 @@ subroutine gstore_compute(gstore, wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst,
  class(gstore_t),target,intent(inout) :: gstore
  character(len=*),intent(in) :: wfk0_path
  integer,intent(in) :: comm
- type(datafiles_type),intent(in) :: dtfil
+ !type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
@@ -1614,21 +1675,20 @@ subroutine gstore_compute(gstore, wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst,
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz, ebands_timrev
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev !iq_ibz,
  integer :: cplex,natom,natom3,ipc,nspinor
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k, trev_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: ii,jj,mpw,mnb,ierr,cnt
+ integer :: mpw,mnb,ierr !,cnt ii,jj,
  integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,kq_count,nkpg,nkpg1
+ integer :: nfft,nfftf,mgfft,mgfftf, nkpg,nkpg1
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, dksqmax
  logical :: gen_eigenpb, isirr_k, isirr_kq
  type(wfd_t) :: wfd
- type(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(ddkop_t) :: ddkop
@@ -1636,11 +1696,11 @@ subroutine gstore_compute(gstore, wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst,
  type(gqk_t),pointer :: gqk
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3),g0bz_kq(3),g0_kq(3)
+ integer :: g0_k(3), g0_kq(3)
  integer :: work_ngfft(18),gmax(3),gamma_ngqpt(3)
  integer :: indkk_kq(6,1)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),wfd_istwfk(:)
- integer,allocatable :: my_pinfo(:,:) !, pert_table(:,:)
+ !integer,allocatable :: my_pinfo(:,:) !, pert_table(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), vk(3), vkq(3)
  real(dp) :: phfrq(3*cryst%natom)
  real(dp) :: ylmgr_dum(1,1,1)
@@ -1648,7 +1708,7 @@ subroutine gstore_compute(gstore, wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst,
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg1_k(:,:), kpg_k(:,:), dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:), ph3d(:,:,:), ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), gkk_atm(:,:,:,:),gkq_nu(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
+ real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:) !, cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
@@ -2064,9 +2124,6 @@ subroutine gstore_compute(gstore, wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst,
        else
          ABI_ERROR(sjoin("Invalid cplex:", itoa(gqk%cplex)))
        end if
-
-       ! Compute group velocities if we are in transport mode or adaptive gaussian or
-       ! tetrahedron with libtetrabz returning nesting condition.
 
        if (gqk%with_velocities) then
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
