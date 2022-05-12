@@ -2683,7 +2683,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  end if
  ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
  call nderiv_gen(dv1dr,ff,pawrad)
- dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)/InvFineStruct**2)**2) &
+ dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
 & *dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
  call pawrad_deducer0(dv1dr,mesh_size,pawrad)
  do kln=1,ij_size
