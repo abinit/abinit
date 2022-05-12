@@ -533,6 +533,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 &   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
+
+ if (dtset%prtvol>=10) then
+   write(msg,'(5a)') ' CAUTION: Individual contributions to the 3rd-order energy derivatives ',ch10, &
+                   & ' are not written in a unified form. Mixed cartesian/reduced coordinates ',ch10, &
+                   & ' and/or type-I/type-II forms are used.'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if 
  
 !Calculate the nonvariational Ewald terms
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then

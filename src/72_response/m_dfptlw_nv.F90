@@ -302,7 +302,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 
  !Print results
  if (dtset%prtvol>=10) then
-   write(msg,'(3a)') ch10,'LONGWAVE NONVARIATIONAL EWALD D3ETOT: ',ch10
+   write(msg,'(3a)') ch10,' LONGWAVE NONVARIATIONAL EWALD D3ETOT: ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    do i1pert=1,mpert
