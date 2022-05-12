@@ -2071,7 +2071,7 @@ CONTAINS  !=====================================================================
    call nderiv_gen(dVdr,potsph,pawrd)
 
 !  Multiply by relativistic factor
-   dVdr(1:mesh_size)=dVdr(1:mesh_size)*(one/(one-potsph(1:mesh_size)/InvFineStruct**2)**2)
+   dVdr(1:mesh_size)=dVdr(1:mesh_size)*(one/(one-potsph(1:mesh_size)*half/InvFineStruct**2)**2)
 
    ABI_FREE(vxc)
    ABI_FREE(vhartree)
