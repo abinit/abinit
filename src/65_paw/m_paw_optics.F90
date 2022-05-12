@@ -2052,7 +2052,7 @@ CONTAINS  !=====================================================================
      potsph(1:mesh_size)=sqrt(four_pi)*potsph(1:mesh_size)
    end if
 
-!  Compute Hartree potential
+!  Compute Hartree potentialHalfFineStruct2
    ABI_MALLOC(vhartree,(mesh_size))
    ABI_MALLOC(rhosph,(mesh_size))
    vhartree=zero ; rhosph=zero
@@ -2071,7 +2071,7 @@ CONTAINS  !=====================================================================
    call nderiv_gen(dVdr,potsph,pawrd)
 
 !  Multiply by relativistic factor
-   dVdr(1:mesh_size)=dVdr(1:mesh_size)*(one/(one-potsph(1:mesh_size)/InvFineStruct**2))
+   dVdr(1:mesh_size)=dVdr(1:mesh_size)*(one/(one-potsph(1:mesh_size)/InvFineStruct**2)**2)
 
    ABI_FREE(vxc)
    ABI_FREE(vhartree)
