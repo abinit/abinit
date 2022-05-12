@@ -2086,7 +2086,7 @@ subroutine ebands_get_bands_e0(ebands, e0, bands_spin, ierr)
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
- integer :: ik, band, spin, bmin, bmax
+ integer :: band, spin, bmin, bmax
  real(dp) :: emin, emax
 
 ! *************************************************************************

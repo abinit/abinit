@@ -732,8 +732,8 @@ endif
 
  case (14)
     ! Write e-ph matrix elements to disk (WARNING: under HEAVY development)
-    gstore = gstore_build(2, dtset, cryst, ebands, ifc, comm)
-    call gstore%compute(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+    gstore = gstore_build(dtset, cryst, ebands, ifc, comm)
+    call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
     !call gstore%ncwrite_path("foo.nc", cryst, ebands)
