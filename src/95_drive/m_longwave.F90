@@ -748,7 +748,6 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
          end if
        end do
      end do
-     write(ab_out,*)' '
    end do
 
    write(ab_out,'(a)')' Quadrupole tensor, in cartesian coordinates,'
