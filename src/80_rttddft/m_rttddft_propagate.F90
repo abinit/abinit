@@ -92,7 +92,7 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  
 ! ***********************************************************************
 
- write(msg,'(a,a,i5)') ch10,'--- Iteration',istep
+ write(msg,'(a,a,i0)') ch10, '--- Iteration', istep
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 

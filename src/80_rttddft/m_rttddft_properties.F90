@@ -260,7 +260,8 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
       energies%e_entropy = - dtset%tphysel * entropy
    end if
  else
-   energies%e_entropy = zero
+    !FB - TODO: Might want to clean this ?!
+   energies%e_entropy = -entropy
  end if
 
  etotal = energies%e_kinetic     &
