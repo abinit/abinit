@@ -65,7 +65,7 @@ module m_dfpt_loopert
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf, outresid
  use m_ioarr,      only : read_rhor
- use m_orbmag,     only : orbmag_ddk
+ use m_orbmag,     only : orbmag_tt
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
@@ -318,10 +318,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer, pointer :: old_atmtab(:)
  logical, allocatable :: distrb_flags(:,:,:)
  real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
- real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_orbmag(:,:,:),cg0_pert(:,:)
+ real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_3(:,:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
  real(dp),allocatable :: doccde_rbz(:),docckqde(:)
- real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_mean(:)
+ real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_3(:,:),eigen1_mean(:)
  real(dp),allocatable :: eigenq(:),gh1c_set(:,:),gh0c1_set(:,:),kpq(:,:)
  real(dp),allocatable :: kpq_rbz(:,:),kpt_rbz(:,:),occ_pert(:),occ_rbz(:),occkq(:),kpt_rbz_pert(:,:)
  real(dp),allocatable :: occ_disk(:)
@@ -338,7 +338,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:),zeff(:,:,:)
  real(dp),allocatable :: phasecg(:,:),gauss(:,:)
  real(dp),allocatable :: gkk(:,:,:,:,:)
- logical :: has_cg1_orbmag(3)
+ logical :: has_cg1_3(3)
  type(pawcprj_type),allocatable :: cprj(:,:),cprjq(:,:)
  type(paw_ij_type),pointer :: paw_ij_pert(:)
  type(paw_an_type),pointer :: paw_an_pert(:)
@@ -1132,7 +1132,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
 ! distribute cprj by band as well
-! NB: currently nsppol=2 is distributed in data (0s saved for other spin) 
+! NB: currently nsppol=2 is distributed in data (0s saved for other spin)
 !   but not in memory: all procs have nsppol 2 below
        mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
@@ -1476,9 +1476,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_orbmag)) ) then
-     ABI_MALLOC(cg1_orbmag,(2,mcg1,3))
-     has_cg1_orbmag(:) = .FALSE.
+   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_3)) ) then
+     ABI_MALLOC(cg1_3,(2,mcg1,3))
+     ABI_MALLOC(eigen1_3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol,3))
+     has_cg1_3(:) = .FALSE.
    end if
    if (.not.kramers_deg) then
      mcg1mq=mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol
@@ -1634,7 +1635,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        !To compute Absolute Deformation Potentials toghether with FxE tensor
        !the reference has to be the same as in the FxE routines
        g0term=0; if (dtset%rfstrs_ref==1) g0term=1
- 
+
        call vlocalstr(gmet,gprimd,gsqcut,istr,mgfftf,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
 &       ucvol,psps%vlspl,vpsp1,g0term=g0term)
@@ -2095,7 +2096,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ! Write wavefunctions file only if convergence was not achieved.
    write_1wfk = .True.
-   if (dtset%prtwf==-1 .and. dfpt_scfcv_retcode == 0) then
+   if (dtset%prtwf == 0) write_1wfk = .False.
+   if (dtset%prtwf == -1 .and. dfpt_scfcv_retcode == 0) then
      write_1wfk = .False.
      call wrtout(ab_out," dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.")
    end if
@@ -2103,14 +2105,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! store DDK wavefunctions in memory for later call to orbmag-ddk
    ! only relevant for DDK pert with orbmag calculation
    if( (dtset%orbmag .NE. 0) .AND. (ipert .EQ. dtset%natom+1) ) then
-     cg1_orbmag(:,:,idir) = cg1(:,:)
-     has_cg1_orbmag(idir) = .TRUE.
+     cg1_3(:,:,idir) = cg1(:,:)
+     eigen1_3(:,idir) = eigen1(:)
+     has_cg1_3(idir) = .TRUE.
    end if
 
-   if (write_1wfk) then
+
      call outresid(dtset,kpt_rbz,dtset%mband, &
 &                nband_rbz,nkpt_rbz,&
 &                dtset%nsppol,resid)
+
+   if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
      call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, formeig, hdr, dtset%iomode, &
 &          dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
@@ -2189,23 +2194,27 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
-     & (COUNT(has_cg1_orbmag) .EQ. 3) ) then
+   if ( (dtset%orbmag .GT. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
+     & (COUNT(has_cg1_3) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     call orbmag_ddk(atindx,cg,cg1_orbmag,dtset,gsqcut,kg,mcg,mcg1,mpi_enreg,&
-       & nattyp,nfftf,ngfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,&
-       & vtrial_local,xred,ylm,ylmgr)
-
+     if((dtset%orbmag .GE. 1) .AND. (dtset%orbmag .LE. 4)) then
+       call orbmag_tt(cg,cg1_3,cprj,dtset,eigen0,eigen1_3,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
+         & nfftf,ngfftf,npwarr,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,&
+         & vtrial_local,xred,ylm,ylmgr)
+     end if 
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if
-     if( ALLOCATED(cg1_orbmag) ) then
-       ABI_FREE(cg1_orbmag)
-       has_cg1_orbmag(:) = .FALSE.
+     if( ALLOCATED(cg1_3) ) then
+       ABI_FREE(cg1_3)
+       has_cg1_3(:) = .FALSE.
+     end if
+     if ( ALLOCATED(eigen1_3) ) then
+       ABI_FREE(eigen1_3)
      end if
 
    end if

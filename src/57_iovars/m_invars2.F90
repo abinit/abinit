@@ -1313,7 +1313,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  !----------------------------------------------------------------------------
  ! Read other parameters
- ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90 
+ ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
@@ -2126,6 +2126,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
 
+ call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
+ if(tread==1)then
+   dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nwfshist',tread,'INT')
  if(tread==1) dtset%nwfshist=intarr(1)
 
@@ -2645,6 +2650,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%prtprocar=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpot',tread,'INT')
+ if (dtset%optdriver == RUNL_RESPFN) dtset%prtpot = 1
  if(tread==1) dtset%prtpot=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpsps',tread,'INT')
@@ -2695,7 +2701,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf',tread,'INT')
  if(tread==1) then
    dtset%prtwf=intarr(1)
- else if (dtset%tfkinfunc==2)then 
+ else if (dtset%tfkinfunc==2)then
    dtset%prtwf=0
  endif
 
