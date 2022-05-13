@@ -728,9 +728,6 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
              qdrp(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
            & qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
-             qdrp(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
-           & two*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
-
              !imaginary part
              qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
            & -(d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
@@ -738,11 +735,17 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,mpert,natom,ucvol)
 
              qdrp(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
            & qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-
-             qdrp(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
-           &-two*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
            end if
          end do
+         if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)==1) then
+           !real part
+           qdrp(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+         & two*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
+
+           !imaginary part
+           qdrp(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+         &-two*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
+         end if
        end do
      end do
      write(ab_out,*)' '
