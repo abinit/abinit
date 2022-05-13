@@ -150,7 +150,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (do_write_log) call wrtout(std_out,msg)
 
  !** Writes in energy file
- write(msg,'(i8,f10.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
+ write(msg,'(i0,f10.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,                 &
                                     & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
                                     & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
                                     & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
@@ -159,7 +159,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  !** Writes additional optional properties
  !Computed at actual step
  if (mod(istep,dtset%td_prtstr) == 0) then
-    call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+   call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
  end if
  !Computed at previous step
  if (mod(istep-1,dtset%td_prtstr) == 0) then
@@ -241,7 +241,7 @@ subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
  me = xmpi_comm_rank(spacecomm)
 
  write(step_nb,*) istep
- fname = trim(dtfil%filnam_ds(4))//'_EIG_'//trim(adjustl(step_nb))
+ fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_EIG'
  resid = zero
  vxcavg_dum=zero
 
@@ -312,7 +312,7 @@ subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
    me = xmpi_comm_rank(mpi_enreg%comm_cell)
    
    write(step_nb,*) istep
-   fname = trim(dtfil%filnam_ds(4))//'_OCC_'//trim(adjustl(step_nb))
+   fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_OCC'
    
    if (open_file(fname, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
        ABI_ERROR(msg)
@@ -404,9 +404,8 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
- integer,parameter     :: master=0, cplex1=1
+ integer,parameter     :: cplex1=1
  integer               :: bantot
- integer               :: collect
  integer               :: iatom
  integer               :: spacecomm
  integer               :: my_comm_atom, my_natom
@@ -422,7 +421,6 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  logical               :: remove_inv
  logical               :: my_atmtab_allocated
  type(crystal_t)       :: crystal
- type(epjdos_t)        :: dos
  type(ebands_t)        :: ebands
  !arrays
  integer, pointer      :: my_atmtab(:)
@@ -430,53 +428,55 @@ subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
 ! *************************************************************************
 
- spacecomm = mpi_enreg%comm_cell
- me = xmpi_comm_rank(spacecomm)
-
- natom = dtset%natom
- my_natom = mpi_enreg%my_natom
- paral_atom=(my_natom/=natom)
- my_comm_atom = mpi_enreg%comm_atom
- nullify(my_atmtab)
- if (paral_atom) then
-   call get_my_atmtab(mpi_enreg%comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
- else
-   ABI_MALLOC(my_atmtab, (natom))
-   my_atmtab = (/ (iatom, iatom=1, natom) /)
-   my_atmtab_allocated = .true.
+ if (dtset%prtden /= 0) then
+   spacecomm = mpi_enreg%comm_cell
+   me = xmpi_comm_rank(spacecomm)
+   
+   natom = dtset%natom
+   my_natom = mpi_enreg%my_natom
+   paral_atom=(my_natom/=natom)
+   my_comm_atom = mpi_enreg%comm_atom
+   nullify(my_atmtab)
+   if (paral_atom) then
+     call get_my_atmtab(mpi_enreg%comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+   else
+     ABI_MALLOC(my_atmtab, (natom))
+     my_atmtab = (/ (iatom, iatom=1, natom) /)
+     my_atmtab_allocated = .true.
+   end if
+   
+   !FB: Maybe this should be moved out of that subroutine if needed in other outputs than densities
+   remove_inv=.false.
+   timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
+   call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
+     dtset%nsym,tdks%rprimd,dtset%typat,tdks%xred,dtset%ziontypat,dtset%znucl,timrev,&
+     dtset%nspden==2.and.dtset%nsppol==1,remove_inv,tdks%hdr%title,&
+     dtset%symrel,dtset%tnons,dtset%symafm)
+   !Electron band energies.
+   bantot= dtset%mband*dtset%nkpt*dtset%nsppol
+   ABI_CALLOC(doccde, (bantot))
+   call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
+     doccde,tdks%eigen,dtset%istwfk,dtset%kptns,dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol, &
+     dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ0,dtset%wtk,&
+     dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig, &
+     dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
+   ABI_FREE(doccde)
+   
+   write(step_nb,*) istep
+   
+   !** Outputs the density
+   !Warnings :
+   !- core charge is excluded from the charge density;
+   !- the potential is the INPUT vtrial.
+   if (iwrite_fftdatar(mpi_enreg)) then
+       fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_DEN'
+       call fftdatar_write("density",fname,dtset%iomode,tdks%hdr,crystal,tdks%pawfgr%ngfft, &
+                         & cplex1,tdks%pawfgr%nfft,dtset%nspden,tdks%rhor,mpi_enreg,ebands=ebands)
+   end if
+   
+   call crystal%free()
+   call ebands_free(ebands)
  end if
-
- !FB: Maybe this should be moved out of that subroutine if needed in other outputs than densities
- remove_inv=.false.
- timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,psps%ntypat, &
-   dtset%nsym,tdks%rprimd,dtset%typat,tdks%xred,dtset%ziontypat,dtset%znucl,timrev,&
-   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,tdks%hdr%title,&
-   dtset%symrel,dtset%tnons,dtset%symafm)
- !Electron band energies.
- bantot= dtset%mband*dtset%nkpt*dtset%nsppol
- ABI_CALLOC(doccde, (bantot))
- call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,         &
-   doccde,tdks%eigen,dtset%istwfk,dtset%kptns,dtset%nband,dtset%nkpt,tdks%npwarr,dtset%nsppol, &
-   dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,tdks%occ0,dtset%wtk,&
-   dtset%cellcharge(1),dtset%kptopt,dtset%kptrlatt_orig,dtset%nshiftk_orig,dtset%shiftk_orig, &
-   dtset%kptrlatt,dtset%nshiftk,dtset%shiftk)
- ABI_FREE(doccde)
-
- write(step_nb,*) istep
-
- !** Outputs the density
- !Warnings :
- !- core charge is excluded from the charge density;
- !- the potential is the INPUT vtrial.
- if (iwrite_fftdatar(mpi_enreg) .and. dtset%prtden/=0) then
-     fname = trim(dtfil%filnam_ds(4))//'_DEN_'//trim(adjustl(step_nb))
-     call fftdatar_write("density",fname,dtset%iomode,tdks%hdr,crystal,tdks%pawfgr%ngfft, &
-                       & cplex1,tdks%pawfgr%nfft,dtset%nspden,tdks%rhor,mpi_enreg,ebands=ebands)
- end if
-
- call crystal%free()
- call ebands_free(ebands)
  
 end subroutine prt_den
 !!***
@@ -520,7 +520,7 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
- integer,parameter     :: master=0, cplex1=1
+ integer,parameter     :: master=0
  integer               :: bantot
  integer               :: collect
  integer               :: iatom
@@ -602,13 +602,13 @@ subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
    !Here, print out fatbands for the k-points given in file appended _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
-      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS_'//trim(adjustl(step_nb))
+      fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_FATBANDS'
       call prtfatbands(dos,dtset,ebands,fname,dtset%pawfatbnd,tdks%pawtab)
    end if
 
    !Here, computation and output of DOS and partial DOS  _DOS
    if (dos%fatbands_flag == 0 .and. dos%prtdos /= 4) then
-      fname = trim(dtfil%filnam_ds(4))//'_DOS_'//trim(adjustl(step_nb))
+      fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_DOS'
       call dos_calcnwrite(dos,dtset,crystal,ebands,fname,spacecomm)
    end if
  end if
@@ -670,7 +670,7 @@ subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks, force_write)
 ! *************************************************************************
 
  write(step_nb,*) istep
- fname = trim(dtfil%filnam_ds(4))//'_WFK_'//trim(adjustl(step_nb))
+ fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
 
  if (present(force_write)) then
     if (force_write) lforce_write = .TRUE.
@@ -743,7 +743,7 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
    call wrtout(tdks%tdrestart_unit,msg)
    write(msg,'(a)') tdks%fname_wfk0
    call wrtout(tdks%tdrestart_unit,msg)
-   fname = trim(dtfil%filnam_ds(4))//'_WFK_'//trim(adjustl(step_nb))
+   fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
    write(msg,'(a)') fname
    call wrtout(tdks%tdrestart_unit,msg)
  end if

@@ -372,7 +372,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          end if
          ! occupations
          if (lproperties(4)) then
-            !note that occupations are computed at istep-1 like energies
+            !note that occupations are computed at istep-1 like energies and eigenvalues
             call rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg, &
                                 & nband_k,npw_k,my_nspinor,occ,occ0,tdks)
          end if
