@@ -15,11 +15,11 @@
 !!  would be very expensive.
 !!
 !!  Note that g depends on the two wave vectors (q, k), two electron band indices (m, n),
-!!  phonon mode nu with momentum q and collinear spin.
+!!  phonon mode nu with momentum q and spin if nsppol == 2 (collinear case).
 !!
 !!  g(q, k) is therefore a sloppy notation for:
 !!
-!!          g(q, k) = <k + q, m, spin| \Delta_{q, \nu} V_{scf} | k, n, spin>
+!!          g(q, k) = <k + q, m, spin| \Delta_{q, \nu} V^{spin}_{scf} | k, n, spin>
 !!
 !!  There are lots of technical details that should be discussed but, roughly speaking,
 !!  the gqk API allows one to:
@@ -41,7 +41,7 @@
 !!
 !!  At the level of the API, we have three different steps.
 !!
-!!      1) call gstore_build to define the BZ sampling type (e.g. k in the IBZ, q in the BZ)
+!!      1) call gstore_new to define the BZ sampling type (e.g. k in the IBZ, q in the BZ)
 !!         and additional filtering techniques. The MPI grid is automatically generated at this level
 !!
 !!      2) call gstore_compute to compute the e-ph matrix elements
@@ -49,9 +49,9 @@
 !!      3) use the gstore object to implement your equations or write the results to nc file.
 !!
 !!  Now, let's discuss the MPI-distribution.
+!!
 !!  The (k, q) matrix is distributed inside a 2D cartesian grid using block distribution.
 !!  This is schematic representation for 4 procs with 2 procs for k and 2 procs for q:
-!!
 !!
 !!                      k-axis
 !!              |--------------------
@@ -60,14 +60,17 @@
 !!              |         |         |
 !!              |--------------------
 !!              |         |         |
-!!              |   P10   |   P01   |
+!!              |   P10   |   P11   |
 !!              |         |         |
 !!              |--------------------
 !!
 !!  Each processor stores all the (band_1, band_2) transitions for a given (q, k) pair.
 !!  Perturbations can be optionally distributed along a third axis (pert_comm).
+!!  The parallelism over perturbations is not expected to be the most efficient but it allows
+!!  one to reduce the memory requires to store the scattering potential in the supercell
+!!  as we can distribute W(r, R, 3*natom) over the last dimension.
 !!
-!!  If nsppol == 2, we create two qqk objects, one for each spin.
+!!  NB: If nsppol == 2, we create two gqk objects, one for each spin.
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
 !!  depend on the spin if we start to filter the g.
 !!
@@ -120,7 +123,7 @@ module m_gstore
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, get_diag ! , isdiagmat
+ use m_numeric_tools,  only : arth, get_diag !, isdiagmat
  use m_io_tools,       only : iomode_from_fname
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
@@ -152,7 +155,9 @@ module m_gstore
 !!  a given spin index (collinear case).
 !!
 !! NOTES
-!!  global and local mean that the ...
+!!  global and
+!!  local dimensions start with `my_`,
+!!  global dimensions start with `glob_
 !!
 !! SOURCE
 
@@ -172,6 +177,7 @@ type, public :: gqk_t
   integer :: nb = -1
   ! Number of bands included in the calculation for this spin
   ! Global as this dimension is not MPI-distributed due to (m, n) pairs.
+  ! NB: nb is not necessarily equation to nband.
 
   integer :: bstart = 1
   ! The fist band starts at bstart. (global index)
@@ -181,8 +187,8 @@ type, public :: gqk_t
 
   integer :: glob_nk = -1, glob_nq = -1
   ! Total number of k/q points in global matrix.
-  ! Use k_zone_type and q_zone_type to interpret these values (IBZ or BZ)
-  ! Note that k-points can be filtered by ...
+  ! Note that k-points/q-points can be filtered.
+  ! Use k_zone_type and q_zone_type, kfilter_type to interpret these values
 
   integer :: my_nk = -1, my_nq = -1
   ! Number of k/q points treated by this MPI proc.
@@ -205,22 +211,26 @@ type, public :: gqk_t
   ! (6, my_nq)
   ! Mapping my_qpoints --> qibz
 
-  logical :: with_velocities = .False.
-  ! True if electronic group velocities should be computed and stored.
+  complex(dp),allocatable :: my_vk_cart(:,:,:)
+  ! (3, nb, my_nk)
+  ! Diagonal v_{m, m,k} for the k-points treated by this MPI proc.
+  ! Allocated if gstore%with_velocities == 1
 
-  !complex(dp),allocatable :: my_vcar_k(:,:,:,:)
-  ! group velocities v_{nm,k} for the k-points treated by this MPI proc.
+  complex(dp),allocatable :: my_vkmat_cart(:,:,:,:)
   ! (3, nb, nb, my_nk)
+  ! v_{m, n,k} for the k-points treated by this MPI proc.
+  ! Allocated if gstore%with_velocities == 2
 
-  !complex(dp),allocatable :: my_vcar_qk(:,:,:,:)
+  !complex(dp),allocatable :: my_vcart_qk(:,:,:,:)
   ! group velocities v_{nm,q+k} for the k/q-points treated by this MPI proc.
   ! (3, nb, nb, my_nq, my_nk)
 
   ! or alternatively:
-  !complex(dp),allocatable :: my_vcar_kibz(:,:,:,:)
+  !complex(dp),allocatable :: my_vcart_kibz(:,:,:,:)
 
   integer,allocatable :: my_iperts(:)
   ! (my_npert)
+  ! List of pert indices treated by this MPI proc.
 
   real(dp), allocatable :: my_vals(:,:,:,:,:,:)
   ! E-ph matrix elements
@@ -239,6 +249,7 @@ type, public :: gqk_t
    ! MPI communicator over atomic perturbations.
 
   type(xcomm_t) :: grid_comm
+   ! MPI communicator for full grid.
 
   real(dp),allocatable :: my_wqnu(:,:)
   ! (my_npert, my_nq)
@@ -299,12 +310,28 @@ type, public :: gstore_t
    ! Global communicator
    ! Inherited by the caller so we don't free it in gstore_free.
 
-  character(len=500) :: k_zone_type, q_zone_type
-    ! Either "ibz" or "bz"
+  integer :: with_velocities = 0
+  ! 0 if group velocities should not be computed
+  ! 1 to compute diagonal terms only
+  ! 2 to compute diagonal + off-diagonal terms
+  !
+  ! NB: We compute v_k for all the k-points treated by this MPI proc.
+  ! as v_kq can be reconstructed by symmetry although this step requires an all_gather along the k-axis.
 
-  character(len=500) :: k_filter_type
+  character(len=500) :: k_zone_type, q_zone_type
+    ! Specifies whether k- or q-points are in the BZ or in the IBZ.
+    ! Possibe values "ibz" or "bz".
+    ! Note that combination ("ibz", "ibz") is not very useful
+
+  character(len=500) :: k_filter_type = "None"
+  ! Specifies the tecnique used to filter k-points.
+  ! Possible values:
+  !     "None"
+  !     "fs_tetra"
+  !     ...
 
   !real(dp) :: erange(2) = zero
+  ! Energy window
 
   type(crystal_t), pointer :: cryst  => null()
 
@@ -313,6 +340,7 @@ type, public :: gstore_t
   type(ifc_type), pointer :: ifc => null()
 
   type(krank_t) :: krank !, qrank
+  ! Object used to find the correspondence with the kibz array with the IBZ.
 
   integer,allocatable :: my_spins(:)
    ! (%my_nspins)
@@ -331,7 +359,6 @@ type, public :: gstore_t
   ! (nqibz)
   ! q-points weights in the IBZ
 
-  !kmesh, qmesh
   !integer :: kptrlatt(3, 3), qptrlatt(3, 3)
    ! k-mesh and q-mesh
 
@@ -343,15 +370,16 @@ type, public :: gstore_t
   ! Used by tetra routines.
 
   type(xcomm_t) :: spin_comm
-    ! MPI communicator over spin (nsppol = 2)
+    ! MPI communicator over spins (nsppol = 2)
 
   type(gqk_t), allocatable :: gqk(:)
   ! (my_nspins)
+  ! Datastructure storing e-ph matrix elements.
 
-  !type(htetra_t), pointer :: tetra_k
+  !type(htetra_t) :: ktetra
   ! Used to evaluate integrals in k-space with the tetrahedron method.
 
-  !type(htetra_t), pointer :: tetra_q
+  !type(htetra_t) :: qtetra
   ! Used to evaluate integrals in q-space with the tetrahedron method.
 
 
@@ -368,18 +396,21 @@ contains
   procedure :: free => gstore_free
   ! Free memory
 
-  procedure :: calc_my_phonons => gstore_calc_my_phonons
-
   procedure :: ncwrite_path => gstore_ncwrite_path
+  ! Write object to file
 
   !procedure :: ncread => gstore_ncread_path
+  ! Reconstruct object from file
 
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
 
+  procedure :: calc_my_phonons => gstore_calc_my_phonons
+  ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
+
 end type gstore_t
 
-public :: gstore_build
+public :: gstore_new
 !!***
 
 contains
@@ -387,9 +418,9 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gstore_build
+!!****f* m_gstore/gstore_new
 !! NAME
-!! gstore_build
+!! gstore_new
 !!
 !! FUNCTION
 !!
@@ -403,7 +434,7 @@ contains
 !!
 !! SOURCE
 
-function gstore_build(dtset, cryst, ebands, ifc, comm) result (gstore)
+function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
 
 !Arguments ------------------------------------
 !scalars
@@ -563,6 +594,7 @@ function gstore_build(dtset, cryst, ebands, ifc, comm) result (gstore)
 
  gstore%k_zone_type = "ibz"; gstore%q_zone_type = "bz"
  gstore%k_filter_type = "None"
+ gstore%with_velocities = 0
 
  ! These tables are used to exclude q/k points
  ! We use the full BZ because this mask can be also used when points are restricted to the IBZ
@@ -604,7 +636,7 @@ function gstore_build(dtset, cryst, ebands, ifc, comm) result (gstore)
    ABI_ERROR(sjoin("Invalid q_zone_type:", gstore%q_zone_type))
  end select
 
-if (gstore%k_filter_type == "fermi_surface") then
+if (gstore%k_filter_type == "fs_tetra") then
  ! This is just to show how to use the tetrahedron method
  ! to filter k- and k+q points on the FS in metals and define bands_spin automatically
  !
@@ -670,7 +702,7 @@ if (gstore%k_filter_type == "fermi_surface") then
 
  ! Now the tricky part as we want to remove q-points that
  ! do not lead to any scattering process between two states on the FS
- ! Remember that k+q is a submesh of the ebands k-mesh.
+ ! Remember that k+q is a sub-mesh of the ebands k-mesh.
 
  select_qbz_spin = 0
 
@@ -779,7 +811,6 @@ end if
    gqk%spin = spin
    gqk%natom3 = natom3
    gqk%cplex = 1 ! or 2 depending on dtset
-   gqk%with_velocities = .False.
 
    ! The global shape of the q/k matrix for this spin.
    gqk%glob_nq = glob_nq_spin(spin)
@@ -813,9 +844,7 @@ end if
 
    else
      ! Automatic grid generation
-     ! Not the most efficient distribution if large number of MPI procs.
-     ! TODO: Add parallelism over perturbations although it's less efficient than the parallelism over k
-     ! It starts to be interesting if we implement symmetries in the k-integration though.
+     ! TODO: Add smart logic to find "optimal" distribution.
 
      np = nproc_spin(spin)
      gqk%qpt_comm%nproc = np
@@ -961,16 +990,24 @@ end if
    ABI_MALLOC_OR_DIE(gqk%my_vals, (gqk%cplex, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk, gqk%my_npert), ierr)
    gqk%my_vals = zero
    !gqk%my_vals = huge(one)
+
+   ! Allocate storage for MPI-distributed dH/dk matrix elements.
+   select case (gstore%with_velocities)
+   case (1)
+     ABI_MALLOC(gqk%my_vk_cart, (3, gqk%nb, gqk%my_nk))
+   case (2)
+     ABI_MALLOC(gqk%my_vkmat_cart, (3, gqk%nb, gqk%nb, gqk%my_nk))
+   end select
+
  end do ! my_is
 
  ! Get phonon frequencies and eigenvectors my set of q-point.
- call gstore%calc_my_phonons(store_phdispl=.False.)
+ !call gstore%calc_my_phonons(store_phdispl=.False.)
 
  ABI_FREE(qbz_)
  ABI_FREE(qbz2ibz_)
 
  ! TODO: Use ebands%kptns
-
  ABI_FREE(wtk_)
  ABI_FREE(kbz_)
  ABI_FREE(kbz2ibz_)
@@ -983,9 +1020,9 @@ end if
  ABI_FREE(qglob2bz_idx)
  ABI_FREE(kglob2bz_idx)
 
- call cwtime_report(" gstore_build:", cpu, wall, gflops)
+ call cwtime_report(" gstore_new:", cpu, wall, gflops)
 
-end function gstore_build
+end function gstore_new
 !!***
 
 subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
@@ -1294,11 +1331,10 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
      if (gqk%kpt_comm%skip(my_iq)) cycle ! MPI parallelism inside k comm
      qpt = gqk%get_myqpt(my_iq, gstore)
      call gstore%ifc%fourq(cryst, qpt, phfrq, displ_cart) !, out_displ_red=displ_red)
+
      gqk%my_wqnu(:, my_iq) = phfrq
      gqk%my_wqnu(:, my_iq) = phfrq(gqk%my_iperts(:))
-     if (store_phdispl) then
-       gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart(:,:,:,gqk%my_iperts(:))
-     end if
+     if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart(:,:,:,gqk%my_iperts(:))
    end do
 
    ABI_FREE(displ_cart)
@@ -1523,6 +1559,8 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_displ_cart)
  ABI_SFREE(gqk%my_vals)
  ABI_SFREE(gqk%my_iperts)
+ ABI_SFREE(gqk%my_vk_cart)
+ ABI_SFREE(gqk%my_vkmat_cart)
 
  ! Communicators
  call gqk%kpt_comm%free()
@@ -1531,91 +1569,6 @@ subroutine gqk_free(gqk)
  call gqk%grid_comm%free()
 
 end subroutine gqk_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gstore/gqk_ncwrite_path
-!! NAME
-!! gqk_ncwrite_path
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine gqk_ncwrite_path(gqk, path)
-
-!Arguments ------------------------------------
-!scalars
- class(gqk_t),intent(in) :: gqk
- character(len=*),intent(in) :: path
-
-!Local variables-------------------------------
-!scalars
- integer :: ncid, spin_ncid, ncerr
-
-! *************************************************************************
-
- !my_rank = xmpi_comm_rank(gstore%comm)
- NCF_CHECK(nctk_open_modify(ncid, path, gqk%grid_comm%value))
-
- ! Create group to store gkq datastructure for this spin.
- NCF_CHECK(nf90_def_grp(ncid, strcat("gqk", "_spin", itoa(gqk%spin)), spin_ncid))
-
- ! =====================
- ! === Write dimensions
- ! =====================
- ncerr = nctk_def_dims(spin_ncid, [ &
-    nctkdim_t("cplex", gqk%cplex), &
-    nctkdim_t("nb", gqk%nb), &
-    nctkdim_t("natom3", gqk%natom3), &
-    nctkdim_t("glob_nk", gqk%glob_nk), &
-    nctkdim_t("glob_nq", gqk%glob_nq)  &
-   ], &
-   defmode=.True.)
- NCF_CHECK(ncerr)
-
- ! ==============
- ! Define scalars
- ! ==============
-
- !ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "number_of_electrons"])
- !NCF_CHECK(ncerr)
- !ncerr = nctk_def_dpscalars(spin_ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
- !NCF_CHECK(ncerr)
-
- ! =============
- ! Define arrays
- ! =============
- ncerr = nctk_def_arrays(spin_ncid, [ &
-   nctkarr_t("k2ibz", "int", "six, glob_nk"), &
-   nctkarr_t("q2ibz", "int", "six, glob_nq"), &
-   nctkarr_t("qpk2ibz_k", "int", "six, glob_nq, glob_nk"), &
-   nctkarr_t("vals", "dp", "cplex, nb, glob_nq, nb, glob_nk, natom3") &
- ])
- NCF_CHECK(ncerr)
-
- ! ==========
- ! Write data
- ! ==========
- NCF_CHECK(nctk_set_datamode(spin_ncid))
- !NCF_CHECK(nf90_put_var(spin_ncid, vid("tphysel"), ebands%tphysel))
-
- NCF_CHECK(nf90_close(ncid))
-
-contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(spin_ncid, vname)
- end function vid
-
-end subroutine gqk_ncwrite_path
 !!***
 
 !----------------------------------------------------------------------
@@ -1789,6 +1742,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
+ ABI_FREE(bks_mask)
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
@@ -1857,56 +1811,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
  ABI_CALLOC(dummy_vtrial, (nfftf, nspden))
 
- ! Create ddkop object to compute group velocities if needed.
- !
- !   1) precompute group velocities in the IBZ and the ihave_ikibz_spin file (common to all procs)
- !   2) Use symmetries to reconstruct v_kq from vcar_ibz
- !
- ! NB: All procs store in memory the same set of Bloch states inside the energy window.
-
+ ! Create ddkop object to compute group velocities (if needed)
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
-
- !call cwtime(cpu, wall, gflops, "start", msg=" Computing v_nk matrix elements for all states on the FS...")
- !ii = huge(1); jj = -1
- !do spin=1,nsppol
- !  ii = min(ii, fstab(spin)%bmin)
- !  jj = max(jj, fstab(spin)%bmax)
- !end do
- !ABI_CALLOC(vcar_ibz, (3, ii:jj, nkibz, nsppol))
- !ABI_MALLOC(cgwork, (2, mpw * wfd%nspinor))
-
- !cnt = 0
- !do spin=1,nsppol
- !  fs => fstab(spin)
- !  do ik_ibz=1,ebands%nkpt
- !    kk = ebands%kptns(:, ik_ibz)
- !    npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
- !    ! NB: The two checks below are global --> all procs will cycle.
- !    if (all(bks_mask(:, ik_ibz, spin) .eqv. .False.)) cycle
- !    if (npw_k == 1) cycle
- !    cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
-
- !    call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
-
- !    do band_k=fs%bmin,fs%bmax
- !      if (.not. bks_mask(band_k, ik_ibz, spin)) cycle
- !      call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
- !      eig0nk = ebands%eig(band_k, ik_ibz, spin)
- !      vk = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
- !      vcar_ibz(:, band_k, ik_ibz, spin) = vk
-
- !    end do
- !  end do
- !end do ! spin
-
- !call xmpi_sum(vcar_ibz, comm, ierr)
- !ABI_FREE(cgwork)
- !call cwtime_report(" Velocities", cpu, wall, gflops)
-
- ABI_FREE(bks_mask)
-
- ! Build krank object to find k-points
- !krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
@@ -1967,9 +1873,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        !bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
        bstart_k = gqk%bstart; nband_k = gqk%nb
 
-       ! Find symmetrical image of k+q in in the IBZ
-       !
-       !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
+       ! Find symmetrical image of k+q in in the kIBZ
        !
        kq = kk + qpt
 
@@ -2001,8 +1905,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_CHECK(nband_k <= mnb .and. nband_kq <= mnb, "wrong nband")
 
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, & !fs%indkk_fs(:,ik_fs),
-                          gqk%my_k2ibz(:, my_ik), cryst, &
+       call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, gqk%my_k2ibz(:, my_ik), cryst, &
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
@@ -2125,7 +2028,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ABI_ERROR(sjoin("Invalid cplex:", itoa(gqk%cplex)))
        end if
 
-       if (gqk%with_velocities) then
+       if (gstore%with_velocities /= 0) then
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
          ! Velocities are in Cartesian coordinates.
          !
@@ -2134,31 +2037,38 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ! In this case listkk has been called with symrec and use_symrec=False
          ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
 
-         !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
+         call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
+
+         !if (gstore%with_velocities == 1) then
+         !else
+
          do ib_k=1,nband_k
            band_k = ib_k + bstart_k - 1
-           vk = vcar_ibz(:, band_k, ik_ibz, spin)
-           if (.not. isirr_k) then
-             vk = matmul(transpose(cryst%symrel_cart(:,:,isym_k)), vk)
-             if (trev_k /= 0) vk = -vk
-           end if
-           !vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), &
-           !                     istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib_k), cwaveprj0)
+           !vk = vcar_ibz(:, band_k, ik_ibz, spin)
+           !if (.not. isirr_k) then
+           !  vk = matmul(transpose(cryst%symrel_cart(:,:,isym_k)), vk)
+           !  if (trev_k /= 0) vk = -vk
+           !end if
+           vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), &
+                                istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib_k), cwaveprj0)
+
+           gqk%my_vk_cart(:, ib_k, my_ik) = vk
            !fs%vk(:,ib_k) = vk
+           !gqk%my_vk_cart(3, nb, nb, my_ik) = vk
          end do
 
          !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
-         do ib_kq=1,nband_kq
-           band_kq = ib_kq + bstart_kq - 1
-           vkq = vcar_ibz(:, band_kq, ikq_ibz, spin)
-           if (.not. isirr_kq) then
-             vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
-             if (trev_kq /= 0) vkq = -vkq
-           end if
-           !vkq = ddkop%get_vdiag(ebands%eig(band_kq, ikq_ibz, spin), &
-           !                                 istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib_kq), cwaveprj0)
-           !fs%vkq(:,ib_kq) = vkq
-         end do
+         !do ib_kq=1,nband_kq
+         !  band_kq = ib_kq + bstart_kq - 1
+         !  vkq = vcar_ibz(:, band_kq, ikq_ibz, spin)
+         !  if (.not. isirr_kq) then
+         !    vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
+         !    if (trev_kq /= 0) vkq = -vkq
+         !  end if
+         !  !vkq = ddkop%get_vdiag(ebands%eig(band_kq, ikq_ibz, spin), &
+         !  !                                 istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib_kq), cwaveprj0)
+         !  !fs%vkq(:,ib_kq) = vkq
+         !end do
        end if
 
        !if (my_ik < 20 .or. (fs%nkfs > 100 .and. mod(my_ik, 200) == 0)) then
@@ -2197,7 +2107,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  ABI_SFREE(vcar_ibz)
- !call krank%free()
 
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
@@ -2241,17 +2150,19 @@ subroutine gstore_ncwrite_path(gstore, path, cryst, ebands)
 
  my_rank = xmpi_comm_rank(gstore%comm)
 
- ! Master node writes basic objects and dimensions
- ! then we are gonna write the big arrays with MPI-IO and hdf5 groups
- ! to account for spin and spin-dependent gqk dimensions.
+ ! Master node writes basic objects and gstore dimensions
+
  if (my_rank == 0) then
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   ! TODO Add extra stuff
    NCF_CHECK(nf90_close(ncid))
  end if
  call xmpi_barrier(gstore%comm)
 
+ ! Now we write the big arrays with MPI-IO and hdf5 groups.
+ ! Note the loop over spin to account as each gqk has its own dimensions.
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
    if (my_is /= 0) call gstore%gqk(my_is)%ncwrite_path(path)
@@ -2262,6 +2173,92 @@ end subroutine gstore_ncwrite_path
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_gstore/gqk_ncwrite_path
+!! NAME
+!! gqk_ncwrite_path
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gqk_ncwrite_path(gqk, path)
+
+!Arguments ------------------------------------
+!scalars
+ class(gqk_t),intent(in) :: gqk
+ character(len=*),intent(in) :: path
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncid, spin_ncid, ncerr
+
+! *************************************************************************
+
+ !my_rank = xmpi_comm_rank(gstore%comm)
+ NCF_CHECK(nctk_open_modify(ncid, path, gqk%grid_comm%value))
+
+ ! Create group to store gkq datastructure for this spin.
+ NCF_CHECK(nf90_def_grp(ncid, strcat("gqk", "_spin", itoa(gqk%spin)), spin_ncid))
+
+ ! =====================
+ ! === Write dimensions
+ ! =====================
+ ncerr = nctk_def_dims(spin_ncid, [ &
+    nctkdim_t("cplex", gqk%cplex), &
+    nctkdim_t("nb", gqk%nb), &
+    nctkdim_t("natom3", gqk%natom3), &
+    nctkdim_t("glob_nk", gqk%glob_nk), &
+    nctkdim_t("glob_nq", gqk%glob_nq)  &
+   ], &
+   defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! ==============
+ ! Define scalars
+ ! ==============
+
+ !ncerr = nctk_def_iscalars(spin_ncid, [character(len=nctk_slen) :: "number_of_electrons"])
+ !NCF_CHECK(ncerr)
+ !ncerr = nctk_def_dpscalars(spin_ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
+ !NCF_CHECK(ncerr)
+
+ ! Here I will need to gather stuff along the k/q axis before writing
+ ! so it makes more sense to open file using a single row/col comm in k/q grid
+ ! while keeping in mind the per_comm.
+
+ ! =============
+ ! Define arrays
+ ! =============
+ ncerr = nctk_def_arrays(spin_ncid, [ &
+   nctkarr_t("k2ibz", "int", "six, glob_nk"), &
+   nctkarr_t("q2ibz", "int", "six, glob_nq"), &
+   nctkarr_t("vals", "dp", "cplex, nb, glob_nq, nb, glob_nk, natom3") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! ==========
+ ! Write data
+ ! ==========
+ NCF_CHECK(nctk_set_datamode(spin_ncid))
+ !NCF_CHECK(nf90_put_var(spin_ncid, vid("tphysel"), ebands%tphysel))
+
+ NCF_CHECK(nf90_close(ncid))
+
+contains
+ integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(spin_ncid, vname)
+ end function vid
+
+end subroutine gqk_ncwrite_path
+!!***
 
 end module m_gstore
 !!***
