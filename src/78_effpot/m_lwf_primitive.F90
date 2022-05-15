@@ -361,9 +361,10 @@ contains
        NCF_CHECK_MSG(ierr, "Close netcdf file")
 
        do i = 1, twobody_nterm
+        twobody_val(i)=twobody_val(i) * eV_Ha *  &
+            & (Bohr_Ang**(twobody_orderi(i)+ twobody_orderj(i)))
           call self%coeff_twobody%add_entry([twobody_iR(i), twobody_i(i), &
-               & twobody_j(i), twobody_orderi(i), twobody_orderj(i)], twobody_val(i))
-          !TODO change to a.u.
+              & twobody_j(i), twobody_orderi(i), twobody_orderj(i)], twobody_val(i))
        end do
     end if
 
