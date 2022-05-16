@@ -48,21 +48,6 @@ module m_alloc_hamilt_gpu
  public :: dealloc_hamilt_gpu
 !!***
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
- !> this interface is only useful when gpu is enabled
- !! these functions are defined in 46_manage_gpu/gpu_apply_invovl_inner.cu
- interface
-
-   subroutine f_gpu_apply_invovl_inner_alloc() bind(c, name='gpu_apply_invovl_inner_alloc')
-   end subroutine f_gpu_apply_invovl_inner_alloc
-
-   subroutine f_gpu_apply_invovl_inner_dealloc() bind(c, name='gpu_apply_invovl_inner_dealloc')
-   end subroutine f_gpu_apply_invovl_inner_dealloc
-
- end interface
-#endif
-
-
 contains
 !!***
 
@@ -96,8 +81,6 @@ contains
 !! CHILDREN
 !!      alloc_gpu_fourwf
 !!      alloc_nonlop_gpu
-!!      f_gpu_apply_invovl_inner_alloc
-!!      f_gpu_apply_invovl_inner_dealloc
 !!
 !! SOURCE
 
@@ -118,6 +101,8 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 #if defined HAVE_GPU_CUDA
  integer :: dimekb1_max,dimekb2_max,dimffnl_max,ierr,ikpt,npw_max_loc,npw_max_nonloc
  integer ::npwarr_tmp(dtset%nkpt)
+
+ integer(kind=c_int32_t) :: proj_dim(3)
 #endif
 
 ! *************************************************************************
@@ -164,7 +149,6 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    call alloc_nonlop_gpu(npw_max_nonloc,npw_max_nonloc,dtset%nspinor,dtset%natom,&
 &   dtset%ntypat,psps%lmnmax,psps%indlmn,nattyp,atindx1,gprimd,&
 &   dimffnl_max,dimffnl_max,dimekb1_max,dimekb2_max)
-   call f_gpu_apply_invovl_inner_alloc()
  end if
  call xmpi_barrier(mpi_enreg%comm_cell)
 #else
@@ -200,7 +184,6 @@ end subroutine alloc_hamilt_gpu
 !! CHILDREN
 !!      free_gpu_fourwf
 !!      free_nonlop_gpu
-!!      gpu_invovl_inner_dealloc
 !!
 !! SOURCE
 
@@ -223,7 +206,6 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
  end if
  if (option==1.or.option==2) then
    call free_nonlop_gpu()
-   call f_gpu_apply_invovl_inner_dealloc()
  end if
 #else
  if (.false.) then

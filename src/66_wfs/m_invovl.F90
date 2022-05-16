@@ -155,17 +155,35 @@ end type invovl_kpt_type
  type(invovl_kpt_type), public,save,allocatable, target :: invovl_kpt(:)
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+
  !> this interface is only useful when gpu is enabled
+ !! these functions are defined in 46_manage_gpu/gpu_apply_invovl_inner.cu
  interface
 
-   subroutine f_solve_inner_gpu(invovl_gpu) bind(c, name='solve_inner_gpu')
+   !> allocate GPU workspace
+   subroutine f_gpu_apply_invovl_inner_alloc(proj_dim) bind(c, name='gpu_apply_invovl_inner_alloc')
+     use, intrinsic :: iso_c_binding
+     implicit none
+     integer(kind=c_int32_t), intent(in) :: proj_dim(3)
+   end subroutine f_gpu_apply_invovl_inner_alloc
+
+   !> deallocate GPU workspace
+   subroutine f_gpu_apply_invovl_inner_dealloc() bind(c, name='gpu_apply_invovl_inner_dealloc')
+   end subroutine f_gpu_apply_invovl_inner_dealloc
+
+   !> solver_inner on GPU
+   subroutine f_solve_inner_gpu(invovl_gpu, proj_ptr, f_comm_fft, nproc_fft) bind(c, name='solve_inner_gpu')
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
      implicit none
      type(invovl_kpt_gpu_type), intent(inout) :: invovl_gpu
+     type(c_ptr)             :: proj_ptr
+     integer(kind=c_int32_t) :: f_comm_fft
+     integer(kind=c_int32_t) :: nproc_fft
    end subroutine f_solve_inner_gpu
 
  end interface
+
 #endif
 
 CONTAINS
@@ -284,6 +302,10 @@ CONTAINS
 
   ABI_FREE(invovl_kpt)
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+   call f_gpu_apply_invovl_inner_dealloc()
+#endif
+
  end subroutine destroy_invovl
 !!***
 
@@ -301,10 +323,12 @@ CONTAINS
 !!
 !! CHILDREN
 !!      dsymm,zhemm
+!!      f_gpu_apply_invovl_inner_alloc
+!!      f_gpu_apply_invovl_inner_dealloc
 !!
 !! SOURCE
 
-subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
+subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg, use_gpu_cuda)
 
  use m_abi_linalg
  implicit none
@@ -314,6 +338,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  real(dp),intent(in) :: ffnl(ham%npw_k,dimffnl,ham%lmnmax,ham%ntypat)
  real(dp),intent(in) :: ph3d(2,ham%npw_k,ham%matblk)
  type(mpi_type) :: mpi_enreg
+ integer, intent(in) :: use_gpu_cuda
 
  real(dp) :: atom_projs(2, ham%npw_k, ham%lmnmax)
  real(dp) :: temp(ham%npw_k)
@@ -335,6 +360,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  real(dp), allocatable :: gramwork(:,:,:)
 
  integer, parameter :: timer_mkinvovl = 1620, timer_mkinvovl_build_d = 1621, timer_mkinvovl_build_ptp = 1622
+
+ integer(kind=c_int32_t) :: proj_dim(3)
 
 ! *************************************************************************
 
@@ -533,6 +560,16 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end do
  call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+ !! memory allocation of data used in solve_inner_gpu
+ if (use_gpu_cuda==1) then
+   proj_dim(1) = 2
+   proj_dim(2) = ham%npw_k
+   proj_dim(3) = invovl%nprojs
+   call f_gpu_apply_invovl_inner_alloc(proj_dim)
+ endif
+#endif
+
  call timab(timer_mkinvovl_build_ptp, 2, tsec)
  call timab(timer_mkinvovl,2,tsec)
 
@@ -560,6 +597,10 @@ end subroutine make_invovl
 
  subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
 
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+   use, intrinsic :: iso_c_binding
+#endif
+
  implicit none
 
  ! args
@@ -572,7 +613,7 @@ end subroutine make_invovl
  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
  type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
 
- real(dp),allocatable :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
+ real(dp),allocatable, target :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
  integer :: idat, iatom, nlmn, shift
  real(dp) :: tsec(2)
 
@@ -653,16 +694,13 @@ end subroutine make_invovl
  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
  ! TODO : when solve_inner_gpu is ready, uncomment the following
  if (ham%use_gpu_cuda == 1) then
-   call wrtout(std_out,"ALLLLLLLLLLLLLO ?")
-
-   !invovl_c_handle = C_LOC(invovl)
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
    !call solve_inner_gpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
    invovl_gpu = make_invovl_kpt_gpu(invovl)
+   call f_solve_inner_gpu(invovl_gpu, c_loc(proj(1,1,1)), mpi_enreg%comm_fft, mpi_enreg%nproc_fft)
 
-   call f_solve_inner_gpu(invovl_gpu)
 #endif
 
  else
