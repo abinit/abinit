@@ -32,6 +32,10 @@ module m_alloc_hamilt_gpu
  use m_gpu_toolbox
 #endif
 
+#ifdef HAVE_FC_ISO_C_BINDING
+ use, intrinsic :: iso_c_binding
+#endif
+
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
 
@@ -43,6 +47,21 @@ module m_alloc_hamilt_gpu
  public :: alloc_hamilt_gpu
  public :: dealloc_hamilt_gpu
 !!***
+
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+ !> this interface is only useful when gpu is enabled
+ !! these functions are defined in 46_manage_gpu/gpu_apply_invovl_inner.cu
+ interface
+
+   subroutine f_gpu_apply_invovl_inner_alloc() bind(c, name='gpu_apply_invovl_inner_alloc')
+   end subroutine f_gpu_apply_invovl_inner_alloc
+
+   subroutine f_gpu_apply_invovl_inner_dealloc() bind(c, name='gpu_apply_invovl_inner_dealloc')
+   end subroutine f_gpu_apply_invovl_inner_dealloc
+
+ end interface
+#endif
+
 
 contains
 !!***
@@ -71,10 +90,14 @@ contains
 !!  (no output - only allocation on GPU)
 !!
 !! PARENTS
-!!      m_gstate,m_respfn_driver
+!!      m_gstate
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      free_gpu_fourwf,free_nonlop_gpu
+!!      alloc_gpu_fourwf
+!!      alloc_nonlop_gpu
+!!      f_gpu_apply_invovl_inner_alloc
+!!      f_gpu_apply_invovl_inner_dealloc
 !!
 !! SOURCE
 
@@ -101,7 +124,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 
  if (use_gpu_cuda==0) return
 
-#if defined HAVE_GPU_CUDA
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
 !=== Local Hamiltonian ===
  if (option==0.or.option==2) then
 !  Compute max of total planes waves
@@ -141,6 +164,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    call alloc_nonlop_gpu(npw_max_nonloc,npw_max_nonloc,dtset%nspinor,dtset%natom,&
 &   dtset%ntypat,psps%lmnmax,psps%indlmn,nattyp,atindx1,gprimd,&
 &   dimffnl_max,dimffnl_max,dimekb1_max,dimekb2_max)
+   call f_gpu_apply_invovl_inner_alloc()
  end if
  call xmpi_barrier(mpi_enreg%comm_cell)
 #else
@@ -170,10 +194,13 @@ end subroutine alloc_hamilt_gpu
 !!  (no output - only deallocation on GPU)
 !!
 !! PARENTS
-!!      m_gstate,m_respfn_driver
+!!      m_gstate
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      free_gpu_fourwf,free_nonlop_gpu
+!!      free_gpu_fourwf
+!!      free_nonlop_gpu
+!!      gpu_invovl_inner_dealloc
 !!
 !! SOURCE
 
@@ -190,12 +217,13 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
  if (use_gpu_cuda==0) return
 
-#if defined HAVE_GPU_CUDA
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
  if (option==0.or.option==2) then
    call free_gpu_fourwf()
  end if
  if (option==1.or.option==2) then
    call free_nonlop_gpu()
+   call f_gpu_apply_invovl_inner_dealloc()
  end if
 #else
  if (.false.) then
