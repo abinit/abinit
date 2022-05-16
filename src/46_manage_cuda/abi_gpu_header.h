@@ -98,11 +98,8 @@ extern "C" {
   void gpu_mkkpg_(int *kg_gpu,double *kpg_gpu,double *kpt,int *npw);
 
   // headers for inverse overlap matrix application
-  void gpu_apply_invovl_inner_alloc();
-
+  void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3]);
   void gpu_apply_invovl_inner_dealloc();
-
-  void solve_inner_gpu(invovl_kpt_gpu_t* invovl);
 
 #ifdef __cplusplus
 }
