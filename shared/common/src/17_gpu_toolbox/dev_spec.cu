@@ -9,7 +9,7 @@
  */
 
 #include <stdio.h>
-#include <abi_gpu_header.h>
+#include <abi_gpu_header_common.h>
 
 static __host__ int version_2_cores(int major, int minor);
 

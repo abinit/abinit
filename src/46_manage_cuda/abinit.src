@@ -24,6 +24,7 @@ sources = [
  "cuda_rec.cu",
  "cuda_rec_cut.cu",
  "density.cu",
+ "gpu_apply_invovl_inner.cu",
  "gpu_apply_local_potential.cu",
  "gpu_compute_nl_hamiltonian.cu",
  "gpu_compute_nl_projections.cu",

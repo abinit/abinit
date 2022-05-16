@@ -13,8 +13,13 @@
 #define GPU_FOUR_HEADER_H
 
 
+#if defined HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "cuda_header.h"
+
+#include "gpu_apply_invovl_inner.h"
 
 #define BLOCK_SIZE 128  // CUDA block size
 #define MAX_GRID_SIZE 65535  // CUDA max grid size by dimension
@@ -92,6 +97,12 @@ extern "C" {
                                    );
   void gpu_mkkpg_(int *kg_gpu,double *kpg_gpu,double *kpt,int *npw);
 
+  // headers for inverse overlap matrix application
+  void gpu_apply_invovl_inner_alloc();
+
+  void gpu_apply_invovl_inner_dealloc();
+
+  void solve_inner_gpu(invovl_kpt_gpu_t* invovl);
 
 #ifdef __cplusplus
 }

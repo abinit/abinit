@@ -45,6 +45,10 @@ MODULE m_invovl
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
 
+#ifdef HAVE_FC_ISO_C_BINDING
+ use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+#endif
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
 #endif
@@ -70,7 +74,60 @@ MODULE m_invovl
 !!
 !! SOURCE
 
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+
  type, public :: invovl_kpt_type
+
+   integer(kind=c_int32_t) :: nprojs
+   !  total number of projectors
+   !    nlmn for a specific atom = count(indlmn(3,:,itypat)>0)
+   !  A value of -1 means that the following arrays are not allocated
+
+   real(kind=c_double), allocatable :: gram_projs(:,:,:)
+   ! gram_projs(cplx, nprojs, nprojs)
+   ! projs' * projs
+
+   real(kind=c_double), allocatable :: inv_sij(:,:,:,:)
+   ! inv_sij(cplx, lmnmax, lmnmax, ntypat)
+   ! inverse of ham%sij
+
+   real(kind=c_double), allocatable :: inv_s_approx(:,:,:,:)
+   ! inv_s_approx(cplx, lmnmax, lmnmax, ntypat)
+   ! preconditionner
+
+ end type invovl_kpt_type
+
+ !> companion type to invovl_kpt_type to pass data to gpu/cuda
+ type, bind(c), public :: invovl_kpt_gpu_type
+
+   integer(kind=c_int32_t) :: nprojs
+   !  total number of projectors
+   !    nlmn for a specific atom = count(indlmn(3,:,itypat)>0)
+   !  A value of -1 means that the following arrays are not allocated
+
+   type(c_ptr) :: gram_projs
+   ! gram_projs(cplx, nprojs, nprojs)
+   ! projs' * projs
+
+   integer(kind=c_int32_t) :: gram_projs_dim(3)
+
+   type(c_ptr) :: inv_sij
+   ! inv_sij(cplx, lmnmax, lmnmax, ntypat)
+   ! inverse of ham%sij
+
+   integer(kind=c_int32_t) :: inv_sij_dim(4)
+
+   type(c_ptr) :: inv_s_approx
+   ! inv_s_approx(cplx, lmnmax, lmnmax, ntypat)
+   ! preconditionner
+
+   integer(kind=c_int32_t) :: inv_s_approx_dim(4)
+
+ end type invovl_kpt_gpu_type
+
+#else
+
+type, public :: invovl_kpt_type
 
    integer :: nprojs
    !  total number of projectors
@@ -81,7 +138,7 @@ MODULE m_invovl
    ! gram_projs(cplx, nprojs, nprojs)
    ! projs' * projs
 
-   real(dp), allocatable :: inv_sij(:, :,:,:)
+   real(dp), allocatable :: inv_sij(:,:,:,:)
    ! inv_sij(cplx, lmnmax, lmnmax, ntypat)
    ! inverse of ham%sij
 
@@ -90,11 +147,69 @@ MODULE m_invovl
    ! preconditionner
 
 end type invovl_kpt_type
+
+#endif
+
 !!***
 
  type(invovl_kpt_type), public,save,allocatable, target :: invovl_kpt(:)
 
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+ !> this interface is only useful when gpu is enabled
+ interface
+
+   subroutine f_solve_inner_gpu(invovl_gpu) bind(c, name='solve_inner_gpu')
+     use, intrinsic :: iso_c_binding
+     import invovl_kpt_gpu_type
+     implicit none
+     type(invovl_kpt_gpu_type), intent(inout) :: invovl_gpu
+   end subroutine f_solve_inner_gpu
+
+ end interface
+#endif
+
 CONTAINS
+
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+!!****f* m_invovl/make_invovl_kpt_gpu
+!! NAME
+!! make_invovl_kpt
+!!
+!! FUNCTION
+!! Create a invovl_pkt_gpu_type from a cpu counter part for cuda interoperability
+!! SOURCE
+  function make_invovl_kpt_gpu(invovl) result(invovl_gpu)
+    implicit none
+    type(invovl_kpt_type), intent(inout),target :: invovl
+    type(invovl_kpt_gpu_type)                   :: invovl_gpu
+
+    invovl_gpu%nprojs = invovl%nprojs
+
+    invovl_gpu%gram_projs = c_loc(invovl%gram_projs(1,1,1))
+    invovl_gpu%gram_projs_dim = (/ &
+      & size(invovl%gram_projs,1), &
+      & size(invovl%gram_projs,2), &
+      & size(invovl%gram_projs,3)  &
+      & /)
+
+    invovl_gpu%inv_sij = c_loc(invovl%inv_sij(1,1,1,1))
+    invovl_gpu%inv_sij_dim = (/ &
+      & size(invovl%inv_sij,1), &
+      & size(invovl%inv_sij,2), &
+      & size(invovl%inv_sij,3), &
+      & size(invovl%inv_sij,4)  &
+      & /)
+
+    invovl_gpu%inv_s_approx = c_loc(invovl%inv_s_approx(1,1,1,1))
+    invovl_gpu%inv_s_approx_dim = (/ &
+      & size(invovl%inv_s_approx,1), &
+      & size(invovl%inv_s_approx,2), &
+      & size(invovl%inv_s_approx,3), &
+      & size(invovl%inv_s_approx,4)  &
+      & /)
+
+  end function make_invovl_kpt_gpu
+#endif
 
 !!****f* m_invovl/init_invovl
 !! NAME
@@ -472,6 +587,12 @@ end subroutine make_invovl
  integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
  type(invovl_kpt_type), pointer :: invovl
+ type(c_ptr) :: invovl_c_handle
+
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+ type(invovl_kpt_gpu_type) :: invovl_gpu
+#endif
+
  integer, parameter :: &
       & timer_apply_inv_ovl_opernla = 1630, &
       & timer_apply_inv_ovl_opernlb = 1631, &
@@ -530,9 +651,25 @@ end subroutine make_invovl
 
  !multiply by S^1
  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
- call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
- sm1proj = - sm1proj
- PtPsm1proj = - PtPsm1proj
+ ! TODO : when solve_inner_gpu is ready, uncomment the following
+ if (ham%use_gpu_cuda == 1) then
+   call wrtout(std_out,"ALLLLLLLLLLLLLO ?")
+
+   !invovl_c_handle = C_LOC(invovl)
+
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+
+   !call solve_inner_gpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
+   invovl_gpu = make_invovl_kpt_gpu(invovl)
+
+   call f_solve_inner_gpu(invovl_gpu)
+#endif
+
+ else
+   call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
+   sm1proj = - sm1proj
+   PtPsm1proj = - PtPsm1proj
+ end if
  ABI_NVTX_END_RANGE()
 
  ! copy sm1proj to cwaveprj(:,:)
@@ -644,7 +781,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    nlmntot_this_proc = nprojs
  end if
 
- ABI_MALLOC(temp_proj, (cplx, nlmntot_this_proc,ndat))
+ ABI_MALLOC(temp_proj, (cplx, nlmntot_this_proc, ndat))
 
  ! first guess for sm1proj
  call apply_block(ham, cplx, invovl%inv_s_approx, nprojs, ndat, proj, sm1proj, block_sliced)
@@ -653,11 +790,16 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
  ! TODO use a more efficient iterative algorithm than iterative refinement, use locking
  additional_steps_to_take = -1
  do i=1, 30
-  ! compute resid = proj - (D^-1 + PtP)sm1proj
+   ! compute resid = proj - (D^-1 + PtP)sm1proj
    call apply_block(ham, cplx, invovl%inv_sij, nprojs, ndat, sm1proj, resid, block_sliced)
    temp_proj = sm1proj(:,ibeg:iend,:)
-   call abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, invovl%gram_projs(:,:,1), nprojs, &
-&            temp_proj(:,:,1), nlmntot_this_proc, czero, PtPsm1proj(:,:,1), nprojs, x_cplx=cplx)
+
+   ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * temp_proj(:,:,1)
+   call abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
+     & invovl%gram_projs(:,:,1), nprojs, &
+     & temp_proj(:,:,1), nlmntot_this_proc, czero, &
+     & PtPsm1proj(:,:,1), nprojs, &
+     & x_cplx=cplx)
    call xmpi_sum(PtPsm1proj, mpi_enreg%comm_fft, ierr)
    resid = proj - resid - Ptpsm1proj
    ! exit check
