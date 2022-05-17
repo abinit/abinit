@@ -150,9 +150,9 @@ P          mk1mem           1
           rfatpol2          1       1
           rfatpol3          1       1
           rfatpol4          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          0       0       1
            rfphon1          0
            rfphon2          0
@@ -910,9 +910,9 @@ P          mk1mem           1
           rfatpol2          1       1
           rfatpol3          1       1
           rfatpol4          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
             rfdir4          0       0       1
            rfphon1          0
            rfphon2          0
