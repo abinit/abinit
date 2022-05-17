@@ -625,6 +625,7 @@ end do
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
    ABI_MALLOC(dtsets(idtset)%kberry,(3,20))
+   ABI_MALLOC(dtsets(idtset)%lambsig,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lexexch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lpawu,(mxntypat))
@@ -2411,6 +2412,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%lotf_nneigx=40
    dtsets(idtset)%lotf_version=2
 #endif
+   dtsets(idtset)%lambsig(:) = zero
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
 !  M

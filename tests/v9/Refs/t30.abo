@@ -104,7 +104,7 @@ P           mkmem           8
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolvrs      1.20000000E-08
+           tolvrs      2.15000000E-08
             typat      1  2
   use_gemm_nonlop           1
            useylm           1
@@ -203,7 +203,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     593.953     593.920
 --- !BeginCycle
 iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 1.20E-08, }
+tolerances: {tolvrs: 2.15E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
@@ -218,7 +218,7 @@ tolerances: {tolvrs: 1.20E-08, }
  ETOT  9  -192.96282318332    -7.510E-08 5.993E-08 2.507E-08
  ETOT 10  -192.96282320950    -2.618E-08 7.687E-09 7.904E-09
 
- At SCF step   10       nres2   =  7.90E-09 < tolvrs=  1.20E-08 =>converged.
+ At SCF step   10       nres2   =  7.90E-09 < tolvrs=  2.15E-08 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.38964830E-04  sigma(3 2)=  0.00000000E+00
@@ -468,7 +468,7 @@ P           mkmem           8
                        0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
                        0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
-           tolvrs      1.20000000E-08
+           tolvrs      2.15000000E-08
             typat      1  2
   use_gemm_nonlop           1
            useylm           1

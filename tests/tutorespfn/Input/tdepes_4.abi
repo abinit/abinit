@@ -143,7 +143,7 @@
 #%% exclude_builders = [^s][^c][^o].*
 #%% [files]
 #%% files_to_test = 
-#%%   tdepes_4.abo,  tolnlines= 0, tolabs=  0.0, tolrel=  0.0
+#%%   tdepes_4.abo,  tolnlines= 1000, tolabs=  0.002, tolrel=  1.0e-03
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
