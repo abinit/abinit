@@ -22,15 +22,11 @@
 #include <fstream>
 #include <iomanip>
 
-// #if defined HAVE_MPI
-// #include <mpi.h>
-// #endif
-
-#include "invoke_python.hpp"
-
 #if defined HAVE_MPI
 using namespace std;
+// #include <mpi.h>
 
+#include "invoke_python.hpp"
 
 //--------------------
 // The function to run Python
@@ -85,12 +81,12 @@ int execute_python_file(const char* filename) {
   return 1;
  }
 
- // check Python is running
- // LOAD(Py_IsInitialized, int, );
- // if (!(*Py_IsInitialized)()) {
- //  fprintf(stderr, "Python Interpreter failed to initialize\n");
- //  return 1;
- //}
+  // check Python is running
+  LOAD(Py_IsInitialized, int, );
+  if (!(*Py_IsInitialized)()) {
+   fprintf(stderr, "Python Interpreter failed to initialize\n");
+   return 1;
+ }
 
  // open the script file, report error, and run it in the interpreter
  FILE* file = fopen(filename, "r");
@@ -126,9 +122,10 @@ int close_python_interpreter() {
  * ****************/
 
 // Function to invoke python and run the script
+// void invoke_python_triqs(int rank, char* filapp_in, MPI_Fint *MPI_world_ptr) {
 void invoke_python_triqs(int rank, char* filapp_in) {
 	// MPI_Comm comm;
-	// comm = MPI_Comm_f2c(*mpi_comm);
+	// comm = MPI_Comm_f2c(*MPI_world_ptr );
 
 	// int ierr, rank;
 	// ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -171,7 +168,7 @@ void invoke_python_triqs(int rank, char* filapp_in) {
 	// }
 
 	// Close python
-	close_python_interpreter();
+	// close_python_interpreter();
 	// MPI_Barrier(MPI_COMM_WORLD);
 }
 #else
