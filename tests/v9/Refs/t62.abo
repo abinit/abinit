@@ -2118,7 +2118,7 @@ tolerances: {tolvrs: 1.00E-06, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -2258,7 +2258,7 @@ tolerances: {tolvrs: 1.00E-06, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  6.944018E+01
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================

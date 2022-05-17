@@ -1327,7 +1327,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 - -5.348640E+02  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1826,7 +1826,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 -  0.000000E+00  0.000000E+00  6.384195E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  9 ==================================================================
