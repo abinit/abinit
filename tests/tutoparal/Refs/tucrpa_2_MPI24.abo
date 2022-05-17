@@ -648,6 +648,7 @@ P           mkmem           2
   plowan_projcalc2       5
   plowan_projcalc3       5
   plowan_projcalc4       5
+           prtgsr           0
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
@@ -14169,6 +14170,7 @@ P           mkmem           2
   plowan_projcalc2       5
   plowan_projcalc3       5
   plowan_projcalc4       5
+           prtgsr           0
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1

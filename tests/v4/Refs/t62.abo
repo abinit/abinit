@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t62/t62.in
-- output file    -> t62.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t62/t62.abi
+- output file    -> t62.abo
 - root for input  files -> t62i
 - root for output files -> t62o
 
@@ -34,17 +34,17 @@
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         449          nfft =       13824          nkpt =           4
 ================================================================================
-P This job should need less than                       4.491 Mbytes of memory.
+P This job should need less than                       4.892 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           15 blocks of mpw  integer numbers, for      0.026 Mbytes.
-P           65 blocks of mpw  real(dp)  numbers, for      0.223 Mbytes.
-P           33 blocks of nfft real(dp)  numbers, for      3.480 Mbytes.
+P           59 blocks of mpw  real(dp)  numbers, for      0.202 Mbytes.
+P           37 blocks of nfft real(dp)  numbers, for      3.902 Mbytes.
 P              Additional     real(dp)  numbers, for      0.525 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 4.491 Mbytes.
-P Main chain + nonlop.f + opernl.f      4.112 Mbytes.
+P Main chain + fourwf.f                 4.892 Mbytes.
+P Main chain + nonlop.f + opernl.f      4.514 Mbytes.
 P XC chain                              3.806 Mbytes.
 P mkrho chain                           3.849 Mbytes.
 P fourdp chain                          3.614 Mbytes.
@@ -128,6 +128,8 @@ P          mk1mem           4
               occ      2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
            prtvol          10
             rfdir1          0       0       0
             rfdir2          1       0       0
@@ -191,8 +193,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/57la.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/57la.drh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/57la.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/57la.drh
 - psp for La for testing purposes only by D. R. Hamann in fhi format
 - 57.00000   3.00000    999999                znucl, zion, pspdat
     6    2    3    1      1295   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -205,8 +207,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -8.662078
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.drh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.drh
 - psp for Asw for testing purposes only by D. R. Hamann in fhi format
 - 33.00000   5.00000    999999                znucl, zion, pspdat
     6    2    2    2      1249   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -452,13 +454,13 @@ force_length_stats: {min:   2.10317145E-02, max:   2.10317145E-02, mean:   2.103
 
  Mean square residual over all n,k,spin=   59.429E-19; max=  98.480E-19
    0.2500  0.2500  0.2500    1  9.03372E-18 kpt; spin; max resid(k); each band:
-   9.03E-18  4.33E-18  2.45E-18  7.00E-18
+  9.03E-18 4.33E-18 2.45E-18 7.00E-18
   -0.2500  0.2500  0.2500    1  8.03847E-18 kpt; spin; max resid(k); each band:
-   7.38E-18  7.44E-18  2.58E-18  8.04E-18
+  7.38E-18 7.44E-18 2.58E-18 8.04E-18
    0.2500 -0.2500  0.2500    1  8.77980E-18 kpt; spin; max resid(k); each band:
-   8.78E-18  3.51E-18  3.82E-18  6.42E-18
+  8.78E-18 3.51E-18 3.82E-18 6.42E-18
   -0.2500 -0.2500  0.2500    1  9.84804E-18 kpt; spin; max resid(k); each band:
-   9.26E-18  1.54E-18  3.65E-18  9.85E-18
+  9.26E-18 1.54E-18 3.65E-18 9.85E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.543000000000      0.493000000000      0.508000000000
@@ -581,11 +583,6 @@ meta: {optdriver: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t62o_DS1_WFK
-P newkpt: treating      4 bands with npw=     446 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     449 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   4 by node    0
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -603,19 +600,10 @@ P newkpt: treating      4 bands with npw=     442 for ikpt=   4 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t62o_DS1_WFK
-P newkpt: treating      4 bands with npw=     446 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     449 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   4 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=     446 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     449 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -643,13 +631,13 @@ tolerances: {tolvrs: 1.00E-12, }
 
  ETOT  9   3.8295144953308     -3.891E-09 3.494E-12 9.203E-09
 
- ETOT 10   3.8295144953062     -2.461E-11 1.749E-13 1.702E-09
+ ETOT 10   3.8295144953062     -2.460E-11 1.749E-13 1.702E-09
 
  ETOT 11   3.8295144953041     -2.046E-12 6.876E-15 2.226E-10
 
- ETOT 12   3.8295144953038     -3.659E-13 6.150E-16 4.067E-12
+ ETOT 12   3.8295144953038     -3.677E-13 6.150E-16 4.067E-12
 
- ETOT 13   3.8295144953038     -1.066E-14 2.773E-17 5.081E-14
+ ETOT 13   3.8295144953038     -8.882E-15 2.773E-17 5.081E-14
 
  At SCF step   13       vres2   =  5.08E-14 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
@@ -658,13 +646,13 @@ tolerances: {tolvrs: 1.00E-12, }
 
  Mean square residual over all n,k,spin=   88.126E-19; max=  27.732E-18
    0.2500  0.2500  0.2500    1  9.42764E-18 kpt; spin; max resid(k); each band:
-   3.20E-18  3.91E-18  6.92E-18  9.43E-18
+  3.20E-18 3.91E-18 6.92E-18 9.43E-18
   -0.2500  0.2500  0.2500    1  2.77321E-17 kpt; spin; max resid(k); each band:
-   2.47E-18  5.96E-18  1.39E-17  2.77E-17
+  2.47E-18 5.96E-18 1.39E-17 2.77E-17
    0.2500 -0.2500  0.2500    1  1.35821E-17 kpt; spin; max resid(k); each band:
-   2.81E-18  2.88E-18  9.78E-18  1.36E-17
+  2.81E-18 2.88E-18 9.78E-18 1.36E-17
   -0.2500 -0.2500  0.2500    1  2.18122E-17 kpt; spin; max resid(k); each band:
-   2.74E-18  2.93E-18  1.10E-17  2.18E-17
+  2.74E-18 2.93E-18 1.10E-17 2.18E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -695,19 +683,10 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t62o_DS1_WFK
-P newkpt: treating      4 bands with npw=     446 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     449 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   4 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=     446 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     449 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=     442 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -739,7 +718,7 @@ tolerances: {tolvrs: 1.00E-12, }
 
  ETOT 11  0.43579429760885     -7.105E-14 5.064E-16 1.209E-12
 
- ETOT 12  0.43579429760885     -2.220E-15 1.482E-17 1.191E-13
+ ETOT 12  0.43579429760885     -2.665E-15 1.482E-17 1.191E-13
 
  At SCF step   12       vres2   =  1.19E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
@@ -748,13 +727,13 @@ tolerances: {tolvrs: 1.00E-12, }
 
  Mean square residual over all n,k,spin=   58.740E-19; max=  14.823E-18
    0.2500  0.2500  0.2500    1  7.31985E-18 kpt; spin; max resid(k); each band:
-   2.97E-18  4.67E-18  5.40E-18  7.32E-18
+  2.97E-18 4.67E-18 5.40E-18 7.32E-18
   -0.2500  0.2500  0.2500    1  1.44204E-17 kpt; spin; max resid(k); each band:
-   2.77E-18  2.69E-18  9.91E-18  1.44E-17
+  2.77E-18 2.69E-18 9.91E-18 1.44E-17
    0.2500 -0.2500  0.2500    1  7.91761E-18 kpt; spin; max resid(k); each band:
-   3.06E-18  2.64E-18  4.42E-18  7.92E-18
+  3.06E-18 2.64E-18 4.42E-18 7.92E-18
   -0.2500 -0.2500  0.2500    1  1.48228E-17 kpt; spin; max resid(k); each band:
-   2.61E-18  3.32E-18  5.03E-18  1.48E-17
+  2.61E-18 3.32E-18 5.03E-18 1.48E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1244,6 +1223,8 @@ P          mk1mem           4
               occ      2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
            prtvol          10
             rfdir1          0       0       0
             rfdir2          1       0       0
@@ -1315,7 +1296,7 @@ P          mk1mem           4
 -
 - [3] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -1354,10 +1335,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
+.Delivered   5 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.4
