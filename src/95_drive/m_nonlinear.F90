@@ -1158,7 +1158,7 @@ end if
        write(message,'(a,a,a,a,a,a)')ch10,&
 &       ' dfptnl_doutput: WARNING -',ch10,&
 &       '  matrix of third-order energies incomplete,',ch10,&
-&       '  non-linear optical coefficients may be wrong.'
+&       '  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.'
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
