@@ -2255,7 +2255,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -3910,7 +3910,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
