@@ -136,7 +136,7 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!  Response function calculations:
-!!    In order to compute first- or second-order qunatities, paw_an (resp. paw_ij) datastructures
+!!    In order to compute first- or second-order quantities, paw_an (resp. paw_ij) datastructures
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
 !! PARENTS

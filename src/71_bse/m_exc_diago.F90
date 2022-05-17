@@ -44,7 +44,7 @@ MODULE m_exc_diago
  use m_bz_mesh,         only : kmesh_t
  use m_ebands,          only : ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
- use m_wfd,             only : wfd_t
+ use m_wfd,             only : wfdgw_t
  use m_paw_hr,          only : pawhur_t
  use m_pawtab,          only : pawtab_type
  use m_exc_itdiago,     only : exc_iterative_diago
@@ -111,7 +111,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
  type(pseudopotential_type),intent(in) :: Psps
  type(kmesh_t),intent(in) :: Kmesh
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
  type(eprenorms_t),intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
