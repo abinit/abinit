@@ -491,7 +491,6 @@ P          mk1mem10         1
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
             rfdir5          1       0       0
             rfdir8          1       0       0
-            rfdir10         0       0       0
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -2458,7 +2457,6 @@ P          mk1mem10         1
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
             rfdir5          1       0       0
             rfdir8          1       0       0
-            rfdir10         0       0       0
            rfphon1          0
            rfphon2          0
            rfphon3          0

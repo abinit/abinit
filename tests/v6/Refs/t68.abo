@@ -110,7 +110,6 @@ P          mk1mem           1
            prtpot1          0
            prtpot2          1
           rfatpol           1       2
-            rfdir           1       1       1
            rfphon1          0
            rfphon2          1
           smdelta1          0
@@ -1325,7 +1324,6 @@ P          mk1mem           1
            prtpot1          0
            prtpot2          1
           rfatpol           1       2
-            rfdir           1       1       1
            rfphon1          0
            rfphon2          1
           smdelta1          0

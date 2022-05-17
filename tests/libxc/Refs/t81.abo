@@ -952,13 +952,6 @@ P          mk1mem37        16
            prtpot35         1
            prtpot36         1
            prtpot37         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
-            rfdir14         0       0       0
-            rfdir15         0       0       0
-            rfdir16         0       0       0
-            rfdir17         0       0       0
             rfdir21         1       0       0
             rfdir22         1       0       0
             rfdir23         1       0       0
@@ -6066,13 +6059,6 @@ P          mk1mem37        16
            prtpot35         1
            prtpot36         1
            prtpot37         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
-            rfdir14         0       0       0
-            rfdir15         0       0       0
-            rfdir16         0       0       0
-            rfdir17         0       0       0
             rfdir21         1       0       0
             rfdir22         1       0       0
             rfdir23         1       0       0

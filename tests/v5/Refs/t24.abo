@@ -359,7 +359,6 @@ P          mk1mem33         4
            prtpot32         1
            prtpot33         1
           rfatpol           1       2
-            rfdir           1       1       1
            rfelfd11         0
            rfelfd12         2
            rfelfd13         3
@@ -3774,7 +3773,6 @@ P          mk1mem33         4
            prtpot32         1
            prtpot33         1
           rfatpol           1       2
-            rfdir           1       1       1
            rfelfd11         0
            rfelfd12         2
            rfelfd13         3

@@ -220,8 +220,6 @@ P          mk1mem4          2
            prtpot2          0
            prtpot3          1
            prtpot4          1
-            rfdir3          1       1       1
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -1526,8 +1524,6 @@ P          mk1mem4          2
            prtpot2          0
            prtpot3          1
            prtpot4          1
-            rfdir3          1       1       1
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2

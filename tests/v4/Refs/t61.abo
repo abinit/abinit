@@ -478,8 +478,6 @@ P          mk1mem12        16
            prtpot11         0
            prtpot12         1
            prtvol           1
-            rfdir10         0       0       0
-            rfdir11         0       0       0
             rfdir12         1       0       0
            rfstrs1          0
            rfstrs2          0
@@ -3309,8 +3307,6 @@ P          mk1mem12        16
            prtpot11         0
            prtpot12         1
            prtvol           1
-            rfdir10         0       0       0
-            rfdir11         0       0       0
             rfdir12         1       0       0
            rfstrs1          0
            rfstrs2          0

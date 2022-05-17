@@ -105,7 +105,6 @@ P          mk1mem           1
         optdriver2          1
            prtpot1          0
            prtpot2          1
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -554,7 +553,6 @@ P          mk1mem           1
         optdriver2          1
            prtpot1          0
            prtpot2          1
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01

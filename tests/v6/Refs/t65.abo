@@ -238,11 +238,6 @@ P          mk1mem           1
           rfatpol13         1       1
           rfatpol14         1       2
           rfatpol15         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
@@ -2133,11 +2128,6 @@ P          mk1mem           1
           rfatpol13         1       1
           rfatpol14         1       2
           rfatpol15         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2

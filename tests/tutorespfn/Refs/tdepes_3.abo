@@ -794,30 +794,6 @@ P          mk1mem           8
           rfatpol81         1       1
           rfatpol82         1       1
           rfatpol83         1       2
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir41         0       0       0
-            rfdir42         0       0       0
-            rfdir43         1       1       1
-            rfdir51         0       0       0
-            rfdir52         0       0       0
-            rfdir53         1       1       1
-            rfdir61         0       0       0
-            rfdir62         0       0       0
-            rfdir63         1       1       1
-            rfdir71         0       0       0
-            rfdir72         0       0       0
-            rfdir73         1       1       1
-            rfdir81         0       0       0
-            rfdir82         0       0       0
-            rfdir83         1       1       1
            rfphon11         0
            rfphon12         0
            rfphon13         1
@@ -8078,30 +8054,6 @@ P          mk1mem           8
           rfatpol81         1       1
           rfatpol82         1       1
           rfatpol83         1       2
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir41         0       0       0
-            rfdir42         0       0       0
-            rfdir43         1       1       1
-            rfdir51         0       0       0
-            rfdir52         0       0       0
-            rfdir53         1       1       1
-            rfdir61         0       0       0
-            rfdir62         0       0       0
-            rfdir63         1       1       1
-            rfdir71         0       0       0
-            rfdir72         0       0       0
-            rfdir73         1       1       1
-            rfdir81         0       0       0
-            rfdir82         0       0       0
-            rfdir83         1       1       1
            rfphon11         0
            rfphon12         0
            rfphon13         1
