@@ -1591,7 +1591,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir. check input variables rfatpol and rfdir.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -1854,7 +1854,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir. check input variables rfatpol and rfdir.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -2117,7 +2117,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir. check input variables rfatpol and rfdir.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
