@@ -260,8 +260,11 @@ P          mk1mem           1
           rfatpol12         1       1
           rfatpol13         3       3
           rfatpol14         3       3
+            rfdir1          0       0       0
+            rfdir2          0       0       0
             rfdir3          0       0       1
             rfdir4          0       0       1
+            rfdir12         0       0       0
             rfdir13         0       0       1
             rfdir14         0       0       1
            rfphon1          0
@@ -2513,8 +2516,11 @@ P          mk1mem           1
           rfatpol12         1       1
           rfatpol13         3       3
           rfatpol14         3       3
+            rfdir1          0       0       0
+            rfdir2          0       0       0
             rfdir3          0       0       1
             rfdir4          0       0       1
+            rfdir12         0       0       0
             rfdir13         0       0       1
             rfdir14         0       0       1
            rfphon1          0
