@@ -59,7 +59,6 @@
  nbdbuf?4  2            # 2 buffer bands. RF converges much faster.
  rfphon?4  1            # Do phonon response
  rfatpol?4 1 2          # Treat displacements of all atoms
- rfdir?4   1 1 1        # Do all directions 
  tolwfr?4  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
  kptopt?4  3
 

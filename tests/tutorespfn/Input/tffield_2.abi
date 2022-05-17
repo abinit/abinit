@@ -25,13 +25,11 @@ ndtset 3
                 # difference formula, roughly |du/dk> = (|u_k+dk> - |u_k-dk>)/(2*dk)
                 # It would also be possible to use rfddk 1 here, and compute the DDK
                 # wavefunctions from within the DFPT formalism
-    rfdir2    1 1 1
     prtwf2    1
 
 #DATASET3 : linear response to atomic displacements
 #**************************************************
    getwfk3    2
-    rfdir3    1 1 1
    rfphon3    1
   rfatpol3    1 2
    rfstrs3    3

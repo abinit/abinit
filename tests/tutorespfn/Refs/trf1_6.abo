@@ -431,11 +431,6 @@ P          mk1mem5        256
           rfatpol3          1       2
           rfatpol4          1       1
           rfatpol5          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
            rfphon1          0
            rfphon2          1
            rfphon3          1
@@ -2398,11 +2393,6 @@ P          mk1mem5        256
           rfatpol3          1       2
           rfatpol4          1       1
           rfatpol5          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
            rfphon1          0
            rfphon2          1
            rfphon3          1

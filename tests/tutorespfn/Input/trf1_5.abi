@@ -13,7 +13,7 @@
   rfelfd2   2             # Activate the calculation of the d/dk perturbation
    rfdir2   1 0 0         # Need to consider the perturbation in the x-direction only
                           # This is rather specific, due to the high symmetry of the AlAs crystal
-                          # In general, just use rfdir 1 1 1
+                          # In general, just use the default rfdir 1 1 1
                           # In the present version of ABINIT (v4.6), symmetry cannot be used
                           # to reduce the number of ddk perturbations
 
