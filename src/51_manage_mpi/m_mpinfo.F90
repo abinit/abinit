@@ -91,7 +91,7 @@ MODULE m_mpinfo
  public :: iwrite_fftdatar  ! Select the subset of processors that will write density/potential files.
 
  public :: distrb2          ! Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
- public :: distrb2_hf       ! Ceate the tabs of repartition for Hartree-Fock calculations.
+ public :: distrb2_hf       ! Creates the tabs of repartition for Hartree-Fock calculations.
 !!***
 
 CONTAINS  !========================================================================================
@@ -2273,7 +2273,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(4(a,i6))') 'Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
+     write(msg,'(4(a,i6))') ' Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
 &     ' nband per processor= ', nb_per_proc, ' npband= ',nrank
      call wrtout(std_out,msg,'COLL')
 

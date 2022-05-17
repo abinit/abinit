@@ -109,7 +109,7 @@ contains
 !scalars
  integer :: iomode,bdtot_index,cplex,etiq,fformopt,ib,icg,ierr,ikg,ikpt
  integer :: ipw,isppol,istwf_k,iwavef,jb,jwavef
- integer :: me,me_kpt,my_nspinor,nband_k,npw_k,sender,ount
+ integer :: me,me_kpt,my_nspinor,nband_k,npw_k,sender,ount,pnp_size
  integer :: spaceComm_band,spaceComm_bandfftspin,spaceComm_fft,spaceComm_k
  logical :: mykpt
  real(dp) :: cgnm1,cgnm2
@@ -148,8 +148,9 @@ contains
 
 !Initialize main variables
  ABI_MALLOC(psinablapsi,(2,3,mband,mband))
+ pnp_size=size(psinablapsi)
  psinablapsi=zero
-
+ 
  iomode= IO_MODE_FORTRAN_MASTER
  fformopt=612
  ount = get_unit()
@@ -275,12 +276,12 @@ contains
          write(ount)((psinablapsi(1:2,2,ib,jb),ib=1,nband_k),jb=1,nband_k)
          write(ount)((psinablapsi(1:2,3,ib,jb),ib=1,nband_k),jb=1,nband_k)
        elseif (mpi_enreg%me_band==0.and.mpi_enreg%me_fft==0) then
-         call xmpi_exch(psinablapsi,etiq,me_kpt,psinablapsi,0,spaceComm_k,ierr)
+         call xmpi_exch(psinablapsi,pnp_size,me_kpt,psinablapsi,0,spaceComm_k,etiq,ierr)
        end if
 
      elseif (me==0) then
        sender=minval(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol))
-       call xmpi_exch(psinablapsi,etiq,sender,psinablapsi,0,spaceComm_k,ierr)
+       call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,0,spaceComm_k,etiq,ierr)
        write(ount)(eig0_k(ib),ib=1,nband_k)
        write(ount)((psinablapsi(1:2,1,ib,jb),ib=1,nband_k),jb=1,nband_k)
        write(ount)((psinablapsi(1:2,2,ib,jb),ib=1,nband_k),jb=1,nband_k)
