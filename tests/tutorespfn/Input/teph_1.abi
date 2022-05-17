@@ -95,7 +95,6 @@ prtgkk10     1
 # general data for all phonon calculations:
 #
 rfatpol 1 1      # all atoms are perturbed
-rfdir 1 1 1      # all directions of perturbation = reduced x y z
 rfphon 1
 
 prepgkk 1        # flag to calculate all perturbations for el-phon calculations

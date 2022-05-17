@@ -2598,7 +2598,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfasr=0
    dtsets(idtset)%rfatpol(1:2)=1
    dtsets(idtset)%rfddk=0
-   dtsets(idtset)%rfdir(1:3)=0
+   dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1

@@ -17263,7 +17263,8 @@ The atoms to be moved will be defined by the do-loop variable iatpol:
   - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
 
 For the calculation of a full dynamical matrix, use [[rfatpol]](1)=1 and
-[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1. For selected
+[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1, both being the default values. 
+For selected
 elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
@@ -17299,7 +17300,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_compulsory', 'Elastic_compulsory', 'Phonons_compulsory'],
     dimensions=[3],
-    defaultval=[0, 0, 0],
+    defaultval=[1, 1, 1],
     mnemonics="Response Function: DIRections",
     added_in_version="before_v9",
     text=r"""
@@ -17311,8 +17312,9 @@ space (phonon calculations), or in reciprocal space ($\,d/ \,d k$, homogeneous
 electric field, homogeneous magnetic field calculations). So, they generate a
 basis for the generation of the dynamical matrix or the macroscopic dielectric
 tensor or magnetic susceptibility and magnetic shielding, or the effective charge tensors.
-If equal to 1, response functions, as defined by [[rfddk]], [[rfelfd]],
-[[rfphon]], [[rfdir]] and [[rfatpol]], are to be computed for the
+If equal to 1, response functions, as defined by [[rfdir]], [[rfddk]], [[rfelfd]],
+[[rfphon]], [[rfstrs]], [[rfmagn]], [[rfatpol]], and possibly other response-function activating 
+input variables, but also [[berryopt]] are to be computed for the
 corresponding direction. If 0, this direction should not be considered.
 """,
 ),

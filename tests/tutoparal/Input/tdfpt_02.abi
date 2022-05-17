@@ -3,7 +3,6 @@
 #Definition of DFPT calculation
  rfphon 1
  rfatpol 1 1
- rfdir  1 1 1
  nqpt   1
  qpt    0.25 -0.125 0.125
  irdwfk 1
