@@ -306,8 +306,6 @@ P          mk1mem6          1
            prtpot4          1
            prtpot5          1
            prtpot6          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
             rfdir3          1       1       1
             rfdir4          1       1       1
             rfdir5          1       1       1
@@ -3412,8 +3410,6 @@ P          mk1mem6          1
            prtpot4          1
            prtpot5          1
            prtpot6          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
             rfdir3          1       1       1
             rfdir4          1       1       1
             rfdir5          1       1       1

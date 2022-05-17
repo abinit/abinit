@@ -114,7 +114,6 @@ P          mk1mem           1
            prtpot2          1
             rfddk1          0
             rfddk2          1
-            rfdir1          0       0       0
             rfdir2          1       1       1
           spgroup           1
         symmorphi           0
@@ -793,7 +792,6 @@ P          mk1mem           1
            prtpot2          1
             rfddk1          0
             rfddk2          1
-            rfdir1          0       0       0
             rfdir2          1       1       1
           spgroup           1
            strten1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99

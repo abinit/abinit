@@ -199,11 +199,6 @@ P          mk1mem           1
           rfatpol4          1       1
           rfatpol5          1       1
           rfatpol6          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
             rfdir6          1       0       0
            rfmeth1          1
            rfmeth2          1
@@ -1308,11 +1303,6 @@ P          mk1mem           1
           rfatpol4          1       1
           rfatpol5          1       1
           rfatpol6          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
             rfdir6          1       0       0
            rfmeth1          1
            rfmeth2          1

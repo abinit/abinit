@@ -176,9 +176,6 @@ P          mk1mem           1
            prtpot3          0
            prtpot4          1
            prtpot5          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
             rfdir4          0       0       1
             rfdir5          0       0       1
            rfphon1          0
@@ -1148,9 +1145,6 @@ P          mk1mem           1
            prtpot3          0
            prtpot4          1
            prtpot5          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
             rfdir4          0       0       1
             rfdir5          0       0       1
            rfphon1          0

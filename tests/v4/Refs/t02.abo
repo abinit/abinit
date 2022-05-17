@@ -340,7 +340,6 @@ P          mk1mem5         32
           rfatpol3          1       2
           rfatpol4          1       1
           rfatpol5          1       2
-            rfdir1          0       0       0
             rfdir2          1       0       0
             rfdir3          1       1       1
             rfdir4          1       0       0
@@ -2137,7 +2136,6 @@ P          mk1mem5         32
           rfatpol3          1       2
           rfatpol4          1       1
           rfatpol5          1       2
-            rfdir1          0       0       0
             rfdir2          1       0       0
             rfdir3          1       1       1
             rfdir4          1       0       0

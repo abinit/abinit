@@ -172,7 +172,6 @@ P          mk1mem           8
            prtvol           1
             prtwf1          1
             prtwf2         -1
-            rfdir1          0       0       0
             rfdir2          0       0       1
            rfmagn1          0
            rfmagn2          1
@@ -677,7 +676,6 @@ P          mk1mem           8
            prtvol           1
             prtwf1          1
             prtwf2         -1
-            rfdir1          0       0       0
             rfdir2          0       0       1
            rfmagn1          0
            rfmagn2          1

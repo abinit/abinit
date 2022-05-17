@@ -145,7 +145,6 @@ P          mk1mem2         32
               qpt2     5.00000000E-01  0.00000000E+00  5.00000000E-01
           rfatpol1          1       1
           rfatpol2          1       3
-            rfdir1          0       0       0
             rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
@@ -1044,7 +1043,6 @@ P          mk1mem2         32
               qpt2     5.00000000E-01  0.00000000E+00  5.00000000E-01
           rfatpol1          1       1
           rfatpol2          1       3
-            rfdir1          0       0       0
             rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
