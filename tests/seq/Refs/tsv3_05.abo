@@ -490,10 +490,8 @@ P          mk1mem7         32
            prtpot5          1
            prtpot6          0
            prtpot7          1
-            rfdir1          0       0       0
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
             rfdir5          1       1       1
             rfdir6          1       0       0
             rfdir7          1       1       1
@@ -2132,10 +2130,8 @@ P          mk1mem7         32
            prtpot5          1
            prtpot6          0
            prtpot7          1
-            rfdir1          0       0       0
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
             rfdir5          1       1       1
             rfdir6          1       0       0
             rfdir7          1       1       1

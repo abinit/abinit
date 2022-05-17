@@ -253,11 +253,9 @@ P          mk1mem         128
           rfatpol3          1       1
           rfatpol4          1       2
           rfatpol5          1       1
-            rfdir1          0       0       0
             rfdir2          1       1       1
             rfdir3          1       1       1
             rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0
@@ -3431,11 +3429,9 @@ P          mk1mem         128
           rfatpol3          1       1
           rfatpol4          1       2
           rfatpol5          1       1
-            rfdir1          0       0       0
             rfdir2          1       1       1
             rfdir3          1       1       1
             rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0

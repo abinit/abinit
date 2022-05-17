@@ -339,9 +339,6 @@ P          mk1mem6         16
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1
@@ -1491,9 +1488,6 @@ P          mk1mem6         16
             prtwf4          3
             prtwf5          3
             prtwf6          3
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          0       0       1

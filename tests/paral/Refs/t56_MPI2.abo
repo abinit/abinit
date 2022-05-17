@@ -197,7 +197,6 @@ P          mk1mem2          8
         optdriver2          1
            prtpot1          0
            prtpot2          1
-            rfdir1          0       0       0
             rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
@@ -763,7 +762,6 @@ P          mk1mem2          8
         optdriver2          1
            prtpot1          0
            prtpot2          1
-            rfdir1          0       0       0
             rfdir2          1       1       1
            rfphon1          0
            rfphon2          1

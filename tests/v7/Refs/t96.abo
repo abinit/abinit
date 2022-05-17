@@ -874,12 +874,6 @@ P          mk1mem13         8
           rfatpol26         1       1
           rfatpol12         1       4
           rfatpol13         1       4
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
             rfdir22         0       0       0
             rfdir23         0       0       0
             rfdir24         0       0       0
@@ -15469,12 +15463,6 @@ P          mk1mem13         8
           rfatpol26         1       1
           rfatpol12         1       4
           rfatpol13         1       4
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
             rfdir22         0       0       0
             rfdir23         0       0       0
             rfdir24         0       0       0
