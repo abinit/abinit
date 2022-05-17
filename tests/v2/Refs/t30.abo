@@ -740,13 +740,13 @@ P          mk1mem10        32
           rfatpol8          1       2
           rfatpol9          1       1
           rfatpol10         1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       1       1
-            rfdir5          0       0       0
+            rfdir5          1       1       1
             rfdir6          1       1       1
-            rfdir7          0       0       0
+            rfdir7          1       1       1
             rfdir8          1       1       1
             rfdir9          1       1       1
             rfdir10         1       1       1
@@ -4965,13 +4965,13 @@ P          mk1mem10        32
           rfatpol8          1       2
           rfatpol9          1       1
           rfatpol10         1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       1       1
-            rfdir5          0       0       0
+            rfdir5          1       1       1
             rfdir6          1       1       1
-            rfdir7          0       0       0
+            rfdir7          1       1       1
             rfdir8          1       1       1
             rfdir9          1       1       1
             rfdir10         1       1       1

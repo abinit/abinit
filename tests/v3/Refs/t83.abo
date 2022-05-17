@@ -440,13 +440,13 @@ P          mk1mem7         16
            prtpot6          0
            prtpot7          0
            prtvol           1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir5          1       1       1
+            rfdir6          1       1       1
+            rfdir7          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -2457,13 +2457,13 @@ P          mk1mem7         16
            prtpot6          0
            prtpot7          0
            prtvol           1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir5          1       1       1
+            rfdir6          1       1       1
+            rfdir7          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2

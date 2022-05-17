@@ -531,15 +531,15 @@ P          mk1mem11         1
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
+            rfdir9          1       1       1
             rfdir10         0       0       0
             rfdir11         1       0       0
            rfphon1          0
@@ -2798,15 +2798,15 @@ P          mk1mem11         1
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
+            rfdir9          1       1       1
             rfdir10         0       0       0
             rfdir11         1       0       0
            rfphon1          0
