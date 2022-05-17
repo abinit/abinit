@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!changes in the dielectric susceptibility may be wrong.!changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.!' $file > tmp.file
+ sed -e 's!and transformation to cartesian coordinates may be wrong.!and transformation to cartesian coordinates may be wrong. Check input variable rfdir.!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
