@@ -2225,7 +2225,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir. check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -3880,7 +3880,7 @@ meta: {optdriver: 5, }
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir. check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
