@@ -2094,7 +2094,7 @@ tolerances: {toldfe: 1.00E-10, }
 -  2.312173E+03  2.360398E+03  2.533858E+03  2.533858E+03  2.730669E+03
 -  2.730669E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================

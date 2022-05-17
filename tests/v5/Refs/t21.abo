@@ -1469,7 +1469,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  2.206569E+02  2.206569E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1707,7 +1707,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00  2.206569E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -2127,7 +2127,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  1.041428E+02  1.664572E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET 14 ==================================================================
@@ -2371,7 +2371,7 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00  1.388411E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================

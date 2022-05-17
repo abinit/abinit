@@ -565,7 +565,7 @@ tolerances: {tolvrs: 1.00E-08, }
 - -6.293978E-01  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  3.632061E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 

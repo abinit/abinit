@@ -2033,7 +2033,7 @@ tolerances: {tolwfr: 1.00E-10, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  1.827236E+03  1.827236E+03
 -  1.850425E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
