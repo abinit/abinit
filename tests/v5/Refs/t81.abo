@@ -141,6 +141,7 @@ P          mk1mem2         32
            prteig           0
            prtpot1          0
            prtpot2          1
+            rfdir1          0       0       0
             rfdir2          1       0       0
            rfelfd1          0
            rfelfd2          2
@@ -598,6 +599,7 @@ P          mk1mem2         32
            prteig           0
            prtpot1          0
            prtpot2          1
+            rfdir1          0       0       0
             rfdir2          1       0       0
            rfelfd1          0
            rfelfd2          2

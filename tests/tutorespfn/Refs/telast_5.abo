@@ -242,6 +242,7 @@ P          mk1mem3         32
            prtpot1          0
            prtpot2          0
            prtpot3          1
+            rfdir1          0       0       0
             rfdir2          0       0       1
             rfdir3          0       0       1
            rfstrs1          0
@@ -1098,6 +1099,7 @@ P          mk1mem3         32
            prtpot1          0
            prtpot2          0
            prtpot3          1
+            rfdir1          0       0       0
             rfdir2          0       0       1
             rfdir3          0       0       1
            rfstrs1          0

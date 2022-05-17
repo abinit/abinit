@@ -131,6 +131,7 @@ P          mk1mem           4
            prtpot1          0
            prtpot2          1
            prtvol          10
+            rfdir1          0       0       0
             rfdir2          1       0       0
            rfstrs1          0
            rfstrs2          3
@@ -1225,6 +1226,7 @@ P          mk1mem           4
            prtpot1          0
            prtpot2          1
            prtvol          10
+            rfdir1          0       0       0
             rfdir2          1       0       0
            rfstrs1          0
            rfstrs2          3

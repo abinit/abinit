@@ -311,6 +311,10 @@ P          mk1mem32        16
            prtpot22         1
            prtpot31         1
            prtpot32         1
+            rfdir11         0       0       0
+            rfdir12         0       0       0
+            rfdir21         1       1       1
+            rfdir22         1       1       1
             rfdir31         1       0       0
             rfdir32         1       0       0
            rfelfd11         0
@@ -2412,6 +2416,10 @@ P          mk1mem32        16
            prtpot22         1
            prtpot31         1
            prtpot32         1
+            rfdir11         0       0       0
+            rfdir12         0       0       0
+            rfdir21         1       1       1
+            rfdir22         1       1       1
             rfdir31         1       0       0
             rfdir32         1       0       0
            rfelfd11         0

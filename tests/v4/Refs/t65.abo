@@ -255,6 +255,8 @@ P          mk1mem3         32
            prtpot2          1
            prtpot3          1
            prtvol          10
+            rfdir1          0       0       0
+            rfdir2          1       1       1
             rfdir3          1       0       0
            rfelfd1          0
            rfelfd2          2
@@ -2519,6 +2521,8 @@ P          mk1mem3         32
            prtpot2          1
            prtpot3          1
            prtvol          10
+            rfdir1          0       0       0
+            rfdir2          1       1       1
             rfdir3          1       0       0
            rfelfd1          0
            rfelfd2          2
