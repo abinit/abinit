@@ -188,8 +188,6 @@ P          mk1mem           8
            prtpot5          1
            prtpot6          1
            prtpot7          0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
          rf2_dkdk5          1
          rf2_dkdk6          0
          rf2_dkdk7          0
@@ -2261,8 +2259,6 @@ P          mk1mem           8
            prtpot5          1
            prtpot6          1
            prtpot7          0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
          rf2_dkdk5          1
          rf2_dkdk6          0
          rf2_dkdk7          0

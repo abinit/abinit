@@ -653,8 +653,6 @@ P          mk1mem13        32
             prtwf6          0
             prtwf12         0
             prtwf13         0
-            rfdir12         1       1       1
-            rfdir13         1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -7074,8 +7072,6 @@ P          mk1mem13        32
             prtwf6          0
             prtwf12         0
             prtwf13         0
-            rfdir12         1       1       1
-            rfdir13         1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0

@@ -273,7 +273,6 @@ P          mk1mem6          8
            prtpot5          1
            prtpot6          1
           rfatpol           1       2
-            rfdir           1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2226,7 +2225,6 @@ P          mk1mem6          8
            prtpot5          1
            prtpot6          1
           rfatpol           1       2
-            rfdir           1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3

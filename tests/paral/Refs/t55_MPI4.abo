@@ -240,7 +240,6 @@ P          mk1mem4          4
           rfatpol3          1       1
           rfatpol4          1       2
             rfdir3          1       0       0
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -1380,7 +1379,6 @@ P          mk1mem4          4
           rfatpol3          1       1
           rfatpol4          1       2
             rfdir3          1       0       0
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2

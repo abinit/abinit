@@ -249,8 +249,6 @@ P          mk1mem4         16
             rfddk2          0
             rfddk3          1
             rfddk4          0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          0
@@ -1889,8 +1887,6 @@ P          mk1mem4         16
             rfddk2          0
             rfddk3          1
             rfddk4          0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          0

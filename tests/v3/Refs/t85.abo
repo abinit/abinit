@@ -214,7 +214,6 @@ P          mk1mem           8
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       2
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -2970,7 +2969,6 @@ P          mk1mem           8
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       2
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1

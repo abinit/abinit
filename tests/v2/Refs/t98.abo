@@ -349,9 +349,7 @@ P          mk1mem5         32
           rfatpol4          1       1
           rfatpol5          1       2
             rfdir2          1       0       0
-            rfdir3          1       1       1
             rfdir4          1       0       0
-            rfdir5          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2188,9 +2186,7 @@ P          mk1mem5         32
           rfatpol4          1       1
           rfatpol5          1       2
             rfdir2          1       0       0
-            rfdir3          1       1       1
             rfdir4          1       0       0
-            rfdir5          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3

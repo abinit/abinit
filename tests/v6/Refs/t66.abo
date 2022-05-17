@@ -595,21 +595,6 @@ P          mk1mem           5
           rfatpol33         1       1
           rfatpol34         1       2
           rfatpol35         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir24         1       1       1
-            rfdir25         0       0       0
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir34         1       1       1
-            rfdir35         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
@@ -5743,21 +5728,6 @@ P          mk1mem           5
           rfatpol33         1       1
           rfatpol34         1       2
           rfatpol35         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
-            rfdir21         0       0       0
-            rfdir22         0       0       0
-            rfdir23         1       1       1
-            rfdir24         1       1       1
-            rfdir25         0       0       0
-            rfdir31         0       0       0
-            rfdir32         0       0       0
-            rfdir33         1       1       1
-            rfdir34         1       1       1
-            rfdir35         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
