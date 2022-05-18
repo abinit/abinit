@@ -1376,6 +1376,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getden_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getden_filepath = key_value
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'relax',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%relax = key_value
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'md',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%md = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpawden',tread,'INT')
  if(tread==1) dtset%getpawden=intarr(1)
 
