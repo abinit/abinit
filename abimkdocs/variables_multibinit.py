@@ -6,7 +6,7 @@ executable = "multibinit"
 from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
 #from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
 ValueWithConditions = dict
-Variable=dict
+Variable = dict
 
 variables = [
 Variable(
@@ -83,6 +83,68 @@ or not specified in the XML file), (by default in Hartree).
 ),
 
 Variable(
+    abivarname="lwf_dynamics@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier Function DYNAMICS",
+    added_in_version="9.8",
+    text=r"""
+Kind of LWF dynamics to run. Currently there is only the option 3.
+
+* 0: Do not run LWF dynamics.
+
+* 3: Run NVT LWF dynamics with the Berendsen thermalstat. 
+
+""",
+),
+
+
+Variable(
+    abivarname="lwf_init_hist_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['LatticeWannier_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LWF INITIAL state HISTory file name",
+    added_in_version="9.8",
+    text=r"""
+Specify the initial state of the multibinit LWF dynamics calculation, which can be a lwf_hist netcdf file, usually generated from previous LWF dynamics calculations. It is used when [[multibinit:lwf_init_state]]=4 The string must be enclosed between quotation marks, for example:
+
+    lwf_init_hist_fname "last_step_lwf_hist.nc"
+""",
+),
+
+
+Variable(
+    abivarname="lwf_init_state@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Lattice Wannier Function INITial STATE",
+    added_in_version="before_v9",
+    text=r"""
+Flag to initialize spin state.
+
+* 1 --> The LWF amplitudes are homogenous random numbers between -0.1 to 0.1 Bohr.
+
+* 2 --> The LWF amplitudes are 0.
+
+* 4 --> Restart from an input spin hist file, as specified in [[multibinit:lwf_init_hist_fname]]. 
+""",
+),
+
+
+
+
+
+
+Variable(
     abivarname="lwf_constraint@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -90,7 +152,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Lattice Wannier Function use CONSTRAINT",
-    added_in_version="9.5.3",
+    added_in_version="9.8",
     text=r"""
     Whether to use constraint in Lattice Wannier function dynamics. The constraints are defined in a LWF initial state file by three parameters:
     n_fixed_lwf: number of fixed LWF.
@@ -98,6 +160,154 @@ Variable(
     fixed_lwf_values: values of fixed LWFs.
 """,
 ),
+
+Variable(
+    abivarname="lwf_dt@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['LatticeWannier_basic'],
+    dimensions="scalar",
+    defaultval=100,
+    mnemonics="LWF Delta Time",
+    added_in_version="9.8",
+    text=r"""
+Time step for lwf dynamics. Default value is 100.
+Default unit is atomic unit (2.419e-17 s).
+S, Sec or Second can be appended as unit. (e.g. 1e-16 Sec).
+""",
+),
+
+
+
+Variable(
+    abivarname="lwf_nctime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier function dynamics NetCdf write per number of TIME steps",
+    added_in_version="before_v9",
+    text=r"""
+Write LWF amplitude into netcdf file in every lwf_nctime of spin dynamics time steps.
+""",
+),
+
+
+
+Variable(
+    abivarname="lwf_ntime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier function dynamics total Number of TIME steps",
+    added_in_version="9.8",
+    text=r"""
+Total number of lattice Wannier function dynamics time steps.
+""",
+),
+
+Variable(
+    abivarname="lwf_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=[],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LWF POTential File NAME",
+    added_in_version="9.8",
+    text=r"""
+Specify the LWF potential file name in the multibinit lwf dynamics calculation, which is a netcdf file. The string must be enclosed between quotation marks:
+
+    lwf_pot_fname "BaTiO3_lwf_pot.nc"
+"""
+
+),
+
+
+Variable(
+    abivarname="lwf_taut@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeWannier_basic'],
+    dimensions="scalar",
+    defaultval=1000,
+    mnemonics="LWF dynamics relaxation time TAUT",
+    added_in_version="9.8",
+    text=r"""
+    Parameter used in Berendsen lattice dynamics [[multibinit:lwf_dynamics]] = 3, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of lwf_taut. 
+    The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
+
+    lwf_taut 1d-15 S
+""",
+),
+
+
+
+Variable(
+    abivarname="lwf_temperature_start@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="LWF TEMPERATURE START",
+    added_in_version="9.8",
+    text=r"""
+Start point of variable temperature LWF dynamcis calculation (see [[multibinit:lwf_var_temperature]]) in lwf dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="lwf_temperature_end@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="LWF TEMPERATURE END",
+    added_in_version="9.8",
+    text=r"""
+End point of variable temperature LWF dynamics calculation (see [[multibinit:LWF_var_temperature]]) in LWF dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="lwf_temperature_nstep@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LWF TEMPERATURE Number of STEPs",
+    added_in_version="9.8",
+    text=r"""
+Number of steps in the variable temperature LWF dynamics calculation (see [[multibinit:lwf_var_temperature]]) in lwf dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="lwf_var_temperature@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=[],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LWF  VARiable TEMPERATURE",
+    added_in_version="9.8",
+    text=r"""
+Switch for variable temperature calculation in LWF dynamics. 0: off. 1: on.
+If switched on, a series of LWF dynamics calculation with temperatures from
+[[multibinit:lwf_temperature_start]] to [[multibinit:lwf_temperature_end]],
+with number of steps [[multibinit:lwf_temperature_nstep]] will be done.
+The corresponding _lwf_hist.nc  file has the corresponding temperature in the filename.
+""",
+),
+
+
+
 
 
 
@@ -1047,7 +1257,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
     Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =102 and 103, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of latt_taut.
-    The unit is atomic unit, same as [[dtion]].
+    The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
+
+    latt_taut 1d-15 S
+
 """,
 ),
 
@@ -1061,8 +1274,12 @@ Variable(
     mnemonics="LATTice dynamics relaxation time TAUP",
     added_in_version="before_v9",
     text=r"""
-    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
-    The unit is atomic unit, same as [[dtion]].
+    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup. 
+    The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
+
+    latt_taup 1d-15 S
+
+
 """,
 ),
 
@@ -1427,7 +1644,7 @@ Variable(
     mnemonics="SPIN INITIAL state HISTory file name",
     added_in_version="9.3.3",
     text=r"""
-Specify the initial state of the multibinit spin dynamics calculation, which can be a spin_hist netcdf file, usually generated from previous spin dynamics calculations. It is used when [[multibinit:spin_init_state]]=4 The string must be enclosed between quotation marks:
+Specify the initial state of the multibinit spin dynamics calculation, which can be a spin_hist netcdf file, usually generated from previous spin dynamics calculations. It is used when [[multibinit:spin_init_state]]=4 The string must be enclosed between quotation marks, for example:
 
     spin_init_hist_fname "last_step_spin_hist.nc"
 """
@@ -1918,5 +2135,3 @@ Specify the spin-lattice-coupling potential file name in the coupled spin-lattic
 
 
 ]
-
-

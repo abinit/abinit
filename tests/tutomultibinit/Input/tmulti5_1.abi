@@ -26,7 +26,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% system_xml = tmulti5_1.xml
+#%% spin_pot= tmulti5_1.xml
 #%% exclude_builders = .*_nag_7.[01]_.*
 #%% coeff_xml = no
 #%% [files]
