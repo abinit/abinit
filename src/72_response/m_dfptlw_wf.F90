@@ -75,6 +75,8 @@ contains
 !!  ddk_f = wf files
 !!  d2_dkdk_f = wf files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  eig1_k(2*nband_k**2)=1st-order eigenvalues at k for i1pert,i1dir
+!!  eig2_k(2*nband_k**2)=1st-order eigenvalues at k for i2pert,i2dir
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  cg1 = first derivative of cg with respect the perturbation i1pert
 !!  cg2 = first derivative of cg with respect the perturbation i2pert
@@ -140,7 +142,7 @@ contains
 
 subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      & d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,&
-     & d3etot_t4_k,d3etot_t5_k,dtset,gs_hamkq,gsqcut,icg,&
+     & d3etot_t4_k,d3etot_t5_k,dtset,eig1_k,eig2_k,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
@@ -179,6 +181,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  real(dp),intent(out) :: d3etot_t3_k(2)
  real(dp),intent(out) :: d3etot_t4_k(2,n2dq)
  real(dp),intent(out) :: d3etot_t5_k(2,n1dq)
+ real(dp),intent(in) :: eig1_k(2*nband_k**2),eig2_k(2*nband_k**2)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3)
@@ -192,7 +195,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iband,idir,idq,jband,nkpg,nkpg1,nylmgrtmp
+ integer :: berryopt,iband,idir,idq,ii,jband,nkpg,nkpg1,nylmgrtmp
  integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda,fac,tmpim,tmpre
@@ -371,6 +374,10 @@ if (.not.samepert) then
      & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
        cj_h1_ci(1)=dotr
        cj_h1_ci(2)=doti
+
+!       ii=2*jband-1+(iband-1)*2*nband_k
+!       cj_h1_ci(1)=eig2_k(ii)
+!       cj_h1_ci(2)=eig2_k(ii+1)
        
        !Calculate: < u_{i,k}^{lambda1}} | u_{j,k}^{k_{\gamma}} >
        call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,cg1_aux, &
