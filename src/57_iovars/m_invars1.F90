@@ -2419,6 +2419,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
    dtsets(idtset)%mband = -1
+   dtsets(idtset)%md='NO'
    dtsets(idtset)%mdtemp(:)=300.0_dp
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
@@ -2593,6 +2594,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
+   dtsets(idtset)%relax='NO'
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
    dtsets(idtset)%rfasr=0

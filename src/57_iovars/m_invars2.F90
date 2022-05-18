@@ -40,7 +40,7 @@ module m_invars2
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
- use m_fstrings,  only : sjoin, itoa, ltoa, tolower
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, inupper
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm, intagm_img
  use m_geometry,   only : mkrdim, metric
@@ -1377,10 +1377,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%getden_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'relax',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%relax = key_value
+ if(tread==1) then 
+   dtset%relax = trim(key_value)
+   call inupper(dtset%relax)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'md',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%md = key_value
+ if(tread==1) then 
+   dtset%md = trim(key_value)
+   call inupper(dtset%md)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpawden',tread,'INT')
  if(tread==1) dtset%getpawden=intarr(1)
