@@ -212,7 +212,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: flg1(3),flg2(3)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:)
- real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:)
+ real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:),eigen2(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
@@ -249,6 +249,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho2r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho1g1,(2,nfftf))
@@ -398,7 +399,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
              pert2case = i2dir + (i2pert-1)*3
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
-             call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
+             call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
              & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
              & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
              & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
@@ -589,7 +590,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
 
                    !Perform the longwave DFPT part of the 3dte calculation
                    call dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dtfil,dtset, &
-                   & gmet,gs_hamkq,gsqcut,i1dir,&
+                   & eigen1,eigen2,gmet,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,occ,&
                    & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,&
@@ -690,6 +691,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  ABI_FREE(cg1)
  ABI_FREE(cg2)
  ABI_FREE(eigen1)
+ ABI_FREE(eigen2)
  ABI_FREE(rho1r1)
  ABI_FREE(rho2r1)
  ABI_FREE(rho1g1)

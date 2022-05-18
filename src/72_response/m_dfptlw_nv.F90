@@ -404,7 +404,8 @@ end subroutine dfptlw_nv
 !!
 !! SOURCE
 
-subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset,gs_hamkq,gsqcut,icg, &
+subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
+       &  gs_hamkq,gsqcut,icg, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
