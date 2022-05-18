@@ -2044,7 +2044,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[3],
-    defaultval=[0, 0, 0],
+    defaultval=[1, 1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: DIRections",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",

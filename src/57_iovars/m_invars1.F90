@@ -2263,16 +2263,16 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dosdeltae=zero
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%d3e_pert1_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert1_dir(1:3)=0
+   dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
    dtsets(idtset)%d3e_pert1_phon=0
    dtsets(idtset)%d3e_pert2_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert2_dir(1:3)=0
+   dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
    dtsets(idtset)%d3e_pert3_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert3_dir(1:3)=0
+   dtsets(idtset)%d3e_pert3_dir(1:3)=1
    dtsets(idtset)%d3e_pert3_elfd=0
    dtsets(idtset)%d3e_pert3_phon=0
 !  E
@@ -2608,8 +2608,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
-   dtsets(idtset)%rf2_pert1_dir(1:3)=0
-   dtsets(idtset)%rf2_pert2_dir(1:3)=0
+   dtsets(idtset)%rf2_pert1_dir(1:3)=1
+   dtsets(idtset)%rf2_pert2_dir(1:3)=1
    dtsets(idtset)%rhoqpmix=one
 !  S
    dtsets(idtset)%shiftk_orig(:,:)=one
