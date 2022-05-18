@@ -78,6 +78,10 @@ optdriver5    5
  natom  2 nband 4  nbdbuf 0
  nstep 40
 
+ d3e_pert1_dir  0 0 0  # This is only to exercize the non-default value of this variable
+ d3e_pert2_dir  0 0 0  # This is only to exercize the non-default value of this variable
+ d3e_pert3_dir  0 0 0  # This is only to exercize the non-default value of this variable
+
  nsym  24 ntypat  2
  occopt 1
  paral_kgb 0

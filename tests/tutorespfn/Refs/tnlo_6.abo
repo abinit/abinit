@@ -166,13 +166,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
   d3e_pert1_atpol5          1       1
   d3e_pert1_atpol6          1       1
   d3e_pert1_atpol7          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -187,13 +180,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
@@ -201,13 +187,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -746,20 +725,6 @@ P          mk1mem7        432
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          0       0       0
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          0       0       0
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
                        7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
                        7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
@@ -3575,13 +3540,6 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
   d3e_pert1_atpol5          1       1
   d3e_pert1_atpol6          1       1
   d3e_pert1_atpol7          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          0       0       0
-    d3e_pert1_dir6          0       0       0
-    d3e_pert1_dir7          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -3596,13 +3554,6 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    d3e_pert1_phon5          0
    d3e_pert1_phon6          0
    d3e_pert1_phon7          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          0       0       0
-    d3e_pert2_dir6          0       0       0
-    d3e_pert2_dir7          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
@@ -3610,13 +3561,6 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    d3e_pert2_elfd5          0
    d3e_pert2_elfd6          0
    d3e_pert2_elfd7          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          0       0       0
-    d3e_pert3_dir6          0       0       0
-    d3e_pert3_dir7          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -4173,20 +4117,6 @@ P          mk1mem7        432
          rf2_dkde5          0
          rf2_dkde6          1
          rf2_dkde7          0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          0       0       0
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          1       1       1
-    rf2_pert1_dir6          1       1       1
-    rf2_pert1_dir7          0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          0       0       0
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          1       1       1
-    rf2_pert2_dir6          1       1       1
-    rf2_pert2_dir7          0       0       0
             rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
                        7.0710678119E-01  0.0000000000E+00  7.0710678119E-01
                        7.0710678119E-01  7.0710678119E-01  0.0000000000E+00

@@ -129,11 +129,8 @@ optdriver7    5 # for nonlinear calculation
   d3e_pert1_phon7   1
  d3e_pert1_atpol7   1 2
   d3e_pert1_elfd7   1
-   d3e_pert1_dir7   1 1 1
   d3e_pert2_elfd7   1
-   d3e_pert2_dir7   1 1 1
   d3e_pert3_elfd7   1
-   d3e_pert3_dir7   1 1 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
