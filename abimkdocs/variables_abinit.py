@@ -17250,7 +17250,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_basic', 'Elastic_compulsory', 'Phonons_compulsory'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, [[natom]] ],
     mnemonics="Response Function: ATomic POLarisation",
     added_in_version="before_v9",
     text=r"""
@@ -17270,6 +17270,10 @@ elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
 or stress type (see [the DFPT help file](/guide/respfn)).
+
+As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and transformed
+immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
+while the default input values are actually [[rfatpol]]=-1 .
 """,
 ),
 

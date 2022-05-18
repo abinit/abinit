@@ -217,9 +217,6 @@ P          mk1mem3         32
            prtpot1          0
            prtpot2          1
            prtpot3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       4
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0
@@ -2352,9 +2349,6 @@ P          mk1mem3         32
            prtpot1          0
            prtpot2          1
            prtpot3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       4
            rfelfd1          0
            rfelfd2          2
            rfelfd3          0

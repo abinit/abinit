@@ -31,7 +31,6 @@ ndtset 3
 #**************************************************
    getwfk3    2
    rfphon3    1
-  rfatpol3    1 2
    rfstrs3    3
    rfelfd3    3
    getddk3    2

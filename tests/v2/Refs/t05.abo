@@ -158,7 +158,7 @@ P          mk1mem           2
            prtvol1          0
            prtvol2         10
            prtvol3         10
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
           rfatpol3          2       2
             rfdir1          1       1       1
@@ -1020,7 +1020,7 @@ P          mk1mem           2
            prtvol1          0
            prtvol2         10
            prtvol3         10
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
           rfatpol3          2       2
             rfdir1          1       1       1

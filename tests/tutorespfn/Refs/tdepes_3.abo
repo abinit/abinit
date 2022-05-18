@@ -770,30 +770,6 @@ P          mk1mem           8
               qpt81    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt82   -2.50000000E-01  5.00000000E-01  2.50000000E-01
               qpt83   -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       2
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       2
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       2
-          rfatpol41         1       1
-          rfatpol42         1       1
-          rfatpol43         1       2
-          rfatpol51         1       1
-          rfatpol52         1       1
-          rfatpol53         1       2
-          rfatpol61         1       1
-          rfatpol62         1       1
-          rfatpol63         1       2
-          rfatpol71         1       1
-          rfatpol72         1       1
-          rfatpol73         1       2
-          rfatpol81         1       1
-          rfatpol82         1       1
-          rfatpol83         1       2
            rfphon11         0
            rfphon12         0
            rfphon13         1
@@ -8030,30 +8006,6 @@ P          mk1mem           8
               qpt81    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt82   -2.50000000E-01  5.00000000E-01  2.50000000E-01
               qpt83   -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       2
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       2
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       2
-          rfatpol41         1       1
-          rfatpol42         1       1
-          rfatpol43         1       2
-          rfatpol51         1       1
-          rfatpol52         1       1
-          rfatpol53         1       2
-          rfatpol61         1       1
-          rfatpol62         1       1
-          rfatpol63         1       2
-          rfatpol71         1       1
-          rfatpol72         1       1
-          rfatpol73         1       2
-          rfatpol81         1       1
-          rfatpol82         1       1
-          rfatpol83         1       2
            rfphon11         0
            rfphon12         0
            rfphon13         1

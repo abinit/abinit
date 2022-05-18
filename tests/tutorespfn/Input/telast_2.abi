@@ -32,7 +32,6 @@
     nqpt3   1
      qpt3   0 0 0
   rfphon3   1        #do atomic displacement perturbation
- rfatpol3   1 4      #do for all atoms
   rfstrs3   3        #do strain perturbation
   tolvrs3   1.0d-10  #need reasonable convergence of 1st-order quantities
 
