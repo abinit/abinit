@@ -540,7 +540,7 @@ P          mk1mem11         1
             rfdir7          1       1       1
             rfdir8          1       0       0
             rfdir9          1       1       1
-            rfdir10         0       0       0
+            rfdir10         1       1       1
             rfdir11         1       0       0
            rfphon1          0
            rfphon2          0
@@ -2807,7 +2807,7 @@ P          mk1mem11         1
             rfdir7          1       1       1
             rfdir8          1       0       0
             rfdir9          1       1       1
-            rfdir10         0       0       0
+            rfdir10         1       1       1
             rfdir11         1       0       0
            rfphon1          0
            rfphon2          0
