@@ -531,8 +531,6 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 !multibinit_dtset%spin_n1l=1
 !multibinit_dtset%spin_n2l=0
 
- multibinit_dtset%spin_dt=100
- multibinit_dtset%spin_pot_fname=""
 
  multibinit_dtset%spin_damping=-1.0
  multibinit_dtset%spin_sia_add=0
@@ -1286,9 +1284,20 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ABI_ERROR(message)
  end if
 
- multibinit_dtset%latt_taut=1000
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taut',tread,'DPR')
+ multibinit_dtset%latt_taut=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taut',tread,'TIM')
  if(tread==1) multibinit_dtset%latt_taut=dprarr(1)
+ if(multibinit_dtset%latt_taut<0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'latt_taut is ',multibinit_dtset%latt_taut,'. The only allowed values',ch10,&
+         &   'are non-negative values.',ch10,&
+         &   'Action: correct latt_taut in your input file.'
+    ABI_ERROR(message)
+ end if
+
+
+
+
 multibinit_dtset%latt_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_temperature_start',tread,'DPR')
  if(tread==1) multibinit_dtset%latt_temperature_start=dprarr(1)
@@ -1333,7 +1342,7 @@ multibinit_dtset%latt_temperature_start=0.0
  end if
 
 ! multibinit_dtset%latt_taup=1000
-! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taup',tread,'DPR')
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taup',tread,'TIM')
 ! if(tread==1) multibinit_dtset%latt_taup=dprarr(1)
 
  multibinit_dtset%lwf_dt= 1d-16
@@ -1376,19 +1385,7 @@ multibinit_dtset%latt_temperature_start=0.0
  if(.not. tread==1) multibinit_dtset%latt_init_hist_fname="latt_init_hist.nc"
 
 
- multibinit_dtset%lwf_pot_fname=""
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_pot_fname',tread,'KEY',&
-      & key_value=multibinit_dtset%lwf_pot_fname)
 
-
- multibinit_dtset%spin_pot_fname=""
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_pot_fname',tread,'KEY',&
-      & key_value=multibinit_dtset%spin_pot_fname)
-
-
- multibinit_dtset%latt_pot_fname=""
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_pot_fname',tread,'KEY',&
-      & key_value=multibinit_dtset%latt_pot_fname)
 
  multibinit_dtset%slc_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
@@ -1605,6 +1602,10 @@ multibinit_dtset%lwf_temperature_start=0.0
     end do
  end if
 
+ multibinit_dtset%lwf_pot_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_pot_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%lwf_pot_fname)
+ if(.not. tread==1) multibinit_dtset%lwf_pot_fname=""
 
  multibinit_dtset%slc_pot_fname=""
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_pot_fname',tread,'KEY',&
@@ -3428,17 +3429,21 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(12x,a16,I12.1)')'lwf_dynamics',multibinit_dtset%lwf_dynamics
     write(nunit, '(13x, a15, I12.1)') 'lwf_init_state', multibinit_dtset%lwf_init_state
     write(nunit,'(10x, a18, 5x, F10.5)')'lwf_temperature',multibinit_dtset%lwf_temperature
-    write(nunit,'(10x, a18, 5x, F10.5)')'lwf_mc_avg_amp',multibinit_dtset%lwf_mc_avg_amp
     write(nunit,'(13x,a15,ES15.5, a8)')  'lwf_dt',multibinit_dtset%lwf_dt*Time_Sec , ' second' !TODO: use a.u.
     write(nunit,'(13x,a15,I10.1)')'lwf_ntime',multibinit_dtset%lwf_ntime
     write(nunit,'(13x,a15,I10.1)')'lwf_nctime',multibinit_dtset%lwf_nctime
-    write(nunit,'(8x,a20,I10.1)')'lwf_self_bound_order',multibinit_dtset%lwf_self_bound_order
-    write(nunit,'(8x,a20,F10.5)')'lwf_self_bound_coeff',multibinit_dtset%lwf_self_bound_coeff
+    !write(nunit,'(8x,a20,I10.1)')'lwf_self_bound_order',multibinit_dtset%lwf_self_bound_order
+    !write(nunit,'(8x,a20,F10.5)')'lwf_self_bound_coeff',multibinit_dtset%lwf_self_bound_coeff
     write(nunit, '(6x, a22, I12.1)') 'lwf_var_temperature', multibinit_dtset%lwf_var_temperature
     write(nunit, '(6x, a22, 5x, F10.5)') 'lwf_temperature_start', multibinit_dtset%lwf_temperature_start
     write(nunit, '(6x, a22, 5x, F10.5)') 'lwf_temperature_end', multibinit_dtset%lwf_temperature_end
     write(nunit, '(5x, a23, I12.1)') 'lwf_temperature_nstep', multibinit_dtset%lwf_temperature_nstep
 
+    if(multibinit_dtset%lwf_dynamics==1) then
+    write(nunit,'(20x,a8,ES15.5, a8)')  'lwf_taut',multibinit_dtset%lwf_dt*Time_Sec , ' second' !TODO: use a.u.
+    else if(multibinit_dtset%lwf_dynamics==3) then 
+       write(nunit,'(10x, a18, 5x, F10.5)')'lwf_mc_avg_amp',multibinit_dtset%lwf_mc_avg_amp
+    end if  
  end if
 
  if(multibinit_dtset%spin_dynamics/=0) then
