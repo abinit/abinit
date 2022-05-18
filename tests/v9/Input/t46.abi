@@ -23,6 +23,8 @@ getddk3   2
 iscf3    -3 
 rf2_dkdk3 1 
 tolwfr3   1.0d-20  
+rf2_pert1_dir3  1 1 1   
+rf2_pert2_dir3  1 1 1  
 
 #Set 4 : Response function calculation to q=0 phonons, electric field and strain
 #*******************************************************************************
@@ -51,6 +53,8 @@ lw_flexo5 1
 getwfk  1  
 useylm  1
 kptopt 2
+rf2_pert1_dir 0 0 0   # This is simply to exercize this input variable : the default might have been used, but it is only needed in dataset 3
+rf2_pert2_dir 0 0 0   # This is simply to exercize this input variable : the default might have been used, but it is only needed in dataset 3
 
 #Definition of the unit cell
 #***************************
