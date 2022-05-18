@@ -606,6 +606,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rfatpol',tread,'INT')
  if(tread==1) dtset%rfatpol(1:2)=intarr(1:2)
+ if(dtset%rfatpol(1)==-1)then
+   dtset%rfatpol(1)=1
+ endif
+ if(dtset%rfatpol(2)==-1)then
+   dtset%rfatpol(2)=dtset%natom
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rfdir',tread,'INT')
  if(tread==1) dtset%rfdir(1:3)=intarr(1:3)

@@ -51,7 +51,6 @@
    getwfk   1          # Use GS wave functions from dataset1
    kptopt   3          # Need full k-point set for finite-Q response
    rfphon   1          # Do phonon response
-  rfatpol   1 2        # Treat displacements of all atoms
    tolvrs   1.0d-8     # This default is active for sets 3-10
 
 #######################################################################

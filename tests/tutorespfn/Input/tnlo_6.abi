@@ -37,7 +37,6 @@ ndtset 7
    kptopt4    2        # use Half Brillouin Zone (only time-reversal symmetry taken into account)
    getddk4    3        # use ddk WF from dataset 3 (needed for electric field)
    rfphon4    1        # compute 1st-order WF derivatives with respect to atomic displacements...
-  rfatpol4    1 2      # ...for all atoms (so here only 1 and 2)
    rfelfd4    3        # compute 1st-order WF derivatives with respect to electric field
    rfstrs4    3        # compute 1st-order WF derivatives with respect to strains
    tolvrs4    1.0d-12  # SCF convergence criteria (could be tolwfr)

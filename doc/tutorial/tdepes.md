@@ -95,7 +95,7 @@ This second dataset produces the wavefunction file tdepes_1o_DS2_WFQ, that is re
 as well as the tdepes_1o_DS1_WFK file from the first dataset ([[getwfk]]3=1).
 
 The third dataset corresponds to a DFPT phonon calculation ([[rfphon]]3=1)
-with displacement of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1, which is the default).
+with displacement of all atoms ([[rfatpol]]3= 1 2) in all directions ([[rfdir]]3= 1 1 1), which are the default values.
 This induces the creation of the Derivative DataBase file tdepes_1o_DS3_DDB.
 The electron-phonon matrix elements are produced because of [[ieig2rf]]3=5 ,
 this option generating the needed netCDF files tdepes_1o_DS3_EIGR2D.nc and tdepes_1o_DS3_GKK.nc .

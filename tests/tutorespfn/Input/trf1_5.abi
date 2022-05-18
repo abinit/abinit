@@ -33,7 +33,6 @@
 
 #Response Function calculation : electric field perturbation and phonons
   rfphon3   1             # Activate the calculation of the atomic dispacement perturbations
- rfatpol3   1 2           # All the atoms will be displaced
   rfelfd3   3             # Activate the calculation of the electric field perturbation
    rfdir3   1 1 1         # All directions are selected. However, symmetries will be used to decrease
                           # the number of perturbations, so only the x electric field is needed
