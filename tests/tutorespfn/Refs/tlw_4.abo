@@ -1090,30 +1090,6 @@ P          mk1mem12       256
          rf2_dkdk10         0
          rf2_dkdk11         0
          rf2_dkdk12         0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          1       1       1
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          0       0       0
-    rf2_pert1_dir6          0       0       0
-    rf2_pert1_dir7          0       0       0
-    rf2_pert1_dir8          0       0       0
-    rf2_pert1_dir9          0       0       0
-    rf2_pert1_dir10         0       0       0
-    rf2_pert1_dir11         0       0       0
-    rf2_pert1_dir12         0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          1       1       1
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          0       0       0
-    rf2_pert2_dir6          0       0       0
-    rf2_pert2_dir7          0       0       0
-    rf2_pert2_dir8          0       0       0
-    rf2_pert2_dir9          0       0       0
-    rf2_pert2_dir10         0       0       0
-    rf2_pert2_dir11         0       0       0
-    rf2_pert2_dir12         0       0       0
             rprim      0.0000000000E+00  5.0230160830E+00  5.0230160830E+00
                        5.0230160830E+00  0.0000000000E+00  5.0230160830E+00
                        5.0230160830E+00  5.0230160830E+00  0.0000000000E+00
@@ -7253,30 +7229,6 @@ P          mk1mem12       256
          rf2_dkdk10         0
          rf2_dkdk11         0
          rf2_dkdk12         0
-    rf2_pert1_dir1          0       0       0
-    rf2_pert1_dir2          0       0       0
-    rf2_pert1_dir3          1       1       1
-    rf2_pert1_dir4          0       0       0
-    rf2_pert1_dir5          0       0       0
-    rf2_pert1_dir6          0       0       0
-    rf2_pert1_dir7          0       0       0
-    rf2_pert1_dir8          0       0       0
-    rf2_pert1_dir9          0       0       0
-    rf2_pert1_dir10         0       0       0
-    rf2_pert1_dir11         0       0       0
-    rf2_pert1_dir12         0       0       0
-    rf2_pert2_dir1          0       0       0
-    rf2_pert2_dir2          0       0       0
-    rf2_pert2_dir3          1       1       1
-    rf2_pert2_dir4          0       0       0
-    rf2_pert2_dir5          0       0       0
-    rf2_pert2_dir6          0       0       0
-    rf2_pert2_dir7          0       0       0
-    rf2_pert2_dir8          0       0       0
-    rf2_pert2_dir9          0       0       0
-    rf2_pert2_dir10         0       0       0
-    rf2_pert2_dir11         0       0       0
-    rf2_pert2_dir12         0       0       0
             rprim      0.0000000000E+00  5.0230160830E+00  5.0230160830E+00
                        5.0230160830E+00  0.0000000000E+00  5.0230160830E+00
                        5.0230160830E+00  5.0230160830E+00  0.0000000000E+00
