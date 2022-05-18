@@ -476,6 +476,38 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(0)%npsp = mxntypat   ! Default value
  dtsets(1:ndtset_alloc)%npsp = npsp
 
+ ! Reads relax keyword for relaxation algos
+ dtsets(1)%relax = "no"
+ call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'relax', tread, 'KEY', key_value=dtsets(1)%relax)
+ if (tread == 1) then
+   print*, 'relax=', dtsets(1)%relax
+ end if
+ if(ndtset_alloc>1)then
+   do idtset=2,ndtset_alloc
+      dtsets(idtset)%relax = "no"
+      call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'relax', tread, 'KEY', key_value=dtsets(idtset)%relax)
+      if (tread == 1) then
+         print*, 'relax=', dtsets(idtset)%relax
+      end if
+   end do
+ end if
+
+ ! Reads md keyword for molecular dynamics algos
+ dtsets(1)%md = "no"
+ call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'md', tread, 'KEY', key_value=dtsets(1)%md)
+ if (tread == 1) then
+    print*, 'md=', dtsets(1)%md
+ end if
+ if(ndtset_alloc>1)then
+   do idtset=2,ndtset_alloc
+      dtsets(idtset)%md = "no"
+      call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'md', tread, 'KEY', key_value=dtsets(idtset)%md)
+      if (tread == 1) then
+         print*, 'md=', dtsets(idtset)%md
+      end if
+   end do
+ end if
+
  ! Read pseudopotential directory and pseudo paths from input.
  ! Remember that in "files file mode", this info is passed through the files file so these variables are optional
  pp_dirpath = ""
