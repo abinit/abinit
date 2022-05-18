@@ -949,6 +949,8 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
+ character(len=fnlen) :: relax
+ character(len=fnlen) :: md
 
  contains
 
@@ -3331,7 +3333,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
  list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
 !M
- list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
+ list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym md mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' mqgrid mqgriddg'
@@ -3384,7 +3386,7 @@ subroutine chkvars(string)
 !R
  list_vars=trim(list_vars)//' random_atpos ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
- list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
+ list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar relax restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
