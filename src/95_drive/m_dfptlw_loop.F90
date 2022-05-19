@@ -341,7 +341,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
          call WffClose (wff1,ierr)
        end if
 
-       call read_1wf(cg1,eigen1,formeig,mband,mcg,mpi_enreg,mkmem,nsppol,fiwf1i)
+       !TODO:  Complete this subroutine
+!       call read_1wf(cg1,eigen1,formeig,mband,mcg,mpi_enreg,mpw,mkmem,nspinor,nsppol,fiwf1i)
 
        rho1r1(:,:) = zero; rho1g1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
@@ -963,8 +964,9 @@ end subroutine dfptlw_typeIproc
 !!   1 => respfn format 
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband_mem*mkmem*nsppol
-!!  mpi_enreg=information about MPI parallelization
+!!  mpi_enreg=MPI-parallelisation information
 !!  nkpt= number of k points
+!!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  wffnm=name (character data) of file for input wavefunctions.
 !!
@@ -989,32 +991,34 @@ end subroutine dfptlw_typeIproc
 #include "abi_common.h"
 
 
-subroutine read_1wf(cg,eigen,formeig,mband,mcg,mpi_enreg,nkpt,nsppol,wffnm)
+subroutine read_1wf(cg,eigen,formeig,mband,mcg,mpi_enreg,mpw,nkpt,nspinor,nsppol,wffnm)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: formeig,mband,mcg,nkpt,nsppol
- character(len=*),intent(inout) :: wffnm
+ integer,intent(in) :: formeig,mband,mcg,mpw,nkpt,nspinor,nsppol
  type(MPI_type),intent(in) :: mpi_enreg
+ character(len=*),intent(inout) :: wffnm
 !arrays
  real(dp),intent(out) :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol)
 
 !Local variables-------------------------------
 !scalar 
- integer :: iomode,master, my_rank
+ integer :: comm,ierr,iband,ik_bz,iomode,isppol,master,my_rank
  type(wfk_t) :: Wfk1
  type(hdr_type) :: hdr1
  character(len=500) :: msg
 !arrays
+ real(dp),allocatable :: cg_buffer(:,:),eig_buffer(:)
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
+DBG_ENTER("COLL")
 
+ comm = xmpi_world
  master = 0
- my_rank = mpi_enreg%me
+ my_rank = xmpi_comm_rank(comm)
 
  ! Master opens the 1WF file
  if (my_rank == master) then
@@ -1039,9 +1043,40 @@ subroutine read_1wf(cg,eigen,formeig,mband,mcg,mpi_enreg,nkpt,nsppol,wffnm)
    call wfk_open_read(Wfk1, wffnm, formeig, iomode, get_unit(), xmpi_comm_self, Hdr_out=hdr1)
  end if
 
+ ! Master Broadcasts the header to all procs in comm
+ call hdr1%bcast(master, my_rank, comm)
+
+ !Allocate buffer for MPI communicatio with max dimensions.
+ ABI_MALLOC(cg_buffer,(2,mpw*nspinor*mband))
+ ABI_MALLOC(eig_buffer,((2*mband)**formeig*mband*nsppol))
+
+ do isppol=1,nsppol
+   do ik_bz=1,hdr1%nkpt
+     do iband=1,mband
+
+       ! Master reads and broadcasts
+       if (my_rank == master) then
+         call Wfk1%read_band_block([iband,iband], ik_bz, isppol, xmpio_single, &
+       & cg_k=cg_buffer,eig_k=eig_buffer)
+       end if
+       call xmpi_bcast(cg_buffer, master, comm, ierr)
+       call xmpi_bcast(eig_buffer, master, comm, ierr)
+
+       !Pseudo code: If this proc treats this (ik_bz, spin), copy the buffer at the right location
+       ! in my cg array
+       if(mpi_enreg%proc_distrb(ik_bz,iband,isppol) == mpi_enreg%me_kpt) then
+!         cg(:, :, my_ik, my_spin) = cg_buffer
+       end if
+
+     end do
+   end do
+ end do
 
  if (my_rank == master) call Wfk1%close()
  call hdr1%free()
+
+ ABI_FREE(cg_buffer)
+ ABI_FREE(eig_buffer)
 
  DBG_EXIT("COLL")
 
