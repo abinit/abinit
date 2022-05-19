@@ -56,21 +56,7 @@ module m_mover
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
- use m_pred_delocint,      only : pred_delocint
- use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- use m_pred_fire,          only : pred_fire
- use m_pred_isokinetic,    only : pred_isokinetic
- use m_pred_diisrelax,     only : pred_diisrelax
- use m_pred_nose,          only : pred_nose
- use m_pred_srkhna14,      only : pred_srkna14
- use m_pred_isothermal,    only : pred_isothermal
- use m_pred_verlet,        only : pred_verlet
- use m_pred_velverlet,     only : pred_velverlet
- use m_pred_moldyn,        only : pred_moldyn
- use m_pred_langevin,      only : pred_langevin
- use m_pred_steepdesc,     only : pred_steepdesc
- use m_pred_simple,        only : pred_simple, prec_simple
- use m_pred_hmc,           only : pred_hmc
+ use m_pred_simple,        only : prec_simple
 !use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
