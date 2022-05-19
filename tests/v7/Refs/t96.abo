@@ -861,19 +861,6 @@ P          mk1mem13         8
             prtwf26         0
             prtwf12         0
             prtwf13         0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-          rfatpol22         1       1
-          rfatpol23         1       1
-          rfatpol24         1       1
-          rfatpol25         1       1
-          rfatpol26         1       1
-          rfatpol12         1       4
-          rfatpol13         1       4
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -15443,19 +15430,6 @@ P          mk1mem13         8
             prtwf26         0
             prtwf12         0
             prtwf13         0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-          rfatpol22         1       1
-          rfatpol23         1       1
-          rfatpol24         1       1
-          rfatpol25         1       1
-          rfatpol26         1       1
-          rfatpol12         1       4
-          rfatpol13         1       4
            rfphon1          0
            rfphon2          0
            rfphon3          0

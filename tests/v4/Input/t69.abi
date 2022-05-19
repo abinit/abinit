@@ -4,6 +4,8 @@
 
   ndtset  3
 
+   rfdir 1 0 0
+
 #Ground state calculation
   kptopt1   1             # Automatic generation of k points, taking
                           # into account the symmetry
@@ -13,7 +15,7 @@
 
 #Response Function calculation : d/dk
   rfelfd2   2             # Activate the calculation of the d/dk perturbation
-   rfdir2   1 1 1         # Need to consider the perturbation in the x-direction only
+   rfdir2   1 0 0        # Need to consider the perturbation in the x-direction only
 
     nqpt2   1
      qpt2   0.0 0.0 0.0   # This is a calculation at the Gamma point
@@ -31,9 +33,8 @@
 
 #Response Function calculation : electric field perturbation and phonons
   rfphon3   1             # Activate the calculation of the atomic dispacement perturbations
- rfatpol3   1 2           # All the atoms will be displaced
   rfelfd3   3             # Activate the calculation of the electric field perturbation
-   rfdir3   1 1 1         # Need to consider the perturbation in the x-direction only
+   rfdir3   1 0 0         # Need to consider the perturbation in the x-direction only
    rfstrs3  3
     nqpt3   1
      qpt3   0.0 0.0 0.0   # This is a calculation at the Gamma point

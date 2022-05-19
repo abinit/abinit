@@ -233,11 +233,6 @@ P          mk1mem           1
            prtpot13         1
            prtpot14         1
            prtpot15         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
@@ -2123,11 +2118,6 @@ P          mk1mem           1
            prtpot13         1
            prtpot14         1
            prtpot15         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2

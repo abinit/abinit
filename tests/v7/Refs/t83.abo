@@ -174,10 +174,6 @@ P          mk1mem           1
            prtpot2          0
            prtpot3          0
            prtpot4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -1388,10 +1384,6 @@ P          mk1mem           1
            prtpot2          0
            prtpot3          0
            prtpot4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
            rfphon1          0
            rfphon2          0
            rfphon3          0

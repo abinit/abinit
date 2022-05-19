@@ -185,7 +185,6 @@ P          mk1mem           8
               qpt3     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt4     5.00000000E-01  5.00000000E-01  0.00000000E+00
             rfasr           1
-          rfatpol           1       2
            rfphon1          0
            rfphon2          1
            rfphon3          0
@@ -1839,7 +1838,6 @@ P          mk1mem           8
               qpt3     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt4     5.00000000E-01  5.00000000E-01  0.00000000E+00
             rfasr           1
-          rfatpol           1       2
            rfphon1          0
            rfphon2          1
            rfphon3          0

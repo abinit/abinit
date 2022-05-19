@@ -32,8 +32,8 @@
  getden2   1
    iscf2  -3
    nqpt2   1
-  rfdir2   1 1 1
  rfelfd2   2
+  rfdir2   1 0 0
 
 #DATASET 3 : phonon and electric field perturbations
   getddk3   2
@@ -54,8 +54,8 @@
  getden5   4
    iscf5  -3
    nqpt5   1
-  rfdir5   1 1 1
  rfelfd5   2
+  rfdir5   1 0 0
 
 #DATASET 6 : phonon and electric field perturbations
   getddk6   5
@@ -75,8 +75,6 @@
  nstep 20
  ntypat  1
  qpt    3*0.0d0
- rfatpol   1 2
- rfdir     1 1 1
  tolwfr  1.0d-16
  typat  1 1
  xred  3*0.231d0

@@ -99,7 +99,7 @@ P          mk1mem           1
         optdriver2          1
            prtpot1          0
            prtpot2          1
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
             rfdir1          1       1       1
             rfdir2          1       0       0
@@ -564,7 +564,7 @@ P          mk1mem           1
         optdriver2          1
            prtpot1          0
            prtpot2          1
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
             rfdir1          1       1       1
             rfdir2          1       0       0

@@ -1,4 +1,4 @@
-#Definition of primitive cell
+ Definition of primitive cell
 #****************************
    acell 3*1.0616530850E+01
    rprim 0.0 0.5 0.5
@@ -41,6 +41,9 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
  ndtset 7   # jdtset 1 2 3 4 5
 #ndtset 1     jdtset 5
 
+ rfatpol 1 1
+   rfdir 1 0 0
+
 #DATASET1 : scf calculation: GS WF in the BZ
 #********************************************
    prtden1   1
@@ -70,7 +73,6 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
 #DATASET3 : ddk on the MP grid of k-points
 #*****************************************
    getwfk3   2
-    rfdir3   1 0 0
    rfelfd3   2
    tolwfr3   1.0d-18
     nband3   4
@@ -87,11 +89,9 @@ d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
    prtden4   1
    getwfk4   2
    getddk4   3
-    rfdir4   1 0 0
    toldfe4   0.8d-10 # For portability concerns
    rfelfd4   3
    rfphon4   1
-  rfatpol4   1 1
     nband4   4
    kptopt4   2
   nshiftk4   4

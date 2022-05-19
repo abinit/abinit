@@ -240,11 +240,11 @@ P          mk1mem5          1
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     0.00000000E+00  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
+          rfatpol1          1       2
+          rfatpol2          1       2
           rfatpol3          2       2
-          rfatpol4          1       1
-          rfatpol5          1       1
+          rfatpol4          1       2
+          rfatpol5          1       2
             rfdir1          1       1       1
             rfdir2          1       1       1
             rfdir3          1       0       0
@@ -1301,11 +1301,11 @@ P          mk1mem5          1
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     0.00000000E+00  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
+          rfatpol1          1       2
+          rfatpol2          1       2
           rfatpol3          2       2
-          rfatpol4          1       1
-          rfatpol5          1       1
+          rfatpol4          1       2
+          rfatpol5          1       2
             rfdir1          1       1       1
             rfdir2          1       1       1
             rfdir3          1       0       0

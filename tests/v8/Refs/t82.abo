@@ -465,13 +465,6 @@ P          mk1mem7         16
            prtpot5          1
            prtpot6          1
            prtpot7          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       1
-          rfatpol7          1       1
             rfddk1          0
             rfddk2          0
             rfddk3          1
@@ -3201,13 +3194,6 @@ P          mk1mem7         16
            prtpot5          1
            prtpot6          1
            prtpot7          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       1
-          rfatpol7          1       1
             rfddk1          0
             rfddk2          0
             rfddk3          1

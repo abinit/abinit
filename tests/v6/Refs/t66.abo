@@ -580,21 +580,6 @@ P          mk1mem           5
            prtpot33         1
            prtpot34         1
            prtpot35         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       1
-          rfatpol24         1       2
-          rfatpol25         1       1
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       1
-          rfatpol34         1       2
-          rfatpol35         1       1
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
@@ -5713,21 +5698,6 @@ P          mk1mem           5
            prtpot33         1
            prtpot34         1
            prtpot35         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
-          rfatpol21         1       1
-          rfatpol22         1       1
-          rfatpol23         1       1
-          rfatpol24         1       2
-          rfatpol25         1       1
-          rfatpol31         1       1
-          rfatpol32         1       1
-          rfatpol33         1       1
-          rfatpol34         1       2
-          rfatpol35         1       1
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2

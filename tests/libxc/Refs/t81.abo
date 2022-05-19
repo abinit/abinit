@@ -952,6 +952,7 @@ P          mk1mem37        16
            prtpot35         1
            prtpot36         1
            prtpot37         1
+          rfatpol           1       1
             rfdir11         1       1       1
             rfdir12         1       1       1
             rfdir13         1       1       1
@@ -6066,6 +6067,7 @@ P          mk1mem37        16
            prtpot35         1
            prtpot36         1
            prtpot37         1
+          rfatpol           1       1
             rfdir11         1       1       1
             rfdir12         1       1       1
             rfdir13         1       1       1

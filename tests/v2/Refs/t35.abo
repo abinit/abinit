@@ -146,9 +146,9 @@ P          mk1mem           1
            prtpot2          0
            prtpot3          0
            prtpot4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
+          rfatpol1          1       2
+          rfatpol2          1       2
+          rfatpol3          1       2
           rfatpol4          2       2
             rfdir1          1       1       1
             rfdir2          1       1       1
@@ -906,9 +906,9 @@ P          mk1mem           1
            prtpot2          0
            prtpot3          0
            prtpot4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
+          rfatpol1          1       2
+          rfatpol2          1       2
+          rfatpol3          1       2
           rfatpol4          2       2
             rfdir1          1       1       1
             rfdir2          1       1       1

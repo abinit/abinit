@@ -253,20 +253,8 @@ P          mk1mem           1
               qpt12    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt13    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt14    1.00000000E-01  1.00000000E-01  2.00000000E-01
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          3       3
-          rfatpol4          3       3
-          rfatpol12         1       1
-          rfatpol13         3       3
-          rfatpol14         3       3
-            rfdir1          1       1       1
-            rfdir2          1       1       1
-            rfdir3          0       0       1
-            rfdir4          0       0       1
-            rfdir12         1       1       1
-            rfdir13         0       0       1
-            rfdir14         0       0       1
+          rfatpol           3       3
+            rfdir           0       0       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -2509,20 +2497,8 @@ P          mk1mem           1
               qpt12    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt13    1.00000000E-01  1.00000000E-01  2.00000000E-01
               qpt14    1.00000000E-01  1.00000000E-01  2.00000000E-01
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          3       3
-          rfatpol4          3       3
-          rfatpol12         1       1
-          rfatpol13         3       3
-          rfatpol14         3       3
-            rfdir1          1       1       1
-            rfdir2          1       1       1
-            rfdir3          0       0       1
-            rfdir4          0       0       1
-            rfdir12         1       1       1
-            rfdir13         0       0       1
-            rfdir14         0       0       1
+          rfatpol           3       3
+            rfdir           0       0       1
            rfphon1          0
            rfphon2          0
            rfphon3          1

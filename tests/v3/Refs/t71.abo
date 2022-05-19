@@ -193,18 +193,8 @@ P          mk1mem           1
            prtpot4          0
            prtpot5          0
            prtpot6          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          2       2
-            rfdir1          1       1       1
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          1       1       1
-            rfdir6          1       0       0
+          rfatpol           2       2
+            rfdir           1       0       0
            rfmeth1          1
            rfmeth2          1
            rfmeth3          1
@@ -1302,18 +1292,8 @@ P          mk1mem           1
            prtpot4          0
            prtpot5          0
            prtpot6          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          2       2
-            rfdir1          1       1       1
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          1       1       1
-            rfdir6          1       0       0
+          rfatpol           2       2
+            rfdir           1       0       0
            rfmeth1          1
            rfmeth2          1
            rfmeth3          1

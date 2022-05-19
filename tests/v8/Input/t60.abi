@@ -20,7 +20,6 @@
      nbdbuf1   0
 
   # RF calculation of ddk
-    rfdir2   1 1 1
     rfelfd2  2
     kptopt2  2
     tolwfr2  1.0d-8
@@ -31,8 +30,6 @@
 
   # RF calculation of phonons and electric field perturbation
     rfphon3  1
-    rfatpol3  1 2
-    rfdir3   1 1 1
     rfelfd3  3
     kptopt3  2
     tolvrs3  1.0d-10
