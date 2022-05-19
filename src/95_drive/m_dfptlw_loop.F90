@@ -26,6 +26,49 @@
 
 module m_dfptlw_loop
 
+ use defs_basis
+ use defs_wvltypes
+ use m_errors
+ use m_abicore
+ use m_hdr
+ use m_nctk
+ use m_wffile
+ use m_wfk
+ use m_dtset
+ use m_dtfil
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_time,        only : timab
+ use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
+ use m_kg,          only : getcut,getph
+ use m_inwffil,     only : inwffil
+ use m_fft,         only : fourdp
+ use m_ioarr,       only : read_rhor
+ use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
+ use m_pawdij,      only : pawdij, pawdijfr, symdij
+ use m_pawfgr,      only : pawfgr_type
+ use m_pawfgrtab,   only : pawfgrtab_type
+ use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
+ use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags, paw_ij_print
+ use m_pawang,      only : pawang_type
+ use m_pawrad,      only : pawrad_type
+ use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
+&                          pawrhoij_io, pawrhoij_inquire_dim
+ use m_paw_nhat,    only : pawmknhat,pawnhatfr
+ use m_paw_denpot,  only : pawdenpot
+ use m_pawtab,      only : pawtab_type
+ use m_rf2,         only : rf2_getidir
+ use m_initylmg,    only : initylmg
+ use m_atm2fft,     only : dfpt_atm2fft
+ use m_dfpt_mkvxc,  only : dfpt_mkvxc
+ use m_dfpt_rhotov, only : dfpt_rhotov
+ use m_mkcore,      only : dfpt_mkcore
+ use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vmetdqdq 
+ use m_dfptlw_pert, only : dfptlw_pert
+ use m_dynmat,      only : cart39
+ use m_xmpi
+
  implicit none
 
  private
@@ -115,48 +158,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
 & npwarr,occ,&
 & pawfgr,pawrad,pawrhoij,pawtab,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,vxc,xred)
-
- use defs_basis
- use defs_wvltypes
- use m_errors
- use m_abicore
- use m_hdr
- use m_nctk
- use m_wffile
- use m_wfk
- use m_dtset
- use m_dtfil
-
- use defs_datatypes, only : pseudopotential_type
- use defs_abitypes, only : MPI_type
- use m_time,        only : timab
- use m_io_tools,    only : file_exists
- use m_kg,          only : getcut,getph
- use m_inwffil,     only : inwffil
- use m_fft,         only : fourdp
- use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : gs_hamiltonian_type, init_hamiltonian
- use m_pawdij,      only : pawdij, pawdijfr, symdij
- use m_pawfgr,      only : pawfgr_type
- use m_pawfgrtab,   only : pawfgrtab_type
- use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
- use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags, paw_ij_print
- use m_pawang,      only : pawang_type
- use m_pawrad,      only : pawrad_type
- use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
-&                          pawrhoij_io, pawrhoij_inquire_dim
- use m_paw_nhat,    only : pawmknhat,pawnhatfr
- use m_paw_denpot,  only : pawdenpot
- use m_pawtab,      only : pawtab_type
- use m_rf2,         only : rf2_getidir
- use m_initylmg,    only : initylmg
- use m_atm2fft,     only : dfpt_atm2fft
- use m_dfpt_mkvxc,  only : dfpt_mkvxc
- use m_dfpt_rhotov, only : dfpt_rhotov
- use m_mkcore,      only : dfpt_mkcore
- use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vmetdqdq 
- use m_dfptlw_pert, only : dfptlw_pert
- use m_dynmat,      only : cart39
 
  implicit none
 
@@ -335,9 +336,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
        & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
        & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
 
+
        if (ireadwf==1) then
          call WffClose (wff1,ierr)
        end if
+
+       call read_1wf(cg1,eigen1,formeig,mband,mcg,mpi_enreg,mkmem,nsppol,fiwf1i)
 
        rho1r1(:,:) = zero; rho1g1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
@@ -936,6 +940,112 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
  DBG_EXIT("COLL")
 
 end subroutine dfptlw_typeIproc
+!!***
+
+!!****f* ABINIT/m_dfptlw_loop/read_1wf
+!! NAME
+!!  read_1wf
+!!
+!! FUNCTION
+!!
+!!  Reads all the first-order wave functions and energies from
+!!  a given _1WF file. Data is read by the master and broadcasted.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2022 ABINIT group (MR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! formeig option (format of the eigenvalues and occupations) :
+!!   0 => ground-state format 
+!!   1 => respfn format 
+!!  mband=maximum number of bands
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband_mem*mkmem*nsppol
+!!  mpi_enreg=information about MPI parallelization
+!!  nkpt= number of k points
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  wffnm=name (character data) of file for input wavefunctions.
+!!
+!! OUTPUT
+!!  cg(2,mcg)=complex wf array
+!!  eigen(2*mband*mband*nkpt*nsppol)=matrix of eigenvalues
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine read_1wf(cg,eigen,formeig,mband,mcg,mpi_enreg,nkpt,nsppol,wffnm)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: formeig,mband,mcg,nkpt,nsppol
+ character(len=*),intent(inout) :: wffnm
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ real(dp),intent(out) :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol)
+
+!Local variables-------------------------------
+!scalar 
+ integer :: iomode,master, my_rank
+ type(wfk_t) :: Wfk1
+ type(hdr_type) :: hdr1
+ character(len=500) :: msg
+!arrays
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ master = 0
+ my_rank = mpi_enreg%me
+
+ ! Master opens the 1WF file
+ if (my_rank == master) then
+   iomode = iomode_from_fname(wffnm)
+
+   !Check that atdis file exists and open it
+   if (.not. file_exists(wffnm)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(wffnm))) then
+       write(msg,"(3a)")"- File: ",trim(wffnm),&
+       " does not exist but found netcdf file with similar name."
+       call wrtout(std_out,msg,'COLL')
+       wffnm = nctk_ncify(wffnm)
+     end if
+     if (.not. file_exists(wffnm)) then
+       ABI_ERROR('Missing file: '//TRIM(wffnm))
+     end if
+   end if
+   write(msg,'(a,a)')'-open 1wf file :',trim(wffnm)
+   call wrtout(std_out,msg,'COLL')
+
+   call wfk_open_read(Wfk1, wffnm, formeig, iomode, get_unit(), xmpi_comm_self, Hdr_out=hdr1)
+ end if
+
+
+ if (my_rank == master) call Wfk1%close()
+ call hdr1%free()
+
+ DBG_EXIT("COLL")
+
+end subroutine read_1wf
 !!***
 
 end module m_dfptlw_loop
