@@ -370,12 +370,8 @@ P          mk1mem3         72
            prtpot1          0
            prtpot2          0
            prtpot3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          2       2
-            rfdir1          1       1       1
-            rfdir2          1       1       1
-            rfdir3          0       0       1
+          rfatpol           2       2
+            rfdir           0       0       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1290,12 +1286,8 @@ P          mk1mem3         72
            prtpot1          0
            prtpot2          0
            prtpot3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          2       2
-            rfdir1          1       1       1
-            rfdir2          1       1       1
-            rfdir3          0       0       1
+          rfatpol           2       2
+            rfdir           0       0       1
            rfphon1          0
            rfphon2          0
            rfphon3          1

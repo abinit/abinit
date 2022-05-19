@@ -68,7 +68,6 @@ ndtset 5     jdtset 1 2 3 4 5
 #DATASET3 : ddk on the MP grid of k-points
 #*****************************************
    getwfk3    2
-    rfdir3    1 1 1
    rfelfd3    2
    tolwfr3    1.0d-22
    kptopt3    2
@@ -78,9 +77,7 @@ ndtset 5     jdtset 1 2 3 4 5
    prtden4    1
    getwfk4    2
    getddk4    3
-    rfdir4    1 1 1
    rfphon4    1
-  rfatpol4    1 2
    tolvrs4    1.0d-22
    rfelfd4    3
    kptopt4    2

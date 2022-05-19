@@ -85,7 +85,6 @@
 # DATASET3 : ddk (SCF cycles are useless)
 #*******************************
     rfddk3   1
-    rfdir3   1 1 1
 # For a more effective non self-consistent computation:
     nstep3   1
     nline3   100
@@ -97,8 +96,6 @@
 #*******************************
    rfelfd4   3
    rfphon4   1
-  rfatpol4   1 2
-    rfdir4   1 1 1
    getddk4   3
    prtden4   1
   prepanl4   1

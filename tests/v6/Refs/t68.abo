@@ -109,7 +109,6 @@ P          mk1mem           1
         optdriver2          1
            prtpot1          0
            prtpot2          1
-          rfatpol           1       2
            rfphon1          0
            rfphon2          1
           smdelta1          0
@@ -1323,7 +1322,6 @@ P          mk1mem           1
         optdriver2          1
            prtpot1          0
            prtpot2          1
-          rfatpol           1       2
            rfphon1          0
            rfphon2          1
           smdelta1          0

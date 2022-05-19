@@ -158,9 +158,6 @@ P          mk1mem3          8
             prtwf1          1
             prtwf2          1
             prtwf3          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
            rfelfd1          0
            rfelfd2          0
            rfelfd3          3
@@ -1644,9 +1641,6 @@ P          mk1mem3          8
             prtwf1          1
             prtwf2          1
             prtwf3          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
            rfelfd1          0
            rfelfd2          0
            rfelfd3          3
