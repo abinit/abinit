@@ -1135,7 +1135,7 @@ end function xmpi_comm_rank
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  xmpi_comm_size=The number of processors inside comm.
+!!  xmpi_comm_size=The number of processors inside comm. Return 0 if comm = xmpi_comm_null
 !!
 !! PARENTS
 !!
@@ -1155,9 +1155,8 @@ function xmpi_comm_size(comm)
 
  mpierr=0; xmpi_comm_size=1
 #ifdef HAVE_MPI
- if (comm/=xmpi_comm_null) then
-   call MPI_COMM_SIZE(comm,xmpi_comm_size,mpierr)
- end if
+ xmpi_comm_size = 0
+ if (comm /= xmpi_comm_null) call MPI_COMM_SIZE(comm,xmpi_comm_size,mpierr)
 #endif
 
 end function xmpi_comm_size

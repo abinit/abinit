@@ -368,10 +368,6 @@ type, public :: gstore_t
   !real(dp) :: kshift(3, 1), qshift(3, 1)
   ! k/q-mesh shift (well, q-mesh is usually gamma-centered)
 
-  !real(dp) :: klatt(3, 3), qlatt(3, 3)
-  ! Reciprocal of lattice vectors for full kpoint grid.
-  ! Used by tetra routines.
-
   type(xcomm_t) :: spin_comm
     ! MPI communicator over spins (nsppol = 2)
 
@@ -384,7 +380,6 @@ type, public :: gstore_t
 
   !type(htetra_t) :: qtetra
   ! Used to evaluate integrals in q-space with the tetrahedron method.
-
 
 contains
 
@@ -454,7 +449,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, iq_glob, ik_glob, ii ! out_nkibz,
  integer :: my_is, my_ik, my_iq, spin, natom3, cnt, np, band, iflag ! bstart, bstop, nw,
  integer :: ik_ibz, ik_bz, ebands_timrev, nk_in_star  ! isym_k, trev_k,
- integer :: iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr  !isym_q, trev_q,
+ integer :: iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, color  !isym_q, trev_q,
  real(dp) :: cpu, wall, gflops, dksqmax, max_occ, mem_mb ! , elow, ehigh, estep
  !logical :: isirr_k, isirr_q
  character(len=5000) :: msg
@@ -509,11 +504,9 @@ function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
  gstore%with_vk = 0      ! = dtset%gstore_with_vk
 
  !gstore%kptrlatt(3, 3)
- !gstore%qptrlatt(3, 3)
  !gstore%kshift(3, 1)
+ !gstore%qptrlatt(3, 3)
  !gstore%qshift(3, 1)
- !gstore%klatt(3, 3)
- !gstore%qlatt(3, 3)
  !gstore%spin_comm
 
  ! Distribute spins and create mapping to spin index.
@@ -523,18 +516,26 @@ function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
  !end if
  !if (any(dtset%eph_np_pqbks /= 0)) gstore%spin_comm%nproc = dtset%eph_np_pqbks(5)
 
- !if (gstore%nsppol == 2) then
- !  call xmpi_split_block(gstore%nsppol, gstore%spin_comm%value, gstore%my_nspins, gstore%my_spins)
- !  msg = sjoin("nsppol (", itoa(gstore%nsppol), ") < spin_comm_nproc (", itoa(gstore%spin_comm%nproc), ")")
- !  ABI_CHECK(gstore%my_nspins > 0, msg)
- !else
+ if (gstore%nsppol == 2) then
+   call xmpi_split_block(gstore%nsppol, gstore%comm, gstore%my_nspins, gstore%my_spins)
+   !msg = sjoin("nsppol (", itoa(gstore%nsppol), ") < spin_comm_nproc (", itoa(gstore%spin_comm%nproc), ")")
+   !ABI_CHECK(gstore%my_nspins > 0, msg)
+ else
    ! No nsppol parallelism DOH!
    gstore%my_nspins = 1
    ABI_MALLOC(gstore%my_spins, (gstore%my_nspins))
    gstore%my_spins = 1
- !end if
+ end if
 
- comm_spin(:) = comm
+ !comm_spin(:) = comm
+
+ do spin=1,nsppol
+   ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling
+   ! MPI process will be placed is MPI_COMM_NULL
+   color = xmpi_undefined; if (any(gstore%my_spins == spin)) color = 1
+   call xmpi_comm_split(comm, color, my_rank, comm_spin(spin), ierr)
+ end do
+
  ABI_MALLOC(gstore%gqk, (gstore%my_nspins))
  do spin=1,nsppol
    nproc_spin(spin) = xmpi_comm_size(comm_spin(spin))
@@ -687,7 +688,6 @@ function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
 
    ABI_MALLOC(eig_ibz, (gstore%nkibz))
    max_occ = two / (ebands%nspinor * ebands%nsppol)
-
    select_kbz_spin = 0
 
    cnt = 0
@@ -701,7 +701,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
                                      gstore%nkibz, eig_ibz, delta_theta_ef)
          iflag = merge(1, 0, abs(delta_theta_ef(1)) > zero)
 
-         ! Filter k-points.
+         ! Use iflag to filter k-points.
          select case (gstore%kzone)
          case ("ibz")
            ik_bz = kibz2bz(ik_ibz)
@@ -944,6 +944,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm) result (gstore)
 
    ! Note comm_spin(spin)
    gqk%grid_comm = xcomm_from_mpi_int(comm_spin(spin))
+   !call xmpi_comm_free(comm_spin(spin))
 
    call MPI_CART_CREATE(gqk%grid_comm, ndims, dims, periods, reorder, comm_cart, ierr)
 

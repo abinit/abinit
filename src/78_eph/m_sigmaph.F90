@@ -3048,6 +3048,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
     ! Only SIGPEPH.nc will contain all the results.
     ! Remember that now all nc define operations must be done inside ncwrite_comm
     ! Obviously I'm assuming HDF5 + MPI-IO
+    !
+    ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling
+    ! MPI process will be placed is MPI_COMM_NULL
+
     color = xmpi_undefined; if (all(new%coords_pqbks(1:3) == 0)) color = 1
     call xmpi_comm_split(comm, color, my_rank, new%ncwrite_comm%value, ierr)
     if (color == 1) then
