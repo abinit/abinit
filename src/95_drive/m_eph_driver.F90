@@ -736,7 +736,7 @@ endif
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-    call gstore%calc_my_phonons(store_phdispl=.False.)
+    !call gstore%calc_my_phonons(store_phdispl=.False.)
     call gstore%ncwrite_path("foo.nc", cryst, ebands)
     call gstore%free()
 
@@ -767,10 +767,6 @@ endif
      ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
      call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
    end if
-
-
-
-
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
