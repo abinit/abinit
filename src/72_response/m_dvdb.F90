@@ -20,6 +20,9 @@
 !!  Do we still need to support the case in which the potentials are read from file
 !!  without interpolation? We know that IO is gonna be terrible.
 !!
+!!  - Check spin and MPI-parallelism. Can we distributed nsppol?
+!!  - Release potentials if FFT
+!!
 !! PARENTS
 !!
 !! SOURCE

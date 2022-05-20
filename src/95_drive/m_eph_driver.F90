@@ -737,7 +737,7 @@ endif
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
     !call gstore%calc_my_phonons(store_phdispl=.False.)
-    call gstore%ncwrite_path("foo.nc", cryst, ebands)
+    call gstore%ncwrite_path(strcat(dtfil%filnam_ds(4), "_GSTORE.nc"), cryst, ebands)
     call gstore%free()
 
  case (15, -15)
