@@ -691,7 +691,6 @@ CONTAINS  !===========================================================
 !!      mrgscr,multibinit,optic,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -788,7 +787,6 @@ end subroutine xmpi_init
 !!      m_argparse
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -852,7 +850,6 @@ end function xmpi_get_unit
 !!      macroave,mrggkk,testtransposer,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -896,7 +893,6 @@ end subroutine xmpi_end
 !!      m_errors,m_initcuda,m_libpaw_tools,m_mpinfo,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -988,7 +984,6 @@ end subroutine xmpi_abort
 !!      m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1032,7 +1027,6 @@ end subroutine sys_exit
 !!      abinit,m_argparse,m_errors
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1178,7 +1172,6 @@ end function xmpi_comm_size
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1233,7 +1226,6 @@ end subroutine xmpi_comm_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1283,7 +1275,6 @@ end subroutine xmpi_comm_free_1D
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1336,7 +1327,6 @@ end subroutine xmpi_comm_free_2D
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1392,7 +1382,6 @@ end subroutine xmpi_comm_free_3D
 !!      m_paw_tools,m_wfd,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1450,7 +1439,6 @@ end subroutine xmpi_group_free
 !!      m_wfd
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1496,7 +1484,6 @@ end subroutine xmpi_group_incl
 !!      m_wfd
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1611,7 +1598,6 @@ end function xmpi_subcomm
 !!      m_paw_tools,m_wfd,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1656,7 +1642,6 @@ end subroutine xmpi_comm_group
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1703,7 +1688,6 @@ end subroutine xmpi_comm_split
 !!      m_paw_tools,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1755,7 +1739,6 @@ end subroutine xmpi_group_translate_ranks
 !!      m_paral_pert
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1812,7 +1795,6 @@ end subroutine xmpi_comm_translate_ranks
 !!      m_wfk,m_wfk_analyze,testtransposer
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1857,7 +1839,6 @@ end subroutine xmpi_barrier
 !!      m_gpu_detect
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1911,7 +1892,6 @@ end subroutine xmpi_name
 !!      m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1959,7 +1939,6 @@ end subroutine xmpi_iprobe
 !!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002,m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2006,7 +1985,6 @@ end subroutine xmpi_wait
 !!      m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2052,7 +2030,6 @@ end subroutine xmpi_waitall_1d
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2095,7 +2072,6 @@ end subroutine xmpi_waitall_2d
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2140,7 +2116,6 @@ end subroutine xmpi_request_free
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2261,7 +2236,6 @@ end subroutine xmpi_comm_set_errhandler
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2315,7 +2289,6 @@ end subroutine xmpi_split_work_i4b
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2361,7 +2334,6 @@ end subroutine xmpi_split_block
 !!      m_phgamma,m_sigmaph
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2419,7 +2391,6 @@ end subroutine xmpi_split_cyclic
 !!      m_phgamma
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2488,7 +2459,6 @@ end subroutine xmpi_split_list
 !!      m_exc_build,m_phonons,m_screening,m_screening_driver,m_skw
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2540,7 +2510,6 @@ end subroutine xmpi_split_work2_i4b
 !!      m_exc_build
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2593,7 +2562,6 @@ end subroutine xmpi_split_work2_i8b
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2746,7 +2714,6 @@ end function xmpi_distrib_with_replicas
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3024,7 +2991,6 @@ end subroutine xmpi_largetype_create
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3108,7 +3074,6 @@ end subroutine xmpi_largetype_free
 !!      m_slk,m_wffile,m_wfk,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3341,7 +3306,6 @@ end subroutine xmpio_get_info_frm
 !!      m_bse_io,m_exc_diago,m_exc_itdiago,m_hdr,m_io_screening,m_xmpi
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3472,7 +3436,6 @@ end subroutine xmpio_read_frm
 !!      m_ioarr
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3611,7 +3574,6 @@ end subroutine xmpio_write_frm
 !!      m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3706,7 +3668,6 @@ end subroutine xmpio_create_fstripes
 !!      m_exc_build,m_exc_itdiago,m_mpiotk,m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3796,7 +3757,6 @@ end subroutine xmpio_create_fsubarray_2D
 !!      m_mpiotk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3898,7 +3858,6 @@ end subroutine xmpio_create_fsubarray_3D
 !!      m_mpiotk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4009,7 +3968,6 @@ end subroutine xmpio_create_fsubarray_4D
 !!      m_bse_io,m_exc_itdiago,m_slk,m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4195,7 +4153,6 @@ end subroutine xmpio_check_frmarkers
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4292,7 +4249,6 @@ end subroutine xmpio_read_int
 !! PARENTS
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4413,7 +4369,6 @@ end function xmpio_max_address
 !!      m_exc_build,m_exc_itdiago,m_ioarr,m_slk,m_wfk
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4613,7 +4568,6 @@ end subroutine xmpio_write_frmarkers
 !!      m_exc_build
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4767,7 +4721,6 @@ end subroutine xmpio_create_fherm_packed
 !!      m_bse_io
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4899,7 +4852,6 @@ end subroutine xmpio_create_coldistr_from_fpacked
 !!      m_bse_io
 !!
 !! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
