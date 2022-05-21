@@ -566,6 +566,9 @@ end subroutine cwtime
 !!  wall= wall clock time in seconds
 !!  gflops = Gigaflops
 !!
+!! OUTPUT
+!!  [out_wall]= Output wall-time.
+!!
 !! PARENTS
 !!      m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg,m_fstab,m_gruneisen,m_ifc
 !!      m_ioarr,m_iowf,m_phgamma,m_phonons,m_rmm_diis,m_rta,m_sigmaph,m_skw
@@ -576,7 +579,7 @@ end subroutine cwtime
 !!
 !! SOURCE
 
-subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
+subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -585,6 +588,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  integer,intent(in),optional :: comm
  character(len=*),intent(in) :: tag
  character(len=*),optional,intent(in) :: pre_str, end_str
+ real(dp),optional,intent(out) :: out_wall
 
 !Local variables-------------------------------
 !scalars
@@ -604,6 +608,8 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
+ if (present(out_wall)) out_wall = wall
+
  call cwtime(cpu, wall, gflops, "start")
 
  ! Activate this line to get mallinfo section for each checkpoint
