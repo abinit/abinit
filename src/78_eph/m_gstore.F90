@@ -176,7 +176,7 @@ type, public :: gqk_t
   ! Global as this dimension is not MPI-distributed due to (m, n) pairs.
   ! NB: nb is not necessarily equal to nband.
 
-  integer :: bstart = 1
+  integer :: bstart = -1, bstop = -1
   ! The first band starts at bstart. (global index)
 
   integer :: my_npert = -1
@@ -353,6 +353,10 @@ type, public :: gstore_t
   ! k-points in the IBZ. Points to ebands%kptns
   ! (3, nkibz)
 
+  real(dp),allocatable :: delta_ef_ibz(:,:,:)
+  ! (nb, gstore%nkibz, nsppol))
+  ! Tetrahedron weights at eF in the IBZ.
+
   real(dp), allocatable :: qibz(:,:)
   ! (3, nqibz)
   ! q-points in the IBZ
@@ -458,7 +462,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
 !scalars
  integer,parameter :: qptopt1 = 1, timrev1 = 1, tetra_opt0 = 0, master = 0
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, iq_glob, ik_glob, ii ! out_nkibz,
- integer :: my_is, my_ik, my_iq, spin, natom3, cnt, np, band, iflag
+ integer :: my_is, my_ik, my_iq, spin, natom3, cnt, np, band, ib, iflag, nb
  integer :: ik_ibz, ik_bz, ebands_timrev, nk_in_star, max_nq, max_nk
  integer :: iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, color
  real(dp) :: cpu, wall, gflops, dksqmax, max_occ, mem_mb
@@ -472,7 +476,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
  integer :: ngqpt(3), qptrlatt(3,3)
  integer :: comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), unts(2), buff_spin(2)
  integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
- integer :: bands_spin(2, ebands%nsppol), fs_bands_spin(2, ebands%nsppol)
+ integer :: bands_spin(2, ebands%nsppol) !, fs_bands_spin(2, ebands%nsppol)
  integer,allocatable :: myq2glob(:), myk2glob(:)
  integer,allocatable :: qbz2ibz_(:,:), kbz2ibz_(:,:), kibz2bz(:), qibz2bz(:), indkk(:), kstar_bz_inds(:)
  integer,allocatable :: qglob2bz_idx(:,:), kglob2bz_idx(:,:)
@@ -632,34 +636,42 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
  case ("fs_tetra")
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
    ! and define bands_spin automatically.
-   call wrtout(std_out, sjoin("Filtering k-points using:", gstore%kfilter))
-   !
-   call ebands_get_bands_e0(ebands, ebands%fermie, fs_bands_spin, ierr)
+   call wrtout(std_out, sjoin(" Filtering k-points using:", gstore%kfilter))
+
+   ! NB: here we recompute bands_spin
+   call ebands_get_bands_e0(ebands, ebands%fermie, bands_spin, ierr)
    ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
-   !print *, "after ebands_get_bands_e0 with fs_bands_spin:", fs_bands_spin
 
-   bands_spin = fs_bands_spin
-   rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
-
+   ! TODO: Decide whether it makes sense to store ktetra or indkk in gstore.
    ABI_MALLOC(indkk, (gstore%nkbz))
-   indkk(:) = kbz2ibz_(1, :) ! TODO: Decide whether it makes sense to store ktetra or indkk in gstore.
+   indkk(:) = kbz2ibz_(1, :)
 
-   call htetra_init(ktetra, indkk, cryst%gprimd, klatt, kbz_, gstore%nkbz, gstore%kibz, gstore%nkibz, ierr, errorstring, comm)
+   rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
+   call htetra_init(ktetra, indkk, cryst%gprimd, klatt, kbz_, gstore%nkbz, gstore%kibz, gstore%nkibz, &
+                    ierr, errorstring, comm)
    ABI_CHECK(ierr == 0, errorstring)
 
    ABI_MALLOC(eig_ibz, (gstore%nkibz))
    max_occ = two / (ebands%nspinor * ebands%nsppol)
    select_kbz_spin = 0
 
+   nb = maxval(bands_spin(2, :) - bands_spin(1, :) + 1)
+   ABI_CALLOC(gstore%delta_ef_ibz, (nb, gstore%nkibz, nsppol))
+
    cnt = 0
    do spin=1,nsppol
-     do band=fs_bands_spin(1, spin), fs_bands_spin(2, spin)
+     do band=bands_spin(1, spin), bands_spin(2, spin)
+       ib = band - bands_spin(1, spin) + 1
        eig_ibz = ebands%eig(band, :, spin)
+
        do ik_ibz=1,gstore%nkibz
          cnt = cnt + 1; if (mod(cnt, all_nproc) /= my_rank) cycle ! MPI parallelism inside comm
 
          call ktetra%get_onewk_wvals(ik_ibz, tetra_opt0, 1, [ebands%fermie], max_occ, &
                                      gstore%nkibz, eig_ibz, delta_theta_ef)
+
+         gstore%delta_ef_ibz(ib, ik_ibz, spin) = delta_theta_ef(1)
+
          iflag = merge(1, 0, abs(delta_theta_ef(1)) > zero)
 
          ! Use iflag to filter k-points.
@@ -682,7 +694,10 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
      end do
    end do
 
+   call ktetra%print(std_out)
+
    call xmpi_sum(select_kbz_spin, comm, ierr)
+   call xmpi_sum(gstore%delta_ef_ibz, comm, ierr)
 
    ! Now the tricky part as we want to remove q-points that
    ! do not lead to any scattering process between two states on the FS
@@ -798,6 +813,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
 
    ! Compute bstart and band size for this spin.
    gqk%bstart = bands_spin(1, spin)
+   gqk%bstop = bands_spin(2, spin)
    gqk%nb = bands_spin(2, spin) - bands_spin(1, spin) + 1
    !print *, "gqk%bstart:", gqk%bstart; print *, "gqk%nb:", gqk%nb
 
@@ -824,9 +840,6 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
 
  ABI_FREE(qbz_)
 
- !do spin=1,nsppol
- !  call xmpi_comm_free(comm_spin(spin))
- !end do
  call xmpi_comm_free(comm_spin)
 
  ! TODO: Use ebands%kptns
@@ -1149,7 +1162,7 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, q
    call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
    ! Allocate storage for MPI-distributed e-ph matrix elements.
-#if 0
+#if 1
    ABI_MALLOC_OR_DIE(gqk%my_vals, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
    gqk%my_vals = zero !; gqk%my_vals = huge(one)
 #endif
@@ -1570,10 +1583,11 @@ subroutine gstore_free(gstore)
    call gstore%gqk(my_is)%free()
  end do
  ABI_SFREE(gstore%gqk)
- ABI_SFREE(gstore%qibz)
 
+ ABI_SFREE(gstore%delta_ef_ibz)
+ ABI_SFREE(gstore%qibz)
+ ABI_SFREE(gstore%wtq)
  ABI_SFREE(gstore%my_spins)
- !call gstore%spin_comm%free()
 
  call gstore%krank%free()
 
@@ -1817,7 +1831,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev !iq_ibz,
- integer :: cplex,natom,natom3,ipc,nspinor
+ integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, ib_k, ib_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k, trev_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq
@@ -1826,7 +1840,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg,nkpg1
- real(dp) :: cpu, wall, gflops, cpu_q, wall_q, out_wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
+ real(dp) :: cpu, wall, gflops, cpu_q, wall_q, out_wall_q, gflops_q, cpu_k, wall_k, gflops_k
+ real(dp) :: cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, dksqmax
  logical :: gen_eigenpb, isirr_k, isirr_kq
  type(wfd_t) :: wfd
@@ -2001,15 +2016,15 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Create ddkop object to compute group velocities (if needed)
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
+
+
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    my_npert = gqk%my_npert
 
-   ! Allocate workspace for wavefunctions. Make npw larger than expected.
-   ! maxnb is the maximum number of bands crossing the FS, used to dimension arrays.
-   !mnb = fs%maxnb
+   ! Allocate workspace for wavefunctions using mpw and mnb
    mnb = gqk%nb
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, mnb))
    ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
@@ -2023,6 +2038,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      qpt = gqk%get_myqpt(my_iq, gstore)
      !iq_ibz = gqk%my_q2ibz(1, my_iq)
+
+     nskip_tetra_kq = 0
 
      ! Use Fourier interpolation of DFPT potentials to get my_npert potentials.
      cplex = 2
@@ -2089,6 +2106,15 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! so we skip this transition immediately. This should happen only if fsewin > sigma_erange.
        if (wfd%npwarr(ik_ibz) == 1 .or. wfd%npwarr(ikq_ibz) == 1) cycle
 
+       ! TODO:
+       ! If kfilter == "fs_tetra", compute delta(e_{k+q}) and cycle if weight is zero.
+       if (gstore%kfilter == "fs_tetra") then
+         if (all(abs(gstore%delta_ef_ibz(:, ikq_ibz, spin)) == zero)) then
+           nskip_tetra_kq = nskip_tetra_kq + 1
+           cycle
+         end if
+       end if
+
        ! Number of bands crossing the Fermi level at k+q
        !bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
        bstart_kq = gqk%bstart; nband_kq = gqk%nb
@@ -2125,7 +2151,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Compute nonlocal form factors ffnlk at (k+G)
        ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
        call mkffnl_objs(cryst, psps, 1, ffnlk, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
-                        comm=gqk%pert_comm%value)
+                        comm=gqk%pert_comm%value)  !, request=ffnlk_request)
 
        ! Compute k+q+G vectors
        nkpg1 = 3 * dtset%nloalg(3)
@@ -2135,7 +2161,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Compute nonlocal form factors ffnl1 at (k+q+G)
        ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
        call mkffnl_objs(cryst, psps, 1, ffnl1, ider0, idir0, kg_kq, kpg1_k, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
-                        comm=gqk%pert_comm%value)
+                        comm=gqk%pert_comm%value) ! request=ffnl1_request)
 
        ! Loop over my atomic perturbations and compute gkk_atm.
        gkk_atm = zero
@@ -2202,10 +2228,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        ! Save e-ph matrix elements. Remember the shape of the two arrays.
        !
-       !    gkq_nu(2, mnb, mnb, natom3)
-       !    my_vals(cplex, my_npert, nb, my_nq, nb, my_nk)
+       !    - gkq_nu(2, mnb, mnb, natom3)
+       !    - my_vals(cplex, my_npert, nb, my_nq, nb, my_nk)
        !
-#if 0
+#if 1
        select case (gqk%cplex)
        case (1)
         do my_ip=1,my_npert
@@ -2273,10 +2299,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      !if
      !end if
 
-     if (my_iq <= 10 .or. mod(my_iq, 100) == 0) then
+     if (my_iq <= 5 .or. mod(my_iq, 100) == 0) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q, out_wall=out_wall_q)
-       if (my_iq == 10) then
+       call wrtout(std_out, sjoin(" nskip_tetra_kq:", itoa(nskip_tetra_kq)))
+       if (my_iq == 5) then
          call wrtout(std_out, sjoin(" Estimated time to completion:", sec2str((gqk%my_nq - my_iq) * out_wall_q)))
          call wrtout(std_out, " >>> Will print next iteration when mod(my_iq, 100) == 0) ...", do_flush=.True.)
        end if
