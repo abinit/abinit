@@ -2403,7 +2403,7 @@ end subroutine xmpi_split_cyclic
 !!  xmpi_split_list
 !!
 !! FUNCTION
-!!  Splits list of itmes inside communicator using block distribution.
+!!  Splits list of items inside communicator using block distribution.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS

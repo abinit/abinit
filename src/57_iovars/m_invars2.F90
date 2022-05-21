@@ -2115,10 +2115,30 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
 
- call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
- if(tread==1)then
-   dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_cplex', tread, 'INT')
+ if (tread == 1) dtset%gstore_cplex = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
+ if (tread == 1) dtset%gstore_with_vk = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kzone', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_kzone = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_qzone', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_qzone = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_kfilter = tolower(key_value)
+
+ narr = 2 * nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread, 'INT')
+ if (tread == 1) then
+   if (nsppol == 1) dtset%gstore_brange(:, 1) = intarr(1:narr)
+   if (nsppol == 2) dtset%gstore_brange = reshape(intarr(1:narr), [2, nsppol])
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
+ if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nwfshist',tread,'INT')
  if(tread==1) dtset%nwfshist=intarr(1)
