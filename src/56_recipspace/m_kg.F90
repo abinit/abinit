@@ -219,7 +219,7 @@ end subroutine getcut
 !! FUNCTION
 !! From input ecut, combined with ucvol and gmet, compute recommended mpw
 !! mpw is the maximum number of plane-waves in the wave-function basis
-!!  for one processor of the WF group
+!! for one processor of the WF group
 !!
 !! INPUTS
 !! ecut=plane-wave cutoff energy in Hartrees

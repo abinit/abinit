@@ -4,9 +4,8 @@
 !!
 !! FUNCTION
 !!
-!!  This module implements the gstore object that allows one to
-!!  **precompute"" the e-ph matrix elements g and store them in memory
-!!  with a MPI-distributed data structure.
+!!  This module implements the gstore object that allows one to **precompute"" the e-ph matrix elements g
+!!  and store them in memory with a MPI-distributed data structure.
 !!
 !!  This approach is the most CPU-efficient when one has to deal with
 !!  algorithms in which the same g(q, k) is required several (many) times.
@@ -50,7 +49,7 @@
 !!
 !!  Now, let's discuss the MPI-distribution.
 !!
-!!  The (k, q) matrix is distributed inside a 2D cartesian grid using block distribution.
+!!  The (q, k) matrix is distributed inside a 2D cartesian grid using block distribution.
 !!  This is schematic representation for 4 procs with 2 procs for k and 2 procs for q:
 !!
 !!                      k-axis
@@ -66,9 +65,9 @@
 !!
 !!  Each processor stores all the (band_1, band_2) transitions for a given (q, k) pair.
 !!  Perturbations can be optionally distributed along a third axis (pert_comm).
-!!  The parallelism over perturbations is not expected to be the most efficient but it allows
-!!  one to reduce the memory required to store the scattering potential in the supercell
-!!  as we can distribute W(r, R, 3*natom) over the last dimension.
+!!  Note, however, that the parallelism over perturbations is not expected to be the most efficient
+!!  although it allows one to reduce the memory required to store the scattering potential in the supercell
+!!  as we can distribute W(r, R, 3 * natom) over the last dimension.
 !!
 !!  NB: If nsppol == 2, we create two gqk objects, one for each spin.
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
@@ -151,10 +150,9 @@ module m_gstore
 !! gqk_t
 !!
 !! FUNCTION
-!!  This object Stores MPI-distributed e-p matrix elements for
-!!  a given spin index (collinear case).
+!!  This object stores MPI-distributed e-ph matrix elements for
+!!  a given spin index (collinear case only).
 !!
-!! NOTES
 !!  local dimensions start with `my_`,
 !!  global dimensions start with `glob_
 !!
@@ -255,7 +253,7 @@ type, public :: gqk_t
 
   real(dp),allocatable :: my_wqnu(:,:)
   ! (my_npert, my_nq)
-  ! Phonon frequencies (MPI distributed)
+  ! Phonon frequencies in Ha (MPI distributed)
 
   real(dp),allocatable :: my_displ_cart(:,:,:,:,:)
   ! (2, 3, cryst%natom, my_npert, my_nq))
@@ -815,10 +813,10 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
    call wrtout(unts, sjoin(" qzone:", gstore%qzone))
    call wrtout(unts, sjoin(" kfilter:", gstore%kfilter))
    call wrtout(unts, sjoin(" with_vk:", itoa(gstore%with_vk)))
-   call wrtout(unts, sjoin(" nqibz, nkibz:", itoa(gstore%nqibz), itoa(gstore%nkibz)))
-   call wrtout(unts, sjoin(" nqbz, nkbz:", itoa(gstore%nqbz), itoa(gstore%nkbz)))
-   call wrtout(unts, sjoin(" glob_nk_spin:", ltoa(glob_nk_spin)))
+   call wrtout(unts, sjoin(" nqibz, nqbz:", itoa(gstore%nqibz), itoa(gstore%nqbz)))
    call wrtout(unts, sjoin(" glob_nq_spin:", ltoa(glob_nq_spin)))
+   call wrtout(unts, sjoin(" nkibz, nkbz:", itoa(gstore%nkibz), itoa(gstore%nkbz)))
+   call wrtout(unts, sjoin(" glob_nk_spin:", ltoa(glob_nk_spin)))
  end if
 
  ! Set MPI grid
@@ -826,9 +824,10 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
 
  ABI_FREE(qbz_)
 
- do spin=1,nsppol
-   call xmpi_comm_free(comm_spin(spin))
- end do
+ !do spin=1,nsppol
+ !  call xmpi_comm_free(comm_spin(spin))
+ !end do
+ call xmpi_comm_free(comm_spin)
 
  ! TODO: Use ebands%kptns
  ABI_FREE(kibz_)
@@ -841,7 +840,6 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
-
  call gstore%malloc__(max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, qbz2ibz_, kbz2ibz_)
 
  ABI_FREE(qglob2bz_idx)
@@ -1151,9 +1149,10 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, q
    call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
    ! Allocate storage for MPI-distributed e-ph matrix elements.
-   !ABI_MALLOC_OR_DIE(gqk%my_vals, (gqk%cplex, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk, gqk%my_npert), ierr)
+#if 0
    ABI_MALLOC_OR_DIE(gqk%my_vals, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
    gqk%my_vals = zero !; gqk%my_vals = huge(one)
+#endif
 
    ! Allocate storage for MPI-distributed dH/dk matrix elements.
    select case (gstore%with_vk)
@@ -1841,8 +1840,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),wfd_istwfk(:)
  !integer,allocatable :: my_pinfo(:,:) !, pert_table(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), vk(3) !, vkq(3)
- real(dp) :: phfrq(3*cryst%natom)
- real(dp) :: ylmgr_dum(1,1,1)
+ real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
  real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg1_k(:,:), kpg_k(:,:), dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:), ph3d(:,:,:), ph3d1(:,:,:)
@@ -1851,7 +1849,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
- real(dp),allocatable :: gs1c(:,:), vcar_ibz(:,:,:,:)
+ real(dp),allocatable :: gs1c(:,:) !, vcar_ibz(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 
@@ -2207,6 +2205,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        !    gkq_nu(2, mnb, mnb, natom3)
        !    my_vals(cplex, my_npert, nb, my_nq, nb, my_nk)
        !
+#if 0
        select case (gqk%cplex)
        case (1)
         do my_ip=1,my_npert
@@ -2221,6 +2220,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        case default
          ABI_ERROR(sjoin("Invalid cplex:", itoa(gqk%cplex)))
        end select
+#endif
 
        if (gstore%with_vk /= 0) then
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
@@ -2306,7 +2306,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(ylmgr_kq)
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
- ABI_SFREE(vcar_ibz)
+ !ABI_SFREE(vcar_ibz)
 
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
@@ -2445,6 +2445,8 @@ type(gstore_t) function gstore_from_ncpath(path, dtset, comm) result(gstore) !, 
 !scalars
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, my_is, ncerr
+!arrays
+ integer :: bands_spin(2, dtset%nsppol), nproc_spin(dtset%nsppol), comm_spin(dtset%nsppol)
 
 ! *************************************************************************
 
@@ -2478,16 +2480,32 @@ type(gstore_t) function gstore_from_ncpath(path, dtset, comm) result(gstore) !, 
 
  call xmpi_barrier(comm)
 
- ! Init MPI grid and allocate memory.
+ ! Distribute spins and create indirect mapping to spin index.
+ !call gstore%distribute_spins__(ebands%mband, dtset%gstore_brange, dtset%eph_np_pqbks, &
+ !                               bands_spin, nproc_spin, comm_spin, comm)
 
- ! Now we write the big arrays with MPI-IO and hdf5 groups.
+ ! TODO BZ stuff and krange
+
+ ! Set MPI grid
+ call gstore%set_mpi_grid__(dtset%eph_np_pqbks, nproc_spin, comm_spin)
+
+ ! At this point, we have the Cartesian grid (one per spin if any)
+ ! and we can finally allocate and distribute other arrays.
+ !call gstore%malloc__(max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, qbz2ibz_, kbz2ibz_)
+
+ !call xmpi_comm_free(comm_spin)
+
+ ! Now we read the big arrays with MPI-IO and hdf5 groups.
  ! Note the loop over spin to account as each gqk has its own dimensions.
- !
- !do spin=1,gstore%nsppol
- !  my_is = gstore%spin2my_is(spin)
- !  if (my_is /= 0) call gstore%gqk(my_is)%ncwrite_path(path, gstore)
- !  call xmpi_barrier(gstore%comm)
- !end do
+
+ ! Get ncid of group used to store scattering rate for this k-point.
+ !NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(gqk%spin)), spin_ncid))
+
+ do spin=1,gstore%nsppol
+   my_is = gstore%spin2my_is(spin)
+   !if (my_is /= 0) call gstore%gqk(my_is)%ncwrite_path(path, gstore)
+   !call xmpi_barrier(gstore%comm)
+ end do
 
 contains
  integer function vid(vname)

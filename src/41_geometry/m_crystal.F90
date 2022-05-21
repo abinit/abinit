@@ -472,13 +472,13 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    endif
  enddo
 
- !Write indexes of irreducible atoms
+ ! Write indexes of irreducible atoms
  ABI_MALLOC(cryst%irredatindx,(cryst%nirredat))
  indx = 0
  do iat = 1,natom
-    if(irredat_tmp(iat))then
-        indx = indx + 1
-        cryst%irredatindx(indx) = iat
+    if (irredat_tmp(iat)) then
+      indx = indx + 1
+      cryst%irredatindx(indx) = iat
     endif
  enddo
 
