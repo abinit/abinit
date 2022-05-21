@@ -227,6 +227,14 @@ type, public :: dataset_type
  integer :: gethaydock = 0
  integer :: goprecon
  integer :: gpu_linalg_limit
+
+ integer :: gstore_cplex = 2
+ integer :: gstore_with_vk = 0
+ character(len=fnlen) :: gstore_kzone = "ibz"
+ character(len=fnlen) :: gstore_qzone = "bz"
+ character(len=fnlen) :: gstore_kfilter = "none"
+ integer :: gstore_brange(2, 2) = 0
+
  integer :: gwaclowrank = 0
  integer :: gwcalctyp = 0
  integer :: gwcomp = 0
@@ -973,7 +981,7 @@ type, public :: dataset_type
    ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
  procedure :: get_crystal => dtset_get_crystal
-   !  Build crystal_t object from dtset and image index.
+   ! Build crystal_t object from dtset and image index.
 
  end type dataset_type
 !!***
@@ -1565,6 +1573,14 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
+
+ dtout%gstore_cplex       = dtin%gstore_cplex
+ dtout%gstore_with_vk     = dtin%gstore_with_vk
+ dtout%gstore_kzone       = dtin%gstore_kzone
+ dtout%gstore_qzone       = dtin%gstore_qzone
+ dtout%gstore_kfilter     = dtin%gstore_kfilter
+ dtout%gstore_brange      = dtin%gstore_brange
+
  dtout%gwaclowrank        = dtin%gwaclowrank
  dtout%gwcalctyp          = dtin%gwcalctyp
  dtout%gwcomp             = dtin%gwcomp
@@ -3297,6 +3313,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
+ list_vars=trim(list_vars)//' gstore_cplex gstore_with_vk gstore_kzone gstore_qzone gstore_kfilter gstore_brange'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'

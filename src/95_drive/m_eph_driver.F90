@@ -186,7 +186,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
- type(gstore_t) :: gstore
+ type(gstore_t) :: gstore !,other_gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
@@ -736,8 +736,11 @@ endif
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-    !call gstore%calc_my_phonons(store_phdispl=.False.)
-    call gstore%ncwrite_path(strcat(dtfil%filnam_ds(4), "_GSTORE.nc"), cryst, ebands)
+    if (nprocs == 1) then
+      call gstore%ncwrite_path(strcat(dtfil%filnam_ds(4), "_GSTORE.nc"), cryst, ebands)
+      !other_gstore = gstore_from_ncpath(strcat(dtfil%filnam_ds(4), "_GSTORE.nc"), dtset, comm)
+      !call other_gstore%free()
+    end if
     call gstore%free()
 
  case (15, -15)
