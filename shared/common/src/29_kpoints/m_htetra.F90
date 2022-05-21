@@ -821,6 +821,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
                         '2. Generate tetrahedra in the FBZ a map to IBZ (default)'
    return
  end select
+
  !ierr = octree_free(oct)
  ABI_FREE(tetra_hash_count)
  call krank%free()
@@ -928,7 +929,7 @@ subroutine htetra_init_mapping_ibz(tetra)
    mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
  end do
 
- !call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
+ call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
@@ -1001,7 +1002,7 @@ subroutine htetra_print(self, unit)
 
  if (unit == dev_null) return
 
- unique_tetra_size = self%nunique_tetra*5*four/1024/1024
+ unique_tetra_size = self%nunique_tetra * 5* four / 1024 ** 2
  total_size        = unique_tetra_size
  !write(unit,'(a,i0)')     ' htetra unique_tetra:', self%nunique_tetra
  !write(unit,'(a,f12.1,a)') ' htetra unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'

@@ -472,24 +472,24 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Here we get the quadrupoles from the DDB file (this should become the official API).
  ! Section Copied from Anaddb.
 
-if (iblock_quadrupoles == 0) then
- mtyp = ddb_hdr%mblktyp
- mpert = dtset%natom + MPERT_MAX
- !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
- !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
+ if (iblock_quadrupoles == 0) then
+   mtyp = ddb_hdr%mblktyp
+   mpert = dtset%natom + MPERT_MAX
+   !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+   !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
 
- ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
- ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+   ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+   ! that ddb%val and ddb%flg experience when passed as arguments of some routines
 
- ! Get Quadrupole tensor
- qdrp_cart=zero
- if (mtyp==33) then
-   lwsym=1
-   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
-   call ddb_lw%free()
- end if
-endif
+   ! Get Quadrupole tensor
+   qdrp_cart=zero
+   if (mtyp==33) then
+     lwsym=1
+     call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+     iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+     call ddb_lw%free()
+   end if
+ endif
 
  ! The default value is 1. Here we set the flags to zero if Q* is not available.
  if (iblock_quadrupoles == 0) then
@@ -708,7 +708,8 @@ endif
 
  case (5, -5)
    ! Interpolate the phonon potential.
-   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
+   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
+                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
