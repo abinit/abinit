@@ -1120,7 +1120,7 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, q
    ! FIXME: Note that glob_nq and glob_nk does not necessarily correspond to the size of the BZ
    ! First of all we have to consider kzone
    ! Even if kzone == "bz" we may have filtered the wavevectors e.g. Fermi surface.
-   call xmpi_split_block(gqk%glob_nq, gqk%kpt_comm%value, gqk%my_nq, myq2glob)
+   call xmpi_split_block(gqk%glob_nq, gqk%qpt_comm%value, gqk%my_nq, myq2glob)
    ABI_CHECK(gqk%my_nq > 0, "my_nq == 0")
    gqk%my_qstart = myq2glob(1)
    ABI_FREE(myq2glob)
