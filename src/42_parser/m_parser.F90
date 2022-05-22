@@ -3239,7 +3239,7 @@ end subroutine chkint_prt
 
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
                     marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
-                    firstchar,forceprint)  ! optional
+                    firstchar,forceprint,strarr)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -3253,6 +3253,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  integer,intent(in) :: jdtset_(0:ndtset_alloc)
  integer,intent(in) :: narrm(0:ndtset_alloc)
  real(dp),intent(in) :: dprarr(marr,0:ndtset_alloc)
+ character(len=fnlen),intent(in),optional :: strarr(marr,0:ndtset_alloc)
 
 !Local variables-------------------------------
 !character(len=*), parameter :: long_beg     ='(a,a16,a,1x,(t22,'
@@ -3273,6 +3274,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  character(len=*), parameter :: f_wtk        ='6f11.5)'
  character(len=*), parameter :: f_atvshift   ='5f11.5)'
  character(len=*), parameter :: f_kptrlatt   ='3(3i5,2x))'
+ character(len=*), parameter :: f_str        ='2x,a'
 !scalars
  integer :: iarr,idtset,jdtset,multi,ndtset_eff,narr_eff
  logical :: print_netcdf,print_out
@@ -3283,6 +3285,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
  character(len=4) :: appen
  character(len=8) :: out_unit
  character(len=50) :: format_dp,format_int,full_format
+ character(len=48) :: format_str
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -3544,8 +3547,90 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
        end do
      end if
 
+!  ###########################################################
+!  ### 04. Treatment of strings 'STR'
+
+   else if(typevarphys=='STR')then
+      if (.not. present(strarr)) then
+         write(msg,'(a,a)') 'typevarphys equal STR but no strarr given!',ch10
+            ABI_ERROR(msg)
+      end if
+
+!    Determine whether the different non-default occurences are all equal
+
+     if (use_narrm==0) then ! use of scalar 'narr' instead of array 'narrm'
+       if(ndtset_alloc>1)then
+         do idtset=1,ndtset_alloc
+           do iarr=1,narr
+             if(strarr(iarr,1)/=strarr(iarr,idtset))multi=1
+           end do
+         end do
+       end if
+     else
+!      If the sizes of the arrays are different we can not compare them
+!      So we have to assume they are different
+       multi=1
+     end if
+
+!    If they are all equal, then determine whether they are equal to the default
+     if(multi==0)then
+       print_out=.false.
+       do iarr=1,narr
+         if (trim(strarr(iarr,1))/=trim(strarr(iarr,0))) print_out=.true.
+       end do
+       print_netcdf=print_out
+     end if
+
+     if (present(forceprint)) then
+       if (forceprint==1.or.forceprint==3) print_out=.true.
+       if (forceprint==1.or.forceprint==2) print_netcdf=.true.
+     end if
+
+     print_out = .TRUE.
+
+!    Print only if the values differ from the default
+     if (print_out.or.print_netcdf.or.(ncid<0))then
+       ndtset_eff=ndtset_alloc
+       if((multi==0).or.(ncid<0)) ndtset_eff=1
+       do idtset=1,ndtset_eff
+
+!        Initialize the character in the first column
+         first_column=' ';if (present(firstchar)) first_column=firstchar
+!        Initialize the format
+         format_str=f_str
+!        Initialize the dataset number string, and print
+         if((multi==0).or.(ncid<0))then
+           appen=' '
+         else
+           jdtset=jdtset_(idtset)
+           call appdig(jdtset,'',appen)
+         end if
+         full_format='("'//first_column//trim(format_1)//trim(format_str)//")"
+
+!        narr_eff could be narr or narrm(idtset)
+!        It depends if the size is variable for different datasets
+         if (use_narrm==0)then
+           narr_eff=narr
+         else
+           narr_eff=narrm(idtset)
+         end if
+
+         if (narr_eff/=0) then
+
+           if (print_out) write(iout,full_format) token,trim(appen),(trim(strarr(iarr,idtset)),iarr=1,narr_eff)
+!#ifdef HAVE_NETCDF
+!           if (print_netcdf) then
+!             call write_var_netcdf(intarr(1:narr_eff,idtset),&
+!&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
+!           end if
+!#endif
+         end if
+
+       end do
+     end if !(print==1)
+
 !    ###########################################################
-!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI','TIM'
+!    ### 05. The type is neither 'INT' nor 'DPR', 'STR', 'ENE','LEN','BFI','TIM'
    else
      ABI_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
    end if
