@@ -743,6 +743,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (14)
     ! Write e-ph matrix elements to disk.
 
+    if (dtfil%filgstorein /= ABI_NOFILE) then
+      other_gstore = gstore_from_ncpath(dtfil%filgstorein, dtset, cryst, ebands, ifc, comm)
+
+      !call other_gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+      !                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+      call other_gstore%free()
+      return
+    end if
+
     gstore = gstore_new(dtset, cryst, ebands, ifc, comm)
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)

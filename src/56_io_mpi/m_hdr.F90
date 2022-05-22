@@ -3573,6 +3573,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
    !call wrtout(std_out, "hdr_ncwrite: defining variables")
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
+   ! Write ETSF-dims
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("max_number_of_states", hdr%mband), &
      nctkdim_t("number_of_atoms", hdr%natom), &
@@ -3738,7 +3739,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  ! Switch to write mode.
  NCF_CHECK(nctk_set_datamode(ncid))
 
- ! Associate and write values to ETSF groups.
+ ! write ETSF variables.
  if (hdr%usewvl == 0) then
    ! Plane wave case.
    basis_set = "plane_waves"
@@ -3802,9 +3803,9 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
 &  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
  NCF_CHECK(ncerr)
 
-!Array variables.
+ ! Write Abinit array variables.
 
-! FIXME Be careful with zionpsp if alchemical mixing!
+ ! FIXME Be careful with zionpsp if alchemical mixing!
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), hdr%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("pspcod"), hdr%pspcod))
  NCF_CHECK(nf90_put_var(ncid, vid("pspdat"), hdr%pspdat))
@@ -3831,11 +3832,11 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  end if
 
  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-   "kptopt", "pawcpxocc"],[hdr%kptopt, hdr%pawcpxocc])
+   "kptopt", "pawcpxocc"], [hdr%kptopt, hdr%pawcpxocc])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "nelect", "charge"],[hdr%nelect, hdr%cellcharge])
+   "nelect", "charge"], [hdr%nelect, hdr%cellcharge])
  NCF_CHECK(ncerr)
 
  ! NB: In etsf_io the number of electrons is declared as integer.

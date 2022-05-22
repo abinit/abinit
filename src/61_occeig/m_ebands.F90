@@ -2063,7 +2063,7 @@ end subroutine ebands_enclose_degbands
 !!
 !! FUNCTION
 !!  Find min/max band indices crossing energy e0
-!!  min/max are returned in bands_spin(1:2, spin) for each spin.
+!!  min/max are returned in brange_spin(1:2, spin) for each spin.
 !!  If no band crosses e0, bmin is set to +huge(1) and bmax to -huge(1) and ierr != 0
 !!
 !! INPUTS
@@ -2076,13 +2076,13 @@ end subroutine ebands_enclose_degbands
 !!
 !! SOURCE
 
-subroutine ebands_get_bands_e0(ebands, e0, bands_spin, ierr)
+subroutine ebands_get_bands_e0(ebands, e0, brange_spin, ierr)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(in) :: ebands
  real(dp),intent(in) :: e0
- integer,intent(out) :: bands_spin(2, ebands%nsppol)
+ integer,intent(out) :: brange_spin(2, ebands%nsppol)
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
@@ -2104,7 +2104,7 @@ subroutine ebands_get_bands_e0(ebands, e0, bands_spin, ierr)
      end if
    end do
 
-   bands_spin(:, spin) = [bmin, bmax]
+   brange_spin(:, spin) = [bmin, bmax]
    if (bmin == +huge(1)) ierr = ierr + 1
  end do
 
