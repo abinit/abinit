@@ -959,6 +959,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
+ character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
 
  contains
 
@@ -1556,6 +1557,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getdvdb_filepath       = dtin%getdvdb_filepath
  dtout%getpot_filepath        = dtin%getpot_filepath
  dtout%getsigeph_filepath     = dtin%getsigeph_filepath
+ dtout%getgstore_filepath     = dtin%getgstore_filepath
  dtout%getscr_filepath        = dtin%getscr_filepath
  dtout%getwfk_filepath        = dtin%getwfk_filepath
  dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
@@ -3308,7 +3310,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getqps getscr getscr_filepath'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
+ list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'

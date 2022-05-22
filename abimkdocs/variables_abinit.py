@@ -23096,4 +23096,19 @@ unless additional filters are activated via [[gstore_kfilter]].
 """,
 ),
 
+Variable(
+    abivarname="getgstore_filepath",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    #defaultval="Output filename of the present dataset",
+    mnemonics="GET the GSTORE.nc from FILEPATH",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the path of the GSTORE.nc file with the e-ph matrix elements
+that should be used as input for further analysis.
+""",
+),
+
 ]
