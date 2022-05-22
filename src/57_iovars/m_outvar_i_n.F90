@@ -141,6 +141,7 @@ subroutine outvar_i_n (dtsets,iout,&
  integer,allocatable :: narrm(:)
  integer,allocatable :: nimagem(:),prtimg(:,:)
  real(dp),allocatable :: dprarr(:,:),dprarr_images(:,:,:)
+ character(len=fnlen),allocatable :: strarr(:,:)
 
 ! *************************************************************************
 
@@ -152,6 +153,7 @@ subroutine outvar_i_n (dtsets,iout,&
  ABI_MALLOC(dprarr,(marr,0:ndtset_alloc))
  ABI_MALLOC(dprarr_images,(marr,mxvals%nimage,0:ndtset_alloc))
  ABI_MALLOC(intarr,(marr,0:ndtset_alloc))
+ ABI_MALLOC(strarr,(marr,0:ndtset_alloc))
  ABI_MALLOC(narrm,(0:ndtset_alloc))
  ABI_MALLOC(nimagem,(0:ndtset_alloc))
  ABI_MALLOC(prtimg,(mxvals%nimage,0:ndtset_alloc))
@@ -755,6 +757,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%mbpt_sciss
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mbpt_sciss','ENE',0)
+
+ strarr(1,:)=dtsets(:)%md
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'md','STR',0,strarr=strarr)
 
  dprarr(1,:)=dtsets(:)%mdf_epsinf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mdf_epsinf','DPR',0)
