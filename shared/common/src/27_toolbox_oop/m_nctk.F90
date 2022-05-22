@@ -319,8 +319,8 @@ integer function nctk_idname(ncid, varname) result(varid)
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
  if (ncerr /= nf90_noerr) then
-   write(msg,'(5a)')&
-     "NetCDF library returned: ",trim(nf90_strerror(ncerr)),ch10,&
+   write(msg,'(6a)')&
+     "NetCDF library returned: `",trim(nf90_strerror(ncerr)), "`", ch10,&
      "while trying to get the ncid of variable: ",trim(varname)
    ABI_ERROR(msg)
  end if

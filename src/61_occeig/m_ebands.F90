@@ -1396,7 +1396,7 @@ end subroutine unpack_eneocc
 !!
 !! SOURCE
 
-subroutine pack_eneocc(nkpt,nsppol,mband,nband,bantot,array3d,vect)
+subroutine pack_eneocc(nkpt, nsppol, mband, nband, bantot, array3d, vect)
 
 !Arguments ------------------------------------
 !scalars
@@ -1452,7 +1452,7 @@ end subroutine pack_eneocc
 !!
 !! SOURCE
 
-subroutine get_eneocc_vect(ebands,arr_name,vect)
+subroutine get_eneocc_vect(ebands, arr_name, vect)
 
 !Arguments ------------------------------------
 !scalars
@@ -1464,13 +1464,13 @@ subroutine get_eneocc_vect(ebands,arr_name,vect)
  integer :: nkpt,nsppol,mband,bantot
 ! *************************************************************************
 
- mband =ebands%mband; bantot=ebands%bantot; nkpt=ebands%nkpt; nsppol=ebands%nsppol
+ mband = ebands%mband; bantot = ebands%bantot; nkpt = ebands%nkpt; nsppol = ebands%nsppol
 
  select case (arr_name)
  case ('occ')
-   call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%occ,vect)
+   call pack_eneocc(nkpt, nsppol, mband, ebands%nband, bantot, ebands%occ, vect)
  case ('eig')
-   call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%eig,vect)
+   call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%eig, vect)
  case ('doccde')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%doccde,vect)
  case default
@@ -2802,7 +2802,7 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
  ebands%extrael = nelect-nholes
  ebands%nelect = ebands%nelect + ebands%extrael
 ! CP modified and added
- if (ebands%occopt /=9 ) then
+ if (ebands%occopt /= 9) then
     ebands%ne_qFD = zero
     ebands%nh_qFD = zero
  else
