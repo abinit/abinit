@@ -4283,8 +4283,11 @@ The choice is among:
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
-         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirement than for [[eph_task]]=6.
-         Reference B. Guster et al to be published (2021) or (2022).
+         Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2012]]
+* 14 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
+         Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
+         The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
+         by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh).
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
@@ -22963,6 +22966,133 @@ self-consistent QS$GW$ or $G_0W_0$ starting from a hybrid-functional starting po
 * 1 --> Keep the old implementation.
 
 See line 743 in src/95_drive/screening.F90 .
+""",
+),
+
+Variable(
+    abivarname="gstore_cplex",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=2,
+    mnemonics=r"GSTORE ComPLEX dimension",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should store $|g|^2$ or $g$
+when computing the e-ph matrix elements ([[eph_task]] == 14)
+Possible values are:
+
+    1 --> compute and store complex $g$
+    2 --> compute and store $|g|^2$
+""",
+),
+
+Variable(
+    abivarname="gstore_with_vk",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE WITH Velocity_k",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should compute and store
+the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 14)
+Possible values are:
+
+    0 --> Do not compute velocity matrix elements
+    1 --> compute and store the diagonal matrix elements
+    2 --> compute and store diagonal + off-diagonal terms.
+""",
+),
+
+Variable(
+    abivarname="gstore_kzone",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="ibz",
+    mnemonics=r"GSTORE K-point ZONE",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
+e-ph matrix elements for $\kk$ in the IBZ or in the BZ.
+
+!!! important
+
+    Note that the combination [[gstore_kbz]] = "ibz" with [[gstore_qbz]] = "ibz" is not allowed.
+    One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+""",
+),
+
+Variable(
+    abivarname="gstore_qzone",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="bz",
+    mnemonics=r"GSTORE Q-point ZONE",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
+e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
+
+!!! important
+
+    Note that the combination [[gstore_kbz]] = "ibz" with [[gstore_qbz]] = "ibz" is not allowed.
+    One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+""",
+),
+
+Variable(
+    abivarname="gstore_kfilter",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="none",
+    mnemonics=r"GSTORE K-FILTER",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable can be used to introduce a filter in the electronic wavevectors (k and k+q)
+when computing the e-ph matrix elements with [[eph_task]] == 14.
+Possible values are:
+
+    "none" --> No filter is applied.
+    "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+""",
+),
+
+Variable(
+    abivarname="gstore_brange",
+    varset="eph",
+    vartype="int",
+    topics=['ElPhonInt_basic'],
+    dimensions=[2, "[[nsppol]]"],
+    defaultval=0,
+    mnemonics=r"GSTORE Band RANGE",
+    requires="[[optdriver]] == 7",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable can be used to specify the band range
+when computing the e-ph matrix elements with [[eph_task]] == 14.
+The first entry gives the first band to be included while the second index specifies the last band.
+Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
+two different spin channels when [[nsppol]] == 2.
+
+If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands
+unless additional filters are activated via [[gstore_kfilter]].
 """,
 ),
 

@@ -449,6 +449,7 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
 
 !Local variables-------------------------
 !scalars
+ real(dp),parameter :: nholes = zero
  character(len=500) :: msg
  integer :: unts(2)
 
@@ -483,10 +484,7 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  else if (abs(dtset%eph_extrael) > zero) then
    call wrtout(unts, sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
    call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   ! CP modified
-   ! call ebands_set_extrael(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
-   call ebands_set_extrael(ebands, dtset%eph_extrael, 0.d0, dtset%spinmagntarget, msg)
-   ! End CP modified
+   call ebands_set_extrael(ebands, dtset%eph_extrael, nholes, dtset%spinmagntarget, msg)
    call wrtout(unts, msg)
  end if
 

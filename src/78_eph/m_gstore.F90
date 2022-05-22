@@ -129,6 +129,7 @@ module m_gstore
  use m_cgtools,        only : cg_zdotc
  use m_kg,             only : getph, mkkpg
  use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
  use m_symtk,          only : matr3inv
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
@@ -407,9 +408,7 @@ contains
   ! Allocate local buffers once the MPI grid has been initialized.
 
   procedure :: ncwrite_path => gstore_ncwrite_path
-  ! Write object to file
-
-  !procedure :: ncread => gstore_from_ncpath
+  ! Write object to netcdf file
 
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
@@ -420,7 +419,7 @@ contains
 end type gstore_t
 
 public :: gstore_new
-public :: gstore_from_ncpath  ! Reconstruct object from file
+public :: gstore_from_ncpath  ! Reconstruct object from netcdf file
 !!***
 
 contains
@@ -519,7 +518,6 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
  !gstore%kshift(3, 1)
  !gstore%qptrlatt(3, 3)
  !gstore%qshift(3, 1)
- !gstore%spin_comm
 
  ! Distribute spins and create indirect mapping to spin index.
  call gstore%distribute_spins__(ebands%mband, dtset%gstore_brange, dtset%eph_np_pqbks, &
@@ -571,7 +569,6 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
 
  ABI_MALLOC(kbz2ibz_, (6, gstore%nkbz))
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
- gstore%kibz => ebands%kptns
 
  gstore%krank = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
  call gstore%krank%get_mapping(gstore%nkbz, kbz_, dksqmax, cryst%gmet, kbz2ibz_, &
@@ -656,6 +653,7 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
    select_kbz_spin = 0
 
    nb = maxval(bands_spin(2, :) - bands_spin(1, :) + 1)
+   ! TODO: Write this stuff to ncfile
    ABI_CALLOC(gstore%delta_ef_ibz, (nb, gstore%nkibz, nsppol))
 
    cnt = 0
@@ -815,9 +813,8 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
    gqk%bstart = bands_spin(1, spin)
    gqk%bstop = bands_spin(2, spin)
    gqk%nb = bands_spin(2, spin) - bands_spin(1, spin) + 1
-   !print *, "gqk%bstart:", gqk%bstart; print *, "gqk%nb:", gqk%nb
 
-   ! The global shape of the q/k matrix for this spin.
+   ! Store global shape of the q/k matrix for this spin.
    gqk%glob_nq = glob_nq_spin(spin)
    gqk%glob_nk = glob_nk_spin(spin)
  end do
@@ -839,7 +836,6 @@ function gstore_new(dtset, cryst, ebands, ifc, comm, &
  call gstore%set_mpi_grid__(dtset%eph_np_pqbks, nproc_spin, comm_spin)
 
  ABI_FREE(qbz_)
-
  call xmpi_comm_free(comm_spin)
 
  ! TODO: Use ebands%kptns
@@ -1162,10 +1158,8 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, q
    call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
    ! Allocate storage for MPI-distributed e-ph matrix elements.
-#if 1
    ABI_MALLOC_OR_DIE(gqk%my_vals, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
    gqk%my_vals = zero !; gqk%my_vals = huge(one)
-#endif
 
    ! Allocate storage for MPI-distributed dH/dk matrix elements.
    select case (gstore%with_vk)
@@ -1190,6 +1184,7 @@ end subroutine gstore_malloc__
 !! get_ibz2bz
 !!
 !! FUNCTION
+!!  Build array with the index of the ibz wave vectors in the BZ.
 !!
 !! INPUTS
 !!
@@ -1244,6 +1239,7 @@ end subroutine get_ibz2bz
 !! get_star_from_ibz
 !!
 !! FUNCTION
+!!  Build array with the indices of the start of the ik_ibz wavevector in the BZ.
 !!
 !! INPUTS
 !!
@@ -2016,8 +2012,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Create ddkop object to compute group velocities (if needed)
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
-
-
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -2106,12 +2100,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! so we skip this transition immediately. This should happen only if fsewin > sigma_erange.
        if (wfd%npwarr(ik_ibz) == 1 .or. wfd%npwarr(ikq_ibz) == 1) cycle
 
-       ! TODO:
-       ! If kfilter == "fs_tetra", compute delta(e_{k+q}) and cycle if weight is zero.
        if (gstore%kfilter == "fs_tetra") then
+         ! Check tetra delta(e_{k+q}) and cycle if weight is zero.
          if (all(abs(gstore%delta_ef_ibz(:, ikq_ibz, spin)) == zero)) then
-           nskip_tetra_kq = nskip_tetra_kq + 1
-           cycle
+           nskip_tetra_kq = nskip_tetra_kq + 1; cycle
          end if
        end if
 
@@ -2151,7 +2143,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Compute nonlocal form factors ffnlk at (k+G)
        ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
        call mkffnl_objs(cryst, psps, 1, ffnlk, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
-                        comm=gqk%pert_comm%value)  !, request=ffnlk_request)
+                        comm=gqk%pert_comm%value) !, request=ffnlk_request)
 
        ! Compute k+q+G vectors
        nkpg1 = 3 * dtset%nloalg(3)
@@ -2231,7 +2223,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        !    - gkq_nu(2, mnb, mnb, natom3)
        !    - my_vals(cplex, my_npert, nb, my_nq, nb, my_nk)
        !
-#if 1
        select case (gqk%cplex)
        case (1)
         do my_ip=1,my_npert
@@ -2246,7 +2237,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        case default
          ABI_ERROR(sjoin("Invalid cplex:", itoa(gqk%cplex)))
        end select
-#endif
 
        if (gstore%with_vk /= 0) then
          ! Compute diagonal matrix elements of velocity operator with DFPT routines
@@ -2299,13 +2289,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      !if
      !end if
 
-     if (my_iq <= 5 .or. mod(my_iq, 100) == 0) then
+     if (my_iq <= 10 .or. mod(my_iq, 20) == 0) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q, out_wall=out_wall_q)
-       call wrtout(std_out, sjoin(" nskip_tetra_kq:", itoa(nskip_tetra_kq)))
-       if (my_iq == 5) then
+       !call wrtout(std_out, sjoin(" nskip_tetra_kq:", itoa(nskip_tetra_kq)))
+       if (my_iq == 10) then
          call wrtout(std_out, sjoin(" Estimated time to completion:", sec2str((gqk%my_nq - my_iq) * out_wall_q)))
-         call wrtout(std_out, " >>> Will print next iteration when mod(my_iq, 100) == 0) ...", do_flush=.True.)
+         call wrtout(std_out, " >>> Will print next iteration when mod(my_iq, 20) == 0) ...", do_flush=.True.)
        end if
      end if
    end do ! my_iq
@@ -2360,23 +2350,25 @@ end subroutine gstore_compute
 !!
 !! SOURCE
 
-subroutine gstore_ncwrite_path(gstore, path, cryst, ebands)
+subroutine gstore_ncwrite_path(gstore, path, dtset, wfk0_hdr)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),intent(in) :: gstore
  character(len=*),intent(in) :: path
- class(crystal_t),target,intent(in) :: cryst
- class(ebands_t),intent(in) :: ebands
+ type(dataset_type),intent(in) :: dtset
+ type(hdr_type),intent(in) :: wfk0_hdr
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, ncid, spin, my_is, ncerr
+ integer :: my_rank, ncid, spin, my_is, ncerr, gstore_fform
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(gstore%comm)
+
+ gstore_fform = fform_from_ext("GSTORE.nc")
 
  if (my_rank == master) then
    ! =======================================================
@@ -2384,8 +2376,9 @@ subroutine gstore_ncwrite_path(gstore, path, cryst, ebands)
    ! =======================================================
    !call wrtout(std_out, sjoin(" Writing e-ph matrix elements to:", path))
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   !NCF_CHECK(gstore%cryst%ncwrite(ncid))
+   !NCF_CHECK(ebands_ncwrite(gstore%ebands, ncid))
+   NCF_CHECK(wfk0_hdr%ncwrite(ncid, gstore_fform, spinat=dtset%spinat, nc_define=.True.))
 
    ! Write gstore dimensions
    ncerr = nctk_def_dims(ncid, [ &
@@ -2405,6 +2398,7 @@ subroutine gstore_ncwrite_path(gstore, path, cryst, ebands)
 
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("qibz", "dp", "three, nqibz"), &
+     nctkarr_t("wtq", "dp", "nqibz"), &
      nctkarr_t("kibz", "dp", "three, nkibz"), &
      nctkarr_t("kzone", "c", "nctk_slen"), &
      nctkarr_t("qzone", "c", "nctk_slen"), &
@@ -2418,6 +2412,7 @@ subroutine gstore_ncwrite_path(gstore, path, cryst, ebands)
    NCF_CHECK(nf90_put_var(ncid, vid("qzone"), gstore%qzone))
    NCF_CHECK(nf90_put_var(ncid, vid("kfilter"), gstore%kfilter))
    NCF_CHECK(nf90_put_var(ncid, vid("qibz"), gstore%qibz))
+   NCF_CHECK(nf90_put_var(ncid, vid("wtq"), gstore%wtq))
    !NCF_CHECK(nf90_put_var(ncid, vid("kibz"), gstore%kibz))
    NCF_CHECK(nf90_close(ncid))
  end if ! master
@@ -2458,30 +2453,44 @@ end subroutine gstore_ncwrite_path
 !!
 !! SOURCE
 
-type(gstore_t) function gstore_from_ncpath(path, dtset, comm) result(gstore) !, cryst, ebands)
+type(gstore_t) function gstore_from_ncpath(path, dtset, cryst, ebands, ifc, comm) result(gstore)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
- !class(crystal_t),target,intent(in) :: cryst
- !class(ebands_t),intent(in) :: ebands
+ class(crystal_t),target,intent(in) :: cryst
+ class(ebands_t),target,intent(in) :: ebands
+ class(ifc_type),target,intent(in) :: ifc
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, ncid, spin, my_is, ncerr
+ integer :: my_rank, ncid, spin, my_is, ncerr, nproc, ierr, fform
+ type(hdr_type) :: wfk0_hdr
+ type(crystal_t) :: gstore_cryst
 !arrays
  integer :: bands_spin(2, dtset%nsppol), nproc_spin(dtset%nsppol), comm_spin(dtset%nsppol)
+ integer :: ibuffer(5)
 
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+
+ ! Set basic parameters.
+ gstore%comm = comm
+ gstore%nsppol = dtset%nsppol
+
+ ! Get references to other data structures.
+ gstore%cryst => cryst
+ gstore%ebands => ebands
+ gstore%ifc => ifc
+ gstore%kibz => ebands%kptns
 
  if (my_rank == master) then
    ! =======================================================
-   ! Master node writes basic objects and gstore dimensions
+   ! Master node reads basic objects and gstore dimensions
    ! =======================================================
    !call wrtout(std_out, sjoin(" Reading e-ph matrix elements from:", path))
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
@@ -2489,27 +2498,73 @@ type(gstore_t) function gstore_from_ncpath(path, dtset, comm) result(gstore) !, 
    !NCF_CHECK(ebands_ncwrite(ebands, ncid))
    !NCF_CHECK(nctk_set_datamode(ncid))
 
+   call hdr_ncread(wfk0_hdr, ncid, fform)
+   ABI_CHECK(fform /= 0, sjoin("Error while reading:", path))
+
    ! Read gstore dimensions
    NCF_CHECK(nctk_get_dim(ncid, "nkibz", gstore%nkibz))
    NCF_CHECK(nctk_get_dim(ncid, "nkbz", gstore%nkbz))
    NCF_CHECK(nctk_get_dim(ncid, "nqibz", gstore%nqibz))
    NCF_CHECK(nctk_get_dim(ncid, "nqbz", gstore%nqbz))
    !NCF_CHECK(nctk_get_dim(ncid, "nctk_slen", nctk_slen))
-
    NCF_CHECK(nf90_get_var(ncid, vid("with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_get_var(ncid, vid("kzone"), gstore%kzone))
    NCF_CHECK(nf90_get_var(ncid, vid("qzone"), gstore%qzone))
    NCF_CHECK(nf90_get_var(ncid, vid("kfilter"), gstore%kfilter))
-   !NCF_CHECK(nf90_get_var(ncid, vid("qibz"), gstore%qibz))
+
+   ABI_MALLOC(gstore%qibz, (3, gstore%nqibz))
+   ABI_MALLOC(gstore%wtq, (gstore%nqibz))
+
+   NCF_CHECK(nf90_get_var(ncid, vid("qibz"), gstore%qibz))
+   NCF_CHECK(nf90_get_var(ncid, vid("wtq"), gstore%wtq))
    !NCF_CHECK(nf90_get_var(ncid,vid("kibz"), gstore%kibz))
    NCF_CHECK(nf90_close(ncid))
+
+   ! =================
+   ! Consistency check
+   ! =================
+   gstore_cryst = wfk0_hdr%get_crystal()
+   !call gstore_cryst%print(header="crystal structure from WFK file")
+
+   if (cryst%compare(gstore_cryst, header=" Comparing input crystal with GSTORE crystal") /= 0) then
+     ABI_ERROR("Crystal structure from input and GSTORE do not agree! Check messages above!")
+   end if
+   call gstore_cryst%free()
  end if ! master
 
- call xmpi_barrier(comm)
+ if (nproc > 1) then
+   ! Broadcast the header.
+   call wfk0_hdr%bcast(master, my_rank, comm)
+
+   ! Broadcast dimensions.
+   if (my_rank == master) then
+     ibuffer = [gstore%nkibz, gstore%nkbz, gstore%nqibz, gstore%nqbz, gstore%with_vk]
+   end if
+   call xmpi_bcast(ibuffer, master, comm, ierr)
+
+   if (my_rank /= master) then
+     gstore%nkibz = ibuffer(1)
+     gstore%nkbz = ibuffer(2)
+     gstore%nqibz = ibuffer(3)
+     gstore%nqbz = ibuffer(4)
+     gstore%with_vk = ibuffer(5)
+
+     ABI_MALLOC(gstore%qibz, (3, gstore%nqibz))
+     ABI_MALLOC(gstore%wtq, (gstore%nqibz))
+   end if
+
+   call xmpi_bcast(gstore%qibz, master, comm, ierr)
+   call xmpi_bcast(gstore%wtq, master, comm, ierr)
+ end if
+
+ ! Construct crystal and ebands from the GS WFK file.
+ !ebands = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
+ call wfk0_hdr%vs_dtset(dtset)
+ call wfk0_hdr%free()
 
  ! Distribute spins and create indirect mapping to spin index.
- !call gstore%distribute_spins__(ebands%mband, dtset%gstore_brange, dtset%eph_np_pqbks, &
- !                               bands_spin, nproc_spin, comm_spin, comm)
+ call gstore%distribute_spins__(ebands%mband, dtset%gstore_brange, dtset%eph_np_pqbks, &
+                                bands_spin, nproc_spin, comm_spin, comm)
 
  ! TODO BZ stuff and krange
 
@@ -2520,7 +2575,7 @@ type(gstore_t) function gstore_from_ncpath(path, dtset, comm) result(gstore) !, 
  ! and we can finally allocate and distribute other arrays.
  !call gstore%malloc__(max_nq, qglob2bz_idx, max_nk, kglob2bz_idx, qbz2ibz_, kbz2ibz_)
 
- !call xmpi_comm_free(comm_spin)
+ call xmpi_comm_free(comm_spin)
 
  ! Now we read the big arrays with MPI-IO and hdf5 groups.
  ! Note the loop over spin to account as each gqk has its own dimensions.
@@ -2530,8 +2585,8 @@ type(gstore_t) function gstore_from_ncpath(path, dtset, comm) result(gstore) !, 
 
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
-   !if (my_is /= 0) call gstore%gqk(my_is)%ncwrite_path(path, gstore)
-   !call xmpi_barrier(gstore%comm)
+   !if (my_is /= 0) call gstore%gqk(my_is)%ncread_path(path, gstore)
+   call xmpi_barrier(gstore%comm)
  end do
 
 contains

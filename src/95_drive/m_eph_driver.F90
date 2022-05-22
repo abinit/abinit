@@ -72,7 +72,7 @@ module m_eph_driver
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
- use m_gstore,          only : gstore_t, gstore_new
+ use m_gstore,          only : gstore_t, gstore_new, gstore_from_ncpath
 
  implicit none
 
@@ -186,7 +186,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
- type(gstore_t) :: gstore !,other_gstore
+ type(gstore_t) :: gstore, other_gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
@@ -346,6 +346,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
    call ephtk_update_ebands(dtset, ebands, "Ground state energies")
+
+   ! Need to update the WFK header to reflect the changes in ebands.
+   ! because we may need to write the header to ncfile
+   ! NB: eigenvalues are not stored in the header.
+
+   wfk0_hdr%occopt = ebands%occopt
+   call get_eneocc_vect(ebands, "occ", wfk0_hdr%occ)
+   wfk0_hdr%fermie = ebands%fermie
+   wfk0_hdr%nelect = ebands%nelect
  end if
 
  if (use_wfq) then
@@ -399,7 +408,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
                       prtvol=dtset%prtvol)
 
-   ! DDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! DDB cryst comes from DFPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    cryst_ddb%timrev = cryst%timrev
    if (cryst%compare(cryst_ddb, header=" Comparing WFK crystal with DDB crystal") /= 0) then
@@ -733,14 +742,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (14)
     ! Write e-ph matrix elements to disk.
+
     gstore = gstore_new(dtset, cryst, ebands, ifc, comm)
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
     if (nprocs == 1) then
-      call gstore%ncwrite_path(strcat(dtfil%filnam_ds(4), "_GSTORE.nc"), cryst, ebands)
-      !other_gstore = gstore_from_ncpath(strcat(dtfil%filnam_ds(4), "_GSTORE.nc"), dtset, comm)
-      !call other_gstore%free()
+      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+      call gstore%ncwrite_path(path, dtset, wfk0_hdr)
+      other_gstore = gstore_from_ncpath(path, dtset, cryst, ebands, ifc, comm)
+      call other_gstore%free()
     end if
     call gstore%free()
 
