@@ -417,6 +417,8 @@ contains
   procedure, private :: malloc__ => gstore_malloc__
   ! Allocate local buffers once the MPI grid has been initialized.
 
+  procedure, private :: filter_fs_tetra__ => gstore_filter_fs_tetra__
+
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
 
@@ -632,6 +634,9 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
    ABI_ERROR(sjoin("Invalid qzone:", gstore%qzone))
  end select
 
+ ! Here we filter the electronic wavevectors k
+ ! and recompute select_qbz_spin and select_kbz_spin.
+
  select case (gstore%kfilter)
  case ("none")
    continue
@@ -640,138 +645,10 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  !case ("erange") ! referred to CBM, VBM in semiconductors.
 
  case ("fs_tetra")
-   !call gstore%filter_fs_tetra(brange_spin, select_qbz_spin, select_kbz_spin)
-
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
-   ! and define brange_spin automatically.
-   call wrtout(std_out, sjoin(" Filtering k-points using:", gstore%kfilter))
-
-   ! NB: here we recompute brange_spin
-   call ebands_get_bands_e0(ebands, ebands%fermie, gstore%brange_spin, ierr)
-   ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
-
-   ! TODO: Decide whether it makes sense to store ktetra or indkk in gstore.
-   ABI_MALLOC(indkk, (gstore%nkbz))
-   indkk(:) = kbz2ibz_(1, :)
-
-   rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
-   call htetra_init(ktetra, indkk, cryst%gprimd, klatt, kbz_, gstore%nkbz, gstore%kibz, gstore%nkibz, &
-                    ierr, errorstring, comm)
-   ABI_CHECK(ierr == 0, errorstring)
-
-   ABI_MALLOC(eig_ibz, (gstore%nkibz))
-   max_occ = two / (ebands%nspinor * ebands%nsppol)
-   select_kbz_spin = 0
-
-   nb = maxval(gstore%brange_spin(2, :) - gstore%brange_spin(1, :) + 1)
-   ! TODO: Write this stuff to ncfile
-   ABI_CALLOC(gstore%delta_ef_ibz, (nb, gstore%nkibz, nsppol))
-
-   cnt = 0
-   do spin=1,nsppol
-     do band=gstore%brange_spin(1, spin), gstore%brange_spin(2, spin)
-       ib = band - gstore%brange_spin(1, spin) + 1
-       eig_ibz = ebands%eig(band, :, spin)
-
-       do ik_ibz=1,gstore%nkibz
-         cnt = cnt + 1; if (mod(cnt, all_nproc) /= my_rank) cycle ! MPI parallelism inside comm
-
-         call ktetra%get_onewk_wvals(ik_ibz, tetra_opt0, 1, [ebands%fermie], max_occ, &
-                                     gstore%nkibz, eig_ibz, delta_theta_ef)
-
-         gstore%delta_ef_ibz(ib, ik_ibz, spin) = delta_theta_ef(1)
-
-         iflag = merge(1, 0, abs(delta_theta_ef(1)) > zero)
-
-         ! Use iflag to filter k-points.
-         select case (gstore%kzone)
-         case ("ibz")
-           ik_bz = kibz2bz(ik_ibz)
-           select_kbz_spin(ik_bz, spin) = iflag
-
-         case ("bz")
-           call get_star_from_ibz(ik_ibz, gstore%nkbz, kbz2ibz_, nk_in_star, kstar_bz_inds)
-           ABI_CHECK(nk_in_star > 0, "Something wrong in get_star_from_ibz")
-           do ii=1,nk_in_star
-             ik_bz = kstar_bz_inds(ii)
-             select_kbz_spin(ik_bz, spin) = iflag
-           end do
-           ABI_FREE(kstar_bz_inds)
-         end select
-       end do
-
-     end do
-   end do
-
-   call ktetra%print(std_out)
-
-   call xmpi_sum(select_kbz_spin, comm, ierr)
-   call xmpi_sum(gstore%delta_ef_ibz, comm, ierr)
-
-   ! Now the tricky part as we want to remove q-points that
-   ! do not lead to any scattering process between two states on the FS
-   ! Remember that k+q is always a sub-mesh of the input ebands k-mesh.
-
-   select_qbz_spin = 0
-
-   if (gstore%kzone == "ibz") kpts_ptr => kibz_
-   if (gstore%kzone == "bz")  kpts_ptr => kbz_
-   len_kpts_ptr = size(kpts_ptr, dim=2)
-   ABI_MALLOC(map_kq, (6, len_kpts_ptr))
-
-   select case (gstore%qzone)
-   case ("ibz")
-     do iq_ibz=1,gstore%nqibz
-       if (mod(iq_ibz, all_nproc) /= my_rank) cycle ! MPI parallelism.
-       qpt = gstore%qibz(:, iq_ibz)
-       iq_bz = qibz2bz(iq_ibz)
-       ! k + q_ibz --> k IBZ --> k BZ
-
-       call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
-                                     dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                     ebands_timrev, use_symrec=.False., qpt=qpt)
-
-       if (dksqmax > tol12) then
-          ABI_ERROR("Cannot map k+q to IBZ!")
-       end if
-
-       do ii=1,len_kpts_ptr
-         ikq_ibz = map_kq(1, ii)
-         ikq_bz = kibz2bz(ikq_ibz)
-         select_qbz_spin(iq_bz, :) = select_kbz_spin(ikq_bz, :)
-       end do
-     end do ! iq_ibz
-
-   case ("bz")
-     do iq_bz=1,gstore%nqbz
-       if (mod(iq_bz, all_nproc) /= my_rank) cycle ! MPI parallelism.
-       qpt = qbz_(:, iq_bz)
-       iq_ibz = qbz2ibz_(1, iq_bz)
-       ! k + q_bz --> k IBZ --> k BZ
-
-       call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
-                                     dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                     ebands_timrev, use_symrec=.False., qpt=qpt)
-
-       if (dksqmax > tol12) then
-          ABI_ERROR("Cannot map k+q to IBZ!")
-       end if
-
-       do ii=1,len_kpts_ptr
-         ikq_ibz = map_kq(1, ii)
-         ikq_bz = kibz2bz(ikq_ibz)
-         select_qbz_spin(iq_bz, :) = select_kbz_spin(ikq_bz, :)
-       end do
-     end do
-   end select
-
-   call xmpi_sum(select_qbz_spin, comm, ierr)
-
-   ABI_FREE(map_kq)
-   ABI_FREE(eig_ibz)
-   ABI_FREE(indkk)
-   call ktetra%free()
-
+   ! and define gstore%brange_spin automatically.
+   call gstore%filter_fs_tetra__(qbz_, qbz2ibz_, qibz2bz, kbz_, kibz_, kbz2ibz_, kibz2bz, &
+                                 select_qbz_spin, select_kbz_spin)
  case default
    ABI_ERROR(sjoin("Invalid kfilter:", gstore%kfilter))
  end select
@@ -779,14 +656,14 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  ! Total number of k/q points for each spin after filtering (if any)
  glob_nk_spin(:) = count(select_kbz_spin /= 0, dim=1)
  glob_nq_spin(:) = count(select_qbz_spin /= 0, dim=1)
- ! Max dim over spin.
- max_nq = maxval(glob_nq_spin)
- max_nk = maxval(glob_nk_spin)
 
  ! We need another table mapping the global index in the gqk matrix to the q/k index in the BZ
  ! so that one can extract the symmetry tables computed above.
  ! Again this is needed as the global sizes of the gqk matrix
  ! is not necessarily equal to the size of the BZ/IBZ if we have filtered the wave vectors.
+
+ max_nq = maxval(glob_nq_spin) ! Max dim over spin
+ max_nk = maxval(glob_nk_spin)
  ABI_ICALLOC(qglob2bz, (max_nq, nsppol))
  ABI_ICALLOC(kglob2bz, (max_nk, nsppol))
 
@@ -1277,6 +1154,197 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, 
 
 end subroutine gstore_malloc__
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_filter_fs_tetra__
+!! NAME
+!! gstore_filter_fs_tetra__
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+                                    select_qbz_spin, select_kbz_spin)
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t),target,intent(inout) :: gstore
+ real(dp),intent(in) :: qbz(3, gstore%nqbz)
+ real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
+ integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
+ integer,intent(in) :: kbz2ibz(6,gstore%nkbz), kibz2bz(gstore%nkibz)
+ integer,intent(out) :: select_qbz_spin(gstore%nqbz, gstore%nsppol)
+ integer,intent(out) :: select_kbz_spin(gstore%nkbz, gstore%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: tetra_opt0 = 0
+ integer :: nsppol, ierr, cnt, spin, band, ib, ii, nb, all_nproc, my_rank, comm, ebands_timrev
+ integer :: ik_bz, ik_ibz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, iflag, nk_in_star
+ real(dp) :: max_occ, dksqmax
+ character(len=80) :: errorstring
+ type(ebands_t),pointer :: ebands
+ type(crystal_t),pointer :: cryst
+ type(htetra_t) :: ktetra
+!arrays
+ integer,allocatable :: indkk(:), map_kq(:,:), kstar_bz_inds(:)
+ real(dp):: qpt(3), rlatt(3,3), klatt(3,3), delta_theta_ef(2)
+ real(dp),allocatable :: eig_ibz(:)  !, wvals(:)
+ real(dp),contiguous, pointer :: kpts_ptr(:,:)
+!----------------------------------------------------------------------
+
+ comm = gstore%comm
+ all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
+ ! and define gstore%brange_spin automatically.
+ call wrtout(std_out, sjoin(" Filtering k-points using:", gstore%kfilter))
+
+ ! NB: here we recompute brange_spin
+ cryst => gstore%cryst
+ ebands => gstore%ebands
+ nsppol = gstore%nsppol
+
+ ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ call ebands_get_bands_e0(ebands, ebands%fermie, gstore%brange_spin, ierr)
+ ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
+
+ ! TODO: Decide whether it makes sense to store ktetra or indkk in gstore.
+ ABI_MALLOC(indkk, (gstore%nkbz))
+ indkk(:) = kbz2ibz(1, :)
+
+ rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
+ call htetra_init(ktetra, indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
+                  ierr, errorstring, gstore%comm)
+ ABI_CHECK(ierr == 0, errorstring)
+
+ ABI_MALLOC(eig_ibz, (gstore%nkibz))
+ max_occ = two / (ebands%nspinor * nsppol)
+ select_kbz_spin = 0
+
+ nb = maxval(gstore%brange_spin(2, :) - gstore%brange_spin(1, :) + 1)
+ ! TODO: Write this stuff to ncfile
+ ABI_CALLOC(gstore%delta_ef_ibz, (nb, gstore%nkibz, nsppol))
+
+ cnt = 0
+ do spin=1,nsppol
+   do band=gstore%brange_spin(1, spin), gstore%brange_spin(2, spin)
+     ib = band - gstore%brange_spin(1, spin) + 1
+     eig_ibz = ebands%eig(band, :, spin)
+
+     do ik_ibz=1,gstore%nkibz
+       cnt = cnt + 1; if (mod(cnt, all_nproc) /= my_rank) cycle ! MPI parallelism inside comm
+
+       call ktetra%get_onewk_wvals(ik_ibz, tetra_opt0, 1, [ebands%fermie], max_occ, &
+                                   gstore%nkibz, eig_ibz, delta_theta_ef)
+
+       gstore%delta_ef_ibz(ib, ik_ibz, spin) = delta_theta_ef(1)
+
+       iflag = merge(1, 0, abs(delta_theta_ef(1)) > zero)
+
+       ! Use iflag to filter k-points.
+       select case (gstore%kzone)
+       case ("ibz")
+         ik_bz = kibz2bz(ik_ibz)
+         select_kbz_spin(ik_bz, spin) = iflag
+
+       case ("bz")
+         call get_star_from_ibz(ik_ibz, gstore%nkbz, kbz2ibz, nk_in_star, kstar_bz_inds)
+         ABI_CHECK(nk_in_star > 0, "Something wrong in get_star_from_ibz")
+         do ii=1,nk_in_star
+           ik_bz = kstar_bz_inds(ii)
+           select_kbz_spin(ik_bz, spin) = iflag
+         end do
+         ABI_FREE(kstar_bz_inds)
+       end select
+     end do
+
+   end do
+ end do
+
+ call ktetra%print(std_out)
+
+ call xmpi_sum(select_kbz_spin, comm, ierr)
+ call xmpi_sum(gstore%delta_ef_ibz, comm, ierr)
+
+ ! Now the tricky part as we want to remove q-points that
+ ! do not lead to any scattering process between two states on the FS
+ ! Remember that k+q is always a sub-mesh of the input ebands k-mesh.
+
+ select_qbz_spin = 0
+
+ if (gstore%kzone == "ibz") kpts_ptr => kibz
+ if (gstore%kzone == "bz")  kpts_ptr => kbz
+ len_kpts_ptr = size(kpts_ptr, dim=2)
+ ABI_MALLOC(map_kq, (6, len_kpts_ptr))
+
+ select case (gstore%qzone)
+ case ("ibz")
+   do iq_ibz=1,gstore%nqibz
+     if (mod(iq_ibz, all_nproc) /= my_rank) cycle ! MPI parallelism.
+     qpt = gstore%qibz(:, iq_ibz)
+     iq_bz = qibz2bz(iq_ibz)
+     ! k + q_ibz --> k IBZ --> k BZ
+
+     call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
+                                   dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                   ebands_timrev, use_symrec=.False., qpt=qpt)
+
+     if (dksqmax > tol12) then
+        ABI_ERROR("Cannot map k+q to IBZ!")
+     end if
+
+     do ii=1,len_kpts_ptr
+       ikq_ibz = map_kq(1, ii)
+       ikq_bz = kibz2bz(ikq_ibz)
+       select_qbz_spin(iq_bz, :) = select_kbz_spin(ikq_bz, :)
+     end do
+   end do ! iq_ibz
+
+ case ("bz")
+   do iq_bz=1,gstore%nqbz
+     if (mod(iq_bz, all_nproc) /= my_rank) cycle ! MPI parallelism.
+     qpt = qbz(:, iq_bz)
+     iq_ibz = qbz2ibz(1, iq_bz)
+     ! k + q_bz --> k IBZ --> k BZ
+
+     call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
+                                   dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                   ebands_timrev, use_symrec=.False., qpt=qpt)
+
+     if (dksqmax > tol12) then
+        ABI_ERROR("Cannot map k+q to IBZ!")
+     end if
+
+     do ii=1,len_kpts_ptr
+       ikq_ibz = map_kq(1, ii)
+       ikq_bz = kibz2bz(ikq_ibz)
+       select_qbz_spin(iq_bz, :) = select_kbz_spin(ikq_bz, :)
+     end do
+   end do
+ end select
+
+ call xmpi_sum(select_qbz_spin, comm, ierr)
+
+ ABI_FREE(map_kq)
+ ABI_FREE(eig_ibz)
+ ABI_FREE(indkk)
+ call ktetra%free()
+
+end subroutine gstore_filter_fs_tetra__
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_gstore/get_ibz2bz
@@ -2643,13 +2711,12 @@ type(gstore_t) function gstore_from_ncpath(path, dtset, cryst, ebands, ifc, comm
  call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
- call gstore%distribute_spins__(ebands%mband, brange_spin, dtset%eph_np_pqbks, &
-                                nproc_spin, comm_spin, comm)
+ call gstore%distribute_spins__(ebands%mband, brange_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin, comm)
 
  ! TODO BZ stuff and krank
  gstore%krank = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
- ! TODO: Read it
+ ! TODO: Read it from file
  gstore_cplex = 1
 
  ! Set MPI grid
