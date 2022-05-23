@@ -125,6 +125,7 @@ contains
 !!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol = number of channels for spin-polarization (1 or 2)
 !!  npwarr(nkpt) = array holding npw for each k point
+!!  nylmgr=second dimension of ylmgr_k
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
@@ -138,6 +139,7 @@ contains
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  samepert= .true. if i1pert=i2pert and i1dir=i2dir
 !!  ucvol=volume of the unit cell
+!!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  vpsp1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
 !!          gradient Hamiltonian for i1pert
 !!  vpsp1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
@@ -146,6 +148,8 @@ contains
 !!  d2_dkdk_f = wf files
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density (dummy) 
 !!  xred(3,natom) = reduced atomic coordinates
+!!  ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics
+!!  ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical harmonics
 !!
 !! OUTPUT
 !!  d3etot(2,3,mpert,3,mpert,3,mpert) = third derivatives of the energy tensor
@@ -168,14 +172,14 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 & dtfil,dtset,eigen1,eigen2,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
-& nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
-& ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,xccc3d1,xred)
+& nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
+& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
  integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nkxc,nspden
- integer,intent(in) :: nspinor,nsppol
+ integer,intent(in) :: nspinor,nsppol,nylmgr,useylmgr
  real(dp),intent(in) :: gsqcut,ucvol
  logical,intent(in) :: samepert
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -206,13 +210,16 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(out) :: d3etot_t4(2,n2dq),d3etot_t5(2,n1dq)
  real(dp),intent(out) :: d3etot_tgeom(2,n2dq)
+ real(dp),intent(in) :: ylm(mpw*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr(mpw*mk1mem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
 
 !Variables ------------------------------------
 !scalars
  integer :: bandtot,bd2tot,icg,idq,ierr,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
- integer :: nband_k,npw_k,nylmgr,option,spaceworld,tim_getgh1c
- integer :: usepaw,useylmgr
+ integer :: nband_k,npw_k,spaceworld,tim_getgh1c
+ integer :: usepaw
  real(dp) :: tmpim,tmpre,wtk_k
+ real(dp) :: cpu, wall, gflops
  character(len=1000) :: msg
  logical :: with_nonlocal_i1pert, with_nonlocal_i2pert
 !arrays
@@ -230,7 +237,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),allocatable :: vlocal1dq(:,:,:,:)
  real(dp),allocatable :: vlocal1(:,:,:,:)
  real(dp),allocatable :: vpsp1(:)
- real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
@@ -264,14 +270,14 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  ABI_MALLOC(dum_cwaveprj,(0,0))
 
 !Set up the spherical harmonics (Ylm) and gradients at each k point 
- useylmgr=1; option=2 ; nylmgr=9
- ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))               
- ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
- if (psps%useylm==1) then
-   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,mkmem_rbz,mpi_enreg,&
- & psps%mpsang,mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
- & rprimd,ylm,ylmgr)                                   
- end if
+! useylmgr=1; option=2 ; nylmgr=9
+! ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))               
+! ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+! if (psps%useylm==1) then
+!   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,mkmem_rbz,mpi_enreg,&
+! & psps%mpsang,mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+! & rprimd,ylm,ylmgr)                                   
+! end if
 
 !Initialize d3etot parts
  d3etot_t1=zero
