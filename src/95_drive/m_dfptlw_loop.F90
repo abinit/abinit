@@ -341,8 +341,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
          call WffClose (wff1,ierr)
        end if
 
-       !TODO:  Complete this subroutine
-       call read_1wf(cg1,eigen1,formeig,mband,mcg,mpi_enreg,mpw,mkmem,nspinor,nsppol,fiwf1i)
+       call read_1eig(eigen1,formeig,mband,nkpt,nsppol,fiwf1i)
 
        rho1r1(:,:) = zero; rho1g1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
@@ -416,8 +415,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
                call WffClose (wff2,ierr)
              end if
 
-             !TODO:  Complete this subroutine
-              call read_1wf(cg2,eigen2,formeig,mband,mcg,mpi_enreg,mpw,mkmem,nspinor,nsppol,fiwf2i)
+             call read_1eig(eigen2,formeig,mband,nkpt,nsppol,fiwf2i)
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
                samepert=.true.
@@ -946,14 +944,14 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
 end subroutine dfptlw_typeIproc
 !!***
 
-!!****f* ABINIT/m_dfptlw_loop/read_1wf
+!!****f* ABINIT/m_dfptlw_loop/read_1eig
 !! NAME
-!!  read_1wf
+!!  read_1eig
 !!
 !! FUNCTION
 !!
-!!  Reads all the first-order wave functions and energies from
-!!  a given _1WF file. Data is read by the master and broadcasted.
+!!  Reads all the first-order energies from a given _1WF file. 
+!!  Data is read by the master and broadcasted.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2022 ABINIT group (MR)
@@ -966,15 +964,11 @@ end subroutine dfptlw_typeIproc
 !!   0 => ground-state format 
 !!   1 => respfn format 
 !!  mband=maximum number of bands
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband_mem*mkmem*nsppol
-!!  mpi_enreg=MPI-parallelisation information
 !!  nkpt= number of k points
-!!  nspinor = number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  wffnm=name (character data) of file for input wavefunctions.
 !!
 !! OUTPUT
-!!  cg(2,mcg)=complex wf array
 !!  eigen(2*mband*mband*nkpt*nsppol)=matrix of eigenvalues
 !!
 !! SIDE EFFECTS
@@ -994,26 +988,25 @@ end subroutine dfptlw_typeIproc
 #include "abi_common.h"
 
 
-subroutine read_1wf(cg,eigen,formeig,mband,mcg,mpi_enreg,mpw,nkpt,nspinor,nsppol,wffnm)
+subroutine read_1eig(eigen,formeig,mband,nkpt,nsppol,wffnm)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: formeig,mband,mcg,mpw,nkpt,nspinor,nsppol
- type(MPI_type),intent(in) :: mpi_enreg
+ integer,intent(in) :: formeig,mband,nkpt,nsppol
  character(len=*),intent(inout) :: wffnm
 !arrays
- real(dp),intent(out) :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol)
+ real(dp),intent(out) :: eigen((2*mband)**formeig*mband*nkpt*nsppol)
 
 !Local variables-------------------------------
 !scalar 
- integer :: bd2tot,comm,ierr,iband,icount,ik_bz,iomode,isppol,master,my_rank
+ integer :: bd2tot,comm,ierr,ik_bz,iomode,isppol,master,my_rank
  type(wfk_t) :: Wfk1
  type(hdr_type) :: hdr1
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: cg_buffer(:,:),eig_buffer(:)
+ real(dp),allocatable :: eig_buffer(:)
 
 ! *************************************************************************
 
@@ -1050,7 +1043,6 @@ DBG_ENTER("COLL")
  call hdr1%bcast(master, my_rank, comm)
 
  !Allocate buffer for MPI communicatio with max dimensions.
- ABI_MALLOC(cg_buffer,(2,mpw*nspinor*mband))
  ABI_MALLOC(eig_buffer,((2*mband)**formeig*mband*nsppol))
 
  bd2tot = 0
@@ -1060,16 +1052,10 @@ DBG_ENTER("COLL")
      !Master reads and broadcasts
      if (my_rank == master) then
        call Wfk1%read_band_block([1,mband], ik_bz, isppol, xmpio_single, &
-     & cg_k=cg_buffer,eig_k=eig_buffer)
+     & eig_k=eig_buffer)
      end if
 
-     call xmpi_bcast(cg_buffer, master, comm, ierr)
      call xmpi_bcast(eig_buffer, master, comm, ierr)
-
-     !Pseudo code: If this proc treats this (ik_bz, spin), copy the buffer at the right location
-     ! in my cg array
-!     if (.not.proc_distrb_cycle(mpi_enreg%proc_distrb,ik_bz,1,mband,isppol,mpi_enreg%me)) then
-!     end if
 
      eigen(1+bd2tot:2*mband**2+bd2tot)=eig_buffer(:)
 
@@ -1082,12 +1068,11 @@ DBG_ENTER("COLL")
  if (my_rank == master) call Wfk1%close()
  call hdr1%free()
 
- ABI_FREE(cg_buffer)
  ABI_FREE(eig_buffer)
 
  DBG_EXIT("COLL")
 
-end subroutine read_1wf
+end subroutine read_1eig
 !!***
 
 end module m_dfptlw_loop
