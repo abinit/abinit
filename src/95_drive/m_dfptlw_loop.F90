@@ -342,7 +342,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
        end if
 
        !TODO:  Complete this subroutine
-!       call read_1wf(cg1,eigen1,formeig,mband,mcg,mpi_enreg,mpw,mkmem,nspinor,nsppol,fiwf1i)
+       call read_1wf(cg1,eigen1,formeig,mband,mcg,mpi_enreg,mpw,mkmem,nspinor,nsppol,fiwf1i)
 
        rho1r1(:,:) = zero; rho1g1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
@@ -415,6 +415,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
              if (ireadwf==1) then
                call WffClose (wff2,ierr)
              end if
+
+             !TODO:  Complete this subroutine
+              call read_1wf(cg2,eigen2,formeig,mband,mcg,mpi_enreg,mpw,mkmem,nspinor,nsppol,fiwf2i)
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
                samepert=.true.
@@ -1005,7 +1008,7 @@ subroutine read_1wf(cg,eigen,formeig,mband,mcg,mpi_enreg,mpw,nkpt,nspinor,nsppol
 
 !Local variables-------------------------------
 !scalar 
- integer :: comm,ierr,iband,ik_bz,iomode,isppol,master,my_rank
+ integer :: bd2tot,comm,ierr,iband,icount,ik_bz,iomode,isppol,master,my_rank
  type(wfk_t) :: Wfk1
  type(hdr_type) :: hdr1
  character(len=500) :: msg
@@ -1050,25 +1053,29 @@ DBG_ENTER("COLL")
  ABI_MALLOC(cg_buffer,(2,mpw*nspinor*mband))
  ABI_MALLOC(eig_buffer,((2*mband)**formeig*mband*nsppol))
 
+ bd2tot = 0
  do isppol=1,nsppol
    do ik_bz=1,hdr1%nkpt
-     do iband=1,mband
+  
+     !Master reads and broadcasts
+     if (my_rank == master) then
+       call Wfk1%read_band_block([1,mband], ik_bz, isppol, xmpio_single, &
+     & cg_k=cg_buffer,eig_k=eig_buffer)
+     end if
 
-       ! Master reads and broadcasts
-       if (my_rank == master) then
-         call Wfk1%read_band_block([iband,iband], ik_bz, isppol, xmpio_single, &
-       & cg_k=cg_buffer,eig_k=eig_buffer)
-       end if
-       call xmpi_bcast(cg_buffer, master, comm, ierr)
-       call xmpi_bcast(eig_buffer, master, comm, ierr)
+     call xmpi_bcast(cg_buffer, master, comm, ierr)
+     call xmpi_bcast(eig_buffer, master, comm, ierr)
 
-       !Pseudo code: If this proc treats this (ik_bz, spin), copy the buffer at the right location
-       ! in my cg array
-       if(mpi_enreg%proc_distrb(ik_bz,iband,isppol) == mpi_enreg%me_kpt) then
-!         cg(:, :, my_ik, my_spin) = cg_buffer
-       end if
+     !Pseudo code: If this proc treats this (ik_bz, spin), copy the buffer at the right location
+     ! in my cg array
+!     if (.not.proc_distrb_cycle(mpi_enreg%proc_distrb,ik_bz,1,mband,isppol,mpi_enreg%me)) then
+!     end if
 
-     end do
+     eigen(1+bd2tot:2*mband**2+bd2tot)=eig_buffer(:)
+
+     !Keep track of total number of bands
+     bd2tot = bd2tot + 2*mband**2
+
    end do
  end do
 
