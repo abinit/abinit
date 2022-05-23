@@ -61,6 +61,7 @@ module m_longwave
  use m_mkcore,      only : mkcore
  use m_dfptlw_loop, only : dfptlw_loop
  use m_dfptlw_nv,   only : dfptlw_nv
+ use m_initylmg,    only : initylmg
 
  implicit none
 
@@ -143,8 +144,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: ask_accurate,bantot,coredens_method,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
- integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho,usexcnhat
+ integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc,nylmgr
+ integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
+ integer :: usexcnhat,useylmgr
 ! integer :: idir,ipert,
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
@@ -176,6 +178,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
+ real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
 
@@ -465,6 +468,16 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
+!Set up the spherical harmonics (Ylm) and gradients at each k point 
+ useylmgr=1; option=2 ; nylmgr=9
+ ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
+ ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ if (psps%useylm==1) then
+   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+ & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+ & rprimd,ylm,ylmgr)                                   
+ end if
+
 !TODO: This part of the implementation does not work properly to select specific directions
 !      for each perturbation. This development is temporarily frozen.
 !Initialize the list of perturbations rfpert
@@ -553,9 +566,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & eigen0,gmet,gprimd,&
 & hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
 & dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
-& dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,occ,&
+& dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
 & pawfgr,pawrad,pawrhoij,pawtab,&
-& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,vxc,xred)
+& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,vxc,xred,ylm,ylmgr)
 
 !Merge stationay and nonvariational contributions
  d3etot=d3etot+d3etot_nv
@@ -613,6 +626,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(d3e_pert1)
  ABI_FREE(d3e_pert2)
  ABI_FREE(d3e_pert3)
+ ABI_FREE(ylm)
+ ABI_FREE(ylmgr)
 
  ! Clean the header
  call hdr%free()
