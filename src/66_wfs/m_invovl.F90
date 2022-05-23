@@ -328,7 +328,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg, use_gpu_cuda)
+subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  use m_abi_linalg
  implicit none
@@ -338,7 +338,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg, use_gpu_cuda)
  real(dp),intent(in) :: ffnl(ham%npw_k,dimffnl,ham%lmnmax,ham%ntypat)
  real(dp),intent(in) :: ph3d(2,ham%npw_k,ham%matblk)
  type(mpi_type) :: mpi_enreg
- integer, intent(in) :: use_gpu_cuda
 
  real(dp) :: atom_projs(2, ham%npw_k, ham%lmnmax)
  real(dp) :: temp(ham%npw_k)
@@ -562,7 +561,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg, use_gpu_cuda)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
  !! memory allocation of data used in solve_inner_gpu
- if (use_gpu_cuda==1) then
+ if (ham%use_gpu_cuda==1) then
    proj_dim(1) = 2
    proj_dim(2) = ham%npw_k
    proj_dim(3) = invovl%nprojs

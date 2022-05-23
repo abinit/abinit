@@ -903,7 +903,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
           ABI_NVTX_START_RANGE(NVTX_INVOVL)
-          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg, dtset%use_gpu_cuda)
+          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
           ABI_NVTX_END_RANGE()
        end if
 
