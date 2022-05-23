@@ -372,13 +372,14 @@ if (.not.samepert) then
        !Compute < u_{j,k}^{(0) | H^{\lambda2}+V^{\lambda2}} | u_{i,k}^{(0)} >
        call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwave0j,gv1c, &
      & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-       cj_h1_ci(1)=dotr
-       cj_h1_ci(2)=doti
+!       cj_h1_ci(1)=dotr
+!       cj_h1_ci(2)=doti
 
-!       ii=2*jband-1+(iband-1)*2*nband_k
-!       cj_h1_ci(1)=eig2_k(ii)
-!       cj_h1_ci(2)=eig2_k(ii+1)
-       
+       !Load < u_{j,k}^{(0) | H^{\lambda2}+V^{\lambda2}} | u_{i,k}^{(0)} >
+       ii=2*jband-1+(iband-1)*2*nband_k
+       cj_h1_ci(1)=eig2_k(ii)
+       cj_h1_ci(2)=eig2_k(ii+1)
+
        !Calculate: < u_{i,k}^{lambda1}} | u_{j,k}^{k_{\gamma}} >
        call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwavef1,cg1_aux, &
      & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -466,8 +467,13 @@ end if !samepert
      !Compute (< u_{j,k}^{(0) | H^{\lambda1}+V^{\lambda1}} | u_{i,k}^{(0)} >)^*
      call dotprod_g(dotr,doti,istwf_k,size_wf,2,cwave0j,gv1c, &
    & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-     cj_h1_ci(1)=dotr
-     cj_h1_ci(2)=-doti
+!     cj_h1_ci(1)=dotr
+!     cj_h1_ci(2)=-doti
+
+     !Load (< u_{j,k}^{(0) | H^{\lambda1}+V^{\lambda1}} | u_{i,k}^{(0)} >)^*
+     ii=2*jband-1+(iband-1)*2*nband_k
+     cj_h1_ci(1)=eig1_k(ii)
+     cj_h1_ci(2)=-eig1_k(ii+1)
 
      !Calculate: < u_{j,k}^{k_{\gamma}} | u_{i,k}^{lambda2}} >
      call dotprod_g(dotr,doti,istwf_k,size_wf,2,cg1_aux,cwavef2, &
