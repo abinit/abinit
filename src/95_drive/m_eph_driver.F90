@@ -752,6 +752,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
       return
     end if
 
+    path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
     gstore = gstore_new(dtset, cryst, ebands, ifc, comm)
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
