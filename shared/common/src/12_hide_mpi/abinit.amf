@@ -1,4 +1,4 @@
-EXTRA_DIST += \
+finc_list = \
 	xmpi_allgather.finc \
 	xmpi_iallgather.finc \
 	xmpi_allgatherv.finc \
@@ -22,3 +22,9 @@ EXTRA_DIST += \
 	xmpi_isend.finc \
 	xmpi_scatterv.finc \
 	xmpi_land_lor.finc
+
+#EXTRA_DIST_TMP = $(foreach ffile,$(finc_list),$(ffile))
+EXTRA_DIST += $(finc_list)
+
+# make sure lib12_hide_mpi is recompiled if any file from finc_list is modified
+lib12_hide_mpi_a_DEPENDENCIES = $(finc_list)
