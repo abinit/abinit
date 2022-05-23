@@ -73,7 +73,7 @@ contains
 !! The main inputs are :
 !!   - GS WFs and Hamiltonian (cg,gs_hamkq)
 !!   - 1st-order WFs for two perturbations i1pert/i1dir,i2pert/i2dir (cg1,cg2)
-!!   - 1st-order Local+SCF potentials for i1pert and i2pert (vtrial1_i1pert,vtrial1_i2pert)
+!!   - 1st-order Local+SCF potentials for i1pert and i2pert 
 !!   - 1st-order WFs DDK and 2nd-order WF D2_DKDK (d2_dkdk_f)
 !!
 !! COPYRIGHT
@@ -142,8 +142,6 @@ contains
 !!          gradient Hamiltonian for i1pert
 !!  vpsp1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
 !!          gradient Hamiltonian for i2pert
-!!  vtrial1_i1pert(cplex*nfft,nspden)=firs-order local potential
-!!  vtrial1_i2pert(cplex*nfft,nspden)=firs-order local potential
 !!  ddk_f = wf files
 !!  d2_dkdk_f = wf files
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density (dummy) 
@@ -171,7 +169,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
-& ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,ddk_f,d2_dkdk_f,xccc3d1,xred)
+& ucvol,vpsp1_i1pertdq,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,xccc3d1,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -205,8 +203,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),intent(in) :: xccc3d1(cplex*nfft),xred(3,natom)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
- real(dp),intent(in) :: vtrial1_i1pert(cplex*nfft,nspden)
- real(dp),intent(in) :: vtrial1_i2pert(cplex*nfft,nspden)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(out) :: d3etot_t4(2,n2dq),d3etot_t5(2,n1dq)
  real(dp),intent(out) :: d3etot_tgeom(2,n2dq)
@@ -348,7 +344,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
      & pawfgr,ph1d,psps,rhog,rhor,rmet,samepert,ucvol,useylmgr,&
-     & vpsp1_i1pertdq,vpsp1_i2pertdq,vtrial1_i1pert,vtrial1_i2pert,&
+     & vpsp1_i1pertdq,vpsp1_i2pertdq,&
      & wtk_k,xred,ylm_k,ylmgr_k)
 
 !    Add the contribution from each k-point. 
