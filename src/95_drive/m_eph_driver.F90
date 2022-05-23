@@ -753,14 +753,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
     end if
 
     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-    gstore = gstore_new(dtset, cryst, ebands, ifc, comm)
+    gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
     if (nprocs == 1) then
       path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-      call gstore%ncwrite_path(path, dtset, wfk0_hdr)
-      other_gstore = gstore_from_ncpath(path, dtset, cryst, ebands, ifc, comm)
+      other_gstore = gstore_from_ncpath(gstore%path, dtset, cryst, ebands, ifc, comm)
       call other_gstore%free()
     end if
     call gstore%free()
