@@ -803,7 +803,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
      ! Define global arrays
      ! ====================
      ncerr = nctk_def_arrays(spin_ncid, [ &
-       nctkarr_t("vals", "dp", "gqk_cplex, natom3, nb, glob_nq, nb, glob_nk") &
+       nctkarr_t("gvals", "dp", "gqk_cplex, nb, nb, natom3, glob_nk, glob_nq") &
      ])
      NCF_CHECK(ncerr)
 
@@ -2601,9 +2601,9 @@ subroutine dump_data()
 
  ! On disk we have the global arrays:
  !
- !  nctkarr_t("vals", "dp", "gqk_cplex, natom3, nb, glob_nq, nb, glob_nk")
- !  nctkarr_t("vk_cart", "dp", "three, nb, glob_nk")
- !  nctkarr_t("vkmat_cart", "dp", "three, nb, nb, glob_nk")
+ !   nctkarr_t("gvals", "dp", "gqk_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !   nctkarr_t("vk_cart", "dp", "three, nb, glob_nk")
+ !   nctkarr_t("vkmat_cart", "dp", "two, three, nb, nb, glob_nk")
 
  ! Write phonon stuff
  if (spin == 1 .and. gqk%grid_comm%me == 0) then
@@ -2897,15 +2897,6 @@ subroutine gqk_ncread_path(gqk, path, gstore)
  ! so it makes more sense to open file using a single row/col comm in k/q grid
  ! while keeping in mind the per_comm.
 
- ! =============
- ! Define arrays
- ! =============
- !ncerr = nctk_def_arrays(spin_ncid, [ &
- !  nctkarr_t("vals", "dp", "gqk_cplex, natom3, nb, glob_nq, nb, glob_nk") &  ! Global matrix
- !  !nctkarr_t("q2ibz", "int", "six, glob_nq"), &
- !])
- !NCF_CHECK(ncerr)
-
  !if (gstore%with_vk == 1) then
  !  ncerr = nctk_def_arrays(spin_ncid, [ &
  !    nctkarr_t("vk_cart", "dp", "three, nb, glob_nk") &  ! Global matrix
@@ -2924,17 +2915,6 @@ subroutine gqk_ncread_path(gqk, path, gstore)
  ! ==========
  !NCF_CHECK(nctk_set_datamode(spin_ncid))
  !NCF_CHECK(nf90_put_var(spin_ncid, vid("bstart"), gqk%bstart))
-
- !! TODO: Should write mapping glob_k --> kbz, glob_q --> qbz
- !if (nproc > 1) then
- !  NCF_CHECK(nctk_set_collective(spin_ncid, vid("vals")))
- !end if
- !ncerr = nf90_put_var(spin_ncid, vid("vals"), gqk%my_vals, &
- !                     start=[1, gqk%my_iperts(1), 1, gqk%my_qstart, 1, gqk%my_kstart], &
- !                     count=[gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk] &
- !                     !stride= ?? &
- !                     )
- !NCF_CHECK(ncerr)
 
  if (gstore%with_vk == 1) then
    !NCF_CHECK(nctk_set_collective(spin_ncid, vid("vk_cart")))
