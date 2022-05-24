@@ -334,7 +334,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !FB 03/2022: Added an option to force writing (used in RT-TDDFT)
  prtwf = dtset%prtwf/=0
  if (present(force_write)) then
-    if (force_write) prtwf = 1
+    if (force_write) prtwf = .true.
  end if
  if (prtwf) then
 
