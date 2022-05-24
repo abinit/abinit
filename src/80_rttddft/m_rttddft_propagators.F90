@@ -359,7 +359,8 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          end if
          ! kinetic energy
          if (lproperties(1)) then 
-            call rttddft_calc_kin(energies%e_kinetic,cg,dtset,ham_k,nband_k,npw_k,my_nspinor,occ0,dtset%wtk(ikpt),mpi_enreg,my_bandfft_kpt)
+            call rttddft_calc_kin(energies%e_kinetic,cg,dtset,ham_k,nband_k,npw_k,my_nspinor, &
+                                & occ0,dtset%wtk(ikpt),mpi_enreg,my_bandfft_kpt)
          end if
          ! for NL PSP part
          if (lproperties(2)) then

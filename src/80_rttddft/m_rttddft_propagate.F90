@@ -44,7 +44,7 @@ module m_rttddft_propagate
 !!***
 
  public :: rttddft_propagate_ele
- public :: rttddft_propagate_nuc
+!public :: rttddft_propagate_nuc
 !!***
 
 contains 
@@ -138,30 +138,30 @@ end subroutine rttddft_propagate_ele
 !! CHILDREN
 !!
 !! SOURCE
-subroutine rttddft_propagate_nuc(dtset, istep, mpi_enreg, psps, tdks)
+!subroutine rttddft_propagate_nuc(dtset, istep, mpi_enreg, psps, tdks)
 
- implicit none
+!implicit none
 
- !Arguments ------------------------------------
- !scalars
- type(tdks_type),           intent(inout) :: tdks
- integer,                    intent(in)    :: istep
- type(dataset_type),         intent(in)    :: dtset
- type(MPI_type),             intent(inout) :: mpi_enreg
- type(pseudopotential_type), intent(inout) :: psps
- 
- !Local variables-------------------------------
- !scalars
- character(len=500)   :: msg
- !arrays
- 
+!!Arguments ------------------------------------
+!!scalars
+!type(tdks_type),            intent(inout) :: tdks
+!integer,                    intent(in)    :: istep
+!type(dataset_type),         intent(in)    :: dtset
+!type(MPI_type),             intent(inout) :: mpi_enreg
+!type(pseudopotential_type), intent(inout) :: psps
+!
+!!Local variables-------------------------------
+!!scalars
+!character(len=500)   :: msg
+!!arrays
+!
 ! ***********************************************************************
 
- write(msg,'(2a,i5,a)') ch10,'--- Iteration',istep,ch10
- call wrtout(ab_out,msg)
- if (do_write_log) call wrtout(std_out,msg)
+!write(msg,'(2a,i5,a)') ch10,'--- Iteration',istep,ch10
+!call wrtout(ab_out,msg)
+!if (do_write_log) call wrtout(std_out,msg)
 
-end subroutine rttddft_propagate_nuc
+!end subroutine rttddft_propagate_nuc
 !!***
 
 end module m_rttddft_propagate

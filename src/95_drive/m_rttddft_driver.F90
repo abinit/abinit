@@ -120,7 +120,6 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
                  & ch10,'---------------------------------------------------------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
- print*, 'FB-test: here!!'
 
  !FB: Do not allow RT-TDDFT for now. Still under development
  write(msg,'(3a)') ch10,'Real-time time dependent DFT is not yet available. Still under development..',ch10
