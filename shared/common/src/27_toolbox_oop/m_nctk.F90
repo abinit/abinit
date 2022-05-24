@@ -850,7 +850,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 ! *********************************************************************
 
  if (.not. nctk_has_mpiio .and. xmpi_comm_size(comm) > 1) then
-   ABI_ERROR("netcdf without MPI-IO support with nprocs > 1!")
+   ABI_ERROR("netcdf without MPI-IO support and nprocs > 1!")
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then

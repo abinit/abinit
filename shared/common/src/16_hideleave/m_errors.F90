@@ -510,7 +510,7 @@ end subroutine assert_v
 !!
 !! SOURCE
 
-subroutine netcdf_check(ncerr,msg,file,line)
+subroutine netcdf_check(ncerr, msg, file, line)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncerr
@@ -528,23 +528,15 @@ subroutine netcdf_check(ncerr,msg,file,line)
 
 #ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
-   if (PRESENT(line)) then
-     f90line=line
-   else
-     f90line=0
-   end if
-   if (PRESENT(file)) then
-     f90name = basename(file)
-   else
-     f90name='Subroutine Unknown'
-   end if
-   !
-   ! Append Netcdf string to user-defined message.
-   write(nc_msg,'(a,2x,a)')' - NetCDF library returned:',TRIM(nf90_strerror(ncerr))
-   !write(std_out,*)TRIM(nf90_strerror(ncerr))
-   my_msg = TRIM(msg) // TRIM(nc_msg)
 
-   call msg_hndl(my_msg,"ERROR","PERS",f90name,f90line)
+   f90line = 0; if (present(line)) f90line = line
+   f90name = 'Subroutine Unknown'; if (present(file)) f90name = basename(file)
+
+   ! Append netcdf string to user-defined message.
+   write(nc_msg,'(3a)')' - NetCDF library returned: `', trim(nf90_strerror(ncerr)),"`"
+   my_msg = trim(msg) // trim(nc_msg)
+
+   call msg_hndl(my_msg, "ERROR", "PERS", f90name, f90line)
  end if
 #endif
 
