@@ -158,13 +158,15 @@ end type invovl_kpt_type
 
  !> this interface is only useful when gpu is enabled
  !! these functions are defined in 46_manage_gpu/gpu_apply_invovl_inner.cu
+ !! these functions are entry point for calling cuda implemented functions
  interface
 
    !> allocate GPU workspace
-   subroutine f_gpu_apply_invovl_inner_alloc(proj_dim) bind(c, name='gpu_apply_invovl_inner_alloc')
+   subroutine f_gpu_apply_invovl_inner_alloc(proj_dim, nproc_fft) bind(c, name='gpu_apply_invovl_inner_alloc')
      use, intrinsic :: iso_c_binding
      implicit none
-     integer(kind=c_int32_t), intent(in) :: proj_dim(3)
+     integer(kind=c_int32_t),        intent(in) :: proj_dim(3)
+     integer(kind=c_int32_t), value, intent(in) :: nproc_fft
    end subroutine f_gpu_apply_invovl_inner_alloc
 
    !> deallocate GPU workspace
@@ -172,14 +174,17 @@ end type invovl_kpt_type
    end subroutine f_gpu_apply_invovl_inner_dealloc
 
    !> solver_inner on GPU
-   subroutine f_solve_inner_gpu(invovl_gpu, proj_ptr, f_comm_fft, nproc_fft) bind(c, name='solve_inner_gpu')
+   subroutine f_solve_inner_gpu(invovl_gpu, proj_ptr, proj_dim, f_comm_fft, me_fft, nproc_fft, paral_kgb) bind(c, name='solve_inner_gpu')
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
      implicit none
-     type(invovl_kpt_gpu_type), intent(inout) :: invovl_gpu
-     type(c_ptr)             :: proj_ptr
-     integer(kind=c_int32_t) :: f_comm_fft
-     integer(kind=c_int32_t) :: nproc_fft
+     type(invovl_kpt_gpu_type),      intent(inout) :: invovl_gpu
+     type(c_ptr)                                   :: proj_ptr
+     integer(kind=c_int32_t),        intent(in)    :: proj_dim(3)
+     integer(kind=c_int32_t)                       :: f_comm_fft
+     integer(kind=c_int32_t), value, intent(in)    :: me_fft
+     integer(kind=c_int32_t), value, intent(in)    :: nproc_fft
+     integer(kind=c_int32_t), value, intent(in)    :: paral_kgb
    end subroutine f_solve_inner_gpu
 
  end interface
@@ -565,7 +570,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    proj_dim(1) = 2
    proj_dim(2) = ham%npw_k
    proj_dim(3) = invovl%nprojs
-   call f_gpu_apply_invovl_inner_alloc(proj_dim)
+   call f_gpu_apply_invovl_inner_alloc(proj_dim, mpi_enreg%nproc_fft)
  endif
 #endif
 
@@ -613,6 +618,10 @@ end subroutine make_invovl
  type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
 
  real(dp),allocatable, target :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
+
+ ! used to pass proj dimensions to cuda
+ integer(kind=c_int32_t) :: proj_dim(3)
+
  integer :: idat, iatom, nlmn, shift
  real(dp) :: tsec(2)
 
@@ -658,6 +667,8 @@ end subroutine make_invovl
  sm1proj = zero
  PtPsm1proj = zero
 
+ proj_dim = (/ size(proj,1), size(proj,2), size(proj,3) /)
+
  call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
@@ -692,21 +703,21 @@ end subroutine make_invovl
  !multiply by S^1
  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
  ! TODO : when solve_inner_gpu is ready, uncomment the following
- if (ham%use_gpu_cuda == 1) then
+!  if (ham%use_gpu_cuda == 1) then
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+! #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
-   !call solve_inner_gpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
-   invovl_gpu = make_invovl_kpt_gpu(invovl)
-   call f_solve_inner_gpu(invovl_gpu, c_loc(proj(1,1,1)), mpi_enreg%comm_fft, mpi_enreg%nproc_fft)
+!    !call solve_inner_gpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
+!    invovl_gpu = make_invovl_kpt_gpu(invovl)
+!    call f_solve_inner_gpu(invovl_gpu, c_loc(proj(1,1,1)), proj_dim, mpi_enreg%comm_fft, mpi_enreg%me_fft, mpi_enreg%nproc_fft, mpi_enreg%paral_kgb)
 
-#endif
+! #endif
 
- else
+!  else
    call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
    sm1proj = - sm1proj
    PtPsm1proj = - PtPsm1proj
- end if
+! end if
  ABI_NVTX_END_RANGE()
 
  ! copy sm1proj to cwaveprj(:,:)
@@ -907,6 +918,7 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
 ! *************************************************************************
 
+  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_APPLY_BLOCK)
   if (block_sliced == 1) then
 
      do idat = 1, ndat
@@ -952,6 +964,7 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
      end do
 
   end if
+ ABI_NVTX_END_RANGE()
 
 end subroutine apply_block
 !!***
