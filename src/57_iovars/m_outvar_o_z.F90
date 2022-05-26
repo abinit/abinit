@@ -533,9 +533,6 @@ contains
  intarr(1,:)=dtsets(:)%prtebands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtebands','INT',0)
 
- intarr(1,:)=dtsets(:)%prtefg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
-
  intarr(1,:)=dtsets(:)%prtefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefmas','INT',0)
 
