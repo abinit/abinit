@@ -1,7 +1,7 @@
 # Computation of the Fermi contact term at the atomic sites in SnO2
 # SnO2 has the rutile structure
 
-prtfc 1 # requests Fermi contact at each nuclear site
+nucfc 1 # requests Fermi contact at each nuclear site
 
 #Definition of the unit cell
 
