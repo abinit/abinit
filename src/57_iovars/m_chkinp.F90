@@ -3036,10 +3036,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='prtden' ; cond_values(1)=dt%prtden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
    end if
+
+!  prtnabla
    if(dt%prtnabla>0)then
      cond_string(1)='prtnabla' ; cond_values(1)=dt%prtnabla
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
+     if(dt%npspinor>1.and.(dt%prtnabla==1.or.dt%prtnabla==2).and.dt%pawspnorb==1)then
+       msg='Parallelization over spinorial components not allowed with prtnabla=(1 or 2) and SOC!'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
    end if
+
    if(dt%prtvxc>0)then
      cond_string(1)='prtvxc' ; cond_values(1)=dt%prtvxc
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
