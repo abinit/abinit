@@ -91,7 +91,7 @@ contains
 !!
 !! FUNCTION
 !! Main routine to compute electron phonon coupling matrix elements and
-!! calculate related properties - superconductin Tc, phonon linewidths, electronic renormalization
+!! calculate related properties - superconducting Tc, phonon linewidths, electronic renormalization
 !! due to phonons and temperature effects...
 !!
 !! INPUTS
@@ -743,10 +743,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (14)
 
     if (dtfil%filgstorein /= ABI_NOFILE) then
-      other_gstore = gstore_from_ncpath(dtfil%filgstorein, dtset, cryst, ebands, ifc, comm)
+      other_gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
 
-      call other_gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+      !call other_gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+      !                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
       call other_gstore%free()
       return
     end if
@@ -759,7 +759,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
     if (nprocs == 1) then
       path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-      other_gstore = gstore_from_ncpath(gstore%path, dtset, cryst, ebands, ifc, comm)
+      other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
       call other_gstore%free()
     end if
     call gstore%free()
