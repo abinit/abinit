@@ -21620,13 +21620,13 @@ Variable(
     text=r"""
 This variable consists of two entries that allow one to select the k-points and the bands
 in the e-ph self-energy $\Sigma_\nk$ on the basis of their KS energy $\ee_\nk$.
-This variable is used in [eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
+This variable is used in [[eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
 
 If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
 
 Positive (or zero) values are used in semiconductors
-to define an energy range with respect to the band edges
+to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
 A zero entry can be used to exclude either holes or electrons from the calculation.
@@ -21640,7 +21640,7 @@ Note that [[sigma_erange]] is not compatible with [[nkptgw]] and [[sigma_ngkpt]]
 
         sigma_erange 0.0 0.5 eV
 
-    to specify the energy intervals in eV units.
+    to specify the energy intervals in eV units. meV is supported as well.
 """,
 ),
 
