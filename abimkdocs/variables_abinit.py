@@ -12684,6 +12684,25 @@ Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 ),
 
 Variable(
+    abivarname="nucfc",
+    varset="paw",
+    vartype="integer",
+    topics=['EFG_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUClear site Fermi Contact term",
+    requires="[[usepaw]] == 1",
+    added_in_version="before_v9",
+    text=r"""
+  * If set to 1, print the Fermi contact interaction at each nuclear site, that 
+  is, the electron density at each site. The result appears in the main output file 
+  (search for FC). Note that this calculation is different than what is done by cut3d, 
+  because it also computes the PAW on-site corrections in addition to the 
+  contribution from the valence pseudo-wavefunctions.
+""",
+),
+
+Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -15544,21 +15563,6 @@ account the existence of spin dependent densities (see the documentation in
 
 Please note that ELF is **not** yet implemented in the case of PAW
 ([[usepaw]] = 1) calculations.
-""",
-),
-
-Variable(
-    abivarname="prtfc",
-    varset="paw",
-    vartype="integer",
-    topics=['printing_prden', 'EFG_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PRinT Fermi Contact term",
-    requires="[[usepaw]] == 1",
-    added_in_version="before_v9",
-    text=r"""
-  * If set to 1, print the Fermi contact interaction at each nuclear site, that is, the electron density at each site. The result appears in the main output file (search for FC). Note that this calculation is different than what is done by cut3d, because it also computes the PAW on-site corrections in addition to the contribution from the valence pseudo-wavefunctions.
 """,
 ),
 
