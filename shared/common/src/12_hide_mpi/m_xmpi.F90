@@ -2274,7 +2274,7 @@ end subroutine xmpi_split_work_i4b
 !!  xmpi_split_block
 !!
 !! FUNCTION
-!!  Splits tasks inside communicator using cyclic distribution.
+!!  Splits tasks inside communicator using block distribution.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
