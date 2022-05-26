@@ -2512,6 +2512,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
  
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucefg',tread,'INT')
+ if(tread==1) dtset%nucefg=intarr(1)
+ 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucfc',tread,'INT')
  if(tread==1) dtset%nucfc=intarr(1)
 
@@ -2555,9 +2558,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtebands',tread,'INT')
  if(tread==1) dtset%prtebands=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
- if(tread==1) dtset%prtefg=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefmas',tread,'INT')
  if(tread==1) dtset%prtefmas=intarr(1)
