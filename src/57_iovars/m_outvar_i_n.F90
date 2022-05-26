@@ -1136,6 +1136,9 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
 
+ intarr(1,:)=dtsets(:)%nucfc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucfc','INT',0)
+
  intarr(1,:)=dtsets(:)%nwfshist
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nwfshist','INT',0)
 
