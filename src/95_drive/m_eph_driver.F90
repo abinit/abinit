@@ -740,7 +740,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
- case (14)
+ case (11)
 
     if (dtfil%filgstorein /= ABI_NOFILE) then
       other_gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
@@ -762,6 +762,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
     other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
     call other_gstore%free()
     !end if
+    call gstore%free()
+
+ case (12)
+   ! Migdal-Eliashberg
+    gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+    !call migdal_eliashber(gstore, dtset, dtfil)
     call gstore%free()
 
  case (15, -15)
