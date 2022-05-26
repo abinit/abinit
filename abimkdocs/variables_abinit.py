@@ -4284,7 +4284,7 @@ The choice is among:
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
          Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2012]]
-* 14 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
+* 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh).
@@ -22981,7 +22981,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable specifies whether the EPH code should store $|g|^2$ or $g$
-when computing the e-ph matrix elements ([[eph_task]] == 14)
+when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
     1 --> compute and store complex $g$
@@ -23001,7 +23001,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable specifies whether the EPH code should compute and store
-the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 14)
+the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
     0 --> Do not compute velocity matrix elements
@@ -23066,7 +23066,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable can be used to introduce a filter in the electronic wavevectors (k and k+q)
-when computing the e-ph matrix elements with [[eph_task]] == 14.
+when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
     "none" --> No filter is applied.
@@ -23086,7 +23086,7 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable can be used to specify the band range
-when computing the e-ph matrix elements with [[eph_task]] == 14.
+when computing the e-ph matrix elements with [[eph_task]] == 11.
 The first entry gives the first band to be included while the second index specifies the last band.
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
