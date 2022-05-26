@@ -1308,7 +1308,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
 !Optionally provide output for Fermi-contact term at nuclear positions
- if (dtset%prtfc > 0) then
+ if (dtset%nucfc > 0) then
    call timab(1177,1,tsec)
    call calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,dtset%typat,psps%usepaw,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)

@@ -311,7 +311,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' J.W. Zwanziger, '// &
   ' J. Phys. Conden. Matt. 21, 15024-15036 (2009).'
  comment(22)=' Comment: to be cited in case the computation of Fermi contact'// &
-  ' interactions for isomer shifts, i.e. prtfc=1 and usepaw=1.'//ch10//&
+  ' interactions for isomer shifts, i.e. nucfc=1 and usepaw=1.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2009'
  priority(22)=20
 
@@ -556,8 +556,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If prtefg/=0, cite Zwanziger2008
    if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%prtefg>0)cite(21)=1
 
-!  If prtfc/=0, cite Zwanziger2009
-   if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%prtfc>0)cite(22)=1
+!  If nucfc/=0, cite Zwanziger2009
+   if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%nucfc>0)cite(22)=1
 
 !  If optdriver==1 and usepaw==1, cite Audouze2006 and Audouze2008
    if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%optdriver==1)cite(23)=1
