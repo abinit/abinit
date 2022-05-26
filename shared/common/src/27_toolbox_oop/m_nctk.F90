@@ -526,6 +526,10 @@ end function nctk_try_fort_or_ncfile
 !!  This is a COLLECTIVE routine that should be called by all processors
 !!  in MPI_COMM_WORLD at the beginning of the calculation
 !!
+!! INPUTS
+!!  [print_warning]=TRUE if a warning about paral_kgb use has to be printed
+!!                  Optional, default=yes
+!!
 !! PARENTS
 !!      abinit
 !!
@@ -534,10 +538,13 @@ end function nctk_try_fort_or_ncfile
 !!
 !! SOURCE
 
-subroutine nctk_test_mpiio()
+subroutine nctk_test_mpiio(print_warning)
 
+ logical,intent(in),optional :: print_warning
+ 
 !Local variables-------------------------------
 !scalars
+ logical :: my_print_warning
 #ifdef HAVE_NETCDF_MPI
  integer,parameter :: master=0
  integer :: ierr,ncid,ncerr
@@ -548,6 +555,7 @@ subroutine nctk_test_mpiio()
 ! *********************************************************************
 
  nctk_has_mpiio = .False.
+ my_print_warning=.true. ; if (present(print_warning)) my_print_warning=print_warning
 
 #ifdef HAVE_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
@@ -576,7 +584,7 @@ subroutine nctk_test_mpiio()
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
- if (.not. nctk_has_mpiio) then
+ if ((.not.nctk_has_mpiio).and.my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
