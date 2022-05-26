@@ -6,7 +6,7 @@ ndtset 2
 pawspnorb1 0
 pawspnorb2 1
 
-prtefg 2
+nucefg 2
 quadmom -0.696 -0.08165
 
 # these ecuts are far too small to give converged results
