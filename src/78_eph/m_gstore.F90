@@ -393,10 +393,10 @@ type, public :: gstore_t
   ! (nqibz)
   ! q-points weights in the IBZ
 
-  !integer :: kptrlatt(3, 3), qptrlatt(3, 3)
+  !integer :: kptrlatt(3, 3) = -1, qptrlatt(3, 3) = -1
    ! k-mesh and q-mesh
 
-  !real(dp) :: kshift(3, 1), qshift(3, 1)
+  !real(dp),allocatable :: kshift(:, :), qshift(:, :)
   ! k/q-mesh shift (well, q-mesh is usually gamma-centered)
 
   !type(xcomm_t) :: spin_comm
@@ -565,8 +565,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
                              gstore%nqibz, gstore%qibz, gstore%wtq, gstore%nqbz, qbz)
-                             !new_kptrlatt, new_shiftk,
-                             !, bz2ibz=new%ind_qbz2ibz)
+                             !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
+                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
@@ -586,6 +586,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
                              gstore%nkibz, kibz, wtk, gstore%nkbz, kbz) !, bz2ibz=bz2ibz)
+                             !new_kptrlatt=gstore%kptrlatt, new_shiftk=gstore%kshift,
+                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
 
  ! In principle kibz should be equal to ebands%kptns
  ABI_CHECK(gstore%nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
@@ -635,12 +637,10 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  select case (gstore%qzone)
  case ("ibz")
    do spin=1,nsppol
-     cnt = 0
      do iq_ibz=1, gstore%nqibz
        iq_bz = qibz2bz(iq_ibz)
        select_qbz_spin(iq_bz, spin) = 1
      end do
-     ABI_CHECK(cnt == gstore%nqibz, "cnt != nqibz. Something wrong with symmetry tables.")
    end do
 
  case ("bz")
@@ -670,8 +670,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  case default
    ABI_ERROR(sjoin("Invalid kfilter:", gstore%kfilter))
  end select
-
- ABI_FREE(qbz)
 
  ! Total number of k/q points for each spin after filtering (if any)
  glob_nk_spin(:) = count(select_kbz_spin /= 0, dim=1)
@@ -756,16 +754,18 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
 
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("gstore_qibz", "dp", "three, gstore_nqibz"), &
+     nctkarr_t("gstore_qbz", "dp", "three, gstore_nqbz"), &
      nctkarr_t("gstore_wtq", "dp", "gstore_nqibz"), &
-     nctkarr_t("gstore_kibz", "dp", "three, gstore_nkibz"), &
+     !nctkarr_t("gstore_kibz", "dp", "three, gstore_nkibz"), &
+     nctkarr_t("gstore_kbz", "dp", "three, gstore_nkbz"), &
      nctkarr_t("gstore_kzone", "c", "fnlen"), &
      nctkarr_t("gstore_qzone", "c", "fnlen"), &
      nctkarr_t("gstore_kfilter", "c", "fnlen"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
-     nctkarr_t("phfreqs_ibz", "dp", "natom3, nqibz"), &
-     nctkarr_t("phdispl_cart_ibz", "dp", "two, three, natom, natom3, nqibz"), &
+     nctkarr_t("phfreqs_ibz", "dp", "natom3, gstore_nqibz"), &
+     nctkarr_t("phdispl_cart_ibz", "dp", "two, three, natom, natom3, gstore_nqibz"), &
      nctkarr_t("gstore_glob_nq_spin", "i", "number_of_spins"), &
      nctkarr_t("gstore_glob_nk_spin", "i", "number_of_spins"), &
      nctkarr_t("gstore_done_qbz_spin", "i", "gstore_nqbz, number_of_spins"), &
@@ -784,7 +784,9 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
 
    ! Write arrays
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qibz"), gstore%qibz))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz"), qbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_wtq"), gstore%wtq))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz"), kbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_spin"), gstore%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nq_spin"), glob_nq_spin))
@@ -810,7 +812,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
      ! Define dimensions
      ! =================
      ncerr = nctk_def_dims(spin_ncid, [ &
-        nctkdim_t("nb", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1 ), &
+        nctkdim_t("nb", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", glob_nk_spin(spin)), &
         nctkdim_t("glob_nq", glob_nq_spin(spin))  &
        ], &
@@ -861,6 +863,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  ABI_FREE(kibz)
  ABI_FREE(wtk)
  ABI_FREE(kbz)
+ ABI_FREE(qbz)
  ABI_FREE(qibz2bz)
  ABI_FREE(kibz2bz)
  ABI_FREE(select_qbz_spin)
@@ -2178,7 +2181,6 @@ pure function gqk_get_myqpt(gqk, my_iq, gstore) result (qpt)
  tsign = 1; if (trev_q == 1) tsign = -1
 
  ! symrec convention for q
- !qpt = tsign * matmul(transpose(gqk%cryst%symrel(:,:,isym_q)), gqk%qibz(:, iq_ibz)) + g0_q
  qpt = tsign * matmul(gstore%cryst%symrec(:,:,isym_q), gstore%qibz(:, iq_ibz)) + g0_q
 
 end function gqk_get_myqpt
@@ -2210,7 +2212,6 @@ subroutine gqk_free(gqk)
 
 !----------------------------------------------------------------------
 
- !ABI_SFREE(gqk%kibz)
  ABI_SFREE(gqk%my_k2ibz)
  ABI_SFREE(gqk%my_q2ibz)
  ABI_SFREE(gqk%my_q2bz)
@@ -2328,9 +2329,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
  integer :: qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
  integer,allocatable :: done_qbz_spin(:,:), iq_buf(:,:)
- real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_displ_cart(:,:,:,:,:)
- integer :: my_ntasks
- integer,allocatable :: my_inds(:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_displ_cart(:,:,:,:,:)
+ integer :: ii, my_nqibz, iq_ibz, iq_start
+ integer,allocatable :: my_iqibz_inds(:)
 
 !************************************************************************
 
@@ -2339,7 +2340,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Increasing the buffer size increases the memory requirements
  ! but it leads to better performance as the number of IO operations is decreased.
  qbuf_size = 4
- with_phdata = 2
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -2487,29 +2487,40 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Create ddkop object to compute group velocities (if needed)
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
- ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
-
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
+
+ ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
  NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
  gstore%wfk0_path = wfk0_path
  if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), gstore%wfk0_path))
  end if
 
- ! Get phonon frequencies and eigenvectors for this q-point.
- !call xmpi_split_block(gstore%nqibz, gstore%comm, my_ntasks, my_inds)
- !do iq_ibz=1,gstore%nqibz
- !  call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), phfrq, displ_cart)
- !end do
- if (nproc > 1) then
-   !NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
-   !NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phdispl_cart_ibz")))
+ ! NB: If we write ph data here, we are not guaranteed to have all the IBZ
+ ! as q-points may have been filtered.
+ call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
+ ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
+ ABI_MALLOC(buf_displ_cart, (2, 3, natom, natom3, my_nqibz))
+
+ do ii=1,my_nqibz
+   iq_ibz = my_iqibz_inds(ii)
+   call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), buf_displ_cart(:,:,:,:,ii))
+ end do
+ if (nproc > 1 .and. gstore%nqibz >= nproc) then
+   NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
+   NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phdispl_cart_ibz")))
  end if
- !ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), start=[1, iq_start], count=[])
- !NCF_CHECK(ncerr)
- !ncerr = nf90_put_var(root_ncid, root_vid("phdispl_cart_ibz"), start=[1,1 1 1,iq_start], count=[])
- !NCF_CHECK(ncerr)
- !ABI_FREE(my_inds)
+ iq_start = my_iqibz_inds(1)
+ ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, &
+                      start=[1, iq_start], count=[natom3, my_nqibz])
+ NCF_CHECK(ncerr)
+ ncerr = nf90_put_var(root_ncid, root_vid("phdispl_cart_ibz"), buf_displ_cart, &
+                      start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
+ NCF_CHECK(ncerr)
+
+ ABI_FREE(my_iqibz_inds)
+ ABI_FREE(buf_wqnu)
+ ABI_FREE(buf_displ_cart)
 
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
@@ -2530,10 +2541,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    my_vkdone = .False.
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
-   !if (with_phdata /= 0) then
-   !  ABI_MALLOC(buf_wqnu, (natom3, qbuf_size))
-   !  ABI_MALLOC(buf_displ_cart, (2, 3, natom, natom3, qbuf_size))
-   !end if
 
    ! gkq_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (2, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
@@ -2560,11 +2567,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Get phonon frequencies and eigenvectors for this q-point.
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
-
-     !if (with_phdata /= 0) then
-     !  buf_wqnu(:, my_iq) = phfrq
-     !  if (with_phdata == 2) buf_displ_cart(:,:,:,:,my_iq) = displ_cart
-     !end if
 
      ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
      ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
@@ -2809,9 +2811,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
-   !ABI_SFREE(buf_wqnu)
-   !ABI_SFREE(buf_displ_cart)
-
    ABI_FREE(bras_kq)
    ABI_FREE(kets_k)
    ABI_FREE(h1kets_kq)
@@ -2871,26 +2870,10 @@ subroutine dump_data()
  ! as all the local buffers store results for all natom3 pertubations.
 
  integer :: ii, iq_bz, my_iq_start, iq_glob, my_iq
- integer :: iq_ibz, isym_q, trev_q, tsign, g0_q(3)
- logical :: isirr_q
+ !integer :: iq_ibz, isym_q, trev_q, tsign, g0_q(3)
+ !logical :: isirr_q
 
  if (gqk%coords_qkp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
-
- ! NB: If we write ph data here, we are not guaranteed to have all the IBZ
- ! as q-points may have been filtered.
- !if (spin == 1 .and. with_phdata /= 0 .and. all(gqk%coords_qkp(2:3) == 0)) then
- !  do ii=1,iqbuf_cnt
- !    my_iq = iq_buf(1, 1)
- !    iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
- !    trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
- !    isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
- !    tsign = 1; if (trev_q == 1) tsign = -1
- !    if (isirr_q) then
- !      !NCF_CHECK(nf90_put_var(root_ncid, root_vid("wqnu_ibz"), buf_wqnu(:,ii) start=[1, iq_ibz]))
- !      !buf_displ_cart(2, 3, natom, natom3, ii)
- !    end if
- !  end do
- !end if
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)

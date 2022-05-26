@@ -757,11 +757,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-    if (nprocs == 1) then
-      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-      other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-      call other_gstore%free()
-    end if
+    !if (nprocs == 1) then
+    path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+    other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
+    call other_gstore%free()
+    !end if
     call gstore%free()
 
  case (15, -15)
