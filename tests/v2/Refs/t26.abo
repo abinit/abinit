@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t26-t27-t28/t26.in
-- output file    -> t26.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t26-t27-t28/t26.abi
+- output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          22          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.683 Mbytes of memory.
+P This job should need less than                       1.735 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.536 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.536 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -121,7 +121,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.536 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -156,7 +156,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.536 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -191,7 +191,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.536 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -226,7 +226,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          22          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.536 Mbytes of memory.
+P This job should need less than                       1.588 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -1012,6 +1012,19 @@ P          mk1mem13        32
         optdriver11         1
         optdriver12         0
         optdriver13         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
+           prtpot8          0
+           prtpot9          1
+           prtpot10         0
+           prtpot11         1
+           prtpot12         0
+           prtpot13         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -1247,8 +1260,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1631,7 +1644,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1659,10 +1671,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS3_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -1678,11 +1688,11 @@ tolerances: {tolvrs: 1.00E-10, }
 -ETOT  1   814.78773717566      7.977E+02 1.740E-02 9.965E+05
  ETOT  2   273.32196089209     -5.415E+02 1.948E-02 3.328E+05
  ETOT  3  0.21927357245513     -2.731E+02 2.595E-03 8.997E+00
- ETOT  4  0.21148335899449     -7.790E-03 9.316E-07 2.031E-02
- ETOT  5  0.21145603542788     -2.732E-05 2.664E-08 3.129E-04
+ ETOT  4  0.21148335899450     -7.790E-03 9.316E-07 2.031E-02
+ ETOT  5  0.21145603542785     -2.732E-05 2.664E-08 3.129E-04
  ETOT  6  0.21145572050679     -3.149E-07 1.324E-10 9.134E-08
  ETOT  7  0.21145572035082     -1.560E-10 7.741E-14 2.144E-10
- ETOT  8  0.21145572035050     -3.197E-13 1.558E-16 5.209E-13
+ ETOT  8  0.21145572035051     -3.126E-13 1.558E-16 5.209E-13
 
  At SCF step    8       vres2   =  5.21E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1805,7 +1815,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1833,7 +1842,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1848,12 +1856,12 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  1.90307948271862E-03 -3.332E+00 2.220E-03 1.921E+00
+-ETOT  1  1.90307948271951E-03 -3.332E+00 2.220E-03 1.921E+00
  ETOT  2  5.01116867495099E-05 -1.853E-03 9.942E-07 3.890E-02
- ETOT  3  1.11337748709417E-06 -4.900E-05 8.248E-08 3.930E-05
- ETOT  4  1.01982996536520E-06 -9.355E-08 1.028E-10 2.032E-07
- ETOT  5  1.01917441508448E-06 -6.556E-10 7.905E-13 6.800E-10
- ETOT  6  1.01917286077224E-06 -1.554E-12 1.269E-15 6.674E-13
+ ETOT  3  1.11337748531781E-06 -4.900E-05 8.248E-08 3.930E-05
+ ETOT  4  1.01982996358885E-06 -9.355E-08 1.028E-10 2.032E-07
+ ETOT  5  1.01917441597266E-06 -6.555E-10 7.905E-13 6.800E-10
+ ETOT  6  1.01917286166042E-06 -1.554E-12 1.269E-15 6.674E-13
 
  At SCF step    6       vres2   =  6.67E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1932,7 +1940,7 @@ tolerances: {tolvrs: 1.00E-10, }
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000341         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
@@ -1942,11 +1950,11 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon energies in Hartree :
    8.324042E-07  8.324047E-07  8.324064E-07
  Phonon energies in meV     :
--  2.265087E-02  2.265088E-02  2.265093E-02
+-  2.265087E-02  2.265089E-02  2.265093E-02
  Phonon frequencies in cm-1    :
 -  1.826916E-01  1.826917E-01  1.826921E-01
  Phonon frequencies in Thz     :
--  5.476956E-03  5.476960E-03  5.476971E-03
+-  5.476957E-03  5.476960E-03  5.476971E-03
  Phonon energies in Kelvin  :
 -  2.628521E-01  2.628523E-01  2.628528E-01
 
@@ -2094,7 +2102,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2122,10 +2129,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS6_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2139,12 +2144,12 @@ tolerances: {tolvrs: 1.00E-10, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   14.547750352360     -1.273E+00 2.022E-02 5.214E+03
- ETOT  2   1.5203668140112     -1.303E+01 1.802E-03 5.617E-01
+ ETOT  2   1.5203668140111     -1.303E+01 1.802E-03 5.617E-01
  ETOT  3   1.5188189188827     -1.548E-03 1.490E-06 1.008E-02
  ETOT  4   1.5187999266220     -1.899E-05 2.630E-08 8.095E-05
- ETOT  5   1.5187997297080     -1.969E-07 3.860E-10 3.605E-07
+ ETOT  5   1.5187997297081     -1.969E-07 3.860E-10 3.605E-07
  ETOT  6   1.5187997289973     -7.108E-10 1.042E-12 3.247E-10
- ETOT  7   1.5187997289968     -4.690E-13 1.806E-15 1.676E-12
+ ETOT  7   1.5187997289968     -4.565E-13 1.806E-15 1.676E-12
 
  At SCF step    7       vres2   =  1.68E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2370,7 +2375,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2394,10 +2398,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS8_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2410,7 +2412,7 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   52.291416140533      3.047E+01 4.539E-02 2.523E+04
+-ETOT  1   52.291416140532      3.047E+01 4.539E-02 2.523E+04
  ETOT  2   2.0196010090978     -5.027E+01 1.040E-02 1.148E+02
  ETOT  3   1.7820112275060     -2.376E-01 4.480E-05 1.027E-01
  ETOT  4   1.7817773441930     -2.339E-04 2.502E-07 5.356E-05
@@ -2453,10 +2455,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS8_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2473,8 +2473,8 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2  0.22641128228102     -3.100E-02 2.199E-05 1.102E-01
  ETOT  3  0.22604314234082     -3.681E-04 1.244E-07 1.249E-04
  ETOT  4  0.22604293292849     -2.094E-07 2.754E-10 2.971E-07
- ETOT  5  0.22604293218855     -7.399E-10 1.381E-12 1.096E-09
- ETOT  6  0.22604293218527     -3.284E-12 5.233E-15 4.081E-12
+ ETOT  5  0.22604293218856     -7.399E-10 1.381E-12 1.096E-09
+ ETOT  6  0.22604293218527     -3.289E-12 5.233E-15 4.081E-12
 
  At SCF step    6       vres2   =  4.08E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2700,7 +2700,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2724,10 +2723,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS10_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2742,11 +2739,11 @@ tolerances: {tolvrs: 1.00E-10, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   300.73768440072      2.758E+02 5.640E-02 1.915E+05
  ETOT  2   70.750232261994     -2.300E+02 3.444E-02 4.468E+04
- ETOT  3  0.63155612736376     -7.012E+01 3.430E-03 1.400E+00
+ ETOT  3  0.63155612736374     -7.012E+01 3.430E-03 1.400E+00
  ETOT  4  0.62893330038909     -2.623E-03 1.002E-06 1.085E-02
- ETOT  5  0.62891435910518     -1.894E-05 1.072E-08 6.525E-06
- ETOT  6  0.62891434326531     -1.584E-08 3.891E-12 1.988E-08
- ETOT  7  0.62891434323005     -3.526E-11 3.716E-14 6.991E-11
+ ETOT  5  0.62891435910521     -1.894E-05 1.072E-08 6.525E-06
+ ETOT  6  0.62891434326533     -1.584E-08 3.891E-12 1.988E-08
+ ETOT  7  0.62891434323005     -3.528E-11 3.716E-14 6.991E-11
 
  At SCF step    7       vres2   =  6.99E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -2783,10 +2780,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS10_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2802,10 +2797,10 @@ tolerances: {tolvrs: 1.00E-10, }
 -ETOT  1   77.041178789000      6.458E+01 3.878E-02 4.826E+04
  ETOT  2   18.334270573020     -5.871E+01 1.268E-02 1.117E+04
  ETOT  3  0.80521501099192     -1.753E+01 8.956E-04 1.783E+00
- ETOT  4  0.80206787597291     -3.147E-03 9.810E-07 4.374E-03
+ ETOT  4  0.80206787597293     -3.147E-03 9.810E-07 4.374E-03
  ETOT  5  0.80206005529978     -7.821E-06 5.418E-09 3.411E-06
  ETOT  6  0.80206004814811     -7.152E-09 7.210E-12 1.852E-08
- ETOT  7  0.80206004811445     -3.365E-11 2.777E-14 5.026E-11
+ ETOT  7  0.80206004811445     -3.366E-11 2.777E-14 5.026E-11
 
  At SCF step    7       vres2   =  5.03E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -3031,7 +3026,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3054,10 +3048,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS12_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3074,9 +3066,9 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2   1.1959770191482     -2.031E+01 6.528E-03 3.150E+02
  ETOT  3  0.11141149345433     -1.085E+00 2.022E-04 1.692E-02
  ETOT  4  0.11138662786121     -2.487E-05 2.520E-08 3.251E-05
- ETOT  5  0.11138655297457     -7.489E-08 9.114E-11 9.638E-08
+ ETOT  5  0.11138655297459     -7.489E-08 9.114E-11 9.638E-08
  ETOT  6  0.11138655276744     -2.071E-10 2.671E-13 2.080E-10
- ETOT  7  0.11138655276709     -3.517E-13 5.264E-16 8.821E-13
+ ETOT  7  0.11138655276708     -3.624E-13 5.264E-16 8.821E-13
 
  At SCF step    7       vres2   =  8.82E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -3113,10 +3105,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t26o_DS12_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3132,11 +3122,11 @@ tolerances: {tolvrs: 1.00E-10, }
 -ETOT  1   14.654094246128      2.332E+00 1.122E-02 4.192E+03
  ETOT  2   1.0202084835254     -1.363E+01 1.133E-02 1.702E+02
  ETOT  3  0.43501150252731     -5.852E-01 3.738E-04 1.614E-01
- ETOT  4  0.43447422018709     -5.373E-04 3.221E-07 2.899E-03
- ETOT  5  0.43446699674262     -7.223E-06 4.385E-09 3.691E-06
- ETOT  6  0.43446698835075     -8.392E-09 1.086E-11 1.411E-08
- ETOT  7  0.43446698831953     -3.123E-11 2.769E-14 3.006E-10
- ETOT  8  0.43446698831870     -8.225E-13 3.044E-16 8.201E-13
+ ETOT  4  0.43447422018708     -5.373E-04 3.221E-07 2.899E-03
+ ETOT  5  0.43446699674261     -7.223E-06 4.385E-09 3.691E-06
+ ETOT  6  0.43446698835076     -8.392E-09 1.086E-11 1.411E-08
+ ETOT  7  0.43446698831952     -3.124E-11 2.769E-14 3.006E-10
+ ETOT  8  0.43446698831870     -8.153E-13 3.044E-16 8.201E-13
 
  At SCF step    8       vres2   =  8.20E-13 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -3228,7 +3218,7 @@ tolerances: {tolvrs: 1.00E-10, }
            enunit           2
            etotal1    -2.0702873765E+00
            etotal4     2.1145572035E-01
-           etotal5     1.0191728608E-06
+           etotal5     1.0191728617E-06
            etotal7     1.5187997290E+00
            etotal9     2.2604293219E-01
            etotal11    8.0206004811E-01
@@ -3988,6 +3978,19 @@ P          mk1mem13        32
         optdriver11         1
         optdriver12         0
         optdriver13         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
+           prtpot8          0
+           prtpot9          1
+           prtpot10         0
+           prtpot11         1
+           prtpot12         0
+           prtpot13         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     2.50000000E-01  2.50000000E-01  0.00000000E+00
@@ -4225,7 +4228,7 @@ P          mk1mem13        32
 -
 - [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -4264,10 +4267,10 @@ P          mk1mem13        32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  79 WARNINGs and  96 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          3.9
+.Delivered  44 WARNINGs and  79 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.1  wall=          5.7

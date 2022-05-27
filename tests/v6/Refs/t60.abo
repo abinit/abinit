@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t60/t60.in
-- output file    -> t60.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t60/t60.abi
+- output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =          16
        mpw =         150          nfft =        4096          nkpt =          16
 ================================================================================
-P This job should need less than                       1.838 Mbytes of memory.
+P This job should need less than                       1.956 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -153,6 +153,8 @@ P          mk1mem2         32
               occ2     2.000000  2.000000  2.000000  2.000000  0.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
           rfatpol           1       2
             rfdir           1       1       1
            rfphon1          0
@@ -225,8 +227,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -405,7 +407,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -427,7 +428,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -443,7 +443,7 @@ tolerances: {tolvrs: 1.00E-04, }
 -ETOT  1   15.723271225429     -3.794E+01 5.198E-02 2.388E+03
  ETOT  2   7.3377787754184     -8.385E+00 2.221E-02 9.810E+00
  ETOT  3   7.3101895803567     -2.759E-02 3.088E-04 8.794E-01
- ETOT  4   7.3084354300131     -1.754E-03 1.269E-05 1.229E-02
+ ETOT  4   7.3084354300130     -1.754E-03 1.269E-05 1.229E-02
  ETOT  5   7.3084177630032     -1.767E-05 3.895E-07 1.847E-04
  ETOT  6   7.3084175140705     -2.489E-07 5.267E-09 3.305E-06
 
@@ -482,7 +482,6 @@ tolerances: {tolvrs: 1.00E-04, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -537,7 +536,6 @@ tolerances: {tolvrs: 1.00E-04, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -592,7 +590,6 @@ tolerances: {tolvrs: 1.00E-04, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -647,7 +644,6 @@ tolerances: {tolvrs: 1.00E-04, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -663,7 +659,7 @@ tolerances: {tolvrs: 1.00E-04, }
 -ETOT  1   15.724733731611     -3.794E+01 5.198E-02 2.389E+03
  ETOT  2   7.3381246067920     -8.387E+00 2.221E-02 9.791E+00
  ETOT  3   7.3103599545251     -2.776E-02 3.080E-04 8.761E-01
- ETOT  4   7.3086161197492     -1.744E-03 1.289E-05 1.208E-02
+ ETOT  4   7.3086161197493     -1.744E-03 1.289E-05 1.208E-02
  ETOT  5   7.3085987862319     -1.733E-05 3.853E-07 1.804E-04
  ETOT  6   7.3085985432523     -2.430E-07 5.244E-09 3.233E-06
 
@@ -702,7 +698,6 @@ tolerances: {tolvrs: 1.00E-04, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1013,6 +1008,8 @@ P          mk1mem2         32
               occ2     2.000000  2.000000  2.000000  2.000000  0.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
           rfatpol           1       2
             rfdir           1       1       1
            rfphon1          0
@@ -1145,10 +1142,10 @@ P          mk1mem2         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and  40 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.0
+.Delivered   0 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.1  wall=          7.2

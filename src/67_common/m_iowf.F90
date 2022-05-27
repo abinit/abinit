@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -244,7 +244,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 !Local variables-------------------------------
  integer :: iomode,action,band_index,fform,formeig,iband,icg,iat,iproj
- integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
+ integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,mtag,my_nspinor
  integer :: nband_k,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
 #ifdef HAVE_MPI
@@ -504,6 +504,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 #ifdef HAVE_MPI
        if (dtset%usewvl == 0) then
+         mtag=ikpt+(spin-1)*nkpt
          call xmpi_barrier(spaceWorld)
 
 !        Must transfer the wavefunctions to the master processor
@@ -551,12 +552,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
              !write(std_out,*)npw_k,nband_k
              call timab(48,1,tsec)
              if(action==2)then
-               call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,ierr)
+               call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
                call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor, &
-&               source,cg_disk,nmaster,spaceWorld,ierr)
+&               source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              else
-               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,ierr)
-               call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,ierr)
+               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
+               call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              end if
              call timab(48,2,tsec)
            end if
@@ -607,21 +608,21 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
                if ( iband == 1 ) then
                  if (action==2) then
                    call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,spin), &
-&                   kg_disk,nmaster,spaceWorld,ierr)
+&                   kg_disk,nmaster,spaceWorld,iband*(mtag-1)+1,ierr)
                  else
                    call xmpi_exch(kg_disk,3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,spin),  &
-&                   kg_disk,nmaster,spaceWorld,ierr)
+&                   kg_disk,nmaster,spaceWorld,iband*(mtag-1)+1,ierr)
                  end if
                end if       ! iband =1
                ipwnbd=(iband-1)*npw_k*my_nspinor
                if (action==2) then
                  call xmpi_exch( cg(:,ipwnbd+icg+1:ipwnbd+icg+npw_k*my_nspinor),2*npw_k*my_nspinor &
 &                 ,mpi_enreg%proc_distrb(ikpt,iband,spin)                    &
-&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,ierr)
+&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,iband*(mtag-1)+2,ierr)
                else
                  call xmpi_exch( cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),2*npw_k*my_nspinor    &
 &                 ,mpi_enreg%proc_distrb(ikpt,iband,spin)                    &
-&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,ierr)
+&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,iband*(mtag-1)+2,ierr)
                end if
 
                call timab(48,2,tsec)
@@ -779,7 +780,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 !scalars
  integer,parameter :: master=0,fform2=2
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
- integer :: comm_cell,comm_fft,comm_bandfft,formeig
+ integer :: comm_cell,comm_fft,comm_bandfft,mtag,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
  integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
@@ -1106,6 +1107,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        do ikpt=1,nkpt
          nband_k = nband(ikpt + (spin-1)*nkpt)
          npw_k   = npwarr(ikpt)
+         mtag = ikpt+(spin-1)*nkpt
 
          call xmpi_barrier(comm_cell)
 
@@ -1127,12 +1129,12 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          if (action==2.or.action==3) then
            call timab(48,1,tsec)
            if (action==2) then
-             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,ierr)
+             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
              call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor,&
-&             source,cg_k,master,comm_cell,ierr)
+&             source,cg_k,master,comm_cell,2*mtag+2,ierr)
            else
-             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,ierr)
-             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,ierr)
+             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
+             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,2*mtag+2,ierr)
            end if
            call timab(48,2,tsec)
          end if

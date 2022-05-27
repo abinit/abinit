@@ -8,7 +8,7 @@
 !!  It is implemented in C as a simple linked pair list (associative list).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2022 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

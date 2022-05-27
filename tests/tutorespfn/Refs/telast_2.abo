@@ -1,8 +1,8 @@
 
-.Version 9.3.4 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  6 Feb 2021.
-- ( at 21h57 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze1/tests/TestBot_MPI1/tutorespfn_telast_2-telast_3/telast_2.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_telast_2-telast_3/telast_2.abi
 - output file    -> telast_2.abo
 - root for input  files -> telast_2i
 - root for output files -> telast_2o
@@ -34,7 +34,7 @@
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         386          nfft =        7680          nkpt =           8
 ================================================================================
-P This job should need less than                       3.876 Mbytes of memory.
+P This job should need less than                       4.092 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.379 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
@@ -214,6 +214,9 @@ P          mk1mem3         32
         optdriver2          1
         optdriver3          1
         optforces           1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       4
@@ -313,8 +316,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00174
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze1/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze1/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -328,8 +331,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -4.229503   -0.925599
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze1/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze1/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -516,7 +519,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00174
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -535,7 +537,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -598,7 +599,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -661,7 +661,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -764,7 +763,6 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00174
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -831,7 +829,6 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -851,7 +848,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  5   5.7740050007464     -3.780E-07 2.417E-08 1.207E-06
  ETOT  6   5.7740049941386     -6.608E-09 6.990E-10 8.241E-08
  ETOT  7   5.7740049938176     -3.210E-10 2.858E-11 7.619E-10
- ETOT  8   5.7740049938140     -3.610E-12 1.029E-12 2.431E-11
+ ETOT  8   5.7740049938140     -3.613E-12 1.029E-12 2.431E-11
 
  At SCF step    8       vres2   =  2.43E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -892,7 +889,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -954,7 +950,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -973,8 +968,8 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  4   5.8325510429193     -3.836E-04 3.012E-06 2.040E-03
  ETOT  5   5.8325461805732     -4.862E-06 1.280E-07 1.524E-05
  ETOT  6   5.8325461244312     -5.614E-08 1.782E-09 3.797E-07
- ETOT  7   5.8325461231906     -1.241E-09 7.961E-11 1.391E-08
- ETOT  8   5.8325461231457     -4.488E-11 1.560E-12 1.616E-10
+ ETOT  7   5.8325461231905     -1.241E-09 7.961E-11 1.391E-08
+ ETOT  8   5.8325461231457     -4.485E-11 1.560E-12 1.616E-10
  ETOT  9   5.8325461231448     -8.811E-13 6.347E-14 1.640E-12
 
  At SCF step    9       vres2   =  1.64E-12 < tolvrs=  1.00E-10 =>converged.
@@ -1016,7 +1011,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1038,8 +1032,8 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  7   18.725260793015     -6.066E-07 1.454E-09 4.369E-05
  ETOT  8   18.725260739080     -5.393E-08 1.236E-10 3.058E-07
  ETOT  9   18.725260738697     -3.832E-10 2.277E-12 2.449E-08
- ETOT 10   18.725260738665     -3.195E-11 1.422E-13 2.780E-10
- ETOT 11   18.725260738666      1.080E-12 2.832E-15 1.257E-11
+ ETOT 10   18.725260738665     -3.200E-11 1.422E-13 2.780E-10
+ ETOT 11   18.725260738666      1.137E-12 2.832E-15 1.257E-11
 
  At SCF step   11       vres2   =  1.26E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -1079,7 +1073,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1101,7 +1094,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  7   4.2169089632873     -3.856E-08 2.058E-10 4.924E-07
  ETOT  8   4.2169089622769     -1.010E-09 5.473E-12 1.787E-08
  ETOT  9   4.2169089621971     -7.982E-11 3.726E-13 2.288E-10
- ETOT 10   4.2169089621966     -4.547E-13 7.680E-15 1.517E-11
+ ETOT 10   4.2169089621966     -4.619E-13 7.680E-15 1.517E-11
 
  At SCF step   10       vres2   =  1.52E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -1143,7 +1136,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1163,9 +1155,9 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  5   4.2169131753696     -1.026E-04 1.764E-07 1.535E-03
  ETOT  6   4.2169089452935     -4.230E-06 6.785E-09 2.626E-05
  ETOT  7   4.2169089067092     -3.858E-08 2.344E-10 4.830E-07
- ETOT  8   4.2169089057458     -9.635E-10 8.709E-12 1.646E-08
+ ETOT  8   4.2169089057457     -9.635E-10 8.709E-12 1.646E-08
  ETOT  9   4.2169089056723     -7.346E-11 3.517E-13 2.404E-10
- ETOT 10   4.2169089056717     -5.898E-13 1.196E-14 1.571E-11
+ ETOT 10   4.2169089056717     -5.755E-13 1.196E-14 1.571E-11
 
  At SCF step   10       vres2   =  1.57E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -1207,7 +1199,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1224,12 +1215,12 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2   4.7110743274375     -3.000E+00 1.847E-03 4.284E+01
  ETOT  3   4.5437619978283     -1.673E-01 1.544E-04 1.768E+00
  ETOT  4   4.5378643103414     -5.898E-03 5.252E-06 4.073E-02
- ETOT  5   4.5377668134846     -9.750E-05 9.168E-08 1.082E-03
+ ETOT  5   4.5377668134845     -9.750E-05 9.168E-08 1.082E-03
  ETOT  6   4.5377633406210     -3.473E-06 4.906E-09 9.544E-06
  ETOT  7   4.5377633238894     -1.673E-08 1.066E-10 1.521E-07
  ETOT  8   4.5377633234157     -4.737E-10 1.427E-12 7.197E-09
- ETOT  9   4.5377633233854     -3.028E-11 5.963E-14 2.328E-10
- ETOT 10   4.5377633233847     -7.248E-13 9.358E-16 2.685E-12
+ ETOT  9   4.5377633233854     -3.030E-11 5.963E-14 2.328E-10
+ ETOT 10   4.5377633233847     -7.105E-13 9.358E-16 2.685E-12
 
  At SCF step   10       vres2   =  2.68E-12 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -1271,7 +1262,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1333,7 +1323,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1354,7 +1343,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  6   1.0697169287104     -3.995E-08 2.744E-10 4.867E-06
  ETOT  7   1.0697169195268     -9.184E-09 7.660E-12 2.922E-08
  ETOT  8   1.0697169194727     -5.410E-11 2.276E-13 2.647E-10
- ETOT  9   1.0697169194719     -7.656E-13 3.746E-15 1.473E-11
+ ETOT  9   1.0697169194719     -7.567E-13 3.746E-15 1.473E-11
 
  At SCF step    9       vres2   =  1.47E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -1396,7 +1385,6 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file telast_2o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1417,7 +1405,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  6   1.5757928924042     -7.795E-08 1.128E-09 3.010E-07
  ETOT  7   1.5757928913992     -1.005E-09 9.367E-11 6.841E-09
  ETOT  8   1.5757928913588     -4.049E-11 1.281E-12 1.312E-10
- ETOT  9   1.5757928913580     -7.105E-13 1.064E-13 8.070E-12
+ ETOT  9   1.5757928913580     -7.141E-13 1.064E-13 8.070E-12
 
  At SCF step    9       vres2   =  8.07E-12 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :telast_2o_DS2_1WF13
@@ -2364,6 +2352,9 @@ P          mk1mem3         32
         optdriver2          1
         optdriver3          1
         optforces           1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       4
@@ -2536,10 +2527,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         61.7  wall=         62.0
+- Proc.   0 individual time (sec): cpu=         58.3  wall=         58.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and  47 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         61.7  wall=         62.0
+.Delivered   6 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         58.3  wall=         58.6

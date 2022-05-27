@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t09/t09.in
-- output file    -> t09.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t09/t09.abi
+- output file    -> t09.abo
 - root for input  files -> t09i
 - root for output files -> t09o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =          69          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       1.429 Mbytes of memory.
+P This job should need less than                       1.551 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =          69          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       0.929 Mbytes of memory.
+P This job should need less than                       1.051 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -96,7 +96,7 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =          69          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       0.929 Mbytes of memory.
+P This job should need less than                       1.051 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -212,6 +212,11 @@ P          mk1mem           4
         optdriver3          1
         optdriver4          0
         optdriver5          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
            prtvol1          0
            prtvol2          0
            prtvol3         10
@@ -298,8 +303,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge.SJ_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge.SJ_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/32ge.SJ_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/32ge.SJ_mod
 -   Starkloff-Joannopoulos local psp ( !!! OLD : only for tests)
 - 32.00000   4.00000    900101                znucl, zion, pspdat
     5    3    0    0       700   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -593,11 +598,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS1_WFK
-P newkpt: treating      4 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -614,24 +614,10 @@ P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS1_WFK
-P newkpt: treating      4 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS2_WFQ
-- newkpt: read input wf with ikpt,npw=   1      69, make ikpt,npw=   1      69
-- newkpt: read input wf with ikpt,npw=   2      65, make ikpt,npw=   2      65
-- newkpt: read input wf with ikpt,npw=   3      65, make ikpt,npw=   3      65
-- newkpt: read input wf with ikpt,npw=   4      69, make ikpt,npw=   4      69
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -670,13 +656,13 @@ tolerances: {tolwfr: 1.00E-15, }
 
  Mean square residual over all n,k,spin=   57.432E-17; max=  97.271E-17
    0.0000  0.0000 -0.3750    1  7.70029E-16 kpt; spin; max resid(k); each band:
-   7.70E-16  6.15E-16  1.96E-16  1.96E-16
+  7.70E-16 6.15E-16 1.96E-16 1.96E-16
    0.0000  0.0000 -0.1250    1  9.72708E-16 kpt; spin; max resid(k); each band:
-   5.52E-16  3.20E-16  9.73E-16  9.73E-16
+  5.52E-16 3.20E-16 9.73E-16 9.73E-16
    0.0000  0.0000  0.1250    1  9.72697E-16 kpt; spin; max resid(k); each band:
-   5.52E-16  3.20E-16  9.73E-16  9.73E-16
+  5.52E-16 3.20E-16 9.73E-16 9.73E-16
    0.0000  0.0000  0.3750    1  7.70560E-16 kpt; spin; max resid(k); each band:
-   7.71E-16  6.15E-16  1.96E-16  1.96E-16
+  7.71E-16 6.15E-16 1.96E-16 1.96E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1019,11 +1005,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS1_WFK
-P newkpt: treating      4 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -1040,24 +1021,10 @@ P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS1_WFK
-P newkpt: treating      4 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t09o_DS4_WFQ
-- newkpt: read input wf with ikpt,npw=   1      69, make ikpt,npw=   1      69
-- newkpt: read input wf with ikpt,npw=   2      69, make ikpt,npw=   2      69
-- newkpt: read input wf with ikpt,npw=   3      65, make ikpt,npw=   3      65
-- newkpt: read input wf with ikpt,npw=   4      65, make ikpt,npw=   4      65
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      69 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      65 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
@@ -1103,7 +1070,7 @@ tolerances: {tolwfr: 1.00E-15, }
 
  ETOT 18   117.42888650603     -2.482E-10 1.281E-13 3.825E-08
 
- ETOT 19   117.42888650598     -5.204E-11 2.374E-14 3.284E-08
+ ETOT 19   117.42888650598     -5.203E-11 2.374E-14 3.284E-08
 
  ETOT 20   117.42888650596     -2.331E-11 3.016E-14 1.178E-09
 
@@ -1116,13 +1083,13 @@ tolerances: {tolwfr: 1.00E-15, }
 
  Mean square residual over all n,k,spin=   38.481E-17; max=  93.326E-17
    0.0000  0.0000 -0.3750    1  9.04583E-16 kpt; spin; max resid(k); each band:
-   5.61E-16  9.05E-16  1.46E-16  1.46E-16
+  5.61E-16 9.05E-16 1.46E-16 1.46E-16
    0.0000  0.0000 -0.1250    1  9.33264E-16 kpt; spin; max resid(k); each band:
-   1.54E-16  9.33E-16  1.98E-16  1.98E-16
+  1.54E-16 9.33E-16 1.98E-16 1.98E-16
    0.0000  0.0000  0.1250    1  6.93880E-16 kpt; spin; max resid(k); each band:
-   6.94E-16  2.41E-16  2.55E-16  2.55E-16
+  6.94E-16 2.41E-16 2.55E-16 2.55E-16
    0.0000  0.0000  0.3750    1  6.23392E-16 kpt; spin; max resid(k); each band:
-   4.64E-16  6.23E-16  1.92E-16  1.92E-16
+  4.64E-16 6.23E-16 1.92E-16 1.92E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1402,6 +1369,11 @@ P          mk1mem           4
         optdriver3          1
         optdriver4          0
         optdriver5          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
            prtvol1          0
            prtvol2          0
            prtvol3         10
@@ -1533,10 +1505,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  47 WARNINGs and  48 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          1.7
+.Delivered  45 WARNINGs and  41 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.9  wall=          2.2

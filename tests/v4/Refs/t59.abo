@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t59/t59.in
-- output file    -> t59.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t59/t59.abi
+- output file    -> t59.abo
 - root for input  files -> t59i
 - root for output files -> t59o
 
@@ -171,6 +171,9 @@ P          mk1mem3          4
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          1       0       0
@@ -258,8 +261,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     21.780   => boxcut(ratio)=   2.03324
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -560,7 +563,6 @@ meta: {optdriver: 1, rfstrs: 2, }
          ecut(hartree)=     21.780   => boxcut(ratio)=   2.03324
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t59o_DS2_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -578,7 +580,6 @@ meta: {optdriver: 1, rfstrs: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t59o_DS2_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -601,7 +602,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  6   4.1744760470920     -8.713E-06 5.089E-08 8.524E-05
  ETOT  7   4.1744759487514     -9.834E-08 1.850E-08 4.947E-06
  ETOT  8   4.1744759431684     -5.583E-09 1.342E-09 1.579E-07
- ETOT  9   4.1744759430049     -1.634E-10 5.697E-10 3.028E-09
+ ETOT  9   4.1744759430049     -1.635E-10 5.697E-10 3.028E-09
 
  At SCF step    9       vres2   =  3.03E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -800,6 +801,9 @@ P          mk1mem3          4
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          1       0       0
@@ -948,10 +952,10 @@ P          mk1mem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          2.9
+.Delivered  14 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          3.4

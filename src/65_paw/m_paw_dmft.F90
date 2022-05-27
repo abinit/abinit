@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,6 +91,10 @@ MODULE m_paw_dmft
   integer :: dmftcheck
   ! Check various part of the implementation
 
+  integer :: dmft_entropy
+  ! = 0: do not compute entropy
+  ! = 1: compute entropy
+
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
@@ -141,6 +145,10 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_grnns
   ! CTQMC: compute green function noise for each imaginary time
   ! 0 : nothing, 1 : activated
+
+  integer :: dmftctqmc_config
+  ! CTQMC: Enables histogram of occupations.
+  ! 0 : nothing, 1 enabled
 
   integer :: dmftctqmc_meas
   ! CTQMC: every each dmftctqmc_meas step energy is measured
@@ -230,6 +238,9 @@ MODULE m_paw_dmft
 
   integer  :: use_fixed_self
 
+  integer :: ientropy
+  ! activate evaluation of terms for alternative calculation of entropy in DMFT
+
   real(dp) :: edmft
 
   real(dp) :: dmft_charge_prec
@@ -251,6 +262,14 @@ MODULE m_paw_dmft
   ! DMFT cycle (integrate_green) => ichargeloc_cv
 
   real(dp) :: fermie
+
+  real(dp) :: u_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
+
+  real(dp) :: j_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
 
 
   real(dp) :: fermie_dft
@@ -634,6 +653,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
  paw_dmft%dmft_iter=dtset%dmft_iter
+ paw_dmft%dmft_entropy=dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
  paw_dmft%dmft_wanorthnorm=dtset%dmft_wanorthnorm
@@ -643,6 +663,11 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
  paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
+
+! for entropy (alternate external calculation)
+ paw_dmft%ientropy  =  0
+ paw_dmft%u_for_s   =  4.1_dp
+ paw_dmft%j_for_s   =  0.5_dp
 
 !=======================
 !==  Fixed self for input
@@ -727,6 +752,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftctqmc_mrka  =dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov   =dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order =dtset%dmftctqmc_order
+ paw_dmft%dmftctqmc_config =dtset%dmftctqmc_config
  paw_dmft%dmftctqmc_triqs_nleg =dtset%dmftctqmc_triqs_nleg
 
  if ( paw_dmft%dmft_solv >= 4 ) then
@@ -867,6 +893,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
        call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                    opt_Fk      =1,&
 &                                  opt_order   =paw_dmft%dmftctqmc_order ,&
+&                                  opt_histo   =paw_dmft%dmftctqmc_config ,&
 &                                  opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &                                  opt_analysis=paw_dmft%dmftctqmc_correl,&
 &                                  opt_check   =paw_dmft%dmftctqmc_check ,&
