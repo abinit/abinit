@@ -1,0 +1,462 @@
+
+.Version 9.5.4 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2021 ABINIT group . 
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Wed 18 May 2022.
+- ( at 09h20 )
+  
+-  nproc =   10
+
+================================================================================
+
+ Read the information in the reference structure in 
+-/phythema/tutoMB/BaHfO3/ddb/BHfOCub.ddb
+ to initialize the multibinit input
+
+================================================================================
+
+ -outvars_multibinit: echo values of input variables ----------------------
+
+ Flags : 
+     ifcflag         1
+   prt_model         4
+     strcpli        -1
+ Fit the coefficients :
+         fit_coeff  1
+ fit_generateCoeff  1
+        fit_cutoff  5.60000000E+00
+        fit_option  0
+         fit_iatom  0
+        fit_ncoeff  12
+          fit_grid  1  1  1
+         ts_option  0
+    fit_rangePower  3  4
+     fit_dispterms  1
+    fit_anhaStrain  0
+    fit_SPCoupling  1
+      fit_SPC_maxS  1
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+dipdip_range         2         2         2
+      ifcana         0
+      ifcout   2000000
+      natifc         5
+       atifc         1   2   3   4   5
+ Description of grid 1 :
+        brav         1
+       ngqpt         4         4         4
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+ Read the DDB information of the reference system and perform some checks
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.8411196  0.0000000  0.0000000  G(1)=  0.1275328  0.0000000  0.0000000
+ R(2)=  0.0000000  7.8411196  0.0000000  G(2)=  0.0000000  0.1275328  0.0000000
+ R(3)=  0.0000000  0.0000000  7.8411196  G(3)=  0.0000000  0.0000000  0.1275328
+ Unit cell volume ucvol=  4.8209678E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Extraction of the energy of the structure (unit: Hartree)
+
+ Energy  =       -1.343187819874E+02
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.000507        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.000507        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
+       3               3       -0.000507        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.753751E+00    0.000000E+00    0.000000E+00
+         1         2    0.000000E+00    2.753751E+00    0.000000E+00
+         1         3    0.000000E+00    0.000000E+00    2.753751E+00
+         2         1    5.816047E+00    0.000000E+00    0.000000E+00
+         2         2    0.000000E+00    5.816047E+00    0.000000E+00
+         2         3    0.000000E+00    0.000000E+00    5.816047E+00
+         3         1   -2.019049E+00    0.000000E+00    0.000000E+00
+         3         2    0.000000E+00   -4.531700E+00    0.000000E+00
+         3         3    0.000000E+00    0.000000E+00   -2.019049E+00
+         4         1   -4.531700E+00    0.000000E+00    0.000000E+00
+         4         2    0.000000E+00   -2.019049E+00    0.000000E+00
+         4         3    0.000000E+00    0.000000E+00   -2.019049E+00
+         5         1   -2.019049E+00    0.000000E+00    0.000000E+00
+         5         2    0.000000E+00   -2.019049E+00    0.000000E+00
+         5         3    0.000000E+00    0.000000E+00   -4.531700E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+
+================================================================================
+
+ Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
+
+ Cartesian components of forces (hartree/bohr)
+
+   1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   5     0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  2.23642476E-11  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.23642563E-11  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.23642563E-11  sigma(2 1)=  0.00000000E+00
+
+
+================================================================================
+
+ Extraction of the clamped elastic tensor (unit:10^2GPa)
+
+   3.4403978   0.8535133   0.8535134   0.0000000   0.0000001   0.0000004
+   0.8535133   3.4403977   0.8535134   0.0000001   0.0000000   0.0000004
+   0.8535133   0.8535133   3.4403975   0.0000001   0.0000001  -0.0000004
+  -0.0000000   0.0000000   0.0000000   0.9606190   0.0000000   0.0000000
+   0.0000000  -0.0000000   0.0000000   0.0000000   0.9606190   0.0000000
+   0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000   0.9606190
+
+================================================================================
+
+ Calculation of acoustic sum rule
+
+
+================================================================================
+
+ Calculation of the interatomic forces from DDB
+
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+
+================================================================================
+
+ Calculation of dynamical matrix for each ph1l points
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  4.855216E-04  4.855216E-04
+   4.855216E-04  8.565574E-04  8.565574E-04  8.565574E-04  9.382818E-04
+   9.382818E-04  9.382818E-04  2.363951E-03  2.363951E-03  2.363951E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.065597E+02  1.065597E+02
+-  1.065597E+02  1.879926E+02  1.879926E+02  1.879926E+02  2.059290E+02
+-  2.059290E+02  2.059290E+02  5.188273E+02  5.188273E+02  5.188273E+02
+
+================================================================================
+
+ Calculation of the internal-strain  tensor
+
+ Force-response internal strain tensor(Unit:Hartree/bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x    -0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
+  1  y     0.0000000  -0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000
+  1  z     0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000
+  2  x     0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  2  y     0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000
+  2  z    -0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000
+  3  x    -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000  -0.0000000
+  3  y     0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+  3  z     0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  4  x    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
+  4  y    -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000  -0.0000000
+  4  z    -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000
+  5  x    -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000
+  5  y    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
+  5  z    -0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000
+
+
+
+ Bound for ifc SR:
+
+ x=[ -2  2], y=[ -2  2] and z=[ -2  2]
+
+================================================================================
+ Generation of new ifc
+
+ dipdip is set to one, the dipole-dipole interation is recompute.
+
+ Bound for ifc (LR):
+
+ x=[  0  1], y=[  0  1] and z=[  0  1]
+
+ Computation of new dipole-dipole interaction.
+
+ Impose acoustic sum rule on total ifc
+
+================================================================================
+
+================================================================================
+
+ There is no file for the coefficients from polynomial fitting
+
+================================================================================
+
+-Reading the training-set file :
+-/phythema/tutoMB/BaHfO3/TS/TS1_HIST.nc
+
+
+================================================================================
+
+  Starting Fit Iterations  
+  -----------------------  
+  Select in total fit_ncoeff =  12 coefficients
+  In   1 iterations
+  Over   3 irreducible atoms
+  Selecting   4 coefficients per atom in each iteration
+
+
+--------------------------------------------------------------------------------
+
+ Start Iteration (  1/  1)
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients for the fit around atom  1: Ba, will be generated
+
+ 2944 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   2.2780100662032291E-03
+   Forces+Stresses :   3.9733621903060741E-02
+   Forces          :   2.4711894644538119E-02
+   Stresses        :   1.5021727258522627E-02
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 1     2928        2.9783239555E-03  3.1308799171E-02  2.4777594206E-02  6.5312049658E-03
+ 2     228         4.6288456886E-04  2.3477736581E-02  1.7300015333E-02  6.1777212475E-03
+ 3     13          4.0190342476E-04  2.0948571534E-02  1.4803679378E-02  6.1448921567E-03
+ 4     2296        2.5192572341E-04  1.9286862409E-02  1.4603689942E-02  4.6831724669E-03
+
+ Fitted coefficients at the end of the fit process:
+ 2928 =>  -5.2188881403E-02 (Ba_y-O1_y)^2(eta_1)^1
+ 228 =>   5.7509000440E-03 (Ba_x-O1_x)^2(Ba_z-O1_z)^2
+ 13 =>   3.5520658586E-03 (Ba_x-O1_x)^2(Ba_z-O1_z)^1
+ 2296 =>  -2.6172690420E-02 (Ba_x-O1_x)^1(Ba_x-O1_x[-1 0 0])^1(eta_1)^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   2.5192572341196630E-04
+   Forces+Stresses :   1.9286862409041403E-02
+   Forces          :   1.4603689942114712E-02
+   Stresses        :   4.6831724669266920E-03
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  2: Hf, will be generated
+
+ 353 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   2.2780100662032291E-03
+   Forces+Stresses :   3.9733621903060741E-02
+   Forces          :   2.4711894644538119E-02
+   Stresses        :   1.5021727258522627E-02
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 5     355         2.9348766677E-04  1.3758749865E-02  1.0254693631E-02  3.5040562334E-03
+ 6     323         2.9850671435E-04  1.0994185079E-02  7.4675017777E-03  3.5266833014E-03
+ 7     13          7.5864537725E-05  1.0127658733E-02  6.4173169098E-03  3.7103418236E-03
+ 8     165         7.2453502965E-05  9.2134295726E-03  5.6846332596E-03  3.5287963130E-03
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -1.9249447465E-02 (Ba_y-O1_y)^2(eta_1)^1
+ 2 =>   4.6190211375E-03 (Ba_x-O1_x)^2(Ba_z-O1_z)^2
+ 3 =>   3.5384897616E-03 (Ba_x-O1_x)^2(Ba_z-O1_z)^1
+ 4 =>  -2.9890096267E-02 (Ba_x-O1_x)^1(Ba_x-O1_x[-1 0 0])^1(eta_1)^1
+ 355 =>  -4.1027165147E-01 (Hf_y-O1_y)^2(eta_2)^1
+ 323 =>  -3.8988783253E-02 (Hf_y-O1_y)^3
+ 13 =>  -1.3787905266E-03 (Hf_x-O1_x)^3(Hf_y-O2_y)^1
+ 165 =>   8.9372063474E-03 (Hf_x-O1_x)^1(Hf_x-O2_x)^2(Hf_y-O2_y)^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   7.2453502965154760E-05
+   Forces+Stresses :   9.2134295726166195E-03
+   Forces          :   5.6846332595678669E-03
+   Stresses        :   3.5287963130487530E-03
+
+
+--------------------------------------------------------------------------------
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  3: O1, will be generated
+
+ 2952 coefficients generated 
+
+
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Energy          :   2.2780100662032291E-03
+   Forces+Stresses :   3.9733621903060741E-02
+   Forces          :   2.4711894644538119E-02
+   Stresses        :   1.5021727258522627E-02
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 9     9           5.4129522994E-05  8.4489141561E-03  4.9224279200E-03  3.5264862362E-03
+ 10    12          4.8260197770E-05  7.6977911703E-03  4.2011949729E-03  3.4965961974E-03
+ 11    2931        5.5474561685E-05  6.9913685680E-03  4.2096736741E-03  2.7816948939E-03
+ 12    2114        5.3930653437E-05  6.3907163407E-03  3.9644715403E-03  2.4262448004E-03
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -2.1821700494E-02 (Ba_y-O1_y)^2(eta_1)^1
+ 2 =>   4.1392126220E-03 (Ba_x-O1_x)^2(Ba_z-O1_z)^2
+ 3 =>   3.5051011821E-03 (Ba_x-O1_x)^2(Ba_z-O1_z)^1
+ 4 =>  -1.4703513687E-02 (Ba_x-O1_x)^1(Ba_x-O1_x[-1 0 0])^1(eta_1)^1
+ 5 =>  -4.1909880709E-01 (Hf_y-O1_y)^2(eta_2)^1
+ 6 =>  -3.9025248562E-02 (Hf_y-O1_y)^3
+ 7 =>  -1.4860799055E-03 (Hf_x-O1_x)^3(Hf_y-O2_y)^1
+ 8 =>   8.7898235825E-03 (Hf_x-O1_x)^1(Hf_x-O2_x)^2(Hf_y-O2_y)^1
+ 9 =>   1.3037086931E-03 (Ba_x-O1_x)^3
+ 12 =>   1.8648268302E-03 (Ba_x-O1_x)^3(Ba_z-O1_z)^1
+ 2931 =>  -7.8921777437E-03 (O1_x-O2_x)^2(eta_3)^1
+ 2114 =>   2.2682266212E-02 (Hf_x-O1_x)^2(eta_2)^1
+
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Energy          :   5.3930653437262267E-05
+   Forces+Stresses :   6.3907163407037606E-03
+   Forces          :   3.9644715403426073E-03
+   Stresses        :   2.4262448003611538E-03
+
+
+================================================================================
+
+ Generation of the xml file for the fitted polynomial in BaHfO3-fit_coeffs.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=        619.3  wall=        619.4
+
+================================================================================
+
++Total cpu time   6193.444  and wall time   6193.841 sec
+
+ multibinit : the run completed succesfully.
