@@ -28,6 +28,7 @@ module m_dtset
  use m_xmpi
 
  use m_fstrings,     only : inupper
+ use m_numeric_tools,only : arth
  use m_symtk,        only : mati3inv, littlegroup_q, symatm
  use m_symkpt,       only : symkpt
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
@@ -983,6 +984,9 @@ type, public :: dataset_type
 
  procedure :: get_crystal => dtset_get_crystal
    ! Build crystal_t object from dtset and image index.
+
+ procedure :: get_ktmesh => dtset_get_ktmesh
+   ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
 
  end type dataset_type
 !!***
@@ -2875,6 +2879,38 @@ type(crystal_t) function dtset_get_crystal(dtset, img) result(cryst)
    symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
 
 end function dtset_get_crystal
+!!***
+
+!!****f* m_dtset/dtset_get_ktmesh
+!! NAME
+!! dtset_get_ktmesh
+!!
+!! FUNCTION
+!!  Build (linear) mesh of K * temperatures from tsmesh(1:3) = [start, step, num]
+!!  Return number of temperatures (ntemp) and ktmesh array.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: ntemp
+ real(dp),allocatable,intent(out) :: ktmesh(:)
+
+! *********************************************************************
+
+ ntemp = nint(dtset%tmesh(3))
+ ABI_CHECK(ntemp > 0, "ntemp <= 0")
+ ABI_MALLOC(kTmesh, (ntemp))
+ kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
+
+end subroutine dtset_get_ktmesh
 !!***
 
 !!****f* m_dtset/macroin

@@ -23,6 +23,7 @@ sources = [
 "m_frohlichmodel.F90",
 "m_gstore.F90",
 "m_gkk.F90",
+"m_migdal_eliashberg.F90",
 "m_phgamma.F90",
 "m_phpi.F90",
 "m_rta.F90",

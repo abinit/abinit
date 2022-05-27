@@ -2582,10 +2582,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 !END DEBUG
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
- new%ntemp = nint(dtset%tmesh(3))
- ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
- ABI_MALLOC(new%kTmesh, (new%ntemp))
- new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
+ call dtset%get_ktmesh(new%ntemp, new%kTmesh)
 
  gaps = ebands_get_gaps(ebands, gap_err)
 
