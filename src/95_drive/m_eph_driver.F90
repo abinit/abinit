@@ -73,6 +73,7 @@ module m_eph_driver
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
  use m_gstore,          only : gstore_t, gstore_new, gstore_from_ncpath
+ use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
 
  implicit none
 
@@ -764,10 +765,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
     !end if
     call gstore%free()
 
- case (12)
+ case (12, -12)
    ! Migdal-Eliashberg
     gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
-    !call migdal_eliashber(gstore, dtset, dtfil)
+    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
+    !if (dtset%eph_task == +12) call migdal_eliashber_aniso(gstore, dtset, dtfil)
     call gstore%free()
 
  case (15, -15)

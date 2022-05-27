@@ -541,7 +541,7 @@ end function nctk_try_fort_or_ncfile
 subroutine nctk_test_mpiio(print_warning)
 
  logical,intent(in),optional :: print_warning
- 
+
 !Local variables-------------------------------
 !scalars
  logical :: my_print_warning
@@ -1144,9 +1144,9 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
  if (ncerr == nf90_noerr) then
    NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
    if (dimlen /= nctkdim%value) then
-     write(msg, "(2a,2(a,i0))")&
-        "dimension already exists with a different value",ch10,&
-        "file = ", dimlen, "; write = ", nctkdim%value
+     write(msg, "(4a,2(a,i0))")&
+        "dimension ", trim(dname)," already exists but with a different value",ch10,&
+        "from file: ", dimlen, "; about to write: ", nctkdim%value
      ABI_ERROR(msg)
    end if
  else
@@ -1300,11 +1300,11 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
  NCF_CHECK(ncerr)
 
  ! Useful integers.
- ncerr = nctk_def_dims(ncid, [&
+ ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("one", 1), nctkdim_t("two", 2), nctkdim_t("three", 3), &
    nctkdim_t("four", 4), nctkdim_t("five", 5), nctkdim_t("six", 6), &
    nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10), &
-   nctkdim_t("fnlen", fnlen) &
+   nctkdim_t("fnlen", fnlen + 1) &
  ])
  NCF_CHECK(ncerr)
 

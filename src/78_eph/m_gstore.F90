@@ -251,7 +251,7 @@ type, public :: gqk_t
   ! e-ph matrix elements g (local buffer)
   ! (cplex, my_npert, nb, my_nq, nb, my_nk)
 
-  !real(dp), allocatable :: my_g2(:,:,:,:,:)
+  real(dp), allocatable :: my_g2(:,:,:,:,:)
   ! |g|^2 (local buffer)
   ! (my_npert, nb, my_nq, nb, my_nk)
 
@@ -270,7 +270,7 @@ type, public :: gqk_t
   type(xcomm_t) :: grid_comm
    ! MPI communicator for full (q,k,pert) grid.
 
-  real(dp),allocatable :: my_wqnu(:,:)
+  real(dp),allocatable :: my_wnuq(:,:)
   ! (my_npert, my_nq)
   ! Phonon frequencies in Ha (MPI distributed)
 
@@ -281,15 +281,21 @@ type, public :: gqk_t
 
  contains
 
-  procedure :: get_mykpt => gqk_get_mykpt
+  procedure :: mykpt => gqk_mykpt
   ! Return the k-point from my local index my_ik
+
+  procedure :: my_kweight => gqk_my_kweight
+  ! Return the k-point weight from my local index my_ik
 
   procedure :: get_all_mykpts => gqk_get_all_mykpts
   ! Allocate and return array with the all reduced coordinates of the k-point
   ! treated by this MPI rank
 
-  procedure :: get_myqpt => gqk_get_myqpt
+  procedure :: myqpt => gqk_myqpt
   ! Return the q-point from my local index my_iq
+
+  !procedure :: my_qweight => gqk_my_qweight
+  ! Return the q-point weight from my local index my_iq
 
   !procedure :: ncread_path => gqk_ncread_path
 
@@ -414,6 +420,8 @@ type, public :: gstore_t
 
 contains
 
+  !procedure :: check_params
+
   procedure :: fill_bks_mask => gstore_fill_bks_mask
   ! Fill the table used to read (b, k, s) wavefunctions from the WFK file
   ! keeping into account the distribution of the e-ph matrix elements.
@@ -443,6 +451,8 @@ contains
 
   procedure :: calc_my_phonons => gstore_calc_my_phonons
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
+
+  procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
 
 end type gstore_t
 
@@ -786,9 +796,9 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
 
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), gstore%kzone))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), gstore%qzone))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), trim(gstore%kzone)))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_kfilter"), trim(gstore%kfilter)))
 
    ! Write arrays
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qibz"), gstore%qibz))
@@ -1498,7 +1508,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tetra_opt0 = 0
- integer :: nsppol, ierr, cnt, spin, band, ib, ii, nb, all_nproc, my_rank, comm, ebands_timrev
+ integer :: nsppol, ierr, cnt, spin, ib, ii, nb, all_nproc, my_rank, comm, ebands_timrev
  integer :: ik_bz, ik_ibz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, iflag, nk_in_star
  real(dp) :: max_occ, dksqmax
  character(len=80) :: errorstring
@@ -1845,7 +1855,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
    ABI_MALLOC(indkk_kq, (6, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
-     qpt = gqk%get_myqpt(my_iq, gstore)
+     qpt = gqk%myqpt(my_iq, gstore)
 
      call gstore%krank%get_mapping(gqk%my_nk, my_kpts, dksqmax, cryst%gmet, indkk_kq, &
                                    cryst%nsym, cryst%symafm, cryst%symrel, kpts_timrev_from_kptopt(gstore%ebands%kptopt), &
@@ -1913,7 +1923,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
    spin = gstore%my_spins(my_is)
 
    do my_ik=1,gqk%my_nk
-     kk = gqk%get_mykpt(my_ik, gstore)
+     kk = gqk%mykpt(my_ik, gstore)
 
      ! Compute G sphere, returning npw. Note istwfk == 1.
      call get_kg(kk, 1, ecut, gstore%cryst%gmet, onpw, gtmp)
@@ -1926,7 +1936,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
      ABI_FREE(gtmp)
 
      do my_iq=1,gqk%my_nq
-       qpt = gqk%get_myqpt(my_iq, gstore)
+       qpt = gqk%myqpt(my_iq, gstore)
 
        ! TODO: g0 umklapp here can enter into play!
        ! gmax could not be large enough!
@@ -1993,21 +2003,21 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
    gqk => gstore%gqk(my_is)
 
    ! Get phonon frequencies and eigenvectors for this q-point.
-   ABI_CALLOC(gqk%my_wqnu, (gqk%my_npert, gqk%my_nq))
+   ABI_CALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
    if (store_phdispl) then
      ABI_CALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
    end if
 
    do my_iq=1,gqk%my_nq
      if (gqk%kpt_comm%skip(my_iq)) cycle ! MPI parallelism inside kpt_comm
-     qpt = gqk%get_myqpt(my_iq, gstore)
+     qpt = gqk%myqpt(my_iq, gstore)
      call gstore%ifc%fourq(cryst, qpt, phfrq, displ_cart) !, out_displ_red=displ_red)
 
-     gqk%my_wqnu(:, my_iq) = phfrq(gqk%my_iperts(:))
+     gqk%my_wnuq(:, my_iq) = phfrq(gqk%my_iperts(:))
      if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart(:,:,:,gqk%my_iperts(:))
    end do
 
-   call xmpi_sum(gqk%my_wqnu, gqk%kpt_comm%value, ierr)
+   call xmpi_sum(gqk%my_wnuq, gqk%kpt_comm%value, ierr)
    if (store_phdispl) call xmpi_sum(gqk%my_displ_cart, gqk%kpt_comm%value, ierr)
    ! Note that the computation is replicated across the perturbation communicator.
    ! This should not represent a problem since the phase in the displacement is fixed in dfpt_phfrq
@@ -2018,6 +2028,81 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
  ABI_FREE(phfrq)
 
 end subroutine gstore_calc_my_phonons
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_get_lambda_iso_iw
+!! NAME
+!! gstore_get_lambda_iso_iw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
+
+!Arguments ------------------------------------
+ class(gstore_t),target,intent(inout) :: gstore
+ integer,intent(in) :: nw
+ real(dp),intent(in) :: imag_w(nw)
+ real(dp),intent(out) :: lambda(nw)
+
+!Local variables-------------------------------
+ integer :: my_is, my_ik, my_iq, my_ip, ib_k, ib_kq, ii, ierr
+ real(dp) :: g2, w_nuq, weight_k
+ type(gqk_t), pointer :: gqk
+!arrays
+ real(dp),allocatable :: work_kbz(:,:,:), dbl_delta_q(:,:,:)
+
+!----------------------------------------------------------------------
+
+ if (gstore%qzone /= "bz") then
+   ABI_ERROR("gstore_get_lambda_iso_iw assumes qzone == `ibz`")
+ end if
+
+ lambda = zero
+
+ do my_is=1,gstore%my_nspins
+   gqk => gstore%gqk(my_is)
+   ABI_MALLOC(work_kbz, (gqk%nb, gqk%nb, gstore%nkbz))
+   ABI_MALLOC(dbl_delta_q, (gqk%nb, gqk%nb, gqk%my_nk))
+   dbl_delta_q = one
+
+   do my_iq=1,gqk%my_nq
+    ! FIXME Compute integration weights for the double delta according to different schema.
+
+     do my_ik=1,gqk%my_nk
+       weight_k = gqk%my_kweight(my_ik, gstore)
+
+       do ib_k=1,gqk%nb
+         do ib_kq=1,gqk%nb
+           do my_ip=1,gqk%my_npert
+             g2 = gqk%my_g2(my_ip, ib_kq, my_iq, ib_k, my_ik)
+             w_nuq = gqk%my_wnuq(my_ip, my_iq)
+             lambda(:) = lambda(:) + &
+               two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * dbl_delta_q(ib_kq, ib_k, my_ik)
+           end do
+         end do
+       end do
+     end do
+   end do ! my_ik
+
+   ABI_FREE(work_kbz)
+   ABI_FREE(dbl_delta_q)
+ end do ! my_is
+
+ call xmpi_sum(lambda, gstore%comm, ierr)
+
+end subroutine gstore_get_lambda_iso_iw
 !!***
 
 !----------------------------------------------------------------------
@@ -2068,9 +2153,9 @@ end subroutine gstore_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gqk_get_mykpt
+!!****f* m_gstore/gqk_mykpt
 !! NAME
-!! gqk_get_mykpt
+!! gqk_mykpt
 !!
 !! FUNCTION
 !!  Return the reduced coordinates of the k-point from the local index my_ik
@@ -2085,7 +2170,7 @@ end subroutine gstore_free
 !!
 !! SOURCE
 
-pure function gqk_get_mykpt(gqk, my_ik, gstore) result (kpt)
+pure function gqk_mykpt(gqk, my_ik, gstore) result (kpt)
 
 !Arguments ------------------------------------
  class(gqk_t),intent(in) :: gqk
@@ -2108,7 +2193,59 @@ pure function gqk_get_mykpt(gqk, my_ik, gstore) result (kpt)
  ! symrel^T convention for k
  kpt = tsign * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
 
-end function gqk_get_mykpt
+end function gqk_mykpt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gqk_my_kweight
+!! NAME
+!! gqk_my_kweight
+!!
+!! FUNCTION
+!!  Return the weight of the k-point from the local index my_ik
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure real(dp) function gqk_my_kweight(gqk, my_ik, gstore) result (weight_k)
+
+!Arguments ------------------------------------
+ class(gqk_t),intent(in) :: gqk
+ class(gstore_t),intent(in) :: gstore
+ integer,intent(in) :: my_ik
+
+!Local variables ------------------------------
+!scalars
+ integer :: ik_ibz !, isym_k, trev_k, tsign, g0_k(3)
+ !logical :: isirr_k
+
+!----------------------------------------------------------------------
+
+ !ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
+ !trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5, my_ik)
+ !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+ !tsign = 1; if (trev_k == 1) tsign = -1
+
+ ! symrel^T convention for k
+ !kpt = tsign * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
+
+ select case(gstore%kzone)
+ case ("ibz")
+    ik_ibz = gqk%my_k2ibz(1, my_ik)
+    weight_k = gstore%ebands%wtk(ik_ibz)
+ case ("bz")
+    weight_k = one / gstore%nkbz
+ end select
+
+end function gqk_my_kweight
 !!***
 
 !----------------------------------------------------------------------
@@ -2146,7 +2283,7 @@ subroutine gqk_get_all_mykpts(gqk, gstore, my_kpts)
 
  ABI_MALLOC(my_kpts, (3, gqk%my_nk))
  do my_ik=1,gqk%my_nk
-   my_kpts(:, my_ik) = gqk%get_mykpt(my_ik, gstore)
+   my_kpts(:, my_ik) = gqk%mykpt(my_ik, gstore)
  end do
 
 end subroutine gqk_get_all_mykpts
@@ -2154,9 +2291,9 @@ end subroutine gqk_get_all_mykpts
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gqk_get_myqpt
+!!****f* m_gstore/gqk_myqpt
 !! NAME
-!! gqk_get_myqpt
+!! gqk_myqpt
 !!
 !! FUNCTION
 !!  Return the reduced coordinates of the q-point from the local index my_iq
@@ -2171,7 +2308,7 @@ end subroutine gqk_get_all_mykpts
 !!
 !! SOURCE
 
-pure function gqk_get_myqpt(gqk, my_iq, gstore) result (qpt)
+pure function gqk_myqpt(gqk, my_iq, gstore) result (qpt)
 
 !Arguments ------------------------------------
  class(gqk_t),intent(in) :: gqk
@@ -2194,7 +2331,7 @@ pure function gqk_get_myqpt(gqk, my_iq, gstore) result (qpt)
  ! symrec convention for q
  qpt = tsign * matmul(gstore%cryst%symrec(:,:,isym_q), gstore%qibz(:, iq_ibz)) + g0_q
 
-end function gqk_get_myqpt
+end function gqk_myqpt
 !!***
 
 !----------------------------------------------------------------------
@@ -2227,10 +2364,10 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_q2ibz)
  ABI_SFREE(gqk%my_q2bz)
 
- ABI_SFREE(gqk%my_wqnu)
+ ABI_SFREE(gqk%my_wnuq)
  ABI_SFREE(gqk%my_displ_cart)
  ABI_SFREE(gqk%my_g)
- !ABI_SFREE(gqk%my_g2)
+ ABI_SFREE(gqk%my_g2)
  ABI_SFREE(gqk%my_iperts)
  ABI_SFREE(gqk%my_vk_cart)
  ABI_SFREE(gqk%my_vkmat_cart)
@@ -2310,7 +2447,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: mpw, nb,ierr !,cnt ii,jj,
  integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf, nkpg, nkpg1, with_phdata
+ integer :: nfft,nfftf,mgfft,mgfftf, nkpg, nkpg1
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, out_wall_q, gflops_q !, cpu_k, wall_k, gflops_k
  real(dp) :: cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, dksqmax
@@ -2504,11 +2641,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
  gstore%wfk0_path = wfk0_path
  if (my_rank == master) then
-   NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), gstore%wfk0_path))
+   NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
  end if
 
- ! NB: If we write ph data here, we are not guaranteed to have all the IBZ
- ! as q-points may have been filtered.
+ ! NB: Write ph data here as we are not guaranteed to have all the IBZ q-points
+ ! inside the loop over my_iq if filtering has been used.
  call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
  ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
  ABI_MALLOC(buf_displ_cart, (2, 3, natom, natom3, my_nqibz))
@@ -2564,7 +2701,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      call cwtime(cpu_q, wall_q, gflops_q, "start")
 
-     qpt = gqk%get_myqpt(my_iq, gstore)
+     qpt = gqk%myqpt(my_iq, gstore)
      !iq_ibz = gqk%my_q2ibz(1, my_iq)
 
      iq_bz = gqk%my_q2bz(my_iq)
@@ -2599,7 +2736,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        !call cwtime(cpu_k, wall_k, gflops_k, "start")
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
-       kk = gqk%get_mykpt(my_ik, gstore)
+       kk = gqk%mykpt(my_ik, gstore)
        ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
        trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
@@ -2883,9 +3020,7 @@ subroutine dump_data()
  ! i.e. the procs treating different k-points for this q are involved in IO
  ! as all the local buffers store results for all natom3 pertubations.
 
- integer :: ii, iq_bz, my_iq_start, iq_glob, my_iq
- !integer :: iq_ibz, isym_q, trev_q, tsign, g0_q(3)
- !logical :: isirr_q
+ integer :: ii, iq_bz, iq_glob, my_iq
 
  if (gqk%coords_qkp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
