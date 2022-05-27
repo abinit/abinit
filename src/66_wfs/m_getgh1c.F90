@@ -1680,7 +1680,7 @@ end subroutine getgh1dqc
 !! SOURCE
 
 subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qdir1,&    ! In
-&                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                    ! In
+&                natom,rmet,rprimd,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                    ! In
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                            ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&       ! Out
 &                qdir2)                                                                  ! Optional
@@ -1696,7 +1696,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k),kg1_k(3,npw1_k)
- real(dp),intent(in) :: kpoint(3),kpq(3),gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),intent(in) :: kpoint(3),kpq(3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
 ! real(dp),intent(in) :: ylmgr1_k(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: ylmgr1_k(npw1_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
@@ -1715,6 +1715,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ffnl1_tmp(:,:,:,:)
+ real(dp) :: rprim(3,3)
 
 
 ! *************************************************************************
@@ -1762,7 +1763,8 @@ end if
    ider=2;idir0=4
  !-- 2nd q-grad of metric (1st q-grad of strain) perturbation
  else if (ipert==natom+3.or.ipert==natom+4) then
-   ider=2;idir0=0
+!   ider=2;idir0=0
+   ider=2;idir0=4
  end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
@@ -1784,7 +1786,8 @@ end if
    do mu=1,3
      do ig=1,npw1_k
        do nu=1,3
-         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*gprimd(mu,nu)
+!         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*gprimd(mu,nu)
+         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*rprimd(nu,mu)
        end do
      end do
    end do
@@ -1798,7 +1801,8 @@ end if
          do nub=1,3
            nu=gamma(nua,nub)
            ffnl1(ig,4+mu,:,:)=ffnl1(ig,4+mu,:,:)+ &
-         & ffnl1_tmp(ig,4+nu,:,:)*gprimd(mua,nua)*gprimd(mub,nub)
+!         & ffnl1_tmp(ig,4+nu,:,:)*gprimd(mua,nua)*gprimd(mub,nub)
+         & ffnl1_tmp(ig,4+nu,:,:)*rprimd(nua,mua)*rprimd(nub,mub)
          end do
        end do
      end do

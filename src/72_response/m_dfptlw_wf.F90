@@ -111,6 +111,7 @@ contains
 !!  rhog(2,nfftf)=array for Fourier transform of GS electron density
 !!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rmet(3,3)=real space metric (bohr**2)
+!!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  samepert= .true. if i1pert=i2pert and i1dir=i2dir
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
@@ -144,7 +145,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
-     & pawfgr,ph1d,psps,rhog,rhor,rmet,samepert,ucvol,useylmgr,&
+     & pawfgr,ph1d,psps,rhog,rhor,rmet,rprimd,samepert,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
      & wtk_k,xred,ylm_k,ylmgr_k)
     
@@ -182,7 +183,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  real(dp),intent(in) :: eig1_k(2*nband_k**2),eig2_k(2*nband_k**2)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: xred(3,natom)
@@ -471,7 +472,7 @@ if (.not.samepert) then
   
        !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i2pert,i3dir, &
-     & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
+     & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
      & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
   
      end if
@@ -594,7 +595,7 @@ if (.not.samepert) then
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i1pert,i3dir, &
-   & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
+   & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
    & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
 
    end if
