@@ -379,6 +379,7 @@ end subroutine dfptlw_nv
 !!  ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)=1-dimensional phases
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rmet(3,3)=real space metric (bohr**2)
+!!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  wtk_k=weight assigned to the k point.
@@ -409,7 +410,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
-       &  ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
+       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -430,7 +431,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rmet(3,3)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  real(dp),intent(out) :: d3etot_tgeom_k(2,n2dq)
@@ -525,7 +526,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
 
        !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,q1dir, &
-     & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
+     & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
      & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
 
        !LOOP OVER BANDS
@@ -592,7 +593,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,gamma, &
- & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
+ & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
  & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
  & qdir2=delta)
 

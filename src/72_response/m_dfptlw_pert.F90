@@ -349,7 +349,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
-     & pawfgr,ph1d,psps,rhog,rhor,rmet,samepert,ucvol,useylmgr,&
+     & pawfgr,ph1d,psps,rhog,rhor,rmet,rprimd,samepert,ucvol,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
      & wtk_k,xred,ylm_k,ylmgr_k)
 
@@ -367,7 +367,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem_rbz,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
-       &  ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
+       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
 
        !Add the contribution from each k-point
        d3etot_tgeom=d3etot_tgeom + d3etot_tgeom_k
