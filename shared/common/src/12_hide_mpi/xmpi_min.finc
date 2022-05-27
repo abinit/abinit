@@ -9,7 +9,7 @@
 !!  xmpi_min is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2022 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,9 @@ subroutine xmpi_min_intv(xval,xmin,comm,ier)
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
+#if defined HAVE_MPI
  integer :: arr_xval(1),arr_xmin(1)
+#endif
 
 ! *************************************************************************
 
@@ -84,7 +86,9 @@ subroutine xmpi_min_dpv(xval,xmin,comm,ier)
  integer ,intent(out)   :: ier
 
 !Local variables-------------------
+#if defined HAVE_MPI
  real(dp) :: arr_xval(1),arr_xmin(1)
+#endif
 
 ! *************************************************************************
 
@@ -102,4 +106,52 @@ subroutine xmpi_min_dpv(xval,xmin,comm,ier)
 #endif
 
 end subroutine xmpi_min_dpv
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_min_dp
+!! NAME
+!!  xmpi_min_dp
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: scalar double precisions, inplace.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_min_dp(xval,comm,ier)
+
+!Arguments-------------------------
+ real(dp),intent(inout) :: xval
+ integer ,intent(in) :: comm
+ integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ real(dp) :: arr_xval(1),arr_xmin(1)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   arr_xval(1) = xval
+   call MPI_ALLREDUCE(arr_xval,arr_xmin,1,MPI_DOUBLE_PRECISION,MPI_MIN,comm,ier)
+   xval = arr_xmin(1)
+ end if
+#endif
+
+end subroutine xmpi_min_dp
 !!***

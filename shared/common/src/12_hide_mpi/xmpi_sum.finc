@@ -9,7 +9,7 @@
 !!  xmpi_sum is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2022 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2906,4 +2906,119 @@ subroutine xmpi_sum_c6cplx(xval,comm,ier)
 #endif
 
 end subroutine xmpi_sum_c6cplx
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_coeff5d1
+!! NAME
+!!  xmpi_sum_coeff5d1
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: coeff5_type 1D-structure
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval = coeff5d_type array structure (input and output)
+!!
+!! SOURCE
+
+subroutine xmpi_sum_coeff5d1(xval,comm,ier)
+
+!Arguments ------------------------------------
+ type(coeff5_type),intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: buf_size,i2,i3,i4,i5,ii,indx_buf,n1,n2,n3,n4,n5,nb,nproc_space_comm
+ integer, allocatable :: dims(:,:)
+ real(dp),allocatable :: buf(:),xsum(:)
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     nb = size(xval,1)
+
+!    Retrieve sizes of 'value' fields
+     ABI_MALLOC(dims,(5,nb))
+     buf_size=0
+     do ii=1,nb
+       if (.not.allocated(xval(ii)%value)) &
+&        call xmpi_abort(msg='bug in xmpi_sum(coeff5): xval should be allocated!')
+       dims(1,ii)=size(xval(ii)%value,dim=1)
+       dims(2,ii)=size(xval(ii)%value,dim=2)
+       dims(3,ii)=size(xval(ii)%value,dim=3)
+       dims(4,ii)=size(xval(ii)%value,dim=4)
+       dims(5,ii)=size(xval(ii)%value,dim=5)
+       buf_size=buf_size+dims(1,ii)*dims(2,ii)*dims(3,ii)*dims(4,ii)*dims(5,ii)
+     end do
+
+!    Fill in buffer
+     ABI_STAT_MALLOC(buf,(buf_size) ,ier)
+     if (ier/= 0) call xmpi_abort(msg='error allocating buf in xmpi_sum(coeff5)!')
+     indx_buf=1
+     do ii=1,nb
+       n1=dims(1,ii); n2=dims(2,ii)
+       n3=dims(3,ii); n4=dims(4,ii); n5=dims(5,ii)
+       do i5=1,n5
+         do i4=1,n4
+           do i3=1,n3
+             do i2=1,n2
+               buf(indx_buf:indx_buf+n1-1)=xval(ii)%value(1:n1,i2,i3,i4,i5)
+               indx_buf=indx_buf+n1
+             end do
+           end do
+         end do
+       end do
+     end do
+
+!    Accumulate xval%value on all proc. in comm
+     if (xmpi_use_inplace_operations) then
+       call MPI_ALLREDUCE(MPI_IN_PLACE,buf,buf_size,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     else
+       ABI_STAT_MALLOC(xsum,(buf_size), ier)
+       if (ier/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_sum(coeff5)!')
+       call MPI_ALLREDUCE(buf,xsum,buf_size,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+       buf = xsum
+       ABI_FREE(xsum)
+     endif
+
+!    Transfer buffer into output datastructure
+     indx_buf=1
+     do ii=1,nb
+       n1=dims(1,ii); n2=dims(2,ii)
+       n3=dims(3,ii); n4=dims(4,ii); n5=dims(5,ii)
+       do i5=1,n5
+         do i4=1,n4
+           do i3=1,n3
+             do i2=1,n2
+               xval(ii)%value(1:n1,i2,i3,i4,i5)=buf(indx_buf:indx_buf+n1-1)
+               indx_buf=indx_buf+n1
+             end do
+           end do
+         end do
+       end do
+     end do
+
+     ABI_FREE(dims)
+     ABI_FREE(buf)
+
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_coeff5d1
 !!***

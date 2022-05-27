@@ -1,8 +1,8 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu8.3 computer) 
+.Version 9.7.4 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu8.5 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 22h57 )
+.Starting date : Sat  7 May 2022.
+- ( at 10h38 )
   
-- input  file    -> /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Test_suite/gpu_t01/t01.in
-- output file    -> t01.out
+- input  file    -> /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/TestBot_MPI1_OMP1/gpu_t01/t01.abi
+- output file    -> t01.abo
 - root for input  files -> t01i
 - root for output files -> t01o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         117          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       1.683 Mbytes of memory.
+P This job should need less than                       1.781 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         125
        mpw =         120          nfft =        3375          nkpt =         125
 ================================================================================
-P This job should need less than                       2.868 Mbytes of memory.
+P This job should need less than                       2.965 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.918 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.918 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         125
        mpw =         120          nfft =        3375          nkpt =         125
 ================================================================================
-P This job should need less than                       2.868 Mbytes of memory.
+P This job should need less than                       2.965 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.918 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -335,6 +335,10 @@ P          mk1mem4        125
            prtden3          0
            prtden4          0
            prteig           0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  5.00000000E-01  5.00000000E-01
@@ -459,8 +463,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.08519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
 -  Troullier-Martins psp for element  Ga        Thu Oct 27 17:36:43 EDT 1994
 - 31.00000   3.00000    940714                znucl, zion, pspdat
     1    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -474,8 +478,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    2.537532
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -510,13 +514,13 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  5  -10.708215588279    -1.260E-07 7.377E-11 3.987E-06
  ETOT  6  -10.708215593685    -5.406E-09 1.890E-12 7.061E-08
  ETOT  7  -10.708215593851    -1.662E-10 5.511E-14 7.694E-09
- ETOT  8  -10.708215593868    -1.668E-11 3.083E-15 1.929E-10
- ETOT  9  -10.708215593868    -5.649E-13 2.915E-16 2.418E-12
- ETOT 10  -10.708215593868     1.599E-14 1.233E-17 1.122E-14
- ETOT 11  -10.708215593868    -8.882E-15 3.168E-19 3.363E-16
- ETOT 12  -10.708215593868    -4.086E-14 1.360E-20 1.767E-17
- ETOT 13  -10.708215593868     4.796E-14 3.360E-22 1.256E-20
- ETOT 14  -10.708215593868     1.243E-14 9.359E-23 3.989E-20
+ ETOT  8  -10.708215593868    -1.669E-11 3.083E-15 1.929E-10
+ ETOT  9  -10.708215593868    -5.400E-13 2.915E-16 2.418E-12
+ ETOT 10  -10.708215593868     3.553E-15 1.233E-17 1.122E-14
+ ETOT 11  -10.708215593868     0.000E+00 3.168E-19 3.363E-16
+ ETOT 12  -10.708215593868    -5.329E-14 1.360E-20 1.767E-17
+ ETOT 13  -10.708215593868     5.329E-14 3.361E-22 1.256E-20
+ ETOT 14  -10.708215593868     1.066E-14 9.359E-23 3.989E-20
 
  At SCF step   14   max residual=  9.36E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -536,7 +540,7 @@ lattice_vectors:
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9775400E+02
-convergence: {deltae:  1.243E-14, res2:  3.989E-20, residm:  9.359E-23, diffor: null, }
+convergence: {deltae:  1.066E-14, res2:  3.989E-20, residm:  9.359E-23, diffor: null, }
 etotal    :  -1.07082156E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.03010391E-02
@@ -563,7 +567,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   55.118E-24; max=  93.590E-24
+ Mean square residual over all n,k,spin=   55.119E-24; max=  93.592E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -597,11 +601,11 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.96811996191688E+00
-hartree             :  7.89694267120194E-01
+hartree             :  7.89694267120192E-01
 xc                  : -4.88505933010453E+00
 Ewald energy        : -8.48789573682593E+00
 psp_core            :  1.45806676895480E+00
-local_psp           : -2.69399858366340E+00
+local_psp           : -2.69399858366339E+00
 non_local_psp       :  1.42857058733923E-01
 total_energy        : -1.07082155938681E+01
 total_energy_eV     : -2.91385364980382E+02
@@ -658,126 +662,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -4.6021E-01 -5.9755E-02 -1.3931E-02 -1.3931E-02
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.12446E-16
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  8.27040E-18
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  8.65518E-17
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  6.80967E-20
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  4.13447E-17
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  2.68867E-19
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30    9 max resid (incl. the buffer)=  7.79688E-18
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.97259E-18
-  prteigrs : nnsclo,ikpt=   30   11 max resid (incl. the buffer)=  8.27040E-18
-  prteigrs : nnsclo,ikpt=   30   12 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   13 max resid (incl. the buffer)=  1.66357E-19
-  prteigrs : nnsclo,ikpt=   30   14 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   15 max resid (incl. the buffer)=  5.12362E-17
-  prteigrs : nnsclo,ikpt=   30   16 max resid (incl. the buffer)=  7.80914E-17
-  prteigrs : nnsclo,ikpt=   30   17 max resid (incl. the buffer)=  7.79688E-18
-  prteigrs : nnsclo,ikpt=   30   18 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   19 max resid (incl. the buffer)=  2.19027E-19
-  prteigrs : nnsclo,ikpt=   30   20 max resid (incl. the buffer)=  1.97195E-17
-  prteigrs : nnsclo,ikpt=   30   21 max resid (incl. the buffer)=  5.50000E-20
-  prteigrs : nnsclo,ikpt=   30   22 max resid (incl. the buffer)=  3.20154E-18
-  prteigrs : nnsclo,ikpt=   30   23 max resid (incl. the buffer)=  5.12362E-17
-  prteigrs : nnsclo,ikpt=   30   24 max resid (incl. the buffer)=  4.78397E-18
-  prteigrs : nnsclo,ikpt=   30   25 max resid (incl. the buffer)=  6.72711E-20
-  prteigrs : nnsclo,ikpt=   30   26 max resid (incl. the buffer)=  1.16149E-18
-  prteigrs : nnsclo,ikpt=   30   27 max resid (incl. the buffer)=  2.07093E-19
-  prteigrs : nnsclo,ikpt=   30   28 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   29 max resid (incl. the buffer)=  7.79688E-18
-  prteigrs : nnsclo,ikpt=   30   30 max resid (incl. the buffer)=  2.83680E-17
-  prteigrs : nnsclo,ikpt=   30   31 max resid (incl. the buffer)=  2.91994E-19
-  prteigrs : nnsclo,ikpt=   30   33 max resid (incl. the buffer)=  4.70207E-17
-  prteigrs : nnsclo,ikpt=   30   34 max resid (incl. the buffer)=  6.69674E-20
-  prteigrs : nnsclo,ikpt=   30   35 max resid (incl. the buffer)=  2.19027E-19
-  prteigrs : nnsclo,ikpt=   30   36 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   37 max resid (incl. the buffer)=  1.41370E-17
-  prteigrs : nnsclo,ikpt=   30   38 max resid (incl. the buffer)=  3.72022E-20
-  prteigrs : nnsclo,ikpt=   30   39 max resid (incl. the buffer)=  2.97937E-20
-  prteigrs : nnsclo,ikpt=   30   40 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   41 max resid (incl. the buffer)=  7.79688E-18
-  prteigrs : nnsclo,ikpt=   30   42 max resid (incl. the buffer)=  6.69674E-20
-  prteigrs : nnsclo,ikpt=   30   43 max resid (incl. the buffer)=  2.97937E-20
-  prteigrs : nnsclo,ikpt=   30   44 max resid (incl. the buffer)=  6.69674E-20
-  prteigrs : nnsclo,ikpt=   30   45 max resid (incl. the buffer)=  2.09899E-18
-  prteigrs : nnsclo,ikpt=   30   46 max resid (incl. the buffer)=  1.44682E-18
-  prteigrs : nnsclo,ikpt=   30   47 max resid (incl. the buffer)=  2.19027E-19
-  prteigrs : nnsclo,ikpt=   30   48 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   49 max resid (incl. the buffer)=  2.09899E-18
-  prteigrs : nnsclo,ikpt=   30   50 max resid (incl. the buffer)=  8.58819E-17
-  prteigrs : nnsclo,ikpt=   30   51 max resid (incl. the buffer)=  8.27040E-18
-  prteigrs : nnsclo,ikpt=   30   52 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   53 max resid (incl. the buffer)=  1.66357E-19
-  prteigrs : nnsclo,ikpt=   30   54 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   55 max resid (incl. the buffer)=  5.12362E-17
-  prteigrs : nnsclo,ikpt=   30   56 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   57 max resid (incl. the buffer)=  5.18662E-18
-  prteigrs : nnsclo,ikpt=   30   58 max resid (incl. the buffer)=  3.72022E-20
-  prteigrs : nnsclo,ikpt=   30   59 max resid (incl. the buffer)=  2.97937E-20
-  prteigrs : nnsclo,ikpt=   30   60 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   61 max resid (incl. the buffer)=  1.66357E-19
-  prteigrs : nnsclo,ikpt=   30   62 max resid (incl. the buffer)=  3.72022E-20
-  prteigrs : nnsclo,ikpt=   30   64 max resid (incl. the buffer)=  3.72022E-20
-  prteigrs : nnsclo,ikpt=   30   65 max resid (incl. the buffer)=  1.66357E-19
-  prteigrs : nnsclo,ikpt=   30   66 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   67 max resid (incl. the buffer)=  2.97937E-20
-  prteigrs : nnsclo,ikpt=   30   68 max resid (incl. the buffer)=  3.72022E-20
-  prteigrs : nnsclo,ikpt=   30   69 max resid (incl. the buffer)=  1.69242E-22
-  prteigrs : nnsclo,ikpt=   30   70 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   71 max resid (incl. the buffer)=  5.12362E-17
-  prteigrs : nnsclo,ikpt=   30   72 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   73 max resid (incl. the buffer)=  1.66357E-19
-  prteigrs : nnsclo,ikpt=   30   74 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   75 max resid (incl. the buffer)=  5.09770E-17
-  prteigrs : nnsclo,ikpt=   30   76 max resid (incl. the buffer)=  8.58819E-17
-  prteigrs : nnsclo,ikpt=   30   77 max resid (incl. the buffer)=  7.79688E-18
-  prteigrs : nnsclo,ikpt=   30   78 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   79 max resid (incl. the buffer)=  2.19027E-19
-  prteigrs : nnsclo,ikpt=   30   80 max resid (incl. the buffer)=  1.44682E-18
-  prteigrs : nnsclo,ikpt=   30   81 max resid (incl. the buffer)=  7.79688E-18
-  prteigrs : nnsclo,ikpt=   30   82 max resid (incl. the buffer)=  6.69674E-20
-  prteigrs : nnsclo,ikpt=   30   83 max resid (incl. the buffer)=  2.97937E-20
-  prteigrs : nnsclo,ikpt=   30   84 max resid (incl. the buffer)=  6.69674E-20
-  prteigrs : nnsclo,ikpt=   30   85 max resid (incl. the buffer)=  2.09899E-18
-  prteigrs : nnsclo,ikpt=   30   86 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30   87 max resid (incl. the buffer)=  2.97937E-20
-  prteigrs : nnsclo,ikpt=   30   88 max resid (incl. the buffer)=  3.72022E-20
-  prteigrs : nnsclo,ikpt=   30   89 max resid (incl. the buffer)=  1.69243E-22
-  prteigrs : nnsclo,ikpt=   30   90 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   91 max resid (incl. the buffer)=  2.19027E-19
-  prteigrs : nnsclo,ikpt=   30   92 max resid (incl. the buffer)=  6.69674E-20
-  prteigrs : nnsclo,ikpt=   30   93 max resid (incl. the buffer)=  1.69243E-22
-  prteigrs : nnsclo,ikpt=   30   95 max resid (incl. the buffer)=  2.91994E-19
-  prteigrs : nnsclo,ikpt=   30   96 max resid (incl. the buffer)=  2.83680E-17
-  prteigrs : nnsclo,ikpt=   30   97 max resid (incl. the buffer)=  2.09899E-18
-  prteigrs : nnsclo,ikpt=   30   98 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30   99 max resid (incl. the buffer)=  2.07093E-19
-  prteigrs : nnsclo,ikpt=   30  100 max resid (incl. the buffer)=  1.16149E-18
-  prteigrs : nnsclo,ikpt=   30  101 max resid (incl. the buffer)=  6.72711E-20
-  prteigrs : nnsclo,ikpt=   30  102 max resid (incl. the buffer)=  4.78397E-18
-  prteigrs : nnsclo,ikpt=   30  103 max resid (incl. the buffer)=  5.12362E-17
-  prteigrs : nnsclo,ikpt=   30  104 max resid (incl. the buffer)=  3.20154E-18
-  prteigrs : nnsclo,ikpt=   30  105 max resid (incl. the buffer)=  5.50000E-20
-  prteigrs : nnsclo,ikpt=   30  106 max resid (incl. the buffer)=  1.97195E-17
-  prteigrs : nnsclo,ikpt=   30  107 max resid (incl. the buffer)=  2.19027E-19
-  prteigrs : nnsclo,ikpt=   30  108 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30  109 max resid (incl. the buffer)=  2.09899E-18
-  prteigrs : nnsclo,ikpt=   30  110 max resid (incl. the buffer)=  7.80914E-17
-  prteigrs : nnsclo,ikpt=   30  111 max resid (incl. the buffer)=  5.12362E-17
-  prteigrs : nnsclo,ikpt=   30  112 max resid (incl. the buffer)=  4.17121E-21
-  prteigrs : nnsclo,ikpt=   30  113 max resid (incl. the buffer)=  1.66357E-19
-  prteigrs : nnsclo,ikpt=   30  114 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30  115 max resid (incl. the buffer)=  1.86477E-15
-  prteigrs : nnsclo,ikpt=   30  116 max resid (incl. the buffer)=  1.97259E-18
-  prteigrs : nnsclo,ikpt=   30  117 max resid (incl. the buffer)=  2.09899E-18
-  prteigrs : nnsclo,ikpt=   30  118 max resid (incl. the buffer)=  3.97134E-18
-  prteigrs : nnsclo,ikpt=   30  119 max resid (incl. the buffer)=  2.68867E-19
-  prteigrs : nnsclo,ikpt=   30  120 max resid (incl. the buffer)=  4.13447E-17
-  prteigrs : nnsclo,ikpt=   30  121 max resid (incl. the buffer)=  6.80967E-20
-  prteigrs : nnsclo,ikpt=   30  122 max resid (incl. the buffer)=  8.65518E-17
-  prteigrs : nnsclo,ikpt=   30  123 max resid (incl. the buffer)=  7.36279E-18
-  prteigrs : nnsclo,ikpt=   30  124 max resid (incl. the buffer)=  1.12446E-16
 
 
 --- !ResultsGS
@@ -865,101 +749,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt    1 (  0.10000  0.60000  0.60000), residuals and eigenvalues=
   2.36E-23  9.29E-23  1.26E-21  3.17E-23
  -3.8290E-01 -2.4180E-01 -1.1129E-01 -9.4378E-02
-  prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  1.26489E-21
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  1.32228E-22
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  9.97493E-20
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  1.06178E-18
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.72564E-21
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  1.07971E-20
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  1.07971E-20
-  prteigrs : nnsclo,ikpt=   30    9 max resid (incl. the buffer)=  2.75901E-20
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  1.77113E-20
-  prteigrs : nnsclo,ikpt=   30   11 max resid (incl. the buffer)=  2.48997E-17
-  prteigrs : nnsclo,ikpt=   30   12 max resid (incl. the buffer)=  1.32228E-22
-  prteigrs : nnsclo,ikpt=   30   13 max resid (incl. the buffer)=  1.26490E-21
-  prteigrs : nnsclo,ikpt=   30   14 max resid (incl. the buffer)=  1.72564E-21
-  prteigrs : nnsclo,ikpt=   30   15 max resid (incl. the buffer)=  9.45874E-19
-  prteigrs : nnsclo,ikpt=   30   16 max resid (incl. the buffer)=  3.84350E-19
-  prteigrs : nnsclo,ikpt=   30   17 max resid (incl. the buffer)=  9.36399E-21
-  prteigrs : nnsclo,ikpt=   30   20 max resid (incl. the buffer)=  3.20739E-20
-  prteigrs : nnsclo,ikpt=   30   22 max resid (incl. the buffer)=  3.21002E-20
-  prteigrs : nnsclo,ikpt=   30   23 max resid (incl. the buffer)=  3.84207E-19
-  prteigrs : nnsclo,ikpt=   30   24 max resid (incl. the buffer)=  9.36174E-21
-  prteigrs : nnsclo,ikpt=   30   26 max resid (incl. the buffer)=  1.08026E-20
-  prteigrs : nnsclo,ikpt=   30   28 max resid (incl. the buffer)=  1.08153E-20
-  prteigrs : nnsclo,ikpt=   30   29 max resid (incl. the buffer)=  4.19550E-20
-  prteigrs : nnsclo,ikpt=   30   30 max resid (incl. the buffer)=  2.23378E-19
-  prteigrs : nnsclo,ikpt=   30   31 max resid (incl. the buffer)=  2.64208E-21
-  prteigrs : nnsclo,ikpt=   30   33 max resid (incl. the buffer)=  1.50516E-19
-  prteigrs : nnsclo,ikpt=   30   34 max resid (incl. the buffer)=  3.07037E-18
-  prteigrs : nnsclo,ikpt=   30   35 max resid (incl. the buffer)=  9.74798E-22
-  prteigrs : nnsclo,ikpt=   30   36 max resid (incl. the buffer)=  4.20512E-19
-  prteigrs : nnsclo,ikpt=   30   39 max resid (incl. the buffer)=  1.78289E-21
-  prteigrs : nnsclo,ikpt=   30   40 max resid (incl. the buffer)=  8.62568E-22
-  prteigrs : nnsclo,ikpt=   30   41 max resid (incl. the buffer)=  1.17166E-19
-  prteigrs : nnsclo,ikpt=   30   42 max resid (incl. the buffer)=  1.08153E-20
-  prteigrs : nnsclo,ikpt=   30   44 max resid (incl. the buffer)=  1.08026E-20
-  prteigrs : nnsclo,ikpt=   30   45 max resid (incl. the buffer)=  8.63185E-21
-  prteigrs : nnsclo,ikpt=   30   46 max resid (incl. the buffer)=  9.35977E-21
-  prteigrs : nnsclo,ikpt=   30   49 max resid (incl. the buffer)=  3.20585E-20
-  prteigrs : nnsclo,ikpt=   30   50 max resid (incl. the buffer)=  3.84287E-19
-  prteigrs : nnsclo,ikpt=   30   51 max resid (incl. the buffer)=  7.34521E-19
-  prteigrs : nnsclo,ikpt=   30   52 max resid (incl. the buffer)=  1.31657E-22
-  prteigrs : nnsclo,ikpt=   30   53 max resid (incl. the buffer)=  1.26259E-21
-  prteigrs : nnsclo,ikpt=   30   54 max resid (incl. the buffer)=  1.72293E-21
-  prteigrs : nnsclo,ikpt=   30   55 max resid (incl. the buffer)=  1.03901E-18
-  prteigrs : nnsclo,ikpt=   30   56 max resid (incl. the buffer)=  1.49068E-20
-  prteigrs : nnsclo,ikpt=   30   59 max resid (incl. the buffer)=  2.42324E-21
-  prteigrs : nnsclo,ikpt=   30   60 max resid (incl. the buffer)=  9.69617E-22
-  prteigrs : nnsclo,ikpt=   30   66 max resid (incl. the buffer)=  9.69617E-22
-  prteigrs : nnsclo,ikpt=   30   67 max resid (incl. the buffer)=  2.42324E-21
-  prteigrs : nnsclo,ikpt=   30   69 max resid (incl. the buffer)=  4.02522E-20
-  prteigrs : nnsclo,ikpt=   30   70 max resid (incl. the buffer)=  1.49068E-20
-  prteigrs : nnsclo,ikpt=   30   71 max resid (incl. the buffer)=  1.03901E-18
-  prteigrs : nnsclo,ikpt=   30   72 max resid (incl. the buffer)=  1.72294E-21
-  prteigrs : nnsclo,ikpt=   30   73 max resid (incl. the buffer)=  1.26259E-21
-  prteigrs : nnsclo,ikpt=   30   74 max resid (incl. the buffer)=  1.31657E-22
-  prteigrs : nnsclo,ikpt=   30   75 max resid (incl. the buffer)=  9.97840E-20
-  prteigrs : nnsclo,ikpt=   30   76 max resid (incl. the buffer)=  3.84287E-19
-  prteigrs : nnsclo,ikpt=   30   77 max resid (incl. the buffer)=  9.35977E-21
-  prteigrs : nnsclo,ikpt=   30   80 max resid (incl. the buffer)=  3.20585E-20
-  prteigrs : nnsclo,ikpt=   30   81 max resid (incl. the buffer)=  8.63185E-21
-  prteigrs : nnsclo,ikpt=   30   82 max resid (incl. the buffer)=  1.08026E-20
-  prteigrs : nnsclo,ikpt=   30   84 max resid (incl. the buffer)=  1.08153E-20
-  prteigrs : nnsclo,ikpt=   30   85 max resid (incl. the buffer)=  1.17166E-19
-  prteigrs : nnsclo,ikpt=   30   86 max resid (incl. the buffer)=  8.62568E-22
-  prteigrs : nnsclo,ikpt=   30   87 max resid (incl. the buffer)=  1.78289E-21
-  prteigrs : nnsclo,ikpt=   30   89 max resid (incl. the buffer)=  1.50996E-19
-  prteigrs : nnsclo,ikpt=   30   90 max resid (incl. the buffer)=  4.20512E-19
-  prteigrs : nnsclo,ikpt=   30   91 max resid (incl. the buffer)=  9.74798E-22
-  prteigrs : nnsclo,ikpt=   30   92 max resid (incl. the buffer)=  3.07037E-18
-  prteigrs : nnsclo,ikpt=   30   95 max resid (incl. the buffer)=  2.64208E-21
-  prteigrs : nnsclo,ikpt=   30   96 max resid (incl. the buffer)=  2.23378E-19
-  prteigrs : nnsclo,ikpt=   30   97 max resid (incl. the buffer)=  4.19550E-20
-  prteigrs : nnsclo,ikpt=   30   98 max resid (incl. the buffer)=  1.08153E-20
-  prteigrs : nnsclo,ikpt=   30  100 max resid (incl. the buffer)=  1.08026E-20
-  prteigrs : nnsclo,ikpt=   30  102 max resid (incl. the buffer)=  3.20739E-20
-  prteigrs : nnsclo,ikpt=   30  103 max resid (incl. the buffer)=  3.84350E-19
-  prteigrs : nnsclo,ikpt=   30  104 max resid (incl. the buffer)=  9.36399E-21
-  prteigrs : nnsclo,ikpt=   30  106 max resid (incl. the buffer)=  9.36174E-21
-  prteigrs : nnsclo,ikpt=   30  109 max resid (incl. the buffer)=  3.21002E-20
-  prteigrs : nnsclo,ikpt=   30  110 max resid (incl. the buffer)=  3.84207E-19
-  prteigrs : nnsclo,ikpt=   30  111 max resid (incl. the buffer)=  9.45874E-19
-  prteigrs : nnsclo,ikpt=   30  112 max resid (incl. the buffer)=  1.72564E-21
-  prteigrs : nnsclo,ikpt=   30  113 max resid (incl. the buffer)=  1.26490E-21
-  prteigrs : nnsclo,ikpt=   30  114 max resid (incl. the buffer)=  1.32228E-22
-  prteigrs : nnsclo,ikpt=   30  115 max resid (incl. the buffer)=  9.97494E-20
-  prteigrs : nnsclo,ikpt=   30  116 max resid (incl. the buffer)=  1.77113E-20
-  prteigrs : nnsclo,ikpt=   30  117 max resid (incl. the buffer)=  2.75901E-20
-  prteigrs : nnsclo,ikpt=   30  118 max resid (incl. the buffer)=  1.07971E-20
-  prteigrs : nnsclo,ikpt=   30  120 max resid (incl. the buffer)=  1.07971E-20
-  prteigrs : nnsclo,ikpt=   30  121 max resid (incl. the buffer)=  1.72564E-21
-  prteigrs : nnsclo,ikpt=   30  122 max resid (incl. the buffer)=  1.06178E-18
-  prteigrs : nnsclo,ikpt=   30  123 max resid (incl. the buffer)=  4.17666E-20
-  prteigrs : nnsclo,ikpt=   30  124 max resid (incl. the buffer)=  1.32228E-22
-  prteigrs : nnsclo,ikpt=   30  125 max resid (incl. the buffer)=  1.26489E-21
 
 
 --- !ResultsGS
@@ -994,7 +785,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   44.725E-24; max=  94.028E-24
+ Mean square residual over all n,k,spin=   44.725E-24; max=  94.026E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1042,8 +833,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.93214
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
 -  Troullier-Martins psp for element  Ga        Thu Oct 27 17:36:43 EDT 1994
 - 31.00000   3.00000    940714                znucl, zion, pspdat
     1    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1057,8 +848,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    2.537532
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.5_cuda/trunk__gmatteo/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1074,7 +865,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1105,10 +895,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1119,17 +907,17 @@ tolerances: {tolwfr: 2.00E-15, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   17.967803238685     -1.884E+01 2.454E-01 4.123E+03
- ETOT  2   3.8801617867821     -1.409E+01 3.465E-02 2.305E+01
- ETOT  3   3.7851528394565     -9.501E-02 2.313E-04 4.343E+00
- ETOT  4   3.7755160978158     -9.637E-03 1.048E-05 6.303E-02
- ETOT  5   3.7754065922409     -1.095E-04 3.669E-07 6.166E-04
- ETOT  6   3.7754052888911     -1.303E-06 8.260E-09 6.529E-05
- ETOT  7   3.7754051144539     -1.744E-07 3.849E-10 5.629E-07
- ETOT  8   3.7754051133281     -1.126E-09 8.839E-12 3.536E-08
- ETOT  9   3.7754051132768     -5.122E-11 3.849E-14 2.495E-09
- ETOT 10   3.7754051132731     -3.730E-12 4.000E-15 5.064E-11
- ETOT 11   3.7754051132731     -4.263E-14 1.989E-15 2.331E-12
+-ETOT  1   17.967803331252     -1.884E+01 2.454E-01 4.123E+03
+ ETOT  2   3.8801617839383     -1.409E+01 3.465E-02 2.305E+01
+ ETOT  3   3.7851528408691     -9.501E-02 2.313E-04 4.343E+00
+ ETOT  4   3.7755160977387     -9.637E-03 1.048E-05 6.303E-02
+ ETOT  5   3.7754065922307     -1.095E-04 3.669E-07 6.166E-04
+ ETOT  6   3.7754052888907     -1.303E-06 8.260E-09 6.529E-05
+ ETOT  7   3.7754051144541     -1.744E-07 3.849E-10 5.629E-07
+ ETOT  8   3.7754051133282     -1.126E-09 8.839E-12 3.536E-08
+ ETOT  9   3.7754051132770     -5.122E-11 3.849E-14 2.495E-09
+ ETOT 10   3.7754051132729     -4.050E-12 4.000E-15 5.064E-11
+ ETOT 11   3.7754051132730      5.684E-14 1.989E-15 2.331E-12
 
  At SCF step   11   max residual=  1.99E-15 < tolwfr=  2.00E-15 =>converged.
 ================================================================================
@@ -1166,10 +954,8 @@ tolerances: {tolwfr: 2.00E-15, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1180,24 +966,24 @@ tolerances: {tolwfr: 2.00E-15, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   39.442225861106     -2.890E+00 1.257E-01 1.652E+04
- ETOT  2   6.8189568373431     -3.262E+01 6.027E-02 4.788E+02
- ETOT  3   6.0139499984714     -8.050E-01 2.035E-03 1.727E+02
- ETOT  4   5.7488776146264     -2.651E-01 2.128E-04 3.593E+00
- ETOT  5   5.7435270128404     -5.351E-03 9.262E-06 1.139E-01
- ETOT  6   5.7433514216773     -1.756E-04 2.546E-07 2.818E-03
- ETOT  7   5.7433461148581     -5.307E-06 1.373E-08 2.371E-05
- ETOT  8   5.7433460691119     -4.575E-08 2.302E-10 1.274E-07
- ETOT  9   5.7433460687406     -3.713E-10 1.402E-12 1.457E-08
- ETOT 10   5.7433460687055     -3.509E-11 5.760E-14 1.839E-10
- ETOT 11   5.7433460687049     -5.613E-13 1.964E-15 1.185E-11
+-ETOT  1   39.442225889910     -2.890E+00 1.257E-01 1.652E+04
+ ETOT  2   6.8189569105731     -3.262E+01 6.027E-02 4.788E+02
+ ETOT  3   6.0139500179145     -8.050E-01 2.035E-03 1.727E+02
+ ETOT  4   5.7488776150633     -2.651E-01 2.128E-04 3.593E+00
+ ETOT  5   5.7435270128735     -5.351E-03 9.262E-06 1.139E-01
+ ETOT  6   5.7433514216781     -1.756E-04 2.546E-07 2.818E-03
+ ETOT  7   5.7433461148579     -5.307E-06 1.373E-08 2.371E-05
+ ETOT  8   5.7433460691117     -4.575E-08 2.302E-10 1.274E-07
+ ETOT  9   5.7433460687403     -3.714E-10 1.402E-12 1.457E-08
+ ETOT 10   5.7433460687055     -3.485E-11 5.760E-14 1.839E-10
+ ETOT 11   5.7433460687051     -3.340E-13 1.964E-15 1.185E-11
 
  At SCF step   11   max residual=  1.96E-15 < tolwfr=  2.00E-15 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   91.301E-17; max=  19.640E-16
+ Mean square residual over all n,k,spin=   91.302E-17; max=  19.642E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1228,10 +1014,8 @@ tolerances: {tolwfr: 2.00E-15, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1242,24 +1026,24 @@ tolerances: {tolwfr: 2.00E-15, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   82.188226483878     -1.237E+01 4.730E-01 2.181E+04
- ETOT  2   5.2246037608003     -7.696E+01 3.385E-01 1.155E+02
- ETOT  3   4.6744612789600     -5.501E-01 2.021E-03 1.970E+01
- ETOT  4   4.6303936474258     -4.407E-02 5.911E-05 2.484E-01
- ETOT  5   4.6299650241759     -4.286E-04 1.749E-06 2.765E-03
- ETOT  6   4.6299593023845     -5.722E-06 3.379E-08 2.693E-04
- ETOT  7   4.6299585535345     -7.489E-07 1.850E-09 2.359E-06
- ETOT  8   4.6299585484167     -5.118E-09 2.896E-11 6.943E-08
- ETOT  9   4.6299585483119     -1.048E-10 1.442E-13 8.741E-09
- ETOT 10   4.6299585482994     -1.246E-11 9.745E-15 2.183E-10
- ETOT 11   4.6299585482980     -1.378E-12 1.860E-15 9.674E-12
+-ETOT  1   82.188226620266     -1.237E+01 4.730E-01 2.181E+04
+ ETOT  2   5.2246037289081     -7.696E+01 3.385E-01 1.155E+02
+ ETOT  3   4.6744612859776     -5.501E-01 2.021E-03 1.970E+01
+ ETOT  4   4.6303936472721     -4.407E-02 5.911E-05 2.484E-01
+ ETOT  5   4.6299650241604     -4.286E-04 1.749E-06 2.765E-03
+ ETOT  6   4.6299593023822     -5.722E-06 3.379E-08 2.693E-04
+ ETOT  7   4.6299585535332     -7.488E-07 1.850E-09 2.359E-06
+ ETOT  8   4.6299585484168     -5.116E-09 2.896E-11 6.943E-08
+ ETOT  9   4.6299585483107     -1.061E-10 1.442E-13 8.741E-09
+ ETOT 10   4.6299585482986     -1.212E-11 9.745E-15 2.183E-10
+ ETOT 11   4.6299585482971     -1.450E-12 1.860E-15 9.674E-12
 
  At SCF step   11   max residual=  1.86E-15 < tolwfr=  2.00E-15 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   77.834E-17; max=  18.605E-16
+ Mean square residual over all n,k,spin=   77.832E-17; max=  18.604E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1289,10 +1073,8 @@ tolerances: {tolwfr: 2.00E-15, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS2_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS3_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1303,18 +1085,18 @@ tolerances: {tolwfr: 2.00E-15, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   261.13274350409      1.512E+02 1.004E+00 1.195E+05
- ETOT  2   6.7290201910703     -2.544E+02 2.824E-01 4.076E+02
- ETOT  3   5.6142358094866     -1.115E+00 3.725E-03 1.698E+02
- ETOT  4   5.3431489045701     -2.711E-01 2.169E-04 3.061E+00
- ETOT  5   5.3386576312003     -4.491E-03 7.793E-06 5.580E-02
- ETOT  6   5.3385681178514     -8.951E-05 1.355E-07 8.500E-04
- ETOT  7   5.3385665780291     -1.540E-06 6.047E-09 1.034E-05
- ETOT  8   5.3385665508974     -2.713E-08 1.742E-10 7.862E-07
- ETOT  9   5.3385665493170     -1.580E-09 3.210E-12 3.226E-08
- ETOT 10   5.3385665492428     -7.419E-11 1.088E-13 1.997E-09
- ETOT 11   5.3385665492389     -3.951E-12 3.881E-15 9.867E-11
- ETOT 12   5.3385665492387     -1.990E-13 1.990E-15 8.515E-12
+-ETOT  1   261.13274316667      1.512E+02 1.004E+00 1.195E+05
+ ETOT  2   6.7290202476609     -2.544E+02 2.824E-01 4.076E+02
+ ETOT  3   5.6142358078604     -1.115E+00 3.725E-03 1.698E+02
+ ETOT  4   5.3431489047912     -2.711E-01 2.169E-04 3.061E+00
+ ETOT  5   5.3386576312026     -4.491E-03 7.793E-06 5.580E-02
+ ETOT  6   5.3385681178493     -8.951E-05 1.355E-07 8.500E-04
+ ETOT  7   5.3385665780264     -1.540E-06 6.048E-09 1.034E-05
+ ETOT  8   5.3385665508954     -2.713E-08 1.742E-10 7.862E-07
+ ETOT  9   5.3385665493145     -1.581E-09 3.210E-12 3.226E-08
+ ETOT 10   5.3385665492410     -7.350E-11 1.088E-13 1.997E-09
+ ETOT 11   5.3385665492364     -4.533E-12 3.881E-15 9.866E-11
+ ETOT 12   5.3385665492368      4.121E-13 1.990E-15 8.515E-12
 
  At SCF step   12   max residual=  1.99E-15 < tolwfr=  2.00E-15 =>converged.
 ================================================================================
@@ -1404,20 +1186,20 @@ tolerances: {tolwfr: 2.00E-15, }
   
    1    1   1    1         0.1337239468         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000        -0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2        -0.0000000000        -0.0000000000
    1    1   3    2        -0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0656504121         0.0000000000
-   2    1   3    1        -0.0000000000        -0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2        -0.0535350243         0.0000000001
   
    3    1   1    1         0.0000000000        -0.0000000000
-   3    1   2    1         0.0000000000        -0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0656504121         0.0000000000
    3    1   1    2        -0.0000000000         0.0000000000
    3    1   2    2        -0.0535350243         0.0000000001
@@ -1427,20 +1209,20 @@ tolerances: {tolwfr: 2.00E-15, }
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000        -0.0000000000
    1    2   1    2         0.1042652410        -0.0000000001
-   1    2   2    2         0.0000000000         0.0000000000
+   1    2   2    2         0.0000000000        -0.0000000000
    1    2   3    2         0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0000000000        -0.0000000000
    2    2   3    1        -0.0535340007        -0.0000000001
-   2    2   1    2         0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000        -0.0000000000
    2    2   2    2         0.0763533391        -0.0000000000
-   2    2   3    2        -0.0000000000        -0.0000000000
+   2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1        -0.0000000000        -0.0000000000
    3    2   2    1        -0.0535340007        -0.0000000001
    3    2   3    1        -0.0000000000        -0.0000000000
-   3    2   1    2         0.0000000000        -0.0000000000
+   3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.0763533391        -0.0000000000
 
@@ -1695,6 +1477,10 @@ P          mk1mem4        125
            prtden3          0
            prtden4          0
            prteig           0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  5.00000000E-01  5.00000000E-01
@@ -1836,7 +1622,24 @@ P          mk1mem4        125
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Recent developments in the ABINIT software package.
+- [4] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1854,23 +1657,10 @@ P          mk1mem4        125
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=         27.6  wall=         34.6
+- Proc.   0 individual time (sec): cpu=         43.2  wall=         43.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.6  wall=         34.6
+.Delivered  20 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         43.2  wall=         43.5

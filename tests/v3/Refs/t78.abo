@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t78-t79/t78.in
-- output file    -> t78.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t78-t79/t78.abi
+- output file    -> t78.abo
 - root for input  files -> t78i
 - root for output files -> t78o
 
@@ -34,7 +34,7 @@
 -    mband =          20        mffmem =           1         mkmem =           1
        mpw =          33          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.507 Mbytes of memory.
+P This job should need less than                       1.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           1
        mpw =          33          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.454 Mbytes of memory.
+P This job should need less than                       1.505 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -183,6 +183,11 @@ P          mk1mem           1
         optdriver3          1
         optdriver4          1
         optdriver5          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
            prtvol           1
             rfdir1          0       0       0
             rfdir2          0       0       0
@@ -253,8 +258,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01034
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Al,  from PRB58, 3641 (1998)
 - 13.00000   3.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -459,7 +464,6 @@ P newkpt: treating     20 bands with npw=      33 for ikpt=   1 by node    0
   8.6326E-01  9.7699E-01  1.0974E+00  1.0974E+00  1.1601E+00  1.2503E+00
   1.2625E+00  1.2625E+00  1.4936E+00  2.3381E+00  2.3513E+00  2.3513E+00
   2.4417E+00  2.4417E+00
-  prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  7.01053E-18
 
 
 --- !ResultsGS
@@ -544,8 +548,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01034
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      33, make ikpt,npw=   1      65
 
  ==>  initialize data related to q vector <== 
 
@@ -562,15 +564,12 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      33, make ikpt,npw=   1      65
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     20 bands with npw=      65 for ikpt=   1 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -581,15 +580,15 @@ tolerances: {tolwfr: 1.00E-22, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -30.381036644902     -3.038E+01 1.678E-01 0.000E+00
  ETOT  2  -30.381037337349     -6.924E-07 6.852E-04 0.000E+00
- ETOT  3  -30.381037337353     -4.391E-12 6.691E-06 0.000E+00
- ETOT  4  -30.381037337353      2.132E-14 2.867E-08 0.000E+00
- ETOT  5  -30.381037337353     -1.421E-14 2.930E-10 0.000E+00
- ETOT  6  -30.381037337353     -2.132E-14 1.399E-12 0.000E+00
- ETOT  7  -30.381037337353     -3.553E-15 1.520E-14 0.000E+00
- ETOT  8  -30.381037337353      7.105E-15 8.106E-17 0.000E+00
- ETOT  9  -30.381037337353     -7.105E-15 9.231E-19 0.000E+00
- ETOT 10  -30.381037337353      1.066E-14 5.104E-21 0.000E+00
- ETOT 11  -30.381037337353     -7.105E-15 8.548E-23 0.000E+00
+ ETOT  3  -30.381037337353     -4.395E-12 6.691E-06 0.000E+00
+ ETOT  4  -30.381037337353      3.197E-14 2.867E-08 0.000E+00
+ ETOT  5  -30.381037337353     -7.105E-15 2.930E-10 0.000E+00
+ ETOT  6  -30.381037337353     -1.421E-14 1.399E-12 0.000E+00
+ ETOT  7  -30.381037337353     -1.421E-14 1.520E-14 0.000E+00
+ ETOT  8  -30.381037337353      0.000E+00 8.106E-17 0.000E+00
+ ETOT  9  -30.381037337353      0.000E+00 9.231E-19 0.000E+00
+ ETOT 10  -30.381037337353      0.000E+00 5.104E-21 0.000E+00
+ ETOT 11  -30.381037337353      0.000E+00 8.548E-23 0.000E+00
 
  At SCF step   11   max residual=  8.55E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
@@ -663,8 +662,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01034
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      33, make ikpt,npw=   1      65
 
  ==>  initialize data related to q vector <== 
 
@@ -681,15 +678,12 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      33, make ikpt,npw=   1      65
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     20 bands with npw=      65 for ikpt=   1 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -700,15 +694,15 @@ tolerances: {tolwfr: 1.00E-22, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -30.381064450816     -3.038E+01 1.482E-01 0.000E+00
  ETOT  2  -30.381065143262     -6.924E-07 3.618E-04 0.000E+00
- ETOT  3  -30.381065143267     -4.427E-12 2.779E-06 0.000E+00
- ETOT  4  -30.381065143267      3.553E-15 1.009E-08 0.000E+00
- ETOT  5  -30.381065143267      7.105E-15 8.699E-11 0.000E+00
- ETOT  6  -30.381065143267      2.132E-14 4.426E-13 0.000E+00
- ETOT  7  -30.381065143267     -7.105E-15 3.664E-15 0.000E+00
- ETOT  8  -30.381065143267      7.105E-15 1.926E-17 0.000E+00
- ETOT  9  -30.381065143267     -7.105E-15 1.648E-19 0.000E+00
- ETOT 10  -30.381065143267      7.105E-15 8.789E-22 0.000E+00
- ETOT 11  -30.381065143267     -1.421E-14 8.897E-23 0.000E+00
+ ETOT  3  -30.381065143267     -4.412E-12 2.779E-06 0.000E+00
+ ETOT  4  -30.381065143267     -3.553E-15 1.009E-08 0.000E+00
+ ETOT  5  -30.381065143267     -7.105E-15 8.699E-11 0.000E+00
+ ETOT  6  -30.381065143267      3.553E-14 4.426E-13 0.000E+00
+ ETOT  7  -30.381065143267      0.000E+00 3.664E-15 0.000E+00
+ ETOT  8  -30.381065143267     -7.105E-15 1.926E-17 0.000E+00
+ ETOT  9  -30.381065143267      7.105E-15 1.648E-19 0.000E+00
+ ETOT 10  -30.381065143267      0.000E+00 8.789E-22 0.000E+00
+ ETOT 11  -30.381065143267     -7.105E-15 8.897E-23 0.000E+00
 
  At SCF step   11   max residual=  8.90E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
@@ -782,8 +776,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01034
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      33, make ikpt,npw=   1      65
 
  ==>  initialize data related to q vector <== 
 
@@ -800,15 +792,12 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t78o_DS2_WFK
-- newkpt: read input wf with ikpt,npw=   1      33, make ikpt,npw=   1      65
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating     20 bands with npw=      65 for ikpt=   1 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
@@ -819,15 +808,15 @@ tolerances: {tolwfr: 1.00E-22, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -30.381083278852     -3.038E+01 1.416E-01 0.000E+00
  ETOT  2  -30.381083971299     -6.924E-07 2.869E-04 0.000E+00
- ETOT  3  -30.381083971303     -4.349E-12 2.088E-06 0.000E+00
- ETOT  4  -30.381083971303     -5.329E-14 7.055E-09 0.000E+00
- ETOT  5  -30.381083971303      4.263E-14 5.529E-11 0.000E+00
+ ETOT  3  -30.381083971303     -4.356E-12 2.088E-06 0.000E+00
+ ETOT  4  -30.381083971303     -3.197E-14 7.055E-09 0.000E+00
+ ETOT  5  -30.381083971303      2.487E-14 5.529E-11 0.000E+00
  ETOT  6  -30.381083971303     -7.105E-15 2.268E-13 0.000E+00
- ETOT  7  -30.381083971303      7.105E-15 1.908E-15 0.000E+00
- ETOT  8  -30.381083971303     -1.421E-14 8.260E-18 0.000E+00
- ETOT  9  -30.381083971303      7.105E-15 7.112E-20 0.000E+00
+ ETOT  7  -30.381083971303     -7.105E-15 1.908E-15 0.000E+00
+ ETOT  8  -30.381083971303      7.105E-15 8.260E-18 0.000E+00
+ ETOT  9  -30.381083971303      0.000E+00 7.112E-20 0.000E+00
  ETOT 10  -30.381083971303      0.000E+00 3.123E-22 0.000E+00
- ETOT 11  -30.381083971303     -7.105E-15 7.228E-23 0.000E+00
+ ETOT 11  -30.381083971303     -1.421E-14 7.228E-23 0.000E+00
 
  At SCF step   11   max residual=  7.23E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
@@ -940,6 +929,11 @@ P          mk1mem           1
         optdriver3          1
         optdriver4          1
         optdriver5          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
            prtvol           1
             rfdir1          0       0       0
             rfdir2          0       0       0
@@ -1056,10 +1050,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and  33 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.9
+.Delivered   3 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.6

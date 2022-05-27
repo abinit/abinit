@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 24 Dec 2020.
-- ( at 21h27 )
+.Starting date : Fri 11 Feb 2022.
+- ( at 11h55 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/TestBot_MPI24/tutoparal_tdmft_1_MPI24/tdmft_1.abi
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/TestBot_MPI24/tutoparal_tdmft_1_MPI24/tdmft_1.abi
 - output file    -> tdmft_1_MPI24.abo
 - root for input  files -> tdmft_1_MPI24i
 - root for output files -> tdmft_1_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -43,7 +43,7 @@ Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      13.353 Mbytes of memory.
+P This job should need less than                      13.011 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.527 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -63,7 +63,7 @@ Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      14.946 Mbytes of memory.
+P This job should need less than                      14.594 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     31.066 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ================================================================================
@@ -336,9 +336,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -356,9 +356,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -376,9 +376,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -705,7 +705,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.4379E-02  8.4379E-02  1.0372E-01  1.0372E-01  1.0413E-01  1.8583E-01
   1.8583E-01  1.9802E-01  3.1167E-01  3.1534E-01  3.1534E-01  4.2538E-01
   4.2538E-01  5.0240E-01  5.0240E-01  5.1375E-01  5.6234E-01  5.6234E-01
-  prteigrs : nnsclo,ikpt=   40    1 max resid (incl. the buffer)=  4.00001E-10
  Non-SCF case, kpt    2 (  0.23611  0.23611  0.23611), residuals and eigenvalues=
   4.28E-16  4.92E-16  4.02E-16  6.93E-16  9.47E-16  8.10E-16  8.85E-16  3.94E-16
   6.15E-16  6.05E-16  7.20E-16  8.42E-16  1.15E-16  1.70E-16  8.28E-16  2.92E-16
@@ -716,7 +715,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.6563E-02  8.6563E-02  1.0738E-01  1.0738E-01  1.1046E-01  1.8498E-01
   1.8498E-01  1.9602E-01  3.0798E-01  3.1190E-01  3.1190E-01  4.1914E-01
   4.1914E-01  4.9695E-01  4.9695E-01  5.1263E-01  5.6188E-01  5.6188E-01
-  prteigrs : nnsclo,ikpt=   40    2 max resid (incl. the buffer)=  1.04219E-09
  Non-SCF case, kpt    3 (  0.22222  0.22222  0.22222), residuals and eigenvalues=
   9.66E-16  3.62E-16  4.81E-16  5.85E-16  7.02E-16  4.65E-16  9.82E-16  5.44E-16
   8.64E-16  3.70E-16  7.83E-16  3.84E-16  8.43E-16  2.19E-16  1.45E-16  2.32E-16
@@ -727,7 +725,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.8580E-02  8.8580E-02  1.1074E-01  1.1074E-01  1.1680E-01  1.8447E-01
   1.8447E-01  1.9365E-01  3.0424E-01  3.0822E-01  3.0822E-01  4.1275E-01
   4.1275E-01  4.9101E-01  4.9101E-01  5.1109E-01  5.6098E-01  5.6098E-01
-  prteigrs : nnsclo,ikpt=   40    3 max resid (incl. the buffer)=  1.01551E-09
  Non-SCF case, kpt    4 (  0.20833  0.20833  0.20833), residuals and eigenvalues=
   4.68E-16  7.60E-16  2.71E-16  4.67E-16  5.24E-16  4.26E-16  2.82E-16  6.19E-16
   4.72E-16  2.12E-16  4.08E-16  5.58E-16  1.54E-16  8.85E-16  1.55E-16  6.54E-16
@@ -738,7 +735,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.0613E-02  9.0613E-02  1.1498E-01  1.1498E-01  1.2442E-01  1.8511E-01
   1.8511E-01  1.9174E-01  3.0064E-01  3.0468E-01  3.0468E-01  4.0656E-01
   4.0656E-01  4.8495E-01  4.8495E-01  5.0928E-01  5.5980E-01  5.5980E-01
-  prteigrs : nnsclo,ikpt=   40    4 max resid (incl. the buffer)=  5.15827E-08
  Non-SCF case, kpt    5 (  0.19444  0.19444  0.19444), residuals and eigenvalues=
   4.13E-16  8.59E-16  9.89E-16  5.27E-16  3.71E-16  8.33E-16  4.50E-16  2.18E-16
   8.27E-16  8.25E-16  3.40E-16  2.92E-16  2.58E-16  7.67E-17  8.87E-16  1.70E-16
@@ -749,7 +745,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.1830E-02  9.1830E-02  1.1928E-01  1.1928E-01  1.3228E-01  1.8521E-01
   1.8521E-01  1.8981E-01  2.9694E-01  3.0105E-01  3.0105E-01  4.0015E-01
   4.0015E-01  4.7873E-01  4.7873E-01  5.0708E-01  5.5799E-01  5.5799E-01
-  prteigrs : nnsclo,ikpt=   40    5 max resid (incl. the buffer)=  1.67689E-08
  Non-SCF case, kpt    6 (  0.18056  0.18056  0.18056), residuals and eigenvalues=
   5.87E-16  9.16E-16  2.16E-16  8.45E-16  4.29E-16  8.68E-16  8.71E-16  7.03E-16
   6.11E-16  7.99E-16  7.61E-16  3.12E-16  3.00E-16  1.35E-16  9.39E-16  1.76E-16
@@ -760,7 +755,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.3532E-02  9.3532E-02  1.2384E-01  1.2384E-01  1.3918E-01  1.8601E-01
   1.8601E-01  1.8804E-01  2.9314E-01  2.9738E-01  2.9738E-01  3.9387E-01
   3.9387E-01  4.7245E-01  4.7245E-01  5.0440E-01  5.5605E-01  5.5605E-01
-  prteigrs : nnsclo,ikpt=   40    6 max resid (incl. the buffer)=  1.29743E-07
  Non-SCF case, kpt    7 (  0.16667  0.16667  0.16667), residuals and eigenvalues=
   8.63E-16  5.53E-16  7.43E-16  3.79E-16  9.33E-16  2.70E-16  9.49E-16  7.54E-16
   4.78E-16  2.54E-16  4.88E-16  2.01E-16  1.46E-16  8.62E-16  2.07E-16  8.15E-16
@@ -771,7 +765,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.5091E-02  9.5091E-02  1.2861E-01  1.2861E-01  1.4798E-01  1.8637E-01
   1.8749E-01  1.8749E-01  2.8964E-01  2.9367E-01  2.9367E-01  3.8772E-01
   3.8772E-01  4.6617E-01  4.6617E-01  5.0138E-01  5.5388E-01  5.5398E-01
-  prteigrs : nnsclo,ikpt=   40    7 max resid (incl. the buffer)=  9.94738E-06
  Non-SCF case, kpt    8 (  0.15278  0.15278  0.15278), residuals and eigenvalues=
   6.90E-16  6.66E-16  8.50E-16  3.03E-16  7.18E-16  9.89E-16  3.51E-16  9.77E-16
   2.46E-16  3.48E-16  2.94E-16  4.19E-16  2.79E-16  1.87E-16  3.31E-16  6.30E-16
@@ -782,7 +775,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.5673E-02  9.5673E-02  1.3266E-01  1.3266E-01  1.5453E-01  1.8383E-01
   1.8871E-01  1.8871E-01  2.8585E-01  2.8978E-01  2.8978E-01  3.8144E-01
   3.8144E-01  4.5984E-01  4.5984E-01  4.9769E-01  5.5118E-01  5.5121E-01
-  prteigrs : nnsclo,ikpt=   40    8 max resid (incl. the buffer)=  4.22464E-06
  Non-SCF case, kpt    9 (  0.13889  0.13889  0.13889), residuals and eigenvalues=
   5.89E-16  6.25E-16  2.64E-16  2.71E-16  7.64E-16  3.16E-16  4.61E-16  9.26E-16
   2.41E-16  3.89E-16  2.84E-16  5.00E-16  3.18E-16  2.18E-16  4.09E-16  8.01E-16
@@ -793,7 +785,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.6875E-02  9.6875E-02  1.3760E-01  1.3760E-01  1.6137E-01  1.8234E-01
   1.9055E-01  1.9055E-01  2.8218E-01  2.8599E-01  2.8599E-01  3.7557E-01
   3.7557E-01  4.5380E-01  4.5380E-01  4.9351E-01  5.4877E-01  5.4903E-01
-  prteigrs : nnsclo,ikpt=   40    9 max resid (incl. the buffer)=  1.46815E-05
  Non-SCF case, kpt   10 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
   8.39E-16  5.59E-16  7.22E-16  2.62E-16  3.62E-16  4.07E-16  3.50E-16  9.11E-16
   8.21E-16  7.77E-16  6.56E-16  5.54E-16  7.89E-16  5.05E-17  7.55E-16  3.40E-16
@@ -804,7 +795,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.7981E-02  9.7981E-02  1.4351E-01  1.4351E-01  1.6848E-01  1.8106E-01
   1.9267E-01  1.9267E-01  2.7862E-01  2.8233E-01  2.8233E-01  3.6994E-01
   3.6994E-01  4.4807E-01  4.4807E-01  4.8890E-01  5.4647E-01  5.4809E-01
-  prteigrs : nnsclo,ikpt=   40   10 max resid (incl. the buffer)=  5.18897E-06
  Non-SCF case, kpt   11 (  0.11111  0.11111  0.11111), residuals and eigenvalues=
   6.10E-16  9.90E-16  8.15E-16  4.41E-16  9.94E-16  1.74E-16  9.23E-16  6.12E-16
   3.75E-16  6.24E-16  2.03E-16  1.12E-16  7.27E-16  8.24E-17  8.35E-16  5.04E-16
@@ -815,7 +805,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.8544E-02  9.8544E-02  1.4782E-01  1.4782E-01  1.7477E-01  1.7941E-01
   1.9339E-01  1.9339E-01  2.7514E-01  2.7838E-01  2.7838E-01  3.6436E-01
   3.6436E-01  4.4248E-01  4.4248E-01  4.8390E-01  5.4400E-01  5.4405E-01
-  prteigrs : nnsclo,ikpt=   40   11 max resid (incl. the buffer)=  2.23726E-07
  Non-SCF case, kpt   12 (  0.09722  0.09722  0.09722), residuals and eigenvalues=
   3.52E-16  4.57E-16  5.36E-16  8.18E-16  3.47E-16  8.07E-16  5.40E-16  9.83E-16
   8.73E-16  5.93E-16  2.46E-16  1.18E-16  1.61E-16  2.12E-16  4.78E-16  3.96E-16
@@ -826,7 +815,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0023E-01  1.0023E-01  1.5299E-01  1.5299E-01  1.7863E-01  1.8126E-01
   1.9593E-01  1.9593E-01  2.7186E-01  2.7465E-01  2.7465E-01  3.5942E-01
   3.5942E-01  4.3741E-01  4.3741E-01  4.7883E-01  5.4149E-01  5.4183E-01
-  prteigrs : nnsclo,ikpt=   40   12 max resid (incl. the buffer)=  3.44327E-07
  Non-SCF case, kpt   13 (  0.08333  0.08333  0.08333), residuals and eigenvalues=
   5.25E-16  4.48E-16  5.05E-16  3.60E-16  4.05E-16  8.23E-16  8.21E-16  4.45E-16
   6.95E-16  4.62E-16  9.66E-16  1.52E-16  2.56E-16  1.73E-16  5.83E-16  4.70E-16
@@ -837,7 +825,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0086E-01  1.0086E-01  1.5765E-01  1.5765E-01  1.7763E-01  1.8722E-01
   1.9831E-01  1.9831E-01  2.6871E-01  2.7097E-01  2.7097E-01  3.5488E-01
   3.5488E-01  4.3279E-01  4.3279E-01  4.7383E-01  5.3918E-01  5.3981E-01
-  prteigrs : nnsclo,ikpt=   40   13 max resid (incl. the buffer)=  9.19940E-07
  Non-SCF case, kpt   14 (  0.06944  0.06944  0.06944), residuals and eigenvalues=
   6.70E-16  3.98E-16  6.92E-16  9.49E-16  4.73E-16  8.91E-16  9.80E-16  5.38E-16
   1.68E-16  3.61E-16  7.98E-16  2.08E-16  2.67E-16  9.43E-16  7.29E-16  8.88E-16
@@ -848,7 +835,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0136E-01  1.0136E-01  1.6201E-01  1.6201E-01  1.7678E-01  1.9274E-01
   2.0063E-01  2.0063E-01  2.6576E-01  2.6747E-01  2.6747E-01  3.5083E-01
   3.5083E-01  4.2874E-01  4.2874E-01  4.6914E-01  5.3742E-01  5.3803E-01
-  prteigrs : nnsclo,ikpt=   40   14 max resid (incl. the buffer)=  1.10211E-06
  Non-SCF case, kpt   15 (  0.05556  0.05556  0.05556), residuals and eigenvalues=
   8.46E-16  7.20E-16  2.41E-16  8.77E-16  1.88E-16  4.14E-16  6.40E-16  3.67E-16
   6.97E-16  9.32E-16  4.80E-16  3.59E-16  4.32E-16  6.20E-16  3.83E-16  9.70E-16
@@ -859,7 +845,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0177E-01  1.0177E-01  1.6636E-01  1.6636E-01  1.7607E-01  1.9788E-01
   2.0283E-01  2.0283E-01  2.6309E-01  2.6428E-01  2.6428E-01  3.4738E-01
   3.4738E-01  4.2533E-01  4.2533E-01  4.6499E-01  5.3631E-01  5.3654E-01
-  prteigrs : nnsclo,ikpt=   40   15 max resid (incl. the buffer)=  9.52474E-07
  Non-SCF case, kpt   16 (  0.04167  0.04167  0.04167), residuals and eigenvalues=
   5.29E-16  9.61E-16  6.36E-16  6.25E-16  1.86E-16  2.93E-16  7.36E-16  8.25E-16
   8.52E-16  6.73E-16  4.23E-16  2.17E-16  1.85E-16  1.55E-16  2.38E-16  9.34E-16
@@ -870,7 +855,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0256E-01  1.0256E-01  1.7022E-01  1.7022E-01  1.7552E-01  2.0241E-01
   2.0477E-01  2.0477E-01  2.6078E-01  2.6148E-01  2.6148E-01  3.4458E-01
   3.4458E-01  4.2260E-01  4.2260E-01  4.6155E-01  5.3511E-01  5.3535E-01
-  prteigrs : nnsclo,ikpt=   40   16 max resid (incl. the buffer)=  9.18913E-07
  Non-SCF case, kpt   17 (  0.02778  0.02778  0.02778), residuals and eigenvalues=
   4.88E-16  2.21E-16  3.97E-16  3.62E-16  1.88E-16  3.36E-16  7.22E-16  6.00E-16
   2.10E-16  4.98E-16  4.37E-16  2.37E-16  6.35E-16  6.30E-16  6.65E-16  7.67E-16
@@ -881,7 +865,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0276E-01  1.0276E-01  1.7271E-01  1.7271E-01  1.7512E-01  2.0564E-01
   2.0628E-01  2.0628E-01  2.5894E-01  2.5925E-01  2.5925E-01  3.4252E-01
   3.4252E-01  4.2060E-01  4.2060E-01  4.5897E-01  5.3436E-01  5.3447E-01
-  prteigrs : nnsclo,ikpt=   40   17 max resid (incl. the buffer)=  2.15599E-07
  Non-SCF case, kpt   18 (  0.01389  0.01389  0.01389), residuals and eigenvalues=
   4.01E-16  5.24E-16  7.39E-16  4.08E-16  1.99E-16  3.54E-16  6.29E-16  4.94E-16
   7.98E-16  6.46E-16  3.69E-16  4.31E-16  1.76E-16  6.82E-16  9.67E-16  4.55E-16
@@ -892,7 +875,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0288E-01  1.0288E-01  1.7427E-01  1.7427E-01  1.7488E-01  2.0726E-01
   2.0726E-01  2.0773E-01  2.5774E-01  2.5782E-01  2.5782E-01  3.4126E-01
   3.4126E-01  4.1939E-01  4.1939E-01  4.5738E-01  5.3391E-01  5.3394E-01
-  prteigrs : nnsclo,ikpt=   40   18 max resid (incl. the buffer)=  8.36030E-09
  Non-SCF case, kpt   19 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   6.90E-16  2.13E-16  8.42E-16  5.27E-16  6.38E-16  2.85E-16  4.92E-16  7.31E-16
   6.69E-16  3.63E-16  9.86E-16  2.17E-16  4.42E-16  8.43E-16  2.76E-16  2.56E-16
@@ -913,7 +895,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0290E-01  1.0290E-01  1.7439E-01  1.7439E-01  1.7457E-01  2.0753E-01
   2.0759E-01  2.0759E-01  2.5734E-01  2.5807E-01  2.5807E-01  3.4084E-01
   3.4175E-01  4.1940E-01  4.1945E-01  4.5742E-01  5.3381E-01  5.3405E-01
-  prteigrs : nnsclo,ikpt=   40   20 max resid (incl. the buffer)=  4.70879E-07
  Non-SCF case, kpt   21 (  0.05000  0.00000  0.00000), residuals and eigenvalues=
   7.42E-16  2.51E-16  9.85E-16  2.66E-16  7.52E-16  2.54E-16  3.68E-16  2.91E-16
   6.95E-16  5.43E-16  2.99E-16  8.31E-16  6.30E-16  8.61E-16  6.01E-16  5.74E-16
@@ -924,7 +905,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0286E-01  1.0286E-01  1.7316E-01  1.7316E-01  1.7386E-01  2.0489E-01
   2.0676E-01  2.0676E-01  2.5743E-01  2.6022E-01  2.6022E-01  3.4086E-01
   3.4438E-01  4.2063E-01  4.2084E-01  4.5917E-01  5.3381E-01  5.3489E-01
-  prteigrs : nnsclo,ikpt=   40   21 max resid (incl. the buffer)=  5.00748E-06
  Non-SCF case, kpt   22 (  0.07500  0.00000  0.00000), residuals and eigenvalues=
   2.76E-16  4.59E-16  8.20E-16  9.09E-16  7.91E-16  9.32E-16  3.84E-16  5.03E-16
   4.29E-16  9.48E-16  9.45E-16  1.49E-16  3.08E-16  9.64E-16  5.77E-16  7.53E-16
@@ -935,7 +915,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0279E-01  1.0279E-01  1.7120E-01  1.7120E-01  1.7273E-01  2.0081E-01
   2.0560E-01  2.0560E-01  2.5756E-01  2.6354E-01  2.6354E-01  3.4089E-01
   3.4847E-01  4.2266E-01  4.2311E-01  4.6204E-01  5.3381E-01  5.3627E-01
-  prteigrs : nnsclo,ikpt=   40   22 max resid (incl. the buffer)=  1.27368E-05
  Non-SCF case, kpt   23 (  0.10000  0.00000  0.00000), residuals and eigenvalues=
   3.38E-16  9.37E-16  6.32E-16  8.50E-16  3.97E-16  2.25E-16  6.63E-16  5.95E-16
   7.51E-16  5.42E-16  3.30E-16  2.40E-16  4.77E-16  3.09E-16  2.35E-16  6.49E-16
@@ -946,7 +925,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0267E-01  1.0267E-01  1.6846E-01  1.6846E-01  1.7121E-01  1.9551E-01
   2.0420E-01  2.0420E-01  2.5775E-01  2.6773E-01  2.6773E-01  3.4094E-01
   3.5368E-01  4.2546E-01  4.2621E-01  4.6599E-01  5.3305E-01  5.3816E-01
-  prteigrs : nnsclo,ikpt=   40   23 max resid (incl. the buffer)=  5.34473E-06
  Non-SCF case, kpt   24 (  0.12500  0.00000  0.00000), residuals and eigenvalues=
   6.06E-16  4.23E-16  3.62E-16  4.18E-16  6.00E-16  3.86E-16  2.86E-16  3.95E-16
   9.44E-16  2.29E-16  7.88E-16  4.03E-16  3.52E-16  5.58E-16  4.59E-16  4.64E-16
@@ -957,7 +935,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0236E-01  1.0236E-01  1.6469E-01  1.6469E-01  1.6815E-01  1.8923E-01
   2.0271E-01  2.0271E-01  2.5798E-01  2.7247E-01  2.7247E-01  3.4098E-01
   3.5959E-01  4.2901E-01  4.2995E-01  4.7096E-01  5.3254E-01  5.4047E-01
-  prteigrs : nnsclo,ikpt=   40   24 max resid (incl. the buffer)=  5.22525E-06
  Non-SCF case, kpt   25 (  0.15000  0.00000  0.00000), residuals and eigenvalues=
   5.17E-16  3.52E-16  2.81E-16  4.01E-16  5.31E-16  4.12E-16  2.59E-16  3.37E-16
   5.10E-16  8.61E-16  7.84E-16  3.71E-16  3.02E-16  9.24E-16  3.97E-16  3.75E-16
@@ -968,7 +945,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0222E-01  1.0222E-01  1.6124E-01  1.6124E-01  1.6603E-01  1.8285E-01
   2.0137E-01  2.0137E-01  2.5825E-01  2.7767E-01  2.7767E-01  3.4103E-01
   3.6602E-01  4.3326E-01  4.3440E-01  4.7689E-01  5.3199E-01  5.4323E-01
-  prteigrs : nnsclo,ikpt=   40   25 max resid (incl. the buffer)=  2.78686E-06
  Non-SCF case, kpt   26 (  0.17500  0.00000  0.00000), residuals and eigenvalues=
   5.39E-16  4.00E-16  9.25E-16  3.50E-16  4.28E-16  5.20E-16  7.30E-16  2.84E-16
   2.33E-16  4.98E-16  7.25E-16  3.80E-16  2.83E-16  5.21E-16  5.21E-16  3.35E-16
@@ -979,7 +955,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0208E-01  1.0208E-01  1.5759E-01  1.5759E-01  1.6372E-01  1.7628E-01
   2.0009E-01  2.0009E-01  2.5855E-01  2.8311E-01  2.8311E-01  3.4109E-01
   3.7268E-01  4.3813E-01  4.3938E-01  4.8369E-01  5.3139E-01  5.4635E-01
-  prteigrs : nnsclo,ikpt=   40   26 max resid (incl. the buffer)=  4.08984E-07
  Non-SCF case, kpt   27 (  0.20000  0.00000  0.00000), residuals and eigenvalues=
   2.51E-16  3.92E-16  3.35E-16  5.32E-16  6.89E-16  2.13E-16  4.32E-16  6.36E-16
   3.17E-16  4.01E-16  4.06E-16  1.65E-16  5.64E-16  5.81E-16  2.63E-16  9.94E-16
@@ -990,7 +965,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0188E-01  1.0188E-01  1.5364E-01  1.5364E-01  1.6036E-01  1.6959E-01
   1.9886E-01  1.9886E-01  2.5888E-01  2.8860E-01  2.8860E-01  3.4114E-01
   3.7929E-01  4.4355E-01  4.4465E-01  4.9128E-01  5.3075E-01  5.4971E-01
-  prteigrs : nnsclo,ikpt=   40   27 max resid (incl. the buffer)=  5.10051E-08
  Non-SCF case, kpt   28 (  0.22500  0.00000  0.00000), residuals and eigenvalues=
   2.80E-16  5.86E-16  4.34E-16  7.30E-16  8.77E-16  4.72E-16  4.99E-16  6.06E-16
   3.09E-16  6.56E-16  3.54E-16  2.57E-16  4.35E-16  7.71E-17  3.23E-16  2.89E-16
@@ -1001,7 +975,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0195E-01  1.0195E-01  1.4999E-01  1.4999E-01  1.5989E-01  1.6349E-01
   1.9867E-01  1.9867E-01  2.5924E-01  2.9425E-01  2.9425E-01  3.4119E-01
   3.8613E-01  4.4946E-01  4.5081E-01  4.9969E-01  5.3009E-01  5.5338E-01
-  prteigrs : nnsclo,ikpt=   40   28 max resid (incl. the buffer)=  5.66975E-11
  Non-SCF case, kpt   29 (  0.25000  0.00000  0.00000), residuals and eigenvalues=
   2.91E-16  5.28E-16  4.22E-16  4.87E-16  8.42E-16  3.81E-16  5.06E-16  5.96E-16
   3.29E-16  6.83E-16  2.79E-16  3.44E-16  7.36E-16  7.64E-16  9.49E-16  7.48E-16
@@ -1012,7 +985,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0180E-01  1.0180E-01  1.4636E-01  1.4636E-01  1.5729E-01  1.5739E-01
   1.9758E-01  1.9758E-01  2.5960E-01  2.9963E-01  2.9963E-01  3.4124E-01
   3.9241E-01  4.5570E-01  4.5667E-01  5.0868E-01  5.2939E-01  5.5710E-01
-  prteigrs : nnsclo,ikpt=   40   29 max resid (incl. the buffer)=  3.25659E-13
  Non-SCF case, kpt   30 (  0.27500  0.00000  0.00000), residuals and eigenvalues=
   9.81E-16  9.50E-16  2.41E-16  2.77E-16  6.41E-16  8.56E-16  4.57E-16  3.19E-16
   4.22E-16  3.35E-16  2.00E-16  2.02E-16  3.01E-16  4.57E-16  3.67E-16  6.38E-16
@@ -1023,7 +995,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0036E-01  1.0036E-01  1.4251E-01  1.4251E-01  1.5146E-01  1.5453E-01
   1.9618E-01  1.9618E-01  2.5996E-01  3.0466E-01  3.0466E-01  3.4128E-01
   3.9827E-01  4.6213E-01  4.6254E-01  5.1824E-01  5.2866E-01  5.6070E-01
-  prteigrs : nnsclo,ikpt=   40   30 max resid (incl. the buffer)=  2.94265E-14
  Non-SCF case, kpt   31 (  0.30000  0.00000  0.00000), residuals and eigenvalues=
   7.73E-16  6.67E-16  3.25E-16  4.95E-16  3.71E-16  5.91E-16  8.00E-16  2.41E-16
   3.30E-16  4.48E-16  6.30E-16  5.04E-16  7.05E-16  7.29E-16  8.90E-16  5.48E-16
@@ -1034,7 +1005,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0026E-01  1.0026E-01  1.3930E-01  1.3930E-01  1.4669E-01  1.5216E-01
   1.9532E-01  1.9532E-01  2.6032E-01  3.0953E-01  3.0953E-01  3.4132E-01
   4.0388E-01  4.6832E-01  4.6866E-01  5.2797E-01  5.2854E-01  5.6438E-01
-  prteigrs : nnsclo,ikpt=   40   31 max resid (incl. the buffer)=  7.75534E-14
+  prteigrs : nnsclo,ikpt=   40   31 max resid (excl. the buffer)=  1.14110E-15
  Non-SCF case, kpt   32 (  0.32500  0.00000  0.00000), residuals and eigenvalues=
   3.90E-16  4.70E-16  9.36E-16  2.27E-16  6.36E-16  7.83E-16  3.29E-16  6.19E-16
   3.45E-16  3.04E-16  9.47E-16  5.87E-16  2.58E-16  6.23E-16  1.22E-16  5.36E-16
@@ -1045,7 +1016,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0018E-01  1.0018E-01  1.3624E-01  1.3624E-01  1.3985E-01  1.4997E-01
   1.9389E-01  1.9389E-01  2.6066E-01  3.1394E-01  3.1394E-01  3.4136E-01
   4.0863E-01  4.7386E-01  4.7493E-01  5.2732E-01  5.3871E-01  5.6780E-01
-  prteigrs : nnsclo,ikpt=   40   32 max resid (incl. the buffer)=  1.04379E-11
  Non-SCF case, kpt   33 (  0.35000  0.00000  0.00000), residuals and eigenvalues=
   6.50E-16  5.33E-16  5.34E-16  8.86E-16  6.27E-16  9.03E-16  5.79E-16  2.78E-16
   2.59E-16  2.72E-16  5.73E-16  3.33E-16  3.60E-16  7.00E-16  2.49E-16  2.72E-16
@@ -1056,7 +1026,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9014E-02  9.9014E-02  1.3276E-01  1.3276E-01  1.3528E-01  1.4722E-01
   1.9310E-01  1.9310E-01  2.6097E-01  3.1770E-01  3.1770E-01  3.4139E-01
   4.1288E-01  4.7871E-01  4.8097E-01  5.2666E-01  5.4968E-01  5.7066E-01
-  prteigrs : nnsclo,ikpt=   40   33 max resid (incl. the buffer)=  1.53414E-09
  Non-SCF case, kpt   34 (  0.37500  0.00000  0.00000), residuals and eigenvalues=
   9.19E-16  9.06E-16  3.13E-16  2.19E-16  2.53E-16  3.33E-16  9.81E-16  5.41E-16
   7.67E-16  7.30E-16  4.19E-16  2.73E-16  7.11E-16  8.36E-16  5.86E-16  3.92E-16
@@ -1067,7 +1036,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9433E-02  9.9433E-02  1.3057E-01  1.3057E-01  1.3180E-01  1.4688E-01
   1.9246E-01  1.9246E-01  2.6125E-01  3.2131E-01  3.2131E-01  3.4141E-01
   4.1689E-01  4.8397E-01  4.8654E-01  5.2613E-01  5.6128E-01  5.7378E-01
-  prteigrs : nnsclo,ikpt=   40   34 max resid (incl. the buffer)=  3.64846E-07
  Non-SCF case, kpt   35 (  0.40000  0.00000  0.00000), residuals and eigenvalues=
   3.01E-16  6.78E-16  3.40E-16  9.90E-16  2.53E-16  3.34E-16  5.47E-16  5.05E-16
   9.61E-16  9.60E-16  4.87E-16  3.70E-16  6.51E-16  8.27E-16  2.21E-16  1.55E-16
@@ -1078,7 +1046,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9386E-02  9.9386E-02  1.2861E-01  1.2861E-01  1.2889E-01  1.4542E-01
   1.9193E-01  1.9193E-01  2.6150E-01  3.2427E-01  3.2427E-01  3.4144E-01
   4.2005E-01  4.8797E-01  4.9142E-01  5.2566E-01  5.7312E-01  5.7624E-01
-  prteigrs : nnsclo,ikpt=   40   35 max resid (incl. the buffer)=  2.40186E-06
  Non-SCF case, kpt   36 (  0.42500  0.00000  0.00000), residuals and eigenvalues=
   4.37E-16  9.26E-16  3.66E-16  6.73E-16  9.89E-16  3.44E-16  7.03E-16  6.01E-16
   3.12E-16  2.96E-16  3.81E-16  4.38E-16  1.49E-16  9.09E-16  4.46E-16  3.52E-16
@@ -1089,7 +1056,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9363E-02  9.9363E-02  1.2663E-01  1.2706E-01  1.2706E-01  1.4427E-01
   1.9151E-01  1.9151E-01  2.6169E-01  3.2664E-01  3.2664E-01  3.4145E-01
   4.2255E-01  4.9122E-01  4.9543E-01  5.2528E-01  5.7824E-01  5.8062E-01
-  prteigrs : nnsclo,ikpt=   40   36 max resid (incl. the buffer)=  8.53074E-05
  Non-SCF case, kpt   37 (  0.45000  0.00000  0.00000), residuals and eigenvalues=
   5.16E-16  2.01E-16  9.35E-16  8.55E-16  7.31E-16  2.91E-16  8.23E-16  1.91E-16
   3.22E-16  6.61E-16  3.67E-16  7.34E-16  5.91E-16  5.79E-16  6.09E-16  7.02E-16
@@ -1100,7 +1066,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9333E-02  9.9333E-02  1.2501E-01  1.2595E-01  1.2595E-01  1.4227E-01
   1.9122E-01  1.9122E-01  2.6183E-01  3.2835E-01  3.2835E-01  3.4147E-01
   4.2418E-01  4.9307E-01  4.9840E-01  5.2500E-01  5.7970E-01  5.7982E-01
-  prteigrs : nnsclo,ikpt=   40   37 max resid (incl. the buffer)=  3.11425E-05
  Non-SCF case, kpt   38 (  0.47500  0.00000  0.00000), residuals and eigenvalues=
   4.19E-16  4.17E-16  2.95E-16  2.37E-16  9.57E-16  3.87E-16  3.04E-16  2.30E-16
   8.54E-16  2.61E-16  6.65E-16  5.64E-16  1.04E-16  7.30E-16  4.51E-16  5.37E-16
@@ -1111,7 +1076,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9345E-02  9.9345E-02  1.2518E-01  1.2597E-01  1.2597E-01  1.4175E-01
   1.9312E-01  1.9312E-01  2.6193E-01  3.2971E-01  3.2971E-01  3.4148E-01
   4.2552E-01  4.9455E-01  5.0053E-01  5.2484E-01  5.8092E-01  5.8096E-01
-  prteigrs : nnsclo,ikpt=   40   38 max resid (incl. the buffer)=  1.04828E-05
  Non-SCF case, kpt   39 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   3.29E-16  2.88E-16  5.71E-16  5.14E-16  7.57E-16  2.05E-16  2.17E-16  4.81E-16
   6.27E-16  3.10E-16  8.06E-16  2.45E-16  7.82E-16  6.26E-16  5.14E-16  4.78E-16
@@ -1122,7 +1086,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9341E-02  9.9341E-02  1.2574E-01  1.2574E-01  1.2592E-01  1.4157E-01
   1.9312E-01  1.9312E-01  2.6195E-01  3.3007E-01  3.3007E-01  3.4148E-01
   4.2609E-01  4.9504E-01  5.0159E-01  5.2478E-01  5.8122E-01  5.8123E-01
-  prteigrs : nnsclo,ikpt=   40   39 max resid (incl. the buffer)=  6.97255E-07
  Non-SCF case, kpt   40 (  0.50000  0.02500  0.00000), residuals and eigenvalues=
   3.16E-16  5.71E-16  4.72E-16  8.19E-16  8.06E-16  3.29E-16  4.15E-16  4.59E-16
   4.72E-16  2.88E-16  7.63E-16  1.37E-16  1.59E-16  5.57E-16  2.97E-16  1.65E-16
@@ -1133,7 +1096,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9177E-02  9.9360E-02  1.1915E-01  1.2560E-01  1.3072E-01  1.4302E-01
   1.9134E-01  1.9254E-01  2.6260E-01  3.2987E-01  3.3006E-01  3.4213E-01
   4.2638E-01  4.9525E-01  5.0192E-01  5.2513E-01  5.8006E-01  5.8125E-01
-  prteigrs : nnsclo,ikpt=   40   40 max resid (incl. the buffer)=  1.08253E-06
  Non-SCF case, kpt   41 (  0.50000  0.05000  0.00000), residuals and eigenvalues=
   3.47E-16  4.35E-16  3.26E-16  4.96E-16  7.74E-16  4.47E-16  3.17E-16  6.38E-16
   6.28E-16  8.17E-16  3.13E-16  2.67E-16  2.77E-16  4.05E-16  2.12E-16  5.10E-16
@@ -1144,7 +1106,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.8670E-02  9.9417E-02  1.1193E-01  1.2494E-01  1.3359E-01  1.4714E-01
   1.8794E-01  1.9007E-01  2.6446E-01  3.2959E-01  3.2990E-01  3.4395E-01
   4.2730E-01  4.9591E-01  5.0296E-01  5.2613E-01  5.7726E-01  5.8125E-01
-  prteigrs : nnsclo,ikpt=   40   41 max resid (incl. the buffer)=  2.01808E-07
  Non-SCF case, kpt   42 (  0.50000  0.07500  0.00000), residuals and eigenvalues=
   3.43E-16  4.60E-16  9.98E-16  2.72E-16  6.61E-16  7.17E-16  3.70E-16  4.65E-16
   3.35E-16  5.52E-16  4.02E-16  5.28E-16  2.85E-16  2.25E-16  6.81E-16  6.55E-16
@@ -1155,7 +1116,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.7790E-02  9.9512E-02  1.0496E-01  1.2409E-01  1.3528E-01  1.5295E-01
   1.8496E-01  1.8699E-01  2.6734E-01  3.2950E-01  3.2975E-01  3.4673E-01
   4.2890E-01  4.9699E-01  5.0478E-01  5.2780E-01  5.7357E-01  5.8124E-01
-  prteigrs : nnsclo,ikpt=   40   42 max resid (incl. the buffer)=  4.27314E-08
  Non-SCF case, kpt   43 (  0.50000  0.10000  0.00000), residuals and eigenvalues=
   3.65E-16  6.69E-16  2.40E-16  9.95E-16  3.72E-16  2.40E-16  2.17E-16  3.16E-16
   2.93E-16  4.17E-16  4.04E-16  2.14E-16  8.83E-16  4.60E-16  3.85E-16  9.89E-16
@@ -1166,7 +1126,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.8219E-02  9.8866E-02  1.0006E-01  1.2343E-01  1.3720E-01  1.5972E-01
   1.8156E-01  1.8407E-01  2.7105E-01  3.2980E-01  3.2986E-01  3.5023E-01
   4.3132E-01  4.9867E-01  5.0755E-01  5.3020E-01  5.6982E-01  5.8162E-01
-  prteigrs : nnsclo,ikpt=   40   43 max resid (incl. the buffer)=  6.46111E-09
  Non-SCF case, kpt   44 (  0.50000  0.12500  0.00000), residuals and eigenvalues=
   5.36E-16  1.97E-16  7.97E-16  4.58E-16  5.60E-16  1.96E-16  3.32E-16  3.91E-16
   2.43E-16  8.34E-16  2.45E-16  1.98E-16  2.07E-16  1.18E-16  2.46E-16  1.58E-16
@@ -1177,7 +1136,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.2013E-02  9.6303E-02  1.0021E-01  1.2198E-01  1.3812E-01  1.6595E-01
   1.7780E-01  1.7966E-01  2.7526E-01  3.2955E-01  3.2984E-01  3.5401E-01
   4.3415E-01  5.0045E-01  5.1063E-01  5.3307E-01  5.6527E-01  5.8165E-01
-  prteigrs : nnsclo,ikpt=   40   44 max resid (incl. the buffer)=  7.42545E-10
  Non-SCF case, kpt   45 (  0.50000  0.15000  0.00000), residuals and eigenvalues=
   9.15E-16  4.40E-16  2.59E-16  3.18E-16  4.74E-16  6.91E-16  6.19E-16  6.89E-16
   9.46E-16  3.90E-16  5.86E-16  5.05E-16  4.81E-16  1.97E-16  3.70E-16  1.74E-16
@@ -1188,7 +1146,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.5760E-02  9.4175E-02  1.0094E-01  1.2096E-01  1.3984E-01  1.7272E-01
   1.7419E-01  1.7613E-01  2.7998E-01  3.2962E-01  3.2997E-01  3.5784E-01
   4.3803E-01  5.0263E-01  5.1492E-01  5.3656E-01  5.6071E-01  5.8200E-01
-  prteigrs : nnsclo,ikpt=   40   45 max resid (incl. the buffer)=  4.80061E-10
  Non-SCF case, kpt   46 (  0.50000  0.17500  0.00000), residuals and eigenvalues=
   8.63E-16  6.01E-16  3.25E-16  3.11E-16  5.70E-16  7.15E-16  6.22E-16  6.01E-16
   4.04E-16  3.62E-16  4.82E-16  4.14E-16  3.96E-16  1.89E-16  2.95E-16  9.77E-16
@@ -1199,7 +1156,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.9749E-02  9.1134E-02  1.0115E-01  1.1957E-01  1.4166E-01  1.7088E-01
   1.7249E-01  1.7888E-01  2.8495E-01  3.2955E-01  3.3018E-01  3.6146E-01
   4.4252E-01  5.0502E-01  5.1991E-01  5.4042E-01  5.5609E-01  5.8225E-01
-  prteigrs : nnsclo,ikpt=   40   46 max resid (incl. the buffer)=  4.13981E-11
  Non-SCF case, kpt   47 (  0.50000  0.20000  0.00000), residuals and eigenvalues=
   5.22E-16  4.51E-16  6.76E-16  3.22E-16  5.41E-16  6.46E-16  2.51E-16  1.93E-16
   2.79E-16  3.73E-16  6.49E-16  4.85E-16  1.95E-16  2.42E-16  1.48E-16  4.23E-16
@@ -1210,7 +1166,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.4039E-02  8.7711E-02  1.0219E-01  1.1843E-01  1.4364E-01  1.6807E-01
   1.6887E-01  1.8488E-01  2.9009E-01  3.2967E-01  3.3059E-01  3.6475E-01
   4.4762E-01  5.0764E-01  5.2564E-01  5.4477E-01  5.5159E-01  5.8276E-01
-  prteigrs : nnsclo,ikpt=   40   47 max resid (incl. the buffer)=  6.93952E-11
  Non-SCF case, kpt   48 (  0.50000  0.22500  0.00000), residuals and eigenvalues=
   5.08E-16  2.62E-16  2.83E-16  3.45E-16  5.09E-16  9.41E-16  7.32E-16  9.37E-16
   6.50E-16  7.64E-16  7.64E-16  4.14E-16  2.24E-16  5.32E-16  7.29E-16  9.41E-16
@@ -1221,7 +1176,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.8352E-02  8.3542E-02  1.0231E-01  1.1681E-01  1.4521E-01  1.6531E-01
   1.6578E-01  1.9027E-01  2.9521E-01  3.2956E-01  3.3111E-01  3.6759E-01
   4.5310E-01  5.0999E-01  5.3202E-01  5.4694E-01  5.4928E-01  5.8303E-01
-  prteigrs : nnsclo,ikpt=   40   48 max resid (incl. the buffer)=  7.11754E-11
  Non-SCF case, kpt   49 (  0.50000  0.25000  0.00000), residuals and eigenvalues=
   3.46E-16  2.24E-16  3.76E-16  8.91E-16  3.90E-16  5.80E-16  4.34E-16  6.23E-16
   7.52E-16  6.65E-16  6.61E-16  2.35E-16  9.53E-16  6.05E-16  8.72E-16  4.32E-16
@@ -1232,7 +1186,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.3147E-02  7.9162E-02  1.0258E-01  1.1510E-01  1.4728E-01  1.6151E-01
   1.6329E-01  1.9511E-01  3.0019E-01  3.2944E-01  3.3181E-01  3.6996E-01
   4.5882E-01  5.1287E-01  5.3897E-01  5.4278E-01  5.5389E-01  5.8333E-01
-  prteigrs : nnsclo,ikpt=   40   49 max resid (incl. the buffer)=  4.00047E-11
  Non-SCF case, kpt   50 (  0.50000  0.27500  0.00000), residuals and eigenvalues=
   4.12E-16  3.97E-16  2.35E-16  3.92E-16  4.83E-16  7.91E-16  9.67E-16  9.47E-16
   7.04E-16  8.42E-16  1.88E-16  2.72E-16  6.75E-16  5.32E-16  6.65E-16  1.65E-16
@@ -1243,7 +1196,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.8664E-02  7.5418E-02  1.0300E-01  1.1359E-01  1.4935E-01  1.5828E-01
   1.6235E-01  2.0000E-01  3.0505E-01  3.2941E-01  3.3290E-01  3.7201E-01
   4.6483E-01  5.1582E-01  5.3899E-01  5.4672E-01  5.5870E-01  5.8369E-01
-  prteigrs : nnsclo,ikpt=   40   50 max resid (incl. the buffer)=  5.81071E-12
  Non-SCF case, kpt   51 (  0.50000  0.30000  0.00000), residuals and eigenvalues=
   5.24E-16  5.42E-16  3.39E-16  3.46E-16  3.53E-16  3.54E-16  8.66E-16  6.95E-16
   8.23E-16  8.23E-16  4.28E-16  8.86E-16  3.94E-16  4.62E-16  3.92E-16  9.42E-16
@@ -1254,7 +1206,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.4588E-02  7.1203E-02  1.0330E-01  1.1200E-01  1.5189E-01  1.5500E-01
   1.6185E-01  2.0462E-01  3.0964E-01  3.2935E-01  3.3410E-01  3.7366E-01
   4.7092E-01  5.1877E-01  5.3551E-01  5.5496E-01  5.6328E-01  5.8395E-01
-  prteigrs : nnsclo,ikpt=   40   51 max resid (incl. the buffer)=  2.14892E-13
  Non-SCF case, kpt   52 (  0.50000  0.32500  0.00000), residuals and eigenvalues=
   4.54E-16  4.85E-16  2.70E-16  2.76E-16  2.90E-16  7.96E-16  7.78E-16  6.03E-16
   5.45E-16  6.39E-16  3.19E-16  7.70E-16  1.37E-16  3.37E-16  9.61E-16  4.14E-16
@@ -1275,7 +1226,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.7226E-02  6.3877E-02  1.0366E-01  1.0906E-01  1.4964E-01  1.5549E-01
   1.6119E-01  2.1135E-01  3.1768E-01  3.2918E-01  3.3670E-01  3.7605E-01
   4.8170E-01  5.2400E-01  5.2910E-01  5.7207E-01  5.7267E-01  5.8437E-01
-  prteigrs : nnsclo,ikpt=   40   53 max resid (incl. the buffer)=  6.25725E-13
  Non-SCF case, kpt   54 (  0.50000  0.37500  0.00000), residuals and eigenvalues=
   3.82E-16  3.96E-16  5.42E-16  3.20E-16  5.67E-16  5.46E-16  5.54E-16  2.32E-16
   7.73E-16  8.65E-16  2.22E-16  6.75E-16  3.77E-16  6.11E-16  5.11E-16  2.69E-16
@@ -1286,7 +1236,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.4551E-02  6.1029E-02  1.0400E-01  1.0792E-01  1.4748E-01  1.5708E-01
   1.6149E-01  2.1372E-01  3.2105E-01  3.2915E-01  3.3811E-01  3.7695E-01
   4.8620E-01  5.2657E-01  5.2665E-01  5.7593E-01  5.8183E-01  5.8467E-01
-  prteigrs : nnsclo,ikpt=   40   54 max resid (incl. the buffer)=  2.74758E-14
  Non-SCF case, kpt   55 (  0.50000  0.40000  0.00000), residuals and eigenvalues=
   3.69E-16  8.18E-16  9.47E-16  2.47E-16  3.86E-16  3.40E-16  7.11E-16  5.52E-16
   3.55E-16  6.10E-16  4.96E-16  2.01E-16  5.79E-16  8.26E-16  5.02E-16  7.59E-16
@@ -1297,7 +1246,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.2127E-02  5.8807E-02  1.0417E-01  1.0660E-01  1.4488E-01  1.5840E-01
   1.6133E-01  2.1557E-01  3.2370E-01  3.2897E-01  3.3936E-01  3.7756E-01
   4.8999E-01  5.2457E-01  5.2857E-01  5.7904E-01  5.8481E-01  5.9092E-01
-  prteigrs : nnsclo,ikpt=   40   55 max resid (incl. the buffer)=  4.02897E-14
  Non-SCF case, kpt   56 (  0.50000  0.42500  0.00000), residuals and eigenvalues=
   3.27E-16  6.99E-16  2.21E-16  2.43E-16  3.28E-16  3.68E-16  5.82E-16  5.95E-16
   3.57E-16  6.69E-16  4.37E-16  2.23E-16  5.13E-16  8.58E-16  3.96E-16  8.25E-16
@@ -1308,7 +1256,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.0274E-02  5.7252E-02  1.0441E-01  1.0582E-01  1.4342E-01  1.5947E-01
   1.6142E-01  2.1703E-01  3.2596E-01  3.2895E-01  3.4045E-01  3.7803E-01
   4.9305E-01  5.2294E-01  5.3026E-01  5.8176E-01  5.8502E-01  5.9946E-01
-  prteigrs : nnsclo,ikpt=   40   56 max resid (incl. the buffer)=  8.43342E-14
  Non-SCF case, kpt   57 (  0.50000  0.45000  0.00000), residuals and eigenvalues=
   5.75E-16  7.13E-16  4.68E-16  2.73E-16  3.57E-16  2.69E-16  5.16E-16  6.04E-16
   8.42E-16  2.20E-16  3.51E-16  7.16E-16  9.68E-16  2.08E-16  8.31E-16  9.81E-16
@@ -1319,7 +1266,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.8900E-02  5.6421E-02  1.0452E-01  1.0514E-01  1.4211E-01  1.6051E-01
   1.6136E-01  2.1840E-01  3.2754E-01  3.2889E-01  3.4127E-01  3.7835E-01
   4.9548E-01  5.2176E-01  5.3151E-01  5.8363E-01  5.8515E-01  6.0670E-01
-  prteigrs : nnsclo,ikpt=   40   57 max resid (incl. the buffer)=  2.35116E-14
  Non-SCF case, kpt   58 (  0.50000  0.47500  0.00000), residuals and eigenvalues=
   5.72E-16  4.41E-16  6.41E-16  5.10E-16  4.57E-16  5.13E-16  3.48E-16  2.38E-16
   4.06E-16  8.43E-16  6.34E-16  1.78E-16  8.29E-16  3.29E-16  1.95E-16  5.50E-16
@@ -1330,7 +1276,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.8065E-02  5.5611E-02  1.0461E-01  1.0477E-01  1.4146E-01  1.6101E-01
   1.6115E-01  2.1857E-01  3.2853E-01  3.2887E-01  3.4180E-01  3.7853E-01
   4.9663E-01  5.2102E-01  5.3219E-01  5.8486E-01  5.8524E-01  6.1168E-01
-  prteigrs : nnsclo,ikpt=   40   58 max resid (incl. the buffer)=  4.13539E-12
  Non-SCF case, kpt   59 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
   5.03E-16  4.33E-16  4.90E-16  4.46E-16  4.54E-16  5.11E-16  8.82E-16  7.59E-16
   4.65E-16  9.20E-16  2.14E-16  1.74E-16  7.60E-16  1.71E-16  2.58E-16  4.97E-16
@@ -1341,7 +1286,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.7795E-02  5.5426E-02  1.0465E-01  1.0465E-01  1.4124E-01  1.6117E-01
   1.6117E-01  2.1876E-01  3.2887E-01  3.2887E-01  3.4198E-01  3.7860E-01
   4.9708E-01  5.2078E-01  5.3245E-01  5.8527E-01  5.8527E-01  6.1345E-01
-  prteigrs : nnsclo,ikpt=   40   59 max resid (incl. the buffer)=  1.17504E-12
  Non-SCF case, kpt   60 (  0.48214  0.48214  0.00000), residuals and eigenvalues=
   5.47E-16  2.81E-16  5.05E-16  5.19E-16  5.05E-16  4.90E-16  2.88E-16  3.44E-16
   4.27E-16  4.74E-16  8.66E-16  8.65E-16  6.87E-16  2.01E-16  3.89E-16  2.51E-16
@@ -1352,7 +1296,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.8075E-02  5.5613E-02  1.0459E-01  1.0480E-01  1.4146E-01  1.6097E-01
   1.6119E-01  2.1857E-01  3.2867E-01  3.2872E-01  3.4180E-01  3.7853E-01
   4.9662E-01  5.2102E-01  5.3219E-01  5.8499E-01  5.8510E-01  6.1166E-01
-  prteigrs : nnsclo,ikpt=   40   60 max resid (incl. the buffer)=  4.47911E-12
  Non-SCF case, kpt   61 (  0.46429  0.46429  0.00000), residuals and eigenvalues=
   3.10E-16  4.35E-16  8.19E-16  6.07E-16  2.70E-16  4.15E-16  5.96E-16  7.24E-16
   6.38E-16  4.16E-16  6.86E-16  3.50E-16  8.56E-16  3.87E-16  2.42E-16  4.45E-16
@@ -1363,7 +1306,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   3.8792E-02  5.5893E-02  1.0442E-01  1.0522E-01  1.4211E-01  1.5984E-01
   1.6118E-01  2.1751E-01  3.2808E-01  3.2830E-01  3.4120E-01  3.7832E-01
   4.9498E-01  5.2162E-01  5.3141E-01  5.8414E-01  5.8459E-01  6.0669E-01
-  prteigrs : nnsclo,ikpt=   40   61 max resid (incl. the buffer)=  1.66648E-12
  Non-SCF case, kpt   62 (  0.44643  0.44643  0.00000), residuals and eigenvalues=
   2.88E-16  9.25E-16  7.95E-16  2.69E-16  3.12E-16  8.79E-16  5.07E-16  3.79E-16
   3.32E-16  4.21E-16  3.81E-16  6.21E-16  9.84E-16  3.86E-16  2.66E-16  9.61E-16
@@ -1374,7 +1316,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.0442E-02  5.7330E-02  1.0415E-01  1.0619E-01  1.4338E-01  1.5955E-01
   1.6165E-01  2.1746E-01  3.2711E-01  3.2771E-01  3.4032E-01  3.7804E-01
   4.9319E-01  5.2237E-01  5.3064E-01  5.8280E-01  5.8390E-01  5.9976E-01
-  prteigrs : nnsclo,ikpt=   40   62 max resid (incl. the buffer)=  2.05099E-13
  Non-SCF case, kpt   63 (  0.42857  0.42857  0.00000), residuals and eigenvalues=
   3.64E-16  6.14E-16  6.37E-16  6.95E-16  5.86E-16  6.21E-16  3.48E-16  4.81E-16
   6.83E-16  7.51E-16  6.67E-16  2.27E-16  8.76E-16  6.02E-16  9.00E-16  2.70E-16
@@ -1385,7 +1326,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.2944E-02  5.8795E-02  1.0385E-01  1.0717E-01  1.4481E-01  1.5850E-01
   1.6181E-01  2.1652E-01  3.2578E-01  3.2672E-01  3.3904E-01  3.7759E-01
   4.9024E-01  5.2227E-01  5.3050E-01  5.8097E-01  5.8272E-01  5.9142E-01
-  prteigrs : nnsclo,ikpt=   40   63 max resid (incl. the buffer)=  1.88843E-14
  Non-SCF case, kpt   64 (  0.41071  0.41071  0.00000), residuals and eigenvalues=
   2.88E-16  2.53E-16  2.56E-16  7.33E-16  2.34E-16  7.05E-16  5.06E-16  4.02E-16
   5.89E-16  4.55E-16  4.43E-16  1.52E-16  3.75E-16  1.76E-16  1.53E-16  3.71E-16
@@ -1396,7 +1336,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.6235E-02  6.0606E-02  1.0387E-01  1.0843E-01  1.4785E-01  1.5736E-01
   1.6243E-01  2.1534E-01  3.2457E-01  3.2544E-01  3.3744E-01  3.7704E-01
   4.8659E-01  5.2075E-01  5.3138E-01  5.7915E-01  5.8127E-01  5.8224E-01
-  prteigrs : nnsclo,ikpt=   40   64 max resid (incl. the buffer)=  3.91705E-15
  Non-SCF case, kpt   65 (  0.39286  0.39286  0.00000), residuals and eigenvalues=
   8.56E-16  9.77E-16  2.68E-16  3.78E-16  3.22E-16  4.12E-16  4.04E-16  4.04E-16
   9.54E-16  7.70E-16  6.44E-16  5.56E-16  8.62E-16  2.04E-16  2.21E-16  1.41E-16
@@ -1407,7 +1346,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.9222E-02  6.1926E-02  1.0333E-01  1.0993E-01  1.4972E-01  1.5449E-01
   1.6253E-01  2.1244E-01  3.2242E-01  3.2388E-01  3.3538E-01  3.7622E-01
   4.8140E-01  5.1798E-01  5.3250E-01  5.7249E-01  5.7652E-01  5.7949E-01
-  prteigrs : nnsclo,ikpt=   40   65 max resid (incl. the buffer)=  8.63634E-15
  Non-SCF case, kpt   66 (  0.37500  0.37500  0.00000), residuals and eigenvalues=
   4.68E-16  2.68E-16  3.85E-16  6.30E-16  6.65E-16  2.10E-16  3.10E-16  7.98E-16
   6.24E-16  4.98E-16  4.58E-16  8.62E-16  4.87E-16  1.70E-16  3.94E-16  7.91E-16
@@ -1418,7 +1356,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.4269E-02  6.4105E-02  1.0306E-01  1.1173E-01  1.5207E-01  1.5338E-01
   1.6291E-01  2.1033E-01  3.2010E-01  3.2206E-01  3.3320E-01  3.7539E-01
   4.7611E-01  5.1450E-01  5.3468E-01  5.6250E-01  5.7368E-01  5.7747E-01
-  prteigrs : nnsclo,ikpt=   40   66 max resid (incl. the buffer)=  2.51469E-12
  Non-SCF case, kpt   67 (  0.35714  0.35714  0.00000), residuals and eigenvalues=
   4.42E-16  3.64E-16  5.36E-16  4.24E-16  7.25E-16  3.89E-16  4.47E-16  1.00E-15
   5.54E-16  5.72E-16  3.76E-16  7.99E-16  7.45E-16  6.19E-16  9.55E-16  9.26E-16
@@ -1429,7 +1366,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.9199E-02  6.6671E-02  1.0272E-01  1.1452E-01  1.5233E-01  1.5503E-01
   1.6365E-01  2.0825E-01  3.1746E-01  3.2026E-01  3.3067E-01  3.7442E-01
   4.7034E-01  5.1058E-01  5.3588E-01  5.5244E-01  5.7067E-01  5.7555E-01
-  prteigrs : nnsclo,ikpt=   40   67 max resid (incl. the buffer)=  6.94657E-12
  Non-SCF case, kpt   68 (  0.33929  0.33929  0.00000), residuals and eigenvalues=
   5.20E-16  4.93E-16  4.78E-16  6.02E-16  9.96E-16  1.59E-16  9.37E-16  4.17E-16
   4.24E-16  2.37E-16  8.03E-16  1.41E-16  5.63E-16  6.65E-16  7.31E-16  2.32E-16
@@ -1440,7 +1376,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.5129E-02  6.9425E-02  1.0243E-01  1.1683E-01  1.5176E-01  1.5849E-01
   1.6449E-01  2.0605E-01  3.1475E-01  3.1790E-01  3.2789E-01  3.7334E-01
   4.6407E-01  5.0615E-01  5.3643E-01  5.4223E-01  5.6773E-01  5.7308E-01
-  prteigrs : nnsclo,ikpt=   40   68 max resid (incl. the buffer)=  4.88254E-11
  Non-SCF case, kpt   69 (  0.32143  0.32143  0.00000), residuals and eigenvalues=
   4.66E-16  5.23E-16  5.11E-16  7.76E-16  3.46E-16  7.95E-16  2.75E-16  3.13E-16
   3.86E-16  2.41E-16  6.84E-16  1.51E-16  7.80E-16  9.91E-16  7.37E-16  3.06E-16
@@ -1451,7 +1386,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.1026E-02  7.2245E-02  1.0211E-01  1.1939E-01  1.5104E-01  1.6135E-01
   1.6517E-01  2.0353E-01  3.1160E-01  3.1529E-01  3.2482E-01  3.7204E-01
   4.5717E-01  5.0136E-01  5.3205E-01  5.3599E-01  5.6455E-01  5.7043E-01
-  prteigrs : nnsclo,ikpt=   40   69 max resid (incl. the buffer)=  9.60426E-11
  Non-SCF case, kpt   70 (  0.30357  0.30357  0.00000), residuals and eigenvalues=
   7.76E-16  8.83E-16  6.90E-16  3.57E-16  6.15E-16  2.38E-16  3.92E-16  4.83E-16
   7.86E-16  4.13E-16  9.19E-16  8.96E-16  2.02E-16  1.53E-16  2.07E-16  4.70E-16
@@ -1462,7 +1396,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.5043E-02  7.7313E-02  1.0170E-01  1.2142E-01  1.5038E-01  1.6399E-01
   1.6535E-01  2.0077E-01  3.0824E-01  3.1209E-01  3.2146E-01  3.7053E-01
   4.4973E-01  4.9594E-01  5.2192E-01  5.3446E-01  5.6140E-01  5.6739E-01
-  prteigrs : nnsclo,ikpt=   40   70 max resid (incl. the buffer)=  1.95473E-09
  Non-SCF case, kpt   71 (  0.28571  0.28571  0.00000), residuals and eigenvalues=
   7.60E-16  4.93E-16  9.98E-16  7.06E-16  8.93E-16  3.94E-16  3.19E-16  3.04E-16
   6.33E-16  8.58E-16  5.88E-16  9.32E-16  2.36E-16  9.71E-16  3.45E-16  3.33E-16
@@ -1473,7 +1406,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   7.7349E-02  8.3966E-02  1.0137E-01  1.2383E-01  1.5035E-01  1.6615E-01
   1.6679E-01  1.9777E-01  3.0471E-01  3.0873E-01  3.1794E-01  3.6893E-01
   4.4190E-01  4.9062E-01  5.1199E-01  5.3185E-01  5.5831E-01  5.6429E-01
-  prteigrs : nnsclo,ikpt=   40   71 max resid (incl. the buffer)=  3.36572E-09
  Non-SCF case, kpt   72 (  0.26786  0.26786  0.00000), residuals and eigenvalues=
   5.23E-16  4.23E-16  9.07E-16  5.82E-16  8.63E-16  4.18E-16  2.73E-16  2.80E-16
   5.64E-16  8.30E-16  4.31E-16  9.29E-16  2.75E-16  6.18E-16  3.61E-16  5.16E-16
@@ -1484,7 +1416,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.0377E-02  9.0912E-02  1.0123E-01  1.2699E-01  1.5123E-01  1.6726E-01
   1.6995E-01  1.9553E-01  3.0106E-01  3.0541E-01  3.1427E-01  3.6721E-01
   4.3405E-01  4.8512E-01  5.0231E-01  5.2822E-01  5.5535E-01  5.6140E-01
-  prteigrs : nnsclo,ikpt=   40   72 max resid (incl. the buffer)=  4.19169E-09
  Non-SCF case, kpt   73 (  0.25000  0.25000  0.00000), residuals and eigenvalues=
   9.22E-16  4.77E-16  3.89E-16  4.06E-16  3.66E-16  4.83E-16  5.22E-16  3.29E-16
   8.48E-16  6.28E-16  2.54E-16  3.04E-16  3.96E-16  2.04E-16  9.90E-16  3.65E-16
@@ -1495,7 +1426,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.3404E-02  9.8650E-02  1.0118E-01  1.3033E-01  1.5368E-01  1.6873E-01
   1.7375E-01  1.9374E-01  2.9744E-01  3.0189E-01  3.1053E-01  3.6547E-01
   4.2608E-01  4.7948E-01  4.9292E-01  5.2388E-01  5.5261E-01  5.5850E-01
-  prteigrs : nnsclo,ikpt=   40   73 max resid (incl. the buffer)=  1.43429E-09
  Non-SCF case, kpt   74 (  0.23214  0.23214  0.00000), residuals and eigenvalues=
   7.52E-16  8.40E-16  2.89E-16  3.59E-16  4.18E-16  3.18E-16  5.88E-16  4.48E-16
   8.42E-16  9.75E-16  7.84E-16  1.52E-16  1.00E-15  3.04E-16  2.56E-16  4.73E-16
@@ -1506,7 +1436,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.5987E-02  1.0050E-01  1.0475E-01  1.3384E-01  1.5572E-01  1.6986E-01
   1.7698E-01  1.9144E-01  2.9359E-01  2.9820E-01  3.0639E-01  3.6344E-01
   4.1766E-01  4.7349E-01  4.8371E-01  5.1852E-01  5.4965E-01  5.5560E-01
-  prteigrs : nnsclo,ikpt=   40   74 max resid (incl. the buffer)=  3.79298E-10
  Non-SCF case, kpt   75 (  0.21429  0.21429  0.00000), residuals and eigenvalues=
   8.15E-16  2.27E-16  9.72E-16  6.35E-16  3.21E-16  4.43E-16  5.58E-16  4.79E-16
   9.32E-16  2.99E-16  7.01E-16  1.65E-16  3.84E-16  1.43E-16  1.73E-16  5.60E-16
@@ -1517,7 +1446,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   8.8747E-02  1.0051E-01  1.1201E-01  1.3750E-01  1.5861E-01  1.7127E-01
   1.8021E-01  1.9018E-01  2.8974E-01  2.9436E-01  3.0228E-01  3.6136E-01
   4.0942E-01  4.6759E-01  4.7506E-01  5.1285E-01  5.4720E-01  5.5279E-01
-  prteigrs : nnsclo,ikpt=   40   75 max resid (incl. the buffer)=  1.33255E-09
  Non-SCF case, kpt   76 (  0.19643  0.19643  0.00000), residuals and eigenvalues=
   4.61E-16  6.70E-16  5.49E-16  7.71E-16  1.73E-16  6.20E-16  6.57E-16  4.65E-16
   3.45E-16  9.67E-16  2.86E-16  2.98E-16  9.27E-16  9.57E-16  1.54E-16  7.79E-16
@@ -1528,7 +1456,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.0438E-02  1.0060E-01  1.1932E-01  1.4146E-01  1.6197E-01  1.7286E-01
   1.8352E-01  1.8917E-01  2.8590E-01  2.9042E-01  2.9809E-01  3.5922E-01
   4.0101E-01  4.6167E-01  4.6689E-01  5.0679E-01  5.4496E-01  5.5011E-01
-  prteigrs : nnsclo,ikpt=   40   76 max resid (incl. the buffer)=  3.08830E-07
  Non-SCF case, kpt   77 (  0.17857  0.17857  0.00000), residuals and eigenvalues=
   5.58E-16  5.24E-16  3.20E-16  4.01E-16  3.80E-16  3.26E-16  2.97E-16  9.05E-16
   7.98E-16  3.94E-16  8.83E-16  9.14E-16  1.48E-16  3.16E-16  4.75E-16  7.01E-16
@@ -1539,7 +1466,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.2690E-02  1.0070E-01  1.2687E-01  1.4529E-01  1.6725E-01  1.7392E-01
   1.8675E-01  1.8942E-01  2.8210E-01  2.8637E-01  2.9386E-01  3.5705E-01
   3.9289E-01  4.5578E-01  4.5917E-01  5.0067E-01  5.4293E-01  5.4751E-01
-  prteigrs : nnsclo,ikpt=   40   77 max resid (incl. the buffer)=  5.64653E-07
  Non-SCF case, kpt   78 (  0.16071  0.16071  0.00000), residuals and eigenvalues=
   8.53E-16  9.81E-16  6.77E-16  5.64E-16  6.96E-16  3.53E-16  8.52E-16  4.66E-16
   6.22E-16  4.63E-16  2.06E-16  1.59E-16  5.57E-16  5.31E-16  3.66E-16  4.47E-16
@@ -1550,7 +1476,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.4888E-02  1.0120E-01  1.3351E-01  1.4983E-01  1.7204E-01  1.7494E-01
   1.9014E-01  1.9046E-01  2.7841E-01  2.8244E-01  2.8942E-01  3.5480E-01
   3.8487E-01  4.5001E-01  4.5199E-01  4.9426E-01  5.4106E-01  5.4515E-01
-  prteigrs : nnsclo,ikpt=   40   78 max resid (incl. the buffer)=  1.95001E-08
  Non-SCF case, kpt   79 (  0.14286  0.14286  0.00000), residuals and eigenvalues=
   7.65E-16  8.46E-16  3.17E-16  4.95E-16  6.17E-16  7.08E-16  4.78E-16  6.06E-16
   5.97E-16  6.28E-16  5.54E-16  3.26E-16  5.04E-16  9.69E-16  6.78E-16  7.47E-16
@@ -1561,7 +1486,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.6173E-02  1.0131E-01  1.4007E-01  1.5366E-01  1.7448E-01  1.7649E-01
   1.9134E-01  1.9313E-01  2.7479E-01  2.7835E-01  2.8489E-01  3.5249E-01
   3.7694E-01  4.4431E-01  4.4537E-01  4.8788E-01  5.3947E-01  5.4288E-01
-  prteigrs : nnsclo,ikpt=   40   79 max resid (incl. the buffer)=  1.80866E-06
  Non-SCF case, kpt   80 (  0.12500  0.12500  0.00000), residuals and eigenvalues=
   7.72E-16  3.61E-16  3.07E-16  9.70E-16  4.79E-16  1.98E-16  3.21E-16  3.40E-16
   7.50E-16  5.65E-16  3.22E-16  1.85E-16  2.71E-16  7.99E-16  5.78E-16  5.85E-16
@@ -1572,7 +1496,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.8199E-02  1.0152E-01  1.4657E-01  1.5778E-01  1.7470E-01  1.8188E-01
   1.9372E-01  1.9615E-01  2.7135E-01  2.7440E-01  2.8035E-01  3.5026E-01
   3.6968E-01  4.3903E-01  4.3942E-01  4.8172E-01  5.3810E-01  5.4085E-01
-  prteigrs : nnsclo,ikpt=   40   80 max resid (incl. the buffer)=  1.36588E-06
  Non-SCF case, kpt   81 (  0.10714  0.10714  0.00000), residuals and eigenvalues=
   5.28E-16  8.85E-16  3.96E-16  3.11E-16  8.71E-16  7.65E-16  2.82E-16  3.64E-16
   3.07E-16  4.50E-16  4.08E-16  1.55E-16  6.70E-16  2.76E-16  6.97E-16  5.24E-16
@@ -1583,7 +1506,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   9.9351E-02  1.0228E-01  1.5347E-01  1.6141E-01  1.7468E-01  1.8714E-01
   1.9643E-01  1.9889E-01  2.6813E-01  2.7056E-01  2.7590E-01  3.4812E-01
   3.6289E-01  4.3416E-01  4.3419E-01  4.7589E-01  5.3692E-01  5.3918E-01
-  prteigrs : nnsclo,ikpt=   40   81 max resid (incl. the buffer)=  7.70608E-06
  Non-SCF case, kpt   82 (  0.08929  0.08929  0.00000), residuals and eigenvalues=
   3.91E-16  3.89E-16  6.26E-16  7.41E-16  7.61E-16  7.30E-16  4.38E-16  3.45E-16
   4.08E-16  6.35E-16  7.85E-16  5.93E-16  2.43E-16  4.20E-16  3.41E-16  6.63E-16
@@ -1594,7 +1516,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0041E-01  1.0253E-01  1.5924E-01  1.6540E-01  1.7492E-01  1.9246E-01
   1.9927E-01  2.0161E-01  2.6518E-01  2.6704E-01  2.7145E-01  3.4614E-01
   3.5674E-01  4.2963E-01  4.2984E-01  4.7055E-01  5.3596E-01  5.3761E-01
-  prteigrs : nnsclo,ikpt=   40   82 max resid (incl. the buffer)=  8.06772E-06
  Non-SCF case, kpt   83 (  0.07143  0.07143  0.00000), residuals and eigenvalues=
   4.79E-16  3.73E-16  8.68E-16  4.75E-16  8.75E-16  6.77E-16  3.89E-16  3.84E-16
   4.31E-16  7.60E-16  7.16E-16  6.05E-16  2.85E-16  4.39E-16  6.08E-16  4.71E-16
@@ -1605,7 +1526,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0109E-01  1.0265E-01  1.6418E-01  1.6845E-01  1.7484E-01  1.9728E-01
   2.0198E-01  2.0384E-01  2.6256E-01  2.6383E-01  2.6721E-01  3.4437E-01
   3.5135E-01  4.2585E-01  4.2608E-01  4.6588E-01  5.3517E-01  5.3660E-01
-  prteigrs : nnsclo,ikpt=   40   83 max resid (incl. the buffer)=  1.10909E-05
  Non-SCF case, kpt   84 (  0.05357  0.05357  0.00000), residuals and eigenvalues=
   9.95E-16  2.95E-16  2.85E-16  2.56E-16  8.39E-16  4.23E-16  2.71E-16  8.41E-16
   2.70E-16  2.57E-16  3.59E-16  4.03E-16  3.08E-16  4.62E-16  4.76E-16  8.45E-16
@@ -1616,7 +1536,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0237E-01  1.0279E-01  1.6905E-01  1.7118E-01  1.7486E-01  2.0183E-01
   2.0438E-01  2.0577E-01  2.6038E-01  2.6113E-01  2.6340E-01  3.4289E-01
   3.4692E-01  4.2287E-01  4.2306E-01  4.6205E-01  5.3471E-01  5.3529E-01
-  prteigrs : nnsclo,ikpt=   40   84 max resid (incl. the buffer)=  5.11232E-06
  Non-SCF case, kpt   85 (  0.03571  0.03571  0.00000), residuals and eigenvalues=
   9.45E-16  9.35E-16  4.63E-16  2.07E-16  8.43E-16  4.94E-16  8.21E-16  7.31E-16
   2.45E-16  5.93E-16  3.14E-16  4.14E-16  2.66E-16  3.22E-16  2.12E-16  6.66E-16
@@ -1627,7 +1546,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0268E-01  1.0286E-01  1.7217E-01  1.7314E-01  1.7483E-01  2.0531E-01
   2.0626E-01  2.0721E-01  2.5872E-01  2.5906E-01  2.6022E-01  3.4177E-01
   3.4360E-01  4.2072E-01  4.2082E-01  4.5920E-01  5.3425E-01  5.3453E-01
-  prteigrs : nnsclo,ikpt=   40   85 max resid (incl. the buffer)=  9.17965E-07
  Non-SCF case, kpt   86 (  0.01786  0.01786  0.00000), residuals and eigenvalues=
   7.94E-16  6.83E-16  5.56E-16  2.51E-16  9.62E-16  6.05E-16  3.89E-16  6.31E-16
   9.41E-16  6.24E-16  9.12E-16  5.07E-16  6.76E-16  2.75E-16  2.73E-16  4.30E-16
@@ -1638,7 +1556,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0286E-01  1.0291E-01  1.7413E-01  1.7438E-01  1.7481E-01  2.0747E-01
   2.0763E-01  2.0813E-01  2.5768E-01  2.5776E-01  2.5808E-01  3.4107E-01
   3.4154E-01  4.1942E-01  4.1945E-01  4.5744E-01  5.3389E-01  5.3396E-01
-  prteigrs : nnsclo,ikpt=   40   86 max resid (incl. the buffer)=  7.35960E-08
  Non-SCF case, kpt   87 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   6.90E-16  2.13E-16  8.42E-16  5.27E-16  6.38E-16  2.85E-16  4.92E-16  7.31E-16
   6.69E-16  3.63E-16  9.86E-16  2.17E-16  4.42E-16  8.43E-16  2.76E-16  2.56E-16
@@ -2542,10 +2459,10 @@ P           mkmem2          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         16.4  wall=         16.5
+- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        395.0  wall=        395.5
++Overall time at end (sec) : cpu=        395.7  wall=        396.2

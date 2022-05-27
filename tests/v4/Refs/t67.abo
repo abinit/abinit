@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t67-t68/t67.in
-- output file    -> t67.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t67-t68/t67.abi
+- output file    -> t67.abo
 - root for input  files -> t67i
 - root for output files -> t67o
 
@@ -34,18 +34,18 @@
 -    mband =           8        mffmem =           1         mkmem =           2
        mpw =         326          nfft =        6912          nkpt =           2
 ================================================================================
-P This job should need less than                       3.024 Mbytes of memory.
+P This job should need less than                       3.220 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            9 blocks of mpw  integer numbers, for      0.011 Mbytes.
-P           75 blocks of mpw  real(dp)  numbers, for      0.187 Mbytes.
+P           69 blocks of mpw  real(dp)  numbers, for      0.172 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.053 Mbytes.
-P           34 blocks of nfft real(dp)  numbers, for      1.793 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for      2.004 Mbytes.
 P              Additional     real(dp)  numbers, for      0.730 Mbytes.
 P              With residue estimated to be             0.249 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 3.024 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.862 Mbytes.
+P Main chain + fourwf.f                 3.220 Mbytes.
+P Main chain + nonlop.f + opernl.f      3.058 Mbytes.
 P XC chain                              2.563 Mbytes.
 P mkrho chain                           2.648 Mbytes.
 P fourdp chain                          2.643 Mbytes.
@@ -187,6 +187,9 @@ P          mk1mem3          4
         optdriver1          0
         optdriver2          1
         optdriver3          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
            prtvol          10
           rfatpol1          1       1
           rfatpol2          1       1
@@ -281,8 +284,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.09432
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -307,8 +310,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -553,9 +556,9 @@ force_length_stats: {min:   1.33253118E-03, max:   1.33253118E-03, mean:   1.332
 
  Mean square residual over all n,k,spin=   29.752E-24; max=  23.196E-23
    0.0000  0.0000  0.2500    1  2.31955E-22 kpt; spin; max resid(k); each band:
-   2.37E-23  2.14E-23  2.17E-23  2.20E-23  3.45E-24  3.37E-24  2.32E-22  7.45E-23
+  2.37E-23 2.14E-23 2.17E-23 2.20E-23 3.45E-24 3.37E-24 2.32E-22 7.45E-23
    0.5000  0.0000  0.2500    1  1.68755E-23 kpt; spin; max resid(k); each band:
-   1.69E-23  1.35E-23  4.94E-24  1.02E-23  1.27E-23  2.64E-24  1.07E-23  2.41E-24
+  1.69E-23 1.35E-23 4.94E-24 1.02E-23 1.27E-23 2.64E-24 1.07E-23 2.41E-24
  reduced coordinates (array xred) for    4 atoms
        0.333333333333      0.666666666667      0.000878861213
        0.666666666667      0.333333333333      0.500878861213
@@ -596,10 +599,10 @@ force_length_stats: {min:   1.33253118E-03, max:   1.33253118E-03, mean:   1.332
  kpt#   2, nband=  8, wtk=  0.75000, kpt=  0.5000  0.0000  0.2500 (reduced coord)
   -0.24794   -0.22312   -0.11597   -0.08688    0.00853    0.04124    0.06337    0.08086
  Total charge density [el/Bohr^3]
-      Maximum=    9.4874E-02  at reduced coord.    0.8750    0.4375    0.9259
- Next maximum=    9.4874E-02  at reduced coord.    0.5625    0.4375    0.9259
-      Minimum=    1.3914E-03  at reduced coord.    0.0000    0.0000    0.1852
- Next minimum=    1.4051E-03  at reduced coord.    0.0000    0.0000    0.6667
+)     Maximum=    9.4874E-02  at reduced coord.    0.8750    0.4375    0.9259
+)Next maximum=    9.4874E-02  at reduced coord.    0.5625    0.4375    0.9259
+)     Minimum=    1.3914E-03  at reduced coord.    0.0000    0.0000    0.1852
+)Next minimum=    1.4051E-03  at reduced coord.    0.0000    0.0000    0.6667
    Integrated=    1.6000E+01
 
 --- !EnergyTerms
@@ -682,11 +685,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.09432
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 
  ==>  initialize data related to q vector <== 
 
@@ -705,19 +703,10 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -758,13 +747,13 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Mean square residual over all n,k,spin=   47.238E-22; max=  95.918E-22
    0.0000  0.0000  0.2500    1  7.29516E-21 kpt; spin; max resid(k); each band:
-   1.83E-21  1.86E-21  1.53E-21  1.36E-21  4.64E-21  3.42E-21  4.25E-21  7.30E-21
+  1.83E-21 1.86E-21 1.53E-21 1.36E-21 4.64E-21 3.42E-21 4.25E-21 7.30E-21
    0.5000  0.0000  0.2500    1  9.42254E-21 kpt; spin; max resid(k); each band:
-   3.79E-21  1.15E-21  9.42E-21  7.42E-21  3.65E-21  7.26E-21  3.32E-21  1.32E-21
+  3.79E-21 1.15E-21 9.42E-21 7.42E-21 3.65E-21 7.26E-21 3.32E-21 1.32E-21
    0.0000  0.5000  0.2500    1  9.59175E-21 kpt; spin; max resid(k); each band:
-   7.62E-21  1.89E-21  3.75E-21  3.78E-21  9.59E-21  4.37E-21  5.25E-21  7.59E-21
+  7.62E-21 1.89E-21 3.75E-21 3.78E-21 9.59E-21 4.37E-21 5.25E-21 7.59E-21
    0.5000  0.5000  0.2500    1  9.59176E-21 kpt; spin; max resid(k); each band:
-   7.62E-21  1.89E-21  3.75E-21  3.78E-21  9.59E-21  4.37E-21  5.25E-21  7.59E-21
+  7.62E-21 1.89E-21 3.75E-21 3.78E-21 9.59E-21 4.37E-21 5.25E-21 7.59E-21
  dfpt_looppert : ek2=    2.9529458503E+01
           f-sum rule ratio=    1.7863237572E+00
  prteigrs : about to open file t67t_1WF1_EIG
@@ -800,19 +789,10 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -853,13 +833,13 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Mean square residual over all n,k,spin=   46.655E-22; max=  95.917E-22
    0.0000  0.0000  0.2500    1  7.35435E-21 kpt; spin; max resid(k); each band:
-   2.05E-21  1.86E-21  1.53E-21  1.36E-21  4.29E-21  5.27E-22  7.35E-21  5.34E-21
+  2.05E-21 1.86E-21 1.53E-21 1.36E-21 4.29E-21 5.27E-22 7.35E-21 5.34E-21
    0.5000  0.0000  0.2500    1  9.59174E-21 kpt; spin; max resid(k); each band:
-   7.62E-21  1.89E-21  3.75E-21  3.78E-21  9.59E-21  4.37E-21  5.25E-21  7.59E-21
+  7.62E-21 1.89E-21 3.75E-21 3.78E-21 9.59E-21 4.37E-21 5.25E-21 7.59E-21
    0.0000  0.5000  0.2500    1  9.42255E-21 kpt; spin; max resid(k); each band:
-   3.79E-21  1.15E-21  9.42E-21  7.42E-21  3.65E-21  7.26E-21  3.32E-21  1.32E-21
+  3.79E-21 1.15E-21 9.42E-21 7.42E-21 3.65E-21 7.26E-21 3.32E-21 1.32E-21
    0.5000  0.5000  0.2500    1  9.59173E-21 kpt; spin; max resid(k); each band:
-   7.62E-21  1.89E-21  3.75E-21  3.78E-21  9.59E-21  4.37E-21  5.25E-21  7.59E-21
+  7.62E-21 1.89E-21 3.75E-21 3.78E-21 9.59E-21 4.37E-21 5.25E-21 7.59E-21
  dfpt_looppert : ek2=    2.9529458503E+01
           f-sum rule ratio=    1.7863237572E+00
  prteigrs : about to open file t67t_1WF1_EIG
@@ -895,19 +875,10 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 2, }
@@ -940,13 +911,13 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Mean square residual over all n,k,spin=   42.797E-22; max=  85.956E-22
    0.0000  0.0000  0.2500    1  4.81775E-21 kpt; spin; max resid(k); each band:
-   4.54E-21  4.68E-21  4.82E-21  2.57E-21  1.94E-21  1.94E-21  3.15E-21  3.14E-21
+  4.54E-21 4.68E-21 4.82E-21 2.57E-21 1.94E-21 1.94E-21 3.15E-21 3.14E-21
    0.5000  0.0000  0.2500    1  8.59562E-21 kpt; spin; max resid(k); each band:
-   4.83E-21  8.60E-21  4.23E-21  2.25E-21  4.94E-21  3.75E-21  7.00E-21  1.12E-21
+  4.83E-21 8.60E-21 4.23E-21 2.25E-21 4.94E-21 3.75E-21 7.00E-21 1.12E-21
    0.0000  0.5000  0.2500    1  8.59562E-21 kpt; spin; max resid(k); each band:
-   4.83E-21  8.60E-21  4.23E-21  2.25E-21  4.94E-21  3.75E-21  7.00E-21  1.12E-21
+  4.83E-21 8.60E-21 4.23E-21 2.25E-21 4.94E-21 3.75E-21 7.00E-21 1.12E-21
    0.5000  0.5000  0.2500    1  8.59562E-21 kpt; spin; max resid(k); each band:
-   4.83E-21  8.60E-21  4.23E-21  2.25E-21  4.94E-21  3.75E-21  7.00E-21  1.12E-21
+  4.83E-21 8.60E-21 4.23E-21 2.25E-21 4.94E-21 3.75E-21 7.00E-21 1.12E-21
  dfpt_looppert : ek2=    8.3052196703E+00
           f-sum rule ratio=    8.9506005637E-01
  prteigrs : about to open file t67t_1WF1_EIG
@@ -1028,11 +999,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.09432
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -1106,19 +1072,10 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1156,13 +1113,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   25.960E-15; max=  81.784E-14
    0.0000  0.0000  0.2500    1  8.17838E-13 kpt; spin; max resid(k); each band:
-   5.40E-17  2.46E-16  1.45E-16  1.59E-16  9.34E-17  7.57E-15  2.49E-16  8.18E-13
+  5.40E-17 2.46E-16 1.45E-16 1.59E-16 9.34E-17 7.57E-15 2.49E-16 8.18E-13
    0.5000  0.0000  0.2500    1  3.69088E-16 kpt; spin; max resid(k); each band:
-   1.02E-16  6.81E-17  3.69E-16  2.75E-16  5.51E-17  1.93E-16  1.48E-16  2.13E-16
+  1.02E-16 6.81E-17 3.69E-16 2.75E-16 5.51E-17 1.93E-16 1.48E-16 2.13E-16
    0.0000  0.5000  0.2500    1  6.11625E-16 kpt; spin; max resid(k); each band:
-   2.61E-16  1.47E-16  1.57E-16  1.17E-16  5.80E-17  2.36E-16  2.07E-16  6.12E-16
+  2.61E-16 1.47E-16 1.57E-16 1.17E-16 5.80E-17 2.36E-16 2.07E-16 6.12E-16
    0.5000  0.5000  0.2500    1  2.74729E-16 kpt; spin; max resid(k); each band:
-   1.07E-16  7.20E-17  4.47E-17  2.75E-16  5.94E-17  1.97E-16  1.70E-16  2.15E-16
+  1.07E-16 7.20E-17 4.47E-17 2.75E-16 5.94E-17 1.97E-16 1.70E-16 2.15E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1193,15 +1150,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1229,9 +1181,9 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  9   14.754495995430     -5.045E-09 1.638E-12 1.951E-08
 
- ETOT 10   14.754495995401     -2.974E-11 1.422E-14 5.682E-10
+ ETOT 10   14.754495995401     -2.973E-11 1.422E-14 5.682E-10
 
- ETOT 11   14.754495995400     -1.037E-12 3.298E-16 1.097E-11
+ ETOT 11   14.754495995400     -1.052E-12 3.298E-16 1.097E-11
 
  At SCF step   11       vres2   =  1.10E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -1243,9 +1195,9 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   62.278E-18; max=  32.979E-17
    0.0000  0.0000  0.2500    1  3.29790E-16 kpt; spin; max resid(k); each band:
-   3.03E-17  2.30E-17  3.89E-17  3.30E-16  2.36E-17  2.36E-17  3.75E-17  3.72E-17
+  3.03E-17 2.30E-17 3.89E-17 3.30E-16 2.36E-17 2.36E-17 3.75E-17 3.72E-17
    0.5000  0.0000  0.2500    1  1.63661E-16 kpt; spin; max resid(k); each band:
-   1.59E-17  1.65E-17  1.50E-17  1.60E-17  9.72E-17  6.85E-17  1.64E-16  5.95E-17
+  1.59E-17 1.65E-17 1.50E-17 1.60E-17 9.72E-17 6.85E-17 1.64E-16 5.95E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1275,19 +1227,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1301,7 +1244,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  2   5.3484637098628     -2.967E+01 5.391E-02 6.055E+01
 
- ETOT  3   4.9293955587140     -4.191E-01 5.542E-04 2.535E+00
+ ETOT  3   4.9293955587139     -4.191E-01 5.542E-04 2.535E+00
 
  ETOT  4   4.9209978993852     -8.398E-03 2.189E-05 2.594E-02
 
@@ -1327,13 +1270,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   56.687E-16; max=  17.546E-14
    0.0000  0.0000  0.2500    1  1.75458E-13 kpt; spin; max resid(k); each band:
-   2.18E-17  1.83E-16  1.21E-16  3.77E-17  7.84E-17  1.46E-15  1.41E-16  1.75E-13
+  2.18E-17 1.83E-16 1.21E-16 3.77E-17 7.84E-17 1.46E-15 1.41E-16 1.75E-13
    0.5000  0.0000  0.2500    1  3.11187E-16 kpt; spin; max resid(k); each band:
-   5.95E-17  5.21E-17  3.11E-16  3.08E-16  1.07E-16  2.83E-16  1.56E-16  1.52E-16
+  5.95E-17 5.21E-17 3.11E-16 3.08E-16 1.07E-16 2.83E-16 1.56E-16 1.52E-16
    0.0000  0.5000  0.2500    1  4.46705E-16 kpt; spin; max resid(k); each band:
-   1.95E-16  1.71E-16  1.08E-16  8.49E-17  9.33E-17  9.62E-17  1.24E-16  4.47E-16
+  1.95E-16 1.71E-16 1.08E-16 8.49E-17 9.33E-17 9.62E-17 1.24E-16 4.47E-16
    0.5000  0.5000  0.2500    1  2.78789E-16 kpt; spin; max resid(k); each band:
-   6.02E-17  5.86E-17  3.86E-17  2.79E-16  1.26E-16  2.56E-16  1.78E-16  1.55E-16
+  6.02E-17 5.86E-17 3.86E-17 2.79E-16 1.26E-16 2.56E-16 1.78E-16 1.55E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1364,15 +1307,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1416,9 +1354,9 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   29.948E-17; max=  92.250E-17
    0.0000  0.0000  0.2500    1  9.22503E-16 kpt; spin; max resid(k); each band:
-   1.90E-16  1.56E-16  1.71E-16  9.23E-16  6.00E-16  6.00E-16  4.31E-16  3.13E-16
+  1.90E-16 1.56E-16 1.71E-16 9.23E-16 6.00E-16 6.00E-16 4.31E-16 3.13E-16
    0.5000  0.0000  0.2500    1  3.29570E-16 kpt; spin; max resid(k); each band:
-   1.04E-16  5.45E-17  9.83E-17  7.52E-17  3.26E-16  1.47E-16  3.30E-16  2.74E-16
+  1.04E-16 5.45E-17 9.83E-17 7.52E-17 3.26E-16 1.47E-16 3.30E-16 2.74E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1448,19 +1386,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 - dfpt_looppert: read the DDK wavefunctions from file: t67o_DS2_1WF13
 
 --- !BeginCycle
@@ -1503,13 +1432,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   36.371E-18; max=  23.370E-17
    0.0000  0.0000  0.2500    1  2.33699E-16 kpt; spin; max resid(k); each band:
-   6.47E-18  4.11E-18  7.66E-18  6.00E-17  9.39E-17  1.10E-16  1.49E-16  2.34E-16
+  6.47E-18 4.11E-18 7.66E-18 6.00E-17 9.39E-17 1.10E-16 1.49E-16 2.34E-16
    0.5000  0.0000  0.2500    1  4.37704E-17 kpt; spin; max resid(k); each band:
-   3.18E-18  2.78E-17  1.90E-18  3.15E-17  2.18E-17  1.35E-17  4.38E-17  1.46E-17
+  3.18E-18 2.78E-17 1.90E-18 3.15E-17 2.18E-17 1.35E-17 4.38E-17 1.46E-17
    0.0000  0.5000  0.2500    1  3.13814E-17 kpt; spin; max resid(k); each band:
-   3.46E-18  2.25E-17  3.31E-18  2.71E-17  2.76E-17  2.55E-17  3.14E-17  1.49E-17
+  3.46E-18 2.25E-17 3.31E-18 2.71E-17 2.76E-17 2.55E-17 3.14E-17 1.49E-17
    0.5000  0.5000  0.2500    1  3.33406E-17 kpt; spin; max resid(k); each band:
-   2.87E-18  2.32E-17  3.33E-17  2.60E-17  2.95E-17  2.56E-17  3.24E-17  1.22E-17
+  2.87E-18 2.32E-17 3.33E-17 2.60E-17 2.95E-17 2.56E-17 3.24E-17 1.22E-17
 
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1532,19 +1461,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 - dfpt_looppert: read the DDK wavefunctions from file: t67o_DS2_1WF15
 
 --- !BeginCycle
@@ -1571,7 +1491,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  8  -95.793160118042     -1.798E-10 2.118E-14 2.505E-09
 
- ETOT  9  -95.793160118046     -4.277E-12 9.503E-16 4.795E-11
+ ETOT  9  -95.793160118046     -4.263E-12 9.503E-16 4.795E-11
 
  At SCF step    9       vres2   =  4.79E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -1583,13 +1503,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   39.672E-17; max=  95.030E-17
    0.0000  0.0000  0.2500    1  9.50297E-16 kpt; spin; max resid(k); each band:
-   9.50E-16  4.32E-16  6.17E-16  4.31E-16  1.82E-16  2.47E-16  3.06E-16  3.37E-16
+  9.50E-16 4.32E-16 6.17E-16 4.31E-16 1.82E-16 2.47E-16 3.06E-16 3.37E-16
    0.5000  0.0000  0.2500    1  6.88953E-16 kpt; spin; max resid(k); each band:
-   5.70E-17  5.59E-16  5.33E-16  6.89E-16  2.67E-16  2.25E-16  2.21E-16  5.10E-16
+  5.70E-17 5.59E-16 5.33E-16 6.89E-16 2.67E-16 2.25E-16 2.21E-16 5.10E-16
    0.0000  0.5000  0.2500    1  6.90117E-16 kpt; spin; max resid(k); each band:
-   5.67E-17  5.60E-16  5.34E-16  6.90E-16  2.68E-16  2.25E-16  2.20E-16  5.14E-16
+  5.67E-17 5.60E-16 5.34E-16 6.90E-16 2.68E-16 2.25E-16 2.20E-16 5.14E-16
    0.5000  0.5000  0.2500    1  6.88807E-16 kpt; spin; max resid(k); each band:
-   5.70E-17  5.59E-16  5.33E-16  6.89E-16  2.67E-16  2.25E-16  2.21E-16  5.14E-16
+  5.70E-17 5.59E-16 5.33E-16 6.89E-16 2.67E-16 2.25E-16 2.21E-16 5.14E-16
 
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1612,17 +1532,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1650,7 +1563,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  9   3.6265335825774     -2.468E-10 1.933E-12 4.381E-10
 
- ETOT 10   3.6265335825699     -7.434E-12 2.070E-13 1.613E-11
+ ETOT 10   3.6265335825699     -7.439E-12 2.070E-13 1.613E-11
 
  At SCF step   10       vres2   =  1.61E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -1662,11 +1575,11 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   15.554E-15; max=  20.701E-14
    0.0000  0.0000  0.2500    1  2.07010E-13 kpt; spin; max resid(k); each band:
-   2.06E-17  2.36E-17  6.71E-17  1.29E-16  1.13E-16  3.00E-17  1.64E-13  2.07E-13
+  2.06E-17 2.36E-17 6.71E-17 1.29E-16 1.13E-16 3.00E-17 1.64E-13 2.07E-13
    0.5000  0.0000  0.2500    1  3.54702E-16 kpt; spin; max resid(k); each band:
-   1.14E-17  1.13E-16  1.54E-16  2.26E-17  3.55E-16  1.64E-16  1.85E-16  1.42E-16
+  1.14E-17 1.13E-16 1.54E-16 2.26E-17 3.55E-16 1.64E-16 1.85E-16 1.42E-16
    0.5000  0.5000  0.2500    1  2.58941E-16 kpt; spin; max resid(k); each band:
-   2.03E-17  1.66E-17  2.59E-16  1.77E-16  6.71E-17  3.67E-17  8.49E-17  4.00E-17
+  2.03E-17 1.66E-17 2.59E-16 1.77E-16 6.71E-17 3.67E-17 8.49E-17 4.00E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1698,17 +1611,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1736,7 +1642,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  9   3.6265335825044     -2.319E-10 2.166E-12 4.553E-10
 
- ETOT 10   3.6265335824975     -6.876E-12 1.876E-13 1.779E-11
+ ETOT 10   3.6265335824975     -6.880E-12 1.876E-13 1.779E-11
 
  At SCF step   10       vres2   =  1.78E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -1748,11 +1654,11 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   12.531E-15; max=  18.756E-14
    0.0000  0.0000  0.2500    1  1.87560E-13 kpt; spin; max resid(k); each band:
-   1.76E-17  1.96E-17  2.63E-16  9.65E-17  9.56E-17  1.27E-16  1.11E-13  1.88E-13
+  1.76E-17 1.96E-17 2.63E-16 9.65E-17 9.56E-17 1.27E-16 1.11E-13 1.88E-13
    0.5000  0.0000  0.2500    1  2.08985E-16 kpt; spin; max resid(k); each band:
-   1.40E-17  1.38E-17  2.07E-16  1.52E-16  1.24E-16  2.09E-16  5.16E-17  1.51E-16
+  1.40E-17 1.38E-17 2.07E-16 1.52E-16 1.24E-16 2.09E-16 5.16E-17 1.51E-16
    0.5000  0.5000  0.2500    1  3.02786E-16 kpt; spin; max resid(k); each band:
-   1.27E-17  1.00E-16  1.45E-16  2.50E-17  3.03E-16  5.23E-17  8.12E-17  4.65E-17
+  1.27E-17 1.00E-16 1.45E-16 2.50E-17 3.03E-16 5.23E-17 8.12E-17 4.65E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1784,15 +1690,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1818,7 +1719,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  8   3.8943524019479     -1.459E-10 8.147E-14 1.960E-09
 
- ETOT  9   3.8943524019443     -3.631E-12 1.316E-15 2.885E-11
+ ETOT  9   3.8943524019443     -3.634E-12 1.316E-15 2.885E-11
 
  At SCF step    9       vres2   =  2.88E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -1830,9 +1731,9 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   40.545E-17; max=  13.158E-16
    0.0000  0.0000  0.2500    1  1.31580E-15 kpt; spin; max resid(k); each band:
-   1.32E-15  5.49E-16  2.82E-16  2.79E-16  2.25E-16  2.25E-16  1.85E-16  1.85E-16
+  1.32E-15 5.49E-16 2.82E-16 2.79E-16 2.25E-16 2.25E-16 1.85E-16 1.85E-16
    0.5000  0.0000  0.2500    1  1.20103E-15 kpt; spin; max resid(k); each band:
-   4.03E-17  6.85E-16  1.75E-16  2.47E-16  1.20E-15  2.52E-16  3.53E-16  2.88E-16
+  4.03E-17 6.85E-16 1.75E-16 2.47E-16 1.20E-15 2.52E-16 3.53E-16 2.88E-16
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1864,17 +1765,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1910,11 +1804,11 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   28.320E-16; max=  11.816E-15
    0.0000  0.0000  0.2500    1  1.18159E-14 kpt; spin; max resid(k); each band:
-   1.12E-15  2.13E-15  1.42E-15  1.17E-15  8.07E-15  1.18E-14  6.61E-15  3.75E-15
+  1.12E-15 2.13E-15 1.42E-15 1.17E-15 8.07E-15 1.18E-14 6.61E-15 3.75E-15
    0.5000  0.0000  0.2500    1  3.65648E-15 kpt; spin; max resid(k); each band:
-   8.22E-16  6.65E-16  5.14E-16  3.66E-15  4.97E-16  2.57E-15  8.45E-16  3.62E-15
+  8.22E-16 6.65E-16 5.14E-16 3.66E-15 4.97E-16 2.57E-15 8.45E-16 3.62E-15
    0.5000  0.5000  0.2500    1  7.54732E-15 kpt; spin; max resid(k); each band:
-   1.56E-15  9.03E-16  1.51E-15  1.83E-15  7.79E-16  1.01E-15  3.55E-15  7.55E-15
+  1.56E-15 9.03E-16 1.51E-15 1.83E-15 7.79E-16 1.01E-15 3.55E-15 7.55E-15
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1946,17 +1840,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1982,7 +1869,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  8   1.0820249622645     -4.411E-11 2.128E-14 1.152E-09
 
- ETOT  9   1.0820249622615     -2.990E-12 1.293E-15 1.824E-11
+ ETOT  9   1.0820249622615     -2.989E-12 1.293E-15 1.824E-11
 
  At SCF step    9       vres2   =  1.82E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -1994,11 +1881,11 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   34.887E-17; max=  12.930E-16
    0.0000  0.0000  0.2500    1  1.29301E-15 kpt; spin; max resid(k); each band:
-   1.25E-16  7.31E-17  8.07E-17  8.11E-16  1.29E-15  9.49E-16  7.28E-16  8.67E-16
+  1.25E-16 7.31E-17 8.07E-17 8.11E-16 1.29E-15 9.49E-16 7.28E-16 8.67E-16
    0.5000  0.0000  0.2500    1  7.83261E-16 kpt; spin; max resid(k); each band:
-   6.53E-17  5.65E-17  9.75E-17  6.04E-17  6.02E-17  1.09E-16  7.03E-16  7.83E-16
+  6.53E-17 5.65E-17 9.75E-17 6.04E-17 6.02E-17 1.09E-16 7.03E-16 7.83E-16
    0.5000  0.5000  0.2500    1  3.96486E-16 kpt; spin; max resid(k); each band:
-   4.35E-17  2.67E-16  5.32E-17  2.97E-16  8.17E-17  2.37E-16  3.96E-16  1.35E-16
+  4.35E-17 2.67E-16 5.32E-17 2.97E-16 8.17E-17 2.37E-16 3.96E-16 1.35E-16
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2029,19 +1916,10 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t67o_DS1_WFK
-- newkpt: read input wf with ikpt,npw=   1     324, make ikpt,npw=   1     324
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   2     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   3     326
-- newkpt: read input wf with ikpt,npw=   2     326, make ikpt,npw=   4     326
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      8 bands with npw=     324 for ikpt=   1 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   2 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   3 by node    0
-P newkpt: treating      8 bands with npw=     326 for ikpt=   4 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -2067,7 +1945,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
  ETOT  8   1.4854167645549     -2.466E-10 5.192E-12 3.397E-10
 
- ETOT  9   1.4854167645453     -9.634E-12 2.429E-13 1.067E-11
+ ETOT  9   1.4854167645453     -9.635E-12 2.429E-13 1.067E-11
 
  At SCF step    9       vres2   =  1.07E-11 < tolvrs=  1.00E-10 =>converged.
 -open ddk wf file :t67o_DS2_1WF13
@@ -2079,13 +1957,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
  Mean square residual over all n,k,spin=   84.278E-16; max=  24.286E-14
    0.0000  0.0000  0.2500    1  2.42864E-13 kpt; spin; max resid(k); each band:
-   9.17E-17  6.21E-17  2.51E-16  1.29E-16  4.29E-16  9.56E-17  2.09E-14  2.43E-13
+  9.17E-17 6.21E-17 2.51E-16 1.29E-16 4.29E-16 9.56E-17 2.09E-14 2.43E-13
    0.5000  0.0000  0.2500    1  4.12255E-16 kpt; spin; max resid(k); each band:
-   7.68E-17  3.21E-16  1.77E-16  2.80E-16  6.96E-17  1.78E-16  1.08E-16  4.12E-16
+  7.68E-17 3.21E-16 1.77E-16 2.80E-16 6.96E-17 1.78E-16 1.08E-16 4.12E-16
    0.0000  0.5000  0.2500    1  2.45905E-16 kpt; spin; max resid(k); each band:
-   1.50E-16  9.16E-17  4.26E-17  2.41E-17  6.94E-17  9.45E-17  1.03E-16  2.46E-16
+  1.50E-16 9.16E-17 4.26E-17 2.41E-17 6.94E-17 9.45E-17 1.03E-16 2.46E-16
    0.5000  0.5000  0.2500    1  7.91224E-16 kpt; spin; max resid(k); each band:
-   3.27E-16  3.46E-16  2.52E-16  2.71E-16  1.87E-16  1.51E-16  7.05E-17  7.91E-16
+  3.27E-16 3.46E-16 2.52E-16 2.71E-16 1.87E-16 1.51E-16 7.05E-17 7.91E-16
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -5466,6 +5344,9 @@ P          mk1mem3          4
         optdriver1          0
         optdriver2          1
         optdriver3          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
            prtvol          10
           rfatpol1          1       1
           rfatpol2          1       1
@@ -5617,10 +5498,10 @@ P          mk1mem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.9  wall=         11.1
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  50 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.9  wall=         11.1
+.Delivered   6 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.4  wall=         13.8

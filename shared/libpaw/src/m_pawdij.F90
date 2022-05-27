@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2022 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2445,7 +2445,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
- complex(dpc) :: lms
+ complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:)
@@ -2504,8 +2504,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
    ! Matrix elements of interest are <S_l'm'|L_i|S_lm>
    ! these are zero if l' /= l and also if l' == l == 0
-   if ( il .NE. jl ) cycle
-   if ( il .EQ. 0  ) cycle
+   if ( il /= jl ) cycle
+   if ( il == 0  ) cycle
 
    do idir = 1, 3
 
@@ -2514,10 +2514,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
-       & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
-     dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
+     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
+     dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
    end do ! end loop over idir
 
@@ -2684,7 +2683,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  end if
  ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
  call nderiv_gen(dv1dr,ff,pawrad)
- dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)/InvFineStruct**2)) &
+ dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
 & *dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
  call pawrad_deducer0(dv1dr,mesh_size,pawrad)
  do kln=1,ij_size
