@@ -21625,8 +21625,7 @@ This variable is used in [[eph_task]] = -4 to compute phonon-limited mobilities 
 If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
 
-Positive (or zero) values are used in semiconductors
-to define an energy range with respect to the band edges.
+Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
 A zero entry can be used to exclude either holes or electrons from the calculation.
@@ -23108,6 +23107,42 @@ Variable(
     text=r"""
 This variable defines the path of the GSTORE.nc file with the e-ph matrix elements
 that should be used as input for further analysis.
+""",
+),
+
+Variable(
+    abivarname="gstore_erange",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_basic'],
+    dimensions=[2, "[[nsppol]]"],
+    characteristics=['[[ENERGY]]'],
+    mnemonics="GSTORE Energy  RANGE",
+    added_in_version="9.6.2",
+    text=r"""
+This variable is used when [[eph_task]] = 11 to define the k/q points that should be considered when
+producing the GSTORE.nc file
+This variable consists of two x [[nsppol]] entries that allow one to select the k-points and the bands
+on the basis of their KS energy $\ee_\nk$.
+
+If both entries in [[gstore_erange]] are negative, the code assumes a metal and only states within the energy
+window [efermi - abs(gstore_erange(1)), efermi + abs(gstore_erange(2)] are included in the calculation.
+
+Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
+In this case, the first entry given the position of the holes with respect to the CBM while the second entry
+gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
+A zero entry can be used to exclude either holes or electrons from the calculation.
+
+If both entries are zero, the variable is ignored.
+Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
+
+!!! important
+
+    By default, this variable is given in Hartree. Use e.g.
+
+        gstore_erange 0.0 0.5 eV
+
+    to specify the energy intervals in eV units. meV is supported as well.
 """,
 ),
 

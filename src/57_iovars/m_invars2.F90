@@ -259,6 +259,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
+ integer :: tread_brange, tread_erange, tread_kfilter
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
@@ -2130,14 +2131,29 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_qzone', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_qzone = tolower(key_value)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread, 'KEY', key_value=key_value)
- if (tread == 1) dtset%gstore_kfilter = tolower(key_value)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
+ if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
 
  narr = 2 * nsppol
- call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread, 'INT')
- if (tread == 1) then
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
+ if (tread_brange == 1) then
    if (nsppol == 1) dtset%gstore_brange(:, 1) = intarr(1:narr)
    if (nsppol == 2) dtset%gstore_brange = reshape(intarr(1:narr), [2, nsppol])
+ end if
+
+ narr = 2 * nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_erange', tread_erange, 'ENE')
+ if (tread_erange == 1) then
+   if (nsppol == 1) dtset%gstore_erange(:, 1) = dprarr(1:narr)
+   if (nsppol == 2) dtset%gstore_erange = reshape(dprarr(1:narr), [2, nsppol])
+ end if
+
+ if (tread_erange == 1 .and. tread_brange == 1) then
+   ABI_ERROR("gstore_erange and gstore_brange are mutually exclusive!")
+ end if
+
+ if (tread_erange == 1 .and. tread_kfilter == 1) then
+   ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')

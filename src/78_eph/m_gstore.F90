@@ -358,13 +358,12 @@ type, public :: gstore_t
   ! Possible values:
   !     "None"
   !     "fs_tetra"
-  !     "erange" ! referred to CBM, VBM in semiconductors.
-  !     "fs_erange"
+  !     "erange"
   !     ...
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
-  ! Energy window. zero if not used. requires kfilter /= "none"
+  ! Energy window. zero if not used. Requires kfilter == "erange"
 
   type(crystal_t), pointer :: cryst  => null()
 
@@ -481,8 +480,7 @@ contains
 !!
 !! SOURCE
 
-function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
-                    kzone, qzone, kfilter, with_vk, gstore_cplex) result (gstore)
+function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gstore)
 
 !Arguments ------------------------------------
 !scalars
@@ -494,22 +492,20 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
  type(gstore_t), target :: gstore
- character(len=*),optional,intent(in) :: kzone, qzone, kfilter
- integer,optional,intent(in) :: with_vk, gstore_cplex
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol !, iq_glob, ik_glob, ii ! out_nkibz,
- integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is,
- integer :: ik_ibz, ik_bz, ebands_timrev, max_nq, max_nk, gstore_cplex_
+ integer :: spin, natom3, cnt
+ integer :: ik_ibz, ik_bz, ebands_timrev, max_nq, max_nk
  integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  integer :: ncid, spin_ncid, ncerr, gstore_fform
- real(dp) :: cpu, wall, gflops, dksqmax !, mem_mb
+ real(dp) :: cpu, wall, gflops, dksqmax
  !character(len=5000) :: msg
  !type(gqk_t),pointer :: gqk
  type(krank_t) :: qrank
- !type(htetra_t) :: qtetra ktetra,
+ !type(htetra_t) :: qtetra, ktetra,
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3)
  integer :: comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
@@ -542,16 +538,22 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  gstore%kibz => ebands%kptns
 
  ! Set metadata.
- gstore%kzone =  dtset%gstore_kzone; if (present(kzone)) gstore%kzone = kzone
- gstore%qzone = dtset%gstore_qzone; if (present(qzone)) gstore%qzone = qzone
- gstore%kfilter = dtset%gstore_kfilter; if (present(kfilter)) gstore%kfilter = kfilter
- gstore%with_vk = dtset%gstore_with_vk; if (present(with_vk)) gstore%with_vk = with_vk
- ABI_CALLOC(gstore%erange_spin, (2, nsppol))
+ gstore%kzone =  dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
+ gstore%with_vk = dtset%gstore_with_vk
 
- if (gstore%kzone == "ibz" .and. gstore%qzone == "ibz") then
-   ABI_ERROR("The combination kzone = 'ibz' and qzone = 'ibz' is not allowed")
+ ABI_CALLOC(gstore%erange_spin, (2, nsppol))
+ gstore%erange_spin = dtset%gstore_erange(:, 1:nsppol)
+
+ if (any(gstore%erange_spin /= zero)) then
+   ABI_CHECK(gstore%kfilter == "none", sjoin("kfilter should be none when erange is used while it is:", gstore%kfilter))
+   gstore%kfilter = "erange"
  end if
 
+ if (gstore%kzone == "ibz" .and. gstore%qzone == "ibz") then
+   ABI_ERROR("The combination kzone = 'ibz' and qzone = 'ibz' is not allowed!")
+ end if
+
+ ! TODO
  !gstore%kptrlatt(3, 3)
  !gstore%kshift(3, 1)
  !gstore%qptrlatt(3, 3)
@@ -668,9 +670,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
    continue
 
  case ("erange")
-   !gstore%erange_spin = dtset%gstore_erange
-   !call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
-   !                            select_qbz_spin, select_kbz_spin)
+   call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+                               select_qbz_spin, select_kbz_spin)
 
  case ("fs_tetra")
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
@@ -712,12 +713,10 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
  end do
 
  ! =============================================
- ! Initialize gqk basic dimensions and set flags
+ ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
- gstore_cplex_ = dtset%gstore_cplex; if (present(gstore_cplex)) gstore_cplex_ = gstore_cplex
 
- ! Set MPI grid
- call gstore%set_mpi_grid__(gstore_cplex_, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(dtset%gstore_cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
@@ -753,7 +752,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
       nctkdim_t("gstore_max_nb", maxval(gstore%brange_spin(2, :) - gstore%brange_spin(1, :) + 1) ), &
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
-      nctkdim_t("gstore_cplex", gstore_cplex_) &
+      nctkdim_t("gstore_cplex", dtset%gstore_cplex) &
      ], &
    defmode=.True.)
    NCF_CHECK(ncerr)
@@ -767,7 +766,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm, &
      nctkarr_t("gstore_qibz", "dp", "three, gstore_nqibz"), &
      nctkarr_t("gstore_qbz", "dp", "three, gstore_nqbz"), &
      nctkarr_t("gstore_wtq", "dp", "gstore_nqibz"), &
-     !nctkarr_t("gstore_kibz", "dp", "three, gstore_nkibz"), &
      nctkarr_t("gstore_kbz", "dp", "three, gstore_nkbz"), &
      nctkarr_t("gstore_kzone", "c", "fnlen"), &
      nctkarr_t("gstore_qzone", "c", "fnlen"), &
@@ -1431,7 +1429,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
                                    ebands_timrev, use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
-        ABI_ERROR("Cannot map k+q to IBZ!")
+       ABI_ERROR("Cannot map k+q to IBZ!")
      end if
 
      do ii=1,len_kpts_ptr
@@ -1453,7 +1451,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
                                    ebands_timrev, use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
-        ABI_ERROR("Cannot map k+q to IBZ!")
+       ABI_ERROR("Cannot map k+q to IBZ!")
      end if
 
      do ii=1,len_kpts_ptr
@@ -1508,17 +1506,18 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tetra_opt0 = 0
- integer :: nsppol, ierr, cnt, spin, ib, ii, nb, all_nproc, my_rank, comm, ebands_timrev
+ integer :: nsppol, ierr, cnt, spin, ib, ii, all_nproc, my_rank, comm, ebands_timrev, band
  integer :: ik_bz, ik_ibz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, iflag, nk_in_star
- real(dp) :: max_occ, dksqmax
- character(len=80) :: errorstring
+ integer :: gap_err
+ logical :: assume_gap
+ real(dp) :: dksqmax, ee, abs_erange1, abs_erange2, vmax, cmin
  type(ebands_t),pointer :: ebands
  type(crystal_t),pointer :: cryst
  type(htetra_t) :: ktetra
+ type(gaps_t) :: gaps
 !arrays
- integer,allocatable :: indkk(:), map_kq(:,:), kstar_bz_inds(:)
- real(dp):: qpt(3), rlatt(3,3), klatt(3,3), delta_theta_ef(2)
- real(dp),allocatable :: eig_ibz(:)
+ integer,allocatable :: map_kq(:,:), kstar_bz_inds(:)
+ real(dp):: qpt(3)
  real(dp),contiguous, pointer :: kpts_ptr(:,:)
 !----------------------------------------------------------------------
 
@@ -1527,70 +1526,90 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 
  ! filter k- and k+q points according to erange and define gstore%brange_spin automatically.
  ! NB: here we recompute brange_spin
- call wrtout(std_out, " Filtering k-points using erange") !, ltoa(gstore%erange_spin)))
+ call wrtout(std_out, sjoin(" Filtering k-points using gstore_erange:", &
+                            ltoa(reshape(gstore%erange_spin, [2 * gstore%nsppol]) * Ha_eV), "(eV)"))
 
  cryst => gstore%cryst
  ebands => gstore%ebands
  nsppol = gstore%nsppol
+ assume_gap = .not. all(gstore%erange_spin < zero)
+
+ gaps = ebands_get_gaps(ebands, gap_err)
+ if (assume_gap) call gaps%print(unit=std_out) !, header=msg)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
-#if 0
- call ebands_get_bands_e0(ebands, ebands%fermie, gstore%brange_spin, ierr)
- ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
-
- ! TODO: Decide whether it makes sense to store ktetra or indkk in gstore.
- ABI_MALLOC(indkk, (gstore%nkbz))
- indkk(:) = kbz2ibz(1, :)
-
- rlatt = ebands%kptrlatt; call matr3inv(rlatt, klatt)
- call htetra_init(ktetra, indkk, gstore%cryst%gprimd, klatt, kbz, gstore%nkbz, gstore%kibz, gstore%nkibz, &
-                  ierr, errorstring, gstore%comm)
- ABI_CHECK(ierr == 0, errorstring)
-
- ABI_MALLOC(eig_ibz, (gstore%nkibz))
- max_occ = two / (ebands%nspinor * nsppol)
  select_kbz_spin = 0
-
- nb = maxval(gstore%brange_spin(2, :) - gstore%brange_spin(1, :) + 1)
 
  cnt = 0
  do spin=1,nsppol
-   do band=gstore%brange_spin(1, spin), gstore%brange_spin(2, spin)
-     ib = band - gstore%brange_spin(1, spin) + 1
-     eig_ibz = ebands%eig(band, :, spin)
 
+   gstore%brange_spin(:, spin) = [huge(1), -huge(1)]
+   abs_erange1 = abs(gstore%erange_spin(1, spin))
+   abs_erange2 = abs(gstore%erange_spin(2, spin))
+
+   if (assume_gap) then
+     ! Get CBM and VBM with some tolerance
+     vmax = gaps%vb_max(spin) + tol2 * eV_Ha
+     cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+   else
+     vmax = ebands%fermie
+     cmin = ebands%fermie
+   end if
+
+   do band=1, ebands%mband
      do ik_ibz=1,gstore%nkibz
-       cnt = cnt + 1; if (mod(cnt, all_nproc) /= my_rank) cycle ! MPI parallelism inside comm
-
-       call ktetra%get_onewk_wvals(ik_ibz, tetra_opt0, 1, [ebands%fermie], max_occ, &
-                                   gstore%nkibz, eig_ibz, delta_theta_ef)
-
-       iflag = merge(1, 0, abs(delta_theta_ef(1)) > zero)
+       !cnt = cnt + 1; if (mod(cnt, all_nproc) /= my_rank) cycle ! MPI parallelism inside comm
 
        ! Use iflag to filter k-points.
-       select case (gstore%kzone)
-       case ("ibz")
-         ik_bz = kibz2bz(ik_ibz)
-         select_kbz_spin(ik_bz, spin) = iflag
+       ee = ebands%eig(band, ik_ibz, spin)
+       iflag = 0
 
-       case ("bz")
-         call get_star_from_ibz(ik_ibz, gstore%nkbz, kbz2ibz, nk_in_star, kstar_bz_inds)
-         ABI_CHECK(nk_in_star > 0, "Something wrong in get_star_from_ibz")
-         do ii=1,nk_in_star
-           ik_bz = kstar_bz_inds(ii)
+       if (abs_erange1 > zero) then
+         if (ee <= vmax .and. vmax - ee <= abs_erange1) then
+           iflag = 1
+           !write(std_out, *), "Adding valence band", band, " with ee [eV]: ", ee * Ha_eV
+         end if
+       end if
+       if (abs_erange2 > zero) then
+         if (ee >= cmin .and. ee - cmin <= abs_erange2) then
+           iflag = 1
+           !write(std_out, *)"Adding conduction band", band, " with ee [eV]: ", ee * Ha_eV
+         end if
+       end if
+
+       if (iflag == 1) then
+         gstore%brange_spin(1, spin) = min(gstore%brange_spin(1, spin), band)
+         gstore%brange_spin(2, spin) = max(gstore%brange_spin(2, spin), band)
+
+         select case (gstore%kzone)
+         case ("ibz")
+           ik_bz = kibz2bz(ik_ibz)
            select_kbz_spin(ik_bz, spin) = iflag
-         end do
-         ABI_FREE(kstar_bz_inds)
-       end select
-     end do
 
-   end do
- end do
+         case ("bz")
+           call get_star_from_ibz(ik_ibz, gstore%nkbz, kbz2ibz, nk_in_star, kstar_bz_inds)
+           ABI_CHECK(nk_in_star > 0, "Something wrong in get_star_from_ibz")
+           do ii=1,nk_in_star
+             ik_bz = kstar_bz_inds(ii)
+             select_kbz_spin(ik_bz, spin) = iflag
+           end do
+           ABI_FREE(kstar_bz_inds)
+         end select
+       end if
 
- call ktetra%print(std_out)
+     end do ! band
+   end do ! ik_ibz
 
- call xmpi_sum(select_kbz_spin, comm, ierr)
+   call wrtout(std_out, sjoin("brange_spin:", ltoa(gstore%brange_spin(:, spin))))
+   call wrtout(std_out, sjoin("count_select_kbz:", itoa(count(select_kbz_spin == 1))))
+
+   if (any(gstore%brange_spin(:, spin) == [huge(1), -huge(1)])) then
+     ABI_ERROR("Empty list of states inside gstore_erange")
+   end if
+ end do ! spin
+
+ !call xmpi_sum(select_kbz_spin, comm, ierr)
 
  ! Now the tricky part as we want to remove q-points that
  ! do not lead to any scattering process between two states on the FS
@@ -1652,10 +1671,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  call xmpi_sum(select_qbz_spin, comm, ierr)
 
  ABI_FREE(map_kq)
- ABI_FREE(eig_ibz)
- ABI_FREE(indkk)
- call ktetra%free()
-#endif
+ call gaps%free()
 
 end subroutine gstore_filter_erange__
 !!***
@@ -1667,7 +1683,7 @@ end subroutine gstore_filter_erange__
 !! get_ibz2bz
 !!
 !! FUNCTION
-!!  Build array with the index of the ibz wave vectors in the BZ.
+!!  Build array with the index of the IBZ wave vectors in the BZ.
 !!
 !! INPUTS
 !!
