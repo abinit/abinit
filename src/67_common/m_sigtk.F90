@@ -81,9 +81,6 @@ contains  !=====================================================
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -164,9 +161,6 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -265,9 +259,6 @@ end subroutine sigtk_kcalc_from_qprange
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -364,9 +355,6 @@ end subroutine sigtk_kcalc_from_gaps
 !!      m_sigmaph
 !!
 !! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 

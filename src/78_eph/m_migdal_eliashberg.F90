@@ -91,6 +91,7 @@ type, public :: iso_solver_t
   real(dp) :: tolerance = -one
 
   real(dp),allocatable :: zeta_iw(:), delta_iw(:)
+  real(dp),allocatable :: prev_zeta_iw(:), prev_delta_iw(:)
   real(dp),allocatable :: delta_iw_mix(:,:)
 
 contains
@@ -133,8 +134,10 @@ subroutine iso_solver_free(solver)
  class(iso_solver_t),intent(inout) :: solver
 !----------------------------------------------------------------------
 
- ABI_SFREE(solver%zeta_iw)
  ABI_SFREE(solver%delta_iw)
+ ABI_SFREE(solver%zeta_iw)
+ ABI_SFREE(solver%prev_delta_iw)
+ ABI_SFREE(solver%prev_zeta_iw)
  ABI_SFREE(solver%delta_iw_mix)
 
 end subroutine iso_solver_free
@@ -170,41 +173,69 @@ subroutine iso_solver_solve(solver, itemp, kt, niw, imag_w, lambda_ij)
 
 !Local variables-------------------------------
 !scalars
- integer :: iter !, ii
+ integer,parameter :: master = 0
+ integer :: nproc, my_rank, iter, ii, jj, converged
+ real(dp) :: rr
 !arrays
  real(dp),allocatable :: prev_vals(:)
 
 !----------------------------------------------------------------------
 
+ nproc = xmpi_comm_size(solver%comm); my_rank = xmpi_comm_rank(solver%comm)
+
  ABI_REMALLOC(solver%delta_iw_mix, (niw, solver%max_nmix))
 
  if (itemp == 1) then
    ! Init values from scratch
-   ABI_MALLOC(solver%zeta_iw, (niw))
-   ABI_MALLOC(solver%delta_iw, (niw))
+   ABI_CALLOC(solver%zeta_iw, (niw))
+   ABI_CALLOC(solver%prev_zeta_iw, (niw))
+   ABI_CALLOC(solver%delta_iw, (niw))
+   ABI_CALLOC(solver%prev_delta_iw, (niw))
  else
    ! Init values from previous temp. TODO: May use spline
    call alloc_copy(solver%zeta_iw, prev_vals)
-   ABI_MOVE_ALLOC(prev_vals, solver%zeta_iw)
+   ABI_RECALLOC(solver%zeta_iw, (niw))
+   ABI_MOVE_ALLOC(prev_vals, solver%prev_zeta_iw)
    call alloc_copy(solver%delta_iw, prev_vals)
-   ABI_MOVE_ALLOC(prev_vals, solver%delta_iw)
+   ABI_RECALLOC(solver%delta_iw, (niw))
+   ABI_MOVE_ALLOC(prev_vals, solver%prev_delta_iw)
  end if
 
- do iter=1,solver%max_niter
+ converged = 0
+iter_loop: do iter=1,solver%max_niter
 
-   ! Write SCF cycle to stdout.
+   do ii=1,niw
+     !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism inside comm
+     do jj=1,niw
+       rr = one / sqrt(imag_w(jj) ** 2 + solver%prev_delta_iw(jj) ** 2)
+       solver%zeta_iw(ii) = solver%zeta_iw(ii) + imag_w(jj) * rr  !* lambda(ii - jj)
+       solver%delta_iw(ii) = solver%delta_iw(ii) + rr * solver%prev_delta_iw(jj) !* (lambda(ii - jj) - mustar)
+     end do
+      solver%zeta_iw(ii) = one + pi * kt / imag_w(ii) * solver%zeta_iw(ii)
+      solver%delta_iw(ii) = pi * kt * solver%delta_iw(ii) / solver%zeta_iw(ii)
+   end do ! ii
 
-   ! Check for convergence.
+   if (my_rank == master) then
+     ! Write SCF cycle to stdout.
+     ! Check for convergence.
+     converged = 0
+   end if
 
-   ! Mix delta.
+   if (converged == 2) exit iter_loop
 
- end do ! iter
+   ! TODO: Mixing
+   solver%prev_zeta_iw = solver%zeta_iw
+   solver%prev_delta_iw = solver%delta_iw
+
+ end do iter_loop
 
  ! Pade' to go to real axis
  ! Compute Delta F
  ! Compute QP DOS
 
  ! Write results to netcdff
+ if (my_rank == master) then
+ end if
 
 end subroutine iso_solver_solve
 !!***
