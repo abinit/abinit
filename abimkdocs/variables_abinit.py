@@ -23097,12 +23097,13 @@ unless additional filters are activated via [[gstore_kfilter]].
 
 Variable(
     abivarname="getgstore_filepath",
-    varset="files",
+    varset="eph",
     vartype="string",
-    topics=['multidtset_useful'],
+    topics=['ElPhonInt_basic'],
     dimensions="scalar",
-    #defaultval="Output filename of the present dataset",
+    defaultval="None",
     mnemonics="GET the GSTORE.nc from FILEPATH",
+    requires="[[optdriver]] == 7",
     added_in_version="9.6.2",
     text=r"""
 This variable defines the path of the GSTORE.nc file with the e-ph matrix elements
@@ -23117,6 +23118,7 @@ Variable(
     topics=['ElPhonInt_basic'],
     dimensions=[2, "[[nsppol]]"],
     characteristics=['[[ENERGY]]'],
+    requires="[[optdriver]] == 7",
     mnemonics="GSTORE Energy  RANGE",
     added_in_version="9.6.2",
     text=r"""
