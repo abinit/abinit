@@ -33,8 +33,7 @@ module m_kpts
  use m_htetra
  use m_xmpi
 
- use m_time,           only : timab
- use m_time,           only : cwtime, cwtime_report
+ use m_time,           only : timab, cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
  use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
@@ -48,9 +47,10 @@ module m_kpts
 
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
- public :: tetra_from_kptrlatt       ! Create an instance from kptrlatt and shiftk
+ public :: tetra_from_kptrlatt       ! Create an instance of htetra_t from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
+ public :: kpts_map
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
  !FIXME: Deprecated
@@ -206,7 +206,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !! tetra_from_kptrlatt
 !!
 !! FUNCTION
-!!  Helper functio to to create an instance and htetra from kptrlatt and shiftk
+!!  Helper function to to create an instance and htetra from kptrlatt and shiftk
 !!
 !! INPUTS
 !!  cryst<cryst_t>=Crystalline structure.
@@ -460,6 +460,72 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
  end if
 
 end function symkchk
+!!***
+
+!!****f* m_kpts/kpts_map
+!! NAME
+!! kpts_map
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dksqmax_tol) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: mode
+ integer,intent(in) :: timrev, nkpt2
+ class(crystal_t),intent(in) :: cryst
+ class(krank_t),intent(inout) :: krank
+ real(dp),optional,intent(in) :: dksqmax_tol
+!arrays
+ real(dp),intent(in) :: kpt2(3, nkpt2)
+ real(dp),optional,intent(in) :: qpt(3)
+ integer,intent(out) :: map(6, nkpt2)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: dksqmax, my_tol
+!arrays
+ real(dp) :: my_qpt(3)
+
+! *************************************************************************
+
+ my_qpt = zero; if (present(qpt)) my_qpt = qpt
+
+ select case (mode)
+ case("symrel")
+   ! Note symrel and use_symrec = .False.
+   ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
+   call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False., qpt=my_qpt)
+
+ case("symrec")
+   ! Note symrec and use_symrec = .True.
+   ! These are the conventions for the symmetrization of the DVDB as well as the conventions
+   ! used in several BZ routines. We should always use this convention.
+
+   call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
+                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
+
+ case default
+   ABI_ERROR(sjoin("Invalid mode:", mode))
+ end select
+
+ my_tol = tol12; if (present(dksqmax_tol)) my_tol = dksqmax_tol
+
+ ierr = merge(1, 0, dksqmax > my_tol)
+
+end function kpts_map
 !!***
 
 !!****f* m_kpts/listkk
@@ -2966,12 +3032,6 @@ end subroutine testkgrid
 !!  The first call reports the total number of divisions in the normalized path, dimension
 !!  that is required to correctly allocate the array.
 !!  The second call calculates the reduced coordinates of the circuit.
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2007-2022 ABINIT group (MG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! nbounds=number of points defining the path

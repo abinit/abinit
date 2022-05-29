@@ -612,6 +612,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 !Local variables-------------------------------
 !scalars
  integer :: bstart_k, nband_k, bstart_kq, nband_kq, ib1, band1, ib2, band2, ii
+ logical :: use_adaptive
  real(dp) :: g1, g2, sigma
 
 ! *************************************************************************
@@ -626,16 +627,17 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
  if (fs%eph_intmeth == 1 .or. nesting /= 0) then
    ! Gaussian method: constant or adaptive method from group velocities if eph_fsmear is negative.
    sigma = fs%eph_fsmear
+   use_adaptive = fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
-     if (fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2) then
+     if (use_adaptive) then
        sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        !write(std_out, *)"sigma:", sigma * Ha_eV
      end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
-       if (fs%eph_fsmear < zero .or. abs(fs%eph_intmeth) == 2) then
+       if (use_adaptive) then
          sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)

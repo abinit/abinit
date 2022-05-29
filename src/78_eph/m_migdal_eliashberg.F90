@@ -128,17 +128,17 @@ contains
 !!
 !! SOURCE
 
-subroutine iso_solver_free(solver)
+subroutine iso_solver_free(iso)
 
 !Arguments ------------------------------------
- class(iso_solver_t),intent(inout) :: solver
+ class(iso_solver_t),intent(inout) :: iso
 !----------------------------------------------------------------------
 
- ABI_SFREE(solver%delta_iw)
- ABI_SFREE(solver%zeta_iw)
- ABI_SFREE(solver%prev_delta_iw)
- ABI_SFREE(solver%prev_zeta_iw)
- ABI_SFREE(solver%delta_iw_mix)
+ ABI_SFREE(iso%delta_iw)
+ ABI_SFREE(iso%zeta_iw)
+ ABI_SFREE(iso%prev_delta_iw)
+ ABI_SFREE(iso%prev_zeta_iw)
+ ABI_SFREE(iso%delta_iw_mix)
 
 end subroutine iso_solver_free
 !!***
@@ -161,11 +161,11 @@ end subroutine iso_solver_free
 !!
 !! SOURCE
 
-subroutine iso_solver_solve(solver, itemp, kt, niw, imag_w, lambda_ij)
+subroutine iso_solver_solve(iso, itemp, kt, niw, imag_w, lambda_ij)
 
 !Arguments ------------------------------------
 !scalars
- class(iso_solver_t),intent(inout) :: solver
+ class(iso_solver_t),intent(inout) :: iso
  integer,intent(in) :: itemp, niw
  real(dp),intent(in) :: kt
 !arrays
@@ -181,38 +181,38 @@ subroutine iso_solver_solve(solver, itemp, kt, niw, imag_w, lambda_ij)
 
 !----------------------------------------------------------------------
 
- nproc = xmpi_comm_size(solver%comm); my_rank = xmpi_comm_rank(solver%comm)
+ nproc = xmpi_comm_size(iso%comm); my_rank = xmpi_comm_rank(iso%comm)
 
- ABI_REMALLOC(solver%delta_iw_mix, (niw, solver%max_nmix))
+ ABI_REMALLOC(iso%delta_iw_mix, (niw, iso%max_nmix))
 
  if (itemp == 1) then
    ! Init values from scratch
-   ABI_CALLOC(solver%zeta_iw, (niw))
-   ABI_CALLOC(solver%prev_zeta_iw, (niw))
-   ABI_CALLOC(solver%delta_iw, (niw))
-   ABI_CALLOC(solver%prev_delta_iw, (niw))
+   ABI_CALLOC(iso%zeta_iw, (niw))
+   ABI_CALLOC(iso%prev_zeta_iw, (niw))
+   ABI_CALLOC(iso%delta_iw, (niw))
+   ABI_CALLOC(iso%prev_delta_iw, (niw))
  else
    ! Init values from previous temperature. TODO: May use spline
-   call alloc_copy(solver%zeta_iw, prev_vals)
-   ABI_RECALLOC(solver%zeta_iw, (niw))
-   ABI_MOVE_ALLOC(prev_vals, solver%prev_zeta_iw)
-   call alloc_copy(solver%delta_iw, prev_vals)
-   ABI_RECALLOC(solver%delta_iw, (niw))
-   ABI_MOVE_ALLOC(prev_vals, solver%prev_delta_iw)
+   call alloc_copy(iso%zeta_iw, prev_vals)
+   ABI_RECALLOC(iso%zeta_iw, (niw))
+   ABI_MOVE_ALLOC(prev_vals, iso%prev_zeta_iw)
+   call alloc_copy(iso%delta_iw, prev_vals)
+   ABI_RECALLOC(iso%delta_iw, (niw))
+   ABI_MOVE_ALLOC(prev_vals, iso%prev_delta_iw)
  end if
 
  converged = 0
-iter_loop: do iter=1,solver%max_niter
+iter_loop: do iter=1,iso%max_niter
 
    do ii=1,niw
      !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism inside comm
      do jj=1,niw
-       rr = one / sqrt(imag_w(jj) ** 2 + solver%prev_delta_iw(jj) ** 2)
-       solver%zeta_iw(ii) = solver%zeta_iw(ii) + imag_w(jj) * rr  !* lambda(ii - jj)
-       solver%delta_iw(ii) = solver%delta_iw(ii) + rr * solver%prev_delta_iw(jj) !* (lambda(ii - jj) - mustar)
+       rr = one / sqrt(imag_w(jj) ** 2 + iso%prev_delta_iw(jj) ** 2)
+       iso%zeta_iw(ii) = iso%zeta_iw(ii) + imag_w(jj) * rr  !* lambda(ii - jj)
+       iso%delta_iw(ii) = iso%delta_iw(ii) + rr * iso%prev_delta_iw(jj) !* (lambda(ii - jj) - mustar)
      end do
-      solver%zeta_iw(ii) = one + pi * kt / imag_w(ii) * solver%zeta_iw(ii)
-      solver%delta_iw(ii) = pi * kt * solver%delta_iw(ii) / solver%zeta_iw(ii)
+      iso%zeta_iw(ii) = one + pi * kt / imag_w(ii) * iso%zeta_iw(ii)
+      iso%delta_iw(ii) = pi * kt * iso%delta_iw(ii) / iso%zeta_iw(ii)
    end do ! ii
 
    if (my_rank == master) then
@@ -224,8 +224,8 @@ iter_loop: do iter=1,solver%max_niter
    if (converged == 2) exit iter_loop
 
    ! TODO: Mixing
-   solver%prev_zeta_iw = solver%zeta_iw
-   solver%prev_delta_iw = solver%delta_iw
+   iso%prev_zeta_iw = iso%zeta_iw
+   iso%prev_delta_iw = iso%delta_iw
 
  end do iter_loop
 
@@ -281,17 +281,21 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !class(ifc_type),target,intent(in) :: ifc
  !type(gqk_t),pointer :: gqk
  !type(krank_t) :: qrank
- type(iso_solver_t) :: solver
+ type(iso_solver_t) :: iso
 !arrays
  real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:)
 
 !----------------------------------------------------------------------
 
- call cwtime(cpu, wall, gflops, "start")
-
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
 
- !call gstore%calc_my_phonons(store_phdispl=.False.)
+ ! Consistency check
+ ierr = 0
+ ABI_CHECK_NOSTOP(gstore%qzone == "bz", "migdal_eliashberg_iso requires qzone == 'bz'", ierr)
+ ABI_CHECK(ierr == 0, "Wrong GSTORE.nc file for migdal_eliashberg_iso. See messages above")
+
+ call cwtime(cpu, wall, gflops, "start")
+ call gstore%calc_my_phonons(store_phdispl=.False.)
 
  !cryst => gstore%cryst
  !ebands => gstore%ebands
@@ -299,18 +303,13 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !kibz => gstore%kibz
  !natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
 
- ! Consistency check
- ierr = 0
- ABI_CHECK_NOSTOP(gstore%qzone == "bz", "migdal_eliashberg_iso requires qzone == 'bz'", ierr)
- ABI_CHECK(ierr == 0, "Wrong GSTORE.nc file for migdal_eliashberg_iso. See messages above")
-
  ncid = nctk_noid
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_ISOME.nc") , xmpi_comm_self))
  end if
 
  call dtset%get_ktmesh(ntemp, ktmesh)
- solver = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
+ iso = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
 
  do itemp=1,ntemp
    ! Generate Matsubara imaginary-mesh for this T.
@@ -325,12 +324,12 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    call gstore%get_lambda_iso_iw(dtset, 2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
-   call solver%solve(itemp, kt, niw, imag_w, lambda_ij)
+   call iso%solve(itemp, kt, niw, imag_w, lambda_ij)
    ABI_FREE(lambda_ij)
    ABI_FREE(imag_w)
  end do ! itemp
 
- call solver%free()
+ call iso%free()
  ABI_FREE(ktmesh)
 
  if (my_rank == master) then
