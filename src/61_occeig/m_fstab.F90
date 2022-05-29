@@ -81,7 +81,7 @@ module m_fstab
 
    integer :: eph_intmeth
    ! Integration method.
-   ! 1 for gaussian,
+   ! 1 for gaussian (incuding adaptive broadening)
    ! |2| for tetrahedra.
    !     2 for the optimized tetrahedron method.
    !    -2 for the linear tetrahedron method.

@@ -101,6 +101,7 @@ module m_gstore
  use m_errors
  use m_krank
  use m_htetra
+ use libtetrabz
 
  use m_ebands
  use iso_c_binding
@@ -122,9 +123,10 @@ module m_gstore
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
- use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, get_diag !, isdiagmat
+ use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0
+ use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_io_tools,       only : iomode_from_fname
+ use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
@@ -297,7 +299,8 @@ type, public :: gqk_t
   !procedure :: my_qweight => gqk_my_qweight
   ! Return the q-point weight from my local index my_iq
 
-  !procedure :: ncread_path => gqk_ncread_path
+  procedure :: dbldelta_qpt => gqk_dbldelta_qpt
+  ! Compute weights for the double delta.
 
   procedure :: free => gqk_free
   ! Free memory
@@ -340,15 +343,15 @@ type, public :: gstore_t
   ! 1 to compute diagonal terms only
   ! 2 to compute diagonal + off-diagonal terms
 
-  character(len=fnlen) :: path = ""
+  character(len=fnlen) :: path = " "
   ! Path to the nc file associated to the gstore
 
-  character(len=fnlen) :: wfk0_path = ""
+  character(len=fnlen) :: wfk0_path = " "
 
   ! NB: We compute v_k for all the k-points treated by this MPI proc.
   ! as v_kq can be reconstructed by symmetry although this step requires an all_gather along the k-axis.
 
-  character(len=fnlen) :: kzone = "", qzone = ""
+  character(len=fnlen) :: kzone = " ", qzone = " "
     ! Specifies whether k- or q-points are in the BZ or in the IBZ.
     ! Possible values are "ibz" or "bz".
     ! Note that combination ("ibz", "ibz") is not allowed
@@ -371,8 +374,8 @@ type, public :: gstore_t
 
   type(ifc_type), pointer :: ifc => null()
 
-  type(krank_t) :: krank !, qrank
-  ! Object used to find the correspondence with the kibz array with the IBZ.
+  type(krank_t) :: krank_ibz !, qrank
+  ! Object used to find k-points in the IBZ and map BZ to IBZ.
 
   integer,allocatable :: my_spins(:)
    ! (%my_nspins)
@@ -611,10 +614,10 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  ABI_MALLOC(kbz2ibz, (6, gstore%nkbz))
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
- gstore%krank = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
- call gstore%krank%get_mapping(gstore%nkbz, kbz, dksqmax, cryst%gmet, kbz2ibz, &
-                               cryst%nsym, cryst%symafm, cryst%symrel, ebands_timrev, &
-                               use_symrec=.False.)
+ gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
+ call gstore%krank_ibz%get_mapping(gstore%nkbz, kbz, dksqmax, cryst%gmet, kbz2ibz, &
+                                   cryst%nsym, cryst%symafm, cryst%symrel, ebands_timrev, &
+                                   use_symrec=.False.)
 
  if (dksqmax > tol12) then
     ABI_ERROR("Cannot map kBZ to IBZ!")
@@ -1250,13 +1253,13 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, 
      mem_mb = gqk%cplex * gqk%my_npert * gqk%nb ** 2 * gqk%my_nq * gqk%my_nk * eight * b2Mb
      call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
-     ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
-     ! This initialization is important as not all the g are computed when we filter in k-space.
+     ! The initialization with zero is important as not all the g are computed when we filter in k-space.
      ! Abinit postprocessing tools will operate of the full my_g array
      ! and we don't want to trigger floating point exceptions.
+     ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
      gqk%my_g = zero
 
-     !ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
+     !ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
      !gqk%my_g2 = zero
 
      ! Allocate storage for MPI-distributed dH/dk matrix elements.
@@ -1424,9 +1427,9 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
      iq_bz = qibz2bz(iq_ibz)
      ! k + q_ibz --> k IBZ --> k BZ
 
-     call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
-                                   dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                   ebands_timrev, use_symrec=.False., qpt=qpt)
+     call gstore%krank_ibz%get_mapping(len_kpts_ptr, kpts_ptr, &
+                                       dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                       ebands_timrev, use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
        ABI_ERROR("Cannot map k+q to IBZ!")
@@ -1446,9 +1449,9 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
      iq_ibz = qbz2ibz(1, iq_bz)
      ! k + q_bz --> k IBZ --> k BZ
 
-     call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
-                                   dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                   ebands_timrev, use_symrec=.False., qpt=qpt)
+     call gstore%krank_ibz%get_mapping(len_kpts_ptr, kpts_ptr, &
+                                       dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                       ebands_timrev, use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
        ABI_ERROR("Cannot map k+q to IBZ!")
@@ -1567,14 +1570,12 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 
        if (abs_erange1 > zero) then
          if (ee <= vmax .and. vmax - ee <= abs_erange1) then
-           iflag = 1
-           !write(std_out, *), "Adding valence band", band, " with ee [eV]: ", ee * Ha_eV
+           iflag = 1 !; write(std_out, *), "Adding valence band", band, " with ee [eV]: ", ee * Ha_eV
          end if
        end if
        if (abs_erange2 > zero) then
          if (ee >= cmin .and. ee - cmin <= abs_erange2) then
-           iflag = 1
-           !write(std_out, *)"Adding conduction band", band, " with ee [eV]: ", ee * Ha_eV
+           iflag = 1 !; write(std_out, *)"Adding conduction band", band, " with ee [eV]: ", ee * Ha_eV
          end if
        end if
 
@@ -1601,8 +1602,8 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
      end do ! band
    end do ! ik_ibz
 
-   call wrtout(std_out, sjoin("brange_spin:", ltoa(gstore%brange_spin(:, spin))))
-   call wrtout(std_out, sjoin("count_select_kbz:", itoa(count(select_kbz_spin == 1))))
+   !call wrtout(std_out, sjoin("brange_spin:", ltoa(gstore%brange_spin(:, spin))))
+   !call wrtout(std_out, sjoin("count_select_kbz:", itoa(count(select_kbz_spin == 1))))
 
    if (any(gstore%brange_spin(:, spin) == [huge(1), -huge(1)])) then
      ABI_ERROR("Empty list of states inside gstore_erange")
@@ -1630,9 +1631,9 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
      iq_bz = qibz2bz(iq_ibz)
      ! k + q_ibz --> k IBZ --> k BZ
 
-     call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
-                                   dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                   ebands_timrev, use_symrec=.False., qpt=qpt)
+     call gstore%krank_ibz%get_mapping(len_kpts_ptr, kpts_ptr, &
+                                       dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                       ebands_timrev, use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
         ABI_ERROR("Cannot map k+q to IBZ!")
@@ -1652,9 +1653,9 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
      iq_ibz = qbz2ibz(1, iq_bz)
      ! k + q_bz --> k IBZ --> k BZ
 
-     call gstore%krank%get_mapping(len_kpts_ptr, kpts_ptr, &
-                                   dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                   ebands_timrev, use_symrec=.False., qpt=qpt)
+     call gstore%krank_ibz%get_mapping(len_kpts_ptr, kpts_ptr, &
+                                       dksqmax, cryst%gmet, map_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                       ebands_timrev, use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
         ABI_ERROR("Cannot map k+q to IBZ!")
@@ -1725,8 +1726,7 @@ subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
    end if
  end do
 
- ierr = 0
- if (cnt /= nibz) ierr = 1
+ ierr = merge(0, 1, cnt == nibz)
 
 end subroutine get_ibz2bz
 !!***
@@ -1738,7 +1738,9 @@ end subroutine get_ibz2bz
 !! get_star_from_ibz
 !!
 !! FUNCTION
-!!  Build array with the indices of the start of the ik_ibz wavevector in the BZ.
+!!  Build array with the indices of the star of the ik_ibz wavevector in the IBZ.
+!!  Return number of points in the star, allocate array with the indices of the
+!!  star points in the BZ.
 !!
 !! INPUTS
 !!
@@ -1752,6 +1754,7 @@ end subroutine get_ibz2bz
 
 subroutine get_star_from_ibz(ik_ibz, nkbz, bz2ibz, nk_in_star, kstar_bz_inds)
 
+!Arguments ------------------------------------
  integer,intent(in) :: ik_ibz, nkbz
  integer,intent(out) :: nk_in_star
  integer,intent(in) :: bz2ibz(6, nkbz)
@@ -1764,7 +1767,6 @@ subroutine get_star_from_ibz(ik_ibz, nkbz, bz2ibz, nk_in_star, kstar_bz_inds)
 !----------------------------------------------------------------------
 
  nk_in_star = count(bz2ibz(1, :) == ik_ibz)
-
  ABI_MALLOC(kstar_bz_inds, (nk_in_star))
 
  nk_in_star = 0
@@ -1873,9 +1875,9 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
    do my_iq=1,gqk%my_nq
      qpt = gqk%myqpt(my_iq, gstore)
 
-     call gstore%krank%get_mapping(gqk%my_nk, my_kpts, dksqmax, cryst%gmet, indkk_kq, &
-                                   cryst%nsym, cryst%symafm, cryst%symrel, kpts_timrev_from_kptopt(gstore%ebands%kptopt), &
-                                   use_symrec=.False., qpt=qpt)
+     call gstore%krank_ibz%get_mapping(gqk%my_nk, my_kpts, dksqmax, cryst%gmet, indkk_kq, &
+                                       cryst%nsym, cryst%symafm, cryst%symrel, kpts_timrev_from_kptopt(gstore%ebands%kptopt),&
+                                       use_symrec=.False., qpt=qpt)
 
      if (dksqmax > tol12) then
        ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt), ", dkqsmax:", ftoa(dksqmax)))
@@ -2077,24 +2079,25 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
  real(dp) :: g2, w_nuq, weight_k
  type(gqk_t), pointer :: gqk
 !arrays
- real(dp),allocatable :: work_kbz(:,:,:), dbl_delta_q(:,:,:)
+ !real(dp) :: qpt(3)
+ real(dp),allocatable :: work_kbz(:,:,:), dbldelta_q(:,:,:)
 
 !----------------------------------------------------------------------
 
- if (gstore%qzone /= "bz") then
-   ABI_ERROR("gstore_get_lambda_iso_iw assumes qzone == `ibz`")
- end if
+ ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
 
  lambda = zero
 
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is)
    ABI_MALLOC(work_kbz, (gqk%nb, gqk%nb, gstore%nkbz))
-   ABI_MALLOC(dbl_delta_q, (gqk%nb, gqk%nb, gqk%my_nk))
-   dbl_delta_q = one
+   ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
+   dbldelta_q = one
 
    do my_iq=1,gqk%my_nq
-    ! FIXME Compute integration weights for the double delta according to different schema.
+    ! TODO
+    ! Compute integration weights for the double delta according to different schema.
+    !call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, dbldelta_q)
 
      do my_ik=1,gqk%my_nk
        weight_k = gqk%my_kweight(my_ik, gstore)
@@ -2105,7 +2108,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
              g2 = gqk%my_g2(my_ip, ib_kq, my_iq, ib_k, my_ik)
              w_nuq = gqk%my_wnuq(my_ip, my_iq)
              lambda(:) = lambda(:) + &
-               two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * dbl_delta_q(ib_kq, ib_k, my_ik)
+               two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * dbldelta_q(ib_kq, ib_k, my_ik)
            end do
          end do
        end do
@@ -2113,7 +2116,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, nw, imag_w, lambda)
    end do ! my_ik
 
    ABI_FREE(work_kbz)
-   ABI_FREE(dbl_delta_q)
+   ABI_FREE(dbldelta_q)
  end do ! my_is
 
  call xmpi_sum(lambda, gstore%comm, ierr)
@@ -2162,7 +2165,7 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%brange_spin)
  ABI_SFREE(gstore%erange_spin)
 
- call gstore%krank%free()
+ call gstore%krank_ibz%free()
 
 end subroutine gstore_free
 !!***
@@ -2208,6 +2211,13 @@ pure function gqk_mykpt(gqk, my_ik, gstore) result (kpt)
 
  ! symrel^T convention for k
  kpt = tsign * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
+
+ !select case(gstore%kzone)
+ !case ("ibz")
+ !  weight_k = gstore%ebands%wtk(ik_ibz)
+ !case ("bz")
+ !  weight_k = one / gstore%nkbz
+ !end select
 
 end function gqk_mykpt
 !!***
@@ -2255,10 +2265,10 @@ pure real(dp) function gqk_my_kweight(gqk, my_ik, gstore) result (weight_k)
 
  select case(gstore%kzone)
  case ("ibz")
-    ik_ibz = gqk%my_k2ibz(1, my_ik)
-    weight_k = gstore%ebands%wtk(ik_ibz)
+   ik_ibz = gqk%my_k2ibz(1, my_ik)
+   weight_k = gstore%ebands%wtk(ik_ibz)
  case ("bz")
-    weight_k = one / gstore%nkbz
+   weight_k = one / gstore%nkbz
  end select
 
 end function gqk_my_kweight
@@ -2352,6 +2362,187 @@ end function gqk_myqpt
 
 !----------------------------------------------------------------------
 
+!!****f* m_gstore/gqk_dbldelta_qpt
+!! NAME
+!! gqk_dbldelta_qpt
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, dbldelta_q)
+
+!Arguments ------------------------------------
+ class(gqk_t),intent(in) :: gqk
+ class(gstore_t),target,intent(in) :: gstore
+ integer,intent(in) :: my_iq, eph_intmeth
+ real(dp),intent(in) :: eph_fsmear
+ real(dp),intent(out) :: dbldelta_q(gqk%nb, gqk%nb, gqk%my_nk)
+
+!Local variables ------------------------------
+!scalars
+ integer :: i1, i2, i3, nb, nkbz, spin, ltetra, my_ik, ib1, ib2, band1, band2, ik_ibz, ikq_ibz, nesting
+ real(dp) :: g1, g2, sigma
+ type(ebands_t), pointer :: ebands
+!arrays
+ integer :: nge(3), ngw(3), indekk_kq(6,1)
+ !integer,allocatable :: kbz2fs(:)
+ real(dp) :: kk(3), kq(3), qpt(3)
+ real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:) !, kbz(:,:)
+
+!----------------------------------------------------------------------
+
+ nb = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
+ ebands => gstore%ebands
+ qpt = gqk%myqpt(my_iq, gstore)
+
+ ! The double delta with tetra is ill-defined for q == 0.
+ ! In this case we fall back to gaussian.
+ nesting = merge(1, 0, abs(eph_intmeth) == 2 .and. all(abs(qpt) < tol12))
+
+ if (abs(eph_intmeth) == 1 .or. nesting /= 0) then
+
+   sigma = eph_fsmear
+   do my_ik=1,gqk%my_nk
+     ik_ibz = gqk%my_k2ibz(1, my_ik)
+
+     !call gstore%krank_ibz%get_mapping(gqk%my_nk, my_kpts, dksqmax, cryst%gmet, indkk_kq, &
+     !                                  cryst%nsym, cryst%symafm, cryst%symrel, kpts_timrev_from_kptopt(gstore%ebands%kptopt),&
+     !                                  use_symrec=.False., qpt=qpt)
+
+     !if (dksqmax > tol12) then
+     !  ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt), ", dkqsmax:", ftoa(dksqmax)))
+     !end if
+
+     do ib2=1,nb
+       band2 = ib2 + gqk%bstart - 1
+       g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
+       !if (eph_fsmear < zero .or. abs(eph_intmeth) == 2) then
+       !  sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+       !  !write(std_out, *)"sigma:", sigma * Ha_eV
+       !end if
+       do ib1=1,nb
+         band1 = ib1 + gqk%bstart - 1
+         !if (eph_fsmear < zero .or. abs(eph_intmeth) == 2) then
+         !  sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+         !end if
+         g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
+         dbldelta_q(ib1, ib2, my_ik) = (g1 * g2) ! / fs%nktot
+       end do
+     end do
+   end do
+
+ else if (abs(eph_intmeth) == 2) then
+
+   ABI_CHECK(isdiagmat(ebands%kptrlatt), "kptrlatt must be diagonal when tetra is used.")
+   ABI_CHECK(ebands%nshiftk == 1, "nshiftk must be 1 when tetra is used")
+   nge = get_diag(ebands%kptrlatt); ngw = nge
+   ABI_CHECK(nkbz == product(nge(1:3)), "Wrong nge")
+
+   ABI_ERROR("Not implemented Error!")
+#if 0
+   ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
+   ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                         time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
+
+   ! Compute eig_k and eig_kq in full BZ for the relevant bands around Ef.
+   !ABI_MALLOC(kbz, (3, nkbz))
+   ABI_MALLOC(eig_k, (nb, nkbz))
+   ABI_MALLOC(eig_kq, (nb, nkbz))
+   !ABI_MALLOC(kbz2fs, (nkbz))
+
+   !kbz2fs = -1
+
+   ierr = 0; ik_bz = 0
+   do i3=0,nge(3) - 1
+     do i2=0,nge(2) - 1
+       do i1=0,nge(1) - 1
+         ik_bz = ik_bz + 1
+
+         ! Find correspondence between the grid and the IBZ
+         kk = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
+         !kbz(:, ik_bz) = kk
+
+         !ik_fs = gstore%krank%get_index(kk)
+         !if (ik_fs /= -1) then
+         !  kbz2fs(ik_bz) = ik_fs
+         !else
+         !  !ABI_ERROR(sjoin('kpt:', trim(ktoa(kk)), 'is not in FS!!'))
+         !end if
+
+         ik_ibz = ibz_krank%get_index(kk)
+         if (ik_ibz < 1) then
+           if (ierr <= enough) then
+             ABI_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
+           end if
+           ierr = ierr + 1; cycle
+         end if
+
+         eig_k(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ik_ibz, spin)
+
+         ! Find correspondence between the k+q in the BZ grid and the IBZ.
+         kq = kk + qpt
+         ikq_ibz = ibz_krank%get_index(kq)
+
+         if (ikq_ibz < 1) then
+           if (ierr <= enough) then
+             ABI_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
+           end if
+           ierr = ierr + 1; cycle
+         end if
+
+         eig_kq(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ikq_ibz, spin)
+       end do
+     end do
+   end do
+
+   ABI_CHECK(ierr == 0, "See above warnings")
+   !call ibz_krank%free()
+
+   ! Use libtetra routines.
+   ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
+   ! TODO: Average weights over degenerate states?
+   ltetra = 1
+   !if (ltetra == 1) call wrtout(std_out, " Using linear tetrahedron method from libtetrabz (ltetra 1)")
+   !if (ltetra == 2) call wrtout(std_out, " Using optimized tetrahedron method from libtetrabz (ltetra 2)")
+
+   eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
+
+   ABI_MALLOC(wght_bz, (nb, nb, nkbz))
+   call libtetrabz_dbldelta(ltetra, gstore%cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+
+   ! Reindex from full BZ to my set kpoints.
+   !do ik_bz=1,nkbz
+   !  ik_fs = kbz2fs(ik_bz)
+   !  if (ik_fs /= -1) then
+   !    dbldelta_q(:,:,ik_fs) = wght_bz(:,:,ik_bz)
+   !  else
+   !    !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
+   !  end if
+   !end do
+   ABI_FREE(wght_bz)
+
+   !ABI_FREE(kbz)
+   ABI_FREE(eig_k)
+   ABI_FREE(eig_kq)
+   !ABI_FREE(kbz2fs)
+#endif
+ else
+   ABI_ERROR("Invalid case")
+ end if
+
+end subroutine gqk_dbldelta_qpt
+!!***
+!----------------------------------------------------------------------
+
 !!****f* m_gstore/gqk_free
 !! NAME
 !! gqk_free
@@ -2379,7 +2570,6 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_k2ibz)
  ABI_SFREE(gqk%my_q2ibz)
  ABI_SFREE(gqk%my_q2bz)
-
  ABI_SFREE(gqk%my_wnuq)
  ABI_SFREE(gqk%my_displ_cart)
  ABI_SFREE(gqk%my_g)
@@ -2388,7 +2578,7 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_vk_cart)
  ABI_SFREE(gqk%my_vkmat_cart)
 
- ! Communicators
+ ! Free communicators
  call gqk%kpt_comm%free()
  call gqk%qpt_comm%free()
  call gqk%pert_comm%free()
@@ -2767,8 +2957,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! ============================================
        kq = kk + qpt
 
-       call gstore%krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                                    ebands_timrev, use_symrec=.False.)
+       call gstore%krank_ibz%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+                                         ebands_timrev, use_symrec=.False.)
 
        if (dksqmax > tol12) then
          write(msg, '(3a,es16.6,6a)' ) &
@@ -3112,16 +3302,15 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
  integer,parameter :: master = 0
  integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, my_ip, ipert
- real(dp) :: cpu, wall, gflops !, mem_mb
+ real(dp) :: cpu, wall, gflops
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
 !arrays
+ integer :: ibuffer(9)
  integer :: nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
  integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol), brange_spin(2, ebands%nsppol)
- integer,allocatable :: qglob2bz(:,:), kglob2bz(:,:)
- integer,allocatable :: qbz2ibz(:,:), kbz2ibz(:,:) !, kibz2bz(:), qibz2bz(:), indkk(:), kstar_bz_inds(:)
- integer :: ibuffer(9)
+ integer,allocatable :: qglob2bz(:,:), kglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
 
 ! *************************************************************************
@@ -3168,9 +3357,13 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
    ! Read gstore variables
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kzone"), gstore%kzone))
+   call replace_ch0(gstore%kzone)
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qzone"), gstore%qzone))
+   call replace_ch0(gstore%qzone)
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
+   call replace_ch0(gstore%kfilter)
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_wfk0_path"), gstore%wfk0_path))
+   call replace_ch0(gstore%wfk0_path)
 
    ABI_MALLOC(gstore%qibz, (3, gstore%nqibz))
    ABI_MALLOC(gstore%wtq, (gstore%nqibz))
@@ -3250,7 +3443,6 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
    call xmpi_bcast(gstore%qzone, master, comm, ierr)
    call xmpi_bcast(gstore%kfilter, master, comm, ierr)
    call xmpi_bcast(gstore%wfk0_path, master, comm, ierr)
-
    call xmpi_bcast(brange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%erange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%qibz, master, comm, ierr)
@@ -3280,7 +3472,7 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
  call gstore%distribute_spins__(ebands%mband, brange_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin, comm)
 
  ! Compute krank
- gstore%krank = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
+ gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
  ! TODO: Read it from file, also treat with_vk option that should be read from file
  !gstore_cplex = 2
@@ -3317,6 +3509,7 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
      NCF_CHECK(nf90_inq_ncid(ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
      !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstart"), gqk%bstart))
+     !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstop"), gqk%bstop))
 
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
      ABI_MALLOC(slice_bb, (gstore_cplex, gqk%nb, gqk%nb))
@@ -3333,8 +3526,10 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
           do my_ip=1,gqk%my_npert
             ipert = gqk%my_iperts(my_ip)
             slice_bb = gwork_q(:,:,:, ipert, ik_glob)
+            ! TODO: Finalize implementation.
             if (cplex == gstore_cplex) then
-              gqk%my_g(:, my_ip, :, my_iq, :, my_ik) = slice_bb
+              if (cplex == 2) gqk%my_g(:, my_ip, :, my_iq, :, my_ik) = slice_bb
+              !if (cplex == 1) gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:)
             else
               if (cplex == 1 .and. gstore_cplex == 2) then
                 !gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2
