@@ -135,7 +135,7 @@ module m_gstore
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
  use m_symtk,          only : matr3inv
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ifc,            only : ifc_type
  use m_pawang,         only : pawang_type
@@ -616,6 +616,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  call gstore%krank_ibz%get_mapping(gstore%nkbz, kbz, dksqmax, cryst%gmet, kbz2ibz, &
                                    cryst%nsym, cryst%symafm, cryst%symrel, ebands_timrev, &
                                    use_symrec=.False.)
+
+ !if (kpts_map("symrel", ebands_timvrev, cryst, gstore%krank_ibz, gstore%nkbz, kbz, kbz2ibz) /= 0) then
 
  if (dksqmax > tol12) then
     ABI_ERROR("Cannot map kBZ to IBZ!")
@@ -1774,7 +1776,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 
      do my_ik=1,gqk%my_nk
        iqk_ibz = indkk_kq(1, my_ik)
-       bks_mask(gqk%bstart:gqk%bstart + gqk%nb - 1, iqk_ibz, spin) = .True.
+       bks_mask(gqk%bstart:gqk%bstop, iqk_ibz, spin) = .True.
      end do
    end do
 
@@ -1945,6 +1947,7 @@ end subroutine gstore_calc_my_phonons
 !! gstore_get_lambda_iso_iw
 !!
 !! FUNCTION
+!!  Compute isotropic lambda along the imaginary axis
 !!
 !! INPUTS
 !!
@@ -1971,7 +1974,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
  type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
- real(dp),allocatable :: work_kbz(:,:,:), dbldelta_q(:,:,:)
+ real(dp),allocatable :: dbldelta_q(:,:,:) !, g2_pmnk(:,:,:,:)
 
 !----------------------------------------------------------------------
 
@@ -1981,22 +1984,24 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
 
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is)
-   ABI_MALLOC(work_kbz, (gqk%nb, gqk%nb, gstore%nkbz))
    ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
-   dbldelta_q = one
+   !ABI_MALLOC(g2_pmnk, (gqk%my_npert, gqk%nb, gqk%nb, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
-    ! TODO
-    ! Compute integration weights for the double delta according to different schema.
-    call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+     ! Compute integration weights for the double delta.
+     call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+
+     ! Copy data for to improve memory access in the loops below.
+     !g2_pmnk = gqk%my_g2(:,:,:,my_iq,:)
 
      do my_ik=1,gqk%my_nk
        weight_k = gqk%my_kweight(my_ik, gstore)
-
        do ib_k=1,gqk%nb
          do ib_kq=1,gqk%nb
            do my_ip=1,gqk%my_npert
              g2 = gqk%my_g2(my_ip, ib_kq, my_iq, ib_k, my_ik)
+             !g2 = g2_pmnk(my_ip, ib_kq, ib_k, my_ik)
+             ! TODO: handle w_num ~ 0
              w_nuq = gqk%my_wnuq(my_ip, my_iq)
              lambda(:) = lambda(:) + &
                two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * weight_q * dbldelta_q(ib_kq, ib_k, my_ik)
@@ -2004,10 +2009,10 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
          end do
        end do
      end do
-   end do ! my_ik
+   end do ! my_iq
 
-   ABI_FREE(work_kbz)
    ABI_FREE(dbldelta_q)
+   !ABI_FREE(g2_pmnk)
  end do ! my_is
 
  call xmpi_sum(lambda, gstore%comm, ierr)
@@ -2104,13 +2109,6 @@ pure subroutine gqk_mykpt(gqk, my_ik, gstore, weight_k, kpt)
  kpt = tsign * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
 
  weight_k = gqk%my_kweight(my_ik, gstore)
-
- !select case(gstore%kzone)
- !case ("ibz")
- !  weight_k = gstore%ebands%wtk(ik_ibz)
- !case ("bz")
- !  weight_k = one / gstore%nkbz
- !end select
 
 end subroutine gqk_mykpt
 !!***
@@ -2260,6 +2258,7 @@ end subroutine gqk_myqpt
 !! gqk_dbldelta_qpt
 !!
 !! FUNCTION
+!!  Note that k/q weights are not included in dbldelta_q
 !!
 !! INPUTS
 !!
@@ -2275,7 +2274,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
 !Arguments ------------------------------------
  class(gqk_t),intent(in) :: gqk
- class(gstore_t),target,intent(in) :: gstore
+ class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: my_iq, eph_intmeth
  real(dp),intent(in) :: eph_fsmear
  real(dp),intent(out) :: qpt(3), weight_q, dbldelta_q(gqk%nb, gqk%nb, gqk%my_nk)
@@ -2284,18 +2283,22 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 !scalars
  integer :: nb, nkbz, spin, my_ik, ib1, ib2, band1, band2, iq_ibz, ik_ibz, ikq_ibz, nesting
  !integer :: i1, i2, i3, ltetra,
- real(dp) :: g1, g2, sigma
+ real(dp) :: g1, g2, sigma, weight_k, dksqmax
+ logical :: use_adaptive
  type(ebands_t), pointer :: ebands
+ type(crystal_t), pointer :: cryst
 !arrays
- integer :: nge(3), ngw(3) !, indkk_kq(6,1)
- !integer,allocatable :: kbz2fs(:)
- !real(dp) :: kk(3), kq(3)
+ integer :: nge(3), ngw(3), indkk_kq(6,1)
+ !integer,allocatable :: my_kqmap(:,:) !,kbz2fs(:)
+ real(dp) :: kk(3) !, kq(3)
  !real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:) !, kbz(:,:)
 
 !----------------------------------------------------------------------
 
  nb = gqk%nb; nkbz = gstore%nkbz; spin = gqk%spin
+
  ebands => gstore%ebands
+ cryst => gstore%cryst
 
  call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
@@ -2304,29 +2307,37 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  nesting = merge(1, 0, abs(eph_intmeth) == 2 .and. all(abs(qpt) < tol12))
 
  if (abs(eph_intmeth) == 1 .or. nesting /= 0) then
+   use_adaptive = eph_fsmear < zero .or. abs(eph_intmeth) == 2
+
+   !call gqk%my_kqmap(qpt, my_kqmap)
+   !ABI_FREE(my_kqmap)
 
    sigma = eph_fsmear
    do my_ik=1,gqk%my_nk
      ik_ibz = gqk%my_k2ibz(1, my_ik)
+     call gqk%mykpt(my_ik, gstore, weight_k, kk)
 
-     !call gstore%krank_ibz%get_mapping(gqk%my_nk, my_kpts, dksqmax, cryst%gmet, indkk_kq, &
-     !                                  cryst%nsym, cryst%symafm, cryst%symrel, kpts_timrev_from_kptopt(gstore%ebands%kptopt),&
-     !                                  use_symrec=.False., qpt=qpt)
+     ! Find k + q in the IBZ
+     call gstore%krank_ibz%get_mapping(1, kk, dksqmax, cryst%gmet, indkk_kq, &
+                                       cryst%nsym, cryst%symafm, cryst%symrel, kpts_timrev_from_kptopt(ebands%kptopt),&
+                                       use_symrec=.False., qpt=qpt)
 
-     !if (dksqmax > tol12) then
-     !  ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt), ", dkqsmax:", ftoa(dksqmax)))
-     !end if
+     if (dksqmax > tol12) then
+       ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt), ", dkqsmax:", ftoa(dksqmax)))
+     end if
+     ikq_ibz = indkk_kq(1, 1)
+     !ikq_ibz = my_kqmap(1, my_ik)
 
      do ib2=1,nb
        band2 = ib2 + gqk%bstart - 1
        g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
-       !if (eph_fsmear < zero .or. abs(eph_intmeth) == 2) then
+       !if (use_adaptive) then
        !  sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
        !  !write(std_out, *)"sigma:", sigma * Ha_eV
        !end if
        do ib1=1,nb
          band1 = ib1 + gqk%bstart - 1
-         !if (eph_fsmear < zero .or. abs(eph_intmeth) == 2) then
+         !if (use_adaptive) then
          !  sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
          !end if
          g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
@@ -2353,8 +2364,16 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ABI_MALLOC(eig_k, (nb, nkbz))
    ABI_MALLOC(eig_kq, (nb, nkbz))
    !ABI_MALLOC(kbz2fs, (nkbz))
-
    !kbz2fs = -1
+
+   ! Technical problems:
+   !
+   ! 1) libtetrabz works with the BZ and assume a certaing ordering of the k-points (see below)
+   !    so we have to fill the array with eig_k and eig_kq from the IBZ by remapping the libtetra kk
+   !    to the Abinit IBZ
+
+   ! 2) The dbldelta weights are given in the BZ, while the caller requires weights for k in the IBZ
+   !    and moreover only for the IBZ k-point treated by this MPI proc.
 
    ierr = 0; ik_bz = 0
    do i3=0,nge(3) - 1
@@ -2362,9 +2381,12 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
        do i1=0,nge(1) - 1
          ik_bz = ik_bz + 1
 
-         ! Find correspondence between the grid and the IBZ
+         ! Find correspondence between libtetra mesh and the IBZ.
          kk = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
          !kbz(:, ik_bz) = kk
+
+         ! TODO:
+         ! Find kk in the list of k-points treated by this MPI rank
 
          !ik_fs = gstore%krank%get_index(kk)
          !if (ik_fs /= -1) then
@@ -2546,7 +2568,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw, nb,ierr !,cnt ii,jj,
- integer :: n1,n2,n3,n4,n5,n6,nspden
+ integer :: n1,n2,n3,n4,n5,n6,nspden,ndone
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg, nkpg1
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, out_wall_q, gflops_q !, cpu_k, wall_k, gflops_k
@@ -2736,6 +2758,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Create ddkop object to compute group velocities (if needed)
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
+ ! Open GSTORE file, and read table used for restaring.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
 
  ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
@@ -2745,34 +2768,43 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
  end if
 
+ ndone = count(done_qbz_spin == 1)
+
  ! NB: Write ph data here as we are not guaranteed to have all the IBZ q-points
  ! inside the loop over my_iq if filtering has been used.
- call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
- ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
- ABI_MALLOC(buf_displ_cart, (2, 3, natom, natom3, my_nqibz))
+ if (ndone == 0) then
+   call wrtout(std_out, " Computing phonon frequencies and displacements in the IBZ")
 
- do ii=1,my_nqibz
-   iq_ibz = my_iqibz_inds(ii)
-   call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), buf_displ_cart(:,:,:,:,ii))
- end do
- if (nproc > 1 .and. gstore%nqibz >= nproc) then
-   NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
-   NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phdispl_cart_ibz")))
+   call xmpi_split_block(gstore%nqibz, gstore%comm, my_nqibz, my_iqibz_inds)
+   ABI_MALLOC(buf_wqnu, (natom3, my_nqibz))
+   ABI_MALLOC(buf_displ_cart, (2, 3, natom, natom3, my_nqibz))
+
+   do ii=1,my_nqibz
+     iq_ibz = my_iqibz_inds(ii)
+     call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), buf_displ_cart(:,:,:,:,ii))
+   end do
+   if (nproc > 1 .and. gstore%nqibz >= nproc) then
+     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
+     NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phdispl_cart_ibz")))
+   end if
+
+   if (my_nqibz > 0) then
+     iq_start = my_iqibz_inds(1)
+     ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, &
+                          start=[1, iq_start], count=[natom3, my_nqibz])
+     NCF_CHECK(ncerr)
+     ncerr = nf90_put_var(root_ncid, root_vid("phdispl_cart_ibz"), buf_displ_cart, &
+                          start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
+     NCF_CHECK(ncerr)
+   end if
+
+   ABI_FREE(my_iqibz_inds)
+   ABI_FREE(buf_wqnu)
+   ABI_FREE(buf_displ_cart)
+ else
+   call wrtout(std_out, &
+               sjoin(" Restarting GSRORE calculation. Found: ", itoa(ndone), " (qpt, spin) entries already computed"))
  end if
-
- if (my_nqibz > 0) then
-   iq_start = my_iqibz_inds(1)
-   ncerr = nf90_put_var(root_ncid, root_vid("phfreqs_ibz"), buf_wqnu, &
-                        start=[1, iq_start], count=[natom3, my_nqibz])
-   NCF_CHECK(ncerr)
-   ncerr = nf90_put_var(root_ncid, root_vid("phdispl_cart_ibz"), buf_displ_cart, &
-                        start=[1,1,1,1,iq_start], count=[2, 3, natom, natom3, my_nqibz])
-   NCF_CHECK(ncerr)
- end if
-
- ABI_FREE(my_iqibz_inds)
- ABI_FREE(buf_wqnu)
- ABI_FREE(buf_displ_cart)
 
  ! Loop over my spins.
  do my_is=1,gstore%my_nspins
@@ -2834,7 +2866,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
-       !call cwtime(cpu_k, wall_k, gflops_k, "start")
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        call gqk%mykpt(my_ik, gstore, weight_k, kk)
@@ -3310,7 +3341,8 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
 
    ! Broadcast dimensions.
    if (my_rank == master) then
-     ibuffer = [gstore_cplex, gstore%nkibz, gstore%nkbz, gstore%nqibz, gstore%nqbz, gstore%with_vk, max_nq, max_nk, max_nb]
+     ibuffer = [gstore_cplex, gstore%nkibz, gstore%nkbz, gstore%nqibz, gstore%nqbz, &
+                gstore%with_vk, max_nq, max_nk, max_nb]
    end if
    call xmpi_bcast(ibuffer, master, comm, ierr)
 

@@ -4549,7 +4549,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
        ik_bz = ik_bz + 1
        indkpt(ik_bz) = ik_bz
 
-       ! Find correspondence between the grid and the IBZ
+       ! Find correspondence between libtetra mesh and the IBZ.
        kk = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
        kbz(:, ik_bz) = kk
 
