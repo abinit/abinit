@@ -6,7 +6,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MVer,HM)
+!! Copyright (C) 2010-2022 ABINIT group (MVer, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,6 +94,9 @@ module m_krank
 
  public :: krank_from_kptrlatt  ! Initialize object from kptrlatt
  public :: krank_new            ! Sets up the kpt ranks for comparing kpts
+
+ public :: get_ibz2bz           ! Return array with the index of the IBZ wave vectors in the BZ.
+ public :: star_from_ibz_idx    ! Return array with the indices of the star of the ik_ibz wavevector in the IBZ.
 !!***
 
 contains
@@ -670,6 +673,110 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
 end subroutine krank_get_mapping
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_krank/get_ibz2bz
+!! NAME
+!! get_ibz2bz
+!!
+!! FUNCTION
+!!  Return array with the index of the IBZ wave vectors in the BZ.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_ibz2bz(nibz, nbz, bz2ibz, ibz2bz, ierr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nibz, nbz
+ integer,intent(in) :: bz2ibz(6, nbz)
+ integer,intent(out) :: ierr
+!arrays
+ integer,allocatable,intent(out) :: ibz2bz(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq_bz, iq_ibz, isym_q, trev_q, cnt, g0_q(3)
+ logical :: isirr_q
+
+!----------------------------------------------------------------------
+
+ ABI_MALLOC(ibz2bz, (nibz))
+
+ cnt = 0
+ do iq_bz=1,nbz
+   iq_ibz = bz2ibz(1, iq_bz); isym_q = bz2ibz(2, iq_bz)
+   trev_q = bz2ibz(6, iq_bz); g0_q = bz2ibz(3:5,iq_bz)
+   isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+   if (isirr_q) then
+     cnt = cnt + 1
+     ibz2bz(iq_ibz) = iq_bz
+   end if
+ end do
+
+ ierr = merge(0, 1, cnt == nibz)
+
+end subroutine get_ibz2bz
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_krank/star_from_ibz_idx
+!! NAME
+!! star_from_ibz_idx
+!!
+!! FUNCTION
+!!  Return array with the indices of the star of the ik_ibz wavevector in the IBZ.
+!!  Return number of points in the star, allocate array with the indices of the
+!!  star points in the BZ.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine star_from_ibz_idx(ik_ibz, nkbz, bz2ibz, nk_in_star, kstar_bz_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ik_ibz, nkbz
+ integer,intent(out) :: nk_in_star
+ integer,intent(in) :: bz2ibz(6, nkbz)
+ integer,allocatable,intent(out) :: kstar_bz_inds(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq_bz
+
+!----------------------------------------------------------------------
+
+ nk_in_star = count(bz2ibz(1, :) == ik_ibz)
+ ABI_MALLOC(kstar_bz_inds, (nk_in_star))
+
+ nk_in_star = 0
+ do iq_bz=1,nkbz
+   if (bz2ibz(1, iq_bz) /= ik_ibz) continue
+   nk_in_star = nk_in_star + 1
+   kstar_bz_inds(nk_in_star) = iq_bz
+ end do
+
+end subroutine star_from_ibz_idx
+!!***
+
+!----------------------------------------------------------------------
 
 end module m_krank
 !!***

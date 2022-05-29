@@ -192,7 +192,7 @@ subroutine iso_solver_solve(solver, itemp, kt, niw, imag_w, lambda_ij)
    ABI_CALLOC(solver%delta_iw, (niw))
    ABI_CALLOC(solver%prev_delta_iw, (niw))
  else
-   ! Init values from previous temp. TODO: May use spline
+   ! Init values from previous temperature. TODO: May use spline
    call alloc_copy(solver%zeta_iw, prev_vals)
    ABI_RECALLOC(solver%zeta_iw, (niw))
    ABI_MOVE_ALLOC(prev_vals, solver%prev_zeta_iw)
@@ -275,7 +275,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
  real(dp) :: kt, cpu, wall, gflops
- character(len=5000) :: msg
+ !character(len=5000) :: msg
  !class(crystal_t),target,intent(in) :: cryst
  !class(ebands_t),target,intent(in) :: ebands
  !class(ifc_type),target,intent(in) :: ifc
@@ -290,6 +290,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call cwtime(cpu, wall, gflops, "start")
 
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
+
+ !call gstore%calc_my_phonons(store_phdispl=.False.)
 
  !cryst => gstore%cryst
  !ebands => gstore%ebands
@@ -313,13 +315,14 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  do itemp=1,ntemp
    ! Generate Matsubara imaginary-mesh for this T.
    kt = ktmesh(itemp)
-   !call matsubara_mesh(kt, mats_wcut, niw, imag_w)
+   !call matsubara_mesh(kt, mats_max, niw, imag_w)
    niw = 1
 
    ! Compute lambda(w_i - w_j)
    ABI_MALLOC(lambda_ij, (2 * niw))
    ABI_MALLOC(imag_2w, (2 * niw))
-   call gstore%get_lambda_iso_iw(2 * niw, imag_2w, lambda_ij)
+
+   call gstore%get_lambda_iso_iw(dtset, 2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
    call solver%solve(itemp, kt, niw, imag_w, lambda_ij)
