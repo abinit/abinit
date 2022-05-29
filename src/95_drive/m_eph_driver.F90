@@ -742,33 +742,30 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (11)
+    ! Write e-ph matrix elements to GSTORE file.
 
     if (dtfil%filgstorein /= ABI_NOFILE) then
-      other_gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+      call wrtout([std_out, ab_out], sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
+      gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+    else
+      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+      gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-      !call other_gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-      !                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
-      call other_gstore%free()
-      return
+      !if (nprocs == 1) then
+      !  call wrtout([std_out, ab_out], " DEBUG: Trying to reread GSTORE file")
+      !  other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
+      !  call other_gstore%free()
+      !end if
     end if
 
-    ! Write e-ph matrix elements to disk.
-    path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-    gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
-    call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
-
-    !if (nprocs == 1) then
-    path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-    other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-    call other_gstore%free()
-    !end if
     call gstore%free()
 
  case (12, -12)
-   ! Migdal-Eliashberg
+   ! Migdal-Eliashberg equations (isotropic/anistotropic)
     gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
-    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
+    !if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
     !if (dtset%eph_task == +12) call migdal_eliashber_aniso(gstore, dtset, dtfil)
     call gstore%free()
 

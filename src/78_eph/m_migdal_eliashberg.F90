@@ -233,7 +233,7 @@ iter_loop: do iter=1,solver%max_niter
  ! Compute Delta F
  ! Compute QP DOS
 
- ! Write results to netcdff
+ ! Write results to netcdf file
  if (my_rank == master) then
  end if
 
