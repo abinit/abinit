@@ -3960,14 +3960,14 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
-       call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-                              ebands_timrev, use_symrec=.False.)
-
-       if (dksqmax > tol12) then
-         write(msg, '(3a,es16.6,6a)' ) &
+       !call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
+       !                       ebands_timrev, use_symrec=.False.)
+       !if (dksqmax > tol12) then
+       if (kpts_map("symrel", ebands_timrev, cryst, krank, 1, kq, indkk_kq) /= 0) then
+         write(msg, '(9a)' ) &
           "The WFK file cannot be used to compute phonon linewidths.",ch10, &
-          "At least one of the k-points on the FS could not be generated from a symmetrical one. dksqmax: ", dksqmax,ch10, &
-          "Q-mesh: ", trim(ltoa(gamma_ngqpt)), ", K-mesh (from kptrlatt) ", trim(ltoa(get_diag(ebands%kptrlatt))), &
+          "At least one of the k-points on the FS could not be generated from a symmetrical one.", ch10, &
+          "q-mesh: ", trim(ltoa(gamma_ngqpt)), ", k-mesh (from kptrlatt) ", trim(ltoa(get_diag(ebands%kptrlatt))), &
           'Action: check your WFK file and the (k, q) point input variables.'
           ABI_ERROR(msg)
        end if
