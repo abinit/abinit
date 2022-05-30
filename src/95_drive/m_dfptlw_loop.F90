@@ -93,9 +93,11 @@ contains
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave coefficients of wavefunctions
 !!  d3e_pert1(mpert)=array with the i1pert cases to calculate
 !!  d3e_pert2(mpert)=array with the i2pert cases to calculate
+!!  dimffnl= third dimension of ffnl
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree)
+!!  ffnl(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
@@ -155,8 +157,8 @@ contains
 !! SOURCE
 
     
-subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
-& eigen0,gmet,gprimd,&
+subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
+& eigen0,ffnl,gmet,gprimd,&
 & hdr,kg,kxc,mband,mgfft,mgfftf,mkmem,mk1mem,&
 & mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
@@ -167,7 +169,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mgfft,mgfftf,mk1mem,mkmem,mpert,mpw,natom,nfftf
+ integer,intent(in) :: dimffnl,mband,mgfft,mgfftf,mk1mem,mkmem,mpert,mpw,natom,nfftf
  integer,intent(in) :: nkpt,nkxc,nspinor,nsppol,nylmgr,useylmgr
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -185,6 +187,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert) 
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
  real(dp),intent(in) :: nhat(nfftf,dtset%nspden)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
@@ -544,8 +547,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
                    end if
 
                    !Perform the longwave DFPT part of the 3dte calculation
-                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dtfil,dtset, &
-                   & eigen1,eigen2,gmet,gs_hamkq,gsqcut,i1dir,&
+                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtfil,dtset, &
+                   & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
                    & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i2pertdq,&

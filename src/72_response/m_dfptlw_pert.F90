@@ -93,12 +93,14 @@ contains
 !!  cg2 = first derivative of cg with respect the perturbation i2pert
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!          if 2, COMPLEX
+!!  dimffnl= third dimension of ffnl
 !!  d3e_pert1(mpert)=array with the i1pert cases to calculate
 !!  d3e_pert2(mpert)=array with the i2pert cases to calculate
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen1(2*mband*mband*nkpt_rbz*nsppol)=1st-order eigenvalues for i1pert,i1dir (hartree)
 !!  eigen2(2*mband*mband*nkpt_rbz*nsppol)=1st-order eigenvalues for i2pert,i2dir (hartree)
+!!  ffnl(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  gsqcut=large sphere cut-off
@@ -171,7 +173,7 @@ contains
 !! SOURCE
 
 subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
-& dtfil,dtset,eigen1,eigen2,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
+& dimffnl,dtfil,dtset,eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
@@ -179,7 +181,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
+ integer,intent(in) :: cplex,dimffnl,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
  integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nkxc,nspden
  integer,intent(in) :: nspinor,nsppol,nylmgr,useylmgr
  real(dp),intent(in) :: gsqcut,ucvol
@@ -197,6 +199,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  integer,intent(in) :: d3e_pert1(mpert),d3e_pert2(mpert)
  real(dp),intent(in) :: eigen1(2*mband*mband*mk1mem*nsppol)
  real(dp),intent(in) :: eigen2(2*mband*mband*mk1mem*nsppol)
+ real(dp),intent(in) :: ffnl(mkmem_rbz,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
@@ -217,7 +220,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,bd2tot,icg,idq,ierr,ii,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
+ integer :: bandtot,bd2tot,icg,idq,ierr,ii,ikc,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
  integer :: nband_k,npw_k,spaceworld,tim_getgh1c
  integer :: usepaw
  real(dp) :: tmpim,tmpre,wtk_k
@@ -240,6 +243,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),allocatable :: vlocal1(:,:,:,:)
  real(dp),allocatable :: vpsp1(:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
 ! *************************************************************************
@@ -303,6 +307,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
 !  Loop over k-points
    ikg = 0
+   ikc = 0
    do ikpt = 1, nkpt
 
      nband_k = dtset%nband(ikpt+(isppol-1)*nkpt)
@@ -314,6 +319,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
        bd2tot = bd2tot + 2*nband_k**2
        cycle ! Skip the rest of the k-point loop
      end if
+     ikc= ikc + 1
 
      ABI_MALLOC(occ_k,(nband_k))
      occ_k(:) = occ(1+bandtot:nband_k+bandtot)
@@ -341,13 +347,16 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
        end if
      end if
 
+     ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+     ffnl_k(1:npw_k,:,:,:)=ffnl(ikc,1:npw_k,:,:,:)
+ 
      !Get matrix elements for uniform perturbations
      eig1_k(:)=eigen1(1+bd2tot:2*nband_k**2+bd2tot)
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
 
      !Compute the stationary terms of d3etot depending on response functions
      call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
-     & d3etot_t4_k,d3etot_t5_k,dtset,eig1_k,eig2_k,gs_hamkq,gsqcut,icg,&
+     & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
      & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
@@ -364,8 +373,8 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  
      !Compute the nonvariational geometric term
      if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
-       call dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
-       &  gs_hamkq,gsqcut,icg, &
+       call dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset, &
+       &  ffnl_k,gs_hamkq,gsqcut,icg, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem_rbz,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
@@ -389,6 +398,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      ABI_FREE(kg_k)
      ABI_FREE(ylm_k)
      ABI_FREE(ylmgr_k)
+     ABI_FREE(ffnl_k)
 
    end do !ikpt
 
@@ -817,7 +827,6 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
    ikg=ikg+npw_k
 
  end do
-
 
  DBG_EXIT("COLL")
 
