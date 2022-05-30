@@ -4225,7 +4225,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
    !if (dksqmax > tol12) then
    if (kpts_map("symrec", timrev1, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
-     write(msg, '(3aa)' )&
+     write(msg, '(3a)' )&
        "At least one of the q points in the IBZ_k could not be generated from one in the IBZ.", ch10,&
        "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
      ABI_ERROR(msg)
