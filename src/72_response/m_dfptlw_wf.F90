@@ -265,10 +265,15 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
  !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
- call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                     ! In
+ ABI_MALLOC(ffnlk,(npw_k,0,psps%lmnmax,psps%ntypat))
+ ABI_MALLOC(ffnl1,(npw_k,2,psps%lmnmax,psps%ntypat))
+ ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
+ ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
+ call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                        ! In
  kpt,kpt,i3dir,natom+1,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,& ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
- dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)            ! Out
+ dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&           ! Out
+ reuse_ffnlk=1, reuse_ffnl1=1)                                            ! Optional
 
  !LOOP OVER BANDS
  do iband=1,nband_k
