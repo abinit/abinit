@@ -583,7 +583,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,vxc,xred,ylm,ylmgr)
 
 !Merge stationay and nonvariational contributions
- d3etot=d3etot+d3etot_nv
+ d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then

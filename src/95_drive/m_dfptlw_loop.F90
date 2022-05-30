@@ -277,6 +277,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    ABI_MALLOC(t5_typeI,(2,3,mpert,3,3,3))
  end if
  ABI_MALLOC(tgeom_typeII,(2,3,mpert,3,mpert,3,mpert))
+ tgeom_typeII(:,:,:,:,:,:,:)=zero
  if (any(d3e_pert1(1:natom)==1).and.(d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1)) then
    ABI_MALLOC(tgeom_typeI,(2,3,mpert,3,3,3))
  end if
@@ -771,7 +772,7 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(inout) :: t_typeI(2,3,mpert,3,3,3)
- real(dp),intent(out) :: t_typeII(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: t_typeII(2,3,mpert,3,mpert,3,mpert)
 
 !Local variables-------------------------------
 !scalar 
@@ -853,7 +854,6 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
 
  fac=two_pi ** 2
  i3pert= natom+8
- t_typeII=zero
  do i1pert = 1, mpert
    do i1dir = 1, 3
      if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
