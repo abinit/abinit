@@ -61,6 +61,7 @@ module m_longwave
  use m_mkcore,      only : mkcore
  use m_dfptlw_loop, only : dfptlw_loop
  use m_dfptlw_nv,   only : dfptlw_nv
+ use m_dfptlw_pert, only : preca_ffnl
  use m_initylmg,    only : initylmg
 
  implicit none
@@ -141,7 +142,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,coredens_method,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: ask_accurate,bantot,coredens_method,dimffnl,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: ider,idir0
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc,nylmgr
@@ -175,7 +177,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot_nv(:,:,:,:,:,:,:),doccde(:)
- real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
+ real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:)
+ real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
@@ -472,11 +475,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  useylmgr=1; option=2 ; nylmgr=9
  ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
  ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
- if (psps%useylm==1) then
-   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
- & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
- & rprimd,ylm,ylmgr)                                   
+ call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+& psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+& rprimd,ylm,ylmgr)                                   
+
+!Compute nonlocal form factors ffnl1, for all atoms and all k-points.
+ if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) then
+   ider=1; idir0=4; dimffnl=4
+ else if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
+   ider=2; idir0=4; dimffnl=10
  end if
+ ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+ call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+& dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
 
 !TODO: This part of the implementation does not work properly to select specific directions
 !      for each perturbation. This development is temporarily frozen.
@@ -609,6 +620,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(blkflg)
  ABI_FREE(doccde)
  ABI_FREE(eigen0)
+ ABI_FREE(ffnl)
  ABI_FREE(indsym)
  ABI_FREE(irrzon)
  ABI_FREE(nattyp)
