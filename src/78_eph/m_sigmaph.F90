@@ -2497,7 +2497,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
  character(len=5000) :: msg
- real(dp) :: dksqmax, estep, cpu_all, wall_all, gflops_all, cpu, wall, gflops
+ real(dp) :: estep, cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed, isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
@@ -2564,9 +2564,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_MALLOC(temp, (6, new%nqbz))
 
  qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
- !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
- !if (dksqmax > tol12) then
+
  if (kpts_map("symrec", timrev1, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
    ABI_ERROR("Cannot map qBZ to qIBZ!")
  end if
@@ -2671,9 +2669,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Note symrel and use_symrel.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    kk = new%kcalc(:, ikcalc)
-   !call krank%get_mapping(1, kk, dksqmax, cryst%gmet, indkk_k, cryst%nsym, cryst%symafm, cryst%symrel, new%timrev, &
-   !                       use_symrec=.False.)
-   !if (dksqmax > tol12) then
+
    if (kpts_map("symrel", new%timrev, cryst, krank, 1, kk, indkk_k) /= 0) then
       write(msg, '(11a)' )&
        "The WFK file cannot be used to compute self-energy corrections at k-point: ",ktoa(kk),ch10,&
@@ -3812,7 +3808,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  character(len=5000) :: msg
 !arrays
  !integer,allocatable :: kcalc2ebands(:,:)
- real(dp) :: dksqmax
 
 ! *************************************************************************
 
@@ -3826,9 +3821,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
- !call krank%get_mapping(self%nkcalc, self%kcalc, dksqmax, cryst%gmet, kcalc2ebands, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
- !if (dksqmax > tol12) then
+
  if (kpts_map("symrec", timrev, cryst, krank, self%nkcalc, self%kcalc, kcalc2ebands) /= 0) then
     write(msg, '(3a)' ) &
      "Error mapping input ebands%kptns to sigmaph kcalc",ch10,&
@@ -4119,7 +4112,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  integer,parameter :: timrev1 = 1, master = 0
  integer :: spin, my_rank, iq_ibz, nprocs !, nbcalc_ks !, bstart_ks
  integer :: ikpt, ibz_k, isym_k, itim_k !isym_lgk,
- real(dp) :: dksqmax, cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
  logical :: compute_lgk
  type(lgroup_t),target :: lgk
@@ -4221,9 +4214,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    qptrlatt = 0; qptrlatt(1,1) = self%ngqpt(1); qptrlatt(2,2) = self%ngqpt(2); qptrlatt(3,3) = self%ngqpt(3)
    qrank = krank_from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
 
-   !call qrank%get_mapping(self%nqibz_k, self%qibz_k, dksqmax, cryst%gmet, iqk2dvdb, &
-   !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
-   !if (dksqmax > tol12) then
    if (kpts_map("symrec", timrev1, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
      write(msg, '(3a)' )&
        "At least one of the q points in the IBZ_k could not be generated from one in the IBZ.", ch10,&
@@ -4304,9 +4294,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  ABI_MALLOC(iqk2dvdb, (6, self%nqibz_k))
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
- !call krank%get_mapping(self%nqibz_k, kq_list, dksqmax, cryst%gmet, iqk2dvdb, &
- !                       cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
- !if (dksqmax > tol12) then
+
  if (kpts_map("symrel", self%timrev, cryst, krank, self%nqibz_k, kq_list, iqk2dvdb) /= 0) then
    write(msg, '(11a)' )&
     "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
@@ -5413,7 +5401,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer,parameter :: timrev1 = 1, master = 0
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
- real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
+ real(dp) :: eig0nk, eig0mkq, ediff, cpu, wall, gflops
  character(len=5000) :: msg
  type(krank_t) :: krank, qrank
 !arrays
@@ -5490,10 +5478,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  qptrlatt = 0; qptrlatt(1,1) = sigma%ngqpt(1); qptrlatt(2,2) = sigma%ngqpt(2); qptrlatt(3,3) = sigma%ngqpt(3)
  qrank = krank_from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
- !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, qbz2qpt, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
 
- !if (dksqmax > tol12) then
  if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then
    write(msg, '(3a)' )&
      "At least one of the q-points could not be generated from a symmetrical one in the DVDB.", ch10, &

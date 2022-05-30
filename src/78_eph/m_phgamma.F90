@@ -3232,7 +3232,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: ncerr
 #endif
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
- real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk, dksqmax
+ real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
@@ -3960,9 +3960,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
-       !call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, &
-       !                       ebands_timrev, use_symrec=.False.)
-       !if (dksqmax > tol12) then
        if (kpts_map("symrel", ebands_timrev, cryst, krank, 1, kq, indkk_kq) /= 0) then
          write(msg, '(9a)' ) &
           "The WFK file cannot be used to compute phonon linewidths.",ch10, &
