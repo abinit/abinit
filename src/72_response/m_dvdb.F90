@@ -3334,7 +3334,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
- real(dp) :: dksqmax,r_inscribed_sphere
+ real(dp) :: r_inscribed_sphere
  logical :: found
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -3428,9 +3428,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
  ABI_MALLOC(indqq, (6, nqbz))
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- !if (dksqmax > tol12) then
+
  if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
@@ -3487,9 +3485,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
  ! Redo the mapping with the new IBZ
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- !if (dksqmax > tol12) then
+
  if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
