@@ -51,10 +51,12 @@ module m_dfptlw_pert
  use m_dfptlw_nv,  only : dfptlw_geom
  use m_spacepar,   only : hartredq
  use m_cgtools,    only : dotprod_vn
+ use m_mkffnl,     only : mkffnl
 
  implicit none
 
  public :: dfptlw_pert
+ public :: preca_ffnl
 
  private
 
@@ -520,7 +522,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 end subroutine dfptlw_pert
 !!***
 
-!!****f* ABINIT/lw_elecstic
+!!****f* ABINIT/m_dfptlw_pert/lw_elecstic
 !! NAME
 !!  lw_elecstic
 !!
@@ -657,5 +659,170 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 
 end subroutine lw_elecstic
 !!***
+
+!!****f* ABINIT/m_dfptlw_pert/preca_ffnl
+!! NAME
+!!  preca_ffnl
+!!
+!! FUNCTION
+!!  Calculates the nonlocal form factors and derivatives for all the atoms
+!!  and k points.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2022 ABINIT group (MR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  dimffnl= second dimension of ffnl
+!!  gmet(3,3)= reciprocal-space metric tensor
+!!  gprimd(3,3)= dimensional reciprocal space primitive translations (b^-1)
+!!  ider= if 1 first order derivatives of ffnl are calculated
+!!        if 2 first and second order derivatives of ffnl are calculated
+!!  idir0= variable that controls the way in which the derivatives of ffnl are
+!!         calculated and saved
+!!  kg(3,mpw)=integer coordinates of G vectors in basis sphere
+!!  kptns(3,nkpt)=k points in terms of reciprocal translations
+!!  mband= masimum number of bands
+!!  mkmem= maximum number of k points which can fit in core memory
+!!  mpi_enreg=information about MPI parallelization
+!!  mpw   = maximum number of planewaves in basis sphere (large number)
+!!  nkpt = number of k point
+!!  npwarr(nkpt)=array holding npw for each k point
+!!  nylmgr=second dimension of ylmgr
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!  rmet(3,3)= real-space metric tensor
+!!  useylmgr= if 1 use the derivative of spherical harmonics
+!!  ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics
+!!  ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical harmonics
+!!
+!! OUTPUT
+!!  ffnl(mkmem,npw_k,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,mpi_enreg,mpw,nkpt, &
+& npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+    
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer , intent(in)  :: dimffnl,ider,idir0,mband,mkmem,mpw,nkpt,nylmgr,useylmgr
+ type(pseudopotential_type),intent(in) :: psps
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: kg(3,mpw*mkmem)
+ integer,intent(in) :: npwarr(nkpt)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kptns(3,nkpt),rmet(3,3)
+ real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
+ real(dp),intent(out) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)                       
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,ikc,ikg,ikpt,ilm,nkpg,npw_k
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: kg_k(:,:)
+ real(dp) :: kpt(3)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),kpg_k(:,:)
+ real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:),ylmgr_k_part(:,:,:)
+ 
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ !Loop over k-points
+ ikg=0
+ ikc=0
+ do ikpt = 1, nkpt
+ 
+   npw_k = npwarr(ikpt)
+   if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,1,mpi_enreg%me)) then
+     cycle ! Skip the rest of the k-point loop
+   end if
+   ikc= ikc + 1
+
+   ABI_MALLOC(kg_k,(3,npw_k))
+   ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+   if (dimffnl==4) then
+     ABI_MALLOC(ylmgr_k_part,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ylmgr_k_part(:,:,:)=ylmgr_k(:,1:3,:)
+     
+   else if (dimffnl==10) then
+     ABI_MALLOC(ylmgr_k_part,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ylmgr_k_part(:,:,:)=ylmgr_k(:,:,:)
+   else 
+     msg='wrong size for ffnl via dimffnl!'
+     ABI_BUG(msg)
+   end if
+
+ 
+   kpt(:)= kptns(:,ikpt)
+
+   !Get plane-wave vectors and related data at k
+   kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+   if (psps%useylm==1) then
+     do ilm=1,psps%mpsang*psps%mpsang
+       ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+     end do
+     if (useylmgr==1) then
+       do ilm=1,psps%mpsang*psps%mpsang
+         do ii=1,nylmgr
+           ylmgr_k(1:npw_k,ii,ilm)=ylmgr(1+ikg:npw_k+ikg,ii,ilm)
+         end do
+       end do
+     end if
+   end if
+
+   nkpg=0
+   ABI_MALLOC(kpg_k,(npw_k,nkpg))
+   ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+   call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_k,psps%ffspl,gmet,gprimd,ider,idir0,&
+ & psps%indlmn,kg_k,kpg_k,kpt,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
+ & npw_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k_part)
+
+   ffnl(ikc,1:npw_k,:,:,:)=ffnl_k(1:npw_k,:,:,:)
+
+   ABI_FREE(kg_k)
+   ABI_FREE(ylm_k)
+   ABI_FREE(ylmgr_k)
+   ABI_FREE(ylmgr_k_part)
+   ABI_FREE(ffnl_k)
+   ABI_FREE(kpg_k)
+
+   !Shift arrays memory
+   ikg=ikg+npw_k
+
+ end do
+
+
+ DBG_EXIT("COLL")
+
+end subroutine preca_ffnl
+!!***
+
 end module m_dfptlw_pert
 !!***

@@ -1763,7 +1763,6 @@ end if
    ider=2;idir0=4
  !-- 2nd q-grad of metric (1st q-grad of strain) perturbation
  else if (ipert==natom+3.or.ipert==natom+4) then
-!   ider=2;idir0=0
    ider=2;idir0=4
  end if
 
@@ -1786,7 +1785,6 @@ end if
    do mu=1,3
      do ig=1,npw1_k
        do nu=1,3
-!         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*gprimd(mu,nu)
          ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*rprimd(nu,mu)
        end do
      end do
@@ -1801,7 +1799,6 @@ end if
          do nub=1,3
            nu=gamma(nua,nub)
            ffnl1(ig,4+mu,:,:)=ffnl1(ig,4+mu,:,:)+ &
-!         & ffnl1_tmp(ig,4+nu,:,:)*gprimd(mua,nua)*gprimd(mub,nub)
          & ffnl1_tmp(ig,4+nu,:,:)*rprimd(nua,mua)*rprimd(nub,mub)
          end do
        end do
