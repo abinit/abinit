@@ -36,7 +36,7 @@ module m_kpts
  use m_time,           only : timab, cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
- use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
+ use m_fstrings,       only : sjoin, itoa, ftoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_symkpt,         only : symkpt, symkpt_new
@@ -524,6 +524,7 @@ integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dks
  my_tol = tol12; if (present(dksqmax_tol)) my_tol = dksqmax_tol
 
  ierr = merge(1, 0, dksqmax > my_tol)
+ if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
 
 end function kpts_map
 !!***

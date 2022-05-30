@@ -7,21 +7,19 @@
 !!  The DVDB file is Fortran binary file with a collection of DFPT potentials
 !!  associated to the different phonon perturbations (idir, ipert, qpt).
 !!  DVDB files are produced with the `mrgdv` utility and used in the EPH code
-!!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
+!!  to compute the matrix elements: <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG,GA)
+!! Copyright (C) 2009-2022 ABINIT group (MG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! TODO
-!!  Do we still need to support the case in which the potentials are read from file
-!!  without interpolation? We know that IO is gonna be terrible.
-!!
+!!  -  Do we still need to support the case in which the potentials are read from file
+!!     without interpolation? We know that IO is gonna be terrible.
 !!  - Check spin and MPI-parallelism. Can we distributed nsppol?
-!!  - Release potentials if FFT
 !!
 !! PARENTS
 !!
@@ -66,7 +64,7 @@ module m_dvdb
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
  use m_crystal,       only : crystal_t
- use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
  use m_pawrhoij,      only : pawrhoij_type
@@ -3314,6 +3312,7 @@ end subroutine dvdb_get_maxw
 !!
 !! FUNCTION
 !!  Internal helper function used to prepare the Fourier interpolation of the DFPT potentials.
+!!
 
 subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                             qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, comm)
@@ -3325,13 +3324,13 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: qshift(3,nqshift)
- integer,allocatable,intent(out) :: indqq(:,:),nqsts(:),iqs_dvdb(:), iperm(:)
+ integer,allocatable,intent(out) :: indqq(:,:), nqsts(:), iqs_dvdb(:), iperm(:)
  real(dp),allocatable,intent(out) :: all_rpt(:,:), all_wghatm(:,:,:)
  real(dp),allocatable,intent(out) :: qibz(:,:),qbz(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: timrev1=1, cutmode2=2
+ integer,parameter :: timrev1 = 1, cutmode2 = 2
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
@@ -3381,8 +3380,8 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    end do
 #endif
 
-   ! Compute real-space points in big unit cell
-   ! Use the following indexing (N means ngfft of the adequate direction)
+   ! Compute real-space points in the supercell
+   ! Use the following indexing (N means ngfft on the adequate direction)
    ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
    ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
    nrtot = nqbz
@@ -3424,18 +3423,19 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  end select
 
  ! Find correspondence BZ --> IBZ. Note:
- ! q --> -q symmetry is always used for phonons.
- ! we use symrec instead of symrel
+ !  - q --> -q symmetry is always used for phonons.
+ !  - we use symrec instead of symrel
 
  ABI_MALLOC(indqq, (6, nqbz))
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- call qrank%free()
-
- if (dksqmax > tol12) then
-   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ !if (dksqmax > tol12) then
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
+
+ call qrank%free()
 
  ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
  ABI_MALLOC(iperm, (nqbz))
@@ -3469,16 +3469,14 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    end do
 
    ! Check that nqst has been counted properly.
-   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
+   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst + 1) == iq_ibz, "Wrong iqst")
    if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
      write(msg, "(a,i0,a,f5.2)")"Error in q-point star or q-weights. nqst:", nqst, "wtq * nqbz = ", wtq(iq_ibz) * nqbz
      ABI_ERROR(msg)
    end if
 
    ! Check that the q-point has been found in DVDB.
-   if (.not. found) then
-     ABI_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
-   end if
+   ABI_CHECK(found, sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
 
    iqst = iqst + nqst
    nqsts(iq_ibz) = nqst
@@ -3489,13 +3487,13 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
  ! Redo the mapping with the new IBZ
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- call qrank%free()
-
- if (dksqmax > tol12) then
-   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ !if (dksqmax > tol12) then
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
+ call qrank%free()
 
 end subroutine prepare_ftinterp
 !!***

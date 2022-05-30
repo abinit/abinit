@@ -71,7 +71,7 @@ module m_sigmaph
  use m_cgtk,           only : cgtk_rotate
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_seq
  use m_crystal,        only : crystal_t
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_be !occ_dfde,
  use m_kg,             only : getph, mkkpg
  use m_bz_mesh,        only : isamek
@@ -2489,7 +2489,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, qptopt1 = 1, istwfk1 = 1
+ integer,parameter :: master = 0, qptopt1 = 1, istwfk1 = 1, timrev1 = 1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
  integer :: onpw, ii, ipw, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
@@ -2564,13 +2564,14 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_MALLOC(temp, (6, new%nqbz))
 
  qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
- call qrank%free()
-
- if (dksqmax > tol12) then
-    ABI_ERROR("Cannot map BZ to IBZ!")
+ !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
+ !if (dksqmax > tol12) then
+ if (kpts_map("symrec", timrev1, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
+   ABI_ERROR("Cannot map qBZ to qIBZ!")
  end if
+
+ call qrank%free()
 
  new%ind_qbz2ibz(1,:) = temp(1,:)
  new%ind_qbz2ibz(2,:) = temp(2,:)
@@ -2670,15 +2671,15 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Note symrel and use_symrel.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    kk = new%kcalc(:, ikcalc)
-   call krank%get_mapping(1, kk, dksqmax, cryst%gmet, indkk_k, cryst%nsym, cryst%symafm, cryst%symrel, new%timrev, &
-                          use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-      write(msg, '(4a,es16.6,7a)' )&
-       "The WFK file cannot be used to compute self-energy corrections at kpoint: ",ktoa(kk),ch10,&
-       "The k-point cannot be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
-       "Q-mesh: ",trim(ltoa(new%ngqpt)),", K-mesh (from kptrlatt): ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-       'Action: check your WFK file and the (k, q) point input variables'
+   !call krank%get_mapping(1, kk, dksqmax, cryst%gmet, indkk_k, cryst%nsym, cryst%symafm, cryst%symrel, new%timrev, &
+   !                       use_symrec=.False.)
+   !if (dksqmax > tol12) then
+   if (kpts_map("symrel", new%timrev, cryst, krank, 1, kk, indkk_k) /= 0) then
+      write(msg, '(11a)' )&
+       "The WFK file cannot be used to compute self-energy corrections at k-point: ",ktoa(kk),ch10,&
+       "The k-point cannot be generated from a symmetrical one.", ch10,&
+       "q-mesh: ",trim(ltoa(new%ngqpt)),", k-mesh (from kptrlatt): ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
+       'Action: check your WFK file and the (k, q) point input variables.'
       ABI_ERROR(msg)
    end if
 
@@ -2746,11 +2747,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
        ndeg = ndeg_all(ikcalc, spin)
        ABI_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
        do ii=1,ndeg
-           cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
-           ABI_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-           new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
-             degblock_all(1, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1, &
-             degblock_all(2, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1)]
+         cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
+         ABI_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
+           degblock_all(1, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1, &
+           degblock_all(2, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1)]
        end do
      end do
    end do
@@ -3331,8 +3332,6 @@ end function sigmaph_new
 !! PARENTS
 !!
 !! CHILDREN
-!!      cwtime,cwtime_report,kpts_ibz_from_kptrlatt,krank%free,qrank%free
-!!      qrank%get_mapping,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -3827,16 +3826,16 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
- call krank%get_mapping(self%nkcalc, self%kcalc, dksqmax, cryst%gmet, kcalc2ebands, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
- call krank%free()
-
- if (dksqmax > tol12) then
-    write(msg, '(3a,es16.6)' ) &
+ !call krank%get_mapping(self%nkcalc, self%kcalc, dksqmax, cryst%gmet, kcalc2ebands, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
+ !if (dksqmax > tol12) then
+ if (kpts_map("symrec", timrev, cryst, krank, self%nkcalc, self%kcalc, kcalc2ebands) /= 0) then
+    write(msg, '(3a)' ) &
      "Error mapping input ebands%kptns to sigmaph kcalc",ch10,&
-     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     "the k-point could not be generated from a symmetrical one"
     ABI_ERROR(msg)
  end if
+ call krank%free()
 
  ! store mapping to return
  !if (present(kcalc2ebands)) then
@@ -4221,16 +4220,18 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 
    qptrlatt = 0; qptrlatt(1,1) = self%ngqpt(1); qptrlatt(2,2) = self%ngqpt(2); qptrlatt(3,3) = self%ngqpt(3)
    qrank = krank_from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
-   call qrank%get_mapping(self%nqibz_k, self%qibz_k, dksqmax, cryst%gmet, iqk2dvdb, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
-   call qrank%free()
 
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6,2a)' )&
-       "At least one of the q points in the IBZ_k could not be generated from one in the IBZ. dksqmax: ",dksqmax, ch10,&
+   !call qrank%get_mapping(self%nqibz_k, self%qibz_k, dksqmax, cryst%gmet, iqk2dvdb, &
+   !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+   !if (dksqmax > tol12) then
+   if (kpts_map("symrec", timrev1, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
+     write(msg, '(3aa)' )&
+       "At least one of the q points in the IBZ_k could not be generated from one in the IBZ.", ch10,&
        "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
      ABI_ERROR(msg)
    end if
+   call qrank%free()
+
    ABI_REMALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
    do iq_ibz=1,self%nqibz_k
      self%ind_ibzk2ibz(:, iq_ibz) = iqk2dvdb(:, iq_ibz)
@@ -4303,18 +4304,19 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  ABI_MALLOC(iqk2dvdb, (6, self%nqibz_k))
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
- call krank%get_mapping(self%nqibz_k, kq_list, dksqmax, cryst%gmet, iqk2dvdb, &
-                        cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
- call krank%free()
-
- if (dksqmax > tol12) then
-   write(msg, '(4a,es16.6,7a)' )&
+ !call krank%get_mapping(self%nqibz_k, kq_list, dksqmax, cryst%gmet, iqk2dvdb, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+ !if (dksqmax > tol12) then
+ if (kpts_map("symrel", self%timrev, cryst, krank, self%nqibz_k, kq_list, iqk2dvdb) /= 0) then
+   write(msg, '(11a)' )&
     "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
-    "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+    "At least one of the k+q points could not be generated from a symmetrical one.", ch10,&
     "Q-mesh: ",trim(ltoa(self%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
     "Action: check your WFK file and the k/q point input variables."
    ABI_ERROR(msg)
  end if
+
+ call krank%free()
 
  ABI_FREE(kq_list)
 
@@ -5488,16 +5490,18 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  qptrlatt = 0; qptrlatt(1,1) = sigma%ngqpt(1); qptrlatt(2,2) = sigma%ngqpt(2); qptrlatt(3,3) = sigma%ngqpt(3)
  qrank = krank_from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, qbz2qpt, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- call qrank%free()
+ !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, qbz2qpt, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
 
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6,2a)' )&
-     "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10, &
+ !if (dksqmax > tol12) then
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then
+   write(msg, '(3a)' )&
+     "At least one of the q-points could not be generated from a symmetrical one in the DVDB.", ch10, &
      "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
    ABI_ERROR(msg)
  end if
+ call qrank%free()
+
  call cwtime_report(" oracle_listkk_qbz_qpts", cpu, wall, gflops)
 
  ! Compute qselect using qbz2qpt.
