@@ -350,7 +350,9 @@ end subroutine dfptlw_nv
 !!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
 !!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
+!!  dimffnl= third dimension of ffnl_k
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  ffnl_k(dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives for this k point
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
@@ -405,7 +407,7 @@ end subroutine dfptlw_nv
 !!
 !! SOURCE
 
-subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
+subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
        &  gs_hamkq,gsqcut,icg, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
@@ -414,7 +416,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: icg,ikpt,isppol,istwf_k
+ integer,intent(in) :: dimffnl,icg,ikpt,isppol,istwf_k
  integer,intent(in) :: i1dir,i1pert,i2dir,i2pert,i3dir
  integer,intent(in) :: natom,mkmem,mpw,nband_k,nfft
  integer,intent(in) :: npw_k,n2dq,nspden,nsppol,nylmgr
@@ -429,6 +431,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dtset, &
  integer,intent(in) :: atindx(dtset%natom)
  integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
+ real(dp),intent(in) :: ffnl_k(mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)

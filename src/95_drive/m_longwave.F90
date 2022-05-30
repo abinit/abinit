@@ -486,7 +486,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ider=2; idir0=4; dimffnl=10
  end if
  ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
- call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+ call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
+& dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
 & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
 
 !TODO: This part of the implementation does not work properly to select specific directions
@@ -573,8 +574,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Main loop over the perturbations to calculate the stationary part
- call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dtfil,dtset,&
-& eigen0,gmet,gprimd,&
+ call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
+& eigen0,ffnl,gmet,gprimd,&
 & hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
 & dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
