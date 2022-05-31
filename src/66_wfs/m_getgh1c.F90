@@ -1680,15 +1680,15 @@ end subroutine getgh1dqc
 !! SOURCE
 
 subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qdir1,&    ! In
-&                natom,rmet,rprimd,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                    ! In
+&                natom,rmet,rprimd,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&             ! In
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                            ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&       ! Out
-&                qdir2)                                                                  ! Optional
+&                reuse_ffnlk,reuse_ffnl1,qdir2)                                          ! Optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,ipert,istwf_k,natom,npw_k,npw1_k,nylmgr,qdir1,useylmgr1
- integer,intent(in),optional :: qdir2
+ integer,intent(in),optional :: reuse_ffnlk,reuse_ffnl1,qdir2
  integer,intent(out) :: nkpg,nkpg1
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
@@ -1702,13 +1702,14 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  real(dp),intent(in) :: ylmgr1_k(npw1_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: ylm1_k(npw1_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),allocatable,intent(out) :: dqdqkinpw(:),kinpw1(:)
- real(dp),allocatable,intent(out) :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable,intent(inout) :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable,intent(out) :: kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: dimffnl1,dimffnlk,ider,idir0,ig,mu,mua,mub,ntypat
  integer :: nu,nua,nub
+ integer :: reuse_ffnlk_,reuse_ffnl1_
  logical :: qne0
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -1719,6 +1720,9 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 
 
 ! *************************************************************************
+
+ reuse_ffnlk_ = 0; if (present(reuse_ffnlk)) reuse_ffnlk_ = reuse_ffnlk
+ reuse_ffnl1_ = 0; if (present(reuse_ffnl1)) reuse_ffnl1_ = reuse_ffnl1
 
  ntypat = psps%ntypat
  qne0=((kpq(1)-kpoint(1))**2+(kpq(2)-kpoint(2))**2+(kpq(3)-kpoint(3))**2>=tol14)
@@ -1740,16 +1744,20 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 !===== Preparation of the non-local contributions
 
  dimffnlk=0;if (ipert<=natom) dimffnlk=1
- ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,ntypat))
 
 !Compute nonlocal form factors ffnlk at (k+G)
-if (ipert<=natom) then
- ider=0;idir0=0
- call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
-& gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-& psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
-& psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
-end if
+ if (reuse_ffnlk_ == 0) then
+   ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,ntypat))
+   if (ipert<=natom) then
+     ider=0;idir0=0
+     call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
+   & gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+   & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
+   & psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
+   end if
+ else 
+   ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
+ end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G)
 !TODO: For the second order gradients, this routine is called for each 3 directions of the
@@ -1769,10 +1777,15 @@ end if
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
  dimffnl1=1+ider
  if (ider==2.and.(idir0==0.or.idir0==4)) dimffnl1=3+7*psps%useylm
- ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
- call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
-& psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
-& npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+
+ if (reuse_ffnl1_ == 0) then
+   ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
+   call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
+  & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+  & npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+ else
+   ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
+ end if
 
 !Convert nonlocal form factors to cartesian coordinates.
 !For metric (strain) perturbation only.
