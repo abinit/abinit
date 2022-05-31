@@ -2474,7 +2474,7 @@ subroutine write_a2fw_header()
  write(unt,'(2a)')             '# ngqpt: ',trim(ltoa(a2f%ngqpt))
  write(unt,'(a,i0,3(a,e16.6))')'# number of frequencies: ',a2f%nomega," between omega_min: ",a2f%omega_min,&
                                ' Ha and omega_max: ',a2f%omega_max,' Ha with step:',a2f%wstep
- write(unt,'(a,e16.6)')         '#  the smearing width for gaussians is ',a2f%smear
+ write(unt,'(a,e16.6)')        '#  the smearing width for gaussians is ',a2f%smear
  write(unt,'(a,e16.6)')"# Total DOS at Fermi level ",sum(a2f%n0)
  do spin=1,a2f%nsppol
    write(unt,"(a,i0,a,e16.6)")"# The DOS at Fermi level for spin ",spin," is ",a2f%n0(spin)

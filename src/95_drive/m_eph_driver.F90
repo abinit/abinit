@@ -163,12 +163,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
+ integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
  integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
- real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
+ real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
@@ -742,33 +742,33 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (11)
-    ! Write e-ph matrix elements to GSTORE file.
+   ! Write e-ph matrix elements to GSTORE file.
 
-    if (dtfil%filgstorein /= ABI_NOFILE) then
-      call wrtout([std_out, ab_out], sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
-      gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
-    else
-      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-      gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
-      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   if (dtfil%filgstorein /= ABI_NOFILE) then
+     call wrtout([std_out, ab_out], sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
+     gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+   else
+     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     gstore = gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-      ! DEBUG
-      if (nprocs == 1) then
-        call wrtout([std_out, ab_out], " DEBUG: Trying to reread GSTORE file")
-        other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-        call other_gstore%free()
-      end if
-    end if
+     ! DEBUG
+     if (nprocs == 1) then
+       call wrtout(std_out, " DEBUG: Trying to reread GSTORE file")
+       other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
+       call other_gstore%free()
+     end if
+   end if
 
-    call gstore%free()
+   call gstore%free()
 
  case (12, -12)
-     ! Migdal-Eliashberg equations (isotropic/anisotropic case)
-    gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
-    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
-    !if (dtset%eph_task == +12) call migdal_eliashber_aniso(gstore, dtset, dtfil)
-    call gstore%free()
+   ! Migdal-Eliashberg equations (isotropic/anisotropic case)
+   gstore = gstore_from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
+   if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
+   !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
+   call gstore%free()
 
  case (15, -15)
    ! Write average of DFPT potentials to file.

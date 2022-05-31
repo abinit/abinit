@@ -645,11 +645,12 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    ii = self%rank2symtime_(irank)
    isym = 1 + mod(ii - 1, nsym)
    itimrev = (ii - 1) / nsym
-   indkk(1, ikpt2) = ikpt1
-   indkk(2, ikpt2) = isym
    kpt1a = (1 - 2 * itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
    dk(:) = kptns2(:,ikpt2) + my_qpt - kpt1a(:)
    dkint(:) = nint(dk(:) + tol12)
+
+   indkk(1, ikpt2) = ikpt1
+   indkk(2, ikpt2) = isym
    indkk(3:5, ikpt2) = dkint(:)
    indkk(6, ikpt2) = itimrev
 

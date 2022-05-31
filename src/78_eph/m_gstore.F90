@@ -125,7 +125,7 @@ module m_gstore
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
- use m_krank,          only : krank_t, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
+ use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
@@ -219,6 +219,12 @@ type, public :: gqk_t
   !integer,allocatable :: my_q2glob(:)
   ! (my_nq)
   ! Mapping my_iq index --> global index in the g(q, k) matrix.
+
+  !real(dp),allocatable :: my_kpts(:,:)
+  ! (3, my_nkpt)
+
+  !real(dp),allocatable :: my_wtk(:)
+  ! (my_nkpt)
 
   real(dp),allocatable :: my_vk_cart(:,:,:)
   ! (3, nb, my_nk)
@@ -1027,7 +1033,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
  if (my_rank == master) then
    unts = [std_out, ab_out]
    call wrtout(unts, "=== Gstore parameters ===")
-   call wrtout(unts, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
+   !call wrtout(unts, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
    call wrtout(unts, sjoin(" kzone:", gstore%kzone))
    call wrtout(unts, sjoin(" qzone:", gstore%qzone))
    call wrtout(unts, sjoin(" kfilter:", gstore%kfilter))
@@ -1300,7 +1306,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
 !scalars
  integer,parameter :: tetra_opt0 = 0
  integer :: nsppol, ierr, cnt, spin, band, ib, ii, max_nb, all_nproc, my_rank, comm, ebands_timrev
- integer :: ik_bz, ik_ibz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, iflag, nk_in_star
+ integer :: ik_bz, ik_ibz, iflag, nk_in_star
  real(dp) :: max_occ
  character(len=80) :: errorstring
  type(ebands_t),pointer :: ebands
@@ -1434,8 +1440,8 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tetra_opt0 = 0
- integer :: nsppol, ierr, cnt, spin, ii, all_nproc, my_rank, comm, ebands_timrev, band
- integer :: ik_bz, ik_ibz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, iflag, nk_in_star, gap_err
+ integer :: nsppol, cnt, spin, ii, all_nproc, my_rank, comm, ebands_timrev, band ! ierr,
+ integer :: ik_bz, ik_ibz, iflag, nk_in_star, gap_err
  logical :: assume_gap
  real(dp) :: ee, abs_erange1, abs_erange2, vmax, cmin
  type(ebands_t),pointer :: ebands
@@ -1443,7 +1449,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  type(gaps_t) :: gaps
 !arrays
  integer,allocatable :: kstar_bz_inds(:)
- real(dp):: qpt(3)
+ !real(dp):: qpt(3)
 !----------------------------------------------------------------------
 
  comm = gstore%comm
@@ -1712,7 +1718,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 !arrays
  integer,allocatable :: indkk_kq(:,:)
  real(dp) :: qpt(3)
- real(dp),allocatable :: my_kpts(:,:), my_weights(:)
+ real(dp),allocatable :: my_kpts(:,:), my_wtk(:)
 
 !----------------------------------------------------------------------
 
@@ -1732,8 +1738,8 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
    end do
 
    ! as well as the image of k+q in the IBZ.
-   call gqk%get_all_mykpts(gstore, my_kpts, my_weights)
-   ABI_FREE(my_weights)
+   call gqk%get_all_mykpts(gstore, my_kpts, my_wtk)
+   ABI_FREE(my_wtk)
    ABI_MALLOC(indkk_kq, (6, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
@@ -2034,7 +2040,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
 
- call wrtout(std_out, sjoin("Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"))
+ call wrtout(std_out, sjoin(" Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"))
 
  ABI_MALLOC(deltaw_nuq, (nw))
  a2fw = zero
@@ -2049,6 +2055,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
    ABI_MALLOC(g2_mnkp, (gqk%nb, gqk%nb, gqk%my_nk, gqk%my_npert))
 
    do my_iq=1,gqk%my_nq
+
      ! Compute integration weights for the double delta.
      call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
 
@@ -2240,12 +2247,12 @@ end function gqk_my_kweight
 !!
 !! SOURCE
 
-subroutine gqk_get_all_mykpts(gqk, gstore, my_kpts, my_weights)
+subroutine gqk_get_all_mykpts(gqk, gstore, my_kpts, my_wtk)
 
 !Arguments ------------------------------------
  class(gqk_t),intent(in) :: gqk
  class(gstore_t),intent(in) :: gstore
- real(dp),allocatable,intent(out) :: my_kpts(:,:), my_weights(:)
+ real(dp),allocatable,intent(out) :: my_kpts(:,:), my_wtk(:)
 
 !Local variables ------------------------------
 !scalars
@@ -2254,10 +2261,10 @@ subroutine gqk_get_all_mykpts(gqk, gstore, my_kpts, my_weights)
 !----------------------------------------------------------------------
 
  ABI_MALLOC(my_kpts, (3, gqk%my_nk))
- ABI_MALLOC(my_weights, (gqk%my_nk))
+ ABI_MALLOC(my_wtk, (gqk%my_nk))
 
  do my_ik=1,gqk%my_nk
-   call gqk%mykpt(my_ik, gstore, my_weights(my_ik), my_kpts(:, my_ik))
+   call gqk%mykpt(my_ik, gstore, my_wtk(my_ik), my_kpts(:, my_ik))
  end do
 
 end subroutine gqk_get_all_mykpts
@@ -2346,16 +2353,18 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 !Local variables ------------------------------
 !scalars
  integer :: nb, nkbz, spin, my_ik, ib1, ib2, band1, band2, iq_ibz, ik_ibz, ikq_ibz, nesting, ebands_timrev
- !integer :: i1, i2, i3, ltetra,
- real(dp) :: g1, g2, sigma, weight_k
+ integer :: i1, i2, i3, ierr, ik_bz, ltetra
+ real(dp) :: g1, g2, sigma, weight_k, cpu, wall, gflops
  logical :: use_adaptive
  type(ebands_t), pointer :: ebands
  type(crystal_t), pointer :: cryst
+ type(krank_t) :: my_krank
 !arrays
- integer :: nge(3), ngw(3), indkk_kq(6,1)
- !integer,allocatable :: my_kqmap(:,:) !,kbz2fs(:)
- real(dp) :: kk(3) !, kq(3)
- !real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:) !, kbz(:,:)
+ integer :: nge(3), ngw(3)
+ integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
+ real(dp) :: kk(3)
+ real(dp),allocatable :: my_kpts(:,:), my_wtk(:)
+ real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
 
 !----------------------------------------------------------------------
 
@@ -2371,24 +2380,26 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  ! In this case we fall back to gaussian.
  nesting = merge(1, 0, abs(eph_intmeth) == 2 .and. all(abs(qpt) < tol12))
 
+ call gqk%get_all_mykpts(gstore, my_kpts, my_wtk)
+
  if (abs(eph_intmeth) == 1 .or. nesting /= 0) then
    use_adaptive = eph_fsmear < zero .or. abs(eph_intmeth) == 2
 
-   !call gqk%my_kqmap(qpt, my_kqmap)
-   !ABI_FREE(my_kqmap)
+   ! TODO: implement cache?
+   !call gqk%get_my_kqmap(my_iq, qpt, gstore, my_kqmap)
+
+   ! Find k + q in the IBZ for all my k-points.
+   ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
+   if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, my_kpts, my_kqmap, qpt=qpt) /= 0) then
+     ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt)))
+   end if
 
    sigma = eph_fsmear
    do my_ik=1,gqk%my_nk
      ik_ibz = gqk%my_k2ibz(1, my_ik)
      call gqk%mykpt(my_ik, gstore, weight_k, kk)
 
-     ! Find k + q in the IBZ
-     if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kk, indkk_kq, qpt=qpt) /= 0) then
-       ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt)))
-     end if
-
-     ikq_ibz = indkk_kq(1, 1)
-     !ikq_ibz = my_kqmap(1, my_ik)
+     ikq_ibz = my_kqmap(1, my_ik)
 
      do ib2=1,nb
        band2 = ib2 + gqk%bstart - 1
@@ -2403,10 +2414,12 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
          !  sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
          !end if
          g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
-         dbldelta_q(ib1, ib2, my_ik) = (g1 * g2) ! / fs%nktot
+         dbldelta_q(ib1, ib2, my_ik) = g1 * g2 ! / fs%nktot
        end do
      end do
    end do
+
+   ABI_FREE(my_kqmap)
 
  else if (abs(eph_intmeth) == 2) then
 
@@ -2415,18 +2428,10 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    nge = get_diag(ebands%kptrlatt); ngw = nge
    ABI_CHECK(nkbz == product(nge(1:3)), "Wrong nge")
 
-   ABI_ERROR("Not implemented Error!")
-#if 0
-   ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
-   ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
-                         time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
-
    ! Compute eig_k and eig_kq in full BZ for the relevant bands around Ef.
-   !ABI_MALLOC(kbz, (3, nkbz))
+   ABI_MALLOC(kmesh, (3, nkbz))
    ABI_MALLOC(eig_k, (nb, nkbz))
    ABI_MALLOC(eig_kq, (nb, nkbz))
-   !ABI_MALLOC(kbz2fs, (nkbz))
-   !kbz2fs = -1
 
    ! Technical problems:
    !
@@ -2445,78 +2450,76 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
          ! Find correspondence between libtetra mesh and the IBZ.
          kk = ([i1, i2, i3] + ebands%shiftk(:, 1)) / nge(:)
-         !kbz(:, ik_bz) = kk
-
-         ! TODO:
-         ! Find kk in the list of k-points treated by this MPI rank
-
-         !ik_fs = gstore%krank%get_index(kk)
-         !if (ik_fs /= -1) then
-         !  kbz2fs(ik_bz) = ik_fs
-         !else
-         !  !ABI_ERROR(sjoin('kpt:', trim(ktoa(kk)), 'is not in FS!!'))
-         !end if
-
-         ik_ibz = ibz_krank%get_index(kk)
-         if (ik_ibz < 1) then
-           if (ierr <= enough) then
-             ABI_WARNING(sjoin('kpt:', trim(ktoa(kk)), 'has no symmetric among the k-points!'))
-           end if
-           ierr = ierr + 1; cycle
-         end if
-
-         eig_k(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ik_ibz, spin)
-
-         ! Find correspondence between the k+q in the BZ grid and the IBZ.
-         kq = kk + qpt
-         ikq_ibz = ibz_krank%get_index(kq)
-
-         if (ikq_ibz < 1) then
-           if (ierr <= enough) then
-             ABI_WARNING(sjoin('kpt + qpt:', trim(ktoa(kq)), 'has no symmetric among the k-points!'))
-           end if
-           ierr = ierr + 1; cycle
-         end if
-
-         eig_kq(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ikq_ibz, spin)
+         kmesh(:, ik_bz) = kk
        end do
      end do
    end do
 
-   ABI_CHECK(ierr == 0, "See above warnings")
-   !call ibz_krank%free()
+   ! Map libtetra BZ mesh to IBZ and fill eig_k
+   !call cwtime(cpu, wall, gflops, "start")
+   ABI_MALLOC(kmesh_map, (6, nkbz))
 
-   ! Use libtetra routines.
-   ! Compute weights for double delta integration. Note that libtetra assumes Ef set to zero.
+   if (kpts_map("symrec", ebands_timrev, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map) /= 0) then
+     ABI_ERROR("Cannot map libtetra mesh to IBZ:")
+   end if
+
+   do ik_bz=1,nkbz
+     ik_ibz = kmesh_map(1, ik_bz)
+     eig_k(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ik_ibz, spin) - ebands%fermie
+   end do
+
+   ! Map libtetra BZ mesh + q to IBZ and fill eig_kq
+   if (kpts_map("symrec", ebands_timrev, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map, qpt=qpt) /= 0) then
+     ABI_ERROR(sjoin("Cannot map libtetra k+q to IBZ with q:", ktoa(qpt)))
+   end if
+
+   do ik_bz=1,nkbz
+     ikq_ibz = kmesh_map(1, ik_bz)
+     eig_kq(:, ik_bz) = ebands%eig(gqk%bstart:gqk%bstop, ikq_ibz, spin) - ebands%fermie
+   end do
+
+   ABI_FREE(kmesh_map)
+   !call cwtime_report(" kmesh_map", cpu, wall, gflops)
+
+   ! Call libtetra routine to compute weights for double delta integration.
+   ! Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
+   ! NB: This is a bootleneck, can pass comm_kp
    ltetra = 1
    !if (ltetra == 1) call wrtout(std_out, " Using linear tetrahedron method from libtetrabz (ltetra 1)")
    !if (ltetra == 2) call wrtout(std_out, " Using optimized tetrahedron method from libtetrabz (ltetra 2)")
 
-   eig_k = eig_k - ebands%fermie; eig_kq = eig_kq - ebands%fermie
-
    ABI_MALLOC(wght_bz, (nb, nb, nkbz))
    call libtetrabz_dbldelta(ltetra, gstore%cryst%gprimd, nb, nge, eig_k, eig_kq, ngw, wght_bz) !, comm=comm)
+   !call cwtime_report(" libtetrabz_dbldelta", cpu, wall, gflops)
 
-   ! Reindex from full BZ to my set kpoints.
-   !do ik_bz=1,nkbz
-   !  ik_fs = kbz2fs(ik_bz)
-   !  if (ik_fs /= -1) then
-   !    dbldelta_q(:,:,ik_fs) = wght_bz(:,:,ik_bz)
-   !  else
-   !    !write(std_out,*)"should be zero :", wght_bz(:,:,ik_bz)
-   !  end if
-   !end do
+   !call gqk%get_all_mykpts(gstore, my_kpts, my_wtk)
+   my_krank = krank_new(gqk%my_nk, my_kpts)
+
+   ! Reindex from full BZ to my set of kpoints and rescale weights
+   ierr = 0
+   do ik_bz=1,nkbz
+     my_ik = my_krank%get_index(kmesh(:, ik_bz))
+     if (my_ik /= -1) then
+       dbldelta_q(:,:,my_ik) = wght_bz(:,:,ik_bz) * gstore%nkbz
+       ierr = ierr + 1
+     end if
+   end do
+   ABI_CHECK(ierr == gqk%my_nk, "count != my_nk")
+   call my_krank%free()
+   !call cwtime_report(" transfer", cpu, wall, gflops)
+
    ABI_FREE(wght_bz)
-
-   !ABI_FREE(kbz)
+   ABI_FREE(kmesh)
    ABI_FREE(eig_k)
    ABI_FREE(eig_kq)
-   !ABI_FREE(kbz2fs)
-#endif
+
  else
    ABI_ERROR(sjoin("Invalid eph_intmeth:", itoa(eph_intmeth)))
  end if
+
+ ABI_FREE(my_wtk)
+ ABI_FREE(my_kpts)
 
 end subroutine gqk_dbldelta_qpt
 !!***
@@ -3467,7 +3470,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Set MPI grid
- call gstore%set_mpi_grid__(gstore_cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(with_cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
