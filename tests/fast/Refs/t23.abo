@@ -2,7 +2,7 @@
 .Version 9.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -263,34 +263,34 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   2, nband=  8, wtk=  1.00000, kpt=  0.5000  0.0000  0.0000 (reduced coord)
   -6.04772   -3.97464    3.92317    6.41509    7.09141    7.09141    8.86344    8.86344
  Total charge density [el/Bohr^3]
-      Maximum=    7.7261E-02  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    7.5218E-02  at reduced coord.    0.0417    0.0000    0.0000
-      Minimum=    2.6458E-03  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=    2.7199E-03  at reduced coord.    0.0417    0.5000    0.5000
+)     Maximum=    7.7261E-02  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    7.5218E-02  at reduced coord.    0.0417    0.0000    0.0000
+)     Minimum=    2.6458E-03  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=    2.7199E-03  at reduced coord.    0.0417    0.5000    0.5000
    Integrated=    8.0000E+00
  Spin up density      [el/Bohr^3]
-      Maximum=    4.1065E-02  at reduced coord.    0.1250    0.8750    0.1250
- Next maximum=    4.1065E-02  at reduced coord.    0.1250    0.8750    0.8750
-      Minimum=    1.2642E-03  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=    1.3014E-03  at reduced coord.    0.0417    0.5000    0.5000
+)     Maximum=    4.1065E-02  at reduced coord.    0.1250    0.8750    0.1250
+)Next maximum=    4.1065E-02  at reduced coord.    0.1250    0.8750    0.8750
+)     Minimum=    1.2642E-03  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=    1.3014E-03  at reduced coord.    0.0417    0.5000    0.5000
    Integrated=    5.0000E+00
  Spin down density    [el/Bohr^3]
-      Maximum=    3.8888E-02  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    3.7834E-02  at reduced coord.    0.0417    0.0000    0.0000
-      Minimum=    1.3816E-03  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=    1.4184E-03  at reduced coord.    0.0417    0.5000    0.5000
+)     Maximum=    3.8888E-02  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    3.7834E-02  at reduced coord.    0.0417    0.0000    0.0000
+)     Minimum=    1.3816E-03  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=    1.4184E-03  at reduced coord.    0.0417    0.5000    0.5000
    Integrated=    3.0000E+00
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    2.4887E-02  at reduced coord.    0.1667    0.1250    0.8125
- Next maximum=    2.4887E-02  at reduced coord.    0.1667    0.8125    0.1250
-      Minimum=   -1.3129E-03  at reduced coord.    0.3750    0.0000    0.0000
- Next minimum=   -1.3129E-03  at reduced coord.    0.6250    0.0000    0.0000
+)     Maximum=    2.4887E-02  at reduced coord.    0.1667    0.1250    0.8125
+)Next maximum=    2.4887E-02  at reduced coord.    0.1667    0.8125    0.1250
+)     Minimum=   -1.3129E-03  at reduced coord.    0.3750    0.0000    0.0000
+)Next minimum=   -1.3129E-03  at reduced coord.    0.6250    0.0000    0.0000
    Integrated=    2.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    4.7898E-01  at reduced coord.    0.1250    0.2500    0.7500
- Next maximum=    4.7898E-01  at reduced coord.    0.1250    0.2500    0.2500
-      Minimum=   -4.4372E-02  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=   -4.3020E-02  at reduced coord.    0.0417    0.5000    0.5000
+)     Maximum=    4.7898E-01  at reduced coord.    0.1250    0.2500    0.7500
+)Next maximum=    4.7898E-01  at reduced coord.    0.1250    0.2500    0.2500
+)     Minimum=   -4.4372E-02  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=   -4.3020E-02  at reduced coord.    0.0417    0.5000    0.5000
 
 == END DATASET(S) ==============================================================
 ================================================================================

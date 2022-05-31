@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -670,6 +670,14 @@ subroutine outvar_i_n (dtsets,iout,&
 !###########################################################
 !### 03. Print all the input variables (L)
 !##
+
+!lambsig
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%lambsig(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'lambsig','DPR',0)
 
 !lexexch
  narr=mxvals%ntypat             ! default size for all datasets

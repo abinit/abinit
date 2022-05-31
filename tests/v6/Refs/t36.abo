@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t36/t36.in
-- output file    -> t36.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t36/t36.abi
+- output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
 
@@ -34,7 +34,7 @@
 -    mband =          12        mffmem =           1         mkmem =           2
        mpw =         232          nfft =        5832          nkpt =           2
 ================================================================================
-P This job should need less than                       2.496 Mbytes of memory.
+P This job should need less than                       2.664 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.087 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -139,6 +139,8 @@ P          mk1mem2         32
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     5.00000000E-01  0.00000000E+00  5.00000000E-01
           rfatpol1          1       1
@@ -231,8 +233,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.11743
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/40zr.971106_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/40zr.971106_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/40zr.971106_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/40zr.971106_mod
 - Zr, exnc+self, no core, rcs=1.75, rcp=1.55, rcd=1.7, ecut 25/34 (Ar+3d10)+4s2 4p
 - 40.00000  12.00000    971106                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -249,8 +251,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    2.511056   -0.210407
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.phoney_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.phoney_mod
 - Compromise psp for oxygen with rc=1.5 ec=25 double reference
 -  8.00000   6.00000    980710                znucl, zion, pspdat
     5    3    1    1       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -436,8 +438,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.99710
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/40zr.971106_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/40zr.971106_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/40zr.971106_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/40zr.971106_mod
 - Zr, exnc+self, no core, rcs=1.75, rcp=1.55, rcd=1.7, ecut 25/34 (Ar+3d10)+4s2 4p
 - 40.00000  12.00000    971106                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -454,8 +456,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    2.511056   -0.210407
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.phoney_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.phoney_mod
 - Compromise psp for oxygen with rc=1.5 ec=25 double reference
 -  8.00000   6.00000    980710                znucl, zion, pspdat
     5    3    1    1       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -472,7 +474,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -518,10 +519,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -542,7 +541,7 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  8   10.947853546733     -1.557E-06 1.993E-09 8.246E-06
  ETOT  9   10.947853526467     -2.027E-08 5.455E-11 6.306E-08
  ETOT 10   10.947853526305     -1.614E-10 4.018E-13 1.369E-09
- ETOT 11   10.947853526316      1.023E-11 1.490E-14 2.155E-11
+ ETOT 11   10.947853526315      1.000E-11 1.490E-14 2.155E-11
 
  At SCF step   11       vres2   =  2.16E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -580,10 +579,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -596,15 +593,15 @@ tolerances: {tolvrs: 1.00E-10, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   985.21071321450     -2.743E+02 1.499E+00 4.979E+05
  ETOT  2   242.67190113960     -7.425E+02 1.907E+00 1.136E+05
- ETOT  3   3.3007223865380     -2.394E+02 1.940E-01 6.343E+01
+ ETOT  3   3.3007223865382     -2.394E+02 1.940E-01 6.343E+01
  ETOT  4   3.0854091201785     -2.153E-01 5.300E-04 1.104E+00
  ETOT  5   3.0825324978121     -2.877E-03 7.613E-06 2.730E-01
  ETOT  6   3.0821752798145     -3.572E-04 5.640E-07 4.918E-02
  ETOT  7   3.0820990181447     -7.626E-05 6.374E-08 4.396E-05
- ETOT  8   3.0820988655458     -1.526E-07 7.040E-10 2.960E-06
+ ETOT  8   3.0820988655456     -1.526E-07 7.040E-10 2.960E-06
  ETOT  9   3.0820988606946     -4.851E-09 4.473E-12 2.519E-07
- ETOT 10   3.0820988604365     -2.581E-10 1.399E-13 1.212E-08
- ETOT 11   3.0820988604113     -2.524E-11 1.877E-14 1.627E-11
+ ETOT 10   3.0820988604367     -2.578E-10 1.399E-13 1.212E-08
+ ETOT 11   3.0820988604115     -2.524E-11 1.877E-14 1.627E-11
 
  At SCF step   11       vres2   =  1.63E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -641,10 +638,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -659,13 +654,13 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2   860.83526610161     -1.709E+02 2.394E+00 7.550E+05
  ETOT  3   11.805228267926     -8.490E+02 4.489E-01 5.496E+03
  ETOT  4   3.7162274014231     -8.089E+00 7.817E-03 4.244E+01
- ETOT  5   3.6378127774650     -7.841E-02 1.286E-04 2.191E+00
+ ETOT  5   3.6378127774649     -7.841E-02 1.286E-04 2.191E+00
  ETOT  6   3.6351719208292     -2.641E-03 4.402E-06 1.847E-02
- ETOT  7   3.6351439920220     -2.793E-05 3.664E-08 1.951E-03
- ETOT  8   3.6351413796358     -2.612E-06 2.469E-09 1.010E-05
- ETOT  9   3.6351413619537     -1.768E-08 2.721E-11 6.106E-07
- ETOT 10   3.6351413612307     -7.230E-10 7.814E-13 1.215E-09
- ETOT 11   3.6351413612181     -1.262E-11 7.996E-15 3.139E-11
+ ETOT  7   3.6351439920219     -2.793E-05 3.664E-08 1.951E-03
+ ETOT  8   3.6351413796357     -2.612E-06 2.469E-09 1.010E-05
+ ETOT  9   3.6351413619536     -1.768E-08 2.721E-11 6.106E-07
+ ETOT 10   3.6351413612307     -7.229E-10 7.814E-13 1.215E-09
+ ETOT 11   3.6351413612180     -1.273E-11 7.996E-15 3.139E-11
 
  At SCF step   11       vres2   =  3.14E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -703,10 +698,8 @@ tolerances: {tolvrs: 1.00E-10, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -721,14 +714,14 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2   67.306740350273     -3.184E+02 3.050E-01 3.133E+04
  ETOT  3   4.4185610367928     -6.289E+01 2.139E-02 1.602E+02
  ETOT  4   3.9947596821010     -4.238E-01 4.761E-04 7.331E-01
- ETOT  5   3.9932450857870     -1.515E-03 3.623E-06 7.004E-03
- ETOT  6   3.9932357432411     -9.343E-06 7.087E-08 2.316E-03
+ ETOT  5   3.9932450857871     -1.515E-03 3.623E-06 7.004E-03
+ ETOT  6   3.9932357432412     -9.343E-06 7.087E-08 2.316E-03
  ETOT  7   3.9932319105756     -3.833E-06 6.623E-09 1.842E-04
  ETOT  8   3.9932316096028     -3.010E-07 2.753E-10 9.661E-06
- ETOT  9   3.9932315970274     -1.258E-08 1.264E-11 1.603E-07
- ETOT 10   3.9932315967393     -2.881E-10 4.978E-13 2.337E-08
- ETOT 11   3.9932315966909     -4.843E-11 7.888E-14 1.804E-09
- ETOT 12   3.9932315966768     -1.410E-11 5.396E-15 6.025E-11
+ ETOT  9   3.9932315970272     -1.258E-08 1.264E-11 1.603E-07
+ ETOT 10   3.9932315967395     -2.876E-10 4.978E-13 2.337E-08
+ ETOT 11   3.9932315966909     -4.866E-11 7.888E-14 1.804E-09
+ ETOT 12   3.9932315966767     -1.421E-11 5.396E-15 6.025E-11
 
  At SCF step   12       vres2   =  6.02E-11 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
@@ -1045,6 +1038,8 @@ P          mk1mem2         32
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
         optdriver1          0
         optdriver2          1
+           prtpot1          0
+           prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     5.00000000E-01  0.00000000E+00  5.00000000E-01
           rfatpol1          1       1
@@ -1110,53 +1105,54 @@ P          mk1mem2         32
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         33.4        0.56      0.009
-- Total wall clock time (s,m,h):         33.5        0.56      0.009
+- Total cpu        time (s,m,h):         39.1        0.65      0.011
+- Total wall clock time (s,m,h):         39.7        0.66      0.011
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           33.4, wall_time =           33.5
+-  as well as % of the time and number of calls for node 0
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  21.990  65.8     22.075  65.8          72209      -1.00        1.00       1.00
-- fourwf%(G->r)                  4.064  12.2      4.080  12.2          23712      -1.00        1.00       1.00
-- nonlop(apply)                  1.890   5.7      1.898   5.7          60353      -1.00        1.00       1.00
-- projbd                         1.361   4.1      1.373   4.1         119890      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)           0.812   2.4      0.812   2.4             -1      -1.00        1.00       1.00
-- nonlop(forces)                 0.623   1.9      0.627   1.9          21360      -1.00        0.99       0.99
-- getghc-other                   0.535   1.6      0.522   1.6             -1      -1.00        1.03       1.03
-- pspini                         0.426   1.3      0.427   1.3              2      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           0.200   0.6      0.200   0.6             45      -1.00        1.00       1.00
-- getgh1c_setup                  0.185   0.6      0.186   0.6            988      -1.00        1.00       1.00
-- others (117)                  -2.814  -8.4     -2.832  -8.4             -1      -1.00        0.99       0.99
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           39.1, wall_time =           39.7
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- fourwf%(pot)                     25.663  65.6        25.787  65.0          72209      -1.00        1.00       1.00
+- fourwf%(G->r)                     4.702  12.0         4.724  11.9          23712      -1.00        1.00       1.00
+- nonlop(apply)                     2.190   5.6         2.202   5.6          60353      -1.00        0.99       0.99
+- projbd                            1.425   3.6         1.433   3.6         119890      -1.00        0.99       0.99
+- dfpt_vtowfk(contrib)              0.914   2.3         0.913   2.3             -1      -1.00        1.00       1.00
+- nonlop(forces)                    0.693   1.8         0.698   1.8          21360      -1.00        0.99       0.99
+- getghc-other                      0.607   1.6         0.586   1.5             -1      -1.00        1.04       1.04
+- pspini                            0.495   1.3         0.497   1.3              2      -1.00        1.00       1.00
+- dfpt_vtorho-kpt loop              0.235   0.6         0.236   0.6             45      -1.00        1.00       1.00
+- getgh1c_setup                     0.219   0.6         0.220   0.6            988      -1.00        1.00       1.00
+- others (129)                     -2.958  -7.6        -2.974  -7.5             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                      29.272  87.6     29.367  87.5                                  1.00       1.00
+- subtotal                         34.185  87.4        34.323  86.5                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          33.4, wall_time =          33.5
+- cpu_time =          39.1, wall_time =          39.7
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  21.990  65.8     22.075  65.8          72209      -1.00        1.00       1.00
-- fourwf%(G->r)                  4.064  12.2      4.080  12.2          23712      -1.00        1.00       1.00
-- nonlop(apply)                  1.890   5.7      1.898   5.7          60353      -1.00        1.00       1.00
-- projbd                         1.361   4.1      1.373   4.1         119890      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)           0.812   2.4      0.812   2.4             -1      -1.00        1.00       1.00
-- nonlop(forces)                 0.623   1.9      0.627   1.9          21360      -1.00        0.99       0.99
-- getghc-other                   0.535   1.6      0.522   1.6             -1      -1.00        1.03       1.03
-- pspini                         0.426   1.3      0.427   1.3              2      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           0.200   0.6      0.200   0.6             45      -1.00        1.00       1.00
-- getgh1c_setup                  0.185   0.6      0.186   0.6            988      -1.00        1.00       1.00
-- others (117)                  -2.814  -8.4     -2.832  -8.4             -1      -1.00        0.99       0.99
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- fourwf%(pot)                     25.663  65.6        25.787  65.0          72209      -1.00        1.00       1.00
+- fourwf%(G->r)                     4.702  12.0         4.724  11.9          23712      -1.00        1.00       1.00
+- nonlop(apply)                     2.190   5.6         2.202   5.6          60353      -1.00        0.99       0.99
+- projbd                            1.425   3.6         1.433   3.6         119890      -1.00        0.99       0.99
+- dfpt_vtowfk(contrib)              0.914   2.3         0.913   2.3             -1      -1.00        1.00       1.00
+- nonlop(forces)                    0.693   1.8         0.698   1.8          21360      -1.00        0.99       0.99
+- getghc-other                      0.607   1.6         0.586   1.5             -1      -1.00        1.04       1.04
+- pspini                            0.495   1.3         0.497   1.3              2      -1.00        1.00       1.00
+- dfpt_vtorho-kpt loop              0.235   0.6         0.236   0.6             45      -1.00        1.00       1.00
+- getgh1c_setup                     0.219   0.6         0.220   0.6            988      -1.00        1.00       1.00
+- others (129)                     -2.958  -7.6        -2.974  -7.5             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                      29.272  87.6     29.367  87.5                                  1.00       1.00
+- subtotal                         34.185  87.4        34.323  86.5                                  1.00       1.00
 
 ================================================================================
 
@@ -1236,10 +1232,10 @@ P          mk1mem2         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         33.4  wall=         33.5
+- Proc.   0 individual time (sec): cpu=         39.1  wall=         39.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  29 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.4  wall=         33.5
+.Delivered   7 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         39.1  wall=         39.7

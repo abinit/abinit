@@ -7,7 +7,7 @@
 !! Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) [[cite:Ichimaru1987]]
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2021 ABINIT group (JFD,LK)
+!!  Copyright (C) 2002-2022 ABINIT group (JFD,LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

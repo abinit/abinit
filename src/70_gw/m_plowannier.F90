@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon,AGerossier,ROuterovitch)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon,AGerossier,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -803,7 +803,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 ! Drive the normalization of the psichis
 
-if (dtset%plowan_projcalc(1)==-2)then
+if (dtset%nbandkss==-1 .and.dtset%kssform==3 )then
   if (dtset%ucrpa >= 1 .or. dtset%dmft_kspectralfunc==1) then
     opt = 0
   else

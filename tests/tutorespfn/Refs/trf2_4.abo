@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ANADDB 
+.Version 9.7.4 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 20 Dec 2020.
-- ( at 03h25 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h32 )
   
 
 ================================================================================
@@ -91,7 +91,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.024  and twall      0.025 sec
+-begin at tcpu      0.024  and twall      0.037 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -176,7 +176,7 @@
    0.01597  0.01597 -0.02304  -0.00474 -0.00474  0.00000   0.02070  0.02070 -0.02304
  Traces (and ratios) :
  -0.06912                   0.00000                  -0.06912
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
@@ -197,7 +197,7 @@
   -0.01597  0.01597 -0.02304   0.00474 -0.00474  0.00000  -0.02070  0.02070 -0.02304
  Traces (and ratios) :
  -0.06912                   0.00000                  -0.06912
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
@@ -218,7 +218,7 @@
    0.01597 -0.01597 -0.02304  -0.00474  0.00474  0.00000   0.02070 -0.02070 -0.02304
  Traces (and ratios) :
  -0.06912                   0.00000                  -0.06912
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
@@ -239,7 +239,7 @@
   -0.01597 -0.01597 -0.02304   0.00474  0.00474  0.00000  -0.02070 -0.02070 -0.02304
  Traces (and ratios) :
  -0.06912                   0.00000                  -0.06912
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
@@ -512,7 +512,7 @@
    0.00065  0.00017 -0.00047   0.00055  0.00018 -0.00049   0.00010 -0.00001  0.00002
  Traces (and ratios) :
  -0.00037                   0.00000                  -0.00037
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :       -0.904534       -0.301511       -0.301511
  Second local vector :       -0.426401        0.639580        0.639624
@@ -533,7 +533,7 @@
    0.00017  0.00065 -0.00047   0.00018  0.00055 -0.00049  -0.00001  0.00010  0.00002
  Traces (and ratios) :
  -0.00037                   0.00000                  -0.00037
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :       -0.301511       -0.904534       -0.301511
  Second local vector :        0.639640       -0.426401        0.639565
@@ -554,7 +554,7 @@
    0.00019  0.00019  0.00056   0.00055  0.00055  0.00098  -0.00036 -0.00036 -0.00042
  Traces (and ratios) :
  -0.00037                   0.00000                  -0.00037
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :       -0.301511       -0.301511       -0.904534
  Second local vector :        0.639565        0.639640       -0.426401
@@ -571,6 +571,6 @@
 
 ================================================================================
 
-+Total cpu time      0.164  and wall time      0.166 sec
++Total cpu time      0.150  and wall time      0.168 sec
 
  anaddb : the run completed succesfully.
