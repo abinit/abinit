@@ -30,23 +30,19 @@ module m_migdal_eliashberg
  use m_errors
  use m_krank
  use m_htetra
-
-
  use netcdf
  use m_nctk
- !use m_crystal
+ use m_crystal
  use m_dtset
  use m_dtfil
- !use m_ephtk
 
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
- !use m_numeric_tools,  only : arth, get_diag !, isdiagmat
+ !use m_numeric_tools,  only : arth, get_diag
  use m_copy,            only : alloc_copy
- !use defs_datatypes,   only : ebands_t
+ use defs_datatypes ,   only : ebands_t
  !use m_kpts,           only : kpts_timrev_from_kptopt
- !use m_ifc,            only : ifc_type
- use m_ebands,          only : edos_t
+ use m_ebands,          only : edos_t, ebands_get_edos
  use m_gstore,          only : gstore_t
 
  implicit none
@@ -104,7 +100,6 @@ contains
 end type iso_solver_t
 
 !private :: iso_solver_new
-
 !!***
 
 contains
@@ -271,19 +266,18 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  integer,parameter :: master = 0
  integer :: nproc, my_rank, ierr, itemp, ntemp, niw, ncid !, my_nshiftq, nsppol !, iq_glob, ik_glob, ii ! out_nkibz,
  integer :: edos_intmeth
- !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is,
- !integer :: ik_ibz, ik_bz, ebands_timrev, max_nq, max_nk, gstore_cplex_
+ !integer :: spin, natom3, cnt !, band, ib, nb, my_ik, my_iq, my_is
+ !integer :: ik_ibz, ik_bz, ebands_timrev
  !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
  integer :: phmesh_size, iw
  real(dp) :: kt, wmax, cpu, wall, gflops
- !real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
+ real(dp) :: edos_step, edos_broad !, sigma, ecut, eshift, eig0nk
  !character(len=5000) :: msg
- !class(crystal_t),target,intent(in) :: cryst
- !class(ebands_t),target,intent(in) :: ebands
+ class(crystal_t),pointer :: cryst
+ class(ebands_t),pointer :: ebands
  !class(ifc_type),target,intent(in) :: ifc
  !type(gqk_t),pointer :: gqk
- !type(krank_t) :: qrank
  type(iso_solver_t) :: iso
  type(edos_t) :: edos
 !arrays
@@ -296,10 +290,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call wrtout(std_out, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
 
- !cryst => gstore%cryst
- !ebands => gstore%ebands
- !ifc => gstore%ifc
- !kibz => gstore%kibz
+ cryst => gstore%cryst
+ ebands => gstore%ebands
  !natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
 
  ! Consistency check
@@ -309,23 +301,20 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ABI_CHECK(ierr == 0, "Wrong gstore object for migdal_eliashberg_iso. See messages above")
 
  ! Compute electron DOS.
- !edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
- !edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- !edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- !edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+ edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, gstore%comm)
 
  !! Store DOS per spin channel
  !n0(:) = edos%gef(1:edos%nsppol)
- !if (my_rank == master) then
- !  call edos%print(unit=ab_out)
- !  path = strcat(dtfil%filnam_ds(4), "_EDOS")
- !  call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
- !  call edos%write(path)
- !end if
- !call edos%free()
-
-
-
+ if (my_rank == master) then
+   call edos%print(unit=std_out)
+   !call edos%print(unit=ab_out)
+   !path = strcat(dtfil%filnam_ds(4), "_EDOS")
+   !call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path, ch10))
+   !call edos%write(path)
+ end if
 
  ! Compute phonon frequency mesh.
  call gstore%ifc%get_phmesh(dtset%ph_wstep, phmesh_size, phmesh)
@@ -340,14 +329,15 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  ncid = nctk_noid
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_ISOME.nc") , xmpi_comm_self))
-   write(777, *)"# phmesh, a2fw"
+   write(777, *)"# phmesh (meV), a2fw"
    do iw=1, phmesh_size
-     write(777, *) phmesh(iw), a2fw(iw)
+     write(777, *) phmesh(iw) * Ha_meV, a2fw(iw) / (edos%gef(0) / two)
    end do
  end if
 
  ABI_FREE(a2fw)
  ABI_FREE(phmesh)
+ call edos%free()
 
  call dtset%get_ktmesh(ntemp, ktmesh)
  iso = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
