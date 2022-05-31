@@ -32,7 +32,6 @@ module m_migdal_eliashberg
  use m_htetra
 
  !use m_ebands
- !use iso_c_binding
  use netcdf
  use m_nctk
  !use m_crystal
@@ -41,7 +40,7 @@ module m_migdal_eliashberg
  !use m_ephtk
 
  use m_time,           only : cwtime, cwtime_report, sec2str
- use m_fstrings,       only : strcat !,sjoin, tolower, itoa, ftoa, ktoa, ltoa, strcat
+ use m_fstrings,       only : strcat, sjoin !, tolower, itoa, ftoa, ktoa, ltoa, strcat
  !use m_numeric_tools,  only : arth, get_diag !, isdiagmat
  use m_copy,           only : alloc_copy
  !use defs_datatypes,   only : ebands_t
@@ -274,7 +273,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !integer :: ik_ibz, ik_bz, ebands_timrev, max_nq, max_nk, gstore_cplex_
  !integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
  !integer :: ncid, spin_ncid, ncerr, gstore_fform
- real(dp) :: kt, cpu, wall, gflops
+ integer :: phmesh_size
+ real(dp) :: kt, wmax, cpu, wall, gflops
  !character(len=5000) :: msg
  !class(crystal_t),target,intent(in) :: cryst
  !class(ebands_t),target,intent(in) :: ebands
@@ -283,25 +283,37 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  !type(krank_t) :: qrank
  type(iso_solver_t) :: iso
 !arrays
- real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:)
+ real(dp),allocatable :: ktmesh(:), lambda_ij(:), imag_w(:), imag_2w(:), phmesh(:), a2fw(:)
 
 !----------------------------------------------------------------------
 
  nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
-
- ! Consistency check
- ierr = 0
- ABI_CHECK_NOSTOP(gstore%qzone == "bz", "migdal_eliashberg_iso requires qzone == 'bz'", ierr)
- ABI_CHECK(ierr == 0, "Wrong GSTORE.nc file for migdal_eliashberg_iso. See messages above")
-
- call cwtime(cpu, wall, gflops, "start")
- call gstore%calc_my_phonons(store_phdispl=.False.)
 
  !cryst => gstore%cryst
  !ebands => gstore%ebands
  !ifc => gstore%ifc
  !kibz => gstore%kibz
  !natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
+
+ ! Consistency check
+ ierr = 0
+ ABI_CHECK_NOSTOP(gstore%qzone == "bz", "migdal_eliashberg_iso requires qzone == 'bz'", ierr)
+ ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 1, "migdal_eliashberg_iso requires cplex == 1", ierr)
+ ABI_CHECK(ierr == 0, "Wrong GSTORE.nc file for migdal_eliashberg_iso. See messages above")
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ call gstore%calc_my_phonons(store_phdispl=.False.)
+
+ ! Compute phonon frequency mesh.
+ call gstore%ifc%get_phmesh(dtset%ph_wstep, phmesh_size, phmesh)
+
+ ABI_MALLOC(a2fw, (phmesh_size))
+
+ call gstore%get_a2fw(dtset, phmesh_size, phmesh, a2fw)
+
+ ABI_FREE(a2fw)
+ ABI_FREE(phmesh)
 
  ncid = nctk_noid
  if (my_rank == master) then
@@ -312,10 +324,10 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  iso = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
 
  do itemp=1,ntemp
-   ! Generate Matsubara imaginary-mesh for this T.
+   ! Generate Matsubara mesh for this T with cutoff wmax.
    kt = ktmesh(itemp)
-   !call matsubara_mesh(kt, mats_max, niw, imag_w)
-   niw = 1
+   wmax = one
+   call matsubara_mesh("bosons", kt, wmax, niw, imag_w)
 
    ! Compute lambda(w_i - w_j)
    ABI_MALLOC(lambda_ij, (2 * niw))
@@ -329,8 +341,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    ABI_FREE(imag_w)
  end do ! itemp
 
- call iso%free()
  ABI_FREE(ktmesh)
+ call iso%free()
 
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
@@ -340,6 +352,65 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
 
 end subroutine migdal_eliashberg_iso
 !!**
+
+!----------------------------------------------------------------------
+
+!!****f* m_migdal_eliashberg/matsubara_mesh
+!! NAME
+!! mastubara_mesh
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: bosons_or_fermions
+ real(dp),intent(in) :: kt, wmax
+ integer,intent(out) :: niw
+ real(dp),allocatable,intent(out) :: imag_w(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nn
+
+!----------------------------------------------------------------------
+
+ select case (bosons_or_fermions)
+ case ("bosons")
+   ! 2 n pi kT
+   niw = nint(wmax / (two * pi * kt)) + 1
+   ABI_MALLOC(imag_w, (niw))
+   do nn=0,niw-1
+     imag_w(nn) = two * nn * pi * kt
+   end do
+
+ case ("fermions")
+   ! 2 (n + 1) pi kT
+   niw = nint(wmax / (two * pi * kt))
+   ABI_MALLOC(imag_w, (niw))
+   do nn=0,niw-1
+     imag_w(nn) = two * (nn  + 1) * pi * kt
+   end do
+
+ case default
+   ABI_ERROR(sjoin("Wrong bosons_or_fermions:", bosons_or_fermions))
+ end select
+
+end subroutine matsubara_mesh
+!!!***
+
+
 
 end module m_migdal_eliashberg
 !!***

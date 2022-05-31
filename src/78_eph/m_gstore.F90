@@ -243,12 +243,12 @@ type, public :: gqk_t
   ! Contigous indices.
 
   real(dp), allocatable :: my_g(:,:,:,:,:,:)
-  ! e-ph matrix elements g (local buffer)
-  ! (cplex, my_npert, nb, my_nq, nb, my_nk)
+  ! (2, my_npert, nb, my_nq, nb, my_nk)
+  ! e-ph matrix elements g (local buffer). Allocated if cplex == 2
 
   real(dp), allocatable :: my_g2(:,:,:,:,:)
-  ! |g|^2 (local buffer)
   ! (my_npert, nb, my_nq, nb, my_nk)
+  ! |g|^2 (local buffer). Allocated if cplex == 1
 
   integer :: coords_qkp(3)
   ! coordinates of this processor in the (q, k, pert) Cartesian grid.
@@ -393,7 +393,7 @@ type, public :: gstore_t
   ! (nqibz)
   ! q-points weights in the IBZ
 
-  !integer :: kptrlatt(3, 3) = -1, qptrlatt(3, 3) = -1
+  !integer :: qptrlatt(3, 3) = -1  ! kptrlatt(3, 3) = -1,
    ! k-mesh and q-mesh
 
   !real(dp),allocatable :: kshift(:, :), qshift(:, :)
@@ -448,6 +448,9 @@ contains
 
   procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
   ! Compute isotropic lamda(iw) along the imaginary axis.
+
+  procedure :: get_a2fw => gstore_get_a2fw
+  ! Compute Eliashberg function a^2F(w).
 
 end type gstore_t
 
@@ -707,7 +710,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
- call gstore%malloc__(max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz, .False.)
+ call gstore%malloc__(0, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz)
 
  ! Initialize GSTORE.nc file i.e. define dimensions and arrays
  ! Entries such as the e-ph matrix elements will be filled afterwards in gstore_compute.
@@ -1024,6 +1027,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
  if (my_rank == master) then
    unts = [std_out, ab_out]
    call wrtout(unts, "=== Gstore parameters ===")
+   call wrtout(unts, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
    call wrtout(unts, sjoin(" kzone:", gstore%kzone))
    call wrtout(unts, sjoin(" qzone:", gstore%qzone))
    call wrtout(unts, sjoin(" kfilter:", gstore%kfilter))
@@ -1161,16 +1165,15 @@ end subroutine gstore_set_mpi_grid__
 !!
 !! SOURCE
 
-subroutine gstore_malloc__(gstore, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz, with_gvals)
+subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
- integer,intent(in) :: max_nq, max_nk
+ integer,intent(in) :: with_cplex, max_nq, max_nk
  integer,intent(in) :: qglob2bz(max_nq, gstore%nsppol)
  integer,intent(in) :: kglob2bz(max_nk, gstore%nsppol)
  integer,intent(in) :: qbz2ibz(6, gstore%nqbz), kbz2ibz(6, gstore%nkbz)
- logical,intent(in) :: with_gvals
 
 !Local variables-------------------------------
 !scalars
@@ -1220,18 +1223,23 @@ subroutine gstore_malloc__(gstore, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, 
    end do
 
    ! Allocate storage for MPI-distributed e-ph matrix elements.
-   if (with_gvals) then
-     mem_mb = gqk%cplex * gqk%my_npert * gqk%nb ** 2 * gqk%my_nq * gqk%my_nk * eight * b2Mb
+   if (with_cplex > 0) then
+     mem_mb = with_cplex * gqk%my_npert * gqk%nb ** 2 * gqk%my_nq * gqk%my_nk * eight * b2Mb
      call wrtout(std_out, sjoin(" Local memory for e-ph matrix elements:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
      ! The initialization with zero is important as not all the g are computed when we filter in k-space.
      ! Abinit postprocessing tools will operate of the full my_g array
      ! and we don't want to trigger floating point exceptions.
-     ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%cplex, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
-     gqk%my_g = zero
-
-     !ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
-     !gqk%my_g2 = zero
+     select case (with_cplex)
+     case (1)
+       ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
+       gqk%my_g2 = zero
+     case (2)
+        ABI_MALLOC_OR_DIE(gqk%my_g, (2, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
+        gqk%my_g = zero
+     case default
+       ABI_ERROR(sjoin("Wrong with_cplex:", itoa(with_cplex)))
+     end select
 
      ! Allocate storage for MPI-distributed dH/dk matrix elements.
      select case (gstore%with_vk)
@@ -1858,13 +1866,14 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
 
 !Local variables-------------------------------
  integer :: my_is, my_iq, ierr
- real(dp) :: weight_q, qpt(3)
+ real(dp) :: weight_q, cpu, wall, gflops, qpt(3)
  type(crystal_t),pointer :: cryst
  type(gqk_t),pointer :: gqk
  real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:) !, displ_red(:,:,:,:)
 
 !----------------------------------------------------------------------
 
+ call cwtime(cpu, wall, gflops, "start")
  cryst => gstore%cryst
 
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, 3 * cryst%natom))
@@ -1873,16 +1882,17 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is)
 
-   ! Get phonon frequencies and eigenvectors for this q-point.
-   ABI_CALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
+   ABI_RECALLOC(gqk%my_wnuq, (gqk%my_npert, gqk%my_nq))
    if (store_phdispl) then
-     ABI_CALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
+     ABI_RECALLOC(gqk%my_displ_cart, (2, 3, cryst%natom, gqk%my_npert, gqk%my_nq))
    end if
 
    do my_iq=1,gqk%my_nq
      if (gqk%kpt_comm%skip(my_iq)) cycle ! MPI parallelism inside kpt_comm
+
+     ! Get phonon frequencies and eigenvectors for this q-point.
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
-     call gstore%ifc%fourq(cryst, qpt, phfrq, displ_cart) !, out_displ_red=displ_red)
+     call gstore%ifc%fourq(cryst, qpt, phfrq, displ_cart)
 
      gqk%my_wnuq(:, my_iq) = phfrq(gqk%my_iperts(:))
      if (store_phdispl) gqk%my_displ_cart(:,:,:,:,my_iq) = displ_cart(:,:,:,gqk%my_iperts(:))
@@ -1897,6 +1907,8 @@ subroutine gstore_calc_my_phonons(gstore, store_phdispl)
 
  ABI_FREE(displ_cart)
  ABI_FREE(phfrq)
+
+ call cwtime_report(" gstore_calc_my_phonons", cpu, wall, gflops)
 
 end subroutine gstore_calc_my_phonons
 !!***
@@ -1935,34 +1947,36 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
  type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
- real(dp),allocatable :: dbldelta_q(:,:,:) !, g2_pmnk(:,:,:,:)
+ real(dp),allocatable :: dbldelta_q(:,:,:), g2_pmnk(:,:,:,:)
 
 !----------------------------------------------------------------------
 
  ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
-
  lambda = zero
 
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is)
+
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
+
    ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
-   !ABI_MALLOC(g2_pmnk, (gqk%my_npert, gqk%nb, gqk%nb, gqk%my_nk))
+   ABI_MALLOC(g2_pmnk, (gqk%my_npert, gqk%nb, gqk%nb, gqk%my_nk))
 
    do my_iq=1,gqk%my_nq
      ! Compute integration weights for the double delta.
      call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
 
-     ! Copy data for to improve memory access in the loops below.
-     !g2_pmnk = gqk%my_g2(:,:,:,my_iq,:)
+     ! Copy data to improve memory access.
+     g2_pmnk = gqk%my_g2(:,:,my_iq,:,:)
 
      do my_ik=1,gqk%my_nk
        weight_k = gqk%my_kweight(my_ik, gstore)
        do ib_k=1,gqk%nb
          do ib_kq=1,gqk%nb
            do my_ip=1,gqk%my_npert
-             g2 = gqk%my_g2(my_ip, ib_kq, my_iq, ib_k, my_ik)
-             !g2 = g2_pmnk(my_ip, ib_kq, ib_k, my_ik)
-             ! TODO: handle w_num ~ 0
+             g2 = g2_pmnk(my_ip, ib_kq, ib_k, my_ik)
+             ! TODO: handle w_nuq ~ 0
              w_nuq = gqk%my_wnuq(my_ip, my_iq)
              lambda(:) = lambda(:) + &
                two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * weight_q * dbldelta_q(ib_kq, ib_k, my_ik)
@@ -1973,12 +1987,101 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
    end do ! my_iq
 
    ABI_FREE(dbldelta_q)
-   !ABI_FREE(g2_pmnk)
+   ABI_FREE(g2_pmnk)
  end do ! my_is
 
  call xmpi_sum(lambda, gstore%comm, ierr)
 
 end subroutine gstore_get_lambda_iso_iw
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_get_a2fw
+!! NAME
+!! gstore_get_a2fw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
+
+!Arguments ------------------------------------
+ class(gstore_t),target,intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: nw
+ real(dp),intent(in) :: wmesh(nw)
+ real(dp),intent(out) :: a2fw(nw)
+
+!Local variables-------------------------------
+ integer :: my_is, my_ik, my_iq, my_ip, ib_k, ib_kq, ierr
+ real(dp) :: g2, w_nuq, weight_k, weight_q
+ type(gqk_t), pointer :: gqk
+!arrays
+ real(dp) :: qpt(3)
+ real(dp),allocatable :: dbldelta_q(:,:,:), g2_mnkp(:,:,:,:), deltaw_nuq(:)
+
+!----------------------------------------------------------------------
+
+ ABI_CHECK(gstore%qzone == "bz", "gstore_get_lambda_iso_iw assumes qzone == `bz`")
+
+ call wrtout(std_out, sjoin("Computing a^2F(w) with ph_smear:", ftoa(dtset%ph_smear * Ha_meV), "(meV)"))
+
+ ABI_MALLOC(deltaw_nuq, (nw))
+ a2fw = zero
+
+ do my_is=1,gstore%my_nspins
+   gqk => gstore%gqk(my_is)
+
+   ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
+   ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
+
+   ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
+   ABI_MALLOC(g2_mnkp, (gqk%nb, gqk%nb, gqk%my_nk, gqk%my_npert))
+
+   do my_iq=1,gqk%my_nq
+     ! Compute integration weights for the double delta.
+     call gqk%dbldelta_qpt(my_iq, gstore, dtset%eph_intmeth, dtset%eph_fsmear, qpt, weight_q, dbldelta_q)
+
+     ! Copy data to improve memory access.
+     do my_ip=1,gqk%my_npert
+       g2_mnkp(:,:,:,my_ip) = gqk%my_g2(my_ip,:,my_iq,:,:)
+     end do
+
+     do my_ip=1,gqk%my_npert
+       w_nuq = gqk%my_wnuq(my_ip, my_iq)
+       deltaw_nuq = gaussian(wmesh - w_nuq, dtset%ph_smear)
+       do my_ik=1,gqk%my_nk
+         weight_k = gqk%my_kweight(my_ik, gstore)
+         do ib_k=1,gqk%nb
+           do ib_kq=1,gqk%nb
+             g2 = g2_mnkp(ib_kq, ib_k, my_ik, my_ip)
+             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbldelta_q(ib_kq, ib_k, my_ik)
+           end do
+         end do
+       end do
+     end do
+   end do ! my_iq
+
+   ABI_FREE(dbldelta_q)
+   ABI_FREE(g2_mnkp)
+ end do ! my_is
+
+ ABI_FREE(deltaw_nuq)
+
+ call xmpi_sum(a2fw, gstore%comm, ierr)
+ ! TODO Spin and N(eF)
+
+end subroutine gstore_get_a2fw
 !!***
 
 !----------------------------------------------------------------------
@@ -2786,7 +2889,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(iq_buf, (2, qbuf_size))
 
    ! gkq_nu(2, nb, nb, natom3)
-   ABI_MALLOC_OR_DIE(my_gbuf, (2, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+   ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
 
    ! Loop over my set of q-points
    do my_iq=1,gqk%my_nq
@@ -2979,7 +3082,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkk_atm, phfrq, displ_red, gkq_nu)
 
        ! Save e-ph matrix elements.
-       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
+       select case (gqk%cplex)
+       case (1)
+         my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_nu(1,:,:,:) ** 2 + gkq_nu(2,:,:,:) ** 2
+       case (2)
+         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
+       end select
 
        if (gstore%with_vk /= 0 .and. .not. my_vkdone(my_ik)) then
          ! Avoid computing the same k-point multiple times.
@@ -3167,12 +3275,12 @@ end subroutine gstore_compute
 !!
 !! SOURCE
 
-function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result(gstore)
+function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) result(gstore)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
- integer,intent(in) :: cplex
+ integer,intent(in) :: with_cplex
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
  class(crystal_t),target,intent(in) :: cryst
@@ -3287,7 +3395,7 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
    end if
    call gstore_cryst%free()
 
-   if (gstore_cplex == 1 .and. cplex == 2) then
+   if (gstore_cplex == 1 .and. with_cplex == 2) then
      ABI_ERROR("GSTORE file contains |g| while Abinit needs complex g. Regenerate GSTORE file with gstore_cplex 2")
    end if
  end if ! master
@@ -3358,15 +3466,12 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
  ! Compute krank
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
- ! TODO: Read it from file, also treat with_vk option that should be read from file
- !gstore_cplex = 2
-
  ! Set MPI grid
- call gstore%set_mpi_grid__(cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(gstore_cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
- call gstore%malloc__(max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz, .True.)
+ call gstore%malloc__(with_cplex, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz)
 
  ABI_FREE(qglob2bz)
  ABI_FREE(kglob2bz)
@@ -3379,8 +3484,16 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
  ! Note the loop over spin to account as each gqk has its own dimensions.
  ! Recall the shape on the arrays:
  !
- !   In memory, we have: my_g(cplex, my_npert, nb, my_nq, nb, my_nk)
- !   On disk, we have:   nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !   In memory, we have allocated:
+ !
+ !     my_g(2, my_npert, nb, my_nq, nb, my_nk) if with_cplex == 2
+ !     my_g2(my_npert, nb, my_nq, nb, my_nk) if with_cplex == 1
+
+ !   On disk, we have:
+ !
+ !     nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !
+ !   so gstore_cplex == 1 and with_cplex == 2 are not compatible
  !
  call cwtime(cpu, wall, gflops, "start")
  do spin=1,gstore%nsppol
@@ -3395,33 +3508,34 @@ function gstore_from_ncpath(path, cplex, dtset, cryst, ebands, ifc, comm) result
      !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstart"), gqk%bstart))
      !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstop"), gqk%bstop))
 
+     ! gstore_cplex defines the data on disk
+     ! cplex defines what we want to store in memory
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
      ABI_MALLOC(slice_bb, (gstore_cplex, gqk%nb, gqk%nb))
 
      do my_iq=1,gqk%my_nq
         iq_glob = my_iq + gqk%my_qstart - 1
-        ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gwork_q, &
-                             start=[1, 1, 1, 1, 1, iq_glob])  ! count=[])
+        ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gwork_q, start=[1, 1, 1, 1, 1, iq_glob]) ! count=[])
         NCF_CHECK(ncerr)
 
-        ! Put data in the right position.
+        ! Put data in the right place.
         do my_ik=1,gqk%my_nk
           ik_glob = my_ik + gqk%my_kstart - 1
           do my_ip=1,gqk%my_npert
             ipert = gqk%my_iperts(my_ip)
+
             slice_bb = gwork_q(:,:,:, ipert, ik_glob)
-            ! TODO: Finalize implementation.
-            if (cplex == gstore_cplex) then
-              if (cplex == 2) gqk%my_g(:, my_ip, :, my_iq, :, my_ik) = slice_bb
-              !if (cplex == 1) gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:)
+            if (with_cplex == gstore_cplex) then
+              if (with_cplex == 1) gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:)
+              if (with_cplex == 2) gqk%my_g(:, my_ip, :, my_iq, :, my_ik) = slice_bb
             else
-              if (cplex == 1 .and. gstore_cplex == 2) then
-                !gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2
-                !ABI_WARNING("This conversion is not implemented!")
+              if (with_cplex == 1 .and. gstore_cplex == 2) then
+                gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2
               else
                 ABI_ERROR("This conversion is not supported!")
               end if
             end if
+
           end do
         end do
 

@@ -42,6 +42,7 @@ MODULE m_ifc
 #endif
 
  use m_io_tools,    only : open_file
+ use m_numeric_tools, only : arth
  use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
  use m_symtk,       only : matr3inv
  use m_special_funcs,  only : abi_derfc
@@ -215,6 +216,9 @@ MODULE m_ifc
 
     procedure :: fourq => ifc_fourq
      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+
+    procedure :: get_phmesh => ifc_get_phmesh
+     ! Build linear mesh for phonons.
 
     procedure :: speedofsound => ifc_speedofsound
      ! Compute the speed of sound by averaging phonon group velocities.
@@ -431,7 +435,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
  call chkrp9(Ifc%brav,rprim)
 
- ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997). 
+ ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997).
  dyewq0 = zero
  if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
    ! Calculation of the non-analytical part for q=0
@@ -1154,6 +1158,44 @@ end subroutine ifc_get_dwdq
 
 !----------------------------------------------------------------------
 
+!!****f* m_ifc/ifc_get_phmesh
+!! NAME
+!!  ifc_get_phmesh
+!!
+!! FUNCTION
+!!  Build linear mesh for phonons.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_get_phmesh(ifc, ph_wstep, phmesh_size, phmesh)
+
+!Arguments ------------------------------------
+!scalars
+ class(ifc_type),intent(in) :: ifc
+ real(dp),intent(in) :: ph_wstep
+ integer,intent(out) :: phmesh_size
+!arrays
+ real(dp),allocatable,intent(out) :: phmesh(:)
+
+!******************************************************************
+
+ phmesh_size = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
+ ABI_MALLOC(phmesh, (phmesh_size))
+ phmesh = arth(ifc%omega_minmax(1), ph_wstep, phmesh_size)
+
+end subroutine ifc_get_phmesh
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ifc/ifc_speedofsound
 !!
 !! NAME
@@ -1721,7 +1763,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
  iout = ab_out
  if (present(unit_out)) then
    iout = unit_out
- end if   
+ end if
  dielt = ifc%dielt
 
  ! Compute the distances between atoms

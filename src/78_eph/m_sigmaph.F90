@@ -3107,9 +3107,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  end if
 
  ! Compute phonon frequency mesh.
- new%phmesh_size = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / dtset%ph_wstep) + 1
- ABI_MALLOC(new%phmesh, (new%phmesh_size))
- new%phmesh = arth(ifc%omega_minmax(1), dtset%ph_wstep, new%phmesh_size)
+ call ifc%get_phmesh(dtset%ph_wstep, new%phmesh_size, new%phmesh)
 
  ! Prepare calculation of generalized Eliashberg functions
  ! prteliash == 0 deactivates computation (default).
