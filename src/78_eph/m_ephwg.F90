@@ -5,10 +5,7 @@
 !! FUNCTION
 !!  Tools and objects to compute the weights used for the BZ integration of EPH quantities.
 !!  More specifically the integration of quantities such as the imaginary part of the self-energy
-!!  involving delta functions. Different approaches are available:
-!!
-!!    1.
-!!    2.
+!!  involving delta functions. Different approaches are available.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2022 ABINIT group (MG, HM)
@@ -55,7 +52,7 @@ module m_ephwg
  use m_special_funcs,   only : gaussian
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
- use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt
+ use m_kpts,            only : kpts_timrev_from_kptopt, kpts_ibz_from_kptrlatt, kpts_map
  use m_occ,             only : occ_fd, occ_be
 
  implicit none
@@ -364,7 +361,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 !scalars
  integer :: ierr,ii
  logical :: do_mapping
- real(dp) :: dksqmax, cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -395,15 +392,13 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ABI_MALLOC(indkk, (6, self%nq_k))
 
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
-   call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
-                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+     ABI_ERROR("At least one of the points in IBZ(k) could not be generated from a symmetrical one.")
+   end if
+
    call krank%free()
 
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     ABI_ERROR(msg)
-   end if
    ABI_SFREE(self%lgk2ibz)
    call alloc_copy(indkk(1, :), self%lgk2ibz)
    ABI_FREE(indkk)
@@ -416,15 +411,12 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ABI_MALLOC(indkk, (6, self%nq_k))
 
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
-   call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
-                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   if (kpts_map("symrel", self%timrev, cryst, krank, self%nq_k, self%lgk%ibz, indkk) /= 0) then
+     ABI_ERROR("At least one of the points in IBZ(k) + q could not be generated from a symmetrical one.")
+   end if
    call krank%free()
 
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     ABI_ERROR(msg)
-   end if
    call cwtime_report(" listkk2", cpu, wall, gflops)
 
    ABI_SFREE(self%kq2ibz)
@@ -493,7 +485,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 !scalars
  integer,parameter :: timrev0 = 0
  integer :: ierr,ii,ik_idx
- !real(dp) :: dksqmax
  character(len=80) :: errorstring
  !character(len=500) :: msg
  type(crystal_t),pointer :: cryst

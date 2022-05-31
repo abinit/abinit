@@ -53,7 +53,7 @@ module m_phonons
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
- use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid, kpts_map
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
  use m_symfind,         only : symanal
@@ -3647,11 +3647,11 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0
+ integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0, timrev1 = 1
  integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
  integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
- real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
+ real(dp) :: maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
  logical :: isirr_q
  character(len=500) :: msg, fmt_freqs, fmt_eigvec
  type(krank_t) :: qrank
@@ -3696,16 +3696,13 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_MALLOC(bz2ibz_listkk, (6, nqbz))
 
  qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, bz2ibz_listkk, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, cryst%timrev - 1, use_symrec=.True.)
- call qrank%free()
 
- if (dksqmax > tol12) then
-    write(msg, '(3a,es16.6)' ) &
-     "Error mapping BZ to IBZ",ch10,&
-     "The q-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
-    ABI_ERROR(msg)
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
+   write(msg, '(3a)' ) "Error mapping BZ to IBZ",ch10,"The q-point could not be generated from a symmetrical one"
+   ABI_ERROR(msg)
  end if
+
+ call qrank%free()
 
  ! Compute ph freqs in the IBZ.
  ABI_CALLOC(phfreqs_qibz, (natom3, nqibz))

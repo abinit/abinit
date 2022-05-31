@@ -60,7 +60,7 @@ module m_rta
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa, yesno
- use m_kpts,           only : kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
  use m_ddk,            only : ddkstore_t
@@ -359,7 +359,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 !Local variables ------------------------------
  integer,parameter :: sppoldbl1 = 1, master = 0
  integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
- real(dp) :: dksqmax, cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname_dense
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -589,16 +589,15 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
    krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
-   call krank%get_mapping(tmp_ebands%nkpt, tmp_ebands%kptns, dksqmax, cryst%gmet, indkk, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
-   call krank%free()
 
-   if (dksqmax > tol12) then
-      write(msg, '(3a,es16.6,a)' ) &
+   if (kpts_map("symrec", timrev, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
+     write(msg, '(3a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
-       "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
-      ABI_ERROR(msg)
+       "The k-point could not be generated from a symmetrical one."
+     ABI_ERROR(msg)
    end if
+
+   call krank%free()
 
    ! Downsampling linewidths and velocities.
    ABI_MOVE_ALLOC(new%linewidths, tmp_array5)
