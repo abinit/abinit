@@ -39,7 +39,7 @@ module m_fstab
  use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_special_funcs,  only : gaussian
- use m_kpts,           only : kpts_timrev_from_kptopt, smpbz
+ use m_kpts,           only : kpts_timrev_from_kptopt, smpbz, kpts_map
 
  implicit none
 
@@ -272,7 +272,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  integer :: nkfs,spin,band,nband_k,i1,i2,ib,blow,ik_bz,ik_ibz,nkibz,timrev
  integer :: ik,mkpt,nkbz,ierr, nene,ifermi
  real(dp),parameter :: max_occ1 = one
- real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,dksqmax,cpu,wall,gflops
+ real(dp) :: elow,ehigh,ebis,enemin,enemax,deltaene,cpu,wall,gflops
  logical :: inwin
  character(len=80) :: errstr
  character(len=5000) :: msg
@@ -318,20 +318,18 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ABI_MALLOC(indkk, (6, nkbz))
 
  krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, kptrlatt, compute_invrank=.False.)
- call krank%get_mapping(nkbz, kbz, dksqmax, cryst%gmet, indkk, &
-                        cryst%nsym, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
- call krank%free()
 
- if (dksqmax > tol12) then
-   write(msg, '(7a,es16.6,4a)' ) &
+ if (kpts_map("symrel", timrev, cryst, krank, nkbz, kbz, indkk) /= 0) then
+   write(msg, '(10a)' ) &
    'The WFK file cannot be used to start the present calculation ',ch10, &
    'It was asked that the wavefunctions be accurate, but',ch10, &
    'at least one of the k points could not be generated from a symmetrical one.',ch10, &
-   'dksqmax= ',dksqmax,ch10, &
    'Action: check your WFK file and k-point input variables',ch10, &
    '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    ABI_ERROR(msg)
  end if
+
+ call krank%free()
 
  call cwtime_report(" fstab_init%krank", cpu, wall, gflops)
 
