@@ -94,6 +94,7 @@ int execute_python_file(const char* filename) {
   fprintf(stderr, "file %s not found \n", filename);
   return 1;
  }
+ 
  // LOAD(PyRun_SimpleString, int, const char *);
  LOAD(PyRun_SimpleFile, int, FILE*, const char*);
  (*PyRun_SimpleFile)(file, filename);
@@ -150,7 +151,7 @@ void invoke_python_triqs(int rank, char* filapp_in) {
 	if (rank == 0) fprintf(stdout, "invoke_python_triqs: interpreter initialized\n");
 
 	// Execute script
-	fprintf(stdout, "Reading python script: %s\n", triqs_filename.c_str());
+    if (rank == 0) fprintf(stdout, "Reading python script: %s\n", triqs_filename.c_str());
 
 	// Check whether the file exists
 	if (!ifstream(triqs_filename.c_str())) {
