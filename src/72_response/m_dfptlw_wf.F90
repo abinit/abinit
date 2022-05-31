@@ -455,8 +455,8 @@ if (.not.samepert) then
      dimffnlk=1
      dimffnl1=2
    else if (i2pert==natom+3.or.i2pert==natom+4) then
-     dimffnl1=10
      nylmgrtmp=nylmgr
+     dimffnl1=10
      ABI_FREE(part_ylmgr_k)
      ABI_MALLOC(part_ylmgr_k,(npw_k,nylmgrtmp,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
      part_ylmgr_k(:,:,:)=ylmgr_k(:,:,:)
@@ -574,6 +574,7 @@ if (.not.samepert) then
 !Specific definitions and allocations
  d3etot_t5_k=zero
  optlocal=1;optnl=1
+ dimffnlk=0
  if (i1pert/=natom+2) then
    ABI_MALLOC(vlocal1,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
    ABI_MALLOC(vpsp1,(2*nfft))
@@ -585,11 +586,14 @@ if (.not.samepert) then
  if (i1pert==natom+3.or.i1pert==natom+4) fac=-half
  if (i1pert<=natom) then
    nylmgrtmp=3
+   dimffnlk=1
+   dimffnl1=2
    ABI_FREE(part_ylmgr_k)
    ABI_MALLOC(part_ylmgr_k,(npw_k,nylmgrtmp,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
    part_ylmgr_k(:,:,:)=ylmgr_k(:,1:3,:)
  else if (i1pert==natom+3.or.i1pert==natom+4) then
    nylmgrtmp=nylmgr
+   dimffnl1=10
    ABI_FREE(part_ylmgr_k)
    ABI_MALLOC(part_ylmgr_k,(npw_k,nylmgrtmp,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
    part_ylmgr_k(:,:,:)=ylmgr_k(:,:,:)
@@ -615,9 +619,18 @@ if (.not.samepert) then
      & with_nonlocal=with_nonlocal_i1pert)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+     ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
+     if (dimffnlk==1) ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
+     ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
+     if (dimffnl1==2) then
+       ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
+       ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
+     else
+       ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
+     end if
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i1pert,i3dir, &
    & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,reuse_ffnlk=1,reuse_ffnl1=1)
 
    end if
 
