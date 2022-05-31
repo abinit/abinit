@@ -187,7 +187,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
- type(gstore_t) :: gstore !, other_gstore
+ type(gstore_t) :: gstore, other_gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
@@ -753,19 +753,20 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
       call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                           pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-      !if (nprocs == 1) then
-      !  call wrtout([std_out, ab_out], " DEBUG: Trying to reread GSTORE file")
-      !  other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-      !  call other_gstore%free()
-      !end if
+      ! DEBUG
+      if (nprocs == 1) then
+        call wrtout([std_out, ab_out], " DEBUG: Trying to reread GSTORE file")
+        other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
+        call other_gstore%free()
+      end if
     end if
 
     call gstore%free()
 
  case (12, -12)
-   ! Migdal-Eliashberg equations (isotropic/anisotropic)
+     ! Migdal-Eliashberg equations (isotropic/anisotropic case)
     gstore = gstore_from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
-    !if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
+    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
     !if (dtset%eph_task == +12) call migdal_eliashber_aniso(gstore, dtset, dtfil)
     call gstore%free()
 

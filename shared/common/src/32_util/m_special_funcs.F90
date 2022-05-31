@@ -541,7 +541,8 @@ end function IRadFnH
 !! gaussian
 !!
 !! FUNCTION
-!!  Return the values of the normalized Gaussian distribution
+!!  Return the values of the normalized Gaussian distribution:
+!!
 !!    Gauss(arg,sigma) =  1/(sigma SQRT(2*pi)) e^{-arg**2/(2*sigma**2)}
 !!
 !! INPUTS
@@ -580,7 +581,7 @@ end function gaussian
 !! lorentzian
 !!
 !! FUNCTION
-!!  Approximate Dirac Delta with lorentzian
+!!  Lorentzian function.
 !!
 !! INPUTS
 !!   arg=Argument of the lorentzian.
