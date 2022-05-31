@@ -363,7 +363,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  logical :: do_mapping
  real(dp) :: cpu, wall, gflops
  character(len=80) :: errorstring
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(krank_t) :: krank
 !arrays
