@@ -598,7 +598,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
    call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,gamma, &
  & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
  & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
- & qdir2=delta)
+ & reuse_ffnlk=0,reuse_ffnl1=0,qdir2=delta)
 
    !LOOP OVER BANDS
    do iband=1,nband_k

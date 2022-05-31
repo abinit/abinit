@@ -349,7 +349,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
      ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
      ffnl_k(1:npw_k,:,:,:)=ffnl(ikc,1:npw_k,:,:,:)
- 
+
      !Get matrix elements for uniform perturbations
      eig1_k(:)=eigen1(1+bd2tot:2*nband_k**2+bd2tot)
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
@@ -403,6 +403,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
    end do !ikpt
 
  end do !isppol
+
 
 !=== MPI communications ==================
  if (xmpi_paral==1) then
@@ -777,17 +778,6 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
    ABI_MALLOC(kg_k,(3,npw_k))
    ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-   if (dimffnl==4) then
-     ABI_MALLOC(ylmgr_k_part,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-     ylmgr_k_part(:,:,:)=ylmgr_k(:,1:3,:)
-     
-   else if (dimffnl==10) then
-     ABI_MALLOC(ylmgr_k_part,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-     ylmgr_k_part(:,:,:)=ylmgr_k(:,:,:)
-   else 
-     msg='wrong size for ffnl via dimffnl!'
-     ABI_BUG(msg)
-   end if
 
  
    kpt(:)= kptns(:,ikpt)
@@ -805,6 +795,17 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
          end do
        end do
      end if
+   end if
+
+   if (dimffnl==4) then
+     ABI_MALLOC(ylmgr_k_part,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ylmgr_k_part(:,:,:)=ylmgr_k(:,1:3,:)
+   else if (dimffnl==10) then
+     ABI_MALLOC(ylmgr_k_part,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ylmgr_k_part(:,:,:)=ylmgr_k(:,:,:)
+   else 
+     msg='wrong size for ffnl via dimffnl!'
+     ABI_BUG(msg)
    end if
 
    nkpg=0
