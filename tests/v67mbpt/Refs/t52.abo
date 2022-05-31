@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h25 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t52-t53/t52.in
-- output file    -> t52.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v67mbpt_t52-t53/t52.abi
+- output file    -> t52.abo
 - root for input  files -> t52i
 - root for output files -> t52o
 
@@ -34,7 +34,7 @@
 -    mband =          10        mffmem =           1         mkmem =          10
        mpw =         295          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       3.321 Mbytes of memory.
+P This job should need less than                       3.551 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           3
        mpw =         151          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       1.929 Mbytes of memory.
+P This job should need less than                       2.166 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
        mpw =         151          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       2.110 Mbytes of memory.
+P This job should need less than                       2.347 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.260 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -307,6 +307,12 @@ P          mk1mem6          8
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
@@ -452,8 +458,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -640,11 +646,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
-  prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.57802E-25
+  prteigrs : nnsclo,ikpt=    9    1 max resid (excl. the buffer)=  7.86371E-27
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=    9    2 max resid (incl. the buffer)=  1.89299E-26
-  prteigrs : nnsclo,ikpt=    9    3 max resid (incl. the buffer)=  3.69290E-24
+  prteigrs : nnsclo,ikpt=    9    3 max resid (excl. the buffer)=  3.69290E-24
 
 
  scprqt:  WARNING -
@@ -831,7 +836,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t52o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -848,7 +852,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t52o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -949,7 +952,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t52o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -966,7 +968,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t52o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1067,7 +1068,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t52o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1084,7 +1084,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t52o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1332,6 +1331,12 @@ P          mk1mem6          8
         optdriver4          1
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          1
@@ -1521,10 +1526,10 @@ P          mk1mem6          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  66 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          2.9
+.Delivered  13 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.7  wall=          3.9

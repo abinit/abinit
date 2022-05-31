@@ -6,7 +6,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1232,7 +1232,7 @@ subroutine exc_check_phi_block(string)
  ABI_MALLOC(lbuff,(hexc_size,nstates))
  err = -one
  do irank=1,nproc-1
-   call xmpi_exch(phi_block,hexc_size*nstates,irank,lbuff,master,comm,ierr)
+   call xmpi_exch(phi_block,hexc_size*nstates,irank,lbuff,master,comm,11,ierr)
    if (my_rank==master) then
      lbuff = lbuff-phi_block
      err = MAX(err,MAXVAL(MAXVAL(ABS(lbuff),DIM=1)))

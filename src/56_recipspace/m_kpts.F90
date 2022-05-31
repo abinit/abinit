@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
+!! Copyright (C) 2008-2022 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2966,7 +2966,7 @@ end subroutine testkgrid
 !!  The second call calculates the reduced coordinates of the circuit.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2007-2021 ABINIT group (MG)
+!!  Copyright (C) 2007-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

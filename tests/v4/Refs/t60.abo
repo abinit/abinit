@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t60/t60.in
-- output file    -> t60.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t60/t60.abi
+- output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
 
@@ -34,7 +34,7 @@
 -    mband =           8        mffmem =           1         mkmem =          20
        mpw =         198          nfft =        4320          nkpt =          20
 ================================================================================
-P This job should need less than                       3.341 Mbytes of memory.
+P This job should need less than                       3.464 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.485 Mbytes ; DEN or POT disk file :      0.035 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.485 Mbytes ; DEN or POT disk file :      0.035 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          20
        mpw =         198          nfft =        4320          nkpt =          20
 ================================================================================
-P This job should need less than                       2.814 Mbytes of memory.
+P This job should need less than                       2.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.485 Mbytes ; DEN or POT disk file :      0.035 Mbytes.
 ================================================================================
@@ -367,6 +367,9 @@ P          mk1mem3         72
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          2       2
@@ -461,8 +464,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.13609
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -479,8 +482,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.853613
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -676,11 +679,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.9827E-01  6.2813E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  2.02448E-07
-  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  1.67505E-10
-  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  1.36236E-09
-  prteigrs : nnsclo,ikpt=   50   11 max resid (incl. the buffer)=  3.18219E-09
-  prteigrs : nnsclo,ikpt=   50   19 max resid (incl. the buffer)=  4.54550E-10
 
 
 --- !ResultsGS
@@ -768,7 +766,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.13609
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -786,7 +783,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t60o_DS2_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1291,6 +1287,9 @@ P          mk1mem3         72
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          2       2
@@ -1437,10 +1436,10 @@ P          mk1mem3         72
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
+- Proc.   0 individual time (sec): cpu=          7.2  wall=          7.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.6  wall=          5.7
+.Delivered  14 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.2  wall=          7.3

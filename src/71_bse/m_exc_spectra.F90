@@ -6,7 +6,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2022 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@ MODULE m_exc_spectra
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
  use m_paw_hr,          only : pawhur_t
- use m_wfd,             only : wfd_t
+ use m_wfd,             only : wfdgw_t
  !use m_bse_io,          only : exc_amplitude
  use m_wfd_optic,       only : calc_optical_mels
 
@@ -85,7 +85,7 @@ contains
 !!  Psps <pseudopotential_type>=variables related to pseudopotentials.
 !!  Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !!  Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
-!!  Wfd<wfd_t>=Handler for the wavefunctions.
+!!  Wfd<wfdgw_t>=Handler for the wavefunctions.
 !!    nsppol=Number of independent spin polarizations.
 !!    nspinor=Number of spinorial components.
 !!  comm=MPI communicator.
@@ -113,7 +113,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
  type(eprenorms_t),optional,intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)

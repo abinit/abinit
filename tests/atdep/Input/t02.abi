@@ -1,0 +1,44 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 7 0
+natom_unitcell 4
+xred_unitcell 0.0 0.0 0.0   0 0.5 0.5  0.5 0 0.5    0.5 0.5 0
+typat_unitcell 1 1 1 1 
+ntypat 1
+amu 2.69815390E+01
+#DEFINE_SUPERCELL
+rprimd  22.9089998 0.0000000 0.0000000 0.0000000 22.9089998 0.0000000 0.0000000 0.0000000 22.9089998
+multiplicity  3 0 0 0 3 0 0 0 3
+natom  108
+typat 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1 
+temperature  9.00000000E+02
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut  11.45
+#OPTIONAL_INPUT_VARIABLES
+bzpath 7 G A B C D G R
+bzlength 6 100 50 50 35 106 86
+use_ideal_positions 1
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% md_hist = t02
+#%% [files]
+#%% files_to_test = 
+#%%   t02.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t02omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t02thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (2nd order)
+#%%   Aluminum (fcc) with 108 atoms at T = 900 K. Conventional cell
+#%% topics = aTDEP
+#%%<END TEST_INFO>
