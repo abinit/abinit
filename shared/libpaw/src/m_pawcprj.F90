@@ -1138,10 +1138,11 @@ end subroutine pawcprj_lincom
 !!
 !! SOURCE
 
- subroutine pawcprj_output(cprj)
+ subroutine pawcprj_output(cprj,prtgrads)
 
 !Arguments ------------------------------------
 !scalar
+integer,optional :: prtgrads
 !arrays
  type(pawcprj_type),intent(in) :: cprj(:,:)
 
@@ -1171,6 +1172,7 @@ end subroutine pawcprj_lincom
          write(std_out,'(6f12.8)')cprj(ii,jj)%dcp(1,1,kk),cprj(ii,jj)%dcp(2,1,kk),&
            &cprj(ii,jj)%dcp(1,2,kk),cprj(ii,jj)%dcp(2,2,kk),&
            &cprj(ii,jj)%dcp(1,3,kk),cprj(ii,jj)%dcp(2,3,kk)
+       end if
      end do
    end do
  end do
