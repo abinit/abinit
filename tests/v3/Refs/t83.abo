@@ -178,7 +178,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
-  d3e_pert1_atpol           1       1
+  d3e_pert2_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0

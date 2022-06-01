@@ -378,7 +378,7 @@ P          mk1mem5         32
           rfatpol2          1       2
           rfatpol3          1       2
           rfatpol4          1       2
-          rfatpol5          1       2
+          rfatpol5          1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -2279,7 +2279,7 @@ P          mk1mem5         32
           rfatpol2          1       2
           rfatpol3          1       2
           rfatpol4          1       2
-          rfatpol5          1       2
+          rfatpol5          1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0
