@@ -159,6 +159,7 @@
 #Dataset 11 : RF supercell calculation  at Gamma, fixed occupation number case
    nqpt11  1
     qpt11  3*0.0d0
+ rfatpol11  1 1
    rfdir11  1 0 0
   rfphon11  1
 

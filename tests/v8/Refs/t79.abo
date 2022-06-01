@@ -97,7 +97,6 @@ P          mk1mem           8
            prtden           0
            prteig           0
             prtwf           0
-          rfatpol           1       1        
             rfdir           1       0       0
            rfphon           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
