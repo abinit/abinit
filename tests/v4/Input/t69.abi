@@ -4,8 +4,6 @@
 
   ndtset  3
 
-   rfdir 1 0 0
-
 #Ground state calculation
   kptopt1   1             # Automatic generation of k points, taking
                           # into account the symmetry
