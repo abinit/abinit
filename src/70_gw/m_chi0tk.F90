@@ -6,7 +6,7 @@
 !!  This module provides tools for the computation of the irreducible polarizability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2022 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ MODULE m_chi0tk
  use m_xmpi
  use m_xomp
  use m_sort
- use m_wfd
+ use m_wfd,      only : wfdgw_t
 
  use defs_datatypes, only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
@@ -2144,7 +2144,7 @@ subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELT
  real(dp),intent(out) :: my_max_rest,my_min_rest
  type(kmesh_t),intent(in) :: Kmesh
  type(littlegroup_t),intent(in) :: Ltg_q
- type(wfd_t),intent(in) :: Wfd
+ type(wfdgw_t),intent(in) :: Wfd
 !arrays
  real(dp),intent(in) :: gw_energy(nbnds,Kmesh%nibz,nsppol)
  real(dp),intent(in) :: occ(nbnds,Kmesh%nibz,nsppol),qpoint(3)

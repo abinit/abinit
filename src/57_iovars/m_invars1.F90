@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -574,7 +574,17 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
    if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
+end do
+
+ dtsets(:)%use_nvtx=0
+#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ do idtset=1,ndtset_alloc
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
+   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
  end do
+#endif
+
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
@@ -615,6 +625,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
    ABI_MALLOC(dtsets(idtset)%kberry,(3,20))
+   ABI_MALLOC(dtsets(idtset)%lambsig,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lexexch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lpawu,(mxntypat))
@@ -1965,7 +1976,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
+!if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
+!   dtset%usepawu=14
+!else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
+!   dtset%usepawu=1
+!endif
+
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
@@ -2040,7 +2056,7 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine, or even 
+!! (some are initialized earlier, see indefo1 routine, or even
 !!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
@@ -2132,7 +2148,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      else
        dtsets(idtset)%use_gpu_cuda=1
      end if
-   end if
+  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
@@ -2233,6 +2249,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_check =0
    dtsets(idtset)%dmftctqmc_correl=0
    dtsets(idtset)%dmftctqmc_grnns =0
+   dtsets(idtset)%dmftctqmc_config =0
    dtsets(idtset)%dmftctqmc_meas  =1
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0
@@ -2395,6 +2412,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%lotf_nneigx=40
    dtsets(idtset)%lotf_version=2
 #endif
+   dtsets(idtset)%lambsig(:) = zero
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
 !  M

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t70/t70.in
-- output file    -> t70.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t70/t70.abi
+- output file    -> t70.abo
 - root for input  files -> t70i
 - root for output files -> t70o
 
@@ -187,6 +187,12 @@ P          mk1mem           1
         optdriver4          0
         optdriver5          0
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       1
@@ -297,8 +303,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1087,7 +1093,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t70o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1104,7 +1109,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t70o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1125,13 +1129,13 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  6   188.66748772483     -8.199E-06 2.788E-08 4.624E-03
  ETOT  7   188.66748731847     -4.064E-07 1.146E-09 1.629E-04
  ETOT  8   188.66748730784     -1.063E-08 2.707E-11 2.116E-06
- ETOT  9   188.66748730774     -9.717E-11 4.381E-13 4.184E-07
- ETOT 10   188.66748730773     -1.712E-11 4.832E-14 1.479E-08
- ETOT 11   188.66748730772     -2.274E-12 1.188E-15 1.497E-10
+ ETOT  9   188.66748730774     -9.720E-11 4.381E-13 4.184E-07
+ ETOT 10   188.66748730773     -1.710E-11 4.832E-14 1.479E-08
+ ETOT 11   188.66748730772     -2.302E-12 1.188E-15 1.497E-10
  ETOT 12   188.66748730773      3.141E-12 1.735E-18 7.620E-12
  ETOT 13   188.66748730772     -2.785E-12 1.482E-19 1.365E-14
- ETOT 14   188.66748730773      1.862E-12 2.490E-22 2.557E-15
- ETOT 15   188.66748730773      6.679E-13 9.196E-22 1.569E-17
+ ETOT 14   188.66748730773      1.847E-12 2.490E-22 2.557E-15
+ ETOT 15   188.66748730773      7.105E-13 9.196E-22 1.569E-17
 
  At SCF step   15       vres2   =  1.57E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -1294,6 +1298,12 @@ P          mk1mem           1
         optdriver4          0
         optdriver5          0
         optdriver6          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          1
           rfatpol1          1       1
           rfatpol2          1       1
           rfatpol3          1       1
@@ -1458,10 +1468,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
+.Delivered  12 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=          2.5

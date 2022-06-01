@@ -10,7 +10,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2021 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2022 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1732,6 +1732,7 @@ end subroutine pawcprj_reorder
 !!  receiver=ID of the receiver in spaceComm.
 !!  sender=ID of the sender in spaceComm.
 !!  spaceComm=MPI Communicator.
+!!  mtag= message tag
 !!
 !! OUTPUT
 !!  ierr=Error status.
@@ -1748,11 +1749,11 @@ end subroutine pawcprj_reorder
 !!
 !! SOURCE
 
-subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,ierr)
+subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,mtag,ierr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,n2dim,ncpgr
+ integer,intent(in) :: mtag,natom,n2dim,ncpgr
  integer,intent(in) :: sender,receiver,spaceComm
  integer,intent(out) :: ierr
 !arrays
@@ -1819,9 +1820,9 @@ subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,re
  end if
 
 !=== Transmit data ===
- call xmpi_exch(buffer_cp,2*ntotcp,sender,buffer_cp,receiver,spaceComm,ierr)
+ call xmpi_exch(buffer_cp,2*ntotcp,sender,buffer_cp,receiver,spaceComm,2*mtag,ierr)
  if (ncpgr/=0) then
-   call xmpi_exch(buffer_cpgr,2*ncpgr*ntotcp,sender,buffer_cpgr,receiver,spaceComm,ierr)
+   call xmpi_exch(buffer_cpgr,2*ncpgr*ntotcp,sender,buffer_cpgr,receiver,spaceComm,2*mtag+1,ierr)
  end if
 
 !=== UnPack buffers into Cprj_recv ===

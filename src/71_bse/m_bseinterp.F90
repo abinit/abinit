@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2022 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ MODULE m_bseinterp
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_pawtab,            only : pawtab_type
 
  implicit none
@@ -139,7 +139,7 @@ subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
  integer,intent(in) :: method
  type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
- type(wfd_t),intent(inout) :: Wfd_dense, Wfd_coarse
+ type(wfdgw_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
  type(excparam),intent(in) :: BSp
  type(crystal_t),intent(in) :: Cryst
@@ -309,7 +309,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 !scalars
  type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
- type(wfd_t),intent(inout) :: Wfd_dense, Wfd_coarse
+ type(wfdgw_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
  type(excparam),intent(in) :: BSp
  type(crystal_t),intent(in) :: Cryst

@@ -9,7 +9,7 @@
 !!  addr_copy: used to copy the address contained in a pointer
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2022 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

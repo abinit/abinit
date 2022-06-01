@@ -10,7 +10,7 @@
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (B.Amadon, J. Denier and J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (B.Amadon, J. Denier and J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,7 @@ MODULE m_GreenHyboffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -172,7 +172,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -305,7 +305,7 @@ END SUBROUTINE GreenHyboffdiag_init
 !!  reset green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -349,7 +349,7 @@ END SUBROUTINE GreenHyboffdiag_reset
 !!  clear green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -407,7 +407,7 @@ END SUBROUTINE GreenHyboffdiag_clear
 !!  set Green function in frequencies
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -463,7 +463,7 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !!  Measure Green's function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -554,6 +554,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
     ! FIXME SHOULD be much more faster
     
 
+   ! write(6,*) "LKLLL2b"
     SELECT CASE(op%iTech)
     CASE (GREENHYB_TAU)
       argument = DBLE(op%factor)
@@ -609,6 +610,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
   
       ! This is new measurement, thus op%factor should be put to one
       op%factor = 1
+   ! write(6,*) "LKLLL2C"
 
 
       ! initialized index idx_old for the doubles loops over flavors and segments.
@@ -776,6 +778,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
        iC_m_add=iC_m_add+tail
       END DO ! iflavor
       op%signvalueold = signvalue
+   ! write(6,*) "LKLLL2D"
     CASE (GREENHYB_OMEGA)
     !  argument = DBLE(op%factor)
     !  DO iomega = 1, omegaSamples
@@ -820,7 +823,7 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 !!  reduce green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -877,7 +880,7 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 !!  impose number of electrons for this flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -947,7 +950,7 @@ END SUBROUTINE GreenHyboffdiag_setN
 !!  Set first moments for G
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1014,7 +1017,7 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !!  Compute full moments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1081,7 +1084,7 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 !!  perform back fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1431,7 +1434,7 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 !!  perform forward fourier transform
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1750,7 +1753,7 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 !!  print Green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1821,7 +1824,7 @@ END SUBROUTINE GreenHyboffdiag_print
 !!  destroy green function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
