@@ -122,11 +122,6 @@ _ WF disk file :      0.074 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -137,21 +132,11 @@ _ WF disk file :      0.074 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -1954,11 +1939,6 @@ meta: {optdriver: 5, }
  -outvars: echo values of variables after computation  --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -1969,21 +1949,11 @@ meta: {optdriver: 5, }
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
