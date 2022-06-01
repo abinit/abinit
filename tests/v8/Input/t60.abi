@@ -31,6 +31,7 @@
   # RF calculation of phonons and electric field perturbation
     rfphon3  1
     rfelfd3  3
+   rfatpol3  1 2   # One might have left the default, since the atom 3 is symmetric of atom 2
     kptopt3  2
     tolvrs3  1.0d-10
     getwfk3  1

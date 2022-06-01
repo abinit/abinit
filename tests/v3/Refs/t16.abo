@@ -1736,11 +1736,6 @@ P          mk1mem5          5
            prtpot3          1
            prtpot4          0
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
             rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1

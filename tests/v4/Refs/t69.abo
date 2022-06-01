@@ -256,7 +256,6 @@ P          mk1mem3        128
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
-            rfdir           1     0     0
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -2013,7 +2012,6 @@ P          mk1mem3        128
            prtpot1          0
            prtpot2          1
            prtpot3          1
-            rfdir           1     0     0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
