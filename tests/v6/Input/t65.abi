@@ -84,7 +84,6 @@ ngkpt1?   1 1 1
 optdriver?5    5
   d3e_pert1_elfd?5    1
   d3e_pert1_phon?5    1
- d3e_pert1_atpol?5    1 2
    d3e_pert1_dir?5    1 1 1
   d3e_pert2_elfd?5    1
    d3e_pert2_dir?5    1 1 1

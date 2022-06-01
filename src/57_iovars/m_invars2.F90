@@ -680,13 +680,44 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! NONLINEAR integer input variables (same definition as for rfarr)
  ! Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
  ! --Keep the old input variables for backward compatibility
- if(dtset%optdriver==RUNL_NONLINEAR) then
-   tread_key=0
 
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf1atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
+ tread_key=0
+
+!Need always to be read, in order to change the default value.
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf1atpol',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert1_atpol(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert1_atpol(1)==-1)then
+   dtset%d3e_pert1_atpol(1)=1
+ endif
+ if(dtset%d3e_pert1_atpol(2)==-1)then
+   dtset%d3e_pert1_atpol(2)=dtset%natom
+ endif
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_atpol',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf2atpol',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert2_atpol(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert2_atpol(1)==-1)then
+   dtset%d3e_pert2_atpol(1)=1
+ endif
+ if(dtset%d3e_pert2_atpol(2)==-1)then
+   dtset%d3e_pert2_atpol(2)=dtset%natom
+ endif
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert3_atpol(1)==-1)then
+   dtset%d3e_pert3_atpol(1)=1
+ endif
+ if(dtset%d3e_pert3_atpol(2)==-1)then
+   dtset%d3e_pert3_atpol(2)=dtset%natom
+ endif
+
+ if(dtset%optdriver==RUNL_NONLINEAR) then
 
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_dir',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf1dir',tread_alt,'INT')
@@ -703,11 +734,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1.or.tread_alt==1) dtset%d3e_pert1_phon=intarr(1)
    if (tread_alt==1) tread_key=1
 
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf2atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
-
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_dir',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2dir',tread_alt,'INT')
    if(tread==1.or.tread_alt==1) dtset%d3e_pert2_dir(1:3)=intarr(1:3)
@@ -721,11 +747,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_phon',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2phon',tread_alt,'INT')
    if(tread==1.or.tread_alt==1) dtset%d3e_pert2_phon=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
    if (tread_alt==1) tread_key=1
 
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert3_dir',tread,'INT')

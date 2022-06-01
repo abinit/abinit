@@ -299,6 +299,21 @@ _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
+  d3e_pert1_atpol11         1       2
+  d3e_pert1_atpol12         1       2
+  d3e_pert1_atpol13         1       2
+  d3e_pert1_atpol14         1       2
+  d3e_pert1_atpol15         1       1
+  d3e_pert1_atpol21         1       2
+  d3e_pert1_atpol22         1       2
+  d3e_pert1_atpol23         1       2
+  d3e_pert1_atpol24         1       2
+  d3e_pert1_atpol25         1       1
+  d3e_pert1_atpol31         1       2
+  d3e_pert1_atpol32         1       2
+  d3e_pert1_atpol33         1       2
+  d3e_pert1_atpol34         1       2
+  d3e_pert1_atpol35         1       1
     d3e_pert1_dir11         0       0       0
     d3e_pert1_dir12         0       0       0
     d3e_pert1_dir13         0       0       0
@@ -5381,6 +5396,21 @@ meta: {optdriver: 5, }
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
+  d3e_pert1_atpol11         1       2
+  d3e_pert1_atpol12         1       2
+  d3e_pert1_atpol13         1       2
+  d3e_pert1_atpol14         1       2
+  d3e_pert1_atpol15         1       1
+  d3e_pert1_atpol21         1       2
+  d3e_pert1_atpol22         1       2
+  d3e_pert1_atpol23         1       2
+  d3e_pert1_atpol24         1       2
+  d3e_pert1_atpol25         1       1
+  d3e_pert1_atpol31         1       2
+  d3e_pert1_atpol32         1       2
+  d3e_pert1_atpol33         1       2
+  d3e_pert1_atpol34         1       2
+  d3e_pert1_atpol35         1       1
     d3e_pert1_dir11         0       0       0
     d3e_pert1_dir12         0       0       0
     d3e_pert1_dir13         0       0       0

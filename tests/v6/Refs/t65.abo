@@ -123,11 +123,6 @@ _ WF disk file :      0.186 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
             acell      2.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.29897680E+01  3.54527000E+01
            diemac      2.00000000E+00
-  d3e_pert1_atpol11         1       1
-  d3e_pert1_atpol12         1       1
-  d3e_pert1_atpol13         1       1
-  d3e_pert1_atpol14         1       1
-  d3e_pert1_atpol15         1       2
     d3e_pert1_dir11         0       0       0
     d3e_pert1_dir12         0       0       0
     d3e_pert1_dir13         0       0       0
@@ -1996,11 +1991,6 @@ meta: {optdriver: 5, }
             acell      2.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.29897680E+01  3.54527000E+01
            diemac      2.00000000E+00
-  d3e_pert1_atpol11         1       1
-  d3e_pert1_atpol12         1       1
-  d3e_pert1_atpol13         1       1
-  d3e_pert1_atpol14         1       1
-  d3e_pert1_atpol15         1       2
     d3e_pert1_dir11         0       0       0
     d3e_pert1_dir12         0       0       0
     d3e_pert1_dir13         0       0       0
