@@ -84,16 +84,10 @@ ngkpt1?   1 1 1
 optdriver?5    5
   d3e_pert1_elfd?5    1
   d3e_pert1_phon?5    1
-   d3e_pert1_dir?5    1 1 1
   d3e_pert2_elfd?5    1
-   d3e_pert2_dir?5    1 1 1
   d3e_pert3_elfd?5    1
-   d3e_pert3_dir?5    1 1 1
 
 nbdbuf 0
-d3e_pert1_dir 0 0 0 # For backward compatibility of tests only. Instead one should leave the default.
-d3e_pert2_dir 0 0 0 # For backward compatibility of tests only. Instead one should leave the default.
-d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one should leave the default.
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosTM_pwteter/11na.pspnc, PseudosTM_pwteter/17cl.pspnc"
