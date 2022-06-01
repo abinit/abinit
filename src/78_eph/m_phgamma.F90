@@ -320,9 +320,9 @@ module m_phgamma
 
   real(dp) :: deltaene
   ! Chemical potential increment for inelastic integration Copied from fstab
-  !   for simplicity could be made equal to phonon frequency step
+  ! for simplicity could be made equal to phonon frequency step
 
-  real(dp) :: omega_min,omega_max
+  real(dp) :: omega_min, omega_max
   ! min and Max frequency (Ha) in the linear mesh.
 
   real(dp) :: wstep

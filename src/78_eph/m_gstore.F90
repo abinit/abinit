@@ -134,7 +134,7 @@ module m_gstore
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
  use m_symtk,          only : matr3inv
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ifc,            only : ifc_type
  use m_pawang,         only : pawang_type
@@ -574,6 +574,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
  ! TODO: Should fix bz2ibz to use the same conventions as krank and listkk
  ! NB: only sigmaph seems to be using this optional argument
+ ! TODO: Order qbz by shell
 
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry for phonons even in systems without inversion
@@ -582,6 +583,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
                              gstore%nqibz, gstore%qibz, gstore%wtq, gstore%nqbz, qbz)
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
+
+ !call kpts_sort(cryst%gprimd, gstore%nqbz, qbz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
@@ -2036,7 +2039,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
 !Local variables-------------------------------
  integer :: my_is, my_ik, my_iq, my_ip, ib_k, ib_kq, ierr
- real(dp) :: g2, w_nuq, weight_k, weight_q, cpu, wall, gflops, spinfact
+ real(dp) :: g2, w_nuq, weight_k, weight_q, cpu, wall, gflops
  type(gqk_t), pointer :: gqk
 !arrays
  real(dp) :: qpt(3)
@@ -2091,9 +2094,8 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
 
  ABI_FREE(deltaw_nuq)
 
- ! TODO Spin and N(eF)
- spinfact = two / (gstore%nsppol * dtset%nspinor)
- a2fw = a2fw * spinfact
+ ! Take into account spin and N(eF) TODO
+ a2fw = a2fw * (two / (gstore%nsppol * dtset%nspinor))
  call xmpi_sum(a2fw, gstore%comm, ierr)
 
  call cwtime_report(" gstore_get_a2fw", cpu, wall, gflops)
@@ -2493,7 +2495,13 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ! Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
    ! NB: This is a bootleneck, can pass comm_kp
-   ltetra = 1
+
+   ! Select option for double delta with tetra.
+   !  2 for the optimized tetrahedron method.
+   ! -2 for the linear tetrahedron method.
+   ltetra = 0
+   if (eph_intmeth ==  2) ltetra = 2
+   if (eph_intmeth == -2) ltetra = 1
    !if (ltetra == 1) call wrtout(std_out, " Using linear tetrahedron method from libtetrabz (ltetra 1)")
    !if (ltetra == 2) call wrtout(std_out, " Using optimized tetrahedron method from libtetrabz (ltetra 2)")
 
@@ -2656,7 +2664,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3), g0_kq(3), work_ngfft(18),gmax(3),gamma_ngqpt(3), indkk_kq(6,1)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),wfd_istwfk(:)
+ integer(i1b),allocatable :: itreat_qibz(:)
+ integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
  !integer,allocatable :: my_pinfo(:,:) !, pert_table(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), vk(3) !, vkq(3)
  real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
@@ -2732,6 +2741,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  comm_rpt = xmpi_comm_self
  !comm_rpt = bqs_comm%value
  call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+
+ ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
+ ABI_MALLOC(itreat_qibz, (gstore%nqibz))
+ ABI_MALLOC(qselect, (gstore%nqibz))
+ qselect = 0; itreat_qibz = 0
+ call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
+ ABI_FREE(itreat_qibz)
+ ABI_FREE(qselect)
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical imagine of the k/k+q wavevectors
@@ -3535,13 +3552,14 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gwork_q, start=[1, 1, 1, 1, 1, iq_glob]) ! count=[])
         NCF_CHECK(ncerr)
 
-        ! Put data in the right place.
         do my_ik=1,gqk%my_nk
           ik_glob = my_ik + gqk%my_kstart - 1
           do my_ip=1,gqk%my_npert
             ipert = gqk%my_iperts(my_ip)
 
             slice_bb = gwork_q(:,:,:, ipert, ik_glob)
+
+            ! Put data in the right place and handle conversion g --> |g|^2
             if (with_cplex == gstore_cplex) then
               if (with_cplex == 1) gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:)
               if (with_cplex == 2) gqk%my_g(:, my_ip, :, my_iq, :, my_ik) = slice_bb
@@ -3557,6 +3575,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
         end do
 
      end do
+
      ABI_FREE(gwork_q)
      ABI_FREE(slice_bb)
 
