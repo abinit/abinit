@@ -431,7 +431,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
  integer,intent(in) :: atindx(dtset%natom)
  integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(in) :: ffnl_k(mpw,dimffnl,psps%lmnmax,psps%ntypat)
+ real(dp),intent(in) :: ffnl_k(npw_k,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
@@ -441,7 +441,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
 
 !Local variables-------------------------------
 !scalars
- integer :: beta,delta,gamma,iband,idq,ii,ipw,istr,ka,nkpg,nkpg1,nylmgrpart
+ integer :: beta,delta,dimffnlk,dimffnl1,gamma,iband,idq,ii,ipw,istr,ka,nkpg,nkpg1,nylmgrpart
  integer :: optlocal,optnl,q1dir,q2dir,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
@@ -503,6 +503,8 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
    !  q1-gradient of atomic displacement 1st order hamiltonian:
    !  < u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}_{\q1dir} \delta_{\beta\q2dir}| u_{i,k}^{(0)} >
    !-----------------------------------------------------------------------------------------------
+   dimffnlk=1
+   dimffnl1=2
    q1dirs=(/gamma,delta/)
    q2dirs=(/delta,gamma/)
    do ii=1,2
@@ -528,9 +530,14 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
        call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
        !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+       ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
+       ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
+       ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
+       ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
+       ffnl1(:,2,:,:)=ffnl_k(:,1+q1dir,:,:)
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,q1dir, &
      & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
-     & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)
+     & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,reuse_ffnlk=1,reuse_ffnl1=1)
 
        !LOOP OVER BANDS
        do iband=1,nband_k
@@ -595,10 +602,16 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
    call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
+   dimffnlk=1
+   ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
+   ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
+   dimffnl1=10
+   ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
+   ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
    call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,gamma, &
  & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
  & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
- & reuse_ffnlk=0,reuse_ffnl1=0,qdir2=delta)
+ & reuse_ffnlk=1,reuse_ffnl1=1,qdir2=delta)
 
    !LOOP OVER BANDS
    do iband=1,nband_k
