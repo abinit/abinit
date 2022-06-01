@@ -187,7 +187,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
- type(gstore_t) :: gstore, other_gstore
+ type(gstore_t) :: gstore !, other_gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
@@ -754,11 +754,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
      ! DEBUG
-     if (nprocs == 1) then
-       call wrtout(std_out, " DEBUG: Trying to reread GSTORE file")
-       other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-       call other_gstore%free()
-     end if
+     !if (nprocs == 1) then
+     !  call wrtout(std_out, " DEBUG: Trying to reread GSTORE file")
+     !  other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
+     !  call other_gstore%free()
+     !end if
    end if
 
    call gstore%free()

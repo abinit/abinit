@@ -356,7 +356,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    !call gstore%get_lambda_iso_iw(dtset, 2 * niw, imag_2w, lambda_ij)
    ABI_FREE(imag_2w)
 
-   call iso%solve(itemp, kt, niw, imag_w, lambda_ij)
+   !call iso%solve(itemp, kt, niw, imag_w, lambda_ij)
    ABI_FREE(lambda_ij)
    ABI_FREE(imag_w)
  end do ! itemp

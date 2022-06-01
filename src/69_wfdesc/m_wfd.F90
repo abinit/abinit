@@ -4536,7 +4536,6 @@ subroutine wfdgw_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
 
      if (size(Wfd%Kdata(ik_ibz)%kg_k,dim=2)<wfkfile%Hdr%npwarr(ik_ibz)) then
        ABI_ERROR("Wrong number of npw before printing")
-       call wrtout(std_out,msg,'COLL')
      end if
      ! Extract the set of u(g) for this (kpoint,spin)
      ! This works only if all the bands are on the same node.
@@ -4703,10 +4702,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
  call wrtout(std_out, sjoin(" About to read: ",itoa(count(my_readmask)), " (b, k, s) states in total."))
  do spin=1,wfd%nsppol
-   call wrtout(std_out, sjoin(" For spin:", itoa(spin), ", will read:", itoa(count(all_countks(:, spin) /= 0)), " k-points."))
+   call wrtout(std_out, sjoin(" For spin:", itoa(spin), &
+              ", will read:", itoa(count(all_countks(:, spin) /= 0)), " k-points out of:", itoa(wfd%nkibz)))
  end do
- tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
- if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
+ tag_spin(: )= ['      ','      ']; if (Wfd%nsppol==2) tag_spin(:)= [' UP   ',' DOWN ']
+ if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]')
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -4722,8 +4722,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
       nband_wfd  = Wfd%nband(ik_ibz,spin)
       if (nband_wfd > nband_disk) then
-        write(msg,'(a,2(i0,1x))')&
-         " nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd, nband_disk
+        write(msg,'(a,2(i0,1x))')" nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd, nband_disk
         ABI_ERROR(msg)
       end if
 
@@ -4824,7 +4823,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
         call wfk%read_bmask(my_readmask(:,ik_ibz, spin), ik_ibz, spin, sc_mode, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k)
 
       else
-        ! Master read full set of bands and broadcast data, then each proc extract its own set of wavefunctions.
+        ! Master reads full set of bands and broadcasts data, then each proc extract its own set of wavefunctions.
         ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*(bmax-bmin+1)), ierr)
         if (my_rank == master) then
           call wfk%read_band_block([bmin, bmax], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
@@ -6116,7 +6115,7 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  if (abs(pawprtvol)>=1) then
    natinc=1; if(Wfd%natom>1.and.pawprtvol>=0) natinc=Wfd%natom-1
    write(msg, '(7a)') ch10," PAW TEST:",ch10,' ========= Values of RHOIJ in wfdgw_pawrhoij =========',ch10
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    do iatom=1,Cryst%natom,natinc
      call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex_rhoij,&
                   pawrhoij(iatom)%qphase,iatom,Cryst%natom,&

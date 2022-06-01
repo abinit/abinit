@@ -885,7 +885,7 @@ type, public :: dataset_type
  real(dp) :: red_efieldbar(3)
  real(dp) :: sigma_erange(2) = zero
  real(dp) :: strtarget(6)
- real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]
+ real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
  real(dp) :: ucrpa_window(2)
  real(dp) :: vcutgeo(3)
  real(dp) :: vprtrb(2)
