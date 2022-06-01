@@ -32,7 +32,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 26
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 27
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -58,10 +58,11 @@ module m_nvtx_data
   integer, parameter :: NVTX_INVOVL_NONLOP2 = 20
   integer, parameter :: NVTX_INVOVL_INNER = 21
   integer, parameter :: NVTX_INVOVL_INNER_APPLY_BLOCK = 22
-  integer, parameter :: NVTX_SUB_SPC_DIAGO = 23
-  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 24
-  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 25
-  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 26
+  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 23
+  integer, parameter :: NVTX_SUB_SPC_DIAGO = 24
+  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 25
+  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 26
+  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 27
 
 contains
 
@@ -99,6 +100,7 @@ contains
          & "INVOVL_NONLOP2", &
          & "INVOVL_INNER", &
          & "INVOVL_INNER_APPLY_BLOCK", &
+         & "INVOVL_INNER_GEMM", &
          & "SUB_SPC_DIAGO", &
          & "CHEBFI2_NEXT_ORDER", &
          & "CHEBFI2_SWAP_BUF", &
@@ -127,10 +129,11 @@ contains
     nvtx_ids(20)= NVTX_INVOVL_NONLOP2
     nvtx_ids(21)= NVTX_INVOVL_INNER
     nvtx_ids(22)= NVTX_INVOVL_INNER_APPLY_BLOCK
-    nvtx_ids(23)= NVTX_SUB_SPC_DIAGO
-    nvtx_ids(24)= NVTX_CHEBFI2_NEXT_ORDER
-    nvtx_ids(25)= NVTX_CHEBFI2_SWAP_BUF
-    nvtx_ids(26)= NVTX_CHEBFI2_GET_AX_BX
+    nvtx_ids(23)= NVTX_INVOVL_INNER_GEMM
+    nvtx_ids(24)= NVTX_SUB_SPC_DIAGO
+    nvtx_ids(25)= NVTX_CHEBFI2_NEXT_ORDER
+    nvtx_ids(26)= NVTX_CHEBFI2_SWAP_BUF
+    nvtx_ids(27)= NVTX_CHEBFI2_GET_AX_BX
 
   end subroutine nvtx_init
 

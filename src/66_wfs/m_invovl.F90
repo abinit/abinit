@@ -843,6 +843,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    temp_proj = sm1proj(:,ibeg:iend,:)
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * temp_proj(:,:,1)
+   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
    call abi_xgemm('N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
      & invovl%gram_projs(:,:,1), nprojs, &
      & temp_proj(:,:,1), nlmntot_this_proc, czero, &
@@ -853,6 +854,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
    ! exit check
    errs = SUM(SUM(resid**2, 1),1)
    call xmpi_sum(errs, mpi_enreg%comm_fft, ierr)
+   ABI_NVTX_END_RANGE()
 
    maxerr = sqrt(MAXVAL(errs/normprojs))
    if(maxerr < precision .or. additional_steps_to_take == 1) then
