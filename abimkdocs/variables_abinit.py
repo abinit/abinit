@@ -4478,6 +4478,31 @@ The energy is relative to the calculated Fermi energy.
 ),
 
 Variable(
+    abivarname="ffnl_lw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NonLocal Form Factors in LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+In a longwave calculation, the nonlocal form factors and their derivatives are
+by default computed for all k points and atom types at an initial step and then 
+specifically used for each type of perturbation. Depending on the calculation 
+parameters --in particular for dense k-point grids, large ecut and pseudopotentials
+with large l and n values-- such approach might lead to high virtual memory usage.
+
+With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated 
+on-the-fly for each type of perturbation and k point when they are required. 
+This option saves virtual memory but makes the computation of spatial-dispersion 
+tensors slower. 
+""",
+),
+
+
+Variable(
     abivarname="fftalg",
     varset="dev",
     vartype="integer",
