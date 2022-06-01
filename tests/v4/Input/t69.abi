@@ -15,7 +15,7 @@
 
 #Response Function calculation : d/dk
   rfelfd2   2             # Activate the calculation of the d/dk perturbation
-p
+ 
     nqpt2   1
      qpt2   0.0 0.0 0.0   # This is a calculation at the Gamma point
 
