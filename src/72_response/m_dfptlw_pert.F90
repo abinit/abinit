@@ -275,16 +275,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  ABI_MALLOC(vpsp1,(cplex*nfft))
  ABI_MALLOC(dum_cwaveprj,(0,0))
 
-!Set up the spherical harmonics (Ylm) and gradients at each k point 
-! useylmgr=1; option=2 ; nylmgr=9
-! ABI_MALLOC(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))               
-! ABI_MALLOC(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-! if (psps%useylm==1) then
-!   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,mkmem_rbz,mpi_enreg,&
-! & psps%mpsang,mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
-! & rprimd,ylm,ylmgr)                                   
-! end if
-
 !Initialize d3etot parts
  d3etot_t1=zero
  d3etot_t2=zero
@@ -331,24 +321,26 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      ABI_MALLOC(kg_k,(3,npw_k))
      ABI_MALLOC(ylm_k,(npw_k,mpsang*mpsang*psps%useylm))
      ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
 
      !Get plane-wave vectors and related data at k
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
-     if (psps%useylm==1) then
-       do ilm=1,psps%mpsang*psps%mpsang
-         ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
-       end do
-       if (useylmgr==1) then
+     if (dtset%ffnl_lw==1) then
+       if (psps%useylm==1) then
          do ilm=1,psps%mpsang*psps%mpsang
-           do ii=1,nylmgr
-             ylmgr_k(1:npw_k,ii,ilm)=ylmgr(1+ikg:npw_k+ikg,ii,ilm)
-           end do
+           ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
          end do
+         if (useylmgr==1) then
+           do ilm=1,psps%mpsang*psps%mpsang
+             do ii=1,nylmgr
+               ylmgr_k(1:npw_k,ii,ilm)=ylmgr(1+ikg:npw_k+ikg,ii,ilm)
+             end do
+           end do
+         end if
        end if
+     else if (dtset%ffnl_lw==0) then
+       ffnl_k(1:npw_k,:,:,:)=ffnl(ikc,1:npw_k,:,:,:)
      end if
-
-     ABI_MALLOC(ffnl_k,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
-     ffnl_k(1:npw_k,:,:,:)=ffnl(ikc,1:npw_k,:,:,:)
 
      !Get matrix elements for uniform perturbations
      eig1_k(:)=eigen1(1+bd2tot:2*nband_k**2+bd2tot)

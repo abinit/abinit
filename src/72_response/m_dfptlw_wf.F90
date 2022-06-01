@@ -196,7 +196,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
 !Local variables-------------------------------
 !scalars
  integer :: berryopt,dimffnlk,dimffnl1,iband,idir,idq,ii,jband,nkpg,nkpg1,nylmgrtmp
- integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,sij_opt
+ integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,reuse_ffnlk,reuse_ffnl1,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda,fac,tmpim,tmpre
  real(dp) :: cpu,wall,gflops
@@ -228,6 +228,8 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  size_wf= dtset%nspinor*npw_k
  with_nonlocal_i1pert=.true. ; if (i1pert==natom+2) with_nonlocal_i1pert=.false.
  with_nonlocal_i2pert=.true. ; if (i2pert==natom+2) with_nonlocal_i2pert=.false.
+ reuse_ffnlk=1 ; if (dtset%ffnl_lw==1) reuse_ffnlk=0
+ reuse_ffnl1=1 ; if (dtset%ffnl_lw==1) reuse_ffnl1=0
 
 !Additional allocations
  ABI_MALLOC(cwave0i,(2,size_wf))
@@ -265,15 +267,17 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
  !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
- ABI_MALLOC(ffnlk,(npw_k,0,psps%lmnmax,psps%ntypat))
- ABI_MALLOC(ffnl1,(npw_k,2,psps%lmnmax,psps%ntypat))
- ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
- ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
+ if (dtset%ffnl_lw==0) then
+   ABI_MALLOC(ffnlk,(npw_k,0,psps%lmnmax,psps%ntypat))
+   ABI_MALLOC(ffnl1,(npw_k,2,psps%lmnmax,psps%ntypat))
+   ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
+   ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
+ end if
  call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                        ! In
  kpt,kpt,i3dir,natom+1,natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,& ! In
  npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&               ! In
  dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&           ! Out
- reuse_ffnlk=1, reuse_ffnl1=1)                                            ! Optional
+ reuse_ffnlk=reuse_ffnlk, reuse_ffnl1=reuse_ffnl1)                        ! Optional
 
  !LOOP OVER BANDS
  do iband=1,nband_k
@@ -483,18 +487,21 @@ if (.not.samepert) then
        & with_nonlocal=with_nonlocal_i2pert)
   
        !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
-       ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
-       if (dimffnlk==1) ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
-       ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
-       if (dimffnl1==2) then
-         ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
-         ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
-       else
-         ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
+       if (dtset%ffnl_lw==0) then
+         ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
+         if (dimffnlk==1) ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
+         ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
+         if (dimffnl1==2) then
+           ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
+           ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
+         else
+           ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
+         end if
        end if
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i2pert,i3dir, &
      & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
-     & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,reuse_ffnlk=1,reuse_ffnl1=1)
+     & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
+     & reuse_ffnlk=reuse_ffnlk,reuse_ffnl1=reuse_ffnl1)
   
      end if
   
@@ -619,18 +626,21 @@ if (.not.samepert) then
      & with_nonlocal=with_nonlocal_i1pert)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
-     ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
-     if (dimffnlk==1) ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
-     ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
-     if (dimffnl1==2) then
-       ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
-       ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
-     else
-       ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
+     if (dtset%ffnl_lw==0) then
+       ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,psps%ntypat))
+       if (dimffnlk==1) ffnlk(:,1,:,:)=ffnl_k(:,1,:,:)
+       ABI_MALLOC(ffnl1,(npw_k,dimffnl1,psps%lmnmax,psps%ntypat))
+       if (dimffnl1==2) then
+         ffnl1(:,1,:,:)=ffnl_k(:,1,:,:)
+         ffnl1(:,2,:,:)=ffnl_k(:,1+i3dir,:,:)
+       else
+         ffnl1(:,1:dimffnl1,:,:)=ffnl_k(:,1:dimffnl1,:,:)
+       end if
      end if
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,i1pert,i3dir, &
    & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrtmp,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,reuse_ffnlk=1,reuse_ffnl1=1)
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
+   & reuse_ffnlk=reuse_ffnlk,reuse_ffnl1=reuse_ffnl1)
 
    end if
 

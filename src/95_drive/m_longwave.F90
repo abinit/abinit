@@ -480,7 +480,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & rprimd,ylm,ylmgr)                                   
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
-! if (dtset%ffnl_lw == 0) then 
+ if (dtset%ffnl_lw == 0) then 
    if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) then
      ider=1; idir0=4; dimffnl=4
    else if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
@@ -490,13 +490,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
  & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
  & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
-!   useylmgr=0
-!   ABI_FREE(ylmgr)
-!   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-! else if (dtset%ffnl_lw == 1) then 
-!   dimffnl=0
-!   ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
-! end if
+   useylmgr=0
+   ABI_FREE(ylmgr)
+   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ else if (dtset%ffnl_lw == 1) then 
+   dimffnl=0
+   ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+ end if
 
 !TODO: This part of the implementation does not work properly to select specific directions
 !      for each perturbation. This development is temporarily frozen.
