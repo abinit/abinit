@@ -125,11 +125,6 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -3162,11 +3157,6 @@ meta: {optdriver: 5, }
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0

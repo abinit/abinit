@@ -122,11 +122,6 @@ _ WF disk file :      0.074 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -1959,11 +1954,6 @@ meta: {optdriver: 5, }
  -outvars: echo values of variables after computation  --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0

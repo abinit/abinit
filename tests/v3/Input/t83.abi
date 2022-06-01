@@ -35,6 +35,10 @@ d3e_pert1_dir 0 0 0 # For backward compatibility of tests only. Instead one shou
 d3e_pert2_dir 0 0 0 # For backward compatibility of tests only. Instead one should leave the default.
 d3e_pert3_dir 0 0 0 # For backward compatibility of tests only. Instead one should leave the default.
 
+d3e_pert1_atpol 1 1
+d3e_pert2_atpol 1 1
+d3e_pert3_atpol 1 1
+
 
 
 

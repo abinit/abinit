@@ -156,6 +156,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol           1       1
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -177,6 +178,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
+  d3e_pert1_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0
@@ -198,6 +200,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert2_phon5          0
    d3e_pert2_phon6          1
    d3e_pert2_phon7          0
+  d3e_pert3_atpol           1       1
     d3e_pert3_dir1          0       0       0
     d3e_pert3_dir2          0       0       0
     d3e_pert3_dir3          0       0       0
@@ -2150,6 +2153,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
  -outvars: echo values of variables after computation  --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol           1       1
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -2171,6 +2175,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
+  d3e_pert2_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0
@@ -2192,6 +2197,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
    d3e_pert2_phon5          0
    d3e_pert2_phon6          1
    d3e_pert2_phon7          0
+  d3e_pert3_atpol           1       1
     d3e_pert3_dir1          0       0       0
     d3e_pert3_dir2          0       0       0
     d3e_pert3_dir3          0       0       0
