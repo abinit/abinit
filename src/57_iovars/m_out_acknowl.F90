@@ -6,7 +6,7 @@
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG)
+!!  Copyright (C) 2008-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,7 +90,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=43
+ nrefs=44
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -370,7 +370,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
  ref(29)= ' Parallel eigensolvers in plane-wave Density Functional Theory'//ch10//&
   ' A. Levitt and M. Torrent, Computer Phys. Comm. 187, 98-105 (2015).'
- comment(29)=' Comment: in case Chebyshev Filtering algorithm is used (wfoptalg=1).'//ch10//&
+ comment(29)=' Comment: in case Chebyshev Filtering algorithm is used (wfoptalg=1/111).'//ch10//&
   ' Strong suggestion to cite this paper in your publications.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#levitt2015'
  priority(29)=16
@@ -478,6 +478,14 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#paillard2019'
  priority(43)=20
 
+ ref(44)= ' Calculation of optical properties with spin-orbit coupling for warm dense matter'//ch10//&
+  ' N. Brouwer and V. Recoules and N. Holzwarth and M. Torrent, Computer Phys. Comm. 266, 108029 (2021).'
+ comment(44)=' Comment: Transport properties including spin-orbit coupling'//ch10//&
+  ' within the PAW approach (prtnabla>0 and pawspnorb>0).'//ch10//&
+  ' Strong suggestion to cite this paper in your publications.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#brouwer2021'
+ priority(44)=20
+
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
@@ -560,8 +568,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If positron/=0 + PAW, cite Wiktor2015
    if(dtsets(idtset)%positron/=0.and.dtsets(idtset)%usepaw==1)cite(28)=1
 
-!  If Chebyshev filtering (wfoptalg=1), cite Levitt2015
-   if(dtsets(idtset)%wfoptalg==1)cite(29)=1
+!  If Chebyshev filtering (wfoptalg=1/111), cite Levitt2015
+   if(dtsets(idtset)%wfoptalg==1.or.dtsets(idtset)%wfoptalg==111)cite(29)=1
 
 !  If vdw_xc==5, 6 or 7 and rfphon/=0 or rfstrs/=0, cite Van Troeye 2016
    if(dtsets(idtset)%vdw_xc >=5 .and. dtsets(idtset)%vdw_xc <8)then
@@ -605,6 +613,9 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !  If occopt==9, cite Paillard2019
    if(dtsets(idtset)%occopt==9 )cite(43)=1
+
+!  If prtnabla>0 and nspinor==, cite Brouwer2021
+   if(dtsets(idtset)%prtnabla>0.and.dtsets(idtset)%nspinor==2.and.dtsets(idtset)%pawspnorb>0 )cite(44)=1
 
  end do
 

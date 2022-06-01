@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,7 +100,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2022 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -689,7 +689,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  ****************************************************************************
 !  Exchange-correlation
-   
+
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
@@ -792,7 +792,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_SIGMA)
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
-   
+
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 

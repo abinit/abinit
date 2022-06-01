@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h21 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.in
-- output file    -> t31.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.abi
+- output file    -> t31.abo
 - root for input  files -> t31i
 - root for output files -> t31o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           8
        mpw =         190          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.857 Mbytes of memory.
+P This job should need less than                       1.973 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.118 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.118 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          35        mffmem =           1         mkmem =           8
        mpw =         190          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       2.122 Mbytes of memory.
+P This job should need less than                       2.238 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.814 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.814 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           8
        mpw =         190          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.932 Mbytes of memory.
+P This job should need less than                       2.048 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.188 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          35        mffmem =           1         mkmem =          64
        mpw =         193          nfft =        4096          nkpt =          64
 ================================================================================
-P This job should need less than                       8.330 Mbytes of memory.
+P This job should need less than                       8.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      6.599 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      6.599 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          64
        mpw =         193          nfft =        4096          nkpt =          64
 ================================================================================
-P This job should need less than                       3.447 Mbytes of memory.
+P This job should need less than                       3.563 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.510 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -510,8 +510,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -698,16 +698,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.1396E+00  1.1434E+00  1.1847E+00  1.1867E+00  1.1956E+00  1.3164E+00
   1.3389E+00  1.3435E+00  1.5190E+00  1.5559E+00  1.5622E+00  1.5666E+00
   1.6690E+00  1.6758E+00  1.7113E+00  1.7192E+00  1.7557E+00
-  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  2.97738E-05
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  2.48543E-06
-  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  2.00372E-06
-  prteigrs : nnsclo,ikpt=   50    4 max resid (incl. the buffer)=  5.51191E-05
-  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  1.70984E-05
-  prteigrs : nnsclo,ikpt=   50    6 max resid (incl. the buffer)=  3.44515E-06
-  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  1.00976E-05
-  prteigrs : nnsclo,ikpt=   50    8 max resid (incl. the buffer)=  1.91676E-04
 
 
 --- !ResultsGS
@@ -938,72 +930,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.1396E+00  1.1434E+00  1.1847E+00  1.1867E+00  1.1956E+00  1.3164E+00
   1.3389E+00  1.3435E+00  1.5190E+00  1.5559E+00  1.5622E+00  1.5666E+00
   1.6690E+00  1.6758E+00  1.7113E+00  1.7192E+00  1.7557E+00
-  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  2.97738E-05
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  2.13415E-05
-  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  2.48543E-06
-  prteigrs : nnsclo,ikpt=   50    4 max resid (incl. the buffer)=  4.14379E-07
-  prteigrs : nnsclo,ikpt=   50    5 max resid (incl. the buffer)=  2.32263E-05
-  prteigrs : nnsclo,ikpt=   50    6 max resid (incl. the buffer)=  3.32584E-05
-  prteigrs : nnsclo,ikpt=   50    7 max resid (incl. the buffer)=  1.04327E-05
-  prteigrs : nnsclo,ikpt=   50    8 max resid (incl. the buffer)=  6.13660E-06
-  prteigrs : nnsclo,ikpt=   50    9 max resid (incl. the buffer)=  2.00372E-06
-  prteigrs : nnsclo,ikpt=   50   10 max resid (incl. the buffer)=  2.52274E-06
-  prteigrs : nnsclo,ikpt=   50   11 max resid (incl. the buffer)=  5.51191E-05
-  prteigrs : nnsclo,ikpt=   50   12 max resid (incl. the buffer)=  6.91464E-05
-  prteigrs : nnsclo,ikpt=   50   13 max resid (incl. the buffer)=  1.11464E-07
-  prteigrs : nnsclo,ikpt=   50   14 max resid (incl. the buffer)=  2.73399E-05
-  prteigrs : nnsclo,ikpt=   50   15 max resid (incl. the buffer)=  3.87957E-05
-  prteigrs : nnsclo,ikpt=   50   16 max resid (incl. the buffer)=  9.90364E-07
-  prteigrs : nnsclo,ikpt=   50   17 max resid (incl. the buffer)=  1.19503E-05
-  prteigrs : nnsclo,ikpt=   50   18 max resid (incl. the buffer)=  1.37093E-05
-  prteigrs : nnsclo,ikpt=   50   19 max resid (incl. the buffer)=  5.01861E-06
-  prteigrs : nnsclo,ikpt=   50   20 max resid (incl. the buffer)=  5.07637E-06
-  prteigrs : nnsclo,ikpt=   50   21 max resid (incl. the buffer)=  3.57377E-05
-  prteigrs : nnsclo,ikpt=   50   22 max resid (incl. the buffer)=  1.25373E-04
-  prteigrs : nnsclo,ikpt=   50   23 max resid (incl. the buffer)=  5.35719E-07
-  prteigrs : nnsclo,ikpt=   50   24 max resid (incl. the buffer)=  6.00913E-04
-  prteigrs : nnsclo,ikpt=   50   25 max resid (incl. the buffer)=  1.55558E-05
-  prteigrs : nnsclo,ikpt=   50   26 max resid (incl. the buffer)=  1.07992E-04
-  prteigrs : nnsclo,ikpt=   50   27 max resid (incl. the buffer)=  4.92577E-08
-  prteigrs : nnsclo,ikpt=   50   28 max resid (incl. the buffer)=  1.45956E-05
-  prteigrs : nnsclo,ikpt=   50   29 max resid (incl. the buffer)=  2.51171E-06
-  prteigrs : nnsclo,ikpt=   50   30 max resid (incl. the buffer)=  5.26247E-05
-  prteigrs : nnsclo,ikpt=   50   31 max resid (incl. the buffer)=  4.80302E-06
-  prteigrs : nnsclo,ikpt=   50   32 max resid (incl. the buffer)=  3.50450E-07
-  prteigrs : nnsclo,ikpt=   50   33 max resid (incl. the buffer)=  1.70984E-05
-  prteigrs : nnsclo,ikpt=   50   34 max resid (incl. the buffer)=  2.81221E-06
-  prteigrs : nnsclo,ikpt=   50   35 max resid (incl. the buffer)=  3.44515E-06
-  prteigrs : nnsclo,ikpt=   50   36 max resid (incl. the buffer)=  1.49151E-05
-  prteigrs : nnsclo,ikpt=   50   37 max resid (incl. the buffer)=  1.04139E-05
-  prteigrs : nnsclo,ikpt=   50   38 max resid (incl. the buffer)=  1.13331E-05
-  prteigrs : nnsclo,ikpt=   50   39 max resid (incl. the buffer)=  1.39790E-08
-  prteigrs : nnsclo,ikpt=   50   40 max resid (incl. the buffer)=  1.63631E-04
-  prteigrs : nnsclo,ikpt=   50   41 max resid (incl. the buffer)=  1.00976E-05
-  prteigrs : nnsclo,ikpt=   50   42 max resid (incl. the buffer)=  1.89568E-08
-  prteigrs : nnsclo,ikpt=   50   43 max resid (incl. the buffer)=  1.91676E-04
-  prteigrs : nnsclo,ikpt=   50   44 max resid (incl. the buffer)=  6.71650E-07
-  prteigrs : nnsclo,ikpt=   50   45 max resid (incl. the buffer)=  3.10182E-05
-  prteigrs : nnsclo,ikpt=   50   46 max resid (incl. the buffer)=  6.96223E-06
-  prteigrs : nnsclo,ikpt=   50   47 max resid (incl. the buffer)=  1.80144E-06
-  prteigrs : nnsclo,ikpt=   50   48 max resid (incl. the buffer)=  3.39116E-06
-  prteigrs : nnsclo,ikpt=   50   49 max resid (incl. the buffer)=  1.42878E-05
-  prteigrs : nnsclo,ikpt=   50   50 max resid (incl. the buffer)=  1.60121E-05
-  prteigrs : nnsclo,ikpt=   50   51 max resid (incl. the buffer)=  3.66713E-06
-  prteigrs : nnsclo,ikpt=   50   52 max resid (incl. the buffer)=  1.89302E-06
-  prteigrs : nnsclo,ikpt=   50   53 max resid (incl. the buffer)=  2.05644E-06
-  prteigrs : nnsclo,ikpt=   50   54 max resid (incl. the buffer)=  6.91483E-05
-  prteigrs : nnsclo,ikpt=   50   55 max resid (incl. the buffer)=  6.25238E-06
-  prteigrs : nnsclo,ikpt=   50   56 max resid (incl. the buffer)=  1.42018E-06
-  prteigrs : nnsclo,ikpt=   50   57 max resid (incl. the buffer)=  3.87105E-05
-  prteigrs : nnsclo,ikpt=   50   58 max resid (incl. the buffer)=  2.21840E-06
-  prteigrs : nnsclo,ikpt=   50   59 max resid (incl. the buffer)=  8.58020E-07
-  prteigrs : nnsclo,ikpt=   50   60 max resid (incl. the buffer)=  1.29611E-05
-  prteigrs : nnsclo,ikpt=   50   61 max resid (incl. the buffer)=  1.38749E-06
-  prteigrs : nnsclo,ikpt=   50   62 max resid (incl. the buffer)=  5.93478E-07
-  prteigrs : nnsclo,ikpt=   50   63 max resid (incl. the buffer)=  2.25736E-06
-  prteigrs : nnsclo,ikpt=   50   64 max resid (incl. the buffer)=  7.07562E-06
 
 
 --- !ResultsGS
@@ -1708,10 +1636,10 @@ P           mkmem5         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         43.3  wall=         43.5
+- Proc.   0 individual time (sec): cpu=         47.1  wall=         47.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  17 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.3  wall=         43.5
+.Delivered  16 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         47.1  wall=         47.4

@@ -6,7 +6,7 @@
 !!  This module contains routines for the RMM-DIIS eigenvalue solver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2020-2021 ABINIT group (MG)
+!!  Copyright (C) 2020-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

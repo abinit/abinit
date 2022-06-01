@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t61/t61.in
-- output file    -> t61.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t61/t61.abi
+- output file    -> t61.abo
 - root for input  files -> t61i
 - root for output files -> t61o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.745 Mbytes of memory.
+P This job should need less than                       1.862 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           3
        mpw =         188          nfft =        4096          nkpt =           3
 ================================================================================
-P This job should need less than                       1.758 Mbytes of memory.
+P This job should need less than                       1.875 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           3
        mpw =         188          nfft =        4096          nkpt =           3
 ================================================================================
-P This job should need less than                       1.758 Mbytes of memory.
+P This job should need less than                       1.875 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.745 Mbytes of memory.
+P This job should need less than                       1.862 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           3
        mpw =         188          nfft =        4096          nkpt =           3
 ================================================================================
-P This job should need less than                       1.758 Mbytes of memory.
+P This job should need less than                       1.875 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           3
        mpw =         188          nfft =        4096          nkpt =           3
 ================================================================================
-P This job should need less than                       1.758 Mbytes of memory.
+P This job should need less than                       1.875 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.036 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           6
        mpw =         188          nfft =        4096          nkpt =           6
 ================================================================================
-P This job should need less than                       1.801 Mbytes of memory.
+P This job should need less than                       1.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -153,7 +153,7 @@ _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           6
        mpw =         188          nfft =        4096          nkpt =           6
 ================================================================================
-P This job should need less than                       1.801 Mbytes of memory.
+P This job should need less than                       1.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -170,7 +170,7 @@ _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         188          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.745 Mbytes of memory.
+P This job should need less than                       1.862 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -187,7 +187,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           6
        mpw =         188          nfft =        4096          nkpt =           6
 ================================================================================
-P This job should need less than                       1.801 Mbytes of memory.
+P This job should need less than                       1.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -204,7 +204,7 @@ _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           6
        mpw =         188          nfft =        4096          nkpt =           6
 ================================================================================
-P This job should need less than                       1.801 Mbytes of memory.
+P This job should need less than                       1.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -465,6 +465,18 @@ P          mk1mem12        16
         optdriver10         0
         optdriver11         0
         optdriver12         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          0
+           prtpot7          0
+           prtpot8          0
+           prtpot9          0
+           prtpot10         0
+           prtpot11         0
+           prtpot12         1
            prtvol           1
             rfdir1          0       0       0
             rfdir2          0       0       0
@@ -1004,8 +1016,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00312
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2772,23 +2784,6 @@ meta: {optdriver: 1, rfstrs: 3, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00312
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t61o_DS4_WFK
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   1     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   2     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   3     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=   4     187
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   5     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   6     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   7     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=   8     187
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   9     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=  10     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=  11     187
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=  12     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=  13     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=  14     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=  15     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=  16     187
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -2807,17 +2802,10 @@ meta: {optdriver: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t61o_DS4_WFK
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   1     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=   2     187
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   3     188
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=     188 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     187 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     188 for ikpt=   3 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 12, }
@@ -2832,11 +2820,11 @@ tolerances: {tolvrs: 1.00E-20, }
  ETOT  4   1.5232161070971     -9.111E-05 6.707E-08 8.388E-04
  ETOT  5   1.5232150537829     -1.053E-06 1.213E-09 5.653E-07
  ETOT  6   1.5232150527202     -1.063E-09 1.049E-12 3.614E-09
- ETOT  7   1.5232150527149     -5.289E-12 4.390E-15 2.200E-11
- ETOT  8   1.5232150527149     -1.332E-14 4.131E-17 1.597E-14
+ ETOT  7   1.5232150527149     -5.292E-12 4.390E-15 2.200E-11
+ ETOT  8   1.5232150527149     -1.243E-14 4.131E-17 1.597E-14
  ETOT  9   1.5232150527149     -2.665E-15 1.858E-20 1.629E-16
- ETOT 10   1.5232150527148     -1.776E-14 1.895E-22 1.912E-18
- ETOT 11   1.5232150527148     -1.243E-14 2.944E-24 2.248E-21
+ ETOT 10   1.5232150527148     -1.865E-14 1.895E-22 1.912E-18
+ ETOT 11   1.5232150527148     -1.155E-14 2.944E-24 2.248E-21
 
  At SCF step   11       vres2   =  2.25E-21 < tolvrs=  1.00E-20 =>converged.
 ================================================================================
@@ -2875,23 +2863,10 @@ tolerances: {tolvrs: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t61o_DS4_WFK
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   1     188
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   2     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=   3     187
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   4     188
-- newkpt: read input wf with ikpt,npw=   2     187, make ikpt,npw=   5     187
-- newkpt: read input wf with ikpt,npw=   1     188, make ikpt,npw=   6     188
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=     188 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=     188 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=     187 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=     188 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=     187 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=     188 for ikpt=   6 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 12, }
@@ -2908,7 +2883,7 @@ tolerances: {tolvrs: 1.00E-20, }
  ETOT  6  0.96752342670079     -3.333E-09 3.413E-12 1.797E-08
  ETOT  7  0.96752342665362     -4.717E-11 7.808E-14 1.393E-10
  ETOT  8  0.96752342665319     -4.272E-13 4.915E-16 1.632E-12
- ETOT  9  0.96752342665309     -1.030E-13 2.910E-18 1.825E-15
+ ETOT  9  0.96752342665309     -1.039E-13 2.910E-18 1.825E-15
  ETOT 10  0.96752342665312      2.753E-14 6.651E-21 1.144E-17
  ETOT 11  0.96752342665311     -6.217E-15 4.416E-23 8.575E-21
 
@@ -3330,6 +3305,18 @@ P          mk1mem12        16
         optdriver10         0
         optdriver11         0
         optdriver12         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          0
+           prtpot7          0
+           prtpot8          0
+           prtpot9          0
+           prtpot10         0
+           prtpot11         0
+           prtpot12         1
            prtvol           1
             rfdir1          0       0       0
             rfdir2          0       0       0
@@ -3932,10 +3919,10 @@ P          mk1mem12        16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  49 WARNINGs and  47 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          4.4
+.Delivered  47 WARNINGs and  39 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.1  wall=          5.8

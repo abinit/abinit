@@ -6,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2022 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -636,7 +636,9 @@ end subroutine ewald2
 !! FUNCTION
 !! Compute ewald contribution to the dynamical matrix, at a given
 !! q wavevector, including anisotropic dielectric tensor and effective charges
-!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (71) to (75).
+!! See Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], equations (72) to (75).
+!! This has been generalized to quadrupoles.
+!! Delivers the left hand side of Eq.(72), possibly generalized.
 !!
 !! INPUTS
 !! acell = lengths by which lattice vectors are multiplied

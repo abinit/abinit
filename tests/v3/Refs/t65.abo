@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Thu 10 Feb 2022.
+- ( at 14h17 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t65-t66-t67/t65.in
-- output file    -> t65.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v3_t65-t66-t67/t65.abi
+- output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         346          nfft =       13824          nkpt =           1
 ================================================================================
-P This job should need less than                       5.019 Mbytes of memory.
+P This job should need less than                       5.425 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =         691          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       3.717 Mbytes of memory.
+P This job should need less than                       4.107 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.318 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.318 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =         346          nfft =       13824          nkpt =           3
 ================================================================================
-P This job should need less than                       3.482 Mbytes of memory.
+P This job should need less than                       3.888 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.160 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -193,8 +193,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.19834
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -385,13 +385,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.75E-17  1.43E-11
  -2.5025E-01 -8.4460E-02 -7.5032E-02 -7.5032E-02  1.4484E-02  3.1648E-02
   5.9443E-02  7.5916E-02  7.5927E-02  1.0360E-01
-  prteigrs : nnsclo,ikpt=   40    2 max resid (incl. the buffer)=  1.42876E-11
  Non-SCF case, kpt    3 (  0.50000  0.50000  0.50000), residuals and eigenvalues=
   2.68E-17  1.95E-17  3.68E-17  1.54E-17  2.65E-17  3.54E-17  5.77E-17  3.30E-17
   1.33E-11  1.01E-11
  -2.4932E-01 -8.1407E-02 -8.1403E-02 -8.1399E-02  4.0113E-02  4.0117E-02
   4.0121E-02  6.6188E-02  8.8262E-02  8.8265E-02
-  prteigrs : nnsclo,ikpt=   40    3 max resid (incl. the buffer)=  1.32620E-11
 
 
 --- !ResultsGS
@@ -496,7 +494,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.95E-12  4.02E-12
  -2.4932E-01 -8.1407E-02 -8.1403E-02 -8.1399E-02  4.0113E-02  4.0117E-02
   4.0121E-02  6.6188E-02  8.8262E-02  8.8264E-02
-  prteigrs : nnsclo,ikpt=   40    3 max resid (incl. the buffer)=  5.95103E-12
 
 
 --- !ResultsGS
@@ -718,10 +715,10 @@ P           mkmem3          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          1.7
+.Delivered  11 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.8  wall=          2.0
