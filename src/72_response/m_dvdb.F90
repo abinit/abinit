@@ -3031,7 +3031,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using q-mesh ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
- call wrtout(std_out, sjoin(" Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
+ call wrtout(std_out, sjoin(" Using Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
  !call wrtout(std_out, " Q-mesh shifts:")
  !do ii=1,nqshift
  !  call wrtout(std_out, ltoa(qshift(:, ii)))
