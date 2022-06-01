@@ -51,12 +51,8 @@
 optdriver5    5
  d3e_pert1_elfd5    1
  d3e_pert1_phon5    1
- d3e_pert1_atpol5   1 2
- d3e_pert1_dir5     1 1 1
  d3e_pert2_elfd5    1
- d3e_pert2_dir5     1 1 1
  d3e_pert3_elfd5    1
- d3e_pert3_dir5     1 1 1
 
 
 
@@ -77,10 +73,6 @@ optdriver5    5
  localrdwf 1
  natom  2 nband 4  nbdbuf 0
  nstep 40
-
- d3e_pert1_dir  0 0 0  # This is only to exercize the non-default value of this variable
- d3e_pert2_dir  0 0 0  # This is only to exercize the non-default value of this variable
- d3e_pert3_dir  0 0 0  # This is only to exercize the non-default value of this variable
 
  nsym  24 ntypat  2
  occopt 1
