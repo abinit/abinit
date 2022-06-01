@@ -498,11 +498,11 @@ subroutine kpts_sort(gprimd, nkpt, kpts)
 
 ! *************************************************************************
 
+ ABI_MALLOC(knorm2, (nkpt))
  do ikpt=1,nkpt
    knorm2(ikpt) = dot_product(kpts(:,ikpt), matmul(gprimd, kpts(:, ikpt)))
  end do
 
- ABI_MALLOC(knorm2, (nkpt))
  ABI_MALLOC(iperm, (nkpt))
  iperm = [(ikpt, ikpt=1, nkpt)]
  call sort_dp(nkpt, knorm2, iperm, tol12)
