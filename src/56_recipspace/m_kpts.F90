@@ -50,6 +50,7 @@ module m_kpts
  public :: tetra_from_kptrlatt       ! Create an instance of htetra_t from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
+ public :: kpts_sort                 ! Order list of k-points according to the norm.
  public :: kpts_map
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
@@ -461,6 +462,63 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
 end function symkchk
 !!***
+
+!!****f* m_kpts/kpts_sort
+!! NAME
+!! kpts_sort
+!!
+!! FUNCTION
+!!  Order list of k-points according to the norm.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpts_sort(gprimd, nkpt, kpts)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt
+!arrays
+ real(dp),intent(in) :: gprimd(3, 3)
+ real(dp),intent(inout) :: kpts(3, nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt
+!arrays
+ integer,allocatable :: iperm(:)
+ real(dp),allocatable :: knorm2(:), kpts_ord(:,:)
+
+! *************************************************************************
+
+ do ikpt=1,nkpt
+   knorm2(ikpt) = dot_product(kpts(:,ikpt), matmul(gprimd, kpts(:, ikpt)))
+ end do
+
+ ABI_MALLOC(knorm2, (nkpt))
+ ABI_MALLOC(iperm, (nkpt))
+ iperm = [(ikpt, ikpt=1, nkpt)]
+ call sort_dp(nkpt, knorm2, iperm, tol12)
+ ABI_FREE(knorm2)
+
+ ABI_MALLOC(kpts_ord, (3, nkpt))
+ do ikpt=1,nkpt
+   kpts_ord(:, ikpt) = kpts(:, iperm(ikpt))
+ end do
+ kpts = kpts_ord
+
+ ABI_FREE(iperm)
+ ABI_FREE(kpts_ord)
+
+end subroutine kpts_sort
+!!!***
 
 !!****f* m_kpts/kpts_map
 !! NAME

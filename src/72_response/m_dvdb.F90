@@ -20,6 +20,7 @@
 !!  -  Do we still need to support the case in which the potentials are read from file
 !!     without interpolation? We know that IO is gonna be terrible.
 !!  - Check spin and MPI-parallelism. Can we distributed nsppol?
+!!  - Rewrite qcache from scratch, keep only the IBZ of the present iteration
 !!
 !! PARENTS
 !!
@@ -1703,11 +1704,11 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  end if
 
  ! Allocate cache with all the 3*natom perturbations.
- ! Disable it no parallelism over perturbations.
+ ! Disable it if no parallelism over perturbations.
  ! Disabled as slow FT R --> q seems to be faster.
  qcache%use_3natom_cache = .False.
- !qcache%use_3natom_cache = .True.
- if (my_npert == natom3) qcache%use_3natom_cache = .False.
+ qcache%use_3natom_cache = .True.
+ !if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
@@ -3075,6 +3076,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  write(std_out, "(a, i0)")" Number of R-points treated by this MPI rank: ", db%my_nrpt
  write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
+
  ! Allocate potential in the supercell. Memory is MPI-distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
             ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
@@ -3632,6 +3634,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      ! NB: Can use MKL BLAS-like extensions to perform 2 matrix-vector operations:
      !   call dgem2vu(m, n, alpha, a, lda, x1, incx1, x2, incx2, beta, y1, incy1, y2, incy2)
      ! unfortunately the API does not support transa so one has to transport db%wsr.
+     ! Alternatively, compute all my_npert with ZGEMM (more memory but it should be more efficient).
 
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
                 zero_sp, ov1r_sp(1,1), 2)
@@ -3956,6 +3959,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
+ call db%ft_qcache%free()
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 
