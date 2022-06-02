@@ -146,6 +146,8 @@ contains
 !!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  vpsp1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
 !!          gradient Hamiltonian for i1pert
+!!  vpsp1_i1pertdq_geom(cplex*nfft,nspden,3)= local potential of first-order
+!!          gradient Hamiltonian for i1pert wrp to i3dir and i2dir
 !!  vpsp1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
 !!          gradient Hamiltonian for i2pert
 !!  ddk_f = wf files
@@ -177,7 +179,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
-& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
+& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
@@ -211,6 +213,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xccc3d1(cplex*nfft),xred(3,natom)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
+ real(dp),intent(in) :: vpsp1_i1pertdq_geom(2*nfft,nspden,3)
  real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(out) :: d3etot_t4(2,n2dq),d3etot_t5(2,n1dq)
@@ -346,6 +349,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      eig1_k(:)=eigen1(1+bd2tot:2*nband_k**2+bd2tot)
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
 
+     
      !Compute the stationary terms of d3etot depending on response functions
      call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
      & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
@@ -364,17 +368,21 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      d3etot_t5=d3etot_t5 + d3etot_t5_k
  
      !Compute the nonvariational geometric term
+     call cwtime(cpu, wall, gflops, "start")
      if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
        call dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset, &
        &  ffnl_k,gs_hamkq,gsqcut,icg, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem_rbz,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
-       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
+       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,vpsp1_i1pertdq_geom,wtk_k,ylm_k,ylmgr_k)
 
        !Add the contribution from each k-point
        d3etot_tgeom=d3etot_tgeom + d3etot_tgeom_k
      end if
+
+     call cwtime(cpu, wall, gflops, "stop")
+     write(100,*) cpu,wall
 
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k

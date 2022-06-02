@@ -382,6 +382,8 @@ end subroutine dfptlw_nv
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  ucvol=unit cell volume in bohr**3.
+!!  vpsp1_i1pertdq_geom(cplex*nfft,nspden,3)= local potential of first-order
+!!          gradient Hamiltonian for i1pert wrt i3dir and i2dir
 !!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  wtk_k=weight assigned to the k point.
 !!  ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics for the k point
@@ -411,7 +413,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
-       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
+       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,vpsp1_i1pertdq_geom,wtk_k,ylm_k,ylmgr_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -434,6 +436,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: vpsp1_i1pertdq_geom(2*nfft,nspden,3)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  real(dp),intent(out) :: d3etot_tgeom_k(2,n2dq)
@@ -515,13 +518,16 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
      if (beta==q2dir) then
 
        !Get q-gradient of first-order local part of the pseudopotential
-       call dfpt_vlocaldq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
-       &  psps%mqgrid_vl,dtset%natom,&
-       &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
-       &  ph1d,q1dir,psps%qgrid_vl,&
-       &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
+!       call dfpt_vlocaldq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+!       &  psps%mqgrid_vl,dtset%natom,&
+!       &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
+!       &  ph1d,q1dir,psps%qgrid_vl,&
+!       &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
+!       write(300,*) vpsp1dq(:)-vpsp1_i1pertdq_geom(:,isppol,q1dir)
+
 
        !Set up q-gradient of local potential vlocal1dq with proper dimensioning
+       vpsp1dq(:)=vpsp1_i1pertdq_geom(:,isppol,q1dir)
        call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,nfft,ngfft,&
        &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
