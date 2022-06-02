@@ -12684,6 +12684,50 @@ Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 ),
 
 Variable(
+    abivarname="nucefg",
+    varset="paw",
+    vartype="integer",
+    topics=['EFG_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUClear site Electric Field Gradient",
+    requires="[[usepaw]] == 1, [[quadmom]]",
+    added_in_version="before_v9",
+    text=r"""
+If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
+Using this option requires [[quadmom]] to be set as well.
+Values will be written to main output file (search for Electric Field Gradient).
+If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
+If nucefg=2, the full electric field gradient tensors in atomic units are also given,
+showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
+If nucefg=3, then in addition to the nucefg=2 output, the EFGs are computed using an ionic point charge model.
+This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
+Use of nucefg=3 requires that the variable [[ptcharge]] be set as well.
+The option nucefg is compatible with spin polarized calculations (see
+[[nspden]]) and also DFT+U (see [[usepawu]]).
+""",
+),
+
+Variable(
+    abivarname="nucfc",
+    varset="paw",
+    vartype="integer",
+    topics=['EFG_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUClear site Fermi Contact term",
+    requires="[[usepaw]] == 1",
+    added_in_version="before_v9",
+    text=r"""
+  * If set to 1, print the Fermi contact interaction at each nuclear site, that 
+  is, the electron density at each site. The result appears in the main output file 
+  (search for FC). Note that this calculation is different than what is done by cut3d, 
+  because it also computes the PAW on-site corrections in addition to the 
+  contribution from the valence pseudo-wavefunctions.
+""",
+),
+
+Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -15458,31 +15502,6 @@ This option activates the output of the electron eigenvalues. Possible values:
 ),
 
 Variable(
-    abivarname="prtefg",
-    varset="paw",
-    vartype="integer",
-    topics=['printing_prngs', 'EFG_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PRint Electric Field Gradient",
-    requires="[[usepaw]] == 1, [[quadmom]]",
-    added_in_version="before_v9",
-    text=r"""
-If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
-Using this option requires [[quadmom]] to be set as well.
-Values will be written to main output file (search for Electric Field Gradient).
-If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
-If prtefg=2, the full electric field gradient tensors in atomic units are also given,
-showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
-If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model.
-This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
-Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
-The option prtefg is compatible with spin polarized calculations (see
-[[nspden]]) and also DFT+U (see [[usepawu]]).
-""",
-),
-
-Variable(
     abivarname="prtefmas",
     varset="dfpt",
     vartype="integer",
@@ -15544,21 +15563,6 @@ account the existence of spin dependent densities (see the documentation in
 
 Please note that ELF is **not** yet implemented in the case of PAW
 ([[usepaw]] = 1) calculations.
-""",
-),
-
-Variable(
-    abivarname="prtfc",
-    varset="paw",
-    vartype="integer",
-    topics=['printing_prden', 'EFG_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PRinT Fermi Contact term",
-    requires="[[usepaw]] == 1",
-    added_in_version="before_v9",
-    text=r"""
-  * If set to 1, print the Fermi contact interaction at each nuclear site, that is, the electron density at each site. The result appears in the main output file (search for FC). Note that this calculation is different than what is done by cut3d, because it also computes the PAW on-site corrections in addition to the contribution from the valence pseudo-wavefunctions.
 """,
 ),
 
@@ -16441,18 +16445,18 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="PoinT CHARGEs",
-    requires="[[usepaw]] == 1 and [[prtefg]]>=3",
+    requires="[[usepaw]] == 1 and [[nucefg]]>=3",
     added_in_version="before_v9",
     text=r"""
   Array of point charges, in atomic units, of the nuclei. In the normal
-  computation of electric field gradients (see [[prtefg]]) the ionic
+  computation of electric field gradients (see [[nucefg]]) the ionic
   contribution is calculated from the core charges of the atomic sites. Thus
   for example in a PAW data set for oxygen where the core is $1s^{2}$, the core
   charge is +6 (total nuclear charge minus core electron charge). In point
   charge models, which are much less accurate than PAW calculations, all atomic
   sites are treated as ions with charges determined by their valence states. In
   such a case oxygen almost always would have a point charge of -2. The present
-  variable taken together with [[prtefg]] performs a full PAW computation of
+  variable taken together with [[nucefg]] performs a full PAW computation of
   the electric field gradient and also a simple point charge computation. The
   user inputs whatever point charges he/she wishes for each atom type.  
 """,
@@ -16749,10 +16753,15 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="QUADrupole MOMents",
-    requires="[[usepaw]] == 1 and [[prtefg]]>=1",
+    requires="[[usepaw]] == 1 and [[nucefg]]>=1",
     added_in_version="before_v9",
     text=r"""
-  * Array of quadrupole moments, in barns, of the nuclei. These values are used in conjunction with the electric field gradients computed with [[prtefg]] to calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that the electric field gradient at a nuclear site is independent of the nuclear quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0, and the option [[prtefg]] = 2 used to determine the electric field gradient at the site.
+  * Array of quadrupole moments, in barns, of the nuclei. These values are used 
+  in conjunction with the electric field gradients computed with [[nucefg]] to 
+  calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that 
+  the electric field gradient at a nuclear site is independent of the nuclear 
+  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0, 
+  and the option [[nucefg]] = 2 used to determine the electric field gradient at the site.
 """,
 ),
 
