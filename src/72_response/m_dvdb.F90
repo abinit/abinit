@@ -17,8 +17,8 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! TODO
-!!  -  Do we still need to support the case in which the potentials are read from file
-!!     without interpolation? We know that IO is gonna be terrible.
+!!  - Do we still need to support the case in which the potentials are read from file
+!!    without interpolation? We know that IO is gonna be terrible.
 !!  - Check spin and MPI-parallelism. Can we distributed nsppol?
 !!  - Rewrite qcache from scratch, keep only the IBZ of the present iteration
 !!
@@ -1706,8 +1706,8 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  ! Allocate cache with all the 3*natom perturbations.
  ! Disable it if no parallelism over perturbations.
  ! Disabled as slow FT R --> q seems to be faster.
- !qcache%use_3natom_cache = .False.
- qcache%use_3natom_cache = .True.
+ qcache%use_3natom_cache = .False.
+ !qcache%use_3natom_cache = .True.
  !if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
@@ -1986,7 +1986,7 @@ subroutine qcache_report_stats(qcache)
 ! *************************************************************************
 
  if (qcache%maxnq == 0) then
-   write(std_out, "(/,a)")" MPI-distributed q-cache deactivated as maxnq == 0"
+   !write(std_out, "(/,a)")" MPI-distributed q-cache deactivated as maxnq == 0"
    if (qcache%use_3natom_cache) then
      write(std_out, "(a,i0,2x,a,f5.1,a)") &
        " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
@@ -3776,7 +3776,10 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
    call xmpi_wait(db%ft_qcache%v1scf_3natom_request, ierr)
  end if
 
+ !print *, "Have_ibz, need_iq_ibz, isirr_q", db%ft_qcache%stored_iqibz_cplex(1), iq_ibz, isirr_q
+
  if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) == iq_ibz .and. .not. isirr_q) then
+   !print *, "hello cache"
 
    ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq for my_npert perturbations
    db%ft_qcache%stats(2) = db%ft_qcache%stats(2) + 1
@@ -3794,6 +3797,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
  ! Check whether iq_ibz is in cache.
  incache = .False.
+
  if (db%ft_qcache%maxnq > 0) then
    ! Get number of perturbations computed for this iq_ibz as well as cplex.
    ! Remember that the size of v1scf in qcache depends on db%my_npert
@@ -3958,13 +3962,14 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
  !call db%ft_qcache%free()
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 
- ! All procs skip this part is qcache is not used.
+ ! All procs skip this part if qcache is not used.
  if (db%ft_qcache%maxnq /= 0) then
+
+   call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
 
    ! Note that cplex is always set to 2 here
    cplex = 2

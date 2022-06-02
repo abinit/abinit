@@ -414,6 +414,24 @@ meta: {optdriver: 7, eph_task: -12, }
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc 
 
 === Gstore parameters ===
+ ==== Electron Bands ====
+  Number of spinorial components ...... 1
+  Number of spin polarizations ........ 1
+  Number of k-points in the IBZ ....... 370
+  kptopt .............................. 1
+  Maximum number of bands ............. 8
+  Occupation option ................... 4
+
+  kptrlatt .............. [18, 0, 0, 0, 18, 0, 0, 0, 18]
+  shiftk ................ [   0.0000E+00,    0.0000E+00,    0.0000E+00]
+  Number of valence electrons .........           8.00
+  Extra cell charge (from GS run)......           0.00
+  Extra electrons (after GS run).......           0.00
+  Fermi level  ........................       0.282165
+  Entropy .............................      -0.011265
+  Tsmear value ........................       0.020000
+  Tphysel value .......................       0.000000
+
  kzone: ibz
  qzone: bz
  kfilter: fs_tetra

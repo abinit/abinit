@@ -51,6 +51,7 @@ module m_kpts
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
  public :: kpts_sort                 ! Order list of k-points according to the norm.
+ public :: kpts_pack_in_stars        !
  public :: kpts_map
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
@@ -518,6 +519,103 @@ subroutine kpts_sort(gprimd, nkpt, kpts)
  ABI_FREE(kpts_ord)
 
 end subroutine kpts_sort
+!!!***
+
+!!****f* m_kpts/kpts_pack_in_stars
+!! NAME
+!! kpts_pack_in_stars
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt
+!arrays
+ real(dp),intent(inout) :: kpts(3, nkpt)
+ integer,intent(inout) :: kmap(6, nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt, seen_ibz, ik_start, ik0, nkibz
+ integer :: ik_ibz, isym_k, trev_k, tsign, g0_k(3)
+ logical :: isirr_k
+!arrays
+ integer,allocatable :: iperm(:), ibz_ids(:), kmap_ord(:,:), star_pos(:,:)
+ real(dp) :: swap_kpt(3), swap_kmap(6)
+ real(dp),allocatable :: kpts_ord(:,:)
+
+! *************************************************************************
+
+ ! Order according to ik_ibz index
+ ABI_MALLOC(ibz_ids, (nkpt))
+ ABI_MALLOC(iperm, (nkpt))
+ ibz_ids = kmap(1, :)
+ iperm = [(ikpt, ikpt=1, nkpt)]
+
+ call sort_int(nkpt, ibz_ids, iperm)
+
+ ! Rearrange items in _ord arrays.
+ ABI_MALLOC(kpts_ord, (3, nkpt))
+ ABI_MALLOC(kmap_ord, (6, nkpt))
+ do ikpt=1,nkpt
+   kpts_ord(:, ikpt) = kpts(:, iperm(ikpt))
+   kmap_ord(:, ikpt) = kmap(:, iperm(ikpt))
+ end do
+
+ ! We want each star group to start with the point in the IBZ so an extra shuffle is needed.
+ ! star_pos stores the beginning of the star group and the position of the base k0 for each star.
+ nkibz = maxval(kmap(1,:))
+ ABI_ICALLOC(star_pos, (2, nkibz))
+
+ seen_ibz = -1
+ do ikpt=1,nkpt
+   ik_ibz = kmap_ord(1, ikpt); isym_k = kmap_ord(2, ikpt)
+   trev_k = kmap_ord(6, ikpt); g0_k = kmap_ord(3:5, ikpt)
+   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   tsign = 1; if (trev_k == 1) tsign = -1
+   if (ik_ibz /= seen_ibz) then
+     star_pos(1, ik_ibz) = ikpt
+     seen_ibz = ik_ibz
+   end if
+   if (isirr_k) star_pos(2, ik_ibz) = ikpt
+ end do
+
+ ! Now put ik0 in the ik_start slot if needed.
+ do ik_ibz=1, nkibz
+   ik_start = star_pos(1, ik_ibz)
+   ik0 = star_pos(2, ik_ibz)
+   if (ik_start == ik0) cycle
+
+   swap_kpt = kpts_ord(:, ik_start)
+   swap_kmap = kmap_ord(:, ik_start)
+
+   kpts_ord(:, ik_start)  = kpts_ord(:, ik0)
+   kmap_ord(:, ik_start) =  kmap_ord(:, ik0)
+   kpts_ord(:, ik0)  = swap_kpt
+   kmap_ord(:, ik0) =  swap_kmap
+ end do
+
+ kpts = kpts_ord
+ kmap = kmap_ord
+
+ ABI_FREE(star_pos)
+ ABI_FREE(iperm)
+ ABI_FREE(kpts_ord)
+ ABI_FREE(kmap_ord)
+
+end subroutine kpts_pack_in_stars
 !!!***
 
 !!****f* m_kpts/kpts_map
