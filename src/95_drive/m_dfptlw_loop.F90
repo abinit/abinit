@@ -269,17 +269,22 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Allocations for type-I terms
  ABI_MALLOC(t4_typeII,(2,3,mpert,3,mpert,3,mpert))
+ t4_typeII(:,:,:,:,:,:,:)=zero
  if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
    ABI_MALLOC(t4_typeI,(2,3,mpert,3,3,3))
+   t4_typeI(:,:,:,:,:,:)=zero
  end if
  ABI_MALLOC(t5_typeII,(2,3,mpert,3,mpert,3,mpert))
+ t5_typeII(:,:,:,:,:,:,:)=zero
  if (d3e_pert1(natom+3)==1.or.d3e_pert1(natom+4)==1) then
    ABI_MALLOC(t5_typeI,(2,3,mpert,3,3,3))
+   t5_typeI(:,:,:,:,:,:)=zero
  end if
  ABI_MALLOC(tgeom_typeII,(2,3,mpert,3,mpert,3,mpert))
  tgeom_typeII(:,:,:,:,:,:,:)=zero
  if (any(d3e_pert1(1:natom)==1).and.(d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1)) then
    ABI_MALLOC(tgeom_typeI,(2,3,mpert,3,3,3))
+   tgeom_typeI(:,:,:,:,:,:)=zero
  end if
 
 !Compute large sphere cut-off gsqcut
