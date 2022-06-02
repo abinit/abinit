@@ -118,7 +118,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
- real(dp), intent(out) :: d3etot_nv(2,3,mpert,3,mpert,3,mpert)
+ real(dp), intent(inout) :: d3etot_nv(2,3,mpert,3,mpert,3,mpert)
  real(dp), intent(in) :: gmet(3,3),rmet(3,3),xred(3,dtset%natom),zion(*)
  real(dp), intent(in) :: gprimd(3,3),rprimd(3,3)
 
@@ -141,7 +141,6 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 
 !Initialiations
  natom=dtset%natom
- d3etot_nv(:,:,:,:,:,:,:)=zero
  
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
 
