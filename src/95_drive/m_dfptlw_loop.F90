@@ -231,6 +231,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: tgeom_typeI(:,:,:,:,:,:),tgeom_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: vhart1dqdq(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
+ real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:),xccc3d1(:)
  real(dp) :: vec1(3),vec2(3)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
@@ -367,10 +368,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        ABI_FREE(work)
 
        !Allocate the first-order gradient local potential
-       if (i1pert <= natom .or. i1pert <= natom+3) then
+       if (i1pert <= natom .or. i1pert == natom+3) then
          n1dq=1
          ABI_MALLOC(vpsp1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
-       else if (i1pert <= natom+4) then
+       else if (i1pert == natom+4) then
          n1dq=2
          ABI_MALLOC(vpsp1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
        else
@@ -424,10 +425,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end if !samepert  
 
              !Allocate the first-order gradient local potential
-             if (i2pert <= natom .or. i2pert <= natom+3) then
+             if (i2pert <= natom .or. i2pert == natom+3) then
                n2dq=1
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
-             else if (i2pert <= natom+4) then
+             else if (i2pert == natom+4) then
                n2dq=2
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
              else
@@ -435,6 +436,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end if
              ABI_MALLOC(d3etot_t4,(2,n2dq))
              ABI_MALLOC(d3etot_tgeom,(2,n2dq))
+
+             !Allocate the first-order gradient local potential that enters the geometric term
+             if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then
+               
+               !calculate the second of the two first-gradient directions
+               ABI_MALLOC(vpsp1_i1pertdq_geom,(2*nfftf,dtset%nspden,3))
+               do ii=1,3
+                 call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+                 & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                 & ph1d,ii,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq_geom(:,1,ii))
+               end do
+             end if 
 
              do i3pert = 1, mpert
                do i3dir = 1, 3
@@ -450,6 +463,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                      & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,1,1))
+
                    else if (i1pert==natom+3.or.i1pert==natom+4) then
                      istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
                      !Get 2nd q-gradient of first-order local part of the pseudopotential and of the Hartree
@@ -557,7 +571,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
-                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i2pertdq,&
+                   & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
+                   & vpsp1_i1pertdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
                    & ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
 
                    !close ddk file
@@ -634,7 +649,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                end do    ! ir3dir
              end do     ! ir3pert
              
-             ABI_FREE(vpsp1_i2pertdq)
+             if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
+             if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(d3etot_t4)
              ABI_FREE(d3etot_tgeom)
 
@@ -642,7 +658,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
          end do    ! i2dir
        end do     ! i2pert
 
-       ABI_FREE(vpsp1_i1pertdq)
+       if (i1pert/=natom+2) ABI_FREE(vpsp1_i1pertdq)
        ABI_FREE(d3etot_t5)
 
      end if   ! rfpert
