@@ -134,7 +134,7 @@ module m_gstore
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
  use m_symtk,          only : matr3inv
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ifc,            only : ifc_type
  use m_pawang,         only : pawang_type
@@ -584,7 +584,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
 
- call kpts_sort(cryst%gprimd, gstore%nqbz, qbz)
+ !call kpts_sort(cryst%gprimd, gstore%nqbz, qbz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
@@ -595,6 +595,14 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
  call qrank%free()
+
+ call kpts_pack_in_stars(gstore%nqbz, qbz, qbz2ibz)
+
+ !call kpts_print_kmap(std_out, qibz, qbz, qbz2ibz)
+ !do iq_bz=1,gstore%nqbz
+ !  print *, "iq_bz -> iq_ibz", qbz2ibz(1, iq_bz), qbz(:, iq_bz)
+ !end do
+ !stop
 
  call get_ibz2bz(gstore%nqibz, gstore%nqbz, qbz2ibz, qibz2bz, ierr)
  ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for q-points!")
@@ -2642,7 +2650,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev, iq_bz !iq_ibz,
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, ib_k, ib_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k, trev_kq
@@ -2667,7 +2675,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer(i1b),allocatable :: itreat_qibz(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
  !integer,allocatable :: my_pinfo(:,:) !, pert_table(:,:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), vk(3) !, vkq(3)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), qq_ibz(3), vk(3) !, vkq(3)
  real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
  real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg1_k(:,:), kpg_k(:,:), dkinpw(:)
@@ -2928,7 +2936,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      call cwtime(cpu_q, wall_q, gflops_q, "start")
 
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
-     !iq_ibz = gqk%my_q2ibz(1, my_iq)
+     iq_ibz = gqk%my_q2ibz(1, my_iq)
+     qq_ibz = gstore%qibz(:, iq_ibz)
 
      iq_bz = gqk%my_q2bz(my_iq)
      if (done_qbz_spin(iq_bz, spin) == 1) cycle
@@ -2938,9 +2947,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
 
      ! Use Fourier interpolation of DFPT potentials to get my_npert potentials.
-     cplex = 2
-     ABI_MALLOC(v1scf, (cplex, nfft, nspden, dvdb%my_npert))
-     call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
+     !cplex = 2
+     !ABI_MALLOC(v1scf, (cplex, nfft, nspden, dvdb%my_npert))
+     !call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
+
+     call dvdb%get_ftqbz(cryst, qpt, qq_ibz, gqk%my_q2ibz(:, my_iq), cplex, nfftf, ngfftf, v1scf, &
+                         gqk%pert_comm%value)
 
      ! Get phonon frequencies and eigenvectors for this q-point.
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
@@ -3174,7 +3186,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ! Dump buffers
      if (iqbuf_cnt == qbuf_size) call dump_data()
 
-     if (my_iq <= 10 .or. mod(my_iq, 10) == 0) then
+     if (.True.) then
+     !if (my_iq <= 10 .or. mod(my_iq, 10) == 0) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q, out_wall=out_wall_q)
        !call wrtout(std_out, sjoin(" nskip_tetra_kq:", itoa(nskip_tetra_kq)))
@@ -3185,6 +3198,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call wrtout(std_out, sjoin(" Estimated time to completion:", sec2str((gqk%my_nq - my_iq) * out_wall_q)))
        end if
      end if
+
+     if (my_rank == master) then
+       ! Print cache stats.
+       call dvdb%ft_qcache%report_stats()
+       !if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
+     end if
+
    end do ! my_iq
 
    ! Dump remainder.
