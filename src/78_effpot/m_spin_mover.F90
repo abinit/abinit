@@ -277,7 +277,7 @@ contains
     ! read Spin and set as initial state
     ierr =nf90_inq_varid(ncid, "S", varid)
     msg="when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint," // &
-      & "  spin_init_rotate_axis and spin_init_orientation as needed)."
+      & " spin_init_rotate_axis and spin_init_orientation as needed)."
     NCF_CHECK_MSG(ierr, msg)
 
     ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/1, 1, ntime/), count=(/3, nspin,1/))
