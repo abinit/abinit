@@ -371,7 +371,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call cwtime_report(" migdal_eliashberg_iso:", cpu, wall, gflops)
 
 end subroutine migdal_eliashberg_iso
-!!!**
+!!***
 
 !----------------------------------------------------------------------
 
@@ -403,7 +403,6 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
 !Local variables-------------------------------
 !scalars
  integer :: nn
-
 !----------------------------------------------------------------------
 
  select case (bosons_or_fermions)
@@ -412,7 +411,7 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
    niw = nint(wmax / (two * pi * kt)) + 1
    ABI_MALLOC(imag_w, (niw))
    do nn=0,niw-1
-     imag_w(nn) = two * nn * pi * kt
+     imag_w(nn + 1) = two * nn * pi * kt
    end do
 
  case ("fermions")
@@ -420,7 +419,7 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
    niw = nint(wmax / (two * pi * kt))
    ABI_MALLOC(imag_w, (niw))
    do nn=0,niw-1
-     imag_w(nn) = two * (nn  + 1) * pi * kt
+     imag_w(nn + 1) = two * (nn  + 1) * pi * kt
    end do
 
  case default
@@ -428,7 +427,7 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
  end select
 
 end subroutine matsubara_mesh
-!!!***
+!!***
 
 end module m_migdal_eliashberg
 !!***

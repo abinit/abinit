@@ -519,7 +519,7 @@ subroutine kpts_sort(gprimd, nkpt, kpts)
  ABI_FREE(kpts_ord)
 
 end subroutine kpts_sort
-!!!***
+!!***
 
 !!****f* m_kpts/kpts_pack_in_stars
 !! NAME
@@ -601,10 +601,10 @@ subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
    swap_kpt = kpts_ord(:, ik_start)
    swap_kmap = kmap_ord(:, ik_start)
 
-   kpts_ord(:, ik_start)  = kpts_ord(:, ik0)
-   kmap_ord(:, ik_start) =  kmap_ord(:, ik0)
-   kpts_ord(:, ik0)  = swap_kpt
-   kmap_ord(:, ik0) =  swap_kmap
+   kpts_ord(:, ik_start) = kpts_ord(:, ik0)
+   kmap_ord(:, ik_start) = kmap_ord(:, ik0)
+   kpts_ord(:, ik0) = swap_kpt
+   kmap_ord(:, ik0) = swap_kmap
  end do
 
  kpts = kpts_ord
@@ -616,7 +616,7 @@ subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
  ABI_FREE(kmap_ord)
 
 end subroutine kpts_pack_in_stars
-!!!***
+!!***
 
 !!****f* m_kpts/kpts_map
 !! NAME

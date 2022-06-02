@@ -769,7 +769,7 @@ subroutine star_from_ibz_idx(ik_ibz, nkbz, bz2ibz, nk_in_star, kstar_bz_inds)
 
  nk_in_star = 0
  do iq_bz=1,nkbz
-   if (bz2ibz(1, iq_bz) /= ik_ibz) continue
+   if (bz2ibz(1, iq_bz) /= ik_ibz) cycle
    nk_in_star = nk_in_star + 1
    kstar_bz_inds(nk_in_star) = iq_bz
  end do
