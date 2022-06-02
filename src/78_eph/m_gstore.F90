@@ -584,6 +584,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
 
+ !stop
  !call kpts_sort(cryst%gprimd, gstore%nqbz, qbz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
@@ -602,7 +603,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  !do iq_bz=1,gstore%nqbz
  !  print *, "iq_bz -> iq_ibz", qbz2ibz(1, iq_bz), qbz(:, iq_bz)
  !end do
- !stop
 
  call get_ibz2bz(gstore%nqibz, gstore%nqbz, qbz2ibz, qibz2bz, ierr)
  ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for q-points!")
@@ -690,8 +690,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  end select
 
  ! Total number of k/q points for each spin after filtering (if any)
- glob_nk_spin(:) = count(select_kbz_spin /= 0, dim=1)
- glob_nq_spin(:) = count(select_qbz_spin /= 0, dim=1)
+ glob_nk_spin(:) = count(select_kbz_spin > 0, dim=1)
+ glob_nq_spin(:) = count(select_qbz_spin > 0, dim=1)
 
  ! We need another table mapping the global index in the gqk matrix to the q/k index in the BZ
  ! so that one can extract the symmetry tables computed above.
@@ -1050,14 +1050,15 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
      call ebands_print(gstore%ebands, header="Electron Bands", unit=unts(ii))
    end do
    call wrtout(unts, sjoin(" kzone:", gstore%kzone))
-   call wrtout(unts, sjoin(" qzone:", gstore%qzone))
    call wrtout(unts, sjoin(" kfilter:", gstore%kfilter))
-   call wrtout(unts, sjoin(" with_vk:", itoa(gstore%with_vk)))
-   call wrtout(unts, sjoin(" nqibz, nqbz:", itoa(gstore%nqibz), itoa(gstore%nqbz)))
-   call wrtout(unts, sjoin(" glob_nq_spin:", ltoa(glob_nq_spin)))
    call wrtout(unts, sjoin(" nkibz, nkbz:", itoa(gstore%nkibz), itoa(gstore%nkbz)))
    call wrtout(unts, sjoin(" glob_nk_spin:", ltoa(glob_nk_spin)))
+   call wrtout(unts, sjoin(" qzone:", gstore%qzone))
+   call wrtout(unts, sjoin(" nqibz, nqbz:", itoa(gstore%nqibz), itoa(gstore%nqbz)))
+   call wrtout(unts, sjoin(" glob_nq_spin:", ltoa(glob_nq_spin)))
+   call wrtout(unts, sjoin(" with_vk:", itoa(gstore%with_vk)))
  end if
+ !stop
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -1331,7 +1332,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  type(htetra_t) :: ktetra
 !arrays
  integer,allocatable :: indkk(:), kstar_bz_inds(:)
- real(dp):: qpt(3), rlatt(3,3), klatt(3,3), delta_theta_ef(2)
+ real(dp):: rlatt(3,3), klatt(3,3), delta_theta_ef(2) ! qpt(3),
  real(dp),allocatable :: eig_ibz(:)
 !----------------------------------------------------------------------
 
@@ -1388,14 +1389,14 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
        select case (gstore%kzone)
        case ("ibz")
          ik_bz = kibz2bz(ik_ibz)
-         select_kbz_spin(ik_bz, spin) = iflag
+         select_kbz_spin(ik_bz, spin) = select_kbz_spin(ik_bz, spin) + iflag
 
        case ("bz")
          call star_from_ibz_idx(ik_ibz, gstore%nkbz, kbz2ibz, nk_in_star, kstar_bz_inds)
          ABI_CHECK(nk_in_star > 0, "Something wrong in star_from_ibz_idx")
          do ii=1,nk_in_star
            ik_bz = kstar_bz_inds(ii)
-           select_kbz_spin(ik_bz, spin) = iflag
+           select_kbz_spin(ik_bz, spin) = select_kbz_spin(ik_bz, spin) + iflag
          end do
          ABI_FREE(kstar_bz_inds)
        end select
@@ -1634,7 +1635,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      do ii=1,len_kpts_ptr
        ikq_ibz = map_kq(1, ii)
        ikq_bz = kibz2bz(ikq_ibz)
-       select_qbz_spin(iq_bz, :) = select_kbz_spin(ikq_bz, :)
+       select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
      end do
    end do ! iq_ibz
 
@@ -1642,7 +1643,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
    do iq_bz=1,gstore%nqbz
      if (mod(iq_bz, all_nproc) /= my_rank) cycle ! MPI parallelism.
      qpt = qbz(:, iq_bz)
-     iq_ibz = qbz2ibz(1, iq_bz)
+     !iq_ibz = qbz2ibz(1, iq_bz)
      ! k + q_bz --> k IBZ --> k BZ
 
      if (kpts_map("symrel", ebands_timrev, gstore%cryst, gstore%krank_ibz, len_kpts_ptr, kpts_ptr, map_kq, qpt=qpt) /= 0) then
@@ -1652,7 +1653,7 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      do ii=1,len_kpts_ptr
        ikq_ibz = map_kq(1, ii)
        ikq_bz = kibz2bz(ikq_ibz)
-       select_qbz_spin(iq_bz, :) = select_kbz_spin(ikq_bz, :)
+       select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
      end do
    end do
  end select
@@ -2370,9 +2371,9 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
 !Local variables ------------------------------
 !scalars
- integer :: nb, nkbz, spin, my_ik, ib1, ib2, band1, band2, iq_ibz, ik_ibz, ikq_ibz, nesting, ebands_timrev
+ integer :: nb, nkbz, spin, my_ik, ib1, ib2, band1, band2, ik_ibz, ikq_ibz, nesting, ebands_timrev ! iq_ibz,
  integer :: i1, i2, i3, ierr, ik_bz, ltetra
- real(dp) :: g1, g2, sigma, weight_k, cpu, wall, gflops
+ real(dp) :: g1, g2, sigma, weight_k !, cpu, wall, gflops
  logical :: use_adaptive
  type(ebands_t), pointer :: ebands
  type(crystal_t), pointer :: cryst
@@ -3201,8 +3202,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      if (my_rank == master) then
        ! Print cache stats.
-       call dvdb%ft_qcache%report_stats()
-       !if (dvdb%ft_qcache%v1scf_3natom_request /= xmpi_request_null) call xmpi_wait(dvdb%ft_qcache%v1scf_3natom_request, ierr)
+       !call dvdb%ft_qcache%report_stats()
      end if
 
    end do ! my_iq
