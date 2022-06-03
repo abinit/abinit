@@ -63,6 +63,7 @@ module m_longwave
  use m_dfptlw_nv,   only : dfptlw_nv
  use m_dfptlw_pert, only : preca_ffnl
  use m_initylmg,    only : initylmg
+ use m_dynmat,      only : d3sym, sylwtens
 
  implicit none
 
@@ -146,7 +147,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: ider,idir0
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc,nylmgr
+ integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
 ! integer :: idir,ipert,
@@ -164,7 +165,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  type(wvl_data) :: wvl
  type(wffile_type) :: wffgs,wfftgs
  !arrays
- integer :: ngfft(18),ngfftf(18)
+ integer :: ngfft(18),ngfftf(18),perm(6)
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
@@ -273,11 +274,83 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  do i1pert = 1, mpert
    do i2pert = 1, mpert
      do i3pert = 1, mpert
-       if ( d3e_pert1(i1pert)*d3e_pert2(i2pert)*d3e_pert3(i3pert) > 0 ) &
-     & rfpert(:,i1pert,:,i2pert,:,i3pert)=1
+       perm(1)=d3e_pert1(i1pert)*d3e_pert2(i2pert)*d3e_pert3(i3pert)
+       perm(2)=d3e_pert1(i1pert)*d3e_pert2(i3pert)*d3e_pert3(i2pert)
+       perm(3)=d3e_pert1(i2pert)*d3e_pert2(i1pert)*d3e_pert3(i3pert)
+       perm(4)=d3e_pert1(i2pert)*d3e_pert2(i3pert)*d3e_pert3(i1pert)
+       perm(5)=d3e_pert1(i3pert)*d3e_pert2(i2pert)*d3e_pert3(i1pert)
+       perm(6)=d3e_pert1(i3pert)*d3e_pert2(i1pert)*d3e_pert3(i2pert)
+       if ( sum(perm(:)) > 0 ) rfpert(:,i1pert,:,i2pert,:,i3pert)=1
      end do
    end do
  end do 
+
+!Do symmetry stuff
+ ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(indsym,(4,dtset%nsym,natom))
+ ABI_MALLOC(symrec,(3,3,dtset%nsym))
+ irrzon=0;indsym=0;symrec=0;phnons=zero
+!If the density is to be computed by mkrho, need irrzon and phnons
+ iscf_eff=0;if(dtset%getden==0)iscf_eff=1
+ call setsym(indsym,irrzon,iscf_eff,natom,&
+& nfftot,ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
+& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
+
+!Symmetrize atomic coordinates over space group elements:
+ call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
+
+ call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
+
+ write(msg,'(a,a,a)') ch10, &
+& ' The list of irreducible elements of the spatial-dispersion tensors is: ', ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+
+ write(msg,'(12x,a)')&
+& 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ n1 = 0
+ do i1pert = 1, mpert
+   do i1dir = 1, 3
+     do i2pert = 1, mpert
+       do i2dir = 1,3
+         do i3pert = 1, mpert
+           do i3dir = 1, 3
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               n1 = n1 + 1
+               write(msg,'(2x,i4,a,6(5x,i3))') n1,')', &
+&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
+               call wrtout(ab_out,msg,'COLL')
+               call wrtout(std_out,msg,'COLL')
+             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
+               blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+               if (dtset%nonlinear_info>0) then
+!                 n1 = n1 + 1
+                 write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+  &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
+                 call wrtout(ab_out,msg,'COLL')
+                 call wrtout(std_out,msg,'COLL')
+               end if
+             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
+               if (dtset%nonlinear_info>0) then
+!                 n1 = n1 + 1
+                 write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+  &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
+                 call wrtout(ab_out,msg,'COLL')
+                 call wrtout(std_out,msg,'COLL')
+               end if
+             end if
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ write(msg,'(a,a)') ch10,ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
@@ -356,20 +429,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    call WffClose(wffgs,ierr)
  end if
 
-!Do symmetry stuff
- ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_MALLOC(indsym,(4,dtset%nsym,natom))
- ABI_MALLOC(symrec,(3,3,dtset%nsym))
- irrzon=0;indsym=0;symrec=0;phnons=zero
-!If the density is to be computed by mkrho, need irrzon and phnons
- iscf_eff=0;if(dtset%getden==0)iscf_eff=1
- call setsym(indsym,irrzon,iscf_eff,natom,&
-& nfftot,ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
-
-!Symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
