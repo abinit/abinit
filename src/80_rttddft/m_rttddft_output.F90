@@ -46,7 +46,7 @@ module m_rttddft_output
  use netcdf
 #endif
  use m_paral_atom,    only: get_my_atmtab, free_my_atmtab
- use m_profiling_abi, only : abimem_record !FB: Needed to pass bbot tests only
+ use m_profiling_abi, only: abimem_record !FB: Needed to pass bbot test farm
  use m_rttddft_tdks,  only: tdks_type
  use m_specialmsg,    only: wrtout
  use m_xmpi,          only: xmpi_comm_rank
