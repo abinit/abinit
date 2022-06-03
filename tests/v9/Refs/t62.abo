@@ -1393,13 +1393,13 @@ P          mk1mem7          8
               qpt5     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt6     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt7     0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          1       0       0
-            rfdir7          0       0       0
+            rfdir7          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -2118,7 +2118,7 @@ tolerances: {tolvrs: 1.00E-06, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -2258,7 +2258,7 @@ tolerances: {tolvrs: 1.00E-06, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  6.944018E+01
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -3747,13 +3747,13 @@ P          mk1mem7          8
               qpt5     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt6     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt7     0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       0       0
             rfdir5          0       1       0
             rfdir6          1       0       0
-            rfdir7          0       0       0
+            rfdir7          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
