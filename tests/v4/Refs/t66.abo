@@ -439,8 +439,8 @@ P          mk1mem4         64
            prtpot3          0
            prtpot4          1
            prtvol          10
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       1       1
             rfdir4          1       0       0
            rfelfd1          0
@@ -4047,8 +4047,8 @@ P          mk1mem4         64
            prtpot3          0
            prtpot4          1
            prtvol          10
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       1       1
             rfdir4          1       0       0
            rfelfd1          0

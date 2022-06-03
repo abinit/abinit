@@ -6,6 +6,8 @@
 ndtset 3 
 jdtset 12 20 30
 
+  rfatpol  1 1
+
 # Dataset #1 ground state calculation *************
 
    kptopt12   1 

@@ -197,7 +197,7 @@ P           mkmem23        15
              nsym          24
            ntypat           2
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
-            rfdir11         0       0       0
+            rfdir11         1       1       1
             rfdir21         1       0       0
             rfdir22         0       1       0
             rfdir23         0       0       1
@@ -887,7 +887,7 @@ P           mkmem23        15
              nsym          24
            ntypat           2
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
-            rfdir11         0       0       0
+            rfdir11         1       1       1
             rfdir21         1       0       0
             rfdir22         0       1       0
             rfdir23         0       0       1
