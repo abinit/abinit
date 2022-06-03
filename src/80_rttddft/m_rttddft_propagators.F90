@@ -40,7 +40,7 @@ module m_rttddft_propagators
  use m_kg,                  only: mkkin, mkkpg
  use m_mkffnl,              only: mkffnl
  use m_mpinfo,              only: proc_distrb_cycle
- use m_profiling_abi,       only : abimem_record !FB: Needed to pass bbot tests only
+ use m_profiling_abi,       only: abimem_record !FB: Needed to pass bbot test farm
  use m_rttddft,             only: rttddft_init_hamiltonian
  use m_rttddft_exponential, only: rttddft_exp_taylor
  use m_rttddft_properties,  only: rttddft_calc_density, &
