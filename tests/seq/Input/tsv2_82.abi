@@ -28,7 +28,6 @@ getden3   1
 
 #DATASET 4 : NSC run in the full BZ, used to compute the Berry phase (berryopt -1)
 berryopt4 -1
-   rfdir4  0 0 1
   kptopt4    1
    ngkpt4  4 4 10
     iscf4  -2
@@ -50,6 +49,7 @@ berryopt4 -1
  nstep 250
  ntypat  2
  occopt 1
+ rfdir   0 0 1
  rprim   0.0 0.5 0.5  
          0.5 0.0 0.5  
          0.5 0.5 0.0

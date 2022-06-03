@@ -23,7 +23,6 @@
 #Dataset 3: electric field + phonon response
  rfelfd3  3
  rfphon3  1
- rfatpol3  1 2
  rfdir3  1 1 1
  nqpt3    1
  getwfk3  -2
@@ -41,7 +40,6 @@
            diemix5 0.15
            getwfk5 -4   getwfq5 -1
            rfphon5   1
-           rfatpol5  1 2
            rfdir5    1 1 1
            nstep5    100
            kptopt5   3

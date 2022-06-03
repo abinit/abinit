@@ -158,10 +158,10 @@ P          mk1mem           2
            prtvol1          0
            prtvol2         10
            prtvol3         10
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
           rfatpol3          2       2
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          0       0       1
             rfdir3          0       0       1
            rfelfd1          0
@@ -508,7 +508,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -944,7 +944,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  7.373976E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
@@ -955,7 +955,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  7.373982E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1020,10 +1020,10 @@ P          mk1mem           2
            prtvol1          0
            prtvol2         10
            prtvol3         10
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
           rfatpol3          2       2
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          0       0       1
             rfdir3          0       0       1
            rfelfd1          0
