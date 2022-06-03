@@ -70,6 +70,7 @@ module m_rttddft_tdks
  use m_pawtab,           only: pawtab_type, pawtab_get_lsize
  use m_paw_tools,        only: chkpawovlp
  use m_pspini,           only: pspini
+ use m_profiling_abi,    only: abimem_record
  use m_spacepar,         only: setsym
  use m_specialmsg,       only: wrtout
  use m_symtk,            only: symmetrize_xred

@@ -45,7 +45,7 @@ module m_rttddft_properties
  use m_paw_occupancies,  only: pawmkrhoij
  use m_pawrhoij,         only: pawrhoij_type, pawrhoij_free, &
                              & pawrhoij_alloc, pawrhoij_inquire_dim
- use m_profiling_abi,    only: abimem_record !FB: Needed to pass bbot test farm
+ use m_profiling_abi,    only: abimem_record
  use m_rttddft_tdks,     only: tdks_type
  use m_spacepar,         only: meanvalue_g
  use m_xmpi,             only: xmpi_sum, xmpi_comm_rank

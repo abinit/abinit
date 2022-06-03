@@ -41,6 +41,7 @@ module m_rttddft
  use m_paw_ij,           only: paw_ij_reset_flags
  use m_paw_nhat,         only: nhatgrid
  use m_paw_tools,        only: chkpawovlp
+ use m_profiling_abi,    only: abimem_record
  use m_rttddft_tdks,     only: tdks_type
  use m_specialmsg,       only: wrtout
  use m_setvtr,           only: setvtr

@@ -37,6 +37,7 @@ module m_rttddft_exponential
  use m_invovl,             only: apply_invovl
  use m_pawcprj,            only: pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_prep_kgb,           only: prep_getghc, prep_index_wavef_bandpp
+ use m_profiling_abi,      only: abimem_record
  use m_rttddft_properties, only: rttddft_calc_eig, rttddft_calc_enl
  use m_xmpi,               only: xmpi_alltoallv
 
