@@ -358,10 +358,7 @@ type, public :: gstore_t
   character(len=fnlen) :: kfilter = "none"
   ! Specifies the tecnique used to filter k-points.
   ! Possible values:
-  !     "none"
-  !     "fs_tetra"
-  !     "erange"
-  !     ...
+  !     "none", "fs_tetra", "erange"
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
@@ -383,6 +380,9 @@ type, public :: gstore_t
 
   integer,allocatable :: brange_spin(:, :)
   ! (2, nsppol)
+
+  integer,allocatable :: glob_nk_spin(:), glob_nq_spin(:)
+  ! (nsppol)
 
   real(dp), contiguous, pointer :: kibz(:,:)
   ! k-points in the IBZ. Points to ebands%kptns
@@ -431,6 +431,8 @@ contains
 
   procedure :: free => gstore_free
   ! Free memory
+
+  procedure :: print => gstore_print
 
   procedure, private :: distribute_spins__ => gstore_distribute_spins
   ! Distribute spins (nsppol = 2) and create indirect mapping to spin index.
@@ -502,22 +504,20 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0
- integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol !, iq_glob, ik_glob, ii ! out_nkibz,
+ integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol
  integer :: spin, natom3, cnt
- integer :: ik_ibz, ik_bz, ebands_timrev, max_nq, max_nk
- integer :: iq_bz, iq_ibz !, ikq_ibz, ikq_bz
+ integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, ebands_timrev, max_nq, max_nk
  integer :: ncid, spin_ncid, ncerr, gstore_fform
  real(dp) :: cpu, wall, gflops
  !character(len=5000) :: msg
  type(krank_t) :: qrank
- !type(htetra_t) :: qtetra, ktetra,
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3)
  integer :: comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
- integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
+ !integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
  integer,allocatable :: qbz2ibz(:,:), kbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:), done_qbz_spin(:,:)
- real(dp):: my_shiftq(3,1) !qpt(3) !, rlatt(3,3), klatt(3,3) ! kpt(3), qlatt(3,3),
+ real(dp):: my_shiftq(3,1)
  real(dp),allocatable :: qbz(:,:), wtk(:) !, my_kpts(:,:) !wtq_(:),
  real(dp),allocatable :: kibz(:,:), kbz(:,:)
  !integer :: out_kptrlatt(3,3)
@@ -574,7 +574,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
  ! TODO: Should fix bz2ibz to use the same conventions as krank and listkk
  ! NB: only sigmaph seems to be using this optional argument
- ! TODO: Order qbz by shell
 
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry for phonons even in systems without inversion
@@ -583,9 +582,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
                              gstore%nqibz, gstore%qibz, gstore%wtq, gstore%nqbz, qbz)
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
-
- !stop
- !call kpts_sort(cryst%gprimd, gstore%nqbz, qbz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
@@ -597,6 +593,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  end if
  call qrank%free()
 
+ ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gstore%nqbz, qbz, qbz2ibz)
 
  !call kpts_print_kmap(std_out, qibz, qbz, qbz2ibz)
@@ -670,7 +667,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
    ABI_ERROR(sjoin("Invalid qzone:", gstore%qzone))
  end select
 
- ! Here we filter the electronic wavevectors k and recompute select_qbz_spin and select_kbz_spin.
+ ! Here we filter the electronic wavevectors k and
+ ! recompute select_qbz_spin and select_kbz_spin.
 
  select case (gstore%kfilter)
  case ("none")
@@ -690,16 +688,18 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  end select
 
  ! Total number of k/q points for each spin after filtering (if any)
- glob_nk_spin(:) = count(select_kbz_spin > 0, dim=1)
- glob_nq_spin(:) = count(select_qbz_spin > 0, dim=1)
+ ABI_MALLOC(gstore%glob_nk_spin, (nsppol))
+ ABI_MALLOC(gstore%glob_nq_spin, (nsppol))
+ gstore%glob_nk_spin(:) = count(select_kbz_spin > 0, dim=1)
+ gstore%glob_nq_spin(:) = count(select_qbz_spin > 0, dim=1)
 
  ! We need another table mapping the global index in the gqk matrix to the q/k index in the BZ
  ! so that one can extract the symmetry tables computed above.
  ! Again this is needed as the global sizes of the gqk matrix
  ! is not necessarily equal to the size of the BZ/IBZ if we have filtered the wave vectors.
 
- max_nq = maxval(glob_nq_spin) ! Max dim over spin
- max_nk = maxval(glob_nk_spin)
+ max_nq = maxval(gstore%glob_nq_spin) ! Max dim over spin
+ max_nk = maxval(gstore%glob_nk_spin)
  ABI_ICALLOC(qglob2bz, (max_nq, nsppol))
  ABI_ICALLOC(kglob2bz, (max_nk, nsppol))
 
@@ -723,7 +723,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
 
- call gstore%set_mpi_grid__(dtset%gstore_cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(dtset%gstore_cplex, dtset%eph_np_pqbks, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
@@ -790,6 +790,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins") &
    ])
    NCF_CHECK(ncerr)
+
+   ! internal table used to restart computation. Init with zeros.
    NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), 0, zero))
 
    ! Optional arrays
@@ -812,21 +814,14 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz"), kbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_spin"), gstore%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nq_spin"), glob_nq_spin))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nk_spin"), glob_nk_spin))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nq_spin"), gstore%glob_nq_spin))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nk_spin"), gstore%glob_nk_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz2ibz"), kbz2ibz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qbz2ibz"), qbz2ibz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qglob2bz"), qglob2bz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kglob2bz"), kglob2bz))
    ! NB: kibz has been already written by ebands%ncwrite
    !NCF_CHECK(nf90_put_var(ncid, vid("kibz"), gstore%kibz))
-
-   ! Write internal table used to restart computation. Init with zeros.
-   ! TODO: Use fill_value
-   !ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
-   !NCF_CHECK(nf90_put_var(ncid, vid("gstore_done_qbz_spin"), done_qbz_spin))
-   !ABI_FREE(done_qbz_spin)
-   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), 0, zero))
 
    if (allocated(gstore%delta_ef_kibz_spin)) then
      NCF_CHECK(nf90_put_var(ncid, vid("gstore_delta_ef_kibz_spin"), gstore%delta_ef_kibz_spin))
@@ -839,8 +834,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
      ! Dimensions in gqk_spin group
      ncerr = nctk_def_dims(spin_ncid, [ &
         nctkdim_t("nb", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
-        nctkdim_t("glob_nk", glob_nk_spin(spin)), &
-        nctkdim_t("glob_nq", glob_nq_spin(spin))  &
+        nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
+        nctkdim_t("glob_nq", gstore%glob_nq_spin(spin))  &
        ], &
        defmode=.True.)
      NCF_CHECK(ncerr)
@@ -854,6 +849,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
        nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
      ])
      NCF_CHECK(ncerr)
+
+     ! IMPORTANT: Init with zeros.
      NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, zero))
 
      select case(gstore%with_vk)
@@ -999,13 +996,13 @@ end subroutine gstore_distribute_spins
 !!
 !! SOURCE
 
-subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spin, eph_np_pqbks, nproc_spin, comm_spin)
+subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, nproc_spin, comm_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: gstore_cplex
- integer,intent(in) :: glob_nq_spin(gstore%nsppol), glob_nk_spin(gstore%nsppol)
+ !integer,intent(in) :: glob_nq_spin(gstore%nsppol), glob_nk_spin(gstore%nsppol)
  integer,intent(in) :: eph_np_pqbks(5), nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
 
 !Local variables-------------------------------
@@ -1014,7 +1011,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
  integer :: spin, my_is, np, my_rank, ierr, ii
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
- integer :: unts(2)
+ !integer :: unts(2)
 #ifdef HAVE_MPI
  integer,parameter :: ndims = 3
  integer :: comm_cart, me_cart
@@ -1041,28 +1038,9 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
    gqk%nb = gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1
 
    ! Store global shape of the q/k matrix for this spin.
-   gqk%glob_nq = glob_nq_spin(spin)
-   gqk%glob_nk = glob_nk_spin(spin)
+   gqk%glob_nq = gstore%glob_nq_spin(spin)
+   gqk%glob_nk = gstore%glob_nk_spin(spin)
  end do
-
- if (my_rank == master) then
-   unts = [std_out, ab_out]
-   !call gstore%print(unts)
-   call wrtout(unts, "=== Gstore parameters ===")
-   !call wrtout(unts, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
-   do ii=1,size(unts)
-     call ebands_print(gstore%ebands, header="Electron Bands", unit=unts(ii))
-   end do
-   call wrtout(unts, sjoin(" kzone:", gstore%kzone))
-   call wrtout(unts, sjoin(" kfilter:", gstore%kfilter))
-   call wrtout(unts, sjoin(" nkibz, nkbz:", itoa(gstore%nkibz), itoa(gstore%nkbz)))
-   call wrtout(unts, sjoin(" glob_nk_spin:", ltoa(glob_nk_spin)))
-   call wrtout(unts, sjoin(" qzone:", gstore%qzone))
-   call wrtout(unts, sjoin(" nqibz, nqbz:", itoa(gstore%nqibz), itoa(gstore%nqbz)))
-   call wrtout(unts, sjoin(" glob_nq_spin:", ltoa(glob_nq_spin)))
-   call wrtout(unts, sjoin(" with_vk:", itoa(gstore%with_vk)))
- end if
- !stop
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -1095,14 +1073,13 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
      ! allow one to reduce the memory requirements associate to certain arrays.
 
      np = nproc_spin(spin)
-     gqk%qpt_comm%nproc = np
-     gqk%kpt_comm%nproc = 1
-     gqk%pert_comm%nproc = 1
-     !call xmpi_find_grid2(np, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
+
+     call xmpi_find_grid2(np, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
      !if (ierr /= 0) call xmpi_find_grid2_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
-     !if (ierr /= 0) then
-     !  ABI_WARNING(sjoin("Cannot find 2D or 3D distribution with nproc:", itoa(np)))
-     !end if
+     if (ierr /= 0) then
+       ABI_WARNING(sjoin("Cannot find 2D or 3D distribution with nproc:", itoa(np)))
+       gqk%qpt_comm%nproc = np; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1
+     end if
    end if
 
    ! Consistency check.
@@ -1153,20 +1130,73 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
 
    ! Distribute perturbations.
    call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_iperts)
-   !ABI_MALLOC(gqk%my_iperts, (gqk%my_npert))
-   !gqk%my_iperts = [(ii, ii=1, gqk%natom3)]
-
-   if (my_rank == master) then
-     write(std_out, "(/,a)")" === Gstore MPI distribution ==="
-     write(std_out, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", gqk%pert_comm%nproc
-     write(std_out, "(a,i0)")"P Number of perturbations treated by this CPU: ", gqk%my_npert
-     write(std_out, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", gqk%qpt_comm%nproc
-     write(std_out, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", gqk%kpt_comm%nproc
-   end if
  end do ! my_is
+
+ if (my_rank == master) then
+   call gstore%print(std_out)
+   call gstore%print(ab_out)
+ end if
 
 end subroutine gstore_set_mpi_grid__
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_print
+!! NAME
+!! gstore_print
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gstore_print(gstore, unit, header, prtvol)
+
+!Arguments ------------------------------------
+ class(gstore_t),target,intent(inout) :: gstore
+ integer,intent(in) :: unit
+ character(len=*),optional,intent(in) :: header
+ integer,optional,intent(in) :: prtvol
+
+!Local variables ------------------------------
+!scalars
+ integer :: my_is, spin
+ type(gqk_t),pointer :: gqk
+
+!----------------------------------------------------------------------
+
+ call wrtout(unit, "=== Gstore parameters ===")
+ !call wrtout(unit, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
+ call ebands_print(gstore%ebands, header="Electron Bands", unit=unit)
+ call wrtout(unit, sjoin(" kzone:", gstore%kzone))
+ call wrtout(unit, sjoin(" kfilter:", gstore%kfilter))
+ call wrtout(unit, sjoin(" nkibz, nkbz:", itoa(gstore%nkibz), itoa(gstore%nkbz)))
+ call wrtout(unit, sjoin(" glob_nk_spin:", ltoa(gstore%glob_nk_spin)))
+ call wrtout(unit, sjoin(" qzone:", gstore%qzone))
+ call wrtout(unit, sjoin(" nqibz, nqbz:", itoa(gstore%nqibz), itoa(gstore%nqbz)))
+ call wrtout(unit, sjoin(" glob_nq_spin:", ltoa(gstore%glob_nq_spin)))
+ call wrtout(unit, sjoin(" with_vk:", itoa(gstore%with_vk)))
+
+ do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is)
+   call wrtout(unit, sjoin(ch10, " === MPI distribution ==="))
+   call wrtout(unit, sjoin("P Number of CPUs for parallelism over perturbations: ", itoa(gqk%pert_comm%nproc)))
+   call wrtout(unit, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
+   call wrtout(unit, sjoin("P Number of CPUs for parallelism over q-points: ", itoa(gqk%qpt_comm%nproc)))
+   call wrtout(unit, sjoin("P Number of CPUs for parallelism over k-points: ", itoa(gqk%kpt_comm%nproc)))
+ end do
+
+end subroutine gstore_print
+!!!***
 
 !----------------------------------------------------------------------
 
@@ -2154,6 +2184,8 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%wtq)
  ABI_SFREE(gstore%my_spins)
  ABI_SFREE(gstore%brange_spin)
+ ABI_SFREE(gstore%glob_nk_spin)
+ ABI_SFREE(gstore%glob_nq_spin)
  ABI_SFREE(gstore%erange_spin)
 
  call gstore%krank_ibz%free()
@@ -2705,7 +2737,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Increasing the buffer size increases the memory requirements
  ! but it leads to better performance as the number of IO operations is decreased.
  qbuf_size = 4
- call wrtout(std_out, " Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size))
+ call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)))
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -2861,7 +2893,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Create ddkop object to compute group velocities (if needed)
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
- ! Open GSTORE file, and read table used for restaring.
+ ! Open GSTORE file, and read table used for restarting.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
 
  ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
@@ -2976,6 +3008,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
+
+       ! Important as there are cycle instructions inside these loops
+       ! and we don't want to write random numbers to disk.
+       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        call gqk%mykpt(my_ik, gstore, weight_k, kk)
@@ -3357,7 +3393,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
 !arrays
  integer :: ibuffer(9)
  integer :: nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
- integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol), brange_spin(2, ebands%nsppol)
+ integer :: brange_spin(2, ebands%nsppol) ! glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
  integer,allocatable :: qglob2bz(:,:), kglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
 
@@ -3376,6 +3412,8 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  gstore%ifc => ifc
  gstore%kibz => ebands%kptns
  ABI_CALLOC(gstore%erange_spin, (2, gstore%nsppol))
+ ABI_MALLOC(gstore%glob_nk_spin, (gstore%nsppol))
+ ABI_MALLOC(gstore%glob_nq_spin, (gstore%nsppol))
 
  ! =======================================================
  ! Master node reads basic objects and gstore dimensions
@@ -3420,7 +3458,6 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_wtq"), gstore%wtq))
-   !NCF_CHECK(nf90_get_var(ncid,vid("kibz"), gstore%kibz))
 
    ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
    ABI_MALLOC(kbz2ibz, (6, gstore%nkbz))
@@ -3431,8 +3468,8 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
    ABI_MALLOC(kglob2bz, (max_nk, gstore%nsppol))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qglob2bz"), qglob2bz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kglob2bz"), kglob2bz))
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_glob_nq_spin"), glob_nq_spin))
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_glob_nk_spin"), glob_nk_spin))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_glob_nq_spin"), gstore%glob_nq_spin))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_glob_nk_spin"), gstore%glob_nk_spin))
 
    ! Read optional variables:
    if (gstore%kfilter == "fs_tetra") then
@@ -3501,8 +3538,8 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
    call xmpi_bcast(kbz2ibz, master, comm, ierr)
    call xmpi_bcast(qglob2bz, master, comm, ierr)
    call xmpi_bcast(kglob2bz, master, comm, ierr)
-   call xmpi_bcast(glob_nq_spin, master, comm, ierr)
-   call xmpi_bcast(glob_nk_spin, master, comm, ierr)
+   call xmpi_bcast(gstore%glob_nq_spin, master, comm, ierr)
+   call xmpi_bcast(gstore%glob_nk_spin, master, comm, ierr)
 
    if (gstore%kfilter == "fs_tetra") then
      if (my_rank /= master) then
@@ -3525,7 +3562,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Set MPI grid
- call gstore%set_mpi_grid__(with_cplex, glob_nq_spin, glob_nk_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(with_cplex, dtset%eph_np_pqbks, nproc_spin, comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
@@ -3542,16 +3579,19 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  ! Note the loop over spin to account as each gqk has its own dimensions.
  ! Recall the shape on the arrays:
  !
- !   In memory, we have allocated:
+ ! In memory, we have allocated:
  !
- !     my_g(2, my_npert, nb, my_nq, nb, my_nk) if with_cplex == 2
- !     my_g2(my_npert, nb, my_nq, nb, my_nk) if with_cplex == 1
-
- !   On disk, we have:
+ !    my_g(2, my_npert, nb, my_nq, nb, my_nk) if with_cplex == 2
  !
- !     nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ ! or
  !
- !   so gstore_cplex == 1 and with_cplex == 2 are not compatible
+ !    my_g2(my_npert, nb, my_nq, nb, my_nk) if with_cplex == 1
+ !
+ ! On disk, we have:
+ !
+ !   nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !
+ ! so gstore_cplex == 1 and with_cplex == 2 are not compatible.
  !
  call cwtime(cpu, wall, gflops, "start")
  do spin=1,gstore%nsppol
@@ -3665,32 +3705,20 @@ subroutine xmpi_find_grid2(nprocs, size1, size2, n1, n2, ierr)
 
  ierr = 1; n1 = -1; n2 = -1
 
- do ii=nprocs, -1, 1
-   if (mod(size1, ii) == 0 .and.  mod(size2, nprocs / ii) == 0) then
+ do ii=nprocs,1,-1
+   if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size2, nprocs / ii) == 0) then
      n1 = ii; n2 = nprocs / ii; ierr = 0; exit
    end if
  end do
 
  if (ierr /= 0) then
-   do ii=nprocs, -1, 1
-     if (mod(size1, ii) == 0) then
+   ! Try again with more procs without: mod(size2, nprocs / ii) == 0
+   do ii=nprocs,1,-1
+     if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0) then
        n1 = ii; n2 = nprocs / ii; ierr = 0; exit
      end if
    end do
  end if
-
- !if (pert_comm%nproc == 1) then
- !  ! Try again with more procs.
- !  do cnt=natom3,2,-1
- !    if (mod(all_nproc, cnt) == 0 .and. mod(natom3, cnt) == 0) then
- !      pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
- !    end if
- !  end do
- !end if
-
- !if (new%my_npert == natom3 .and. all_nproc > 1) then
- !  ABI_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
- !end if
 
 end subroutine xmpi_find_grid2
 !!***
