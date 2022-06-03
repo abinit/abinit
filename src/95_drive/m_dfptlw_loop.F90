@@ -64,7 +64,7 @@ module m_dfptlw_loop
  use m_dfpt_mkvxc,  only : dfpt_mkvxc
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
- use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vmetdqdq 
+ use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vlocaldqdq,dfpt_vmetdqdq 
  use m_dfptlw_pert, only : dfptlw_pert
  use m_dynmat,      only : cart39
  use m_xmpi
@@ -231,7 +231,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: tgeom_typeI(:,:,:,:,:,:),tgeom_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: vhart1dqdq(:),vpsp1dqdq(:),vresid_dum(:,:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
- real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:)
+ real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:),xccc3d1(:)
  real(dp) :: vec1(3),vec2(3)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
@@ -447,6 +447,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                  & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                  & ph1d,ii,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq_geom(:,1,ii))
                end do
+                
+               !Allocate the second-gradient array
+               ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
              end if 
 
              do i3pert = 1, mpert
@@ -463,6 +466,23 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
                      & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
                      & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdq(:,1,1))
+
+                     if (i2pert == natom+3.or.i2pert == natom+4) then
+                       gamma=i3dir
+                       do idq= 1, n2dq
+                          if (i2pert==natom+3) then
+                            istr=i2dir
+                          else
+                            istr=idq*3+i2dir
+                          endif 
+                          delta=idx(2*istr)
+                          call dfpt_vlocaldqdq(atindx,2,gs_hamkq%gmet,gsqcut,i1dir,i1pert,mpi_enreg, &
+                        & psps%mqgrid_vl,dtset%natom,&
+                        & nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                        & ph1d,gamma,delta,psps%qgrid_vl,&
+                        & dtset%qptn,ucvol,psps%vlspl,vpsp1_i1pertdqdq(:,1,idq))
+                       end do
+                     end if
 
                    else if (i1pert==natom+3.or.i1pert==natom+4) then
                      istr=i1dir; if (i1pert==natom+4) istr=3+i1dir
@@ -572,7 +592,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
                    & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
-                   & vpsp1_i1pertdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
+                   & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
                    & ddk_f,d2_dkdk_f,xccc3d1,xred,ylm,ylmgr)
 
                    !close ddk file
@@ -650,7 +670,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end do     ! ir3pert
              
              if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
-             if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) ABI_FREE(vpsp1_i1pertdq_geom)
+             if (i1pert <= natom .and. (i2pert == natom+3.or.i2pert == natom+4)) then 
+                ABI_FREE(vpsp1_i1pertdq_geom)
+                ABI_FREE(vpsp1_i1pertdqdq)
+             end if
              ABI_FREE(d3etot_t4)
              ABI_FREE(d3etot_tgeom)
 

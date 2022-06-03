@@ -317,7 +317,6 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,&
  ABI_FREE(ph3d)
 
  call cwtime(cpu, wall, gflops, "stop")
- write(101,*) cpu,wall
 
 !------------------------------------T2------------------------------------------------
 !q-gradient of CB projector x rf Hamiltonian lambda 2:
@@ -376,7 +375,6 @@ if (.not.samepert) then
 end if !samepert
 
  call cwtime(cpu, wall, gflops, "stop")
- write(102,*) cpu,wall
 
 !------------------------------------T3------------------------------------------------
 !rf Hamiltonian lambda 1 x q-gradient of CB projector
@@ -432,7 +430,6 @@ if (samepert) then
 end if
 
  call cwtime(cpu, wall, gflops, "stop")
- write(103,*) cpu,wall
 !------------------------------------T4------------------------------------------------
 !q-gradient of rf Hamiltonian lambda 2 
 ! < u_{i,k}^{\lambda1} | H^{\lambda2}_{gamma} | u_{i,k}^{(0)} >
@@ -552,7 +549,6 @@ if (.not.samepert) then
      end if
 
  call cwtime(cpu, wall, gflops, "stop")
- write(104,*) cpu,wall
   
      !Apply the perturbation-dependent prefactors on T4
      tmpre=d3etot_t4_k(1,idq); tmpim=d3etot_t4_k(2,idq)
@@ -691,7 +687,6 @@ if (.not.samepert) then
    end if
 
  call cwtime(cpu, wall, gflops, "stop")
- write(105,*) cpu,wall
 
    !Apply the perturbation-dependent prefactors on T5
    tmpre=d3etot_t5_k(1,idq); tmpim=d3etot_t5_k(2,idq)
