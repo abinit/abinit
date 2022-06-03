@@ -825,6 +825,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
    ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_done_qbz_spin"), done_qbz_spin))
    ABI_FREE(done_qbz_spin)
+   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), 0, zero))
 
    if (allocated(gstore%delta_ef_kibz_spin)) then
      NCF_CHECK(nf90_put_var(ncid, vid("gstore_delta_ef_kibz_spin"), gstore%delta_ef_kibz_spin))
@@ -852,6 +853,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
        nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
      ])
      NCF_CHECK(ncerr)
+     !NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), 0, zero))
 
      select case(gstore%with_vk)
      case (1)
@@ -1044,6 +1046,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
 
  if (my_rank == master) then
    unts = [std_out, ab_out]
+   !call gstore%print(unts)
    call wrtout(unts, "=== Gstore parameters ===")
    !call wrtout(unts, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
    do ii=1,size(unts)
@@ -1094,24 +1097,12 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
      gqk%qpt_comm%nproc = np
      gqk%kpt_comm%nproc = 1
      gqk%pert_comm%nproc = 1
-
-     !if (pert_comm%nproc == 1) then
-     !  ! Try again with more procs.
-     !  do cnt=natom3,2,-1
-     !    if (mod(all_nproc, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-     !      pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
-     !    end if
-     !  end do
-     !end if
-
-     !if (new%my_npert == natom3 .and. all_nproc > 1) then
-     !  ABI_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
+     !call xmpi_find_grid2(np, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
+     !if (ierr /= 0) call xmpi_find_grid2_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
+     !if (ierr /= 0) then
+     !  ABI_WARNING(sjoin("Cannot find 2D or 3D distribution with nproc:", itoa(np)))
      !end if
    end if
-
-   ! Distribute perturbations TODO
-   ABI_MALLOC(gqk%my_iperts, (gqk%my_npert))
-   gqk%my_iperts = [(ii, ii=1, gqk%natom3)]
 
    ! Consistency check.
    if (gqk%pert_comm%nproc * gqk%qpt_comm%nproc * gqk%kpt_comm%nproc /= nproc_spin(spin)) then
@@ -1125,7 +1116,6 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
 
  end do ! my_is
 
-#ifdef HAVE_MPI
  ! For each spin treated by this rank, create 3d cartesian communicator (q-points, k-points, perturbations)
  periods(:) = .False.; reorder = .False.
 
@@ -1138,6 +1128,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
    ! Note comm_spin(spin)
    gqk%grid_comm = xcomm_from_mpi_int(comm_spin(spin))
 
+#ifdef HAVE_MPI
    call MPI_CART_CREATE(gqk%grid_comm, ndims, dims, periods, reorder, comm_cart, ierr)
 
    ! Find the index and coordinates of the current processor
@@ -1157,6 +1148,12 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
    call MPI_CART_SUB(comm_cart, keepdim, gqk%pert_comm%value, ierr); gqk%pert_comm%me = xmpi_comm_rank(gqk%pert_comm%value)
 
    call xmpi_comm_free(comm_cart)
+#endif
+
+   ! Distribute perturbations.
+   call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_iperts)
+   !ABI_MALLOC(gqk%my_iperts, (gqk%my_npert))
+   !gqk%my_iperts = [(ii, ii=1, gqk%natom3)]
 
    if (my_rank == master) then
      write(std_out, "(/,a)")" === Gstore MPI distribution ==="
@@ -1166,7 +1163,6 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, glob_nq_spin, glob_nk_spi
      write(std_out, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", gqk%kpt_comm%nproc
    end if
  end do ! my_is
-#endif
 
 end subroutine gstore_set_mpi_grid__
 !!***
@@ -1405,7 +1401,7 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
    end do
  end do
 
- call ktetra%print(std_out)
+ !call ktetra%print(std_out)
 
  call xmpi_sum(select_kbz_spin, comm, ierr)
  call xmpi_sum(gstore%delta_ef_kibz_spin, comm, ierr)
@@ -2382,8 +2378,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  integer :: nge(3), ngw(3)
  integer,allocatable :: my_kqmap(:,:), kmesh_map(:,:)
  real(dp) :: kk(3)
- real(dp),allocatable :: my_kpts(:,:), my_wtk(:)
- real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
+ real(dp),allocatable :: my_kpts(:,:), my_wtk(:), eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
 
 !----------------------------------------------------------------------
 
@@ -2399,6 +2394,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  ! In this case we fall back to gaussian.
  nesting = merge(1, 0, abs(eph_intmeth) == 2 .and. all(abs(qpt) < tol12))
 
+ !TODO: Store my_kpts and my_wtk in gstore%
  call gqk%get_all_mykpts(gstore, my_kpts, my_wtk)
 
  if (abs(eph_intmeth) == 1 .or. nesting /= 0) then
@@ -2702,6 +2698,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Increasing the buffer size increases the memory requirements
  ! but it leads to better performance as the number of IO operations is decreased.
  qbuf_size = 4
+ call wrtout(std_out, " Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size))
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -3220,7 +3217,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(my_vkdone)
  end do ! my_is
 
- call cwtime_report(" gstore_compute", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
+ call cwtime_report(" gstore_compute", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
 
  NCF_CHECK(nf90_close(root_ncid))
 
@@ -3628,6 +3625,67 @@ contains
  end function spin_vid
 
 end function gstore_from_ncpath
+!!***
+
+!!****f* m_gstore/xmpi_find_grid2
+!! NAME
+!! xmpi_find_grid2
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_find_grid2(nprocs, size1, size2, n1, n2, ierr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nprocs, size1, size2
+ integer,intent(out) :: n1, n2, ierr
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+
+!----------------------------------------------------------------------
+
+ ierr = 1; n1 = -1; n2 = -1
+
+ do ii=nprocs, -1, 1
+   if (mod(size1, ii) == 0 .and.  mod(size2, nprocs / ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0) then
+   do ii=nprocs, -1, 1
+     if (mod(size1, ii) == 0) then
+       n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+     end if
+   end do
+ end if
+
+ !if (pert_comm%nproc == 1) then
+ !  ! Try again with more procs.
+ !  do cnt=natom3,2,-1
+ !    if (mod(all_nproc, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+ !      pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
+ !    end if
+ !  end do
+ !end if
+
+ !if (new%my_npert == natom3 .and. all_nproc > 1) then
+ !  ABI_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
+ !end if
+
+end subroutine xmpi_find_grid2
 !!***
 
 end module m_gstore

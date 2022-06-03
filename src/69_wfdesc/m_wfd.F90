@@ -4703,7 +4703,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  call wrtout(std_out, sjoin(" About to read: ",itoa(count(my_readmask)), " (b, k, s) states in total."))
  do spin=1,wfd%nsppol
    call wrtout(std_out, sjoin(" For spin:", itoa(spin), &
-              ", will read:", itoa(count(all_countks(:, spin) /= 0)), " k-points out of:", itoa(wfd%nkibz)))
+              ", will read:", itoa(count(any(my_readmask(:,:,spin), dim=1))), " k-points out of:", itoa(wfd%nkibz)))
  end do
  tag_spin(: )= ['      ','      ']; if (Wfd%nsppol==2) tag_spin(:)= [' UP   ',' DOWN ']
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]')
@@ -4948,7 +4948,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! Update the kbs table storing the distribution of the ug and set the MPI communicators.
  select type (wfd)
  class is (wfdgw_t)
-    call wfd%update_bkstab()
+   call wfd%update_bkstab()
  end select
 
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
