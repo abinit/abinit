@@ -454,7 +454,7 @@ contains
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
 
   procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
-  ! Compute isotropic lamda(iw) along the imaginary axis.
+  ! Compute isotropic lamdda(iw) along the imaginary axis.
 
   procedure :: get_a2fw => gstore_get_a2fw
   ! Compute Eliashberg function a^2F(w).
@@ -790,6 +790,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins") &
    ])
    NCF_CHECK(ncerr)
+   NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), 0, zero))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -822,9 +823,9 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
    ! Write internal table used to restart computation. Init with zeros.
    ! TODO: Use fill_value
-   ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
-   NCF_CHECK(nf90_put_var(ncid, vid("gstore_done_qbz_spin"), done_qbz_spin))
-   ABI_FREE(done_qbz_spin)
+   !ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+   !NCF_CHECK(nf90_put_var(ncid, vid("gstore_done_qbz_spin"), done_qbz_spin))
+   !ABI_FREE(done_qbz_spin)
    !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), 0, zero))
 
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -853,7 +854,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
        nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq") &
      ])
      NCF_CHECK(ncerr)
-     !NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), 0, zero))
+     NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, zero))
 
      select case(gstore%with_vk)
      case (1)
@@ -1349,7 +1350,6 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kb
  call ebands_get_bands_e0(ebands, ebands%fermie, gstore%brange_spin, ierr)
  ABI_CHECK(ierr == 0, "Error in ebands_get_bands_e0")
 
- ! TODO: Decide whether it makes sense to store ktetra or indkk in gstore.
  ABI_MALLOC(indkk, (gstore%nkbz))
  indkk(:) = kbz2ibz(1, :)
 
@@ -1427,6 +1427,7 @@ end subroutine gstore_filter_fs_tetra__
 !! gstore_filter_erange__
 !!
 !! FUNCTION
+!! Filter k-points and q-points according to an energy range.
 !!
 !! INPUTS
 !!
@@ -1476,8 +1477,8 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  cryst => gstore%cryst
  ebands => gstore%ebands
  nsppol = gstore%nsppol
- assume_gap = .not. all(gstore%erange_spin < zero)
 
+ assume_gap = .not. all(gstore%erange_spin < zero)
  gaps = ebands_get_gaps(ebands, gap_err)
  if (assume_gap) call gaps%print(unit=std_out) !, header=msg)
 
@@ -1570,6 +1571,7 @@ end subroutine gstore_filter_erange__
 !! recompute_select_qbz_spin
 !!
 !! FUNCTION
+!! Recompute select_qbz_spin table after the filtering on the k-points.
 !!
 !! INPUTS
 !!
@@ -1666,8 +1668,8 @@ end subroutine recompute_select_qbz_spin
 !! gstore_spin2my_is
 !!
 !! FUNCTION
-!!  Return the local spin index from the global spin index. 0 if this spin is not treated
-!!  by this MPI proc.
+!!  Return the local spin index from the global spin index.
+!!  0 if this spin is not treated by this MPI proc.
 !!
 !! INPUTS
 !!
@@ -1980,6 +1982,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
+   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
    ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
    ABI_MALLOC(g2_pmnk, (gqk%my_npert, gqk%nb, gqk%nb, gqk%my_nk))
 
@@ -2009,6 +2012,9 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
    ABI_FREE(dbldelta_q)
    ABI_FREE(g2_pmnk)
  end do ! my_is
+
+ ! Take into account spin
+ lambda = lambda * (two / (gstore%nsppol * dtset%nspinor))
 
  call xmpi_sum(lambda, gstore%comm, ierr)
 
@@ -2065,6 +2071,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
    ABI_CHECK(allocated(gqk%my_g2), "my_g2 is not allocated")
    ABI_CHECK(allocated(gqk%my_wnuq), "my_wnuq is not allocated")
 
+   ! Weights for delta(e_{m k+q}) delta(e_{n k}) for my list of k-points.
    ABI_MALLOC(dbldelta_q, (gqk%nb, gqk%nb, gqk%my_nk))
    ABI_MALLOC(g2_mnkp, (gqk%nb, gqk%nb, gqk%my_nk, gqk%my_npert))
 
@@ -2686,7 +2693,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:), my_vkdone(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
  integer :: qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
- integer,allocatable :: done_qbz_spin(:,:), iq_buf(:,:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_displ_cart(:,:,:,:,:)
  integer :: ii, my_nqibz, iq_ibz, iq_start
  integer,allocatable :: my_iqibz_inds(:)
