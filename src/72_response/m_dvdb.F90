@@ -1703,11 +1703,13 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
    qcache%maxnq = max(min(qcache%maxnq, nqpt), 1)
  end if
 
+ ! TODO: Get rid of maxnq, keep use_3natom_cache only.
+
  ! Allocate cache with all the 3*natom perturbations.
  ! Disable it if no parallelism over perturbations.
  ! Disabled as slow FT R --> q seems to be faster.
- !qcache%use_3natom_cache = .False.
- qcache%use_3natom_cache = .True.
+ qcache%use_3natom_cache = .False.
+ !qcache%use_3natom_cache = .True.
  !if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
