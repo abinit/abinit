@@ -176,6 +176,8 @@ subroutine iso_solver_solve(iso, itemp, kt, niw, imag_w, lambda_ij)
 
 !----------------------------------------------------------------------
 
+ ABI_UNUSED(lambda_ij)
+
  nproc = xmpi_comm_size(iso%comm); my_rank = xmpi_comm_rank(iso%comm)
 
  ABI_REMALLOC(iso%delta_iw_mix, (niw, iso%max_nmix))

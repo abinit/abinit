@@ -520,7 +520,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  integer :: comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
  !integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
  integer,allocatable :: qbz2ibz(:,:), kbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
- integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:), done_qbz_spin(:,:)
+ integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:) !, done_qbz_spin(:,:)
  real(dp):: my_shiftq(3,1)
  real(dp),allocatable :: qbz(:,:), wtk(:) !, my_kpts(:,:) !wtq_(:),
  real(dp),allocatable :: kibz(:,:), kbz(:,:)
@@ -567,8 +567,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  !gstore%qshift(3, 1)
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
- call gstore%distribute_spins__(ebands%mband, dtset%gstore_brange, dtset%eph_np_pqbks, &
-                                nproc_spin, comm_spin, comm)
+ call gstore%distribute_spins__(ebands%mband, dtset%gstore_brange, nproc_spin, comm_spin, comm)
 
  ! Define q-mesh: either from DVDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation)
  ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
@@ -963,13 +962,13 @@ end subroutine priority_from_eph_task
 !!
 !! SOURCE
 
-subroutine gstore_distribute_spins(gstore, mband, gstore_brange, eph_np_pqbks, nproc_spin, comm_spin, comm)
+subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, comm_spin, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
  integer,intent(in) :: mband, comm
- integer,intent(in) :: gstore_brange(2, gstore%nsppol), eph_np_pqbks(5)
+ integer,intent(in) :: gstore_brange(2, gstore%nsppol)
  integer,intent(out) :: nproc_spin(gstore%nsppol), comm_spin(gstore%nsppol)
 
 !Local variables-------------------------------
@@ -983,7 +982,6 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, eph_np_pqbks, n
  nsppol = gstore%nsppol
 
  gstore%my_nspins = 0
-
  ABI_MALLOC(gstore%brange_spin, (2, nsppol))
 
  do spin=1,nsppol
@@ -1048,9 +1046,10 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr, ii
+ integer :: spin, my_is, np, my_rank, ierr !, ii
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
+ character(len=10) :: order
  integer,parameter :: ndims = 3
  integer :: comm_cart, me_cart
  logical :: reorder
@@ -1113,39 +1112,20 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
      select case (priority)
      case ("q")
-       gqk%qpt_comm%nproc = np
-       if (np > gqk%glob_nq) then
-         call xmpi_distrib_2d(np, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
-         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: q"))
-       end if
-
+       order = "1"
      case ("k")
-       gqk%kpt_comm%nproc = np
-       if (np > gqk%glob_nk) then
-         call xmpi_distrib_2d(np, gqk%glob_nk, gqk%glob_nq, gqk%kpt_comm%nproc, gqk%qpt_comm%nproc, ierr)
-         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: k"))
-       end if
-
+       order = "2"
      case ("kq")
-       call xmpi_distrib_2d(np, gqk%glob_nk, gqk%glob_nq, gqk%kpt_comm%nproc, gqk%qpt_comm%nproc, ierr)
-       !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
-       if (ierr /= 0) then
-         ABI_COMMENT(sjoin("Cannot find 2D or 3D distribution with nproc:", itoa(np), ". Using all procs for kpt_comm"))
-         gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = np; gqk%pert_comm%nproc = 1
-       end if
-
+       order = "21"
      case ("qk")
-       call xmpi_distrib_2d(np, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
-       !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
-       if (ierr /= 0) then
-         ABI_COMMENT(sjoin("Cannot find 2D or 3D distribution with nproc:", itoa(np), ". Using all procs for qpt_comm"))
-         gqk%qpt_comm%nproc = np; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1
-       end if
-
+       order = "12"
      case default
        ABI_ERROR(sjoin("Wrong priority:", priority))
      end select
 
+     call xmpi_distrib_2d(np, order, gqk%glob_nq, gqk%glob_nk, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, ierr)
+     ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
+     !if (ierr /= 0) call xmpi_distrib_2d_extra(np, gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, ierr)
    end if
 
    ! Consistency check.
@@ -1239,14 +1219,20 @@ subroutine gstore_print(gstore, unit, header, prtvol)
 
 !Local variables ------------------------------
 !scalars
- integer :: my_is, spin
+ integer :: my_is, spin, my_prtvol
  type(gqk_t),pointer :: gqk
 
 !----------------------------------------------------------------------
 
- call wrtout(unit, "=== Gstore parameters ===")
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+
+ if (present(header)) then
+   call wrtout(unit, header)
+ else
+   call wrtout(unit, "=== Gstore parameters ===")
+ end if
  !call wrtout(unit, sjoin(" gstore_cplex:", itoa(gstore_cplex)))
- call ebands_print(gstore%ebands, header="Electron bands", unit=unit)
+ call ebands_print(gstore%ebands, header="Electron bands", unit=unit, prtvol=my_prtvol)
  call wrtout(unit, sjoin(" kzone:", gstore%kzone))
  call wrtout(unit, sjoin(" kfilter:", gstore%kfilter))
  call wrtout(unit, sjoin(" nkibz, nkbz:", itoa(gstore%nkibz), itoa(gstore%nkbz)))
@@ -1267,7 +1253,7 @@ subroutine gstore_print(gstore, unit, header, prtvol)
  end do
 
 end subroutine gstore_print
-!!!***
+!!***
 
 !----------------------------------------------------------------------
 
@@ -3452,7 +3438,7 @@ end subroutine gstore_compute
 !! gstore_from_ncpath
 !!
 !! FUNCTION
-!!  Build a gstore object from a GSTORE.nc netcdf file.
+!!  Reconstruct a gstore object from a GSTORE.nc netcdf file.
 !!
 !! INPUTS
 !!
@@ -3486,9 +3472,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
 !arrays
- integer :: ibuffer(9)
- integer :: nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol)
- integer :: brange_spin(2, ebands%nsppol) ! glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
+ integer :: ibuffer(9), nproc_spin(ebands%nsppol), comm_spin(ebands%nsppol), brange_spin(2, ebands%nsppol)
  integer,allocatable :: qglob2bz(:,:), kglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
 
@@ -3651,7 +3635,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
- call gstore%distribute_spins__(ebands%mband, brange_spin, dtset%eph_np_pqbks, nproc_spin, comm_spin, comm)
+ call gstore%distribute_spins__(ebands%mband, brange_spin, nproc_spin, comm_spin, comm)
 
  ! Compute krank
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
@@ -3801,11 +3785,12 @@ end function gstore_from_ncpath
 !!
 !! SOURCE
 
-subroutine xmpi_distrib_2d(nprocs, size1, size2, n1, n2, ierr)
+subroutine xmpi_distrib_2d(nprocs, order, size1, size2, n1, n2, ierr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nprocs, size1, size2
+ character(len=*),intent(in) :: order
  integer,intent(out) :: n1, n2, ierr
 
 !Local variables-------------------------------
@@ -3816,6 +3801,25 @@ subroutine xmpi_distrib_2d(nprocs, size1, size2, n1, n2, ierr)
 
  ierr = 1; n1 = -1; n2 = -1
 
+ select case (order)
+ case ("12")
+   call balance_12()
+   if (ierr /= 0) call balance_1()
+ case ("21")
+   call balance_21()
+   if (ierr /= 0) call balance_2()
+ case ("1")
+   call balance_1()
+ case ("2")
+   call balance_2()
+ case default
+   ABI_ERROR(sjoin("Wrong order:", order))
+ end select
+
+contains
+
+subroutine balance_12()
+
  ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
  do ii=nprocs,1,-1
    if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size2, nprocs / ii) == 0) then
@@ -3823,14 +3827,42 @@ subroutine xmpi_distrib_2d(nprocs, size1, size2, n1, n2, ierr)
    end if
  end do
 
- if (ierr /= 0) then
-   ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
-   do ii=nprocs,1,-1
-     if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0) then
-       n1 = ii; n2 = nprocs / ii; ierr = 0; exit
-     end if
-   end do
+end subroutine balance_12
+
+subroutine balance_21()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size2, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size1, nprocs / ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+end subroutine balance_21
+
+subroutine balance_1
+ if (nprocs <= size1) then
+   n1 = nprocs; n2 = 1; ierr = 0; return
  end if
+
+ ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
+ do ii=nprocs,1,-1
+   if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+end subroutine balance_1
+
+subroutine balance_2
+ if (nprocs <= size2) then
+   n2 = nprocs; n1 = 1; ierr = 0; return
+ end if
+
+ ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2
+ do ii=nprocs,1,-1
+   if (mod(size2, ii) == 0 .and. mod(nprocs, ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+end subroutine balance_2
 
 end subroutine xmpi_distrib_2d
 !!***
