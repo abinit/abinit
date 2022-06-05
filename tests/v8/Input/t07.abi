@@ -25,8 +25,6 @@ ndtset 3 jdtset 1 2 3
   rfstrs3  3
   rfphon3  1
   rfelfd3  3
- rfatpol3  1 4
-   rfdir3  1 1 1
     nqpt3  1
      qpt3  0 0 0
   kptopt3  3

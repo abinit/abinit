@@ -432,6 +432,8 @@ type, public :: dataset_type
  integer :: ntypalch
  integer :: ntypat
  integer :: ntyppure
+ integer :: nucefg = 0
+ integer :: nucfc = 0
  integer :: nwfshist
  integer :: nzchempot
 !O
@@ -500,12 +502,10 @@ type, public :: dataset_type
  integer :: prtdos = 0
  integer :: prtdosm = 0
  integer :: prtebands
- integer :: prtefg = 0
  integer :: prtefmas = 1
  integer :: prteliash = 0
  integer :: prteig
  integer :: prtelf = 0
- integer :: prtfc = 0
  integer :: prtfull1wf = 0
  integer :: prtfsurf = 0
  integer :: prtgsr = 1
@@ -1775,6 +1775,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ntypalch           = dtin%ntypalch
  dtout%ntypat             = dtin%ntypat
  dtout%ntyppure           = dtin%ntyppure
+ dtout%nucefg             = dtin%nucefg
+ dtout%nucfc              = dtin%nucfc
  dtout%nwfshist           = dtin%nwfshist
  dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
@@ -1838,12 +1840,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prtdos             = dtin%prtdos
  dtout%prtdosm            = dtin%prtdosm
  dtout%prtebands          = dtin%prtebands    ! TODO prteig could be replaced by prtebands...
- dtout%prtefg             = dtin%prtefg
  dtout%prtefmas           = dtin%prtefmas
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prteliash          = dtin%prteliash
- dtout%prtfc              = dtin%prtfc
  dtout%prtfull1wf         = dtin%prtfull1wf
  dtout%prtfsurf           = dtin%prtfsurf
  dtout%prtgsr             = dtin%prtgsr
@@ -3410,7 +3410,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
- list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nwfshist nzchempot'
+ list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
@@ -3432,8 +3432,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
- list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf'
+ list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
