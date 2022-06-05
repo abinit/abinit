@@ -489,16 +489,16 @@ P          mk1mem10         1
               qpt8     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
-            rfdir10         0       0       0
+            rfdir9          1       1       1
+            rfdir10         1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0
@@ -1327,7 +1327,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 - -5.348640E+02  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1826,7 +1826,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 -  0.000000E+00  0.000000E+00  6.384195E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  9 ==================================================================
@@ -2463,16 +2463,16 @@ P          mk1mem10         1
               qpt8     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
-            rfdir10         0       0       0
+            rfdir9          1       1       1
+            rfdir10         1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          0

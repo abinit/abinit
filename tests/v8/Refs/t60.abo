@@ -323,18 +323,12 @@ P          mk1mem6          2
            prtpot4          0
            prtpot5          1
            prtpot6          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          0       0       0
+          rfatpol1          1       3
+          rfatpol2          1       3			
+          rfatpol3          1       2			
+          rfatpol4          1       3			
+          rfatpol5          1       3			
+          rfatpol6          1       3
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2544,18 +2538,12 @@ P          mk1mem6          2
            prtpot4          0
            prtpot5          1
            prtpot6          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          0       0       0
+          rfatpol1          1       3   
+          rfatpol2          1       3                
+          rfatpol3          1       2                
+          rfatpol4          1       3                
+          rfatpol5          1       3                
+          rfatpol6          1       3       
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3

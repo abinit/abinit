@@ -2026,7 +2026,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: limits of ATomic POLarisations",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -2044,7 +2044,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[3],
-    defaultval=[0, 0, 0],
+    defaultval=[1, 1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: DIRections",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -2097,7 +2097,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: limits of ATomic POLarisations",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -2168,7 +2168,7 @@ Variable(
     vartype="integer",
     topics=['nonlinear_basic'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 3: limits of ATomic POLarisations",
     requires="[[optdriver]] == 5 (non-linear response computations)",
     added_in_version="before_v9",
@@ -12688,6 +12688,50 @@ Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 ),
 
 Variable(
+    abivarname="nucefg",
+    varset="paw",
+    vartype="integer",
+    topics=['EFG_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUClear site Electric Field Gradient",
+    requires="[[usepaw]] == 1, [[quadmom]]",
+    added_in_version="before_v9",
+    text=r"""
+If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
+Using this option requires [[quadmom]] to be set as well.
+Values will be written to main output file (search for Electric Field Gradient).
+If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
+If nucefg=2, the full electric field gradient tensors in atomic units are also given,
+showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
+If nucefg=3, then in addition to the nucefg=2 output, the EFGs are computed using an ionic point charge model.
+This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
+Use of nucefg=3 requires that the variable [[ptcharge]] be set as well.
+The option nucefg is compatible with spin polarized calculations (see
+[[nspden]]) and also DFT+U (see [[usepawu]]).
+""",
+),
+
+Variable(
+    abivarname="nucfc",
+    varset="paw",
+    vartype="integer",
+    topics=['EFG_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUClear site Fermi Contact term",
+    requires="[[usepaw]] == 1",
+    added_in_version="before_v9",
+    text=r"""
+  * If set to 1, print the Fermi contact interaction at each nuclear site, that 
+  is, the electron density at each site. The result appears in the main output file 
+  (search for FC). Note that this calculation is different than what is done by cut3d, 
+  because it also computes the PAW on-site corrections in addition to the 
+  contribution from the valence pseudo-wavefunctions.
+""",
+),
+
+Variable(
     abivarname="nwfshist",
     varset="gstate",
     vartype="integer",
@@ -15461,31 +15505,6 @@ This option activates the output of the electron eigenvalues. Possible values:
 ),
 
 Variable(
-    abivarname="prtefg",
-    varset="paw",
-    vartype="integer",
-    topics=['printing_prngs', 'EFG_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PRint Electric Field Gradient",
-    requires="[[usepaw]] == 1, [[quadmom]]",
-    added_in_version="before_v9",
-    text=r"""
-If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
-Using this option requires [[quadmom]] to be set as well.
-Values will be written to main output file (search for Electric Field Gradient).
-If prtefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
-If prtefg=2, the full electric field gradient tensors in atomic units are also given,
-showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
-If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed using an ionic point charge model.
-This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
-Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
-The option prtefg is compatible with spin polarized calculations (see
-[[nspden]]) and also DFT+U (see [[usepawu]]).
-""",
-),
-
-Variable(
     abivarname="prtefmas",
     varset="dfpt",
     vartype="integer",
@@ -15547,21 +15566,6 @@ account the existence of spin dependent densities (see the documentation in
 
 Please note that ELF is **not** yet implemented in the case of PAW
 ([[usepaw]] = 1) calculations.
-""",
-),
-
-Variable(
-    abivarname="prtfc",
-    varset="paw",
-    vartype="integer",
-    topics=['printing_prden', 'EFG_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PRinT Fermi Contact term",
-    requires="[[usepaw]] == 1",
-    added_in_version="before_v9",
-    text=r"""
-  * If set to 1, print the Fermi contact interaction at each nuclear site, that is, the electron density at each site. The result appears in the main output file (search for FC). Note that this calculation is different than what is done by cut3d, because it also computes the PAW on-site corrections in addition to the contribution from the valence pseudo-wavefunctions.
 """,
 ),
 
@@ -16444,18 +16448,18 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="PoinT CHARGEs",
-    requires="[[usepaw]] == 1 and [[prtefg]]>=3",
+    requires="[[usepaw]] == 1 and [[nucefg]]>=3",
     added_in_version="before_v9",
     text=r"""
   Array of point charges, in atomic units, of the nuclei. In the normal
-  computation of electric field gradients (see [[prtefg]]) the ionic
+  computation of electric field gradients (see [[nucefg]]) the ionic
   contribution is calculated from the core charges of the atomic sites. Thus
   for example in a PAW data set for oxygen where the core is $1s^{2}$, the core
   charge is +6 (total nuclear charge minus core electron charge). In point
   charge models, which are much less accurate than PAW calculations, all atomic
   sites are treated as ions with charges determined by their valence states. In
   such a case oxygen almost always would have a point charge of -2. The present
-  variable taken together with [[prtefg]] performs a full PAW computation of
+  variable taken together with [[nucefg]] performs a full PAW computation of
   the electric field gradient and also a simple point charge computation. The
   user inputs whatever point charges he/she wishes for each atom type.
 """,
@@ -16752,10 +16756,15 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="QUADrupole MOMents",
-    requires="[[usepaw]] == 1 and [[prtefg]]>=1",
+    requires="[[usepaw]] == 1 and [[nucefg]]>=1",
     added_in_version="before_v9",
     text=r"""
-  * Array of quadrupole moments, in barns, of the nuclei. These values are used in conjunction with the electric field gradients computed with [[prtefg]] to calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that the electric field gradient at a nuclear site is independent of the nuclear quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0, and the option [[prtefg]] = 2 used to determine the electric field gradient at the site.
+  * Array of quadrupole moments, in barns, of the nuclei. These values are used 
+  in conjunction with the electric field gradients computed with [[nucefg]] to 
+  calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that 
+  the electric field gradient at a nuclear site is independent of the nuclear 
+  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0, 
+  and the option [[nucefg]] = 2 used to determine the electric field gradient at the site.
 """,
 ),
 
@@ -17253,7 +17262,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_basic', 'Elastic_compulsory', 'Phonons_compulsory'],
     dimensions=[2],
-    defaultval=[1, 1],
+    defaultval=[1, '[[natom]]' ],
     mnemonics="Response Function: ATomic POLarisation",
     added_in_version="before_v9",
     text=r"""
@@ -17266,12 +17275,17 @@ The atoms to be moved will be defined by the do-loop variable iatpol:
   - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
 
 For the calculation of a full dynamical matrix, use [[rfatpol]](1)=1 and
-[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1. For selected
+[[rfatpol]](2)=[[natom]], together with [[rfdir]] 1 1 1, both being the default values. 
+For selected
 elements of the dynamical matrix, use different values of [[rfatpol]] and/or
 [[rfdir]]. The name 'iatpol' is used for the part of the internal variable
 ipert when it runs from 1 to [[natom]]. The internal variable ipert can also
 assume values larger than [[natom]], denoting perturbations of electric field
 or stress type (see [the DFPT help file](/guide/respfn)).
+
+As a side technical information, the value [[rfatpol]](1)=-1 is admitted, and transformed
+immediately to [[rfatpol]](1)=1, while [[rfatpol]](2)=-1 is transformed to  [[rfatpol]](2)=[[natom]],
+while the default input values are actually [[rfatpol]]=-1 .
 """,
 ),
 
@@ -17302,7 +17316,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_compulsory', 'Elastic_compulsory', 'Phonons_compulsory'],
     dimensions=[3],
-    defaultval=[0, 0, 0],
+    defaultval=[1, 1, 1],
     mnemonics="Response Function: DIRections",
     added_in_version="before_v9",
     text=r"""
@@ -17314,8 +17328,9 @@ space (phonon calculations), or in reciprocal space ($\,d/ \,d k$, homogeneous
 electric field, homogeneous magnetic field calculations). So, they generate a
 basis for the generation of the dynamical matrix or the macroscopic dielectric
 tensor or magnetic susceptibility and magnetic shielding, or the effective charge tensors.
-If equal to 1, response functions, as defined by [[rfddk]], [[rfelfd]],
-[[rfphon]], [[rfdir]] and [[rfatpol]], are to be computed for the
+If equal to 1, response functions, as defined by [[rfdir]], [[rfddk]], [[rfelfd]],
+[[rfphon]], [[rfstrs]], [[rfmagn]], [[rfatpol]], and possibly other response-function activating 
+input variables, but also [[berryopt]] are to be computed for the
 corresponding direction. If 0, this direction should not be considered.
 """,
 ),

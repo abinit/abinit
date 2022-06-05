@@ -3234,7 +3234,7 @@ end subroutine eigen_meandege
 !!  should minimize the second order XC energy (without taking self-consistency into account).
 !!
 !! INPUTS
-!!  ipert = perturbtation type (works only for ipert==natom+5)
+!!  ipert = perturbation type (works only for ipert==natom+5)
 !!  idir  = direction of the applied magnetic field
 !!  cplex = complex or real first order density and magnetization
 !!  nfft  = dimension of the fft grid

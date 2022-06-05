@@ -19,7 +19,6 @@
 #RF data
    xcart4  -2.122 0 0 2.122 0 0
   getwfk4  1
- rfatpol4  1 2
    rfdir4  1 0 0
   rfphon4  1
     nqpt4  1
