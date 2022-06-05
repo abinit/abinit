@@ -3838,11 +3838,13 @@ subroutine balance_21()
  end do
 end subroutine balance_21
 
-subroutine balance_1
+subroutine balance_1()
+ integer :: imod1
 
  ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
  do ii=nprocs,1,-1
-   if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0) then
+   imod1 = mod(size1, ii)
+   if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
      n1 = ii; n2 = nprocs / ii; ierr = 0; exit
    end if
  end do
@@ -3852,11 +3854,13 @@ subroutine balance_1
  end if
 end subroutine balance_1
 
-subroutine balance_2
+subroutine balance_2()
+ integer :: imod2
 
  ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2
  do ii=nprocs,1,-1
-   if (mod(size2, ii) == 0 .and. mod(nprocs, ii) == 0) then
+   imod2 = mod(size2, ii)
+   if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
      n2 = ii; n1 = nprocs / ii; ierr = 0; exit
    end if
  end do
