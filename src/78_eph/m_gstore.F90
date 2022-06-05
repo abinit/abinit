@@ -161,8 +161,7 @@ module m_gstore
 !! FUNCTION
 !!  This object stores MPI-distributed e-ph matrix elements for
 !!  a given spin index (if collinear magnetism i.e. nsppol 2).
-!!
-!!  local dimensions start with `my_`,
+!!  local dimensions and arrays start with `my_`,
 !!  global dimensions start with `glob_
 !!
 !! SOURCE
@@ -235,6 +234,7 @@ type, public :: gqk_t
   real(dp),allocatable :: vk_cart_ibz(:,:,:)
   ! (3, nb, nkibz)
   ! Diagonal v_{m, m,k} for k in the IBZ.
+  ! Values in the BZ can be reconstructed by symmetry.
   ! Allocated if gstore%with_vk == 1
 
   real(dp),allocatable :: vkmat_cart_ibz(:,:,:,:,:)
@@ -256,7 +256,7 @@ type, public :: gqk_t
   ! |g|^2 (local buffer). Allocated if cplex == 1
 
   integer :: coords_qkp(3)
-  ! coordinates of this processor in the (q, k, pert) Cartesian grid.
+  ! Coordinates of this processor in the (q, k, pert) Cartesian grid.
 
   type(xcomm_t) :: kpt_comm
    ! MPI communicator over k-points
@@ -315,6 +315,15 @@ type, public :: gqk_t
 !! gstore_t
 !!
 !! FUNCTION
+!! This object stores:
+!!
+!!    - pointers to the cyrstalline structure, the KS bands, the IFCs.
+!!    - arrays that do not depend on the spin such as the IBZ and weights for k/q-points.
+!!    - metadata such as kzone, qzone and kfilter that are needed to interpret
+!!      the storage mode used for the g(k, q)
+!!
+!! NB: the e-ph matrix element are stored in gstore%qqk(my_is)
+!!     where my_is counts the number of spins treated by this MPI processor.
 !!
 !! NOTES
 !!
@@ -336,38 +345,34 @@ type, public :: gstore_t
 
   integer :: comm
    ! Global communicator
-   ! Inherited by the caller so we don't free it in gstore_free.
+   ! Inherited by the caller thus we don't free it in gstore_free.
 
   integer :: with_vk = 0
   ! 0 if group velocities should not be computed
   ! 1 to compute diagonal terms only
-  ! 2 to compute diagonal + off-diagonal terms
+  ! 2 to compute diagonal and off-diagonal terms
 
   character(len=fnlen) :: path = " "
   ! Path to the nc file associated to the gstore
 
   character(len=fnlen) :: wfk0_path = " "
 
-  ! NB: We compute v_k for all the k-points treated by this MPI proc.
-  ! as v_kq can be reconstructed by symmetry although this step requires an all_gather along the k-axis.
-
   character(len=fnlen) :: kzone = " ", qzone = " "
-    ! Specifies whether k- or q-points are in the BZ or in the IBZ.
-    ! Possible values are "ibz" or "bz".
-    ! Note that combination ("ibz", "ibz") is not allowed
+   ! Specifies whether k- or q-points are in the BZ or in the IBZ.
+   ! Possible values are "ibz" or "bz".
+   ! Note that the combination ("ibz", "ibz") is not allowed
 
   character(len=fnlen) :: kfilter = "none"
   ! Specifies the tecnique used to filter k-points.
-  ! Possible values:
-  !     "none", "fs_tetra", "erange"
+  ! Possible values: "none", "fs_tetra", "erange".
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
   ! Energy window. zero if not used. Requires kfilter == "erange"
 
-  type(crystal_t), pointer :: cryst  => null()
+  type(crystal_t), pointer :: cryst => null()
 
-  type(ebands_t), pointer :: ebands  => null()
+  type(ebands_t), pointer :: ebands => null()
 
   type(ifc_type), pointer :: ifc => null()
 
@@ -406,9 +411,6 @@ type, public :: gstore_t
 
   !real(dp),allocatable :: kshift(:, :), qshift(:, :)
   ! k/q-mesh shift (well, q-mesh is usually gamma-centered)
-
-  !type(xcomm_t) :: spin_comm
-    ! MPI communicator over spins (nsppol = 2)
 
   type(gqk_t), allocatable :: gqk(:)
   ! (my_nspins)
@@ -1049,13 +1051,11 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
  integer :: spin, my_is, np, my_rank, ierr, ii
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
-#ifdef HAVE_MPI
  integer,parameter :: ndims = 3
  integer :: comm_cart, me_cart
  logical :: reorder
  integer :: dims(ndims)
  logical :: periods(ndims), keepdim(ndims)
-#endif
 !----------------------------------------------------------------------
 
  my_rank = xmpi_comm_rank(gstore%comm)
@@ -3345,7 +3345,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    end do ! my_iq
 
-   ! Dump remainder.
+   ! Dump the remainder.
    if (iqbuf_cnt /= 0) call dump_data()
 
    ABI_FREE(iq_buf)
@@ -3419,7 +3419,7 @@ subroutine dump_data()
                      )
  NCF_CHECK(ncerr)
 
- ! Only one proc sets the done_qbz_spin flags to 1 for all the q-points in the buffer.
+ ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  if (all(gqk%coords_qkp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
