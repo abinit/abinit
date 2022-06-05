@@ -29,6 +29,7 @@
 !!
 !!   - filter bands and/or k/q wavevectors according to some criterion.
 !!     In superconductors, for instance, only k/k+q states on the Fermi surface are needed.
+!!     In semiconductors, one can include only k, k+q inside an energy window around the band edge.
 !!
 !!  - whether the code should compute and store the complex valued g or |g|^2.
 !!    Expression depending of |g|^2 are gauge-invariant provided that all degenerate states are summed over.
@@ -38,14 +39,18 @@
 !!    Client code reading the e-ph matrix elements produced by ABINIT is expected to follow the
 !!    same conventions, especially if one needs to mix g matrix elements with wavefunctions in the BZ.
 !!
-!!  At the level of the API, we have three different steps.
+!!  At the level of the API, we have three different routines.
 !!
-!!      1) call gstore_new to define the BZ sampling type (e.g. k in the IBZ, q in the BZ)
-!!         and additional filtering techniques. The MPI grid is automatically generated at this level
+!!      1) gstore_new builds the object, defines the BZ sampling type (e.g. k in the IBZ, q in the BZ)
+!!         and implements filtering techniques. The MPI grid is automatically generated at this level
 !!
-!!      2) call gstore_compute to compute the e-ph matrix elements in parallel and dump the results to GSTORE.nc
+!!      2) gstore_compute evaluates the e-ph matrix elements in parallel and dumps the results to GSTORE.nc
 !!
-!!      3) use the gstore object to implement your equations or write the results to nc file.
+!!      3) gstore_from_ncpath reconstructs the object from GSTORE.nc
+!!
+!! In a typical scenarion, one uses eph_task 11 to generate GSTORE.nc i.e. steps 1) and 2).
+!! Then one introduces a new value of eph_task in which we read the object from file and call
+!! a specialized routine that implements the "post-processing" steps needed to compute the physical properties of interest.
 !!
 !!  Now, let's discuss the MPI-distribution.
 !!
@@ -227,22 +232,15 @@ type, public :: gqk_t
   ! (my_nkpt)
   ! k-point weights
 
-  real(dp),allocatable :: my_vk_cart(:,:,:)
-  ! (3, nb, my_nk)
-  ! Diagonal v_{m, m,k} for the k-points treated by this MPI proc.
+  real(dp),allocatable :: vk_cart_ibz(:,:,:)
+  ! (3, nb, nkibz)
+  ! Diagonal v_{m, m,k} for k in the IBZ.
   ! Allocated if gstore%with_vk == 1
 
-  complex(dp),allocatable :: my_vkmat_cart(:,:,:,:)
-  ! (3, nb, nb, my_nk)
-  ! v_{m, n,k} for the k-points treated by this MPI proc.
-  ! Allocated if gstore%with_vk == 2
-
-  !complex(dp),allocatable :: my_vcart_qk(:,:,:,:)
-  ! group velocities v_{nm,q+k} for the k/q-points treated by this MPI proc.
-  ! (3, nb, nb, my_nq, my_nk)
-
-  ! or alternatively:
-  !complex(dp),allocatable :: my_vcart_kibz(:,:,:,:)
+  real(dp),allocatable :: vkmat_cart_ibz(:,:,:,:,:)
+  ! (3, nb, nb, nkibz)
+  ! v_{m, n,k} for the k in the IBZ
+  ! Allocated if gstore%with_vk in (1, 2)
 
   integer,allocatable :: my_iperts(:)
   ! (my_npert)
@@ -616,6 +614,8 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
  ! In principle kibz should be equal to ebands%kptns
  ABI_CHECK(gstore%nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
+ ABI_CHECK(all(abs(gstore%kibz - kibz) < tol12), "ebands%kibz != kibz")
+ ABI_FREE(kibz)
 
  ! Note symrel and use_symrec=.False. in get_mapping.
  ! This means that this table can be used to symmetrize wavefunctions in cgtk_rotate.
@@ -679,13 +679,13 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
    continue
 
  case ("erange")
-   call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+   call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
                                select_qbz_spin, select_kbz_spin)
 
  case ("fs_tetra")
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
    ! and define gstore%brange_spin automatically.
-   call gstore%filter_fs_tetra__(qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+   call gstore%filter_fs_tetra__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
                                  select_qbz_spin, select_kbz_spin)
  case default
    ABI_ERROR(sjoin("Invalid kfilter:", gstore%kfilter))
@@ -827,7 +827,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qglob2bz"), qglob2bz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kglob2bz"), kglob2bz))
    ! NB: kibz has been already written by ebands%ncwrite
-   !NCF_CHECK(nf90_put_var(ncid, vid("kibz"), gstore%kibz))
 
    if (allocated(gstore%delta_ef_kibz_spin)) then
      NCF_CHECK(nf90_put_var(ncid, vid("gstore_delta_ef_kibz_spin"), gstore%delta_ef_kibz_spin))
@@ -880,8 +879,7 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
  call xmpi_barrier(gstore%comm)
 
- ! TODO: Use ebands%kptns
- ABI_FREE(kibz)
+
  ABI_FREE(wtk)
  ABI_FREE(kbz)
  ABI_FREE(qbz)
@@ -1366,18 +1364,19 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      end select
 
      ! Allocate storage for MPI-distributed dH/dk matrix elements.
-     select case (gstore%with_vk)
-     case (1)
+     if (any(gstore%with_vk == [1, 2])) then
        mem_mb = 3 * gqk%nb * gqk%my_nk * eight * b2Mb
-       call wrtout(std_out, sjoin(" Local memory for diagonal vk:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
-       ABI_MALLOC_OR_DIE(gqk%my_vk_cart, (3, gqk%nb, gqk%my_nk), ierr)
-       gqk%my_vk_cart = zero
-     case (2)
-       mem_mb = 3 * gqk%nb ** 2 * gqk%my_nk * eight * b2Mb
-       call wrtout(std_out, sjoin(" Local memory for vkmat:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
-       ABI_MALLOC_OR_DIE(gqk%my_vkmat_cart, (3, gqk%nb, gqk%nb, gqk%my_nk), ierr)
-       gqk%my_vkmat_cart = zero
-     end select
+       call wrtout(std_out, sjoin(" Memory for diagonal vk_cart_ibz:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
+       ABI_MALLOC_OR_DIE(gqk%vk_cart_ibz, (3, gqk%nb, gstore%nkibz), ierr)
+       gqk%vk_cart_ibz = zero
+     end if
+
+     if (gstore%with_vk == 2) then
+       mem_mb = two * 3 * gqk%nb ** 2 * gqk%my_nk * eight * b2Mb
+       call wrtout(std_out, sjoin(" Memory for vkmat_cart_ibz:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
+       ABI_MALLOC_OR_DIE(gqk%vkmat_cart_ibz, (2, 3, gqk%nb, gqk%nb, gstore%nkibz), ierr)
+       gqk%vkmat_cart_ibz = zero
+     end if
    end if
 
  end do ! my_is
@@ -2533,6 +2532,10 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
      ikq_ibz = my_kqmap(1, my_ik)
 
+     !if (use_adaptive) then
+     !  v_bk = gqk%vk_cart_ibz(:, :, ik_ibz) ! Need to rotate
+     !end if
+
      do ib2=1,nb
        band2 = ib2 + gqk%bstart - 1
        g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
@@ -2694,8 +2697,8 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_g)
  ABI_SFREE(gqk%my_g2)
  ABI_SFREE(gqk%my_iperts)
- ABI_SFREE(gqk%my_vk_cart)
- ABI_SFREE(gqk%my_vkmat_cart)
+ ABI_SFREE(gqk%vk_cart_ibz)
+ ABI_SFREE(gqk%vkmat_cart_ibz)
 
  ! Free communicators
  call gqk%kpt_comm%free()
@@ -3020,7 +3023,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ")
-   call wrtout(std_out, " Note that not all the k-points in the IBZ are computed if kfilter is activated!")
+   call wrtout(std_out, " Note that not all the k-points in the IBZ are computed when kfilter is activated!")
    call cwtime(cpu, wall, gflops, "start")
 
    ! On disk, we have:
@@ -3373,7 +3376,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  ABI_FREE(done_qbz_spin)
- !ABI_SFREE(vcar_ibz)
 
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
@@ -3476,7 +3478,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb
+ integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, my_ip, ipert
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
@@ -3702,7 +3704,7 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
      !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstart"), gqk%bstart))
      !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("bstop"), gqk%bstop))
 
-     ! gstore_cplex defines the data on disk
+     ! gstore_cplex defines the data on disk while
      ! cplex defines what we want to store in memory
      ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
      ABI_MALLOC(slice_bb, (gstore_cplex, gqk%nb, gqk%nb))
@@ -3741,13 +3743,24 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
      ABI_FREE(gwork_q)
      ABI_FREE(slice_bb)
 
-     ! TODO
+     ! Read matrix elements of the velocity operator.
      if (gstore%with_vk == 1) then
-       !NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vk_cart_ibz")))
-       !NCF_CHECK(nf90_get_var(spin_ncid, vid("vk_cart_ibz"), ??))
+       if (gqk%grid_comm%nproc > 1) then
+         NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vk_cart_ibz")))
+       end if
+       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), gqk%vk_cart_ibz))
+
      else if (gstore%with_vk == 2) then
-       !NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vkmat_cart_ibz")))
-       !NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vkmat_cart_ibz"), ??))
+
+       if (gqk%grid_comm%nproc > 1) then
+         NCF_CHECK(nctk_set_collective(spin_ncid, spin_vid("vkmat_cart_ibz")))
+       end if
+       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vkmat_cart_ibz"), gqk%vkmat_cart_ibz))
+
+       ! Tranfer diagonal terms to vk_cart_ibz.
+       do ib=1,gqk%nb
+         gqk%vk_cart_ibz(:, ib, :) = gqk%vkmat_cart_ibz(1, :, ib, ib, :)
+       end do
      end if
 
      NCF_CHECK(nf90_close(ncid))

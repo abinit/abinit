@@ -414,7 +414,7 @@ meta: {optdriver: 7, eph_task: -12, }
  Initializing gstore object from: teph4isotc_6o_GSTORE.nc 
 
 === Gstore parameters ===
- ==== Electron Bands ====
+ ==== Electron bands ====
   Number of spinorial components ...... 1
   Number of spin polarizations ........ 1
   Number of k-points in the IBZ ....... 370
@@ -433,13 +433,19 @@ meta: {optdriver: 7, eph_task: -12, }
   Tphysel value .......................       0.000000
 
  kzone: ibz
- qzone: bz
  kfilter: fs_tetra
- with_vk: 1
- nqibz, nqbz: 28 216
- glob_nq_spin: [46]
  nkibz, nkbz: 370 5832
- glob_nk_spin: [77]
+ glob_nk_spin: [173]
+ qzone: bz
+ nqibz, nqbz: 28 216
+ glob_nq_spin: [216]
+ with_vk: 1
+
+  === MPI distribution ===
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 9
+P Number of CPUs for parallelism over q-points: 1
+P Number of CPUs for parallelism over k-points: 1
 
 == END DATASET(S) ==============================================================
 ================================================================================

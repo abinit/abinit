@@ -755,9 +755,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
      ! DEBUG
      !if (nprocs == 1) then
-     !  call wrtout(std_out, " DEBUG: Trying to reread GSTORE file")
-     !  other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
-     !  call other_gstore%free()
+     !call wrtout(std_out, " DEBUG: Trying to reread GSTORE file")
+     !other_gstore = gstore_from_ncpath(gstore%path, 1, dtset, cryst, ebands, ifc, comm)
+     !call other_gstore%free()
      !end if
    end if
 
