@@ -1115,7 +1115,7 @@ to represent the importance of the eigen mode, is a defined as a function of the
 
   * 0 -->  The unity function, equals to 1 for any energy.
 
-  * 1 --> The Erfc function, $f(\lambda)=\frac{1}{2} erfc(\frac{\lambda-\mu}{\sigma}) $. 
+  * 1 --> The Erfc function, $f(\lambda)=\frac{1}{2} erfc(\frac{\lambda-\mu}{\sigma}) $.
 
   * 2 --> The Gaussian function $f(\lambda) = exp(\frac{-(\lambda-\mu)^2}{\sigma^2})$.
 
@@ -1198,8 +1198,8 @@ The number of Lattice Wannier functions to be constructed.
         mnemonics="Lattice Wannier Function: the PROJECTORs",
         added_in_version="9.8.0",
         text=r"""
-The indices of atomic displacements used as projectors in the construction of Lattice Wannier function with the projected Wannier function method. 
-For each atom, there are three displacements along x, y, and z in the cartesian coordinate. The list of the displacements are thus (atom 1, x), (atoms 1, y), (atom 1, z), (atom 2, x), etc. The lwf_projector option specifies the indices of the se displacement to be used as projectors. The number of the projectors should equal the number of wannier functions. 
+The indices of atomic displacements used as projectors in the construction of Lattice Wannier function with the projected Wannier function method.
+For each atom, there are three displacements along x, y, and z in the cartesian coordinate. The list of the displacements are thus (atom 1, x), (atoms 1, y), (atom 1, z), (atom 2, x), etc. The lwf_projector option specifies the indices of the se displacement to be used as projectors. The number of the projectors should equal the number of wannier functions.
 """,
     ),
 
@@ -1382,7 +1382,7 @@ Should correspond to the grid of points available in the DDB or to a sub-grid.
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
 one described by [[anaddb:ng2qpt]]. The intermediate grids are defined for
-igrid=1... [[anaddb:ngrids]], by the numbers 
+igrid=1... [[anaddb:ngrids]], by the numbers
 ngqpt_igrid(ii)=(igrid ng2qpt(ii))/[[anaddb:ngrids]]s
 """,
     ),

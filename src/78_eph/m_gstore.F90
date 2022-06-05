@@ -7,7 +7,7 @@
 !!  This module implements the gstore_t object that allows one to **precompute"" the e-ph matrix elements g
 !!  and store them in memory with a MPI-distributed data structure.
 !!
-!!  This approach is the most CPU-efficient when one has to deal with
+!!  This approach is the most CPU-efficient one when one has to deal with
 !!  algorithms in which the same g(q, k) is required several (many) times.
 !!  Typical examples are iterative solvers for non-linear equations that are called inside a loop over T.
 !!  At each iteration, indeed, we need g(q, k) and computing these quantities from scratch
@@ -37,7 +37,7 @@
 !!    In Abinit, the g elements are computed within the same gauge by reconstructing Bloch states
 !!    in the BZ from the IBZ by using a deterministic symmetrization algorithm
 !!    Client code reading the e-ph matrix elements produced by ABINIT is expected to follow the
-!!    same conventions, especially if one needs to mix g matrix elements with wavefunctions in the BZ.
+!!    same conventions, especially if one needs to mix g with wavefunctions in the BZ.
 !!
 !!  At the level of the API, we have three different routines.
 !!
@@ -48,9 +48,9 @@
 !!
 !!      3) gstore_from_ncpath reconstructs the object from GSTORE.nc
 !!
-!! In a typical scenarion, one uses eph_task 11 to generate GSTORE.nc i.e. steps 1) and 2).
-!! Then one introduces a new value of eph_task in which we read the object from file and call
-!! a specialized routine that implements the "post-processing" steps needed to compute the physical properties of interest.
+!!  In a typical scenario, one uses eph_task 11 to generate GSTORE.nc i.e. steps 1) and 2).
+!!  Then one introduces a new value of eph_task in which we read the object from file and call
+!!  a specialized routine that implements the "post-processing" steps needed to compute the physical properties of interest.
 !!
 !!  Now, let's discuss the MPI-distribution.
 !!
@@ -75,9 +75,15 @@
 !!  although it allows one to reduce the memory required to store the scattering potential in the supercell
 !!  as we can distribute W(r, R, 3 * natom) over the last dimension.
 !!
+!!  For electronic properties, one usually uses k-points in the IBZ and q-points in the BZ.
+!!  hence the parallelism over q-points is the most efficient one in terms of wall-time.
+!!  Keep in mind, however, that the k-point parallelism allows one to reduce the memory allocated for the
+!!  wavefunctions. Using some procs for k-point is also beneficial in terms of performance
+!!  as we reduce load imbalance with the number of procs in qpt_comm does not divide nqbz.
+!!
 !!  NB: If nsppol == 2, we create two gqk objects, one for each spin.
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
-!!  depends on the spin if filters are employed.
+!!  depends on spin if filters are employed.
 !!
 !!
 !! COPYRIGHT
@@ -245,7 +251,7 @@ type, public :: gqk_t
   integer,allocatable :: my_iperts(:)
   ! (my_npert)
   ! List of perturbation indices treated by this MPI proc.
-  ! Contigous indices.
+  ! Contiguous indices.
 
   real(dp), allocatable :: my_g(:,:,:,:,:,:)
   ! (2, my_npert, nb, my_nq, nb, my_nk)

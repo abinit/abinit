@@ -335,6 +335,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
    do iw=1, phmesh_size
      write(777, *) phmesh(iw) * Ha_meV, a2fw(iw) / (edos%gef(0) / two)
    end do
+   !close(777)
  end if
 
  ABI_FREE(a2fw)
