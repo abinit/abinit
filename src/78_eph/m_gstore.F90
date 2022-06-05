@@ -57,13 +57,13 @@
 !!  The (q, k) matrix is distributed inside a 2D cartesian grid using block distribution.
 !!  This is schematic representation for 4 procs with 2 procs for k and 2 procs for q:
 !!
-!!                      k-axis
+!!                 k-axis (kpt_comm)
 !!              |--------------------
 !!              |         |         |
 !!              |   P00   |   P01   |
 !!              |         |         |
-!!      q-axis  |--------------------
-!!              |         |         |
+!!    q-axis    |--------------------
+!!  (qpt_comm)  |         |         |
 !!              |   P10   |   P11   |
 !!              |         |         |
 !!              |--------------------
@@ -880,7 +880,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
 
  call xmpi_barrier(gstore%comm)
 
-
  ABI_FREE(wtk)
  ABI_FREE(kbz)
  ABI_FREE(qbz)
@@ -1686,11 +1685,14 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
  integer :: all_nproc, my_rank, ierr
  integer :: ii, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev
 !arrays
+ integer,allocatable :: map_kq(:,:)
  real(dp):: qpt(3)
  real(dp),contiguous, pointer :: kpts_ptr(:,:)
- integer,allocatable :: map_kq(:,:)
 
 ! *************************************************************************
+
+ ABI_UNUSED(kbz2ibz)
+ ABI_UNUSED(qbz2ibz)
 
  all_nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
  ebands_timrev = kpts_timrev_from_kptopt(gstore%ebands%kptopt)
@@ -2966,6 +2968,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
  end if
 
+ if (my_rank == master) call gstore%print(std_out)
+
  ndone = count(done_qbz_spin == 1)
 
  ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
@@ -3343,8 +3347,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(gkq_nu)
  end do ! my_is
 
- call cwtime_report(" gstore_compute", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10, comm=gstore%comm)
+ !call wrtout(std_out, " My computation completed. Waiting for other procs working on other q-points ", do_flush=.True.)
+ call cwtime_report(" My gstore computation", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
 
+ !call xmpi_barrier(gstore%comm)
  NCF_CHECK(nf90_close(root_ncid))
 
  ! Free memory

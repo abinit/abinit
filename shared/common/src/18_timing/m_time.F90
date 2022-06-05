@@ -518,32 +518,32 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
 
  if (present(msg)) call wrtout(std_out, msg)
 
- SELECT CASE (start_or_stop)
- CASE ("start")
- if (use_papi) then
-   call xpapi_flops(real_time,proc_time,flops,mflops,check)
-   cpu = proc_time; wall = real_time; gflops = mflops / 1000
- else
-   cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
- end if
+ select case (start_or_stop)
+ case ("start")
+   if (use_papi) then
+     call xpapi_flops(real_time,proc_time,flops,mflops,check)
+     cpu = proc_time; wall = real_time; gflops = mflops / 1000
+   else
+     cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
+   end if
 
- CASE ("stop")
- if (use_papi) then
-   call xpapi_flops(real_time,proc_time,flops,mflops,check)
-   cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
- else
-   cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
- end if
- if (present(comm)) then
-   vals = [cpu, wall, gflops]
-   call xmpi_sum(vals, comm, ierr)
-   vals = vals / xmpi_comm_size(comm)
-   cpu = vals(1); wall = vals(2); gflops = vals(3)
- end if
+ case ("stop")
+   if (use_papi) then
+     call xpapi_flops(real_time,proc_time,flops,mflops,check)
+     cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
+   else
+     cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
+   end if
+   if (present(comm)) then
+     vals = [cpu, wall, gflops]
+     call xmpi_sum(vals, comm, ierr)
+     vals = vals / xmpi_comm_size(comm)
+     cpu = vals(1); wall = vals(2); gflops = vals(3)
+   end if
 
- CASE DEFAULT
-   ABI_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
- END SELECT
+ case default
+   ABI_ERROR("Wrong option for start_or_stop: "//trim(start_or_stop))
+ end select
 
 end subroutine cwtime
 !!***

@@ -230,7 +230,7 @@ type, public :: dataset_type
  integer :: gpu_linalg_limit
 
  integer :: gstore_cplex = 2
- integer :: gstore_with_vk = 0
+ integer :: gstore_with_vk = 1
  character(len=fnlen) :: gstore_kzone = "ibz"
  character(len=fnlen) :: gstore_qzone = "bz"
  character(len=fnlen) :: gstore_kfilter = "none"
