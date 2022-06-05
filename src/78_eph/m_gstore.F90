@@ -3839,9 +3839,6 @@ subroutine balance_21()
 end subroutine balance_21
 
 subroutine balance_1
- if (nprocs <= size1) then
-   n1 = nprocs; n2 = 1; ierr = 0; return
- end if
 
  ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1
  do ii=nprocs,1,-1
@@ -3849,12 +3846,13 @@ subroutine balance_1
      n1 = ii; n2 = nprocs / ii; ierr = 0; exit
    end if
  end do
+
+ if (ierr /= 0 .and. nprocs <= size1) then
+   n1 = nprocs; n2 = 1; ierr = 0; return
+ end if
 end subroutine balance_1
 
 subroutine balance_2
- if (nprocs <= size2) then
-   n2 = nprocs; n1 = 1; ierr = 0; return
- end if
 
  ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2
  do ii=nprocs,1,-1
@@ -3862,6 +3860,10 @@ subroutine balance_2
      n2 = ii; n1 = nprocs / ii; ierr = 0; exit
    end if
  end do
+
+ if (ierr /= 0 .and. nprocs <= size2) then
+   n2 = nprocs; n1 = 1; ierr = 0; return
+ end if
 end subroutine balance_2
 
 end subroutine xmpi_distrib_2d
