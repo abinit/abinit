@@ -95,9 +95,9 @@ It has two data sets: first a SCF calculation and then a NSCF calculation which
 will call the Wannier90 library. The only new input variable is [[prtwant]]
 which has to be set to 2 in order to use the Wannier90 utility.
 
-Now lets look at the second input file *wannier90.win*.
+Now lets look at the second input file *tw90_1o_DS2_w90.win*.
 
-{% dialog tests/tutoplugs/Input/wannier90.win %}
+{% dialog tests/tutoplugs/Input/tw90_1o_DS2_w90.win %}
 
 This is a mandatory input file required by the Wannier90 library.
 There are many variables that can be defined inside this file.
@@ -114,25 +114,25 @@ reached. We can see that the Wannier90 library is called. You will find the foll
 
       Calculation of overlap and call to Wannier90 library
       to obtain Maximally Localized Wannier functions
-      - wannier90.win is a mandatory secondary input
-      - wannier90.wout is the output for the library
-      - wannier90.amn contains projections
-      - wannier90random.amn contains random projections
-      - wannier90.mmn contains the overlap
-      - wannier90.eig contains the eigenvalues
+      - tw90_1o_DS2_w90.win is a mandatory secondary input
+      - tw90_1o_DS2_w90.wout is the output for the library
+      - tw90_1o_DS2_w90.amn contains projections
+      - tw90_1o_DS2_w90random.amn contains random projections
+      - tw90_1o_DS2_w90.mmn contains the overlap
+      - tw90_1o_DS2_w90.eig contains the eigenvalues
 
 This is an explanation of the input and output files for the Wannier90
 library. As you can see many new files were created. The input files for
 Wannier90 which were created by ABINIT are:
 
-**wannier90random.amn**
+**tw90_1o_DS2_w90random.amn**
 :   Contains a list of projections to be used as a starting guess of the WF.
     This is the $A_{mn}$ matrix which was mentioned before in this tutorial.
 
-**wannier90.eig**
+**tw90_1o_DS2_w90.eig**
 :   Contains a list of eigenvalues for each k-point and band.
 
-**wannier90.mmn**
+**tw90_1o_DS2_w90.mmn**
 :   Contains the overlaps between the cell periodic part of the Bloch states.
     This is the M_mn matrix mentioned before in this tutorial.
 
@@ -141,11 +141,11 @@ Wannier90 which were created by ABINIT are:
     Once these files were computed by ABINIT the Wannier90 library was used.
     The output files of Wannier90 are:
 
-**wannier90.wout**
+**tw90_1o_DS2_w90.wout**
 :   This is the main output file of the library.
     You should read it carefully to see the details of the calculation.
 
-**wannier90.chk**
+**tw90_1o_DS2_w90.chk**
 :   This file is required to restart a calculation is case you use Wannier90 in standalone mode.
     In our case it is not used.
 
@@ -167,7 +167,7 @@ You can verify that the final spread you get is around 4.0 Å$^2$.
 Similarly to obtain information about the disentanglement procedure (not used in this example)
 just type:
 
-    grep DIS wannier90.wout
+    grep DIS tw90_1o_DS2_w90.wout
 
 You will obtain a table of the following form:
 
@@ -438,7 +438,7 @@ for the Cu 3d x^2 -y^2 orbital.
 First copy this file:
 
     cp ../tw90_6_2.abi .
-    cp ../wannier90_2.win wannier90.win
+    cp ../tw90_6_2o_DS2_w90.win .
 
 and run abinit using
 
@@ -460,7 +460,7 @@ computed by Wannier90.
 
 The important part here happens in the third set. The Wannier90 library uses the following input file:
 
-{% dialog tests/tutoplugs/Input/wannier90_2.win %}
+{% dialog tests/tutoplugs/Input/tw90_6_2o_DS2_w90.win %}
 
 The keywords can be understood using Wannier90's user guide found on their web page ([https://raw.githubusercontent.com/wannier-developers/wannier90/v3.1.0/doc/compiled_docs/user_guide.pdf](https://raw.githubusercontent.com/wannier-developers/wannier90/v3.1.0/doc/compiled_docs/user_guide.pdf)). 
 
@@ -482,13 +482,13 @@ To plot the resulting band structures, you will need a little bit of work. Copy 
 
 Then you can use gnuplot to plot both the band structures together to compare them, with something like:
 
-    plot [][0:18] "wannier90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/204):2 tit "DFT" l
+    plot [][0:18] "tw90_6_2o_DS2_w90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/204):2 tit "DFT" l
 
 Performing the calculation with more converged parameters, we find the following band strcture:
 
 ![](wannier90_assets/Wannier90_vs_ABINIT.png) 
 
-The resulting Hamiltonian is written as the wannier90_hr.dat.
+The resulting Hamiltonian is written as the tw90_6_2o_DS2_w90_hr.dat.
 It can be used for example using the TRIQS package to apply DMFT, thus correcting the
 DFT calculation to compute correctly the strong electronic correlations.
 We would then observe a Mott transition with respect to temperature.
