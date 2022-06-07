@@ -271,15 +271,16 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    d3e_pert2(natom+3:natom+4)=1
  end if
 
+ perm(:)=0
  do i1pert = 1, mpert
    do i2pert = 1, mpert
      do i3pert = 1, mpert
        perm(1)=d3e_pert1(i1pert)*d3e_pert2(i2pert)*d3e_pert3(i3pert)
-       perm(2)=d3e_pert1(i1pert)*d3e_pert2(i3pert)*d3e_pert3(i2pert)
-       perm(3)=d3e_pert1(i2pert)*d3e_pert2(i1pert)*d3e_pert3(i3pert)
-       perm(4)=d3e_pert1(i2pert)*d3e_pert2(i3pert)*d3e_pert3(i1pert)
-       perm(5)=d3e_pert1(i3pert)*d3e_pert2(i2pert)*d3e_pert3(i1pert)
-       perm(6)=d3e_pert1(i3pert)*d3e_pert2(i1pert)*d3e_pert3(i2pert)
+!       perm(2)=d3e_pert1(i1pert)*d3e_pert2(i3pert)*d3e_pert3(i2pert)
+!       perm(3)=d3e_pert1(i2pert)*d3e_pert2(i1pert)*d3e_pert3(i3pert)
+!       perm(4)=d3e_pert1(i2pert)*d3e_pert2(i3pert)*d3e_pert3(i1pert)
+!       perm(5)=d3e_pert1(i3pert)*d3e_pert2(i2pert)*d3e_pert3(i1pert)
+!       perm(6)=d3e_pert1(i3pert)*d3e_pert2(i1pert)*d3e_pert3(i2pert)
        if ( sum(perm(:)) > 0 ) rfpert(:,i1pert,:,i2pert,:,i3pert)=1
      end do
    end do
@@ -326,16 +327,16 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
                call wrtout(std_out,msg,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
-               if (dtset%nonlinear_info>0) then
-!                 n1 = n1 + 1
+               if (dtset%prtvol>=10) then
+                 n1 = n1 + 1
                  write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
   &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
                  call wrtout(ab_out,msg,'COLL')
                  call wrtout(std_out,msg,'COLL')
                end if
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
-               if (dtset%nonlinear_info>0) then
-!                 n1 = n1 + 1
+               if (dtset%prtvol>=10) then
+                 n1 = n1 + 1
                  write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
   &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
                  call wrtout(ab_out,msg,'COLL')
