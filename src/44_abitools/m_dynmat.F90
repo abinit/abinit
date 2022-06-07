@@ -84,6 +84,7 @@ module m_dynmat
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
+ public :: d3lwsym                                
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
  public :: sytens               ! Determines the set of irreductible elements of the nonlinear optical susceptibility
                                 ! and Raman tensors
@@ -4579,6 +4580,211 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 end subroutine d3sym
 !!***
 
+!!****f* m_dynmat/d3lwsym
+!! NAME
+!! d3lwsym
+!!
+!! FUNCTION
+!! Given a set of calculated elements of the 3DTE matrix,
+!! build (nearly) all the other matrix elements that can be build using symmetries.
+!!
+!! INPUTS
+!!  indsym(4,nsym,natom)=indirect indexing array : for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back
+!!   to the original unit cell.
+!!  mpert =maximum number of ipert
+!!  natom= number of atoms
+!!  nsym=number of space group symmetries
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
+!!
+!! SIDE EFFECTS
+!!  Input/Output
+!!  blkflg(3,mpert,3,mpert,3,mpert)= matrix that indicates if an
+!!   element of d3 is available (1 if available, 0 otherwise)
+!!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!
+!! PARENTS
+!!      m_ddb,m_nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,nsym
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
+ integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: found,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idisy1,idisy2,idisy3
+ integer :: ipesy1,ipesy2,ipesy3,isym,ithree
+ real(dp) :: sumi,sumr
+!arrays
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+
+! *********************************************************************
+
+!DEBUG
+!write(std_out,*)'d3sym : enter'
+!do i1dir = 1, 3
+!do i2dir = 1, 3
+!do i3dir = 1, 3
+!write(std_out,*)i1dir,i2dir,i3dir,blkflg(i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
+!end do
+!end do
+!end do
+!stop
+!ENDDEBUG
+
+!First, take into account the permutations symmetry of
+!(i1pert,i1dir) and (i3pert,i3dir)
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+
+             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
+&             (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
+
+               d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+&              d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+&             -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+               blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
+
+             end if
+
+           end do
+         end do
+       end do
+
+     end do
+   end do
+ end do
+
+!Big Big Loop : symmetrize three times, because
+!of some cases in which one element is not yet available
+!at the first pass, and even at the second one !
+
+ do ithree=1,3
+
+!  Loop over perturbations
+   do i1pert = 1, mpert
+     do i2pert = 1, mpert
+       do i3pert = 1, mpert
+
+         do i1dir = 1, 3
+           do i2dir = 1, 3
+             do i3dir = 1, 3
+
+!              Will get element (idir1,ipert1,idir2,ipert2)
+!              so this element should not yet be present ...
+               if(blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)then
+
+                 d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 0_dp
+
+                 do isym = 1, nsym
+
+                   found = 1
+
+                   if (i1pert <= natom) then
+                     ipesy1 = indsym(4,isym,i1pert)
+                     sym1(:,:) = symrec(:,:,isym)
+                   else if (i1pert == natom + 2) then
+                     ipesy1 = i1pert
+                     sym1(:,:) = symrel(:,:,isym)
+                   else
+                     ipesy1 = i1pert
+                     sym1(:,:) = symrel(:,:,isym)
+!                     found = 0
+                   end if
+
+                   if (i2pert <= natom) then
+                     ipesy2 = indsym(4,isym,i2pert)
+                     sym2(:,:) = symrec(:,:,isym)
+                   else if (i2pert == natom + 2) then
+                     ipesy2 = i2pert
+                     sym2(:,:) = symrel(:,:,isym)
+                   else
+                     ipesy2 = i2pert
+                     sym2(:,:) = symrel(:,:,isym)
+!                     found = 0
+                   end if
+
+                   if (i3pert <= natom) then
+                     ipesy3 = indsym(4,isym,i3pert)
+                     sym3(:,:) = symrec(:,:,isym)
+                   else if (i3pert == natom + 2) then
+                     ipesy3 = i3pert
+                     sym3(:,:) = symrel(:,:,isym)
+                   else
+                     ipesy3 = i3pert
+                     sym3(:,:) = symrel(:,:,isym)
+!                     found = 0
+                   end if
+
+                   sumr = 0_dp ; sumi = 0_dp;
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       do idisy3 = 1, 3
+
+                         if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
+&                         .and.(sym3(i3dir,idisy3) /=0)) then
+
+                           if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
+
+                             sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                             sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                             sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                             sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+
+                           else
+
+                             found = 0
+
+                           end if
+
+                         end if
+
+                       end do
+                     end do
+                   end do
+
+                   if (found == 1) then
+                     d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
+                     d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumi
+                     blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+                   end if
+
+                 end do  ! isym
+
+               end if  ! blkflg
+
+!              Close loop over perturbations
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end do  ! close loop over ithree
+
+end subroutine d3lwsym
+
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/sytens
@@ -4870,13 +5076,14 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
  integer :: ipesy3,isym
 !arrays
- integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3),iden(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
 
 !***********************************************************************
 
  ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
+ iden(:,:)=0;iden(1,1)=1;iden(2,2)=1;iden(3,3)=1
 
 !Loop over perturbations
 
@@ -4894,6 +5101,10 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
              if (i2pert <= natom) i2pert = natom + 1 - i2pert
              i3pert = (mpert - i3pert_ + 1)
              if (i3pert <= natom) i3pert = natom + 1 - i3pert
+
+             i1dir= i1dir_
+             i2dir= i2dir_
+             i3dir= i3dir_
 
              if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) /= 0) then
 
@@ -4913,8 +5124,11 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                    ipesy1 = i1pert
                    sym1(:,:) = symrel(:,:,isym)
                  else
-                   sym1(:,:)=zero
-                   found = 0
+                   ipesy1 = i1pert
+                   sym1(:,:) = symrel(:,:,isym)
+!                   sym1(:,:)=zero
+!                   found = 0
+!                   sym1(:,:)=iden(:,:)
                  end if
 
                  if (i2pert <= natom) then
@@ -4924,8 +5138,11 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
                  else
-                   sym2(:,:)=zero
-                   found = 0
+                   ipesy2 = i2pert
+                   sym2(:,:) = symrel(:,:,isym)
+!                   sym2(:,:)=zero
+!                   found = 0
+!                   sym2(:,:)=iden(:,:)
                  end if
 
                  if (i3pert <= natom) then
@@ -4935,12 +5152,15 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                    ipesy3 = i3pert
                    sym3(:,:) = symrel(:,:,isym)
                  else
-                   sym3(:,:)=zero
-                   found = 0
+                   ipesy3 = i3pert
+                   sym3(:,:) = symrel(:,:,isym)
+!                   sym3(:,:)=zero
+!                   found = 0
+!                   sym3(:,:)=iden(:,:)
                  end if
 
 !                See if the symmetric element is available and check if some
-!                of the elements may be zeor. In the latter case, they do not need
+!                of the elements may be zero. In the latter case, they do not need
 !                to be computed.
 
 
@@ -4953,11 +5173,6 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  do idisy1 = 1, 3
                    do idisy2 = 1, 3
                      do idisy3 = 1, 3
-
-                       print *, i1dir,i2dir,i3dir
-                       print *, idisy1,idisy2,idisy3
-                       print *, ipesy1,ipesy2,ipesy3
-                       print *, "   "
 
                        if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
 &                       (sym3(i3dir,idisy3) /= 0)) then
