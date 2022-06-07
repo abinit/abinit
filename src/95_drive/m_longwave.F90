@@ -63,7 +63,7 @@ module m_longwave
  use m_dfptlw_nv,   only : dfptlw_nv
  use m_dfptlw_pert, only : preca_ffnl
  use m_initylmg,    only : initylmg
- use m_dynmat,      only : d3sym, sylwtens
+ use m_dynmat,      only : d3lwsym, sylwtens
 
  implicit none
 
@@ -651,6 +651,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Merge stationay and nonvariational contributions
  d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
+
+ !Complete missing elements using symmetry operations
+ call d3lwsym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
