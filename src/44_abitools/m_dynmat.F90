@@ -4703,37 +4703,31 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
                    if (i1pert <= natom) then
                      ipesy1 = indsym(4,isym,i1pert)
                      sym1(:,:) = symrec(:,:,isym)
-                   else if (i1pert == natom + 2) then
+                   else if (i1pert == natom + 2.or.i1pert == natom + 8) then
                      ipesy1 = i1pert
                      sym1(:,:) = symrel(:,:,isym)
                    else
-                     ipesy1 = i1pert
-                     sym1(:,:) = symrel(:,:,isym)
-!                     found = 0
+                     found = 0
                    end if
 
                    if (i2pert <= natom) then
                      ipesy2 = indsym(4,isym,i2pert)
                      sym2(:,:) = symrec(:,:,isym)
-                   else if (i2pert == natom + 2) then
+                   else if (i2pert == natom + 2.or.i2pert == natom + 8) then
                      ipesy2 = i2pert
                      sym2(:,:) = symrel(:,:,isym)
                    else
-                     ipesy2 = i2pert
-                     sym2(:,:) = symrel(:,:,isym)
-!                     found = 0
+                     found = 0
                    end if
 
                    if (i3pert <= natom) then
                      ipesy3 = indsym(4,isym,i3pert)
                      sym3(:,:) = symrec(:,:,isym)
-                   else if (i3pert == natom + 2) then
+                   else if (i3pert == natom + 2.or.i3pert == natom + 8) then
                      ipesy3 = i3pert
                      sym3(:,:) = symrel(:,:,isym)
                    else
-                     ipesy3 = i3pert
-                     sym3(:,:) = symrel(:,:,isym)
-!                     found = 0
+                     found = 0
                    end if
 
                    sumr = 0_dp ; sumi = 0_dp;
@@ -5120,43 +5114,31 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  if (i1pert <= natom) then
                    ipesy1 = indsym(4,isym,i1pert)
                    sym1(:,:) = symrec(:,:,isym)
-                 else if (i1pert == natom + 2) then
+                 else if (i1pert == natom + 2.or.i1pert == natom + 8) then
                    ipesy1 = i1pert
                    sym1(:,:) = symrel(:,:,isym)
                  else
-                   ipesy1 = i1pert
-                   sym1(:,:) = symrel(:,:,isym)
-!                   sym1(:,:)=zero
-!                   found = 0
-!                   sym1(:,:)=iden(:,:)
+                   found = 0
                  end if
 
                  if (i2pert <= natom) then
                    ipesy2 = indsym(4,isym,i2pert)
                    sym2(:,:) = symrec(:,:,isym)
-                 else if (i2pert == natom + 2) then
+                 else if (i2pert == natom + 2.or.i2pert == natom + 8) then
                    ipesy2 = i2pert
                    sym2(:,:) = symrel(:,:,isym)
                  else
-                   ipesy2 = i2pert
-                   sym2(:,:) = symrel(:,:,isym)
-!                   sym2(:,:)=zero
-!                   found = 0
-!                   sym2(:,:)=iden(:,:)
+                   found = 0
                  end if
 
                  if (i3pert <= natom) then
                    ipesy3 = indsym(4,isym,i3pert)
                    sym3(:,:) = symrec(:,:,isym)
-                 else if (i3pert == natom + 2) then
+                 else if (i3pert == natom + 2.or.i3pert == natom + 8) then
                    ipesy3 = i3pert
                    sym3(:,:) = symrel(:,:,isym)
                  else
-                   ipesy3 = i3pert
-                   sym3(:,:) = symrel(:,:,isym)
-!                   sym3(:,:)=zero
-!                   found = 0
-!                   sym3(:,:)=iden(:,:)
+                   found = 0
                  end if
 
 !                See if the symmetric element is available and check if some
