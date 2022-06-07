@@ -1156,13 +1156,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !MR: Deactivate perturbation symmetries temporarily for a longwave calculation
 !The same has been done in 51_manage_mpi/get_npert_rbz.F90
- if (dtset%prepalw==1) then
-   do ipert=1,natom+6
-     do idir=1,3
-       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-     end do
-   end do
- endif
+! if (dtset%prepalw==1) then
+!   do ipert=1,natom+6
+!     do idir=1,3
+!       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+!     end do
+!   end do
+! endif
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
