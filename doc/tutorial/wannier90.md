@@ -366,11 +366,11 @@ Once this Hamiltonian is generated, DMFT can be applied to study the Mott transi
 
 Let's start by running the first calculations. Copy this file:
 
-    cp ../tw90_6_1.abi
+    cp ../tw90_6_1.abi .
 
 and run abinit using
 
-    mpirun -n 12 abinit tw90_6_1.abi > tw90_6_1.log &
+    mpirun -n 4 abinit tw90_6_1.abi > tw90_6_1.log &
 
 This calculation should take a couple of minutes.
 
@@ -413,11 +413,11 @@ to be partially filled, at the Fermi level.
 
 !!! tip
     Let's now look at the resulting fatbands now.
-    We use abipy with the following commands:
+    We use abipy with the following commands in a python script:
     
         from abipy.abilab import abiopen                                                
                                                                                     
-        with abiopen("La2CuO4o_DS2_FATBANDS.nc") as fb:                                 
+        with abiopen("tw90_6_1o_DS2_FATBANDS.nc") as fb:                                 
             fb.plot_fatbands_mview(iatom=2, fact=1.5, lmax=2, ylims=[-8, 2])
     
     These are the fatbands for the atom 2 (third atom as python starts at 0), thus the
@@ -438,11 +438,11 @@ for the Cu 3d x^2 -y^2 orbital.
 First copy this file:
 
     cp ../tw90_6_2.abi .
-    cp ../tw90_6_2o_DS2_w90.win .
+    cp ../tw90_6_2o_DS3_w90.win .
 
 and run abinit using
 
-    mpirun -n 12 abinit tw90_6_2.abi > tw90_6_2.log &
+    mpirun -n 4 abinit tw90_6_2.abi > tw90_6_2.log &
 
 This calculation should take a couple of minutes. It uses two files.
 The first one is
@@ -460,7 +460,7 @@ computed by Wannier90.
 
 The important part here happens in the third set. The Wannier90 library uses the following input file:
 
-{% dialog tests/tutoplugs/Input/tw90_6_2o_DS2_w90.win %}
+{% dialog tests/tutoplugs/Input/tw90_6_2o_DS3_w90.win %}
 
 The keywords can be understood using Wannier90's user guide found on their web page ([https://raw.githubusercontent.com/wannier-developers/wannier90/v3.1.0/doc/compiled_docs/user_guide.pdf](https://raw.githubusercontent.com/wannier-developers/wannier90/v3.1.0/doc/compiled_docs/user_guide.pdf)). 
 
@@ -482,13 +482,13 @@ To plot the resulting band structures, you will need a little bit of work. Copy 
 
 Then you can use gnuplot to plot both the band structures together to compare them, with something like:
 
-    plot [][0:18] "tw90_6_2o_DS2_w90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/204):2 tit "DFT" l
+    plot [][0:18] "tw90_6_2o_DS3_w90_band.dat" u ($1/3.0470170):2 tit "Wannier90" w l lw 4, "band_struct.dat" u ($1/204):2 tit "DFT" l
 
 Performing the calculation with more converged parameters, we find the following band strcture:
 
 ![](wannier90_assets/Wannier90_vs_ABINIT.png) 
 
-The resulting Hamiltonian is written as the tw90_6_2o_DS2_w90_hr.dat.
+The resulting Hamiltonian is written as the tw90_6_2o_DS3_w90_hr.dat.
 It can be used for example using the TRIQS package to apply DMFT, thus correcting the
 DFT calculation to compute correctly the strong electronic correlations.
 We would then observe a Mott transition with respect to temperature.
