@@ -36,8 +36,8 @@ sel_EFS = 0 1 1       # Select coefficient on the (E)nergy (F)orces and (S)tress
 #%% md_hist = tmulti6_HIST.nc
 #%% [files]
 #%% files_to_test =
-#%%   tmulti6_1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%%   tmulti6_1_coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   tmulti6_1.abo, tolnlines = 10, tolabs = 0.00001, tolrel = 0.00001, fld_options = -easy;
+#%%   tmulti6_1_coeffs.xml, tolnlines = 30, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
