@@ -7,7 +7,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
+!! Copyright (C) 2009-2022 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1702,15 +1702,6 @@ function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfai
    !n4=pars(4,iset); n5=pars(5,iset); n6=pars(6,iset)
    n4=n1; n5=n2; n6=n3
 
-   !n4=n1+1; n5=n2; n6=n3
-   !n4=n1; n5=n2+1; n6=n3
-   !n4=n1; n5=n2; n6=n3+1
-   !write(std_out,*)pars(1:6,iset)
-   !cplex = 1
-
-   !call getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,paral_fft,symrel,&
-   !&ngfftc,use_gpu_cuda,unit) ! optional
-
    ! Init ngfft
    ! TODO Propagate more info via ngfft, define helper functions, write routine to get fftcache
    ngfft = 0
@@ -1802,7 +1793,7 @@ end function fftbox_mpi_utests
 !! fftu_mpi_utests
 !!
 !! FUNCTION
-!! Unit tests for the FFTs of wavefunctions (MPI vesion).
+!! Unit tests for the FFTs of wavefunctions (MPI version).
 !!
 !! INPUTS
 !!
@@ -1832,7 +1823,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
  integer :: n1,n2,n3,idat,n4,n5,n6,ierr,npw_k,full_npw_k,istwf_npw_k,cplexwf
  integer :: mgfft,istwf_k,ikpt,old_nthreads,ount,isign,fftalga,fftalgc
  integer :: ig,i1,i2,i3,i3_glob,i3dat,nd3proc,i3_local,g0sender
- integer :: step,me_g0,me_fft,nproc_fft,mpierr,nfft,cplex
+ integer :: step,me_g0,me_fft,nproc_fft,mpierr,nfft,cplex,chksymtnons
  real(dp),parameter :: boxcutmin2=two,ATOL_DP=tol12,RTOL_DP=tol3 ! Tolerances on the absolute and relative error
  real(dp),parameter :: weight_r=one,weight_i=one
  real(dp) :: max_abserr,max_relerr,ucvol,relerr,den,refden
@@ -1845,7 +1836,7 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
  integer,allocatable :: gbound_k(:,:),kg_k(:,:)
  real(dp) :: dummy_fofg(0,0) !dummy_denpot(0,0,0)
  real(dp) :: kpoint(3),kpoints(3,2)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tnons(3,nsym1)
  real(dp),allocatable :: fofg(:,:),ref_fofg(:,:),fofg_out(:,:),fofr(:,:,:,:)
  real(dp),allocatable :: density(:,:,:),pot(:,:,:),invpot(:,:,:)
  real(dp),allocatable :: full_fofg(:,:),istwf_fofg(:,:)
@@ -1869,6 +1860,8 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
  nproc_fft = xmpi_comm_size(comm_fft); me_fft = xmpi_comm_rank(comm_fft)
 
  symrel = reshape([1,0,0,0,1,0,0,0,1],[3,3,nsym1])
+ tnons=zero
+ chksymtnons=0
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  kpoints = RESHAPE( [ &
@@ -1894,8 +1887,8 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
    ngfft(7) = fftalg
    ngfft(8) = get_cache_kb()
 
-   call getng(boxcutmin2,ecut,gmet,kpoint,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym1,&
-              paral_kgb,symrel,unit=dev_null)
+   call getng(boxcutmin2,chksymtnons,ecut,gmet,kpoint,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym1,&
+              paral_kgb,symrel,tnons,unit=dev_null)
 
    n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
    ! Do not use augmentation.

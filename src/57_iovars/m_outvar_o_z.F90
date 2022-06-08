@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,7 +134,7 @@ contains
  integer :: multi_kptopt
  integer :: natom
  integer :: nimage,nnos,nsym
- integer :: ntypalch,ntypat,size1,size2,tnkpt,timopt_default,tmpimg0
+ integer :: ntypalch,ntypat,size1,size2,test_write,tnkpt,timopt_default,tmpimg0
  logical :: compute_static_images
  character(len=1) :: firstchar_gpu
 !arrays
@@ -533,9 +533,6 @@ contains
  intarr(1,:)=dtsets(:)%prtebands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtebands','INT',0)
 
- intarr(1,:)=dtsets(:)%prtefg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
-
  intarr(1,:)=dtsets(:)%prtefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefmas','INT',0)
 
@@ -547,9 +544,6 @@ contains
 
  intarr(1,:)=dtsets(:)%prteliash
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prteliash','INT',0)
-
- intarr(1,:)=dtsets(:)%prtfc
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfc','INT',0)
 
  intarr(1,:)=dtsets(:)%prtfull1wf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfull1wf','INT',0)
@@ -651,6 +645,7 @@ contains
  intarr(1,:)=dtsets(:)%prt1dm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1dm','INT',0)
 
+ !ptcharge
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
      dprarr(ii,idtset) = dtsets(idtset)%ptcharge(ii)
@@ -797,9 +792,15 @@ contains
  intarr(1,:)=dtsets(:)%rfasr
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
 
- intarr(1,:)=dtsets(:)%rfatpol(1)
- intarr(2,:)=dtsets(:)%rfatpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfatpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%rfatpol(1)/=1 .or. dtsets(idtset)%rfatpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%rfatpol(1)
+   intarr(2,:)=dtsets(:)%rfatpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfatpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%rfddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfddk','INT',0)

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -671,6 +671,14 @@ subroutine outvar_i_n (dtsets,iout,&
 !### 03. Print all the input variables (L)
 !##
 
+!lambsig
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%lambsig(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'lambsig','DPR',0)
+
 !lexexch
  narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
@@ -1127,6 +1135,12 @@ subroutine outvar_i_n (dtsets,iout,&
    if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
+ 
+ intarr(1,:)=dtsets(:)%nucefg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucefg','INT',0)
+
+ intarr(1,:)=dtsets(:)%nucfc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucfc','INT',0)
 
  intarr(1,:)=dtsets(:)%nwfshist
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nwfshist','INT',0)

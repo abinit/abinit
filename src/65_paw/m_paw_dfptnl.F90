@@ -7,7 +7,7 @@
 !!   or 2nd-order PAW occupancies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (LB)
+!! Copyright (C) 2018-2022 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

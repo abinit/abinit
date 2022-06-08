@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t50-t51-t52-t53/t50.in
-- output file    -> t50.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t50-t51-t52-t53/t50.abi
+- output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           8
        mpw =          47          nfft =        1000          nkpt =           8
 ================================================================================
-P This job should need less than                       0.688 Mbytes of memory.
+P This job should need less than                       0.716 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -269,6 +269,15 @@ P          mk1mem           8
         optdriver7          1
         optdriver8          1
         optdriver9          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -278,7 +287,6 @@ P          mk1mem           8
               qpt7     5.00000000E-01  0.00000000E+00  5.00000000E-01
               qpt8     0.00000000E+00  5.00000000E-01  5.00000000E-01
               qpt9     5.00000000E-01  5.00000000E-01  5.00000000E-01
-            rfdir           1       1       1
            rfphon1          0
            rfphon2          1
            rfphon3          1
@@ -365,8 +373,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.13006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -534,7 +542,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.13006
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -553,7 +560,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -566,9 +572,9 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  9.28397649329806E-02 -9.246E+00 3.161E-02 2.115E+01
+-ETOT  1  9.28397649329789E-02 -9.246E+00 3.161E-02 2.115E+01
  ETOT  2  2.56988837659122E-05 -9.281E-02 2.441E-04 1.063E-02
- ETOT  3  3.77741766754980E-08 -2.566E-05 1.501E-07 3.143E-05
+ ETOT  3  3.77741784518548E-08 -2.566E-05 1.501E-07 3.143E-05
  ETOT  4  1.31690391924622E-09 -3.646E-08 2.871E-10 6.705E-09
 
  At SCF step    4       vres2   =  6.71E-09 < tolvrs=  1.00E-08 =>converged.
@@ -606,7 +612,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -621,8 +626,8 @@ tolerances: {tolvrs: 1.00E-08, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  9.28397649343378E-02 -9.246E+00 3.161E-02 2.115E+01
  ETOT  2  2.56988838138739E-05 -9.281E-02 2.441E-04 1.063E-02
- ETOT  3  3.77741855572822E-08 -2.566E-05 1.501E-07 3.143E-05
- ETOT  4  1.31696431537875E-09 -3.646E-08 2.731E-10 6.705E-09
+ ETOT  3  3.77741891099959E-08 -2.566E-05 1.501E-07 3.143E-05
+ ETOT  4  1.31696609173559E-09 -3.646E-08 2.731E-10 6.705E-09
 
  At SCF step    4       vres2   =  6.71E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -646,9 +651,9 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1316964315E-08 Ha. Also 2DEtotal=    0.358364215157E-07 eV
+ 2DEtotal=    0.1316966092E-08 Ha. Also 2DEtotal=    0.358364698528E-07 eV
     (2DErelax=   -9.3387736468E+00 Ha. 2DEnonrelax=    9.3387736481E+00 Ha)
-    (  non-var. 2DEtotal :   -1.3413572830E-07 Ha)
+    (  non-var. 2DEtotal :   -1.3413572653E-07 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -659,7 +664,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -673,9 +677,9 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  9.28397649358228E-02 -9.246E+00 3.161E-02 2.115E+01
- ETOT  2  2.56988840181549E-05 -9.281E-02 2.441E-04 1.063E-02
+ ETOT  2  2.56988840163785E-05 -9.281E-02 2.441E-04 1.063E-02
  ETOT  3  3.77744004964597E-08 -2.566E-05 1.501E-07 3.143E-05
- ETOT  4  1.31712596385114E-09 -3.646E-08 2.842E-10 6.705E-09
+ ETOT  4  1.31712774020798E-09 -3.646E-08 2.842E-10 6.705E-09
 
  At SCF step    4       vres2   =  6.71E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -699,9 +703,9 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1317125964E-08 Ha. Also 2DEtotal=    0.358408201943E-07 eV
+ 2DEtotal=    0.1317127740E-08 Ha. Also 2DEtotal=    0.358408685315E-07 eV
     (2DErelax=   -9.3387736469E+00 Ha. 2DEnonrelax=    9.3387736482E+00 Ha)
-    (  non-var. 2DEtotal :   -1.3413555067E-07 Ha)
+    (  non-var. 2DEtotal :   -1.3413554889E-07 Ha)
 
  Components of second-order derivatives of the electronic energy, EIGR2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -843,8 +847,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -865,7 +869,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -884,10 +887,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -939,10 +940,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -994,10 +993,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1076,7 +1073,7 @@ tolerances: {tolvrs: 1.00E-08, }
   dir pert dir pert     real part     imaginary part
   
    1    1   1    1         2.8820388655         0.0000000000
-   1    1   2    1        -0.6389772213         0.0000000000
+   1    1   2    1        -0.6389772213        -0.0000000000
    1    1   3    1        -0.6389772213        -0.0000000000
   
    2    1   1    1        -0.6389777699         0.0000000000
@@ -1093,16 +1090,16 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.1382319490         0.0000000000
-   1    1   2    1        -0.0000000633         0.0000000000
+   1    1   1    1         0.1382319490        -0.0000000000
+   1    1   2    1        -0.0000000633        -0.0000000000
    1    1   3    1        -0.0000000633         0.0000000000
   
-   2    1   1    1        -0.0000000040         0.0000000000
-   2    1   2    1         0.1559378162         0.0000000000
+   2    1   1    1        -0.0000000040        -0.0000000000
+   2    1   2    1         0.1559378162        -0.0000000000
    2    1   3    1         0.0866864194         0.0000000000
   
    3    1   1    1        -0.0000000040        -0.0000000000
-   3    1   2    1         0.0866864194         0.0000000000
+   3    1   2    1         0.0866864194        -0.0000000000
    3    1   3    1         0.1559378162         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
@@ -1179,7 +1176,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1198,10 +1194,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1253,10 +1247,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1308,10 +1300,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1407,16 +1397,16 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.1559378162         0.0000000000
+   1    1   1    1         0.1559378162        -0.0000000000
    1    1   2    1        -0.0000000040         0.0000000000
    1    1   3    1         0.0866864194         0.0000000000
   
-   2    1   1    1        -0.0000000633         0.0000000000
+   2    1   1    1        -0.0000000633        -0.0000000000
    2    1   2    1         0.1382319490        -0.0000000000
-   2    1   3    1        -0.0000000633         0.0000000000
+   2    1   3    1        -0.0000000633        -0.0000000000
   
    3    1   1    1         0.0866864194        -0.0000000000
-   3    1   2    1        -0.0000000040         0.0000000000
+   3    1   2    1        -0.0000000040        -0.0000000000
    3    1   3    1         0.1559378162         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.00000
@@ -1493,7 +1483,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1512,10 +1501,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1567,10 +1554,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1622,10 +1607,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1705,9 +1688,9 @@ tolerances: {tolvrs: 1.00E-08, }
   
    1    1   1    1         2.8820388860         0.0000000000
    1    1   2    1        -1.6040833829        -0.0000000000
-   1    1   3    1        -0.6389772027         0.0000000000
+   1    1   3    1        -0.6389772027        -0.0000000000
   
-   2    1   1    1        -1.6040833829        -0.0000000000
+   2    1   1    1        -1.6040833829         0.0000000000
    2    1   2    1         2.8820388860         0.0000000000
    2    1   3    1        -0.6389772027        -0.0000000000
   
@@ -1721,13 +1704,13 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.1559378205        -0.0000000000
-   1    1   2    1        -0.0866864234        -0.0000000000
+   1    1   1    1         0.1559378205         0.0000000000
+   1    1   2    1        -0.0866864234         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
   
    2    1   1    1        -0.0866864234        -0.0000000000
    2    1   2    1         0.1559378205         0.0000000000
-   2    1   3    1        -0.0000000000        -0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000594        -0.0000000000
    3    1   2    1         0.0000000594        -0.0000000000
@@ -1807,7 +1790,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1826,10 +1808,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1881,10 +1861,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1936,10 +1914,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2036,7 +2012,7 @@ tolerances: {tolvrs: 1.00E-08, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.1559378162        -0.0000000000
-   1    1   2    1         0.0866864195         0.0000000000
+   1    1   2    1         0.0866864195        -0.0000000000
    1    1   3    1        -0.0000000040         0.0000000000
   
    2    1   1    1         0.0866864195        -0.0000000000
@@ -2121,7 +2097,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2140,10 +2115,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2155,7 +2128,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   9.3598593341921     -1.076E+01 1.012E-01 3.423E+03
- ETOT  2   3.5701172726979     -5.790E+00 4.127E-02 3.533E+02
+ ETOT  2   3.5701172726978     -5.790E+00 4.127E-02 3.533E+02
  ETOT  3   2.8820927160338     -6.880E-01 1.939E-03 3.597E-02
  ETOT  4   2.8820345272039     -5.819E-05 8.092E-08 1.382E-04
  ETOT  5   2.8820343148649     -2.123E-07 7.704E-10 3.620E-09
@@ -2195,10 +2168,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2250,10 +2221,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2265,7 +2234,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   9.3598593342449     -1.076E+01 1.012E-01 3.423E+03
- ETOT  2   3.5701172727084     -5.790E+00 4.127E-02 3.533E+02
+ ETOT  2   3.5701172727085     -5.790E+00 4.127E-02 3.533E+02
  ETOT  3   2.8820927160392     -6.880E-01 1.939E-03 3.597E-02
  ETOT  4   2.8820345272092     -5.819E-05 8.224E-08 1.382E-04
  ETOT  5   2.8820343148703     -2.123E-07 7.704E-10 3.620E-09
@@ -2333,7 +2302,7 @@ tolerances: {tolvrs: 1.00E-08, }
   
    1    1   1    1         2.8820388860         0.0000000000
    1    1   2    1        -0.6389772026        -0.0000000000
-   1    1   3    1        -1.6040833830         0.0000000000
+   1    1   3    1        -1.6040833830        -0.0000000000
   
    2    1   1    1        -0.6389777515         0.0000000000
    2    1   2    1         1.2792063684         0.0000000000
@@ -2355,7 +2324,7 @@ tolerances: {tolvrs: 1.00E-08, }
   
    2    1   1    1         0.0000000594         0.0000000000
    2    1   2    1         0.1382320717         0.0000000000
-   2    1   3    1         0.0000000594        -0.0000000000
+   2    1   3    1         0.0000000594         0.0000000000
   
    3    1   1    1        -0.0866864234        -0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
@@ -2435,7 +2404,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2454,10 +2422,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2509,10 +2475,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2564,10 +2528,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2582,7 +2544,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  2   3.5701172727164     -5.790E+00 3.369E-02 3.533E+02
  ETOT  3   2.8820927160389     -6.880E-01 1.939E-03 3.597E-02
  ETOT  4   2.8820345272088     -5.819E-05 5.907E-08 1.382E-04
- ETOT  5   2.8820343148699     -2.123E-07 7.704E-10 3.620E-09
+ ETOT  5   2.8820343148698     -2.123E-07 7.704E-10 3.620E-09
 
  At SCF step    5       vres2   =  3.62E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2672,8 +2634,8 @@ tolerances: {tolvrs: 1.00E-08, }
    2    1   3    1        -0.0866864234        -0.0000000000
   
    3    1   1    1         0.0000000000        -0.0000000000
-   3    1   2    1        -0.0866864234         0.0000000000
-   3    1   3    1         0.1559378205        -0.0000000000
+   3    1   2    1        -0.0866864234        -0.0000000000
+   3    1   3    1         0.1559378205         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
@@ -2749,8 +2711,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.89816
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2771,7 +2733,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2790,10 +2751,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2808,7 +2767,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  2   1.1901503785925     -1.243E+00 5.927E-03 6.417E+00
  ETOT  3   1.1693707329147     -2.078E-02 5.967E-05 2.078E-03
  ETOT  4   1.1693670301446     -3.703E-06 1.409E-08 4.883E-08
- ETOT  5   1.1693670301023     -4.224E-11 5.044E-12 1.436E-10
+ ETOT  5   1.1693670301023     -4.223E-11 5.044E-12 1.436E-10
 
  At SCF step    5       vres2   =  1.44E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2845,10 +2804,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2862,8 +2819,8 @@ tolerances: {tolvrs: 1.00E-08, }
 -ETOT  1   2.4326657776475     -1.275E+01 4.896E-02 4.295E+02
  ETOT  2   1.1901503786418     -1.243E+00 5.927E-03 6.417E+00
  ETOT  3   1.1693707329651     -2.078E-02 5.967E-05 2.078E-03
- ETOT  4   1.1693670301950     -3.703E-06 1.185E-08 4.883E-08
- ETOT  5   1.1693670301528     -4.224E-11 5.044E-12 1.436E-10
+ ETOT  4   1.1693670301951     -3.703E-06 1.185E-08 4.883E-08
+ ETOT  5   1.1693670301528     -4.225E-11 5.044E-12 1.436E-10
 
  At SCF step    5       vres2   =  1.44E-10 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2900,10 +2857,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t50o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -3004,12 +2959,12 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   3    1        -0.0000000039         0.0000000000
   
    2    1   1    1        -0.0000000039        -0.0000000000
-   2    1   2    1         0.0843242281        -0.0000000000
+   2    1   2    1         0.0843242281         0.0000000000
    2    1   3    1        -0.0000000039         0.0000000000
   
    3    1   1    1        -0.0000000039        -0.0000000000
    3    1   2    1        -0.0000000039        -0.0000000000
-   3    1   3    1         0.0843242281         0.0000000000
+   3    1   3    1         0.0843242281        -0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
@@ -3063,7 +3018,7 @@ tolerances: {tolvrs: 1.00E-08, }
            diemac      2.00000000E+00
              ecut      8.00000000E+00 Hartree
            etotal1    -1.6363976146E+00
-           etotal2     1.3171259639E-09
+           etotal2     1.3171277402E-09
            etotal3     1.2792061883E+00
            etotal4     1.2792061883E+00
            etotal5     1.2792062070E+00
@@ -3150,6 +3105,15 @@ P          mk1mem           8
         optdriver7          1
         optdriver8          1
         optdriver9          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -3159,7 +3123,6 @@ P          mk1mem           8
               qpt7     5.00000000E-01  0.00000000E+00  5.00000000E-01
               qpt8     0.00000000E+00  5.00000000E-01  5.00000000E-01
               qpt9     5.00000000E-01  5.00000000E-01  5.00000000E-01
-            rfdir           1       1       1
            rfphon1          0
            rfphon2          1
            rfphon3          1
@@ -3313,10 +3276,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered 105 WARNINGs and  78 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          3.0
+.Delivered   0 WARNINGs and  48 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.7  wall=          4.4
