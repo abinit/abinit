@@ -927,7 +927,7 @@ end function pawxc_get_uselaplacian
 !!      rotate_back_mag_dfpt
 !!
 !! SOURCE
-subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
+subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
 &                nrad,nspden,option,pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos,&
 &                coretau,taur,vxctau) ! optional arguments
 
@@ -935,7 +935,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !scalars
  integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
- real(dp),intent(in) :: xc_denpos
+ real(dp),intent(in) :: hyb_mixing,xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
@@ -1329,7 +1329,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
 
 !    Call to main XC driver
-     call pawxc_drivexc_wrapper(ixc,order,nrad,nspden_updn,&
+     call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden_updn,&
 &          usegradient,uselaplacian,usekden,rho_updn,exci,vxci,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
 &          grho2=grho2_updn,vxcgrho=vxci_grho,&
@@ -2985,11 +2985,12 @@ end subroutine pawxc_dfpt
 !!
 !! SOURCE
 
- subroutine pawxcsph(exc,exexch,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
+ subroutine pawxcsph(exc,exexch,hyb_mixing,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exexch,ixc,nkxc,nrad,nspden,xclevel
+ real(dp),intent(in) :: hyb_mixing
  type(pawrad_type),intent(in) :: pawrad
 !arrays
  real(dp),intent(in) :: rho_updn(nrad,nspden)
@@ -3068,7 +3069,7 @@ end subroutine pawxc_dfpt
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call pawxc_drivexc_wrapper(ixc,order,nrad,nspden,&
+ call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden,&
 &          usegradient,uselaplacian,usekden,rho_updn,exc,vxc,&
 &          nvxcdgr,0,0,ndvxc,0,grho2=grho2,vxcgrho=dvxcdgr,&
 &          dvxc=dvxci,d2vxc=d2vxc,exexch=exexch)
@@ -3274,6 +3275,7 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
 !real(dp) :: coeff_grho_corr,coeff_grho_dn,coeff_grho_up,fact
 !real(dp) :: grho_grho1,grho_grho1_dn,grho_grho1_up
  character(len=500) :: msg
+ real(dp),parameter :: hyb_mixing_ = 0.0_dp
 !arrays
  integer,parameter :: ikxc(4)=(/1,2,2,3/),irho(4)=(/1,2,1,2/)
  real(dp),allocatable :: dff(:),dgg(:),dvxcdgr(:,:),dvxc(:,:),exc(:),ff(:),gg(:)
@@ -3363,7 +3365,7 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
- call pawxc_drivexc_wrapper(ixc,order,nrad,nspden,usegradient,0,0,&
+ call pawxc_drivexc_wrapper(hyb_mixing_,ixc,order,nrad,nspden,usegradient,0,0,&
 &             rho_updn,exc,vxc,nvxcdgr,0,0,ndvxc,0,&
 &             grho2=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
 
@@ -4070,7 +4072,7 @@ end subroutine pawxcsphpositron
 !!
 !! SOURCE
 
- subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,&
+ subroutine pawxcm(corexc,enxc,enxcdc,exexch,hyb_mixing,ixc,kxc,lm_size,lmselect,nhat,nkxc,&
 &                  non_magnetic_xc,nrad,nspden,option,pawang,pawrad,pawxcdev,rhor,&
 &                  usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
@@ -4079,7 +4081,7 @@ end subroutine pawxcsphpositron
  integer,intent(in) :: exexch,ixc,lm_size,nkxc,nrad,nspden,option,pawxcdev,usecore
  integer,intent(in) :: usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
- real(dp),intent(in) :: xc_denpos
+ real(dp),intent(in) :: hyb_mixing,xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
@@ -4229,7 +4231,7 @@ end subroutine pawxcsphpositron
  LIBPAW_ALLOCATE(exci,(nrad))
  LIBPAW_ALLOCATE(vxci,(nrad,nspden_updn))
  LIBPAW_ALLOCATE(kxci,(nrad,nkxc))
- call pawxcsph(exci,exexch,ixc,kxci,nkxc,nrad,nspden_updn,pawrad,rhosph,vxci,xclevel)
+ call pawxcsph(exci,exexch,hyb_mixing,ixc,kxci,nkxc,nrad,nspden_updn,pawrad,rhosph,vxci,xclevel)
 
 !----------------------------------------------------------------------
 !----- Compute numerical derivatives of Vxc,Kxc (by finite diff. scheme)
@@ -4245,13 +4247,13 @@ end subroutine pawxcsphpositron
    LIBPAW_ALLOCATE(vxc1,(nrad,nspden_updn))
    LIBPAW_ALLOCATE(kxc1,(nrad,nkxc))
    rho_(:,1)=(one+delta)*rhosph(:,1)
-   call pawxcsph(exc_,exexch,ixc,kxc1,nkxc,nrad,nspden_updn,pawrad,rho_,vxc1,xclevel)
+   call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxc1,nkxc,nrad,nspden_updn,pawrad,rho_,vxc1,xclevel)
 
 !  Compute Exc, Vxc for rho-delta_rho
    LIBPAW_ALLOCATE(vxc2,(nrad,nspden_updn))
    LIBPAW_ALLOCATE(kxc2,(nrad,nkxc))
    rho_(:,1)=(one-delta)*rhosph(:,1)
-   call pawxcsph(exc_,exexch,ixc,kxc2,nkxc,nrad,nspden_updn,pawrad,rho_,vxc2,xclevel)
+   call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxc2,nkxc,nrad,nspden_updn,pawrad,rho_,vxc2,xclevel)
 
 !  Additional terms for spin-polarized systems
    if (nspden_updn==2) then
@@ -4261,13 +4263,13 @@ end subroutine pawxcsphpositron
      LIBPAW_ALLOCATE(vxcdn1,(nrad,nspden_updn))
      LIBPAW_ALLOCATE(kxcdn1,(nrad,nkxc))
      rho_(:,2)=(one+delta)*rhosph(:,2)
-     call pawxcsph(exc_,exexch,ixc,kxcdn1,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn1,xclevel)
+     call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxcdn1,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn1,xclevel)
 
 !    Compute Exc, Vxc for rho-delta_rho_down
      LIBPAW_ALLOCATE(vxcdn2,(nrad,nspden_updn))
      LIBPAW_ALLOCATE(kxcdn2,(nrad,nkxc))
      rho_(:,2)=(one-delta)*rhosph(:,2)
-     call pawxcsph(exc_,exexch,ixc,kxcdn2,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn2,xclevel)
+     call pawxcsph(exc_,exexch,hyb_mixing,ixc,kxcdn2,nkxc,nrad,nspden_updn,pawrad,rho_,vxcdn2,xclevel)
 
    end if !nspden_updn==2
    LIBPAW_DEALLOCATE(exc_)
@@ -5773,7 +5775,7 @@ end subroutine pawxcmpositron
 !!
 !! SOURCE
 
- subroutine pawxc_drivexc_wrapper(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
+ subroutine pawxc_drivexc_wrapper(hyb_mixing,ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &          rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, & ! mandatory arguments
 &          grho2,vxcgrho,lrho,vxclrho,tau,vxctau,dvxc,d2vxc, &      ! optional arguments
 &          exexch,el_temp,fxcT)                                     ! optional arguments
@@ -5782,6 +5784,7 @@ end subroutine pawxcmpositron
 !scalars
  integer,intent(in) :: ixc,ndvxc,nd2vxc,npts,nspden,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
+ real(dp),intent(in) :: hyb_mixing
 !arrays
  real(dp),intent(in) :: rho(npts,nspden)
  real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
@@ -5797,6 +5800,7 @@ end subroutine pawxcmpositron
  character(len=100) :: msg
 
 ! *************************************************************************
+
 
 !One could add here a section for other codes (i.e. BigDFT, ...)
 #if defined HAVE_LIBPAW_ABINIT
@@ -5853,19 +5857,19 @@ subroutine pawxc_drivexc_abinit()
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
 &            tau_updn=tau,vxctau=vxctau,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    else if (uselaplacian==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            lrho_updn=lrho,vxclrho=vxclrho,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    else if (usekden==1) then
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            tau_updn=tau,vxctau=vxctau,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    end if
  else if (usegradient==1) then
    if (present(exexch)) then
@@ -5873,17 +5877,17 @@ subroutine pawxc_drivexc_abinit()
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
 &            dvxc=dvxc,d2vxc=d2vxc,&
-&            exexch=exexch)
+&            exexch=exexch,hyb_mixing=hyb_mixing)
    else
      call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
 &            grho2_updn=grho2,vxcgrho=vxcgrho,&
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
    end if
  else
    call drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &            rho,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &
-&            dvxc=dvxc,d2vxc=d2vxc)
+&            dvxc=dvxc,d2vxc=d2vxc,hyb_mixing=hyb_mixing)
  end if
 
 end subroutine pawxc_drivexc_abinit

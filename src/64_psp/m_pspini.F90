@@ -1130,7 +1130,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (pspcod==7)then
      ! PAW "pseudopotentials"
-     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,dtset%ixc,&
+     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
        lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
        pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
        dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
@@ -1177,7 +1177,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      ! NB for pspcod 11 the reading has already been done above.
    else if (pspcod==17)then
      ! PAW XML pseudopotentials
-     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,dtset%ixc,lmax,&
+     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
       psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
       dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
       dtset%usexcnhat_orig,vlspl,xcccrc,&
