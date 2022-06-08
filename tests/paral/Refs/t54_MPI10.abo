@@ -132,16 +132,6 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
            diemix3     1.00000000E+00
            diemix4     7.00000000E-01
            diemix5     1.00000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -152,21 +142,11 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -334,16 +314,6 @@ P          mk1mem5          2
            prtpot3          1
            prtpot4          1
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -2022,16 +1992,6 @@ meta: {optdriver: 5, }
            diemix3     1.00000000E+00
            diemix4     7.00000000E-01
            diemix5     1.00000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -2042,21 +2002,11 @@ meta: {optdriver: 5, }
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -2234,16 +2184,6 @@ P          mk1mem5          2
            prtpot3          1
            prtpot4          1
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
